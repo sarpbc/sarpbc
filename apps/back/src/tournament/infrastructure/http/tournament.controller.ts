@@ -109,15 +109,15 @@ export class TournamentController {
   @Get()
   async find(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryInput) {
     const [tournaments, count] = await this.tournaments.find({
+      activeOnly: query.activeOnly === true,
       limit: query.limit,
       offset: query.offset,
       pickems: query.pickems,
-      activeOnly: query.activeOnly === true,
     });
 
     return {
-      tournaments: tournaments.map(mapTournamentListItem),
       count,
+      tournaments: tournaments.map(mapTournamentListItem),
     };
   }
 
@@ -206,9 +206,9 @@ export class TournamentController {
     const tournament = await this.syncTournaments.executeByPandascoreId(pandascoreId);
 
     return {
+      pandascoreId,
       success: true,
       tournamentId: tournament.id,
-      pandascoreId,
     };
   }
 
@@ -366,8 +366,8 @@ export class TournamentController {
     @Body({ schema: SetMatchResultDto }) body: SetMatchResultInput,
   ) {
     const match = await this.matchService.updateMatch(matchId, {
-      status: "finished",
       results: body.results,
+      status: "finished",
     });
 
     return { match: withPublicSlug(match) };
@@ -401,7 +401,7 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Get("matches/:matchId/streams")
   async getMatchStreams(@Param("matchId") matchId: string) {
-    return await this.streamService.find({ kind: "match", id: matchId });
+    return await this.streamService.find({ id: matchId, kind: "match" });
   }
 
   @RequirePermissions("tournaments.manage")
@@ -411,7 +411,7 @@ export class TournamentController {
     @Param("matchId") matchId: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
-    return await this.streamService.set({ kind: "match", id: matchId }, body.streams, "manual");
+    return await this.streamService.set({ id: matchId, kind: "match" }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")
@@ -425,7 +425,7 @@ export class TournamentController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Get("matches/:matchId/viewership")
   async getMatchViewership(@Param("matchId") matchId: string) {
-    return await this.viewershipService.find({ kind: "match", id: matchId });
+    return await this.viewershipService.find({ id: matchId, kind: "match" });
   }
 
   @RequirePermissions("tournaments.manage")
@@ -445,14 +445,14 @@ export class TournamentController {
     @Param("matchId") matchId: string,
     @Body({ schema: SetViewershipDto }) body: SetViewershipInput,
   ) {
-    return await this.viewershipService.set({ kind: "match", id: matchId }, body.viewership);
+    return await this.viewershipService.set({ id: matchId, kind: "match" }, body.viewership);
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get(":id/streams")
   async getTournamentStreams(@Param("id") id: string) {
-    return await this.streamService.find({ kind: "tournament", id });
+    return await this.streamService.find({ id, kind: "tournament" });
   }
 
   @RequirePermissions("tournaments.manage")
@@ -462,7 +462,7 @@ export class TournamentController {
     @Param("id") id: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
-    return await this.streamService.set({ kind: "tournament", id }, body.streams, "manual");
+    return await this.streamService.set({ id, kind: "tournament" }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")

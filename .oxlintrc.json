@@ -356,6 +356,7 @@
     "require-unicode-regexp": "error",
     "require-yield": "error",
     "sort-imports": "off",
+    "sort-keys": "error",
     "sort-vars": "error",
     "symbol-description": "error",
     "typescript/adjacent-overload-signatures": "error",

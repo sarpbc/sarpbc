@@ -19,12 +19,12 @@ const columns: TableColumn<Team>[] = [
   },
   {
     accessorKey: "location",
-    header: t("page.teams.columns.location"),
     cell: ({ row }) => row.original.location || "-",
+    header: t("page.teams.columns.location"),
   },
   {
-    id: "actions",
     header: "",
+    id: "actions",
   },
 ];
 
@@ -50,9 +50,9 @@ const isCreating = ref(false);
 const isSyncing = ref(false);
 
 const newTeam = ref({
-  name: "",
-  location: "",
   imageUrl: "",
+  location: "",
+  name: "",
 });
 
 const selectRow = (e: Event, row: TableRow<Team>) => {
@@ -67,9 +67,9 @@ const openDeleteModal = (e: Event, team: Team) => {
 
 const openCreateModal = () => {
   newTeam.value = {
-    name: "",
-    location: "",
     imageUrl: "",
+    location: "",
+    name: "",
   };
   isCreateModalOpen.value = true;
 };

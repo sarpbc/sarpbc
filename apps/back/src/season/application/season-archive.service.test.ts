@@ -25,15 +25,15 @@ describe(SeasonArchiveService, () => {
     await seasons.create({ name: "Draft season" });
 
     await expect(archives.published()).resolves.toStrictEqual([
-      { slug: "rlcs-2024", name: "RLCS 2024", winner: null },
+      { name: "RLCS 2024", slug: "rlcs-2024", winner: null },
     ]);
     await expect(archives.archive("rlcs-2024")).resolves.toStrictEqual({
-      slug: "rlcs-2024",
-      name: "RLCS 2024",
-      format: { summary: null, phases: [] },
-      winner: null,
-      participants: [],
       awards: [],
+      format: { phases: [], summary: null },
+      name: "RLCS 2024",
+      participants: [],
+      slug: "rlcs-2024",
+      winner: null,
     });
   });
 
@@ -43,14 +43,14 @@ describe(SeasonArchiveService, () => {
 
   it("adds a team with a trimmed path note", async () => {
     const participant = await archives.addParticipant(season.id, {
-      teamId: "vitality",
       pathNote: "  Won both Majors. ",
+      teamId: "vitality",
     });
 
     expect(participant).toMatchObject({
-      team: SEASON_TEAMS.vitality,
-      pathNote: "Won both Majors.",
       path: [],
+      pathNote: "Won both Majors.",
+      team: SEASON_TEAMS.vitality,
     });
   });
 
@@ -76,8 +76,8 @@ describe(SeasonArchiveService, () => {
 
   it("clears a blank path note and refuses an overlong one", async () => {
     const participant = await archives.addParticipant(season.id, {
-      teamId: "vitality",
       pathNote: "Won both Majors.",
+      teamId: "vitality",
     });
 
     await expect(archives.updatePathNote(season.id, participant.id, " ")).resolves.toMatchObject({
@@ -172,16 +172,16 @@ describe(SeasonArchiveService, () => {
         result: "2nd",
       });
       await seasons.update(season.id, {
+        format: {
+          phases: [{ description: null, name: "Splits" }],
+          summary: "Three splits ending in a Major each.",
+        },
         name: "RLCS 2024",
         winnerTeamId: "vitality",
-        format: {
-          summary: "Three splits ending in a Major each.",
-          phases: [{ name: "Splits", description: null }],
-        },
       });
       await seasons.addAward(season.id, {
-        playerId: "zen",
         awardType: "season_mvp",
+        playerId: "zen",
         sourceUrl: ANNOUNCEMENT,
       });
       archive = await archives.archive("rlcs-2024");
@@ -189,7 +189,7 @@ describe(SeasonArchiveService, () => {
 
     it("publishes the winner and the format", () => {
       expect(archive.winner).toStrictEqual(SEASON_TEAMS.vitality);
-      expect(archive.format.phases).toStrictEqual([{ name: "Splits", description: null }]);
+      expect(archive.format.phases).toStrictEqual([{ description: null, name: "Splits" }]);
     });
 
     it("lists participants by team name", () => {
@@ -205,10 +205,10 @@ describe(SeasonArchiveService, () => {
           label: "RLCS Major",
           result: "1st",
           tournament: {
+            event: { id: "major-event", name: "RLCS Major", slug: "rlcs-major" },
             id: "major",
             name: "Playoffs",
             slug: "playoffs",
-            event: { id: "major-event", slug: "rlcs-major", name: "RLCS Major" },
           },
         },
         { label: "Regional 3", result: "2nd", tournament: null },
@@ -219,10 +219,10 @@ describe(SeasonArchiveService, () => {
       expect(archive.awards).toStrictEqual([
         {
           awardType: "season_mvp",
-          region: null,
-          presentedBy: null,
-          sourceUrl: ANNOUNCEMENT,
           player: { name: "zen", slug: "zen" },
+          presentedBy: null,
+          region: null,
+          sourceUrl: ANNOUNCEMENT,
         },
       ]);
     });
@@ -233,7 +233,7 @@ describe(SeasonArchiveService, () => {
 
     it("lists the season with its winner", async () => {
       await expect(archives.published()).resolves.toStrictEqual([
-        { slug: "rlcs-2024", name: "RLCS 2024", winner: SEASON_TEAMS.vitality },
+        { name: "RLCS 2024", slug: "rlcs-2024", winner: SEASON_TEAMS.vitality },
       ]);
     });
   });

@@ -5,16 +5,16 @@ import { TournamentPlayerStatsService } from "./tournament-player-stats.service"
 const setup = () => {
   const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
     ids.map((id) => ({
-      gameId: `game-${id}`,
       account: "steam:1",
-      player: { id: "zen", name: "zen", slug: "zen" },
-      team: { id: "team-vit", name: "Vitality", slug: "vitality" },
-      teamGoals: 3,
-      goals: 1,
       assists: 1,
+      demolitions: 0,
+      gameId: `game-${id}`,
+      goals: 1,
+      player: { id: "zen", name: "zen", slug: "zen" },
       saves: 1,
       shots: 2,
-      demolitions: 0,
+      team: { id: "team-vit", name: "Vitality", slug: "vitality" },
+      teamGoals: 3,
     })),
   );
 

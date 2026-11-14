@@ -48,20 +48,20 @@ export const deriveTransfers = (contracts: Contract[], until: Date): Transfer[] 
 
   for (const contract of contracts) {
     transfers.push({
-      id: `${contract.id}:join`,
-      type: joinType(contract.role),
-      date: contract.startDate,
       contract,
+      date: contract.startDate,
+      id: `${contract.id}:join`,
       sourceUrl: contract.joinSourceUrl,
+      type: joinType(contract.role),
     });
 
     if (contract.endDate && !starts.has(stint(contract, contract.endDate))) {
       transfers.push({
-        id: `${contract.id}:leave`,
-        type: "departure",
-        date: contract.endDate,
         contract,
+        date: contract.endDate,
+        id: `${contract.id}:leave`,
         sourceUrl: contract.leaveSourceUrl,
+        type: "departure",
       });
     }
   }

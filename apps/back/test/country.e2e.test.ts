@@ -14,10 +14,10 @@ import { countrySources } from "./country-fixtures";
 const countryBody = z.object({
   country: z.looseObject({
     code: z.string(),
+    matchTotal: z.number(),
+    matches: z.array(z.looseObject({ id: z.string() })),
     players: z.array(z.looseObject({ slug: z.string() })),
     teams: z.array(z.looseObject({ slug: z.string() })),
-    matches: z.array(z.looseObject({ id: z.string() })),
-    matchTotal: z.number(),
   }),
 });
 

@@ -46,32 +46,32 @@ describe("API smoke (e2e)", () => {
   const user = Object.assign(new User("fan@sarpbc.org", "fan", "hash"), { id: "user-1" });
 
   const userService = {
-    signIn: vi.fn<UserService["signIn"]>().mockResolvedValue(user),
-    findById: vi.fn<UserService["findById"]>().mockResolvedValue(user),
     create: vi.fn<UserService["create"]>(),
-    findOneByGoogleId: vi.fn<UserService["findOneByGoogleId"]>(),
-    findOneByEmail: vi.fn<UserService["findOneByEmail"]>(),
     createGoogleUser: vi.fn<UserService["createGoogleUser"]>(),
+    findById: vi.fn<UserService["findById"]>().mockResolvedValue(user),
+    findOneByEmail: vi.fn<UserService["findOneByEmail"]>(),
+    findOneByGoogleId: vi.fn<UserService["findOneByGoogleId"]>(),
     linkGoogleAccount: vi.fn<UserService["linkGoogleAccount"]>(),
+    signIn: vi.fn<UserService["signIn"]>().mockResolvedValue(user),
   };
 
   const newsService = {
     findAllPublishedArticle: vi.fn<NewsService["findAllPublishedArticle"]>().mockResolvedValue({
       data: [
         {
-          id: "n1",
-          title: "Hello",
-          slug: "hello",
-          createdAt: new Date("2026-06-01T00:00:00.000Z"),
-          imageUrl: null,
-          excerpt: "Hello world",
           commentCount: 0,
+          createdAt: new Date("2026-06-01T00:00:00.000Z"),
+          excerpt: "Hello world",
+          id: "n1",
+          imageUrl: null,
+          slug: "hello",
+          title: "Hello",
           type: "article",
         },
       ],
-      total: 1,
-      page: 0,
       limit: 25,
+      page: 0,
+      total: 1,
     }),
     findPublishedShortsByWeek: vi.fn<NewsService["findPublishedShortsByWeek"]>(async (week) => {
       if (week === "2026-W99") {
@@ -79,10 +79,10 @@ describe("API smoke (e2e)", () => {
       }
 
       return {
-        week,
-        start: new Date("2026-08-31T00:00:00.000Z"),
         end: new Date("2026-09-07T00:00:00.000Z"),
         items: [],
+        start: new Date("2026-08-31T00:00:00.000Z"),
+        week,
       };
     }),
   };
@@ -97,58 +97,58 @@ describe("API smoke (e2e)", () => {
         throw new IntegrationError("Could not load this image from X. Try again in a moment.");
       }
 
-      return { contentType: "image/png", body: Buffer.from("png") };
+      return { body: Buffer.from("png"), contentType: "image/png" };
     }),
   };
 
   const MISSING_MATCH_ID = "11111111-1111-4111-8111-111111111111";
 
   const grandFinal = Object.assign(new Match(), {
-    publicId: 7250,
     name: "Grand Final: Karmine Corp vs Team Falcons",
     participants: ["Karmine Corp", "Team Falcons"].map((name) =>
       Object.assign(new TournamentParticipant(), { team: Object.assign(new Team(), { name }) }),
     ),
+    publicId: 7250,
     tournament: {
+      beginAt: null,
+      event: { id: "event", name: "RLCS Major Paris 2026", slug: "rlcs-major-paris-2026" },
+      eventStreams: [],
+      league: Object.assign(new League(), { name: "RLCS Major" }),
       name: "Playoffs",
       slug: "playoffs",
-      event: { id: "event", slug: "rlcs-major-paris-2026", name: "RLCS Major Paris 2026" },
-      beginAt: null,
-      league: Object.assign(new League(), { name: "RLCS Major" }),
       streams: [],
-      eventStreams: [],
     },
   });
 
   const matchService = {
+    findBlocks: vi.fn<MatchService["findBlocks"]>(async (blocks) => blocks.map(() => [grandFinal])),
     findDetail: vi.fn<MatchService["findDetail"]>(async (ref) => {
       if (ref.kind === "id" && ref.value === MISSING_MATCH_ID) {
         throw new NotFoundError("This match could not be found.");
       }
 
-      return { match: grandFinal, teamForms: {}, headToHead: null };
+      return { headToHead: null, match: grandFinal, teamForms: {} };
     }),
-    findBlocks: vi.fn<MatchService["findBlocks"]>(async (blocks) => blocks.map(() => [grandFinal])),
   };
 
   const games: MatchGameStats[] = [
     {
-      number: 1,
       ballchasingId: "replay-1",
+      number: 1,
       playedAt: "2026-06-01T18:05:00.000Z",
       teams: [
         {
-          participantId: "p1",
           goals: 2,
+          participantId: "p1",
           players: [
             {
+              assists: 0,
+              demolitions: 1,
+              goals: 2,
               name: "Vatira",
               player: null,
-              goals: 2,
-              assists: 0,
               saves: 1,
               shots: 3,
-              demolitions: 1,
             },
           ],
         },
@@ -164,12 +164,12 @@ describe("API smoke (e2e)", () => {
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
+      controllers: [AuthController, NewsController, MatchController, TransferController],
       imports: [
         ThrottlerModule.forRoot({
-          throttlers: [{ name: "default", ttl: 60_000, limit: 1000 }],
+          throttlers: [{ limit: 1000, name: "default", ttl: 60_000 }],
         }),
       ],
-      controllers: [AuthController, NewsController, MatchController, TransferController],
       providers: [
         authServiceProvider,
         AuthGuard,
@@ -177,13 +177,13 @@ describe("API smoke (e2e)", () => {
         {
           provide: ConfigService,
           useValue: new ConfigService({
+            admin_url: "http://localhost:4002",
+            front_url: "http://localhost:4000",
+            google_client_id: "client-id",
+            google_client_secret: "secret",
+            google_redirect_uri: "http://localhost/callback",
             jwt_token: "test-jwt-key-for-e2e",
             production: false,
-            google_client_secret: "secret",
-            google_client_id: "client-id",
-            google_redirect_uri: "http://localhost/callback",
-            front_url: "http://localhost:4000",
-            admin_url: "http://localhost:4002",
           }),
         },
         { provide: UserService, useValue: userService },
@@ -335,8 +335,8 @@ describe("API smoke (e2e)", () => {
 
     expect(matchService.findBlocks).toHaveBeenLastCalledWith(
       [
-        { kind: "match", id: grandFinal.id },
-        { kind: "team", id: team, limit: 5 },
+        { id: grandFinal.id, kind: "match" },
+        { id: team, kind: "team", limit: 5 },
       ],
       expect.any(Date),
     );
@@ -348,9 +348,9 @@ describe("API smoke (e2e)", () => {
 
     expect(Object.keys(blocks)).toStrictEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
     expect(blocks[`team:${team}:5`]?.[0]).toMatchObject({
+      commentCount: 2,
       publicId: 7250,
       state: "upcoming",
-      commentCount: 2,
     });
   });
 
@@ -373,14 +373,14 @@ describe("API smoke (e2e)", () => {
       .get("/transfers?type=loan&from=2026-01-01&to=2026-06-30&limit=5")
       .expect(200);
 
-    expect(response.body).toStrictEqual({ transfers: [], count: 0 });
+    expect(response.body).toStrictEqual({ count: 0, transfers: [] });
     expect(transferService.findAndCount).toHaveBeenLastCalledWith(
       expect.objectContaining({
-        type: "loan",
         from: new Date("2026-01-01"),
-        to: new Date("2026-06-30"),
         limit: 5,
         offset: 0,
+        to: new Date("2026-06-30"),
+        type: "loan",
       }),
     );
   });

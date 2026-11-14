@@ -30,13 +30,13 @@ export const UserSchema = defineEntity({
   class: User,
   indexes: [{ properties: ["email"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    role: p.string().nullable().hidden(),
-    email: p.string(),
-    userName: p.string(),
-    password: p.string().nullable().hidden(),
     avatarUrl: p.string().nullable(),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    email: p.string(),
     googleId: p.string().nullable().hidden(),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    password: p.string().nullable().hidden(),
+    role: p.string().nullable().hidden(),
+    userName: p.string(),
   },
 });

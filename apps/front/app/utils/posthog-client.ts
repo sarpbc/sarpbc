@@ -12,8 +12,8 @@ let consentGranted = false;
 let tracingHost = "";
 
 const autocapture: AutocaptureConfig = {
-  dom_event_allowlist: ["click", "change", "submit"],
   capture_copied_text: false,
+  dom_event_allowlist: ["click", "change", "submit"],
 };
 
 const applyConsent = (): void => {
@@ -24,17 +24,17 @@ const applyConsent = (): void => {
   if (consentGranted) {
     client.set_config({
       autocapture,
-      capture_pageleave: true,
-      capture_heatmaps: true,
       capture_dead_clicks: true,
+      capture_heatmaps: true,
+      capture_pageleave: true,
       tracing_headers: [tracingHost],
     });
     client.opt_in_capturing({ captureEventName: false });
     client.startSessionRecording({
-      sampling: true,
-      linked_flag: true,
-      url_trigger: true,
       event_trigger: true,
+      linked_flag: true,
+      sampling: true,
+      url_trigger: true,
     });
 
     return;
@@ -44,9 +44,9 @@ const applyConsent = (): void => {
   client.stopSessionRecording();
   client.set_config({
     autocapture: false,
-    capture_pageleave: false,
-    capture_heatmaps: false,
     capture_dead_clicks: false,
+    capture_heatmaps: false,
+    capture_pageleave: false,
     tracing_headers: [],
   });
   client.reset(true);
@@ -82,44 +82,44 @@ export const loadPostHogClient = async function loadPostHogClient(
 
     posthog.init(config.publicKey, {
       api_host: config.host,
-      ui_host: "https://eu.posthog.com",
-      defaults: "2026-08-30",
-      person_profiles: "never",
-      persistence: "sessionStorage",
-      persistence_name: "visit",
-      opt_out_capturing_by_default: true,
-      opt_out_persistence_by_default: true,
       autocapture: false,
-      capture_pageview: false,
-      capture_pageleave: false,
-      capture_heatmaps: false,
+      before_send: (event) => (consentGranted ? sanitizePostHogEvent(event) : null),
       capture_dead_clicks: false,
       // Exception messages can contain form values.
       capture_exceptions: false,
+      capture_heatmaps: false,
+      capture_pageleave: false,
+      capture_pageview: false,
+      capture_performance: false,
+      defaults: "2026-08-30",
+      disable_capture_url_hashes: true,
       disable_session_recording: true,
       disable_surveys: true,
       disable_web_experiments: true,
       enable_recording_console_log: false,
-      capture_performance: false,
-      mask_all_text: true,
       mask_all_element_attributes: true,
-      disable_capture_url_hashes: true,
+      mask_all_text: true,
       mask_personal_data_properties: true,
+      opt_out_capturing_by_default: true,
+      opt_out_persistence_by_default: true,
+      persistence: "sessionStorage",
+      persistence_name: "visit",
+      person_profiles: "never",
       session_recording: {
-        maskAllInputs: true,
-        maskTextSelector: ".ph-mask, [contenteditable]:not([contenteditable='false'])",
-        maskAllElementAttributes: false,
-        inlineStylesheet: true,
-        recordHeaders: false,
-        recordBody: false,
-        recordCrossOriginIframes: false,
         captureCanvas: { recordCanvas: false },
+        inlineStylesheet: true,
+        maskAllElementAttributes: false,
+        maskAllInputs: true,
         maskCapturedNetworkRequestFn: (request) => ({
           ...request,
           name: sanitizePostHogUrl(request.name),
         }),
+        maskTextSelector: ".ph-mask, [contenteditable]:not([contenteditable='false'])",
+        recordBody: false,
+        recordCrossOriginIframes: false,
+        recordHeaders: false,
       },
-      before_send: (event) => (consentGranted ? sanitizePostHogEvent(event) : null),
+      ui_host: "https://eu.posthog.com",
     });
 
     client = posthog;

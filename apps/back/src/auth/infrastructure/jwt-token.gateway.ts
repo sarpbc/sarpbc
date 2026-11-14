@@ -11,8 +11,8 @@ export const ACCESS_TOKEN_TTL_SECONDS = 2 * 60 * 60;
 export const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
 
 const payloadSchema = z.object({
-  id: z.string().min(1),
   email: z.string(),
+  id: z.string().min(1),
   typ: z.enum(["access", "refresh"]),
 });
 
@@ -29,12 +29,12 @@ export class JwtTokenGateway implements SessionTokens {
 
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(
-        { id: user.id, email: user.email, typ: "access" },
-        { secret, expiresIn: ACCESS_TOKEN_TTL_SECONDS },
+        { email: user.email, id: user.id, typ: "access" },
+        { expiresIn: ACCESS_TOKEN_TTL_SECONDS, secret },
       ),
       this.jwt.signAsync(
-        { id: user.id, email: user.email, typ: "refresh" },
-        { secret, expiresIn: REFRESH_TOKEN_TTL_SECONDS },
+        { email: user.email, id: user.id, typ: "refresh" },
+        { expiresIn: REFRESH_TOKEN_TTL_SECONDS, secret },
       ),
     ]);
 
@@ -48,7 +48,7 @@ export class JwtTokenGateway implements SessionTokens {
       );
 
       return parsed.success && parsed.data.typ === type
-        ? { id: parsed.data.id, email: parsed.data.email }
+        ? { email: parsed.data.email, id: parsed.data.id }
         : null;
     } catch {
       return null;

@@ -25,7 +25,7 @@ export const useTweetTagEditor = () => {
       activeEditor
         .chain()
         .focus()
-        .insertContent([{ type: "tweetTag", attrs: { url: parsed.url } }, { type: "paragraph" }])
+        .insertContent([{ attrs: { url: parsed.url }, type: "tweetTag" }, { type: "paragraph" }])
         .run();
     } finally {
       pickerOpen.value = false;
@@ -47,8 +47,8 @@ export const useTweetTagEditor = () => {
   };
 
   return {
+    insertTweetTag,
     tweetPickerOpen: pickerOpen,
     tweetTagHandlers,
-    insertTweetTag,
   };
 };

@@ -108,9 +108,9 @@ export const useR2Upload = () => {
   };
 
   return {
-    uploadFile,
-    progress,
-    isUploading,
     error,
+    isUploading,
+    progress,
+    uploadFile,
   };
 };

@@ -23,15 +23,15 @@ const match = (fields: Partial<Match> = {}) =>
     name: "Group A round 1",
     source: "manual",
     tournament: {
-      id: "oce-open",
-      name: "OCE Open 1",
-      slug: "group-a",
-      event: { id: "event", slug: "oce-open-1", name: "OCE Open 1" },
       beginAt: null,
+      event: { id: "event", name: "OCE Open 1", slug: "oce-open-1" },
+      id: "oce-open",
       league: null,
-      pickemsEnabled: false,
-      source: "manual",
+      name: "OCE Open 1",
       pandascoreId: null,
+      pickemsEnabled: false,
+      slug: "group-a",
+      source: "manual",
     },
     ...fields,
   });
@@ -43,37 +43,37 @@ describe("MatchService deletion", () => {
   const invalidated: string[] = [];
 
   const matches: MatchWriter = {
-    load: async () => stored,
-    byPandascoreId: unused,
-    save: unused,
-    timings: unused,
-    tournament: unused,
-    participants: unused,
     bracket: unused,
+    byPandascoreId: unused,
+    load: async () => stored,
+    participants: unused,
     references: async () => references,
     remove: async (id) => {
       removed.push(id);
     },
+    save: unused,
+    timings: unused,
+    tournament: unused,
   };
 
   const scope: CompetitionWriteScope = {
-    matches,
-    get tournaments() {
+    get awards() {
       return unused();
     },
     get events() {
       return unused();
     },
-    get rosters() {
+    get lineups() {
       return unused();
     },
-    get awards() {
-      return unused();
-    },
+    matches,
     get prizes() {
       return unused();
     },
-    get lineups() {
+    get rosters() {
+      return unused();
+    },
+    get tournaments() {
       return unused();
     },
   };
@@ -81,16 +81,16 @@ describe("MatchService deletion", () => {
   const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };
 
   const reads: MatchQueries = {
-    list: vi.fn<MatchQueries["list"]>(),
-    page: vi.fn<MatchQueries["page"]>(),
-    byIds: vi.fn<MatchQueries["byIds"]>(),
-    recentlyEnded: vi.fn<MatchQueries["recentlyEnded"]>(),
-    detail: vi.fn<MatchQueries["detail"]>(),
-    recentByTeam: vi.fn<MatchQueries["recentByTeam"]>(),
     betweenTeams: vi.fn<MatchQueries["betweenTeams"]>(),
+    byIds: vi.fn<MatchQueries["byIds"]>(),
     byPlayer: vi.fn<MatchQueries["byPlayer"]>(),
     byTeam: vi.fn<MatchQueries["byTeam"]>(),
     byTournament: vi.fn<MatchQueries["byTournament"]>(),
+    detail: vi.fn<MatchQueries["detail"]>(),
+    list: vi.fn<MatchQueries["list"]>(),
+    page: vi.fn<MatchQueries["page"]>(),
+    recentByTeam: vi.fn<MatchQueries["recentByTeam"]>(),
+    recentlyEnded: vi.fn<MatchQueries["recentlyEnded"]>(),
   };
 
   const service = new MatchService(
@@ -109,7 +109,7 @@ describe("MatchService deletion", () => {
 
   beforeEach(() => {
     stored = match();
-    references = { picks: 0, comments: 0, nextMatches: 0 };
+    references = { comments: 0, nextMatches: 0, picks: 0 };
     removed.length = 0;
     invalidated.length = 0;
   });
@@ -122,7 +122,7 @@ describe("MatchService deletion", () => {
   });
 
   it("refuses to delete a PandaScore match", async () => {
-    stored = match({ source: "pandascore", pandascoreId: 4242 });
+    stored = match({ pandascoreId: 4242, source: "pandascore" });
 
     await expect(service.deleteMatch("dup")).rejects.toBeInstanceOf(InvalidInputError);
     await expect(service.requireProposableDeletion("dup")).rejects.toThrow(
@@ -133,7 +133,7 @@ describe("MatchService deletion", () => {
   });
 
   it("refuses to delete a match that picks, comments or the bracket still reference", async () => {
-    references = { picks: 3, comments: 1, nextMatches: 1 };
+    references = { comments: 1, nextMatches: 1, picks: 3 };
 
     await expect(service.deleteMatch("dup")).rejects.toThrow(
       "3 pick'em picks, 1 comment, 1 bracket match fed by it",

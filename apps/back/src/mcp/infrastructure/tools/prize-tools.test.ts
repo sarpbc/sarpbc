@@ -25,14 +25,14 @@ const setup = (role: StaffRole = "admin", toolName = "propose_tournament_prizes"
   }
 
   const call = async (args: ToolArguments) =>
-    await tool.run({ id: "u1", email: "staff@test.com", role }, args);
+    await tool.run({ email: "staff@test.com", id: "u1", role }, args);
 
-  return { rosterProposalService, tool, call };
+  return { call, rosterProposalService, tool };
 };
 
 describe("propose_tournament_prizes", () => {
-  const prizes = [{ placement: 1, amount: 500, currency: "EUR", teamId: TEAM_ID }];
-  const input = { tournamentId: TOURNAMENT_ID, prizes, sourceUrl: SOURCE };
+  const prizes = [{ amount: 500, currency: "EUR", placement: 1, teamId: TEAM_ID }];
+  const input = { prizes, sourceUrl: SOURCE, tournamentId: TOURNAMENT_ID };
 
   it("queues a proposal instead of writing the distribution", async () => {
     const { call, rosterProposalService } = setup();
@@ -41,8 +41,8 @@ describe("propose_tournament_prizes", () => {
     expect(rosterProposalService.propose).toHaveBeenCalledWith(
       {
         kind: "set_tournament_prizes",
-        tournamentId: TOURNAMENT_ID,
         prizes: [{ ...prizes[0], playerIds: [] }],
+        tournamentId: TOURNAMENT_ID,
       },
       SOURCE,
       "u1",
@@ -79,9 +79,9 @@ describe("propose_tournament_prize_update", () => {
 
   it("queues a source-only correction with an empty patch", async () => {
     const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
-    await call({ tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, sourceUrl: RULES });
+    await call({ sourceUrl: RULES, teamId: TEAM_ID, tournamentId: TOURNAMENT_ID });
     expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      { kind: "update_tournament_prize", tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, patch: {} },
+      { kind: "update_tournament_prize", patch: {}, teamId: TEAM_ID, tournamentId: TOURNAMENT_ID },
       RULES,
       "u1",
     );
@@ -89,7 +89,7 @@ describe("propose_tournament_prize_update", () => {
 
   it("queues only the corrected fields", async () => {
     const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
-    await call({ tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, amount: 1800, sourceUrl: RULES });
+    await call({ amount: 1800, sourceUrl: RULES, teamId: TEAM_ID, tournamentId: TOURNAMENT_ID });
     expect(rosterProposalService.propose).toHaveBeenCalledWith(
       expect.objectContaining({ patch: { amount: 1800 } }),
       RULES,
@@ -104,11 +104,11 @@ describe("propose_player_award", () => {
   const PLAYER_ID = "3a9d4c7e-5b1f-4e2a-8c6d-9f0e1d2c3b4a";
 
   const input = {
-    tournamentId: TOURNAMENT_ID,
-    teamId: TEAM_ID,
-    playerId: PLAYER_ID,
     awardType: "mvp",
+    playerId: PLAYER_ID,
     sourceUrl: SOURCE,
+    teamId: TEAM_ID,
+    tournamentId: TOURNAMENT_ID,
   };
 
   it("queues a proposal instead of creating the award", async () => {
@@ -117,11 +117,11 @@ describe("propose_player_award", () => {
 
     expect(rosterProposalService.propose).toHaveBeenCalledWith(
       {
-        kind: "award_player",
-        tournamentId: TOURNAMENT_ID,
-        teamId: TEAM_ID,
-        playerId: PLAYER_ID,
         awardType: "mvp",
+        kind: "award_player",
+        playerId: PLAYER_ID,
+        teamId: TEAM_ID,
+        tournamentId: TOURNAMENT_ID,
       },
       SOURCE,
       "u1",
@@ -145,8 +145,8 @@ describe("propose_player_award", () => {
     await call({ ...input, awardType: "grand_finals_mvp" });
 
     expect(rosterProposalService.propose.mock.calls.map(([change]) => change)).toStrictEqual([
-      expect.objectContaining({ kind: "award_player", awardType: "mvp" }),
-      expect.objectContaining({ kind: "award_player", awardType: "grand_finals_mvp" }),
+      expect.objectContaining({ awardType: "mvp", kind: "award_player" }),
+      expect.objectContaining({ awardType: "grand_finals_mvp", kind: "award_player" }),
     ]);
   });
 

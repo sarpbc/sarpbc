@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 export const CreateTeamDto = z.strictObject({
-  name: z.string().min(1),
-  location: z.string().optional(),
-  imageUrl: z.string().optional(),
   darkModeImageUrl: z.string().optional(),
+  imageUrl: z.string().optional(),
+  location: z.string().optional(),
+  name: z.string().min(1),
   slug: z.string().optional(),
 });
 

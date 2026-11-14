@@ -11,10 +11,10 @@ export const groupMatchesByEvent = (matches: MatchListItem[]): MatchEventGroup[]
 
     if (!group) {
       group = {
-        key: tournament.id,
         displayName: tournamentStageLabel(tournament),
-        matchesPath: stageMatchesPath(tournament.event.slug, tournament.slug),
+        key: tournament.id,
         matches: [],
+        matchesPath: stageMatchesPath(tournament.event.slug, tournament.slug),
       };
       byStage.set(tournament.id, group);
     }

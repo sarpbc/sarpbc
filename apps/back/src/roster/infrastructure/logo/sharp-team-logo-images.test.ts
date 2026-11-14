@@ -7,7 +7,7 @@ const images = new SharpTeamLogoImages();
 
 const png = async (width: number, height: number) =>
   await sharp({
-    create: { width, height, channels: 3, background: { r: 200, g: 20, b: 20 } },
+    create: { background: { b: 20, g: 20, r: 200 }, channels: 3, height, width },
   })
     .png()
     .toBuffer();
@@ -15,8 +15,8 @@ const png = async (width: number, height: number) =>
 describe(SharpTeamLogoImages, () => {
   it("reads raster dimensions", async () => {
     await expect(images.dimensions(await png(300, 150))).resolves.toStrictEqual({
-      width: 300,
       height: 150,
+      width: 300,
     });
   });
 
@@ -25,7 +25,7 @@ describe(SharpTeamLogoImages, () => {
 
     const { data, info } = await sharp(output).raw().toBuffer({ resolveWithObject: true });
     const meta = await sharp(output).metadata();
-    expect(meta).toMatchObject({ format: "webp", width: 512, height: 512, hasAlpha: true });
+    expect(meta).toMatchObject({ format: "webp", hasAlpha: true, height: 512, width: 512 });
     expect(data[info.channels - 1]).toBe(0);
     expect(data[(256 * 512 + 256) * info.channels + 3]).toBe(255);
   });
@@ -39,9 +39,9 @@ describe(SharpTeamLogoImages, () => {
 
     await expect(sharp(output).metadata()).resolves.toMatchObject({
       format: "webp",
-      width: 512,
-      height: 512,
       hasAlpha: true,
+      height: 512,
+      width: 512,
     });
   });
 
@@ -54,8 +54,8 @@ describe(SharpTeamLogoImages, () => {
 
     await expect(sharp(output).metadata()).resolves.toMatchObject({
       format: "webp",
-      width: 512,
       height: 512,
+      width: 512,
     });
   });
 

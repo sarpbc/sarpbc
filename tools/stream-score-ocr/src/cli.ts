@@ -1,11 +1,11 @@
 import { createReadStream } from "node:fs";
-import { writeFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
 import { parseArgs } from "node:util";
 import type { StreamScoreProposal } from "@sarpbc/types";
 import { readPpmFrames, scaleRegion } from "./frame.ts";
 import type { Frame } from "./frame.ts";
 import { glyphGrids, templateFromGrid } from "./glyph.ts";
-import { loadOverlay } from "./overlay.ts";
+import { loadOverlay, overlayWithTemplates, parseOverlay } from "./overlay.ts";
 import type { GlyphTemplate, Overlay, Region } from "./overlay.ts";
 import { readScoreboard } from "./scoreboard.ts";
 import { SeriesTracker } from "./series.ts";
@@ -56,14 +56,14 @@ const read = async (args: readonly string[]): Promise<void> => {
   const { values } = parseArgs({
     args: [...args],
     options: {
-      overlay: { type: "string" },
-      input: { type: "string" },
-      live: { type: "boolean", default: false },
-      quality: { type: "string", default: "best" },
-      interval: { type: "string" },
       "best-of": { type: "string" },
-      stable: { type: "string" },
+      input: { type: "string" },
+      interval: { type: "string" },
+      live: { default: false, type: "boolean" },
       out: { type: "string" },
+      overlay: { type: "string" },
+      quality: { default: "best", type: "string" },
+      stable: { type: "string" },
     },
   });
 
@@ -83,9 +83,9 @@ const read = async (args: readonly string[]): Promise<void> => {
 
   const frames = streamFrames({
     input,
+    intervalSeconds: positiveInteger(values.interval, 1, "interval"),
     live: values.live,
     quality: values.quality,
-    intervalSeconds: positiveInteger(values.interval, 1, "interval"),
   });
 
   let writes: Promise<void> = Promise.resolve();
@@ -146,8 +146,8 @@ const labelledTemplates = (
   text: string,
 ): GlyphTemplate[] => {
   const grids = glyphGrids(frame, scaleRegion(region, overlay.reference, frame), {
-    threshold: overlay.text.threshold,
     size: overlay.glyph,
+    threshold: overlay.text.threshold,
   });
 
   if (grids.length !== text.length) {
@@ -161,15 +161,16 @@ const calibrate = async (args: readonly string[]): Promise<void> => {
   const { values } = parseArgs({
     args: [...args],
     options: {
-      overlay: { type: "string" },
-      frame: { type: "string" },
       blue: { type: "string" },
-      orange: { type: "string" },
       clock: { type: "string" },
+      frame: { type: "string" },
+      orange: { type: "string" },
+      overlay: { type: "string" },
     },
   });
 
-  const overlay = await loadOverlay(required(values.overlay, "overlay"));
+  const stored = await readFile(required(values.overlay, "overlay"), "utf-8");
+  const overlay = parseOverlay(stored);
   const frame = await readSingleFrame(required(values.frame, "frame"));
 
   const learned = [
@@ -185,7 +186,7 @@ const calibrate = async (args: readonly string[]): Promise<void> => {
     ...learned.filter((template) => !known.has(JSON.stringify(template))),
   ];
 
-  process.stdout.write(`${JSON.stringify({ ...overlay, templates }, null, 2)}\n`);
+  process.stdout.write(overlayWithTemplates(stored, templates));
 };
 
 const main = async (argv: readonly string[]): Promise<void> => {

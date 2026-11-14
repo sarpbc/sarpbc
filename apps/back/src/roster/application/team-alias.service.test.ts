@@ -9,37 +9,37 @@ import type { TeamAliasTransaction, TeamAliasWriter, TeamWriter } from "./ports"
 import { TeamAliasService } from "./team-alias.service";
 
 const INPUT: TeamAliasInput = {
-  name: " Fixture Origins ",
   from: "2020-01-01",
-  to: "2022-06-01",
-  sourceUrl: "https://www.rlesports.com/news/fixture-rebrand",
   logoUrl: null,
+  name: " Fixture Origins ",
   pandascoreId: null,
+  sourceUrl: "https://www.rlesports.com/news/fixture-rebrand",
+  to: "2022-06-01",
 };
 
 const setup = (owner: string | null = null) => {
   const team = Object.assign(new Team(), {
-    id: "team",
-    name: "Fixture Now",
     aliases: [
       Object.assign(new TeamAlias(), {
+        from: "2022-06-01",
         id: "a1",
         name: "Fixture Sponsored",
-        from: "2022-06-01",
-        to: null,
         sourceUrl: "https://x.com/fixture/status/2",
+        to: null,
       }),
     ],
+    id: "team",
+    name: "Fixture Now",
   });
 
-  const merged = Object.assign(new Team(), { id: "merged", name: "Old", mergedIntoId: "team" });
+  const merged = Object.assign(new Team(), { id: "merged", mergedIntoId: "team", name: "Old" });
 
   const aliases = {
+    delete: vi.fn<TeamAliasWriter["delete"]>(async () => {}),
     pandascoreOwner: vi.fn<TeamAliasWriter["pandascoreOwner"]>(async () => owner),
     save: vi.fn<TeamAliasWriter["save"]>(async (_teamId, alias) => {
       alias.id ||= "new-alias";
     }),
-    delete: vi.fn<TeamAliasWriter["delete"]>(async () => {}),
   };
 
   const known = new Map([team, merged].map((entry) => [entry.id, entry]));
@@ -48,7 +48,7 @@ const setup = (owner: string | null = null) => {
     findById: vi.fn<TeamWriter["findById"]>(async (id) => known.get(id) ?? null),
   };
 
-  const transaction: TeamAliasTransaction = { run: async (work) => await work({ teams, aliases }) };
+  const transaction: TeamAliasTransaction = { run: async (work) => await work({ aliases, teams }) };
 
   return { aliases, service: new TeamAliasService(transaction) };
 };
@@ -89,14 +89,14 @@ describe(TeamAliasService, () => {
 
     const updated = await service.update("team", "a1", {
       ...INPUT,
-      name: "Fixture Sponsored",
       from: "2022-07-01",
+      name: "Fixture Sponsored",
       to: null,
     });
 
     await service.delete("team", "a1");
 
-    expect(updated).toMatchObject({ id: "a1", from: "2022-07-01" });
+    expect(updated).toMatchObject({ from: "2022-07-01", id: "a1" });
     expect(aliases.delete).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ id: "a1" }));
     await expect(service.update("team", "other", INPUT)).rejects.toThrow(NotFoundError);
   });

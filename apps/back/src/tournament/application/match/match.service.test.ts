@@ -20,11 +20,11 @@ describe("MatchService decided events", () => {
   let persisted: Match;
 
   const matches = {
-    load: vi.fn<MatchWriter["load"]>(),
     byPandascoreId: vi.fn<MatchWriter["byPandascoreId"]>(),
+    load: vi.fn<MatchWriter["load"]>(),
+    participants: vi.fn<MatchWriter["participants"]>(),
     save: vi.fn<MatchWriter["save"]>(),
     tournament: vi.fn<MatchWriter["tournament"]>(),
-    participants: vi.fn<MatchWriter["participants"]>(),
   };
 
   const reads = { detail: vi.fn<MatchQueries["detail"]>() };
@@ -46,17 +46,17 @@ describe("MatchService decided events", () => {
   );
 
   const cup: TournamentSummary = {
-    id: "cup",
-    name: "Cup",
-    slug: "cup",
-    event: { id: "event", slug: "event", name: "Event" },
     beginAt: null,
-    league: null,
-    pickemsEnabled: false,
-    source: "manual",
-    pandascoreId: null,
-    streams: [],
+    event: { id: "event", name: "Event", slug: "event" },
     eventStreams: [],
+    id: "cup",
+    league: null,
+    name: "Cup",
+    pandascoreId: null,
+    pickemsEnabled: false,
+    slug: "cup",
+    source: "manual",
+    streams: [],
   };
 
   const storedMatch = (fields: Partial<Match> = {}) =>
@@ -95,7 +95,7 @@ describe("MatchService decided events", () => {
   it("does not re-score a decided match when only its VODs change", async () => {
     persisted = storedMatch({ status: "finished", winner: participants[0] });
 
-    await service.setVods("match", [{ game: 1, url: "https://youtu.be/a", language: "en" }]);
+    await service.setVods("match", [{ game: 1, language: "en", url: "https://youtu.be/a" }]);
     await service.setGameVods("match", 2, []);
 
     expect(events.publish).not.toHaveBeenCalled();

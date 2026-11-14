@@ -28,9 +28,9 @@ export const getCommentsByTarget = async (
 ): Promise<PaginatedReplies> => {
   try {
     const query: GetCommentsQuery = {
-      targetType,
-      targetId,
       page,
+      targetId,
+      targetType,
     };
 
     if (limit !== undefined) {
@@ -79,7 +79,7 @@ export const createComment = async (data: {
     default: {
       const _exhaustive: never = data.targetType;
 
-      return { ok: false, reason: "unknown", message: String(_exhaustive) };
+      return { message: String(_exhaustive), ok: false, reason: "unknown" };
     }
   }
 
@@ -89,11 +89,11 @@ export const createComment = async (data: {
 
   try {
     const res = await apiFetch<{ reply: Reply }>("/replies", {
-      method: "POST",
       body,
+      method: "POST",
     });
 
-    return { ok: true, comment: res.reply };
+    return { comment: res.reply, ok: true };
   } catch (error) {
     return apiFailure(error, "creating comment", {
       codes: { [FORUM_ERROR_CODES.REPLY_RATE_LIMITED]: "rate_limited" },
@@ -103,7 +103,7 @@ export const createComment = async (data: {
 
 export const hideComment = async (commentId: string): Promise<boolean> => {
   try {
-    await apiFetch(`/replies/${commentId}/hide`, { method: "PATCH", body: {} });
+    await apiFetch(`/replies/${commentId}/hide`, { body: {}, method: "PATCH" });
 
     return true;
   } catch (error) {
@@ -131,8 +131,8 @@ export const reportComment = async (
 ): Promise<ReportCommentResult> => {
   try {
     await apiFetch(`/replies/${commentId}/report`, {
-      method: "POST",
       body: { reason },
+      method: "POST",
     });
 
     return { ok: true };

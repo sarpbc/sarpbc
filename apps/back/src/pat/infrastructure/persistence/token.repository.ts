@@ -6,10 +6,10 @@ import { User } from "../../../user/infrastructure/user-persistence";
 import { PersonalAccessToken } from "./personal-access-token.entity";
 
 const summary = (token: PersonalAccessToken): TokenSummary => ({
-  id: token.id,
-  name: token.name,
   createdAt: token.createdAt,
+  id: token.id,
   lastUsedAt: token.lastUsedAt,
+  name: token.name,
 });
 
 @Injectable()
@@ -39,15 +39,15 @@ export class TokenRepository implements TokenStore {
   async findActive(hash: string): Promise<StoredToken | null> {
     const token = await this.em.findOne(
       PersonalAccessToken,
-      { tokenHash: hash, revokedAt: null },
+      { revokedAt: null, tokenHash: hash },
       { populate: ["owner"] },
     );
 
     return token
       ? {
           id: token.id,
-          owner: { id: token.owner.id, email: token.owner.email, role: token.owner.role },
           lastUsedAt: token.lastUsedAt,
+          owner: { email: token.owner.email, id: token.owner.id, role: token.owner.role },
         }
       : null;
   }

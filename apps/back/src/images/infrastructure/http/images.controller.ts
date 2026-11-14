@@ -16,7 +16,7 @@ export class ImagesController {
 
   @Post("upload-url")
   async getUploadUrl(@Req() request: FastifyRequest) {
-    useLogger().set({ userId: request.user?.id, userEmail: request.user?.email });
+    useLogger().set({ userEmail: request.user?.email, userId: request.user?.id });
 
     return await this.imagesService.createUploadUrl();
   }

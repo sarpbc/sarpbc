@@ -14,7 +14,7 @@ export const parseIsoWeekId = (weekId: string): IsoWeekId | null => {
     return null;
   }
 
-  return { year: Number(match[1]), week: Number(match[2]) };
+  return { week: Number(match[2]), year: Number(match[1]) };
 };
 
 export const formatIsoWeekId = (year: number, week: number): string =>
@@ -52,5 +52,5 @@ export const isoWeekUtcRange = (weekId: string): { start: Date; end: Date } | nu
   const end = new Date(start);
   end.setUTCDate(start.getUTCDate() + 7);
 
-  return { start, end };
+  return { end, start };
 };

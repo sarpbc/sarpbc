@@ -54,8 +54,8 @@ export const parseTweetUrl = (input: string): ParsedTweetUrl | null => {
   const pathHandle = handle ?? "i/web";
 
   return {
-    id,
     handle,
+    id,
     url: `https://x.com/${pathHandle}/status/${id}`,
   };
 };
@@ -82,9 +82,9 @@ export const parseNewsTweetTag = (raw: string): NewsTweetTag | null => {
   }
 
   return {
-    url: parsed.url,
     parsed,
     raw: match[0],
+    url: parsed.url,
   };
 };
 

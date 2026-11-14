@@ -44,16 +44,16 @@ const imageUrl = computed({
 });
 
 const eventOptions = computed(() => {
-  const options = events.map((event) => ({ value: event.id, label: event.name }));
+  const options = events.map((event) => ({ label: event.name, value: event.id }));
   const current = original?.event;
 
   if (current && !options.some((option) => option.value === current.id)) {
-    options.unshift({ value: current.id, label: current.name });
+    options.unshift({ label: current.name, value: current.id });
   }
 
   return original
     ? options
-    : [{ value: NEW_EVENT, label: t("page.tournaments.form.newEvent") }, ...options];
+    : [{ label: t("page.tournaments.form.newEvent"), value: NEW_EVENT }, ...options];
 });
 
 const eventId = computed({
@@ -90,7 +90,7 @@ const eventHelp = computed(() => {
 
 const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.source.pandascore")));
 
-const formatItems = TOURNAMENT_FORMATS.map((format) => ({ value: format, label: format }));
+const formatItems = TOURNAMENT_FORMATS.map((format) => ({ label: format, value: format }));
 
 const teamSearch = ref("");
 

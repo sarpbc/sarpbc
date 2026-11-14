@@ -23,8 +23,8 @@ const { data: player, error: playerError } = await useAsyncData(
 
 if (!player.value) {
   throwEntityLoadError(playerError.value, {
-    notFound: t("page.player.slug.playerNotFound"),
     failed: t("page.player.slug.failedToLoadPlayerData"),
+    notFound: t("page.player.slug.playerNotFound"),
   });
 }
 
@@ -40,7 +40,7 @@ const playerId = computed(() => player.value?.id ?? "");
 const { data: oldTeams } = await useAsyncData(
   () => `player-old-teams-${playerId.value}`,
   () => getPlayerOldTeams(playerId.value),
-  { watch: [playerId], default: () => [] },
+  { default: () => [], watch: [playerId] },
 );
 
 const hasStaffCareer = computed(
@@ -131,9 +131,9 @@ const description = computed(() =>
 );
 
 setPageSeo({
-  title: title.value,
   description: description.value,
   image: currentPlayer.value.imageUrl || undefined,
+  title: title.value,
 });
 </script>
 

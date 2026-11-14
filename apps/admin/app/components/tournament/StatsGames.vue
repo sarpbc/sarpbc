@@ -26,9 +26,9 @@ const teamName = (match: TournamentMatchListItem, participantId: string): string
 
 const gameLabel = (match: TournamentMatchListItem, game: TournamentStatsGame): string =>
   t("page.tournaments.statsGames.score", {
-    number: game.number,
     blue: teamName(match, game.blueParticipantId),
     blueGoals: game.blueGoals,
+    number: game.number,
     orange: teamName(match, game.orangeParticipantId),
     orangeGoals: game.orangeGoals,
   });
@@ -40,15 +40,15 @@ const rows = computed(() => {
     loaded
       .filter((game) => game.matchId === match.id)
       .map((game, index) => ({
-        key: `${match.id}:${game.number}`,
-        heading: index === 0 ? matchLabel(match) : null,
-        label: gameLabel(match, game),
-        url: `https://ballchasing.com/replay/${game.ballchasingId}`,
-        removeLabel: t("page.tournaments.statsGames.remove", {
-          number: game.number,
-          match: matchLabel(match),
-        }),
         game,
+        heading: index === 0 ? matchLabel(match) : null,
+        key: `${match.id}:${game.number}`,
+        label: gameLabel(match, game),
+        removeLabel: t("page.tournaments.statsGames.remove", {
+          match: matchLabel(match),
+          number: game.number,
+        }),
+        url: `https://ballchasing.com/replay/${game.ballchasingId}`,
       })),
   );
 });
@@ -57,16 +57,16 @@ const confirmMessage = (game: TournamentStatsGame): string => {
   const match = matches.find((candidate) => candidate.id === game.matchId);
 
   return t("page.tournaments.statsGames.confirm", {
-    number: game.number,
     match: match ? matchLabel(match) : "",
+    number: game.number,
   });
 };
 
 const remove = async (game: TournamentStatsGame): Promise<void> => {
   await removeStatsGame(tournamentId, game.matchId, game.number);
   toast.add({
-    title: t("page.tournaments.statsGames.removed", { number: game.number }),
     color: "success",
+    title: t("page.tournaments.statsGames.removed", { number: game.number }),
   });
 };
 </script>

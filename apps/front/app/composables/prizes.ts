@@ -20,5 +20,5 @@ export const usePrizeFormat = () => {
   const formatPlacement = (placement: number): string =>
     t(`common.placement.${ordinalRules.value.select(placement)}`, { n: placement });
 
-  return { formatAmount, formatTotals, formatPlacement };
+  return { formatAmount, formatPlacement, formatTotals };
 };

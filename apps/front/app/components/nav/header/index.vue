@@ -58,19 +58,19 @@ watch(
 
 const items = computed<NavigationMenuItem[]>(() => [
   {
+    active: isNewsSection(),
     label: t("general.news"),
     to: homePath.value,
-    active: isNewsSection(),
   },
   {
+    active: isExactPath(matchesPath.value),
     label: t("general.matches"),
     to: matchesPath.value,
-    active: isExactPath(matchesPath.value),
   },
   {
+    active: isExactPath(resultsPath.value),
     label: t("general.results"),
     to: resultsPath.value,
-    active: isExactPath(resultsPath.value),
   },
   {
     label: t("general.tournaments"),

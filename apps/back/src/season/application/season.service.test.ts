@@ -23,12 +23,12 @@ describe(SeasonService, () => {
 
   it("creates a season with a trimmed, unique name and an empty archive", async () => {
     expect(season).toMatchObject({
-      name: "RLCS 2024",
-      slug: null,
-      format: { summary: null, phases: [] },
-      winnerTeamId: null,
-      participants: [],
       awards: [],
+      format: { phases: [], summary: null },
+      name: "RLCS 2024",
+      participants: [],
+      slug: null,
+      winnerTeamId: null,
     });
     await expect(service.create({ name: "RLCS 2024" })).rejects.toBeInstanceOf(ConflictError);
     await expect(service.create({ name: "   " })).rejects.toBeInstanceOf(InvalidInputError);
@@ -66,39 +66,39 @@ describe(SeasonService, () => {
 
   it("stores a trimmed format with ordered phases", async () => {
     const updated = await service.update(season.id, {
-      name: "RLCS 2024",
       format: {
-        summary: "  Open qualifiers feed two Majors and a World Championship. ",
         phases: [
-          { name: " Open Qualifiers ", description: " " },
-          { name: "World Championship", description: "Top teams from every region." },
+          { description: " ", name: " Open Qualifiers " },
+          { description: "Top teams from every region.", name: "World Championship" },
         ],
+        summary: "  Open qualifiers feed two Majors and a World Championship. ",
       },
+      name: "RLCS 2024",
     });
 
     expect(updated.format).toStrictEqual({
-      summary: "Open qualifiers feed two Majors and a World Championship.",
       phases: [
-        { name: "Open Qualifiers", description: null },
-        { name: "World Championship", description: "Top teams from every region." },
+        { description: null, name: "Open Qualifiers" },
+        { description: "Top teams from every region.", name: "World Championship" },
       ],
+      summary: "Open qualifiers feed two Majors and a World Championship.",
     });
     await expect(
       service.update(season.id, {
+        format: { phases: [{ description: null, name: "  " }], summary: null },
         name: "RLCS 2024",
-        format: { summary: null, phases: [{ name: "  ", description: null }] },
       }),
     ).rejects.toThrow("The phase name is required.");
     await expect(
       service.update(season.id, {
-        name: "RLCS 2024",
         format: {
-          summary: null,
           phases: Array.from({ length: 13 }, (_, index) => ({
-            name: `Phase ${index}`,
             description: null,
+            name: `Phase ${index}`,
           })),
+          summary: null,
         },
+        name: "RLCS 2024",
       }),
     ).rejects.toThrow("at most 12 phases");
   });
@@ -129,16 +129,16 @@ describe(SeasonService, () => {
 
   it("records a Season MVP presented by a partner", async () => {
     const award = await service.addAward(season.id, {
-      playerId: "zen",
       awardType: "season_mvp",
+      playerId: "zen",
       presentedBy: " Ally ",
       sourceUrl: ANNOUNCEMENT,
     });
 
     expect(award).toMatchObject({
       awardType: "season_mvp",
-      region: null,
       presentedBy: "Ally",
+      region: null,
       sourceUrl: ANNOUNCEMENT,
     });
     await expect(service.awardsOfPlayer("zen")).resolves.toStrictEqual([
@@ -152,8 +152,8 @@ describe(SeasonService, () => {
   it("holds one Regional MVP per region and one of every other type", async () => {
     const regional = async (playerId: string, region: string) =>
       await service.addAward(season.id, {
-        playerId,
         awardType: "regional_mvp",
+        playerId,
         region,
         sourceUrl: ANNOUNCEMENT,
       });
@@ -166,8 +166,8 @@ describe(SeasonService, () => {
 
     const seasonMvp = async () =>
       await service.addAward(season.id, {
-        playerId: "zen",
         awardType: "season_mvp",
+        playerId: "zen",
         sourceUrl: ANNOUNCEMENT,
       });
 
@@ -180,24 +180,24 @@ describe(SeasonService, () => {
   it("requires a region for a Regional MVP and refuses one for a Season MVP", async () => {
     await expect(
       service.addAward(season.id, {
-        playerId: "zen",
         awardType: "regional_mvp",
+        playerId: "zen",
         region: " ",
         sourceUrl: ANNOUNCEMENT,
       }),
     ).rejects.toThrow("A Regional MVP names its region.");
     await expect(
       service.addAward(season.id, {
-        playerId: "zen",
         awardType: "season_mvp",
+        playerId: "zen",
         region: "Europe",
         sourceUrl: ANNOUNCEMENT,
       }),
     ).rejects.toThrow("covers the whole season");
     await expect(
       service.addAward(season.id, {
-        playerId: "zen",
         awardType: "regular_season_mvp",
+        playerId: "zen",
         sourceUrl: ANNOUNCEMENT,
       }),
     ).resolves.toMatchObject({ region: null });
@@ -211,14 +211,14 @@ describe(SeasonService, () => {
         "ftp://rlesports.com/award",
       ].map(async (sourceUrl) => {
         await expect(
-          service.addAward(season.id, { playerId: "zen", awardType: "season_mvp", sourceUrl }),
+          service.addAward(season.id, { awardType: "season_mvp", playerId: "zen", sourceUrl }),
         ).rejects.toBeInstanceOf(InvalidInputError);
       }),
     );
   });
 
   it("refuses unknown seasons and players and merged player ids", async () => {
-    const input = { playerId: "zen", awardType: "season_mvp" as const, sourceUrl: ANNOUNCEMENT };
+    const input = { awardType: "season_mvp" as const, playerId: "zen", sourceUrl: ANNOUNCEMENT };
     await expect(service.addAward("missing", input)).rejects.toBeInstanceOf(NotFoundError);
     await expect(
       service.addAward(season.id, { ...input, playerId: "ghost" }),
@@ -230,8 +230,8 @@ describe(SeasonService, () => {
 
   it("removes awards and seasons", async () => {
     const award = await service.addAward(season.id, {
-      playerId: "zen",
       awardType: "season_mvp",
+      playerId: "zen",
       sourceUrl: ANNOUNCEMENT,
     });
 

@@ -10,8 +10,8 @@ const weekId = computed(() => String(route.params.week));
 
 if (!parseIsoWeekId(weekId.value)) {
   throw createError({
-    statusCode: 404,
     message: t("page.news.articleNotFound"),
+    statusCode: 404,
   });
 }
 
@@ -23,8 +23,8 @@ const { data: week, error: weekError } = await useAsyncData(
 
 if (!week.value || week.value.items.length === 0) {
   throwEntityLoadError(weekError.value, {
-    notFound: t("page.news.articleNotFound"),
     failed: t("page.news.error"),
+    notFound: t("page.news.articleNotFound"),
   });
 }
 
@@ -53,16 +53,16 @@ const rangeLabel = computed(() => {
   });
 
   return t("page.news.week.range", {
-    start: format.format(bounds.start),
     end: format.format(endInclusive),
+    start: format.format(bounds.start),
   });
 });
 
 const title = computed(() => (isCurrentWeek.value ? t("page.news.week.title") : rangeLabel.value));
 
 setPageSeo({
-  title: t("page.news.week.seoTitle"),
   description: t("page.news.week.seoDescription"),
+  title: t("page.news.week.seoTitle"),
 });
 </script>
 

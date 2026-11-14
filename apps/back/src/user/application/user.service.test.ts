@@ -11,17 +11,17 @@ describe(UserService, () => {
   let service: UserService;
 
   const userQueries = {
-    list: vi.fn<UserQueries["list"]>(),
     findByEmail: vi.fn<UserQueries["findByEmail"]>(),
-    findById: vi.fn<UserQueries["findById"]>(),
-    findByGoogleId: vi.fn<UserQueries["findByGoogleId"]>(),
     findByEmailWithPassword: vi.fn<UserQueries["findByEmailWithPassword"]>(),
+    findByGoogleId: vi.fn<UserQueries["findByGoogleId"]>(),
+    findById: vi.fn<UserQueries["findById"]>(),
+    list: vi.fn<UserQueries["list"]>(),
   };
 
   const userWriter = {
-    findById: vi.fn<UserWriter["findById"]>(),
     existsByEmail: vi.fn<UserWriter["existsByEmail"]>(),
     existsByUserName: vi.fn<UserWriter["existsByUserName"]>(),
+    findById: vi.fn<UserWriter["findById"]>(),
     save: vi.fn<UserWriter["save"]>(),
   };
 
@@ -30,8 +30,8 @@ describe(UserService, () => {
   };
 
   const passwords: PasswordHasher = {
-    hash: async (password) => `hashed:${password}`,
     compare: async (password, hash) => hash === `hashed:${password}`,
+    hash: async (password) => `hashed:${password}`,
   };
 
   beforeEach(async () => {

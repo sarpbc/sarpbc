@@ -114,11 +114,11 @@ const regional = computed(() => !isWorldwideCircuitRegion(region));
 
 const teamOptions = computed(() =>
   eventTeams.value.map(({ team, placement }) => ({
-    value: team.id,
     label:
       placement === null
         ? team.name
         : t("page.circuits.scale.teamPlacement", { name: team.name, placement }),
+    value: team.id,
   })),
 );
 
@@ -141,7 +141,7 @@ const toFinish = (row: FinishRow): CircuitStageFinishInput | null => {
     return null;
   }
 
-  return { teamId, placement };
+  return { placement, teamId };
 };
 
 const finishes = computed<CircuitStageFinishInput[] | null>(() => {
@@ -171,7 +171,7 @@ const finishError = (row: FinishRow): string | undefined => {
 };
 
 const addFinish = () => {
-  finishRows.value.push({ key: (nextKey += 1), teamId: undefined, placement: null });
+  finishRows.value.push({ key: (nextKey += 1), placement: null, teamId: undefined });
 };
 
 const removeFinish = (key: number) => {
@@ -197,7 +197,7 @@ const toTier = (row: TierRow): ValidTier | null => {
     return null;
   }
 
-  return { from, to, points };
+  return { from, points, to };
 };
 
 const rowError = (row: TierRow): string | undefined => {
@@ -247,10 +247,10 @@ const canSave = computed(
 const addRow = () => {
   const last = tiers.value?.toSorted((a, b) => a.to - b.to).at(-1);
   rows.value.push({
-    key: (nextKey += 1),
     from: last ? last.to + 1 : null,
-    to: null,
+    key: (nextKey += 1),
     points: null,
+    to: null,
   });
 };
 
@@ -272,11 +272,11 @@ const save = async () => {
 
   try {
     const circuit = await setCircuitStageScale(circuitId, current.tournamentId, {
+      finishes: finishList.toSorted((a, b) => a.placement - b.placement),
+      regionTeamIds: worldwide.value ? regionTeamIds.value : [],
       scale: scale.toSorted((a, b) => a.from - b.from),
       sourceUrl: sourceUrl.value.trim(),
       worldwide: worldwide.value,
-      regionTeamIds: worldwide.value ? regionTeamIds.value : [],
-      finishes: finishList.toSorted((a, b) => a.placement - b.placement),
     });
 
     target.value = null;

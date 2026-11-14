@@ -47,12 +47,12 @@ export const matchToCalendarEvent = (
   const url = matchPageUrl(match);
 
   return {
-    uid: matchEventUid(match.id),
-    summary: `${teamA} vs ${teamB}`,
     description: `${tournamentStageLabel(stage)}\n${url}`,
-    url,
-    dtStart: beginAt,
     dtEnd: matchEndAt(beginAt, endAt, match.numberOfGames ?? undefined),
     dtStamp,
+    dtStart: beginAt,
+    summary: `${teamA} vs ${teamB}`,
+    uid: matchEventUid(match.id),
+    url,
   };
 };

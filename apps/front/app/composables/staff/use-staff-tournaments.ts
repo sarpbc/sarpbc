@@ -36,13 +36,13 @@ export const useStaffTournaments = (
   const { data, pending, error, refresh } = useAsyncData(
     () => `staff-tournaments-${idRef.value}`,
     async () => ({
-      tournaments: idRef.value ? await getPlayerStaffTournaments(idRef.value) : [],
       /** Captured with the fetch so the server and client split events identically on hydration. */
       fetchedAt: Date.now(),
+      tournaments: idRef.value ? await getPlayerStaffTournaments(idRef.value) : [],
     }),
     {
+      default: () => ({ fetchedAt: 0, tournaments: [] }),
       watch: [idRef],
-      default: () => ({ tournaments: [], fetchedAt: 0 }),
     },
   );
 
@@ -55,11 +55,11 @@ export const useStaffTournaments = (
   );
 
   return {
+    error,
     live: computed(() => sections.value.live),
-    upcoming: computed(() => sections.value.upcoming),
     past: computed(() => sections.value.past),
     pending,
-    error,
     refresh,
+    upcoming: computed(() => sections.value.upcoming),
   };
 };

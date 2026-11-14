@@ -137,10 +137,10 @@ export class ContractService {
 
   async createForTeam(teamId: string, dto: CreateTeamContractInput): Promise<Contract> {
     return await this.create(dto.playerId, {
-      teamId,
-      startDate: dto.startDate,
       endDate: dto.endDate,
       role: dto.role,
+      startDate: dto.startDate,
+      teamId,
     });
   }
 

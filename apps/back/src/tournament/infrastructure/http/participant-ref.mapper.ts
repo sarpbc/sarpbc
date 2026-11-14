@@ -10,6 +10,6 @@ export const mapParticipantRef = <TTeam>(
     ? { id: participant.id, team: mapTeam(participant.team) }
     : {
         id: participant.id,
-        team: null,
         players: participant.players.map(({ id, name, slug }) => ({ id, name, slug })),
+        team: null,
       };

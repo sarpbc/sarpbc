@@ -27,8 +27,8 @@ describe("client throttle behind a trusted proxy", () => {
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
-      imports: [ThrottlerModule.forRoot(createClientThrottleOptions(TOKEN))],
       controllers: [ProbeController],
+      imports: [ThrottlerModule.forRoot(createClientThrottleOptions(TOKEN))],
       providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
     }).compile();
 
@@ -71,18 +71,18 @@ describe("client throttle behind a trusted proxy", () => {
     }
 
     return await app.getHttpAdapter().getInstance().inject({
-      method: "GET",
-      url: "/probe",
-      remoteAddress: options.remoteAddress,
       headers,
+      method: "GET",
+      remoteAddress: options.remoteAddress,
+      url: "/probe",
     });
   };
 
   it("keeps a separate bucket per Cloudflare visitor", async () => {
     const visitor = {
-      remoteAddress: "10.0.0.8",
-      forwardedFor: "104.16.0.1",
       connectingIp: "203.0.113.10",
+      forwardedFor: "104.16.0.1",
+      remoteAddress: "10.0.0.8",
     };
 
     const responses = await Promise.all(
@@ -97,9 +97,9 @@ describe("client throttle behind a trusted proxy", () => {
     expect(response2.statusCode).toBe(429);
 
     const otherVisitor = {
-      remoteAddress: "10.0.0.8",
-      forwardedFor: "104.16.0.2",
       connectingIp: "203.0.113.11",
+      forwardedFor: "104.16.0.2",
+      remoteAddress: "10.0.0.8",
     };
 
     const response3 = await hit(otherVisitor);
@@ -108,8 +108,8 @@ describe("client throttle behind a trusted proxy", () => {
 
   it("ignores a spoofed CF-Connecting-IP when the proxy did not see Cloudflare", async () => {
     const options = {
-      remoteAddress: "10.0.0.9",
       forwardedFor: "203.0.113.40",
+      remoteAddress: "10.0.0.9",
     };
 
     const responses = await Promise.all(
@@ -133,13 +133,13 @@ describe("client throttle behind a trusted proxy", () => {
         .getHttpAdapter()
         .getInstance()
         .inject({
-          method: "GET",
-          url: "/probe",
-          remoteAddress: "203.0.113.77",
           headers: {
-            "x-forwarded-for": `198.51.100.${attempt}`,
             "cf-connecting-ip": `203.0.113.${attempt}`,
+            "x-forwarded-for": `198.51.100.${attempt}`,
           },
+          method: "GET",
+          remoteAddress: "203.0.113.77",
+          url: "/probe",
         });
 
     const responses = await Promise.all(
@@ -152,8 +152,8 @@ describe("client throttle behind a trusted proxy", () => {
 
     const blocked = await app.getHttpAdapter().getInstance().inject({
       method: "GET",
-      url: "/probe",
       remoteAddress: "203.0.113.77",
+      url: "/probe",
     });
 
     expect(blocked.statusCode).toBe(429);
@@ -170,14 +170,14 @@ describe("client throttle behind a trusted proxy", () => {
   });
 
   const callInternal = async (client: string) =>
-    await hit({ remoteAddress: "10.0.0.12", token: TOKEN, client });
+    await hit({ client, remoteAddress: "10.0.0.12", token: TOKEN });
 
   const callPrivateHop = async (client: string) =>
     await hit({
-      remoteAddress: "10.0.0.22",
-      forwardedFor: "198.51.100.88",
-      token: TOKEN,
       client,
+      forwardedFor: "198.51.100.88",
+      remoteAddress: "10.0.0.22",
+      token: TOKEN,
     });
 
   it("limits internal SSR calls per forwarded visitor above the public limit", async () => {
@@ -197,8 +197,8 @@ describe("client throttle behind a trusted proxy", () => {
 
   it("ignores a forwarded visitor without the internal token", async () => {
     const base = {
-      remoteAddress: "10.0.0.21",
       forwardedFor: "198.51.100.77",
+      remoteAddress: "10.0.0.21",
     };
 
     const responses = await Promise.all(

@@ -17,8 +17,8 @@ const {
 } = useResultsListPage();
 
 setPageSeo({
-  title: t("page.results.seo.title"),
   description: t("page.results.seo.description"),
+  title: t("page.results.seo.title"),
 });
 </script>
 

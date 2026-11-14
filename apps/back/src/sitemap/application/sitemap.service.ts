@@ -14,8 +14,8 @@ import { matchPublicSlug } from "../../tournament/domain/match";
 import type { MatchSitemapRow, SitemapQueries, StageSitemapRow } from "./ports";
 
 const dated = (path: string, lastmod: Date): SitemapEntry => ({
-  path,
   lastmod: lastmod.toISOString(),
+  path,
 });
 
 const tournamentEntries = (stages: StageSitemapRow[]): SitemapEntry[] => {
@@ -67,19 +67,19 @@ export class SitemapService {
       case "players": {
         const slugs = await this.queries.playerSlugs();
 
-        return slugs.map((slug) => ({ path: playerPath(slug), lastmod: null }));
+        return slugs.map((slug) => ({ lastmod: null, path: playerPath(slug) }));
       }
 
       case "staff": {
         const slugs = await this.queries.staffSlugs();
 
-        return slugs.map((slug) => ({ path: staffPath(slug), lastmod: null }));
+        return slugs.map((slug) => ({ lastmod: null, path: staffPath(slug) }));
       }
 
       case "teams": {
         const slugs = await this.queries.teamSlugs();
 
-        return slugs.map((slug) => ({ path: teamPath(slug), lastmod: null }));
+        return slugs.map((slug) => ({ lastmod: null, path: teamPath(slug) }));
       }
 
       default: {

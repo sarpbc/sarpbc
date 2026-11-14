@@ -31,7 +31,7 @@ export const useCountryName = () => {
   const { locale } = useI18n();
 
   const names = computed(
-    () => new Intl.DisplayNames([locale.value], { type: "region", fallback: "code" }),
+    () => new Intl.DisplayNames([locale.value], { fallback: "code", type: "region" }),
   );
 
   return (code: string): string => names.value.of(code) ?? code;

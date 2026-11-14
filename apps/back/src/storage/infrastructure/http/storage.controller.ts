@@ -40,7 +40,7 @@ export class StorageController {
   @HttpCode(HttpStatus.CREATED)
   @UseInterceptors(
     MultipartInterceptor(
-      { maxFileSize: MAX_IMAGE_BYTES, fileType: IMAGE_FILE_TYPE },
+      { fileType: IMAGE_FILE_TYPE, maxFileSize: MAX_IMAGE_BYTES },
       {
         tooLarge: `Image must be ${MAX_IMAGE_MEGABYTES} MB or smaller. Compress the JPEG or pick another file.`,
         unreadable: `The image could not be read. Try a JPEG, PNG, WebP, or GIF under ${MAX_IMAGE_MEGABYTES} MB.`,
@@ -60,13 +60,13 @@ export class StorageController {
 
     useLogger().set({
       upload: {
-        target: dto.target,
-        userId: request.user?.id,
-        userEmail: request.user?.email,
         articleSlug: dto.articleSlug,
         articleTitle: dto.articleTitle,
         imageFilename: file.filename,
         imageSize: file.size,
+        target: dto.target,
+        userEmail: request.user?.email,
+        userId: request.user?.id,
       },
     });
 

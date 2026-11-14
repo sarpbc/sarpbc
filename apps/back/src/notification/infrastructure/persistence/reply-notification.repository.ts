@@ -14,25 +14,25 @@ const hasTarget = () => REPLY_HAS_TARGET.map((target) => ({ reply: target }));
 export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
   async findForRecipient(recipientId: string, limit: number): Promise<ReplyNotification[]> {
     return await this.findAll({
-      where: { recipient: { id: recipientId }, $or: hasTarget() },
-      populate: ["reply", ...REPLY_POPULATE.map((relation) => `reply.${relation}` as const)],
-      orderBy: { createdAt: "DESC" },
       limit,
+      orderBy: { createdAt: "DESC" },
+      populate: ["reply", ...REPLY_POPULATE.map((relation) => `reply.${relation}` as const)],
+      where: { $or: hasTarget(), recipient: { id: recipientId } },
     });
   }
 
   async countUnread(recipientId: string): Promise<number> {
     return await this.count({
-      recipient: { id: recipientId },
-      readAt: null,
       $or: hasTarget(),
+      readAt: null,
+      recipient: { id: recipientId },
     });
   }
 
   async markRead(recipientId: string, ids?: string[]): Promise<number> {
     const where: ReplyNotificationReadFilter = {
-      recipient: { id: recipientId },
       readAt: null,
+      recipient: { id: recipientId },
     };
 
     if (ids?.length !== undefined && ids.length !== 0) {

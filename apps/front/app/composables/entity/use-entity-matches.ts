@@ -9,8 +9,8 @@ import { byBeginAtAsc, byEndAtDesc, PAST_ENTRIES_LIMIT } from "./entity-sort";
 const LIVE_STATUSES = new Set(["running", "live", "in_progress"]);
 
 const FETCH_MATCHES = {
-  team: getTeamMatches,
   player: getPlayerMatches,
+  team: getTeamMatches,
 } satisfies Record<EntityKind, (id: string) => Promise<ProfileMatchListItem[]>>;
 
 const isLive = (match: ProfileMatchListItem, now: number): boolean =>
@@ -35,7 +35,7 @@ const splitMatches = (matches: ProfileMatchListItem[], now: number): EntityMatch
   upcoming.sort(byBeginAtAsc);
   past.sort(byEndAtDesc);
 
-  return { live, upcoming, past: past.slice(0, PAST_ENTRIES_LIMIT) };
+  return { live, past: past.slice(0, PAST_ENTRIES_LIMIT), upcoming };
 };
 
 export const useEntityMatches = (kind: EntityKind, entityId: MaybeRef<string | undefined>) => {
@@ -44,13 +44,13 @@ export const useEntityMatches = (kind: EntityKind, entityId: MaybeRef<string | u
   const { data, pending, error, refresh } = useAsyncData(
     () => `${kind}-matches-${idRef.value ?? "unknown"}`,
     async () => ({
-      matches: isNonEmptyString(idRef.value) ? await FETCH_MATCHES[kind](idRef.value) : [],
       /** Captured with the fetch so the server and client split matches identically on hydration. */
       fetchedAt: Date.now(),
+      matches: isNonEmptyString(idRef.value) ? await FETCH_MATCHES[kind](idRef.value) : [],
     }),
     {
+      default: () => ({ fetchedAt: 0, matches: [] }),
       watch: [idRef],
-      default: () => ({ matches: [], fetchedAt: 0 }),
     },
   );
 
@@ -59,11 +59,11 @@ export const useEntityMatches = (kind: EntityKind, entityId: MaybeRef<string | u
   );
 
   return {
+    error,
     live: computed(() => sections.value.live),
-    upcoming: computed(() => sections.value.upcoming),
     past: computed(() => sections.value.past),
     pending,
-    error,
     refresh,
+    upcoming: computed(() => sections.value.upcoming),
   };
 };

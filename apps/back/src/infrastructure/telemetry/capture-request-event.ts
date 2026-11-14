@@ -19,8 +19,8 @@ export const captureRequestEvent = async (
   posthog.capture({
     distinctId: singleHeader(headers["x-posthog-distinct-id"]),
     event,
-    sessionId: singleHeader(headers["x-posthog-session-id"]),
     properties,
+    sessionId: singleHeader(headers["x-posthog-session-id"]),
   });
   await posthog.flush();
 };

@@ -185,14 +185,14 @@ export class RosterProposalService {
 
     if (change.kind === "set_event_viewership") {
       await this.viewerships.requireProposable(
-        { kind: "event", id: change.eventId },
+        { id: change.eventId, kind: "event" },
         change.viewership,
       );
     }
 
     if (change.kind === "set_match_viewership") {
       await this.viewerships.requireProposable(
-        { kind: "match", id: change.matchId },
+        { id: change.matchId, kind: "match" },
         change.viewership,
       );
     }
@@ -218,7 +218,7 @@ export class RosterProposalService {
       await this.requireTeamRemoval(change.teamId, change.mergeIntoTeamId);
     }
 
-    const proposal = Object.assign(new RosterProposal(), { change, sourceUrl, proposedById });
+    const proposal = Object.assign(new RosterProposal(), { change, proposedById, sourceUrl });
     await this.store.save(proposal);
 
     return proposal;
@@ -235,12 +235,12 @@ export class RosterProposalService {
     try {
       return await this.propose(
         {
-          kind: "upload_team_logo",
-          teamId,
-          variant,
           imageUrl,
+          kind: "upload_team_logo",
           logoKey: logo.key,
           logoUrl: logo.url,
+          teamId,
+          variant,
         },
         sourceUrl,
         proposedById,
@@ -255,9 +255,22 @@ export class RosterProposalService {
     const proposals = await this.store.list(status, LIST_LIMIT);
 
     const names = await this.store.names({
-      players: [...new Set(proposals.flatMap(({ change }) => referencedPlayerIds(change)))],
-      teams: [...new Set(proposals.flatMap(({ change }) => referencedTeamIds(change)))],
-      users: [...new Set(proposals.map(({ proposedById }) => proposedById))],
+      circuits: [
+        ...new Set(
+          proposals.flatMap(({ change }) =>
+            change.kind === "set_circuit_stage_scale" ? [change.circuitId] : [],
+          ),
+        ),
+      ],
+      events: [
+        ...new Set(
+          proposals.flatMap(({ change }) =>
+            change.kind === "set_event_streams" || change.kind === "set_event_viewership"
+              ? [change.eventId]
+              : [],
+          ),
+        ),
+      ],
       matches: [
         ...new Set(
           proposals.flatMap(({ change }) =>
@@ -270,6 +283,15 @@ export class RosterProposalService {
           ),
         ),
       ],
+      players: [...new Set(proposals.flatMap(({ change }) => referencedPlayerIds(change)))],
+      seasons: [
+        ...new Set(
+          proposals.flatMap(({ change }) =>
+            change.kind === "award_season_player" ? [change.seasonId] : [],
+          ),
+        ),
+      ],
+      teams: [...new Set(proposals.flatMap(({ change }) => referencedTeamIds(change)))],
       tournaments: [
         ...new Set(
           proposals.flatMap(({ change }) =>
@@ -283,32 +305,10 @@ export class RosterProposalService {
           ),
         ),
       ],
-      events: [
-        ...new Set(
-          proposals.flatMap(({ change }) =>
-            change.kind === "set_event_streams" || change.kind === "set_event_viewership"
-              ? [change.eventId]
-              : [],
-          ),
-        ),
-      ],
-      circuits: [
-        ...new Set(
-          proposals.flatMap(({ change }) =>
-            change.kind === "set_circuit_stage_scale" ? [change.circuitId] : [],
-          ),
-        ),
-      ],
-      seasons: [
-        ...new Set(
-          proposals.flatMap(({ change }) =>
-            change.kind === "award_season_player" ? [change.seasonId] : [],
-          ),
-        ),
-      ],
+      users: [...new Set(proposals.map(({ proposedById }) => proposedById))],
     });
 
-    return { proposals, names };
+    return { names, proposals };
   }
 
   async approve(id: string, reviewerId: string): Promise<RosterProposal> {
@@ -373,90 +373,18 @@ export class RosterProposalService {
     return {
       add_player_to_team: async ({ playerId, teamId, effectiveDate, contractRole }, sourceUrl) => {
         await this.players.joinTeam(playerId, {
-          teamId,
           effectiveDate,
-          sourceUrl,
           role: contractRole,
+          sourceUrl,
+          teamId,
         });
 
         return playerId;
       },
-      remove_player_from_team: async ({ playerId, teamId, effectiveDate, status }, sourceUrl) => {
-        await this.players.leaveTeam(playerId, { teamId, effectiveDate, sourceUrl, status });
-
-        return playerId;
-      },
-      create_player: async (change, sourceUrl) => {
-        const { kind: _, ...input } = change;
-
-        return await idOf(this.players.create({ ...input, source: sourceFromUrl(sourceUrl) }));
-      },
-      update_player: async (change) => {
-        const { kind: _, playerId, ...input } = change;
-
-        return await idOf(this.players.update(playerId, input));
-      },
-      create_team: async (change, sourceUrl) => {
-        const { kind: _, ...input } = change;
-
-        return await idOf(this.teams.create({ ...input, source: sourceFromUrl(sourceUrl) }));
-      },
-      update_team: async (change) => {
-        const { kind: _, teamId, ...input } = change;
-
-        return await idOf(this.teams.update(teamId, input));
-      },
-      upload_team_logo: async ({ teamId, variant, logoUrl }) =>
-        await idOf(this.teams.update(teamId, { [teamLogoField(variant)]: logoUrl })),
       add_team_alias: async (change, sourceUrl) => {
         await this.teamAliases.add(change.teamId, { ...change.alias, sourceUrl });
 
         return change.teamId;
-      },
-      update_team_alias: async ({ teamId, aliasId, alias }, sourceUrl) => {
-        await this.teamAliases.update(teamId, aliasId, { ...alias, sourceUrl });
-
-        return teamId;
-      },
-      merge_players: async (change) =>
-        await keptIdOf(this.merges.mergePlayers(change.keptId, change.duplicateId)),
-      merge_teams: async (change) =>
-        await keptIdOf(this.merges.mergeTeams(change.keptId, change.duplicateId)),
-      create_contract: async ({ playerId, teamId, startDate, endDate, contractRole }, sourceUrl) =>
-        await idOf(
-          this.contracts.recordPeriod(playerId, {
-            teamId,
-            startDate,
-            endDate,
-            role: contractRole,
-            sourceUrl,
-          }),
-        ),
-      update_contract: async (
-        { contractId, playerId, teamId, startDate, endDate, contractRole },
-        sourceUrl,
-      ) =>
-        await idOf(
-          this.contracts.revisePeriod(playerId, contractId, {
-            teamId,
-            startDate,
-            endDate,
-            role: contractRole,
-            sourceUrl,
-          }),
-        ),
-      set_tournament_prizes: async (change, sourceUrl) => {
-        await this.prizes.setDistribution(
-          change.tournamentId,
-          sourcedPrizes(change.prizes, sourceUrl),
-        );
-
-        return change.tournamentId;
-      },
-      update_tournament_prize: async ({ tournamentId, teamId, patch }, sourceUrl) => {
-        await this.prizes.updateEntry(tournamentId, teamId, patch, sourceUrl);
-
-        return tournamentId;
       },
       award_player: async ({ tournamentId, teamId, playerId, awardType }) =>
         await idOf(this.awards.createForTeam(tournamentId, teamId, playerId, awardType)),
@@ -465,33 +393,25 @@ export class RosterProposalService {
 
         return await idOf(this.seasons.addAward(seasonId, { ...award, sourceUrl }));
       },
-      set_event_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
-      set_tournament_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
-      set_match_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
-      set_match_lineups: async (change) => {
-        await this.lineups.set(change.matchId, change.lineups);
+      create_contract: async ({ playerId, teamId, startDate, endDate, contractRole }, sourceUrl) =>
+        await idOf(
+          this.contracts.recordPeriod(playerId, {
+            endDate,
+            role: contractRole,
+            sourceUrl,
+            startDate,
+            teamId,
+          }),
+        ),
+      create_player: async (change, sourceUrl) => {
+        const { kind: _, ...input } = change;
 
-        return change.matchId;
+        return await idOf(this.players.create({ ...input, source: sourceFromUrl(sourceUrl) }));
       },
-      set_event_viewership: async (change) => {
-        await this.viewerships.set({ kind: "event", id: change.eventId }, change.viewership);
+      create_team: async (change, sourceUrl) => {
+        const { kind: _, ...input } = change;
 
-        return change.eventId;
-      },
-      set_match_viewership: async (change) => {
-        await this.viewerships.set({ kind: "match", id: change.matchId }, change.viewership);
-
-        return change.matchId;
-      },
-      set_circuit_stage_scale: async (change, sourceUrl) => {
-        const { circuitId, tournamentId } = change;
-        await this.circuits.setStageScale(
-          circuitId,
-          tournamentId,
-          circuitStageInput(change, sourceUrl),
-        );
-
-        return circuitId;
+        return await idOf(this.teams.create({ ...input, source: sourceFromUrl(sourceUrl) }));
       },
       delete_match: async (change) => {
         await this.matches.deleteMatch(change.matchId);
@@ -507,6 +427,86 @@ export class RosterProposalService {
 
         return change.teamId;
       },
+      merge_players: async (change) =>
+        await keptIdOf(this.merges.mergePlayers(change.keptId, change.duplicateId)),
+      merge_teams: async (change) =>
+        await keptIdOf(this.merges.mergeTeams(change.keptId, change.duplicateId)),
+      remove_player_from_team: async ({ playerId, teamId, effectiveDate, status }, sourceUrl) => {
+        await this.players.leaveTeam(playerId, { effectiveDate, sourceUrl, status, teamId });
+
+        return playerId;
+      },
+      set_circuit_stage_scale: async (change, sourceUrl) => {
+        const { circuitId, tournamentId } = change;
+        await this.circuits.setStageScale(
+          circuitId,
+          tournamentId,
+          circuitStageInput(change, sourceUrl),
+        );
+
+        return circuitId;
+      },
+      set_event_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_event_viewership: async (change) => {
+        await this.viewerships.set({ id: change.eventId, kind: "event" }, change.viewership);
+
+        return change.eventId;
+      },
+      set_match_lineups: async (change) => {
+        await this.lineups.set(change.matchId, change.lineups);
+
+        return change.matchId;
+      },
+      set_match_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_match_viewership: async (change) => {
+        await this.viewerships.set({ id: change.matchId, kind: "match" }, change.viewership);
+
+        return change.matchId;
+      },
+      set_tournament_prizes: async (change, sourceUrl) => {
+        await this.prizes.setDistribution(
+          change.tournamentId,
+          sourcedPrizes(change.prizes, sourceUrl),
+        );
+
+        return change.tournamentId;
+      },
+      set_tournament_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      update_contract: async (
+        { contractId, playerId, teamId, startDate, endDate, contractRole },
+        sourceUrl,
+      ) =>
+        await idOf(
+          this.contracts.revisePeriod(playerId, contractId, {
+            endDate,
+            role: contractRole,
+            sourceUrl,
+            startDate,
+            teamId,
+          }),
+        ),
+      update_player: async (change) => {
+        const { kind: _, playerId, ...input } = change;
+
+        return await idOf(this.players.update(playerId, input));
+      },
+      update_team: async (change) => {
+        const { kind: _, teamId, ...input } = change;
+
+        return await idOf(this.teams.update(teamId, input));
+      },
+      update_team_alias: async ({ teamId, aliasId, alias }, sourceUrl) => {
+        await this.teamAliases.update(teamId, aliasId, { ...alias, sourceUrl });
+
+        return teamId;
+      },
+      update_tournament_prize: async ({ tournamentId, teamId, patch }, sourceUrl) => {
+        await this.prizes.updateEntry(tournamentId, teamId, patch, sourceUrl);
+
+        return tournamentId;
+      },
+      upload_team_logo: async ({ teamId, variant, logoUrl }) =>
+        await idOf(this.teams.update(teamId, { [teamLogoField(variant)]: logoUrl })),
     };
   }
 

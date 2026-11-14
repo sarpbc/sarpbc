@@ -5,9 +5,9 @@ const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 setPageSeo({
-  title: t("page.login.seoTitle"),
   description: t("page.login.seoDescription"),
   noIndex: true,
+  title: t("page.login.seoTitle"),
 });
 
 const { leaveIfSignedIn, submit, googleLogin } = useAuthFlow();

@@ -28,7 +28,7 @@ const matchName = (match: Match): string => {
   const sides = match.participants
     .getItems()
     .map((participant) =>
-      participantName({ team: participant.team, players: participant.players.getItems() }),
+      participantName({ players: participant.players.getItems(), team: participant.team }),
     );
 
   return sides.length === 2 ? sides.join(" vs ") : match.name;
@@ -36,28 +36,28 @@ const matchName = (match: Match): string => {
 
 const toLink = ({ player, team, tournament, match }: OnThisDayFact): StaffFact["link"] => {
   if (player) {
-    return { kind: "player", id: player.id, name: player.name, slug: player.slug, source: null };
+    return { id: player.id, kind: "player", name: player.name, slug: player.slug, source: null };
   }
 
   if (team) {
-    return { kind: "team", id: team.id, name: team.name, slug: team.slug, source: null };
+    return { id: team.id, kind: "team", name: team.name, slug: team.slug, source: null };
   }
 
   if (tournament) {
     return {
-      kind: "tournament",
+      event: { name: tournament.event.name, slug: tournament.event.slug },
       id: tournament.id,
+      kind: "tournament",
       name: tournament.name,
       slug: tournament.slug,
-      event: { name: tournament.event.name, slug: tournament.event.slug },
       source: tournament.source,
     };
   }
 
   if (match) {
     return {
-      kind: "match",
       id: match.id,
+      kind: "match",
       name: matchName(match),
       publicId: match.publicId,
       slug: toMatchSlug(match),
@@ -69,14 +69,14 @@ const toLink = ({ player, team, tournament, match }: OnThisDayFact): StaffFact["
 };
 
 const toFact = (row: OnThisDayFact): StaffFact => ({
-  id: row.id,
-  month: row.month,
   day: row.day,
-  year: row.year,
+  id: row.id,
+  link: toLink(row),
+  month: row.month,
+  sourceUrl: row.sourceUrl,
   textEn: row.textEn,
   textFr: row.textFr,
-  link: toLink(row),
-  sourceUrl: row.sourceUrl,
+  year: row.year,
 });
 
 export class OnThisDayFactPersistence implements OnThisDayFactStore {
@@ -87,8 +87,8 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
       OnThisDayFact,
       {},
       {
+        orderBy: [{ month: "ASC" }, { day: "ASC" }, { year: "ASC" }, { createdAt: "ASC" }],
         populate: FACT_POPULATE,
-        orderBy: { month: "ASC", day: "ASC", year: "ASC", createdAt: "ASC" },
       },
     );
 
@@ -98,8 +98,8 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
   async onDay(month: number, day: number) {
     const rows = await this.em.find(
       OnThisDayFact,
-      { month, day },
-      { populate: FACT_POPULATE, orderBy: { year: "DESC", createdAt: "ASC" } },
+      { day, month },
+      { orderBy: [{ year: "DESC" }, { createdAt: "ASC" }], populate: FACT_POPULATE },
     );
 
     return rows.map(toFact);
@@ -147,13 +147,13 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
     Object.assign(row, {
       id,
       ...fields,
+      match: matchId !== null && matchId !== "" ? this.em.getReference(Match, matchId) : null,
       player: playerId !== null && playerId !== "" ? this.em.getReference(Player, playerId) : null,
       team: teamId !== null && teamId !== "" ? this.em.getReference(Team, teamId) : null,
       tournament:
         tournamentId !== null && tournamentId !== ""
           ? this.em.getReference(Tournament, tournamentId)
           : null,
-      match: matchId !== null && matchId !== "" ? this.em.getReference(Match, matchId) : null,
     });
     await this.em.persist(row).flush();
   }

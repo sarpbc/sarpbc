@@ -18,28 +18,28 @@ import { teamAt } from "../../../roster/domain/team-alias";
 
 export const toLeague = (row: LeagueRow): League =>
   Object.assign(new League(), {
+    createdAt: row.createdAt,
     id: row.id,
-    pandascoreId: row.pandascoreId,
-    name: row.name,
-    slug: row.slug,
-    url: row.url,
     imageUrl: row.imageUrl,
     modifiedAt: row.modifiedAt,
-    createdAt: row.createdAt,
+    name: row.name,
+    pandascoreId: row.pandascoreId,
+    slug: row.slug,
     updatedAt: row.updatedAt,
+    url: row.url,
   });
 
 export const toTournamentEvent = (row: TournamentEventRow): TournamentEvent =>
   Object.assign(new TournamentEvent(), {
+    createdAt: row.createdAt,
     id: row.id,
+    league: row.league ? toLeague(row.league) : null,
+    name: row.name,
     pandascoreSerieId: row.pandascoreSerieId,
     slug: row.slug,
-    name: row.name,
-    league: row.league ? toLeague(row.league) : null,
     streams: row.streams ?? [],
-    viewership: row.viewership ?? null,
-    createdAt: row.createdAt,
     updatedAt: row.updatedAt,
+    viewership: row.viewership ?? null,
   });
 
 export const MATCH_WRITE_POPULATE = [
@@ -77,15 +77,14 @@ export const toParticipant = (
     (team ? wrap(team).isInitialized() : row.players.isInitialized());
 
   if (!loaded) {
-    log.warn({ component: "CompetitionMapper", skipped: "participant", participantId: row.id });
+    log.warn({ component: "CompetitionMapper", participantId: row.id, skipped: "participant" });
 
     return null;
   }
 
   return Object.assign(new TournamentParticipant(), {
+    createdAt: row.createdAt,
     id: row.id,
-    tournamentId: tournament.id,
-    team: team ? teamAt(toTeam(team, false), at === undefined ? stageDate(tournament) : at) : null,
     players: row.players.isInitialized()
       ? row.players
           .getItems()
@@ -93,7 +92,8 @@ export const toParticipant = (
           .map(toPlayer)
       : [],
     rosterSourceUrl: row.rosterSourceUrl,
-    createdAt: row.createdAt,
+    team: team ? teamAt(toTeam(team, false), at === undefined ? stageDate(tournament) : at) : null,
+    tournamentId: tournament.id,
     updatedAt: row.updatedAt,
   });
 };
@@ -101,51 +101,33 @@ export const toParticipant = (
 const matchDate = (row: MatchRow): Date | null => row.beginAt ?? stageDate(row.tournament);
 
 export const toTournamentSummary = (row: TournamentRow): TournamentSummary => ({
-  id: row.id,
-  name: row.name,
-  slug: row.slug,
-  event: eventRefOf(row.event),
   beginAt: row.beginAt,
-  league: row.league ? toLeague(row.league) : null,
-  pickemsEnabled: row.pickemsEnabled,
-  source: row.source,
-  pandascoreId: row.pandascoreId,
-  streams: row.streams ?? [],
+  event: eventRefOf(row.event),
   eventStreams: row.event.streams ?? [],
+  id: row.id,
+  league: row.league ? toLeague(row.league) : null,
+  name: row.name,
+  pandascoreId: row.pandascoreId,
+  pickemsEnabled: row.pickemsEnabled,
+  slug: row.slug,
+  source: row.source,
+  streams: row.streams ?? [],
 });
 
 export const toMatch = (row: MatchRow): Match =>
   Object.assign(new Match(), {
-    id: row.id,
-    publicId: row.publicId,
-    pandascoreId: row.pandascoreId,
-    source: row.source,
-    name: row.name,
     beginAt: row.beginAt,
+    createdAt: row.createdAt,
     endAt: row.endAt,
-    status: row.status,
+    id: row.id,
+    name: row.name,
     numberOfGames: row.numberOfGames,
     officialStreams: row.officialStreams ?? [],
-    streams: row.streams ?? [],
-    viewership: row.viewership ?? null,
-    vods: row.vods ?? [],
-    sourceUrl: row.sourceUrl,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-    tournament: toTournamentSummary(row.tournament),
-    winner: row.winner ? toParticipant(row.winner, matchDate(row)) : null,
+    pandascoreId: row.pandascoreId,
     participants: row.participants.isInitialized()
       ? row.participants
           .getItems()
           .flatMap((participant) => toParticipant(participant, matchDate(row)) ?? [])
-      : [],
-    results: row.results.isInitialized()
-      ? row.results.getItems().map((r) => ({
-          id: r.id,
-          match: { id: row.id },
-          participant: { id: r.participant.id },
-          score: r.score,
-        }))
       : [],
     previousMatches: row.previousMatches.isInitialized()
       ? row.previousMatches.getItems().map((r) => ({
@@ -155,39 +137,57 @@ export const toMatch = (row: MatchRow): Match =>
           type: r.type,
         }))
       : [],
+    publicId: row.publicId,
+    results: row.results.isInitialized()
+      ? row.results.getItems().map((r) => ({
+          id: r.id,
+          match: { id: row.id },
+          participant: { id: r.participant.id },
+          score: r.score,
+        }))
+      : [],
+    source: row.source,
+    sourceUrl: row.sourceUrl,
+    status: row.status,
+    streams: row.streams ?? [],
+    tournament: toTournamentSummary(row.tournament),
+    updatedAt: row.updatedAt,
+    viewership: row.viewership ?? null,
+    vods: row.vods ?? [],
+    winner: row.winner ? toParticipant(row.winner, matchDate(row)) : null,
   });
 
 export const toTournament = (row: TournamentRow): Tournament =>
   Object.assign(new Tournament(), {
-    id: row.id,
-    pandascoreId: row.pandascoreId,
-    source: row.source,
-    format: row.format,
-    name: row.name,
-    description: row.description,
-    slug: row.slug,
-    event: eventRefOf(row.event),
-    tier: row.tier,
     beginAt: row.beginAt,
+    country: row.country,
+    createdAt: row.createdAt,
+    description: row.description,
     endAt: row.endAt,
     endAtCorrected: row.endAtCorrected,
-    winnerType: row.winnerType,
-    type: row.type,
-    country: row.country,
-    prizepool: row.prizepool,
-    imageUrl: row.imageUrl,
-    pickemsEnabled: row.pickemsEnabled,
-    hasBracket: row.hasBracket,
-    streams: row.streams ?? [],
+    event: eventRefOf(row.event),
     eventStreams: row.event.streams ?? [],
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
+    format: row.format,
+    hasBracket: row.hasBracket,
+    id: row.id,
+    imageUrl: row.imageUrl,
     league: row.league ? toLeague(row.league) : null,
-    winner: row.winner ? toParticipant(row.winner) : null,
+    matches: row.matches.isInitialized() ? row.matches.getItems().map(toMatch) : [],
+    name: row.name,
+    pandascoreId: row.pandascoreId,
     participants: row.participants.isInitialized()
       ? row.participants.getItems().flatMap((participant) => toParticipant(participant) ?? [])
       : [],
-    matches: row.matches.isInitialized() ? row.matches.getItems().map(toMatch) : [],
+    pickemsEnabled: row.pickemsEnabled,
+    prizepool: row.prizepool,
+    slug: row.slug,
+    source: row.source,
+    streams: row.streams ?? [],
+    tier: row.tier,
+    type: row.type,
+    updatedAt: row.updatedAt,
+    winner: row.winner ? toParticipant(row.winner) : null,
+    winnerType: row.winnerType,
   });
 
 export const toMatchSlug = (row: MatchRow): string => {
@@ -207,12 +207,12 @@ export const toMatchSlug = (row: MatchRow): string => {
     participants:
       loaded && row.participants.isInitialized()
         ? row.participants.getItems().map((participant) => ({
+            players: participant.players.isInitialized() ? participant.players.getItems() : [],
             team: participant.team && {
               name: teamNameAt(participant.team, loaded ? matchDate(row) : null),
             },
-            players: participant.players.isInitialized() ? participant.players.getItems() : [],
           }))
         : [],
-    tournament: { slug: tournament?.slug ?? "", event: { slug: event?.slug ?? "" } },
+    tournament: { event: { slug: event?.slug ?? "" }, slug: tournament?.slug ?? "" },
   });
 };

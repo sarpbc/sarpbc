@@ -19,7 +19,7 @@ const {
 const { t, locale } = useI18n();
 
 const blockKey = computed(() => {
-  const block = newsMatchBlockFromAttrs({ match, ids, tournament, team, limit });
+  const block = newsMatchBlockFromAttrs({ ids, limit, match, team, tournament });
 
   return block ? newsMatchBlockKey(block) : null;
 });

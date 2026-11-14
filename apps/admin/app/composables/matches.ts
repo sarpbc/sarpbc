@@ -37,7 +37,7 @@ export const setMatchVods = async (
 ): Promise<MatchVod[]> => {
   const res = await apiFetch<{ match: { vods: MatchVod[] } }>(
     `/tournaments/matches/${matchId}/vods`,
-    { method: "PUT", body: { vods } },
+    { body: { vods }, method: "PUT" },
   );
 
   return res.match.vods;
@@ -47,12 +47,12 @@ export const setMatchBracket = async (
   matchId: string,
   body: { participantIds: string[]; previousMatches: BracketLinkInput[] },
 ): Promise<void> => {
-  await apiFetch(`/tournaments/matches/${matchId}/bracket`, { method: "PUT", body });
+  await apiFetch(`/tournaments/matches/${matchId}/bracket`, { body, method: "PUT" });
 };
 
 export const createEmptyBracket = async (
   tournamentId: string,
   body: { teams: EmptyBracketSize; numberOfGames?: number },
 ): Promise<void> => {
-  await apiFetch(`/tournaments/${tournamentId}/bracket`, { method: "POST", body });
+  await apiFetch(`/tournaments/${tournamentId}/bracket`, { body, method: "POST" });
 };

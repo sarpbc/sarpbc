@@ -4,10 +4,10 @@ import { buildLineups, isStandIn, lineupsFromGames, normalizeLineups } from "./m
 
 const player = (id: string) => ({
   id,
-  name: id,
-  slug: id,
   imageUrl: null,
+  name: id,
   nationality: null,
+  slug: id,
 });
 
 describe(isStandIn, () => {

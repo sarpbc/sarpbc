@@ -15,15 +15,15 @@ export class PostRepository extends EntityRepository<Post> {
     return await super.findAll({
       limit,
       offset,
-      populate: ["author", "topic"],
       orderBy: { createdAt: "DESC" },
+      populate: ["author", "topic"],
     });
   }
 
   async findByTopicId(topicId: string): Promise<Post[]> {
     return await super.findAll({
-      where: { topic: { id: topicId } },
       populate: ["author", "topic"],
+      where: { topic: { id: topicId } },
     });
   }
 
@@ -70,27 +70,27 @@ export class PostRepository extends EntityRepository<Post> {
       .array(
         z.object({
           id: z.string(),
-          public_id: z.number().int().positive(),
-          title: z.string(),
-          reply_count: z.coerce.number().int().nonnegative(),
           last_activity: z.coerce.date(),
+          public_id: z.number().int().positive(),
+          reply_count: z.coerce.number().int().nonnegative(),
+          title: z.string(),
         }),
       )
       .parse(results);
 
     return rows.map((row) => ({
       id: row.id,
+      lastActivity: row.last_activity,
+      messageCount: row.reply_count + 1,
       publicId: row.public_id,
       title: row.title,
-      messageCount: row.reply_count + 1,
-      lastActivity: row.last_activity,
     }));
   }
 
   async findLatestByUser(userId: string): Promise<Post | null> {
     return await this.findOne(
       { author: { id: userId } },
-      { populate: ["author", "topic"], orderBy: { createdAt: "DESC" } },
+      { orderBy: { createdAt: "DESC" }, populate: ["author", "topic"] },
     );
   }
 }

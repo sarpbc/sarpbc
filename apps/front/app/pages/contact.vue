@@ -17,8 +17,8 @@ watch(
   (value) => {
     if (value) {
       setPageSeo({
-        title: value.title,
         description: value.description,
+        title: value.title,
       });
     }
   },

@@ -5,17 +5,17 @@ import type { StatsImport } from "../../domain/stats-import";
 import { MatchStatsImport } from "./match-stats-import.entity";
 
 const toImport = (row: MatchStatsImport): StatsImport => ({
-  id: row.id,
-  tournamentId: row.tournament.id,
+  createdAt: row.createdAt,
+  error: row.error,
+  finishedAt: row.finishedAt,
   groupId: row.groupId,
+  id: row.id,
+  items: [...row.items],
+  processed: row.processed,
+  startedAt: row.startedAt,
   status: row.status,
   total: row.total,
-  processed: row.processed,
-  items: [...row.items],
-  error: row.error,
-  createdAt: row.createdAt,
-  startedAt: row.startedAt,
-  finishedAt: row.finishedAt,
+  tournamentId: row.tournament.id,
 });
 
 export class MikroOrmStatsImportStore implements StatsImportStore {
@@ -35,13 +35,13 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
   async save(statsImport: StatsImport): Promise<void> {
     const row = await this.em.findOneOrFail(MatchStatsImport, statsImport.id);
     this.em.assign(row, {
+      error: statsImport.error,
+      finishedAt: statsImport.finishedAt,
+      items: [...statsImport.items],
+      processed: statsImport.processed,
+      startedAt: statsImport.startedAt,
       status: statsImport.status,
       total: statsImport.total,
-      processed: statsImport.processed,
-      items: [...statsImport.items],
-      error: statsImport.error,
-      startedAt: statsImport.startedAt,
-      finishedAt: statsImport.finishedAt,
     });
     await this.em.flush();
   }
@@ -50,7 +50,7 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
     const rows = await this.em.find(
       MatchStatsImport,
       { tournament: tournamentId },
-      { orderBy: { createdAt: "DESC" }, limit },
+      { limit, orderBy: { createdAt: "DESC" } },
     );
 
     return rows.map(toImport);
@@ -60,7 +60,7 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
     return await this.em.nativeUpdate(
       MatchStatsImport,
       { status: { $in: [...ACTIVE_IMPORT_STATUSES] } },
-      { status: "failed", error, finishedAt: new Date() },
+      { error, finishedAt: new Date(), status: "failed" },
     );
   }
 }

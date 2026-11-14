@@ -7,29 +7,29 @@ const idRow = z.looseObject({ id: z.string() });
 
 const participantView = z.object({
   id: z.string(),
-  team: z.looseObject({ id: z.string(), slug: z.string() }),
   players: z.array(idRow),
+  team: z.looseObject({ id: z.string(), slug: z.string() }),
 });
 
 const matchView = z.looseObject({
   id: z.string(),
   name: z.string(),
-  winnerId: z.string().nullable(),
-  results: z.array(z.looseObject({ participant: z.string(), score: z.number() })),
   previousMatches: z.array(z.looseObject({ previousMatch: z.string() })),
+  results: z.array(z.looseObject({ participant: z.string(), score: z.number() })),
+  winnerId: z.string().nullable(),
 });
 
 const tournamentRecord = z.looseObject({
-  source: z.string(),
-  slug: z.string(),
-  name: z.string(),
   country: z.string().nullable(),
+  event: z.looseObject({ name: z.string(), slug: z.string() }),
   imageUrl: z.string().nullable(),
-  event: z.looseObject({ slug: z.string(), name: z.string() }),
   league: idRow,
-  winner: idRow.nullable(),
-  participants: z.array(participantView),
   matches: z.array(matchView),
+  name: z.string(),
+  participants: z.array(participantView),
+  slug: z.string(),
+  source: z.string(),
+  winner: idRow.nullable(),
 });
 
 const playerRecord = z.looseObject({
@@ -40,13 +40,13 @@ const playerRecord = z.looseObject({
 const eventView = z.object({ event: z.looseObject({ stages: z.array(idRow) }) });
 
 const matchDetail = z.object({
+  headToHead: z.looseObject({ totalMeetings: z.number() }),
   match: z.looseObject({
     id: z.string(),
-    winner: idRow.nullable(),
     officialStreams: z.array(z.looseObject({ language: z.string() })),
     results: z.array(z.looseObject({ participant: idRow, score: z.number() })),
+    winner: idRow.nullable(),
   }),
-  headToHead: z.looseObject({ totalMeetings: z.number() }),
   teamForms: z.record(z.string(), z.looseObject({ record: z.looseObject({ wins: z.number() }) })),
 });
 
@@ -91,30 +91,30 @@ export const verifyCompetitionImport = async ({
   const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
   const veteran = {
-    pandascoreId: 9101,
     name: "Imported Veteran",
-    slug: "imported-veteran",
     nationality: "FR",
+    pandascoreId: 9101,
+    slug: "imported-veteran",
   };
 
   const rookie = {
-    pandascoreId: 9102,
     name: "Imported Rookie",
-    slug: "imported-rookie",
     nationality: "BR",
+    pandascoreId: 9102,
+    slug: "imported-rookie",
   };
 
-  const currentTeam = { pandascoreId: 9201, name: "Current Roster", slug: "current-roster" };
-  const oldTeam = { pandascoreId: 9202, name: "Historical Roster", slug: "historical-roster" };
-  const rival = { pandascoreId: 9203, name: "Historical Rival", slug: "historical-rival" };
+  const currentTeam = { name: "Current Roster", pandascoreId: 9201, slug: "current-roster" };
+  const oldTeam = { name: "Historical Roster", pandascoreId: 9202, slug: "historical-roster" };
+  const rival = { name: "Historical Rival", pandascoreId: 9203, slug: "historical-rival" };
 
   await run(async () => {
     await sync.applyIncident({
-      id: 1,
-      modifiedAt: new Date(),
       changeType: "creation",
+      command: { currentTeam, player: veteran },
+      id: 1,
       kind: "player",
-      command: { player: veteran, currentTeam },
+      modifiedAt: new Date(),
     });
   });
 
@@ -127,61 +127,61 @@ export const verifyCompetitionImport = async ({
   await request(
     "PATCH",
     `/player/${player.id}`,
-    { slug: "local-veteran", firstName: "Local" },
+    { firstName: "Local", slug: "local-veteran" },
     staffCookie,
   );
 
   const tournamentCommand = {
-    pandascoreId: 9301,
-    name: "Imported Championship",
-    serie: { pandascoreId: 9601, fullName: "Spring Split", year: 2026 },
-    country: "FR",
-    hasBracket: true,
     beginAt: new Date(Date.now() - 172_800_000),
+    country: "FR",
     endAt: new Date(Date.now() + 172_800_000),
-    winnerPandascoreTeamId: oldTeam.pandascoreId,
+    expectedRoster: [
+      { players: [veteran], team: oldTeam },
+      { players: [rookie], team: rival },
+    ],
+    hasBracket: true,
     league: {
-      pandascoreId: 9401,
       name: "Imported League",
+      pandascoreId: 9401,
       slug: "imported-league",
       url: "https://example.test/league",
     },
-    expectedRoster: [
-      { team: oldTeam, players: [veteran] },
-      { team: rival, players: [rookie] },
-    ],
+    name: "Imported Championship",
+    pandascoreId: 9301,
+    serie: { fullName: "Spring Split", pandascoreId: 9601, year: 2026 },
+    winnerPandascoreTeamId: oldTeam.pandascoreId,
   };
 
   const semifinal = {
-    pandascoreId: 9501,
-    tournamentPandascoreId: tournamentCommand.pandascoreId,
-    name: "Imported Semifinal",
-    slug: "imported-semifinal",
     beginAt: new Date(Date.now() - 7_200_000),
     endAt: new Date(Date.now() - 3_600_000),
-    status: "finished",
+    name: "Imported Semifinal",
     numberOfGames: 5,
-    opponentSlugs: [oldTeam.slug, rival.slug],
-    opponentPandascoreIds: [oldTeam.pandascoreId, rival.pandascoreId],
-    results: [
-      { teamPandascoreId: oldTeam.pandascoreId, score: 3 },
-      { teamPandascoreId: rival.pandascoreId, score: 1 },
-    ],
-    previousMatches: [],
     officialStreams: [],
+    opponentPandascoreIds: [oldTeam.pandascoreId, rival.pandascoreId],
+    opponentSlugs: [oldTeam.slug, rival.slug],
+    pandascoreId: 9501,
+    previousMatches: [],
+    results: [
+      { score: 3, teamPandascoreId: oldTeam.pandascoreId },
+      { score: 1, teamPandascoreId: rival.pandascoreId },
+    ],
+    slug: "imported-semifinal",
+    status: "finished",
+    tournamentPandascoreId: tournamentCommand.pandascoreId,
   };
 
   const final = {
     ...semifinal,
-    pandascoreId: 9502,
-    name: "Imported Final",
-    slug: "imported-final",
     beginAt: new Date(Date.now() + 86_400_000),
     endAt: undefined,
-    status: "not_started",
+    name: "Imported Final",
+    officialStreams: [{ language: "en", main: true, url: "https://twitch.tv/example" }],
+    pandascoreId: 9502,
+    previousMatches: [{ matchPandascoreId: semifinal.pandascoreId, type: "winner" as const }],
     results: [],
-    previousMatches: [{ type: "winner" as const, matchPandascoreId: semifinal.pandascoreId }],
-    officialStreams: [{ url: "https://twitch.tv/example", language: "en", main: true }],
+    slug: "imported-final",
+    status: "not_started",
   };
 
   const imported = await run(
@@ -210,8 +210,8 @@ export const verifyCompetitionImport = async ({
   assert.equal(view.source, "pandascore");
   assert.equal(view.slug, "imported-championship");
   assert.deepEqual(
-    { slug: view.event.slug, name: view.event.name },
-    { slug: "imported-league-spring-split-2026", name: "Imported League Spring Split" },
+    { name: view.event.name, slug: view.event.slug },
+    { name: "Imported League Spring Split", slug: "imported-league-spring-split-2026" },
   );
   assert.equal(view.country, "FR");
   assert.equal(view.participants.length, 2);
@@ -249,8 +249,8 @@ export const verifyCompetitionImport = async ({
   assert.equal(view.name, "Imported Championship Updated");
   assert.equal(view.slug, "imported-championship");
   assert.deepEqual(
-    { slug: view.event.slug, name: view.event.name },
-    { slug: "imported-league-spring-split-2026", name: "Imported League Spring Major" },
+    { name: view.event.name, slug: view.event.slug },
+    { name: "Imported League Spring Major", slug: "imported-league-spring-split-2026" },
   );
 
   const { Match } = await import("../../src/tournament/infrastructure/persistence/match.entity.ts");
@@ -358,17 +358,17 @@ export const verifyCompetitionImport = async ({
   assert.ok(runResult2.has(tournamentCommand.pandascoreId));
   await run(async () => {
     await sync.applyIncident({
-      id: 3,
-      modifiedAt: new Date(),
       changeType: "update",
-      kind: "match",
       command: {
         ...semifinal,
         results: [
-          { teamPandascoreId: oldTeam.pandascoreId, score: 3 },
-          { teamPandascoreId: rival.pandascoreId, score: 2 },
+          { score: 3, teamPandascoreId: oldTeam.pandascoreId },
+          { score: 2, teamPandascoreId: rival.pandascoreId },
         ],
       },
+      id: 3,
+      kind: "match",
+      modifiedAt: new Date(),
     });
   });
   const readResult10 = await read(`/matches/${semiView.id}`, matchDetail);
@@ -383,11 +383,11 @@ export const verifyCompetitionImport = async ({
 
   await run(async () => {
     await sync.applyIncident({
-      id: 2,
-      modifiedAt: new Date(),
       changeType: "update",
+      command: { currentTeam: null, player: veteran },
+      id: 2,
       kind: "player",
-      command: { player: veteran, currentTeam: null },
+      modifiedAt: new Date(),
     });
   });
   const playerViewResult2 = await playerView();
@@ -401,21 +401,21 @@ export const verifyCompetitionImport = async ({
   const qualifier = await run(
     async () =>
       await sync.upsertTournament({
-        pandascoreId: 9302,
-        name: "Imported Championship Updated",
         league: tournamentCommand.league,
-        serie: { pandascoreId: 9602, fullName: "Spring Qualifier", year: 2026 },
+        name: "Imported Championship Updated",
+        pandascoreId: 9302,
+        serie: { fullName: "Spring Qualifier", pandascoreId: 9602, year: 2026 },
       }),
   );
 
   assert.equal(qualifier.event.slug, "imported-league-spring-qualifier-2026");
   await run(async () => {
     await sync.applyIncident({
-      id: 9602,
-      modifiedAt: new Date(),
       changeType: "deletion",
+      deletion: { intoId: tournamentCommand.serie.pandascoreId, kind: "merged" },
+      id: 9602,
       kind: "serie",
-      deletion: { kind: "merged", intoId: tournamentCommand.serie.pandascoreId },
+      modifiedAt: new Date(),
     });
   });
   const merged = await tournamentView(qualifier.id);
@@ -434,10 +434,10 @@ export const verifyCompetitionImport = async ({
   assert.ok(rivalParticipant, "the rival remains a tournament participant");
 
   return {
-    tournamentId: imported.id,
+    matchId: semiView.id,
     participantId: participant.id,
     playerId: player.id,
-    matchId: semiView.id,
     rivalParticipantId: rivalParticipant.id,
+    tournamentId: imported.id,
   };
 };

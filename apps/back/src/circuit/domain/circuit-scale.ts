@@ -36,7 +36,7 @@ export const parseCircuitScale = (tiers: readonly CircuitScaleTier[]): CircuitSc
 
   const sorted = tiers
     .toSorted((a, b) => a.from - b.from)
-    .map(({ from, to, points }) => ({ from, to, points }));
+    .map(({ from, to, points }) => ({ from, points, to }));
 
   for (const [index, tier] of sorted.entries()) {
     const previous: typeof tier | undefined = sorted[index - 1];
@@ -101,7 +101,7 @@ export const parseCircuitStageSettings = (
 ): CircuitStageSettings => {
   assertCircuitSourceUrl(input.sourceUrl);
   const regionTeamIds = [...(input.regionTeamIds ?? [])];
-  const finishes = (input.finishes ?? []).map(({ teamId, placement }) => ({ teamId, placement }));
+  const finishes = (input.finishes ?? []).map(({ teamId, placement }) => ({ placement, teamId }));
   requireEventTeams(regionTeamIds, eventTeamIds);
   requireEventTeams(
     finishes.map(({ teamId }) => teamId),
@@ -115,10 +115,10 @@ export const parseCircuitStageSettings = (
   }
 
   return {
+    finishes: finishes.toSorted((a, b) => a.placement - b.placement),
+    regionTeamIds,
     scale: parseCircuitScale(input.scale),
     sourceUrl: input.sourceUrl,
     worldwide: input.worldwide ?? false,
-    regionTeamIds,
-    finishes: finishes.toSorted((a, b) => a.placement - b.placement),
   };
 };

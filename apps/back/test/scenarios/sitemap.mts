@@ -58,7 +58,7 @@ export const verifySitemap = async ({
   Object.assign(tbdTeam, { name: " tbd ", slug: "sitemap-tbd-team" });
   em.persist(tbdTeam);
   const tbdParticipant = new TournamentParticipant();
-  Object.assign(tbdParticipant, { tournament: stage, team: tbdTeam });
+  Object.assign(tbdParticipant, { team: tbdTeam, tournament: stage });
   em.persist(tbdParticipant);
   const listed = addMatch("Sitemap Listed", "not_started", participants.slice(0, 2));
   const noTeams = addMatch("Sitemap No Teams", "not_started", []);
@@ -72,11 +72,11 @@ export const verifySitemap = async ({
   Object.assign(coach, { name: "Sitemap Coach", slug: "sitemap-coach" });
   const coaching = new Contract();
   Object.assign(coaching, {
-    player: coach,
-    team: participants[0].team,
-    startDate: new Date("2000-01-01"),
     endDate: null,
+    player: coach,
     role: "coach",
+    startDate: new Date("2000-01-01"),
+    team: participants[0].team,
   });
   em.persist([coach, coaching]);
   const stageBeginAt = stage.beginAt;

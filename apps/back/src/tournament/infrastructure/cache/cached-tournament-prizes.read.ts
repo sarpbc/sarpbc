@@ -8,25 +8,25 @@ import { DATA_SOURCES } from "@sarpbc/types";
 const nullableText = z.string().nullable();
 
 const distribution = z.object({
-  source: z.enum(DATA_SOURCES),
   prizepool: nullableText,
   prizes: z.array(
     z.object({
-      id: z.string(),
-      placement: z.number().int(),
       amount: z.number(),
       currency: z.string(),
-      team: z.object({
-        id: z.string(),
-        name: z.string(),
-        slug: z.string(),
-        imageUrl: nullableText,
-        darkModeImageUrl: nullableText,
-      }),
+      id: z.string(),
+      placement: z.number().int(),
       players: z.array(z.object({ id: z.string(), name: z.string(), slug: z.string() })),
       sourceUrl: nullableText,
+      team: z.object({
+        darkModeImageUrl: nullableText,
+        id: z.string(),
+        imageUrl: nullableText,
+        name: z.string(),
+        slug: z.string(),
+      }),
     }),
   ),
+  source: z.enum(DATA_SOURCES),
 }) satisfies z.ZodType<TournamentPrizes>;
 
 export const tournamentPrizesCacheKey = (id: string): string => `tournament-prizes:${id}`;
@@ -34,10 +34,10 @@ export const tournamentPrizesCacheKey = (id: string): string => `tournament-priz
 const diagnose = (key: string, operation: string, error: Error): void => {
   log.warn({
     component: "CachedTournamentPrizesRead",
-    message: "Optional tournament prizes cache failed",
-    key,
-    operation,
     error,
+    key,
+    message: "Optional tournament prizes cache failed",
+    operation,
   });
 };
 

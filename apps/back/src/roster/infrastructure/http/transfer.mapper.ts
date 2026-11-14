@@ -12,26 +12,26 @@ export const mapTransfer = ({
   const { player, team } = contract;
 
   return {
-    id,
-    type,
     date: isoDay(date),
-    role: contract.role,
-    sourceUrl,
+    id,
     player: {
       id: player.id,
-      name: player.name,
-      slug: player.slug,
       imageUrl: player.imageUrl,
+      name: player.name,
       nationality: player.nationality,
+      slug: player.slug,
     },
+    role: contract.role,
+    sourceUrl,
     team: {
+      darkModeImageUrl: team.darkModeImageUrl,
       id: team.id,
+      imageUrl: team.imageUrl,
+      logoDarkUrl: team.logoDarkUrl,
+      logoLightUrl: team.logoLightUrl,
       name: team.name,
       slug: team.slug,
-      imageUrl: team.imageUrl,
-      darkModeImageUrl: team.darkModeImageUrl,
-      logoLightUrl: team.logoLightUrl,
-      logoDarkUrl: team.logoDarkUrl,
     },
+    type,
   };
 };

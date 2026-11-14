@@ -39,13 +39,13 @@ let nextKey = 0;
 
 const gameOptions = computed(() =>
   Array.from({ length: maxVodGame(match.numberOfGames) }, (_, index) => ({
-    value: index + 1,
     label: t("page.tournaments.vods.game", { number: index + 1 }),
+    value: index + 1,
   })),
 );
 
 const languageNames = computed(
-  () => new Intl.DisplayNames([locale.value], { type: "language", fallback: "none" }),
+  () => new Intl.DisplayNames([locale.value], { fallback: "none", type: "language" }),
 );
 
 const normalizeLanguage = (language: string): string => language.trim().toLowerCase();
@@ -95,7 +95,7 @@ const canSave = computed(() =>
 );
 
 const toRows = (vods: MatchVod[]): VodRow[] =>
-  vods.map(({ game, url, language }) => ({ key: (nextKey += 1), game, url, language }));
+  vods.map(({ game, url, language }) => ({ game, key: (nextKey += 1), language, url }));
 
 const load = async () => {
   loading.value = true;
@@ -123,10 +123,10 @@ watch(
 const addRow = () => {
   const last = rows.value.at(-1);
   rows.value.push({
-    key: (nextKey += 1),
     game: last ? Math.min(last.game + 1, maxVodGame(match.numberOfGames)) : 1,
-    url: "",
+    key: (nextKey += 1),
     language: last?.language ?? "en",
+    url: "",
   });
 };
 
@@ -142,13 +142,13 @@ const save = async () => {
       match.id,
       rows.value.map(({ game, url, language }) => ({
         game,
-        url,
         language: normalizeLanguage(language),
+        url,
       })),
     );
 
     rows.value = toRows(vods);
-    toast.add({ title: t("page.tournaments.vods.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.vods.saved") });
     open.value = false;
   } catch (error) {
     reportError(error, t("page.tournaments.vods.saveError"));

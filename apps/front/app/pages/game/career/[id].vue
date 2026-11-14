@@ -39,8 +39,8 @@ const pageTitle = computed(() =>
 
 watchEffect(() => {
   setPageSeo({
-    title: pageTitle.value,
     description: t("page.game.career.seo.description"),
+    title: pageTitle.value,
   });
 });
 </script>

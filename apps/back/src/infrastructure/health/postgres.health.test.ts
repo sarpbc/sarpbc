@@ -31,7 +31,7 @@ describe(PostgresHealthIndicator, () => {
     execute.mockRejectedValue(new Error("connection refused"));
 
     await expect(indicator.pingCheck("postgres")).resolves.toStrictEqual({
-      postgres: { status: "down", message: "connection refused" },
+      postgres: { message: "connection refused", status: "down" },
     });
   });
 });

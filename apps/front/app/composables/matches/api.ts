@@ -124,7 +124,7 @@ export const setMatchVods = async (
 ): Promise<MatchVod[]> => {
   const response = await apiFetch<{ match: { vods: MatchVod[] } }>(
     `/tournaments/matches/${matchId}/vods`,
-    { method: "PUT", body: { vods } },
+    { body: { vods }, method: "PUT" },
   );
 
   return response.match.vods;

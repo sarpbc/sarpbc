@@ -10,9 +10,9 @@ const model = defineModel<string>({ required: true });
 
 /* `after:hidden` drops the link variant's active underline, drawn when the list has no indicator. */
 const ui = {
-  root: "gap-0",
-  list: "h-7 w-fit gap-0 border border-default px-2 py-0",
   indicator: "hidden",
+  list: "h-7 w-fit gap-0 border border-default px-2 py-0",
+  root: "gap-0",
   trigger: [
     "grow-0 rounded-none px-1 py-0 text-xs font-medium transition-none after:hidden",
     "data-[state=inactive]:text-muted hover:data-[state=inactive]:text-default data-[state=active]:text-highlighted",

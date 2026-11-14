@@ -10,7 +10,7 @@ import {
 import { OnThisDayService } from "./on-this-day.service";
 
 const NOW = new Date("2026-12-06T09:00:00Z");
-const ON = { year: 2026, month: 12, day: 6 };
+const ON = { day: 6, month: 12, year: 2026 };
 
 const anySlug: unknown = expect.any(String);
 
@@ -21,7 +21,7 @@ describe(OnThisDayService, () => {
     const day = await new OnThisDayService(sources).forDay(ON, NOW);
 
     expect(day).toStrictEqual({ date: "2026-12-06", events: [] });
-    const query = { month: 12, day: 6, timeZone: "Europe/Paris", beforeYear: 2026 };
+    const query = { beforeYear: 2026, day: 6, month: 12, timeZone: "Europe/Paris" };
     expect(tournaments.wonOnDay).toHaveBeenCalledWith(query);
     expect(tournaments.finalsOnDay).toHaveBeenCalledWith(query);
     expect(transfers.onDay).toHaveBeenCalledWith(12, 6, NOW);
@@ -35,7 +35,7 @@ describe(OnThisDayService, () => {
 
     expect(day.date).toBe("2027-01-01");
     expect(tournaments.wonOnDay).toHaveBeenCalledWith(
-      expect.objectContaining({ month: 1, day: 1, beforeYear: 2027 }),
+      expect.objectContaining({ beforeYear: 2027, day: 1, month: 1 }),
     );
   });
 
@@ -44,57 +44,57 @@ describe(OnThisDayService, () => {
     const decided = stage("major-playoffs", "manual", "2023-12-06T20:00:00Z");
 
     const { sources } = onThisDaySources({
-      titles: [won, decided],
       finals: [grandFinal(decided, "2023-12-06T19:30:00Z")],
+      titles: [won, decided],
       transfers: [transfer("contract", "arrival", "2022-12-06")],
     });
 
     const { events } = await new OnThisDayService(sources).forDay(ON, NOW);
 
     const kc = {
+      darkModeImageUrl: null,
+      imageUrl: "https://cdn.example/kc.png",
+      logoDarkUrl: null,
+      logoLightUrl: null,
       name: "Karmine Corp",
       slug: "karmine-corp",
-      imageUrl: "https://cdn.example/kc.png",
-      darkModeImageUrl: null,
-      logoLightUrl: null,
-      logoDarkUrl: null,
     };
 
     const tournament = {
+      event: { name: "RLCS 2024 World Championship", slug: "rlcs-worlds-2024" },
       name: "Playoffs",
       slug: "playoffs",
-      event: { name: "RLCS 2024 World Championship", slug: "rlcs-worlds-2024" },
     };
 
     const vatira = { name: "Vatira", slug: "vatira" };
     expect(events).toStrictEqual([
       {
-        kind: "title",
-        year: 2024,
         date: "2024-12-06",
+        kind: "title",
         tournament,
-        winner: { team: kc, players: [vatira] },
+        winner: { players: [vatira], team: kc },
+        year: 2024,
       },
       {
-        kind: "final",
-        year: 2023,
         date: "2023-12-06",
-        tournament,
-        match: { publicId: 42, slug: anySlug },
-        winner: { team: kc, players: [vatira], score: 4 },
+        kind: "final",
         loser: {
-          team: { ...kc, name: "Team BDS", slug: "team-bds", imageUrl: null },
           players: [vatira],
           score: 2,
+          team: { ...kc, imageUrl: null, name: "Team BDS", slug: "team-bds" },
         },
+        match: { publicId: 42, slug: anySlug },
+        tournament,
+        winner: { players: [vatira], score: 4, team: kc },
+        year: 2023,
       },
       {
-        kind: "transfer",
-        year: 2022,
         date: "2022-12-06",
-        type: "arrival",
+        kind: "transfer",
         player: vatira,
         team: kc,
+        type: "arrival",
+        year: 2022,
       },
     ]);
     expect(JSON.stringify(events)).not.toMatch(/"id":/u);
@@ -105,23 +105,23 @@ describe(OnThisDayService, () => {
     const manualStage = stage("cup", "manual", "2021-12-06T18:00:00Z");
 
     const { sources } = onThisDaySources({
-      titles: [startggStage, manualStage],
-      finals: [
-        grandFinal(startggStage, "2024-12-06T17:00:00Z"),
-        grandFinal(manualStage, "2021-12-06T17:00:00Z", { source: "startgg" }),
-      ],
       facts: [
         fact({
           link: {
-            kind: "tournament",
+            event: { name: "Community Cup", slug: "community-cup" },
             id: STARTGG_STAGE_ID,
+            kind: "tournament",
             name: "Open qualifier",
             slug: "open-qualifier",
-            event: { name: "Community Cup", slug: "community-cup" },
             source: "startgg",
           },
         }),
       ],
+      finals: [
+        grandFinal(startggStage, "2024-12-06T17:00:00Z"),
+        grandFinal(manualStage, "2021-12-06T17:00:00Z", { source: "startgg" }),
+      ],
+      titles: [startggStage, manualStage],
     });
 
     const { events } = await new OnThisDayService(sources).forDay(ON, NOW);
@@ -132,7 +132,7 @@ describe(OnThisDayService, () => {
   it("shows only staff facts of this day that are not dated in a future year", async () => {
     const { sources } = onThisDaySources({
       facts: [
-        fact({ year: null, textEn: "Every year", textFr: "Chaque année" }),
+        fact({ textEn: "Every year", textFr: "Chaque année", year: null }),
         fact({ year: 2015 }),
         fact({ year: 2027 }),
         fact({ day: 7 }),
@@ -151,8 +151,8 @@ describe(OnThisDayService, () => {
   it("returns the staff text as written next to structured fields, never a generated sentence", async () => {
     const written = fact({
       link: {
-        kind: "player",
         id: "vatira-id",
+        kind: "player",
         name: "Vatira",
         slug: "vatira",
         source: null,
@@ -168,16 +168,16 @@ describe(OnThisDayService, () => {
 
     expect(events[0]).toStrictEqual({
       kind: "fact",
-      year: 2015,
-      text: { en: written.textEn, fr: written.textFr },
       link: { kind: "player", name: "Vatira", slug: "vatira" },
       sourceUrl: written.sourceUrl,
+      text: { en: written.textEn, fr: written.textFr },
+      year: 2015,
     });
     expect(events).toHaveLength(2);
     expect(Object.keys(events[1] ?? {})).toStrictEqual([
       "kind",
-      "year",
       "date",
+      "year",
       "tournament",
       "winner",
     ]);

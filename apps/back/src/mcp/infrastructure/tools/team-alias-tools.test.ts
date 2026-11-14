@@ -8,7 +8,7 @@ import { rosterTools } from "./roster-tools";
 const TEAM_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
 const ALIAS_ID = "1c7f4e9b-2a3d-4f6e-9b0c-8d7e6f5a4b3c";
 const SOURCE = "https://www.rlesports.com/news/fixture-rebrand";
-const INPUT = { teamId: TEAM_ID, name: "Fixture Origins", from: "2020-01-01", sourceUrl: SOURCE };
+const INPUT = { from: "2020-01-01", name: "Fixture Origins", sourceUrl: SOURCE, teamId: TEAM_ID };
 
 const setup = (toolName: string, role: StaffRole = "admin") => {
   const rosterProposalService = pendingProposalService();
@@ -22,9 +22,9 @@ const setup = (toolName: string, role: StaffRole = "admin") => {
   }
 
   const call = async (args: ToolArguments) =>
-    await tool.run({ id: "u1", email: "staff@test.com", role }, args);
+    await tool.run({ email: "staff@test.com", id: "u1", role }, args);
 
-  return { rosterProposalService, tool, call };
+  return { call, rosterProposalService, tool };
 };
 
 describe("team alias tools", () => {
@@ -32,19 +32,19 @@ describe("team alias tools", () => {
     vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
     const { call, rosterProposalService } = setup("add_team_alias");
 
-    await call({ ...INPUT, to: "2022-06-01", pandascoreId: 1234 });
+    await call({ ...INPUT, pandascoreId: 1234, to: "2022-06-01" });
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
       {
+        alias: {
+          from: "2020-01-01",
+          logoUrl: null,
+          name: "Fixture Origins",
+          pandascoreId: 1234,
+          to: "2022-06-01",
+        },
         kind: "add_team_alias",
         teamId: TEAM_ID,
-        alias: {
-          name: "Fixture Origins",
-          from: "2020-01-01",
-          to: "2022-06-01",
-          logoUrl: null,
-          pandascoreId: 1234,
-        },
       },
       SOURCE,
       "u1",
@@ -59,16 +59,16 @@ describe("team alias tools", () => {
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
       {
+        alias: {
+          from: "2020-01-01",
+          logoUrl: null,
+          name: "Fixture Origins",
+          pandascoreId: null,
+          to: null,
+        },
+        aliasId: ALIAS_ID,
         kind: "update_team_alias",
         teamId: TEAM_ID,
-        aliasId: ALIAS_ID,
-        alias: {
-          name: "Fixture Origins",
-          from: "2020-01-01",
-          to: null,
-          logoUrl: null,
-          pandascoreId: null,
-        },
       },
       SOURCE,
       "u1",

@@ -17,8 +17,8 @@ const getUserStanding = (rankings: WorldRankings): UserStanding => {
   const user = rankings.players.find((player) => player.isUser);
 
   return {
-    rating: user?.rating ?? 0,
     rank: user?.rank ?? rankings.players.length + 1,
+    rating: user?.rating ?? 0,
   };
 };
 
@@ -83,14 +83,14 @@ export const getTransferBand = (
   const betterMax = Math.max(1, currentRank - 1);
 
   if (playerWorldRank <= ELITE_PLAYER_RANK) {
-    return { minRank: 1, maxRank: betterMax, maxOffers: 3 };
+    return { maxOffers: 3, maxRank: betterMax, minRank: 1 };
   }
 
   if (playerWorldRank <= STRONG_PLAYER_RANK) {
     return {
-      minRank: seasonPoints >= 28 ? 1 : 5,
-      maxRank: betterMax,
       maxOffers: 2,
+      maxRank: betterMax,
+      minRank: seasonPoints >= 28 ? 1 : 5,
     };
   }
 
@@ -99,22 +99,22 @@ export const getTransferBand = (
   }
 
   if (seasonPoints < 28) {
-    return { minRank: Math.max(currentRank, 8), maxRank: 99, maxOffers: 1 };
+    return { maxOffers: 1, maxRank: 99, minRank: Math.max(currentRank, 8) };
   }
 
   if (seasonPoints < 42) {
-    return { minRank: Math.max(5, currentRank - 1), maxRank: currentRank + 6, maxOffers: 1 };
+    return { maxOffers: 1, maxRank: currentRank + 6, minRank: Math.max(5, currentRank - 1) };
   }
 
   if (seasonPoints < 60) {
     return {
-      minRank: Math.max(3, currentRank - 3),
-      maxRank: Math.max(currentRank + 2, 8),
       maxOffers: 2,
+      maxRank: Math.max(currentRank + 2, 8),
+      minRank: Math.max(3, currentRank - 3),
     };
   }
 
-  return { minRank: 1, maxRank: Math.max(6, currentRank), maxOffers: 3 };
+  return { maxOffers: 3, maxRank: Math.max(6, currentRank), minRank: 1 };
 };
 
 const rollOfferCount = (rng: () => number, threeChance: number, twoChance: number): number => {
@@ -227,9 +227,9 @@ export const resolveOffseasonContracts = (
 
   if (pastPeak === 0) {
     return {
-      transferTeamIds,
-      renewalOffered: true,
       lastChanceTeamId: null,
+      renewalOffered: true,
+      transferTeamIds,
     };
   }
 
@@ -248,5 +248,5 @@ export const resolveOffseasonContracts = (
     }
   }
 
-  return { transferTeamIds, renewalOffered, lastChanceTeamId };
+  return { lastChanceTeamId, renewalOffered, transferTeamIds };
 };

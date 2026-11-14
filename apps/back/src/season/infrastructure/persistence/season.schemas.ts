@@ -11,66 +11,66 @@ import { SeasonPathEntry } from "./season-path-entry.entity";
 export const SeasonSchema = defineEntity({
   class: Season,
   properties: {
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    formatPhases: p.json().$type<SeasonFormatPhase[]>().default([]),
+    formatSummary: p.text().nullable(),
     id: p.uuid().primary(),
     name: p.string().unique(),
     slug: p.string().nullable().unique(),
-    formatSummary: p.text().nullable(),
-    formatPhases: p.json().$type<SeasonFormatPhase[]>().default([]),
-    winnerTeam: p.manyToOne(Team).nullable().deleteRule("set null"),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     updatedAt: p
       .datetime()
       .type("timestamptz")
       .defaultRaw("now()")
       .onUpdate(() => new Date()),
+    winnerTeam: p.manyToOne(Team).nullable().deleteRule("set null"),
   },
 });
 
 export const SeasonAwardSchema = defineEntity({
   class: SeasonAward,
-  uniques: [
-    {
-      name: "season_award_season_id_award_type_region_unique",
-      expression:
-        'alter table "season_award" add constraint "season_award_season_id_award_type_region_unique" unique nulls not distinct ("season_id", "award_type", "region");',
-    },
-  ],
   indexes: [{ properties: ["player"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    season: p.manyToOne(Season).deleteRule("cascade"),
-    player: p.manyToOne(Player),
     awardType: p.enum([...SEASON_AWARD_TYPES]).columnType("text"),
-    region: p.string().nullable(),
-    presentedBy: p.string().nullable(),
-    sourceUrl: p.text(),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    player: p.manyToOne(Player),
+    presentedBy: p.string().nullable(),
+    region: p.string().nullable(),
+    season: p.manyToOne(Season).deleteRule("cascade"),
+    sourceUrl: p.text(),
   },
+  uniques: [
+    {
+      expression:
+        'alter table "season_award" add constraint "season_award_season_id_award_type_region_unique" unique nulls not distinct ("season_id", "award_type", "region");',
+      name: "season_award_season_id_award_type_region_unique",
+    },
+  ],
 });
 
 export const SeasonParticipantSchema = defineEntity({
   class: SeasonParticipant,
-  uniques: [{ properties: ["season", "team"] }],
   indexes: [{ properties: ["team"] }],
   properties: {
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    path: p.oneToMany(SeasonPathEntry).mappedBy("participant"),
+    pathNote: p.text().nullable(),
     season: p.manyToOne(Season).deleteRule("cascade"),
     team: p.manyToOne(Team).deleteRule("cascade"),
-    pathNote: p.text().nullable(),
-    path: p.oneToMany(SeasonPathEntry).mappedBy("participant"),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
+  uniques: [{ properties: ["season", "team"] }],
 });
 
 export const SeasonPathEntrySchema = defineEntity({
   class: SeasonPathEntry,
   indexes: [{ properties: ["participant"] }, { properties: ["tournament"] }],
   properties: {
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    participant: p.manyToOne(SeasonParticipant).deleteRule("cascade"),
     label: p.string(),
+    participant: p.manyToOne(SeasonParticipant).deleteRule("cascade"),
     result: p.string(),
     tournament: p.manyToOne(Tournament).nullable().deleteRule("set null"),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });

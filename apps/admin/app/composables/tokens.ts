@@ -10,8 +10,8 @@ export const getPatTokens = async (): Promise<PatToken[]> => {
 
 export const createPatToken = async (name: string): Promise<CreatedPatToken> =>
   await apiFetch<CreatedPatToken>("/pat/tokens", {
-    method: "POST",
     body: { name },
+    method: "POST",
   });
 
 export const revokePatToken = async (id: string): Promise<void> => {

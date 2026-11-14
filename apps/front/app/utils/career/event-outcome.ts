@@ -88,9 +88,9 @@ const applyMalus = (
   const moraleHit = rng() < 0.4 ? 1 : 0;
 
   return {
-    rating: (authored.rating ?? 0) - ratingHit,
     form: (authored.form ?? 0) - formHit,
     morale: (authored.morale ?? 0) - moraleHit,
+    rating: (authored.rating ?? 0) - ratingHit,
   };
 };
 
@@ -115,11 +115,14 @@ export const buildEventOutcomeContext = (
   const lastSplit = state.currentSplits.at(-1) ?? lastSeason?.splits.at(-1);
 
   return {
-    careerId: state.id,
-    eventId,
-    choiceId: choice.id,
-    season: state.currentSeason,
     authoredDelta: choice.delta,
+    careerId: state.id,
+    choiceId: choice.id,
+    eventId,
+    lastSplitPoints: lastSplit?.points ?? null,
+    missedWorldsLastSeason: lastSeason ? lastSeason.worlds === null : false,
+    quitLeaning: state.destinyLeanings.quit,
+    season: state.currentSeason,
     teamStrength: roster
       ? getRosterStrength(roster, state.world, state.stats.rating)
       : WORLD_STRENGTH_BASELINE,
@@ -128,9 +131,6 @@ export const buildEventOutcomeContext = (
           .filter((playerId) => playerId !== USER_ROSTER_ID)
           .map((playerId) => getRosterPlayerRating(playerId, state.world, state.stats.rating))
       : [],
-    lastSplitPoints: lastSplit?.points ?? null,
-    missedWorldsLastSeason: lastSeason ? lastSeason.worlds === null : false,
-    quitLeaning: state.destinyLeanings.quit,
   };
 };
 

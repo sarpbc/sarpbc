@@ -12,23 +12,23 @@ describe(AirRiddleService, () => {
   };
 
   const players = {
-    getRandomPlayer: vi.fn<RiddlePlayers["getRandomPlayer"]>(),
     find: vi.fn<RiddlePlayers["find"]>(),
+    getRandomPlayer: vi.fn<RiddlePlayers["getRandomPlayer"]>(),
   };
 
   const runtime = {
     dayStart: () => new Date("2026-10-14T22:00:00Z"),
-    now: () => new Date("2026-10-15T12:00:00Z"),
-    id: () => "riddle-1",
-    skipped: vi.fn<RiddleRuntime["skipped"]>(),
     error: vi.fn<RiddleRuntime["error"]>(),
+    id: () => "riddle-1",
+    now: () => new Date("2026-10-15T12:00:00Z"),
+    skipped: vi.fn<RiddleRuntime["skipped"]>(),
   };
 
   const riddle = (id: string): DailyRiddle => ({
+    createdAt: runtime.now(),
     id,
     playerId: "player-1",
     playerName: "Kaydop",
-    createdAt: runtime.now(),
   });
 
   let service: AirRiddleService;
@@ -42,16 +42,16 @@ describe(AirRiddleService, () => {
     players.getRandomPlayer.mockResolvedValue({ id: "player-1", name: "Kaydop" });
     repository.save.mockResolvedValue(undefined);
     await expect(service.createAirRiddle()).resolves.toStrictEqual({
+      createdAt: runtime.now(),
       id: "riddle-1",
       playerId: "player-1",
       playerName: "Kaydop",
-      createdAt: runtime.now(),
     });
     expect(repository.save).toHaveBeenCalledExactlyOnceWith({
+      createdAt: runtime.now(),
       id: "riddle-1",
       playerId: "player-1",
       playerName: "Kaydop",
-      createdAt: runtime.now(),
     });
     expect(runtime.error).not.toHaveBeenCalled();
   });

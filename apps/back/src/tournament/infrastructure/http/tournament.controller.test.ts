@@ -46,16 +46,16 @@ const unusedViewerships = new ViewershipService({
 
 const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
   ids.map((id) => ({
-    gameId: `game-${id}`,
     account: "steam:1",
-    player: { id: "zen", name: "zen", slug: "zen" },
-    team: { id: "team-vit", name: "Vitality", slug: "vitality" },
-    teamGoals: 2,
-    goals: 1,
     assists: 0,
+    demolitions: 1,
+    gameId: `game-${id}`,
+    goals: 1,
+    player: { id: "zen", name: "zen", slug: "zen" },
     saves: 2,
     shots: 3,
-    demolitions: 1,
+    team: { id: "team-vit", name: "Vitality", slug: "vitality" },
+    teamGoals: 2,
   })),
 );
 
@@ -102,10 +102,10 @@ describe("TournamentController stage reads", () => {
       new CachedTournamentRead(tournaments, redis),
       new TournamentPrizeService(
         {
-          tournamentSource: vi.fn<PrizeQueries["tournamentSource"]>(),
-          byTournament: vi.fn<PrizeQueries["byTournament"]>(),
-          byTeam: vi.fn<PrizeQueries["byTeam"]>(),
           byPlayer: vi.fn<PrizeQueries["byPlayer"]>(),
+          byTeam: vi.fn<PrizeQueries["byTeam"]>(),
+          byTournament: vi.fn<PrizeQueries["byTournament"]>(),
+          tournamentSource: vi.fn<PrizeQueries["tournamentSource"]>(),
         },
         { run: async () => await Promise.reject(new Error("unused")) },
         new CompetitionAfterCommit(
@@ -132,9 +132,9 @@ describe("TournamentController stage reads", () => {
   it("returns the tournament response through the read adapter", async () => {
     tournaments.findById.mockResolvedValue(
       Object.assign(new Tournament(), {
+        event: { id: "e1", name: "RLCS 2026", slug: "rlcs-2026" },
         id: "t1",
         slug: "playoffs",
-        event: { id: "e1", slug: "rlcs-2026", name: "RLCS 2026" },
       }),
     );
     const result = await controller.findOne("t1");
@@ -146,16 +146,16 @@ describe("TournamentController stage reads", () => {
       id === "missing"
         ? null
         : Object.assign(new Tournament(), {
+            event: { id: "e1", name: "Coupe de France", slug: "coupe-de-france-slash-2026" },
             id,
             slug: id,
             source: id === "open-qualifier" ? "startgg" : "manual",
-            event: { id: "e1", slug: "coupe-de-france-slash-2026", name: "Coupe de France" },
           }),
     );
 
     await expect(controller.getPlayerStats("group-stage")).resolves.toMatchObject({
       games: 1,
-      players: [{ player: { id: "zen" }, totals: { goals: 1, saves: 2 }, goalParticipation: 50 }],
+      players: [{ goalParticipation: 50, player: { id: "zen" }, totals: { goals: 1, saves: 2 } }],
     });
     await expect(controller.getPlayerStats("open-qualifier")).rejects.toBeInstanceOf(
       NotFoundException,
@@ -197,19 +197,19 @@ describe("TournamentController leagues", () => {
       leagues: [
         {
           id: "l1",
-          pandascoreId: null,
+          imageUrl: null,
           name: "Coupe de France",
+          pandascoreId: null,
           slug: "coupe-de-france",
           url: null,
-          imageUrl: null,
         },
         {
           id: "l2",
-          pandascoreId: 4,
+          imageUrl: null,
           name: "RLCS",
+          pandascoreId: 4,
           slug: null,
           url: null,
-          imageUrl: null,
         },
       ],
     });

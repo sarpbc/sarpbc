@@ -35,8 +35,8 @@ const assignedTypes = computed(() => new Set((awards.value ?? []).map((award) =>
 
 const availableAwardTypeOptions = computed(() =>
   PLAYER_AWARD_TYPES.filter((type) => !assignedTypes.value.has(type)).map((type) => ({
-    value: type,
     label: t(`page.tournaments.awards.types.${type}`),
+    value: type,
   })),
 );
 
@@ -52,11 +52,11 @@ const rosterOptions = computed(() => {
   for (const participant of participants) {
     for (const player of participant.players ?? []) {
       options.push({
-        value: player.id,
         label: participant.team ? `${player.name} (${participant.team.name})` : player.name,
         participantId: participant.id,
         playerId: player.id,
         playerName: player.name,
+        value: player.id,
       });
     }
   }
@@ -99,16 +99,16 @@ const handleAssignAward = async () => {
 
   try {
     await createTournamentAward(tournamentId, {
+      awardType,
       participantId: entry.participantId,
       playerId: entry.playerId,
-      awardType,
     });
     toast.add({
+      color: "success",
       title: t("page.tournaments.awards.assigned", {
         name: entry.playerName,
         type: t(`page.tournaments.awards.types.${awardType}`),
       }),
-      color: "success",
     });
     selectedPlayerId.value = undefined;
     await refreshAwards();
@@ -125,10 +125,10 @@ const handleRemoveAward = async (award: TournamentAwardListItem) => {
   try {
     await deleteTournamentAward(tournamentId, award.id);
     toast.add({
+      color: "success",
       title: t("page.tournaments.awards.removed", {
         type: t(`page.tournaments.awards.types.${award.awardType}`),
       }),
-      color: "success",
     });
     await refreshAwards();
   } catch (removeError) {

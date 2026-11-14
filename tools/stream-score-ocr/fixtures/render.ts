@@ -31,17 +31,17 @@ const FONT: ReadonlyMap<string, readonly string[]> = new Map([
 
 const FONT_PIXEL = 6;
 const FONT_ROWS = 7;
-const REFERENCE: Size = { width: 1920, height: 1080 };
-const BAND: Region = { x: 760, y: 0, width: 400, height: 124 };
-const PANEL: Region = { x: 780, y: 8, width: 360, height: 80 };
-const BLUE_STRIP: Region = { x: 780, y: 86, width: 100, height: 10 };
-const ORANGE_STRIP: Region = { x: 1040, y: 86, width: 100, height: 10 };
-const REPLAY_BANNER: Region = { x: 860, y: 100, width: 200, height: 14 };
+const REFERENCE: Size = { height: 1080, width: 1920 };
+const BAND: Region = { height: 124, width: 400, x: 760, y: 0 };
+const PANEL: Region = { height: 80, width: 360, x: 780, y: 8 };
+const BLUE_STRIP: Region = { height: 10, width: 100, x: 780, y: 86 };
+const ORANGE_STRIP: Region = { height: 10, width: 100, x: 1040, y: 86 };
+const REPLAY_BANNER: Region = { height: 14, width: 200, x: 860, y: 100 };
 
 export const TEXT_REGIONS = {
-  blue: { x: 790, y: 16, width: 80, height: 62 },
-  clock: { x: 875, y: 16, width: 170, height: 62 },
-  orange: { x: 1050, y: 16, width: 80, height: 62 },
+  blue: { height: 62, width: 80, x: 790, y: 16 },
+  clock: { height: 62, width: 170, x: 875, y: 16 },
+  orange: { height: 62, width: 80, x: 1050, y: 16 },
 } as const satisfies Record<string, Region>;
 
 const PANEL_COLOR: Rgb = [18, 22, 38];
@@ -134,10 +134,10 @@ export class FixtureRenderer {
     this.#jitterX = this.#random() - 0.5;
     this.#jitterY = this.#random() - 0.5;
     this.#band = {
+      height: Math.ceil(BAND.height * this.#scale),
+      width: Math.ceil(BAND.width * this.#scale),
       x: Math.floor(BAND.x * this.#scale),
       y: 0,
-      width: Math.ceil(BAND.width * this.#scale),
-      height: Math.ceil(BAND.height * this.#scale),
     };
     const data = new Uint8Array(size.width * size.height * 3);
 
@@ -148,7 +148,7 @@ export class FixtureRenderer {
       }
     }
 
-    this.frame = { width: size.width, height: size.height, data };
+    this.frame = { data, height: size.height, width: size.width };
     this.#pixels = new Uint8ClampedArray(data.buffer);
     this.#background = this.#bandLayer((_x0, _x1, _y0, _y1, base) => base);
     this.#layer = new Float32Array(this.#background.length);
@@ -213,13 +213,13 @@ export class FixtureRenderer {
     }
 
     const layers: { region: Region; color: Rgb }[] = [
-      { region: PANEL, color: PANEL_COLOR },
-      { region: BLUE_STRIP, color: BLUE_COLOR },
-      { region: ORANGE_STRIP, color: ORANGE_COLOR },
+      { color: PANEL_COLOR, region: PANEL },
+      { color: BLUE_COLOR, region: BLUE_STRIP },
+      { color: ORANGE_COLOR, region: ORANGE_STRIP },
     ];
 
     if (replay) {
-      layers.push({ region: REPLAY_BANNER, color: REPLAY_COLOR });
+      layers.push({ color: REPLAY_COLOR, region: REPLAY_BANNER });
     }
 
     const layer = this.#bandLayer((x0, x1, y0, y1, base) => {
@@ -321,13 +321,13 @@ export class FixtureRenderer {
     const random = seededRandom(variant * 7919 + 17);
 
     const blocks = Array.from({ length: 6 }, () => ({
+      color: [random() * 255, random() * 255, random() * 255] as const,
       region: {
+        height: 20 + random() * 80,
+        width: 40 + random() * 200,
         x: BAND.x + random() * BAND.width,
         y: random() * BAND.height,
-        width: 40 + random() * 200,
-        height: 20 + random() * 80,
       },
-      color: [random() * 255, random() * 255, random() * 255] as const,
     }));
 
     const layer = this.#bandLayer(

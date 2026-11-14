@@ -53,10 +53,10 @@ describe(HealthController, () => {
     health.check.mockImplementation(async (indicators) => {
       await Promise.all(indicators.map(async (indicator) => await indicator()));
 
-      return { status: "ok", details: {} };
+      return { details: {}, status: "ok" };
     });
 
-    await expect(controller.ready()).resolves.toStrictEqual({ status: "ok", details: {} });
+    await expect(controller.ready()).resolves.toStrictEqual({ details: {}, status: "ok" });
     expect(postgres.pingCheck).toHaveBeenCalledExactlyOnceWith("postgres");
     expect(redis.pingCheck).toHaveBeenCalledExactlyOnceWith("redis");
   });

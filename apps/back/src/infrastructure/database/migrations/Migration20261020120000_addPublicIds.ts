@@ -1,8 +1,8 @@
 import { Migration } from "@mikro-orm/migrations";
 
 const PUBLIC_ID_TABLES = [
-  { table: "match", chronology: `"begin_at", "id"` },
-  { table: "post", chronology: `"created_at", "id"` },
+  { chronology: `"begin_at", "id"`, table: "match" },
+  { chronology: `"created_at", "id"`, table: "post" },
 ] as const;
 
 export class Migration20261020120000_addPublicIds extends Migration {

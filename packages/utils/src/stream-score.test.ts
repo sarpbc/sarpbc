@@ -4,54 +4,54 @@ import type { StreamScoreProposal } from "@sarpbc/types";
 import { gameWinner, parseStreamScoreProposal, winsNeeded } from "./stream-score";
 
 const PROPOSAL: StreamScoreProposal = {
-  overlay: "coupe-de-france-slash-2026",
-  source: "vod.mp4",
-  sourceStartedAt: null,
   bestOf: 5,
+  frames: { accepted: 700, hidden: 80, read: 800, rejected: 5, unreadable: 15 },
   games: [
     {
-      number: 1,
       blue: 3,
-      orange: 1,
-      winner: "blue",
-      endedBy: "regulation",
-      startedAt: 10,
-      endedAt: 330,
       confidence: 0.92,
-    },
-    {
-      number: 2,
-      blue: 1,
-      orange: 2,
-      winner: "orange",
-      endedBy: "overtime",
-      startedAt: 400,
-      endedAt: 790,
-      confidence: 0.88,
-    },
-    {
-      number: 3,
-      blue: 4,
-      orange: 0,
-      winner: "blue",
-      endedBy: "reset",
-      startedAt: 850,
-      endedAt: 1160,
-      confidence: 0.9,
-    },
-    {
-      number: 4,
-      blue: 2,
-      orange: 1,
-      winner: "blue",
+      endedAt: 330,
       endedBy: "regulation",
-      startedAt: 1200,
-      endedAt: 1520,
+      number: 1,
+      orange: 1,
+      startedAt: 10,
+      winner: "blue",
+    },
+    {
+      blue: 1,
+      confidence: 0.88,
+      endedAt: 790,
+      endedBy: "overtime",
+      number: 2,
+      orange: 2,
+      startedAt: 400,
+      winner: "orange",
+    },
+    {
+      blue: 4,
+      confidence: 0.9,
+      endedAt: 1160,
+      endedBy: "reset",
+      number: 3,
+      orange: 0,
+      startedAt: 850,
+      winner: "blue",
+    },
+    {
+      blue: 2,
       confidence: 0.95,
+      endedAt: 1520,
+      endedBy: "regulation",
+      number: 4,
+      orange: 1,
+      startedAt: 1200,
+      winner: "blue",
     },
   ],
+  overlay: "coupe-de-france-slash-2026",
   series: { blue: 3, orange: 1, winner: "blue" },
-  frames: { read: 800, accepted: 700, hidden: 80, unreadable: 15, rejected: 5 },
+  source: "vod.mp4",
+  sourceStartedAt: null,
 };
 
 const error = (proposal: StreamScoreProposal): string | null => {
@@ -83,7 +83,7 @@ void describe("parseStreamScoreProposal", () => {
     assert.equal(
       error({
         ...PROPOSAL,
-        games: [{ ...first, blue: 1, orange: 1, winner: null, confidence: 0 }, second],
+        games: [{ ...first, blue: 1, confidence: 0, orange: 1, winner: null }, second],
         series: { blue: 0, orange: 1, winner: null },
       }),
       null,
@@ -91,7 +91,7 @@ void describe("parseStreamScoreProposal", () => {
   });
 
   void it("rejects text that is not a proposal", () => {
-    assert.deepEqual(parseStreamScoreProposal("{"), { ok: false, error: "invalid-json" });
+    assert.deepEqual(parseStreamScoreProposal("{"), { error: "invalid-json", ok: false });
     assert.equal(error({ ...PROPOSAL, bestOf: 0 }), "invalid-proposal");
   });
 

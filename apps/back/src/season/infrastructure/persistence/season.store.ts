@@ -30,16 +30,16 @@ const toSummary = (row: Season): SeasonSummary => ({ id: row.id, name: row.name,
 
 const toRecord = (row: Season): SeasonRecord => ({
   ...toSummary(row),
-  format: { summary: row.formatSummary, phases: row.formatPhases },
+  format: { phases: row.formatPhases, summary: row.formatSummary },
   winnerTeamId: row.winnerTeam?.id ?? null,
 });
 
 const toTeam = (row: Team): SeasonTeam => ({
+  darkModeImageUrl: row.darkModeImageUrl,
   id: row.id,
+  imageUrl: row.imageUrl,
   name: row.name,
   slug: row.slug,
-  imageUrl: row.imageUrl,
-  darkModeImageUrl: row.darkModeImageUrl,
 });
 
 const toPathEntry = (row: SeasonPathEntry): SeasonPathEntryItem => {
@@ -51,15 +51,15 @@ const toPathEntry = (row: SeasonPathEntry): SeasonPathEntryItem => {
     result: row.result,
     tournament: tournament
       ? {
+          event: {
+            id: tournament.event.id,
+            name: tournament.event.name,
+            slug: tournament.event.slug,
+          },
           id: tournament.id,
           name: tournament.name,
           slug: tournament.slug,
           source: tournament.source,
-          event: {
-            id: tournament.event.id,
-            slug: tournament.event.slug,
-            name: tournament.event.name,
-          },
         }
       : null,
   };
@@ -70,18 +70,18 @@ const byCreation = (a: { createdAt: Date; id: string }, b: { createdAt: Date; id
 
 const toParticipant = (row: SeasonParticipant): SeasonParticipantItem => ({
   id: row.id,
-  team: toTeam(row.team),
-  pathNote: row.pathNote,
   path: row.path.getItems().toSorted(byCreation).map(toPathEntry),
+  pathNote: row.pathNote,
+  team: toTeam(row.team),
 });
 
 const toAward = (row: SeasonAward): SeasonAwardItem => ({
-  id: row.id,
   awardType: row.awardType,
-  region: row.region,
-  presentedBy: row.presentedBy,
-  sourceUrl: row.sourceUrl,
+  id: row.id,
   player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
+  presentedBy: row.presentedBy,
+  region: row.region,
+  sourceUrl: row.sourceUrl,
 });
 
 const byAwardOrder = (a: SeasonAward, b: SeasonAward): number =>
@@ -103,12 +103,12 @@ export class SeasonPersistence implements SeasonStore {
     const rows = await this.em.find(
       Season,
       { slug: { $ne: null } },
-      { populate: ["winnerTeam"], orderBy: { createdAt: "DESC", name: "ASC" } },
+      { orderBy: { createdAt: "DESC", name: "ASC" }, populate: ["winnerTeam"] },
     );
 
     return rows.flatMap(({ slug, name, winnerTeam }) =>
       slug !== null && slug !== ""
-        ? [{ slug, name, winner: winnerTeam ? toTeam(winnerTeam) : null }]
+        ? [{ name, slug, winner: winnerTeam ? toTeam(winnerTeam) : null }]
         : [],
     );
   }
@@ -127,14 +127,14 @@ export class SeasonPersistence implements SeasonStore {
 
   async nameTaken(name: string, exceptId: string | null) {
     const filter =
-      exceptId !== null && exceptId !== "" ? { name, id: { $ne: exceptId } } : { name };
+      exceptId !== null && exceptId !== "" ? { id: { $ne: exceptId }, name } : { name };
 
     return (await this.em.count(Season, filter)) > 0;
   }
 
   async slugTaken(slug: string, exceptId: string | null) {
     const filter =
-      exceptId !== null && exceptId !== "" ? { slug, id: { $ne: exceptId } } : { slug };
+      exceptId !== null && exceptId !== "" ? { id: { $ne: exceptId }, slug } : { slug };
 
     return (await this.em.count(Season, filter)) > 0;
   }
@@ -142,11 +142,11 @@ export class SeasonPersistence implements SeasonStore {
   async save(season: SeasonRecord) {
     const row = (await this.em.findOne(Season, { id: season.id })) ?? new Season();
     Object.assign(row, {
+      formatPhases: season.format.phases,
+      formatSummary: season.format.summary,
       id: season.id,
       name: season.name,
       slug: season.slug,
-      formatSummary: season.format.summary,
-      formatPhases: season.format.phases,
       winnerTeam:
         season.winnerTeamId !== null && season.winnerTeamId !== ""
           ? this.em.getReference(Team, season.winnerTeamId)
@@ -194,37 +194,35 @@ export class SeasonPersistence implements SeasonStore {
     );
 
     return sorted.map((row) => ({
-      id: row.id,
       awardType: row.awardType,
-      region: row.region,
+      id: row.id,
       presentedBy: row.presentedBy,
-      sourceUrl: row.sourceUrl,
+      region: row.region,
       season: toSummary(row.season),
+      sourceUrl: row.sourceUrl,
     }));
   }
 
   async player(id: string): Promise<SeasonAwardPlayer | null> {
     const row = await this.em.findOne(Player, { id }, { populate: ["mergedInto"] });
 
-    return row ? { id: row.id, name: row.name, mergedIntoId: row.mergedInto?.id ?? null } : null;
+    return row ? { id: row.id, mergedIntoId: row.mergedInto?.id ?? null, name: row.name } : null;
   }
 
   async awardTaken(seasonId: string, award: Pick<SeasonAwardFields, "awardType" | "region">) {
     return (
       (await this.em.count(SeasonAward, {
-        season: { id: seasonId },
         awardType: award.awardType,
         region: award.region,
+        season: { id: seasonId },
       })) > 0
     );
   }
 
   async saveAward(seasonId: string, playerId: string, award: SeasonAwardFields) {
-    const row = Object.assign(new SeasonAward(), {
-      ...award,
-      season: await this.em.findOneOrFail(Season, { id: seasonId }),
-      player: await this.em.findOneOrFail(Player, { id: playerId }),
-    });
+    const season = await this.em.findOneOrFail(Season, { id: seasonId });
+    const player = await this.em.findOneOrFail(Player, { id: playerId });
+    const row = Object.assign(new SeasonAward(), { ...award, player, season });
 
     try {
       await this.em.persist(row).flush();
@@ -253,7 +251,7 @@ export class SeasonPersistence implements SeasonStore {
   async team(id: string): Promise<SeasonParticipantTeam | null> {
     const row = await this.em.findOne(Team, { id }, { populate: ["mergedInto"] });
 
-    return row ? { id: row.id, name: row.name, mergedIntoId: row.mergedInto?.id ?? null } : null;
+    return row ? { id: row.id, mergedIntoId: row.mergedInto?.id ?? null, name: row.name } : null;
   }
 
   async tournamentExists(id: string) {
@@ -264,7 +262,7 @@ export class SeasonPersistence implements SeasonStore {
     const rows = await this.em.find(
       SeasonParticipant,
       { season: { id: seasonId } },
-      { populate: PARTICIPANT_POPULATE, orderBy: { team: { name: "ASC" } } },
+      { orderBy: { team: { name: "ASC" } }, populate: PARTICIPANT_POPULATE },
     );
 
     return rows.map(toParticipant);
@@ -289,9 +287,9 @@ export class SeasonPersistence implements SeasonStore {
 
   async saveParticipant(seasonId: string, teamId: string, pathNote: string | null) {
     const row = Object.assign(new SeasonParticipant(), {
+      pathNote,
       season: this.em.getReference(Season, seasonId),
       team: await this.em.findOneOrFail(Team, { id: teamId }),
-      pathNote,
     });
 
     try {
@@ -322,8 +320,8 @@ export class SeasonPersistence implements SeasonStore {
 
   async savePathEntry(participantId: string, entry: SeasonPathEntryFields) {
     const row = Object.assign(new SeasonPathEntry(), {
-      participant: this.em.getReference(SeasonParticipant, participantId),
       label: entry.label,
+      participant: this.em.getReference(SeasonParticipant, participantId),
       result: entry.result,
       tournament:
         entry.tournamentId !== null && entry.tournamentId !== ""

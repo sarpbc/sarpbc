@@ -15,17 +15,18 @@ import {
 } from "./redis-live-stream-cache";
 
 const stream = {
-  login: "zenrll",
   displayName: "Zen",
+  login: "zenrll",
   title: "ranked",
-  viewerCount: 900,
   url: "https://twitch.tv/zenrll",
+  viewerCount: 900,
 };
 
 describe(RedisLiveStreamCache, () => {
   let store = new Map<string, string>();
 
   const createRedis = () => ({
+    delete: vi.fn<RedisService["delete"]>(async (key) => (store.delete(key) ? 1 : 0)),
     get: vi.fn<RedisService["get"]>(async (key) => store.get(key) ?? null),
     setIfAbsent: vi.fn<RedisService["setIfAbsent"]>(async (key, value) => {
       if (store.has(key)) {
@@ -45,7 +46,6 @@ describe(RedisLiveStreamCache, () => {
 
       return true;
     }),
-    delete: vi.fn<RedisService["delete"]>(async (key) => (store.delete(key) ? 1 : 0)),
   });
 
   let redis = createRedis();
@@ -65,9 +65,9 @@ describe(RedisLiveStreamCache, () => {
       throw new Error("expected a refresh claim");
     }
 
-    await expect(cache.write({ streams: [stream], fetchedAt }, claim)).resolves.toBe(true);
+    await expect(cache.write({ fetchedAt, streams: [stream] }, claim)).resolves.toBe(true);
 
-    await expect(cache.read()).resolves.toStrictEqual({ streams: [stream], fetchedAt });
+    await expect(cache.read()).resolves.toStrictEqual({ fetchedAt, streams: [stream] });
     expect(redis.setWhileHeld).toHaveBeenCalledWith(
       LIVE_STREAMS_LOCK_KEY,
       claim,
@@ -99,17 +99,17 @@ describe(RedisLiveStreamCache, () => {
     const findLiveRocketLeague = vi
       .fn<LiveStreamSource["findLiveRocketLeague"]>()
       .mockResolvedValue([
-        { login: "zenrll", displayName: "Zen", title: "ranked", viewerCount: 900 },
+        { displayName: "Zen", login: "zenrll", title: "ranked", viewerCount: 900 },
       ]);
 
     const service = new StreamerService(
       {
+        add: vi.fn<TrackedStreamerStore["add"]>(),
         list: vi
           .fn<TrackedStreamerStore["list"]>()
           .mockResolvedValue([
-            { id: "zenrll-id", login: "zenrll", displayName: "Zen", createdAt: now },
+            { createdAt: now, displayName: "Zen", id: "zenrll-id", login: "zenrll" },
           ]),
-        add: vi.fn<TrackedStreamerStore["add"]>(),
         remove: vi.fn<TrackedStreamerStore["remove"]>(),
       },
       { findLiveRocketLeague },
@@ -120,7 +120,7 @@ describe(RedisLiveStreamCache, () => {
 
     await expect(service.listLive()).resolves.toStrictEqual([stream]);
     expect(findLiveRocketLeague).toHaveBeenCalledOnce();
-    await expect(cache.read()).resolves.toStrictEqual({ streams: [stream], fetchedAt: now });
+    await expect(cache.read()).resolves.toStrictEqual({ fetchedAt: now, streams: [stream] });
   });
 
   it("lets a single caller claim the refresh", async () => {
@@ -149,7 +149,7 @@ describe(RedisLiveStreamCache, () => {
     const freshClaim = await cache.claimRefresh();
 
     await expect(
-      cache.write({ streams: [stream], fetchedAt: new Date() }, staleClaim),
+      cache.write({ fetchedAt: new Date(), streams: [stream] }, staleClaim),
     ).resolves.toBe(false);
     expect(freshClaim).not.toBe(staleClaim);
     await expect(cache.read()).resolves.toBeNull();
@@ -162,7 +162,7 @@ describe(RedisLiveStreamCache, () => {
       throw new Error("expected a refresh claim");
     }
 
-    await cache.write({ streams: [stream], fetchedAt: new Date() }, claim);
+    await cache.write({ fetchedAt: new Date(), streams: [stream] }, claim);
 
     await cache.clear();
 

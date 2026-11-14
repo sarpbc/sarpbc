@@ -14,5 +14,5 @@ export const rethrowApiError: (cause: unknown, messages: ApiErrorMessages) => ne
     throw createError({ statusCode: 404, statusMessage: messages.notFound });
   }
 
-  throw createError({ statusCode: 502, statusMessage: messages.badGateway, cause });
+  throw createError({ cause, statusCode: 502, statusMessage: messages.badGateway });
 };

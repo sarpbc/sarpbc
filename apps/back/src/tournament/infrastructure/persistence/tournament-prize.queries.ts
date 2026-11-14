@@ -9,42 +9,42 @@ import { Tournament } from "./tournament.entity";
 import { TournamentPrize } from "./tournament-prize.entities";
 
 const toPrizeItem = (row: TournamentPrize): TournamentPrizeItem => ({
-  id: row.id,
-  placement: row.placement,
   amount: row.amount,
   currency: row.currency,
-  team: {
-    id: row.team.id,
-    name: row.team.name,
-    slug: row.team.slug,
-    imageUrl: row.team.imageUrl,
-    darkModeImageUrl: row.team.darkModeImageUrl,
-  },
+  id: row.id,
+  placement: row.placement,
   players: row.players
     .getItems()
     .map(({ id, name, slug }) => ({ id, name, slug }))
     .toSorted((a, b) => a.name.localeCompare(b.name)),
   sourceUrl: row.sourceUrl,
+  team: {
+    darkModeImageUrl: row.team.darkModeImageUrl,
+    id: row.team.id,
+    imageUrl: row.team.imageUrl,
+    name: row.team.name,
+    slug: row.team.slug,
+  },
 });
 
 const toEarningsLine = (row: TournamentPrize, shares: number): EarningsLine => {
   const { tournament } = row;
 
   return {
-    id: row.id,
-    placement: row.placement,
     amount: row.amount,
     currency: row.currency,
+    id: row.id,
+    placement: row.placement,
     shares,
     team: { id: row.team.id, name: row.team.name, slug: row.team.slug },
     tournament: {
+      beginAt: tournament.beginAt?.toISOString() ?? null,
+      endAt: tournament.endAt?.toISOString() ?? null,
+      event: toEventRef(tournament.event),
       id: tournament.id,
       name: tournament.name,
       slug: tournament.slug,
       source: tournament.source,
-      beginAt: tournament.beginAt?.toISOString() ?? null,
-      endAt: tournament.endAt?.toISOString() ?? null,
-      event: toEventRef(tournament.event),
     },
   };
 };
@@ -68,13 +68,13 @@ export class CompetitionPrizeQueries implements PrizeQueries {
     const rows = await this.em.find(
       TournamentPrize,
       { tournament: { id } },
-      { populate: ["team", "players"], orderBy: { placement: "ASC", amount: "DESC" } },
+      { orderBy: [{ placement: "ASC" }, { amount: "DESC" }], populate: ["team", "players"] },
     );
 
     return {
-      source: tournament.source,
       prizepool: tournament.prizepool,
       prizes: rows.map(toPrizeItem),
+      source: tournament.source,
     };
   }
 
@@ -104,11 +104,12 @@ export class CompetitionPrizeQueries implements PrizeQueries {
         ],
       },
       {
+        orderBy: [
+          { tournament: { endAt: QueryOrder.DESC_NULLS_LAST } },
+          { tournament: { beginAt: QueryOrder.DESC } },
+          { placement: "ASC" },
+        ],
         populate: ["team", "tournament.event", ...populate],
-        orderBy: {
-          tournament: { endAt: QueryOrder.DESC_NULLS_LAST, beginAt: QueryOrder.DESC },
-          placement: "ASC",
-        },
       },
     );
   }

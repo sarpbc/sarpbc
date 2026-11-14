@@ -12,27 +12,27 @@ const PLAYER_ID = "6f1c1f9e-2a4b-4c55-9d1e-0f3a2b1c4d5e";
 const LOGO_URL = `https://cdn.sarpbc.test/teams/${TEAM_ID}/logo-light-0123456789abcdef.webp`;
 
 const input = {
-  teamId: TEAM_ID,
-  variant: "light",
   imageUrl: "https://kcorp.gg/brand/logo.svg",
   sourceUrl: "https://kcorp.gg/brand",
+  teamId: TEAM_ID,
+  variant: "light",
 };
 
 const setup = (role: "admin" | "journalist") => {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
 
   const rosterProposalService = {
+    list: vi.fn<RosterProposalService["list"]>(),
     propose: vi.fn<RosterProposalService["propose"]>(async (change, sourceUrl) =>
-      Object.assign(new RosterProposal(), { id: "proposal-1", sourceUrl, change }),
+      Object.assign(new RosterProposal(), { change, id: "proposal-1", sourceUrl }),
     ),
     proposeTeamLogo: vi.fn<RosterProposalService["proposeTeamLogo"]>(async (logo, sourceUrl) =>
       Object.assign(new RosterProposal(), {
+        change: { kind: "upload_team_logo", ...logo, logoUrl: LOGO_URL },
         id: "proposal-1",
         sourceUrl,
-        change: { kind: "upload_team_logo", ...logo, logoUrl: LOGO_URL },
       }),
     ),
-    list: vi.fn<RosterProposalService["list"]>(),
   };
 
   const tools = rosterTools({ rosterProposalService });
@@ -48,9 +48,9 @@ const setup = (role: "admin" | "journalist") => {
   };
 
   const call = async (name: string, args: ToolArguments) =>
-    await tool(name).run({ id: "u1", email: "staff@test.com", role }, args);
+    await tool(name).run({ email: "staff@test.com", id: "u1", role }, args);
 
-  return { rosterProposalService, tool, call };
+  return { call, rosterProposalService, tool };
 };
 
 const textOf = (result: { content: { type: string; text?: string }[] }): string =>
@@ -63,15 +63,15 @@ describe("upload_team_logo", () => {
     const result = await call("upload_team_logo", input);
 
     expect(rosterProposalService.proposeTeamLogo).toHaveBeenCalledWith(
-      { teamId: TEAM_ID, variant: "light", imageUrl: input.imageUrl },
+      { imageUrl: input.imageUrl, teamId: TEAM_ID, variant: "light" },
       input.sourceUrl,
       "u1",
     );
     expect(jsonOf(result)).toMatchObject({
-      proposalId: "proposal-1",
+      change: { logoUrl: LOGO_URL, variant: "light" },
       kind: "upload_team_logo",
+      proposalId: "proposal-1",
       status: "pending",
-      change: { variant: "light", logoUrl: LOGO_URL },
     });
   });
 
@@ -102,8 +102,8 @@ describe("upload_team_logo", () => {
     const result = await call("upload_team_logo", input);
 
     expect(result).toMatchObject({
-      isError: true,
       content: [{ text: "The logo is 64x64 pixels; it must be at least 128x128." }],
+      isError: true,
     });
   });
 
@@ -122,10 +122,10 @@ describe("roster proposals", () => {
     const { rosterProposalService, call } = setup("admin");
 
     const move = {
-      playerId: PLAYER_ID,
-      teamId: TEAM_ID,
       effectiveDate: "2026-11-01",
+      playerId: PLAYER_ID,
       sourceUrl: input.sourceUrl,
+      teamId: TEAM_ID,
     };
 
     await call("remove_player_from_team", move);
@@ -147,16 +147,16 @@ describe("roster proposals", () => {
     const { rosterProposalService, call } = setup("admin");
 
     await call("add_player_to_team", {
-      playerId: PLAYER_ID,
-      teamId: TEAM_ID,
       effectiveDate: "2026-11-01",
+      playerId: PLAYER_ID,
       role: "coach",
       sourceUrl: input.sourceUrl,
+      teamId: TEAM_ID,
     });
-    await call("update_player", { playerId: PLAYER_ID, country: "FR", sourceUrl: input.sourceUrl });
+    await call("update_player", { country: "FR", playerId: PLAYER_ID, sourceUrl: input.sourceUrl });
 
     expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: "add_player_to_team", contractRole: "coach" }),
+      expect.objectContaining({ contractRole: "coach", kind: "add_player_to_team" }),
       input.sourceUrl,
       "u1",
     );
@@ -171,14 +171,14 @@ describe("roster proposals", () => {
     const { rosterProposalService, call } = setup("admin");
 
     const reversed = await call("create_contract", {
-      playerId: PLAYER_ID,
-      teamId: TEAM_ID,
-      startDate: "2026-06-01",
       endDate: "2026-01-01",
+      playerId: PLAYER_ID,
       sourceUrl: input.sourceUrl,
+      startDate: "2026-06-01",
+      teamId: TEAM_ID,
     });
 
-    const empty = await call("update_team", { teamId: TEAM_ID, sourceUrl: input.sourceUrl });
+    const empty = await call("update_team", { sourceUrl: input.sourceUrl, teamId: TEAM_ID });
 
     expect(textOf(reversed)).toBe("endDate must not precede startDate.");
     expect(empty.isError).toBe(true);
@@ -187,7 +187,7 @@ describe("roster proposals", () => {
 
   it("lists pending proposals by default", async () => {
     const { rosterProposalService, call } = setup("admin");
-    rosterProposalService.list.mockResolvedValue({ proposals: [], names: {} });
+    rosterProposalService.list.mockResolvedValue({ names: {}, proposals: [] });
 
     await call("list_roster_proposals", {});
 
@@ -228,27 +228,27 @@ describe("delete proposals", () => {
     const nothingChanged: unknown = expect.stringContaining("Nothing changed yet");
 
     expect(jsonOf(unsourced)).toMatchObject({
-      proposalId: "proposal-1",
       kind: "delete_match",
-      status: "pending",
-      reviewUrl: "https://admin.sarpbc.test/proposals",
       note: nothingChanged,
+      proposalId: "proposal-1",
+      reviewUrl: "https://admin.sarpbc.test/proposals",
+      status: "pending",
     });
   });
 
   it("records a pending team deletion or merge", async () => {
     const { rosterProposalService, call } = setup("admin");
 
-    await call("propose_delete_team", { teamId: TEAM_ID, reason: "Empty duplicate" });
+    await call("propose_delete_team", { reason: "Empty duplicate", teamId: TEAM_ID });
     await call("propose_delete_team", {
-      teamId: TEAM_ID,
-      reason: "Empty duplicate",
       mergeIntoTeamId: KEPT_TEAM_ID,
+      reason: "Empty duplicate",
+      teamId: TEAM_ID,
     });
 
     expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
       1,
-      { kind: "delete_team", teamId: TEAM_ID, reason: "Empty duplicate" },
+      { kind: "delete_team", reason: "Empty duplicate", teamId: TEAM_ID },
       "",
       "u1",
     );
@@ -256,9 +256,9 @@ describe("delete proposals", () => {
       2,
       {
         kind: "delete_team",
-        teamId: TEAM_ID,
-        reason: "Empty duplicate",
         mergeIntoTeamId: KEPT_TEAM_ID,
+        reason: "Empty duplicate",
+        teamId: TEAM_ID,
       },
       "",
       "u1",
@@ -285,9 +285,9 @@ describe("delete proposals", () => {
       expect(match.safeParse(invalid).success).toBe(false);
     }
 
-    expect(team.safeParse({ teamId: TEAM_ID, reason: "Duplicate" }).success).toBe(true);
+    expect(team.safeParse({ reason: "Duplicate", teamId: TEAM_ID }).success).toBe(true);
     expect(
-      team.safeParse({ teamId: TEAM_ID, reason: "Duplicate", mergeIntoTeamId: "kc" }).success,
+      team.safeParse({ mergeIntoTeamId: "kc", reason: "Duplicate", teamId: TEAM_ID }).success,
     ).toBe(false);
   });
 
@@ -300,8 +300,8 @@ describe("delete proposals", () => {
     const result = await call("propose_delete_match", { matchId: MATCH_ID, reason: "Duplicate" });
 
     expect(result).toMatchObject({
-      isError: true,
       content: [{ text: "Group A is synced from PandaScore and cannot be deleted" }],
+      isError: true,
     });
   });
 
@@ -314,7 +314,7 @@ describe("delete proposals", () => {
     });
 
     expect(callResult2.isError).toBe(true);
-    const callResult3 = await call("propose_delete_team", { teamId: TEAM_ID, reason: "Duplicate" });
+    const callResult3 = await call("propose_delete_team", { reason: "Duplicate", teamId: TEAM_ID });
     expect(callResult3.isError).toBe(true);
     expect(rosterProposalService.propose).not.toHaveBeenCalled();
     expect(tool("propose_delete_match").description).toContain("Requires tournaments.manage.");

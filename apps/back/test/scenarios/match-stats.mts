@@ -29,23 +29,23 @@ const identified = z.looseObject({ id: z.string() });
 
 const errorBody = z.looseObject({ code: z.string() });
 
-const deletedGame = z.looseObject({ number: z.number(), ballchasingId: z.string() });
+const deletedGame = z.looseObject({ ballchasingId: z.string(), number: z.number() });
 
 const statsImports = z.object({
   imports: z.array(
-    z.looseObject({ status: z.string(), error: z.string().nullable(), processed: z.number() }),
+    z.looseObject({ error: z.string().nullable(), processed: z.number(), status: z.string() }),
   ),
 });
 
 const matchGames = z.object({
   games: z.array(
     z.looseObject({
-      number: z.number(),
       ballchasingId: z.string(),
+      number: z.number(),
       teams: z.array(
         z.looseObject({
-          participantId: z.string(),
           goals: z.number(),
+          participantId: z.string(),
           players: z.array(z.looseObject({ name: z.string(), player: identified.nullable() })),
         }),
       ),
@@ -57,27 +57,27 @@ const statCount = z.number();
 
 const playerStats = z.looseObject({
   games: z.number(),
-  unlinkedAccounts: z.number(),
   players: z.array(
     z.looseObject({
-      player: identified,
       games: z.number(),
       goalParticipation: z.number(),
+      player: identified,
       totals: z.looseObject({
-        goals: statCount,
         assists: statCount,
+        demolitions: statCount,
+        goals: statCount,
         saves: statCount,
         shots: statCount,
-        demolitions: statCount,
       }),
     }),
   ),
+  unlinkedAccounts: z.number(),
 });
 
 const tournamentBody = z.object({
   tournament: z.looseObject({
-    name: z.string(),
     event: z.looseObject({ slug: z.string() }),
+    name: z.string(),
     participants: z.array(
       z.looseObject({ id: z.string(), team: z.looseObject({ name: z.string() }).nullish() }),
     ),
@@ -87,12 +87,12 @@ const tournamentBody = z.object({
 const statsPlayerAccounts = z.looseObject({
   players: z.array(
     z.looseObject({
+      games: z.number(),
+      name: z.string(),
       platform: z.string(),
       platformId: z.string(),
-      name: z.string(),
-      team: z.looseObject({ participantId: z.string(), name: z.string() }),
-      games: z.number(),
       player: identified.nullable(),
+      team: z.looseObject({ name: z.string(), participantId: z.string() }),
     }),
   ),
   rosters: z.array(z.looseObject({ participantId: z.string(), players: z.array(identified) })),
@@ -105,7 +105,7 @@ const linkResult = z.looseObject({
 
 const storedGames = z.object({
   games: z.array(
-    z.looseObject({ matchId: z.string(), number: z.number(), ballchasingId: z.string() }),
+    z.looseObject({ ballchasingId: z.string(), matchId: z.string(), number: z.number() }),
   ),
 });
 
@@ -155,23 +155,23 @@ export const verifyMatchStats = async ({
   const response2 = await request("GET", importsUrl, undefined, staffCookie);
   assert.deepEqual(response2.json(statsImports).imports, []);
 
-  const stat = { platform: "epic", goals: 1, assists: 0, saves: 2, shots: 3, demolitions: 1 };
+  const stat = { assists: 0, demolitions: 1, goals: 1, platform: "epic", saves: 2, shots: 3 };
 
   const game: GameRecord = {
+    ballchasingId: "integration-replay-1",
+    blueGoals: 1,
+    blueParticipantId: participantId,
+    learnedLinks: [],
     matchId,
     number: 1,
-    ballchasingId: "integration-replay-1",
-    rocketLeagueId: "RL-1",
-    playedAt: new Date(),
-    blueParticipantId: participantId,
-    orangeParticipantId: rivalParticipantId,
-    blueGoals: 1,
     orangeGoals: 0,
+    orangeParticipantId: rivalParticipantId,
+    playedAt: new Date(),
     players: [
-      { ...stat, name: "KC Veteran", platformId: "a", side: "blue", playerId },
-      { ...stat, name: "Stand-in", platformId: null, side: "orange", playerId: null, goals: 0 },
+      { ...stat, name: "KC Veteran", platformId: "a", playerId, side: "blue" },
+      { ...stat, goals: 0, name: "Stand-in", platformId: null, playerId: null, side: "orange" },
     ],
-    learnedLinks: [],
+    rocketLeagueId: "RL-1",
   };
 
   await new MikroOrmGameStatsStore(orm.em.fork()).save(game);
@@ -229,17 +229,17 @@ export const verifyMatchStats = async ({
 
   const imports = new MikroOrmStatsImportStore(orm.em.fork());
   await imports.create({
-    id: "00000000-0000-4000-8000-000000000021",
-    tournamentId,
+    createdAt: new Date(),
+    error: null,
+    finishedAt: null,
     groupId: "pilot-group",
+    id: "00000000-0000-4000-8000-000000000021",
+    items: [],
+    processed: 1,
+    startedAt: new Date(),
     status: "running",
     total: 3,
-    processed: 1,
-    items: [],
-    error: null,
-    createdAt: new Date(),
-    startedAt: new Date(),
-    finishedAt: null,
+    tournamentId,
   });
   assert.equal(await new MikroOrmStatsImportStore(orm.em.fork()).failUnfinished("restarted"), 1);
 
@@ -257,19 +257,19 @@ export const verifyMatchStats = async ({
       id: duplicateId,
       name: "KC Veteran Twin",
       slug: duplicateId,
-      status: "active",
       source: "manual",
+      status: "active",
     }),
   );
   await em.flush();
   await new MikroOrmGameStatsStore(orm.em.fork()).save({
     ...game,
-    number: 2,
     ballchasingId: "integration-replay-2",
-    rocketLeagueId: "RL-2",
+    number: 2,
     players: [
-      { ...stat, name: "KC Veteran", platformId: "a", side: "blue", playerId: duplicateId },
+      { ...stat, name: "KC Veteran", platformId: "a", playerId: duplicateId, side: "blue" },
     ],
+    rocketLeagueId: "RL-2",
   });
   const merges = app.get(RosterMergeService);
   await RequestContext.create(
@@ -296,7 +296,7 @@ export const verifyMatchStats = async ({
   const veteranRows = await orm.em
     .fork()
     .getRepository(MatchGamePlayer)
-    .find({ player: playerId, game: { match: { tournament: tournamentId } } });
+    .find({ game: { match: { tournament: tournamentId } }, player: playerId });
 
   for (const key of statKeys) {
     assert.equal(
@@ -338,15 +338,15 @@ export const verifyMatchStats = async ({
       id: otherId,
       name: "Rival Regular",
       slug: otherId,
-      status: "active",
       source: "manual",
+      status: "active",
     }),
     setup.create(Player, {
       id: twinId,
       name: "Rival Twin",
       slug: twinId,
-      status: "active",
       source: "manual",
+      status: "active",
     }),
   ]);
   await setup.flush();
@@ -365,11 +365,11 @@ export const verifyMatchStats = async ({
   ): Promise<TournamentStatsGame> =>
     await new MikroOrmGameStatsStore(orm.em.fork()).save({
       ...game,
-      number,
       ballchasingId: `integration-replay-${number}`,
-      rocketLeagueId: `RL-${number}`,
-      players,
       learnedLinks,
+      number,
+      players,
+      rocketLeagueId: `RL-${number}`,
     });
 
   const steam = (
@@ -379,11 +379,11 @@ export const verifyMatchStats = async ({
     rowPlayerId: string | null = null,
   ): GamePlayerRecord => ({
     ...stat,
+    name,
     platform: "steam",
     platformId,
-    name,
-    side,
     playerId: rowPlayerId,
+    side,
   });
 
   const linkOf = async (platformId: string): Promise<string | null> => {
@@ -425,12 +425,12 @@ export const verifyMatchStats = async ({
   const unlinked = known.players.filter((account) => account.player === null);
   assert.deepEqual(unlinked, [
     {
+      games: 1,
+      name: "Racer",
       platform: "steam",
       platformId: "s-renamed",
-      name: "Racer",
-      team: { participantId: rivalParticipantId, name: unlinked[0].team.name },
-      games: 1,
       player: null,
+      team: { name: unlinked[0].team.name, participantId: rivalParticipantId },
     },
   ]);
   assert.equal(
@@ -537,10 +537,10 @@ export const verifyMatchStats = async ({
   const gamesUrl = `/tournaments/${tournamentId}/stats-games`;
 
   const attach = {
+    blueParticipantId: participantId,
+    gameNumber: 6,
     matchId,
     replay: "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
-    gameNumber: 6,
-    blueParticipantId: participantId,
   };
 
   await request("GET", gamesUrl, undefined, undefined, 401);
@@ -568,8 +568,8 @@ export const verifyMatchStats = async ({
   assert.deepEqual(await store().attachment("integration-replay-3"), {
     matchId,
     number: 3,
-    tournamentName: tournament.name,
     teams: [teamName(participantId), teamName(rivalParticipantId)],
+    tournamentName: tournament.name,
   });
   assert.equal(await store().attachment("never-attached"), null);
 

@@ -23,8 +23,8 @@ const TOURNAMENT_FORMATS = ["online", "offline", "online/offline"] as const;
 type TournamentFormat = (typeof TOURNAMENT_FORMATS)[number];
 
 const FORMAT_LABEL = {
-  online: "Online",
   offline: "LAN",
+  online: "Online",
   "online/offline": "Online & LAN",
 } as const satisfies Record<TournamentFormat, string>;
 
@@ -171,8 +171,8 @@ const countryPlace = (country: string | null | undefined): PlaceLd | undefined =
 
   return {
     "@type": "Place",
-    name: COUNTRY_NAMES.of(code) ?? code,
     address: { "@type": "PostalAddress", addressCountry: code },
+    name: COUNTRY_NAMES.of(code) ?? code,
   };
 };
 
@@ -355,16 +355,24 @@ export const buildTournamentSportsEvent = (
   const venue = eventVenue(tournament.type, tournament.country, url);
 
   const event = compactJsonLd<SportsEventLd>({
-    "@type": "SportsEvent",
     "@id": url,
-    url,
-    name: tournamentStageLabel(tournament),
-    sport: ROCKET_LEAGUE_SPORT,
-    startDate: toIsoDate(tournament.beginAt),
+    "@type": "SportsEvent",
+    additionalProperty: additionalProperties(prizepool, format),
+    award: prizepool,
+    competitor: competitors,
+    description: buildDescription({
+      championName: champion ? participantName(champion) : undefined,
+      format,
+      leagueName: organizerName,
+      prizepool,
+      status,
+    }),
     endDate: toIsoDate(tournament.endAt),
-    eventStatus: sportsEventStatusUrl(status),
     eventAttendanceMode: venue.eventAttendanceMode,
+    eventStatus: sportsEventStatusUrl(status),
+    image,
     location: venue.location,
+    name: tournamentStageLabel(tournament),
     organizer: isNonEmptyString(organizerName)
       ? compactJsonLd<SportsOrganizationLd>({
           "@type": "SportsOrganization",
@@ -372,18 +380,10 @@ export const buildTournamentSportsEvent = (
           url: resolveSiteUrl(tournament.league?.url),
         })
       : undefined,
-    image,
-    description: buildDescription({
-      leagueName: organizerName,
-      format,
-      prizepool,
-      championName: champion ? participantName(champion) : undefined,
-      status,
-    }),
-    award: prizepool,
-    competitor: competitors,
     performer: competitors,
-    additionalProperty: additionalProperties(prizepool, format),
+    sport: ROCKET_LEAGUE_SPORT,
+    startDate: toIsoDate(tournament.beginAt),
+    url,
   });
 
   if (options.includeContext === true) {

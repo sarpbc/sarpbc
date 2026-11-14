@@ -33,23 +33,23 @@ const breadcrumbItems = computed(() => [
 
 const columns: TableColumn<TournamentListItem>[] = [
   {
-    id: "name",
-    header: t("page.tournaments.columns.name"),
     cell: ({ row }) => tournamentStageLabel(row.original),
+    header: t("page.tournaments.columns.name"),
+    id: "name",
   },
   {
-    id: "source",
     header: t("page.tournaments.columns.source"),
+    id: "source",
   },
   {
-    id: "beginAt",
-    header: t("page.tournaments.columns.beginAt"),
     cell: ({ row }) =>
       row.original.beginAt ? new Date(row.original.beginAt).toLocaleDateString() : "-",
+    header: t("page.tournaments.columns.beginAt"),
+    id: "beginAt",
   },
   {
-    id: "actions",
     header: t("page.tournaments.columns.actions"),
+    id: "actions",
   },
 ];
 
@@ -66,7 +66,7 @@ const handleSyncAdditions = async () => {
 
   try {
     await syncTournamentAdditions();
-    toast.add({ title: t("page.tournaments.syncAdditions"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.syncAdditions") });
     await refresh();
   } catch (syncError) {
     reportError(syncError);

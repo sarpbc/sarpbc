@@ -52,8 +52,8 @@ const add = async (team: Team) => {
   try {
     await createSeasonParticipant(seasonId, { teamId: team.id });
     toast.add({
-      title: t("page.seasons.participants.added", { name: team.name }),
       color: "success",
+      title: t("page.seasons.participants.added", { name: team.name }),
     });
     query.value = "";
     results.value = [];

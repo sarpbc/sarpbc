@@ -28,14 +28,14 @@ const postFields = (row: Post) => ({ id: row.id, publicId: row.publicId, title: 
 
 const newsArticleFields = (row: NewsArticle) => ({
   id: row.id,
-  title: row.title,
   slug: row.slug,
+  title: row.title,
 });
 
 const matchFields = (row: Match) => ({
   id: row.id,
-  publicId: row.publicId,
   name: row.name,
+  publicId: row.publicId,
   slug: toMatchSlug(row),
 });
 
@@ -44,11 +44,6 @@ export const REPLY_TARGET_LOADERS = {
     const row = await em.findOne(Post, { id });
 
     return row && { post: postFields(row) };
-  },
-  newsArticle: async (em, id) => {
-    const row = await em.findOne(NewsArticle, { id });
-
-    return row && { newsArticle: newsArticleFields(row) };
   },
   match: async (em, id) => {
     const row = await em.findOne(
@@ -59,19 +54,24 @@ export const REPLY_TARGET_LOADERS = {
 
     return row && { match: matchFields(row) };
   },
+  newsArticle: async (em, id) => {
+    const row = await em.findOne(NewsArticle, { id });
+
+    return row && { newsArticle: newsArticleFields(row) };
+  },
 } satisfies Record<
   ReplyTargetType,
   (em: EntityManager, id: string) => Promise<Partial<ReplyTargetFields> | null>
 >;
 
 export const replySnapshot = (row: Reply): ReplyRecord => ({
-  id: row.id,
+  author: { id: row.author.id, userName: row.author.userName },
   content: row.content,
   createdAt: new Date(row.createdAt),
   hiddenAt: row.hiddenAt ? new Date(row.hiddenAt) : null,
-  author: { id: row.author.id, userName: row.author.userName },
-  replyTo: row.replyTo ? { id: row.replyTo.id } : null,
-  post: row.post ? postFields(row.post) : null,
-  newsArticle: row.newsArticle ? newsArticleFields(row.newsArticle) : null,
+  id: row.id,
   match: row.match ? matchFields(row.match) : null,
+  newsArticle: row.newsArticle ? newsArticleFields(row.newsArticle) : null,
+  post: row.post ? postFields(row.post) : null,
+  replyTo: row.replyTo ? { id: row.replyTo.id } : null,
 });

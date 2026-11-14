@@ -72,15 +72,20 @@ const poll = useIntervalFn(() => refresh(), POLL_MS, { immediate: false });
 
 watch(active, (isActive) => (isActive ? poll.resume() : poll.pause()), { immediate: true });
 
+const COUNT_ORDER = [
+  ["imported", "imported"],
+  ["already", "already_imported"],
+  ["unmatched", "unmatched"],
+  ["failed", "failed"],
+] as const satisfies readonly (readonly [string, StatsImportItem["status"]])[];
+
 const counts = computed(() => {
   const items = latest.value?.items ?? [];
 
-  return {
-    imported: items.filter((item) => item.status === "imported").length,
-    already: items.filter((item) => item.status === "already_imported").length,
-    unmatched: items.filter((item) => item.status === "unmatched").length,
-    failed: items.filter((item) => item.status === "failed").length,
-  };
+  return COUNT_ORDER.map(([key, status]) => ({
+    key,
+    value: items.filter((item) => item.status === status).length,
+  }));
 });
 
 const attention = computed(() =>
@@ -178,12 +183,12 @@ const submit = async () => {
     const created = await requestStatsImport(tournamentId, group.value.trim());
     imports.value = [created, ...(imports.value ?? [])];
     group.value = "";
-    toast.add({ title: t("page.tournaments.statsImport.started"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.statsImport.started") });
   } catch (requestError) {
     toast.add({
-      title: t("page.tournaments.statsImport.startError"),
-      description: getApiErrorMessage(requestError) ?? undefined,
       color: "error",
+      description: getApiErrorMessage(requestError) ?? undefined,
+      title: t("page.tournaments.statsImport.startError"),
     });
   } finally {
     submitting.value = false;
@@ -262,7 +267,7 @@ const submit = async () => {
       <p v-if="latest.error" class="text-sm text-error">{{ latest.error }}</p>
 
       <dl v-if="latest.items.length > 0" class="grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
-        <div v-for="(value, key) in counts" :key="key" class="border border-default p-2">
+        <div v-for="{ key, value } in counts" :key="key" class="border border-default p-2">
           <dt class="text-muted">{{ t(`page.tournaments.statsImport.counts.${key}`) }}</dt>
           <dd class="text-lg font-semibold tabular-nums">{{ value }}</dd>
         </div>

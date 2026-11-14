@@ -10,20 +10,20 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 
 describe(R2Service, () => {
   const configuredValues = {
-    r2_account_id: "acct",
-    r2_endpoint: "https://acct.r2.cloudflarestorage.com",
     r2_access_key_id: "key",
-    r2_secret_access_key: "secret",
+    r2_account_id: "acct",
     r2_bucket: "sarpbc-org",
+    r2_endpoint: "https://acct.r2.cloudflarestorage.com",
     r2_public_base_url: "https://cdn.example",
+    r2_secret_access_key: "secret",
   } as const;
 
   const logError = vi.fn<ObjectOperationLogger["error"]>();
 
   const operationLogger: ObjectOperationLogger = {
-    set: () => {},
-    error: logError,
     emit: () => {},
+    error: logError,
+    set: () => {},
   };
 
   let sendSpy: MockInstance;
@@ -46,7 +46,7 @@ describe(R2Service, () => {
 
     expect(result.key).toMatch(/^news\/covers\/.+\.jpg$/u);
     expect(result.publicUrl).toContain(result.key);
-    const input: unknown = expect.objectContaining({ Key: result.key, ContentType: "image/jpeg" });
+    const input: unknown = expect.objectContaining({ ContentType: "image/jpeg", Key: result.key });
 
     expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ input }));
   });
@@ -78,9 +78,9 @@ describe(R2Service, () => {
     expect(result.publicUrl).toBe(`https://cdn.example/${result.key}`);
 
     const input: unknown = expect.objectContaining({
-      Key: result.key,
       Body: buffer,
       ContentType: "image/png",
+      Key: result.key,
     });
 
     expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ input }));
@@ -97,11 +97,11 @@ describe(R2Service, () => {
     expect(sendSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         input: {
-          Bucket: "sarpbc-org",
-          Key: key,
           Body: bytes,
-          ContentType: "image/webp",
+          Bucket: "sarpbc-org",
           CacheControl: "public, max-age=31536000, immutable",
+          ContentType: "image/webp",
+          Key: key,
         },
       }),
     );

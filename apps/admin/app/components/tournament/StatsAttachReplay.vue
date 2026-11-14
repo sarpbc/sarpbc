@@ -36,7 +36,7 @@ const pickable = computed(() => matches.filter((match) => (match.participants?.l
 const match = computed(() => pickable.value.find((candidate) => candidate.id === matchId.value));
 
 const matchOptions = computed(() =>
-  pickable.value.map((candidate) => ({ value: candidate.id, label: matchLabel(candidate) })),
+  pickable.value.map((candidate) => ({ label: matchLabel(candidate), value: candidate.id })),
 );
 
 const gameOptions = computed(() => {
@@ -45,18 +45,18 @@ const gameOptions = computed(() => {
   );
 
   return Array.from({ length: maxVodGame(match.value?.numberOfGames) }, (_, index) => ({
-    value: index + 1,
+    disabled: taken.has(index + 1),
     label: taken.has(index + 1)
       ? t("page.tournaments.statsAttach.gameTaken", { number: index + 1 })
       : t("page.tournaments.statsAttach.gameOption", { number: index + 1 }),
-    disabled: taken.has(index + 1),
+    value: index + 1,
   }));
 });
 
 const sideOptions = computed(() =>
   (match.value?.participants ?? []).map((participant) => ({
-    value: participant.id,
     label: participantName(participant),
+    value: participant.id,
   })),
 );
 
@@ -103,23 +103,23 @@ const save = async () => {
 
   try {
     const game = await attachStatsReplay(tournamentId, {
+      blueParticipantId: blueParticipantId.value,
+      gameNumber: gameNumber.value,
       matchId: matchId.value,
       replay: item.replayId,
-      gameNumber: gameNumber.value,
-      blueParticipantId: blueParticipantId.value,
     });
 
     toast.add({
-      title: t("page.tournaments.statsAttach.saved", { number: game.number }),
       color: "success",
+      title: t("page.tournaments.statsAttach.saved", { number: game.number }),
     });
     emit("attached", game);
     target.value = null;
   } catch (error) {
     toast.add({
-      title: t("page.tournaments.statsAttach.saveError"),
-      description: getApiErrorMessage(error) ?? undefined,
       color: "error",
+      description: getApiErrorMessage(error) ?? undefined,
+      title: t("page.tournaments.statsAttach.saveError"),
     });
   } finally {
     saving.value = false;

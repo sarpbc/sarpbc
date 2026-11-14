@@ -17,7 +17,7 @@ void describe("isSpoilerConcealed", () => {
   });
 
   void it("shows a match once that match is revealed", () => {
-    const reveals = revealSpoilers(NO_SPOILER_REVEALS, { kind: "match", id: "match-1" });
+    const reveals = revealSpoilers(NO_SPOILER_REVEALS, { id: "match-1", kind: "match" });
     assert.equal(isSpoilerConcealed(true, reveals, scope), false);
     assert.equal(
       isSpoilerConcealed(true, reveals, { matchId: "match-2", tournamentId: "tournament-1" }),
@@ -27,7 +27,7 @@ void describe("isSpoilerConcealed", () => {
   });
 
   void it("shows every match of a tournament once the tournament is revealed", () => {
-    const reveals = revealSpoilers(NO_SPOILER_REVEALS, { kind: "tournament", id: "tournament-1" });
+    const reveals = revealSpoilers(NO_SPOILER_REVEALS, { id: "tournament-1", kind: "tournament" });
     assert.equal(isSpoilerConcealed(true, reveals, scope), false);
     assert.equal(
       isSpoilerConcealed(true, reveals, { matchId: "match-2", tournamentId: "tournament-1" }),
@@ -43,18 +43,18 @@ void describe("isSpoilerConcealed", () => {
 
 void describe("revealSpoilers", () => {
   void it("is idempotent", () => {
-    const once = revealSpoilers(NO_SPOILER_REVEALS, { kind: "match", id: "match-1" });
-    assert.equal(revealSpoilers(once, { kind: "match", id: "match-1" }), once);
-    const tournament = revealSpoilers(once, { kind: "tournament", id: "tournament-1" });
+    const once = revealSpoilers(NO_SPOILER_REVEALS, { id: "match-1", kind: "match" });
+    assert.equal(revealSpoilers(once, { id: "match-1", kind: "match" }), once);
+    const tournament = revealSpoilers(once, { id: "tournament-1", kind: "tournament" });
     assert.equal(
-      revealSpoilers(tournament, { kind: "tournament", id: "tournament-1" }),
+      revealSpoilers(tournament, { id: "tournament-1", kind: "tournament" }),
       tournament,
     );
     assert.deepEqual(tournament, { matchIds: ["match-1"], tournamentIds: ["tournament-1"] });
   });
 
   void it("does not mutate the previous reveals", () => {
-    revealSpoilers(NO_SPOILER_REVEALS, { kind: "match", id: "match-1" });
+    revealSpoilers(NO_SPOILER_REVEALS, { id: "match-1", kind: "match" });
     assert.deepEqual(NO_SPOILER_REVEALS, { matchIds: [], tournamentIds: [] });
   });
 });

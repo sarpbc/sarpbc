@@ -7,8 +7,8 @@ import { RedisHealthIndicator } from "./redis.health";
 import { ShutdownStateService } from "./shutdown-state.service";
 
 @Module({
-  imports: [TerminusModule, RedisModule],
   controllers: [HealthController],
+  imports: [TerminusModule, RedisModule],
   providers: [PostgresHealthIndicator, RedisHealthIndicator, ShutdownStateService],
 })
 export class HealthModule {}

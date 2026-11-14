@@ -10,8 +10,8 @@ export const transactionalForum = (em: EntityManager): ForumTransaction => ({
     await em.transactional(async (tx) => {
       const result = await work({
         posts: new MikroPostStore(tx),
-        topics: new MikroTopicStore(tx),
         replies: replyDeletion(tx),
+        topics: new MikroTopicStore(tx),
         users: authorReader(tx),
       });
 

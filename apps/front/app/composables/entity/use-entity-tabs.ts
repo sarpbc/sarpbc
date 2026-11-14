@@ -28,7 +28,7 @@ export const useEntityTabs = (kind: EntityKind) => {
   const tab = computed(() => parseProfileTab(route.query.tab));
 
   const tabItems = computed<TabsItem[]>(() =>
-    PROFILE_TABS.map((value) => ({ value, label: t(`page.${kind}.slug.tabs.${value}`) })),
+    PROFILE_TABS.map((value) => ({ label: t(`page.${kind}.slug.tabs.${value}`), value })),
   );
 
   const setTab = (value: string | number) => {
@@ -53,7 +53,7 @@ export const useEntityTabs = (kind: EntityKind) => {
     void router.replace({ query });
   };
 
-  return { tab, tabItems, setTab };
+  return { setTab, tab, tabItems };
 };
 
 export const useEntityListTab = (key: EntityListTabKey) => {
@@ -79,5 +79,5 @@ export const useEntityListTab = (key: EntityListTabKey) => {
     void router.replace({ query });
   };
 
-  return { tab, emptyIcon, setTab };
+  return { emptyIcon, setTab, tab };
 };

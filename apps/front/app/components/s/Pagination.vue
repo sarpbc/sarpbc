@@ -31,7 +31,7 @@ const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
   }
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+  window.scrollTo({ behavior: reduceMotion ? "auto" : "smooth", top: 0 });
 };
 </script>
 

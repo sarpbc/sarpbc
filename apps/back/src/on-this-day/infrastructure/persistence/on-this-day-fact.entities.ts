@@ -29,22 +29,22 @@ export const OnThisDayFactSchema = defineEntity({
     { properties: ["match"] },
   ],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    month: p.smallint(),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     day: p.smallint(),
-    year: p.smallint().nullable(),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    match: p.manyToOne(Match).nullable().deleteRule("set null"),
+    month: p.smallint(),
+    player: p.manyToOne(Player).nullable().deleteRule("set null"),
+    sourceUrl: p.text().nullable(),
+    team: p.manyToOne(Team).nullable().deleteRule("set null"),
     textEn: p.text(),
     textFr: p.text(),
-    player: p.manyToOne(Player).nullable().deleteRule("set null"),
-    team: p.manyToOne(Team).nullable().deleteRule("set null"),
     tournament: p.manyToOne(Tournament).nullable().deleteRule("set null"),
-    match: p.manyToOne(Match).nullable().deleteRule("set null"),
-    sourceUrl: p.text().nullable(),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     updatedAt: p
       .datetime()
       .type("timestamptz")
       .defaultRaw("now()")
       .onUpdate(() => new Date()),
+    year: p.smallint().nullable(),
   },
 });

@@ -8,9 +8,9 @@ import { SitemapStore } from "./persistence/sitemap.store";
   controllers: [SitemapController],
   providers: [
     {
+      inject: [EntityManager],
       provide: SitemapService,
       useFactory: (em: EntityManager) => new SitemapService(new SitemapStore(em)),
-      inject: [EntityManager],
     },
   ],
 })

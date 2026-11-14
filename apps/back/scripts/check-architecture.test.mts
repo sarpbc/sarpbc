@@ -16,17 +16,17 @@ const fixture = (): Fixture => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "architecture-"));
 
   return {
+    cleanup: () => {
+      fs.rmSync(root, { force: true, recursive: true });
+    },
     root,
+    violations: (files: string[]): string[] => architectureViolations(files, root),
     write(relative: string, content: string): string {
       const file = path.join(root, relative);
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, content);
 
       return file;
-    },
-    violations: (files: string[]): string[] => architectureViolations(files, root),
-    cleanup: () => {
-      fs.rmSync(root, { recursive: true, force: true });
     },
   };
 };

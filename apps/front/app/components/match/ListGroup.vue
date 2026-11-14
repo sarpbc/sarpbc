@@ -32,19 +32,19 @@ const blocks = computed((): ListBlock[] => {
   if (!useDateGrouping.value) {
     return [
       {
-        key: "all",
         dateLabel: null,
         events: groupMatchesByEvent(matches),
+        key: "all",
       },
     ];
   }
 
   return groupByDay(matches, (match) => match.beginAt, "asc").map((dayGroup) => ({
-    key: dayGroup.dateKey,
     dateLabel: dayGroup.date
       ? formatDayHeaderDate(dayGroup.date, locale.value)
       : t("page.tournaments.id.matchSections.unknownDate"),
     events: groupMatchesByEvent(dayGroup.items),
+    key: dayGroup.dateKey,
   }));
 });
 </script>

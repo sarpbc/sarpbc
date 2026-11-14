@@ -11,9 +11,9 @@ export const mediumDateFormatter = (locale: string) =>
 
 const dayHeaderFormatter = (locale: string) =>
   new DateFormatter(locale, {
-    weekday: "long",
-    month: "long",
     day: "numeric",
+    month: "long",
+    weekday: "long",
     year: "numeric",
   });
 

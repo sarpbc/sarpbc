@@ -12,10 +12,10 @@ describe("manual catalog DTOs", () => {
     expect(UpdateEventDto.parse({ leagueId: null })).toStrictEqual({
       leagueId: null,
     });
-    expect(UpdateLeagueDto.parse({ slug: null, url: null, imageUrl: null })).toStrictEqual({
+    expect(UpdateLeagueDto.parse({ imageUrl: null, slug: null, url: null })).toStrictEqual({
+      imageUrl: null,
       slug: null,
       url: null,
-      imageUrl: null,
     });
   });
 

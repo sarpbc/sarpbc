@@ -20,10 +20,10 @@ const playerBody = z.object({ player: playerRef });
 
 const soloTournamentBody = z.object({
   tournament: z.object({
-    id: z.string(),
     format: z.string(),
+    id: z.string(),
     participants: z.array(
-      z.object({ id: z.string(), team: z.null(), players: z.array(playerRef) }),
+      z.object({ id: z.string(), players: z.array(playerRef), team: z.null() }),
     ),
   }),
 });
@@ -35,10 +35,10 @@ const tournamentDetailBody = z.object({
     format: z.string(),
     matches: z.array(
       z.object({
-        winnerId: z.string().nullable(),
         participants: z.array(
-          z.strictObject({ id: z.string(), team: z.null(), players: z.array(playerRef) }),
+          z.strictObject({ id: z.string(), players: z.array(playerRef), team: z.null() }),
         ),
+        winnerId: z.string().nullable(),
       }),
     ),
   }),
@@ -48,7 +48,7 @@ const matchResultsBody = z.object({
   results: z.array(
     z.object({
       participants: z.array(
-        z.object({ team: z.unknown(), players: z.array(z.unknown()).optional() }),
+        z.object({ players: z.array(z.unknown()).optional(), team: z.unknown() }),
       ),
     }),
   ),
@@ -106,14 +106,14 @@ export const verifyPlayerTournaments = async ({
   await request(
     "POST",
     "/tournaments",
-    { name: "Fake Knockout", format: "1v1", playerParticipants: [[solo.id]] },
+    { format: "1v1", name: "Fake Knockout", playerParticipants: [[solo.id]] },
     memberCookie,
     403,
   );
   await request(
     "POST",
     "/tournaments",
-    { name: "Fake Knockout", format: "1v1", playerParticipants: [[solo.id, rival.id]] },
+    { format: "1v1", name: "Fake Knockout", playerParticipants: [[solo.id, rival.id]] },
     staffCookie,
     400,
   );
@@ -121,7 +121,7 @@ export const verifyPlayerTournaments = async ({
   const response2 = await request(
     "POST",
     "/tournaments",
-    { name: "Fake Knockout", format: "1v1", playerParticipants: [[solo.id], [rival.id]] },
+    { format: "1v1", name: "Fake Knockout", playerParticipants: [[solo.id], [rival.id]] },
     staffCookie,
     201,
   );
@@ -156,11 +156,11 @@ export const verifyPlayerTournaments = async ({
     "POST",
     `/tournaments/${tournament.id}/matches`,
     {
-      name: "Final",
-      participantIds: [soloParticipant, rivalParticipant],
       beginAt: playedAt.toISOString(),
-      status: "running",
+      name: "Final",
       numberOfGames: 1,
+      participantIds: [soloParticipant, rivalParticipant],
+      status: "running",
     },
     staffCookie,
     201,
@@ -174,11 +174,11 @@ export const verifyPlayerTournaments = async ({
     orm.em.fork(),
     async () =>
       await app.get(MatchService).updateMatch(match.id, {
-        status: "finished",
         results: [
           { participantId: soloParticipant, score: 1 },
           { participantId: rivalParticipant, score: 0 },
         ],
+        status: "finished",
       }),
   );
 
@@ -194,8 +194,8 @@ export const verifyPlayerTournaments = async ({
     detail.matches[0].participants.find((participant) => participant.id === soloParticipant),
     {
       id: soloParticipant,
-      team: null,
       players: [{ id: solo.id, name: solo.name, slug: solo.slug }],
+      team: null,
     },
   );
 
@@ -222,13 +222,13 @@ export const verifyPlayerTournaments = async ({
   const [assignment] = assignReplays(
     [
       {
+        blue: { goals: 0, name: null, playerNames: ["Fake Solo Two"] },
         id: "fake-1v1-replay",
-        rocketLeagueId: "RL-1v1",
-        title: "Fake 1v1",
+        orange: { goals: 2, name: null, playerNames: ["Fake Solo One"] },
         playedAt,
         playedAtHasTimezone: true,
-        blue: { name: null, goals: 0, playerNames: ["Fake Solo Two"] },
-        orange: { name: null, goals: 2, playerNames: ["Fake Solo One"] },
+        rocketLeagueId: "RL-1v1",
+        title: "Fake 1v1",
       },
     ],
     [candidate],
@@ -237,36 +237,36 @@ export const verifyPlayerTournaments = async ({
   assert.equal(assignment.kind, "matched");
   assert.deepEqual(assignment.sides, { blue: rivalParticipant, orange: soloParticipant });
 
-  const stat = { platform: "epic", assists: 0, saves: 1, shots: 2, demolitions: 0 } as const;
+  const stat = { assists: 0, demolitions: 0, platform: "epic", saves: 1, shots: 2 } as const;
   await new MikroOrmGameStatsStore(orm.em.fork()).save({
+    ballchasingId: "fake-1v1-replay",
+    blueGoals: 0,
+    blueParticipantId: rivalParticipant,
+    learnedLinks: [],
     matchId: match.id,
     number: 1,
-    ballchasingId: "fake-1v1-replay",
-    rocketLeagueId: "RL-1v1",
-    playedAt,
-    blueParticipantId: rivalParticipant,
-    orangeParticipantId: soloParticipant,
-    blueGoals: 0,
     orangeGoals: 2,
+    orangeParticipantId: soloParticipant,
+    playedAt,
     players: [
       {
         ...stat,
+        goals: 0,
         name: "Fake Solo Two",
         platformId: "fake-two",
-        side: "blue",
-        goals: 0,
         playerId: rival.id,
+        side: "blue",
       },
       {
         ...stat,
+        goals: 2,
         name: "Fake Solo One",
         platformId: "fake-one",
-        side: "orange",
-        goals: 2,
         playerId: solo.id,
+        side: "orange",
       },
     ],
-    learnedLinks: [],
+    rocketLeagueId: "RL-1v1",
   });
   const response7 = await request("GET", `/matches/${match.id}`);
   const [game] = response7.json(gameBody).games;

@@ -3,8 +3,8 @@ import { nodeEnvironment } from "../../../infrastructure/config/env.validation";
 
 export const requestLogContext = (request: FastifyRequest) => ({
   environment: nodeEnvironment(),
-  path: request.url,
   method: request.method,
-  userId: request.user?.id,
+  path: request.url,
   userEmail: request.user?.email,
+  userId: request.user?.id,
 });

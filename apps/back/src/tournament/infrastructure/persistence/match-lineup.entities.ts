@@ -13,7 +13,6 @@ export class MatchLineupPlayer {
 
 export const MatchLineupPlayerSchema = defineEntity({
   class: MatchLineupPlayer,
-  uniques: [{ properties: ["match", "player"] }],
   indexes: [{ properties: ["player"] }],
   properties: {
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
@@ -22,4 +21,5 @@ export const MatchLineupPlayerSchema = defineEntity({
     player: p.manyToOne(Player).deleteRule("cascade"),
     position: p.integer(),
   },
+  uniques: [{ properties: ["match", "player"] }],
 });

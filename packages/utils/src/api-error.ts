@@ -9,17 +9,17 @@ export interface ApiErrorBody {
 const apiErrorMessageSchema = z.union([z.string(), z.array(z.string())]);
 
 const apiErrorBodySchema = z.object({
-  message: z.optional(apiErrorMessageSchema),
   code: z.optional(z.string()),
+  message: z.optional(apiErrorMessageSchema),
   statusCode: z.optional(z.number()),
 });
 
 const apiErrorSchema = z.object({
-  statusCode: z.optional(z.number()),
-  status: z.optional(z.number()),
+  code: z.optional(z.string()),
   data: z.optional(apiErrorBodySchema),
   message: z.optional(apiErrorMessageSchema),
-  code: z.optional(z.string()),
+  status: z.optional(z.number()),
+  statusCode: z.optional(z.number()),
 });
 
 export const getApiErrorStatus = (cause: unknown): number | undefined => {
@@ -44,8 +44,8 @@ export const getApiErrorBody = (cause: unknown): ApiErrorBody | undefined => {
   }
 
   return {
-    message: parsed.data.message,
     code: parsed.data.code,
+    message: parsed.data.message,
     statusCode: parsed.data.statusCode,
   };
 };

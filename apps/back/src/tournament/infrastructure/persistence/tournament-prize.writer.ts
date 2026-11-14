@@ -27,7 +27,7 @@ export class CompetitionPrizeWriter implements PrizeWriter {
 
     return rows.flatMap((row) =>
       row.team
-        ? [{ teamId: row.team.id, playerIds: row.players.getItems().map(({ id }) => id) }]
+        ? [{ playerIds: row.players.getItems().map(({ id }) => id), teamId: row.team.id }]
         : [],
     );
   }
@@ -36,16 +36,16 @@ export class CompetitionPrizeWriter implements PrizeWriter {
     const rows = await this.em.find(
       TournamentPrize,
       { tournament: tournamentId },
-      { populate: ["players"], orderBy: { placement: "ASC", amount: "DESC" } },
+      { orderBy: [{ placement: "ASC" }, { amount: "DESC" }], populate: ["players"] },
     );
 
     return rows.map((row) => ({
-      placement: row.placement,
       amount: row.amount,
       currency: row.currency,
-      teamId: row.team.id,
+      placement: row.placement,
       playerIds: row.players.getItems().map(({ id }) => id),
       sourceUrl: row.sourceUrl,
+      teamId: row.team.id,
     }));
   }
 

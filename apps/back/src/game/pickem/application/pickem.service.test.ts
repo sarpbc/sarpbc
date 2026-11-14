@@ -11,28 +11,28 @@ describe(PickemService, () => {
   beforeEach(() => {
     vi.clearAllMocks();
     match = {
-      id: "m",
-      pickemsEnabled: true,
       beginAt: new Date("2030-01-01"),
       endAt: null,
-      status: null,
+      id: "m",
       participantIds: ["a", "b"],
-      winnerId: null,
+      pickemsEnabled: true,
       results: [],
+      status: null,
+      winnerId: null,
     };
     picks = [];
 
     const scope: PickemWrites = {
-      userExists: async () => true,
       participantExists: async () => true,
       pick: async (user, matchId) =>
         picks.find((p) => p.user.id === user && p.match.id === matchId) ?? null,
-      unscored: async () => picks.filter((p) => !p.scored),
       savePick: async (pick) => {
         if (!picks.some((p) => p.id === pick.id)) {
           picks.push(pick);
         }
       },
+      unscored: async () => picks.filter((p) => !p.scored),
+      userExists: async () => true,
     };
 
     service = new PickemService(
@@ -44,13 +44,13 @@ describe(PickemService, () => {
           })),
       },
       {
-        find: async () => structuredClone(match),
         decide: async (_, id) => {
           match.winnerId = id;
         },
+        find: async () => structuredClone(match),
       },
       { run: async (work) => await work(scope) },
-      { now: () => new Date("2026-01-01"), id: () => "pick-1", warn },
+      { id: () => "pick-1", now: () => new Date("2026-01-01"), warn },
     );
   });
 
@@ -59,8 +59,8 @@ describe(PickemService, () => {
     picks.push({
       ...picks[0],
       id: "pick-2",
-      user: { id: "v" },
       pickedParticipant: { id: "b" },
+      user: { id: "v" },
     });
     match.results = [
       { participantId: "a", score: 4 },

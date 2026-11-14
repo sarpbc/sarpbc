@@ -9,19 +9,19 @@ const toModerationDto = (
   reportCount: number,
   target: ReplyTargetLink,
 ): ModerationReplyDto => ({
-  id: reply.id,
-  content: reply.content,
-  createdAt: reply.createdAt,
-  hiddenAt: reply.hiddenAt,
   author: {
     id: reply.author.id,
     userName: reply.author.userName,
   },
-  targetType: target.targetType,
+  content: reply.content,
+  createdAt: reply.createdAt,
+  hiddenAt: reply.hiddenAt,
+  id: reply.id,
+  reportCount,
   targetId: target.targetId,
   targetLabel: target.targetLabel,
   targetPath: target.targetPath,
-  reportCount,
+  targetType: target.targetType,
 });
 
 export class ModerationService {

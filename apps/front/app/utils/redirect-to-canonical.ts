@@ -2,6 +2,6 @@ import type { RouteLocationNormalizedLoaded } from "vue-router";
 
 export const redirectToCanonical = async (route: RouteLocationNormalizedLoaded, path: string) =>
   await navigateTo(
-    { path, query: route.query, hash: route.hash },
+    { hash: route.hash, path, query: route.query },
     { redirectCode: 301, replace: true },
   );

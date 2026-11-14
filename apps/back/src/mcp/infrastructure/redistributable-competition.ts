@@ -74,26 +74,16 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
   };
 
   return {
-    async tournaments(options: { activeOnly: boolean; limit: number }): Promise<Tournament[]> {
-      const [found] = await tournamentQueries.find({
-        ...options,
-        redistributableOnly: true,
-        offset: 0,
-      });
+    event,
 
-      return found;
+    async eventPlayerStats(idOrSlug: string) {
+      const { stages } = await event(idOrSlug);
+
+      return await tournamentPlayerStatsService.forStages(stages);
     },
 
-    tournament,
-
-    async tournamentAwards(tournamentId: string) {
-      await tournament(tournamentId);
-
-      return await playerAwardService.findByTournamentId(tournamentId);
-    },
-
-    async matches(kind: MatchListKind, limit: number) {
-      return await matchService.list(kind, { limit, redistributableOnly: true });
+    async events(options: { activeOnly: boolean; limit: number; offset: number }) {
+      return await eventQueries.list({ ...options, redistributableOnly: true });
     },
 
     async matchLineups(matchId: string) {
@@ -104,6 +94,14 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
       }
 
       return lineups;
+    },
+
+    async matches(kind: MatchListKind, limit: number) {
+      return await matchService.list(kind, { limit, redistributableOnly: true });
+    },
+
+    async playerEarnings(playerId: string) {
+      return await tournamentPrizeService.playerEarnings(playerId, { redistributableOnly: true });
     },
 
     async prizeDistribution(tournamentId: string) {
@@ -120,24 +118,26 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
       return await tournamentPrizeService.teamEarnings(teamId, { redistributableOnly: true });
     },
 
-    async playerEarnings(playerId: string) {
-      return await tournamentPrizeService.playerEarnings(playerId, { redistributableOnly: true });
-    },
+    tournament,
 
-    async events(options: { activeOnly: boolean; limit: number; offset: number }) {
-      return await eventQueries.list({ ...options, redistributableOnly: true });
-    },
+    async tournamentAwards(tournamentId: string) {
+      await tournament(tournamentId);
 
-    event,
+      return await playerAwardService.findByTournamentId(tournamentId);
+    },
 
     async tournamentPlayerStats(tournamentId: string) {
       return await tournamentPlayerStatsService.forStages([await tournament(tournamentId)]);
     },
 
-    async eventPlayerStats(idOrSlug: string) {
-      const { stages } = await event(idOrSlug);
+    async tournaments(options: { activeOnly: boolean; limit: number }): Promise<Tournament[]> {
+      const [found] = await tournamentQueries.find({
+        ...options,
+        offset: 0,
+        redistributableOnly: true,
+      });
 
-      return await tournamentPlayerStatsService.forStages(stages);
+      return found;
     },
   };
 };

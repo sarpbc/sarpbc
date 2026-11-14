@@ -55,8 +55,8 @@ export const useOffsetMatchListPage = <TData extends { total: number }>(config: 
     () => `${config.keyPrefix}-${offset.value}`,
     async () => ({ data: await config.fetch(listQuery.value) }),
     {
-      watch: [offset],
       default: () => null,
+      watch: [offset],
     },
   );
 
@@ -72,16 +72,16 @@ export const useOffsetMatchListPage = <TData extends { total: number }>(config: 
   const hasNext = computed(() => offset.value + MATCH_LIST_PAGE_SIZE < totalMatches.value);
 
   return {
+    currentPage,
+    data,
+    error,
+    getPageQuery,
+    hasNext,
+    hasPrevious,
     offset,
     pending,
-    error,
     refresh,
-    data,
     totalMatches,
-    currentPage,
     totalPages,
-    hasPrevious,
-    hasNext,
-    getPageQuery,
   };
 };

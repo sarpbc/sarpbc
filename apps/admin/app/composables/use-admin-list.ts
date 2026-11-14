@@ -22,7 +22,7 @@ export const useAdminList = <T>(
   const { status, data, error, refresh } = useLazyAsyncData(
     () => `${key}-${search.value}-${page.value}`,
     async () => await fetchPage({ limit, offset: (page.value - 1) * limit, search: search.value }),
-    { watch: [page, search], server: false },
+    { server: false, watch: [page, search] },
   );
 
   watch(search, () => {
@@ -40,5 +40,5 @@ export const useAdminList = <T>(
     { immediate: true },
   );
 
-  return { items, total, page, search, limit, status, error, refresh };
+  return { error, items, limit, page, refresh, search, status, total };
 };

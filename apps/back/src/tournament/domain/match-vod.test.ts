@@ -125,10 +125,10 @@ describe(replaceGameVods, () => {
 
   it("replaces only the targeted game", () => {
     expect(
-      replaceGameVods(current, 1, [{ url: "https://twitch.tv/videos/9", language: "fr" }], 5),
+      replaceGameVods(current, 1, [{ language: "fr", url: "https://twitch.tv/videos/9" }], 5),
     ).toStrictEqual([
-      { game: 1, url: "https://twitch.tv/videos/9", language: "fr", source: "twitch" },
-      { game: 2, url: "https://youtu.be/g2", language: "en", source: "youtube" },
+      { game: 1, language: "fr", source: "twitch", url: "https://twitch.tv/videos/9" },
+      { game: 2, language: "en", source: "youtube", url: "https://youtu.be/g2" },
     ]);
   });
 

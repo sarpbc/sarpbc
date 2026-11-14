@@ -174,11 +174,11 @@ const get = async (
   transport: PublicHttpsTransport,
 ): Promise<IncomingMessage> => {
   const req = transport.request(url, {
-    method: "GET",
-    lookup: createPublicOnlyLookup(transport.lookup),
-    signal,
     agent: false,
     headers: { accept: "image/png,image/webp,image/svg+xml", "user-agent": "sarpbc.org" },
+    lookup: createPublicOnlyLookup(transport.lookup),
+    method: "GET",
+    signal,
   });
 
   const { promise, resolve, reject } = Promise.withResolvers<IncomingMessage>();

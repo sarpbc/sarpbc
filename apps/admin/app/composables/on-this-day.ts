@@ -8,8 +8,8 @@ export const getOnThisDayFacts = async (): Promise<OnThisDayFact[]> => {
 
 export const createOnThisDayFact = async (input: OnThisDayFactInput): Promise<OnThisDayFact> => {
   const res = await apiFetch<{ fact: OnThisDayFact }>("/on-this-day-facts", {
-    method: "POST",
     body: input,
+    method: "POST",
   });
 
   return res.fact;
@@ -20,8 +20,8 @@ export const updateOnThisDayFact = async (
   input: OnThisDayFactInput,
 ): Promise<OnThisDayFact> => {
   const res = await apiFetch<{ fact: OnThisDayFact }>(`/on-this-day-facts/${id}`, {
-    method: "PATCH",
     body: input,
+    method: "PATCH",
   });
 
   return res.fact;

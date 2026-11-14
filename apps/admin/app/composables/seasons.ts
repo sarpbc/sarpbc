@@ -20,10 +20,10 @@ export const getSeason = async (id: string): Promise<SeasonDetail> =>
   await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "GET" });
 
 export const createSeason = async (input: SeasonInput): Promise<SeasonDetail> =>
-  await apiFetch<SeasonDetail>("/seasons", { method: "POST", body: input });
+  await apiFetch<SeasonDetail>("/seasons", { body: input, method: "POST" });
 
 export const updateSeason = async (id: string, input: SeasonInput): Promise<SeasonDetail> =>
-  await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "PATCH", body: input });
+  await apiFetch<SeasonDetail>(`/seasons/${id}`, { body: input, method: "PATCH" });
 
 export const deleteSeason = async (id: string): Promise<void> => {
   await apiFetch(`/seasons/${id}`, { method: "DELETE" });
@@ -34,8 +34,8 @@ export const createSeasonAward = async (
   input: SeasonAwardInput,
 ): Promise<SeasonAward> => {
   const res = await apiFetch<{ award: SeasonAward }>(`/seasons/${seasonId}/awards`, {
-    method: "POST",
     body: input,
+    method: "POST",
   });
 
   return res.award;
@@ -51,7 +51,7 @@ export const createSeasonParticipant = async (
 ): Promise<SeasonParticipant> => {
   const res = await apiFetch<{ participant: SeasonParticipant }>(
     `/seasons/${seasonId}/participants`,
-    { method: "POST", body: input },
+    { body: input, method: "POST" },
   );
 
   return res.participant;
@@ -64,7 +64,7 @@ export const updateSeasonPathNote = async (
 ): Promise<SeasonParticipant> => {
   const res = await apiFetch<{ participant: SeasonParticipant }>(
     `/seasons/${seasonId}/participants/${participantId}`,
-    { method: "PATCH", body: { pathNote } },
+    { body: { pathNote }, method: "PATCH" },
   );
 
   return res.participant;
@@ -84,7 +84,7 @@ export const createSeasonPathEntry = async (
 ): Promise<SeasonPathEntry> => {
   const res = await apiFetch<{ entry: SeasonPathEntry }>(
     `/seasons/${seasonId}/participants/${participantId}/path`,
-    { method: "POST", body: input },
+    { body: input, method: "POST" },
   );
 
   return res.entry;

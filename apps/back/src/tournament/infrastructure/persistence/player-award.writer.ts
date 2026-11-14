@@ -29,19 +29,19 @@ export class CompetitionAwardWriter implements AwardWriter {
     ]);
 
     return {
-      tournament: t ? { id: t.id, name: t.name, source: t.source } : null,
       participant: p
         ? {
             id: p.id,
-            name: participantName({ team: p.team, players: p.players.getItems() }),
+            name: participantName({ players: p.players.getItems(), team: p.team }),
             playerIds: p.players.getItems().map((r) => r.id),
           }
         : null,
       player: player ? { id: player.id, name: player.name, slug: player.slug } : null,
+      tournament: t ? { id: t.id, name: t.name, source: t.source } : null,
     };
   }
   async awardTaken(tournamentId: string, awardType: PlayerAwardType) {
-    return (await this.em.count(PlayerAward, { tournament: { id: tournamentId }, awardType })) > 0;
+    return (await this.em.count(PlayerAward, { awardType, tournament: { id: tournamentId } })) > 0;
   }
 
   async create(input: {

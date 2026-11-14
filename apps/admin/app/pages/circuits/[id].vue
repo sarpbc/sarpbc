@@ -11,7 +11,7 @@ const toast = useToast();
 const reportError = useReportError();
 
 const circuitId = computed(() => String(route.params.id));
-const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
+const dateFormatter = useDateFormatter({ day: "numeric", month: "short", year: "numeric" });
 
 const {
   data: circuit,
@@ -48,7 +48,7 @@ const save = async (input: CircuitInput) => {
       setCircuit({ ...circuit.value, ...summary });
     }
 
-    toast.add({ title: t("page.circuits.edit.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.circuits.edit.saved") });
   } catch (saveError) {
     reportError(saveError, t("page.circuits.edit.failed"));
   } finally {
@@ -58,13 +58,13 @@ const save = async (input: CircuitInput) => {
 
 const startStage = (stage: PickedStage) => {
   scaleTarget.value = {
-    tournamentId: stage.id,
+    finishes: [],
     label: stage.label,
+    regionTeamIds: [],
     scale: [],
     sourceUrl: "",
+    tournamentId: stage.id,
     worldwide: false,
-    regionTeamIds: [],
-    finishes: [],
   };
 };
 
@@ -72,13 +72,13 @@ const stageLabel = (stage: CircuitStage): string => tournamentStageLabel(stage.t
 
 const editStage = (stage: CircuitStage) => {
   scaleTarget.value = {
-    tournamentId: stage.tournament.id,
+    finishes: stage.finishes.map(({ team, placement }) => ({ placement, teamId: team.id })),
     label: stageLabel(stage),
+    regionTeamIds: stage.regionTeams.map(({ id }) => id),
     scale: stage.scale,
     sourceUrl: stage.sourceUrl,
+    tournamentId: stage.tournament.id,
     worldwide: stage.worldwide,
-    regionTeamIds: stage.regionTeams.map(({ id }) => id),
-    finishes: stage.finishes.map(({ team, placement }) => ({ teamId: team.id, placement })),
   };
 };
 

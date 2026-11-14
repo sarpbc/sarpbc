@@ -28,7 +28,7 @@ describe(TeamController, () => {
   const controller = new TeamController(
     Object.assign(unconstructed(TeamService), { findById }),
     new TeamAliasService({ run: async () => await Promise.reject(new Error("unused")) }),
-    Object.assign(unconstructed(ContractService), { getFormerPlayersByTeam, getContractsByTeam }),
+    Object.assign(unconstructed(ContractService), { getContractsByTeam, getFormerPlayersByTeam }),
     tournaments,
     Object.assign(unconstructed(TournamentPrizeService), { teamEarnings }),
     unconstructed(SyncPandascoreTeamsUseCase),

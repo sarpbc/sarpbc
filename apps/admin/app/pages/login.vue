@@ -41,12 +41,12 @@ const onSubmit = async (event: Event) => {
 
   try {
     const res = await $fetch<{ success?: boolean }>(`${config.public.apiBase}/auth/login`, {
-      method: "POST",
       body: {
         email: state.email.trim(),
         password: state.password,
       },
       credentials: "include",
+      method: "POST",
     });
 
     if (res.success === true) {
@@ -62,21 +62,21 @@ const onSubmit = async (event: Event) => {
 
       user.value = null;
       toast.add({
-        title: t("page.authentication.errors.notAdmin"),
         color: "error",
+        title: t("page.authentication.errors.notAdmin"),
       });
 
       return;
     }
 
     toast.add({
-      title: t("page.authentication.errors.loginFailed"),
       color: "error",
+      title: t("page.authentication.errors.loginFailed"),
     });
   } catch (error) {
     toast.add({
-      title: getApiErrorMessage(error) ?? t("page.authentication.errors.loginFailed"),
       color: "error",
+      title: getApiErrorMessage(error) ?? t("page.authentication.errors.loginFailed"),
     });
   } finally {
     pending.value = false;

@@ -15,9 +15,9 @@ export interface SeasonAwardFields {
 }
 
 export const SEASON_AWARD_LABELS = {
-  season_mvp: "Season MVP",
-  regular_season_mvp: "Regular Season MVP",
   regional_mvp: "Regional MVP",
+  regular_season_mvp: "Regular Season MVP",
+  season_mvp: "Season MVP",
 } as const satisfies Record<SeasonAwardType, string>;
 
 type RegionRule = "required" | "optional" | "forbidden";
@@ -99,8 +99,8 @@ export const parseSeasonAward = (input: {
 
   return {
     awardType: input.awardType,
-    region: parseRegion(input.awardType, input.region),
     presentedBy: optionalText(input.presentedBy, SEASON_AWARD_PRESENTER_MAX_LENGTH, "presenter"),
+    region: parseRegion(input.awardType, input.region),
     sourceUrl,
   };
 };

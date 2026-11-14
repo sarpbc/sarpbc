@@ -7,16 +7,16 @@ const BRAND_BLUE = "#2B7FFF";
 const BRAND_BLUE_RGB = "43, 127, 255";
 
 setPageSeo({
-  title: t("page.brand.metaTitle"),
   description: t("page.brand.metaDescription"),
+  title: t("page.brand.metaTitle"),
 });
 
 const copyHex = async (): Promise<void> => {
   try {
     await navigator.clipboard.writeText(BRAND_BLUE);
-    toast.add({ title: t("page.brand.hexCopied"), color: "success" });
+    toast.add({ color: "success", title: t("page.brand.hexCopied") });
   } catch {
-    toast.add({ title: t("page.brand.hexCopyFailed"), color: "error" });
+    toast.add({ color: "error", title: t("page.brand.hexCopyFailed") });
   }
 };
 </script>

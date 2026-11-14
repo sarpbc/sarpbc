@@ -10,9 +10,9 @@ const optionalBoolean = z.preprocess(
 );
 
 export const ListTournamentsQueryDto = OffsetPaginationQueryDto.extend({
+  activeOnly: optionalBoolean,
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(DEFAULT_PAGE_SIZE),
   pickems: optionalBoolean,
-  activeOnly: optionalBoolean,
 });
 
 export type ListTournamentsQueryInput = z.infer<typeof ListTournamentsQueryDto>;

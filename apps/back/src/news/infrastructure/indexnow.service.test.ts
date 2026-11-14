@@ -15,9 +15,9 @@ describe(IndexNowService, () => {
 
     const service = new IndexNowService(
       new ConfigService({
-        production: true,
         front_url: "https://sarpbc.org/",
         indexnow: { key: TEST_KEY },
+        production: true,
       }),
     );
 
@@ -38,7 +38,7 @@ describe(IndexNowService, () => {
     const fetch = vi.spyOn(globalThis, "fetch");
 
     const service = new IndexNowService(
-      new ConfigService({ production: false, indexnow: { key: TEST_KEY } }),
+      new ConfigService({ indexnow: { key: TEST_KEY }, production: false }),
     );
 
     await service.submitNewsSlugs(["draft"]);
@@ -49,7 +49,7 @@ describe(IndexNowService, () => {
     const fetch = vi.spyOn(globalThis, "fetch");
 
     const service = new IndexNowService(
-      new ConfigService({ production: true, front_url: "https://sarpbc.org" }),
+      new ConfigService({ front_url: "https://sarpbc.org", production: true }),
     );
 
     await service.submitNewsSlugs(["rlcs-final"]);
@@ -61,9 +61,9 @@ describe(IndexNowService, () => {
 
     const service = new IndexNowService(
       new ConfigService({
-        production: true,
         front_url: "https://sarpbc.org",
         indexnow: { key: TEST_KEY },
+        production: true,
       }),
     );
 
@@ -75,9 +75,9 @@ describe(IndexNowService, () => {
 
     const service = new IndexNowService(
       new ConfigService({
-        production: true,
         front_url: "https://sarpbc.org",
         indexnow: { key: TEST_KEY },
+        production: true,
       }),
     );
 

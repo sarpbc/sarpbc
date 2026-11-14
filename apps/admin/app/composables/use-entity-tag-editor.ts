@@ -24,8 +24,8 @@ export const useEntityTagEditor = () => {
         .chain()
         .focus()
         .insertContent([
-          { type: nodeType, attrs: { slug: payload.slug, label: payload.label } },
-          { type: "text", text: " " },
+          { attrs: { label: payload.label, slug: payload.slug }, type: nodeType },
+          { text: " ", type: "text" },
         ])
         .run();
     } finally {
@@ -51,9 +51,9 @@ export const useEntityTagEditor = () => {
   };
 
   return {
-    pickerOpen,
-    pickerKind,
     entityTagHandlers,
     insertEntityTag,
+    pickerKind,
+    pickerOpen,
   };
 };

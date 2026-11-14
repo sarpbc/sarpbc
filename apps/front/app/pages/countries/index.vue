@@ -21,8 +21,8 @@ const namedCountries = computed(() =>
 );
 
 setPageSeo({
-  title: t("page.countries.index.seoTitle"),
   description: t("page.countries.index.description"),
+  title: t("page.countries.index.seoTitle"),
 });
 </script>
 

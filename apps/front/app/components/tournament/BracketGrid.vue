@@ -60,8 +60,8 @@ const connectorPaths = computed(() => {
 
 const bracketMatchStatus = (match: (typeof layout.matches)[number]) =>
   resolveMatchDiscoveryStatus({
-    endAt: match.endAt,
     beginAt: match.beginAt,
+    endAt: match.endAt,
     status: match.status,
   });
 </script>

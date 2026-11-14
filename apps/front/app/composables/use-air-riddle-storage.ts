@@ -31,12 +31,12 @@ const airRiddleAttemptSchema = z.object({
 });
 
 const airRiddleStoredStateSchema = z.object({
-  date: z.string(),
-  targetLength: z.number(),
-  attempts: z.array(airRiddleAttemptSchema),
-  isWon: z.boolean(),
-  isGameOver: z.boolean(),
   answer: z.string().optional(),
+  attempts: z.array(airRiddleAttemptSchema),
+  date: z.string(),
+  isGameOver: z.boolean(),
+  isWon: z.boolean(),
+  targetLength: z.number(),
 });
 
 export const AIR_RIDDLE_MAX_ATTEMPTS = 6;
@@ -44,10 +44,10 @@ export const AIR_RIDDLE_MAX_ATTEMPTS = 6;
 /** Calendar date for today's Air Riddle, aligned with the API (Europe/Berlin). */
 export const getAirRiddleDateKey = (now = new Date()): string =>
   new Intl.DateTimeFormat("en-CA", {
+    day: "2-digit",
+    month: "2-digit",
     timeZone: AIR_RIDDLE_TIMEZONE,
     year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
   }).format(now);
 
 export const parseAirRiddleStoredState = (

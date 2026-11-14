@@ -64,7 +64,7 @@ const schedule = computed((): ScheduleDisplay | null => {
     return { kind: "tomorrow", label: t("components.match.tomorrowShort"), time };
   }
 
-  return { kind: "date", date: dayDf.value.format(beginAt) };
+  return { date: dayDf.value.format(beginAt), kind: "date" };
 });
 
 const teamA = computed(() => match.participants?.[0]);

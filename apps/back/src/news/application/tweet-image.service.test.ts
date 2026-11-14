@@ -6,7 +6,7 @@ import { TwimgImageGateway } from "../infrastructure/twimg-image.gateway";
 import { TweetImageService } from "./tweet-image.service";
 
 const image = (body: ConstructorParameters<typeof Response>[0], init: ResponseInit = {}) =>
-  new Response(body, { status: 200, headers: { "content-type": "image/jpeg" }, ...init });
+  new Response(body, { headers: { "content-type": "image/jpeg" }, status: 200, ...init });
 
 describe(TweetImageService, () => {
   const fetchMock = vi.fn<typeof fetch>();
@@ -30,7 +30,7 @@ describe(TweetImageService, () => {
 
     const result = await service.load(imageUrl);
 
-    expect(result).toStrictEqual({ contentType: "image/jpeg", body: Buffer.from(jpeg) });
+    expect(result).toStrictEqual({ body: Buffer.from(jpeg), contentType: "image/jpeg" });
     expect(fetchMock).toHaveBeenCalledOnce();
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     expect(url).toBe(imageUrl);
@@ -58,7 +58,7 @@ describe(TweetImageService, () => {
   it("follows a redirect that stays on the allowlisted host", async () => {
     const next = "https://pbs.twimg.com/media/photo.jpg?name=orig";
     fetchMock
-      .mockResolvedValueOnce(new Response(null, { status: 302, headers: { location: next } }))
+      .mockResolvedValueOnce(new Response(null, { headers: { location: next }, status: 302 }))
       .mockResolvedValueOnce(image(jpeg));
 
     await expect(service.load(imageUrl)).resolves.toMatchObject({ contentType: "image/jpeg" });
@@ -76,7 +76,7 @@ describe(TweetImageService, () => {
   it("resolves a relative redirect against the allowlisted host", async () => {
     fetchMock
       .mockResolvedValueOnce(
-        new Response(null, { status: 302, headers: { location: "/media/photo.jpg?name=orig" } }),
+        new Response(null, { headers: { location: "/media/photo.jpg?name=orig" }, status: 302 }),
       )
       .mockResolvedValueOnce(image(jpeg));
 
@@ -92,7 +92,7 @@ describe(TweetImageService, () => {
     "",
   ])("rejects a redirect to %j", async (location) => {
     fetchMock.mockResolvedValue(
-      new Response(null, { status: 301, headers: location === "" ? {} : { location } }),
+      new Response(null, { headers: location === "" ? {} : { location }, status: 301 }),
     );
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
@@ -101,7 +101,7 @@ describe(TweetImageService, () => {
 
   it("stops after too many redirects", async () => {
     fetchMock.mockImplementation(
-      async () => new Response(null, { status: 302, headers: { location: imageUrl } }),
+      async () => new Response(null, { headers: { location: imageUrl }, status: 302 }),
     );
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
@@ -121,7 +121,7 @@ describe(TweetImageService, () => {
     const tooLarge = new Uint8Array(5 * 1024 * 1024 + 1);
     fetchMock
       .mockResolvedValueOnce(
-        image(jpeg, { headers: { "content-type": "image/jpeg", "content-length": "6000000" } }),
+        image(jpeg, { headers: { "content-length": "6000000", "content-type": "image/jpeg" } }),
       )
       .mockResolvedValueOnce(image(tooLarge));
 

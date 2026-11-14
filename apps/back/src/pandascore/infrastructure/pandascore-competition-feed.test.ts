@@ -27,14 +27,14 @@ describe("PandascoreCompetitionFeed standings", () => {
         { rank: 1, team: { id: 8, name: "Winner" } },
         { rank: 3, team: { id: 9, name: "Third" } },
         { rank: 3, team: { id: 10, name: "Also third" } },
-        { rank: 5, player: { id: 77 } },
+        { player: { id: 77 }, rank: 5 },
       ]),
     );
 
     await expect(feed.getTournamentStandings(42)).resolves.toStrictEqual([
-      { teamPandascoreId: 8, rank: 1 },
-      { teamPandascoreId: 9, rank: 3 },
-      { teamPandascoreId: 10, rank: 3 },
+      { rank: 1, teamPandascoreId: 8 },
+      { rank: 3, teamPandascoreId: 9 },
+      { rank: 3, teamPandascoreId: 10 },
     ]);
     expect(requestUrl(fetch.mock.calls[0]?.[0])).toContain("/tournaments/42/standings");
   });

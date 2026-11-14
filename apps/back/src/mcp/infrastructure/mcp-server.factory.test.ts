@@ -107,49 +107,49 @@ const TOOL_NAMES = [
 const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
 
 const services: McpServices = {
-  playerService: unconstructed(PlayerService),
+  catalogService: unconstructed(ManualCatalogService),
+  circuitService: unconstructed(CircuitService),
   contractService: unconstructed(ContractService),
+  events: { find: unused, list: unused, stageId: unused, unsynced: unused },
+  manualGameService: unconstructed(ManualGameService),
+  manualTournamentService: unconstructed(ManualTournamentService),
+  matchLineupService: unconstructed(MatchLineupService),
+  matchService: unconstructed(MatchService),
+  newsService: unconstructed(NewsService),
+  pandascoreNewTournamentsSync: unconstructed(SyncNewTournamentsUseCase),
+  pandascoreTournamentSync: unconstructed(SyncPandascoreTournamentUseCase),
+  playerAwardService: unconstructed(PlayerAwardService),
+  playerService: unconstructed(PlayerService),
+  rosterProposalService: unconstructed(RosterProposalService),
+  seasonService: unconstructed(SeasonService),
+  statsImportService: unconstructed(StatsImportService),
+  statsPlayerLinkService: unconstructed(StatsPlayerLinkService),
   teamService: unconstructed(TeamService),
+  tournamentPlayerStatsService: unconstructed(TournamentPlayerStatsService),
+  tournamentPrizeService: unconstructed(TournamentPrizeService),
   tournaments: {
+    finalsOnDay: unused,
     find: unused,
-    searchByName: unused,
     findById: unused,
-    findPandascoreWithoutMatches: unused,
+    findByPandascoreId: unused,
     findPandascoreActive: unused,
+    findPandascoreWithoutMatches: unused,
     getTournamentsByPlayer: unused,
     getTournamentsByTeam: unused,
     getTournamentsByTeamTenures: unused,
     getTournamentsWonByPlayer: unused,
     getTournamentsWonByTeam: unused,
-    wonOnDay: unused,
-    finalsOnDay: unused,
     knownPandascoreIds: unused,
-    findByPandascoreId: unused,
     leagues: unused,
+    searchByName: unused,
+    wonOnDay: unused,
   },
-  pandascoreTournamentSync: unconstructed(SyncPandascoreTournamentUseCase),
-  pandascoreNewTournamentsSync: unconstructed(SyncNewTournamentsUseCase),
-  manualTournamentService: unconstructed(ManualTournamentService),
-  catalogService: unconstructed(ManualCatalogService),
-  events: { list: unused, find: unused, unsynced: unused, stageId: unused },
-  matchService: unconstructed(MatchService),
-  matchLineupService: unconstructed(MatchLineupService),
-  newsService: unconstructed(NewsService),
-  rosterProposalService: unconstructed(RosterProposalService),
-  tournamentPrizeService: unconstructed(TournamentPrizeService),
-  playerAwardService: unconstructed(PlayerAwardService),
-  statsImportService: unconstructed(StatsImportService),
-  statsPlayerLinkService: unconstructed(StatsPlayerLinkService),
-  manualGameService: unconstructed(ManualGameService),
-  tournamentPlayerStatsService: unconstructed(TournamentPlayerStatsService),
-  circuitService: unconstructed(CircuitService),
-  seasonService: unconstructed(SeasonService),
 };
 
 describe(McpServerFactory, () => {
   it("serves every tool with a JSON schema and a stated permission", async () => {
     const factory = new McpServerFactory(services);
-    const server = factory.createServer({ id: "u1", email: "staff@test.com", role: "admin" });
+    const server = factory.createServer({ email: "staff@test.com", id: "u1", role: "admin" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const client = new Client({ name: "test", version: "1.0.0" });
     await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);

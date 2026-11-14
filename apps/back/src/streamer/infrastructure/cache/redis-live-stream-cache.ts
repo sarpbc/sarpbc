@@ -13,11 +13,11 @@ export const SNAPSHOT_TTL_SECONDS = 10 * 60;
 export const LOCK_TTL_SECONDS = 30;
 
 const liveStream = z.object({
-  login: z.string(),
   displayName: z.string(),
+  login: z.string(),
   title: z.string(),
-  viewerCount: z.number(),
   url: z.string(),
+  viewerCount: z.number(),
 } satisfies Record<keyof LiveStreamer, z.ZodType>);
 
 const snapshot = z.object({

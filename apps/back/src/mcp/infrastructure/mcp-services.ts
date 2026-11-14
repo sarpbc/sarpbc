@@ -32,27 +32,27 @@ interface QueryToken<T> {
 const query = <T>(token: symbol): QueryToken<T> => ({ token });
 
 const SERVICES = {
-  playerService: PlayerService,
-  contractService: ContractService,
-  teamService: TeamService,
-  tournaments: query<TournamentQueries>(TOURNAMENT_QUERIES),
-  pandascoreTournamentSync: SyncPandascoreTournamentUseCase,
-  pandascoreNewTournamentsSync: SyncNewTournamentsUseCase,
-  manualTournamentService: ManualTournamentService,
   catalogService: ManualCatalogService,
+  circuitService: CircuitService,
+  contractService: ContractService,
   events: query<EventQueries>(EVENT_QUERIES),
-  matchService: MatchService,
+  manualGameService: ManualGameService,
+  manualTournamentService: ManualTournamentService,
   matchLineupService: MatchLineupService,
+  matchService: MatchService,
   newsService: NewsService,
-  rosterProposalService: RosterProposalService,
-  tournamentPrizeService: TournamentPrizeService,
+  pandascoreNewTournamentsSync: SyncNewTournamentsUseCase,
+  pandascoreTournamentSync: SyncPandascoreTournamentUseCase,
   playerAwardService: PlayerAwardService,
+  playerService: PlayerService,
+  rosterProposalService: RosterProposalService,
+  seasonService: SeasonService,
   statsImportService: StatsImportService,
   statsPlayerLinkService: StatsPlayerLinkService,
-  manualGameService: ManualGameService,
+  teamService: TeamService,
   tournamentPlayerStatsService: TournamentPlayerStatsService,
-  circuitService: CircuitService,
-  seasonService: SeasonService,
+  tournamentPrizeService: TournamentPrizeService,
+  tournaments: query<TournamentQueries>(TOURNAMENT_QUERIES),
 };
 
 type Provided<Entry> =
@@ -69,8 +69,8 @@ export const MCP_SERVICES = Symbol("McpServices");
 const names = Object.keys(SERVICES);
 
 export const mcpServicesProvider: Provider = {
-  provide: MCP_SERVICES,
   inject: Object.values(SERVICES).map((entry) => ("token" in entry ? entry.token : entry)),
+  provide: MCP_SERVICES,
   useFactory: (...services: unknown[]) =>
     Object.fromEntries(names.map((name, index) => [name, services[index]])),
 };

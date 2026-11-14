@@ -31,47 +31,47 @@ const isViewerCount = (value: number): boolean =>
 
 export const parseViewership = (input: Viewership): ParsedViewership => {
   if (!isViewerCount(input.peakViewers)) {
-    return { ok: false, error: "invalid-peak" };
+    return { error: "invalid-peak", ok: false };
   }
 
   if (input.averageViewers !== null) {
     if (!isViewerCount(input.averageViewers)) {
-      return { ok: false, error: "invalid-average" };
+      return { error: "invalid-average", ok: false };
     }
 
     if (input.averageViewers > input.peakViewers) {
-      return { ok: false, error: "average-above-peak" };
+      return { error: "average-above-peak", ok: false };
     }
   }
 
   const sourceName = input.sourceName.trim();
 
   if (!sourceName) {
-    return { ok: false, error: "missing-source-name" };
+    return { error: "missing-source-name", ok: false };
   }
 
   if (sourceName.length > VIEWERSHIP_SOURCE_NAME_MAX_LENGTH) {
-    return { ok: false, error: "source-name-too-long" };
+    return { error: "source-name-too-long", ok: false };
   }
 
   const rawUrl = input.sourceUrl.trim();
 
   if (rawUrl.length > VIEWERSHIP_SOURCE_URL_MAX_LENGTH || !URL.canParse(rawUrl)) {
-    return { ok: false, error: "invalid-source-url" };
+    return { error: "invalid-source-url", ok: false };
   }
 
   const url = new URL(rawUrl);
 
   if (url.protocol !== "https:") {
-    return { ok: false, error: "source-url-not-https" };
+    return { error: "source-url-not-https", ok: false };
   }
 
   if (url.username || url.password) {
-    return { ok: false, error: "invalid-source-url" };
+    return { error: "invalid-source-url", ok: false };
   }
 
   if (isForbiddenViewershipSource(url.hostname)) {
-    return { ok: false, error: "forbidden-source" };
+    return { error: "forbidden-source", ok: false };
   }
 
   let measuredAt: string | null = null;
@@ -80,7 +80,7 @@ export const parseViewership = (input: Viewership): ParsedViewership => {
     const time = Date.parse(input.measuredAt);
 
     if (Number.isNaN(time)) {
-      return { ok: false, error: "invalid-measured-at" };
+      return { error: "invalid-measured-at", ok: false };
     }
 
     measuredAt = new Date(time).toISOString();
@@ -89,10 +89,10 @@ export const parseViewership = (input: Viewership): ParsedViewership => {
   return {
     ok: true,
     viewership: {
-      peakViewers: input.peakViewers,
       averageViewers: input.averageViewers,
-      scope: input.scope,
       measuredAt,
+      peakViewers: input.peakViewers,
+      scope: input.scope,
       sourceName,
       sourceUrl: url.href,
     },

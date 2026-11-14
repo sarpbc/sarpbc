@@ -9,24 +9,24 @@ import { toUpsertSerieCommand } from "./pandascore-serie.mapper";
 import { toUpsertTeamCommand } from "./pandascore-team.mapper";
 
 const toParticipantCommand = (dto: ExpectedRosterDto): UpsertTournamentParticipantCommand => ({
-  team: toUpsertTeamCommand(dto.team),
   players: dto.players.map((player) => toUpsertPlayerCommand(player)),
+  team: toUpsertTeamCommand(dto.team),
 });
 
 export const toUpsertTournamentCommand = (dto: TournamentDto): UpsertTournamentCommand => ({
-  pandascoreId: dto.id,
-  name: dto.name,
-  serie: dto.serie ? toUpsertSerieCommand(dto.serie) : undefined,
-  tier: dto.tier,
   beginAt: dto.begin_at !== undefined && dto.begin_at !== "" ? new Date(dto.begin_at) : undefined,
+  country: dto.country ?? undefined,
   endAt: dto.end_at !== undefined && dto.end_at !== "" ? new Date(dto.end_at) : undefined,
+  expectedRoster: dto.expected_roster?.map((roster) => toParticipantCommand(roster)),
+  hasBracket: dto.has_bracket,
+  league: dto.league ? toUpsertLeagueCommand(dto.league) : undefined,
+  name: dto.name,
+  pandascoreId: dto.id,
   prizepool:
     dto.prizepool === null || dto.prizepool === undefined ? undefined : String(dto.prizepool),
+  serie: dto.serie ? toUpsertSerieCommand(dto.serie) : undefined,
+  tier: dto.tier,
   type: dto.type,
-  country: dto.country ?? undefined,
-  hasBracket: dto.has_bracket,
-  winnerType: dto.winner_type,
   winnerPandascoreTeamId: dto.winner_id,
-  league: dto.league ? toUpsertLeagueCommand(dto.league) : undefined,
-  expectedRoster: dto.expected_roster?.map((roster) => toParticipantCommand(roster)),
+  winnerType: dto.winner_type,
 });

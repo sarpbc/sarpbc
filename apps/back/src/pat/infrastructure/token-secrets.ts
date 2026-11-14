@@ -8,6 +8,6 @@ export const tokenSecrets: TokenSecrets = {
   issue: () => {
     const raw = `sarpbc_pat_${randomBytes(32).toString("base64url")}`;
 
-    return { raw, hash: hash(raw) };
+    return { hash: hash(raw), raw };
   },
 };

@@ -10,12 +10,12 @@ export class Image {
 export const ImageSchema = defineEntity({
   class: Image,
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    imageId: p.string().length(255),
-    url: p.string().length(500),
     createdAt: p
       .datetime()
       .type("timestamptz")
       .onCreate(() => new Date()),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    imageId: p.string().length(255),
+    url: p.string().length(500),
   },
 });

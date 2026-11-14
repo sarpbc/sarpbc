@@ -13,7 +13,7 @@ const breadcrumbItems = [{ label: t("page.seasons.title") }];
 const columns: TableColumn<SeasonSummary>[] = [
   { accessorKey: "name", header: t("page.seasons.form.name") },
   { accessorKey: "slug", header: t("page.seasons.form.slug") },
-  { id: "actions", header: "" },
+  { header: "", id: "actions" },
 ];
 
 const {
@@ -36,7 +36,7 @@ const create = async (input: SeasonInput) => {
   try {
     await createSeason(input);
     isCreateOpen.value = false;
-    toast.add({ title: t("page.seasons.create.success"), color: "success" });
+    toast.add({ color: "success", title: t("page.seasons.create.success") });
     await refresh();
   } catch (createError) {
     reportError(createError, t("page.seasons.create.failed"));

@@ -8,8 +8,8 @@ export class MikroTeamAliasTransaction implements TeamAliasTransaction {
   async run<T>(work: (scope: TeamAliasWriteScope) => Promise<T>): Promise<T> {
     return await this.em.transactional(async (tx) => {
       const result = await work({
-        teams: new MikroTeamStore(tx),
         aliases: new MikroTeamAliasStore(tx),
+        teams: new MikroTeamStore(tx),
       });
 
       await tx.flush();

@@ -12,7 +12,7 @@ const isSaving = ref(false);
 const { data: leagues } = await useLazyAsyncData(
   "admin-tournament-leagues",
   () => getTournamentLeagues(),
-  { server: false, default: () => [] },
+  { default: () => [], server: false },
 );
 
 const breadcrumbItems = computed(() => [
@@ -27,7 +27,7 @@ const handleSubmit = async () => {
   }
 
   if (!formState.value.name.trim()) {
-    toast.add({ title: t("page.tournaments.events.form.nameRequired"), color: "error" });
+    toast.add({ color: "error", title: t("page.tournaments.events.form.nameRequired") });
 
     return;
   }
@@ -40,7 +40,7 @@ const handleSubmit = async () => {
       name: formState.value.name.trim(),
     });
 
-    toast.add({ title: t("page.tournaments.events.create.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.events.create.saved") });
     await navigateTo(localePath(`/tournaments/events/${created.id}`));
   } catch (error) {
     reportError(error, t("page.tournaments.events.saveFailed"));

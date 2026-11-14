@@ -23,8 +23,8 @@ export interface GameTarget {
 export const requireBallchasing = (source: BallchasingSource | null): BallchasingSource => {
   if (!source) {
     throw new IntegrationError({
-      message: "Ballchasing is not configured. Set BALLCHASING_API_KEY on the API and restart it.",
       code: "ballchasing_not_configured",
+      message: "Ballchasing is not configured. Set BALLCHASING_API_KEY on the API and restart it.",
     });
   }
 
@@ -80,11 +80,11 @@ export const buildGameRecord = (
 
   return {
     ...target,
-    blueParticipantId: sides.blue,
-    orangeParticipantId: sides.orange,
     blueGoals: stats.blueGoals,
-    orangeGoals: stats.orangeGoals,
-    players,
+    blueParticipantId: sides.blue,
     learnedLinks,
+    orangeGoals: stats.orangeGoals,
+    orangeParticipantId: sides.orange,
+    players,
   };
 };

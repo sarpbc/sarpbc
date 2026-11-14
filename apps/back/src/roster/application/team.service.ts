@@ -146,8 +146,8 @@ export class TeamService {
     const references = await this.usage.teamReferences(id);
 
     assertTeamDeletable(team, {
-      players: team.players.length,
       contracts: teamContracts.length,
+      players: team.players.length,
       redirects: await teams.redirectCount(id),
       ...references,
     });

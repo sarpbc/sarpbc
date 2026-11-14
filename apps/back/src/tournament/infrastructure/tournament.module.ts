@@ -54,6 +54,21 @@ import { CachedTournamentPrizesRead } from "./cache/cached-tournament-prizes.rea
 import { RedisService } from "../../infrastructure/redis/redis.service";
 
 @Module({
+  controllers: [TournamentController, EventController, MatchController],
+  exports: [
+    TOURNAMENT_QUERIES,
+    EVENT_QUERIES,
+    SyncPandascoreTournamentUseCase,
+    SyncNewTournamentsUseCase,
+    ManualTournamentService,
+    ManualCatalogService,
+    MatchService,
+    MatchLineupService,
+    StreamService,
+    ViewershipService,
+    PlayerAwardService,
+    TournamentPrizeService,
+  ],
   imports: [
     MikroOrmModule.forFeature([
       Tournament,
@@ -73,75 +88,80 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     ReplyModule,
     MatchStatsModule,
   ],
-  controllers: [TournamentController, EventController, MatchController],
   providers: [
     {
+      inject: [EntityManager],
       provide: EVENT_QUERIES,
       useFactory: (em: EntityManager) => new CompetitionEventQueries(em),
-      inject: [EntityManager],
     },
     {
+      inject: [CompetitionQueries, RedisService],
       provide: CachedTournamentRead,
       useFactory: (reads: CompetitionQueries, redis: RedisService) =>
         new CachedTournamentRead(reads, redis),
-      inject: [CompetitionQueries, RedisService],
     },
     CompetitionCacheAdapter,
     CompetitionEventsAdapter,
     TournamentSyncRunner,
     TournamentCron,
     {
+      inject: [EntityManager],
       provide: CompetitionQueries,
       useFactory: (em: EntityManager) => new CompetitionQueries(em),
-      inject: [EntityManager],
     },
     { provide: TOURNAMENT_QUERIES, useExisting: CompetitionQueries },
     {
+      inject: [EntityManager],
       provide: MikroOrmCompetitionTransaction,
       useFactory: (em: EntityManager) => new MikroOrmCompetitionTransaction(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: CompetitionAwardQueries,
       useFactory: (em: EntityManager) => new CompetitionAwardQueries(em),
-      inject: [EntityManager],
     },
     {
+      inject: [CompetitionCacheAdapter, CompetitionEventsAdapter],
       provide: CompetitionAfterCommit,
       useFactory: (cache: CompetitionCacheAdapter, events: CompetitionEventsAdapter) =>
         new CompetitionAfterCommit(cache, events, competitionDiagnostics),
-      inject: [CompetitionCacheAdapter, CompetitionEventsAdapter],
     },
     {
+      inject: [MikroOrmCompetitionTransaction, CompetitionAfterCommit],
       provide: CompetitionSyncService,
       useFactory: (tx: MikroOrmCompetitionTransaction, afterCommit: CompetitionAfterCommit) =>
         new CompetitionSyncService(tx, afterCommit, competitionDiagnostics),
-      inject: [MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      inject: [RedisService],
       provide: RedisSyncCursor,
       useFactory: (redis: RedisService) => new RedisSyncCursor(redis),
-      inject: [RedisService],
     },
     {
+      inject: [PandascoreCompetitionFeed, CompetitionQueries, CompetitionSyncService],
       provide: SyncAllTournamentsUseCase,
       useFactory: (
         feed: CompetitionFeed,
         reads: CompetitionQueries,
         sync: CompetitionSyncService,
       ) => new SyncAllTournamentsUseCase(feed, reads, sync),
-      inject: [PandascoreCompetitionFeed, CompetitionQueries, CompetitionSyncService],
     },
     {
+      inject: [PandascoreCompetitionFeed, CompetitionQueries, CompetitionSyncService],
       provide: SyncPandascoreTournamentUseCase,
       useFactory: (
         feed: CompetitionFeed,
         reads: CompetitionQueries,
         sync: CompetitionSyncService,
       ) => new SyncPandascoreTournamentUseCase(feed, reads, sync),
-      inject: [PandascoreCompetitionFeed, CompetitionQueries, CompetitionSyncService],
     },
     {
+      inject: [
+        PandascoreCompetitionFeed,
+        RedisSyncCursor,
+        CompetitionQueries,
+        CompetitionSyncService,
+      ],
       provide: SyncPandascoreIncidentsUseCase,
       useFactory: (
         feed: CompetitionFeed,
@@ -149,36 +169,36 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
         reads: CompetitionQueries,
         sync: CompetitionSyncService,
       ) => new SyncPandascoreIncidentsUseCase(feed, cursor, reads, sync, competitionDiagnostics),
-      inject: [
-        PandascoreCompetitionFeed,
-        RedisSyncCursor,
-        CompetitionQueries,
-        CompetitionSyncService,
-      ],
     },
     {
+      inject: [
+        SyncAllTournamentsUseCase,
+        SyncPandascoreTournamentUseCase,
+        SyncPandascoreIncidentsUseCase,
+      ],
       provide: SyncNewTournamentsUseCase,
       useFactory: (
         all: SyncAllTournamentsUseCase,
         details: SyncPandascoreTournamentUseCase,
         incidents: SyncPandascoreIncidentsUseCase,
       ) => new SyncNewTournamentsUseCase(all, details, incidents, competitionDiagnostics),
-      inject: [
-        SyncAllTournamentsUseCase,
-        SyncPandascoreTournamentUseCase,
-        SyncPandascoreIncidentsUseCase,
-      ],
     },
     {
+      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
       provide: ManualTournamentService,
       useFactory: (
         reads: CompetitionQueries,
         tx: MikroOrmCompetitionTransaction,
         afterCommit: CompetitionAfterCommit,
       ) => new ManualTournamentService(reads, tx, afterCommit),
-      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      inject: [
+        CompetitionQueries,
+        EVENT_QUERIES,
+        MikroOrmCompetitionTransaction,
+        CompetitionAfterCommit,
+      ],
       provide: ManualCatalogService,
       useFactory: (
         reads: CompetitionQueries,
@@ -186,77 +206,57 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
         tx: MikroOrmCompetitionTransaction,
         afterCommit: CompetitionAfterCommit,
       ) => new ManualCatalogService(reads, events, tx, afterCommit),
-      inject: [
-        CompetitionQueries,
-        EVENT_QUERIES,
-        MikroOrmCompetitionTransaction,
-        CompetitionAfterCommit,
-      ],
     },
     {
+      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
       provide: MatchService,
       useFactory: (
         reads: CompetitionQueries,
         tx: MikroOrmCompetitionTransaction,
         afterCommit: CompetitionAfterCommit,
       ) => new MatchService(reads, tx, afterCommit),
-      inject: [CompetitionQueries, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      inject: [EntityManager, CompetitionQueries, MikroOrmCompetitionTransaction],
       provide: MatchLineupService,
       useFactory: (
         em: EntityManager,
         reads: CompetitionQueries,
         tx: MikroOrmCompetitionTransaction,
       ) => new MatchLineupService(new CompetitionLineupQueries(em), reads, tx),
-      inject: [EntityManager, CompetitionQueries, MikroOrmCompetitionTransaction],
     },
     {
+      inject: [MikroOrmCompetitionTransaction, CompetitionAfterCommit],
       provide: StreamService,
       useFactory: (tx: MikroOrmCompetitionTransaction, afterCommit: CompetitionAfterCommit) =>
         new StreamService(tx, afterCommit),
-      inject: [MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      inject: [MikroOrmCompetitionTransaction],
       provide: ViewershipService,
       useFactory: (tx: MikroOrmCompetitionTransaction) => new ViewershipService(tx),
-      inject: [MikroOrmCompetitionTransaction],
     },
     {
+      inject: [CompetitionAwardQueries, MikroOrmCompetitionTransaction],
       provide: PlayerAwardService,
       useFactory: (reads: CompetitionAwardQueries, tx: MikroOrmCompetitionTransaction) =>
         new PlayerAwardService(reads, tx),
-      inject: [CompetitionAwardQueries, MikroOrmCompetitionTransaction],
     },
     {
+      inject: [EntityManager, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
       provide: TournamentPrizeService,
       useFactory: (
         em: EntityManager,
         tx: MikroOrmCompetitionTransaction,
         afterCommit: CompetitionAfterCommit,
       ) => new TournamentPrizeService(new CompetitionPrizeQueries(em), tx, afterCommit),
-      inject: [EntityManager, MikroOrmCompetitionTransaction, CompetitionAfterCommit],
     },
     {
+      inject: [TournamentPrizeService, RedisService],
       provide: CachedTournamentPrizesRead,
       useFactory: (prizes: TournamentPrizeService, redis: RedisService) =>
         new CachedTournamentPrizesRead(prizes, redis),
-      inject: [TournamentPrizeService, RedisService],
     },
-  ],
-  exports: [
-    TOURNAMENT_QUERIES,
-    EVENT_QUERIES,
-    SyncPandascoreTournamentUseCase,
-    SyncNewTournamentsUseCase,
-    ManualTournamentService,
-    ManualCatalogService,
-    MatchService,
-    MatchLineupService,
-    StreamService,
-    ViewershipService,
-    PlayerAwardService,
-    TournamentPrizeService,
   ],
 })
 export class TournamentModule implements OnModuleInit {

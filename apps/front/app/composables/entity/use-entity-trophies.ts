@@ -6,16 +6,16 @@ import type { EntityKind, EntityTrophyListItem } from "~/types/entity";
 import type { Tournament } from "~/types/tournament";
 
 const FETCH_TROPHIES = {
-  team: getTeamTrophies,
   player: getPlayerTrophies,
+  team: getTeamTrophies,
 } satisfies Record<EntityKind, (id: string) => Promise<Tournament[]>>;
 
 const toTrophyListItem = (tournament: Tournament): EntityTrophyListItem => ({
+  displayName: tournament.event.name,
+  endAt: tournament.endAt ?? null,
+  formatLabel: nonDefaultFormatLabel(tournament.format),
   id: tournament.id,
   path: tournamentStagePath(tournament.event.slug, tournament.slug),
-  displayName: tournament.event.name,
-  formatLabel: nonDefaultFormatLabel(tournament.format),
-  endAt: tournament.endAt ?? null,
 });
 
 export const useEntityTrophies = (kind: EntityKind, entityId: MaybeRef<string | undefined>) => {
@@ -25,17 +25,17 @@ export const useEntityTrophies = (kind: EntityKind, entityId: MaybeRef<string | 
     () => `${kind}-trophies-${idRef.value ?? "unknown"}`,
     async () => (isNonEmptyString(idRef.value) ? await FETCH_TROPHIES[kind](idRef.value) : []),
     {
-      watch: [idRef],
       default: () => [],
+      watch: [idRef],
     },
   );
 
   const trophies = computed(() => (data.value ?? []).map(toTrophyListItem));
 
   return {
-    trophies,
-    pending,
     error,
+    pending,
     refresh,
+    trophies,
   };
 };

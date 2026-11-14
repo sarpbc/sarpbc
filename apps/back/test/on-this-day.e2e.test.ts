@@ -26,13 +26,13 @@ const STAFF = "access_token=staff";
 const MEMBER = "access_token=member";
 
 const fact = {
-  month: 6,
   day: 5,
-  year: 2016,
+  link: { id: MANUAL_STAGE_ID, kind: "tournament" },
+  month: 6,
+  sourceUrl: "https://www.rocketleague.com/news/rlcs",
   textEn: "The first RLCS season began.",
   textFr: "La première saison des RLCS débutait.",
-  link: { kind: "tournament", id: MANUAL_STAGE_ID },
-  sourceUrl: "https://www.rocketleague.com/news/rlcs",
+  year: 2016,
 };
 
 describe("on this day (e2e)", () => {
@@ -53,7 +53,7 @@ describe("on this day (e2e)", () => {
           provide: AuthService,
           useValue: {
             authenticate: async (token: string) =>
-              ["staff", "member"].includes(token) ? { id: token, email: `${token}@test` } : null,
+              ["staff", "member"].includes(token) ? { email: `${token}@test`, id: token } : null,
             refreshSession: async () => null,
           },
         },
@@ -139,15 +139,15 @@ describe("on this day (e2e)", () => {
         events: [
           {
             kind: "fact",
-            year: 2016,
-            text: { en: fact.textEn, fr: fact.textFr },
             link: {
+              event: { name: "French Cup", slug: "french-cup" },
               kind: "tournament",
               name: "Playoffs",
               slug: "playoffs",
-              event: { name: "French Cup", slug: "french-cup" },
             },
             sourceUrl: fact.sourceUrl,
+            text: { en: fact.textEn, fr: fact.textFr },
+            year: 2016,
           },
         ],
       });
@@ -167,7 +167,7 @@ describe("on this day (e2e)", () => {
       const edited = await http()
         .patch(`/on-this-day-facts/${id}`)
         .set("Cookie", STAFF)
-        .send({ ...fact, link: { kind: "tournament", id: STARTGG_STAGE_ID } });
+        .send({ ...fact, link: { id: STARTGG_STAGE_ID, kind: "tournament" } });
 
       const hidden = await http().get("/on-this-day").query({ date: "2026-06-05" });
 

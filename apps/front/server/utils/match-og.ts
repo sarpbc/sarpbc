@@ -57,8 +57,8 @@ export const buildMatchOgSvg = (matchDetail: MatchDetailResponse): string => {
     statusLine = "Final score";
   } else if (match.beginAt) {
     statusLine = new Date(match.beginAt).toLocaleDateString("en-US", {
-      month: "short",
       day: "numeric",
+      month: "short",
       year: "numeric",
     });
   }
@@ -99,10 +99,10 @@ export const resolveMatchOgFontFiles = (): string[] => {
 };
 
 export const getMatchOgResvgFontOptions = () => ({
+  defaultFontFamily: MATCH_OG_FONT_FAMILY,
   fontFiles: resolveMatchOgFontFiles(),
   // Alpine runtime images have no system fonts; Resvg drops <text> when none resolve.
   loadSystemFonts: false,
-  defaultFontFamily: MATCH_OG_FONT_FAMILY,
 });
 
 export const fetchMatchDetailForOg = async (id: string): Promise<MatchDetailResponse> => {
@@ -110,8 +110,8 @@ export const fetchMatchDetailForOg = async (id: string): Promise<MatchDetailResp
     return await getMatchById(id);
   } catch (error) {
     return rethrowApiError(error, {
-      notFound: "Match not found",
       badGateway: "Could not load match for OG image",
+      notFound: "Match not found",
     });
   }
 };

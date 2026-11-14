@@ -15,32 +15,32 @@ if (!user.value) {
 }
 
 setPageSeo({
-  title: t("page.forum.new.title"),
   description: t("page.forum.new.description"),
   noIndex: true,
+  title: t("page.forum.new.title"),
 });
 
 const toast = useToast();
 const isSubmitting = ref(false);
 
 const schema = z.object({
+  content: z
+    .string()
+    .min(1, t("page.forum.new.validation.contentMinLength"))
+    .max(2048, t("page.forum.new.validation.contentMaxLength")),
   title: z
     .string()
     .min(1, t("page.forum.new.validation.titleMinLength"))
     .max(128, t("page.forum.new.validation.titleMaxLength")),
   topicId: z.uuid(),
-  content: z
-    .string()
-    .min(1, t("page.forum.new.validation.contentMinLength"))
-    .max(2048, t("page.forum.new.validation.contentMaxLength")),
 });
 
 type Schema = z.output<typeof schema>;
 
 const state = reactive<Partial<Schema>>({
+  content: "",
   title: "",
   topicId: "",
-  content: "",
 });
 
 const topics = ref<ForumTopic[]>([]);
@@ -131,9 +131,9 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   isSubmitting.value = true;
 
   const createResult = await createForumPost({
+    content: result.data.content,
     id: crypto.randomUUID(),
     title: result.data.title,
-    content: result.data.content,
     topicId: result.data.topicId,
   });
 
@@ -159,9 +159,9 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   const description = createFailureDescription(createResult);
 
   toast.add({
-    title: t("page.forum.new.messages.errorTitle"),
-    description,
     color: "error",
+    description,
+    title: t("page.forum.new.messages.errorTitle"),
   });
 };
 </script>

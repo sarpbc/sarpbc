@@ -26,7 +26,7 @@ const rosterReferences = (
 
     const open = await em.find(
       ContractRow,
-      { [owner]: { $in: [from, to] }, endDate: null },
+      { endDate: null, [owner]: { $in: [from, to] } },
       { disableIdentityMap: true },
     );
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 const games = computed(() => [
-  { to: "/game/airriddle", title: "page.game.airriddle.title" },
-  { to: "/game/career", title: "page.game.career.title" },
+  { title: "page.game.airriddle.title", to: "/game/airriddle" },
+  { title: "page.game.career.title", to: "/game/career" },
 ]);
 </script>
 

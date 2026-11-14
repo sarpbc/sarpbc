@@ -166,7 +166,7 @@ export const createEmptyBracketInTransaction = async (
     match.tournament = tournament;
     match.source = tournament.source === "startgg" ? "startgg" : "manual";
 
-    return { slot, match };
+    return { match, slot };
   });
 
   await mapSequentially(planned, async ({ slot, match }) => {
@@ -180,9 +180,9 @@ export const createEmptyBracketInTransaction = async (
     );
     await saveMatch(writer, match, [], {
       name: slot.name,
-      status: "not_started",
       numberOfGames: input.numberOfGames,
       participantIds: [],
+      status: "not_started",
     });
   });
 

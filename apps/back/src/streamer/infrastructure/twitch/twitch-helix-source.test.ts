@@ -3,11 +3,11 @@ import { TwitchAppToken } from "./twitch-app-token";
 import { ROCKET_LEAGUE_GAME_ID, TwitchHelixSource } from "./twitch-helix-source";
 
 const helixStream = (login: string, gameId = ROCKET_LEAGUE_GAME_ID) => ({
+  game_id: gameId,
+  title: `${login} live`,
+  type: "live",
   user_login: login,
   user_name: login.toUpperCase(),
-  game_id: gameId,
-  type: "live",
-  title: `${login} live`,
   viewer_count: 42,
 });
 
@@ -56,8 +56,8 @@ describe(TwitchHelixSource, () => {
     const url = requestedUrl(fetchMock.mock.calls[0] ?? []);
     expect(`${url.origin}${url.pathname}`).toBe("https://api.twitch.tv/helix/streams");
     expect(init?.headers).toStrictEqual({
-      "Client-Id": "client",
       Authorization: "Bearer app-token",
+      "Client-Id": "client",
     });
   });
 
@@ -79,8 +79,8 @@ describe(TwitchHelixSource, () => {
 
     await expect(source.findLiveRocketLeague(["zenrll", "kaydop"])).resolves.toStrictEqual([
       {
-        login: "zenrll",
         displayName: "ZENRLL",
+        login: "zenrll",
         title: "zenrll live",
         viewerCount: 42,
       },

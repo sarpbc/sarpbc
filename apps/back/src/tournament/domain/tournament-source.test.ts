@@ -33,23 +33,23 @@ describe("tournament source", () => {
 
   it("claims a manual tournament for PandaScore and keeps its end date as a correction", () => {
     const tournament = {
-      id: "t1",
-      source: "manual" as const,
-      pandascoreId: null,
       endAt: new Date("2025-03-02T00:00Z"),
       endAtCorrected: false,
+      id: "t1",
+      pandascoreId: null,
+      source: "manual" as const,
     };
 
     claimForPandascore(tournament, 42, null);
     expect(tournament).toMatchObject({
-      source: "pandascore",
-      pandascoreId: 42,
       endAtCorrected: true,
+      pandascoreId: 42,
+      source: "pandascore",
     });
   });
 
   it("refuses to claim a synced or start.gg tournament", () => {
-    const base = { id: "t1", pandascoreId: null, endAt: null, endAtCorrected: false };
+    const base = { endAt: null, endAtCorrected: false, id: "t1", pandascoreId: null };
     expect(() => {
       claimForPandascore({ ...base, source: "startgg" }, 42, null);
     }).toThrow("source=startgg");

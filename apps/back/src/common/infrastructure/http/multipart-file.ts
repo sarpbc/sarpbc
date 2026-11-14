@@ -14,10 +14,10 @@ export const getFileFromPart = async (part: MultipartFile): Promise<Storage.Mult
 
   return {
     buffer,
-    size: buffer.byteLength,
+    fieldname: part.fieldname,
     filename: part.filename,
     mimetype: canonicalImageContentType(part.mimetype),
-    fieldname: part.fieldname,
+    size: buffer.byteLength,
   };
 };
 
@@ -36,7 +36,7 @@ export const validateFile = async (
   }
 
   const checked = await Promise.all(
-    validators.map(async (validator) => ({ validator, valid: await validator.isValid(file) })),
+    validators.map(async (validator) => ({ valid: await validator.isValid(file), validator })),
   );
 
   return checked.find(({ valid }) => !valid)?.validator.buildErrorMessage(file);

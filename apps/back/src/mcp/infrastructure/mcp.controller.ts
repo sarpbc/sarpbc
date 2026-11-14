@@ -8,12 +8,12 @@ import type { PatUser } from "../../pat/application/pat.service";
 import { McpServerFactory } from "./mcp-server.factory";
 
 const METHOD_NOT_ALLOWED_BODY = {
-  jsonrpc: "2.0",
   error: {
     code: -32_000,
     message: "Method not allowed.",
   },
   id: null,
+  jsonrpc: "2.0",
 };
 
 @SkipThrottle()
@@ -46,20 +46,20 @@ export class McpController {
     } catch (error) {
       log.error({
         component: McpController.name,
-        userId: request.user.id,
-        message: "MCP request failed",
         error: error instanceof Error ? error : new Error(String(error)),
+        message: "MCP request failed",
+        userId: request.user.id,
       });
 
       if (!reply.raw.headersSent) {
         reply.raw.writeHead(500, { "Content-Type": "application/json" }).end(
           JSON.stringify({
-            jsonrpc: "2.0",
             error: {
               code: -32_603,
               message: "Internal server error",
             },
             id: null,
+            jsonrpc: "2.0",
           }),
         );
       }

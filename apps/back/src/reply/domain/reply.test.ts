@@ -4,9 +4,9 @@ import { replySortOrder, replyTarget, resolveReplyTargetLink, sameReplyTarget } 
 import type { ReplyTargetFields } from "./reply";
 
 const makeReply = (partial: Partial<ReplyTargetFields>): ReplyTargetFields => ({
-  post: null,
-  newsArticle: null,
   match: null,
+  newsArticle: null,
+  post: null,
   ...partial,
 });
 
@@ -17,10 +17,10 @@ describe(resolveReplyTargetLink, () => {
     });
 
     expect(resolveReplyTargetLink(reply)).toStrictEqual({
-      targetType: "forumPost",
       targetId: "post-1",
       targetLabel: "Thread title: Who wins?",
       targetPath: "/forum/post/88/thread-title-who-wins",
+      targetType: "forumPost",
     });
   });
 
@@ -30,10 +30,10 @@ describe(resolveReplyTargetLink, () => {
     });
 
     expect(resolveReplyTargetLink(reply)).toStrictEqual({
-      targetType: "newsArticle",
       targetId: "news-1",
       targetLabel: "RLCS Finals",
       targetPath: "/news/rlcs-finals",
+      targetType: "newsArticle",
     });
   });
 
@@ -41,17 +41,17 @@ describe(resolveReplyTargetLink, () => {
     const reply = makeReply({
       match: {
         id: "match-1",
-        publicId: 7250,
         name: "Team A vs Team B",
+        publicId: 7250,
         slug: "team-a-vs-team-b-rlcs-open-2026",
       },
     });
 
     expect(resolveReplyTargetLink(reply)).toStrictEqual({
-      targetType: "match",
       targetId: "match-1",
       targetLabel: "Team A vs Team B",
       targetPath: "/matches/7250/team-a-vs-team-b-rlcs-open-2026",
+      targetType: "match",
     });
   });
 
@@ -62,14 +62,14 @@ describe(resolveReplyTargetLink, () => {
 
 describe(replyTarget, () => {
   it.each([
-    [{ postId: "p" }, { kind: "forumPost", id: "p" }],
-    [{ newsArticleId: "n" }, { kind: "newsArticle", id: "n" }],
-    [{ matchId: "m" }, { kind: "match", id: "m" }],
+    [{ postId: "p" }, { id: "p", kind: "forumPost" }],
+    [{ newsArticleId: "n" }, { id: "n", kind: "newsArticle" }],
+    [{ matchId: "m" }, { id: "m", kind: "match" }],
   ])("reads the single target of %j", (input, expected) => {
     expect(replyTarget(input)).toStrictEqual(expected);
   });
 
-  it.each([{}, { postId: "p", matchId: "m" }])("rejects %j", (input) => {
+  it.each([{}, { matchId: "m", postId: "p" }])("rejects %j", (input) => {
     expect(() => replyTarget(input)).toThrow(InvalidInputError);
   });
 });
@@ -84,7 +84,7 @@ describe(sameReplyTarget, () => {
   it("rejects replies on different targets", () => {
     expect(sameReplyTarget(post("p1"), post("p2"))).toBe(false);
     expect(
-      sameReplyTarget(post("p1"), makeReply({ newsArticle: { id: "p1", title: "T", slug: "t" } })),
+      sameReplyTarget(post("p1"), makeReply({ newsArticle: { id: "p1", slug: "t", title: "T" } })),
     ).toBe(false);
   });
 });

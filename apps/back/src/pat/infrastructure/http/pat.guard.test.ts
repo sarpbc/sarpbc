@@ -44,7 +44,7 @@ describe(PatAuthGuard, () => {
   });
 
   it("attaches the resolved user for a valid bearer token", async () => {
-    patService.resolveUser.mockResolvedValue({ id: "user-1", email: "a@b.com", role: "admin" });
+    patService.resolveUser.mockResolvedValue({ email: "a@b.com", id: "user-1", role: "admin" });
 
     const request: PatGuardTestRequest = {
       headers: { authorization: "Bearer sarpbc_pat_valid" },
@@ -53,7 +53,7 @@ describe(PatAuthGuard, () => {
     const context = new ExecutionContextHost([request]);
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
-    expect(request.user).toStrictEqual({ id: "user-1", email: "a@b.com", role: "admin" });
+    expect(request.user).toStrictEqual({ email: "a@b.com", id: "user-1", role: "admin" });
     expect(patService.resolveUser).toHaveBeenCalledExactlyOnceWith("sarpbc_pat_valid");
   });
 });

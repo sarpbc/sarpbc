@@ -36,11 +36,11 @@ export const buildTournamentParticipantEntries = (
       .toSorted((a, b) => a.name.localeCompare(b.name));
 
     result.push({
+      hasReliableRoster: hasReliableParticipantRoster(participant.players),
       id: key,
       name: participantName(participant),
-      team,
       players,
-      hasReliableRoster: hasReliableParticipantRoster(participant.players),
+      team,
     });
   }
 

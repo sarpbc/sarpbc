@@ -8,22 +8,22 @@ const link = { platform: "steam", platformId: "76561198224723032", playerId: "ko
 
 const setup = () => {
   const candidates: StatsCandidates = {
-    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
     matches: vi.fn<StatsCandidates["matches"]>(),
+    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
   };
 
   const links = {
     accounts: vi.fn<PlayerLinkStore["accounts"]>(async () => []),
-    rosters: vi.fn<PlayerLinkStore["rosters"]>(async () => [
-      { participantId: "p1", teamName: "KC", players: [{ id: "kofyr", name: "kofyr" }] },
-    ]),
+    link: vi.fn<PlayerLinkStore["link"]>(async () => 3),
     onTournamentRoster: vi.fn<PlayerLinkStore["onTournamentRoster"]>(
       async (_tournamentId, playerId) => playerId === "kofyr",
     ),
-    link: vi.fn<PlayerLinkStore["link"]>(async () => 3),
+    rosters: vi.fn<PlayerLinkStore["rosters"]>(async () => [
+      { participantId: "p1", players: [{ id: "kofyr", name: "kofyr" }], teamName: "KC" },
+    ]),
   } satisfies PlayerLinkStore;
 
-  return { service: new StatsPlayerLinkService(candidates, links), links };
+  return { links, service: new StatsPlayerLinkService(candidates, links) };
 };
 
 describe(StatsPlayerLinkService, () => {
@@ -56,7 +56,7 @@ describe(StatsPlayerLinkService, () => {
 
     await expect(service.accounts("t1")).resolves.toStrictEqual({
       players: [],
-      rosters: [{ participantId: "p1", teamName: "KC", players: [{ id: "kofyr", name: "kofyr" }] }],
+      rosters: [{ participantId: "p1", players: [{ id: "kofyr", name: "kofyr" }], teamName: "KC" }],
     });
   });
 });

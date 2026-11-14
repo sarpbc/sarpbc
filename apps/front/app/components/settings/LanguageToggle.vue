@@ -6,8 +6,8 @@ import type { TextToggleOption } from "~/components/s/TextToggle.vue";
 const { locale, setLocale, t } = useI18n();
 
 const options = computed<TextToggleOption<UiLocale>[]>(() => [
-  { value: "en", label: "EN", ariaLabel: t("components.header.languageEn") },
-  { value: "fr", label: "FR", ariaLabel: t("components.header.languageFr") },
+  { ariaLabel: t("components.header.languageEn"), label: "EN", value: "en" },
+  { ariaLabel: t("components.header.languageFr"), label: "FR", value: "fr" },
 ]);
 
 const current = computed<UiLocale>({

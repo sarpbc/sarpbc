@@ -11,25 +11,25 @@ export const TeamSchema = defineEntity({
   class: Team,
   indexes: [{ properties: ["name"] }, { properties: ["slug"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    name: p.string(),
-    players: p.oneToMany(Player).mappedBy("team"),
     active: p.boolean().default(true),
-    location: p.string().nullable(),
-    imageUrl: p.string().nullable(),
-    darkModeImageUrl: p.string().nullable(),
-    logoLightUrl: p.text().nullable(),
-    logoDarkUrl: p.text().nullable(),
-    slug: p.string(),
-    pandascoreId: p.integer().nullable(),
-    source: p.string().$type<DataSource>().default("manual"),
-    mergedInto: p.manyToOne(Team).nullable().deleteRule("restrict"),
     aliases: p
       .json<TeamAliasRecord[]>()
       .formula(
         (columns) =>
           `(select coalesce(json_agg(json_build_object('id', ta."id", 'name', ta."name", 'from', ta."valid_from", 'to', ta."valid_to", 'sourceUrl', ta."source_url", 'logoUrl', ta."logo_url", 'pandascoreId', ta."pandascore_id") order by ta."valid_from"), '[]'::json) from "team_alias" ta where ta."team_id" = ${columns.id})`,
       ),
+    darkModeImageUrl: p.string().nullable(),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    imageUrl: p.string().nullable(),
+    location: p.string().nullable(),
+    logoDarkUrl: p.text().nullable(),
+    logoLightUrl: p.text().nullable(),
+    mergedInto: p.manyToOne(Team).nullable().deleteRule("restrict"),
+    name: p.string(),
+    pandascoreId: p.integer().nullable(),
+    players: p.oneToMany(Player).mappedBy("team"),
+    slug: p.string(),
+    source: p.string().$type<DataSource>().default("manual"),
   },
 });
 
@@ -37,15 +37,15 @@ export const TeamAliasSchema = defineEntity({
   class: TeamAlias,
   indexes: [{ properties: ["team"] }, { properties: ["name"] }],
   properties: {
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    team: p.manyToOne(Team).deleteRule("cascade"),
+    logoUrl: p.text().nullable(),
     name: p.string(),
+    pandascoreId: p.integer().nullable().unique(),
+    sourceUrl: p.text(),
+    team: p.manyToOne(Team).deleteRule("cascade"),
     validFrom: p.date(),
     validTo: p.date().nullable(),
-    sourceUrl: p.text(),
-    logoUrl: p.text().nullable(),
-    pandascoreId: p.integer().nullable().unique(),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });
 
@@ -53,15 +53,7 @@ export const PlayerSchema = defineEntity({
   class: Player,
   indexes: [{ properties: ["name"] }, { properties: ["slug"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    name: p.string(),
-    team: p.manyToOne(Team).nullable(),
     birthday: p.datetime().type("date").nullable(),
-    nationality: p.string().nullable(),
-    firstName: p.string().nullable(),
-    lastName: p.string().nullable(),
-    imageUrl: p.string().nullable(),
-    role: p.string().nullable(),
     contractRole: p
       .enum([...CONTRACT_ROLES])
       .nullable()
@@ -69,16 +61,24 @@ export const PlayerSchema = defineEntity({
         (columns) =>
           `(select c."role" from "contract" c where c."player_id" = ${columns.id} and c."team_id" = ${columns.team} and c."end_date" is null order by c."start_date" desc limit 1)`,
       ),
+    contracts: p.oneToMany(Contract).mappedBy("player"),
+    firstName: p.string().nullable(),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    imageUrl: p.string().nullable(),
+    lastName: p.string().nullable(),
+    mergedInto: p.manyToOne(Player).nullable().deleteRule("restrict"),
+    name: p.string(),
+    nationality: p.string().nullable(),
+    pandascoreId: p.integer().nullable().unique(),
+    photos: p.oneToMany(PlayerPhoto).mappedBy("player"),
+    role: p.string().nullable(),
+    slug: p.string(),
+    source: p.string().$type<DataSource>().default("manual"),
     status: p
       .enum([...PLAYER_STATUSES])
       .columnType("text")
       .default("active"),
-    slug: p.string(),
-    pandascoreId: p.integer().nullable().unique(),
-    source: p.string().$type<DataSource>().default("manual"),
-    mergedInto: p.manyToOne(Player).nullable().deleteRule("restrict"),
-    contracts: p.oneToMany(Contract).mappedBy("player"),
-    photos: p.oneToMany(PlayerPhoto).mappedBy("player"),
+    team: p.manyToOne(Team).nullable(),
   },
 });
 
@@ -92,27 +92,27 @@ export const ContractSchema = defineEntity({
     },
   ],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    player: p.manyToOne(Player),
-    team: p.manyToOne(Team),
-    startDate: p.datetime().type("date"),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     endDate: p.datetime().type("date").nullable(),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    joinSourceUrl: p.text().nullable(),
+    leaveSourceUrl: p.text().nullable(),
+    player: p.manyToOne(Player),
     role: p
       .enum([...CONTRACT_ROLES])
       .columnType("text")
       .default("active"),
-    joinSourceUrl: p.text().nullable(),
-    leaveSourceUrl: p.text().nullable(),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    startDate: p.datetime().type("date"),
+    team: p.manyToOne(Team),
   },
 });
 
 export const PlayerPhotoSchema = defineEntity({
   class: PlayerPhoto,
   properties: {
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     player: p.manyToOne(Player),
     url: p.string(),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });

@@ -15,89 +15,89 @@ import { Match } from "./match.entity";
 export const LeagueSchema = defineEntity({
   class: League,
   properties: {
+    createdAt: p.datetime().type("timestamptz"),
     id: p.string().primary(),
-    pandascoreId: p.integer().nullable().unique(),
-    name: p.string(),
-    slug: p.string().nullable(),
-    url: p.string().nullable(),
     imageUrl: p.string().nullable(),
     modifiedAt: p.datetime().type("timestamptz").nullable(),
-    createdAt: p.datetime().type("timestamptz"),
+    name: p.string(),
+    pandascoreId: p.integer().nullable().unique(),
+    slug: p.string().nullable(),
+    tournaments: p.oneToMany(Tournament).mappedBy("league"),
     updatedAt: p
       .datetime()
       .type("timestamptz")
       .onUpdate(() => new Date()),
-    tournaments: p.oneToMany(Tournament).mappedBy("league"),
+    url: p.string().nullable(),
   },
 });
 
 export const TournamentEventSchema = defineEntity({
   class: TournamentEvent,
   properties: {
+    createdAt: p.datetime().type("timestamptz"),
     id: p.string().primary(),
+    league: p.manyToOne(League).nullable(),
+    name: p.string(),
     pandascoreSerieId: p.integer().nullable().unique(),
     slug: p.string().unique(),
-    name: p.string(),
-    league: p.manyToOne(League).nullable(),
+    stages: p.oneToMany(Tournament).mappedBy("event"),
     streams: p.json().$type<Stream[]>().default([]),
-    viewership: p.json().$type<Viewership>().nullable(),
-    createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
       .type("timestamptz")
       .onUpdate(() => new Date()),
-    stages: p.oneToMany(Tournament).mappedBy("event"),
+    viewership: p.json().$type<Viewership>().nullable(),
   },
 });
 
 export const TournamentSchema = defineEntity({
   class: Tournament,
-  repository: () => TournamentRepository,
-  uniques: [{ properties: ["event", "slug"] }],
   properties: {
-    id: p.string().primary(),
-    pandascoreId: p.integer().nullable().unique(),
-    source: p.string().$type<DataSource>().default("pandascore"),
-    format: p.string().$type<TournamentFormat>().default("3v3"),
-    name: p.string(),
-    description: p.string().nullable(),
-    slug: p.string(),
-    event: p.manyToOne(TournamentEvent),
-    tier: p.string().nullable(),
     beginAt: p.datetime().type("timestamptz").nullable(),
+    country: p.string().nullable(),
+    createdAt: p.datetime().type("timestamptz"),
+    description: p.string().nullable(),
     endAt: p.datetime().type("timestamptz").nullable(),
     endAtCorrected: p.boolean().default(false),
-    winner: p.manyToOne(TournamentParticipant).nullable(),
-    winnerType: p.string().nullable(),
-    type: p.string().nullable(),
-    country: p.string().nullable(),
-    prizepool: p.string().nullable(),
+    event: p.manyToOne(TournamentEvent),
+    format: p.string().$type<TournamentFormat>().default("3v3"),
+    hasBracket: p.boolean().default(false),
+    id: p.string().primary(),
     imageUrl: p.string().nullable(),
     league: p.manyToOne(League).nullable(),
+    matches: p.oneToMany(Match).mappedBy("tournament"),
+    name: p.string(),
+    pandascoreId: p.integer().nullable().unique(),
+    participants: p.oneToMany(TournamentParticipant).mappedBy("tournament"),
     pickemsEnabled: p.boolean().default(false),
-    hasBracket: p.boolean().default(false),
+    prizepool: p.string().nullable(),
+    slug: p.string(),
+    source: p.string().$type<DataSource>().default("pandascore"),
     streams: p.json().$type<Stream[]>().default([]),
-    createdAt: p.datetime().type("timestamptz"),
+    tier: p.string().nullable(),
+    type: p.string().nullable(),
     updatedAt: p
       .datetime()
       .type("timestamptz")
       .onUpdate(() => new Date()),
-    matches: p.oneToMany(Match).mappedBy("tournament"),
-    participants: p.oneToMany(TournamentParticipant).mappedBy("tournament"),
+    winner: p.manyToOne(TournamentParticipant).nullable(),
+    winnerType: p.string().nullable(),
   },
+  repository: () => TournamentRepository,
+  uniques: [{ properties: ["event", "slug"] }],
 });
 
 export const TournamentParticipantSchema = defineEntity({
   class: TournamentParticipant,
   indexes: [{ properties: ["team"] }],
   properties: {
-    id: p.string().primary(),
-    tournament: p.manyToOne(Tournament),
-    team: p.manyToOne(Team).nullable().deleteRule("no action"),
-    players: p.manyToMany(Player),
-    placement: p.integer().nullable(),
-    rosterSourceUrl: p.text().nullable(),
     createdAt: p.datetime().type("timestamptz"),
+    id: p.string().primary(),
+    placement: p.integer().nullable(),
+    players: p.manyToMany(Player),
+    rosterSourceUrl: p.text().nullable(),
+    team: p.manyToOne(Team).nullable().deleteRule("no action"),
+    tournament: p.manyToOne(Tournament),
     updatedAt: p
       .datetime()
       .type("timestamptz")
@@ -107,33 +107,33 @@ export const TournamentParticipantSchema = defineEntity({
 
 export const MatchSchema = defineEntity({
   class: Match,
-  repository: () => MatchRepository,
   properties: {
-    id: p.string().primary(),
-    publicId: p.integer().autoincrement().generated("identity").unique(),
-    pandascoreId: p.integer().nullable().unique(),
-    source: p.string().$type<DataSource>().default("manual"),
-    name: p.string(),
     beginAt: p.datetime().type("timestamptz").nullable(),
-    endAt: p.datetime().type("timestamptz").nullable(),
-    status: p.string().nullable(),
-    participants: p.manyToMany(TournamentParticipant),
-    winner: p.manyToOne(TournamentParticipant).nullable(),
-    numberOfGames: p.integer().nullable(),
-    previousMatches: p.oneToMany(BracketLink).mappedBy("match"),
-    results: p.oneToMany(MatchResult).mappedBy("match"),
-    officialStreams: p.json().$type<OfficialMatchStream[]>().default([]),
-    streams: p.json().$type<Stream[]>().default([]),
-    viewership: p.json().$type<Viewership>().nullable(),
-    vods: p.json().$type<MatchVod[]>().default([]),
-    sourceUrl: p.text().nullable(),
     createdAt: p.datetime().type("timestamptz"),
+    endAt: p.datetime().type("timestamptz").nullable(),
+    id: p.string().primary(),
+    name: p.string(),
+    numberOfGames: p.integer().nullable(),
+    officialStreams: p.json().$type<OfficialMatchStream[]>().default([]),
+    pandascoreId: p.integer().nullable().unique(),
+    participants: p.manyToMany(TournamentParticipant),
+    previousMatches: p.oneToMany(BracketLink).mappedBy("match"),
+    publicId: p.integer().autoincrement().generated("identity").unique(),
+    results: p.oneToMany(MatchResult).mappedBy("match"),
+    source: p.string().$type<DataSource>().default("manual"),
+    sourceUrl: p.text().nullable(),
+    status: p.string().nullable(),
+    streams: p.json().$type<Stream[]>().default([]),
+    tournament: p.manyToOne(Tournament),
     updatedAt: p
       .datetime()
       .type("timestamptz")
       .onUpdate(() => new Date()),
-    tournament: p.manyToOne(Tournament),
+    viewership: p.json().$type<Viewership>().nullable(),
+    vods: p.json().$type<MatchVod[]>().default([]),
+    winner: p.manyToOne(TournamentParticipant).nullable(),
   },
+  repository: () => MatchRepository,
 });
 
 export const BracketLinkSchema = defineEntity({
@@ -148,11 +148,11 @@ export const BracketLinkSchema = defineEntity({
 
 export const MatchResultSchema = defineEntity({
   class: MatchResult,
-  uniques: [{ properties: ["match", "participant"] }],
   properties: {
     id: p.string().primary(),
     match: p.manyToOne(Match),
     participant: p.manyToOne(TournamentParticipant),
     score: p.integer(),
   },
+  uniques: [{ properties: ["match", "participant"] }],
 });

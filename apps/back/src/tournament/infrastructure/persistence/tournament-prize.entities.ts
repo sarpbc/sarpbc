@@ -16,16 +16,16 @@ export class TournamentPrize {
 
 export const TournamentPrizeSchema = defineEntity({
   class: TournamentPrize,
-  uniques: [{ properties: ["tournament", "team"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    tournament: p.manyToOne(Tournament),
-    placement: p.integer(),
     amount: p.integer(),
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     currency: p.text(),
-    team: p.manyToOne(Team),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    placement: p.integer(),
     players: p.manyToMany(Player),
     sourceUrl: p.text().nullable(),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    team: p.manyToOne(Team),
+    tournament: p.manyToOne(Tournament),
   },
+  uniques: [{ properties: ["tournament", "team"] }],
 });

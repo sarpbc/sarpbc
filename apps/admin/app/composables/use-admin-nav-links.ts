@@ -7,8 +7,8 @@ export const useAdminSections = () => {
 
   return computed(() =>
     visibleAdminSections(user.value).map((section) => ({
-      label: t(section.label),
       icon: section.icon,
+      label: t(section.label),
       to: localePath(section.path),
     })),
   );
@@ -22,16 +22,16 @@ export const useAdminNavLinks = () => {
 
   return computed(() => [
     {
-      label: t("page.nav.home"),
       icon: "i-fluent-home-24-regular",
+      label: t("page.nav.home"),
       to: localePath("/"),
     },
     ...sections.value,
     {
-      label: t("page.nav.backToSite"),
       icon: "i-fluent-arrow-left-24-regular",
-      to: config.public.publicSiteUrl,
+      label: t("page.nav.backToSite"),
       target: "_blank",
+      to: config.public.publicSiteUrl,
     },
   ]);
 };

@@ -10,12 +10,12 @@ import {
 } from "@sarpbc/utils";
 
 export const TournamentPrizeEntryDto = z.strictObject({
-  placement: z.number().int().min(MIN_PRIZE_PLACEMENT),
   amount: z.number().int().min(MIN_PRIZE_AMOUNT).max(MAX_PRIZE_AMOUNT),
   currency: z.string().length(CURRENCY_CODE_LENGTH),
-  teamId: z.uuid(),
+  placement: z.number().int().min(MIN_PRIZE_PLACEMENT),
   playerIds: z.array(z.uuid()).max(MAX_PRIZE_PLAYERS).default([]),
   sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable(),
+  teamId: z.uuid(),
 });
 
 export const SetTournamentPrizesDto = z.strictObject({

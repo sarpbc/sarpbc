@@ -29,8 +29,8 @@ const language = ref("");
 
 const gameOptions = computed(() =>
   Array.from({ length: maxVodGame(match.numberOfGames) }, (_, index) => ({
-    value: index + 1,
     label: t("page.match.detail.vods.game", { number: index + 1 }),
+    value: index + 1,
   })),
 );
 
@@ -75,20 +75,20 @@ const submit = async () => {
     const vods = await setMatchVods(match.id, [
       ...(latest.vods ?? []).map((vod) => ({
         game: vod.game,
-        url: vod.url,
         language: vod.language,
+        url: vod.url,
       })),
-      { game: game.value, url: parsedUrl.value.url, language: languageCode.value },
+      { game: game.value, language: languageCode.value, url: parsedUrl.value.url },
     ]);
 
     emit("saved", vods);
-    toast.add({ title: t("page.match.detail.vodAdd.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.match.detail.vodAdd.saved") });
     open.value = false;
   } catch (error) {
     toast.add({
-      title: t("page.match.detail.vodAdd.saveError"),
-      description: getApiErrorMessage(error) ?? undefined,
       color: "error",
+      description: getApiErrorMessage(error) ?? undefined,
+      title: t("page.match.detail.vodAdd.saveError"),
     });
   } finally {
     saving.value = false;

@@ -13,7 +13,7 @@ const { data: staff, error: staffError } = await useAsyncData(
   async () => {
     const player = await getPlayerFromSlug(slug.value);
 
-    return player ? { player, contracts: await getPlayerContracts(player.id) } : null;
+    return player ? { contracts: await getPlayerContracts(player.id), player } : null;
   },
   { watch: [slug] },
 );
@@ -26,8 +26,8 @@ const staffContracts = computed(() =>
 
 if (!staff.value || staffContracts.value.length === 0) {
   throwEntityLoadError(staffError.value, {
-    notFound: t("page.staff.slug.staffNotFound"),
     failed: t("page.staff.slug.failedToLoadStaffData"),
+    notFound: t("page.staff.slug.staffNotFound"),
   });
 }
 
@@ -60,9 +60,9 @@ const {
 } = useStaffTournaments(staffId, staffContracts);
 
 setPageSeo({
-  title: t("page.staff.slug.seoTitleWithName", { name: person.value.name }),
   description: t("page.staff.slug.seoDescriptionWithName", { name: person.value.name }),
   image: person.value.imageUrl || undefined,
+  title: t("page.staff.slug.seoTitleWithName", { name: person.value.name }),
 });
 </script>
 

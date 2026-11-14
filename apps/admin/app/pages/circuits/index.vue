@@ -14,11 +14,11 @@ const columns: TableColumn<CircuitSummary>[] = [
   { accessorKey: "name", header: t("page.circuits.form.name") },
   { accessorKey: "slug", header: t("page.circuits.form.slug") },
   {
-    id: "qualificationSpots",
-    header: t("page.circuits.form.qualificationSpots"),
     cell: ({ row }) => row.original.qualificationSpots ?? "—",
+    header: t("page.circuits.form.qualificationSpots"),
+    id: "qualificationSpots",
   },
-  { id: "actions", header: "" },
+  { header: "", id: "actions" },
 ];
 
 const {
@@ -41,7 +41,7 @@ const create = async (input: CircuitInput) => {
   try {
     await createCircuit(input);
     isCreateOpen.value = false;
-    toast.add({ title: t("page.circuits.create.success"), color: "success" });
+    toast.add({ color: "success", title: t("page.circuits.create.success") });
     await refresh();
   } catch (createError) {
     reportError(createError, t("page.circuits.create.failed"));

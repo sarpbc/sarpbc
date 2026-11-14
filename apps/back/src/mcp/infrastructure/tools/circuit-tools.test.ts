@@ -12,11 +12,11 @@ const TEAM_ID = "7a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 const SOURCE = "https://example.com/fake-circuit/rules";
 
 const SCALE = [
-  { from: 1, to: 1, points: 10 },
-  { from: 2, to: 4, points: 5 },
+  { from: 1, points: 10, to: 1 },
+  { from: 2, points: 5, to: 4 },
 ];
 
-const user = (role: StaffRole) => ({ id: "u1", email: "staff@test.com", role });
+const user = (role: StaffRole) => ({ email: "staff@test.com", id: "u1", role });
 
 const scaleTool = () => {
   const rosterProposalService = pendingProposalService();
@@ -42,9 +42,9 @@ interface ScaleInputOverrides {
 describe("set_circuit_stage_scale", () => {
   const input = {
     circuitId: CIRCUIT_ID,
-    tournamentId: TOURNAMENT_ID,
     scale: SCALE,
     sourceUrl: SOURCE,
+    tournamentId: TOURNAMENT_ID,
   };
 
   it("queues a proposal with its source instead of writing the scale", async () => {
@@ -55,10 +55,10 @@ describe("set_circuit_stage_scale", () => {
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
       {
-        kind: "set_circuit_stage_scale",
         circuitId: CIRCUIT_ID,
-        tournamentId: TOURNAMENT_ID,
+        kind: "set_circuit_stage_scale",
         scale: SCALE,
+        tournamentId: TOURNAMENT_ID,
       },
       SOURCE,
       "u1",
@@ -70,19 +70,19 @@ describe("set_circuit_stage_scale", () => {
     const { tool, rosterProposalService } = scaleTool();
 
     const regional = {
-      worldwide: true,
+      finishes: [{ placement: 13, teamId: TEAM_ID }],
       regionTeamIds: [TEAM_ID],
-      finishes: [{ teamId: TEAM_ID, placement: 13 }],
+      worldwide: true,
     };
 
     await tool.run(user("admin"), { ...input, ...regional });
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
       {
-        kind: "set_circuit_stage_scale",
         circuitId: CIRCUIT_ID,
-        tournamentId: TOURNAMENT_ID,
+        kind: "set_circuit_stage_scale",
         scale: SCALE,
+        tournamentId: TOURNAMENT_ID,
         ...regional,
       },
       SOURCE,
@@ -96,10 +96,10 @@ describe("set_circuit_stage_scale", () => {
     ["a Liquipedia sourceUrl", { sourceUrl: "https://liquipedia.net/rocketleague/Fake" }, false],
     ["a BLAST.tv sourceUrl", { sourceUrl: "https://blast.tv/rl/leaderboard/2026" }, false],
     ["a region team that is not a UUID", { regionTeamIds: ["karmine-corp"] }, false],
-    ["a placement below 1", { finishes: [{ teamId: TEAM_ID, placement: 0 }] }, false],
-    ["a placement of 9", { finishes: [{ teamId: TEAM_ID, placement: 9 }] }, true],
-    ["a tier starting below 1", { scale: [{ from: 0, to: 1, points: 3 }] }, false],
-    ["fractional tier points", { scale: [{ from: 1, to: 1, points: 2.5 }] }, false],
+    ["a placement below 1", { finishes: [{ placement: 0, teamId: TEAM_ID }] }, false],
+    ["a placement of 9", { finishes: [{ placement: 9, teamId: TEAM_ID }] }, true],
+    ["a tier starting below 1", { scale: [{ from: 0, points: 3, to: 1 }] }, false],
+    ["fractional tier points", { scale: [{ from: 1, points: 2.5, to: 1 }] }, false],
   ])("validates %s", (_label, overrides, accepted) => {
     const schema = z.object(scaleTool().tool.inputSchema);
 
@@ -120,39 +120,39 @@ describe("get_circuit", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const team = {
+      darkModeImageUrl: null,
       id: TEAM_ID,
+      imageUrl: null,
       name: "Fake Team",
       slug: "fake-team",
-      imageUrl: null,
-      darkModeImageUrl: null,
     };
 
     const stage = (id: string, source: "pandascore" | "manual" | "startgg") => ({
+      finishes: [{ placement: 13, team }],
+      regionTeams: [team],
+      scale: SCALE,
+      sourceUrl: SOURCE,
       tournament: {
+        beginAt: null,
+        endAt: null,
+        event: { id: "e1", name: "Event", slug: "e1" },
         id,
         name: id,
         slug: id,
         source,
-        beginAt: null,
-        endAt: null,
-        event: { id: "e1", slug: "e1", name: "Event" },
       },
-      scale: SCALE,
-      sourceUrl: SOURCE,
       worldwide: true,
-      regionTeams: [team],
-      finishes: [{ team, placement: 13 }],
     });
 
     const summary = {
-      id: CIRCUIT_ID,
-      slug: "season",
-      name: "Season",
-      season: 2026,
-      region: null,
       description: null,
-      sourceUrl: SOURCE,
+      id: CIRCUIT_ID,
+      name: "Season",
       qualificationSpots: null,
+      region: null,
+      season: 2026,
+      slug: "season",
+      sourceUrl: SOURCE,
     };
 
     const detail: CircuitDetail = {
@@ -160,14 +160,14 @@ describe("get_circuit", () => {
       stages: [stage("ps", "pandascore"), stage("manual", "manual"), stage("sgg", "startgg")],
     };
 
-    const standings: CircuitStandings = { ...summary, sourceUrls: [], events: [], rows: [] };
+    const standings: CircuitStandings = { ...summary, events: [], rows: [], sourceUrls: [] };
 
     const tool = circuitTools({
       circuitService: {
-        list: vi.fn<CircuitService["list"]>(),
-        detail: vi.fn<CircuitService["detail"]>(async () => detail),
-        standings: vi.fn<CircuitService["standings"]>(async () => standings),
         create: vi.fn<CircuitService["create"]>(),
+        detail: vi.fn<CircuitService["detail"]>(async () => detail),
+        list: vi.fn<CircuitService["list"]>(),
+        standings: vi.fn<CircuitService["standings"]>(async () => standings),
         update: vi.fn<CircuitService["update"]>(),
       },
     }).find((candidate) => candidate.name === "get_circuit");
@@ -187,24 +187,24 @@ describe("get_circuit", () => {
 
 describe("create_circuit and update_circuit", () => {
   const circuit: CircuitSummary = {
-    id: CIRCUIT_ID,
-    slug: "season-2026",
-    name: "RLCS 2026",
-    season: 2026,
-    region: "Worldwide",
     description: null,
-    sourceUrl: SOURCE,
+    id: CIRCUIT_ID,
+    name: "RLCS 2026",
     qualificationSpots: null,
+    region: "Worldwide",
+    season: 2026,
+    slug: "season-2026",
+    sourceUrl: SOURCE,
   };
 
   const tools = () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const circuitService = {
-      list: vi.fn<CircuitService["list"]>(),
-      detail: vi.fn<CircuitService["detail"]>(),
-      standings: vi.fn<CircuitService["standings"]>(),
       create: vi.fn<CircuitService["create"]>(async () => circuit),
+      detail: vi.fn<CircuitService["detail"]>(),
+      list: vi.fn<CircuitService["list"]>(),
+      standings: vi.fn<CircuitService["standings"]>(),
       update: vi.fn<CircuitService["update"]>(async () => circuit),
     };
 
@@ -225,9 +225,9 @@ describe("create_circuit and update_circuit", () => {
 
   const input = {
     name: "RLCS 2026",
-    slug: "season-2026",
-    season: 2026,
     region: "Worldwide",
+    season: 2026,
+    slug: "season-2026",
     sourceUrl: SOURCE,
   };
 

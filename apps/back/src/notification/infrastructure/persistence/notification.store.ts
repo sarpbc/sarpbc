@@ -13,8 +13,8 @@ export class MikroNotificationStore implements NotificationStore {
     const rows = await this.rows.findForRecipient(id, limit);
 
     return rows.map((row) => ({
-      id: row.id,
       createdAt: new Date(row.createdAt),
+      id: row.id,
       readAt: row.readAt ? new Date(row.readAt) : null,
       reply: replySnapshot(row.reply),
     }));

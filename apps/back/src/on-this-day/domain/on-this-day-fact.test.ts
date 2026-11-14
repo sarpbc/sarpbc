@@ -4,28 +4,28 @@ import { isFactShownOn, parseOnThisDayFact } from "./on-this-day-fact";
 import type { OnThisDayFactFields } from "./on-this-day-fact";
 
 const input: OnThisDayFactFields = {
-  month: 7,
   day: 7,
-  year: 2015,
+  link: null,
+  month: 7,
+  sourceUrl: " https://www.rocketleague.com/news ",
   textEn: "  Rocket League was released.  ",
   textFr: "Rocket League sortait.",
-  link: null,
-  sourceUrl: " https://www.rocketleague.com/news ",
+  year: 2015,
 };
 
 describe(parseOnThisDayFact, () => {
   it("trims the staff-written texts and the source", () => {
     expect(parseOnThisDayFact(input)).toStrictEqual({
       ...input,
-      textEn: "Rocket League was released.",
       sourceUrl: "https://www.rocketleague.com/news",
+      textEn: "Rocket League was released.",
     });
   });
 
   it("keeps an optional year and source", () => {
-    expect(parseOnThisDayFact({ ...input, year: null, sourceUrl: "  " })).toMatchObject({
-      year: null,
+    expect(parseOnThisDayFact({ ...input, sourceUrl: "  ", year: null })).toMatchObject({
       sourceUrl: null,
+      year: null,
     });
   });
 
@@ -39,8 +39,8 @@ describe(parseOnThisDayFact, () => {
   });
 
   it.each([
-    ["an impossible day", { month: 4, day: 31 }],
-    ["February 29 of a common year", { month: 2, day: 29, year: 2023 }],
+    ["an impossible day", { day: 31, month: 4 }],
+    ["February 29 of a common year", { day: 29, month: 2, year: 2023 }],
     ["a year before Rocket League's predecessor", { year: 1999 }],
     ["an empty French text", { textFr: "   " }],
     ["a non-http source", { sourceUrl: "ftp://example.com/fact" }],
@@ -49,23 +49,23 @@ describe(parseOnThisDayFact, () => {
   });
 
   it("accepts February 29 without a year or in a leap year", () => {
-    expect(parseOnThisDayFact({ ...input, month: 2, day: 29, year: null }).day).toBe(29);
-    expect(parseOnThisDayFact({ ...input, month: 2, day: 29, year: 2024 }).year).toBe(2024);
+    expect(parseOnThisDayFact({ ...input, day: 29, month: 2, year: null }).day).toBe(29);
+    expect(parseOnThisDayFact({ ...input, day: 29, month: 2, year: 2024 }).year).toBe(2024);
   });
 });
 
 describe(isFactShownOn, () => {
-  const on = { year: 2026, month: 7, day: 7 };
+  const on = { day: 7, month: 7, year: 2026 };
 
   it("matches the month and day of any past year or of no year", () => {
-    expect(isFactShownOn({ month: 7, day: 7, year: 2015 }, on)).toBe(true);
-    expect(isFactShownOn({ month: 7, day: 7, year: null }, on)).toBe(true);
-    expect(isFactShownOn({ month: 7, day: 7, year: 2026 }, on)).toBe(true);
+    expect(isFactShownOn({ day: 7, month: 7, year: 2015 }, on)).toBe(true);
+    expect(isFactShownOn({ day: 7, month: 7, year: null }, on)).toBe(true);
+    expect(isFactShownOn({ day: 7, month: 7, year: 2026 }, on)).toBe(true);
   });
 
   it("hides another day and a fact dated in a future year", () => {
-    expect(isFactShownOn({ month: 7, day: 8, year: 2015 }, on)).toBe(false);
-    expect(isFactShownOn({ month: 8, day: 7, year: 2015 }, on)).toBe(false);
-    expect(isFactShownOn({ month: 7, day: 7, year: 2027 }, on)).toBe(false);
+    expect(isFactShownOn({ day: 8, month: 7, year: 2015 }, on)).toBe(false);
+    expect(isFactShownOn({ day: 7, month: 8, year: 2015 }, on)).toBe(false);
+    expect(isFactShownOn({ day: 7, month: 7, year: 2027 }, on)).toBe(false);
   });
 });

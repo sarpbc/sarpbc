@@ -11,28 +11,28 @@ import type { NewsArticleRecord } from "../../application/models";
 import { MikroNewsStore } from "./news.store";
 
 const article: NewsArticleRecord = {
+  author: { id: "22222222-2222-4222-8222-222222222222", userName: "writer" },
+  content: "<p>Body</p>",
+  contentFr: null,
+  createdAt: new Date("2026-01-01T00:00:00Z"),
   id: "11111111-1111-4111-8111-111111111111",
+  imageUrl: null,
+  isDraft: true,
   slug: "taken",
   title: "Title",
-  content: "<p>Body</p>",
   titleFr: null,
-  contentFr: null,
-  author: { id: "22222222-2222-4222-8222-222222222222", userName: "writer" },
-  createdAt: new Date("2026-01-01T00:00:00Z"),
-  updatedAt: null,
-  isDraft: true,
-  imageUrl: null,
   type: "short",
+  updatedAt: null,
 };
 
 const storeFailingWith = (error: Error) => {
   const em = {
     findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
+    flush: vi.fn<EntityManager["flush"]>().mockRejectedValue(error),
     getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
       (_entity, id) => ({ id }),
     ),
     persist: vi.fn<() => void>(),
-    flush: vi.fn<EntityManager["flush"]>().mockRejectedValue(error),
   };
 
   return new MikroNewsStore(Object.assign(unconstructed(EntityManager), em));

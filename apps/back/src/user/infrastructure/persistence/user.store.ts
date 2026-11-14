@@ -39,10 +39,10 @@ export class MikroUserStore implements UserQueries, UserWriter {
       search !== undefined && search !== ""
         ? { $or: [{ email: { $ilike: `%${search}%` } }, { userName: { $ilike: `%${search}%` } }] }
         : {},
-      { orderBy: { createdAt: "desc", id: "asc" }, limit, offset },
+      { limit, offset, orderBy: { createdAt: "desc", id: "asc" } },
     );
 
-    return { users: records.map(toAccount), total };
+    return { total, users: records.map(toAccount) };
   }
 
   async findByEmail(email: string): Promise<Account | null> {
@@ -70,7 +70,7 @@ export class MikroUserStore implements UserQueries, UserWriter {
       (await this.em.count(
         User,
         excludeUserId !== undefined && excludeUserId !== ""
-          ? { userName, id: { $ne: excludeUserId } }
+          ? { id: { $ne: excludeUserId }, userName }
           : { userName },
       )) > 0
     );

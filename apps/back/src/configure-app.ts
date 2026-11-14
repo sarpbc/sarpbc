@@ -10,17 +10,17 @@ export const configureApp = async (
   corsOrigins: string[],
 ): Promise<void> => {
   app.enableCors({
-    origin: corsOrigins,
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+    origin: corsOrigins,
   });
 
   app.useGlobalPipes(new StandardSchemaValidationPipe());
 
   await app.register(helmet, {
-    global: true,
     contentSecurityPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
+    global: true,
   });
 
   await app.register(multipart, {

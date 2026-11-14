@@ -28,7 +28,7 @@ void test("accepts framework-free sources", () => {
   try {
     assert.deepEqual(frameworkViolations(directory), []);
   } finally {
-    rmSync(directory, { recursive: true, force: true });
+    rmSync(directory, { force: true, recursive: true });
   }
 });
 
@@ -46,7 +46,7 @@ void test("rejects Vue and Nuxt imports and dependencies", () => {
   try {
     assert.equal(frameworkViolations(directory).length, 5);
   } finally {
-    rmSync(directory, { recursive: true, force: true });
+    rmSync(directory, { force: true, recursive: true });
   }
 });
 
@@ -58,6 +58,6 @@ void test("rejects relative imports that name a .ts extension", () => {
   try {
     assert.equal(frameworkViolations(directory).length, 2);
   } finally {
-    rmSync(directory, { recursive: true, force: true });
+    rmSync(directory, { force: true, recursive: true });
   }
 });

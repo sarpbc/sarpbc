@@ -13,13 +13,13 @@ const offset = computed(() => parseRouteOffset(route.query.offset));
 const { data: country, error } = await useAsyncData<CountryDetail | null>(
   () => `country-${code.value}-${offset.value}`,
   () => getCountry(code.value, { limit: MATCH_LIST_PAGE_SIZE, offset: offset.value }),
-  { watch: [code, offset], default: () => null },
+  { default: () => null, watch: [code, offset] },
 );
 
 if (!country.value) {
   throwEntityLoadError(error.value, {
-    notFound: t("page.countries.detail.notFound"),
     failed: t("page.countries.detail.error"),
+    notFound: t("page.countries.detail.notFound"),
   });
 }
 
@@ -38,12 +38,12 @@ watch(
   name,
   (current) => {
     setPageSeo({
-      title: current
-        ? t("page.countries.detail.seoTitle", { name: current })
-        : t("page.countries.index.seoTitle"),
       description: current
         ? t("page.countries.detail.seoDescription", { name: current })
         : t("page.countries.index.description"),
+      title: current
+        ? t("page.countries.detail.seoTitle", { name: current })
+        : t("page.countries.index.seoTitle"),
     });
   },
   { immediate: true },

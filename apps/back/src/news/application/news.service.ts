@@ -72,13 +72,13 @@ const mapListArticle = (
   const { title, content } = localizedNewsFields(article, locale);
 
   return {
-    id: article.id,
-    title,
-    slug: article.slug,
-    createdAt: article.createdAt,
-    imageUrl: article.imageUrl,
-    excerpt: excerptFromNewsContent(content),
     commentCount,
+    createdAt: article.createdAt,
+    excerpt: excerptFromNewsContent(content),
+    id: article.id,
+    imageUrl: article.imageUrl,
+    slug: article.slug,
+    title,
     type: article.type,
   };
 };
@@ -87,24 +87,24 @@ const mapArticle = (article: NewsArticleRecord, locale: SupportedLocale): NewsAr
   const { title, content } = localizedNewsFields(article, locale);
 
   return {
-    id: article.id,
     author: article.author.userName,
-    title,
-    slug: article.slug,
     content,
     createdAt: article.createdAt,
-    isDraft: article.isDraft,
+    id: article.id,
     imageUrl: article.imageUrl,
+    isDraft: article.isDraft,
+    slug: article.slug,
+    title,
     type: article.type,
   };
 };
 
 const mapAdminArticle = (article: NewsArticleRecord): NewsArticleAdmin => ({
   ...mapArticle(article, "en-US"),
-  createdAt: article.createdAt.toISOString(),
-  titleFr: article.titleFr,
   contentFr: article.contentFr,
+  createdAt: article.createdAt.toISOString(),
   hasFrench: hasFrenchTranslation(article),
+  titleFr: article.titleFr,
 });
 
 const generateUniqueSlug = async (source: string, articles: NewsQueries): Promise<string> => {
@@ -166,20 +166,20 @@ export class NewsService {
       }
 
       const article: NewsArticleRecord = {
-        id: crypto.randomUUID(),
-        updatedAt: null,
-        title: sanitizePlainText(dto.title),
+        author,
         content: newsContent(dto.content),
-        titleFr:
-          dto.titleFr === null || dto.titleFr === undefined ? null : sanitizePlainText(dto.titleFr),
         contentFr:
           dto.contentFr === null || dto.contentFr === undefined ? null : newsContent(dto.contentFr),
-        author,
-        slug,
-        isDraft: true,
-        imageUrl: dto.imageUrl ?? null,
-        type: dto.type ?? DEFAULT_NEWS_TYPE,
         createdAt: new Date(),
+        id: crypto.randomUUID(),
+        imageUrl: dto.imageUrl ?? null,
+        isDraft: true,
+        slug,
+        title: sanitizePlainText(dto.title),
+        titleFr:
+          dto.titleFr === null || dto.titleFr === undefined ? null : sanitizePlainText(dto.titleFr),
+        type: dto.type ?? DEFAULT_NEWS_TYPE,
+        updatedAt: null,
       };
 
       await scope.articles.save(article);
@@ -210,9 +210,9 @@ export class NewsService {
       data: articles.map((article) =>
         mapListArticle(article, locale, commentCounts.get(article.id) ?? 0),
       ),
-      total,
-      page,
       limit,
+      page,
+      total,
     };
   }
 
@@ -233,10 +233,10 @@ export class NewsService {
     );
 
     return {
-      week,
-      start: range.start,
       end: range.end,
       items: articles.map((article) => mapArticle(article, locale)),
+      start: range.start,
+      week,
     };
   }
 
@@ -245,9 +245,9 @@ export class NewsService {
 
     return {
       data: articles.map((a) => mapAdminArticle(a)),
-      total,
-      page,
       limit,
+      page,
+      total,
     };
   }
 

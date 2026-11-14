@@ -79,11 +79,11 @@ const replay = async (script: SeriesScript, intervalSeconds: number): Promise<Se
   const expectedWinner = blueWins > expected.length - blueWins ? "blue" : "orange";
 
   return {
-    id: script.id,
-    games: Math.max(expected.length, parsed.proposal.games.length),
     correctGames,
-    undecidedGames: parsed.proposal.games.filter((game) => game.winner === null).length,
+    games: Math.max(expected.length, parsed.proposal.games.length),
+    id: script.id,
     series: seriesOutcome(winner, expectedWinner),
+    undecidedGames: parsed.proposal.games.filter((game) => game.winner === null).length,
   };
 };
 
@@ -96,7 +96,7 @@ export const measureFixtures = async (intervalSeconds: number): Promise<Measure>
   const correctGames = results.reduce((total, result) => total + result.correctGames, 0);
   const undecidedGames = results.reduce((total, result) => total + result.undecidedGames, 0);
 
-  return { games, correctGames, undecidedGames, rate: correctGames / games, results };
+  return { correctGames, games, rate: correctGames / games, results, undecidedGames };
 };
 
 export const describeMeasure = (measure: Measure): string[] => {

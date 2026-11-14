@@ -11,6 +11,7 @@ const setup = (source: "manual" | "startgg" = "manual") => {
   const given = new Set<PlayerAwardType>();
 
   const writer = {
+    awardTaken: vi.fn<AwardWriter["awardTaken"]>(async (_, awardType) => given.has(awardType)),
     context: vi.fn<AwardWriter["context"]>(async (tournamentId, participant, playerId) => {
       const onTeam =
         "teamId" in participant
@@ -18,20 +19,19 @@ const setup = (source: "manual" | "startgg" = "manual") => {
           : participant.participantId === "part-kc";
 
       return {
-        tournament: tournamentId === "cup" ? { id: "cup", name: "Fake Cup", source } : null,
         participant: onTeam ? { id: "part-kc", name: "Karmine Corp", playerIds: ["zen"] } : null,
         player: playerId === "nobody" ? null : { id: playerId, name: playerId, slug: playerId },
+        tournament: tournamentId === "cup" ? { id: "cup", name: "Fake Cup", source } : null,
       };
     }),
-    awardTaken: vi.fn<AwardWriter["awardTaken"]>(async (_, awardType) => given.has(awardType)),
     create: vi.fn<AwardWriter["create"]>(async (input) => {
       given.add(input.awardType);
 
       return {
-        id: "award-1",
         awardType: input.awardType,
-        player: { id: input.playerId, name: input.playerId, slug: input.playerId },
+        id: "award-1",
         participant: { id: input.participantId },
+        player: { id: input.playerId, name: input.playerId, slug: input.playerId },
       };
     }),
     remove: vi.fn<AwardWriter["remove"]>(),
@@ -59,10 +59,10 @@ describe("PlayerAwardService by team", () => {
     });
 
     expect(writer.create).toHaveBeenCalledWith({
-      tournamentId: "cup",
+      awardType: "mvp",
       participantId: "part-kc",
       playerId: "zen",
-      awardType: "mvp",
+      tournamentId: "cup",
     });
   });
 

@@ -48,7 +48,7 @@ export const useMatchBlockEditor = () => {
         .chain()
         .focus()
         .insertContent([
-          { type: "matchBlock", attrs: matchBlockNodeAttrs(block) },
+          { attrs: matchBlockNodeAttrs(block), type: "matchBlock" },
           { type: "paragraph" },
         ])
         .run();
@@ -69,9 +69,9 @@ export const useMatchBlockEditor = () => {
   };
 
   return {
-    matchPickerOpen: pickerOpen,
-    matchPickerBlock: pickerBlock,
-    matchBlockHandlers,
     applyMatchBlock,
+    matchBlockHandlers,
+    matchPickerBlock: pickerBlock,
+    matchPickerOpen: pickerOpen,
   };
 };

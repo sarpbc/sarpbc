@@ -19,14 +19,14 @@ const KC = ["Vatira", "Atow", "Rise"];
 const BDS = ["M0nkey M00n", "Seikoo", "ExoTiiK"];
 
 const candidate: CandidateMatch = {
-  id: "m1",
   beginAt: new Date("2026-06-01T18:00:00Z"),
   endAt: null,
   finished: true,
+  id: "m1",
   numberOfGames: 5,
   participants: [
-    { id: "p-kc", teamNames: ["Karmine Corp"], players: KC.map((name) => ({ id: name, name })) },
-    { id: "p-bds", teamNames: ["BDS"], players: BDS.map((name) => ({ id: name, name })) },
+    { id: "p-kc", players: KC.map((name) => ({ id: name, name })), teamNames: ["Karmine Corp"] },
+    { id: "p-bds", players: BDS.map((name) => ({ id: name, name })), teamNames: ["BDS"] },
   ],
   scores: new Map([
     ["p-kc", 1],
@@ -41,13 +41,13 @@ const summary = (
   kcBlue: boolean,
   blueGoals: number,
 ): ReplaySummary => ({
+  blue: { goals: blueGoals, name: null, playerNames: kcBlue ? KC : BDS },
   id,
-  rocketLeagueId: `guid-${id}`,
-  title: id,
+  orange: { goals: blueGoals === 0 ? 1 : 0, name: null, playerNames: kcBlue ? BDS : KC },
   playedAt: new Date(playedAt),
   playedAtHasTimezone: true,
-  blue: { name: null, goals: blueGoals, playerNames: kcBlue ? KC : BDS },
-  orange: { name: null, goals: blueGoals === 0 ? 1 : 0, playerNames: kcBlue ? BDS : KC },
+  rocketLeagueId: `guid-${id}`,
+  title: id,
 });
 
 const game1 = summary("r1", "2026-06-01T18:05:00Z", true, 2);
@@ -55,28 +55,28 @@ const game2 = summary("r2", "2026-06-01T18:25:00Z", true, 0);
 
 const stranger: ReplaySummary = {
   ...summary("r3", "2026-06-01T18:40:00Z", true, 1),
-  blue: { name: null, goals: 1, playerNames: ["x", "y", "z"] },
+  blue: { goals: 1, name: null, playerNames: ["x", "y", "z"] },
 };
 
 const side = (names: string[], team: "blue" | "orange") =>
   names.map((name, index) => ({
+    assists: 0,
+    demolitions: index,
+    goals: 0,
     name: index === 2 ? "Stand-in" : name,
     platform: "epic",
     platformId: `${name}-id`,
-    side: team,
-    goals: 0,
-    assists: 0,
     saves: 1,
     shots: 1,
-    demolitions: index,
+    side: team,
   }));
 
 const statsFor = (replay: ReplaySummary): ReplayStats => ({
-  rocketLeagueId: replay.rocketLeagueId,
-  playedAt: replay.playedAt,
   blueGoals: replay.blue.goals,
   orangeGoals: replay.orange.goals,
+  playedAt: replay.playedAt,
   players: [...side(replay.blue.playerNames, "blue"), ...side(replay.orange.playerNames, "orange")],
+  rocketLeagueId: replay.rocketLeagueId,
 });
 
 class MemoryImports implements StatsImportStore {
@@ -105,7 +105,7 @@ class MemoryImports implements StatsImportStore {
 
     for (const row of this.rows.values()) {
       if (row.status === "pending" || row.status === "running") {
-        Object.assign(row, { status: "failed", error, finishedAt: new Date() });
+        Object.assign(row, { error, finishedAt: new Date(), status: "failed" });
         changed += 1;
       }
     }
@@ -133,13 +133,13 @@ const setup = (options: { replays?: ReplaySummary[] } = {}) => {
   const games = new MemoryGames();
 
   const candidates: StatsCandidates = {
-    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
     matches: vi.fn<StatsCandidates["matches"]>(async () => [
       {
         ...candidate,
         storedReplayIds: games.saved.map((game) => game.ballchasingId),
       },
     ]),
+    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
   };
 
   const imports = new MemoryImports();
@@ -155,7 +155,7 @@ const setup = (options: { replays?: ReplaySummary[] } = {}) => {
     reportFailure,
   );
 
-  return { service, source, games, imports, scheduler, reportFailure };
+  return { games, imports, reportFailure, scheduler, service, source };
 };
 
 describe("StatsImportService.request", () => {
@@ -165,9 +165,9 @@ describe("StatsImportService.request", () => {
     const statsImport = await service.request("t1", "https://ballchasing.com/group/pilot-abc123");
 
     expect(statsImport).toMatchObject({
-      tournamentId: "t1",
       groupId: "pilot-abc123",
       status: "pending",
+      tournamentId: "t1",
     });
     expect(imports.rows.get(statsImport.id)?.status).toBe("pending");
     expect(scheduler.schedule).toHaveBeenCalledOnce();
@@ -193,8 +193,8 @@ describe("StatsImportService.request", () => {
     const service = new StatsImportService(
       null,
       {
-        tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(),
         matches: vi.fn<StatsCandidates["matches"]>(),
+        tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(),
       },
       new MemoryGames(),
       imports,
@@ -245,11 +245,11 @@ describe("StatsImportService.run", () => {
       ["r2", 2],
     ]);
     expect(games.saved[0]).toMatchObject({
-      matchId: "m1",
-      blueParticipantId: "p-kc",
-      orangeParticipantId: "p-bds",
       blueGoals: 2,
+      blueParticipantId: "p-kc",
+      matchId: "m1",
       orangeGoals: 0,
+      orangeParticipantId: "p-bds",
     });
     expect(games.saved[0].players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Vatira", "Vatira"],
@@ -342,13 +342,13 @@ describe("StatsImportService.run", () => {
     expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.saved.map((game) => game.ballchasingId)).toStrictEqual(["r1"]);
     expect(imports.rows.get(id)?.items).toStrictEqual([
-      expect.objectContaining({ replayId: "r1", status: "already_imported", gameNumber: 1 }),
-      expect.objectContaining({ replayId: "r2", status: "unmatched", reason: "excluded_by_staff" }),
+      expect.objectContaining({ gameNumber: 1, replayId: "r1", status: "already_imported" }),
+      expect.objectContaining({ reason: "excluded_by_staff", replayId: "r2", status: "unmatched" }),
       expect.objectContaining({
-        replayId: "r3",
-        reason: "unknown_teams",
-        matchId: null,
         blueParticipantId: null,
+        matchId: null,
+        reason: "unknown_teams",
+        replayId: "r3",
       }),
     ]);
   });
@@ -356,17 +356,17 @@ describe("StatsImportService.run", () => {
   it("reports a game staff attached under another number where it is, and adds nothing", async () => {
     const { service, games, imports, source } = setup({ replays: [game1, game2] });
     games.saved.push({
+      ballchasingId: "r1",
+      blueGoals: 2,
+      blueParticipantId: "p-kc",
+      learnedLinks: [],
       matchId: "m1",
       number: 2,
-      ballchasingId: "r1",
-      rocketLeagueId: game1.rocketLeagueId,
-      playedAt: game1.playedAt,
-      blueParticipantId: "p-kc",
-      orangeParticipantId: "p-bds",
-      blueGoals: 2,
       orangeGoals: 0,
+      orangeParticipantId: "p-bds",
+      playedAt: game1.playedAt,
       players: [],
-      learnedLinks: [],
+      rocketLeagueId: game1.rocketLeagueId,
     });
 
     const { id } = await service.request("t1", "pilot-abc123");
@@ -375,13 +375,13 @@ describe("StatsImportService.run", () => {
     expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.saved).toHaveLength(1);
     expect(imports.rows.get(id)?.items).toStrictEqual([
-      expect.objectContaining({ replayId: "r1", status: "already_imported", gameNumber: 2 }),
+      expect.objectContaining({ gameNumber: 2, replayId: "r1", status: "already_imported" }),
       expect.objectContaining({
+        blueParticipantId: "p-kc",
+        matchId: "m1",
+        reason: "match_has_other_stats",
         replayId: "r2",
         status: "unmatched",
-        reason: "match_has_other_stats",
-        matchId: "m1",
-        blueParticipantId: "p-kc",
       }),
     ]);
   });
@@ -397,8 +397,8 @@ describe("StatsImportService.run", () => {
 
     expect(games.saved).toHaveLength(0);
     expect(imports.rows.get(id)?.items.slice(0, 2)).toStrictEqual([
-      expect.objectContaining({ replayId: "r1", status: "failed", reason: "score_mismatch" }),
-      expect.objectContaining({ replayId: "r2", status: "failed", reason: "replay_not_ready" }),
+      expect.objectContaining({ reason: "score_mismatch", replayId: "r1", status: "failed" }),
+      expect.objectContaining({ reason: "replay_not_ready", replayId: "r2", status: "failed" }),
     ]);
     expect(reportFailure).not.toHaveBeenCalled();
   });
@@ -426,14 +426,14 @@ describe("StatsImportService.run", () => {
 
     expect(imports.rows.get(id)?.items).toStrictEqual([
       expect.objectContaining({
+        blueParticipantId: "p-kc",
+        gameNumber: 1,
+        matchId: "m1",
+        reason: "fetch_failed",
         replayId: "r1",
         status: "failed",
-        reason: "fetch_failed",
-        matchId: "m1",
-        gameNumber: 1,
-        blueParticipantId: "p-kc",
       }),
-      expect.objectContaining({ replayId: "r2", status: "failed", reason: "save_failed" }),
+      expect.objectContaining({ reason: "save_failed", replayId: "r2", status: "failed" }),
     ]);
     expect(imports.rows.get(id)?.status).toBe("completed");
   });
@@ -448,8 +448,8 @@ describe("StatsImportService.run", () => {
     await service.run(id);
 
     expect(imports.rows.get(id)).toMatchObject({
-      status: "failed",
       error: "Ballchasing rejected the API key. Check BALLCHASING_API_KEY.",
+      status: "failed",
     });
     expect(reportFailure).not.toHaveBeenCalled();
   });
@@ -485,6 +485,6 @@ describe("StatsImportService maintenance", () => {
 
     await expect(service.failInterrupted()).resolves.toBe(1);
     const [latest] = await service.recent("t1");
-    expect(latest).toMatchObject({ status: "failed", error: INTERRUPTED_IMPORT_ERROR });
+    expect(latest).toMatchObject({ error: INTERRUPTED_IMPORT_ERROR, status: "failed" });
   });
 });

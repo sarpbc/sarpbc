@@ -17,7 +17,7 @@ export const getTransfers = async (
 
   const transfers = res.transfers ?? [];
 
-  return { transfers, total: res.count ?? transfers.length };
+  return { total: res.count ?? transfers.length, transfers };
 };
 
 export const useLatestTransfers = (team: MaybeRef<string | undefined>, limit = 5) => {
@@ -25,14 +25,14 @@ export const useLatestTransfers = (team: MaybeRef<string | undefined>, limit = 5
 
   const { data, pending, error, refresh } = useLazyAsyncData(
     () => `latest-transfers-${teamRef.value ?? "all"}-${limit}`,
-    async () => await getTransfers({ team: teamRef.value, limit }),
+    async () => await getTransfers({ limit, team: teamRef.value }),
     {
+      default: () => ({ total: 0, transfers: [] }),
       watch: [teamRef],
-      default: () => ({ transfers: [], total: 0 }),
     },
   );
 
   const transfers = computed(() => data.value?.transfers ?? []);
 
-  return { transfers, pending, error, refresh };
+  return { error, pending, refresh, transfers };
 };

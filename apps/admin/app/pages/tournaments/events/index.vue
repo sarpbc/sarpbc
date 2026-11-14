@@ -9,7 +9,7 @@ const localePath = useLocalePath();
 const { data, status, error, refresh } = await useLazyAsyncData(
   "admin-manual-events",
   () => getManualEvents(),
-  { server: false, default: () => [] },
+  { default: () => [], server: false },
 );
 
 const breadcrumbItems = computed(() => [
@@ -24,15 +24,15 @@ const columns: TableColumn<ManualEvent>[] = [
   { accessorKey: "name", header: t("page.tournaments.events.columns.name") },
   { accessorKey: "slug", header: t("page.tournaments.form.slug") },
   {
-    id: "league",
-    header: t("page.tournaments.form.league"),
     cell: ({ row }) => row.original.league?.name ?? "-",
+    header: t("page.tournaments.form.league"),
+    id: "league",
   },
-  { id: "stages", header: t("page.tournaments.events.columns.stages") },
+  { header: t("page.tournaments.events.columns.stages"), id: "stages" },
   {
-    id: "beginAt",
-    header: t("page.tournaments.columns.beginAt"),
     cell: ({ row }) => formatDate(row.original.beginAt),
+    header: t("page.tournaments.columns.beginAt"),
+    id: "beginAt",
   },
 ];
 

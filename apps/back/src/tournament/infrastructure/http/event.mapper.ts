@@ -29,13 +29,6 @@ export const mapEvent = <Stage extends EventStage>(
     ordered.find((stage) => stage.prizepool !== null && stage.prizepool !== "") ?? newest;
 
   return {
-    id: event.id,
-    slug: event.slug,
-    name: event.name,
-    league: mapLeague(event.league),
-    logoUrl: nonBlank(newest?.imageUrl) ?? nonBlank(event.league?.imageUrl) ?? null,
-    prizepool: main?.prizepool === undefined || main.prizepool === "" ? null : main.prizepool,
-    type: main?.type ?? null,
     beginAt: bound(
       ordered.map((stage) => stage.beginAt),
       Math.min,
@@ -44,7 +37,14 @@ export const mapEvent = <Stage extends EventStage>(
       ordered.map((stage) => stage.endAt),
       Math.max,
     ),
+    id: event.id,
+    league: mapLeague(event.league),
+    logoUrl: nonBlank(newest?.imageUrl) ?? nonBlank(event.league?.imageUrl) ?? null,
+    name: event.name,
+    prizepool: main?.prizepool === undefined || main.prizepool === "" ? null : main.prizepool,
+    slug: event.slug,
     stages: ordered,
+    type: main?.type ?? null,
   };
 };
 

@@ -6,25 +6,25 @@ import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { CachedTournamentPrizesRead } from "./cached-tournament-prizes.read";
 
 const distribution: TournamentPrizes = {
-  source: "manual",
   prizepool: "10000 United States Dollar",
   prizes: [
     {
-      id: "prize-1",
-      placement: 1,
       amount: 5000,
       currency: "USD",
-      team: {
-        id: "team-a",
-        name: "Team A",
-        slug: "team-a",
-        imageUrl: null,
-        darkModeImageUrl: null,
-      },
+      id: "prize-1",
+      placement: 1,
       players: [{ id: "player-a", name: "Player A", slug: "player-a" }],
       sourceUrl: "https://www.rocketleague.com/en/news/rlcs-rules",
+      team: {
+        darkModeImageUrl: null,
+        id: "team-a",
+        imageUrl: null,
+        name: "Team A",
+        slug: "team-a",
+      },
     },
   ],
+  source: "manual",
 };
 
 describe(CachedTournamentPrizesRead, () => {

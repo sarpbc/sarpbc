@@ -6,10 +6,10 @@ export const SetStreamsDto = z.strictObject({
   streams: z
     .array(
       z.strictObject({
-        url: z.string().min(1).max(2048),
-        language: z.string().min(1).max(8),
-        kind: z.enum(STREAM_KINDS),
         channel: z.string().max(STREAM_CHANNEL_MAX_LENGTH).optional(),
+        kind: z.enum(STREAM_KINDS),
+        language: z.string().min(1).max(8),
+        url: z.string().min(1).max(2048),
       }),
     )
     .max(MAX_STREAMS),

@@ -40,49 +40,49 @@ type PlayerColumn =
 export const teamColumns = <S extends Pick<TeamRow, TeamColumn>>(
   model: S,
 ): Pick<S, TeamColumn> => ({
-  id: model.id,
-  name: model.name,
-  slug: model.slug,
-  pandascoreId: model.pandascoreId,
   active: model.active,
-  source: model.source,
-  location: model.location,
-  imageUrl: model.imageUrl,
   darkModeImageUrl: model.darkModeImageUrl,
-  logoLightUrl: model.logoLightUrl,
+  id: model.id,
+  imageUrl: model.imageUrl,
+  location: model.location,
   logoDarkUrl: model.logoDarkUrl,
+  logoLightUrl: model.logoLightUrl,
+  name: model.name,
+  pandascoreId: model.pandascoreId,
+  slug: model.slug,
+  source: model.source,
 });
 
 /** `contractRole` is a read-only formula column and is never written. */
 export const playerColumns = <S extends Pick<PlayerRow, PlayerColumn>>(
   model: S,
 ): Pick<S, PlayerColumn> => ({
-  id: model.id,
-  name: model.name,
-  slug: model.slug,
-  pandascoreId: model.pandascoreId,
   birthday: model.birthday,
-  nationality: model.nationality,
   firstName: model.firstName,
-  lastName: model.lastName,
+  id: model.id,
   imageUrl: model.imageUrl,
+  lastName: model.lastName,
+  name: model.name,
+  nationality: model.nationality,
+  pandascoreId: model.pandascoreId,
   role: model.role,
-  status: model.status,
+  slug: model.slug,
   source: model.source,
+  status: model.status,
 });
 
 export const toPhoto = (row: PlayerPhotoRow): PlayerPhoto =>
   Object.assign(new PlayerPhoto(), {
+    createdAt: new Date(row.createdAt),
     id: row.id,
     player: Object.assign(new Player(), { id: row.player.id }),
     url: row.url,
-    createdAt: new Date(row.createdAt),
   });
 
 const toBareTeam = (row: TeamRow): Team =>
   Object.assign(new Team(), teamColumns(row), {
-    mergedIntoId: row.mergedInto?.id ?? null,
     aliases: (row.aliases ?? []).map((alias) => Object.assign(new TeamAlias(), alias)),
+    mergedIntoId: row.mergedInto?.id ?? null,
   });
 
 export const toPlayer = (row: PlayerRow): Player => {
@@ -112,15 +112,15 @@ export const toTeam = (row: TeamRow, includePlayers = true): Team => {
 
 export const toContract = (row: ContractRow): Contract =>
   Object.assign(new Contract(), {
-    id: row.id,
-    player: toPlayer(row.player),
-    team: toBareTeam(row.team),
-    startDate: new Date(row.startDate),
+    createdAt: new Date(row.createdAt),
     endDate: row.endDate ? new Date(row.endDate) : null,
-    role: row.role,
+    id: row.id,
     joinSourceUrl: row.joinSourceUrl,
     leaveSourceUrl: row.leaveSourceUrl,
-    createdAt: new Date(row.createdAt),
+    player: toPlayer(row.player),
+    role: row.role,
+    startDate: new Date(row.startDate),
+    team: toBareTeam(row.team),
   });
 
 export const teamNameAt = (row: Pick<TeamRow, "name" | "aliases">, at: Date | null): string => {

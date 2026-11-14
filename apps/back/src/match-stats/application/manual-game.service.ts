@@ -37,8 +37,8 @@ export class ManualGameService {
 
     if (!match) {
       throw new InvalidInputError({
-        message: "Choose a match of this tournament.",
         code: "match_not_in_tournament",
+        message: "Choose a match of this tournament.",
       });
     }
 
@@ -47,8 +47,8 @@ export class ManualGameService {
 
     if (match.participants.length !== 2 || !blue || !orange) {
       throw new InvalidInputError({
-        message: "Choose one of the match's two participants as the blue side.",
         code: "participant_not_in_match",
+        message: "Choose one of the match's two participants as the blue side.",
       });
     }
 
@@ -60,11 +60,11 @@ export class ManualGameService {
       (match.numberOfGames !== null && gameNumber > match.numberOfGames)
     ) {
       throw new InvalidInputError({
+        code: "game_number_out_of_range",
         message:
           match.numberOfGames === null
             ? "The game number starts at 1."
             : `Choose a game number from 1 to ${match.numberOfGames}.`,
-        code: "game_number_out_of_range",
       });
     }
 
@@ -72,8 +72,8 @@ export class ManualGameService {
 
     if (attached) {
       throw new ConflictError({
-        message: `This replay is already attached to game ${attached.number} of ${attached.teams[0]} vs ${attached.teams[1]} in ${attached.tournamentName}. Remove it there first.`,
         code: "replay_already_attached",
+        message: `This replay is already attached to game ${attached.number} of ${attached.teams[0]} vs ${attached.teams[1]} in ${attached.tournamentName}. Remove it there first.`,
       });
     }
 
@@ -81,8 +81,8 @@ export class ManualGameService {
 
     if ([...stored.values()].some((location) => location.number === gameNumber)) {
       throw new ConflictError({
-        message: `Game ${gameNumber} of this match already has stats. Remove it first.`,
         code: "game_number_taken",
+        message: `Game ${gameNumber} of this match already has stats. Remove it first.`,
       });
     }
 
@@ -90,15 +90,15 @@ export class ManualGameService {
 
     if (!stats) {
       throw new UnprocessableError({
-        message: "Ballchasing has not finished processing this replay. Try again in a few minutes.",
         code: "replay_not_ready",
+        message: "Ballchasing has not finished processing this replay. Try again in a few minutes.",
       });
     }
 
     if (!hasBothTeams(stats)) {
       throw new UnprocessableError({
-        message: "This replay has no players on one side.",
         code: "player_mismatch",
+        message: "This replay has no players on one side.",
       });
     }
 
@@ -107,11 +107,11 @@ export class ManualGameService {
 
     const record = buildGameRecord(
       {
+        ballchasingId: replayId,
         matchId: match.id,
         number: gameNumber,
-        ballchasingId: replayId,
-        rocketLeagueId: stats.rocketLeagueId,
         playedAt: stats.playedAt,
+        rocketLeagueId: stats.rocketLeagueId,
         sides,
       },
       stats,
@@ -132,8 +132,8 @@ export class ManualGameService {
 
     if (!removed) {
       throw new NotFoundError({
-        message: `Game ${number} of this match has no stats in this tournament.`,
         code: "match_game_not_found",
+        message: `Game ${number} of this match has no stats in this tournament.`,
       });
     }
 

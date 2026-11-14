@@ -56,7 +56,7 @@ export class PandascoreApiClient {
     perPage = 100,
   }: ListIncidentsClientParams): Promise<PandascoreJson[]> {
     return await this.paginateAll("/incidents", {
-      params: { sort: "modified_at", since: since.toISOString(), videogame: [VIDEOGAME] },
+      params: { since: since.toISOString(), sort: "modified_at", videogame: [VIDEOGAME] },
       perPage,
     });
   }
@@ -188,8 +188,8 @@ export class PandascoreApiClient {
 
     const response = await fetch(url, {
       headers: {
-        Authorization: `Bearer ${this.apiToken}`,
         Accept: "application/json",
+        Authorization: `Bearer ${this.apiToken}`,
         "Content-Type": "application/json",
       },
     });

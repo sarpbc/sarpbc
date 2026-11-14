@@ -75,7 +75,7 @@ export class MatchLineupService {
       async ({ matches }) => await requireMatch(matches, matchId),
     );
 
-    return { source: lineupSource(match), lineups: await this.forMatch(match) };
+    return { lineups: await this.forMatch(match), source: lineupSource(match) };
   }
 
   async set(matchId: string, inputs: readonly MatchLineupInput[]): Promise<MatchLineups> {
@@ -117,7 +117,7 @@ export class MatchLineupService {
         return [];
       }
 
-      return [{ participantId, match }];
+      return [{ match, participantId }];
     });
   }
 }

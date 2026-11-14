@@ -42,8 +42,8 @@ describe("create-reply body", () => {
   it("rejects when two targets are set", async () => {
     const errors = await validateDto({
       content: "hi",
-      postId: "11111111-1111-4111-8111-111111111111",
       matchId: "22222222-2222-4222-8222-222222222222",
+      postId: "11111111-1111-4111-8111-111111111111",
     });
 
     expect(errors.length).toBeGreaterThan(0);

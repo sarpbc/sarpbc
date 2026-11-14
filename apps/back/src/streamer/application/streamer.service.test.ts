@@ -11,24 +11,24 @@ import type { StreamerFailureReporter } from "./streamer.service";
 const now = new Date("2026-10-31T20:00:00Z");
 
 const tracked = (login: string, displayName: string | null = null): TrackedStreamer => ({
+  createdAt: now,
+  displayName,
   id: `${login}-id`,
   login,
-  displayName,
-  createdAt: now,
 });
 
 const live = (login: string, viewerCount: number): SourceStream => ({
-  login,
   displayName: login.toUpperCase(),
+  login,
   title: `${login} ranked`,
   viewerCount,
 });
 
 const createStreamers = () => ({
+  add: vi.fn<TrackedStreamerStore["add"]>(),
   list: vi
     .fn<TrackedStreamerStore["list"]>()
     .mockResolvedValue([tracked("zenrll", "Zen"), tracked("kaydop")]),
-  add: vi.fn<TrackedStreamerStore["add"]>(),
   remove: vi.fn<TrackedStreamerStore["remove"]>(),
 });
 
@@ -42,14 +42,14 @@ describe(StreamerService, () => {
   let snapshot: LiveStreamSnapshot | null = null;
 
   const createCache = () => ({
+    claimRefresh: vi.fn<LiveStreamCache["claimRefresh"]>().mockResolvedValue("claim-1"),
+    clear: vi.fn<LiveStreamCache["clear"]>().mockResolvedValue(undefined),
     read: vi.fn<LiveStreamCache["read"]>(async () => snapshot),
     write: vi.fn<LiveStreamCache["write"]>(async (value) => {
       snapshot = value;
 
       return true;
     }),
-    claimRefresh: vi.fn<LiveStreamCache["claimRefresh"]>().mockResolvedValue("claim-1"),
-    clear: vi.fn<LiveStreamCache["clear"]>().mockResolvedValue(undefined),
   });
 
   let streamers = createStreamers();
@@ -81,25 +81,25 @@ describe(StreamerService, () => {
     expect(source.findLiveRocketLeague).toHaveBeenCalledWith(["zenrll", "kaydop"]);
     expect(result).toStrictEqual([
       {
-        login: "zenrll",
         displayName: "Zen",
+        login: "zenrll",
         title: "zenrll ranked",
-        viewerCount: 900,
         url: "https://twitch.tv/zenrll",
+        viewerCount: 900,
       },
       {
-        login: "kaydop",
         displayName: "KAYDOP",
+        login: "kaydop",
         title: "kaydop ranked",
-        viewerCount: 100,
         url: "https://twitch.tv/kaydop",
+        viewerCount: 100,
       },
     ]);
-    expect(cache.write).toHaveBeenCalledWith({ streams: result, fetchedAt: now }, "claim-1");
+    expect(cache.write).toHaveBeenCalledWith({ fetchedAt: now, streams: result }, "claim-1");
   });
 
   it("serves a fresh cached result without calling Twitch", async () => {
-    snapshot = { streams: [], fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS + 1) };
+    snapshot = { fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS + 1), streams: [] };
 
     await expect(service.listLive()).resolves.toStrictEqual([]);
     expect(source.findLiveRocketLeague).not.toHaveBeenCalled();
@@ -116,7 +116,7 @@ describe(StreamerService, () => {
 
   it("serves the stale result while another instance refreshes", async () => {
     const stale = await service.listLive();
-    snapshot = { streams: stale, fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS) };
+    snapshot = { fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS), streams: stale };
     cache.claimRefresh.mockResolvedValue(null);
     source.findLiveRocketLeague.mockClear();
 
@@ -126,7 +126,7 @@ describe(StreamerService, () => {
 
   it("falls back to the previous result when Twitch fails", async () => {
     const stale = await service.listLive();
-    snapshot = { streams: stale, fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS) };
+    snapshot = { fetchedAt: new Date(now.getTime() - LIVE_STREAMS_FRESH_MS), streams: stale };
     source.findLiveRocketLeague.mockRejectedValue(new Error("Twitch down"));
 
     await expect(service.listLive()).resolves.toStrictEqual(stale);

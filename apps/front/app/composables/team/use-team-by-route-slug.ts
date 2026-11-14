@@ -14,11 +14,11 @@ export const useTeamByRouteSlug = async () => {
   );
 
   return {
+    error,
+    pending,
+    refresh,
     slug,
     team: data,
     teamId: computed(() => data.value?.id),
-    pending,
-    error,
-    refresh,
   };
 };

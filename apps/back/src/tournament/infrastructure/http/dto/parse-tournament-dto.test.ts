@@ -10,14 +10,14 @@ describe("MCP tournament input", () => {
       tier: "S",
     });
     expect(
-      parseDto(UpdateTournamentDto, { beginAt: null, endAt: null, leagueId: null, imageUrl: "  " }),
-    ).toStrictEqual({ beginAt: null, endAt: null, leagueId: null, imageUrl: "" });
+      parseDto(UpdateTournamentDto, { beginAt: null, endAt: null, imageUrl: "  ", leagueId: null }),
+    ).toStrictEqual({ beginAt: null, endAt: null, imageUrl: "", leagueId: null });
   });
 
   it.each([
     {},
     { name: " " },
-    { name: "RLCS", beginAt: "invalid" },
+    { beginAt: "invalid", name: "RLCS" },
     { name: "RLCS", unexpected: true },
     {
       name: "RLCS",

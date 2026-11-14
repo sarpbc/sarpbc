@@ -19,15 +19,15 @@ import {
 
 const matchWriterMock = () =>
   ({
-    load: vi.fn<MatchWriter["load"]>(),
+    bracket: vi.fn<MatchWriter["bracket"]>(),
     byPandascoreId: vi.fn<MatchWriter["byPandascoreId"]>(),
-    save: vi.fn<MatchWriter["save"]>(),
-    tournament: vi.fn<MatchWriter["tournament"]>(),
+    load: vi.fn<MatchWriter["load"]>(),
     participants: vi.fn<MatchWriter["participants"]>(),
-    timings: vi.fn<MatchWriter["timings"]>(),
     references: vi.fn<MatchWriter["references"]>(),
     remove: vi.fn<MatchWriter["remove"]>(),
-    bracket: vi.fn<MatchWriter["bracket"]>(),
+    save: vi.fn<MatchWriter["save"]>(),
+    timings: vi.fn<MatchWriter["timings"]>(),
+    tournament: vi.fn<MatchWriter["tournament"]>(),
   }) satisfies MatchWriter;
 
 describe("Match writes", () => {
@@ -36,8 +36,8 @@ describe("Match writes", () => {
   const participants = ["a", "b"].map((id) =>
     Object.assign(new TournamentParticipant(), {
       id,
-      tournamentId: tournament.id,
       team: Object.assign(new Team(), { id: `team-${id}` }),
+      tournamentId: tournament.id,
     }),
   );
 
@@ -54,11 +54,11 @@ describe("Match writes", () => {
     const match = await createMatchInTransaction(writer, tournament.id, {
       name: "Final",
       participantIds: ["a", "b"],
-      status: "finished",
       results: [
         { participantId: "a", score: 4 },
         { participantId: "b", score: 2 },
       ],
+      status: "finished",
     });
 
     expect(match.winner?.id).toBe("a");
@@ -69,13 +69,13 @@ describe("Match writes", () => {
   it("keeps the first end date of a finished match synced without one", async () => {
     const endAt = new Date("2026-11-02T19:12:00Z");
     writer.byPandascoreId.mockResolvedValue(
-      Object.assign(new Match(), { tournament, pandascoreId: 7, status: "finished", endAt }),
+      Object.assign(new Match(), { endAt, pandascoreId: 7, status: "finished", tournament }),
     );
 
     const match = await upsertSyncedMatchInTransaction(writer, tournament.id, {
       name: "Final",
-      participantIds: ["a", "b"],
       pandascoreId: 7,
+      participantIds: ["a", "b"],
       status: "finished",
     });
 
@@ -95,8 +95,8 @@ describe("Match writes", () => {
   it("preserves omitted streams when refreshing a match", async () => {
     const match = Object.assign(new Match(), {
       id: "match",
+      officialStreams: [{ language: "en", main: true, url: "https://twitch.tv/rocketleague" }],
       tournament,
-      officialStreams: [{ language: "en", url: "https://twitch.tv/rocketleague", main: true }],
     });
 
     writer.byPandascoreId.mockResolvedValue(match);
@@ -108,7 +108,7 @@ describe("Match writes", () => {
     });
 
     expect(updated.officialStreams).toStrictEqual([
-      { language: "en", url: "https://twitch.tv/rocketleague", main: true },
+      { language: "en", main: true, url: "https://twitch.tv/rocketleague" },
     ]);
   });
 
@@ -177,11 +177,11 @@ describe("Manual match corrections", () => {
     writer.load.mockResolvedValue(Object.assign(manualMatch(), { endAt: new Date() }));
 
     const match = await updateMatchInTransaction(writer, "match", {
-      status: "running",
       results: [
         { participantId: "a", score: 1 },
         { participantId: "b", score: 3 },
       ],
+      status: "running",
     });
 
     expect(match).toMatchObject({ status: "running", winner: null });
@@ -190,12 +190,12 @@ describe("Manual match corrections", () => {
   it("derives the winner from stored scores when finishing a match", async () => {
     writer.load.mockResolvedValue(
       Object.assign(manualMatch(), {
-        status: "running",
-        winner: null,
         results: [
           { id: "r1", match: { id: "match" }, participant: { id: "a" }, score: 2 },
           { id: "r2", match: { id: "match" }, participant: { id: "b" }, score: 4 },
         ],
+        status: "running",
+        winner: null,
       }),
     );
     const match = await updateMatchInTransaction(writer, "match", { status: "finished" });
@@ -216,7 +216,7 @@ describe("Manual match corrections", () => {
       Object.assign(manualMatch(), { status: "running", winner: null }),
     );
     const endAt = new Date("2026-11-02T19:12:00Z");
-    const match = await updateMatchInTransaction(writer, "match", { status: "finished", endAt });
+    const match = await updateMatchInTransaction(writer, "match", { endAt, status: "finished" });
     expect(match.endAt).toStrictEqual(endAt);
   });
 
@@ -251,12 +251,12 @@ describe("Manual match corrections", () => {
 const syncedMatch = () =>
   Object.assign(new Match(), {
     id: "match",
+    numberOfGames: 7,
     pandascoreId: 42,
     source: "pandascore",
-    numberOfGames: 7,
     vods: [
-      { game: 1, url: "https://youtu.be/g1", language: "en", source: "youtube" },
-      { game: 5, url: "https://youtu.be/g5", language: "en", source: "youtube" },
+      { game: 1, language: "en", source: "youtube", url: "https://youtu.be/g1" },
+      { game: 5, language: "en", source: "youtube", url: "https://youtu.be/g5" },
     ],
   });
 
@@ -269,11 +269,11 @@ describe("Match VOD writes", () => {
     writer.load.mockResolvedValue(syncedMatch());
 
     const match = await setVodsInTransaction(writer, "match", [
-      { game: 7, url: "https://www.twitch.tv/videos/1?t=2h", language: "FR" },
+      { game: 7, language: "FR", url: "https://www.twitch.tv/videos/1?t=2h" },
     ]);
 
     expect(match.vods).toStrictEqual([
-      { game: 7, url: "https://www.twitch.tv/videos/1?t=2h", language: "fr", source: "twitch" },
+      { game: 7, language: "fr", source: "twitch", url: "https://www.twitch.tv/videos/1?t=2h" },
     ]);
     expect(writer.save).toHaveBeenCalledWith(match);
   });
@@ -282,8 +282,8 @@ describe("Match VOD writes", () => {
     writer.load.mockResolvedValue(syncedMatch());
 
     const match = await setGameVodsInTransaction(writer, "match", 5, [
-      { url: "https://youtu.be/g5?t=95", language: "de" },
-      { url: "https://twitch.tv/videos/5", language: "en", source: "twitch" },
+      { language: "de", url: "https://youtu.be/g5?t=95" },
+      { language: "en", source: "twitch", url: "https://twitch.tv/videos/5" },
     ]);
 
     expect(match.vods.map((vod) => [vod.game, vod.source, vod.language])).toStrictEqual([
@@ -296,11 +296,11 @@ describe("Match VOD writes", () => {
   it("rejects invalid links without saving", async () => {
     writer.load.mockResolvedValue(syncedMatch());
     await expect(
-      setGameVodsInTransaction(writer, "match", 8, [{ url: "https://youtu.be/x", language: "en" }]),
+      setGameVodsInTransaction(writer, "match", 8, [{ language: "en", url: "https://youtu.be/x" }]),
     ).rejects.toBeInstanceOf(InvalidInputError);
     await expect(
       setVodsInTransaction(writer, "match", [
-        { game: 1, url: "https://youtu.be/x", language: "en", source: "twitch" },
+        { game: 1, language: "en", source: "twitch", url: "https://youtu.be/x" },
       ]),
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(writer.save).not.toHaveBeenCalled();
@@ -319,9 +319,9 @@ describe("Match VOD writes", () => {
 
     const match = await upsertSyncedMatchInTransaction(writer, "cup", {
       name: "Final",
-      participantIds: [],
-      pandascoreId: 42,
       numberOfGames: 7,
+      pandascoreId: 42,
+      participantIds: [],
     });
 
     expect(match.vods).toHaveLength(2);
@@ -330,20 +330,20 @@ describe("Match VOD writes", () => {
 
 describe("Match writes between player participants", () => {
   const knockout = Object.assign(new Tournament(), {
-    id: "knockout",
+    event: { id: "event", name: "Fake Knockout", slug: "fake-knockout" },
     format: "1v1",
+    id: "knockout",
     slug: "fake-knockout",
-    event: { id: "event", slug: "fake-knockout", name: "Fake Knockout" },
   });
 
   const solo = (id: string, name: string) =>
     Object.assign(new TournamentParticipant(), {
       id,
-      tournamentId: knockout.id,
-      team: null,
       players: [
         Object.assign(new Player(), { id: `player-${id}`, name, slug: name.toLowerCase() }),
       ],
+      team: null,
+      tournamentId: knockout.id,
     });
 
   const players = [solo("zen", "Zen"), solo("vatira", "Vatira")];
@@ -359,11 +359,11 @@ describe("Match writes between player participants", () => {
     const match = await createMatchInTransaction(writer, knockout.id, {
       name: "Final",
       participantIds: ["zen", "vatira"],
-      status: "finished",
       results: [
         { participantId: "zen", score: 3 },
         { participantId: "vatira", score: 1 },
       ],
+      status: "finished",
     });
 
     expect(match.participants.every((participant) => participant.team === null)).toBe(true);
@@ -375,9 +375,9 @@ describe("Match writes between player participants", () => {
     writer.load.mockResolvedValue(
       Object.assign(new Match(), {
         id: "final",
-        tournament: knockout,
         participants: players,
         status: "finished",
+        tournament: knockout,
         winner: players[0],
       }),
     );
@@ -400,8 +400,8 @@ describe("Manual bracket writes", () => {
   const participants = ["a", "b"].map((id) =>
     Object.assign(new TournamentParticipant(), {
       id,
-      tournamentId: stage.id,
       team: Object.assign(new Team(), { id: `team-${id}` }),
+      tournamentId: stage.id,
     }),
   );
 
@@ -501,7 +501,7 @@ describe("Manual bracket writes", () => {
 
   it("refuses bracket links on a new match of a PandaScore stage", async () => {
     writer.tournament.mockResolvedValue(
-      Object.assign(new Tournament(), { id: "synced", source: "pandascore", pandascoreId: 7 }),
+      Object.assign(new Tournament(), { id: "synced", pandascoreId: 7, source: "pandascore" }),
     );
     await expect(
       createMatchInTransaction(writer, "synced", {
@@ -535,8 +535,8 @@ describe("Manual bracket writes", () => {
     writer.bracket.mockResolvedValue({ hasBracket: true, matches: [] });
 
     const matches = await createEmptyBracketInTransaction(writer, stage.id, {
-      teams: 4,
       numberOfGames: 7,
+      teams: 4,
     });
 
     const [semi1, semi2, final] = matches;
@@ -568,7 +568,7 @@ describe("Manual bracket writes", () => {
       /already has matches/u,
     );
     writer.tournament.mockResolvedValue(
-      Object.assign(new Tournament(), { id: "synced", source: "pandascore", pandascoreId: 7 }),
+      Object.assign(new Tournament(), { id: "synced", pandascoreId: 7, source: "pandascore" }),
     );
     await expect(createEmptyBracketInTransaction(writer, "synced", { teams: 4 })).rejects.toThrow(
       /PandaScore/u,

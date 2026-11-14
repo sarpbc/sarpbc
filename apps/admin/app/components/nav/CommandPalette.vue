@@ -24,7 +24,6 @@ const canSearch = computed(() => canPlayers.value || canTeams.value || canTourna
 
 defineShortcuts({
   meta_k: {
-    usingInput: true,
     handler: () => {
       if (!canSearch.value) {
         return;
@@ -32,6 +31,7 @@ defineShortcuts({
 
       open.value = !open.value;
     },
+    usingInput: true,
   },
 });
 
@@ -86,14 +86,14 @@ const playerItems = (): CommandPaletteItem[] => {
   }
 
   return results.value.players.map((player: Player) => ({
+    avatar: player.imageUrl ? { alt: player.name, src: player.imageUrl } : undefined,
+    icon: "i-fluent-person-24-regular",
     id: `player-${player.id}`,
     label: player.name,
-    suffix: player.team?.name,
-    icon: "i-fluent-person-24-regular",
-    avatar: player.imageUrl ? { src: player.imageUrl, alt: player.name } : undefined,
     onSelect() {
       closeAndGo(`/players/${player.id}`);
     },
+    suffix: player.team?.name,
   }));
 };
 
@@ -106,14 +106,14 @@ const teamItems = (): CommandPaletteItem[] => {
     const src = resolveThemedLogoUrl(team, colorMode.value);
 
     return {
+      avatar: src ? { alt: team.name, src } : undefined,
+      icon: "i-fluent-people-team-24-regular",
       id: `team-${team.id}`,
       label: team.name,
-      suffix: team.location ?? undefined,
-      icon: "i-fluent-people-team-24-regular",
-      avatar: src ? { src, alt: team.name } : undefined,
       onSelect() {
         closeAndGo(`/teams/${team.id}`);
       },
+      suffix: team.location ?? undefined,
     };
   });
 };
@@ -124,10 +124,10 @@ const tournamentItems = (): CommandPaletteItem[] => {
   }
 
   return results.value.tournaments.map((tournament) => ({
+    avatar: tournament.imageUrl ? { alt: tournament.name, src: tournament.imageUrl } : undefined,
+    icon: "i-fluent-trophy-24-regular",
     id: `tournament-${tournament.id}`,
     label: tournamentStageLabel(tournament),
-    icon: "i-fluent-trophy-24-regular",
-    avatar: tournament.imageUrl ? { src: tournament.imageUrl, alt: tournament.name } : undefined,
     onSelect() {
       closeAndGo(`/tournaments/${tournament.id}`);
     },
@@ -161,46 +161,46 @@ const groups = computed<CommandPaletteGroup[]>(() => {
   if (canTournaments.value) {
     items.push({
       id: "commands",
-      label: t("page.search.commands"),
       items: [
         {
+          icon: syncIcon(refreshState.value === "loading" ? "idle" : refreshState.value),
           id: "refresh-empty-tournaments",
           label: t("page.search.refreshEmptyTournaments"),
-          suffix: t("page.search.refreshEmptyTournamentsHint"),
-          icon: syncIcon(refreshState.value === "loading" ? "idle" : refreshState.value),
           loading: refreshState.value === "loading",
           onSelect: (event: Event) => {
             void refreshEmptyTournaments(event);
           },
+          suffix: t("page.search.refreshEmptyTournamentsHint"),
         },
       ],
+      label: t("page.search.commands"),
     });
   }
 
   if (canPlayers.value && results.value.players.length > 0) {
     items.push({
       id: "players",
-      label: t("page.search.players"),
-      items: playerItems(),
       ignoreFilter: true,
+      items: playerItems(),
+      label: t("page.search.players"),
     });
   }
 
   if (canTeams.value && results.value.teams.length > 0) {
     items.push({
       id: "teams",
-      label: t("page.search.teams"),
-      items: teamItems(),
       ignoreFilter: true,
+      items: teamItems(),
+      label: t("page.search.teams"),
     });
   }
 
   if (canTournaments.value && results.value.tournaments.length > 0) {
     items.push({
       id: "tournaments",
-      label: t("page.search.tournaments"),
-      items: tournamentItems(),
       ignoreFilter: true,
+      items: tournamentItems(),
+      label: t("page.search.tournaments"),
     });
   }
 

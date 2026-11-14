@@ -113,12 +113,12 @@ const playerFooterItems = computed((): PlayerListItem[] => {
     items.push({ type: "divider" });
 
     for (const entry of highlightedRosterExtras.value) {
-      items.push({ type: "player", entry });
+      items.push({ entry, type: "player" });
     }
   }
 
   if (userExtra.value) {
-    items.push({ type: "player", entry: userExtra.value });
+    items.push({ entry: userExtra.value, type: "player" });
   }
 
   return items;

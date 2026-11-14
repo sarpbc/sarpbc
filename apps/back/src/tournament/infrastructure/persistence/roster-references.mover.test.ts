@@ -6,12 +6,12 @@ import { TournamentPrize } from "./tournament-prize.entities";
 
 const prize = (id: string, teamId: string, tournamentId: string, playerIds: string[]) => ({
   id,
-  team: { id: teamId },
-  tournament: { id: tournamentId },
   players: {
     add: vi.fn<(items: { id: string }[]) => void>(),
     getItems: () => playerIds.map((playerId) => ({ id: playerId })),
   },
+  team: { id: teamId },
+  tournament: { id: tournamentId },
 });
 
 const mover = (prizes: ReturnType<typeof prize>[]) => {
@@ -28,7 +28,7 @@ const mover = (prizes: ReturnType<typeof prize>[]) => {
       nativeUpdate.mock.calls.findIndex(([entity]) => entity === TournamentPrize)
     ] ?? 0;
 
-  return { references, nativeDelete, nativeUpdate, prizeUpdateOrder };
+  return { nativeDelete, nativeUpdate, prizeUpdateOrder, references };
 };
 
 describe("TournamentRosterReferences.moveTeam prizes", () => {

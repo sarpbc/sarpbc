@@ -34,34 +34,34 @@ export const buildTournamentBracketView = (tournament: TournamentDetail): Tourna
   switch (format) {
     case "flat-stage": {
       return {
-        format,
-        upperLayout: null,
         doubleEliminationLayout: null,
-        lowerBracketFlatMatches: [],
         flatMatches: sortMatchesByBeginAt(matches),
+        format,
         groupedMatches: [],
+        lowerBracketFlatMatches: [],
+        upperLayout: null,
       };
     }
 
     case "bracket-missing-links": {
       return {
-        format,
-        upperLayout: null,
         doubleEliminationLayout: null,
-        lowerBracketFlatMatches: [],
         flatMatches: [],
+        format,
         groupedMatches: groupMatchesByRound(matches),
+        lowerBracketFlatMatches: [],
+        upperLayout: null,
       };
     }
 
     case "linked-single-elimination": {
       return {
-        format,
-        upperLayout: buildBracketSectionLayout(matches),
         doubleEliminationLayout: null,
-        lowerBracketFlatMatches: [],
         flatMatches: [],
+        format,
         groupedMatches: [],
+        lowerBracketFlatMatches: [],
+        upperLayout: buildBracketSectionLayout(matches),
       };
     }
 
@@ -70,12 +70,12 @@ export const buildTournamentBracketView = (tournament: TournamentDetail): Tourna
       const doubleEliminationLayout = buildUnifiedDoubleEliminationLayout(upper, lower, matches);
 
       return {
-        format,
-        upperLayout: null,
         doubleEliminationLayout,
-        lowerBracketFlatMatches: getOrphanMatches(lower),
         flatMatches: [],
+        format,
         groupedMatches: [],
+        lowerBracketFlatMatches: getOrphanMatches(lower),
+        upperLayout: null,
       };
     }
 

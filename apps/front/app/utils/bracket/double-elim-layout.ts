@@ -131,7 +131,7 @@ export const splitDoubleEliminationMatches = (
   const lower = sortMatchesByBeginAt(matches.filter((match) => lowerIds.has(match.id)));
   const upper = sortMatchesByBeginAt(matches.filter((match) => !lowerIds.has(match.id)));
 
-  return { upper, lower };
+  return { lower, upper };
 };
 
 export const buildDoubleEliminationCombinedLayout = (
@@ -295,7 +295,7 @@ export const buildUnifiedDoubleEliminationLayout = (
 
     const column = anchorColumn ?? 0;
     const row = Math.max(0, (anchorRow ?? 0) - UPPER_TO_LOWER_ROW_GAP);
-    upperPlacements.push({ match: upperMatch, column, row });
+    upperPlacements.push({ column, match: upperMatch, row });
   }
 
   const takenUpperRows = new Map<number, number[]>();
@@ -332,9 +332,9 @@ export const buildUnifiedDoubleEliminationLayout = (
   const maxRow = Math.max(...layoutMatches.map((match) => match.row), 0);
 
   return {
-    matches: layoutMatches,
-    connectors: buildConnectors(gridMatches, gridMatchIds),
     columnCount: maxColumn + 1,
+    connectors: buildConnectors(gridMatches, gridMatchIds),
+    matches: layoutMatches,
     rowCount: maxRow + 2,
   };
 };

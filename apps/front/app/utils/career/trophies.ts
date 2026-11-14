@@ -7,17 +7,17 @@ export const deriveTrophies = (seasons: CareerSeasonRecord[]): CareerTrophy[] =>
     for (const split of season.splits) {
       for (const regional of split.regionals) {
         if (regional === "winner") {
-          trophies.push({ type: "regional", season: season.season });
+          trophies.push({ season: season.season, type: "regional" });
         }
       }
 
       if (split.major === "winner") {
-        trophies.push({ type: "major", season: season.season });
+        trophies.push({ season: season.season, type: "major" });
       }
     }
 
     if (season.worlds === "winner") {
-      trophies.push({ type: "worlds", season: season.season });
+      trophies.push({ season: season.season, type: "worlds" });
     }
   }
 

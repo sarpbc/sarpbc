@@ -7,9 +7,9 @@ export interface EventFormState {
 }
 
 export const eventToFormState = (event: ManualEvent | null): EventFormState => ({
+  leagueId: event?.league?.id ?? "",
   name: event?.name ?? "",
   slug: event?.slug ?? "",
-  leagueId: event?.league?.id ?? "",
 });
 
 /** Sends only what changed so an update never trips the backend's "change at least one field". */

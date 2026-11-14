@@ -38,7 +38,7 @@ export class SeasonService {
     const season = await this.require(id);
     const participants = await this.store.participants(season.id);
 
-    return { ...season, participants, awards: await this.store.awards(season.id) };
+    return { ...season, awards: await this.store.awards(season.id), participants };
   }
 
   async create(input: SeasonInput): Promise<SeasonDetail> {
@@ -51,10 +51,10 @@ export class SeasonService {
     }
 
     const season: SeasonRecord = {
+      format: input.format ? parseSeasonFormat(input.format) : EMPTY_SEASON_FORMAT,
       id: v4(),
       name: await this.freeName(input.name, null),
       slug: await this.freeSlug(input.slug ?? null, null),
-      format: input.format ? parseSeasonFormat(input.format) : EMPTY_SEASON_FORMAT,
       winnerTeamId: null,
     };
 
@@ -68,9 +68,9 @@ export class SeasonService {
 
     const season: SeasonRecord = {
       ...current,
+      format: input.format ? parseSeasonFormat(input.format) : current.format,
       name: await this.freeName(input.name, id),
       slug: input.slug === undefined ? current.slug : await this.freeSlug(input.slug, id),
-      format: input.format ? parseSeasonFormat(input.format) : current.format,
       winnerTeamId:
         input.winnerTeamId === undefined
           ? current.winnerTeamId

@@ -53,16 +53,16 @@ const onFileChange = async (event: Event) => {
 
   try {
     imageUrl.value = await uploadFile(file, {
-      target,
       articleSlug,
       articleTitle,
+      target,
     });
   } catch (error_) {
     const message = error_ instanceof Error ? error_.message : "";
     toast.add({
-      title: t("imageUpload.uploadFailed"),
-      description: message || t("imageUpload.uploadServerError"),
       color: "error",
+      description: message || t("imageUpload.uploadServerError"),
+      title: t("imageUpload.uploadFailed"),
     });
   }
 };

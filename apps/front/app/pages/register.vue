@@ -5,9 +5,9 @@ const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 setPageSeo({
-  title: t("page.register.seoTitle"),
   description: t("page.register.seoDescription"),
   noIndex: true,
+  title: t("page.register.seoTitle"),
 });
 
 const { leaveIfSignedIn, submit, googleLogin } = useAuthFlow();
@@ -19,9 +19,9 @@ interface RegisterState {
 }
 
 const state = reactive<RegisterState>({
-  userName: "",
   email: "",
   password: "",
+  userName: "",
 });
 
 const errorMessage = ref<string | null>(null);
@@ -35,7 +35,7 @@ const onSubmit = async (event: Event) => {
   try {
     const signedUp = await submit(
       "/auth/signup",
-      { userName: state.userName, email: state.email, password: state.password },
+      { email: state.email, password: state.password, userName: state.userName },
       "user_signed_up",
     );
 

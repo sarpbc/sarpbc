@@ -5,13 +5,13 @@ import { ModerationController } from "./http/moderation.controller";
 import { ModerationService } from "../application/moderation.service";
 
 @Module({
-  imports: [ReplyModule],
   controllers: [ModerationController],
+  imports: [ReplyModule],
   providers: [
     {
+      inject: [ReplyService],
       provide: ModerationService,
       useFactory: (replies: ReplyService) => new ModerationService(replies),
-      inject: [ReplyService],
     },
   ],
 })

@@ -33,16 +33,16 @@ export const buildTournamentItemList = (options: BuildTournamentItemListOptions)
   return compactJsonLd({
     "@context": SCHEMA_ORG,
     "@type": "ItemList",
-    name: options.name ?? "Rocket League tournaments",
-    url,
-    numberOfItems: options.total,
     itemListElement: options.events.map((event, index) =>
       compactJsonLd({
         "@type": "ListItem",
-        position: positionOffset + index + 1,
         name: event.name,
+        position: positionOffset + index + 1,
         url: `${SITE_ORIGIN}${tournamentEventPath(event.slug)}`,
       }),
     ),
+    name: options.name ?? "Rocket League tournaments",
+    numberOfItems: options.total,
+    url,
   });
 };

@@ -28,9 +28,9 @@ const setup = (role: StaffRole = "admin") => {
   }
 
   const call = async (args: ToolArguments) =>
-    await tool.run({ id: "u1", email: "staff@test.com", role }, args);
+    await tool.run({ email: "staff@test.com", id: "u1", role }, args);
 
-  return { rosterProposalService, tool, call };
+  return { call, rosterProposalService, tool };
 };
 
 describe("set_match_lineups", () => {
@@ -38,10 +38,10 @@ describe("set_match_lineups", () => {
     vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
     const { call, rosterProposalService } = setup();
 
-    const result = await call({ matchId: MATCH_ID, lineups: LINEUPS, sourceUrl: SOURCE });
+    const result = await call({ lineups: LINEUPS, matchId: MATCH_ID, sourceUrl: SOURCE });
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      { kind: "set_match_lineups", matchId: MATCH_ID, lineups: LINEUPS },
+      { kind: "set_match_lineups", lineups: LINEUPS, matchId: MATCH_ID },
       SOURCE,
       "u1",
     );
@@ -49,14 +49,14 @@ describe("set_match_lineups", () => {
 
     expect(jsonOf(result)).toMatchObject({
       kind: "set_match_lineups",
-      status: "pending",
       reviewUrl: adminUrl,
+      status: "pending",
     });
   });
 
   it("requires a non-Liquipedia sourceUrl and bounded lineups", () => {
     const schema = z.object(setup().tool.inputSchema);
-    const input = { matchId: MATCH_ID, lineups: LINEUPS, sourceUrl: SOURCE };
+    const input = { lineups: LINEUPS, matchId: MATCH_ID, sourceUrl: SOURCE };
     expect(schema.safeParse(input).success).toBe(true);
     expect(schema.safeParse({ ...input, sourceUrl: undefined }).success).toBe(false);
     expect(
@@ -81,7 +81,7 @@ describe("set_match_lineups", () => {
 
   it("requires tournaments.manage", async () => {
     const { call, rosterProposalService } = setup("journalist");
-    const result = await call({ matchId: MATCH_ID, lineups: LINEUPS, sourceUrl: SOURCE });
+    const result = await call({ lineups: LINEUPS, matchId: MATCH_ID, sourceUrl: SOURCE });
     expect(result.isError).toBe(true);
     expect(rosterProposalService.propose).not.toHaveBeenCalled();
   });

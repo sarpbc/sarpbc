@@ -12,8 +12,6 @@ const PUBLIC_LIMIT = 100;
 const SSR_LIMIT = 400;
 
 export const createClientThrottleOptions = (internalApiToken: string | undefined) => ({
-  skipIf: (context: ExecutionContext) =>
-    isDirectLoopback(context.switchToHttp().getRequest<ClientRequest>()),
   getTracker: (request: ClientRequest) => {
     const address = internalApiTokenMatches(request, internalApiToken)
       ? (forwardedPublicClient(request) ?? resolveClientAddress(request))
@@ -23,10 +21,10 @@ export const createClientThrottleOptions = (internalApiToken: string | undefined
 
     return internalApiTokenMatches(request, internalApiToken) ? `ssr:${normalized}` : normalized;
   },
+  skipIf: (context: ExecutionContext) =>
+    isDirectLoopback(context.switchToHttp().getRequest<ClientRequest>()),
   throttlers: [
     {
-      name: "default",
-      ttl: 60_000,
       limit: (context: ExecutionContext) =>
         internalApiTokenMatches(
           context.switchToHttp().getRequest<ClientRequest>(),
@@ -34,6 +32,8 @@ export const createClientThrottleOptions = (internalApiToken: string | undefined
         )
           ? SSR_LIMIT
           : PUBLIC_LIMIT,
+      name: "default",
+      ttl: 60_000,
     },
   ],
 });

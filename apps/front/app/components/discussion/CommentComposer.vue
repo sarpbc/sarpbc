@@ -87,20 +87,20 @@ const submitComment = async () => {
 
   const createResult = await createComment({
     content: result.data.content,
-    targetType,
-    targetId,
     replyToId: replyToId ?? undefined,
+    targetId,
+    targetType,
   });
 
   isSubmitting.value = false;
 
   if (createResult.ok) {
     state.content = "";
-    posthog?.capture("comment_posted", { target_type: targetType, target_id: targetId });
+    posthog?.capture("comment_posted", { target_id: targetId, target_type: targetType });
     emit("commentCreated");
     toast.add({
-      title: t("components.discussion.messages.created"),
       color: "success",
+      title: t("components.discussion.messages.created"),
     });
 
     return;
@@ -109,9 +109,9 @@ const submitComment = async () => {
   const description = createFailureDescription(createResult);
 
   toast.add({
-    title: t("components.discussion.messages.errorTitle"),
-    description,
     color: "error",
+    description,
+    title: t("components.discussion.messages.errorTitle"),
   });
 };
 

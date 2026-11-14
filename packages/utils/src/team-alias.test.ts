@@ -4,12 +4,12 @@ import type { TeamAliasInput } from "@sarpbc/types";
 import { parseTeamAlias, teamAliasInForce, teamAliasesOverlap } from "./team-alias";
 
 const VALID: TeamAliasInput = {
-  name: " Fixture Esports ",
   from: "2024-01-15",
-  to: "2025-03-01",
-  sourceUrl: " https://x.com/fixture/status/1 ",
   logoUrl: null,
+  name: " Fixture Esports ",
   pandascoreId: null,
+  sourceUrl: " https://x.com/fixture/status/1 ",
+  to: "2025-03-01",
 };
 
 const error = (input: Partial<TeamAliasInput>) => {
@@ -21,10 +21,10 @@ const error = (input: Partial<TeamAliasInput>) => {
 void describe("parseTeamAlias", () => {
   void it("trims the name and normalizes the source URL", () => {
     assert.deepEqual(parseTeamAlias(VALID), {
-      ok: true,
       alias: { ...VALID, name: "Fixture Esports", sourceUrl: "https://x.com/fixture/status/1" },
+      ok: true,
     });
-    assert.equal(parseTeamAlias({ ...VALID, to: null, pandascoreId: 42 }).ok, true);
+    assert.equal(parseTeamAlias({ ...VALID, pandascoreId: 42, to: null }).ok, true);
   });
 
   void it("refuses Liquipedia and its mirrors as a source or a logo", () => {
@@ -52,8 +52,8 @@ void describe("parseTeamAlias", () => {
 
 void describe("teamAliasInForce", () => {
   const aliases = [
-    { name: "First", from: "2020-01-01", to: "2022-06-01" },
-    { name: "Second", from: "2022-06-01", to: null },
+    { from: "2020-01-01", name: "First", to: "2022-06-01" },
+    { from: "2022-06-01", name: "Second", to: null },
   ];
 
   void it("picks the alias whose period holds the day, the end day excluded", () => {

@@ -60,6 +60,6 @@ export class CountryService {
       redistributableOnly: true,
     });
 
-    return { code, players, teams: currentTeams(players), matches, matchTotal };
+    return { code, matchTotal, matches, players, teams: currentTeams(players) };
   }
 }

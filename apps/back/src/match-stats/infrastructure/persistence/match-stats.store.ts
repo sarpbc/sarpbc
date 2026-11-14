@@ -18,34 +18,34 @@ import { nameOf } from "./participant-name";
 import { toLink } from "./player-link.store";
 
 const toTeam = (game: MatchGame, side: Side): MatchGameTeamStats => ({
-  participantId: (side === "blue" ? game.blueParticipant : game.orangeParticipant).id,
   goals: side === "blue" ? game.blueGoals : game.orangeGoals,
+  participantId: (side === "blue" ? game.blueParticipant : game.orangeParticipant).id,
   players: game.players
     .getItems()
     .filter((row) => row.side === side)
     .toSorted((a, b) => a.name.localeCompare(b.name))
     .map((row) => ({
+      assists: row.assists,
+      demolitions: row.demolitions,
+      goals: row.goals,
       name: row.name,
       player: row.player
         ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
         : null,
-      goals: row.goals,
-      assists: row.assists,
       saves: row.saves,
       shots: row.shots,
-      demolitions: row.demolitions,
     })),
 });
 
 const toTournamentGame = (game: MatchGame): TournamentStatsGame => ({
+  ballchasingId: game.ballchasingId,
+  blueGoals: game.blueGoals,
+  blueParticipantId: game.blueParticipant.id,
   matchId: game.match.id,
   number: game.number,
-  ballchasingId: game.ballchasingId,
-  playedAt: game.playedAt?.toISOString() ?? null,
-  blueParticipantId: game.blueParticipant.id,
-  orangeParticipantId: game.orangeParticipant.id,
-  blueGoals: game.blueGoals,
   orangeGoals: game.orangeGoals,
+  orangeParticipantId: game.orangeParticipant.id,
+  playedAt: game.playedAt?.toISOString() ?? null,
 });
 
 export class MikroOrmGameStatsStore implements GameStatsStore {
@@ -98,8 +98,8 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       ? {
           matchId: game.match.id,
           number: game.number,
-          tournamentName: game.match.tournament.name,
           teams: [nameOf(game.blueParticipant), nameOf(game.orangeParticipant)],
+          tournamentName: game.match.tournament.name,
         }
       : null;
   }
@@ -122,7 +122,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         await em.upsert(
           PlayerPlatformLink,
           { ...account, player: playerId },
-          { onConflictFields: ["platform", "platformId"], onConflictAction: "ignore" },
+          { onConflictAction: "ignore", onConflictFields: ["platform", "platformId"] },
         );
         const kept = await em.findOneOrFail(PlayerPlatformLink, account, { refresh: true });
         await em.nativeUpdate(
@@ -133,31 +133,31 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       });
 
       const row = em.create(MatchGame, {
+        ballchasingId: game.ballchasingId,
+        blueGoals: game.blueGoals,
+        blueParticipant: game.blueParticipantId,
+        createdAt: new Date(),
         match: game.matchId,
         number: game.number,
-        ballchasingId: game.ballchasingId,
-        rocketLeagueId: game.rocketLeagueId,
-        playedAt: game.playedAt,
-        blueParticipant: game.blueParticipantId,
-        orangeParticipant: game.orangeParticipantId,
-        blueGoals: game.blueGoals,
         orangeGoals: game.orangeGoals,
-        createdAt: new Date(),
+        orangeParticipant: game.orangeParticipantId,
+        playedAt: game.playedAt,
+        rocketLeagueId: game.rocketLeagueId,
       });
 
       for (const player of game.players) {
         em.create(MatchGamePlayer, {
+          assists: player.assists,
+          demolitions: player.demolitions,
           game: row,
-          side: player.side,
-          player: player.playerId,
+          goals: player.goals,
           name: player.name,
           platform: player.platform,
           platformId: player.platformId,
-          goals: player.goals,
-          assists: player.assists,
+          player: player.playerId,
           saves: player.saves,
           shots: player.shots,
-          demolitions: player.demolitions,
+          side: player.side,
         });
       }
 
@@ -169,12 +169,12 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     const games = await this.em.find(
       MatchGame,
       { match: matchId },
-      { populate: ["players.player"], orderBy: { number: "ASC" } },
+      { orderBy: { number: "ASC" }, populate: ["players.player"] },
     );
 
     return games.map((game) => ({
-      number: game.number,
       ballchasingId: game.ballchasingId,
+      number: game.number,
       playedAt: game.playedAt?.toISOString() ?? null,
       teams: [toTeam(game, "blue"), toTeam(game, "orange")],
     }));
@@ -210,22 +210,22 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
 
       return {
-        gameId: row.game.id,
         account: JSON.stringify([row.platform, row.platformId ?? row.name]),
+        assists: row.assists,
+        demolitions: row.demolitions,
+        gameId: row.game.id,
+        goals: row.goals,
         player: row.player
           ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
           : null,
+        saves: row.saves,
+        shots: row.shots,
         team: {
           id: participant.team?.id ?? null,
           name: nameOf(participant),
           slug: participant.team?.slug ?? null,
         },
         teamGoals: row.side === "blue" ? row.game.blueGoals : row.game.orangeGoals,
-        goals: row.goals,
-        assists: row.assists,
-        saves: row.saves,
-        shots: row.shots,
-        demolitions: row.demolitions,
       };
     });
   }
@@ -246,7 +246,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       await em.upsert(
         MatchGameExclusion,
         { ballchasingId: game.ballchasingId },
-        { onConflictFields: ["ballchasingId"], onConflictAction: "ignore" },
+        { onConflictAction: "ignore", onConflictFields: ["ballchasingId"] },
       );
 
       return removed;

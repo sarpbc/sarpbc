@@ -14,15 +14,15 @@ export const proposalSourceUrlSchema = dataSourceUrlField(
 
 export const proposed = (proposal: RosterProposal, sourceUrl: string | undefined): ToolWrite => ({
   entityId: proposal.id,
-  sourceUrl,
   result: {
-    proposalId: proposal.id,
-    kind: proposal.change.kind,
     change: proposal.change,
-    status: proposal.status,
-    reviewUrl: adminRosterProposalsUrl(),
+    kind: proposal.change.kind,
     note: REVIEW_NOTE,
+    proposalId: proposal.id,
+    reviewUrl: adminRosterProposalsUrl(),
+    status: proposal.status,
   },
+  sourceUrl,
 });
 
 export const proposer =

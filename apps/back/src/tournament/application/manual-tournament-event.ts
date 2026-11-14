@@ -17,8 +17,8 @@ export const createOwnEvent = async (
   slug: string | undefined,
 ): Promise<TournamentEvent> => {
   const event = Object.assign(new TournamentEvent(), {
-    name: tournament.name,
     league: tournament.league,
+    name: tournament.name,
   });
 
   event.slug =

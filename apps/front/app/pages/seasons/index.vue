@@ -14,8 +14,8 @@ const {
 });
 
 setPageSeo({
-  title: t("page.seasons.index.seoTitle"),
   description: t("page.seasons.index.description"),
+  title: t("page.seasons.index.seoTitle"),
 });
 </script>
 

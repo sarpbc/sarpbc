@@ -103,7 +103,7 @@ export class CompetitionEventQueries implements EventQueries {
     const rows = await this.em.find(
       TournamentEvent,
       { pandascoreSerieId: null },
-      { populate: ["league"], orderBy: { createdAt: QueryOrder.DESC, id: QueryOrder.ASC } },
+      { orderBy: { createdAt: QueryOrder.DESC, id: QueryOrder.ASC }, populate: ["league"] },
     );
 
     if (!rows.length) {
@@ -132,7 +132,7 @@ export class CompetitionEventQueries implements EventQueries {
     }));
   }
   async stageId(eventSlug: string, stageSlug: string) {
-    const row = await this.em.findOne(Tournament, { slug: stageSlug, event: { slug: eventSlug } });
+    const row = await this.em.findOne(Tournament, { event: { slug: eventSlug }, slug: stageSlug });
 
     return row?.id ?? null;
   }

@@ -46,8 +46,8 @@ const parseListScopeFilters = (
   tournamentId?: string,
   leagueId?: string,
 ): MatchListScopeFilters => ({
-  tournamentId: nonBlank(tournamentId),
   leagueId: nonBlank(leagueId),
+  tournamentId: nonBlank(tournamentId),
 });
 
 const parsePagingValue = (name: string, value?: string): number | undefined => {
@@ -110,11 +110,11 @@ export class MatchController {
     const commentCounts = await this.replyService.countByTargetIds("match", matchIds);
 
     return {
-      upcoming: attachCommentCounts(upcomingMatches.map(mapMatchListItem), commentCounts),
       live: attachCommentCounts(liveMatches.map(mapMatchListItem), commentCounts),
-      upcomingTotal,
       liveTotal,
       total: upcomingTotal + liveTotal,
+      upcoming: attachCommentCounts(upcomingMatches.map(mapMatchListItem), commentCounts),
+      upcomingTotal,
     };
   }
 
@@ -175,9 +175,9 @@ export class MatchController {
 
     return {
       ...detail,
-      match: { ...withPublicSlug(detail.match), watchStreams: detail.match.watchStreams() },
       games,
       lineups,
+      match: { ...withPublicSlug(detail.match), watchStreams: detail.match.watchStreams() },
     };
   }
 }

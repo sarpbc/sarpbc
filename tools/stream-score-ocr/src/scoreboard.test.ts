@@ -8,9 +8,9 @@ import type { Overlay } from "./overlay.ts";
 import { readScoreboard } from "./scoreboard.ts";
 
 const SIZES = [
-  { width: 1920, height: 1080 },
-  { width: 1280, height: 720 },
-  { width: 960, height: 540 },
+  { height: 1080, width: 1920 },
+  { height: 720, width: 1280 },
+  { height: 540, width: 960 },
 ] as const;
 
 const scorebug = (
@@ -19,14 +19,14 @@ const scorebug = (
   clock: number,
   overtime: boolean,
 ): ScorebugScene => ({
-  kind: "scorebug",
   blue,
-  orange,
   clock,
-  overtime,
-  replay: false,
   fade: 1,
   glitch: false,
+  kind: "scorebug",
+  orange,
+  overtime,
+  replay: false,
 });
 
 void describe("readScoreboard", () => {
@@ -68,7 +68,7 @@ void describe("readScoreboard", () => {
   });
 
   void it("ignores replays, faded transitions and screens without the scorebug", () => {
-    const renderer = new FixtureRenderer({ width: 1920, height: 1080 }, 9);
+    const renderer = new FixtureRenderer({ height: 1080, width: 1920 }, 9);
 
     const scenes: Scene[] = [
       { ...scorebug(1, 0, 200, false), replay: true },

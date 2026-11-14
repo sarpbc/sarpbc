@@ -35,8 +35,8 @@ const postedAtLabel = computed(() =>
     ? new Intl.DateTimeFormat(locale.value, {
         day: "numeric",
         month: "short",
-        year: "numeric",
         timeZone: "UTC",
+        year: "numeric",
       }).format(new Date(data.value.postedAt))
     : "",
 );

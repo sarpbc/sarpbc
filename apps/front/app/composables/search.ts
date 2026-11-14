@@ -20,6 +20,6 @@ export const searchTeamsAndPlayers = async ({
       },
     });
   } catch {
-    return { teams: [], players: [], total: { teams: 0, players: 0 } };
+    return { players: [], teams: [], total: { players: 0, teams: 0 } };
   }
 };

@@ -78,9 +78,9 @@ export class R2Service implements ObjectStorage {
 
     this.connection = {
       client: new S3Client({
-        region: "auto",
-        endpoint,
         credentials: { accessKeyId, secretAccessKey },
+        endpoint,
+        region: "auto",
       }),
       publicUrl: (key) => `${publicBaseUrl.replace(/\/$/u, "")}/${key}`,
     };
@@ -101,13 +101,13 @@ export class R2Service implements ObjectStorage {
 
     const command = new PutObjectCommand({
       Bucket: this.bucket,
-      Key: key,
       ContentType: contentType,
+      Key: key,
     });
 
     const uploadUrl = await getSignedUrl(client, command, { expiresIn: 600 });
 
-    return { uploadUrl, publicUrl: publicUrl(key), key };
+    return { key, publicUrl: publicUrl(key), uploadUrl };
   }
 
   async uploadImage(
@@ -119,18 +119,18 @@ export class R2Service implements ObjectStorage {
 
     return await this.objectOperation(
       "uploadImage",
-      { key, target, imageContentType: contentType, imageSize: buffer.byteLength },
+      { imageContentType: contentType, imageSize: buffer.byteLength, key, target },
       async ({ client, publicUrl }) => {
         await client.send(
           new PutObjectCommand({
-            Bucket: this.bucket,
-            Key: key,
             Body: buffer,
+            Bucket: this.bucket,
             ContentType: contentType,
+            Key: key,
           }),
         );
 
-        return { publicUrl: publicUrl(key), key };
+        return { key, publicUrl: publicUrl(key) };
       },
       "Image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
     );
@@ -139,19 +139,19 @@ export class R2Service implements ObjectStorage {
   async putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject> {
     return await this.objectOperation(
       "putObject",
-      { key, imageContentType: contentType, imageSize: bytes.byteLength },
+      { imageContentType: contentType, imageSize: bytes.byteLength, key },
       async ({ client, publicUrl }) => {
         await client.send(
           new PutObjectCommand({
-            Bucket: this.bucket,
-            Key: key,
             Body: bytes,
-            ContentType: contentType,
+            Bucket: this.bucket,
             CacheControl: "public, max-age=31536000, immutable",
+            ContentType: contentType,
+            Key: key,
           }),
         );
 
-        return { publicUrl: publicUrl(key), key };
+        return { key, publicUrl: publicUrl(key) };
       },
     );
   }
@@ -159,7 +159,7 @@ export class R2Service implements ObjectStorage {
   async copyObject(sourceKey: string, key: string): Promise<StoredObject> {
     return await this.objectOperation(
       "copyObject",
-      { sourceKey, key },
+      { key, sourceKey },
       async ({ client, publicUrl }) => {
         await client.send(
           new CopyObjectCommand({
@@ -169,7 +169,7 @@ export class R2Service implements ObjectStorage {
           }),
         );
 
-        return { publicUrl: publicUrl(key), key };
+        return { key, publicUrl: publicUrl(key) };
       },
     );
   }
@@ -189,10 +189,10 @@ export class R2Service implements ObjectStorage {
     const connection = this.connect();
 
     const log = this.createLogger({
-      component: R2Service.name,
       action,
-      environment: nodeEnvironment(),
       bucket: this.bucket,
+      component: R2Service.name,
+      environment: nodeEnvironment(),
       ...fields,
     });
 

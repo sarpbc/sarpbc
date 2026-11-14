@@ -3,12 +3,12 @@ export const CAREER_REGIONS = ["na", "eu", "oce", "sam", "mena", "apac", "ssa"] 
 export type CareerRegion = (typeof CAREER_REGIONS)[number];
 
 export const CAREER_COUNTRIES = {
-  na: ["us", "ca", "mx"],
+  apac: ["jp", "kr", "sg", "in"],
   eu: ["fr", "gb", "de", "es", "nl", "se", "dk", "it"],
+  mena: ["sa", "ae", "ma", "eg"],
+  na: ["us", "ca", "mx"],
   oce: ["au", "nz"],
   sam: ["br", "ar", "cl", "pe"],
-  mena: ["sa", "ae", "ma", "eg"],
-  apac: ["jp", "kr", "sg", "in"],
   ssa: ["za", "ng", "ke"],
 } as const satisfies Record<CareerRegion, readonly string[]>;
 
@@ -285,18 +285,18 @@ export const getSeasonsPastPeak = (season: number): number => Math.max(0, season
 export const getRetiredAge = (seasonsPlayed: number): number => STARTING_AGE + seasonsPlayed;
 
 export const emptyDestinyLeanings = (): CareerDestinyLeanings => ({
+  coach: 0,
   quit: 0,
   streamer: 0,
-  coach: 0,
 });
 
 export const applyDestinyLeanings = (
   current: CareerDestinyLeanings,
   delta: Partial<CareerDestinyLeanings>,
 ): CareerDestinyLeanings => ({
+  coach: current.coach + (delta.coach ?? 0),
   quit: current.quit + (delta.quit ?? 0),
   streamer: current.streamer + (delta.streamer ?? 0),
-  coach: current.coach + (delta.coach ?? 0),
 });
 
 export const getRecommendedDestiny = (leanings: CareerDestinyLeanings): CareerDestiny => {

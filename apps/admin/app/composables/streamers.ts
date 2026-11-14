@@ -13,8 +13,8 @@ export const addTrackedStreamer = async (
   displayName: string | null,
 ): Promise<TrackedStreamer> =>
   await apiFetch<TrackedStreamer>("/streamers", {
+    body: { displayName, login },
     method: "POST",
-    body: { login, displayName },
   });
 
 export const removeTrackedStreamer = async (id: string): Promise<void> => {

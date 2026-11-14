@@ -25,8 +25,8 @@ const presentedBy = ref("");
 const sourceUrl = ref("");
 
 const awardTypeOptions = SEASON_AWARD_TYPES.map((type) => ({
-  value: type,
   label: t(`page.seasons.awards.types.${type}`),
+  value: type,
 }));
 
 const showsRegion = computed(() => awardType.value !== "season_mvp");
@@ -81,10 +81,10 @@ const submit = () => {
   }
 
   emit("submit", {
-    playerId: player.value.id,
     awardType: awardType.value,
-    region: showsRegion.value ? region.value.trim() || null : null,
+    playerId: player.value.id,
     presentedBy: presentedBy.value.trim() || null,
+    region: showsRegion.value ? region.value.trim() || null : null,
     sourceUrl: sourceUrl.value.trim(),
   });
 };

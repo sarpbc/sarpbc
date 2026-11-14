@@ -22,7 +22,7 @@ export class AirRiddleService {
     const players = await this.players.find({ name: guess });
 
     if (!players.some((p) => p.name.toUpperCase() === guess.toUpperCase())) {
-      return { results: [], error: "playerNotFound" };
+      return { error: "playerNotFound", results: [] };
     }
 
     const riddle = await this.getTodaysRiddle();
@@ -34,11 +34,11 @@ export class AirRiddleService {
     const results = evaluateGuess(guess.toUpperCase(), riddle.playerName.toUpperCase());
 
     return {
-      results,
       answer:
         results.every((r) => r === AirRiddleResultEnum.CORRECT) || last === true
           ? riddle.playerName
           : undefined,
+      results,
     };
   }
   async createAirRiddle(): Promise<DailyRiddle | null> {
@@ -56,10 +56,10 @@ export class AirRiddleService {
       }
 
       const riddle = {
+        createdAt: this.runtime.now(),
         id: this.runtime.id(),
         playerId: player.id,
         playerName: player.name,
-        createdAt: this.runtime.now(),
       };
 
       await this.riddles.save(riddle);

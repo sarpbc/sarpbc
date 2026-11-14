@@ -73,7 +73,7 @@ const readImage = async (response: Response): Promise<TweetImage> => {
     chunks.push(value);
   }
 
-  return { contentType, body: Buffer.concat(chunks) };
+  return { body: Buffer.concat(chunks), contentType };
 };
 
 const fetchImage = async (
@@ -86,9 +86,9 @@ const fetchImage = async (
   }
 
   const response = await fetch(target, {
+    headers: { Accept: "image/*" },
     redirect: "manual",
     signal,
-    headers: { Accept: "image/*" },
   });
 
   if (response.status < 300 || response.status >= 400) {

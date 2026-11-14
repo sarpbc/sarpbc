@@ -34,7 +34,7 @@ interface PullRequestFixture {
 const fixture = (t: TestContext): string => {
   const directory = mkdtempSync(path.join(tmpdir(), "sarpbc-git-names-"));
   t.after(() => {
-    rmSync(directory, { recursive: true, force: true });
+    rmSync(directory, { force: true, recursive: true });
   });
 
   return directory;
@@ -183,9 +183,9 @@ void test("PR checks inspect real commits and exclude existing history", (t) => 
   const eventPath = path.join(directory, "event.json");
 
   const pr: PullRequestFixture = {
-    title: "feat(front): add player search",
     base: { sha: base },
     head: { ref: "feat/search", sha: git("rev-parse", "HEAD") },
+    title: "feat(front): add player search",
   };
 
   const checkPr = () => {

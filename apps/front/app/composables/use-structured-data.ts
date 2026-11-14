@@ -13,9 +13,9 @@ const setJsonLd = (key: string, data: MaybeRefOrGetter<JsonLdNode | null | undef
 
       return [
         {
+          innerHTML: serializeJsonLd(compactJsonLd(payload)),
           key,
           type: "application/ld+json",
-          innerHTML: serializeJsonLd(compactJsonLd(payload)),
         },
       ];
     }),

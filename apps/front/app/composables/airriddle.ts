@@ -24,18 +24,18 @@ export const guessAirRiddle = async (
       error?: string;
       answer?: string;
     }>(`/air-riddle/guess`, {
-      method: "POST",
       body: { guess, last },
+      method: "POST",
     });
 
     return {
-      result: res.results,
-      error: res.error,
       answer: res.answer,
+      error: res.error,
+      result: res.results,
     };
   } catch (error) {
     console.error("Error fetching air riddle guess:", error);
 
-    return { result: [], error: "submitFailed" };
+    return { error: "submitFailed", result: [] };
   }
 };

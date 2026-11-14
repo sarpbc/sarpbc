@@ -20,7 +20,7 @@ void test("accepts locales with the same nested keys", () => {
   try {
     assert.deepEqual(parityViolations(directory), []);
   } finally {
-    rmSync(directory, { recursive: true, force: true });
+    rmSync(directory, { force: true, recursive: true });
   }
 });
 
@@ -34,6 +34,6 @@ void test("reports a key missing from either locale", () => {
       "extra: missing in en-US",
     ]);
   } finally {
-    rmSync(directory, { recursive: true, force: true });
+    rmSync(directory, { force: true, recursive: true });
   }
 });

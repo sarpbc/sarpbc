@@ -29,15 +29,15 @@ const loadOwner = async (
       const stages = await scope.events.stages(event.id);
 
       return {
-        streams: event.streams,
         inherited: [],
         redistributable:
           stages.length === 0 || stages.some((stage) => isRedistributable(stage.source)),
-        tournamentIds: stages.map((stage) => stage.id),
         save: async (streams) => {
           event.streams = streams;
           await scope.events.save(event);
         },
+        streams: event.streams,
+        tournamentIds: stages.map((stage) => stage.id),
       };
     }
 
@@ -49,14 +49,14 @@ const loadOwner = async (
       }
 
       return {
-        streams: tournament.streams,
         inherited: tournament.eventStreams,
         redistributable: isRedistributable(tournament.source),
-        tournamentIds: [tournament.id],
         save: async (streams) => {
           tournament.streams = streams;
           await scope.tournaments.save(tournament);
         },
+        streams: tournament.streams,
+        tournamentIds: [tournament.id],
       };
     }
 
@@ -68,15 +68,15 @@ const loadOwner = async (
       }
 
       return {
-        streams: match.streams,
         inherited: match.inheritedStreams(),
         redistributable:
           isRedistributable(match.source) && isRedistributable(match.tournament.source),
-        tournamentIds: [],
         save: async (streams) => {
           match.streams = streams;
           await scope.matches.save(match);
         },
+        streams: match.streams,
+        tournamentIds: [],
       };
     }
 
@@ -98,7 +98,7 @@ export class StreamService {
     return await this.transaction.run(async (scope) => {
       const { streams, inherited } = await loadOwner(scope, owner);
 
-      return { streams, inherited };
+      return { inherited, streams };
     });
   }
 
@@ -118,7 +118,7 @@ export class StreamService {
 
       await loaded.save(streams);
 
-      return { streams, inherited: loaded.inherited, tournamentIds: loaded.tournamentIds };
+      return { inherited: loaded.inherited, streams, tournamentIds: loaded.tournamentIds };
     });
 
     await this.afterCommit.settle({ tournamentIds });

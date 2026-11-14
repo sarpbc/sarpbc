@@ -43,8 +43,8 @@ const submitReport = async () => {
 
   if (result.ok) {
     toast.add({
-      title: t("components.discussion.report.messages.submitted"),
       color: "success",
+      title: t("components.discussion.report.messages.submitted"),
     });
     open.value = false;
     emit("reported");
@@ -54,8 +54,8 @@ const submitReport = async () => {
 
   if (result.reason === "already_reported") {
     toast.add({
-      title: t("components.discussion.report.messages.alreadyReported"),
       color: "warning",
+      title: t("components.discussion.report.messages.alreadyReported"),
     });
     open.value = false;
 
@@ -64,17 +64,17 @@ const submitReport = async () => {
 
   if (result.reason === "unauthorized") {
     toast.add({
-      title: t("components.discussion.report.messages.signInRequired"),
       color: "warning",
+      title: t("components.discussion.report.messages.signInRequired"),
     });
 
     return;
   }
 
   toast.add({
-    title: t("components.discussion.messages.errorTitle"),
-    description: result.message ?? t("components.discussion.report.messages.error"),
     color: "error",
+    description: result.message ?? t("components.discussion.report.messages.error"),
+    title: t("components.discussion.messages.errorTitle"),
   });
 };
 </script>

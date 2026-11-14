@@ -18,14 +18,14 @@ export class PickemChoice {
 
 export const PickemChoiceSchema = defineEntity({
   class: PickemChoice,
-  uniques: [{ properties: ["user", "match"], name: "pickem_choice_user_match_unique" }],
   properties: {
+    createdAt: p.datetime().type("timestamptz"),
     id: p.string().primary(),
-    user: p.manyToOne(User),
     match: p.manyToOne(Match),
     pickedParticipant: p.manyToOne(TournamentParticipant),
     points: p.integer().nullable(),
     scored: p.boolean().default(false),
-    createdAt: p.datetime().type("timestamptz"),
+    user: p.manyToOne(User),
   },
+  uniques: [{ name: "pickem_choice_user_match_unique", properties: ["user", "match"] }],
 });

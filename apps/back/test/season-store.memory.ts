@@ -20,32 +20,32 @@ interface StoredParticipant extends SeasonParticipant {
 }
 
 const team = (id: string, name: string): SeasonTeam => ({
+  darkModeImageUrl: null,
   id,
+  imageUrl: null,
   name,
   slug: id,
-  imageUrl: null,
-  darkModeImageUrl: null,
 });
 
 export const SEASON_TEAMS = {
-  vitality: team("vitality", "Team Vitality"),
   falcons: team("falcons", "Team Falcons"),
+  vitality: team("vitality", "Team Vitality"),
 } as const;
 
 export const SEASON_TOURNAMENTS = {
   major: {
+    event: { id: "major-event", name: "RLCS Major", slug: "rlcs-major" },
     id: "major",
     name: "Playoffs",
     slug: "playoffs",
     source: "pandascore",
-    event: { id: "major-event", slug: "rlcs-major", name: "RLCS Major" },
   },
   open: {
+    event: { id: "open-event", name: "Community Open", slug: "community-open" },
     id: "open",
     name: "Open Qualifier",
     slug: "open-qualifier",
     source: "startgg",
-    event: { id: "open-event", slug: "community-open", name: "Community Open" },
   },
 } satisfies Record<string, SeasonPathTournament>;
 
@@ -61,15 +61,15 @@ export const memorySeasonStore = () => {
   const participants: StoredParticipant[] = [];
 
   const players = new Map<string, SeasonAwardPlayer>([
-    ["zen", { id: "zen", name: "zen", mergedIntoId: null }],
-    ["vatira", { id: "vatira", name: "Vatira", mergedIntoId: null }],
-    ["old-zen", { id: "old-zen", name: "zen", mergedIntoId: "zen" }],
+    ["zen", { id: "zen", mergedIntoId: null, name: "zen" }],
+    ["vatira", { id: "vatira", mergedIntoId: null, name: "Vatira" }],
+    ["old-zen", { id: "old-zen", mergedIntoId: "zen", name: "zen" }],
   ]);
 
   const teams = new Map<string, SeasonParticipantTeam>([
-    ["vitality", { id: "vitality", name: "Team Vitality", mergedIntoId: null }],
-    ["falcons", { id: "falcons", name: "Team Falcons", mergedIntoId: null }],
-    ["old-vitality", { id: "old-vitality", name: "Vitality", mergedIntoId: "vitality" }],
+    ["vitality", { id: "vitality", mergedIntoId: null, name: "Team Vitality" }],
+    ["falcons", { id: "falcons", mergedIntoId: null, name: "Team Falcons" }],
+    ["old-vitality", { id: "old-vitality", mergedIntoId: "vitality", name: "Vitality" }],
   ]);
 
   let sequence = 0;
@@ -88,34 +88,11 @@ export const memorySeasonStore = () => {
   }: StoredParticipant): SeasonParticipant => ({ ...participant, path: [...participant.path] });
 
   const store: SeasonStore = {
-    list: async () => [...seasons.values()].map(({ id, name, slug }) => ({ id, name, slug })),
-    published: async () =>
-      [...seasons.values()].flatMap(({ id, name, slug, winnerTeamId }) =>
-        slug === null
-          ? []
-          : [
-              {
-                slug,
-                name,
-                winner:
-                  participants.find(
-                    (participant) =>
-                      participant.seasonId === id && participant.team.id === winnerTeamId,
-                  )?.team ?? null,
-              },
-            ],
+    awardTaken: async (seasonId, { awardType, region }) =>
+      awards.some(
+        (award) =>
+          award.seasonId === seasonId && award.awardType === awardType && award.region === region,
       ),
-    find: async (id) => seasons.get(id) ?? null,
-    findBySlug: async (slug) =>
-      [...seasons.values()].find((season) => season.slug === slug) ?? null,
-    nameTaken: async (name, exceptId) =>
-      [...seasons.values()].some((season) => season.name === name && season.id !== exceptId),
-    slugTaken: async (slug, exceptId) =>
-      [...seasons.values()].some((season) => season.slug === slug && season.id !== exceptId),
-    save: async (season) => {
-      seasons.set(season.id, season);
-    },
-    remove: async (id) => seasons.delete(id),
     awards: async (seasonId) =>
       awards.flatMap((award) => (award.seasonId === seasonId ? [stripAward(award)] : [])),
     awardsOfPlayer: async (playerId) =>
@@ -128,34 +105,56 @@ export const memorySeasonStore = () => {
           return season
             ? [
                 {
-                  id,
                   awardType,
-                  region,
+                  id,
                   presentedBy,
-                  sourceUrl,
+                  region,
                   season: { id: season.id, name: season.name, slug: season.slug },
+                  sourceUrl,
                 },
               ]
             : [];
         }),
-    player: async (id) => players.get(id) ?? null,
-    awardTaken: async (seasonId, { awardType, region }) =>
-      awards.some(
-        (award) =>
-          award.seasonId === seasonId && award.awardType === awardType && award.region === region,
-      ),
-    saveAward: async (seasonId, playerId, fields) => {
-      const award: StoredAward = {
-        ...fields,
-        id: nextId("award"),
-        seasonId,
-        player: { id: playerId, name: playerId, slug: playerId },
-      };
+    find: async (id) => seasons.get(id) ?? null,
+    findBySlug: async (slug) =>
+      [...seasons.values()].find((season) => season.slug === slug) ?? null,
+    list: async () => [...seasons.values()].map(({ id, name, slug }) => ({ id, name, slug })),
+    nameTaken: async (name, exceptId) =>
+      [...seasons.values()].some((season) => season.name === name && season.id !== exceptId),
+    participant: async (seasonId, participantId) => {
+      const found = participants.find(
+        (participant) => participant.seasonId === seasonId && participant.id === participantId,
+      );
 
-      awards.push(award);
-
-      return stripAward(award);
+      return found ? stripParticipant(found) : null;
     },
+    participantTaken: async (seasonId, teamId) =>
+      participants.some(
+        (participant) => participant.seasonId === seasonId && participant.team.id === teamId,
+      ),
+    participants: async (seasonId) =>
+      participants
+        .filter((participant) => participant.seasonId === seasonId)
+        .toSorted((a, b) => a.team.name.localeCompare(b.team.name))
+        .map(stripParticipant),
+    player: async (id) => players.get(id) ?? null,
+    published: async () =>
+      [...seasons.values()].flatMap(({ id, name, slug, winnerTeamId }) =>
+        slug === null
+          ? []
+          : [
+              {
+                name,
+                slug,
+                winner:
+                  participants.find(
+                    (participant) =>
+                      participant.seasonId === id && participant.team.id === winnerTeamId,
+                  )?.team ?? null,
+              },
+            ],
+      ),
+    remove: async (id) => seasons.delete(id),
     removeAward: async (seasonId, awardId) => {
       const index = awards.findIndex(
         (award) => award.seasonId === seasonId && award.id === awardId,
@@ -168,44 +167,6 @@ export const memorySeasonStore = () => {
       awards.splice(index, 1);
 
       return true;
-    },
-    team: async (id) => teams.get(id) ?? null,
-    tournamentExists: async (id) => tournamentOf(id) !== null,
-    participants: async (seasonId) =>
-      participants
-        .filter((participant) => participant.seasonId === seasonId)
-        .toSorted((a, b) => a.team.name.localeCompare(b.team.name))
-        .map(stripParticipant),
-    participant: async (seasonId, participantId) => {
-      const found = participants.find(
-        (participant) => participant.seasonId === seasonId && participant.id === participantId,
-      );
-
-      return found ? stripParticipant(found) : null;
-    },
-    participantTaken: async (seasonId, teamId) =>
-      participants.some(
-        (participant) => participant.seasonId === seasonId && participant.team.id === teamId,
-      ),
-    saveParticipant: async (seasonId, teamId, pathNote) => {
-      const participant: StoredParticipant = {
-        id: nextId("participant"),
-        seasonId,
-        team: teamOf(teamId),
-        pathNote,
-        path: [],
-      };
-
-      participants.push(participant);
-
-      return stripParticipant(participant);
-    },
-    updatePathNote: async (participantId, pathNote) => {
-      const found = participants.find((participant) => participant.id === participantId);
-
-      if (found) {
-        found.pathNote = pathNote;
-      }
     },
     removeParticipant: async (seasonId, participantId) => {
       const index = participants.findIndex(
@@ -220,18 +181,6 @@ export const memorySeasonStore = () => {
 
       return true;
     },
-    savePathEntry: async (participantId, { label, result, tournamentId }) => {
-      const entry = {
-        id: nextId("entry"),
-        label,
-        result,
-        tournament: tournamentId === null ? null : tournamentOf(tournamentId),
-      };
-
-      participants.find((participant) => participant.id === participantId)?.path.push(entry);
-
-      return entry;
-    },
     removePathEntry: async (participantId, entryId) => {
       const found = participants.find((participant) => participant.id === participantId);
       const index = found?.path.findIndex((entry) => entry.id === entryId) ?? -1;
@@ -244,7 +193,58 @@ export const memorySeasonStore = () => {
 
       return true;
     },
+    save: async (season) => {
+      seasons.set(season.id, season);
+    },
+    saveAward: async (seasonId, playerId, fields) => {
+      const award: StoredAward = {
+        ...fields,
+        id: nextId("award"),
+        player: { id: playerId, name: playerId, slug: playerId },
+        seasonId,
+      };
+
+      awards.push(award);
+
+      return stripAward(award);
+    },
+    saveParticipant: async (seasonId, teamId, pathNote) => {
+      const participant: StoredParticipant = {
+        id: nextId("participant"),
+        path: [],
+        pathNote,
+        seasonId,
+        team: teamOf(teamId),
+      };
+
+      participants.push(participant);
+
+      return stripParticipant(participant);
+    },
+    savePathEntry: async (participantId, { label, result, tournamentId }) => {
+      const entry = {
+        id: nextId("entry"),
+        label,
+        result,
+        tournament: tournamentId === null ? null : tournamentOf(tournamentId),
+      };
+
+      participants.find((participant) => participant.id === participantId)?.path.push(entry);
+
+      return entry;
+    },
+    slugTaken: async (slug, exceptId) =>
+      [...seasons.values()].some((season) => season.slug === slug && season.id !== exceptId),
+    team: async (id) => teams.get(id) ?? null,
+    tournamentExists: async (id) => tournamentOf(id) !== null,
+    updatePathNote: async (participantId, pathNote) => {
+      const found = participants.find((participant) => participant.id === participantId);
+
+      if (found) {
+        found.pathNote = pathNote;
+      }
+    },
   };
 
-  return { store, awards, participants };
+  return { awards, participants, store };
 };

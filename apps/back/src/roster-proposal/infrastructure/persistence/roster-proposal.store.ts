@@ -19,15 +19,15 @@ const entry = (id: string, label: string): [string, string] => [id, label];
 
 const toProposal = (row: Row.RosterProposal): RosterProposal =>
   Object.assign(new RosterProposal(), {
-    id: row.id,
     change: row.change,
+    createdAt: row.createdAt,
+    entityId: row.entityId,
+    id: row.id,
+    proposedById: row.proposedBy.id,
+    reviewedAt: row.reviewedAt,
+    reviewedById: row.reviewedBy?.id ?? null,
     sourceUrl: row.sourceUrl,
     status: row.status,
-    proposedById: row.proposedBy.id,
-    reviewedById: row.reviewedBy?.id ?? null,
-    reviewedAt: row.reviewedAt,
-    entityId: row.entityId,
-    createdAt: row.createdAt,
   });
 
 export const rosterProposalStore = (
@@ -47,39 +47,10 @@ export const rosterProposalStore = (
     const rows = await em.find(
       Row.RosterProposal,
       { status },
-      { orderBy: { createdAt: "asc" }, limit },
+      { limit, orderBy: { createdAt: "asc" } },
     );
 
     return rows.map(toProposal);
-  },
-  save: async (model) => {
-    const row = model.id
-      ? await em.findOneOrFail(Row.RosterProposal, { id: model.id })
-      : new Row.RosterProposal();
-
-    if (!model.id) {
-      model.id = v4();
-      row.id = model.id;
-      row.createdAt = model.createdAt;
-    }
-
-    Object.assign(row, {
-      change: model.change,
-      sourceUrl: model.sourceUrl,
-      status: model.status,
-      proposedBy: em.getReference(User, model.proposedById),
-      reviewedBy:
-        model.reviewedById !== null && model.reviewedById !== ""
-          ? em.getReference(User, model.reviewedById)
-          : null,
-      reviewedAt: model.reviewedAt,
-      entityId: model.entityId,
-    });
-    em.persist(row);
-
-    if (!inTransaction) {
-      await em.flush();
-    }
   },
   names: async (ids) => {
     const [players, teams, users, tournaments, matches, events, circuits, seasons] =
@@ -130,7 +101,7 @@ export const rosterProposalStore = (
           [
             match.participants
               .map(({ team, players: lineup }) =>
-                participantName({ team, players: lineup.getItems() }),
+                participantName({ players: lineup.getItems(), team }),
               )
               .join(" vs "),
             match.tournament.event.name,
@@ -140,6 +111,35 @@ export const rosterProposalStore = (
         ),
       ),
     ]);
+  },
+  save: async (model) => {
+    const row = model.id
+      ? await em.findOneOrFail(Row.RosterProposal, { id: model.id })
+      : new Row.RosterProposal();
+
+    if (!model.id) {
+      model.id = v4();
+      row.id = model.id;
+      row.createdAt = model.createdAt;
+    }
+
+    Object.assign(row, {
+      change: model.change,
+      entityId: model.entityId,
+      proposedBy: em.getReference(User, model.proposedById),
+      reviewedAt: model.reviewedAt,
+      reviewedBy:
+        model.reviewedById !== null && model.reviewedById !== ""
+          ? em.getReference(User, model.reviewedById)
+          : null,
+      sourceUrl: model.sourceUrl,
+      status: model.status,
+    });
+    em.persist(row);
+
+    if (!inTransaction) {
+      await em.flush();
+    }
   },
 });
 

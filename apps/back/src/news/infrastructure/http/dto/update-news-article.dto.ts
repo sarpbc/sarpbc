@@ -4,7 +4,6 @@ import { createNewsArticleFields, NewsCoverImageUrl } from "./create-news-articl
 
 export const updateNewsArticleFields = {
   ...createNewsArticleFields,
-  title: createNewsArticleFields.title.optional(),
   content: createNewsArticleFields.content.optional(),
   imageUrl: NewsCoverImageUrl.optional().nullable(),
   slug: z
@@ -13,6 +12,7 @@ export const updateNewsArticleFields = {
     .min(1, "Enter a slug, or leave the field unchanged.")
     .max(NEWS_TEXT_MAX_LENGTH)
     .optional(),
+  title: createNewsArticleFields.title.optional(),
 };
 
 export const UpdateNewsArticleDto = z.strictObject(updateNewsArticleFields);

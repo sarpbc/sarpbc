@@ -17,10 +17,10 @@ export const directoryQuery = ({ name, start, limit, offset }: Partial<Directory
   const pattern = namePattern(name, start);
 
   return {
+    page: { limit: limit ?? 25, offset: offset ?? 0, orderBy: { name: "asc" as const } },
     where: {
       ...(pattern !== null && pattern !== "" && { name: { $ilike: pattern } }),
       mergedInto: null,
     },
-    page: { limit: limit ?? 25, offset: offset ?? 0, orderBy: { name: "asc" as const } },
   };
 };

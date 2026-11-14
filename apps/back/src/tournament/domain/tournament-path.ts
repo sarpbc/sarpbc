@@ -15,15 +15,15 @@ export const parseTournamentPath = (segments: readonly string[]): TournamentPath
 
   if (isUuid(first)) {
     if (second === undefined) {
-      return { kind: "legacyStage", id: first, tab: "overview" };
+      return { id: first, kind: "legacyStage", tab: "overview" };
     }
 
-    return second === "matches" ? { kind: "legacyStage", id: first, tab: "matches" } : null;
+    return second === "matches" ? { id: first, kind: "legacyStage", tab: "matches" } : null;
   }
 
   if (second === undefined) {
-    return { kind: "event", eventSlug: first };
+    return { eventSlug: first, kind: "event" };
   }
 
-  return second ? { kind: "stage", eventSlug: first, stageSlug: second } : null;
+  return second ? { eventSlug: first, kind: "stage", stageSlug: second } : null;
 };

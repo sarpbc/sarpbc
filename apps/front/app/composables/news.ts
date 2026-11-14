@@ -9,7 +9,7 @@ export const getNewsArticles = async (
 ): Promise<PaginatedNewsArticles> =>
   await apiFetch<PaginatedNewsArticles>(`/news`, {
     method: "GET",
-    query: { page, limit, locale, type },
+    query: { limit, locale, page, type },
   });
 
 export const getNewsWeek = async (week: string, locale?: string): Promise<NewsWeek> =>

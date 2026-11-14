@@ -105,11 +105,11 @@ export const replyReports = (em: EntityManager) => ({
 
     return row
       ? {
+          createdAt: new Date(row.createdAt),
           id: row.id,
+          reason: row.reason,
           reply: { id: row.reply.id },
           reporter: { id: row.reporter.id },
-          reason: row.reason,
-          createdAt: new Date(row.createdAt),
         }
       : null;
   },

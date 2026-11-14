@@ -1,41 +1,41 @@
 export default defineAppConfig({
   title: "sarpbc.org",
   toaster: {
-    position: "bottom-right" as const,
-    expand: true,
     duration: 5000,
+    expand: true,
+    position: "bottom-right" as const,
   },
   ui: {
-    colors: {
-      primary: "blue",
-      neutral: "ink",
-    },
     button: {
+      compoundVariants: [
+        {
+          class: "active:bg-(--ui-bg-inverted-pressed)",
+          color: "neutral",
+          variant: "solid",
+        },
+        {
+          class: "ring-default",
+          color: "neutral",
+          variant: "outline",
+        },
+      ],
       slots: {
         base: "transition-colors duration-(--duration-fast) ease-out active:transition-none",
       },
-      compoundVariants: [
-        {
-          color: "neutral",
-          variant: "solid",
-          class: "active:bg-(--ui-bg-inverted-pressed)",
-        },
-        {
-          color: "neutral",
-          variant: "outline",
-          class: "ring-default",
-        },
-      ],
     },
-    modal: {
-      slots: {
-        title: "font-medium",
-      },
+    colors: {
+      neutral: "ink",
+      primary: "blue",
     },
     error: {
       slots: {
         statusCode: "font-medium",
         statusMessage: "font-medium",
+      },
+    },
+    modal: {
+      slots: {
+        title: "font-medium",
       },
     },
   },

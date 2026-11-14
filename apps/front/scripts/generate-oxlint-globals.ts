@@ -51,8 +51,8 @@ const globals = Object.fromEntries(
 );
 
 const config = {
-  extends: ["../../.oxlintrc.json"],
   env: { browser: true },
+  extends: ["../../.oxlintrc.json"],
   globals,
   rules: {
     "no-undef": "error",

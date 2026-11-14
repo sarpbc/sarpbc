@@ -47,40 +47,45 @@ const memoryStore = () => {
 
       return found ? copy(Tournament, found) : null;
     }),
+    leagueByPandascoreId: vi.fn<TournamentWriter["leagueByPandascoreId"]>(
+      async (id) => leagues.get(id) ?? null,
+    ),
     load: vi.fn<TournamentWriter["load"]>(async (id) => {
       const found = tournaments.get(id);
 
       return found ? copy(Tournament, found) : null;
     }),
     manualCandidates: vi.fn<TournamentWriter["manualCandidates"]>(async () => []),
+    participants: vi.fn<TournamentWriter["participants"]>(async () => []),
     save: vi.fn<TournamentWriter["save"]>(async (tournament) => {
       tournaments.set(tournament.id, copy(Tournament, tournament));
     }),
-    participants: vi.fn<TournamentWriter["participants"]>(async () => []),
-    saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
-    setPlacements: vi.fn<TournamentWriter["setPlacements"]>(),
-    leagueByPandascoreId: vi.fn<TournamentWriter["leagueByPandascoreId"]>(
-      async (id) => leagues.get(id) ?? null,
-    ),
     saveLeague: vi.fn<TournamentWriter["saveLeague"]>(async (league) => {
       if (league.pandascoreId !== null) {
         leagues.set(league.pandascoreId, copy(League, league));
       }
     }),
+    saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
+    setPlacements: vi.fn<TournamentWriter["setPlacements"]>(),
   };
 
   const eventWriter: EventWriter = {
-    load: async (id) => {
-      const found = events.get(id);
-
-      return found ? copy(TournamentEvent, found) : null;
-    },
     bySerieId: async (id) => {
       const found = [...events.values()].find((e) => e.pandascoreSerieId === id);
 
       return found ? copy(TournamentEvent, found) : null;
     },
-    unclaimedByName: async () => null,
+    load: async (id) => {
+      const found = events.get(id);
+
+      return found ? copy(TournamentEvent, found) : null;
+    },
+    remove: async (id) => {
+      events.delete(id);
+    },
+    save: async (event) => {
+      events.set(event.id, copy(TournamentEvent, event));
+    },
     slugTaken: async (slug, except) =>
       [...events.values()].some((e) => e.slug === slug && e.id !== except),
     stageSlugTaken: async (eventId, slug, except) =>
@@ -89,12 +94,7 @@ const memoryStore = () => {
       all()
         .filter((t) => t.event.id === eventId)
         .map(({ id, name, source }) => ({ id, name, source })),
-    save: async (event) => {
-      events.set(event.id, copy(TournamentEvent, event));
-    },
-    remove: async (id) => {
-      events.delete(id);
-    },
+    unclaimedByName: async () => null,
   };
 
   const seedEvent = (fields: Partial<TournamentEvent>) => {
@@ -118,28 +118,28 @@ const memoryStore = () => {
   };
 
   const matchWriter = {
-    timings: async (id: string) => timings.get(id) ?? [],
-    tournament: async (id: string) => tournaments.get(id) ?? null,
-    participants: async (): Promise<TournamentParticipant[]> => [],
     byPandascoreId: async () => null,
+    participants: async (): Promise<TournamentParticipant[]> => [],
     save: async ({ tournament, status, beginAt, endAt }: Match) => {
       timings.set(tournament.id, [
         ...(timings.get(tournament.id) ?? []),
-        { status, beginAt, endAt },
+        { beginAt, endAt, status },
       ]);
     },
+    timings: async (id: string) => timings.get(id) ?? [],
+    tournament: async (id: string) => tournaments.get(id) ?? null,
   };
 
   return {
-    tournaments,
-    events,
-    timings,
-    matchWriter,
-    tournamentWriter,
+    eventOf,
     eventWriter,
+    events,
+    matchWriter,
     seedEvent,
     seedStage,
-    eventOf,
+    timings,
+    tournamentWriter,
+    tournaments,
   };
 };
 
@@ -149,35 +149,35 @@ const serieIncident = (
     | { changeType: "deletion"; deletion: ProviderDeletion },
 ): CompetitionIncident =>
   change.changeType === "deletion"
-    ? { id: 100, modifiedAt: new Date(), kind: "serie", ...change }
-    : { id: 100, modifiedAt: new Date(), kind: "serie", ...change };
+    ? { id: 100, kind: "serie", modifiedAt: new Date(), ...change }
+    : { id: 100, kind: "serie", modifiedAt: new Date(), ...change };
 
 const finished = (endAt: string): MatchTiming => ({
-  status: "finished",
   beginAt: new Date(endAt),
   endAt: new Date(endAt),
+  status: "finished",
 });
 
 const matchCommand = (pandascoreId: number, status: string) => ({
-  pandascoreId,
-  tournamentPandascoreId: 1,
-  name: `Match ${pandascoreId}`,
   beginAt: new Date("2030-01-01"),
-  status,
-  opponentSlugs: [],
-  opponentPandascoreIds: [1, 2],
-  results: [
-    { teamPandascoreId: 1, score: 3 },
-    { teamPandascoreId: 2, score: 1 },
-  ],
-  previousMatches: [],
+  name: `Match ${pandascoreId}`,
   officialStreams: [],
+  opponentPandascoreIds: [1, 2],
+  opponentSlugs: [],
+  pandascoreId,
+  previousMatches: [],
+  results: [
+    { score: 3, teamPandascoreId: 1 },
+    { score: 1, teamPandascoreId: 2 },
+  ],
+  status,
+  tournamentPandascoreId: 1,
 });
 
 describe("Competition synchronization", () => {
   const rosters = {
-    upsertTeam: vi.fn<RosterIdentityWriter["upsertTeam"]>(),
     upsertPlayer: vi.fn<RosterIdentityWriter["upsertPlayer"]>(),
+    upsertTeam: vi.fn<RosterIdentityWriter["upsertTeam"]>(),
   };
 
   const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
@@ -192,24 +192,24 @@ describe("Competition synchronization", () => {
   let store: ReturnType<typeof memoryStore>;
 
   const seedManual = (id: string, name = "RLCS Major Paris 2026 Playoffs") =>
-    store.seedStage(store.seedEvent({ id: `event-${id}`, slug: id, name }), {
-      id,
-      source: "manual",
-      pandascoreId: null,
-      name,
-      slug: `manual-${id}`,
+    store.seedStage(store.seedEvent({ id: `event-${id}`, name, slug: id }), {
       beginAt: new Date("2026-03-01T00:00Z"),
       endAt: new Date("2026-03-02T00:00Z"),
+      id,
+      name,
+      pandascoreId: null,
+      slug: `manual-${id}`,
+      source: "manual",
     });
 
   const tx: CompetitionTransaction = {
     run: async (work) => {
       const result = await work(
         competitionScope({
-          tournaments: tournamentWriterDouble(store.tournamentWriter),
           events: store.eventWriter,
           matches: matchWriterDouble(store.matchWriter),
           rosters: rosterIdentityWriter(rosters),
+          tournaments: tournamentWriterDouble(store.tournamentWriter),
         }),
       );
 
@@ -225,13 +225,13 @@ describe("Competition synchronization", () => {
     diagnostics,
   );
 
-  const rlcsMajor = { pandascoreId: 7, name: "RLCS Major", slug: "rlcs-major" };
-  const parisSerie = { pandascoreId: 100, fullName: "Paris 2026", year: 2026 };
+  const rlcsMajor = { name: "RLCS Major", pandascoreId: 7, slug: "rlcs-major" };
+  const parisSerie = { fullName: "Paris 2026", pandascoreId: 100, year: 2026 };
 
   const stageCommand = (fields: Partial<UpsertTournamentCommand>): UpsertTournamentCommand => ({
-    pandascoreId: 1,
-    name: "Playoffs",
     league: rlcsMajor,
+    name: "Playoffs",
+    pandascoreId: 1,
     serie: parisSerie,
     ...fields,
   });
@@ -250,12 +250,12 @@ describe("Competition synchronization", () => {
   });
 
   it("rejects corrupt manual identities", async () => {
-    store.seedStage(store.seedEvent({ slug: "cup", name: "Cup" }), {
+    store.seedStage(store.seedEvent({ name: "Cup", slug: "cup" }), {
       id: "manual",
-      source: "manual",
       pandascoreId: 99,
+      source: "manual",
     });
-    await expect(service.upsertTournament({ pandascoreId: 99, name: "Provider" })).rejects.toThrow(
+    await expect(service.upsertTournament({ name: "Provider", pandascoreId: 99 })).rejects.toThrow(
       /source=manual/u,
     );
     expect(store.tournamentWriter.save).not.toHaveBeenCalled();
@@ -263,12 +263,12 @@ describe("Competition synchronization", () => {
 
   it("creates the event of a new serie with a frozen slug and commits before invalidating", async () => {
     const created = await service.upsertTournament(stageCommand({}));
-    expect(created).toMatchObject({ source: "pandascore", pandascoreId: 1, slug: "playoffs" });
+    expect(created).toMatchObject({ pandascoreId: 1, slug: "playoffs", source: "pandascore" });
     expect(store.eventOf(created.id)).toMatchObject({
+      league: { name: "RLCS Major" },
+      name: "RLCS Major Paris 2026",
       pandascoreSerieId: 100,
       slug: "rlcs-major-paris-2026",
-      name: "RLCS Major Paris 2026",
-      league: { name: "RLCS Major" },
     });
     expect(log).toStrictEqual(["commit", `invalidate ${created.id}`]);
   });
@@ -285,7 +285,7 @@ describe("Competition synchronization", () => {
     const created = await service.upsertTournament(stageCommand({}));
 
     const sibling = await service.upsertTournament(
-      stageCommand({ pandascoreId: 2, name: "Swiss" }),
+      stageCommand({ name: "Swiss", pandascoreId: 2 }),
     );
 
     log.length = 0;
@@ -299,36 +299,36 @@ describe("Competition synchronization", () => {
 
     expect(renamed.slug).toBe("playoffs");
     expect(store.eventOf(created.id)).toMatchObject({
-      slug: "rlcs-major-paris-2026",
       name: "RLCS Major Paris Major 2026",
+      slug: "rlcs-major-paris-2026",
     });
     expect(log).toStrictEqual(["commit", `invalidate ${created.id}`, `invalidate ${sibling.id}`]);
   });
 
   it("keeps local artwork while updating feed-owned fields", async () => {
-    const event = store.seedEvent({ slug: "rlcs-major-paris-2026", name: "RLCS Major Paris 2026" });
+    const event = store.seedEvent({ name: "RLCS Major Paris 2026", slug: "rlcs-major-paris-2026" });
     store.seedStage(event, {
       id: "stage",
-      pandascoreId: 1,
-      name: "Playoffs",
-      slug: "playoffs",
       imageUrl: "local-art",
+      name: "Playoffs",
+      pandascoreId: 1,
+      slug: "playoffs",
     });
     await expect(
       service.upsertTournament(stageCommand({ name: "Group A" })),
     ).resolves.toMatchObject({
+      imageUrl: "local-art",
       name: "Group A",
       slug: "playoffs",
-      imageUrl: "local-art",
     });
   });
 
   it("moves a stage to its serie event and deletes the event it leaves empty", async () => {
-    const elsewhere = store.seedEvent({ pandascoreSerieId: 200, slug: "old", name: "Old" });
+    const elsewhere = store.seedEvent({ name: "Old", pandascoreSerieId: 200, slug: "old" });
     store.seedStage(elsewhere, {
       id: "stage",
-      pandascoreId: 1,
       name: "Playoffs",
+      pandascoreId: 1,
       slug: "playoffs",
     });
     const target = await service.upsertTournament(stageCommand({ pandascoreId: 2 }));
@@ -340,13 +340,13 @@ describe("Competition synchronization", () => {
 
   it("gives a stage without serie its own event named after league and stage", async () => {
     const created = await service.upsertTournament(
-      stageCommand({ serie: undefined, name: "Winter Cup", beginAt: new Date("2025-02-01") }),
+      stageCommand({ beginAt: new Date("2025-02-01"), name: "Winter Cup", serie: undefined }),
     );
 
     expect(store.eventOf(created.id)).toMatchObject({
+      name: "RLCS Major Winter Cup",
       pandascoreSerieId: null,
       slug: "rlcs-major-winter-cup-2025",
-      name: "RLCS Major Winter Cup",
     });
   });
 
@@ -356,19 +356,19 @@ describe("Competition synchronization", () => {
     await service.applyIncident(
       serieIncident({
         changeType: "update",
-        command: { pandascoreId: 100, fullName: "Major Paris 2026" },
+        command: { fullName: "Major Paris 2026", pandascoreId: 100 },
       }),
     );
     expect(store.eventOf(stage.id)).toMatchObject({
-      slug: "rlcs-major-paris-2026",
       name: "RLCS Major Major Paris 2026",
+      slug: "rlcs-major-paris-2026",
     });
     expect(log).toStrictEqual(["commit", `invalidate ${stage.id}`]);
   });
 
   it("ignores a serie update that has no event yet", async () => {
     await service.applyIncident(
-      serieIncident({ changeType: "creation", command: { pandascoreId: 100, fullName: "Paris" } }),
+      serieIncident({ changeType: "creation", command: { fullName: "Paris", pandascoreId: 100 } }),
     );
     expect(store.events.size).toBe(0);
     expect(cache.invalidateTournament).not.toHaveBeenCalled();
@@ -377,7 +377,7 @@ describe("Competition synchronization", () => {
   it("re-keys a merged serie event when the target serie has no event", async () => {
     const stage = await service.upsertTournament(stageCommand({}));
     await service.applyIncident(
-      serieIncident({ changeType: "deletion", deletion: { kind: "merged", intoId: 300 } }),
+      serieIncident({ changeType: "deletion", deletion: { intoId: 300, kind: "merged" } }),
     );
     expect(store.eventOf(stage.id)).toMatchObject({
       pandascoreSerieId: 300,
@@ -387,28 +387,28 @@ describe("Competition synchronization", () => {
 
   it("moves the stages of a merged serie into the existing target event", async () => {
     const target = await service.upsertTournament(
-      stageCommand({ pandascoreId: 9, serie: { pandascoreId: 300, fullName: "Paris Major 2026" } }),
+      stageCommand({ pandascoreId: 9, serie: { fullName: "Paris Major 2026", pandascoreId: 300 } }),
     );
 
     const merged = await service.upsertTournament(stageCommand({}));
     const oldEventId = merged.event.id;
     log.length = 0;
     await service.applyIncident(
-      serieIncident({ changeType: "deletion", deletion: { kind: "merged", intoId: 300 } }),
+      serieIncident({ changeType: "deletion", deletion: { intoId: 300, kind: "merged" } }),
     );
     expect(store.tournaments.get(merged.id)).toMatchObject({
-      slug: "playoffs-2",
       event: { id: target.event.id },
+      slug: "playoffs-2",
     });
     expect(store.events.has(oldEventId)).toBe(false);
     expect(log).toStrictEqual(["commit", `invalidate ${merged.id}`]);
     await service.applyIncident(
-      serieIncident({ changeType: "deletion", deletion: { kind: "merged", intoId: 300 } }),
+      serieIncident({ changeType: "deletion", deletion: { intoId: 300, kind: "merged" } }),
     );
     expect(store.tournaments.get(merged.id)?.event.id).toBe(target.event.id);
   });
 
-  it.each([{ kind: "replaced", entity: "serie", byId: 300 }, { kind: "deleted" }] as const)(
+  it.each([{ byId: 300, entity: "serie", kind: "replaced" }, { kind: "deleted" }] as const)(
     "keeps an event on a $kind serie deletion",
     async (deletion) => {
       const stage = await service.upsertTournament(stageCommand({}));
@@ -419,17 +419,17 @@ describe("Competition synchronization", () => {
 
   const upsertPastCup = async () => {
     await service.upsertTournament({
-      pandascoreId: 42,
-      name: "Past Cup",
       expectedRoster: [
         {
-          team: { pandascoreId: 8, name: "Past team", slug: "past-team" },
           players: [
-            { pandascoreId: 1, name: "Player", slug: "player" },
-            { pandascoreId: 3, name: "Sub", slug: "sub" },
+            { name: "Player", pandascoreId: 1, slug: "player" },
+            { name: "Sub", pandascoreId: 3, slug: "sub" },
           ],
+          team: { name: "Past team", pandascoreId: 8, slug: "past-team" },
         },
       ],
+      name: "Past Cup",
+      pandascoreId: 42,
     });
   };
 
@@ -438,13 +438,13 @@ describe("Competition synchronization", () => {
       await upsertPastCup();
 
       expect(rosters.upsertPlayer).toHaveBeenCalledWith({
-        pandascoreId: 1,
         name: "Player",
+        pandascoreId: 1,
         slug: "player",
       });
       expect(rosters.upsertPlayer).toHaveBeenCalledWith({
-        pandascoreId: 3,
         name: "Sub",
+        pandascoreId: 3,
         slug: "sub",
       });
     });
@@ -453,7 +453,7 @@ describe("Competition synchronization", () => {
       await upsertPastCup();
 
       expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
-        expect.objectContaining({ teamId: "team", playerIds: ["1", "3"] }),
+        expect.objectContaining({ playerIds: ["1", "3"], teamId: "team" }),
       );
     });
 
@@ -468,7 +468,7 @@ describe("Competition synchronization", () => {
       await upsertPastCup();
 
       expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
-        expect.objectContaining({ id: "participant", teamId: "team", playerIds: ["1", "3"] }),
+        expect.objectContaining({ id: "participant", playerIds: ["1", "3"], teamId: "team" }),
       );
     });
   });
@@ -482,12 +482,12 @@ describe("Competition synchronization", () => {
       Object.assign(new TournamentParticipant(), { id: "unknown-team", team: null }),
     ]);
     await service.upsertTournament({
-      pandascoreId: 42,
+      expectedRoster: [{ players: [], team: { name: "Winner", pandascoreId: 8, slug: "winner" } }],
       name: "Playoffs",
-      expectedRoster: [{ team: { pandascoreId: 8, name: "Winner", slug: "winner" }, players: [] }],
+      pandascoreId: 42,
       standings: [
-        { teamPandascoreId: 8, rank: 1 },
-        { teamPandascoreId: 99, rank: 2 },
+        { rank: 1, teamPandascoreId: 8 },
+        { rank: 2, teamPandascoreId: 99 },
       ],
     });
 
@@ -500,14 +500,14 @@ describe("Competition synchronization", () => {
   });
 
   it("leaves placements untouched when the feed carries no standings", async () => {
-    await service.upsertTournament({ pandascoreId: 42, name: "Playoffs" });
+    await service.upsertTournament({ name: "Playoffs", pandascoreId: 42 });
     expect(store.tournamentWriter.setPlacements).not.toHaveBeenCalled();
   });
 
   it("preserves success after a committed write when Redis fails", async () => {
     cache.invalidateTournament.mockRejectedValue(new Error("offline"));
     await expect(
-      service.upsertTournament({ pandascoreId: 42, name: "Cup" }),
+      service.upsertTournament({ name: "Cup", pandascoreId: 42 }),
     ).resolves.toMatchObject({ name: "Cup" });
     expect(diagnostics.error).toHaveBeenCalledExactlyOnceWith(
       "Tournament cache invalidation failed",
@@ -517,40 +517,40 @@ describe("Competition synchronization", () => {
 
   describe("end date", () => {
     it("closes a stage once every match is finished and PandaScore has no end date", async () => {
-      const event = store.seedEvent({ slug: "e", name: "E" });
-      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      const event = store.seedEvent({ name: "E", slug: "e" });
+      store.seedStage(event, { id: "stage", name: "Playoffs", pandascoreId: 1, slug: "playoffs" });
       store.timings.set("stage", [finished("2025-03-01T10:00Z"), finished("2025-03-02T18:00Z")]);
       const upsertTournamentResult = await service.upsertTournament(stageCommand({}));
       expect(upsertTournamentResult.endAt).toStrictEqual(new Date("2025-03-02T18:00Z"));
     });
 
     it("keeps the stage open while a match remains", async () => {
-      const event = store.seedEvent({ slug: "e", name: "E" });
-      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      const event = store.seedEvent({ name: "E", slug: "e" });
+      store.seedStage(event, { id: "stage", name: "Playoffs", pandascoreId: 1, slug: "playoffs" });
       store.timings.set("stage", [
         finished("2025-03-01T10:00Z"),
-        { status: "not_started", beginAt: new Date("2025-03-03T10:00Z"), endAt: null },
+        { beginAt: new Date("2025-03-03T10:00Z"), endAt: null, status: "not_started" },
       ]);
       const upsertTournamentResult2 = await service.upsertTournament(stageCommand({}));
       expect(upsertTournamentResult2.endAt).toBeNull();
     });
 
     it("keeps the stage open when the sync adds a match to a finished stage", async () => {
-      const event = store.seedEvent({ slug: "e", name: "E" });
-      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      const event = store.seedEvent({ name: "E", slug: "e" });
+      store.seedStage(event, { id: "stage", name: "Playoffs", pandascoreId: 1, slug: "playoffs" });
       store.timings.set("stage", [finished("2025-03-01T10:00Z")]);
 
       const synced = await service.upsertTournament(stageCommand({}), [
         {
-          pandascoreId: 10,
-          tournamentPandascoreId: 1,
-          name: "Tiebreaker",
           beginAt: new Date("2025-03-03T10:00Z"),
-          status: "not_started",
-          opponentSlugs: [],
-          results: [],
-          previousMatches: [],
+          name: "Tiebreaker",
           officialStreams: [],
+          opponentSlugs: [],
+          pandascoreId: 10,
+          previousMatches: [],
+          results: [],
+          status: "not_started",
+          tournamentPandascoreId: 1,
         },
       ]);
 
@@ -558,28 +558,28 @@ describe("Competition synchronization", () => {
     });
 
     it("closes a finished stage from a tournament incident", async () => {
-      const event = store.seedEvent({ slug: "e", name: "E" });
-      store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
+      const event = store.seedEvent({ name: "E", slug: "e" });
+      store.seedStage(event, { id: "stage", name: "Playoffs", pandascoreId: 1, slug: "playoffs" });
       store.timings.set("stage", [finished("2025-03-02T18:00Z")]);
       await service.applyIncident({
-        id: 1,
-        modifiedAt: new Date(),
-        kind: "tournament",
         changeType: "update",
         command: stageCommand({}),
+        id: 1,
+        kind: "tournament",
+        modifiedAt: new Date(),
       });
       expect(store.tournaments.get("stage")?.endAt).toStrictEqual(new Date("2025-03-02T18:00Z"));
     });
 
     it("keeps a staff-corrected end date over PandaScore", async () => {
-      const event = store.seedEvent({ slug: "e", name: "E" });
+      const event = store.seedEvent({ name: "E", slug: "e" });
       store.seedStage(event, {
-        id: "stage",
-        pandascoreId: 1,
-        name: "Playoffs",
-        slug: "playoffs",
         endAt: new Date("2025-03-05"),
         endAtCorrected: true,
+        id: "stage",
+        name: "Playoffs",
+        pandascoreId: 1,
+        slug: "playoffs",
       });
 
       const synced = await service.upsertTournament(
@@ -596,7 +596,7 @@ describe("Competition synchronization", () => {
     it("links the manual tournament staff chose even when names differ", async () => {
       seedManual("manual", "MENA qualifier");
       const linked = await service.upsertTournament(stageCommand({ beginAt }), [], "manual");
-      expect(linked).toMatchObject({ id: "manual", source: "pandascore", pandascoreId: 1 });
+      expect(linked).toMatchObject({ id: "manual", pandascoreId: 1, source: "pandascore" });
     });
 
     it("refuses a link when PandaScore already has its own stage", async () => {

@@ -35,13 +35,13 @@ export class MikroTeamAliasStore implements TeamAliasWriter {
 
     Object.assign(row, {
       id: model.id,
-      team: this.em.getReference(TeamRow, teamId),
+      logoUrl: model.logoUrl,
       name: model.name,
+      pandascoreId: model.pandascoreId,
+      sourceUrl: model.sourceUrl,
+      team: this.em.getReference(TeamRow, teamId),
       validFrom: model.from,
       validTo: model.to,
-      sourceUrl: model.sourceUrl,
-      logoUrl: model.logoUrl,
-      pandascoreId: model.pandascoreId,
     });
     this.em.persist(row);
   }

@@ -20,7 +20,7 @@ export const useSpoilerFree = () => {
     (value) => {
       enabled.value = value === true;
     },
-    { immediate: import.meta.client, flush: "sync" },
+    { flush: "sync", immediate: import.meta.client },
   );
 
   const setEnabled = (value: boolean) => {
@@ -36,5 +36,5 @@ export const useSpoilerFree = () => {
     reveals.value = revealSpoilers(reveals.value, target);
   };
 
-  return { enabled: readonly(enabled), setEnabled, isConcealed, reveal };
+  return { enabled: readonly(enabled), isConcealed, reveal, setEnabled };
 };

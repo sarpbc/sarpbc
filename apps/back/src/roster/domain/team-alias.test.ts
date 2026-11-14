@@ -7,23 +7,23 @@ const alias = (fields: Partial<TeamAlias>): TeamAlias =>
 
 const fixtureTeam = (): Team =>
   Object.assign(new Team(), {
-    id: "team",
-    name: "Fixture Now",
-    slug: "fixture-now",
-    imageUrl: "https://cdn.example/now.png",
-    logoLightUrl: "https://cdn.example/now-light.webp",
-    logoDarkUrl: "https://cdn.example/now-dark.webp",
-    pandascoreId: 7,
     aliases: [
-      alias({ id: "a1", name: "Fixture Origins", from: "2020-01-01", to: "2022-06-01" }),
+      alias({ from: "2020-01-01", id: "a1", name: "Fixture Origins", to: "2022-06-01" }),
       alias({
-        id: "a2",
-        name: "Fixture Sponsored",
         from: "2022-06-01",
-        to: "2024-01-01",
+        id: "a2",
         logoUrl: "https://cdn.example/sponsored.png",
+        name: "Fixture Sponsored",
+        to: "2024-01-01",
       }),
     ],
+    id: "team",
+    imageUrl: "https://cdn.example/now.png",
+    logoDarkUrl: "https://cdn.example/now-dark.webp",
+    logoLightUrl: "https://cdn.example/now-light.webp",
+    name: "Fixture Now",
+    pandascoreId: 7,
+    slug: "fixture-now",
   });
 
 describe(teamAt, () => {
@@ -33,20 +33,20 @@ describe(teamAt, () => {
 
     expect(then).toMatchObject({
       id: "team",
-      slug: "fixture-now",
-      name: "Fixture Origins",
       logoLightUrl: "https://cdn.example/now-light.webp",
+      name: "Fixture Origins",
+      slug: "fixture-now",
     });
     expect(team.name).toBe("Fixture Now");
   });
 
   it("uses the alias logo for both themes when it has one", () => {
     expect(teamAt(fixtureTeam(), new Date("2023-01-01T00:00:00Z"))).toMatchObject({
-      name: "Fixture Sponsored",
-      imageUrl: "https://cdn.example/sponsored.png",
-      logoLightUrl: "https://cdn.example/sponsored.png",
-      logoDarkUrl: null,
       darkModeImageUrl: null,
+      imageUrl: "https://cdn.example/sponsored.png",
+      logoDarkUrl: null,
+      logoLightUrl: "https://cdn.example/sponsored.png",
+      name: "Fixture Sponsored",
     });
   });
 
@@ -62,7 +62,7 @@ describe(teamAt, () => {
 describe(assertTeamAliasFits, () => {
   it("refuses a period that overlaps another alias of the team", () => {
     expect(() => {
-      assertTeamAliasFits(alias({ name: "Overlap", from: "2022-01-01", to: null }), fixtureTeam());
+      assertTeamAliasFits(alias({ from: "2022-01-01", name: "Overlap", to: null }), fixtureTeam());
     }).toThrow('overlaps the alias "Fixture Origins"');
   });
 
@@ -70,9 +70,9 @@ describe(assertTeamAliasFits, () => {
     const team = fixtureTeam();
 
     const edited = alias({
+      from: "2019-01-01",
       id: "a1",
       name: "Fixture Origins",
-      from: "2019-01-01",
       to: "2022-06-01",
     });
 
@@ -80,7 +80,7 @@ describe(assertTeamAliasFits, () => {
       assertTeamAliasFits(edited, team);
     }).not.toThrow();
     expect(() => {
-      assertTeamAliasFits(alias({ from: "2024-01-01", to: null, pandascoreId: 7 }), team);
+      assertTeamAliasFits(alias({ from: "2024-01-01", pandascoreId: 7, to: null }), team);
     }).toThrow("already has PandaScore id 7");
   });
 });

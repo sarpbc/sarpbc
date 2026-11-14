@@ -111,10 +111,10 @@ const countRow = (
   b: number,
   compared: boolean,
 ): SummaryRow => ({
-  key,
-  label,
   a: numberFormat.value.format(a),
   b: numberFormat.value.format(b),
+  key,
+  label,
   leader: compared ? leaderOf(a, b) : null,
 });
 
@@ -132,10 +132,10 @@ const earningsRows = (a: PlayerCareer, b: PlayerCareer): SummaryRow[] => {
   if (currencies.length === 0) {
     return [
       {
-        key: "earnings",
-        label: t("page.player.compare.rows.earnings"),
         a: "—",
         b: "—",
+        key: "earnings",
+        label: t("page.player.compare.rows.earnings"),
         leader: null,
       },
     ];
@@ -146,13 +146,13 @@ const earningsRows = (a: PlayerCareer, b: PlayerCareer): SummaryRow[] => {
     const amountB = b.earnings.totals.find((total) => total.currency === currency)?.amount ?? 0;
 
     return {
+      a: formatAmount(amountA, currency),
+      b: formatAmount(amountB, currency),
       key: `earnings-${currency}`,
       label:
         currencies.length > 1
           ? t("page.player.compare.rows.earningsIn", { currency })
           : t("page.player.compare.rows.earnings"),
-      a: formatAmount(amountA, currency),
-      b: formatAmount(amountB, currency),
       leader: leaderOf(amountA, amountB),
     };
   });
@@ -266,51 +266,51 @@ const detailSections = computed(() => {
 
   return [
     {
-      key: "titles",
-      title: t("page.player.compare.sections.titles"),
-      empty: t("page.player.compare.empty.titles"),
       a: titleItems(current.a),
       b: titleItems(current.b),
+      empty: t("page.player.compare.empty.titles"),
+      key: "titles",
+      title: t("page.player.compare.sections.titles"),
     },
     {
-      key: "awards",
-      title: t("page.player.compare.sections.awards"),
-      empty: t("page.player.compare.empty.awards"),
       a: awardItems(current.a),
       b: awardItems(current.b),
+      empty: t("page.player.compare.empty.awards"),
+      key: "awards",
+      title: t("page.player.compare.sections.awards"),
     },
     {
-      key: "teams",
-      title: t("page.player.compare.sections.teams"),
-      empty: t("page.player.compare.empty.teams"),
       a: teamItems(current.a),
       b: teamItems(current.b),
+      empty: t("page.player.compare.empty.teams"),
+      key: "teams",
+      title: t("page.player.compare.sections.teams"),
     },
   ];
 });
 
 const sides = computed(() => [
   {
-    side: "a" as const,
-    player: playerA.value,
-    other: playerB.value,
     label: t("page.player.compare.firstPlayer"),
+    other: playerB.value,
+    player: playerA.value,
+    side: "a" as const,
   },
   {
-    side: "b" as const,
-    player: playerB.value,
-    other: playerA.value,
     label: t("page.player.compare.secondPlayer"),
+    other: playerA.value,
+    player: playerB.value,
+    side: "b" as const,
   },
 ]);
 
 setPageSeo({
+  description: t("page.player.compare.seoDescription"),
+  noIndex: true,
   title:
     playerA.value && playerB.value && !samePlayer.value
       ? t("page.player.compare.seoTitleWithNames", { a: playerA.value.name, b: playerB.value.name })
       : t("page.player.compare.seoTitle"),
-  description: t("page.player.compare.seoDescription"),
-  noIndex: true,
 });
 </script>
 

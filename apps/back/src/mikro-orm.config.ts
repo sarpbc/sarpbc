@@ -11,36 +11,36 @@ dotenv.config();
 const env = loadDatabaseEnv();
 
 export default defineConfig({
-  entities: mikroOrmEntities,
   dbName: env.DB_NAME,
-  user: env.DB_USER,
-  password: env.DB_PASSWORD,
-  host: env.DB_HOST,
-  port: env.DB_PORT,
-  namingStrategy: SarpbcNamingStrategy,
-  // MikroORM v7 PoolConfig: min, max, idleTimeoutMillis only (pg reap/acquire timeouts removed from API).
-  pool: {
-    min: 0,
-    max: 10,
-    idleTimeoutMillis: 30_000,
-  },
-  highlighter: new SqlHighlighter(),
   debug: !env.production,
+  entities: mikroOrmEntities,
+  highlighter: new SqlHighlighter(),
+  host: env.DB_HOST,
   logger: (message: string) => {
     log.debug({ component: "MikroORMCLI", message });
   },
+  migrations: {
+    allOrNothing: true,
+    disableForeignKeys: true,
+    dropTables: true,
+    emit: "ts",
+    glob: "!(*.d).{js,ts}",
+    path: "dist/infrastructure/database/migrations",
+    pathTs: "src/infrastructure/database/migrations",
+    safe: false,
+    transactional: true,
+  },
+  namingStrategy: SarpbcNamingStrategy,
+  password: env.DB_PASSWORD,
+  // MikroORM v7 PoolConfig: min, max, idleTimeoutMillis only (pg reap/acquire timeouts removed from API).
+  pool: {
+    idleTimeoutMillis: 30_000,
+    max: 10,
+    min: 0,
+  },
+  port: env.DB_PORT,
   schemaGenerator: {
     defaultUpdateRule: "cascade",
   },
-  migrations: {
-    path: "dist/infrastructure/database/migrations",
-    pathTs: "src/infrastructure/database/migrations",
-    glob: "!(*.d).{js,ts}",
-    transactional: true,
-    disableForeignKeys: true,
-    allOrNothing: true,
-    dropTables: true,
-    safe: false,
-    emit: "ts",
-  },
+  user: env.DB_USER,
 });

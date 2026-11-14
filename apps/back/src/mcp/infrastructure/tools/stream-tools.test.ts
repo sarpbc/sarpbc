@@ -10,8 +10,8 @@ const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
 const SOURCE = "https://example.com/fake-cup/broadcast";
 
 const STREAMS = [
-  { url: "https://twitch.tv/fakecup", language: "en", kind: "official" },
-  { url: "https://twitch.tv/fakecup_fr", language: "fr", kind: "costream", channel: "Fake Cup FR" },
+  { kind: "official", language: "en", url: "https://twitch.tv/fakecup" },
+  { channel: "Fake Cup FR", kind: "costream", language: "fr", url: "https://twitch.tv/fakecup_fr" },
 ];
 
 const setup = (toolName: string, role: StaffRole = "admin") => {
@@ -26,9 +26,9 @@ const setup = (toolName: string, role: StaffRole = "admin") => {
   }
 
   const call = async (args: ToolArguments) =>
-    await tool.run({ id: "u1", email: "staff@test.com", role }, args);
+    await tool.run({ email: "staff@test.com", id: "u1", role }, args);
 
-  return { rosterProposalService, tool, call };
+  return { call, rosterProposalService, tool };
 };
 
 describe("stream tools", () => {
@@ -40,10 +40,10 @@ describe("stream tools", () => {
     vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
     const { call, rosterProposalService } = setup(name);
 
-    const result = await call({ [idField]: MATCH_ID, streams: STREAMS, sourceUrl: SOURCE });
+    const result = await call({ [idField]: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS });
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      { kind, [idField]: MATCH_ID, streams: STREAMS },
+      { [idField]: MATCH_ID, kind, streams: STREAMS },
       SOURCE,
       "u1",
     );
@@ -55,7 +55,7 @@ describe("stream tools", () => {
 
   it("requires a non-Liquipedia sourceUrl and well-formed streams", () => {
     const schema = z.object(setup("set_match_streams").tool.inputSchema);
-    const input = { matchId: MATCH_ID, streams: STREAMS, sourceUrl: SOURCE };
+    const input = { matchId: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS };
     expect(schema.safeParse(input).success).toBe(true);
     expect(schema.safeParse({ ...input, sourceUrl: undefined }).success).toBe(false);
     expect(
@@ -70,7 +70,7 @@ describe("stream tools", () => {
 
   it("requires tournaments.manage", async () => {
     const { call, rosterProposalService } = setup("set_match_streams", "journalist");
-    const result = await call({ matchId: MATCH_ID, streams: STREAMS, sourceUrl: SOURCE });
+    const result = await call({ matchId: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS });
     expect(result.isError).toBe(true);
     expect(rosterProposalService.propose).not.toHaveBeenCalled();
   });
@@ -80,15 +80,15 @@ describe("stream tools", () => {
 
     const proposal = (sourceUrl: string) =>
       Object.assign(new RosterProposal(), {
-        id: sourceUrl,
         change: { kind: "set_match_streams", matchId: MATCH_ID, streams: STREAMS },
-        sourceUrl,
         createdAt: new Date(0),
+        id: sourceUrl,
+        sourceUrl,
       });
 
     rosterProposalService.list.mockResolvedValue({
-      proposals: [proposal("https://www.start.gg/tournament/fake"), proposal(SOURCE)],
       names: {},
+      proposals: [proposal("https://www.start.gg/tournament/fake"), proposal(SOURCE)],
     });
 
     const list = rosterTools({ rosterProposalService }).find(
@@ -99,7 +99,7 @@ describe("stream tools", () => {
       throw new Error("list_roster_proposals is not defined");
     }
 
-    const result = await list.run({ id: "u1", email: "staff@test.com", role: "admin" }, {});
+    const result = await list.run({ email: "staff@test.com", id: "u1", role: "admin" }, {});
     expect(jsonOf(result)).toMatchObject({
       proposals: [{ change: { streams: [] } }, { change: { streams: STREAMS } }],
     });

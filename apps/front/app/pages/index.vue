@@ -10,8 +10,8 @@ const { setPageSeo } = useSarpbcSeo();
 const { setJsonLd } = useStructuredData();
 
 setPageSeo({
-  title: t("page.home.seo.title"),
   description: t("page.home.seo.description"),
+  title: t("page.home.seo.title"),
 });
 
 setJsonLd("ld-json-organization", () => buildOrganization());

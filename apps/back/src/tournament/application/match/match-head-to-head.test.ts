@@ -47,7 +47,7 @@ const createFinishedMatch = ({
   tournament.id = `tournament-${id}`;
   tournament.name = tournamentName;
   tournament.slug = tournamentName.toLowerCase();
-  tournament.event = { id: "event-1", slug: eventSlug, name: eventSlug };
+  tournament.event = { id: "event-1", name: eventSlug, slug: eventSlug };
   tournament.league = Object.assign(new League(), { id: "league-1", name: "RLCS" });
 
   const participantA = createParticipant(`participant-a-${id}`, teamA);
@@ -80,20 +80,20 @@ describe("match-head-to-head", () => {
   const twoMeetings = () => {
     const matches = [
       createFinishedMatch({
+        endAt: new Date("2025-06-10T18:00:00Z"),
         id: "match-1",
-        teamA: teamVitality,
-        teamB: teamKarmine,
         scoreA: 4,
         scoreB: 2,
-        endAt: new Date("2025-06-10T18:00:00Z"),
+        teamA: teamVitality,
+        teamB: teamKarmine,
       }),
       createFinishedMatch({
+        endAt: new Date("2025-06-01T18:00:00Z"),
         id: "match-2",
-        teamA: teamKarmine,
-        teamB: teamVitality,
         scoreA: 3,
         scoreB: 1,
-        endAt: new Date("2025-06-01T18:00:00Z"),
+        teamA: teamKarmine,
+        teamB: teamVitality,
       }),
     ];
 
@@ -120,13 +120,13 @@ describe("match-head-to-head", () => {
 
   it("links each meeting to its canonical match page", () => {
     const match = createFinishedMatch({
+      eventSlug: "rlcs-major-paris-2026",
       id: "match-1",
-      teamA: teamVitality,
-      teamB: teamKarmine,
       scoreA: 4,
       scoreB: 2,
+      teamA: teamVitality,
+      teamB: teamKarmine,
       tournamentName: "Playoffs",
-      eventSlug: "rlcs-major-paris-2026",
     });
 
     const [meeting] = buildHeadToHead([match], teamVitality.id, teamKarmine.id).recentMeetings;
@@ -149,10 +149,10 @@ describe("match-head-to-head", () => {
   it("does not count ties as wins", () => {
     const match = createFinishedMatch({
       id: "match-tie",
-      teamA: teamVitality,
-      teamB: teamKarmine,
       scoreA: 3,
       scoreB: 3,
+      teamA: teamVitality,
+      teamB: teamKarmine,
     });
 
     match.winner = null;
@@ -168,10 +168,10 @@ describe("match-head-to-head", () => {
   it("derives winner from scores when winner relation is missing", () => {
     const match = createFinishedMatch({
       id: "match-no-winner",
-      teamA: teamVitality,
-      teamB: teamKarmine,
       scoreA: 4,
       scoreB: 1,
+      teamA: teamVitality,
+      teamB: teamKarmine,
     });
 
     match.winner = null;
@@ -182,20 +182,20 @@ describe("match-head-to-head", () => {
   it("maps meetings regardless of participant order", () => {
     const match = createFinishedMatch({
       id: "match-order",
-      teamA: teamKarmine,
-      teamB: teamVitality,
       scoreA: 2,
       scoreB: 4,
+      teamA: teamKarmine,
+      teamB: teamVitality,
     });
 
     const meeting = mapHeadToHeadMeeting(match, teamVitality.id, teamKarmine.id);
 
     expect(meeting).toStrictEqual(
       expect.objectContaining({
-        teamAId: teamVitality.id,
-        teamBId: teamKarmine.id,
         scoreA: 4,
         scoreB: 2,
+        teamAId: teamVitality.id,
+        teamBId: teamKarmine.id,
         winnerTeamId: teamVitality.id,
       }),
     );

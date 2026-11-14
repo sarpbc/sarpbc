@@ -53,33 +53,33 @@ export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
   const name = input.name.trim();
 
   if (!name) {
-    return { ok: false, error: "missing-name" };
+    return { error: "missing-name", ok: false };
   }
 
   if (name.length > TEAM_ALIAS_NAME_MAX_LENGTH) {
-    return { ok: false, error: "name-too-long" };
+    return { error: "name-too-long", ok: false };
   }
 
   if (!isIsoDay(input.from)) {
-    return { ok: false, error: "invalid-from" };
+    return { error: "invalid-from", ok: false };
   }
 
   if (input.to !== null && !isIsoDay(input.to)) {
-    return { ok: false, error: "invalid-to" };
+    return { error: "invalid-to", ok: false };
   }
 
   if (input.to !== null && input.to <= input.from) {
-    return { ok: false, error: "to-not-after-from" };
+    return { error: "to-not-after-from", ok: false };
   }
 
   const source = parseUrl(input.sourceUrl.trim(), ["https:", "http:"]);
 
   if (!source) {
-    return { ok: false, error: "invalid-source-url" };
+    return { error: "invalid-source-url", ok: false };
   }
 
   if (isForbiddenSourceHost(source.hostname)) {
-    return { ok: false, error: "forbidden-source" };
+    return { error: "forbidden-source", ok: false };
   }
 
   let logoUrl: string | null = null;
@@ -88,11 +88,11 @@ export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
     const logo = parseUrl(input.logoUrl.trim(), ["https:"]);
 
     if (!logo) {
-      return { ok: false, error: "invalid-logo-url" };
+      return { error: "invalid-logo-url", ok: false };
     }
 
     if (isLiquipediaSourceHost(logo.hostname)) {
-      return { ok: false, error: "forbidden-logo-source" };
+      return { error: "forbidden-logo-source", ok: false };
     }
 
     logoUrl = logo.href;
@@ -102,19 +102,19 @@ export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
     input.pandascoreId !== null &&
     (!Number.isSafeInteger(input.pandascoreId) || input.pandascoreId <= 0)
   ) {
-    return { ok: false, error: "invalid-pandascore-id" };
+    return { error: "invalid-pandascore-id", ok: false };
   }
 
   return {
-    ok: true,
     alias: {
-      name,
       from: input.from,
-      to: input.to,
-      sourceUrl: source.href,
       logoUrl,
+      name,
       pandascoreId: input.pandascoreId,
+      sourceUrl: source.href,
+      to: input.to,
     },
+    ok: true,
   };
 };
 

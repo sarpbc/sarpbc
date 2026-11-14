@@ -38,8 +38,8 @@ const {
   () => `comments-${targetType}-${targetId}`,
   () => getCommentsByTarget(targetType, targetId, 0),
   {
+    default: () => ({ limit: 25, page: 0, replies: [], total: 0 }),
     watch: [() => targetType, () => targetId],
-    default: () => ({ replies: [], total: 0, page: 0, limit: 25 }),
   },
 );
 

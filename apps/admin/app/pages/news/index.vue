@@ -8,7 +8,7 @@ const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
 
-const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
+const dateFormatter = useDateFormatter({ day: "numeric", month: "short", year: "numeric" });
 
 const items = [
   {
@@ -26,37 +26,37 @@ const columns: TableColumn<NewsArticleAdmin>[] = [
     header: t("page.news.columns.author"),
   },
   {
-    id: "languages",
-    header: t("page.news.columns.languages"),
     cell: ({ row }) =>
       hasFrenchTranslation({
-        titleFr: row.original.titleFr ?? null,
         contentFr: row.original.contentFr ?? null,
+        titleFr: row.original.titleFr ?? null,
       })
         ? t("page.news.locale.enFr")
         : t("page.news.locale.enOnly"),
+    header: t("page.news.columns.languages"),
+    id: "languages",
   },
   {
     accessorKey: "type",
-    header: t("page.news.columns.format"),
     cell: ({ row }) => {
       const value = row.original.type;
 
       return value === "article" ? t("page.news.type.article") : t("page.news.type.short");
     },
+    header: t("page.news.columns.format"),
   },
   {
     accessorKey: "createdAt",
-    header: t("page.news.columns.createdAt"),
     cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
+    header: t("page.news.columns.createdAt"),
   },
   {
-    id: "actions",
     header: "",
+    id: "actions",
     meta: {
       class: {
-        th: "w-12",
         td: "w-12",
+        th: "w-12",
       },
     },
   },
@@ -109,8 +109,8 @@ const togglePublish = async (article: NewsArticleAdmin) => {
 
     article.isDraft = !article.isDraft;
     toast.add({
-      title: article.isDraft ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
       color: "success",
+      title: article.isDraft ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
     });
   } catch (publishError) {
     reportError(publishError, t("page.news.edit.publishFailed"));
@@ -122,23 +122,23 @@ const togglePublish = async (article: NewsArticleAdmin) => {
 const articleActions = (article: NewsArticleAdmin): DropdownMenuItem[][] => [
   [
     {
-      label: t("page.news.actions.editName"),
       icon: "i-fluent-edit-24-regular",
+      label: t("page.news.actions.editName"),
       onSelect: () => openRenameModal(article),
     },
     {
-      label: article.isDraft ? t("page.news.edit.publish") : t("page.news.edit.unpublish"),
       icon: article.isDraft
         ? "i-fluent-checkmark-circle-24-regular"
         : "i-fluent-eye-off-24-regular",
+      label: article.isDraft ? t("page.news.edit.publish") : t("page.news.edit.unpublish"),
       onSelect: () => togglePublish(article),
     },
   ],
   [
     {
-      label: t("page.news.actions.delete"),
-      icon: "i-fluent-delete-24-regular",
       color: "error",
+      icon: "i-fluent-delete-24-regular",
+      label: t("page.news.actions.delete"),
       onSelect: () => (articleToDelete.value = article),
     },
   ],
@@ -159,8 +159,8 @@ const saveTitle = async () => {
     isRenameModalOpen.value = false;
     articleToRename.value = null;
     toast.add({
-      title: t("page.news.actions.renamed"),
       color: "success",
+      title: t("page.news.actions.renamed"),
     });
     await refresh();
   } catch (renameError) {
@@ -172,8 +172,8 @@ const saveTitle = async () => {
 
 const onDeleted = async () => {
   toast.add({
-    title: t("page.news.actions.deleted"),
     color: "success",
+    title: t("page.news.actions.deleted"),
   });
   await refresh();
 };

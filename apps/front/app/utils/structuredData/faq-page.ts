@@ -24,10 +24,10 @@ export const buildFaqPage = (items: FaqPageItem[]): FaqPageLd =>
     "@type": "FAQPage",
     mainEntity: items.map((item) => ({
       "@type": "Question",
-      name: item.question,
       acceptedAnswer: {
         "@type": "Answer",
         text: item.answer,
       },
+      name: item.question,
     })),
   });

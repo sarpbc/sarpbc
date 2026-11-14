@@ -9,20 +9,20 @@ const line = (
   endAt: string | null,
   shares = 1,
 ): EarningsLine => ({
-  id,
-  placement: 1,
   amount,
   currency,
+  id,
+  placement: 1,
   shares,
   team: { id: "team-a", name: "Team A", slug: "team-a" },
   tournament: {
+    beginAt: null,
+    endAt,
+    event: { id: "e1", name: "Fake Cup", slug: "fake-cup" },
     id: `t-${id}`,
     name: "Main Event",
     slug: "main-event",
     source: "manual",
-    beginAt: null,
-    endAt,
-    event: { id: "e1", slug: "fake-cup", name: "Fake Cup" },
   },
 });
 
@@ -35,18 +35,18 @@ describe(summarizeEarnings, () => {
     ]);
 
     expect(earnings.totals).toStrictEqual([
-      { currency: "EUR", amount: 500 },
-      { currency: "USD", amount: 1250 },
+      { amount: 500, currency: "EUR" },
+      { amount: 1250, currency: "USD" },
     ]);
-    expect(earnings.years.map(({ year, totals }) => ({ year, totals }))).toStrictEqual([
+    expect(earnings.years.map(({ year, totals }) => ({ totals, year }))).toStrictEqual([
       {
-        year: 2026,
         totals: [
-          { currency: "EUR", amount: 500 },
-          { currency: "USD", amount: 1000 },
+          { amount: 500, currency: "EUR" },
+          { amount: 1000, currency: "USD" },
         ],
+        year: 2026,
       },
-      { year: 2025, totals: [{ currency: "USD", amount: 250 }] },
+      { totals: [{ amount: 250, currency: "USD" }], year: 2025 },
     ]);
   });
 
@@ -57,7 +57,7 @@ describe(summarizeEarnings, () => {
     ]);
 
     expect(earnings.years[0]?.entries.map(({ amount }) => amount)).toStrictEqual([333.33, 333.33]);
-    expect(earnings.totals).toStrictEqual([{ currency: "USD", amount: 666.66 }]);
+    expect(earnings.totals).toStrictEqual([{ amount: 666.66, currency: "USD" }]);
   });
 
   it("rounds shares to the minor unit of each currency", () => {
@@ -71,9 +71,9 @@ describe(summarizeEarnings, () => {
       333, 333, 333.333,
     ]);
     expect(earnings.totals).toStrictEqual([
-      { currency: "JPY", amount: 333 },
-      { currency: "KRW", amount: 333 },
-      { currency: "KWD", amount: 333.333 },
+      { amount: 333, currency: "JPY" },
+      { amount: 333, currency: "KRW" },
+      { amount: 333.333, currency: "KWD" },
     ]);
   });
 

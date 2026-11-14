@@ -28,8 +28,8 @@ const { tab, emptyIcon, setTab } = useEntityListTab("matches");
 const headingId = computed(() => `${kind}-matches-title`);
 
 const tabItems = computed(() => [
-  { value: "upcoming" as const, label: t(`page.${kind}.slug.matches.tabs.upcoming`) },
-  { value: "past" as const, label: t(`page.${kind}.slug.matches.tabs.past`) },
+  { label: t(`page.${kind}.slug.matches.tabs.upcoming`), value: "upcoming" as const },
+  { label: t(`page.${kind}.slug.matches.tabs.past`), value: "past" as const },
 ]);
 
 const activeMatches = computed(() => (tab.value === "past" ? pastMatches : upcomingMatches));

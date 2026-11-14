@@ -38,25 +38,25 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
   let career: Contract[];
 
   const scope: RosterWriteScope = {
-    players: {
-      ...unusedPlayerWriter,
-      findById: async (id: string) => (id === zen.id ? zen : null),
-    },
-    teams: { ...unusedTeamWriter, findById: async (id: string) => (id === kcId ? kc : null) },
-    photos: unusedPhotoWriter,
     contracts: {
       ...unusedContractWriter,
-      findByPlayer: async () => career,
       findById: async (id: string) => {
         const stored = career.find((contract) => contract.id === id);
 
         return stored ? Object.assign(new Contract(), stored) : null;
       },
+      findByPlayer: async () => career,
       save: async (contract: Contract) => {
         contract.id ||= `contract-${career.length + 1}`;
         career = [...career.filter((stored) => stored.id !== contract.id), contract];
       },
     },
+    photos: unusedPhotoWriter,
+    players: {
+      ...unusedPlayerWriter,
+      findById: async (id: string) => (id === zen.id ? zen : null),
+    },
+    teams: { ...unusedTeamWriter, findById: async (id: string) => (id === kcId ? kc : null) },
   };
 
   const transaction: RosterTransaction = { run: async (work) => await work(scope) };
@@ -64,11 +64,11 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
   beforeAll(async () => {
     career = [
       Object.assign(new Contract(), {
+        endDate: null,
         id: "open",
         player: zen,
-        team: kc,
         startDate: new Date("2025-06-01"),
-        endDate: null,
+        team: kc,
       }),
     ];
 
@@ -108,7 +108,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
   it("answers 422 when a contract overlaps another one with the same team", async () => {
     const response = await request(app.getHttpServer())
       .post("/player/zen/contract")
-      .send({ teamId: kcId, startDate: "2024-01-01", endDate: "2025-07-01" })
+      .send({ endDate: "2025-07-01", startDate: "2024-01-01", teamId: kcId })
       .expect(422);
 
     expect(response.body).toHaveProperty(
@@ -121,11 +121,11 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
   it("answers 422 when a patch makes a contract overlap another one", async () => {
     career.push(
       Object.assign(new Contract(), {
+        endDate: new Date("2025-05-31"),
         id: "past",
         player: zen,
-        team: kc,
         startDate: new Date("2024-01-01"),
-        endDate: new Date("2025-05-31"),
+        team: kc,
       }),
     );
 
@@ -144,7 +144,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
   it("still stores a back-to-back period", async () => {
     const response = await request(app.getHttpServer())
       .post("/player/zen/contract")
-      .send({ teamId: kcId, startDate: "2023-01-01", endDate: "2024-01-01" });
+      .send({ endDate: "2024-01-01", startDate: "2023-01-01", teamId: kcId });
 
     expect(response.status).toBe(201);
     expect(career).toHaveLength(3);

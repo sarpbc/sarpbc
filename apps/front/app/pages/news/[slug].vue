@@ -24,8 +24,8 @@ const { data: article, error: articleError } = await useAsyncData(
 
 if (!article.value) {
   throwEntityLoadError(articleError.value, {
-    notFound: t("page.news.articleNotFound"),
     failed: t("page.news.error"),
+    notFound: t("page.news.articleNotFound"),
   });
 }
 
@@ -52,9 +52,9 @@ watch(
   [seoTitle, seoDescription, () => article.value?.imageUrl],
   () => {
     setPageSeo({
-      title: seoTitle.value,
       description: seoDescription.value,
       image: article.value?.imageUrl ?? undefined,
+      title: seoTitle.value,
     });
   },
   { immediate: true },
@@ -66,13 +66,13 @@ setJsonLd("ld-json-news-article", () => {
   }
 
   return buildNewsArticleJsonLd({
-    title: article.value.title,
-    slug: article.value.slug,
-    createdAt: article.value.createdAt,
-    content: article.value.content,
     author: article.value.author,
+    content: article.value.content,
+    createdAt: article.value.createdAt,
     imageUrl: article.value.imageUrl,
     locale: uiLocale(locale.value),
+    slug: article.value.slug,
+    title: article.value.title,
   });
 });
 </script>

@@ -1,7 +1,7 @@
 import type { R2UploadResponse } from "@sarpbc/types";
 import * as z from "zod/mini";
 
-const r2UploadResponseSchema = z.object({ publicUrl: z.string(), key: z.string() });
+const r2UploadResponseSchema = z.object({ key: z.string(), publicUrl: z.string() });
 
 export const MAX_IMAGE_MEGABYTES = 5;
 export const MAX_IMAGE_BYTES = MAX_IMAGE_MEGABYTES * 1024 * 1024;
@@ -11,10 +11,10 @@ export const IMAGE_CONTENT_TYPES = ["image/jpeg", "image/png", "image/webp", "im
 export type ImageContentType = (typeof IMAGE_CONTENT_TYPES)[number];
 
 export const IMAGE_FILE_EXTENSIONS = {
+  "image/gif": "gif",
   "image/jpeg": "jpg",
   "image/png": "png",
   "image/webp": "webp",
-  "image/gif": "gif",
 } as const satisfies Record<ImageContentType, string>;
 
 /** Browsers send these for JPEG files; the upload endpoints accept them and store `image/jpeg`. */

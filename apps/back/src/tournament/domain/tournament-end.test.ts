@@ -7,9 +7,9 @@ describe(inferEndAt, () => {
   it("returns the latest played match end once every match is settled", () => {
     expect(
       inferEndAt([
-        { status: "finished", beginAt: at("2025-03-01T10:00Z"), endAt: at("2025-03-01T11:00Z") },
-        { status: "finished", beginAt: at("2025-03-02T10:00Z"), endAt: null },
-        { status: "canceled", beginAt: at("2025-03-03T10:00Z"), endAt: null },
+        { beginAt: at("2025-03-01T10:00Z"), endAt: at("2025-03-01T11:00Z"), status: "finished" },
+        { beginAt: at("2025-03-02T10:00Z"), endAt: null, status: "finished" },
+        { beginAt: at("2025-03-03T10:00Z"), endAt: null, status: "canceled" },
       ]),
     ).toStrictEqual(at("2025-03-02T10:00Z"));
   });
@@ -17,8 +17,8 @@ describe(inferEndAt, () => {
   it("returns null while a match is still to play", () => {
     expect(
       inferEndAt([
-        { status: "finished", beginAt: at("2025-03-01T10:00Z"), endAt: at("2025-03-01T11:00Z") },
-        { status: "not_started", beginAt: at("2025-03-02T10:00Z"), endAt: null },
+        { beginAt: at("2025-03-01T10:00Z"), endAt: at("2025-03-01T11:00Z"), status: "finished" },
+        { beginAt: at("2025-03-02T10:00Z"), endAt: null, status: "not_started" },
       ]),
     ).toBeNull();
   });
@@ -26,7 +26,7 @@ describe(inferEndAt, () => {
   it("returns null without any played match", () => {
     expect(inferEndAt([])).toBeNull();
     expect(
-      inferEndAt([{ status: "canceled", beginAt: at("2025-03-01T10:00Z"), endAt: null }]),
+      inferEndAt([{ beginAt: at("2025-03-01T10:00Z"), endAt: null, status: "canceled" }]),
     ).toBeNull();
   });
 });

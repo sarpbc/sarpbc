@@ -28,22 +28,22 @@ describe(RosterMergeService, () => {
       [
         Object.assign(new Player(), { id: "zen", name: "zen", nationality: "FR" }),
         Object.assign(new Player(), {
+          birthday: new Date("2005-06-21"),
           id: "zen-dup",
           name: "Zen",
           pandascoreId: 42,
           source: "pandascore" as const,
-          birthday: new Date("2005-06-21"),
           team: vitality,
         }),
       ].map((player) => [player.id, player]),
     );
     teams = new Map(
       [
-        Object.assign(new Team(), { id: "kc", name: "Karmine Corp", location: "FR" }),
+        Object.assign(new Team(), { id: "kc", location: "FR", name: "Karmine Corp" }),
         Object.assign(new Team(), {
           id: "kc-dup",
-          name: "KCorp",
           imageUrl: "kc.png",
+          name: "KCorp",
           pandascoreId: 7,
           source: "pandascore" as const,
         }),
@@ -57,25 +57,25 @@ describe(RosterMergeService, () => {
     movePlayer = vi.fn<RosterMergeWriteScope["references"]["movePlayer"]>(async () => {});
     moveTeam = vi.fn<RosterMergeWriteScope["references"]["moveTeam"]>(async () => {});
     stores = {
+      contracts: unusedContractWriter,
+      photos: unusedPhotoWriter,
       players: {
+        delete: deletePlayer,
         findById: async (id) => players.get(id) ?? null,
         findBySlug: async () => null,
         save: savePlayer,
-        delete: deletePlayer,
       },
-      teams: {
-        findById: async (id) => teams.get(id) ?? null,
-        findBySlug: async () => null,
-        redirectCount: async () => 0,
-        save: saveTeam,
-        delete: deleteTeam,
-      },
-      contracts: unusedContractWriter,
-      photos: unusedPhotoWriter,
       references: {
         movePlayer,
         moveTeam,
         sharedTournamentIds: async () => shared,
+      },
+      teams: {
+        delete: deleteTeam,
+        findById: async (id) => teams.get(id) ?? null,
+        findBySlug: async () => null,
+        redirectCount: async () => 0,
+        save: saveTeam,
       },
     };
     service = new RosterMergeService({ run: async (work) => await work(stores) });
@@ -94,10 +94,10 @@ describe(RosterMergeService, () => {
 
     it("fills the missing profile fields of the kept player", () => {
       expect(result.kept).toMatchObject({
+        birthday: new Date("2005-06-21"),
         nationality: "FR",
         pandascoreId: 42,
         source: "pandascore",
-        birthday: new Date("2005-06-21"),
         team: { id: "vitality" },
       });
     });
@@ -135,8 +135,8 @@ describe(RosterMergeService, () => {
     const { kept, merged } = await service.mergeTeams("kc", "kc-dup");
 
     expect(moveTeam).toHaveBeenCalledExactlyOnceWith("kc-dup", "kc");
-    expect(kept).toMatchObject({ location: "FR", imageUrl: "kc.png", pandascoreId: 7 });
-    expect(merged).toMatchObject({ mergedIntoId: "kc", active: false, pandascoreId: null });
+    expect(kept).toMatchObject({ imageUrl: "kc.png", location: "FR", pandascoreId: 7 });
+    expect(merged).toMatchObject({ active: false, mergedIntoId: "kc", pandascoreId: null });
     expect(deleteTeam).not.toHaveBeenCalled();
   });
 

@@ -12,27 +12,27 @@ import { MatchService } from "../../../tournament/application/match/match.servic
 import { TournamentModule } from "../../../tournament/infrastructure/tournament.module";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([PickemChoice]), TournamentModule],
   controllers: [PickemController],
+  exports: [PickemService],
+  imports: [MikroOrmModule.forFeature([PickemChoice]), TournamentModule],
   providers: [
     {
+      inject: [EntityManager, MatchService],
       provide: PickemService,
       useFactory: (em: EntityManager, matches: MatchService) => {
         const store = new MikroPickemStore(em);
         const logger = new Logger(PickemService.name);
 
         return new PickemService(store, new CompetitionPickemMatches(matches), store, {
-          now: () => new Date(),
           id: v4,
+          now: () => new Date(),
           warn: (message) => {
             logger.warn(message);
           },
         });
       },
-      inject: [EntityManager, MatchService],
     },
     MatchDecidedListener,
   ],
-  exports: [PickemService],
 })
 export class PickemModule {}

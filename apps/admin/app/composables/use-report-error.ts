@@ -5,6 +5,6 @@ export const useReportError = () => {
   const { t } = useI18n();
 
   return (cause: unknown, title: string = t("common.requestFailed")) => {
-    toast.add({ title, description: getApiErrorMessage(cause), color: "error" });
+    toast.add({ color: "error", description: getApiErrorMessage(cause), title });
   };
 };

@@ -58,7 +58,7 @@ describe(RosterProposalService, () => {
 
   const proposeDarkLogo = async () =>
     await service.proposeTeamLogo(
-      { teamId: "kc", variant: "dark", imageUrl: "https://kcorp.gg/logo-dark.svg" },
+      { imageUrl: "https://kcorp.gg/logo-dark.svg", teamId: "kc", variant: "dark" },
       source,
       "journalist",
     );
@@ -72,14 +72,14 @@ describe(RosterProposalService, () => {
 
   const deleteTeam = async (teamId: string, mergeIntoTeamId?: string) =>
     await service.propose(
-      { kind: "delete_team", teamId, reason: "Empty duplicate", mergeIntoTeamId },
+      { kind: "delete_team", mergeIntoTeamId, reason: "Empty duplicate", teamId },
       "",
       "journalist",
     );
 
   const addZen = async () =>
     await service.propose(
-      { kind: "add_player_to_team", playerId: "zen", teamId: "kc", effectiveDate: "2026-10-24" },
+      { effectiveDate: "2026-10-24", kind: "add_player_to_team", playerId: "zen", teamId: "kc" },
       source,
       "journalist",
     );
@@ -87,7 +87,7 @@ describe(RosterProposalService, () => {
   it("records a pending proposal without touching the roster", async () => {
     const proposal = await addZen();
 
-    expect(proposal).toMatchObject({ status: "pending", sourceUrl: source });
+    expect(proposal).toMatchObject({ sourceUrl: source, status: "pending" });
     expect(players.joinTeam).not.toHaveBeenCalled();
   });
 
@@ -99,16 +99,16 @@ describe(RosterProposalService, () => {
     const { proposals, names } = await service.list("pending");
 
     expect(proposals).toHaveLength(2);
-    expect(names).toStrictEqual({ zen: "zen", kc: "Karmine Corp" });
+    expect(names).toStrictEqual({ kc: "Karmine Corp", zen: "zen" });
     expect(store.names).toHaveBeenCalledExactlyOnceWith({
-      players: ["zen"],
-      teams: ["kc"],
-      users: ["journalist"],
-      tournaments: [],
-      matches: [],
-      events: [],
       circuits: [],
+      events: [],
+      matches: [],
+      players: ["zen"],
       seasons: [],
+      teams: ["kc"],
+      tournaments: [],
+      users: ["journalist"],
     });
     expect(players.findById).not.toHaveBeenCalled();
   });
@@ -117,10 +117,10 @@ describe(RosterProposalService, () => {
     await expect(
       service.propose(
         {
+          effectiveDate: "2026-10-24",
           kind: "add_player_to_team",
           playerId: "zen",
           teamId: "nope",
-          effectiveDate: "2026-10-24",
         },
         source,
         "journalist",
@@ -128,7 +128,7 @@ describe(RosterProposalService, () => {
     ).rejects.toThrow(NotFoundError);
     await expect(
       service.propose(
-        { kind: "merge_players", keptId: "zen", duplicateId: "zen-dup" },
+        { duplicateId: "zen-dup", keptId: "zen", kind: "merge_players" },
         source,
         "j",
       ),
@@ -141,21 +141,21 @@ describe(RosterProposalService, () => {
     const approved = await service.approve(id, "admin");
 
     expect(players.joinTeam).toHaveBeenCalledWith("zen", {
-      teamId: "kc",
       effectiveDate: "2026-10-24",
       sourceUrl: source,
+      teamId: "kc",
     });
-    expect(approved).toMatchObject({ status: "applied", reviewedById: "admin", entityId: "zen" });
+    expect(approved).toMatchObject({ entityId: "zen", reviewedById: "admin", status: "applied" });
   });
 
   it("applies a roster move with its staff role", async () => {
     const { id } = await service.propose(
       {
+        contractRole: "coach",
+        effectiveDate: "2026-10-24",
         kind: "add_player_to_team",
         playerId: "zen",
         teamId: "kc",
-        effectiveDate: "2026-10-24",
-        contractRole: "coach",
       },
       source,
       "journalist",
@@ -164,10 +164,10 @@ describe(RosterProposalService, () => {
     await service.approve(id, "admin");
 
     expect(players.joinTeam).toHaveBeenCalledWith("zen", {
-      teamId: "kc",
       effectiveDate: "2026-10-24",
-      sourceUrl: source,
       role: "coach",
+      sourceUrl: source,
+      teamId: "kc",
     });
   });
 
@@ -182,19 +182,19 @@ describe(RosterProposalService, () => {
     expect(approveResult.entityId).toBe("new-player");
     expect(players.create).toHaveBeenCalledWith({
       name: "Atow",
-      status: "free_agent",
       source: "startgg",
+      status: "free_agent",
     });
   });
 
   it("records a sourced career contract on approval", async () => {
     const { id } = await service.propose(
       {
+        endDate: "2023-06-30",
         kind: "create_contract",
         playerId: "zen",
-        teamId: "kc",
         startDate: "2022-01-10",
-        endDate: "2023-06-30",
+        teamId: "kc",
       },
       source,
       "journalist",
@@ -203,25 +203,25 @@ describe(RosterProposalService, () => {
     const approveResult2 = await service.approve(id, "admin");
     expect(approveResult2.entityId).toBe("new-contract");
     expect(contracts.recordPeriod).toHaveBeenCalledWith("zen", {
-      teamId: "kc",
-      startDate: "2022-01-10",
       endDate: "2023-06-30",
       role: undefined,
       sourceUrl: source,
+      startDate: "2022-01-10",
+      teamId: "kc",
     });
   });
 
   it("only proposes updates to a contract of the named player", async () => {
     await expect(
       service.propose(
-        { kind: "update_contract", contractId: "other", playerId: "zen", endDate: null },
+        { contractId: "other", endDate: null, kind: "update_contract", playerId: "zen" },
         source,
         "journalist",
       ),
     ).rejects.toThrow(NotFoundError);
 
     const { id } = await service.propose(
-      { kind: "update_contract", contractId: "zen-kc", playerId: "zen", endDate: "2024-01-01" },
+      { contractId: "zen-kc", endDate: "2024-01-01", kind: "update_contract", playerId: "zen" },
       source,
       "journalist",
     );
@@ -229,11 +229,11 @@ describe(RosterProposalService, () => {
     await service.approve(id, "admin");
 
     expect(contracts.revisePeriod).toHaveBeenCalledWith("zen", "zen-kc", {
-      teamId: undefined,
-      startDate: undefined,
       endDate: "2024-01-01",
       role: undefined,
       sourceUrl: source,
+      startDate: undefined,
+      teamId: undefined,
     });
   });
 
@@ -252,22 +252,22 @@ describe(RosterProposalService, () => {
 
     await expect(service.approve(id, "admin")).rejects.toThrow("Team is inactive");
 
-    expect(saved.get(id)).toMatchObject({ status: "pending", reviewedById: null });
+    expect(saved.get(id)).toMatchObject({ reviewedById: null, status: "pending" });
     const listResult = await service.list("pending");
     expect(listResult.proposals).toHaveLength(1);
   });
 
   const prizeEntry = {
-    placement: 1,
     amount: 1000,
     currency: "USD",
-    teamId: "kc",
+    placement: 1,
     playerIds: ["zen"],
+    teamId: "kc",
   };
 
   it("applies a sourced prize distribution once a tournament manager approves it", async () => {
     const { id } = await service.propose(
-      { kind: "set_tournament_prizes", tournamentId: "cup", prizes: [prizeEntry] },
+      { kind: "set_tournament_prizes", prizes: [prizeEntry], tournamentId: "cup" },
       source,
       "journalist",
     );
@@ -280,12 +280,12 @@ describe(RosterProposalService, () => {
     expect(prizes.setDistribution).toHaveBeenCalledWith("cup", [
       { ...prizeEntry, sourceUrl: source },
     ]);
-    expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
+    expect(approved).toMatchObject({ entityId: "cup", status: "applied" });
   });
 
   it("applies a prize row correction with the proposal's source", async () => {
     const { id } = await service.propose(
-      { kind: "update_tournament_prize", tournamentId: "cup", teamId: "kc", patch: {} },
+      { kind: "update_tournament_prize", patch: {}, teamId: "kc", tournamentId: "cup" },
       source,
       "journalist",
     );
@@ -294,13 +294,13 @@ describe(RosterProposalService, () => {
 
     expect(staff.permissions).toStrictEqual(["tournaments.manage"]);
     expect(prizes.updateEntry).toHaveBeenCalledWith("cup", "kc", {}, source);
-    expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
+    expect(approved).toMatchObject({ entityId: "cup", status: "applied" });
   });
 
   it("refuses a prize row correction for a team without a prize", async () => {
     await expect(
       service.propose(
-        { kind: "update_tournament_prize", tournamentId: "cup", teamId: "zen", patch: {} },
+        { kind: "update_tournament_prize", patch: {}, teamId: "zen", tournamentId: "cup" },
         source,
         "journalist",
       ),
@@ -312,7 +312,7 @@ describe(RosterProposalService, () => {
       ["https://blast.tv/rl/open", "https://liquipedia-mirror.example/x"].map(async (sourceUrl) => {
         await expect(
           service.propose(
-            { kind: "update_tournament_prize", tournamentId: "cup", teamId: "kc", patch: {} },
+            { kind: "update_tournament_prize", patch: {}, teamId: "kc", tournamentId: "cup" },
             sourceUrl,
             "journalist",
           ),
@@ -324,7 +324,7 @@ describe(RosterProposalService, () => {
   it("rejects prize proposals with an unknown or start.gg tournament, team or invalid currency", async () => {
     const proposePrizes = async (tournamentId: string, entry: typeof prizeEntry) =>
       await service.propose(
-        { kind: "set_tournament_prizes", tournamentId, prizes: [entry] },
+        { kind: "set_tournament_prizes", prizes: [entry], tournamentId },
         source,
         "journalist",
       );
@@ -341,11 +341,11 @@ describe(RosterProposalService, () => {
   });
 
   const award: Extract<RosterChange, { kind: "award_player" }> = {
-    kind: "award_player",
-    tournamentId: "cup",
-    teamId: "kc",
-    playerId: "zen",
     awardType: "mvp",
+    kind: "award_player",
+    playerId: "zen",
+    teamId: "kc",
+    tournamentId: "cup",
   };
 
   const propose = async (change: Partial<typeof award>) =>
@@ -359,7 +359,7 @@ describe(RosterProposalService, () => {
 
     expect(staff.permissions).toStrictEqual(["tournaments.manage"]);
     expect(awards.createForTeam).toHaveBeenCalledWith("cup", "kc", "zen", "mvp");
-    expect(approved).toMatchObject({ status: "applied", entityId: "award-1" });
+    expect(approved).toMatchObject({ entityId: "award-1", status: "applied" });
   });
 
   it("applies a Grand Finals MVP proposal through the same path as the admin", async () => {
@@ -395,7 +395,7 @@ describe(RosterProposalService, () => {
 
     await expect(service.approve(id, "admin")).rejects.toThrow(InvalidInputError);
 
-    expect(saved.get(id)).toMatchObject({ status: "pending", entityId: null });
+    expect(saved.get(id)).toMatchObject({ entityId: null, status: "pending" });
   });
 
   it("names the award's tournament, team and player in the proposal list", async () => {
@@ -430,16 +430,16 @@ describe(RosterProposalService, () => {
 
       expect(logos.upload).toHaveBeenCalledWith("kc", "dark", "https://kcorp.gg/logo-dark.svg");
       expect(proposal).toMatchObject({
-        status: "pending",
-        sourceUrl: source,
         change: {
-          kind: "upload_team_logo",
-          teamId: "kc",
-          variant: "dark",
           imageUrl: "https://kcorp.gg/logo-dark.svg",
+          kind: "upload_team_logo",
           logoKey: pendingKey,
           logoUrl: pendingUrl,
+          teamId: "kc",
+          variant: "dark",
         },
+        sourceUrl: source,
+        status: "pending",
       });
       expect(teams.update).not.toHaveBeenCalled();
       expect(logos.publish).not.toHaveBeenCalled();
@@ -448,7 +448,7 @@ describe(RosterProposalService, () => {
     it("does not download anything for an unknown team", async () => {
       await expect(
         service.proposeTeamLogo(
-          { teamId: "nope", variant: "light", imageUrl: "https://kcorp.gg/logo.png" },
+          { imageUrl: "https://kcorp.gg/logo.png", teamId: "nope", variant: "light" },
           source,
           "journalist",
         ),
@@ -474,9 +474,9 @@ describe(RosterProposalService, () => {
       expect(logos.publish).toHaveBeenCalledExactlyOnceWith(pendingKey);
       expect(teams.update).toHaveBeenCalledExactlyOnceWith("kc", { logoDarkUrl: publishedUrl });
       expect(approved).toMatchObject({
-        status: "applied",
-        entityId: "kc",
         change: { logoKey: publishedKey, logoUrl: publishedUrl },
+        entityId: "kc",
+        status: "applied",
       });
       expect(logos.discard).not.toHaveBeenCalled();
     });
@@ -524,7 +524,7 @@ describe(RosterProposalService, () => {
     it("records a pending match deletion without deleting anything", async () => {
       const proposal = await deleteMatch("dup-match");
 
-      expect(proposal).toMatchObject({ status: "pending", sourceUrl: "" });
+      expect(proposal).toMatchObject({ sourceUrl: "", status: "pending" });
       expect(matches.requireProposableDeletion).toHaveBeenCalledWith("dup-match");
       expect(matches.deleteMatch).not.toHaveBeenCalled();
     });
@@ -543,7 +543,7 @@ describe(RosterProposalService, () => {
 
       expect(staff.permissions).toStrictEqual(["tournaments.manage"]);
       expect(matches.deleteMatch).toHaveBeenCalledExactlyOnceWith("dup-match");
-      expect(approved).toMatchObject({ status: "applied", entityId: "dup-match" });
+      expect(approved).toMatchObject({ entityId: "dup-match", status: "applied" });
     });
 
     it("keeps a match deletion pending when the guard refuses it at approval", async () => {
@@ -552,7 +552,7 @@ describe(RosterProposalService, () => {
 
       await expect(service.approve(id, "admin")).rejects.toThrow(ConflictError);
 
-      expect(saved.get(id)).toMatchObject({ status: "pending", entityId: null });
+      expect(saved.get(id)).toMatchObject({ entityId: null, status: "pending" });
     });
 
     it("names the match a pending deletion targets", async () => {
@@ -577,7 +577,7 @@ describe(RosterProposalService, () => {
 
       expect(staff.permissions).toStrictEqual(["teams.manage"]);
       expect(teams.delete).toHaveBeenCalledExactlyOnceWith("kc-copy");
-      expect(approved).toMatchObject({ status: "applied", entityId: "kc-copy" });
+      expect(approved).toMatchObject({ entityId: "kc-copy", status: "applied" });
     });
 
     it("keeps a team deletion pending when the team gained references since the proposal", async () => {
@@ -599,7 +599,7 @@ describe(RosterProposalService, () => {
 
       expect(merges.mergeTeams).toHaveBeenCalledExactlyOnceWith("kc", "kc-copy");
       expect(teams.delete).not.toHaveBeenCalled();
-      expect(approved).toMatchObject({ status: "applied", entityId: "kc" });
+      expect(approved).toMatchObject({ entityId: "kc", status: "applied" });
     });
 
     it("refuses to merge a team into itself or into a missing team", async () => {
@@ -610,8 +610,8 @@ describe(RosterProposalService, () => {
 
   describe("stream proposals", () => {
     const list: StreamInput[] = [
-      { url: "https://twitch.tv/rlesports", language: "en", kind: "official" },
-      { url: "https://twitch.tv/kameto", language: "fr", kind: "costream" },
+      { kind: "official", language: "en", url: "https://twitch.tv/rlesports" },
+      { kind: "costream", language: "fr", url: "https://twitch.tv/kameto" },
     ];
 
     const setMatchStreams = async (sourceUrl: string, matchId = "match-1") =>
@@ -624,9 +624,9 @@ describe(RosterProposalService, () => {
     it("validates a stream list and keeps it pending until approval", async () => {
       const proposal = await setMatchStreams(source);
 
-      expect(proposal).toMatchObject({ status: "pending", change: { streams: list } });
+      expect(proposal).toMatchObject({ change: { streams: list }, status: "pending" });
       expect(streams.requireProposable).toHaveBeenCalledWith(
-        { kind: "match", id: "match-1" },
+        { id: "match-1", kind: "match" },
         list,
       );
       expect(streams.set).not.toHaveBeenCalled();
@@ -637,8 +637,8 @@ describe(RosterProposalService, () => {
         service.propose(
           {
             kind: "set_tournament_streams",
+            streams: [{ kind: "official", language: "en", url: "http://twitch.tv/rl" }],
             tournamentId: "stage-1",
-            streams: [{ url: "http://twitch.tv/rl", language: "en", kind: "official" }],
           },
           source,
           "journalist",
@@ -652,7 +652,7 @@ describe(RosterProposalService, () => {
       const manual = await setMatchStreams(source);
 
       const startgg = await service.propose(
-        { kind: "set_event_streams", eventId: "event-1", streams: list },
+        { eventId: "event-1", kind: "set_event_streams", streams: list },
         "https://www.start.gg/tournament/rl-open",
         "journalist",
       );
@@ -666,13 +666,13 @@ describe(RosterProposalService, () => {
 
       expect(streams.set).toHaveBeenNthCalledWith(
         1,
-        { kind: "match", id: "match-1" },
+        { id: "match-1", kind: "match" },
         list,
         "manual",
       );
       expect(streams.set).toHaveBeenNthCalledWith(
         2,
-        { kind: "event", id: "event-1" },
+        { id: "event-1", kind: "event" },
         list,
         "startgg",
       );
@@ -699,7 +699,7 @@ describe(RosterProposalService, () => {
 
     const setLineups = async (sourceUrl: string, matchId = "match-1") =>
       await service.propose(
-        { kind: "set_match_lineups", matchId, lineups: sides },
+        { kind: "set_match_lineups", lineups: sides, matchId },
         sourceUrl,
         "journalist",
       );
@@ -707,7 +707,7 @@ describe(RosterProposalService, () => {
     it("validates the lineups and keeps them pending until approval", async () => {
       const proposal = await setLineups(source);
 
-      expect(proposal).toMatchObject({ status: "pending", sourceUrl: source });
+      expect(proposal).toMatchObject({ sourceUrl: source, status: "pending" });
       expect(lineups.requireProposable).toHaveBeenCalledExactlyOnceWith("match-1", sides);
       expect(players.findById).toHaveBeenCalledWith("zen");
       expect(lineups.set).not.toHaveBeenCalled();
@@ -719,7 +719,7 @@ describe(RosterProposalService, () => {
       const approved = await service.approve(id, "admin");
 
       expect(lineups.set).toHaveBeenCalledExactlyOnceWith("match-1", sides);
-      expect(approved).toMatchObject({ status: "applied", entityId: "match-1" });
+      expect(approved).toMatchObject({ entityId: "match-1", status: "applied" });
       expect(staff.permissions).toContain("tournaments.manage");
     });
 
@@ -732,8 +732,8 @@ describe(RosterProposalService, () => {
         service.propose(
           {
             kind: "set_match_lineups",
-            matchId: "match-1",
             lineups: [{ participantId: "part-kc", playerIds: ["ghost"] }],
+            matchId: "match-1",
           },
           source,
           "journalist",
@@ -753,10 +753,10 @@ describe(RosterProposalService, () => {
 
   describe("viewership proposals", () => {
     const viewership: Viewership = {
-      peakViewers: 52_000,
       averageViewers: 31_000,
-      scope: "official",
       measuredAt: null,
+      peakViewers: 52_000,
+      scope: "official",
       sourceName: "Esports Charts",
       sourceUrl: "https://escharts.com/tournaments/rl/fake-open",
     };
@@ -768,9 +768,9 @@ describe(RosterProposalService, () => {
         "journalist",
       );
 
-      expect(proposal).toMatchObject({ status: "pending", change: { viewership } });
+      expect(proposal).toMatchObject({ change: { viewership }, status: "pending" });
       expect(viewerships.requireProposable).toHaveBeenCalledWith(
-        { kind: "match", id: "match-1" },
+        { id: "match-1", kind: "match" },
         viewership,
       );
       expect(viewerships.set).not.toHaveBeenCalled();
@@ -779,7 +779,7 @@ describe(RosterProposalService, () => {
         entityId: "match-1",
       });
       expect(viewerships.set).toHaveBeenCalledExactlyOnceWith(
-        { kind: "match", id: "match-1" },
+        { id: "match-1", kind: "match" },
         viewership,
       );
     });
@@ -788,8 +788,8 @@ describe(RosterProposalService, () => {
       await expect(
         service.propose(
           {
-            kind: "set_event_viewership",
             eventId: "event-1",
+            kind: "set_event_viewership",
             viewership: { ...viewership, sourceName: " " },
           },
           viewership.sourceUrl,
@@ -808,7 +808,7 @@ describe(RosterProposalService, () => {
 
     it("names the event of a pending event viewership", async () => {
       await service.propose(
-        { kind: "set_event_viewership", eventId: "event-1", viewership },
+        { eventId: "event-1", kind: "set_event_viewership", viewership },
         viewership.sourceUrl,
         "journalist",
       );
@@ -818,12 +818,12 @@ describe(RosterProposalService, () => {
   });
 
   describe("circuit scale proposals", () => {
-    const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
+    const scale: CircuitScaleTier[] = [{ from: 1, points: 10, to: 1 }];
     const rules = "https://example.org/official-rules";
 
     const setScale = async (tournamentId = "ps-stage") =>
       await service.propose(
-        { kind: "set_circuit_stage_scale", circuitId: "circuit-1", tournamentId, scale },
+        { circuitId: "circuit-1", kind: "set_circuit_stage_scale", scale, tournamentId },
         rules,
         "journalist",
       );
@@ -833,7 +833,7 @@ describe(RosterProposalService, () => {
     it("checks the stage and keeps the scale pending until approval", async () => {
       const proposal = await setScale();
 
-      expect(proposal).toMatchObject({ status: "pending", sourceUrl: rules });
+      expect(proposal).toMatchObject({ sourceUrl: rules, status: "pending" });
       expect(circuits.requireStageSettings).toHaveBeenCalledWith("circuit-1", "ps-stage", input);
       expect(circuits.setStageScale).not.toHaveBeenCalled();
     });
@@ -853,24 +853,24 @@ describe(RosterProposalService, () => {
 
     it("carries the region teams and final placements, which must be known teams", async () => {
       const change = {
-        kind: "set_circuit_stage_scale" as const,
         circuitId: "circuit-1",
-        tournamentId: "major",
-        scale,
-        worldwide: true,
+        finishes: [{ placement: 13, teamId: "kc" }],
+        kind: "set_circuit_stage_scale" as const,
         regionTeamIds: ["kc"],
-        finishes: [{ teamId: "kc", placement: 13 }],
+        scale,
+        tournamentId: "major",
+        worldwide: true,
       };
 
       const { id } = await service.propose(change, rules, "journalist");
 
       await service.approve(id, "admin");
       expect(circuits.setStageScale).toHaveBeenCalledWith("circuit-1", "major", {
+        finishes: [{ placement: 13, teamId: "kc" }],
+        regionTeamIds: ["kc"],
         scale,
         sourceUrl: rules,
         worldwide: true,
-        regionTeamIds: ["kc"],
-        finishes: [{ teamId: "kc", placement: 13 }],
       });
       await expect(
         service.propose({ ...change, regionTeamIds: ["missing-team"] }, rules, "journalist"),
@@ -880,21 +880,21 @@ describe(RosterProposalService, () => {
 
   describe("team aliases", () => {
     const alias = {
-      name: "Fixture Esports",
       from: "2023-01-01",
-      to: "2024-06-01",
       logoUrl: null,
+      name: "Fixture Esports",
       pandascoreId: null,
+      to: "2024-06-01",
     };
 
     it("checks the alias with the proposal source and keeps it pending", async () => {
       const proposal = await service.propose(
-        { kind: "add_team_alias", teamId: "kc", alias },
+        { alias, kind: "add_team_alias", teamId: "kc" },
         source,
         "journalist",
       );
 
-      expect(proposal).toMatchObject({ status: "pending", sourceUrl: source });
+      expect(proposal).toMatchObject({ sourceUrl: source, status: "pending" });
       expect(teamAliases.requireProposable).toHaveBeenCalledWith("kc", {
         ...alias,
         sourceUrl: source,
@@ -905,13 +905,13 @@ describe(RosterProposalService, () => {
     it("refuses a Liquipedia source and an unknown team before recording anything", async () => {
       await expect(
         service.propose(
-          { kind: "add_team_alias", teamId: "kc", alias },
+          { alias, kind: "add_team_alias", teamId: "kc" },
           "https://liquipedia.net/rocketleague/Karmine_Corp",
           "journalist",
         ),
       ).rejects.toThrow("Liquipedia");
       await expect(
-        service.propose({ kind: "add_team_alias", teamId: "nope", alias }, source, "journalist"),
+        service.propose({ alias, kind: "add_team_alias", teamId: "nope" }, source, "journalist"),
       ).rejects.toThrow(NotFoundError);
       expect(saved.size).toBe(0);
     });
@@ -922,13 +922,13 @@ describe(RosterProposalService, () => {
 
       beforeEach(async () => {
         const added = await service.propose(
-          { kind: "add_team_alias", teamId: "kc", alias },
+          { alias, kind: "add_team_alias", teamId: "kc" },
           source,
           "journalist",
         );
 
         const updated = await service.propose(
-          { kind: "update_team_alias", teamId: "kc", aliasId: "alias-1", alias },
+          { alias, aliasId: "alias-1", kind: "update_team_alias", teamId: "kc" },
           source,
           "journalist",
         );

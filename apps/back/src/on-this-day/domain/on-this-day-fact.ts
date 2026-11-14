@@ -86,13 +86,13 @@ export const parseOnThisDayFact = (input: OnThisDayFactFields): OnThisDayFactFie
   }
 
   return {
-    month: input.month,
     day: input.day,
-    year: parseYear(input.year, input.month, input.day),
+    link: input.link,
+    month: input.month,
+    sourceUrl: parseFactSourceUrl(input.sourceUrl),
     textEn: requiredText(input.textEn, "English"),
     textFr: requiredText(input.textFr, "French"),
-    link: input.link,
-    sourceUrl: parseFactSourceUrl(input.sourceUrl),
+    year: parseYear(input.year, input.month, input.day),
   };
 };
 

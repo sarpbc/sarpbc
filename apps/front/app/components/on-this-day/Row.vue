@@ -77,7 +77,7 @@ const factLink = computed(() =>
 
 const finalScore = computed(() =>
   event.kind === "final" && event.winner.score !== null && event.loser.score !== null
-    ? t("components.onThisDay.score", { winner: event.winner.score, loser: event.loser.score })
+    ? t("components.onThisDay.score", { loser: event.loser.score, winner: event.winner.score })
     : null,
 );
 </script>

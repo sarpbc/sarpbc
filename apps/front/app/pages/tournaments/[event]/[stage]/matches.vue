@@ -20,8 +20,8 @@ const {
   () => `tournament-matches-${tournamentId.value}`,
   () => getTournamentMatches(tournamentId.value),
   {
-    watch: [tournamentId],
     default: () => [],
+    watch: [tournamentId],
   },
 );
 
@@ -29,15 +29,15 @@ const groupedMatches = computed(() => {
   const all = matches.value ?? [];
 
   return {
-    upcoming: groupByDay(
-      all.filter((match) => !match.endAt),
-      (match) => match.beginAt,
-      "asc",
-    ),
     completed: groupByDay(
       all.filter((match) => match.endAt),
       (match) => match.endAt,
       "desc",
+    ),
+    upcoming: groupByDay(
+      all.filter((match) => !match.endAt),
+      (match) => match.beginAt,
+      "asc",
     ),
   };
 });
@@ -48,8 +48,8 @@ const displayGroupedMatches = computed(() => {
   const { upcoming, completed } = groupedMatches.value;
 
   return {
-    upcoming: isFinished.value ? [] : upcoming,
     completed,
+    upcoming: isFinished.value ? [] : upcoming,
   };
 });
 

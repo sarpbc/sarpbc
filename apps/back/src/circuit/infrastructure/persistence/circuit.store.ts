@@ -22,28 +22,28 @@ import { CircuitStage } from "./circuit-stage.entity";
 import { CircuitStageTeam } from "./circuit-stage-team.entity";
 
 const toSummary = (row: Circuit): CircuitSummary => ({
-  id: row.id,
-  slug: row.slug,
-  name: row.name,
-  season: row.season,
-  region: row.region,
   description: row.description,
-  sourceUrl: row.sourceUrl,
+  id: row.id,
+  name: row.name,
   qualificationSpots: row.qualificationSpots,
+  region: row.region,
+  season: row.season,
+  slug: row.slug,
+  sourceUrl: row.sourceUrl,
 });
 
 const eventRef = ({ event }: Tournament): TournamentEventRef => ({
   id: event.id,
-  slug: event.slug,
   name: event.name,
+  slug: event.slug,
 });
 
 const toTeam = (team: Team): CircuitStandingTeam => ({
+  darkModeImageUrl: team.darkModeImageUrl,
   id: team.id,
+  imageUrl: team.imageUrl,
   name: team.name,
   slug: team.slug,
-  imageUrl: team.imageUrl,
-  darkModeImageUrl: team.darkModeImageUrl,
 });
 
 const regionTeams = (stage: CircuitStage): Team[] =>
@@ -57,7 +57,7 @@ const finishes = (stage: CircuitStage): StagePlacement[] =>
   stage.teams
     .getItems()
     .flatMap(({ team, placement }) =>
-      placement === null ? [] : [{ team: toTeam(team), placement }],
+      placement === null ? [] : [{ placement, team: toTeam(team) }],
     )
     .toSorted((a, b) => a.placement - b.placement || a.team.name.localeCompare(b.team.name));
 
@@ -65,20 +65,20 @@ const toStageItem = (stage: CircuitStage): CircuitDetail["stages"][number] => {
   const { tournament, scale, sourceUrl, worldwide } = stage;
 
   return {
+    finishes: finishes(stage),
+    regionTeams: regionTeams(stage).map(toTeam),
+    scale,
+    sourceUrl,
     tournament: {
+      beginAt: tournament.beginAt?.toISOString() ?? null,
+      endAt: tournament.endAt?.toISOString() ?? null,
+      event: eventRef(tournament),
       id: tournament.id,
       name: tournament.name,
       slug: tournament.slug,
       source: tournament.source,
-      beginAt: tournament.beginAt?.toISOString() ?? null,
-      endAt: tournament.endAt?.toISOString() ?? null,
-      event: eventRef(tournament),
     },
-    scale,
-    sourceUrl,
     worldwide,
-    regionTeams: regionTeams(stage).map(toTeam),
-    finishes: finishes(stage),
   };
 };
 
@@ -105,7 +105,7 @@ export class CircuitPersistence implements CircuitStore {
 
   async slugTaken(slug: string, exceptId: string | null) {
     const filter =
-      exceptId !== null && exceptId !== "" ? { slug, id: { $ne: exceptId } } : { slug };
+      exceptId !== null && exceptId !== "" ? { id: { $ne: exceptId }, slug } : { slug };
 
     return (await this.em.count(Circuit, filter)) > 0;
   }
@@ -142,8 +142,8 @@ export class CircuitPersistence implements CircuitStore {
       CircuitStage,
       { circuit: { id: circuitId } },
       {
-        populate: ["tournament.event", "teams.team"],
         orderBy: { tournament: { beginAt: "ASC" } },
+        populate: ["tournament.event", "teams.team"],
       },
     );
 
@@ -161,9 +161,9 @@ export class CircuitPersistence implements CircuitStore {
       ? await this.em.find(
           TournamentParticipant,
           {
-            tournament: { id: { $in: rows.map((row) => row.tournament.id) } },
             placement: { $ne: null },
             team: { $ne: null },
+            tournament: { id: { $in: rows.map((row) => row.tournament.id) } },
           },
           { populate: ["team"] },
         )
@@ -177,16 +177,16 @@ export class CircuitPersistence implements CircuitStore {
     }
 
     return rows.map((stage) => ({
-      source: stage.tournament.source,
-      event: eventRef(stage.tournament),
       beginAt: stage.tournament.beginAt,
       endAt: stage.tournament.endAt,
+      event: eventRef(stage.tournament),
+      finishes: finishes(stage),
+      placements: placements.get(stage.tournament.id) ?? [],
+      regionTeamIds: regionTeams(stage).map(({ id }) => id),
       scale: stage.scale,
+      source: stage.tournament.source,
       sourceUrl: stage.sourceUrl,
       worldwide: stage.worldwide,
-      regionTeamIds: regionTeams(stage).map(({ id }) => id),
-      placements: placements.get(stage.tournament.id) ?? [],
-      finishes: finishes(stage),
     }));
   }
 
@@ -203,7 +203,7 @@ export class CircuitPersistence implements CircuitStore {
 
     const participants = await this.em.find(
       TournamentParticipant,
-      { tournament: { event: tournament.event.id }, team: { $ne: null } },
+      { team: { $ne: null }, tournament: { event: tournament.event.id } },
       { populate: ["team"] },
     );
 
@@ -216,7 +216,7 @@ export class CircuitPersistence implements CircuitStore {
 
       const current = teams.get(team.id);
       const own = stage.id === tournamentId ? placement : null;
-      teams.set(team.id, { team: toTeam(team), placement: own ?? current?.placement ?? null });
+      teams.set(team.id, { placement: own ?? current?.placement ?? null, team: toTeam(team) });
     }
 
     return [...teams.values()].toSorted(
@@ -249,10 +249,10 @@ export class CircuitPersistence implements CircuitStore {
       for (const teamId of new Set([...region, ...placements.keys()])) {
         em.persist(
           Object.assign(new CircuitStageTeam(), {
-            stage: row,
-            team: em.getReference(Team, teamId),
             placement: placements.get(teamId) ?? null,
             regionMember: region.has(teamId),
+            stage: row,
+            team: em.getReference(Team, teamId),
           }),
         );
       }

@@ -10,21 +10,21 @@ import { createHttpAdapter } from "./infrastructure/http/fastify-adapter";
 const { NODE_ENV, production } = loadEnv();
 
 const loggerEnv = {
-  service: "sarpbc-back",
   environment: NODE_ENV,
+  service: "sarpbc-back",
 };
 
 if (production) {
   initLogger({
     env: loggerEnv,
     sampling: {
+      keep: [{ duration: 1000 }, { status: 400 }],
       rates: {
-        info: 5,
-        warn: 50,
         debug: 0,
         error: 100,
+        info: 5,
+        warn: 50,
       },
-      keep: [{ duration: 1000 }, { status: 400 }],
     },
   });
 } else {

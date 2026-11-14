@@ -91,13 +91,13 @@ export class PlayerComparisonService {
 
     return {
       career: {
-        player,
-        titles: titles.filter(({ source }) => isRedistributable(source)),
-        contracts: contractList,
-        series: seriesRecord(redistributableMatches, player.id),
-        earnings,
         awards: awardList.filter(({ tournament }) => isRedistributable(tournament.source)),
+        contracts: contractList,
+        earnings,
+        player,
         seasonAwards,
+        series: seriesRecord(redistributableMatches, player.id),
+        titles: titles.filter(({ source }) => isRedistributable(source)),
       },
       matches: redistributableMatches,
     };

@@ -9,14 +9,14 @@ import type { CircuitStore, StoredStageResult } from "./ports";
 import { mapSequentially } from "../../common/application/sequentially";
 
 const SOURCE = "https://example.org/official-rules";
-const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
+const scale: CircuitScaleTier[] = [{ from: 1, points: 10, to: 1 }];
 
 const team = (id: string) => ({
+  darkModeImageUrl: null,
   id,
+  imageUrl: null,
   name: id.toUpperCase(),
   slug: id,
-  imageUrl: null,
-  darkModeImageUrl: null,
 });
 
 const setup = () => {
@@ -26,8 +26,8 @@ const setup = () => {
     ["ps-stage", "startgg-stage", "manual-stage"].map((id) => [
       id,
       [
-        { team: team("kc"), placement: 1 },
-        { team: team("nrg"), placement: null },
+        { placement: 1, team: team("kc") },
+        { placement: null, team: team("nrg") },
       ],
     ]),
   );
@@ -36,48 +36,48 @@ const setup = () => {
   const results: StoredStageResult[] = [];
 
   const store: CircuitStore = {
-    list: vi.fn<CircuitStore["list"]>(async () => [...circuits.values()]),
+    eventTeams: vi.fn<CircuitStore["eventTeams"]>(async (id) => eventTeams.get(id) ?? null),
     find: vi.fn<CircuitStore["find"]>(
       async (ref) =>
         [...circuits.values()].find(({ id, slug }) => id === ref || slug === ref) ?? null,
     ),
-    slugTaken: vi.fn<CircuitStore["slugTaken"]>(async (slug, exceptId) =>
-      [...circuits.values()].some((c) => c.slug === slug && c.id !== exceptId),
-    ),
-    withSeason: vi.fn<CircuitStore["withSeason"]>(async (season) =>
-      [...circuits.values()].filter((c) => c.season === season),
+    list: vi.fn<CircuitStore["list"]>(async () => [...circuits.values()]),
+    remove: vi.fn<CircuitStore["remove"]>(async (id) => circuits.delete(id)),
+    removeStage: vi.fn<CircuitStore["removeStage"]>(async (circuitId, tournamentId) =>
+      saved.delete(`${circuitId}:${tournamentId}`),
     ),
     save: vi.fn<CircuitStore["save"]>(async (circuit) => {
       circuits.set(circuit.id, circuit);
     }),
-    remove: vi.fn<CircuitStore["remove"]>(async (id) => circuits.delete(id)),
-    stages: vi.fn<CircuitStore["stages"]>(async () => []),
-    stageResults: vi.fn<CircuitStore["stageResults"]>(async () => results),
-    eventTeams: vi.fn<CircuitStore["eventTeams"]>(async (id) => eventTeams.get(id) ?? null),
     saveStage: vi.fn<CircuitStore["saveStage"]>(async (circuitId, tournamentId, stage) => {
       saved.set(`${circuitId}:${tournamentId}`, stage);
     }),
-    removeStage: vi.fn<CircuitStore["removeStage"]>(async (circuitId, tournamentId) =>
-      saved.delete(`${circuitId}:${tournamentId}`),
+    slugTaken: vi.fn<CircuitStore["slugTaken"]>(async (slug, exceptId) =>
+      [...circuits.values()].some((c) => c.slug === slug && c.id !== exceptId),
+    ),
+    stageResults: vi.fn<CircuitStore["stageResults"]>(async () => results),
+    stages: vi.fn<CircuitStore["stages"]>(async () => []),
+    withSeason: vi.fn<CircuitStore["withSeason"]>(async (season) =>
+      [...circuits.values()].filter((c) => c.season === season),
     ),
   };
 
   const service = new CircuitService(store, () => new Date("2026-06-01T00:00:00Z"));
 
-  return { service, saved, results };
+  return { results, saved, service };
 };
 
 const result = (overrides: Partial<StoredStageResult>): StoredStageResult => ({
-  source: "pandascore",
-  event: { id: "e1", slug: "e1", name: "Event 1" },
   beginAt: new Date("2026-01-01T00:00:00Z"),
   endAt: new Date("2026-01-05T00:00:00Z"),
+  event: { id: "e1", name: "Event 1", slug: "e1" },
+  finishes: [],
+  placements: [{ placement: 1, team: team("t1") }],
+  regionTeamIds: [],
   scale,
+  source: "pandascore",
   sourceUrl: SOURCE,
   worldwide: false,
-  regionTeamIds: [],
-  placements: [{ placement: 1, team: team("t1") }],
-  finishes: [],
   ...overrides,
 });
 
@@ -102,15 +102,15 @@ describe(CircuitService, () => {
   it("creates a circuit with a slug from its name and refuses a taken slug", async () => {
     await expect(service.detail("season-circuit")).resolves.toMatchObject({
       name: "Season Circuit",
-      slug: "season-circuit",
       qualificationSpots: null,
+      slug: "season-circuit",
       stages: [],
     });
     await expect(
       service.create({ name: "Season circuit", season: 2026, sourceUrl: SOURCE }),
     ).rejects.toThrow(ConflictError);
     await expect(
-      service.create({ name: "x", season: 2026, sourceUrl: SOURCE, qualificationSpots: 0 }),
+      service.create({ name: "x", qualificationSpots: 0, season: 2026, sourceUrl: SOURCE }),
     ).rejects.toThrow(InvalidInputError);
   });
 
@@ -121,28 +121,28 @@ describe(CircuitService, () => {
 
     beforeEach(async () => {
       rlcs = await service.create({
-        name: "RLCS 2026",
-        slug: "season-2026",
-        season: 2026,
-        region: " Worldwide ",
         description: "",
+        name: "RLCS 2026",
+        region: " Worldwide ",
+        season: 2026,
+        slug: "season-2026",
         sourceUrl: ` ${SOURCE} `,
       });
       europe = await service.create({
         name: "RLCS 2026",
-        slug: "season-2026-eu",
-        season: 2026,
         region: "EU",
+        season: 2026,
+        slug: "season-2026-eu",
         ...sourced,
       });
     });
 
     it("stores season, region and rules source", async () => {
       await expect(service.detail("season-2026")).resolves.toMatchObject({
-        id: rlcs.id,
-        season: 2026,
-        region: "Worldwide",
         description: null,
+        id: rlcs.id,
+        region: "Worldwide",
+        season: 2026,
         sourceUrl: SOURCE,
       });
     });
@@ -151,9 +151,9 @@ describe(CircuitService, () => {
       await expect(
         service.create({
           name: "rlcs 2026",
-          slug: "other",
-          season: 2026,
           region: "worldwide",
+          season: 2026,
+          slug: "other",
           ...sourced,
         }),
       ).rejects.toThrow(ConflictError);
@@ -161,19 +161,19 @@ describe(CircuitService, () => {
 
     it("refuses a taken slug", async () => {
       await expect(
-        service.create({ name: "Other", slug: "season-2026", season: 2027, ...sourced }),
+        service.create({ name: "Other", season: 2027, slug: "season-2026", ...sourced }),
       ).rejects.toThrow(ConflictError);
     });
 
     it("treats a blank region as no region", async () => {
-      await service.create({ name: "RLCS 2026", slug: "season-2027", season: 2027, ...sourced });
+      await service.create({ name: "RLCS 2026", season: 2027, slug: "season-2027", ...sourced });
 
       await expect(
         service.create({
           name: "rlcs 2026",
-          slug: "season-2027-copy",
-          season: 2027,
           region: " ",
+          season: 2027,
+          slug: "season-2027-copy",
           ...sourced,
         }),
       ).rejects.toThrow(ConflictError);
@@ -202,10 +202,10 @@ describe(CircuitService, () => {
 
     it("clears the region and the description", async () => {
       await expect(
-        service.update(rlcs.id, { region: null, description: null }),
+        service.update(rlcs.id, { description: null, region: null }),
       ).resolves.toMatchObject({
-        season: 2026,
         region: null,
+        season: 2026,
         sourceUrl: SOURCE,
       });
     });
@@ -234,16 +234,16 @@ describe(CircuitService, () => {
 
   it("stores a PandaScore stage scale with its source, sorted", async () => {
     await service.setStageScale(circuitId, "ps-stage", {
-      scale: [{ from: 2, to: 2, points: 6 }, ...scale],
+      scale: [{ from: 2, points: 6, to: 2 }, ...scale],
       sourceUrl: SOURCE,
     });
 
     expect(saved.get(`${circuitId}:ps-stage`)).toStrictEqual({
-      scale: [...scale, { from: 2, to: 2, points: 6 }],
+      finishes: [],
+      regionTeamIds: [],
+      scale: [...scale, { from: 2, points: 6, to: 2 }],
       sourceUrl: SOURCE,
       worldwide: false,
-      regionTeamIds: [],
-      finishes: [],
     });
   });
 
@@ -260,23 +260,23 @@ describe(CircuitService, () => {
 
   it("stores the worldwide flag, the region teams and the final placements sorted", async () => {
     await service.setStageScale(circuitId, "ps-stage", {
+      finishes: [
+        { placement: 13, teamId: "nrg" },
+        { placement: 9, teamId: "kc" },
+      ],
+      regionTeamIds: ["kc", "nrg"],
       scale,
       sourceUrl: SOURCE,
       worldwide: true,
-      regionTeamIds: ["kc", "nrg"],
-      finishes: [
-        { teamId: "nrg", placement: 13 },
-        { teamId: "kc", placement: 9 },
-      ],
     });
 
     expect(saved.get(`${circuitId}:ps-stage`)).toMatchObject({
-      worldwide: true,
-      regionTeamIds: ["kc", "nrg"],
       finishes: [
-        { teamId: "kc", placement: 9 },
-        { teamId: "nrg", placement: 13 },
+        { placement: 9, teamId: "kc" },
+        { placement: 13, teamId: "nrg" },
       ],
+      regionTeamIds: ["kc", "nrg"],
+      worldwide: true,
     });
   });
 
@@ -287,15 +287,15 @@ describe(CircuitService, () => {
       [
         { regionTeamIds: ["bds"] },
         { regionTeamIds: ["kc", "kc"] },
-        { finishes: [{ teamId: "bds", placement: 9 }] },
+        { finishes: [{ placement: 9, teamId: "bds" }] },
         {
           finishes: [
-            { teamId: "kc", placement: 9 },
-            { teamId: "kc", placement: 13 },
+            { placement: 9, teamId: "kc" },
+            { placement: 13, teamId: "kc" },
           ],
         },
-        { finishes: [{ teamId: "kc", placement: 0 }] },
-        { finishes: [{ teamId: "kc", placement: 9.5 }] },
+        { finishes: [{ placement: 0, teamId: "kc" }] },
+        { finishes: [{ placement: 9.5, teamId: "kc" }] },
       ].map(async (refused) => {
         await expect(
           service.setStageScale(circuitId, "ps-stage", { ...stage, ...refused }),
@@ -334,8 +334,8 @@ describe(CircuitService, () => {
 
     expect(standings).toMatchObject({
       id: circuitId,
+      rows: [{ points: 10, rank: 1, team: { id: "t1" } }],
       sourceUrls: [SOURCE],
-      rows: [{ rank: 1, points: 10, team: { id: "t1" } }],
     });
   });
 
@@ -343,16 +343,16 @@ describe(CircuitService, () => {
     const startgg = "https://www.start.gg/tournament/fake-open/event/3v3/overview/prizing";
     results.push(
       result({
-        source: "manual",
-        event: { id: "manual", slug: "manual", name: "Manual Cup" },
-        placements: [],
+        event: { id: "manual", name: "Manual Cup", slug: "manual" },
         finishes: [{ placement: 1, team: team("manual-winner") }],
+        placements: [],
+        source: "manual",
       }),
       result({
-        source: "startgg",
-        event: { id: "sgg", slug: "sgg", name: "start.gg Open" },
-        sourceUrl: startgg,
+        event: { id: "sgg", name: "start.gg Open", slug: "sgg" },
         placements: [{ placement: 1, team: team("startgg-winner") }],
+        source: "startgg",
+        sourceUrl: startgg,
       }),
     );
 
@@ -365,24 +365,24 @@ describe(CircuitService, () => {
 
   it("credits only the circuit region's teams from a worldwide stage", async () => {
     const major = {
-      worldwide: true,
-      regionTeamIds: ["eu-team"],
       placements: [
         { placement: 1, team: team("na-team") },
         { placement: 2, team: team("eu-team") },
       ],
+      regionTeamIds: ["eu-team"],
       scale: [
-        { from: 1, to: 1, points: 30 },
-        { from: 2, to: 2, points: 20 },
+        { from: 1, points: 30, to: 1 },
+        { from: 2, points: 20, to: 2 },
       ],
+      worldwide: true,
     };
 
     results.push(result(major));
 
     const europe = await service.create({
       name: "RLCS 2026 EU",
-      season: 2026,
       region: "EU",
+      season: 2026,
       sourceUrl: SOURCE,
     });
 

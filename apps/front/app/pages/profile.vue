@@ -71,8 +71,8 @@ const unreadNotifications = computed(
 
 const notificationMessage = (notification: AppNotification): string =>
   t("page.profile.notifications.replied", {
-    user: notification.reply.author.userName,
     target: notification.targetLabel,
+    user: notification.reply.author.userName,
   });
 
 const saveUserName = async (event: FormSubmitEvent<UsernameSchema>) => {
@@ -96,13 +96,13 @@ const saveUserName = async (event: FormSubmitEvent<UsernameSchema>) => {
     usernameState.userName = updated.userName;
     editOpen.value = false;
     toast.add({
-      title: t("page.profile.username.updated"),
       color: "success",
+      title: t("page.profile.username.updated"),
     });
   } catch (error) {
     toast.add({
-      title: getApiErrorMessage(error) ?? t("page.profile.username.updateFailed"),
       color: "error",
+      title: getApiErrorMessage(error) ?? t("page.profile.username.updateFailed"),
     });
   } finally {
     isSavingUserName.value = false;
@@ -146,7 +146,7 @@ const handleLogout = async () => {
     posthog?.capture("user_logged_out");
     await logout();
   } catch {
-    toast.add({ title: t("page.profile.logoutFailed"), color: "error" });
+    toast.add({ color: "error", title: t("page.profile.logoutFailed") });
   } finally {
     isLoggingOut.value = false;
     navigateTo(localePath("/"));
@@ -154,9 +154,9 @@ const handleLogout = async () => {
 };
 
 setPageSeo({
-  title: `${t("page.profile.title")} | sarpbc.org`,
   description: t("page.profile.description"),
   noIndex: true,
+  title: `${t("page.profile.title")} | sarpbc.org`,
 });
 </script>
 

@@ -134,58 +134,20 @@ export const useCareerSimulator = () => {
 
   const offseasonOffers = computed(() =>
     state.value.pendingOfferTeamIds.map((teamId) => ({
-      teamId,
       name: getWorldTeamById(teamId)?.name ?? teamId,
       rank: getTeamRank(worldRankings.value, teamId),
+      teamId,
     })),
   );
 
   const api = {
-    state,
-    hydrated,
-    currentEvent,
-    currentTeamName,
-    worldRankings,
-    seasonPoints,
-    qualifiedForWorlds,
-    lastSplit,
-    playerAge,
-    destinyPromptPending,
-    canRetire,
+    acceptOffer: (teamId: string) => {
+      dispatch({ teamId, type: "ACCEPT_OFFER" });
+    },
     canContinue,
-    continueName,
-    currentTeamRank,
-    currentTeamRegion,
-    offseasonOffers,
-    hydrate,
-    resetCareer,
-    dispatch,
-    setOnboardingStep: (step: OnboardingStep) => {
-      dispatch({ type: "SET_ONBOARDING_STEP", step });
-    },
-    setPlayerName: (name: string) => {
-      dispatch({ type: "SET_PLAYER_NAME", name });
-    },
-    setRegion: (region: CareerRegion) => {
-      dispatch({ type: "SET_REGION", region });
-    },
-    setCountry: (country: CareerCountry) => {
-      dispatch({ type: "SET_COUNTRY", country });
-    },
-    setRole: (role: CareerRole) => {
-      dispatch({ type: "SET_ROLE", role });
-    },
-    setBackground: (background: CareerBackground) => {
-      dispatch({ type: "SET_BACKGROUND", background });
-    },
+    canRetire,
     completeOnboarding: () => {
       dispatch({ type: "COMPLETE_ONBOARDING" });
-    },
-    startSeason: () => {
-      dispatch({ type: "START_SEASON" });
-    },
-    resolveEventChoice: (choiceId: string) => {
-      dispatch({ type: "RESOLVE_EVENT_CHOICE", choiceId });
     },
     continueAfterEventOutcome: () => {
       dispatch({ type: "CONTINUE_AFTER_EVENT_OUTCOME" });
@@ -193,27 +155,65 @@ export const useCareerSimulator = () => {
     continueAfterResult: () => {
       dispatch({ type: "CONTINUE_AFTER_STAGE_RESULT" });
     },
+    continueFromMenu: () => {
+      dispatch({ type: "CONTINUE_FROM_MENU" });
+    },
+    continueName,
+    currentEvent,
+    currentTeamName,
+    currentTeamRank,
+    currentTeamRegion,
+    destinyPromptPending,
+    dispatch,
+    hydrate,
+    hydrated,
+    lastSplit,
+    offseasonOffers,
+    playerAge,
+    qualifiedForWorlds,
+    resetCareer,
+    resolveEventChoice: (choiceId: string) => {
+      dispatch({ choiceId, type: "RESOLVE_EVENT_CHOICE" });
+    },
     resolveOffseasonDestiny: (choiceId: string) => {
-      dispatch({ type: "RESOLVE_OFFSEASON_DESTINY", choiceId });
-    },
-    acceptOffer: (teamId: string) => {
-      dispatch({ type: "ACCEPT_OFFER", teamId });
-    },
-    stayWithTeam: () => {
-      dispatch({ type: "STAY_WITH_TEAM" });
+      dispatch({ choiceId, type: "RESOLVE_OFFSEASON_DESTINY" });
     },
     retireCareer: () => {
       dispatch({ type: "RETIRE_CAREER" });
     },
-    startOnboarding: () => {
-      dispatch({ type: "START_ONBOARDING" });
-    },
-    continueFromMenu: () => {
-      dispatch({ type: "CONTINUE_FROM_MENU" });
-    },
     returnToMenu: () => {
       dispatch({ type: "RETURN_TO_MENU" });
     },
+    seasonPoints,
+    setBackground: (background: CareerBackground) => {
+      dispatch({ background, type: "SET_BACKGROUND" });
+    },
+    setCountry: (country: CareerCountry) => {
+      dispatch({ country, type: "SET_COUNTRY" });
+    },
+    setOnboardingStep: (step: OnboardingStep) => {
+      dispatch({ step, type: "SET_ONBOARDING_STEP" });
+    },
+    setPlayerName: (name: string) => {
+      dispatch({ name, type: "SET_PLAYER_NAME" });
+    },
+    setRegion: (region: CareerRegion) => {
+      dispatch({ region, type: "SET_REGION" });
+    },
+    setRole: (role: CareerRole) => {
+      dispatch({ role, type: "SET_ROLE" });
+    },
+    startOnboarding: () => {
+      dispatch({ type: "START_ONBOARDING" });
+    },
+    startSeason: () => {
+      dispatch({ type: "START_SEASON" });
+    },
+    state,
+    stayWithTeam: () => {
+      dispatch({ type: "STAY_WITH_TEAM" });
+    },
+    worldRankings,
   };
 
   provide(careerSimulatorKey, api);

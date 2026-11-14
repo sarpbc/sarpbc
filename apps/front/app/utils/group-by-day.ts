@@ -39,14 +39,14 @@ export const groupByDay = <T>(
 
   const groups: DayGroup<T>[] = [...byDay.entries()]
     .map(([dateKey, group]) => ({
-      dateKey,
       date: group.date,
+      dateKey,
       items: group.items.toSorted((a, b) => sign * (timeOf(a) - timeOf(b))),
     }))
     .toSorted((a, b) => sign * (a.date.getTime() - b.date.getTime()));
 
   if (unknown.length > 0) {
-    groups.push({ dateKey: UNKNOWN_DAY_KEY, date: null, items: unknown });
+    groups.push({ date: null, dateKey: UNKNOWN_DAY_KEY, items: unknown });
   }
 
   return groups;

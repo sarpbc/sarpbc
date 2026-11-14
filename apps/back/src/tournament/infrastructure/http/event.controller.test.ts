@@ -33,18 +33,18 @@ const STAGE_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 
 const league = Object.assign(new League(), {
   id: "league",
-  name: "RLCS Major",
   imageUrl: "league.png",
+  name: "RLCS Major",
 });
 
 const event = Object.assign(new TournamentEvent(), {
   id: "event",
-  slug: "rlcs-major-paris-2026",
-  name: "RLCS Major Paris 2026",
   league,
+  name: "RLCS Major Paris 2026",
+  slug: "rlcs-major-paris-2026",
 });
 
-const ref = { id: event.id, slug: event.slug, name: event.name };
+const ref = { id: event.id, name: event.name, slug: event.slug };
 
 const stage = (fields: Partial<Tournament>): Tournament =>
   Object.assign(new Tournament(), { event: ref, league, ...fields });
@@ -52,20 +52,20 @@ const stage = (fields: Partial<Tournament>): Tournament =>
 const stages = new Map(
   [
     stage({
+      beginAt: new Date("2026-05-01T10:00:00Z"),
+      endAt: new Date("2026-05-03T10:00:00Z"),
       id: STAGE_ID,
       name: "Group A",
       slug: "group-a",
-      beginAt: new Date("2026-05-01T10:00:00Z"),
-      endAt: new Date("2026-05-03T10:00:00Z"),
       type: "online",
     }),
     stage({
-      id: "playoffs",
-      name: "Playoffs",
-      slug: "playoffs",
       beginAt: new Date("2026-05-08T10:00:00Z"),
       endAt: new Date("2026-05-10T10:00:00Z"),
+      id: "playoffs",
+      name: "Playoffs",
       prizepool: "1000000 United States Dollar",
+      slug: "playoffs",
       type: "offline",
     }),
   ].map((s) => [s.id, s]),
@@ -111,18 +111,18 @@ describe(EventController, () => {
     const resolved = await controller.resolveEvent("RLCS-Major-Paris-2026");
     expect(findEvent).toHaveBeenCalledWith("rlcs-major-paris-2026");
     expect(resolved).toMatchObject({
-      kind: "event",
       event: {
-        id: "event",
-        slug: "rlcs-major-paris-2026",
-        name: "RLCS Major Paris 2026",
-        league: { id: "league", name: "RLCS Major" },
-        logoUrl: "league.png",
-        prizepool: "1000000 United States Dollar",
-        type: "offline",
         beginAt: "2026-05-01T10:00:00.000Z",
         endAt: "2026-05-10T10:00:00.000Z",
+        id: "event",
+        league: { id: "league", name: "RLCS Major" },
+        logoUrl: "league.png",
+        name: "RLCS Major Paris 2026",
+        prizepool: "1000000 United States Dollar",
+        slug: "rlcs-major-paris-2026",
+        type: "offline",
       },
+      kind: "event",
     });
 
     if (resolved.kind !== "event") {
@@ -130,7 +130,7 @@ describe(EventController, () => {
     }
 
     expect(resolved.event.stages.map((s) => s.slug)).toStrictEqual(["playoffs", "group-a"]);
-    expect(resolved.event.stages[0]).toMatchObject({ matches: [], event: ref });
+    expect(resolved.event.stages[0]).toMatchObject({ event: ref, matches: [] });
   });
 
   it("aggregates player stats over the redistributable stages of an event", async () => {
@@ -169,7 +169,7 @@ describe(EventController, () => {
     await expect(controller.resolveStage(event.slug, "Playoffs")).resolves.toMatchObject({
       kind: "stage",
       tab: "overview",
-      tournament: { id: "playoffs", slug: "playoffs", event: ref },
+      tournament: { event: ref, id: "playoffs", slug: "playoffs" },
     });
   });
 
@@ -206,12 +206,12 @@ describe(EventController, () => {
 
   it("lists events with their stages and the total event count", async () => {
     listEvents.mockResolvedValue([[{ event, stages: [...stages.values()] }], 1]);
-    const listed = await controller.list({ limit: 20, offset: 0, activeOnly: true });
+    const listed = await controller.list({ activeOnly: true, limit: 20, offset: 0 });
     expect(listEvents).toHaveBeenCalledWith({
+      activeOnly: true,
       limit: 20,
       offset: 0,
       pickems: undefined,
-      activeOnly: true,
     });
     expect(listed.count).toBe(1);
     expect(listed.events[0].stages.map((s) => s.name)).toStrictEqual(["Playoffs", "Group A"]);
@@ -221,8 +221,8 @@ describe(EventController, () => {
   it("lists manual events for staff, including empty ones, with their stages", async () => {
     const empty = Object.assign(new TournamentEvent(), {
       id: "empty",
-      slug: "cdf",
       name: "CDF",
+      slug: "cdf",
     });
 
     const manualStages = [...stages.values()].map((s) =>
@@ -250,8 +250,8 @@ describe(EventController, () => {
     findManualEvent.mockResolvedValue({ event: synced, stages: [] });
     const findManualResult = await controller.findManual("event");
     expect(findManualResult.event).toMatchObject({
-      id: "event",
       editable: false,
+      id: "event",
     });
   });
 

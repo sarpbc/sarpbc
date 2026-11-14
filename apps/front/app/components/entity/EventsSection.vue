@@ -30,8 +30,8 @@ const { isConcealed } = useSpoilerFree();
 const headingId = computed(() => `${kind}-events-title`);
 
 const tabItems = computed(() => [
-  { value: "upcoming" as const, label: t(`page.${kind}.slug.events.tabs.upcoming`) },
-  { value: "past" as const, label: t(`page.${kind}.slug.events.tabs.past`) },
+  { label: t(`page.${kind}.slug.events.tabs.upcoming`), value: "upcoming" as const },
+  { label: t(`page.${kind}.slug.events.tabs.past`), value: "past" as const },
 ]);
 
 const activeEvents = computed(() => (tab.value === "past" ? pastEvents : upcomingEvents));

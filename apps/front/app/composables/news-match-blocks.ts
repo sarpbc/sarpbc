@@ -41,7 +41,7 @@ export const provideNewsMatchBlocks = (key: MaybeRefOrGetter<string>, contents: 
 
       return Object.fromEntries(responses.flatMap((response) => Object.entries(response.blocks)));
     },
-    { watch: [blockKeys], default: () => ({}) },
+    { default: () => ({}), watch: [blockKeys] },
   );
 
   provide(NEWS_MATCH_BLOCKS, { items: data, status });

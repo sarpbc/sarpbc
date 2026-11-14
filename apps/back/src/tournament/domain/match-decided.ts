@@ -10,4 +10,4 @@ export interface MatchDecided {
   matchId: string;
 }
 
-export const matchDecided = (matchId: string): MatchDecided => ({ type: MATCH_DECIDED, matchId });
+export const matchDecided = (matchId: string): MatchDecided => ({ matchId, type: MATCH_DECIDED });

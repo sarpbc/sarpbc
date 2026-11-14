@@ -11,15 +11,15 @@ const now = new Date("2026-10-15T12:00:00Z");
 const author: Author = { id: "author", userName: "Fan" };
 
 const reply = (overrides: Partial<ReplyRecord> = {}): ReplyRecord => ({
-  id: "parent",
   author,
   content: "hello",
-  post: { id: "p", publicId: 1, title: "Thread" },
-  newsArticle: null,
-  match: null,
-  replyTo: null,
-  hiddenAt: null,
   createdAt: new Date(now.getTime() - 120_000),
+  hiddenAt: null,
+  id: "parent",
+  match: null,
+  newsArticle: null,
+  post: { id: "p", publicId: 1, title: "Thread" },
+  replyTo: null,
   ...overrides,
 });
 
@@ -28,36 +28,21 @@ const setup = () => {
   const notified: { recipientId: string; replyId: string }[] = [];
 
   const replies = {
-    findByTarget: vi.fn<ReplyWrites["findByTarget"]>().mockResolvedValue([]),
-    findById: vi.fn<ReplyWrites["findById"]>().mockResolvedValue(reply()),
-    findLatestByUser: vi.fn<ReplyWrites["findLatestByUser"]>().mockResolvedValue(null),
-    countRootsByTarget: vi.fn<ReplyWrites["countRootsByTarget"]>().mockResolvedValue(0),
     countByTargetIds: vi.fn<ReplyWrites["countByTargetIds"]>().mockResolvedValue(new Map()),
-    findDescendantsForRoots: vi.fn<ReplyWrites["findDescendantsForRoots"]>().mockResolvedValue([]),
-    findRecentForModeration: vi.fn<ReplyWrites["findRecentForModeration"]>().mockResolvedValue([]),
+    countRootsByTarget: vi.fn<ReplyWrites["countRootsByTarget"]>().mockResolvedValue(0),
+    delete: vi.fn<ReplyWrites["delete"]>(),
+    findById: vi.fn<ReplyWrites["findById"]>().mockResolvedValue(reply()),
+    findByTarget: vi.fn<ReplyWrites["findByTarget"]>().mockResolvedValue([]),
     findChildren: vi.fn<ReplyWrites["findChildren"]>().mockResolvedValue([]),
+    findDescendantsForRoots: vi.fn<ReplyWrites["findDescendantsForRoots"]>().mockResolvedValue([]),
+    findLatestByUser: vi.fn<ReplyWrites["findLatestByUser"]>().mockResolvedValue(null),
+    findRecentForModeration: vi.fn<ReplyWrites["findRecentForModeration"]>().mockResolvedValue([]),
     save: vi.fn<ReplyWrites["save"]>(async (model) => {
       saved.push(model);
     }),
-    delete: vi.fn<ReplyWrites["delete"]>(),
   };
 
   const scope: ReplyWriteScope = {
-    replies,
-    reports: {
-      findByReplyAndReporter: vi
-        .fn<ReplyWriteScope["reports"]["findByReplyAndReporter"]>()
-        .mockResolvedValue(null),
-      save: vi.fn<ReplyWriteScope["reports"]["save"]>(),
-    },
-    users: { findById: vi.fn<ReplyWriteScope["users"]["findById"]>().mockResolvedValue(author) },
-    targets: {
-      find: vi.fn<ReplyWriteScope["targets"]["find"]>().mockResolvedValue({
-        post: { id: "p", publicId: 1, title: "Thread" },
-        newsArticle: null,
-        match: null,
-      }),
-    },
     notifications: {
       createForDirectReply: vi.fn<ReplyWriteScope["notifications"]["createForDirectReply"]>(
         async (recipientId, replyId) => {
@@ -65,6 +50,21 @@ const setup = () => {
         },
       ),
     },
+    replies,
+    reports: {
+      findByReplyAndReporter: vi
+        .fn<ReplyWriteScope["reports"]["findByReplyAndReporter"]>()
+        .mockResolvedValue(null),
+      save: vi.fn<ReplyWriteScope["reports"]["save"]>(),
+    },
+    targets: {
+      find: vi.fn<ReplyWriteScope["targets"]["find"]>().mockResolvedValue({
+        match: null,
+        newsArticle: null,
+        post: { id: "p", publicId: 1, title: "Thread" },
+      }),
+    },
+    users: { findById: vi.fn<ReplyWriteScope["users"]["findById"]>().mockResolvedValue(author) },
   };
 
   let commits = 0;
@@ -85,7 +85,7 @@ const setup = () => {
     () => "new-reply",
   );
 
-  return { scope, replies, service, saved, notified, commits: () => commits };
+  return { commits: () => commits, notified, replies, saved, scope, service };
 };
 
 describe("reply invariants without Nest or ORM", () => {
@@ -172,15 +172,15 @@ describe("reply invariants without Nest or ORM", () => {
     const f = setup();
     f.replies.findById.mockResolvedValue(reply({ author: { id: "other", userName: "Other" } }));
     f.scope.reports.findByReplyAndReporter = async () => ({
+      createdAt: now,
       id: "report",
+      reason: "spam",
       reply: { id: "parent" },
       reporter: { id: "author" },
-      reason: "spam",
-      createdAt: now,
     });
     await expect(f.service.report("author", "parent", "spam")).rejects.toMatchObject({
-      kind: "conflict",
       detail: { code: "REPLY_ALREADY_REPORTED" },
+      kind: "conflict",
     });
   });
 

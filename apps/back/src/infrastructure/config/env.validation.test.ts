@@ -2,14 +2,14 @@ import { describe, expect, it } from "vitest";
 import { readSecret, validateEnv as validate } from "./env.validation";
 
 const requiredEnv = {
+  ADMIN_URL: "http://localhost:4002",
   DB_PASSWORD: "db",
-  JWT_KEY: "jwt",
-  PANDASCORE_API_TOKEN: "panda",
+  FRONT_URL: "http://localhost:4000",
   GOOGLE_CLIENT_ID: "id",
   GOOGLE_CLIENT_SECRET: "secret",
   GOOGLE_REDIRECT_URI: "http://localhost:4001/auth/google/callback",
-  FRONT_URL: "http://localhost:4000",
-  ADMIN_URL: "http://localhost:4002",
+  JWT_KEY: "jwt",
+  PANDASCORE_API_TOKEN: "panda",
 };
 
 const validateEnv = (overrides: Record<string, string | undefined> = {}) =>

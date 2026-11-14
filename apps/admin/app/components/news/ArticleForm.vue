@@ -13,10 +13,10 @@ const previewing = ref(false);
 const preview = computed(() =>
   localizedNewsFields(
     {
-      title: title.value,
       content: content.value,
-      titleFr: titleFr.value,
       contentFr: contentFr.value,
+      title: title.value,
+      titleFr: titleFr.value,
     },
     parseLocale(editorLocale.value),
   ),

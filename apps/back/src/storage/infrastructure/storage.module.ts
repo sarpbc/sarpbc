@@ -6,20 +6,20 @@ import { StorageController } from "./http/storage.controller";
 import { StorageService } from "../application/storage.service";
 
 @Module({
-  imports: [ConfigModule],
   controllers: [StorageController],
+  exports: [R2Service],
+  imports: [ConfigModule],
   providers: [
     {
+      inject: [ConfigService],
       provide: R2Service,
       useFactory: (config: ConfigService) => new R2Service(config, createLogger),
-      inject: [ConfigService],
     },
     {
+      inject: [R2Service],
       provide: StorageService,
       useFactory: (storage: R2Service) => new StorageService(storage),
-      inject: [R2Service],
     },
   ],
-  exports: [R2Service],
 })
 export class StorageModule {}

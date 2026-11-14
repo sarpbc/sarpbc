@@ -7,23 +7,23 @@ import { PlayerAward } from "./player-award.entities";
 import { toEventRef } from "../../domain/tournament-event";
 
 export const AWARD_LABELS = {
-  mvp: "MVP",
-  grand_finals_mvp: "Grand Finals MVP",
-  offensive_mvp: "Offensive MVP",
-  defensive_mvp: "Defensive MVP",
   breakthrough_player: "Breakthrough Player",
+  defensive_mvp: "Defensive MVP",
+  grand_finals_mvp: "Grand Finals MVP",
+  mvp: "MVP",
+  offensive_mvp: "Offensive MVP",
 } as const satisfies Record<PlayerAwardType, string>;
 
 export const toTournamentItem = (row: PlayerAward): TournamentAwardListItem => ({
-  id: row.id,
   awardType: row.awardType,
-  player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
+  id: row.id,
   participant: {
     id: row.participant.id,
     team: row.participant.team
       ? { id: row.participant.team.id, name: row.participant.team.name }
       : undefined,
   },
+  player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
 });
 
 export class CompetitionAwardQueries implements AwardQueries {
@@ -36,19 +36,19 @@ export class CompetitionAwardQueries implements AwardQueries {
     const rows = await this.em.find(
       PlayerAward,
       { player: { id } },
-      { populate: ["tournament.event"], orderBy: { tournament: { endAt: "DESC" } } },
+      { orderBy: { tournament: { endAt: "DESC" } }, populate: ["tournament.event"] },
     );
 
     return rows.map((row) => ({
-      id: row.id,
       awardType: row.awardType,
+      id: row.id,
       tournament: {
+        endAt: row.tournament.endAt,
+        event: toEventRef(row.tournament.event),
         id: row.tournament.id,
         name: row.tournament.name,
         slug: row.tournament.slug,
         source: row.tournament.source,
-        endAt: row.tournament.endAt,
-        event: toEventRef(row.tournament.event),
       },
     }));
   }
@@ -60,7 +60,7 @@ export class CompetitionAwardQueries implements AwardQueries {
     const rows = await this.em.find(
       PlayerAward,
       { tournament: { id } },
-      { populate: ["player", "participant.team"], orderBy: { createdAt: "ASC" } },
+      { orderBy: { createdAt: "ASC" }, populate: ["player", "participant.team"] },
     );
 
     return rows.map(toTournamentItem);

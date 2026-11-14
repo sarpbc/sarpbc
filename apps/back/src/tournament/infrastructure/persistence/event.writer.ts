@@ -12,8 +12,8 @@ export class CompetitionEventWriter implements EventWriter {
   constructor(private readonly em: EntityManager) {}
   private async find(where: FilterQuery<TournamentEventRow>) {
     const row = await this.em.findOne(TournamentEventRow, where, {
-      populate: ["league"],
       orderBy: { id: "ASC" },
+      populate: ["league"],
     });
 
     return row ? toTournamentEvent(row) : null;
@@ -26,16 +26,16 @@ export class CompetitionEventWriter implements EventWriter {
   }
   async unclaimedByName(leagueId: string | null, name: string) {
     return await this.find({
-      pandascoreSerieId: null,
       league: leagueId,
       name,
+      pandascoreSerieId: null,
       stages: { $none: { source: { $ne: "pandascore" } } },
     });
   }
   async slugTaken(slug: string, exceptEventId: string | null) {
     const where: FilterQuery<TournamentEventRow> =
       exceptEventId !== null && exceptEventId !== ""
-        ? { slug, id: { $ne: exceptEventId } }
+        ? { id: { $ne: exceptEventId }, slug }
         : { slug };
 
     return (await this.em.count(TournamentEventRow, where)) > 0;
@@ -44,8 +44,8 @@ export class CompetitionEventWriter implements EventWriter {
     return (
       (await this.em.count(TournamentRow, {
         event: eventId,
-        slug,
         id: { $ne: exceptTournamentId },
+        slug,
       })) > 0
     );
   }
@@ -64,9 +64,9 @@ export class CompetitionEventWriter implements EventWriter {
       Object.assign(new TournamentEventRow(), { id: model.id });
 
     Object.assign(row, {
+      name: model.name,
       pandascoreSerieId: model.pandascoreSerieId,
       slug: model.slug,
-      name: model.name,
       streams: unchangedJson(row.streams, model.streams),
       viewership: unchangedJson(row.viewership, model.viewership),
     });

@@ -43,11 +43,11 @@ export class ReplyRepository {
     }
 
     return await this.rows.findAll({
-      where,
-      populate: [...REPLY_POPULATE],
-      orderBy: { createdAt: replySortOrder(targetType) },
       limit,
       offset,
+      orderBy: { createdAt: replySortOrder(targetType) },
+      populate: [...REPLY_POPULATE],
+      where,
     });
   }
 
@@ -58,7 +58,7 @@ export class ReplyRepository {
   async findLatestByUser(userId: string): Promise<Reply | null> {
     return await this.rows.findOne(
       { author: { id: userId } },
-      { populate: [...REPLY_POPULATE], orderBy: { createdAt: QueryOrder.DESC } },
+      { orderBy: { createdAt: QueryOrder.DESC }, populate: [...REPLY_POPULATE] },
     );
   }
 
@@ -101,13 +101,13 @@ export class ReplyRepository {
     }
 
     const nonRoots = await this.rows.findAll({
+      orderBy: { createdAt: QueryOrder.ASC },
+      populate: [...REPLY_POPULATE],
       where: {
         ...onTarget(targetType, { id: targetId }),
         hiddenAt: null,
         replyTo: { $ne: null },
       },
-      populate: [...REPLY_POPULATE],
-      orderBy: { createdAt: QueryOrder.ASC },
     });
 
     const collected = new Map<string, Reply>();
@@ -138,8 +138,8 @@ export class ReplyRepository {
 
   async findChildren(replyId: string): Promise<Reply[]> {
     return await this.rows.findAll({
-      where: { replyTo: { id: replyId } },
       populate: [...REPLY_POPULATE],
+      where: { replyTo: { id: replyId } },
     });
   }
 
@@ -167,8 +167,8 @@ export class ReplyRepository {
     }
 
     const replies: Reply[] = await this.rows.findAll({
-      where: { id: { $in: ids } },
       populate: [...REPLY_POPULATE],
+      where: { id: { $in: ids } },
     });
 
     const replyById = new Map(replies.map((reply) => [reply.id, reply]));

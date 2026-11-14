@@ -1,4 +1,10 @@
 export const uiComponentDefaults = {
+  inputMenu: {
+    content: {
+      bodyLock: false,
+      disableOutsidePointerEvents: false,
+    },
+  },
   select: {
     content: {
       bodyLock: false,
@@ -6,12 +12,6 @@ export const uiComponentDefaults = {
     },
   },
   selectMenu: {
-    content: {
-      bodyLock: false,
-      disableOutsidePointerEvents: false,
-    },
-  },
-  inputMenu: {
     content: {
       bodyLock: false,
       disableOutsidePointerEvents: false,

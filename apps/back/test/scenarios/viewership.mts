@@ -39,10 +39,10 @@ export interface ViewershipProposalsContext {
 }
 
 const ENTRY = {
-  peakViewers: 54_321,
   averageViewers: 32_100,
-  scope: "with_costreams",
   measuredAt: "2026-05-24T20:00:00+02:00",
+  peakViewers: 54_321,
+  scope: "with_costreams",
   sourceName: " Esports Charts ",
   sourceUrl: "https://escharts.com/tournaments/rl/integration-cup",
 };
@@ -108,15 +108,15 @@ export const verifyViewership = async ({
   await request(
     "PUT",
     eventPath,
-    { viewership: { ...ENTRY, averageViewers: null, scope: "official", measuredAt: null } },
+    { viewership: { ...ENTRY, averageViewers: null, measuredAt: null, scope: "official" } },
     staffCookie,
   );
   const publicEventResult = await publicEvent();
   assert.deepEqual(publicEventResult.viewership, {
     ...SAVED,
     averageViewers: null,
-    scope: "official",
     measuredAt: null,
+    scope: "official",
   });
 
   const response5 = await request("GET", "/events?limit=100");
@@ -154,8 +154,8 @@ export const verifyViewershipProposals = async ({
   const sourceUrl = "https://escharts.com/tournaments/rl/integration-cup/final";
 
   const proposal = {
-    peakViewers: 41_000,
     averageViewers: 25_500,
+    peakViewers: 41_000,
     scope: "official",
     sourceName: "Esports Charts",
   };
@@ -205,7 +205,7 @@ export const verifyViewershipProposals = async ({
 
   assert.deepEqual(mcpMatch?.viewership, expected, "MCP reads return sarpbc numbers");
 
-  const startggEntry = { ...expected, peakViewers: 9000, averageViewers: 6000 };
+  const startggEntry = { ...expected, averageViewers: 6000, peakViewers: 9000 };
   await request(
     "PUT",
     `/tournaments/matches/${startggMatchId}/viewership`,

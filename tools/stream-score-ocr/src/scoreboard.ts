@@ -33,7 +33,7 @@ const readRegion = (
   region: Region,
   templates: readonly GlyphTemplate[],
 ): { text: string; confidence: number } | null => {
-  const settings: GlyphSettings = { threshold: overlay.text.threshold, size: overlay.glyph };
+  const settings: GlyphSettings = { size: overlay.glyph, threshold: overlay.text.threshold };
 
   return readText(frame, scaleRegion(region, overlay.reference, frame), settings, templates);
 };
@@ -71,11 +71,11 @@ export const readScoreboard = (frame: Frame, overlay: Overlay): ScoreboardReadin
   }
 
   return {
-    kind: "score",
     blue: Number(blue.text),
-    orange: Number(orange.text),
     clock: Number(clockParts.groups?.minutes) * 60 + seconds,
-    overtime: clockParts.groups?.overtime === "+",
     confidence,
+    kind: "score",
+    orange: Number(orange.text),
+    overtime: clockParts.groups?.overtime === "+",
   };
 };

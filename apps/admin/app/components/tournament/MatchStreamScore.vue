@@ -35,8 +35,8 @@ const proposal = computed(() => (parsed.value?.ok ? parsed.value.proposal : null
 
 const sides = computed(() =>
   match.participants.map((participant) => ({
-    value: participant.id,
     label: participantName(participant),
+    value: participant.id,
   })),
 );
 
@@ -80,9 +80,9 @@ const bestOfMismatch = computed(
 const blockers = computed(() =>
   proposal.value
     ? streamScoreConfirmBlockers(proposal.value, {
-        numberOfGames: match.numberOfGames,
-        checkedGames: new Set(checkedGames.value),
         bestOfAcknowledged: bestOfAcknowledged.value,
+        checkedGames: new Set(checkedGames.value),
+        numberOfGames: match.numberOfGames,
       })
     : [],
 );
@@ -139,7 +139,7 @@ const confirm = async () => {
 
   try {
     await setMatchResult(match.id, series);
-    toast.add({ title: t("page.tournaments.streamScore.confirmed"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.streamScore.confirmed") });
     emit("confirmed");
     open.value = false;
   } catch (confirmError) {

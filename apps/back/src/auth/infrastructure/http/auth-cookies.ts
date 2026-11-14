@@ -17,9 +17,9 @@ const cookieOptions = (
 ): CookieSerializeOptions => {
   const options: CookieSerializeOptions = {
     httpOnly: true,
-    secure: Boolean(config?.secure),
-    sameSite: "lax",
     path: "/",
+    sameSite: "lax",
+    secure: Boolean(config?.secure),
   };
 
   if (config?.domain !== undefined && config.domain !== "") {

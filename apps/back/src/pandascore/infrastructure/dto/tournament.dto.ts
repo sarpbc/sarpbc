@@ -12,43 +12,43 @@ const date = z
   .transform((v) => v ?? undefined);
 
 export const teamSchema = z.object({
+  dark_mode_image_url: text,
   id: z.number().int().positive(),
+  image_url: text,
+  location: text,
   name: z.string(),
   slug: z.string(),
-  location: text,
-  image_url: text,
-  dark_mode_image_url: text,
 });
 
 export const playerSchema = z.object({
-  id: z.number().int().positive(),
-  name: z.string(),
-  slug: z.string(),
-  first_name: text,
-  last_name: text,
   birthday: date,
-  nationality: text,
+  first_name: text,
+  id: z.number().int().positive(),
   image_url: text,
+  last_name: text,
+  name: z.string(),
+  nationality: text,
   role: z.string().nullable().optional(),
+  slug: z.string(),
 });
 
 export const leagueSchema = z.object({
   id: z.number().int().positive(),
+  image_url: text,
+  modified_at: date,
   name: z.string(),
   slug: z.string(),
   url: z.string().nullable().optional(),
-  image_url: text,
-  modified_at: date,
 });
 
 export const rosterSchema = z.object({
-  team: teamSchema,
   players: z.array(playerSchema).default([]),
+  team: teamSchema,
 });
 
 export const serieSchema = z.object({
-  id: z.number().int().positive(),
   full_name: text,
+  id: z.number().int().positive(),
   year: z.number().int().optional().catch(undefined),
 });
 
@@ -58,20 +58,20 @@ export const standingSchema = z.object({
 });
 
 export const tournamentSchema = z.object({
-  id: z.number().int().positive(),
-  name: z.string(),
-  type: text,
-  country: text,
   begin_at: date,
+  country: text,
   end_at: date,
+  expected_roster: z.array(rosterSchema).default([]),
+  has_bracket: z.boolean().optional(),
+  id: z.number().int().positive(),
+  league: leagueSchema.nullish(),
+  name: z.string(),
+  prizepool: z.union([z.number(), z.string()]).nullish(),
+  serie: serieSchema.nullish(),
+  tier: text,
+  type: text,
   winner_id: z.number().int().nullable().optional(),
   winner_type: text,
-  prizepool: z.union([z.number(), z.string()]).nullish(),
-  tier: text,
-  league: leagueSchema.nullish(),
-  serie: serieSchema.nullish(),
-  has_bracket: z.boolean().optional(),
-  expected_roster: z.array(rosterSchema).default([]),
 });
 
 export type TeamDto = z.infer<typeof teamSchema>;

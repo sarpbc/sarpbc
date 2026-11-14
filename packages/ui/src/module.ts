@@ -21,16 +21,16 @@ export default defineNuxtModule({
 
     const resolver = createResolver(import.meta.url);
     addComponentsDir({
+      global: true,
       path: resolver.resolve("./runtime/components-mdc"),
       pathPrefix: false,
       prefix: "Sarp",
-      global: true,
     });
 
     // Host apps that show news tags link to the public site when this is set; empty keeps routes relative.
     addImports({
-      name: "useMatchStateLabel",
       from: resolver.resolve("./runtime/composables/use-match-state-label"),
+      name: "useMatchStateLabel",
     });
 
     nuxt.options.runtimeConfig.public.publicSiteUrl ??= "";

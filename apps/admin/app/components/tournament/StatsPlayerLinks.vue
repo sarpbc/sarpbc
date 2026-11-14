@@ -33,8 +33,8 @@ const savingKey = ref<string | null>(null);
 const keyOf = (player: StatsPlayerAccount): string => `${player.platform}:${player.platformId}`;
 
 const rosterGroup = (roster: StatsRoster): SelectItem[] => [
-  { type: "label", label: roster.teamName },
-  ...roster.players.map((member) => ({ value: member.id, label: member.name })),
+  { label: roster.teamName, type: "label" },
+  ...roster.players.map((member) => ({ label: member.name, value: member.id })),
 ];
 
 const rosterOptions = (player: StatsPlayerAccount): SelectItem[][] => {
@@ -51,10 +51,10 @@ const meta = (player: StatsPlayerAccount): string =>
   t(
     "page.tournaments.statsLinks.meta",
     {
-      team: player.team.name,
       count: player.games,
-      platform: player.platform,
       id: player.platformId,
+      platform: player.platform,
+      team: player.team.name,
     },
     player.games,
   );
@@ -76,17 +76,17 @@ const save = async (player: StatsPlayerAccount) => {
       playerId,
     });
     toast.add({
-      title: t("page.tournaments.statsLinks.saved", { name: player.name }),
       color: "success",
+      title: t("page.tournaments.statsLinks.saved", { name: player.name }),
     });
     selected.value = { ...selected.value, [key]: undefined };
     editing.value = null;
     await refresh();
   } catch (saveError) {
     toast.add({
-      title: t("page.tournaments.statsLinks.saveError"),
-      description: getApiErrorMessage(saveError) ?? undefined,
       color: "error",
+      description: getApiErrorMessage(saveError) ?? undefined,
+      title: t("page.tournaments.statsLinks.saveError"),
     });
   } finally {
     savingKey.value = null;

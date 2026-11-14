@@ -86,16 +86,16 @@ export const mapHeadToHeadMeeting = (
   const scoreB = results.find((r) => r.participant.id === teamBParticipant.id)?.score ?? null;
 
   return {
-    id: match.id,
-    publicId: match.publicId,
-    slug: matchPublicSlug(match),
     beginAt: match.beginAt,
     endAt: match.endAt,
-    tournamentLabel: formatTournamentLabel(match),
-    teamAId,
-    teamBId,
+    id: match.id,
+    publicId: match.publicId,
     scoreA,
     scoreB,
+    slug: matchPublicSlug(match),
+    teamAId,
+    teamBId,
+    tournamentLabel: formatTournamentLabel(match),
     winnerTeamId: getWinnerTeamId(match, teamAId, teamBId),
   };
 };
@@ -120,11 +120,11 @@ export const buildHeadToHead = (
   }
 
   return {
+    recentMeetings: meetings.slice(0, recentLimit),
     teamAId,
-    teamBId,
     teamAWins,
+    teamBId,
     teamBWins,
     totalMeetings: meetings.length,
-    recentMeetings: meetings.slice(0, recentLimit),
   };
 };

@@ -2,7 +2,7 @@ import type { MatchVodSource } from "@sarpbc/types";
 
 export const LANGUAGE_CODE_LENGTH = 2;
 const LANGUAGE_CODE_PATTERN = new RegExp(`^[a-z]{${LANGUAGE_CODE_LENGTH}}$`, "u");
-const LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { type: "language", fallback: "none" });
+const LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { fallback: "none", type: "language" });
 
 export const isIso6391Code = (value: string): boolean =>
   LANGUAGE_CODE_PATTERN.test(value) && LANGUAGE_NAMES.of(value) !== undefined;
@@ -35,24 +35,24 @@ export const parseMatchVodUrl = (input: string): ParsedMatchVodUrl => {
   try {
     url = new URL(input.trim());
   } catch {
-    return { ok: false, error: "invalid-url" };
+    return { error: "invalid-url", ok: false };
   }
 
   if (url.protocol !== "https:") {
-    return { ok: false, error: "not-https" };
+    return { error: "not-https", ok: false };
   }
 
   const source = VOD_HOSTS.get(url.hostname);
 
   if (!source || url.port || url.username || url.password) {
-    return { ok: false, error: "unsupported-host" };
+    return { error: "unsupported-host", ok: false };
   }
 
   if (url.searchParams.getAll("t").some((timestamp) => !TIMESTAMP_PATTERN.test(timestamp))) {
-    return { ok: false, error: "invalid-timestamp" };
+    return { error: "invalid-timestamp", ok: false };
   }
 
-  return { ok: true, url: url.href, source };
+  return { ok: true, source, url: url.href };
 };
 
 export const MAX_VODS_PER_GAME = 10;

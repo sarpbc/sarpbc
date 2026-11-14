@@ -19,9 +19,9 @@ export const buildConnectors = (
     for (const [index, link] of links.entries()) {
       connectors.push({
         fromMatchId: link.previousMatch,
-        toMatchId: match.id,
         linkType: link.type,
         targetSlot: index === 0 ? "a" : "b",
+        toMatchId: match.id,
       });
     }
   }
@@ -35,22 +35,22 @@ export const toLayoutMatch = (
   row: number,
   zone?: BracketZone,
 ): BracketLayoutMatch => ({
-  matchId: match.id,
-  publicId: match.publicId,
-  slug: match.slug,
+  beginAt: match.beginAt,
   column,
-  row,
-  zone,
+  endAt: match.endAt,
+  matchId: match.id,
   name: match.name,
   participantA: match.participants?.[0],
-  participantB: match.participants?.[1],
   participantAId: match.participants?.[0]?.id,
+  participantB: match.participants?.[1],
   participantBId: match.participants?.[1]?.id,
+  publicId: match.publicId,
   results: match.results,
-  winnerParticipantId: getMatchWinnerParticipantId(match),
-  beginAt: match.beginAt,
-  endAt: match.endAt,
+  row,
+  slug: match.slug,
   status: match.status,
+  winnerParticipantId: getMatchWinnerParticipantId(match),
+  zone,
 });
 
 export const finalizeSectionLayout = (
@@ -62,9 +62,9 @@ export const finalizeSectionLayout = (
   const maxRow = Math.max(...layoutMatches.map((match) => match.row), 0);
 
   return {
-    matches: layoutMatches,
-    connectors: buildConnectors(matches, matchIds),
     columnCount: maxColumn + 1,
+    connectors: buildConnectors(matches, matchIds),
+    matches: layoutMatches,
     rowCount: maxRow + 2,
   };
 };

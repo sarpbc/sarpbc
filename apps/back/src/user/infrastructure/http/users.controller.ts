@@ -30,7 +30,7 @@ export class UsersController {
   async list(@Query({ schema: ListUsersQueryDto }) query: ListUsersQueryInput): Promise<UserList> {
     const { users, total } = await this.userService.list(query);
 
-    return { users: users.map((user) => toUserListItem(user)), total };
+    return { total, users: users.map((user) => toUserListItem(user)) };
   }
 
   @Patch(":id/role")

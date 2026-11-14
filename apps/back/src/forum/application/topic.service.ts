@@ -4,20 +4,20 @@ import type { TopicStore, ForumTransaction } from "./ports";
 
 const predefinedTopics = [
   {
-    title: "Rocket League",
     description: "General discussions about Rocket League updates, esports & events",
+    title: "Rocket League",
   },
   {
-    title: "Hardware & Stuff",
     description: "Discussions about hardware, peripherals, and other gaming-related topics",
+    title: "Hardware & Stuff",
   },
   {
-    title: "Offtopic",
     description: "Discussions about off-topic subjects not related to Rocket League",
+    title: "Offtopic",
   },
   {
-    title: "Bug & Suggestion",
     description: "Report bugs and suggest improvements for the sarpbc.org platform",
+    title: "Bug & Suggestion",
   },
 ];
 
@@ -34,11 +34,11 @@ export class TopicService {
 
         if (!exists) {
           const topic: TopicRecord = {
-            id: crypto.randomUUID(),
-            title: topicData.title,
-            description: topicData.description,
-            posts: [],
             createdAt: new Date(),
+            description: topicData.description,
+            id: crypto.randomUUID(),
+            posts: [],
+            title: topicData.title,
             updatedAt: null,
           };
 

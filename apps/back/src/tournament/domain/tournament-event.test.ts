@@ -53,8 +53,8 @@ describe(eventDisplayName, () => {
 });
 
 const stage = (name: string, beginAt: string | null) => ({
-  name,
   beginAt: beginAt === null ? null : new Date(beginAt),
+  name,
 });
 
 describe(compareStages, () => {

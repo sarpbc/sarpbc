@@ -9,6 +9,7 @@ import { createGoogleOAuthSession, GoogleIdentityGateway } from "./google-identi
 import { UserService } from "../../user/application/user.service";
 
 export const authServiceProvider = {
+  inject: [ConfigService, JwtService, UserService],
   provide: AuthService,
   useFactory: (config: ConfigService, jwt: JwtService, users: UserService) =>
     new AuthService(
@@ -22,18 +23,17 @@ export const authServiceProvider = {
       ),
       users,
       {
-        frontUrl: config.getOrThrow<string>("front_url"),
         adminUrl: config.getOrThrow<string>("admin_url"),
+        frontUrl: config.getOrThrow<string>("front_url"),
       },
     ),
-  inject: [ConfigService, JwtService, UserService],
 };
 
 @Global()
 @Module({
-  imports: [UserModule, JwtModule.register({})],
-  providers: [authServiceProvider],
   controllers: [AuthController],
   exports: [AuthService, UserModule],
+  imports: [UserModule, JwtModule.register({})],
+  providers: [authServiceProvider],
 })
 export class AuthModule {}

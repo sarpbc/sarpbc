@@ -13,8 +13,8 @@ const matchLineup = z.looseObject({
 type MatchLineup = z.infer<typeof matchLineup>;
 
 const matchLineupsResponse = z.looseObject({
-  source: z.string(),
   lineups: z.array(matchLineup),
+  source: z.string(),
   suggested: z.array(z.unknown()),
 });
 
@@ -25,7 +25,7 @@ const matchDetail = z.looseObject({
 
 const standIns = z.object({
   standIns: z.array(
-    z.looseObject({ participantId: z.string(), startgg: z.boolean(), match: identified }),
+    z.looseObject({ match: identified, participantId: z.string(), startgg: z.boolean() }),
   ),
 });
 
@@ -227,9 +227,9 @@ export const verifyLineups = async ({
     "POST",
     `/tournaments/${startggCup.id}/matches`,
     {
+      beginAt: new Date(Date.now() - 86_400_000).toISOString(),
       name: "Integration start.gg Final",
       participantIds: startggCup.participants.map(({ id }) => id),
-      beginAt: new Date(Date.now() - 86_400_000).toISOString(),
       status: "finished",
     },
     staffCookie,
@@ -295,7 +295,7 @@ export const verifyLineupProposals = async ({
   };
 
   assert.deepEqual(
-    await callTool("set_match_lineups", { matchId: match.id, lineups }, toolFailure),
+    await callTool("set_match_lineups", { lineups, matchId: match.id }, toolFailure),
     { error: true },
     "set_match_lineups requires a sourceUrl",
   );
@@ -303,8 +303,8 @@ export const verifyLineupProposals = async ({
     await callTool(
       "set_match_lineups",
       {
-        matchId: startggMatch.id,
         lineups: [],
+        matchId: startggMatch.id,
         sourceUrl,
       },
       toolFailure,
@@ -316,8 +316,8 @@ export const verifyLineupProposals = async ({
     await callTool(
       "set_match_lineups",
       {
-        matchId: match.id,
         lineups,
+        matchId: match.id,
         sourceUrl: "https://www.start.gg/tournament/integration/event/main",
       },
       toolFailure,
@@ -332,7 +332,7 @@ export const verifyLineupProposals = async ({
   );
 
   const before = await detail();
-  const proposal = await callTool("set_match_lineups", { matchId: match.id, lineups, sourceUrl });
+  const proposal = await callTool("set_match_lineups", { lineups, matchId: match.id, sourceUrl });
   assert.equal(proposal.status, "pending");
   assert.deepEqual(await detail(), before, "nothing changes before approval");
   const applied = await review(proposal);
@@ -366,8 +366,8 @@ export const verifyLineupProposals = async ({
   );
 
   const merge = await callTool("merge_players", {
-    keptPlayerId: standIn.id,
     duplicatePlayerId: duplicate.id,
+    keptPlayerId: standIn.id,
     sourceUrl,
   });
 

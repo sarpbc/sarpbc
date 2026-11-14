@@ -36,9 +36,9 @@ export const mapOfficialMatchStreams = (
 
     seen.add(url);
     official.push({
-      url,
       language: stream.language?.trim() ?? "",
       main: stream.main,
+      url,
     });
 
     if (official.length >= MAX_OFFICIAL_STREAMS) {

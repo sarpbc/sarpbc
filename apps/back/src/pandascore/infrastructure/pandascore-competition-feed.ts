@@ -44,7 +44,7 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
     return standings.flatMap((value) => {
       const { rank, team } = standingSchema.parse(value);
 
-      return team ? [{ teamPandascoreId: team.id, rank }] : [];
+      return team ? [{ rank, teamPandascoreId: team.id }] : [];
     });
   }
   async listIncidents(params: { since: Date }): Promise<CompetitionIncident[]> {
@@ -58,8 +58,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
         return {
           ...base,
           changeType: "deletion",
-          kind: i.type,
           deletion: parseProviderDeletion(i.object),
+          kind: i.type,
         };
       }
 
@@ -70,8 +70,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           return {
             ...base,
             changeType,
-            kind: i.type,
             command: toUpsertTournamentCommand(i.object),
+            kind: i.type,
           };
         }
 
@@ -79,8 +79,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           return {
             ...base,
             changeType,
-            kind: i.type,
             command: toUpsertMatchCommand(i.object),
+            kind: i.type,
           };
         }
 
@@ -88,8 +88,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           return {
             ...base,
             changeType,
-            kind: i.type,
             command: toUpsertTeamCommand(i.object),
+            kind: i.type,
           };
         }
 
@@ -97,8 +97,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           return {
             ...base,
             changeType,
-            kind: i.type,
             command: toImportedPlayer(i.object),
+            kind: i.type,
           };
         }
 
@@ -106,8 +106,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           return {
             ...base,
             changeType,
-            kind: i.type,
             command: toUpsertLeagueCommand(i.object),
+            kind: i.type,
           };
         }
 
@@ -115,8 +115,8 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           return {
             ...base,
             changeType,
-            kind: i.type,
             command: toUpsertSerieCommand(i.object),
+            kind: i.type,
           };
         }
 

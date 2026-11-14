@@ -6,28 +6,28 @@ import { toEventRef } from "../../../tournament/domain/tournament-event";
 import type { Career, Comparison } from "../../application/player-comparison.service";
 
 const mapTitle = (tournament: Tournament): CareerTitle => ({
+  endAt: tournament.endAt?.toISOString() ?? null,
+  event: toEventRef(tournament.event),
   id: tournament.id,
   name: tournament.name,
   slug: tournament.slug,
-  endAt: tournament.endAt?.toISOString() ?? null,
-  event: toEventRef(tournament.event),
 });
 
 const mapStint = (contract: Contract): CareerStint => ({
+  endDate: contract.endDate?.toISOString() ?? null,
   role: contract.role,
   startDate: contract.startDate.toISOString(),
-  endDate: contract.endDate?.toISOString() ?? null,
   team: mapTeamSummary(contract.team),
 });
 
 const mapCareer = (career: Career): PlayerCareer => ({
-  player: mapPlayer(career.player),
-  titles: career.titles.map(mapTitle),
-  teams: career.contracts.map(mapStint),
-  series: career.series,
-  earnings: career.earnings,
   awards: career.awards,
+  earnings: career.earnings,
+  player: mapPlayer(career.player),
   seasonAwards: career.seasonAwards,
+  series: career.series,
+  teams: career.contracts.map(mapStint),
+  titles: career.titles.map(mapTitle),
 });
 
 export const mapComparison = (comparison: Comparison): PlayerComparison => ({

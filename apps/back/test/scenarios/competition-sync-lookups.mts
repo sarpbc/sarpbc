@@ -9,10 +9,10 @@ import type { Application, Orm, Payload, Request, RequestContextType } from "./s
 const idRef = z.object({ id: z.string() });
 
 const stageView = z.looseObject({
+  event: z.looseObject({ name: z.string(), slug: z.string() }),
   id: z.string(),
-  source: z.string(),
-  event: z.looseObject({ slug: z.string(), name: z.string() }),
   league: idRef,
+  source: z.string(),
 });
 
 const stageBody = z.object({ tournament: stageView });
@@ -43,7 +43,7 @@ export const verifyCompetitionSyncLookups = async ({
 
   const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
-  const league = { pandascoreId: 9701, name: "Lookup League", slug: "lookup-league" };
+  const league = { name: "Lookup League", pandascoreId: 9701, slug: "lookup-league" };
 
   const upsert = async (command: Omit<UpsertTournamentCommand, "league">) =>
     await run(async () => await sync.upsertTournament({ league, ...command }));
@@ -61,18 +61,18 @@ export const verifyCompetitionSyncLookups = async ({
   };
 
   const backfilled = await upsert({
-    pandascoreId: 9711,
-    name: "Lookup Playoffs",
     beginAt: new Date("2026-01-10T12:00:00Z"),
+    name: "Lookup Playoffs",
+    pandascoreId: 9711,
   });
 
   const backfilledEventSlug = await eventSlugOf(backfilled);
 
   const claimed = await upsert({
-    pandascoreId: 9711,
-    name: "Lookup Playoffs",
     beginAt: new Date("2026-01-10T12:00:00Z"),
-    serie: { pandascoreId: 9801, fullName: "Spring", year: 2026 },
+    name: "Lookup Playoffs",
+    pandascoreId: 9711,
+    serie: { fullName: "Spring", pandascoreId: 9801, year: 2026 },
   });
 
   assert.equal(claimed.id, backfilled.id);
@@ -85,18 +85,18 @@ export const verifyCompetitionSyncLookups = async ({
   assert.equal(viewResult2.event.name, "Lookup League Spring");
 
   const unclaimed = await upsert({
-    pandascoreId: 9712,
-    name: "Group A",
     beginAt: new Date("2026-02-10T12:00:00Z"),
+    name: "Group A",
+    pandascoreId: 9712,
   });
 
   const unclaimedEventSlug = await eventSlugOf(unclaimed);
 
   const filed = await upsert({
-    pandascoreId: 9713,
-    name: "Group B",
     beginAt: new Date("2026-02-11T12:00:00Z"),
-    serie: { pandascoreId: 9802, fullName: "Group A", year: 2026 },
+    name: "Group B",
+    pandascoreId: 9713,
+    serie: { fullName: "Group A", pandascoreId: 9802, year: 2026 },
   });
 
   assert.equal(
@@ -111,7 +111,7 @@ export const verifyCompetitionSyncLookups = async ({
   const response3 = await request(
     "POST",
     "/tournaments",
-    { name: "Lookup League Group C", leagueId, beginAt: "2026-04-01T12:00:00Z" },
+    { beginAt: "2026-04-01T12:00:00Z", leagueId, name: "Lookup League Group C" },
     staffCookie,
     201,
   );
@@ -121,10 +121,10 @@ export const verifyCompetitionSyncLookups = async ({
   assert.equal(manualEvent.event.name, "Lookup League Group C");
 
   const beside = await upsert({
-    pandascoreId: 9714,
-    name: "Group D",
     beginAt: new Date("2026-09-01T12:00:00Z"),
-    serie: { pandascoreId: 9803, fullName: "Group C", year: 2026 },
+    name: "Group D",
+    pandascoreId: 9714,
+    serie: { fullName: "Group C", pandascoreId: 9803, year: 2026 },
   });
 
   const besideView = await view(beside.id);
@@ -141,10 +141,10 @@ export const verifyCompetitionSyncLookups = async ({
     "POST",
     "/tournaments",
     {
-      name: "Lookup League Counter Finals",
-      leagueId,
       beginAt: "2026-03-01T00:00:00Z",
       endAt: "2026-03-02T00:00:00Z",
+      leagueId,
+      name: "Lookup League Counter Finals",
     },
     staffCookie,
     201,
@@ -153,10 +153,10 @@ export const verifyCompetitionSyncLookups = async ({
   const manualFinals = response4.json(stageBody).tournament;
 
   const counterpart = await upsert({
-    pandascoreId: 9715,
-    name: "Finals",
     beginAt: new Date("2026-03-01T12:00:00Z"),
-    serie: { pandascoreId: 9804, fullName: "Counter", year: 2026 },
+    name: "Finals",
+    pandascoreId: 9715,
+    serie: { fullName: "Counter", pandascoreId: 9804, year: 2026 },
   });
 
   assert.equal(
@@ -168,10 +168,10 @@ export const verifyCompetitionSyncLookups = async ({
   assert.equal(viewResult5.source, "pandascore");
 
   const ambiguous = [1, 2].map(() => ({
-    name: "Lookup League Twin Finals",
-    leagueId,
     beginAt: "2026-05-01T00:00:00Z",
     endAt: "2026-05-02T00:00:00Z",
+    leagueId,
+    name: "Lookup League Twin Finals",
   }));
 
   const twins: StageView[] = await mapSequentially(ambiguous, async (body) => {
@@ -181,10 +181,10 @@ export const verifyCompetitionSyncLookups = async ({
   });
 
   const separate = await upsert({
-    pandascoreId: 9716,
-    name: "Finals",
     beginAt: new Date("2026-05-01T12:00:00Z"),
-    serie: { pandascoreId: 9805, fullName: "Twin", year: 2026 },
+    name: "Finals",
+    pandascoreId: 9716,
+    serie: { fullName: "Twin", pandascoreId: 9805, year: 2026 },
   });
 
   assert.ok(
@@ -218,11 +218,11 @@ export const verifyPandascoreAdoption = async ({
   const importPlayer = async (pandascoreId: number, slug: string): Promise<void> => {
     await run(async () => {
       await sync.applyIncident({
-        id: pandascoreId,
-        modifiedAt: new Date(),
         changeType: "creation",
+        command: { currentTeam: null, player: { name: slug, pandascoreId, slug } },
+        id: pandascoreId,
         kind: "player",
-        command: { player: { pandascoreId, name: slug, slug }, currentTeam: null },
+        modifiedAt: new Date(),
       });
     });
   };
@@ -313,11 +313,11 @@ export const verifyRedistributableScope = async ({
     await created(
       `/tournaments/${tournament.id}/matches`,
       {
-        name: `Scope ${source} Final`,
         beginAt: "2026-06-01T10:00:00Z",
         endAt: "2026-06-01T12:00:00Z",
-        status: "finished",
+        name: `Scope ${source} Final`,
         participantIds: tournament.participants.map(({ id }) => id),
+        status: "finished",
       },
       z.looseObject({}),
     );
@@ -327,7 +327,7 @@ export const verifyRedistributableScope = async ({
     const response = await request(
       "PUT",
       `/tournaments/${tournament.id}/prizes`,
-      { prizes: [{ placement: 1, amount: 1000, currency: "USD", teamId: alpha, sourceUrl }] },
+      { prizes: [{ amount: 1000, currency: "USD", placement: 1, sourceUrl, teamId: alpha }] },
       staffCookie,
     );
 
@@ -372,10 +372,10 @@ export const verifyRedistributableScope = async ({
     return runResult.totals;
   };
 
-  assert.deepEqual(await earned(false), [{ currency: "USD", amount: 2000 }]);
+  assert.deepEqual(await earned(false), [{ amount: 2000, currency: "USD" }]);
   assert.deepEqual(
     await earned(true),
-    [{ currency: "USD", amount: 1000 }],
+    [{ amount: 1000, currency: "USD" }],
     "redistributable earnings leave out start.gg tournaments",
   );
 

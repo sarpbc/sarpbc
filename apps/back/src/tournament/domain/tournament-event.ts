@@ -47,8 +47,8 @@ export const ownsEvent = (
 
 export const toEventRef = (event: TournamentEventRef): TournamentEventRef => ({
   id: event.id,
-  slug: event.slug,
   name: event.name,
+  slug: event.slug,
 });
 
 const GENERIC_STAGE_NAMES = new Set([

@@ -14,29 +14,29 @@ const fixture = (): Tournament => {
   const team = Object.assign(new Team(), { id: "team", name: "Team", slug: "team" });
 
   const player = Object.assign(new Player(), {
+    birthday: new Date("2000-01-02"),
     id: "player",
     team,
-    birthday: new Date("2000-01-02"),
   });
 
-  const participant = Object.assign(new TournamentParticipant(), { team, players: [player] });
+  const participant = Object.assign(new TournamentParticipant(), { players: [player], team });
 
   const match = Object.assign(new Match(), {
-    id: "match",
-    publicId: 7250,
-    participants: [participant],
-    winner: participant,
     beginAt: new Date("2026-01-01"),
-    officialStreams: [{ url: "https://twitch.tv/rl", language: "en", main: true }],
+    id: "match",
+    officialStreams: [{ language: "en", main: true, url: "https://twitch.tv/rl" }],
+    participants: [participant],
+    publicId: 7250,
+    winner: participant,
   });
 
   return Object.assign(new Tournament(), {
+    event: { id: "e1", name: "RLCS 2026", slug: "rlcs-2026" },
     id: "t1",
-    name: "RLCS",
-    slug: "playoffs",
-    event: { id: "e1", slug: "rlcs-2026", name: "RLCS 2026" },
-    participants: [participant],
     matches: [match],
+    name: "RLCS",
+    participants: [participant],
+    slug: "playoffs",
     winner: participant,
   });
 };

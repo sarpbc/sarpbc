@@ -38,6 +38,6 @@ export class SyncNewTournamentsUseCase {
 
     await this.incidents.execute();
 
-    return { discovered: ids.length, detailsSynced, detailsFailed };
+    return { detailsFailed, detailsSynced, discovered: ids.length };
   }
 }

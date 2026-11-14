@@ -4,10 +4,10 @@ import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 export type AirRiddleLetterStatus = "correct" | "misplaced" | "incorrect" | "unused";
 
 const STATUS_RANK = {
-  unused: 0,
+  correct: 3,
   incorrect: 1,
   misplaced: 2,
-  correct: 3,
+  unused: 0,
 } satisfies Record<AirRiddleLetterStatus, number>;
 
 interface AirRiddleAttemptLike {

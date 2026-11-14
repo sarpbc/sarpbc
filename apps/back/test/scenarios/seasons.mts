@@ -39,7 +39,7 @@ const seasonAwardBody = z.object({
 
 const seasonDetail = z.object({
   awards: z.array(
-    z.object({ awardType: z.string(), region: z.string().nullable(), player: idRef }),
+    z.object({ awardType: z.string(), player: idRef, region: z.string().nullable() }),
   ),
   participants: z.array(
     z.object({
@@ -60,9 +60,9 @@ const playerSeasonAwards = z.object({
 });
 
 const seasonArchive = z.object({
-  winner: idRef.nullable(),
   format: z.object({ phases: z.array(z.unknown()) }),
-  participants: z.array(z.object({ team: idRef, path: z.array(z.object({ label: z.string() })) })),
+  participants: z.array(z.object({ path: z.array(z.object({ label: z.string() })), team: idRef })),
+  winner: idRef.nullable(),
 });
 
 const seasonArchiveList = z.object({
@@ -107,8 +107,8 @@ export const verifySeasonAwards = async ({
   const awardsUrl = `/seasons/${season.id}/awards`;
 
   const seasonMvp = {
-    playerId: player.id,
     awardType: "season_mvp",
+    playerId: player.id,
     presentedBy: "Fake Partner",
     sourceUrl: ANNOUNCEMENT,
   };
@@ -137,10 +137,10 @@ export const verifySeasonAwards = async ({
   await request("POST", awardsUrl, { ...seasonMvp, playerId: otherPlayer.id }, staffCookie, 409);
 
   const regional = (region: string, playerId: string) => ({
-    seasonId: season.id,
-    playerId,
     awardType: "regional_mvp",
+    playerId,
     region,
+    seasonId: season.id,
     sourceUrl: ANNOUNCEMENT,
   });
 
@@ -249,12 +249,12 @@ export const verifySeasonArchives = async ({
   await request("GET", "/season-archives/fake-archive-unknown", undefined, undefined, 404);
   const response8 = await request("GET", `/season-archives/${slug}`);
   assert.deepEqual(response8.json(z.unknown()), {
-    slug,
-    name: "Fake Archive 2026",
-    format: { summary: null, phases: [] },
-    winner: null,
-    participants: [],
     awards: [],
+    format: { phases: [], summary: null },
+    name: "Fake Archive 2026",
+    participants: [],
+    slug,
+    winner: null,
   });
 
   const participantsUrl = `/seasons/${season.id}/participants`;
@@ -263,7 +263,7 @@ export const verifySeasonArchives = async ({
   const response9 = await request(
     "POST",
     participantsUrl,
-    { teamId: team.id, pathNote: "Fake path." },
+    { pathNote: "Fake path.", teamId: team.id },
     staffCookie,
     201,
   );
@@ -288,9 +288,9 @@ export const verifySeasonArchives = async ({
     "PATCH",
     `/seasons/${season.id}`,
     {
+      format: { phases: [{ description: null, name: "Fake splits" }], summary: "Fake format." },
       name: "Fake Archive 2026",
       winnerTeamId: team.id,
-      format: { summary: "Fake format.", phases: [{ name: "Fake splits", description: null }] },
     },
     staffCookie,
     200,
@@ -313,7 +313,7 @@ export const verifySeasonArchives = async ({
   const archive = seasonArchive.parse(archiveBody);
   assert.ok(archive.winner, "the archive names the winner");
   assert.equal(archive.winner.id, team.id);
-  assert.deepEqual(archive.format.phases, [{ name: "Fake splits", description: null }]);
+  assert.deepEqual(archive.format.phases, [{ description: null, name: "Fake splits" }]);
   const publicEntry = archive.participants.find(({ team: { id } }) => id === team.id);
   assert.ok(publicEntry, "the archive lists the winner");
   const publicPath = publicEntry.path;

@@ -22,16 +22,16 @@ export const isMonthDay = (month: number, day: number): boolean => {
 
 export const calendarDayIn = (date: Date, timeZone: string): CalendarDay => {
   const parts = new Intl.DateTimeFormat("en-US", {
+    day: "numeric",
+    month: "numeric",
     timeZone,
     year: "numeric",
-    month: "numeric",
-    day: "numeric",
   }).formatToParts(date);
 
   const part = (type: "year" | "month" | "day") =>
     Number(parts.find((entry) => entry.type === type)?.value);
 
-  return { year: part("year"), month: part("month"), day: part("day") };
+  return { day: part("day"), month: part("month"), year: part("year") };
 };
 
 export const parseIsoDay = (value: string): CalendarDay | null => {
@@ -45,7 +45,7 @@ export const parseIsoDay = (value: string): CalendarDay | null => {
   const date = new Date(Date.UTC(year, month - 1, day));
 
   return date.getUTCMonth() === month - 1 && date.getUTCDate() === day
-    ? { year, month, day }
+    ? { day, month, year }
     : null;
 };
 

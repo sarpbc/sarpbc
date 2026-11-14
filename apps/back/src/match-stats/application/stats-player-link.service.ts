@@ -25,8 +25,8 @@ export class StatsPlayerLinkService {
 
     if (!(await this.links.onTournamentRoster(tournamentId, link.playerId))) {
       throw new InvalidInputError({
-        message: "Choose a player from a roster of this tournament.",
         code: "player_not_on_tournament_roster",
+        message: "Choose a player from a roster of this tournament.",
       });
     }
 

@@ -25,34 +25,34 @@ const count = z.number().int().min(0);
 const seconds = z.number().min(0);
 
 const proposalSchema = z.object({
-  overlay: z.string().min(1),
-  source: z.string().min(1),
-  sourceStartedAt: z.iso.datetime({ offset: true }).nullable(),
   bestOf: z.number().int().min(1).max(9),
+  frames: z.object({
+    accepted: count,
+    hidden: count,
+    read: count,
+    rejected: count,
+    unreadable: count,
+  }),
   games: z.array(
     z.object({
-      number: z.number().int().min(1),
       blue: count,
-      orange: count,
-      winner: z.enum(STREAM_SCORE_SIDES).nullable(),
-      endedBy: z.enum(STREAM_SCORE_GAME_ENDINGS),
-      startedAt: seconds,
-      endedAt: seconds,
       confidence: z.number().min(0).max(1),
+      endedAt: seconds,
+      endedBy: z.enum(STREAM_SCORE_GAME_ENDINGS),
+      number: z.number().int().min(1),
+      orange: count,
+      startedAt: seconds,
+      winner: z.enum(STREAM_SCORE_SIDES).nullable(),
     }),
   ),
+  overlay: z.string().min(1),
   series: z.object({
     blue: count,
     orange: count,
     winner: z.enum(STREAM_SCORE_SIDES).nullable(),
   }),
-  frames: z.object({
-    read: count,
-    accepted: count,
-    hidden: count,
-    unreadable: count,
-    rejected: count,
-  }),
+  source: z.string().min(1),
+  sourceStartedAt: z.iso.datetime({ offset: true }).nullable(),
 });
 
 export const winsNeeded = (bestOf: number): number => Math.floor(bestOf / 2) + 1;
@@ -102,17 +102,17 @@ export const parseStreamScoreProposal = (text: string): ParsedStreamScoreProposa
   try {
     json = JSON.parse(text);
   } catch {
-    return { ok: false, error: "invalid-json" };
+    return { error: "invalid-json", ok: false };
   }
 
   const parsed = proposalSchema.safeParse(json);
 
   if (!parsed.success) {
-    return { ok: false, error: "invalid-proposal" };
+    return { error: "invalid-proposal", ok: false };
   }
 
   if (!isConsistent(parsed.data)) {
-    return { ok: false, error: "inconsistent-series" };
+    return { error: "inconsistent-series", ok: false };
   }
 
   return { ok: true, proposal: parsed.data };

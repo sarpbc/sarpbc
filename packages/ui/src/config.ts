@@ -13,8 +13,8 @@ export const apiPreconnectLinks = (apiBase: string): PreconnectLink[] => {
     const { origin } = new URL(apiBase);
 
     return [
-      { rel: "preconnect", href: origin, crossorigin: "anonymous" },
-      { rel: "dns-prefetch", href: origin },
+      { crossorigin: "anonymous", href: origin, rel: "preconnect" },
+      { href: origin, rel: "dns-prefetch" },
     ];
   } catch {
     return [];
@@ -22,27 +22,27 @@ export const apiPreconnectLinks = (apiBase: string): PreconnectLink[] => {
 };
 
 export const i18nOptions: NuxtI18nOptions = {
-  langDir: "locales",
-  locales: [
-    { code: "en", language: "en", file: "en-US.json", name: "English" },
-    { code: "fr", language: "fr", file: "fr-FR.json", name: "Français" },
-  ],
-  defaultLocale: "en",
-  strategy: "prefix_except_default",
-  detectBrowserLanguage: {
-    useCookie: true,
-    cookieKey: "i18n_redirected",
-    redirectOn: "root",
-    fallbackLocale: "en",
-  },
   compilation: {
     strictMessage: false,
   },
+  defaultLocale: "en",
+  detectBrowserLanguage: {
+    cookieKey: "i18n_redirected",
+    fallbackLocale: "en",
+    redirectOn: "root",
+    useCookie: true,
+  },
+  langDir: "locales",
+  locales: [
+    { code: "en", file: "en-US.json", language: "en", name: "English" },
+    { code: "fr", file: "fr-FR.json", language: "fr", name: "Français" },
+  ],
+  strategy: "prefix_except_default",
 };
 
 export const newsMdcComponentMap = (matchesComponent: string) => ({
+  matches: matchesComponent,
   player: "SarpPlayerTag",
   team: "SarpTeamTag",
   tweet: "SarpTweetTag",
-  matches: matchesComponent,
 });

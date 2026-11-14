@@ -31,7 +31,8 @@ const BACKTICK_RUN_PATTERN = /`+/gu;
 const FENCE_PATTERN = /^ {0,3}(?<fence>`{3,}|~{3,})/u;
 const MAX_TAG_INDENT = 3;
 const SELECTORS = ["match", "ids", "tournament", "team"] as const;
-const ATTR_NAMES = new Set<string>([...SELECTORS, "limit"]);
+const ATTR_ORDER = [...SELECTORS, "limit"] as const;
+const ATTR_NAMES = new Set<string>(ATTR_ORDER);
 
 const isUuid = (value: string): boolean => UUID_PATTERN.test(value);
 
@@ -106,13 +107,13 @@ export const newsMatchBlockFromAttrs = (attrs: NewsMatchBlockAttrs): MatchBlockS
 
   switch (selector) {
     case "match": {
-      return !hasLimit && isUuid(value) ? { kind: "match", id: value.toLowerCase() } : null;
+      return !hasLimit && isUuid(value) ? { id: value.toLowerCase(), kind: "match" } : null;
     }
 
     case "ids": {
       const ids = hasLimit ? null : parseIds(value);
 
-      return ids ? { kind: "matches", ids } : null;
+      return ids ? { ids, kind: "matches" } : null;
     }
 
     case "tournament":
@@ -120,7 +121,7 @@ export const newsMatchBlockFromAttrs = (attrs: NewsMatchBlockAttrs): MatchBlockS
       const limit = parseLimit(attrs.limit);
 
       return limit !== null && isUuid(value)
-        ? { kind: selector, id: value.toLowerCase(), limit }
+        ? { id: value.toLowerCase(), kind: selector, limit }
         : null;
     }
 
@@ -143,11 +144,11 @@ export const newsMatchBlockToAttrs = (block: MatchBlockSelector): NewsMatchBlock
     }
 
     case "tournament": {
-      return { tournament: block.id, limit: String(block.limit) };
+      return { limit: String(block.limit), tournament: block.id };
     }
 
     case "team": {
-      return { team: block.id, limit: String(block.limit) };
+      return { limit: String(block.limit), team: block.id };
     }
 
     default: {
@@ -172,10 +173,13 @@ export const parseNewsMatchTag = (raw: string): NewsMatchTag | null => {
 };
 
 export const serializeNewsMatchTag = (block: MatchBlockSelector): string => {
-  const attrs = Object.entries(newsMatchBlockToAttrs(block))
-    .filter(([, value]) => value !== null && value !== undefined)
-    .map(([name, value]) => `${name}="${value}"`)
-    .join(" ");
+  const blockAttrs = newsMatchBlockToAttrs(block);
+
+  const attrs = ATTR_ORDER.flatMap((name) => {
+    const value = blockAttrs[name];
+
+    return value === null || value === undefined ? [] : [`${name}="${value}"`];
+  }).join(" ");
 
   return `:matches{${attrs}}`;
 };
@@ -242,8 +246,8 @@ export const parseNewsMatchBlockKey = (key: string): MatchBlockSelector | null =
 
 const maskInlineCode = (line: string): string => {
   const runs = [...line.matchAll(BACKTICK_RUN_PATTERN)].map((run) => ({
-    start: run.index,
     length: run[0].length,
+    start: run.index,
   }));
 
   const closers = new Map<number, number>();

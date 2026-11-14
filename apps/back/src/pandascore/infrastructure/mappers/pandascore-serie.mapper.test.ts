@@ -10,11 +10,11 @@ interface DeletionObject {
 
 const deletionReason = (object: DeletionObject | null): string | null => {
   const incident = incidentSchema.parse({
+    change_type: "deletion",
     id: 1,
     modified_at: "2026-10-01T00:00:00Z",
-    change_type: "deletion",
-    type: "serie",
     object,
+    type: "serie",
   });
 
   if (incident.change_type !== "deletion") {
@@ -33,8 +33,8 @@ const deletion = (reason: string | null) => ({
 describe(parseProviderDeletion, () => {
   it("reads a merge into another serie", () => {
     expect(parseProviderDeletion(deletionReason(deletion("Merged with 9417")))).toStrictEqual({
-      kind: "merged",
       intoId: 9417,
+      kind: "merged",
     });
   });
 
@@ -42,9 +42,9 @@ describe(parseProviderDeletion, () => {
     expect(
       parseProviderDeletion(deletionReason(deletion(`Replaced by ${entity} 512`))),
     ).toStrictEqual({
-      kind: "replaced",
-      entity,
       byId: 512,
+      entity,
+      kind: "replaced",
     });
   });
 
@@ -62,11 +62,11 @@ describe(parseProviderDeletion, () => {
 describe("serie incidents", () => {
   it("parse leniently so an unexpected provider field cannot fail the page", () => {
     const incident = incidentSchema.parse({
+      change_type: "update",
       id: 1,
       modified_at: "2026-10-01T00:00:00Z",
-      change_type: "update",
+      object: { full_name: "Paris 2026", id: 9417, league: { id: 4 }, year: "2026" },
       type: "serie",
-      object: { id: 9417, full_name: "Paris 2026", year: "2026", league: { id: 4 } },
     });
 
     if (incident.change_type === "deletion" || incident.type !== "serie") {
@@ -74,8 +74,8 @@ describe("serie incidents", () => {
     }
 
     expect(toUpsertSerieCommand(incident.object)).toStrictEqual({
-      pandascoreId: 9417,
       fullName: "Paris 2026",
+      pandascoreId: 9417,
       year: undefined,
     });
   });

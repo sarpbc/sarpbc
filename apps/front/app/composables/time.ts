@@ -5,13 +5,13 @@ const RELATIVE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
 // VueUse switches to "last week" from 6 days; days must last the whole relative window.
 const TIME_AGO_UNITS: UseTimeAgoUnit[] = [
-  { max: 60_000, value: 1000, name: "second" },
-  { max: 2_760_000, value: 60_000, name: "minute" },
-  { max: 72_000_000, value: 3_600_000, name: "hour" },
-  { max: RELATIVE_WINDOW_MS + 86_400_000, value: 86_400_000, name: "day" },
-  { max: 2_419_200_000, value: 604_800_000, name: "week" },
-  { max: 28_512_000_000, value: 2_592_000_000, name: "month" },
-  { max: Number.POSITIVE_INFINITY, value: 31_536_000_000, name: "year" },
+  { max: 60_000, name: "second", value: 1000 },
+  { max: 2_760_000, name: "minute", value: 60_000 },
+  { max: 72_000_000, name: "hour", value: 3_600_000 },
+  { max: RELATIVE_WINDOW_MS + 86_400_000, name: "day", value: 86_400_000 },
+  { max: 2_419_200_000, name: "week", value: 604_800_000 },
+  { max: 28_512_000_000, name: "month", value: 2_592_000_000 },
+  { max: Number.POSITIVE_INFINITY, name: "year", value: 31_536_000_000 },
 ];
 
 const pf = (past: boolean): string => (past ? ".past" : ".future");
@@ -32,15 +32,33 @@ export const formatLocaleTimeAgo = (date: Date) => {
   }
 
   const messages: UseTimeAgoMessages = {
-    justNow: t("timeAgo.just-now"),
-    past: (n) => (/\d/u.test(n) ? t("timeAgo.ago", [n]) : n),
+    day: (n, past) => {
+      if (n !== 1) {
+        return `${n} ${t(`timeAgo.day${pf(past)}`, n)}`;
+      }
+
+      return past ? t("timeAgo.yesterday") : t("timeAgo.tomorrow");
+    },
     future: (n) => (/\d/u.test(n) ? t("timeAgo.in", [n]) : n),
+    hour: (n, past) => `${n} ${t(`timeAgo.hour${pf(past)}`, n)}`,
+    invalid: "",
+    justNow: t("timeAgo.just-now"),
+    minute: (n, past) => `${n} ${t(`timeAgo.minute${pf(past)}`, n)}`,
     month: (n, past) => {
       if (n !== 1) {
         return `${n} ${t(`timeAgo.month${pf(past)}`, n)}`;
       }
 
       return past ? t("timeAgo.last-month") : t("timeAgo.next-month");
+    },
+    past: (n) => (/\d/u.test(n) ? t("timeAgo.ago", [n]) : n),
+    second: (n, past) => `${n} ${t(`timeAgo.second${pf(past)}`, n)}`,
+    week: (n, past) => {
+      if (n !== 1) {
+        return `${n} ${t(`timeAgo.week${pf(past)}`, n)}`;
+      }
+
+      return past ? t("timeAgo.last-week") : t("timeAgo.next-week");
     },
     year: (n, past) => {
       if (n !== 1) {
@@ -49,24 +67,6 @@ export const formatLocaleTimeAgo = (date: Date) => {
 
       return past ? t("timeAgo.last-year") : t("timeAgo.next-year");
     },
-    day: (n, past) => {
-      if (n !== 1) {
-        return `${n} ${t(`timeAgo.day${pf(past)}`, n)}`;
-      }
-
-      return past ? t("timeAgo.yesterday") : t("timeAgo.tomorrow");
-    },
-    week: (n, past) => {
-      if (n !== 1) {
-        return `${n} ${t(`timeAgo.week${pf(past)}`, n)}`;
-      }
-
-      return past ? t("timeAgo.last-week") : t("timeAgo.next-week");
-    },
-    hour: (n, past) => `${n} ${t(`timeAgo.hour${pf(past)}`, n)}`,
-    minute: (n, past) => `${n} ${t(`timeAgo.minute${pf(past)}`, n)}`,
-    second: (n, past) => `${n} ${t(`timeAgo.second${pf(past)}`, n)}`,
-    invalid: "",
   };
 
   return formatTimeAgo(date, {

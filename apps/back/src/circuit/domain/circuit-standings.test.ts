@@ -8,30 +8,30 @@ const past = (day: number) => new Date(`2026-0${day}-01T00:00:00Z`);
 const future = new Date("2026-09-01T00:00:00Z");
 
 const scale: CircuitScaleTier[] = [
-  { from: 1, to: 1, points: 10 },
-  { from: 2, to: 2, points: 6 },
-  { from: 3, to: 4, points: 3 },
+  { from: 1, points: 10, to: 1 },
+  { from: 2, points: 6, to: 2 },
+  { from: 3, points: 3, to: 4 },
 ];
 
-const event = (id: string): TournamentEventRef => ({ id, slug: id, name: `Event ${id}` });
+const event = (id: string): TournamentEventRef => ({ id, name: `Event ${id}`, slug: id });
 
 const team = (id: string) => ({
+  darkModeImageUrl: null,
   id,
+  imageUrl: null,
   name: id.toUpperCase(),
   slug: id,
-  imageUrl: null,
-  darkModeImageUrl: null,
 });
 
 const stage = (overrides: Partial<CircuitStageResult> & { event: TournamentEventRef }) => ({
   beginAt: past(1),
   endAt: past(2),
+  finishes: [],
+  placements: [],
+  regionTeamIds: [],
   scale,
   sourceUrl: "https://example.org/rules",
   worldwide: false,
-  regionTeamIds: [],
-  placements: [],
-  finishes: [],
   ...overrides,
 });
 
@@ -42,17 +42,17 @@ describe(computeCircuitStandings, () => {
         stage({
           event: event("a"),
           placements: [
-            { team: team("kc"), placement: 1 },
-            { team: team("bds"), placement: 2 },
+            { placement: 1, team: team("kc") },
+            { placement: 2, team: team("bds") },
           ],
         }),
         stage({
-          event: event("b"),
           beginAt: past(3),
           endAt: past(4),
+          event: event("b"),
           placements: [
-            { team: team("bds"), placement: 1 },
-            { team: team("kc"), placement: 3 },
+            { placement: 1, team: team("bds") },
+            { placement: 3, team: team("kc") },
           ],
         }),
       ],
@@ -66,22 +66,22 @@ describe(computeCircuitStandings, () => {
     ]);
     expect(rows).toStrictEqual([
       {
-        rank: 1,
-        points: 16,
-        team: team("bds"),
         events: [
-          { eventId: "a", points: 6, placement: 2 },
-          { eventId: "b", points: 10, placement: 1 },
+          { eventId: "a", placement: 2, points: 6 },
+          { eventId: "b", placement: 1, points: 10 },
         ],
+        points: 16,
+        rank: 1,
+        team: team("bds"),
       },
       {
-        rank: 2,
-        points: 13,
-        team: team("kc"),
         events: [
-          { eventId: "a", points: 10, placement: 1 },
-          { eventId: "b", points: 3, placement: 3 },
+          { eventId: "a", placement: 1, points: 10 },
+          { eventId: "b", placement: 3, points: 3 },
         ],
+        points: 13,
+        rank: 2,
+        team: team("kc"),
       },
     ]);
   });
@@ -92,10 +92,10 @@ describe(computeCircuitStandings, () => {
         stage({
           event: event("a"),
           placements: [
-            { team: team("vit"), placement: 1 },
-            { team: team("kc"), placement: 3 },
-            { team: team("bds"), placement: 3 },
-            { team: team("g2"), placement: 5 },
+            { placement: 1, team: team("vit") },
+            { placement: 3, team: team("kc") },
+            { placement: 3, team: team("bds") },
+            { placement: 5, team: team("g2") },
           ],
         }),
       ],
@@ -112,7 +112,7 @@ describe(computeCircuitStandings, () => {
 
   it("awards nothing for a stage whose scale is missing", () => {
     const { rows, events } = computeCircuitStandings(
-      [stage({ event: event("a"), scale: [], placements: [{ team: team("kc"), placement: 1 }] })],
+      [stage({ event: event("a"), placements: [{ placement: 1, team: team("kc") }], scale: [] })],
       null,
       now,
     );
@@ -127,21 +127,21 @@ describe(computeCircuitStandings, () => {
     expect(rows).toStrictEqual([]);
     expect(events).toStrictEqual([
       {
-        event: event("a"),
         beginAt: past(1).toISOString(),
         endAt: past(2).toISOString(),
+        event: event("a"),
         status: "awaiting_results",
       },
     ]);
   });
 
   it("counts only stages that have ended", () => {
-    const placements = [{ team: team("kc"), placement: 1 }];
+    const placements = [{ placement: 1, team: team("kc") }];
 
     const { rows, events } = computeCircuitStandings(
       [
-        stage({ event: event("live"), endAt: future, placements }),
-        stage({ event: event("next"), beginAt: future, endAt: null, placements }),
+        stage({ endAt: future, event: event("live"), placements }),
+        stage({ beginAt: future, endAt: null, event: event("next"), placements }),
       ],
       null,
       now,
@@ -159,16 +159,16 @@ describe(computeCircuitStandings, () => {
       [
         stage({
           event: event("a"),
-          scale: [{ from: 9, to: 16, points: 1 }],
-          placements: [{ team: team("kc"), placement: 9 }],
+          placements: [{ placement: 9, team: team("kc") }],
+          scale: [{ from: 9, points: 1, to: 16 }],
         }),
-        stage({ event: event("a"), placements: [{ team: team("kc"), placement: 2 }] }),
+        stage({ event: event("a"), placements: [{ placement: 2, team: team("kc") }] }),
       ],
       null,
       now,
     );
 
-    expect(rows[0]?.events).toStrictEqual([{ eventId: "a", points: 7, placement: 2 }]);
+    expect(rows[0]?.events).toStrictEqual([{ eventId: "a", placement: 2, points: 7 }]);
     expect(sourceUrls).toStrictEqual(["https://example.org/rules"]);
   });
 });
@@ -178,24 +178,24 @@ const totals = (stages: CircuitStageResult[], region: string | null) =>
 
 describe("computeCircuitStandings in a regional circuit", () => {
   const majorScale: CircuitScaleTier[] = [
-    { from: 1, to: 1, points: 30 },
-    { from: 2, to: 2, points: 20 },
-    { from: 3, to: 4, points: 14 },
-    { from: 13, to: 16, points: 3 },
+    { from: 1, points: 30, to: 1 },
+    { from: 2, points: 20, to: 2 },
+    { from: 3, points: 14, to: 4 },
+    { from: 13, points: 3, to: 16 },
   ];
 
   const major = (overrides: Partial<CircuitStageResult> = {}) =>
     stage({
       event: event("major"),
+      placements: [
+        { placement: 1, team: team("nrg") },
+        { placement: 2, team: team("kc") },
+        { placement: 3, team: team("vit") },
+        { placement: 4, team: team("flcn") },
+      ],
+      regionTeamIds: ["kc", "vit"],
       scale: majorScale,
       worldwide: true,
-      regionTeamIds: ["kc", "vit"],
-      placements: [
-        { team: team("nrg"), placement: 1 },
-        { team: team("kc"), placement: 2 },
-        { team: team("vit"), placement: 3 },
-        { team: team("flcn"), placement: 4 },
-      ],
       ...overrides,
     });
 
@@ -228,8 +228,8 @@ describe("computeCircuitStandings in a regional circuit", () => {
           stage({
             event: event("open"),
             placements: [
-              { team: team("kc"), placement: 1 },
-              { team: team("vit"), placement: 2 },
+              { placement: 1, team: team("kc") },
+              { placement: 2, team: team("vit") },
             ],
           }),
         ],
@@ -246,11 +246,11 @@ describe("computeCircuitStandings in a regional circuit", () => {
       totals(
         [
           major({
-            placements: [],
             finishes: [
-              { team: team("kc"), placement: 13 },
-              { team: team("nrg"), placement: 13 },
+              { placement: 13, team: team("kc") },
+              { placement: 13, team: team("nrg") },
             ],
+            placements: [],
           }),
         ],
         "EU",
@@ -261,37 +261,37 @@ describe("computeCircuitStandings in a regional circuit", () => {
 
 describe("computeCircuitStandings with places decided in groups", () => {
   const openScale: CircuitScaleTier[] = [
-    { from: 1, to: 1, points: 15 },
-    { from: 2, to: 2, points: 10 },
-    { from: 3, to: 4, points: 7 },
-    { from: 5, to: 6, points: 5 },
-    { from: 7, to: 8, points: 3 },
-    { from: 9, to: 12, points: 2 },
-    { from: 13, to: 16, points: 1 },
+    { from: 1, points: 15, to: 1 },
+    { from: 2, points: 10, to: 2 },
+    { from: 3, points: 7, to: 4 },
+    { from: 5, points: 5, to: 6 },
+    { from: 7, points: 3, to: 8 },
+    { from: 9, points: 2, to: 12 },
+    { from: 13, points: 1, to: 16 },
   ];
 
   const playoffTeams = ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"];
 
   const groupFinishes = [
-    ...["g9", "g10", "g11", "g12"].map((id) => ({ team: team(id), placement: 9 })),
-    ...["g13", "g14", "g15", "g16"].map((id) => ({ team: team(id), placement: 13 })),
+    ...["g9", "g10", "g11", "g12"].map((id) => ({ placement: 9, team: team(id) })),
+    ...["g13", "g14", "g15", "g16"].map((id) => ({ placement: 13, team: team(id) })),
   ];
 
   const playoffs = stage({
     event: event("open"),
-    scale: openScale,
-    placements: [1, 2, 3, 3, 5, 5, 7, 7].map((placement, index) => ({
-      team: team(playoffTeams[index] ?? ""),
-      placement,
-    })),
     finishes: groupFinishes,
+    placements: [1, 2, 3, 3, 5, 5, 7, 7].map((placement, index) => ({
+      placement,
+      team: team(playoffTeams[index] ?? ""),
+    })),
+    scale: openScale,
   });
 
   const playoffStandings = () => {
     const { rows } = computeCircuitStandings([playoffs], null, now);
     const points = Object.fromEntries(rows.map(({ team: { id }, points: total }) => [id, total]));
 
-    return { rows, points };
+    return { points, rows };
   };
 
   it("awards the 9th-12th and 13th-16th bands from staff-entered event placements", () => {
@@ -308,7 +308,7 @@ describe("computeCircuitStandings with places decided in groups", () => {
     expect(points.p1).toBe(15);
     expect(points.p8).toBe(3);
     expect(rows.find(({ team: { id } }) => id === "g9")?.events).toStrictEqual([
-      { eventId: "open", points: 2, placement: 9 },
+      { eventId: "open", placement: 9, points: 2 },
     ]);
   });
 
@@ -317,9 +317,9 @@ describe("computeCircuitStandings with places decided in groups", () => {
       [
         stage({
           event: event("open"),
+          finishes: [{ placement: 9, team: team("kc") }],
+          placements: [{ placement: 3, team: team("kc") }],
           scale: openScale,
-          placements: [{ team: team("kc"), placement: 3 }],
-          finishes: [{ team: team("kc"), placement: 9 }],
         }),
       ],
       null,
@@ -338,7 +338,7 @@ describe("computeCircuitStandings with places decided in groups", () => {
 
   it("counts a stage whose only placements are entered by staff, such as a manual stage", () => {
     const { rows, events } = computeCircuitStandings(
-      [stage({ event: event("manual"), finishes: [{ team: team("kc"), placement: 1 }] })],
+      [stage({ event: event("manual"), finishes: [{ placement: 1, team: team("kc") }] })],
       null,
       now,
     );

@@ -48,20 +48,20 @@ export const getPlayerById = async (id: string): Promise<Player> => {
   const res = await apiFetch<{ player: Player | null }>(`/player/${id}`, { method: "GET" });
 
   if (!res.player) {
-    throw createError({ statusCode: 404, message: "Player not found" });
+    throw createError({ message: "Player not found", statusCode: 404 });
   }
 
   return res.player;
 };
 
 export const createPlayer = async (body: CreatePlayerDto): Promise<Player> => {
-  const res = await apiFetch<{ player: Player }>("/player", { method: "POST", body });
+  const res = await apiFetch<{ player: Player }>("/player", { body, method: "POST" });
 
   return res.player;
 };
 
 export const updatePlayer = async (id: string, body: UpdatePlayerDto): Promise<Player> => {
-  const res = await apiFetch<{ player: Player }>(`/player/${id}`, { method: "PATCH", body });
+  const res = await apiFetch<{ player: Player }>(`/player/${id}`, { body, method: "PATCH" });
 
   return res.player;
 };
@@ -83,8 +83,8 @@ export const createPlayerContract = async (
   body: CreatePlayerContractDto,
 ): Promise<PlayerContract> => {
   const res = await apiFetch<{ contract: PlayerContract }>(`/player/${playerId}/contract`, {
-    method: "POST",
     body,
+    method: "POST",
   });
 
   return res.contract;
@@ -97,7 +97,7 @@ export const updatePlayerContract = async (
 ): Promise<PlayerContract> => {
   const res = await apiFetch<{ contract: PlayerContract }>(
     `/player/${playerId}/contract/${contractId}`,
-    { method: "PATCH", body },
+    { body, method: "PATCH" },
   );
 
   return res.contract;

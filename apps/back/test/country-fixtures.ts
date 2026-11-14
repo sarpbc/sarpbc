@@ -17,7 +17,7 @@ export const vitality = Object.assign(new Team(), {
 });
 
 const countryPlayer = (id: string, name: string, team: Team | null): Player =>
-  Object.assign(new Player(), { id, name, slug: id, nationality: "fr", team });
+  Object.assign(new Player(), { id, name, nationality: "fr", slug: id, team });
 
 export const alpha54 = countryPlayer("alpha54", "Alpha54", vitality);
 export const zen = countryPlayer("zen", "zen", vitality);
@@ -27,12 +27,12 @@ const french = [alpha54, exotiik, vatira, zen];
 
 export const countryMatches: Match[] = [
   careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 }),
-  careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], winner: 0, source: "startgg" }),
+  careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], source: "startgg", winner: 0 }),
   careerMatch({
     id: "startgg-stage",
     sides: [[vatira], [zen]],
-    winner: 1,
     tournamentSource: "startgg",
+    winner: 1,
   }),
 ];
 
@@ -59,15 +59,15 @@ export const countrySources = () => {
   );
 
   const sources: CountrySources = {
+    matches: { list },
     players: {
+      findByNationality,
       nationalities: async () => [
         { code: "FR", players: 4 },
         { code: "US", players: 1 },
       ],
-      findByNationality,
     },
-    matches: { list },
   };
 
-  return { sources, findByNationality, list };
+  return { findByNationality, list, sources };
 };

@@ -12,13 +12,13 @@ const slug = computed(() => String(route.params.slug));
 const { data: season, error } = await useAsyncData<SeasonArchive | null>(
   () => `season-archive-${slug.value}`,
   () => getSeasonArchive(slug.value),
-  { watch: [slug], default: () => null },
+  { default: () => null, watch: [slug] },
 );
 
 if (!season.value) {
   throwEntityLoadError(error.value, {
-    notFound: t("page.seasons.archive.notFound"),
     failed: t("page.seasons.archive.error"),
+    notFound: t("page.seasons.archive.notFound"),
   });
 }
 
@@ -42,12 +42,12 @@ watch(
   season,
   (current) => {
     setPageSeo({
-      title: current
-        ? t("page.seasons.archive.seoTitle", { name: current.name })
-        : t("page.seasons.index.seoTitle"),
       description: current
         ? t("page.seasons.archive.seoDescription", { name: current.name })
         : t("page.seasons.index.description"),
+      title: current
+        ? t("page.seasons.archive.seoTitle", { name: current.name })
+        : t("page.seasons.index.seoTitle"),
     });
   },
   { immediate: true },

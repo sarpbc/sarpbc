@@ -18,14 +18,14 @@ describe(deriveTransfers, () => {
     role = "active",
   ) =>
     Object.assign(new Contract(), {
-      id,
-      player: zen,
-      team,
-      startDate: new Date(startDate),
       endDate: endDate === null ? null : new Date(endDate),
-      role,
+      id,
       joinSourceUrl: `https://x.com/${id}/join`,
       leaveSourceUrl: endDate === null ? null : `https://x.com/${id}/leave`,
+      player: zen,
+      role,
+      startDate: new Date(startDate),
+      team,
     });
 
   const summary = (contracts: Contract[], until = today) =>

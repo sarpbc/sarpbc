@@ -52,20 +52,20 @@ export const parseStreamUrl = (input: string): ParsedStreamUrl => {
   try {
     url = new URL(input.trim());
   } catch {
-    return { ok: false, error: "invalid-url" };
+    return { error: "invalid-url", ok: false };
   }
 
   if (url.protocol !== "https:") {
-    return { ok: false, error: "not-https" };
+    return { error: "not-https", ok: false };
   }
 
   if (url.port || url.username || url.password) {
-    return { ok: false, error: "invalid-url" };
+    return { error: "invalid-url", ok: false };
   }
 
   const platform = STREAM_HOSTS.get(url.hostname) ?? "other";
 
-  return { ok: true, url: url.href, platform, channel: channelOf(url, platform) };
+  return { channel: channelOf(url, platform), ok: true, platform, url: url.href };
 };
 
 export const orderStreams = <T extends { language: string; kind: StreamKind }>(

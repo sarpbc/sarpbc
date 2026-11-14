@@ -17,7 +17,7 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
     const { where, page } = directoryQuery(options);
 
     if (options.name === undefined || options.name === "") {
-      return { where, page };
+      return { page, where };
     }
 
     const aliases = await this.em.find(
@@ -27,13 +27,13 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
     );
 
     if (aliases.length === 0) {
-      return { where, page };
+      return { page, where };
     }
 
     const { name, ...rest } = where;
     const formerly = { id: { $in: [...new Set(aliases.map(({ team }) => team.id))] } };
 
-    return { where: { ...rest, $or: [{ name }, formerly] }, page };
+    return { page, where: { ...rest, $or: [{ name }, formerly] } };
   }
 
   async search(options: Partial<DirectorySearchProps>) {

@@ -13,11 +13,11 @@ export const useLiveStreamers = () => {
     "live-streamers",
     async () => await getLiveStreamers(),
     {
-      server: false,
-      immediate: false,
       default: (): LiveStreamer[] => [],
+      immediate: false,
+      server: false,
     },
   );
 
-  return { streamers: data, load: execute };
+  return { load: execute, streamers: data };
 };

@@ -4,10 +4,10 @@ import { isStaffRole, permissionsForRole } from "../../domain/staff-access";
 
 export const toUserResponse = (user: User): UserResponse => {
   const dto: UserResponse = {
-    id: user.id,
-    email: user.email,
-    userName: user.userName,
     avatarUrl: user.avatarUrl ?? undefined,
+    email: user.email,
+    id: user.id,
+    userName: user.userName,
   };
 
   if (isStaffRole(user.role)) {
@@ -19,10 +19,10 @@ export const toUserResponse = (user: User): UserResponse => {
 };
 
 export const toUserListItem = (user: User): UserListItem => ({
-  id: user.id,
-  email: user.email,
-  userName: user.userName,
   avatarUrl: user.avatarUrl,
-  role: isStaffRole(user.role) ? user.role : null,
   createdAt: user.createdAt.toISOString(),
+  email: user.email,
+  id: user.id,
+  role: isStaffRole(user.role) ? user.role : null,
+  userName: user.userName,
 });

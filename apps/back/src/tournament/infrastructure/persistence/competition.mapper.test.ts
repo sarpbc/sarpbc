@@ -9,25 +9,25 @@ import { TournamentEvent } from "./tournament-event.entity";
 import { TournamentParticipant } from "./tournament-participant.entity";
 
 const orm = new MikroORM({
-  entities: mikroOrmEntities,
-  dbName: "competition-mapper-test",
   allowGlobalContext: true,
+  dbName: "competition-mapper-test",
+  entities: mikroOrmEntities,
 });
 
 const em = orm.em.fork();
 
 const stage = () => {
   const event = Object.assign(new TournamentEvent(), {
-    slug: "coupe-de-france-slash-2025",
     name: "Slash",
+    slug: "coupe-de-france-slash-2025",
   });
 
-  return Object.assign(new Tournament(), { name: "Playoffs", slug: "playoffs", event });
+  return Object.assign(new Tournament(), { event, name: "Playoffs", slug: "playoffs" });
 };
 
 const entry = (tournament: Tournament, teamId: string) => {
   const team = Object.assign(new Team(), { id: teamId, name: teamId });
-  const participant = Object.assign(new TournamentParticipant(), { tournament, team });
+  const participant = Object.assign(new TournamentParticipant(), { team, tournament });
   tournament.participants.add(participant);
 
   return participant;
@@ -61,8 +61,8 @@ describe(toTournament, () => {
     entry(tournament, "gentle-mates");
 
     const orphan = Object.assign(new TournamentParticipant(), {
-      tournament,
       team: em.getReference(Team, "unloaded-team"),
+      tournament,
     });
 
     tournament.participants.add(orphan);
@@ -96,21 +96,21 @@ const renamedStage = (beginAt: string) => {
   const tournament = Object.assign(stage(), { beginAt: new Date(beginAt) });
   const participant = entry(tournament, "fixture");
   Object.assign(participant.team ?? {}, {
-    name: "Fixture Now",
     aliases: [
       {
-        id: "a1",
-        name: "Fixture Origins",
         from: "2020-01-01",
-        to: "2022-06-01",
-        sourceUrl: "https://x.com/fixture/status/1",
+        id: "a1",
         logoUrl: null,
+        name: "Fixture Origins",
         pandascoreId: null,
+        sourceUrl: "https://x.com/fixture/status/1",
+        to: "2022-06-01",
       },
     ],
+    name: "Fixture Now",
   });
 
-  return { tournament, participant };
+  return { participant, tournament };
 };
 
 describe("names in force on the date", () => {
@@ -126,9 +126,9 @@ describe("names in force on the date", () => {
     const { tournament, participant } = renamedStage("2022-05-30T18:00:00Z");
 
     const match = Object.assign(new Match(), {
+      beginAt: new Date("2022-06-02T18:00:00Z"),
       name: "Final",
       tournament,
-      beginAt: new Date("2022-06-02T18:00:00Z"),
     });
 
     match.participants.add(participant);

@@ -29,11 +29,11 @@ describe(PatService, () => {
       create: async (_ownerId, name, hash) => {
         savedHash = hash;
 
-        return { id: "token-1", name, createdAt: now, lastUsedAt: null };
+        return { createdAt: now, id: "token-1", lastUsedAt: null, name };
       },
-      listActive: async () => [],
       findActive: async (hash) =>
-        !revoked && hash === savedHash ? { id: "token-1", owner, lastUsedAt } : null,
+        !revoked && hash === savedHash ? { id: "token-1", lastUsedAt, owner } : null,
+      listActive: async () => [],
       revokeOwned: async (ownerId, id) => {
         if (ownerId !== owner.id || id !== "token-1" || revoked) {
           return false;
@@ -59,7 +59,7 @@ describe(PatService, () => {
 
   it("returns plaintext once and stores only its hash", async () => {
     const created = await service.createToken(owner.id, "CI token");
-    expect(created).toMatchObject({ id: "token-1", name: "CI token", createdAt: now });
+    expect(created).toMatchObject({ createdAt: now, id: "token-1", name: "CI token" });
     expect(created.token).toMatch(/^sarpbc_pat_/u);
     expect(savedHash).toBe(createHash("sha256").update(created.token).digest("hex"));
     expect(savedHash).not.toBe(created.token);
@@ -75,8 +75,8 @@ describe(PatService, () => {
   it("resolves the owner and records usage", async () => {
     const token = await service.createToken(owner.id, "CI");
     await expect(service.resolveUser(token.token)).resolves.toStrictEqual({
-      id: owner.id,
       email: owner.email,
+      id: owner.id,
       role: "admin",
     });
     expect(lastUsedAt).toBe(now);

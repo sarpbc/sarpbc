@@ -19,22 +19,22 @@ const columns: TableColumn<Player>[] = [
   },
   {
     accessorKey: "firstName",
-    header: t("page.players.columns.firstName"),
     cell: ({ row }) => row.original.firstName || "-",
+    header: t("page.players.columns.firstName"),
   },
   {
     accessorKey: "lastName",
-    header: t("page.players.columns.lastName"),
     cell: ({ row }) => row.original.lastName || "-",
+    header: t("page.players.columns.lastName"),
   },
   {
     accessorKey: "nationality",
-    header: t("page.players.columns.nationality"),
     cell: ({ row }) => row.original.nationality || "-",
+    header: t("page.players.columns.nationality"),
   },
   {
-    id: "actions",
     header: "",
+    id: "actions",
   },
 ];
 
@@ -59,12 +59,12 @@ const isCreateModalOpen = ref(false);
 const isCreating = ref(false);
 
 const newPlayer = ref({
-  name: "",
-  firstName: "",
-  lastName: "",
-  nationality: "",
   birthday: "",
+  firstName: "",
   imageUrl: "",
+  lastName: "",
+  name: "",
+  nationality: "",
 });
 
 const selectRow = (e: Event, row: TableRow<Player>) => {
@@ -79,12 +79,12 @@ const openDeleteModal = (e: Event, player: Player) => {
 
 const openCreateModal = () => {
   newPlayer.value = {
-    name: "",
-    firstName: "",
-    lastName: "",
-    nationality: "",
     birthday: "",
+    firstName: "",
     imageUrl: "",
+    lastName: "",
+    name: "",
+    nationality: "",
   };
   isCreateModalOpen.value = true;
 };

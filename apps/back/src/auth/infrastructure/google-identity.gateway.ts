@@ -9,8 +9,8 @@ import type {
 } from "../application/ports/authentication";
 
 const profileSchema = z.object({
-  id: z.string().min(1),
   email: z.string().min(1),
+  id: z.string().min(1),
   name: z.string().min(1),
   picture: z.string().nullish(),
 });
@@ -35,11 +35,11 @@ export const createGoogleOAuthSession = (
   const client = new auth.OAuth2(clientId, clientSecret, redirectUri);
 
   return {
+    generateAuthUrl: (options) => client.generateAuthUrl(options),
     getToken: async (code) => await client.getToken(code),
     setCredentials: (tokens) => {
       client.setCredentials(tokens);
     },
-    generateAuthUrl: (options) => client.generateAuthUrl(options),
     userinfo: async () => {
       const { data } = await oauth2("v2").userinfo.get({ auth: client });
 

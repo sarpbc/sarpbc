@@ -6,57 +6,49 @@ import EntityTagNodeView from "~/components/news/EntityTagNodeView.vue";
 
 const createEntityTagNode = (kind: NewsEntityTagKind, nodeName: string) =>
   Node.create({
-    name: nodeName,
-    group: "inline",
-    inline: true,
-    atom: true,
-    draggable: true,
-
     addAttributes() {
       return {
-        slug: { default: null },
         label: { default: null },
+        slug: { default: null },
       };
     },
-
-    parseHTML() {
-      return [{ tag: `span[data-type="${nodeName}"]` }];
-    },
-
-    renderHTML({ HTMLAttributes }) {
-      return ["span", mergeAttributes({ "data-type": nodeName }, HTMLAttributes)];
-    },
-
     addNodeView() {
       return VueNodeViewRenderer(EntityTagNodeView);
     },
-
+    atom: true,
+    draggable: true,
+    group: "inline",
+    inline: true,
     markdownTokenName: nodeName,
-
     markdownTokenizer: {
-      name: nodeName,
       level: "inline" as const,
+      name: nodeName,
       start: (src: string) => newsEntityTagStart(src, kind),
       tokenize: (src: string) => {
         const parsed = parseNewsEntityTag(src);
 
         return parsed?.kind === kind
-          ? { type: nodeName, raw: parsed.raw, slug: parsed.slug, label: parsed.label }
+          ? { label: parsed.label, raw: parsed.raw, slug: parsed.slug, type: nodeName }
           : undefined;
       },
     },
-
+    name: nodeName,
+    parseHTML() {
+      return [{ tag: `span[data-type="${nodeName}"]` }];
+    },
     parseMarkdown: (token) => {
       const parsed = parseNewsEntityTag(token.raw ?? "");
 
-      return parsed ? { type: nodeName, attrs: { slug: parsed.slug, label: parsed.label } } : [];
+      return parsed ? { attrs: { label: parsed.label, slug: parsed.slug }, type: nodeName } : [];
     },
-
+    renderHTML({ HTMLAttributes }) {
+      return ["span", mergeAttributes({ "data-type": nodeName }, HTMLAttributes)];
+    },
     renderMarkdown: (node) =>
       serializeNewsEntityTag({
         kind,
-        slug: String(node.attrs?.slug ?? ""),
         label: String(node.attrs?.label ?? ""),
+        slug: String(node.attrs?.slug ?? ""),
       }),
   });
 

@@ -32,18 +32,18 @@ export class IndexNowService implements NewsIndexing {
       });
 
       const response = await fetch("https://api.indexnow.org/indexnow", {
-        method: "POST",
-        headers: { "Content-Type": "application/json; charset=utf-8" },
         body: JSON.stringify({
           host: new URL(origin).host,
           key,
           keyLocation: `${origin}/${key}.txt`,
           urlList,
         }),
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        method: "POST",
         signal: AbortSignal.timeout(5000),
       });
 
-      log.set({ urlCount: urlList.length, status: response.status });
+      log.set({ status: response.status, urlCount: urlList.length });
 
       if (!response.ok) {
         log.warn("IndexNow submission rejected");

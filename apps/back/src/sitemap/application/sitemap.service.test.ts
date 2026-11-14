@@ -6,11 +6,11 @@ const team = (name: string) => ({ team: { name } });
 
 describe(SitemapService, () => {
   const queries = {
-    news: vi.fn<SitemapQueries["news"]>(),
-    stages: vi.fn<SitemapQueries["stages"]>(),
     matches: vi.fn<SitemapQueries["matches"]>(),
+    news: vi.fn<SitemapQueries["news"]>(),
     playerSlugs: vi.fn<SitemapQueries["playerSlugs"]>(),
     staffSlugs: vi.fn<SitemapQueries["staffSlugs"]>(),
+    stages: vi.fn<SitemapQueries["stages"]>(),
     teamSlugs: vi.fn<SitemapQueries["teamSlugs"]>(),
   };
 
@@ -19,12 +19,12 @@ describe(SitemapService, () => {
   const lastmod = new Date("2026-03-01T12:00:00.000Z");
 
   const match = (overrides: Partial<MatchSitemapRow>): MatchSitemapRow => ({
-    publicId: 42,
-    name: "Grand Final",
-    status: "not_started",
-    participants: [team("Vitality"), team("Karmine Corp")],
-    tournament: { slug: "major-1", event: { slug: "rlcs-2026" } },
     lastmod,
+    name: "Grand Final",
+    participants: [team("Vitality"), team("Karmine Corp")],
+    publicId: 42,
+    status: "not_started",
+    tournament: { event: { slug: "rlcs-2026" }, slug: "major-1" },
     ...overrides,
   });
 
@@ -33,23 +33,23 @@ describe(SitemapService, () => {
   });
 
   it("links news to their article", async () => {
-    queries.news.mockResolvedValue([{ slug: "a-news", lastmod }]);
+    queries.news.mockResolvedValue([{ lastmod, slug: "a-news" }]);
 
     await expect(service.entries("news")).resolves.toStrictEqual([
-      { path: "/news/a-news", lastmod: lastmod.toISOString() },
+      { lastmod: lastmod.toISOString(), path: "/news/a-news" },
     ]);
   });
 
   it("links each event once, dated by its latest stage, and each of its stages", async () => {
     queries.stages.mockResolvedValue([
-      { slug: "major-1", eventSlug: "rlcs-2026", lastmod: older },
-      { slug: "major-2", eventSlug: "rlcs-2026", lastmod },
+      { eventSlug: "rlcs-2026", lastmod: older, slug: "major-1" },
+      { eventSlug: "rlcs-2026", lastmod, slug: "major-2" },
     ]);
 
     await expect(service.entries("tournaments")).resolves.toStrictEqual([
-      { path: "/tournaments/rlcs-2026", lastmod: lastmod.toISOString() },
-      { path: "/tournaments/rlcs-2026/major-1", lastmod: older.toISOString() },
-      { path: "/tournaments/rlcs-2026/major-2", lastmod: lastmod.toISOString() },
+      { lastmod: lastmod.toISOString(), path: "/tournaments/rlcs-2026" },
+      { lastmod: older.toISOString(), path: "/tournaments/rlcs-2026/major-1" },
+      { lastmod: lastmod.toISOString(), path: "/tournaments/rlcs-2026/major-2" },
     ]);
   });
 
@@ -58,8 +58,8 @@ describe(SitemapService, () => {
 
     await expect(service.entries("matches")).resolves.toStrictEqual([
       {
-        path: "/matches/42/karmine-corp-vs-vitality-rlcs-2026-major-1",
         lastmod: lastmod.toISOString(),
+        path: "/matches/42/karmine-corp-vs-vitality-rlcs-2026-major-1",
       },
     ]);
   });
@@ -88,13 +88,13 @@ describe(SitemapService, () => {
     queries.teamSlugs.mockResolvedValue(["vitality"]);
 
     await expect(service.entries("players")).resolves.toStrictEqual([
-      { path: "/player/zen", lastmod: null },
+      { lastmod: null, path: "/player/zen" },
     ]);
     await expect(service.entries("staff")).resolves.toStrictEqual([
-      { path: "/staff/coach", lastmod: null },
+      { lastmod: null, path: "/staff/coach" },
     ]);
     await expect(service.entries("teams")).resolves.toStrictEqual([
-      { path: "/team/vitality", lastmod: null },
+      { lastmod: null, path: "/team/vitality" },
     ]);
   });
 });

@@ -122,14 +122,14 @@ export class CircuitService {
 
   async create(input: CircuitInput): Promise<CircuitSummary> {
     const circuit: CircuitSummary = {
+      description: cleanDescription(input.description),
       id: v4(),
       name: cleanName(input.name),
-      slug: "",
-      season: cleanSeason(input.season),
-      region: cleanRegion(input.region),
-      description: cleanDescription(input.description),
-      sourceUrl: cleanSourceUrl(input.sourceUrl),
       qualificationSpots: cleanSpots(input.qualificationSpots),
+      region: cleanRegion(input.region),
+      season: cleanSeason(input.season),
+      slug: "",
+      sourceUrl: cleanSourceUrl(input.sourceUrl),
     };
 
     circuit.slug = await this.freeSlug(input.slug ?? circuit.name, circuit.id);
@@ -144,17 +144,17 @@ export class CircuitService {
 
     const circuit: CircuitSummary = {
       ...current,
-      name: input.name === undefined ? current.name : cleanName(input.name),
-      season: input.season === undefined ? current.season : cleanSeason(input.season),
-      region: input.region === undefined ? current.region : cleanRegion(input.region),
       description:
         input.description === undefined ? current.description : cleanDescription(input.description),
-      sourceUrl:
-        input.sourceUrl === undefined ? current.sourceUrl : cleanSourceUrl(input.sourceUrl),
+      name: input.name === undefined ? current.name : cleanName(input.name),
       qualificationSpots:
         input.qualificationSpots === undefined
           ? current.qualificationSpots
           : cleanSpots(input.qualificationSpots),
+      region: input.region === undefined ? current.region : cleanRegion(input.region),
+      season: input.season === undefined ? current.season : cleanSeason(input.season),
+      sourceUrl:
+        input.sourceUrl === undefined ? current.sourceUrl : cleanSourceUrl(input.sourceUrl),
     };
 
     if (input.slug !== undefined) {

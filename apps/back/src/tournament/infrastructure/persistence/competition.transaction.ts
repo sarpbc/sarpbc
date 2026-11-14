@@ -19,26 +19,26 @@ const lazyWriteScope = (em: EntityManager): CompetitionWriteScope => {
   const tournamentWriter = () => (tournaments ??= new CompetitionTournamentWriter(em));
 
   return {
-    get tournaments() {
-      return tournamentWriter();
+    get awards() {
+      return (awards ??= new CompetitionAwardWriter(em));
     },
     get events() {
       return (events ??= new CompetitionEventWriter(em));
     },
+    get lineups() {
+      return (lineups ??= new CompetitionLineupWriter(em));
+    },
     get matches() {
       return (matches ??= new CompetitionMatchWriter(em, tournamentWriter()));
-    },
-    get rosters() {
-      return (rosters ??= new RosterSyncWriter(em));
-    },
-    get awards() {
-      return (awards ??= new CompetitionAwardWriter(em));
     },
     get prizes() {
       return (prizes ??= new CompetitionPrizeWriter(em));
     },
-    get lineups() {
-      return (lineups ??= new CompetitionLineupWriter(em));
+    get rosters() {
+      return (rosters ??= new RosterSyncWriter(em));
+    },
+    get tournaments() {
+      return tournamentWriter();
     },
   };
 };

@@ -27,7 +27,7 @@ void describe("stream-score-ocr cli", () => {
     directory = await mkdtemp(path.join(tmpdir(), "stream-score-ocr-"));
   });
   after(async () => {
-    await rm(directory, { recursive: true, force: true });
+    await rm(directory, { force: true, recursive: true });
   });
 
   void it("learns glyph templates from a labelled frame", async () => {
@@ -41,16 +41,16 @@ void describe("stream-score-ocr cli", () => {
       }),
     );
 
-    const frame = new FixtureRenderer({ width: 1280, height: 720 }, 5).render(
+    const frame = new FixtureRenderer({ height: 720, width: 1280 }, 5).render(
       {
-        kind: "scorebug",
         blue: 7,
-        orange: 4,
         clock: 92,
-        overtime: true,
-        replay: false,
         fade: 1,
         glitch: false,
+        kind: "scorebug",
+        orange: 4,
+        overtime: true,
+        replay: false,
       },
       6,
     );

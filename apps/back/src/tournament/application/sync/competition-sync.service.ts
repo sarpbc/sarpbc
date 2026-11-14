@@ -36,12 +36,12 @@ export class CompetitionSyncService {
       const applied = await applyMatches(scope, tournament, matches);
       await settleEndAt(scope, tournament);
 
-      return { tournament, stageIds, matches: applied };
+      return { matches: applied, stageIds, tournament };
     });
 
     await this.afterCommit.settle({
-      tournamentIds: result.stageIds,
       decidedMatchIds: result.matches,
+      tournamentIds: result.stageIds,
     });
 
     return result.tournament;
@@ -58,8 +58,8 @@ export class CompetitionSyncService {
 
     if (applied) {
       await this.afterCommit.settle({
-        tournamentIds: applied.stageIds,
         decidedMatchIds: applied.matches,
+        tournamentIds: applied.stageIds,
       });
     }
   }
@@ -78,7 +78,7 @@ export class CompetitionSyncService {
 
         await settleEndAt(scope, tournament);
 
-        return { stageIds, matches: [] };
+        return { matches: [], stageIds };
       }
 
       case "match": {
@@ -88,7 +88,7 @@ export class CompetitionSyncService {
         let applied: AppliedTournament | null = null;
 
         if (existing) {
-          applied = { tournament: existing, stageIds: [existing.id] };
+          applied = { stageIds: [existing.id], tournament: existing };
         } else if (backfill) {
           applied = await applyTournament(scope, this.diagnostics, backfill);
         }
@@ -101,7 +101,7 @@ export class CompetitionSyncService {
         const matches = await applyMatches(scope, applied.tournament, [incident.command]);
         await settleEndAt(scope, applied.tournament);
 
-        return { stageIds: applied.stageIds, matches };
+        return { matches, stageIds: applied.stageIds };
       }
 
       case "team": {

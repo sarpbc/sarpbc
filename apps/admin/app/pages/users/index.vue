@@ -13,20 +13,20 @@ const currentUser = useUser();
 
 const breadcrumbItems = [{ label: t("page.users.title") }];
 
-const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
+const dateFormatter = useDateFormatter({ day: "numeric", month: "short", year: "numeric" });
 
 const roleItems = computed(() =>
-  ASSIGNABLE_ROLES.map((role) => ({ value: role, label: t(`page.users.roles.${role}`) })),
+  ASSIGNABLE_ROLES.map((role) => ({ label: t(`page.users.roles.${role}`), value: role })),
 );
 
 const columns: TableColumn<UserListItem>[] = [
   { accessorKey: "userName", header: t("page.users.columns.userName") },
   { accessorKey: "email", header: t("page.users.columns.email") },
-  { id: "role", header: t("page.users.columns.role") },
+  { header: t("page.users.columns.role"), id: "role" },
   {
     accessorKey: "createdAt",
-    header: t("page.users.columns.createdAt"),
     cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
+    header: t("page.users.columns.createdAt"),
   },
 ];
 
@@ -66,11 +66,11 @@ const applyRoleChange = async (user: UserListItem, role: AssignableRole) => {
   try {
     await changeUserRole(user.id, role);
     toast.add({
-      title: t("page.users.messages.updated", {
-        user: user.userName,
-        role: t(`page.users.roles.${role}`),
-      }),
       color: "success",
+      title: t("page.users.messages.updated", {
+        role: t(`page.users.roles.${role}`),
+        user: user.userName,
+      }),
     });
   } catch (changeError) {
     reportError(changeError, t("page.users.messages.updateError"));
@@ -86,7 +86,7 @@ const requestRoleChange = (user: UserListItem, role: AssignableRole) => {
   }
 
   if (role === "admin" || user.role === "admin") {
-    pendingChange.value = { user, role };
+    pendingChange.value = { role, user };
     isConfirmOpen.value = true;
 
     return;

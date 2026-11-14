@@ -31,20 +31,20 @@ export const buildOrganization = (options: BuildOrganizationOptions = {}): Organ
 
   return compactJsonLd({
     "@context": SCHEMA_ORG,
-    "@type": "Organization",
     "@id": ORGANIZATION_ID,
-    name: "sarpbc.org",
-    url: SITE_ORIGIN,
-    logo: `${SITE_ORIGIN}/sarpbc.svg`,
-    email: "contact@sarpbc.org",
-    sameAs: ["https://x.com/SARPBCorg"],
+    "@type": "Organization",
     contactPoint: [
       compactJsonLd({
         "@type": "ContactPoint",
-        email: "contact@sarpbc.org",
         contactType: "customer support",
+        email: "contact@sarpbc.org",
         url: `${SITE_ORIGIN}${contactPagePath}`,
       }),
     ],
+    email: "contact@sarpbc.org",
+    logo: `${SITE_ORIGIN}/sarpbc.svg`,
+    name: "sarpbc.org",
+    sameAs: ["https://x.com/SARPBCorg"],
+    url: SITE_ORIGIN,
   });
 };

@@ -27,7 +27,7 @@ import {
 } from "../../../test/competition-doubles";
 
 const event = (id: string, pandascoreSerieId: number | null = null) =>
-  Object.assign(new TournamentEvent(), { id, slug: id, name: id, pandascoreSerieId });
+  Object.assign(new TournamentEvent(), { id, name: id, pandascoreSerieId, slug: id });
 
 describe(ManualCatalogService, () => {
   const events = new Map<string, TournamentEvent>();
@@ -40,13 +40,13 @@ describe(ManualCatalogService, () => {
 
       return known ? Object.assign(new TournamentEvent(), known) : null;
     }),
+    save: vi.fn<EventWriter["save"]>(async (saved) => {
+      events.set(saved.id, Object.assign(new TournamentEvent(), saved));
+    }),
     slugTaken: vi.fn<EventWriter["slugTaken"]>(async (slug, except) =>
       [...events.values()].some((candidate) => candidate.slug === slug && candidate.id !== except),
     ),
     stages: vi.fn<EventWriter["stages"]>(async () => stages),
-    save: vi.fn<EventWriter["save"]>(async (saved) => {
-      events.set(saved.id, Object.assign(new TournamentEvent(), saved));
-    }),
   };
 
   const tournamentWriter = {
@@ -64,19 +64,19 @@ describe(ManualCatalogService, () => {
     run: async (work) =>
       await work(
         competitionScope({
-          tournaments: tournamentWriterDouble(tournamentWriter),
           events: eventWriterDouble(eventWriter),
+          tournaments: tournamentWriterDouble(tournamentWriter),
         }),
       ),
   };
 
   const queries = {
-    list: vi.fn<EventQueries["list"]>(),
     find: vi.fn<EventQueries["find"]>(async (idOrSlug) => {
       const found = events.get(idOrSlug);
 
       return found ? { event: found, stages: [] } : null;
     }),
+    list: vi.fn<EventQueries["list"]>(),
     stageId: vi.fn<EventQueries["stageId"]>(),
     unsynced: vi.fn<EventQueries["unsynced"]>(),
   };
@@ -108,23 +108,23 @@ describe(ManualCatalogService, () => {
       "cdf",
       Object.assign(new TournamentEvent(), {
         id: "cdf",
-        slug: "coupe-de-france-2026",
         name: "CDF",
+        slug: "coupe-de-france-2026",
       }),
     );
     leagues.set(
       "rlcs",
-      Object.assign(new League(), { id: "rlcs", pandascoreId: 4562, name: "RLCS", slug: "rlcs" }),
+      Object.assign(new League(), { id: "rlcs", name: "RLCS", pandascoreId: 4562, slug: "rlcs" }),
     );
   });
 
   it("creates an empty event under a generated, deduplicated slug", async () => {
-    const created = await service.createEvent({ name: "Coupe de France 2026", leagueId: "rlcs" });
+    const created = await service.createEvent({ leagueId: "rlcs", name: "Coupe de France 2026" });
     expect(created.event).toMatchObject({
-      name: "Coupe de France 2026",
-      slug: "coupe-de-france-2026-2",
       league: { id: "rlcs" },
+      name: "Coupe de France 2026",
       pandascoreSerieId: null,
+      slug: "coupe-de-france-2026-2",
     });
     expect(created.stages).toStrictEqual([]);
   });
@@ -133,7 +133,7 @@ describe(ManualCatalogService, () => {
     await expect(
       service.createEvent({ name: "Other", slug: "coupe-de-france-2026" }),
     ).rejects.toBeInstanceOf(ConflictError);
-    await expect(service.createEvent({ name: "Other", leagueId: "nope" })).rejects.toBeInstanceOf(
+    await expect(service.createEvent({ leagueId: "nope", name: "Other" })).rejects.toBeInstanceOf(
       NotFoundError,
     );
   });
@@ -145,15 +145,15 @@ describe(ManualCatalogService, () => {
     ];
 
     const updated = await service.updateEvent("cdf", {
+      leagueId: null,
       name: "Coupe de France Slash 2026",
       slug: "coupe-de-france-slash-2026",
-      leagueId: null,
     });
 
     expect(updated.event).toMatchObject({
+      league: null,
       name: "Coupe de France Slash 2026",
       slug: "coupe-de-france-slash-2026",
-      league: null,
     });
     expect(cache.invalidateTournament.mock.calls).toStrictEqual([["pool"], ["finals"]]);
   });
@@ -188,12 +188,12 @@ describe(ManualCatalogService, () => {
   });
 
   it("creates a manual league with a slug from its name", async () => {
-    const league = await service.createLeague({ name: "Coupe de France", imageUrl: " " });
+    const league = await service.createLeague({ imageUrl: " ", name: "Coupe de France" });
     expect(league).toMatchObject({
-      pandascoreId: null,
-      name: "Coupe de France",
-      slug: "coupe-de-france",
       imageUrl: null,
+      name: "Coupe de France",
+      pandascoreId: null,
+      slug: "coupe-de-france",
     });
     expect(leagues.get(league.id)).toMatchObject({ name: "Coupe de France" });
   });
@@ -201,7 +201,7 @@ describe(ManualCatalogService, () => {
   it("edits only the image of a PandaScore league", async () => {
     await expect(
       service.updateLeague("rlcs", { imageUrl: "https://cdn.example/rlcs.png" }),
-    ).resolves.toMatchObject({ name: "RLCS", imageUrl: "https://cdn.example/rlcs.png" });
+    ).resolves.toMatchObject({ imageUrl: "https://cdn.example/rlcs.png", name: "RLCS" });
     await expect(service.updateLeague("rlcs", { name: "RLCS 2026" })).rejects.toBeInstanceOf(
       InvalidInputError,
     );

@@ -14,8 +14,8 @@ export type BallchasingRefKind = keyof typeof REFS;
 
 const invalidRef = (kind: BallchasingRefKind): InvalidInputError =>
   new InvalidInputError({
-    message: `Enter a Ballchasing ${kind} link (https://${BALLCHASING_HOST}/${kind}/…) or the ${kind} id from that link.`,
     code: `invalid_ballchasing_${kind}`,
+    message: `Enter a Ballchasing ${kind} link (https://${BALLCHASING_HOST}/${kind}/…) or the ${kind} id from that link.`,
   });
 
 export const parseBallchasingRef = (kind: BallchasingRefKind, input: string): string => {

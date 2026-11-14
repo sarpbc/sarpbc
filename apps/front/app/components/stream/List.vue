@@ -11,7 +11,7 @@ const { streams, live = false } = defineProps<{
 const { t, locale } = useI18n();
 
 const languageNames = computed(
-  () => new Intl.DisplayNames([locale.value], { type: "language", fallback: "code" }),
+  () => new Intl.DisplayNames([locale.value], { fallback: "code", type: "language" }),
 );
 
 const platformLabel = (platform: StreamPlatform): string => {
@@ -64,14 +64,14 @@ const rows = computed(() =>
     const platform = platformLabel(stream.platform);
 
     return {
-      url: stream.url,
       channel: stream.channel,
       details: [platform, language, kindLabel(stream.kind)].join(" · "),
       label: t("page.match.detail.watch.linkLabel", {
         channel: stream.channel,
-        platform,
         language,
+        platform,
       }),
+      url: stream.url,
     };
   }),
 );

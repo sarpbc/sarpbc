@@ -92,12 +92,12 @@ export const matchPublicSlug = ({ name, participants, tournament }: MatchSlugSou
   const second: NamedParticipant | undefined = participants[1];
 
   return matchSlug({
+    eventSlug: tournament.event.slug,
+    matchName: name,
+    stageSlug: tournament.slug,
     teamNames: [
       first === undefined ? undefined : participantName(first),
       second === undefined ? undefined : participantName(second),
     ],
-    matchName: name,
-    eventSlug: tournament.event.slug,
-    stageSlug: tournament.slug,
   });
 };

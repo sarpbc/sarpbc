@@ -18,8 +18,9 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
   async accounts(tournamentId: string): Promise<StatsPlayerAccount[]> {
     const rows = await this.em.find(
       MatchGamePlayer,
-      { platformId: { $ne: null }, game: { match: { tournament: tournamentId } } },
+      { game: { match: { tournament: tournamentId } }, platformId: { $ne: null } },
       {
+        orderBy: { game: { playedAt: QueryOrder.DESC_NULLS_LAST } },
         populate: [
           "player",
           "game.blueParticipant.team",
@@ -27,7 +28,6 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
           "game.orangeParticipant.team",
           "game.orangeParticipant.players",
         ],
-        orderBy: { game: { playedAt: QueryOrder.DESC_NULLS_LAST } },
       },
     );
 
@@ -52,12 +52,12 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
         row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
 
       accounts.set(key, {
+        games: 1,
+        name: row.name,
         platform: row.platform,
         platformId,
-        name: row.name,
-        team: { participantId: participant.id, name: nameOf(participant) },
-        games: 1,
         player: row.player ? { id: row.player.id, name: row.player.name } : null,
+        team: { name: nameOf(participant), participantId: participant.id },
       });
     }
 
@@ -76,11 +76,11 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
     return participants
       .map((participant) => ({
         participantId: participant.id,
-        teamName: nameOf(participant),
         players: participant.players
           .getItems()
           .map(({ id, name }) => ({ id, name }))
           .toSorted((a, b) => a.name.localeCompare(b.name)),
+        teamName: nameOf(participant),
       }))
       .toSorted((a, b) => a.teamName.localeCompare(b.teamName));
   }
@@ -88,8 +88,8 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
   async onTournamentRoster(tournamentId: string, playerId: string): Promise<boolean> {
     return (
       (await this.em.count(TournamentParticipant, {
-        tournament: tournamentId,
         players: playerId,
+        tournament: tournamentId,
       })) > 0
     );
   }
@@ -100,8 +100,8 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
         PlayerPlatformLink,
         { ...account, player: playerId },
         {
-          onConflictFields: ["platform", "platformId"],
           onConflictAction: "merge",
+          onConflictFields: ["platform", "platformId"],
           onConflictMergeFields: ["player"],
         },
       );

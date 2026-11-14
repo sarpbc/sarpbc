@@ -104,8 +104,8 @@ const rosterOptions = (participantId: string): SelectItem[][] => {
 
     return [
       [
-        { type: "label", label: participantName(participant) },
-        ...players.map((player) => ({ value: player.id, label: player.name })),
+        { label: participantName(participant), type: "label" },
+        ...players.map((player) => ({ label: player.name, value: player.id })),
       ],
     ];
   });
@@ -256,7 +256,7 @@ const save = async () => {
         })),
       ),
     );
-    toast.add({ title: t("page.tournaments.lineups.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.lineups.saved") });
     open.value = false;
   } catch (error) {
     reportError(error, t("page.tournaments.lineups.saveError"));

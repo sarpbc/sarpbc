@@ -14,10 +14,19 @@ import { TournamentModule } from "../../tournament/infrastructure/tournament.mod
 import { PlayerComparisonController } from "./http/player-comparison.controller";
 
 @Module({
-  imports: [RosterModule, TournamentModule, SeasonModule],
   controllers: [PlayerComparisonController],
+  imports: [RosterModule, TournamentModule, SeasonModule],
   providers: [
     {
+      inject: [
+        PlayerService,
+        ContractService,
+        TOURNAMENT_QUERIES,
+        MatchService,
+        TournamentPrizeService,
+        PlayerAwardService,
+        SeasonService,
+      ],
       provide: PlayerComparisonService,
       useFactory: (
         players: PlayerService,
@@ -29,23 +38,14 @@ import { PlayerComparisonController } from "./http/player-comparison.controller"
         seasons: SeasonService,
       ) =>
         new PlayerComparisonService({
-          players,
-          contracts,
-          tournaments,
-          matches,
-          prizes,
           awards,
+          contracts,
+          matches,
+          players,
+          prizes,
           seasons,
+          tournaments,
         }),
-      inject: [
-        PlayerService,
-        ContractService,
-        TOURNAMENT_QUERIES,
-        MatchService,
-        TournamentPrizeService,
-        PlayerAwardService,
-        SeasonService,
-      ],
     },
   ],
 })

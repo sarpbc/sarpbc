@@ -6,15 +6,15 @@ const id = ID.toLowerCase();
 
 describe(parseTournamentPath, () => {
   it("reads a UUID as a legacy stage, with an optional matches tab", () => {
-    expect(parseTournamentPath([ID])).toStrictEqual({ kind: "legacyStage", id, tab: "overview" });
+    expect(parseTournamentPath([ID])).toStrictEqual({ id, kind: "legacyStage", tab: "overview" });
     expect(parseTournamentPath([id, "matches"])).toStrictEqual({
-      kind: "legacyStage",
       id,
+      kind: "legacyStage",
       tab: "matches",
     });
     expect(parseTournamentPath([id, "MATCHES"])).toStrictEqual({
-      kind: "legacyStage",
       id,
+      kind: "legacyStage",
       tab: "matches",
     });
   });
@@ -25,20 +25,20 @@ describe(parseTournamentPath, () => {
 
   it("reads lowercased event and stage slugs", () => {
     expect(parseTournamentPath(["RLCS-Major-Paris-2026"])).toStrictEqual({
-      kind: "event",
       eventSlug: "rlcs-major-paris-2026",
+      kind: "event",
     });
     expect(parseTournamentPath(["rlcs-major-paris-2026", "Playoffs"])).toStrictEqual({
-      kind: "stage",
       eventSlug: "rlcs-major-paris-2026",
+      kind: "stage",
       stageSlug: "playoffs",
     });
   });
 
   it("treats a stage slugged matches as a stage", () => {
     expect(parseTournamentPath(["cup", "matches"])).toStrictEqual({
-      kind: "stage",
       eventSlug: "cup",
+      kind: "stage",
       stageSlug: "matches",
     });
   });

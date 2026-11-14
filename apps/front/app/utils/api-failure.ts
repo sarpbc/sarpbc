@@ -21,7 +21,7 @@ export const apiFailure = <Reason extends string>(
   const message = getApiErrorMessage(cause);
 
   if (status === 401) {
-    return { ok: false, reason: "unauthorized", message };
+    return { message, ok: false, reason: "unauthorized" };
   }
 
   const reason =
@@ -29,10 +29,10 @@ export const apiFailure = <Reason extends string>(
     (status === undefined ? undefined : reasons.statuses?.[status]);
 
   if (reason !== undefined) {
-    return { ok: false, reason, message };
+    return { message, ok: false, reason };
   }
 
   console.error(`Error ${action}:`, cause);
 
-  return { ok: false, reason: "unknown", message };
+  return { message, ok: false, reason: "unknown" };
 };

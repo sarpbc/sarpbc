@@ -26,9 +26,9 @@ export const toolProposal = z.object({ proposalId: z.string(), status: z.string(
 export type ToolProposal = z.infer<typeof toolProposal>;
 
 export const reviewedProposal = z.object({
+  entityId: z.string().nullable(),
   id: z.string(),
   status: z.string(),
-  entityId: z.string().nullable(),
 });
 
 export type ReviewedProposal = z.infer<typeof reviewedProposal>;

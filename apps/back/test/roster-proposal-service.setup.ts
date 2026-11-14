@@ -75,6 +75,7 @@ export const setupRosterProposalService = () => {
   const store = {
     findById: async (id) => saved.get(id) ?? null,
     list: async (status) => [...saved.values()].filter((p) => p.status === status),
+    names: vi.fn<RosterProposalStore["names"]>(async () => ({ kc: "Karmine Corp", zen: "zen" })),
     save: async (proposal) => {
       if (proposal.id === "") {
         sequence += 1;
@@ -83,7 +84,6 @@ export const setupRosterProposalService = () => {
 
       saved.set(proposal.id, proposal);
     },
-    names: vi.fn<RosterProposalStore["names"]>(async () => ({ zen: "zen", kc: "Karmine Corp" })),
   } satisfies RosterProposalStore;
 
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
@@ -92,26 +92,27 @@ export const setupRosterProposalService = () => {
   const knownTeams = new Map([kc, kcCopy].map((team) => [team.id, team]));
 
   const players = {
-    findById: vi.fn<PlayerService["findById"]>(async (id: string) =>
-      id === "zen" || id === "zen-dup" ? zen : null,
-    ),
     create: vi.fn<PlayerService["create"]>(async () =>
       Object.assign(new Player(), { id: "new-player" }),
     ),
-    update: vi.fn<PlayerService["update"]>(async () => zen),
+    findById: vi.fn<PlayerService["findById"]>(async (id: string) =>
+      id === "zen" || id === "zen-dup" ? zen : null,
+    ),
     joinTeam: vi.fn<PlayerService["joinTeam"]>(async () => zen),
     leaveTeam: vi.fn<PlayerService["leaveTeam"]>(),
+    update: vi.fn<PlayerService["update"]>(async () => zen),
   };
 
   const teams = {
-    findById: vi.fn<TeamService["findById"]>(async (id: string) => knownTeams.get(id) ?? null),
     create: vi.fn<TeamService["create"]>(async () => Object.assign(new Team(), { id: "new-team" })),
-    update: vi.fn<TeamService["update"]>(async () => kc),
-    requireDeletable: vi.fn<TeamService["requireDeletable"]>(teamGuard),
     delete: vi.fn<TeamService["delete"]>(teamGuard),
+    findById: vi.fn<TeamService["findById"]>(async (id: string) => knownTeams.get(id) ?? null),
+    requireDeletable: vi.fn<TeamService["requireDeletable"]>(teamGuard),
+    update: vi.fn<TeamService["update"]>(async () => kc),
   };
 
   const matches = {
+    deleteMatch: vi.fn<MatchService["deleteMatch"]>(matchGuard),
     requireProposableDeletion: vi.fn<MatchService["requireProposableDeletion"]>(
       async (id: string) => {
         await matchGuard(id);
@@ -121,7 +122,6 @@ export const setupRosterProposalService = () => {
         }
       },
     ),
-    deleteMatch: vi.fn<MatchService["deleteMatch"]>(matchGuard),
   };
 
   const viewerships = {
@@ -151,8 +151,8 @@ export const setupRosterProposalService = () => {
     ),
     set: vi.fn<StreamService["set"]>(
       async (_: StreamOwner, inputs: readonly StreamInput[], from: StreamEditSource) => ({
-        streams: replaceStreams([], inputs, from),
         inherited: [],
+        streams: replaceStreams([], inputs, from),
       }),
     ),
   };
@@ -171,7 +171,7 @@ export const setupRosterProposalService = () => {
         }
       },
     ),
-    set: vi.fn<MatchLineupService["set"]>(async () => ({ source: "manual" as const, lineups: [] })),
+    set: vi.fn<MatchLineupService["set"]>(async () => ({ lineups: [], source: "manual" as const })),
   };
 
   const circuits = {
@@ -181,13 +181,14 @@ export const setupRosterProposalService = () => {
           throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
         }
 
-        return { worldwide: false, regionTeamIds: [], finishes: [], ...input };
+        return { finishes: [], regionTeamIds: [], worldwide: false, ...input };
       },
     ),
     setStageScale: vi.fn<CircuitService["setStageScale"]>().mockResolvedValue(undefined),
   };
 
   const teamAliases = {
+    add: vi.fn<TeamAliasService["add"]>(async () => new TeamAlias()),
     requireProposable: vi.fn<TeamAliasService["requireProposable"]>(
       async (_teamId: string, input: { sourceUrl: string }) => {
         if (input.sourceUrl.includes("liquipedia")) {
@@ -195,11 +196,18 @@ export const setupRosterProposalService = () => {
         }
       },
     ),
-    add: vi.fn<TeamAliasService["add"]>(async () => new TeamAlias()),
     update: vi.fn<TeamAliasService["update"]>(async () => new TeamAlias()),
   };
 
   const seasons = {
+    addAward: vi.fn<SeasonService["addAward"]>(async () => ({
+      awardType: "regional_mvp" as const,
+      id: "season-award-1",
+      player: { id: "zen", name: "zen", slug: "zen" },
+      presentedBy: null,
+      region: "Europe",
+      sourceUrl: "https://x.com/RLEsports/status/1",
+    })),
     requireAward: vi.fn<SeasonService["requireAward"]>(
       async (seasonId: string, input: { region?: string | null }) => {
         if (seasonId !== "season-1") {
@@ -208,30 +216,22 @@ export const setupRosterProposalService = () => {
 
         return {
           awardType: "regional_mvp" as const,
-          region: input.region ?? null,
           presentedBy: null,
+          region: input.region ?? null,
           sourceUrl: "https://x.com/RLEsports/status/1",
         };
       },
     ),
-    addAward: vi.fn<SeasonService["addAward"]>(async () => ({
-      id: "season-award-1",
-      awardType: "regional_mvp" as const,
-      region: "Europe",
-      presentedBy: null,
-      sourceUrl: "https://x.com/RLEsports/status/1",
-      player: { id: "zen", name: "zen", slug: "zen" },
-    })),
   };
 
   const logos = {
-    upload: vi.fn<TeamLogoService["upload"]>(async (teamId: string, variant: string) =>
-      stored(`pending/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`),
-    ),
+    discard: vi.fn<TeamLogoService["discard"]>().mockResolvedValue(undefined),
     publish: vi.fn<TeamLogoService["publish"]>(async (pendingKey: string) =>
       stored(pendingKey.slice("pending/".length)),
     ),
-    discard: vi.fn<TeamLogoService["discard"]>().mockResolvedValue(undefined),
+    upload: vi.fn<TeamLogoService["upload"]>(async (teamId: string, variant: string) =>
+      stored(`pending/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`),
+    ),
   };
 
   const contracts = {
@@ -255,6 +255,17 @@ export const setupRosterProposalService = () => {
   const staff = { allowed: true, permissions };
 
   const prizes = {
+    requireProposablePrize: vi.fn<TournamentPrizeService["requireProposablePrize"]>(
+      async (tournamentId: string, teamId: string) => {
+        if (tournamentId !== "cup") {
+          throw new NotFoundError(`Tournament "${tournamentId}" not found`);
+        }
+
+        if (teamId !== "kc") {
+          throw new NotFoundError(`Team "${teamId}" has no prize`);
+        }
+      },
+    ),
     requireProposableTournament: vi.fn<TournamentPrizeService["requireProposableTournament"]>(
       async (id: string) => {
         if (id === "startgg-cup") {
@@ -268,22 +279,17 @@ export const setupRosterProposalService = () => {
         }
       },
     ),
-    requireProposablePrize: vi.fn<TournamentPrizeService["requireProposablePrize"]>(
-      async (tournamentId: string, teamId: string) => {
-        if (tournamentId !== "cup") {
-          throw new NotFoundError(`Tournament "${tournamentId}" not found`);
-        }
-
-        if (teamId !== "kc") {
-          throw new NotFoundError(`Team "${teamId}" has no prize`);
-        }
-      },
-    ),
     setDistribution: vi.fn<TournamentPrizeService["setDistribution"]>(),
     updateEntry: vi.fn<TournamentPrizeService["updateEntry"]>(),
   };
 
   const awards = {
+    createForTeam: vi.fn<PlayerAwardService["createForTeam"]>(async () => ({
+      awardType: "mvp" as const,
+      id: "award-1",
+      participant: { id: "part-kc" },
+      player: { id: "zen", name: "zen", slug: "zen" },
+    })),
     requireProposable: vi.fn<PlayerAwardService["requireProposable"]>(
       async (tournamentId: string, _team: string, playerId: string) => {
         const error = awardError(tournamentId, playerId);
@@ -293,12 +299,6 @@ export const setupRosterProposalService = () => {
         }
       },
     ),
-    createForTeam: vi.fn<PlayerAwardService["createForTeam"]>(async () => ({
-      id: "award-1",
-      awardType: "mvp" as const,
-      player: { id: "zen", name: "zen", slug: "zen" },
-      participant: { id: "part-kc" },
-    })),
   };
 
   const rollingBack = {
@@ -351,23 +351,23 @@ export const setupRosterProposalService = () => {
   );
 
   return {
-    saved,
-    store,
-    players,
-    teams,
-    contracts,
-    merges,
-    logos,
-    staff,
-    prizes,
     awards,
-    matches,
-    streams,
-    lineups,
-    viewerships,
     circuits,
-    teamAliases,
+    contracts,
+    lineups,
+    logos,
+    matches,
+    merges,
+    players,
+    prizes,
+    saved,
     seasons,
     service,
+    staff,
+    store,
+    streams,
+    teamAliases,
+    teams,
+    viewerships,
   };
 };

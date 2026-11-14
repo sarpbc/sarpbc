@@ -24,27 +24,27 @@ export const NewsArticleSchema = defineEntity({
   class: NewsArticle,
   indexes: [{ properties: ["title"] }, { properties: ["author"] }, { properties: ["type"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    slug: p.string().length(NEWS_TEXT_MAX_LENGTH).unique(),
-    title: p.string().length(NEWS_TEXT_MAX_LENGTH),
-    content: p.text(),
-    titleFr: p.string().length(NEWS_TEXT_MAX_LENGTH).nullable(),
-    contentFr: p.text().nullable(),
     author: p.manyToOne(User),
+    content: p.text(),
+    contentFr: p.text().nullable(),
     createdAt: p
       .datetime()
       .type("timestamptz")
       .onCreate(() => new Date()),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    imageUrl: p.string().length(NEWS_TEXT_MAX_LENGTH).nullable(),
+    isDraft: p.boolean().default(true),
+    slug: p.string().length(NEWS_TEXT_MAX_LENGTH).unique(),
+    title: p.string().length(NEWS_TEXT_MAX_LENGTH),
+    titleFr: p.string().length(NEWS_TEXT_MAX_LENGTH).nullable(),
+    type: p
+      .enum([...NEWS_TYPES])
+      .columnType("text")
+      .default(DEFAULT_NEWS_TYPE),
     updatedAt: p
       .datetime()
       .type("timestamptz")
       .nullable()
       .onUpdate(() => new Date()),
-    isDraft: p.boolean().default(true),
-    imageUrl: p.string().length(NEWS_TEXT_MAX_LENGTH).nullable(),
-    type: p
-      .enum([...NEWS_TYPES])
-      .columnType("text")
-      .default(DEFAULT_NEWS_TYPE),
   },
 });

@@ -50,7 +50,7 @@ export const applySerie = async (
   });
   await events.save(event);
 
-  return { stageIds: stages.map((stage) => stage.id), matches: [] };
+  return { matches: [], stageIds: stages.map((stage) => stage.id) };
 };
 
 const mergeSerie = async (
@@ -72,7 +72,7 @@ const mergeSerie = async (
     from.pandascoreSerieId = intoId;
     await scope.events.save(from);
 
-    return { stageIds, matches: [] };
+    return { matches: [], stageIds };
   }
 
   // Each placement derives its slug from the stages already in the target event, so order matters.
@@ -94,7 +94,7 @@ const mergeSerie = async (
 
   await scope.events.remove(from.id);
 
-  return { stageIds, matches: [] };
+  return { matches: [], stageIds };
 };
 
 const applySerieDeletion = async (
