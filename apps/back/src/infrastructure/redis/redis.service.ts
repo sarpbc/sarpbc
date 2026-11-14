@@ -1,6 +1,6 @@
-import { Injectable, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import type { OnModuleDestroy, OnModuleInit } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import * as Redis from "ioredis";
+import type { Redis, RedisOptions } from "ioredis";
 import { log } from "evlog";
 
 const SET_WHILE_HELD_SCRIPT = `if redis.call("GET", KEYS[1]) == ARGV[1] then
@@ -9,14 +9,18 @@ const SET_WHILE_HELD_SCRIPT = `if redis.call("GET", KEYS[1]) == ARGV[1] then
 end
 return 0`;
 
-@Injectable()
-export class RedisService implements OnModuleInit, OnModuleDestroy {
-  private client!: Redis.Redis;
+export type RedisClientFactory = (options: RedisOptions) => Redis;
 
-  constructor(private readonly configService: ConfigService) {}
+export class RedisService implements OnModuleInit, OnModuleDestroy {
+  private client!: Redis;
+
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly createClient: RedisClientFactory,
+  ) {}
 
   onModuleInit() {
-    this.client = new Redis.Redis({
+    this.client = this.createClient({
       host: this.configService.get<string>("redis.host"),
       port: this.configService.get<number>("redis.port"),
       password: this.configService.get<string>("redis.password"),
