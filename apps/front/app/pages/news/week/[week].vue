@@ -6,7 +6,7 @@ const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const route = useRoute();
 
-const weekId = computed(() => route.params.week as string);
+const weekId = computed(() => String(route.params.week));
 
 if (!parseIsoWeekId(weekId.value)) {
   throw createError({

@@ -54,10 +54,9 @@ function setHoveredTeam(teamId: string | null): void {
 }
 
 function onRowLeave(event: MouseEvent, teamId: string): void {
-  const current = event.currentTarget as HTMLElement;
-  const next = event.relatedTarget as Node | null;
+  const { currentTarget: current, relatedTarget: next } = event;
 
-  if (next && current.contains(next)) {
+  if (current instanceof Node && next instanceof Node && current.contains(next)) {
     return;
   }
 
@@ -210,10 +209,9 @@ function playerRowClass(entry: RankedPlayer): string[] {
 }
 
 function onTeamFocusOut(event: FocusEvent, teamId: string): void {
-  const current = event.currentTarget as HTMLElement;
-  const next = event.relatedTarget as Node | null;
+  const { currentTarget: current, relatedTarget: next } = event;
 
-  if (next && current.contains(next)) {
+  if (current instanceof Node && next instanceof Node && current.contains(next)) {
     return;
   }
 

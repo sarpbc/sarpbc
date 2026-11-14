@@ -8,7 +8,7 @@ const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
 
-const postId = computed(() => route.params.id as string);
+const postId = computed(() => String(route.params.id));
 const postToDelete = ref<ForumPost | null>(null);
 const replyToDelete = ref<Reply | null>(null);
 const hidingReplyId = ref<string | null>(null);

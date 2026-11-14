@@ -20,17 +20,17 @@ const columns: TableColumn<Player>[] = [
   {
     accessorKey: "firstName",
     header: t("page.players.columns.firstName"),
-    cell: ({ getValue }) => (getValue() as string) || "-",
+    cell: ({ row }) => row.original.firstName || "-",
   },
   {
     accessorKey: "lastName",
     header: t("page.players.columns.lastName"),
-    cell: ({ getValue }) => (getValue() as string) || "-",
+    cell: ({ row }) => row.original.lastName || "-",
   },
   {
     accessorKey: "nationality",
     header: t("page.players.columns.nationality"),
-    cell: ({ getValue }) => (getValue() as string) || "-",
+    cell: ({ row }) => row.original.nationality || "-",
   },
   {
     id: "actions",

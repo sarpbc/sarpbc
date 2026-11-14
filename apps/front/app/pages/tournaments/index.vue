@@ -16,11 +16,7 @@ interface TournamentsIndexPayload {
   total: number;
 }
 
-const offset = computed(() => {
-  const param = route.query.offset as string;
-
-  return param ? parseInt(param, 10) : 0;
-});
+const offset = computed(() => parseRouteOffset(route.query.offset));
 
 const {
   data: tournamentsResponse,

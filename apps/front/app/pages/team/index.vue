@@ -5,17 +5,9 @@ const { setPageSeo } = useSarpbcSeo();
 
 const TEAMS_PER_PAGE = 52;
 
-const offset = computed(() => {
-  const param = route.query.offset as string;
+const offset = computed(() => parseRouteOffset(route.query.offset));
 
-  return param ? parseInt(param, 10) : 0;
-});
-
-const start = computed(() => {
-  const param = route.query.start as string;
-
-  return param?.toUpperCase() || "";
-});
+const start = computed(() => routeQueryString(route.query.start).toUpperCase());
 
 const {
   data: teamsResponse,

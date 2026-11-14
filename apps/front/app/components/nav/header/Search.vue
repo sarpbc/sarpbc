@@ -54,9 +54,7 @@ function handleMouseDown(event: MouseEvent): void {
 }
 
 function handleLinkClick(event: MouseEvent): void {
-  const target = event.target as HTMLElement;
-
-  if (target.closest("a")) {
+  if (event.target instanceof Element && event.target.closest("a")) {
     search.value = "";
     resetResults();
     open.value = false;
