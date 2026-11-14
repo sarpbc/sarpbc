@@ -137,10 +137,13 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
     Object.assign(row, {
       id,
       ...fields,
-      player: playerId ? this.em.getReference(Player, playerId) : null,
-      team: teamId ? this.em.getReference(Team, teamId) : null,
-      tournament: tournamentId ? this.em.getReference(Tournament, tournamentId) : null,
-      match: matchId ? this.em.getReference(Match, matchId) : null,
+      player: playerId !== null && playerId !== "" ? this.em.getReference(Player, playerId) : null,
+      team: teamId !== null && teamId !== "" ? this.em.getReference(Team, teamId) : null,
+      tournament:
+        tournamentId !== null && tournamentId !== ""
+          ? this.em.getReference(Tournament, tournamentId)
+          : null,
+      match: matchId !== null && matchId !== "" ? this.em.getReference(Match, matchId) : null,
     });
     await this.em.persist(row).flush();
   }

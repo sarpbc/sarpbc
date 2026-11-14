@@ -1,4 +1,5 @@
 import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs";
+import { isNonEmptyString } from "./text";
 
 export interface ParsedTweetUrl {
   id: string;
@@ -69,7 +70,7 @@ export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
     .find((attr) => attr.name === "url")
     ?.value.trim();
 
-  if (!url) {
+  if (!isNonEmptyString(url)) {
     return null;
   }
 

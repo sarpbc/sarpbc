@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
 import { ExecutionContext } from "@nestjs/common";
+import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import { AuthenticatedUser } from "../../../common/application/models/authenticated-user";
 import { AuthenticationError } from "../../../common/domain/errors";
 import { AuthService } from "../../application/auth.service";
@@ -41,12 +42,7 @@ describe("AuthGuard", () => {
   });
 
   const contextFor = (request: AuthGuardTestRequest): ExecutionContext =>
-    ({
-      switchToHttp: () => ({
-        getRequest: () => request,
-        getResponse: () => ({ setCookie }),
-      }),
-    }) as ExecutionContext;
+    new ExecutionContextHost([request, { setCookie }]);
 
   it("throws when cookie is missing", async () => {
     await expect(guard.canActivate(contextFor({}))).rejects.toBeInstanceOf(AuthenticationError);

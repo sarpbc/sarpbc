@@ -1,13 +1,9 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import type {
-  CircuitDetail,
-  CircuitEventTeam,
-  CircuitScaleTier,
-  CircuitStandings,
-  CircuitSummary,
-} from "@sarpbc/types";
+import type { CircuitScaleTier } from "@sarpbc/types";
+import { z } from "zod";
 import type { UpsertTournamentCommand } from "../../src/tournament/application/feed.ts";
+import { toolFailure } from "./support.mts";
 import type {
   Application,
   CallTool,
@@ -16,6 +12,63 @@ import type {
   RequestContextType,
   Review,
 } from "./support.mts";
+
+const idRef = z.looseObject({ id: z.string() });
+
+const circuitSummary = z.looseObject({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  season: z.number().nullable(),
+  region: z.string().nullable(),
+  description: z.string().nullable(),
+  sourceUrl: z.string().nullable(),
+  qualificationSpots: z.number().nullable(),
+});
+
+type CircuitSummary = z.infer<typeof circuitSummary>;
+
+const standingTeam = z.looseObject({ id: z.string(), slug: z.string() });
+
+const scaleTier = z.looseObject({ from: z.number(), to: z.number(), points: z.number() });
+
+const circuitDetail = circuitSummary.extend({
+  stages: z.array(
+    z.looseObject({
+      tournament: z.looseObject({ id: z.string(), source: z.string() }),
+      scale: z.array(scaleTier),
+      worldwide: z.boolean(),
+      regionTeams: z.array(standingTeam),
+      finishes: z.array(z.looseObject({ team: standingTeam, placement: z.number() })),
+    }),
+  ),
+});
+
+const circuitStandings = circuitSummary.extend({
+  sourceUrls: z.array(z.string()),
+  events: z.array(z.looseObject({ event: idRef, status: z.string() })),
+  rows: z.array(
+    z.looseObject({
+      rank: z.number(),
+      points: z.number(),
+      team: standingTeam,
+      events: z.array(z.looseObject({ eventId: z.string(), placement: z.number() })),
+    }),
+  ),
+});
+
+const mcpCircuit = circuitSummary.extend({
+  standings: z.array(z.looseObject({ points: z.number() })),
+  stages: z.array(
+    z.looseObject({ tournament: z.looseObject({ id: z.string(), source: z.string() }) }),
+  ),
+});
+
+const eventTeams = z.object({
+  teams: z.array(z.looseObject({ team: standingTeam, placement: z.number().nullable() })),
+});
+
+const stageRef = z.looseObject({ id: z.string(), event: idRef });
 
 interface StageInput {
   pandascoreId: number;
@@ -32,15 +85,7 @@ interface CircuitFields extends Partial<Placement> {
   slug: string;
 }
 
-interface StageRef {
-  id: string;
-  event: { id: string };
-}
-
-interface McpCircuit extends CircuitSummary {
-  standings: { points: number }[];
-  stages: { tournament: { id: string; source: string } }[];
-}
+type StageRef = z.infer<typeof stageRef>;
 
 export interface CircuitsContext {
   app: Application;
@@ -141,7 +186,7 @@ export async function verifyCircuits({
       staffCookie,
       201,
     )
-  ).json<{ tournament: StageRef }>().tournament;
+  ).json(z.object({ tournament: stageRef })).tournament;
 
   const identity = { season: 2026, sourceUrl: RULES };
   await request("POST", "/circuits", { name: "Fake Circuit", ...identity }, memberCookie, 403);
@@ -164,7 +209,7 @@ export async function verifyCircuits({
       staffCookie,
       201,
     )
-  ).json<CircuitSummary>();
+  ).json(circuitSummary);
 
   assert.equal(circuit.slug, "fake-circuit");
   await request("POST", "/circuits", { name: "Fake circuit", ...identity }, staffCookie, 409);
@@ -180,7 +225,7 @@ export async function verifyCircuits({
 
   const { ConflictError } = await import("../../src/common/domain/errors.ts");
 
-  const saveDirectly = async (fields: CircuitFields): Promise<void> =>
+  const saveDirectly = async (fields: CircuitFields): Promise<void> => {
     await new CircuitPersistence(orm.em.fork()).save({
       id: randomUUID(),
       season: null,
@@ -190,6 +235,7 @@ export async function verifyCircuits({
       qualificationSpots: null,
       ...fields,
     });
+  };
 
   const twins: [Placement, Placement, string][] = [
     [{ season: null, region: null }, { season: null, region: null }, "no season and no region"],
@@ -223,7 +269,7 @@ export async function verifyCircuits({
   );
 
   assert.deepEqual(
-    raced.map(({ statusCode }) => statusCode).sort(),
+    raced.map(({ statusCode }) => statusCode).sort((a, b) => a - b),
     [201, 409],
     "concurrent twin creates leave one circuit",
   );
@@ -231,14 +277,14 @@ export async function verifyCircuits({
   for (const response of raced.filter(({ statusCode }) => statusCode === 201))
     await request(
       "DELETE",
-      `/circuits/${response.json<{ id: string }>().id}`,
+      `/circuits/${idRef.parse(response.json()).id}`,
       undefined,
       staffCookie,
       204,
     );
   assert(
     (await request("GET", "/circuits"))
-      .json<{ circuits: { id: string }[] }>()
+      .json(z.object({ circuits: z.array(idRef) }))
       .circuits.some(({ id }) => id === circuit.id),
     "the public list shows the circuit",
   );
@@ -272,27 +318,35 @@ export async function verifyCircuits({
   );
   await request("PUT", stagePath(counted.id), { scale, sourceUrl: RULES }, memberCookie, 403);
 
-  const standings = async (): Promise<CircuitStandings> =>
-    (await request("GET", `/circuits/${circuit.slug}/standings`)).json<CircuitStandings>();
+  const standings = async (): Promise<z.infer<typeof circuitStandings>> =>
+    (await request("GET", `/circuits/${circuit.slug}/standings`)).json(circuitStandings);
 
   assert.deepEqual((await standings()).rows, [], "nothing counts before a scale is entered");
 
   assert.deepEqual(
-    await callTool("set_circuit_stage_scale", {
-      circuitId: circuit.id,
-      tournamentId: counted.id,
-      scale,
-    }),
+    await callTool(
+      "set_circuit_stage_scale",
+      {
+        circuitId: circuit.id,
+        tournamentId: counted.id,
+        scale,
+      },
+      toolFailure,
+    ),
     { error: true },
     "set_circuit_stage_scale requires a sourceUrl",
   );
   assert.deepEqual(
-    await callTool("set_circuit_stage_scale", {
-      circuitId: circuit.id,
-      tournamentId: counted.id,
-      scale,
-      sourceUrl: "https://www.blast.tv/rl/leaderboard/2026",
-    }),
+    await callTool(
+      "set_circuit_stage_scale",
+      {
+        circuitId: circuit.id,
+        tournamentId: counted.id,
+        scale,
+        sourceUrl: "https://www.blast.tv/rl/leaderboard/2026",
+      },
+      toolFailure,
+    ),
     { error: true },
     "a BLAST.tv source is refused through the MCP",
   );
@@ -315,7 +369,7 @@ export async function verifyCircuits({
       { scale: [{ from: 1, to: 1, points: 3 }], sourceUrl: RULES },
       staffCookie,
     )
-  ).json<CircuitDetail>();
+  ).json(circuitDetail);
 
   assert.deepEqual(
     Object.fromEntries(detail.stages.map((stage) => [stage.tournament.id, stage.scale])),
@@ -345,22 +399,20 @@ export async function verifyCircuits({
     { [counted.event.id]: "counted", [pending.event.id]: "awaiting_results" },
   );
 
-  const mcp = await callTool<McpCircuit>("get_circuit", { idOrSlug: circuit.slug });
+  const mcp = await callTool("get_circuit", { idOrSlug: circuit.slug }, mcpCircuit);
   assert.deepEqual(
     mcp.standings.map(({ points }) => points),
     [10, 6, 6],
   );
   assert(mcp.stages.every((stage) => stage.tournament.source === "pandascore"));
-  assert(
-    (await callTool<{ id: string }[]>("list_circuits", {})).some(({ id }) => id === circuit.id),
-  );
+  assert((await callTool("list_circuits", {}, z.array(idRef))).some(({ id }) => id === circuit.id));
 
-  const eventTeams = (
+  const teamsOfEvent = (
     await request("GET", `${stagePath(counted.id)}/teams`, undefined, staffCookie)
-  ).json<{ teams: CircuitEventTeam[] }>().teams;
+  ).json(eventTeams).teams;
 
   assert.deepEqual(
-    eventTeams.map(({ team, placement }) => [team.slug, placement]),
+    teamsOfEvent.map(({ team, placement }) => [team.slug, placement]),
     [
       ["circuit-team-9801", 1],
       ["circuit-team-9802", 2],
@@ -370,7 +422,7 @@ export async function verifyCircuits({
   await request("GET", `${stagePath(counted.id)}/teams`, undefined, memberCookie, 403);
 
   const teamId = (slug: string): string => {
-    const found = eventTeams.find(({ team }) => team.slug === slug);
+    const found = teamsOfEvent.find(({ team }) => team.slug === slug);
     assert(found, `${slug} is listed among the event teams`);
 
     return found.team.id;
@@ -379,9 +431,9 @@ export async function verifyCircuits({
   for (const attached of [tournament, startgg])
     await request("PUT", stagePath(attached.id), { scale, sourceUrl: RULES }, staffCookie);
 
-  const withAll = (
-    await request("GET", `/circuits/${circuit.id}`, undefined, staffCookie)
-  ).json<CircuitDetail>();
+  const withAll = (await request("GET", `/circuits/${circuit.id}`, undefined, staffCookie)).json(
+    circuitDetail,
+  );
 
   assert.deepEqual(
     withAll.stages.map(({ tournament: { source } }) => source).sort(),
@@ -391,7 +443,7 @@ export async function verifyCircuits({
   const publicEvents = (await standings()).events.map(({ event }) => event.id);
   assert(publicEvents.includes(tournament.event.id), "a manual stage is public");
   assert(!publicEvents.includes(startgg.event.id), "a start.gg stage stays out of the standings");
-  const mcpAll = await callTool<McpCircuit>("get_circuit", { idOrSlug: circuit.slug });
+  const mcpAll = await callTool("get_circuit", { idOrSlug: circuit.slug }, mcpCircuit);
   assert(!JSON.stringify(mcpAll).includes(startgg.id), "get_circuit leaves start.gg out");
 
   for (const attached of [tournament, startgg])
@@ -419,7 +471,7 @@ export async function verifyCircuits({
       },
       staffCookie,
     )
-  ).json<CircuitDetail>();
+  ).json(circuitDetail);
 
   assert.deepEqual(
     regional.stages
@@ -442,14 +494,18 @@ export async function verifyCircuits({
   await request("PATCH", `/circuits/${circuit.id}`, { region: null }, staffCookie);
   await request("PUT", stagePath(counted.id), { scale, sourceUrl: RULES }, staffCookie);
 
-  const created = await callTool<CircuitSummary>("create_circuit", {
-    name: "Fake Series 2026",
-    slug: "fake-season-2026",
-    season: 2026,
-    region: "Worldwide",
-    description: "A fake circuit created through the MCP.",
-    sourceUrl: RULES,
-  });
+  const created = await callTool(
+    "create_circuit",
+    {
+      name: "Fake Series 2026",
+      slug: "fake-season-2026",
+      season: 2026,
+      region: "Worldwide",
+      description: "A fake circuit created through the MCP.",
+      sourceUrl: RULES,
+    },
+    circuitSummary,
+  );
 
   assert.equal(created.slug, "fake-season-2026");
   assert.equal(created.sourceUrl, RULES);
@@ -462,22 +518,30 @@ export async function verifyCircuits({
 
   for (const [refused, why] of refusals)
     assert.deepEqual(
-      await callTool("create_circuit", {
-        name: "Fake Series 2026",
-        season: 2026,
-        region: "Worldwide",
-        sourceUrl: RULES,
-        ...refused,
-      }),
+      await callTool(
+        "create_circuit",
+        {
+          name: "Fake Series 2026",
+          season: 2026,
+          region: "Worldwide",
+          sourceUrl: RULES,
+          ...refused,
+        },
+        toolFailure,
+      ),
       { error: true },
       `create_circuit refuses ${why}`,
     );
 
-  const updated = await callTool<CircuitSummary>("update_circuit", {
-    idOrSlug: "fake-season-2026",
-    region: "EU",
-    qualificationSpots: 1,
-  });
+  const updated = await callTool(
+    "update_circuit",
+    {
+      idOrSlug: "fake-season-2026",
+      region: "EU",
+      qualificationSpots: 1,
+    },
+    circuitSummary,
+  );
 
   assert.equal(updated.region, "EU");
   assert.equal(updated.qualificationSpots, 1);
@@ -490,7 +554,7 @@ export async function verifyCircuits({
   });
 
   assert.equal((await review(mcpProposal)).status, "applied");
-  const createdDetail = await callTool<McpCircuit>("get_circuit", { idOrSlug: "fake-season-2026" });
+  const createdDetail = await callTool("get_circuit", { idOrSlug: "fake-season-2026" }, mcpCircuit);
   assert.equal(createdDetail.season, 2026);
   assert.deepEqual(
     createdDetail.stages.map((stage) => stage.tournament.id),
@@ -500,9 +564,7 @@ export async function verifyCircuits({
     createdDetail.standings.map(({ points }) => points),
     [10, 6, 6],
   );
-  assert(
-    (await callTool<{ id: string }[]>("list_circuits", {})).some(({ id }) => id === created.id),
-  );
+  assert((await callTool("list_circuits", {}, z.array(idRef))).some(({ id }) => id === created.id));
   await request("DELETE", `/circuits/${created.id}`, undefined, staffCookie, 204);
 
   await request("DELETE", stagePath(pending.id), undefined, staffCookie, 204);

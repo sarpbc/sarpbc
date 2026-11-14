@@ -4,7 +4,8 @@ import { APP_FILTER } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
 import request from "supertest";
-import type { SeasonDetail, StaffPermission } from "@sarpbc/types";
+import type { StaffPermission } from "@sarpbc/types";
+import { z } from "zod";
 import { AuthService } from "../src/auth/application/auth.service";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
 import { configureApp } from "../src/configure-app";
@@ -20,7 +21,7 @@ const MEMBER = "access_token=member";
 
 describe("season archives (e2e)", () => {
   let app: NestFastifyApplication;
-  let pilot: SeasonDetail;
+  let pilot: { id: string };
 
   const http = () => request(app.getHttpServer());
 
@@ -63,7 +64,7 @@ describe("season archives (e2e)", () => {
       .send({ name: "Pilot season", slug: "Pilot Season" })
       .expect(201);
 
-    pilot = created.body;
+    pilot = z.object({ id: z.string() }).parse(created.body);
     await http().post("/seasons").set("Cookie", STAFF).send({ name: "Draft" }).expect(201);
   });
 
@@ -80,7 +81,7 @@ describe("season archives (e2e)", () => {
       .send({ teamId: "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b" })
       .expect(403);
     const list = await http().get("/seasons").set("Cookie", STAFF).expect(200);
-    expect(list.body.seasons).toHaveLength(2);
+    expect(z.object({ seasons: z.array(z.unknown()) }).parse(list.body).seasons).toHaveLength(2);
   });
 
   it("publishes slugged seasons to anyone and renders an empty pilot", async () => {

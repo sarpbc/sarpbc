@@ -1,3 +1,4 @@
+import { ConfigService } from "@nestjs/config";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RedisService } from "./redis.service";
 
@@ -17,18 +18,7 @@ describe("RedisService", () => {
   let service: RedisService;
 
   beforeEach(() => {
-    service = new RedisService({
-      get: vi.fn((key: string) => {
-        switch (key) {
-          case "redis.host":
-            return "redis";
-          case "redis.port":
-            return 6379;
-          default:
-            return undefined;
-        }
-      }),
-    } as never);
+    service = new RedisService(new ConfigService({ redis: { host: "redis", port: 6379 } }));
     vi.clearAllMocks();
     service.onModuleInit();
   });

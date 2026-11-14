@@ -86,7 +86,7 @@ export function memorySeasonStore() {
     list: async () => [...seasons.values()].map(({ id, name, slug }) => ({ id, name, slug })),
     published: async () =>
       [...seasons.values()].flatMap(({ id, name, slug, winnerTeamId }) =>
-        slug
+        slug !== null
           ? [
               {
                 slug,
@@ -212,7 +212,7 @@ export function memorySeasonStore() {
         id: nextId("entry"),
         label,
         result,
-        tournament: tournamentId ? tournamentOf(tournamentId) : null,
+        tournament: tournamentId === null ? null : tournamentOf(tournamentId),
       };
 
       participants.find((participant) => participant.id === participantId)?.path.push(entry);

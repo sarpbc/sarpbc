@@ -37,9 +37,9 @@ export function parseCircuitScale(tiers: readonly CircuitScaleTier[]): CircuitSc
     .map(({ from, to, points }) => ({ from, to, points }));
 
   sorted.forEach((tier, index) => {
-    const previous = sorted[index - 1];
+    const previous: typeof tier | undefined = sorted[index - 1];
 
-    if (previous && tier.from <= previous.to)
+    if (previous !== undefined && tier.from <= previous.to)
       throw new InvalidInputError(
         `Placement ${tier.from} appears in two tiers. Each placement belongs to one tier.`,
       );

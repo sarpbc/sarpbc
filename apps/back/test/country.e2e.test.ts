@@ -3,12 +3,22 @@ import { Test } from "@nestjs/testing";
 import { APP_FILTER } from "@nestjs/core";
 import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
 import request from "supertest";
-import type { CountryDetail, CountrySummary } from "@sarpbc/types";
+import { z } from "zod";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
 import { configureApp } from "../src/configure-app";
 import { CountryService } from "../src/country/application/country.service";
 import { CountryController } from "../src/country/infrastructure/http/country.controller";
 import { countrySources } from "./country-fixtures";
+
+const countryBody = z.object({
+  country: z.looseObject({
+    code: z.string(),
+    players: z.array(z.looseObject({ slug: z.string() })),
+    teams: z.array(z.looseObject({ slug: z.string() })),
+    matches: z.array(z.looseObject({ id: z.string() })),
+    matchTotal: z.number(),
+  }),
+});
 
 describe("country pages (e2e)", () => {
   let app: NestFastifyApplication;
@@ -35,17 +45,18 @@ describe("country pages (e2e)", () => {
 
   it("lists the nationalities in use", async () => {
     const response = await request(app.getHttpServer()).get("/countries").expect(200);
-    const { countries }: { countries: CountrySummary[] } = response.body;
 
-    expect(countries).toEqual([
-      { code: "FR", playerCount: 4 },
-      { code: "US", playerCount: 1 },
-    ]);
+    expect(response.body).toEqual({
+      countries: [
+        { code: "FR", playerCount: 4 },
+        { code: "US", playerCount: 1 },
+      ],
+    });
   });
 
   it("returns the players, teams and matches of a country without start.gg matches", async () => {
     const response = await request(app.getHttpServer()).get("/countries/fr").expect(200);
-    const { country }: { country: CountryDetail } = response.body;
+    const { country } = countryBody.parse(response.body);
 
     expect(country.code).toBe("FR");
     expect(country.players.map(({ slug }) => slug)).toEqual([

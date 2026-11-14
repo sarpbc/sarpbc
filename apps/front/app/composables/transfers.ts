@@ -12,7 +12,7 @@ export async function getTransfers(
 ): Promise<{ transfers: Transfer[]; total: number }> {
   const res = await apiFetch<{ transfers?: Transfer[]; count?: number }>(`/transfers`, {
     method: "GET",
-    params: query,
+    query,
   });
 
   const transfers = res.transfers ?? [];

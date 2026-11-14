@@ -59,7 +59,7 @@ function applyConsent(): void {
 }
 
 export async function loadPostHogClient(config: PostHogPublicConfig): Promise<PostHog | null> {
-  if (!globalThis.window || import.meta.dev || !config.publicKey || !consentGranted) {
+  if (import.meta.server || import.meta.dev || !config.publicKey || !consentGranted) {
     return null;
   }
 
@@ -117,7 +117,7 @@ export async function loadPostHogClient(config: PostHogPublicConfig): Promise<Po
           name: sanitizePostHogUrl(request.name),
         }),
       },
-      before_send: (event) => (consentGranted && event ? sanitizePostHogEvent(event) : null),
+      before_send: (event) => (consentGranted ? sanitizePostHogEvent(event) : null),
     });
 
     client = posthog;

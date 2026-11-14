@@ -48,12 +48,14 @@ function serve(routes: Record<string, Reply>) {
             return;
           }
 
-          const reply = routes[url.href];
+          const reply: Reply | undefined = routes[url.href];
 
-          if (!reply) throw new Error(`Unexpected request to ${url.href}`);
+          if (reply === undefined) throw new Error(`Unexpected request to ${url.href}`);
 
           if (reply === "hang") {
-            signal.addEventListener("abort", () => req.emit("error", new Error("aborted")));
+            signal.addEventListener("abort", () => {
+              req.emit("error", new Error("aborted"));
+            });
 
             return;
           }

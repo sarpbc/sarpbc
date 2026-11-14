@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type {
   CareerPlacement,
   CareerRegion,
@@ -162,7 +163,7 @@ export function simulateSplitField(
         sim.regionals[regional] = placement;
       }
 
-      if (sitOut && player.teamId) {
+      if (sitOut && isNonEmptyString(player.teamId)) {
         const sim = results.get(player.teamId);
 
         if (sim) sim.regionals[regional] = "unavailable";
@@ -177,7 +178,7 @@ export function simulateSplitField(
 
     if (regionalPoints < MAJOR_QUALIFICATION_POINTS) continue;
 
-    if (player.skipMajor && teamId === player.teamId) {
+    if (player.skipMajor === true && teamId === player.teamId) {
       sim.major = "unavailable";
       continue;
     }

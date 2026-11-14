@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
-import type { MatchResultsResponse, TournamentDetail } from "@sarpbc/types";
+import { z } from "zod";
+import { byJoined } from "./support.mts";
 import type { Application, Orm, Request, RequestContextType } from "./support.mts";
 
 export interface PlayerTournamentsContext {
@@ -11,32 +12,62 @@ export interface PlayerTournamentsContext {
   RequestContext: RequestContextType;
 }
 
-interface PlayerRef {
-  id: string;
-  name: string;
-  slug: string;
-}
+const playerRef = z.object({ id: z.string(), name: z.string(), slug: z.string() });
 
-interface SoloParticipant {
-  id: string;
-  team: null;
-  players: PlayerRef[];
-}
+type PlayerRef = z.infer<typeof playerRef>;
 
-interface SoloTournament {
-  id: string;
-  format: string;
-  participants: SoloParticipant[];
-}
+const playerBody = z.object({ player: playerRef });
 
-interface SoloMatch {
-  id: string;
-  slug: string;
-}
+const soloTournamentBody = z.object({
+  tournament: z.object({
+    id: z.string(),
+    format: z.string(),
+    participants: z.array(
+      z.object({ id: z.string(), team: z.null(), players: z.array(playerRef) }),
+    ),
+  }),
+});
 
-interface GameBody {
-  games: { teams: { participantId: string; players: { player: { id: string } }[] }[] }[];
-}
+const soloMatchBody = z.object({ match: z.object({ id: z.string(), slug: z.string() }) });
+
+const tournamentDetailBody = z.object({
+  tournament: z.object({
+    format: z.string(),
+    matches: z.array(
+      z.object({
+        winnerId: z.string().nullable(),
+        participants: z.array(
+          z.strictObject({ id: z.string(), team: z.null(), players: z.array(playerRef) }),
+        ),
+      }),
+    ),
+  }),
+});
+
+const matchResultsBody = z.object({
+  results: z.array(
+    z.object({
+      participants: z.array(
+        z.object({ team: z.unknown(), players: z.array(z.unknown()).optional() }),
+      ),
+    }),
+  ),
+});
+
+const playedTournamentsBody = z.object({ tournaments: z.array(z.object({ id: z.string() })) });
+
+const gameBody = z.object({
+  games: z.array(
+    z.object({
+      teams: z.array(
+        z.object({
+          participantId: z.string(),
+          players: z.array(z.object({ player: z.object({ id: z.string() }) })),
+        }),
+      ),
+    }),
+  ),
+});
 
 export async function verifyPlayerTournaments({
   app,
@@ -60,8 +91,7 @@ export async function verifyPlayerTournaments({
   const { assignReplays } = await import("../../src/match-stats/domain/replay-matching.ts");
 
   const createPlayer = async (name: string): Promise<PlayerRef> =>
-    (await request("POST", "/player", { name }, staffCookie, 201)).json<{ player: PlayerRef }>()
-      .player;
+    (await request("POST", "/player", { name }, staffCookie, 201)).json(playerBody).player;
 
   const solo = await createPlayer("Fake Solo One");
   const rival = await createPlayer("Fake Solo Two");
@@ -90,13 +120,15 @@ export async function verifyPlayerTournaments({
       staffCookie,
       201,
     )
-  ).json<{ tournament: SoloTournament }>().tournament;
+  ).json(soloTournamentBody).tournament;
 
   assert.equal(tournament.format, "1v1");
   assert(tournament.participants.every((participant) => participant.team === null));
   assert.deepEqual(
-    tournament.participants.map((participant) => participant.players.map(({ id }) => id)).sort(),
-    [[solo.id], [rival.id]].sort(),
+    tournament.participants
+      .map((participant) => participant.players.map(({ id }) => id))
+      .sort(byJoined),
+    [[solo.id], [rival.id]].sort(byJoined),
   );
   assert.equal(await orm.em.fork().count(Team, {}), teamsBefore, "no team is created for players");
 
@@ -128,7 +160,7 @@ export async function verifyPlayerTournaments({
       staffCookie,
       201,
     )
-  ).json<{ match: SoloMatch }>().match;
+  ).json(soloMatchBody).match;
 
   assert.equal(match.slug, "fake-solo-one-vs-fake-solo-two-fake-knockout");
 
@@ -147,9 +179,9 @@ export async function verifyPlayerTournaments({
   assert(scored.winner, "the scored match has a winner");
   assert.equal(scored.winner.id, soloParticipant);
 
-  const detail = (await request("GET", `/tournaments/${tournament.id}`)).json<{
-    tournament: TournamentDetail;
-  }>().tournament;
+  const detail = (await request("GET", `/tournaments/${tournament.id}`)).json(
+    tournamentDetailBody,
+  ).tournament;
 
   assert.equal(detail.format, "1v1");
   assert.deepEqual(detail.matches[0].winnerId, soloParticipant);
@@ -162,16 +194,16 @@ export async function verifyPlayerTournaments({
     },
   );
 
-  const results = (
-    await request("GET", `/matches/results?tournamentId=${tournament.id}`)
-  ).json<MatchResultsResponse>();
+  const results = (await request("GET", `/matches/results?tournamentId=${tournament.id}`)).json(
+    matchResultsBody,
+  );
 
   assert.equal(results.results[0].participants[0].team, null);
   assert.equal(results.results[0].participants[0].players?.length, 1);
 
-  const played = (await request("GET", `/player/${solo.id}/tournaments`)).json<{
-    tournaments: { id: string }[];
-  }>().tournaments;
+  const played = (await request("GET", `/player/${solo.id}/tournaments`)).json(
+    playedTournamentsBody,
+  ).tournaments;
 
   assert.deepEqual(
     played.map(({ id }) => id),
@@ -179,7 +211,7 @@ export async function verifyPlayerTournaments({
   );
 
   const [candidate] = await new MikroOrmStatsCandidates(orm.em.fork()).matches(tournament.id);
-  assert.deepEqual(candidate.participants.map(({ teamNames }) => teamNames).sort(), [
+  assert.deepEqual(candidate.participants.map(({ teamNames }) => teamNames).sort(byJoined), [
     ["Fake Solo One"],
     ["Fake Solo Two"],
   ]);
@@ -233,7 +265,7 @@ export async function verifyPlayerTournaments({
     ],
     learnedLinks: [],
   });
-  const [game] = (await request("GET", `/matches/${match.id}`)).json<GameBody>().games;
+  const [game] = (await request("GET", `/matches/${match.id}`)).json(gameBody).games;
   assert.deepEqual(
     game.teams.map(({ participantId, players }) => [participantId, players[0].player.id]),
     [

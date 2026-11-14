@@ -1,8 +1,9 @@
 import type { ToolArguments } from "../define-tool";
 import { describe, expect, it, vi } from "vitest";
-import type { RosterChange, StaffRole } from "@sarpbc/types";
+import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import { prizeTools } from "./prize-tools";
+import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
 import { rosterTools } from "./roster-tools";
 
 const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -12,15 +13,7 @@ const SOURCE = "https://example.com/fake-cup/prizes";
 function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes") {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
 
-  const rosterProposalService = {
-    propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
-      id: "proposal-1",
-      status: "pending",
-      change,
-    })),
-    proposeTeamLogo: vi.fn(),
-    list: vi.fn(),
-  };
+  const rosterProposalService = pendingProposalService();
 
   const tool = [
     ...rosterTools({ rosterProposalService }),
@@ -28,6 +21,7 @@ function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes"
   ].find((candidate) => candidate.name === toolName);
 
   if (!tool) throw new Error(`${toolName} is not defined`);
+
   const call = async (args: ToolArguments) =>
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
@@ -51,8 +45,7 @@ describe("propose_tournament_prizes", () => {
       SOURCE,
       "u1",
     );
-    const block = result.content[0];
-    expect(JSON.parse(block?.type === "text" ? block.text : "null")).toMatchObject({
+    expect(jsonOf(result)).toMatchObject({
       kind: "set_tournament_prizes",
       status: "pending",
     });
@@ -131,8 +124,7 @@ describe("propose_player_award", () => {
       SOURCE,
       "u1",
     );
-    const block = result.content[0];
-    expect(JSON.parse(block?.type === "text" ? block.text : "null")).toMatchObject({
+    expect(jsonOf(result)).toMatchObject({
       kind: "award_player",
       status: "pending",
     });

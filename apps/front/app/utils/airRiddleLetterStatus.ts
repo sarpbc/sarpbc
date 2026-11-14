@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
 export type AirRiddleLetterStatus = "correct" | "misplaced" | "incorrect" | "unused";
@@ -38,7 +39,7 @@ export function deriveAirRiddleLetterStatuses(attempts: AirRiddleAttemptLike[]) 
       const letter = attempt.letters[index]?.toUpperCase();
       const result = attempt.results?.[index];
 
-      if (!letter || result === undefined) {
+      if (!isNonEmptyString(letter) || result === undefined) {
         continue;
       }
 

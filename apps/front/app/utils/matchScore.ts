@@ -1,10 +1,11 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchResult, MatchStatus } from "~/types/matches";
 
 export function getMatchParticipantScore(
   results: MatchResult[] | undefined,
   participantId: string | undefined,
 ): number | null {
-  if (!results || !participantId || results.length === 0) {
+  if (!results || !isNonEmptyString(participantId) || results.length === 0) {
     return null;
   }
 

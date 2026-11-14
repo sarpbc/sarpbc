@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { z } from "zod";
 import { INDEXNOW_KEY_PATTERN } from "@sarpbc/utils";
+import { nonBlank } from "../../common/domain/text";
 
 type RawEnv = Record<string, string | undefined>;
 
@@ -10,7 +11,7 @@ const blankAsUndefined = <T extends z.ZodType>(schema: T) =>
 const optionalText = z
   .string()
   .optional()
-  .transform((value) => value?.trim() || undefined);
+  .transform((value) => nonBlank(value));
 
 const urlSchema = z.url();
 
@@ -82,7 +83,7 @@ export function readSecret(env: RawEnv, name: string, file: string): string | un
   try {
     return readFileSync(`/run/secrets/${file}`, "utf8").trim();
   } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === "ENOENT") {
+    if (error instanceof Error && "code" in error && error.code === "ENOENT") {
       return undefined;
     }
 
@@ -90,11 +91,12 @@ export function readSecret(env: RawEnv, name: string, file: string): string | un
   }
 }
 
-type SecretName = keyof typeof SECRET_FILES;
-
-function withSecrets(env: RawEnv, names: SecretName[]) {
+function withSecrets(env: RawEnv, files: Readonly<Record<string, string>>) {
   const secrets = Object.fromEntries(
-    names.map((name) => [name, readSecret(env, name, SECRET_FILES[name])]),
+    Object.entries(files).map(([name, file]): [string, string | undefined] => [
+      name,
+      readSecret(env, name, file),
+    ]),
   );
 
   return { ...env, ...secrets };
@@ -119,13 +121,13 @@ function withProduction<T extends { NODE_ENV: string }>(data: T) {
 }
 
 export function validateEnv(env: RawEnv) {
-  return withProduction(
-    parse(envSchema, withSecrets(env, Object.keys(SECRET_FILES) as SecretName[])),
-  );
+  return withProduction(parse(envSchema, withSecrets(env, SECRET_FILES)));
 }
 
 export function validateDatabaseEnv(env: RawEnv) {
-  return withProduction(parse(databaseSchema, withSecrets(env, ["DB_PASSWORD"])));
+  return withProduction(
+    parse(databaseSchema, withSecrets(env, { DB_PASSWORD: SECRET_FILES.DB_PASSWORD })),
+  );
 }
 
 export function loadEnv() {

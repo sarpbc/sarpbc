@@ -164,7 +164,10 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     }
 
     row.tournament = this.em.getReference(Row.Tournament, model.tournamentId);
-    row.team = model.teamId ? this.em.getReference(Team, model.teamId) : null;
+    row.team =
+      model.teamId !== null && model.teamId !== ""
+        ? this.em.getReference(Team, model.teamId)
+        : null;
     row.players.set(model.playerIds.map((id) => this.em.getReference(Player, id)));
     row.rosterSourceUrl = model.rosterSourceUrl;
     this.em.persist(row);
@@ -330,7 +333,7 @@ export class CompetitionMatchWriter implements MatchWriter {
     for (const row of matches) {
       const match = byId.get(row.id) ?? { id: row.id, previousMatches: [] };
 
-      if (row.previous_match_id && row.type)
+      if (row.previous_match_id !== null && row.previous_match_id !== "" && row.type)
         match.previousMatches.push({ previousMatchId: row.previous_match_id, type: row.type });
       byId.set(row.id, match);
     }
@@ -440,9 +443,10 @@ export class CompetitionEventWriter implements EventWriter {
     });
   }
   async slugTaken(slug: string, exceptEventId: string | null) {
-    const where: FilterQuery<Row.TournamentEvent> = exceptEventId
-      ? { slug, id: { $ne: exceptEventId } }
-      : { slug };
+    const where: FilterQuery<Row.TournamentEvent> =
+      exceptEventId !== null && exceptEventId !== ""
+        ? { slug, id: { $ne: exceptEventId } }
+        : { slug };
 
     return (await this.em.count(Row.TournamentEvent, where)) > 0;
   }

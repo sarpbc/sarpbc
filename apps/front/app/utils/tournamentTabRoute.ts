@@ -10,6 +10,7 @@ export function getTournamentTabFromRouteName(
       return "matches";
     case "tournaments-event-stage-stats":
       return "stats";
+    case undefined:
     default:
       return "overview";
   }

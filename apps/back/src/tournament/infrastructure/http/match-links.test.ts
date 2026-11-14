@@ -69,7 +69,7 @@ describe("match links in API payloads", () => {
     parent.matches = [
       match({
         participants: [participant("Karmine Corp"), participant("Team Falcons")],
-        tournament: { ...parent, league: null },
+        tournament: Object.assign(new Tournament(), parent, { league: null }),
       }),
     ];
 

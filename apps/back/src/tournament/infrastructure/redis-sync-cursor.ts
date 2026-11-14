@@ -10,7 +10,7 @@ export class RedisSyncCursor implements SyncCursor {
   async getLastSyncAt(): Promise<Date | null> {
     const value = await this.redisService.get(CURSOR_KEY);
 
-    if (!value) {
+    if (value === null || value === "") {
       return null;
     }
 

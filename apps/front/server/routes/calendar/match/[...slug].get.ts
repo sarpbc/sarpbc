@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import {
   buildMatchIcs,
   fetchMatchForCalendar,
@@ -9,7 +10,7 @@ import {
 export default defineEventHandler(async (event) => {
   const id = parseIcsSlug(getRequestURL(event).pathname);
 
-  if (!id) {
+  if (!isNonEmptyString(id)) {
     throw createError({ statusCode: 404, statusMessage: "Match not found" });
   }
 

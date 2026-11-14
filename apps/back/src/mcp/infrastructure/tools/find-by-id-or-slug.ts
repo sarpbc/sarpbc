@@ -26,7 +26,7 @@ export async function requireByIdOrSlug<Entity>(
 ): Promise<Entity> {
   const entity = await findByIdOrSlug(lookup, token);
 
-  if (!entity) {
+  if (entity === null) {
     const search = kind === "Player" ? "search_players" : "search_teams";
     throw new NotFoundError(
       `${kind} "${token}" was not found. Try ${search} to find the correct slug or id.`,

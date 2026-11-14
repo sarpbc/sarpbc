@@ -200,7 +200,7 @@ export class MatchService {
   }
 
   private getTeamMatchOutcome(match: Match, teamId: string): "win" | "loss" | null {
-    if (match.winner?.team?.id) {
+    if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
       return match.winner.team.id === teamId ? "win" : "loss";
     }
 

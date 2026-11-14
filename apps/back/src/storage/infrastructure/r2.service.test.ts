@@ -1,13 +1,4 @@
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-  type Mock,
-  type MockInstance,
-} from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
 import { InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { S3Client } from "@aws-sdk/client-s3";
@@ -17,13 +8,12 @@ import { StorageService } from "../application/storage.service";
 import { InvalidInputError } from "../../common/domain/errors";
 
 describe("R2Service", () => {
-  const logger = {
-    set: vi.fn(),
-    info: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-    debug: vi.fn(),
-    emit: vi.fn(),
+  const createdLogger = () => {
+    const created = vi.mocked(createLogger).mock.results[0];
+
+    if (created?.type !== "return") throw new Error("No logger was created");
+
+    return created.value;
   };
 
   const configuredValues = {
@@ -40,15 +30,10 @@ describe("R2Service", () => {
   let service: StorageService;
 
   beforeEach(() => {
-    (createLogger as Mock).mockReturnValue(logger);
-    sendSpy = vi.spyOn(S3Client.prototype, "send").mockResolvedValue({} as never);
-    r2 = new R2Service({
-      get: (key: string) => configuredValues[key as keyof typeof configuredValues],
-      getOrThrow: (key: string) => configuredValues[key as keyof typeof configuredValues],
-    } as ConfigService);
+    sendSpy = vi.spyOn(S3Client.prototype, "send").mockImplementation(() => {});
+    r2 = new R2Service(new ConfigService(configuredValues));
     service = new StorageService(r2);
     vi.clearAllMocks();
-    (createLogger as Mock).mockReturnValue(logger);
   });
 
   afterEach(() => {
@@ -60,11 +45,9 @@ describe("R2Service", () => {
 
     expect(result.key).toMatch(/^news\/covers\/.+\.jpg$/);
     expect(result.publicUrl).toContain(result.key);
-    expect(sendSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: expect.objectContaining({ Key: result.key, ContentType: "image/jpeg" }),
-      }),
-    );
+    const input: unknown = expect.objectContaining({ Key: result.key, ContentType: "image/jpeg" });
+
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ input }));
   });
 
   it("rejects unsupported types before calling R2", async () => {
@@ -81,7 +64,7 @@ describe("R2Service", () => {
       service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "news"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
 
-    expect(logger.error).toHaveBeenCalled();
+    expect(createdLogger().error).toHaveBeenCalled();
   });
 
   it("stores tournament artwork separately from news covers", async () => {
@@ -90,11 +73,14 @@ describe("R2Service", () => {
 
     expect(result.key).toMatch(/^tournaments\/images\/.+\.png$/);
     expect(result.publicUrl).toBe(`https://cdn.example/${result.key}`);
-    expect(sendSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: expect.objectContaining({ Key: result.key, Body: buffer, ContentType: "image/png" }),
-      }),
-    );
+
+    const input: unknown = expect.objectContaining({
+      Key: result.key,
+      Body: buffer,
+      ContentType: "image/png",
+    });
+
+    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ input }));
   });
 
   it("stores an object under its exact key with immutable caching", async () => {
@@ -124,7 +110,7 @@ describe("R2Service", () => {
     await expect(
       r2.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
-    expect(logger.error).toHaveBeenCalled();
+    expect(createdLogger().error).toHaveBeenCalled();
   });
 
   it("publishes a pending object by copying it under its final key", async () => {
@@ -170,10 +156,7 @@ describe("R2Service", () => {
   });
 
   it("fails with a clear error when R2 is not configured", async () => {
-    const unconfigured = new R2Service({
-      get: (key: string) => (key === "r2_bucket" ? "sarpbc-org" : undefined),
-      getOrThrow: (key: string) => (key === "r2_bucket" ? "sarpbc-org" : undefined),
-    } as ConfigService);
+    const unconfigured = new R2Service(new ConfigService({ r2_bucket: "sarpbc-org" }));
 
     await expect(unconfigured.deleteObject("teams/kc/logo.webp")).rejects.toThrow(
       /R2 storage is not configured/,

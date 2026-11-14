@@ -2,17 +2,28 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
 import { NewsService } from "./news.service";
 import type { NewsArticleRecord } from "./models";
-import type { NewsTransaction, NewsWriteScope } from "./ports";
+import type { NewsQueries, NewsTransaction, NewsWriteScope } from "./ports";
+
+const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
 
 describe("NewsService findPublishedShortsByWeek", () => {
   let service: NewsService;
 
   const newsRepository = {
-    listWeek: vi.fn(),
-  };
+    findBySlug: unused,
+    findById: unused,
+    listPublished: unused,
+    listWeek: vi.fn<NewsQueries["listWeek"]>(),
+    listAdmin: unused,
+  } satisfies NewsQueries;
 
   beforeEach(() => {
-    service = new NewsService(newsRepository as never, {} as never, {} as never, {} as never);
+    service = new NewsService(
+      newsRepository,
+      { run: unused },
+      { countByTargetIds: unused },
+      { submitNewsSlugs: unused },
+    );
     vi.clearAllMocks();
   });
 

@@ -10,19 +10,25 @@ export interface RosterMerge<T> {
 type Mergeable = Pick<Player | Team, "id" | "name" | "pandascoreId" | "mergedIntoId">;
 
 function assertMergeable(kind: "player" | "team", kept: Mergeable, merged: Mergeable): void {
-  if (kept.mergedIntoId) {
+  if (kept.mergedIntoId !== null && kept.mergedIntoId !== "") {
     throw new InvalidInputError(
       `${kept.name} was already merged into ${kind} "${kept.mergedIntoId}"; keep that ${kind} instead`,
     );
   }
 
-  if (merged.mergedIntoId) {
+  if (merged.mergedIntoId !== null && merged.mergedIntoId !== "") {
     throw new ConflictError(
       `${merged.name} was already merged into ${kind} "${merged.mergedIntoId}"`,
     );
   }
 
-  if (kept.pandascoreId && merged.pandascoreId && kept.pandascoreId !== merged.pandascoreId) {
+  if (
+    kept.pandascoreId !== null &&
+    kept.pandascoreId !== 0 &&
+    merged.pandascoreId !== null &&
+    merged.pandascoreId !== 0 &&
+    kept.pandascoreId !== merged.pandascoreId
+  ) {
     throw new ConflictError(
       `${kept.name} and ${merged.name} are distinct PandaScore ${kind}s (${kept.pandascoreId}, ${merged.pandascoreId})`,
     );
@@ -52,7 +58,12 @@ export class RosterMergeService {
 
       await references.movePlayer(merged.id, kept.id);
 
-      if (!kept.pandascoreId && merged.pandascoreId) kept.linkPandascore(merged.pandascoreId);
+      if (
+        (kept.pandascoreId === null || kept.pandascoreId === 0) &&
+        merged.pandascoreId !== null &&
+        merged.pandascoreId !== 0
+      )
+        kept.linkPandascore(merged.pandascoreId);
 
       if (!kept.team && merged.team) {
         kept.team = merged.team;
@@ -97,7 +108,12 @@ export class RosterMergeService {
 
       await references.moveTeam(merged.id, kept.id);
 
-      if (!kept.pandascoreId && merged.pandascoreId) kept.linkPandascore(merged.pandascoreId);
+      if (
+        (kept.pandascoreId === null || kept.pandascoreId === 0) &&
+        merged.pandascoreId !== null &&
+        merged.pandascoreId !== 0
+      )
+        kept.linkPandascore(merged.pandascoreId);
       kept.location ??= merged.location;
       kept.imageUrl ??= merged.imageUrl;
       kept.darkModeImageUrl ??= merged.darkModeImageUrl;

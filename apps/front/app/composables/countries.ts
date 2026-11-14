@@ -14,7 +14,7 @@ export async function getCountry(
   try {
     const res = await apiFetch<{ country: CountryDetail }>(
       `/countries/${encodeURIComponent(code)}`,
-      { method: "GET", params: query },
+      { method: "GET", query },
     );
 
     return res.country;

@@ -1,4 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
+import { EntityManager } from "@mikro-orm/postgresql";
+import { unconstructed } from "../../../../test/doubles";
 import { TournamentRosterReferences } from "./roster-references.mover";
 import { TournamentPrize } from "./tournament-prize.entities";
 
@@ -17,11 +19,9 @@ describe("TournamentRosterReferences.moveTeam prizes", () => {
     const nativeDelete = vi.fn();
     const nativeUpdate = vi.fn();
 
-    const references = new TournamentRosterReferences({
-      find,
-      nativeDelete,
-      nativeUpdate,
-    } as never);
+    const references = new TournamentRosterReferences(
+      Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
+    );
 
     const prizeUpdateOrder = () =>
       nativeUpdate.mock.invocationCallOrder[

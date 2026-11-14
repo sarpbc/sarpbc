@@ -1,6 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team } from "../../domain/roster";
 import { TransferController } from "./transfer.controller";
+import { TransferService } from "../../application/transfer.service";
+import { TeamService } from "../../application/team.service";
+import { PlayerService } from "../../application/player.service";
+import { unconstructed } from "../../../../test/doubles";
 
 describe("TransferController", () => {
   const kc = Object.assign(new Team(), {
@@ -22,17 +26,23 @@ describe("TransferController", () => {
     joinSourceUrl: "https://x.com/KarmineCorp/status/1",
   });
 
-  const transfers = { findAndCount: vi.fn() };
-  const teams = { findBySlug: vi.fn() };
-  const players = { findBySlug: vi.fn() };
-  const controller = new TransferController(transfers as never, teams as never, players as never);
+  const findAndCount = vi.fn();
+  const teamBySlug = vi.fn();
+  const playerBySlug = vi.fn();
+
+  const controller = new TransferController(
+    Object.assign(unconstructed(TransferService), { findAndCount }),
+    Object.assign(unconstructed(TeamService), { findBySlug: teamBySlug }),
+    Object.assign(unconstructed(PlayerService), { findBySlug: playerBySlug }),
+  );
+
   const page = { limit: 5, offset: 0 };
 
   beforeEach(() => {
     vi.resetAllMocks();
-    teams.findBySlug.mockResolvedValue(kc);
-    players.findBySlug.mockResolvedValue(zen);
-    transfers.findAndCount.mockResolvedValue([
+    teamBySlug.mockResolvedValue(kc);
+    playerBySlug.mockResolvedValue(zen);
+    findAndCount.mockResolvedValue([
       [
         {
           id: "c1:join",
@@ -69,7 +79,7 @@ describe("TransferController", () => {
       ],
       count: 1,
     });
-    expect(transfers.findAndCount).toHaveBeenCalledWith({
+    expect(findAndCount).toHaveBeenCalledWith({
       ...page,
       teamId: undefined,
       playerId: undefined,
@@ -89,8 +99,8 @@ describe("TransferController", () => {
       to: "2025-12-31",
     });
 
-    expect(teams.findBySlug).toHaveBeenCalledWith("old-kc-slug");
-    expect(transfers.findAndCount).toHaveBeenCalledWith({
+    expect(teamBySlug).toHaveBeenCalledWith("old-kc-slug");
+    expect(findAndCount).toHaveBeenCalledWith({
       ...page,
       teamId: "kc",
       playerId: "zen",
@@ -101,12 +111,12 @@ describe("TransferController", () => {
   });
 
   it("returns an empty page for an unknown team or player", async () => {
-    teams.findBySlug.mockResolvedValue(null);
+    teamBySlug.mockResolvedValue(null);
 
     await expect(controller.find({ ...page, team: "missing" })).resolves.toEqual({
       transfers: [],
       count: 0,
     });
-    expect(transfers.findAndCount).not.toHaveBeenCalled();
+    expect(findAndCount).not.toHaveBeenCalled();
   });
 });

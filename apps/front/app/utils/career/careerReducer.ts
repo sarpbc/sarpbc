@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { getEventById, pickRandomEvent } from "~/data/career/events";
 import { getWorldTeamById } from "~/data/career/world";
 import { applyStatDelta, getAgeDecline, getStartingStats } from "~/utils/career/stats";
@@ -56,6 +57,10 @@ const OFFSEASON_DESTINY_CHOICES = {
 } as const satisfies Record<string, Partial<CareerDestinyLeanings>>;
 
 type OffseasonDestinyChoiceId = keyof typeof OFFSEASON_DESTINY_CHOICES;
+
+function isOffseasonDestinyChoiceId(id: string): id is OffseasonDestinyChoiceId {
+  return Object.hasOwn(OFFSEASON_DESTINY_CHOICES, id);
+}
 
 export type CareerAction =
   | { type: "START_ONBOARDING" }
@@ -287,7 +292,7 @@ function endSeason(state: CareerState): CareerState {
     pendingOfferTeamIds:
       resolution.transferTeamIds.length > 0
         ? resolution.transferTeamIds
-        : resolution.lastChanceTeamId
+        : isNonEmptyString(resolution.lastChanceTeamId)
           ? [resolution.lastChanceTeamId]
           : [],
     renewalOffered: resolution.renewalOffered,
@@ -479,7 +484,7 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
     case "RESOLVE_EVENT_CHOICE": {
       const eventId = state.currentEventId;
 
-      if (!eventId) return { state, finishedResult: null };
+      if (!isNonEmptyString(eventId)) return { state, finishedResult: null };
 
       const event = getEventById(eventId);
       const choice = event?.choices.find((entry) => entry.id === action.choiceId);
@@ -568,11 +573,11 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
     }
 
     case "RESOLVE_OFFSEASON_DESTINY": {
-      if (!(action.choiceId in OFFSEASON_DESTINY_CHOICES)) {
+      const id = action.choiceId;
+
+      if (!isOffseasonDestinyChoiceId(id)) {
         return { state, finishedResult: null };
       }
-
-      const id = action.choiceId as OffseasonDestinyChoiceId;
 
       const next = {
         ...state,

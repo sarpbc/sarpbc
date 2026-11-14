@@ -1,5 +1,7 @@
+import { isNonEmptyDateInput } from "@sarpbc/utils";
+
 export function formatDateForInput(date: Date | string | null | undefined): string {
-  if (!date) {
+  if (!isNonEmptyDateInput(date)) {
     return "";
   }
 

@@ -10,12 +10,18 @@ export class StatsImportRunner implements StatsImportScheduler {
 
   schedule(task: () => Promise<void>): void {
     setImmediate(() => {
-      RequestContext.create(this.orm.em, task).catch((error) => {
-        log.error({
-          component: StatsImportRunner.name,
-          error: error instanceof Error ? error : new Error(String(error)),
-        });
-      });
+      void this.run(task);
     });
+  }
+
+  private async run(task: () => Promise<void>): Promise<void> {
+    try {
+      await RequestContext.create(this.orm.em, task);
+    } catch (error) {
+      log.error({
+        component: StatsImportRunner.name,
+        error: error instanceof Error ? error : new Error(String(error)),
+      });
+    }
   }
 }

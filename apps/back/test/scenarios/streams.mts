@@ -1,20 +1,29 @@
 import assert from "node:assert/strict";
-import type { Stream, StreamsResponse } from "@sarpbc/types";
-import type { CallTool, Request, Review, ToolFailure } from "./support.mts";
+import { z } from "zod";
+import { toolFailure } from "./support.mts";
+import type { CallTool, Request, Review } from "./support.mts";
 
-interface WatchedMatch {
-  watchStreams: Stream[];
-}
+const stream = z.strictObject({
+  url: z.string(),
+  platform: z.string(),
+  channel: z.string().nullable(),
+  language: z.string(),
+  kind: z.string(),
+  source: z.string(),
+});
 
-interface WatchedTournament {
-  id: string;
-  watchStreams: Stream[];
-}
+const streamsResponse = z.object({ streams: z.array(stream), inherited: z.array(stream) });
 
-interface McpMatches {
-  live?: { id: string; streams: Stream[] }[];
-  upcoming?: { id: string; streams: Stream[] }[];
-}
+const watchedMatch = z.object({ match: z.object({ watchStreams: z.array(stream) }) });
+
+const watchedTournament = z.object({
+  tournament: z.object({ id: z.string(), watchStreams: z.array(stream) }),
+});
+
+const mcpMatches = z.object({
+  live: z.array(z.object({ id: z.string(), streams: z.array(z.unknown()) })).optional(),
+  upcoming: z.array(z.object({ id: z.string(), streams: z.array(z.unknown()) })).optional(),
+});
 
 export interface StreamsContext {
   request: Request;
@@ -33,7 +42,7 @@ export interface StreamProposalsContext {
   match: { id: string };
 }
 
-const urls = (streams: { url: string }[]): string[] => streams.map((stream) => stream.url);
+const urls = (streams: { url: string }[]): string[] => streams.map((entry) => entry.url);
 
 export async function verifyStreams({
   request,
@@ -46,14 +55,11 @@ export async function verifyStreams({
   const tournamentPath = `/tournaments/${tournament.id}/streams`;
   const matchPath = `/tournaments/matches/${match.id}/streams`;
 
-  const watched = async (): Promise<Stream[]> =>
-    (await request("GET", `/matches/${match.id}`)).json<{ match: WatchedMatch }>().match
-      .watchStreams;
+  const watched = async () =>
+    (await request("GET", `/matches/${match.id}`)).json(watchedMatch).match.watchStreams;
 
-  const stage = async (): Promise<WatchedTournament> =>
-    (await request("GET", `/tournaments/${tournament.id}`)).json<{
-      tournament: WatchedTournament;
-    }>().tournament;
+  const stage = async () =>
+    (await request("GET", `/tournaments/${tournament.id}`)).json(watchedTournament).tournament;
 
   await request("GET", tournamentPath, undefined, memberCookie, 403);
   await request("PUT", tournamentPath, { streams: [] }, memberCookie, 403);
@@ -69,7 +75,7 @@ export async function verifyStreams({
       },
       staffCookie,
     )
-  ).json<StreamsResponse>();
+  ).json(z.unknown());
 
   assert.deepEqual(event, {
     streams: [
@@ -94,12 +100,12 @@ export async function verifyStreams({
 
   const saved = (
     await request("PUT", tournamentPath, { streams: tournamentList }, staffCookie)
-  ).json<StreamsResponse>();
+  ).json(streamsResponse);
 
   assert.deepEqual(urls(saved.streams), urls(tournamentList));
   assert.deepEqual(urls(saved.inherited), ["https://twitch.tv/integration_event"]);
   assert.deepEqual(
-    saved.streams.map((stream) => [stream.platform, stream.language]),
+    saved.streams.map((entry) => [entry.platform, entry.language]),
     [
       ["twitch", "en"],
       ["kick", "fr"],
@@ -111,21 +117,18 @@ export async function verifyStreams({
     urls(tournamentList),
     "a match without its own list shows the tournament list",
   );
-  assert.deepEqual(
-    (await request("GET", matchPath, undefined, staffCookie)).json<StreamsResponse>(),
-    {
-      streams: [],
-      inherited: saved.streams,
-    },
-  );
+  assert.deepEqual((await request("GET", matchPath, undefined, staffCookie)).json(z.unknown()), {
+    streams: [],
+    inherited: saved.streams,
+  });
 
   const override = [
     { url: "https://www.youtube.com/@IntegrationB/live", language: "en", kind: "official" },
   ];
 
-  const overridden = (
-    await request("PUT", matchPath, { streams: override }, staffCookie)
-  ).json<StreamsResponse>();
+  const overridden = (await request("PUT", matchPath, { streams: override }, staffCookie)).json(
+    streamsResponse,
+  );
 
   assert.equal(overridden.streams[0].channel, "@IntegrationB");
   assert.deepEqual(
@@ -177,7 +180,7 @@ export async function verifyStreams({
       staffCookie,
       201,
     )
-  ).json<{ tournament: { id: string } }>().tournament;
+  ).json(z.object({ tournament: z.object({ id: z.string() }) })).tournament;
 
   const startggStreams = (
     await request(
@@ -190,10 +193,10 @@ export async function verifyStreams({
       },
       staffCookie,
     )
-  ).json<StreamsResponse>().streams;
+  ).json(streamsResponse).streams;
 
   assert.deepEqual(
-    startggStreams.map((stream) => stream.source),
+    startggStreams.map((entry) => entry.source),
     ["startgg"],
     "staff edits on a start.gg tournament are start.gg data",
   );
@@ -210,45 +213,55 @@ export async function verifyStreamProposals({
   tournament,
   match,
 }: StreamProposalsContext): Promise<void> {
-  const stream = { url: "https://twitch.tv/integration_startgg", language: "en", kind: "official" };
+  const proposed = {
+    url: "https://twitch.tv/integration_startgg",
+    language: "en",
+    kind: "official",
+  };
 
-  const refused = await callTool<ToolFailure>("set_match_streams", {
-    matchId: match.id,
-    streams: [stream],
-  });
+  const refused = await callTool(
+    "set_match_streams",
+    { matchId: match.id, streams: [proposed] },
+    toolFailure,
+  );
 
   assert.deepEqual(refused, { error: true }, "set_match_streams requires a sourceUrl");
 
   const startgg = await callTool("set_tournament_streams", {
     tournamentId: tournament.id,
-    streams: [stream],
+    streams: [proposed],
     sourceUrl: "https://www.start.gg/tournament/integration/event/main",
   });
 
   assert.equal(startgg.status, "pending");
   assert.deepEqual(
-    (
-      await request("GET", `/tournaments/${tournament.id}/streams`, undefined, staffCookie)
-    ).json<StreamsResponse>().streams,
+    (await request("GET", `/tournaments/${tournament.id}/streams`, undefined, staffCookie)).json(
+      streamsResponse,
+    ).streams,
     [],
     "nothing changes before approval",
   );
   assert.equal((await review(startgg)).status, "applied");
 
-  const listed = (await request("GET", `/tournaments/${tournament.id}`)).json<{
-    tournament: WatchedTournament;
-  }>().tournament.watchStreams;
+  const listed = (await request("GET", `/tournaments/${tournament.id}`)).json(watchedTournament)
+    .tournament.watchStreams;
 
   assert.deepEqual(
     listed.map(({ url, source }) => [url, source]),
-    [[stream.url, "startgg"]],
+    [[proposed.url, "startgg"]],
     "the site keeps start.gg streams with their source for the credit",
   );
   assert.deepEqual(
-    (await callTool<{ streams: Stream[] }>("get_tournament", { id: tournament.id })).streams,
+    (
+      await callTool(
+        "get_tournament",
+        { id: tournament.id },
+        z.object({ streams: z.array(z.unknown()) }),
+      )
+    ).streams,
     [],
   );
-  const upcoming = await callTool<McpMatches>("get_upcoming_matches", {});
+  const upcoming = await callTool("get_upcoming_matches", {}, mcpMatches);
 
   const mcpMatch = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? [])].find(
     (candidate) => candidate.id === match.id,
@@ -272,7 +285,7 @@ export async function verifyStreamProposals({
 
   assert.equal((await review(manual)).status, "applied");
 
-  const watch = (await request("GET", `/matches/${match.id}`)).json<{ match: WatchedMatch }>().match
+  const watch = (await request("GET", `/matches/${match.id}`)).json(watchedMatch).match
     .watchStreams;
 
   assert.deepEqual(

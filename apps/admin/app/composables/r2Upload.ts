@@ -1,5 +1,9 @@
-import type { R2UploadResponse } from "@sarpbc/types";
-import type { ImageUploadTarget } from "@sarpbc/utils";
+import {
+  getApiErrorBody,
+  isNonEmptyString,
+  parseR2UploadResponse,
+  type ImageUploadTarget,
+} from "@sarpbc/utils";
 
 type ImageUploadContext = {
   target: ImageUploadTarget;
@@ -7,24 +11,19 @@ type ImageUploadContext = {
   articleTitle?: string;
 };
 
-type NestErrorBody = {
-  message?: string | string[];
-  statusCode?: number;
-};
-
 function messageFromNestBody(responseText: string): string | undefined {
   try {
-    const parsed = JSON.parse(responseText) as NestErrorBody;
+    const message = getApiErrorBody(JSON.parse(responseText))?.message;
 
-    if (Array.isArray(parsed.message)) {
-      const joined = parsed.message.filter((item) => item.trim().length > 0).join(" ");
+    if (Array.isArray(message)) {
+      const joined = message.filter((item) => item.trim().length > 0).join(" ");
 
       return joined.length > 0 ? joined : undefined;
     }
 
-    const text = parsed.message?.trim();
+    const text = message?.trim();
 
-    if (text) return text;
+    if (isNonEmptyString(text)) return text;
   } catch {
     return undefined;
   }
@@ -47,11 +46,11 @@ export function useR2Upload() {
     formData.append("file", file);
     formData.append("target", context.target);
 
-    if (context.articleSlug) {
+    if (isNonEmptyString(context.articleSlug)) {
       formData.append("articleSlug", context.articleSlug);
     }
 
-    if (context.articleTitle) {
+    if (isNonEmptyString(context.articleTitle)) {
       formData.append("articleTitle", context.articleTitle);
     }
 
@@ -67,11 +66,12 @@ export function useR2Upload() {
 
         xhr.addEventListener("load", () => {
           if (xhr.status >= 200 && xhr.status < 300) {
-            try {
-              const parsed = JSON.parse(xhr.responseText) as R2UploadResponse;
-              resolve(parsed.publicUrl);
-            } catch {
+            const parsed = parseR2UploadResponse(xhr.responseText);
+
+            if (parsed === undefined) {
               reject(new Error("Upload succeeded but the server response was invalid."));
+            } else {
+              resolve(parsed.publicUrl);
             }
 
             return;

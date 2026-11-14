@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import { getPlayerTournaments } from "~/composables/player/api";
 import { getTeamTournaments } from "~/composables/team/api";
@@ -94,7 +95,7 @@ export function useEntityTournaments(kind: EntityKind, entityId: MaybeRef<string
   const { data, pending, error, refresh } = useAsyncData(
     () => `${kind}-tournaments-${idRef.value ?? "unknown"}`,
     async () => ({
-      tournaments: idRef.value ? await FETCH_TOURNAMENTS[kind](idRef.value) : [],
+      tournaments: isNonEmptyString(idRef.value) ? await FETCH_TOURNAMENTS[kind](idRef.value) : [],
       /** Captured with the fetch so the server and client split events identically on hydration. */
       fetchedAt: Date.now(),
     }),

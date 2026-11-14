@@ -230,8 +230,8 @@ export function writeTools({
 
         const match = await matchService.createMatch(tournamentId, {
           name,
-          beginAt: beginAt ? new Date(beginAt) : undefined,
-          endAt: endAt ? new Date(endAt) : undefined,
+          beginAt: beginAt !== undefined && beginAt !== "" ? new Date(beginAt) : undefined,
+          endAt: endAt !== undefined && endAt !== "" ? new Date(endAt) : undefined,
           status,
           numberOfGames,
           participantIds: participants.map((participant) => participant.id),
@@ -326,14 +326,12 @@ export function writeTools({
       permission: "tournaments.manage",
       input: {
         matchId: z.string().min(1).describe("Match UUID."),
-        beginAt: z
-          .string()
+        beginAt: z.iso
           .datetime({ offset: true })
           .nullable()
           .optional()
           .describe("Start time (ISO 8601), or null."),
-        endAt: z
-          .string()
+        endAt: z.iso
           .datetime({ offset: true })
           .nullable()
           .optional()
@@ -538,7 +536,7 @@ export function writeTools({
       write: true,
       permission: "tournaments.manage",
       input: {
-        tournamentId: z.string().uuid().describe("Manual tournament UUID to link."),
+        tournamentId: z.uuid().describe("Manual tournament UUID to link."),
         pandascoreId: z
           .number()
           .int()
@@ -578,7 +576,7 @@ export function writeTools({
           .describe("Local tournament UUID to sync. Omit to run the global new-tournament sync."),
       },
       handler: async ({ tournamentId }): Promise<ToolWrite<TriggeredSync>> => {
-        if (tournamentId) {
+        if (tournamentId !== undefined && tournamentId !== "") {
           await pandascoreTournamentSync.execute(tournamentId);
 
           return {

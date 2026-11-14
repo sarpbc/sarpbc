@@ -1,6 +1,7 @@
 import type { NuxtConfig } from "nuxt/schema";
 import { SITEMAP_KINDS } from "@sarpbc/types";
 import { localizedPath } from "@sarpbc/utils/entity-path";
+import { isNonEmptyString } from "@sarpbc/utils/text";
 import {
   DEFAULT_API_BASE,
   SITE_ORIGIN,
@@ -9,8 +10,12 @@ import {
   newsMdcComponentMap,
 } from "@sarpbc/ui/config";
 
-const apiBase = process.env.NUXT_PUBLIC_API_BASE || DEFAULT_API_BASE;
-const adminUrl = process.env.NUXT_PUBLIC_ADMIN_URL || "https://admin.sarpbc.org";
+function envOr(value: string | undefined, fallback: string): string {
+  return isNonEmptyString(value) ? value : fallback;
+}
+
+const apiBase = envOr(process.env.NUXT_PUBLIC_API_BASE, DEFAULT_API_BASE);
+const adminUrl = envOr(process.env.NUXT_PUBLIC_ADMIN_URL, "https://admin.sarpbc.org");
 
 const contentSwr = { swr: 300 } as const;
 
@@ -26,11 +31,15 @@ function localizedRouteRules(rules: RouteRules): RouteRules {
 }
 
 const isProduction = process.env.NODE_ENV === "production";
-const posthogPublicKey = isProduction ? process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN || "" : "";
-const posthogHost = process.env.NUXT_PUBLIC_POSTHOG_HOST || "https://t.sarpbc.org";
+
+const posthogPublicKey = isProduction
+  ? envOr(process.env.NUXT_PUBLIC_POSTHOG_PROJECT_TOKEN, "")
+  : "";
+
+const posthogHost = envOr(process.env.NUXT_PUBLIC_POSTHOG_HOST, "https://t.sarpbc.org");
 
 function hostnameFromUrl(base: string | undefined): string | undefined {
-  if (!base) {
+  if (!isNonEmptyString(base)) {
     return undefined;
   }
 
@@ -72,7 +81,11 @@ export default defineNuxtConfig({
   i18n: i18nOptions,
 
   image: {
-    domains: ["cdn.pandascore.co", "imagedelivery.net", ...(r2ImageHost ? [r2ImageHost] : [])],
+    domains: [
+      "cdn.pandascore.co",
+      "imagedelivery.net",
+      ...(isNonEmptyString(r2ImageHost) ? [r2ImageHost] : []),
+    ],
   },
 
   icon: {
@@ -141,12 +154,6 @@ export default defineNuxtConfig({
           error: 100,
         },
         keep: [{ duration: 1000 }, { status: 400 }],
-      },
-    },
-    vite: {
-      esbuild: {
-        drop: ["debugger"],
-        pure: ["console.debug", "console.log"],
       },
     },
     nitro: {

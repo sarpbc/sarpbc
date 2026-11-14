@@ -4,6 +4,7 @@ import {
   newsPath,
   NEWS_SEO_DESCRIPTION_MAX_LENGTH,
   type UiLocale,
+  isNonEmptyString,
 } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
@@ -37,7 +38,8 @@ export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): Ne
     excerptFromNewsContent(article.content, NEWS_SEO_DESCRIPTION_MAX_LENGTH) || undefined;
 
   const authorName = article.author?.trim();
-  const image = article.imageUrl?.trim() || undefined;
+  const trimmedImage = article.imageUrl?.trim();
+  const image = isNonEmptyString(trimmedImage) ? trimmedImage : undefined;
 
   return compactJsonLd<NewsArticleLd>({
     "@context": SCHEMA_ORG,
@@ -47,7 +49,7 @@ export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): Ne
     url,
     description,
     image,
-    author: authorName
+    author: isNonEmptyString(authorName)
       ? {
           "@type": "Person",
           name: authorName,

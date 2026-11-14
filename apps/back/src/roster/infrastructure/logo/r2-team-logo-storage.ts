@@ -17,6 +17,6 @@ export class R2TeamLogoStorage implements TeamLogoStorage {
   }
 
   async delete(key: string): Promise<void> {
-    return await this.storage.deleteObject(key);
+    await this.storage.deleteObject(key);
   }
 }

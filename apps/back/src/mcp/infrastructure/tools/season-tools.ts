@@ -21,7 +21,7 @@ export function seasonTools({ seasonService }: SeasonToolServices): McpTool[] {
       name: "get_season",
       description:
         "Get one season with its recorded awards: type, region, presenting partner, official source and player. A season holds one award of each type, and one Regional MVP per region. Read it before propose_season_award.",
-      input: { id: z.string().uuid().describe("Season UUID from list_seasons.") },
+      input: { id: z.uuid().describe("Season UUID from list_seasons.") },
       handler: async ({ id }) => {
         const season = await seasonService.detail(id);
 

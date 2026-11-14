@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import type { SitemapEntry } from "@sarpbc/types";
+import { z } from "zod";
 import type { Orm, Request } from "./support.mts";
 
 export interface SitemapContext {
@@ -8,13 +8,11 @@ export interface SitemapContext {
   tournament: { id: string; slug: string; event: { slug: string } };
 }
 
-interface MatchBody {
-  match: { slug: string };
-}
+const matchBody = z.object({ match: z.object({ slug: z.string() }) });
 
-interface StaffTournamentsBody {
-  tournaments: { id: string }[];
-}
+const staffTournamentsBody = z.object({ tournaments: z.array(z.object({ id: z.string() })) });
+
+const sitemapEntries = z.array(z.object({ path: z.string() }));
 
 export async function verifySitemap({ orm, request, tournament }: SitemapContext): Promise<void> {
   const { Match, Tournament, TournamentParticipant } =
@@ -74,7 +72,7 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
   await em.flush();
 
   const paths = async (kind: string): Promise<string[]> =>
-    (await request("GET", `/sitemap/${kind}`)).json<SitemapEntry[]>().map(({ path }) => path);
+    (await request("GET", `/sitemap/${kind}`)).json(sitemapEntries).map(({ path }) => path);
 
   const stages = await paths("tournaments");
   assert(stages.includes(`/tournaments/${tournament.event.slug}`));
@@ -88,7 +86,7 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
     assert(!publicIds.includes(excluded.publicId), `${excluded.name} stays out of the sitemap`);
   }
 
-  const { match } = (await request("GET", `/matches/${listed.publicId}`)).json<MatchBody>();
+  const { match } = (await request("GET", `/matches/${listed.publicId}`)).json(matchBody);
   assert(matches.includes(`/matches/${listed.publicId}/${match.slug}`), "the slug is canonical");
 
   const players = await paths("players");
@@ -104,7 +102,7 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
 
   const { tournaments: coached } = (
     await request("GET", `/player/${coach.id}/staff-tournaments`)
-  ).json<StaffTournamentsBody>();
+  ).json(staffTournamentsBody);
 
   assert(
     coached.some(({ id }) => id === stage.id),

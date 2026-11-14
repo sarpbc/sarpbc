@@ -1,7 +1,8 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchListItem, UpcomingMatchesResponse } from "@sarpbc/types";
 
 function matchBeginTime(match: MatchListItem): number {
-  return match.beginAt ? new Date(match.beginAt).getTime() : 0;
+  return isNonEmptyString(match.beginAt) ? new Date(match.beginAt).getTime() : 0;
 }
 
 export function useMatchesListPage() {

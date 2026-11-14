@@ -108,10 +108,14 @@ export interface MatchSlugSource {
 }
 
 export function matchPublicSlug({ name, participants, tournament }: MatchSlugSource): string {
-  const [first, second] = participants;
+  const first: NamedParticipant | undefined = participants[0];
+  const second: NamedParticipant | undefined = participants[1];
 
   return matchSlug({
-    teamNames: [first && participantName(first), second && participantName(second)],
+    teamNames: [
+      first === undefined ? undefined : participantName(first),
+      second === undefined ? undefined : participantName(second),
+    ],
     matchName: name,
     eventSlug: tournament.event.slug,
     stageSlug: tournament.slug,

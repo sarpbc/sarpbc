@@ -29,7 +29,7 @@ function totals(lines: ShareLine[]): PrizeAmount[] {
 function yearOf(entry: EarningsEntry): number | null {
   const date = entry.tournament.endAt ?? entry.tournament.beginAt;
 
-  return date ? new Date(date).getUTCFullYear() : null;
+  return date !== null && date !== "" ? new Date(date).getUTCFullYear() : null;
 }
 
 export function summarizeEarnings(lines: EarningsLine[]): ProfileEarnings {

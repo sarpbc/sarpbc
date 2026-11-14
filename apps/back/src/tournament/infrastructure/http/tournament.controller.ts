@@ -294,8 +294,14 @@ export class TournamentController {
   ) {
     const match = await this.matchService.createMatch(tournamentId, {
       ...matchData,
-      beginAt: matchData.beginAt ? new Date(matchData.beginAt) : undefined,
-      endAt: matchData.endAt ? new Date(matchData.endAt) : undefined,
+      beginAt:
+        matchData.beginAt !== undefined && matchData.beginAt !== ""
+          ? new Date(matchData.beginAt)
+          : undefined,
+      endAt:
+        matchData.endAt !== undefined && matchData.endAt !== ""
+          ? new Date(matchData.endAt)
+          : undefined,
     });
 
     return { match: withPublicSlug(match) };

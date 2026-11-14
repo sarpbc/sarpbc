@@ -7,7 +7,7 @@ export default defineEventHandler((event) => {
     !INDEXNOW_KEY_PATTERN.test(indexnowKey) ||
     getRequestURL(event).pathname !== `/${indexnowKey}.txt`
   ) {
-    return;
+    return undefined;
   }
 
   setHeader(event, "Content-Type", "text/plain; charset=utf-8");

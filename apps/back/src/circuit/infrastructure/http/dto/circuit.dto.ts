@@ -22,8 +22,7 @@ const circuitFields = {
     .string()
     .trim()
     .max(2048)
-    .url()
-    .regex(/^https?:\/\//, "Use an http(s) URL"),
+    .pipe(z.url().regex(/^https?:\/\//, "Use an http(s) URL")),
   qualificationSpots: z.number().int().min(1).max(MAX_CIRCUIT_QUALIFICATION_SPOTS).nullish(),
 };
 
@@ -50,12 +49,11 @@ export const SetCircuitStageDto = z.strictObject({
   sourceUrl: z
     .string()
     .trim()
-    .url()
-    .regex(/^https?:\/\//, "Use an http(s) URL"),
+    .pipe(z.url().regex(/^https?:\/\//, "Use an http(s) URL")),
   worldwide: z.boolean().optional(),
-  regionTeamIds: z.array(z.string().uuid()).max(MAX_CIRCUIT_STAGE_TEAMS).optional(),
+  regionTeamIds: z.array(z.uuid()).max(MAX_CIRCUIT_STAGE_TEAMS).optional(),
   finishes: z
-    .array(z.strictObject({ teamId: z.string().uuid(), placement }))
+    .array(z.strictObject({ teamId: z.uuid(), placement }))
     .max(MAX_CIRCUIT_STAGE_TEAMS)
     .optional(),
 });

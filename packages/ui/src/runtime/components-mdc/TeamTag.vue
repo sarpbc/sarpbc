@@ -5,7 +5,7 @@ import {
   selectActiveRosterPlayers,
   resolveThemedLogoUrl,
 } from "@sarpbc/utils";
-import { fetchWithEntityTagCache } from "../composables/entityTagCache";
+import { fetchTeamTagWithCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
 const props = defineProps<{
@@ -37,7 +37,7 @@ async function loadTeam() {
   error.value = false;
 
   try {
-    const response = await fetchWithEntityTagCache(`team:${props.slug}`, () =>
+    const response = await fetchTeamTagWithCache(props.slug, () =>
       apiFetch<{ team: Team | null }>(`/team/slug/${encodeURIComponent(props.slug)}`),
     );
 

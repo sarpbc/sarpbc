@@ -68,7 +68,7 @@ function stateColor(state: MatchBlockState): "error" | "info" | "neutral" {
   }
 }
 
-const stateLabel = useMatchStateLabel((beginAt) => dateFormatter.value.format(beginAt));
+const stateLabel = useMatchStateLabel(t, (beginAt) => dateFormatter.value.format(beginAt));
 </script>
 
 <template>

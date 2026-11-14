@@ -9,6 +9,7 @@ import { matchDecided } from "../../../tournament/domain/match-decided";
 import { CompetitionAfterCommit } from "../../../tournament/application/after-commit";
 import { MatchService } from "../../../tournament/application/match/match.service";
 import type { CompetitionTransaction } from "../../../tournament/application/ports";
+import { competitionScope, matchQueries, matchWriter } from "../../../../test/competition-doubles";
 import { PickemService } from "../application/pickem.service";
 import { CompetitionPickemMatches } from "./competition-pickem-matches";
 
@@ -25,27 +26,51 @@ describe("deciding a match from pick'ems", () => {
         { id: "r1", match: { id: "m" }, participant: { id: "a" }, score: 3 },
         { id: "r2", match: { id: "m" }, participant: { id: "b" }, score: 1 },
       ],
-      tournament: { id: "cup", pickemsEnabled: true } as TournamentSummary,
+      tournament: {
+        id: "cup",
+        name: "Cup",
+        slug: "cup",
+        event: { id: "event", slug: "event", name: "Event" },
+        beginAt: null,
+        league: null,
+        pickemsEnabled: true,
+        source: "manual",
+        pandascoreId: null,
+        streams: [],
+        eventStreams: [],
+      } satisfies TournamentSummary,
     });
 
-    const writer = { load: vi.fn(async () => stored), save: vi.fn(async () => {}) };
-    const events = { publish: vi.fn(async () => {}) };
+    const save = vi.fn(async () => {});
+    const writer = matchWriter({ load: async () => stored, save });
+    const publish = vi.fn(async () => {});
 
     const competition = new MatchService(
-      { detail: async () => stored } as never,
+      matchQueries({ detail: async () => stored }),
       {
-        run: async (work) => await work({ matches: writer } as never),
+        run: async (work) => await work(competitionScope({ matches: writer })),
       } satisfies CompetitionTransaction,
-      new CompetitionAfterCommit({ invalidateTournament: vi.fn() }, events, {
-        error: vi.fn(),
-      }),
+      new CompetitionAfterCommit(
+        { invalidateTournament: async () => {} },
+        { publish },
+        { error: () => {} },
+      ),
     );
 
     const pickems = new PickemService(
       { list: async () => [] },
       new CompetitionPickemMatches(competition),
-      { run: async (work) => await work({ unscored: async () => [] } as never) },
-      { now: () => new Date("2026-01-01T12:00:00Z"), id: () => "id", warn: vi.fn() },
+      {
+        run: async (work) =>
+          await work({
+            userExists: async () => true,
+            participantExists: async () => true,
+            pick: async () => null,
+            unscored: async () => [],
+            savePick: async () => {},
+          }),
+      },
+      { now: () => new Date("2026-01-01T12:00:00Z"), id: () => "id", warn: () => {} },
     );
 
     const now = new Date("2026-01-01T12:00:00Z");
@@ -53,11 +78,11 @@ describe("deciding a match from pick'ems", () => {
 
     await pickems.validateMatchResult("m");
 
-    expect(writer.save).toHaveBeenCalledWith(stored);
+    expect(save).toHaveBeenCalledWith(stored);
     expect(stored.winner?.id).toBe("a");
     expect(stored.endAt).toBeInstanceOf(Date);
     expect(isMatchFinished(stored)).toBe(true);
     expect(isMatchLive(stored, now)).toBe(false);
-    expect(events.publish).toHaveBeenCalledWith(matchDecided("m"));
+    expect(publish).toHaveBeenCalledWith(matchDecided("m"));
   });
 });

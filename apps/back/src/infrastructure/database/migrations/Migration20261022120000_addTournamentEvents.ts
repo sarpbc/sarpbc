@@ -17,30 +17,36 @@ const GENERIC_STAGE_NAMES = new Set([
   "finals",
 ]);
 
+function nonBlank(value: string | null | undefined): string | undefined {
+  const trimmed = value?.trim();
+
+  return trimmed === undefined || trimmed === "" ? undefined : trimmed;
+}
+
 function eventDisplayName(input: {
   leagueName: string | null;
   serieName: string | null;
   stageName: string;
 }): string {
-  const league = input.leagueName?.trim();
-  const serie = input.serieName?.trim();
+  const league = nonBlank(input.leagueName);
+  const serie = nonBlank(input.serieName);
   const stage = input.stageName.trim();
 
-  if (serie) {
+  if (serie !== undefined) {
     if (/^\d{4}$/.test(serie)) {
-      if (league) return `${league} ${serie}`;
+      if (league !== undefined) return `${league} ${serie}`;
 
       return stage && !GENERIC_STAGE_NAMES.has(stage.toLowerCase()) ? stage : serie;
     }
 
-    return league && !serie.toLowerCase().startsWith(league.toLowerCase())
+    return league !== undefined && !serie.toLowerCase().startsWith(league.toLowerCase())
       ? `${league} ${serie}`
       : serie;
   }
 
-  if (league && stage) return `${league} ${stage}`;
+  if (league !== undefined && stage) return `${league} ${stage}`;
 
-  return stage || league || "";
+  return stage || (league ?? "");
 }
 
 function utcDay(date: Date | null): string {
@@ -89,9 +95,9 @@ function chronology(
 }
 
 function groupKey(stage: StageRow): string {
-  const serie = stage.serie?.trim();
+  const serie = nonBlank(stage.serie);
 
-  return serie ? `${stage.leagueId ?? ""}::${serie}` : `stage::${stage.id}`;
+  return serie !== undefined ? `${stage.leagueId ?? ""}::${serie}` : `stage::${stage.id}`;
 }
 
 export class Migration20261022120000_addTournamentEvents extends Migration {
@@ -132,7 +138,10 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
 
     for (const group of ordered) {
       const [first] = group;
-      const manual = group.length === 1 && first.source === "manual" && !first.serie?.trim();
+
+      const manual =
+        group.length === 1 && first.source === "manual" && nonBlank(first.serie) === undefined;
+
       const newest = [...group].sort(compareStages)[0];
 
       const name = manual

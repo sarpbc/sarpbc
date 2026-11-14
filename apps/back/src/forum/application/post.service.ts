@@ -118,7 +118,11 @@ export class PostService {
 
       await scope.posts.save(newPost);
 
-      if (user.role === "admin" && createPostInput.translations?.length) {
+      if (
+        user.role === "admin" &&
+        createPostInput.translations?.length !== undefined &&
+        createPostInput.translations.length !== 0
+      ) {
         for (const tr of createPostInput.translations) {
           const t: TranslationRecord = {
             id: this.id(),
@@ -146,7 +150,7 @@ export class PostService {
   }
 
   async delete(id: string): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const post = await scope.posts.findWithDetails({ kind: "id", value: id });
 
       if (!post) {

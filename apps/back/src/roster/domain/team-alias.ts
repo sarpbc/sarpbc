@@ -66,14 +66,15 @@ export function teamAt(team: Team, at: Date | null): Team {
 
   if (!alias) return team;
 
-  const logo = alias.logoUrl
-    ? {
-        imageUrl: alias.logoUrl,
-        darkModeImageUrl: null,
-        logoLightUrl: alias.logoUrl,
-        logoDarkUrl: null,
-      }
-    : {};
+  const logo =
+    alias.logoUrl !== null && alias.logoUrl !== ""
+      ? {
+          imageUrl: alias.logoUrl,
+          darkModeImageUrl: null,
+          logoLightUrl: alias.logoUrl,
+          logoDarkUrl: null,
+        }
+      : {};
 
   return Object.assign(new Team(), team, { name: alias.name }, logo);
 }

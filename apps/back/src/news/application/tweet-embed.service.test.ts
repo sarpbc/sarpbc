@@ -1,26 +1,27 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { IntegrationError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { TweetSyndicationGateway } from "../infrastructure/tweet-syndication.gateway";
 import { TweetEmbedService } from "./tweet-embed.service";
 import hereticsReply from "./__fixtures__/tweet-2116198150683734246.json";
 
 describe("TweetEmbedService", () => {
-  const originalFetch = global.fetch;
+  const fetchMock = vi.fn<typeof fetch>();
   let service: TweetEmbedService;
 
   beforeEach(() => {
     service = new TweetEmbedService(new TweetSyndicationGateway());
-    global.fetch = vi.fn();
+    fetchMock.mockReset();
+    vi.stubGlobal("fetch", fetchMock);
   });
 
   afterEach(() => {
-    global.fetch = originalFetch;
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
   it("rejects URLs that are not X status posts", async () => {
     await expect(service.embed("https://x.com/RL_Comm")).rejects.toBeInstanceOf(InvalidInputError);
-    expect(global.fetch).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
   });
 
   const tweet = {
@@ -46,11 +47,7 @@ describe("TweetEmbedService", () => {
   };
 
   it("returns the tweet's photos, author and date, removes attachment URLs and caches the result", async () => {
-    (global.fetch as Mock).mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => tweet,
-    });
+    fetchMock.mockImplementation(async () => Response.json(tweet));
 
     const url = "https://x.com/RL_Comm/status/2095971934320071030";
     const first = await service.embed(url);
@@ -70,30 +67,26 @@ describe("TweetEmbedService", () => {
       },
     ]);
     expect(second).toEqual(first);
-    expect(global.fetch).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 
   it("returns text-only posts without inventing media", async () => {
-    (global.fetch as Mock).mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({
+    fetchMock.mockImplementation(async () =>
+      Response.json({
         ...tweet,
         text: "A &amp; B 😀",
         display_text_range: [0, 12],
         mediaDetails: undefined,
       }),
-    });
+    );
     const embed = await service.embed("https://x.com/RL_Comm/status/2095971934320071030");
     expect(embed.text).toBe("A & B 😀");
     expect(embed.media).toEqual([]);
   });
 
   it("keeps every photo and video preview with its dimensions", async () => {
-    (global.fetch as Mock).mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({
+    fetchMock.mockImplementation(async () =>
+      Response.json({
         ...tweet,
         mediaDetails: [
           ...tweet.mediaDetails,
@@ -105,7 +98,7 @@ describe("TweetEmbedService", () => {
           },
         ],
       }),
-    });
+    );
     const embed = await service.embed("https://x.com/i/web/status/2095971934320071030");
     expect(embed.url).toBe("https://x.com/RL_Comm/status/2095971934320071030");
     expect(embed.media).toHaveLength(2);
@@ -119,25 +112,19 @@ describe("TweetEmbedService", () => {
   });
 
   it("applies the display range to text containing emoji without exposing a partial attachment URL", async () => {
-    (global.fetch as Mock).mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => ({
+    fetchMock.mockImplementation(async () =>
+      Response.json({
         ...tweet,
         text: "😀😀 Update https://t.co/photo",
         display_text_range: [0, 11],
       }),
-    });
+    );
     const embed = await service.embed("https://x.com/RL_Comm/status/2095971934320071030");
     expect(embed.text).toBe("😀😀 Update");
   });
 
   it("loads a reply whose author has X's default avatar and whose parent has a video", async () => {
-    (global.fetch as Mock).mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => hereticsReply,
-    });
+    fetchMock.mockImplementation(async () => Response.json(hereticsReply));
 
     const embed = await service.embed("https://x.com/HereticsRL/status/2116198150683734246");
 
@@ -153,11 +140,7 @@ describe("TweetEmbedService", () => {
   it.each([{}, { __typename: "TweetTombstone" }])(
     "handles unavailable posts (%j)",
     async (payload) => {
-      (global.fetch as Mock).mockResolvedValue({
-        ok: true,
-        status: 200,
-        json: async () => payload,
-      });
+      fetchMock.mockImplementation(async () => Response.json(payload));
       await expect(
         service.embed("https://x.com/RL_Comm/status/2095971934320071030"),
       ).rejects.toBeInstanceOf(NotFoundError);
@@ -171,14 +154,14 @@ describe("TweetEmbedService", () => {
     },
     { ...tweet, id_str: "123" },
   ])("rejects invalid upstream data", async (payload) => {
-    (global.fetch as Mock).mockResolvedValue({ ok: true, status: 200, json: async () => payload });
+    fetchMock.mockImplementation(async () => Response.json(payload));
     await expect(
       service.embed("https://x.com/RL_Comm/status/2095971934320071030"),
     ).rejects.toBeInstanceOf(IntegrationError);
   });
 
   it("surfaces a service error when X syndication is down", async () => {
-    (global.fetch as Mock).mockRejectedValue(new Error("network"));
+    fetchMock.mockRejectedValue(new Error("network"));
 
     await expect(
       service.embed("https://x.com/RL_Comm/status/2095971934320071030"),

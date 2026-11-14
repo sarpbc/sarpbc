@@ -84,7 +84,7 @@ export function replyTarget(input: {
   const targets = REPLY_TARGET_TYPES.flatMap((kind) => {
     const id = input[REPLY_TARGETS[kind].inputKey];
 
-    return id ? [{ kind, id }] : [];
+    return id !== undefined && id !== "" ? [{ kind, id }] : [];
   });
 
   if (targets.length !== 1)

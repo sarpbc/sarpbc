@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchResultsResponse, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
 import type { MatchDetailResponse, MatchDetailWire } from "~/types/matches";
 // Nitro routes import this file and have no Nuxt auto-imports.
@@ -21,11 +22,11 @@ function matchesPath(path: string, query?: MatchesListQuery): string {
     params.set("offset", String(query.offset));
   }
 
-  if (query?.leagueId) {
+  if (isNonEmptyString(query?.leagueId)) {
     params.set("leagueId", query.leagueId);
   }
 
-  if (query?.tournamentId) {
+  if (isNonEmptyString(query?.tournamentId)) {
     params.set("tournamentId", query.tournamentId);
   }
 

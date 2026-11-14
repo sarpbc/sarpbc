@@ -41,9 +41,11 @@ export class CountryService {
 
   async find(rawCode: string, page: CountryMatchPage): Promise<CountryPage> {
     const code = countryCode(rawCode);
-    const players = code ? await this.sources.players.findByNationality(code) : [];
 
-    if (!code || players.length === 0) {
+    const players =
+      code !== null && code !== "" ? await this.sources.players.findByNationality(code) : [];
+
+    if (code === null || code === "" || players.length === 0) {
       throw new NotFoundError(`No player has the nationality "${rawCode}"`);
     }
 

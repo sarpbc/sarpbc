@@ -227,9 +227,9 @@ function maskInlineCode(line: string): string {
   const nextCloser: (number | undefined)[] = [];
 
   for (let index = runs.length - 1; index >= 0; index -= 1) {
-    const run = runs[index];
+    const run: (typeof runs)[number] | undefined = runs[index];
 
-    if (run) {
+    if (run !== undefined) {
       nextCloser[index] = closers.get(run.length);
       closers.set(run.length, index);
     }
@@ -240,11 +240,13 @@ function maskInlineCode(line: string): string {
   let index = 0;
 
   while (index < runs.length) {
-    const open = runs[index];
+    const open: (typeof runs)[number] | undefined = runs[index];
     const closeIndex = nextCloser[index];
-    const close = closeIndex === undefined ? undefined : runs[closeIndex];
 
-    if (!open || closeIndex === undefined || !close) {
+    const close: (typeof runs)[number] | undefined =
+      closeIndex === undefined ? undefined : runs[closeIndex];
+
+    if (open === undefined || closeIndex === undefined || close === undefined) {
       index += 1;
       continue;
     }
@@ -269,7 +271,7 @@ function maskCode(content: string): string {
       if (fence !== null) {
         if (
           marker !== undefined &&
-          marker[0] === fence[0] &&
+          marker.startsWith(fence.charAt(0)) &&
           marker.length >= fence.length &&
           line.trim() === marker
         ) {

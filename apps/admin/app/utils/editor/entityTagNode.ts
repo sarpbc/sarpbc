@@ -57,13 +57,11 @@ function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
       },
     },
 
-    parseMarkdown: (token) => ({
-      type: nodeName,
-      attrs: {
-        slug: token.slug,
-        label: token.label,
-      },
-    }),
+    parseMarkdown: (token) => {
+      const parsed = parseNewsEntityTag(token.raw ?? "");
+
+      return parsed ? { type: nodeName, attrs: { slug: parsed.slug, label: parsed.label } } : [];
+    },
 
     renderMarkdown: (node) =>
       serializeNewsEntityTag({

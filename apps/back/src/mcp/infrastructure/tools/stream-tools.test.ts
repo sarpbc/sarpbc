@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { RosterChange, StaffRole } from "@sarpbc/types";
+import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import type { ToolArguments } from "../define-tool";
+import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
 import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -13,21 +14,14 @@ const STREAMS = [
 ];
 
 function setup(toolName: string, role: StaffRole = "admin") {
-  const rosterProposalService = {
-    propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
-      id: "proposal-1",
-      status: "pending",
-      change,
-    })),
-    proposeTeamLogo: vi.fn(),
-    list: vi.fn(),
-  };
+  const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
   );
 
   if (!tool) throw new Error(`${toolName} is not defined`);
+
   const call = async (args: ToolArguments) =>
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
@@ -50,8 +44,7 @@ describe("stream tools", () => {
       SOURCE,
       "u1",
     );
-    const block = result.content[0];
-    expect(JSON.parse(block?.type === "text" ? block.text : "null")).toMatchObject({
+    expect(jsonOf(result)).toMatchObject({
       kind,
       status: "pending",
     });
@@ -103,10 +96,8 @@ describe("stream tools", () => {
     if (!list) throw new Error("list_roster_proposals is not defined");
 
     const result = await list.run({ id: "u1", email: "staff@test.com", role: "admin" }, {});
-    const block = result.content[0];
-    const listed = JSON.parse(block?.type === "text" ? block.text : "null");
-    expect(
-      listed.proposals.map((p: { change: { streams: unknown[] } }) => p.change.streams),
-    ).toEqual([[], STREAMS]);
+    expect(jsonOf(result)).toMatchObject({
+      proposals: [{ change: { streams: [] } }, { change: { streams: STREAMS } }],
+    });
   });
 });

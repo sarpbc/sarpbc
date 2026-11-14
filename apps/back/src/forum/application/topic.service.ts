@@ -27,7 +27,7 @@ export class TopicService {
   ) {}
 
   async initializeTopics(): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       for (const topicData of predefinedTopics) {
         const exists = await scope.topics.findByTitle(topicData.title);
 

@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { NEWS_TYPES, type NewsType } from "@sarpbc/types";
 
 export function isNewsType(value: string): value is NewsType {
@@ -11,5 +12,5 @@ export function isNewsType(value: string): value is NewsType {
 }
 
 export function resolveNewsType(value: string | null | undefined): NewsType {
-  return value && isNewsType(value) ? value : "short";
+  return isNonEmptyString(value) && isNewsType(value) ? value : "short";
 }

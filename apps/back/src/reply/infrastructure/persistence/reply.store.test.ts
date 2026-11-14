@@ -7,6 +7,7 @@ import {
 import { FORUM_ERROR_CODES } from "@sarpbc/types";
 import { describe, expect, it, vi } from "vitest";
 import type { ReplyRecord } from "../../application/models";
+import { unconstructed } from "../../../../test/doubles";
 import { MikroReplyStore, replyReports } from "./reply.store";
 
 const reply: ReplyRecord = {
@@ -35,7 +36,7 @@ function entityManager(flushFailure: Error | null) {
 }
 
 const asEntityManager = (em: ReturnType<typeof entityManager>): EntityManager =>
-  Object.assign(Object.create(EntityManager.prototype), em);
+  Object.assign(unconstructed(EntityManager), em);
 
 const report = {
   id: "report",

@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { InvalidInputError } from "../../../common/domain/errors";
 import { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
+import { jsonOf } from "../../../../test/mcp-result";
 import { rosterTools } from "./roster-tools";
 
 const TEAM_ID = "0f8fad5b-d9cb-469f-a165-70867728950e";
@@ -64,7 +65,7 @@ describe("upload_team_logo", () => {
       input.sourceUrl,
       "u1",
     );
-    expect(JSON.parse(textOf(result))).toMatchObject({
+    expect(jsonOf(result)).toMatchObject({
       proposalId: "proposal-1",
       kind: "upload_team_logo",
       status: "pending",
@@ -221,12 +222,14 @@ describe("delete proposals", () => {
       input.sourceUrl,
       "u1",
     );
-    expect(JSON.parse(textOf(unsourced))).toMatchObject({
+    const nothingChanged: unknown = expect.stringContaining("Nothing changed yet");
+
+    expect(jsonOf(unsourced)).toMatchObject({
       proposalId: "proposal-1",
       kind: "delete_match",
       status: "pending",
       reviewUrl: "https://admin.sarpbc.test/proposals",
-      note: expect.stringContaining("Nothing changed yet"),
+      note: nothingChanged,
     });
   });
 

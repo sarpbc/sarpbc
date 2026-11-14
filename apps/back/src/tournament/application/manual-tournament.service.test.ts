@@ -7,6 +7,14 @@ import { Player, Team } from "../../roster/domain/roster";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
+import type { CompetitionTransaction, TournamentWriter } from "./ports";
+import {
+  competitionScope,
+  eventWriter as eventWriterDouble,
+  matchWriter as matchWriterDouble,
+  tournamentQueries,
+  tournamentWriter as tournamentWriterDouble,
+} from "../../../test/competition-doubles";
 
 describe("ManualTournamentService", () => {
   const writer = {
@@ -16,7 +24,7 @@ describe("ManualTournamentService", () => {
     teamsExist: vi.fn(),
     participantReferences: vi.fn(),
     removeParticipant: vi.fn(),
-    saveParticipant: vi.fn(),
+    saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
     league: vi.fn(),
     playersExist: vi.fn(),
     teamPlayers: vi.fn(),
@@ -53,13 +61,15 @@ describe("ManualTournamentService", () => {
   let tournament: Tournament;
   const events: string[] = [];
 
-  const tx = {
-    run: async <T>(work: (scope: never) => Promise<T>) => {
-      const result = await work({
-        tournaments: writer,
-        events: eventWriter,
-        matches: matchWriter,
-      } as never);
+  const tx: CompetitionTransaction = {
+    run: async (work) => {
+      const result = await work(
+        competitionScope({
+          tournaments: tournamentWriterDouble(writer),
+          events: eventWriterDouble(eventWriter),
+          matches: matchWriterDouble(matchWriter),
+        }),
+      );
 
       events.push("commit");
 
@@ -68,7 +78,7 @@ describe("ManualTournamentService", () => {
   };
 
   const service = new ManualTournamentService(
-    reads as never,
+    tournamentQueries(reads),
     tx,
     new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
   );

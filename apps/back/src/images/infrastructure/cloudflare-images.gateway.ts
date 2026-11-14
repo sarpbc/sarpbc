@@ -20,7 +20,14 @@ export class CloudflareImagesGateway implements ImageHost {
     const apiToken = this.configService.get<string>("cloudflare_api_token");
     const accountHash = this.configService.get<string>("cloudflare_account_hash");
 
-    if (!accountId || !apiToken || !accountHash) {
+    if (
+      accountId === undefined ||
+      accountId === "" ||
+      apiToken === undefined ||
+      apiToken === "" ||
+      accountHash === undefined ||
+      accountHash === ""
+    ) {
       throw new InternalServerErrorException("Cloudflare credentials are not configured");
     }
 

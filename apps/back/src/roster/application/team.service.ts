@@ -35,7 +35,11 @@ export class TeamService {
   }
 
   private async resolveMerged(team: Team | null): Promise<Team | null> {
-    return team?.mergedIntoId ? await this.teams.findById(team.mergedIntoId) : team;
+    return team?.mergedIntoId !== null &&
+      team?.mergedIntoId !== undefined &&
+      team.mergedIntoId !== ""
+      ? await this.teams.findById(team.mergedIntoId)
+      : team;
   }
 
   async create(dto: CreateTeamInput): Promise<Team> {
@@ -67,7 +71,7 @@ export class TeamService {
         throw new NotFoundError(`Team with id "${id}" not found`);
       }
 
-      if (team.mergedIntoId) {
+      if (team.mergedIntoId !== null && team.mergedIntoId !== "") {
         throw new InvalidInputError(
           `${team.name} was merged into team "${team.mergedIntoId}"; edit that team instead`,
         );
@@ -106,7 +110,7 @@ export class TeamService {
   }
 
   async delete(id: string): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       await scope.teams.delete(await this.deletable(scope, id));
     });
   }

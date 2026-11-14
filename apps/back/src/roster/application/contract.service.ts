@@ -81,7 +81,7 @@ export class ContractService {
   }
 
   async deleteForTeam(teamId: string, contractId: string): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       const contract = await scope.contracts.findById(contractId);
 
       if (!contract || contract.team.id !== teamId) {
@@ -135,7 +135,7 @@ export class ContractService {
       }
 
       if (dto.endDate !== undefined) {
-        contract.leaveSourceUrl = dto.endDate ? sourceUrl : null;
+        contract.leaveSourceUrl = dto.endDate !== null && dto.endDate !== "" ? sourceUrl : null;
       }
 
       await this.saveInCareer(scope, contract);
@@ -145,9 +145,9 @@ export class ContractService {
   }
 
   async delete(playerId: string, contractId: string): Promise<void> {
-    return await this.transaction.run(
-      async (scope) => await this.remove(scope, playerId, contractId),
-    );
+    await this.transaction.run(async (scope) => {
+      await this.remove(scope, playerId, contractId);
+    });
   }
 
   private async applyUpdate(
@@ -191,7 +191,8 @@ export class ContractService {
     contract.player = player;
     contract.team = await requireTeam(teams, dto.teamId);
     contract.startDate = new Date(dto.startDate);
-    contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
+    contract.endDate =
+      dto.endDate !== undefined && dto.endDate !== "" ? new Date(dto.endDate) : null;
     contract.role = dto.role ?? "active";
 
     return contract;
@@ -209,14 +210,15 @@ export class ContractService {
       throw new NotFoundError(`Contract with id "${contractId}" not found`);
     }
 
-    if (dto.teamId) contract.team = await requireTeam(teams, dto.teamId);
+    if (dto.teamId !== undefined && dto.teamId !== "")
+      contract.team = await requireTeam(teams, dto.teamId);
 
     if (dto.startDate !== undefined) {
       contract.startDate = new Date(dto.startDate);
     }
 
     if (dto.endDate !== undefined) {
-      contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
+      contract.endDate = dto.endDate !== null && dto.endDate !== "" ? new Date(dto.endDate) : null;
     }
 
     if (dto.role !== undefined) {

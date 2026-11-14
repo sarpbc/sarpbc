@@ -72,7 +72,7 @@ function summary(item: MatchBlockItem): string {
   });
 }
 
-const stateLabel = useMatchStateLabel((beginAt) =>
+const stateLabel = useMatchStateLabel(t, (beginAt) =>
   t("newsTag.matchUtc", { date: dateFormatter.value.format(beginAt) }),
 );
 </script>

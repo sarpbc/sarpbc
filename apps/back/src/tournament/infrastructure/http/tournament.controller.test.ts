@@ -9,6 +9,15 @@ import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
 import { MatchLineupService } from "../../application/match/match-lineup.service";
 import { ViewershipService } from "../../application/viewership.service";
+import { tournamentQueries } from "../../../../test/competition-doubles";
+import { unconstructed } from "../../../../test/doubles";
+import { ManualCatalogService } from "../../application/manual-catalog.service";
+import { ManualTournamentService } from "../../application/manual-tournament.service";
+import { MatchService } from "../../application/match/match.service";
+import { PlayerAwardService } from "../../application/player-award.service";
+import type { TournamentQueries } from "../../application/ports";
+import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
+import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 
 const unusedStreams = new StreamService(
@@ -27,6 +36,7 @@ const unusedLineups = new MatchLineupService(
 );
 
 const unusedGameStats = { byMatch: async () => [] };
+
 const unusedViewerships = new ViewershipService({
   run: async () => await Promise.reject(new Error("unused")),
 });
@@ -48,6 +58,32 @@ const playerLines = vi.fn(async (ids: string[]) =>
 
 const playerStats = new TournamentPlayerStatsService({ playerLines });
 
+function controllerWith(
+  tournaments: TournamentQueries,
+  tournamentRead: CachedTournamentRead,
+  prizeService: TournamentPrizeService,
+  prizesRead: CachedTournamentPrizesRead,
+  catalog: ManualCatalogService,
+): TournamentController {
+  return new TournamentController(
+    tournaments,
+    unconstructed(SyncNewTournamentsUseCase),
+    unconstructed(SyncPandascoreTournamentUseCase),
+    unconstructed(ManualTournamentService),
+    unconstructed(MatchService),
+    tournamentRead,
+    unconstructed(PlayerAwardService),
+    prizeService,
+    prizesRead,
+    catalog,
+    unusedStreams,
+    unusedLineups,
+    unusedGameStats,
+    unusedViewerships,
+    playerStats,
+  );
+}
+
 describe("TournamentController stage reads", () => {
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
@@ -55,26 +91,20 @@ describe("TournamentController stage reads", () => {
 
   beforeEach(() => {
     vi.resetAllMocks();
-    controller = new TournamentController(
-      {} as never,
-      {} as never,
-      {} as never,
-      {} as never,
-      {} as never,
+    controller = controllerWith(
+      tournamentQueries(),
       new CachedTournamentRead(tournaments, redis),
-      {} as never,
       new TournamentPrizeService(
         { tournamentSource: vi.fn(), byTournament: vi.fn(), byTeam: vi.fn(), byPlayer: vi.fn() },
         { run: vi.fn() },
-        { settle: vi.fn() } as never,
+        new CompetitionAfterCommit(
+          { invalidateTournament: async () => {} },
+          { publish: async () => {} },
+          { error: () => {} },
+        ),
       ),
       new CachedTournamentPrizesRead({ findByTournamentId: vi.fn() }, redis),
-      {} as never,
-      unusedStreams,
-      unusedLineups,
-      unusedGameStats,
-      unusedViewerships,
-      playerStats,
+      unconstructed(ManualCatalogService),
     );
     redis.get.mockResolvedValue(null);
   });
@@ -123,28 +153,15 @@ describe("TournamentController stage reads", () => {
 });
 
 describe("TournamentController leagues", () => {
-  const catalog = {
-    leagues: vi.fn(),
-    createLeague: vi.fn(),
-    updateLeague: vi.fn(),
-  };
+  const catalog = unconstructed(ManualCatalogService);
+  const leagues = vi.spyOn(catalog, "leagues");
 
-  const controller = new TournamentController(
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    {} as never,
-    catalog as never,
-    unusedStreams,
-    unusedLineups,
-    unusedGameStats,
-    unusedViewerships,
-    playerStats,
+  const controller = controllerWith(
+    tournamentQueries(),
+    unconstructed(CachedTournamentRead),
+    unconstructed(TournamentPrizeService),
+    unconstructed(CachedTournamentPrizesRead),
+    catalog,
   );
 
   const manual = Object.assign(new League(), {
@@ -162,7 +179,7 @@ describe("TournamentController leagues", () => {
   beforeEach(() => vi.resetAllMocks());
 
   it("lists leagues with the fields staff edit and their PandaScore id", async () => {
-    catalog.leagues.mockResolvedValue([manual, synced]);
+    leagues.mockResolvedValue([manual, synced]);
     expect(await controller.findLeagues()).toEqual({
       leagues: [
         {

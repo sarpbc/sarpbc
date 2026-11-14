@@ -1,8 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { ConflictError, InvalidInputError, UnprocessableError } from "../../common/domain/errors";
 import { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
 import { PlayerService } from "./player.service";
-import type { PhotoQueries, PlayerQueries, RosterWriteScope } from "./ports";
+import type { RosterWriteScope } from "./ports";
+import { unusedPhotoQueries, unusedPlayerQueries } from "../../../test/roster-doubles";
 
 describe("PlayerService profile photos", () => {
   const player = Object.assign(new Player(), { id: "player", imageUrl: "old.png" });
@@ -47,7 +48,7 @@ describe("PlayerService profile photos", () => {
     player.imageUrl = "old.png";
     gallery = [Object.assign(new PlayerPhoto(), { id: "selected", player, url: "selected.png" })];
     transactions = 0;
-    service = new PlayerService({} as PlayerQueries, {} as PhotoQueries, {
+    service = new PlayerService(unusedPlayerQueries, unusedPhotoQueries, {
       run: async (work) => {
         transactions += 1;
 
@@ -93,6 +94,9 @@ describe("PlayerService roster moves", () => {
   let player: Player;
   let history: Contract[];
   let stores: RosterWriteScope;
+  let saveContract: Mock<RosterWriteScope["contracts"]["save"]>;
+  let deleteContract: Mock<RosterWriteScope["contracts"]["delete"]>;
+  let savePlayer: Mock<RosterWriteScope["players"]["save"]>;
   let service: PlayerService;
 
   beforeEach(() => {
@@ -115,11 +119,14 @@ describe("PlayerService roster moves", () => {
       }),
     ];
     const teams = new Map([oldTeam, newTeam].map((team) => [team.id, team]));
+    saveContract = vi.fn<RosterWriteScope["contracts"]["save"]>();
+    deleteContract = vi.fn<RosterWriteScope["contracts"]["delete"]>();
+    savePlayer = vi.fn<RosterWriteScope["players"]["save"]>();
     stores = {
       players: {
         findById: async (id) => (id === player.id ? player : null),
         findBySlug: vi.fn(),
-        save: vi.fn(),
+        save: savePlayer,
         delete: vi.fn(),
       },
       photos: { findByPlayer: vi.fn(), findById: vi.fn(), save: vi.fn(), delete: vi.fn() },
@@ -127,8 +134,8 @@ describe("PlayerService roster moves", () => {
         findByPlayer: async () => history,
         findByTeam: vi.fn(),
         findById: vi.fn(),
-        save: vi.fn(),
-        delete: vi.fn(),
+        save: saveContract,
+        delete: deleteContract,
       },
       teams: {
         findById: async (id) => teams.get(id) ?? null,
@@ -138,12 +145,12 @@ describe("PlayerService roster moves", () => {
         delete: vi.fn(),
       },
     };
-    service = new PlayerService({} as PlayerQueries, {} as PhotoQueries, {
+    service = new PlayerService(unusedPlayerQueries, unusedPhotoQueries, {
       run: async (work) => await work(stores),
     });
   });
 
-  const lastSavedContract = () => vi.mocked(stores.contracts.save).mock.lastCall?.[0];
+  const lastSavedContract = () => saveContract.mock.lastCall?.[0];
   const move = (teamId: string) => ({ teamId, effectiveDate: "2026-10-23", sourceUrl: source });
 
   it("closes the open contract and opens a sourced one when a player joins a team", async () => {
@@ -157,15 +164,15 @@ describe("PlayerService roster moves", () => {
       joinSourceUrl: source,
     });
     expect(player).toMatchObject({ team: newTeam, status: "active" });
-    expect(stores.contracts.save).toHaveBeenCalledTimes(2);
-    expect(stores.contracts.delete).not.toHaveBeenCalled();
+    expect(saveContract).toHaveBeenCalledTimes(2);
+    expect(deleteContract).not.toHaveBeenCalled();
   });
 
   it("rejects joining a team the player is already on", async () => {
     await expect(service.joinTeam(player.id, move(oldTeam.id))).rejects.toBeInstanceOf(
       ConflictError,
     );
-    expect(stores.contracts.save).not.toHaveBeenCalled();
+    expect(saveContract).not.toHaveBeenCalled();
   });
 
   it("opens a staff contract on the current team and keeps the player contract", async () => {
@@ -191,7 +198,7 @@ describe("PlayerService roster moves", () => {
     await expect(
       service.joinTeam(player.id, { ...move(oldTeam.id), role: "coach" }),
     ).rejects.toBeInstanceOf(ConflictError);
-    expect(stores.contracts.save).not.toHaveBeenCalled();
+    expect(saveContract).not.toHaveBeenCalled();
   });
 
   it("names the conflict without exposing the raw role value", async () => {
@@ -232,7 +239,7 @@ describe("PlayerService roster moves", () => {
     });
     expect(history[1].leaveSourceUrl).toBe(source);
     expect(player).toMatchObject({ team: null, status: "retired" });
-    expect(stores.contracts.delete).not.toHaveBeenCalled();
+    expect(deleteContract).not.toHaveBeenCalled();
   });
 
   it("clears an imported current team that has no contract", async () => {
@@ -266,6 +273,6 @@ describe("PlayerService roster moves", () => {
       service.leaveTeam(player.id, { ...move(newTeam.id), status: "free_agent" }),
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(player.team).toBe(oldTeam);
-    expect(stores.players.save).not.toHaveBeenCalled();
+    expect(savePlayer).not.toHaveBeenCalled();
   });
 });

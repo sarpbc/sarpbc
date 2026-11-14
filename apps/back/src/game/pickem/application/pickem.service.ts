@@ -26,7 +26,7 @@ export class PickemService {
     }));
   }
   async makePick(userId: string, matchId: string, participantId: string): Promise<void> {
-    return await this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       if (!(await scope.userExists(userId)))
         throw new NotFoundError("User not found. Sign in and try again.");
       const existing = await scope.pick(userId, matchId);
@@ -55,12 +55,13 @@ export class PickemService {
     if (!match) throw new NotFoundError(`Match #${matchId} not found`);
     const winner = derivePickWinner(match);
 
-    if (!winner)
+    if (winner === null || winner === "")
       throw new InvalidInputError(
         "Match has no winner set yet. Wait for the series result and try again.",
       );
 
-    if (!match.winnerId) await this.matches.decide(matchId, winner);
+    if (match.winnerId === null || match.winnerId === "")
+      await this.matches.decide(matchId, winner);
 
     return await this.transaction.run(async (scope) => {
       const picks = await scope.unscored(matchId);

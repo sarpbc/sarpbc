@@ -1,5 +1,9 @@
 import { expect, it, vi } from "vitest";
+import { unconstructed } from "../../../../test/doubles";
+import { SyncAllTournamentsUseCase } from "./sync-all-tournaments.use-case";
 import { SyncNewTournamentsUseCase } from "./sync-new-tournaments.use-case";
+import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
+import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
 
 it("syncs every discovered tournament despite a failure, then reconciles incidents", async () => {
   const steps: string[] = [];
@@ -17,9 +21,9 @@ it("syncs every discovered tournament despite a failure, then reconciles inciden
   const diagnostics = { error: vi.fn(), warn: vi.fn() };
 
   const service = new SyncNewTournamentsUseCase(
-    additions as never,
-    details as never,
-    incidents as never,
+    Object.assign(unconstructed(SyncAllTournamentsUseCase), additions),
+    Object.assign(unconstructed(SyncPandascoreTournamentUseCase), details),
+    Object.assign(unconstructed(SyncPandascoreIncidentsUseCase), incidents),
     diagnostics,
   );
 

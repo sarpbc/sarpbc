@@ -5,6 +5,8 @@ import {
   teamPath,
   tournamentStageLabel,
   tournamentStagePath,
+  isNonEmptyString,
+  isNonEmptyDateInput,
 } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { formatPrizepool } from "~/utils/currencyFormatter";
@@ -105,7 +107,7 @@ function isTournamentFormat(value: string): value is TournamentFormat {
 }
 
 export function toIsoDate(value: Date | string | undefined | null): string | undefined {
-  if (!value) {
+  if (!isNonEmptyDateInput(value)) {
     return undefined;
   }
 
@@ -137,7 +139,7 @@ export function sportsEventStatusUrl(status: TournamentStatus | null): string | 
 }
 
 export function formatLabel(type: string | null): string | undefined {
-  if (!type || !isTournamentFormat(type)) {
+  if (!isNonEmptyString(type) || !isTournamentFormat(type)) {
     return undefined;
   }
 
@@ -163,7 +165,7 @@ const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
 function countryPlace(country: string | null | undefined): PlaceLd | undefined {
   const code = country?.trim().toUpperCase();
 
-  if (!code || !/^[A-Z]{2}$/.test(code)) {
+  if (!isNonEmptyString(code) || !/^[A-Z]{2}$/.test(code)) {
     return undefined;
   }
 
@@ -192,7 +194,7 @@ export function eventVenue(
 ): SportsEventVenueLd {
   const place = countryPlace(country);
 
-  if (!type || !isTournamentFormat(type) || !place) {
+  if (!isNonEmptyString(type) || !isTournamentFormat(type) || !place) {
     return onlineVenue(url);
   }
 
@@ -283,7 +285,7 @@ function additionalProperties(
 ): PropertyValueLd[] | undefined {
   const properties: PropertyValueLd[] = [];
 
-  if (prizepool) {
+  if (isNonEmptyString(prizepool)) {
     properties.push({
       "@type": "PropertyValue",
       name: "Prize pool",
@@ -291,7 +293,7 @@ function additionalProperties(
     });
   }
 
-  if (format) {
+  if (isNonEmptyString(format)) {
     properties.push({
       "@type": "PropertyValue",
       name: "Format",
@@ -310,7 +312,7 @@ function buildDescription(parts: {
   status: TournamentStatus | null;
 }): string {
   const sentences: string[] = [];
-  const leagueSuffix = parts.leagueName ? ` (${parts.leagueName})` : "";
+  const leagueSuffix = isNonEmptyString(parts.leagueName) ? ` (${parts.leagueName})` : "";
   sentences.push(`Rocket League tournament${leagueSuffix}`);
 
   if (parts.status === "finished") {
@@ -319,15 +321,15 @@ function buildDescription(parts: {
     sentences.push("This event is live");
   }
 
-  if (parts.format) {
+  if (isNonEmptyString(parts.format)) {
     sentences.push(`Format: ${parts.format}`);
   }
 
-  if (parts.prizepool) {
+  if (isNonEmptyString(parts.prizepool)) {
     sentences.push(`Prize pool: ${parts.prizepool}`);
   }
 
-  if (parts.championName) {
+  if (isNonEmptyString(parts.championName)) {
     sentences.push(`Champion: ${parts.championName}`);
   }
 
@@ -359,7 +361,7 @@ export function buildTournamentSportsEvent(
     eventStatus: sportsEventStatusUrl(status),
     eventAttendanceMode: venue.eventAttendanceMode,
     location: venue.location,
-    organizer: organizerName
+    organizer: isNonEmptyString(organizerName)
       ? compactJsonLd<SportsOrganizationLd>({
           "@type": "SportsOrganization",
           name: organizerName,
@@ -380,7 +382,7 @@ export function buildTournamentSportsEvent(
     additionalProperty: additionalProperties(prizepool, format),
   });
 
-  if (options.includeContext) {
+  if (options.includeContext === true) {
     event["@context"] = SCHEMA_ORG;
   }
 

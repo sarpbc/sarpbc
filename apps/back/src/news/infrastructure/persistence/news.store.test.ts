@@ -1,4 +1,5 @@
 import { EntityManager } from "@mikro-orm/postgresql";
+import { unconstructed } from "../../../../test/doubles";
 import {
   type EntityName,
   ForeignKeyConstraintViolationException,
@@ -32,7 +33,7 @@ function storeFailingWith(error: Error) {
     flush: vi.fn().mockRejectedValue(error),
   };
 
-  return new MikroNewsStore(Object.assign(Object.create(EntityManager.prototype), em));
+  return new MikroNewsStore(Object.assign(unconstructed(EntityManager), em));
 }
 
 describe("MikroNewsStore.save", () => {

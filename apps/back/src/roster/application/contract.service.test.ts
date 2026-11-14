@@ -2,14 +2,15 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError, UnprocessableError } from "../../common/domain/errors";
 import { Contract, Player, Team } from "../domain/roster";
 import { ContractService } from "./contract.service";
-import type {
-  ContractQueries,
-  ContractWriter,
-  PlayerWriter,
-  RosterWriteScope,
-  TeamQueries,
-  TeamWriter,
-} from "./ports";
+import type { ContractQueries, ContractWriter, RosterWriteScope } from "./ports";
+import {
+  unusedContractQueries,
+  unusedContractWriter,
+  unusedPhotoWriter,
+  unusedPlayerWriter,
+  unusedTeamQueries,
+  unusedTeamWriter,
+} from "../../../test/roster-doubles";
 
 describe("ContractService sourced career periods", () => {
   const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
@@ -34,15 +35,18 @@ describe("ContractService sourced career periods", () => {
     delete: async () => {},
   };
 
-  const players = {
-    findById: async (id: string) => (id === zen.id ? zen : null),
-  } as PlayerWriter;
-
-  const teams = {
-    findById: async (id: string) => [vitality, kc].find((team) => team.id === id) ?? null,
-  } as TeamWriter;
-
-  const scope = { players, teams, contracts } as RosterWriteScope;
+  const scope: RosterWriteScope = {
+    players: {
+      ...unusedPlayerWriter,
+      findById: async (id) => (id === zen.id ? zen : null),
+    },
+    teams: {
+      ...unusedTeamWriter,
+      findById: async (id) => [vitality, kc].find((team) => team.id === id) ?? null,
+    },
+    contracts,
+    photos: unusedPhotoWriter,
+  };
 
   const stint = (team: Team, startDate: string, endDate: string | null) =>
     Object.assign(new Contract(), {
@@ -50,12 +54,12 @@ describe("ContractService sourced career periods", () => {
       player: zen,
       team,
       startDate: new Date(startDate),
-      endDate: endDate ? new Date(endDate) : null,
+      endDate: endDate === null ? null : new Date(endDate),
     });
 
   beforeEach(() => {
     career = [stint(kc, "2025-06-01", null)];
-    service = new ContractService({} as ContractQueries, {} as TeamQueries, {
+    service = new ContractService(unusedContractQueries, unusedTeamQueries, {
       run: async (work) => await work(scope),
     });
   });
@@ -173,8 +177,14 @@ describe("ContractService staff contracts", () => {
       findMovementsOnDay: async () => [],
     };
 
-    const service = new ContractService(queries, {} as TeamQueries, {
-      run: async (work) => await work({} as RosterWriteScope),
+    const service = new ContractService(queries, unusedTeamQueries, {
+      run: async (work) =>
+        await work({
+          players: unusedPlayerWriter,
+          teams: unusedTeamWriter,
+          contracts: unusedContractWriter,
+          photos: unusedPhotoWriter,
+        }),
     });
 
     const staff = await service.getStaffContractsByPlayer("zen");

@@ -60,15 +60,15 @@ export const publicOnlyLookup: LookupFunction = (hostname, options, callback) =>
       return;
     }
 
-    const [first] = resolved;
+    const first: (typeof resolved)[number] | undefined = resolved[0];
 
-    if (!first) {
+    if (first === undefined) {
       callback(privateAddressError(), "", 0);
 
       return;
     }
 
-    if (options.all) {
+    if (options.all === true) {
       callback(null, resolved);
 
       return;
@@ -105,7 +105,12 @@ export async function downloadPublicHttps(
     const response = await get(current, signal);
     const status = response.statusCode ?? 0;
 
-    if (status >= 300 && status < 400 && response.headers.location) {
+    if (
+      status >= 300 &&
+      status < 400 &&
+      response.headers.location !== undefined &&
+      response.headers.location !== ""
+    ) {
       response.resume();
 
       if (redirects >= options.maxRedirects) {

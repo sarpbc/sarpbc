@@ -1,3 +1,5 @@
+import { isNonEmptyString } from "./text";
+
 export const SPOILER_FREE_COOKIE = "spoilerFree";
 
 export type SpoilerRevealTarget =
@@ -25,11 +27,13 @@ export function isSpoilerConcealed(
     return false;
   }
 
-  if (scope.matchId && reveals.matchIds.includes(scope.matchId)) {
+  if (isNonEmptyString(scope.matchId) && reveals.matchIds.includes(scope.matchId)) {
     return false;
   }
 
-  return !(scope.tournamentId && reveals.tournamentIds.includes(scope.tournamentId));
+  return !(
+    isNonEmptyString(scope.tournamentId) && reveals.tournamentIds.includes(scope.tournamentId)
+  );
 }
 
 export function revealSpoilers(

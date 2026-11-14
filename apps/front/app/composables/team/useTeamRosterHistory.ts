@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import { CONTRACT_ROLES, type TeamContract } from "@sarpbc/types";
 import { getTeamContracts } from "~/composables/team/api";
@@ -46,7 +47,9 @@ function normalizeContracts(contracts: TeamContract[], now: number): NormalizedC
       continue;
     }
 
-    let endMs: number | null = contract.endDate ? new Date(contract.endDate).getTime() : null;
+    let endMs: number | null = isNonEmptyString(contract.endDate)
+      ? new Date(contract.endDate).getTime()
+      : null;
 
     if (endMs !== null && Number.isNaN(endMs)) {
       endMs = null;
@@ -240,7 +243,7 @@ export function useTeamRosterHistory(teamId: MaybeRef<string | undefined>) {
   const { data, pending, error, refresh } = useAsyncData<TeamRosterHistoryPayload>(
     () => `team-roster-history-${teamIdRef.value ?? "unknown"}`,
     async () => ({
-      contracts: teamIdRef.value ? await getTeamContracts(teamIdRef.value) : [],
+      contracts: isNonEmptyString(teamIdRef.value) ? await getTeamContracts(teamIdRef.value) : [],
       fetchedAt: Date.now(),
     }),
     {

@@ -57,19 +57,19 @@ describe("client throttle behind a trusted proxy", () => {
   }) {
     const headers: Record<string, string> = {};
 
-    if (options.forwardedFor) {
+    if (options.forwardedFor !== undefined) {
       headers["x-forwarded-for"] = options.forwardedFor;
     }
 
-    if (options.connectingIp) {
+    if (options.connectingIp !== undefined) {
       headers["cf-connecting-ip"] = options.connectingIp;
     }
 
-    if (options.token) {
+    if (options.token !== undefined) {
       headers[INTERNAL_API_HEADER] = options.token;
     }
 
-    if (options.client) {
+    if (options.client !== undefined) {
       headers[INTERNAL_CLIENT_HEADER] = options.client;
     }
 

@@ -55,5 +55,7 @@ export const MAX_VODS_PER_GAME = 10;
 const MAX_VOD_GAME = 9;
 
 export function maxVodGame(numberOfGames: number | null | undefined): number {
-  return numberOfGames && numberOfGames > 0 ? numberOfGames : MAX_VOD_GAME;
+  return numberOfGames !== null && numberOfGames !== undefined && numberOfGames > 0
+    ? numberOfGames
+    : MAX_VOD_GAME;
 }

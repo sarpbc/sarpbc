@@ -1,4 +1,5 @@
 import type { SupportedLocale } from "@sarpbc/types";
+import { isNonEmptyString } from "./text";
 
 export type NewsTranslationFields = {
   titleFr: string | null;
@@ -18,7 +19,7 @@ export type LocalizedNewsFields = {
 export function hasFrenchTranslation(
   article: NewsTranslationFields,
 ): article is { titleFr: string; contentFr: string } {
-  return Boolean(article.titleFr?.trim() && article.contentFr?.trim());
+  return isNonEmptyString(article.titleFr?.trim()) && isNonEmptyString(article.contentFr?.trim());
 }
 
 export function localizedNewsFields(

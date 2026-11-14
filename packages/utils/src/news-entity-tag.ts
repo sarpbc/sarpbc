@@ -1,4 +1,5 @@
 import { escapeNewsTagAttrValue, parseNewsTagAttrs } from "./news-tag-attrs";
+import { isNonEmptyString } from "./text";
 
 export type NewsEntityTagKind = "player" | "team";
 
@@ -39,12 +40,16 @@ export function parseNewsEntityTag(raw: string): NewsEntityTag | null {
     return null;
   }
 
-  const kind = match[1] as NewsEntityTagKind;
+  const kind = match[1];
   const attrs = parseAttrs(match[2] ?? "");
   const slug = attrs.slug?.trim();
   const label = attrs.label?.trim();
 
-  if (!slug || !label) {
+  if (
+    (kind !== "player" && kind !== "team") ||
+    !isNonEmptyString(slug) ||
+    !isNonEmptyString(label)
+  ) {
     return null;
   }
 

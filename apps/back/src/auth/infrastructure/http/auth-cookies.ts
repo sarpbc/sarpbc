@@ -22,7 +22,7 @@ function cookieOptions(
     path: "/",
   };
 
-  if (config?.domain) {
+  if (config?.domain !== undefined && config.domain !== "") {
     options.domain = config.domain;
   }
 

@@ -1,4 +1,4 @@
-import { matchPath } from "@sarpbc/utils";
+import { matchPath, isNonEmptyString } from "@sarpbc/utils";
 import type { MatchLinkTarget } from "~/types/matches";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
@@ -58,7 +58,7 @@ function foldIcsLine(line: string): string {
     return line;
   }
 
-  const chars = [...line];
+  const chars = Array.from(line);
   const folded: string[] = [];
   let current = "";
 
@@ -107,11 +107,11 @@ function eventLines(event: CalendarEvent): string[] {
     `SUMMARY:${escapeIcsText(event.summary)}`,
   ];
 
-  if (event.description) {
+  if (isNonEmptyString(event.description)) {
     lines.push(`DESCRIPTION:${escapeIcsText(event.description)}`);
   }
 
-  if (event.url) {
+  if (isNonEmptyString(event.url)) {
     lines.push(`URL:${event.url}`);
   }
 

@@ -37,7 +37,7 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
       readAt: null,
     };
 
-    if (ids?.length) {
+    if (ids?.length !== undefined && ids.length !== 0) {
       where.id = { $in: ids };
     }
 

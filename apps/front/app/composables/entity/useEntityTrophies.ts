@@ -1,4 +1,4 @@
-import { tournamentStagePath } from "@sarpbc/utils";
+import { tournamentStagePath, isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import { getPlayerTrophies } from "~/composables/player/api";
 import { getTeamTrophies } from "~/composables/team/api";
@@ -25,7 +25,7 @@ export function useEntityTrophies(kind: EntityKind, entityId: MaybeRef<string | 
 
   const { data, pending, error, refresh } = useAsyncData<Tournament[]>(
     () => `${kind}-trophies-${idRef.value ?? "unknown"}`,
-    async () => (idRef.value ? await FETCH_TROPHIES[kind](idRef.value) : []),
+    async () => (isNonEmptyString(idRef.value) ? await FETCH_TROPHIES[kind](idRef.value) : []),
     {
       watch: [idRef],
       default: () => [],

@@ -41,7 +41,7 @@ export class MikroUserStore implements UserQueries, UserWriter {
   }: UserListQuery): Promise<{ users: Account[]; total: number }> {
     const [records, total] = await this.em.findAndCount(
       User,
-      search
+      search !== undefined && search !== ""
         ? { $or: [{ email: { $ilike: `%${search}%` } }, { userName: { $ilike: `%${search}%` } }] }
         : {},
       { orderBy: { createdAt: "desc", id: "asc" }, limit, offset },
@@ -74,7 +74,9 @@ export class MikroUserStore implements UserQueries, UserWriter {
     return (
       (await this.em.count(
         User,
-        excludeUserId ? { userName, id: { $ne: excludeUserId } } : { userName },
+        excludeUserId !== undefined && excludeUserId !== ""
+          ? { userName, id: { $ne: excludeUserId } }
+          : { userName },
       )) > 0
     );
   }

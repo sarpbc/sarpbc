@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
+import { unconstructed } from "../../../../test/doubles";
 import { Player as PlayerRow } from "./player.entities";
 import { Player } from "../../domain/roster";
 import { MikroPlayerStore } from "./roster.store";
@@ -8,12 +9,12 @@ function fixture() {
   const execute = vi.fn();
   const findOne = vi.fn();
 
-  const manager: Pick<EntityManager, "getConnection" | "findOne"> = {
+  const manager = Object.assign(unconstructed(EntityManager), {
     getConnection: vi.fn().mockReturnValue({ execute }),
     findOne,
-  };
+  });
 
-  return { execute, findOne, players: new MikroPlayerStore(manager as EntityManager) };
+  return { execute, findOne, players: new MikroPlayerStore(manager) };
 }
 
 describe("MikroPlayerStore.getRandomPlayer", () => {

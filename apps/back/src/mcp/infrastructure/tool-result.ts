@@ -4,9 +4,9 @@ import { ApplicationError } from "../../common/domain/errors";
 const INTERNAL_ERROR_MESSAGE =
   "Something went wrong on the server and was logged. Try again later, or ask an admin to check the logs.";
 
-export function jsonToolResult<T>(data: T): CallToolResult {
+export function textToolResult(text: string): CallToolResult {
   return {
-    content: [{ type: "text", text: JSON.stringify(data, null, 2) }],
+    content: [{ type: "text", text }],
   };
 }
 

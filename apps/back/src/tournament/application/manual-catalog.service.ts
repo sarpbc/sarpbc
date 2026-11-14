@@ -11,6 +11,7 @@ import type {
   UpdateLeagueInput,
 } from "./inputs";
 import type { CompetitionAfterCommit } from "./after-commit";
+import { nonBlank } from "../../common/domain/text";
 import type {
   CompetitionTransaction,
   EventListing,
@@ -32,11 +33,13 @@ export class ManualCatalogService {
     const league = Object.assign(new League(), {
       name: input.name,
       slug: leagueSlug(input.slug ?? input.name),
-      url: input.url?.trim() || null,
-      imageUrl: input.imageUrl?.trim() || null,
+      url: nonBlank(input.url) ?? null,
+      imageUrl: nonBlank(input.imageUrl) ?? null,
     });
 
-    await this.transaction.run(async ({ tournaments }) => await tournaments.saveLeague(league));
+    await this.transaction.run(async ({ tournaments }) => {
+      await tournaments.saveLeague(league);
+    });
 
     return league;
   }
@@ -52,9 +55,9 @@ export class ManualCatalogService {
       if (input.slug !== undefined)
         league.slug = input.slug === null ? null : leagueSlug(input.slug);
 
-      if (input.url !== undefined) league.url = input.url?.trim() || null;
+      if (input.url !== undefined) league.url = nonBlank(input.url) ?? null;
 
-      if (input.imageUrl !== undefined) league.imageUrl = input.imageUrl?.trim() || null;
+      if (input.imageUrl !== undefined) league.imageUrl = nonBlank(input.imageUrl) ?? null;
       await tournaments.saveLeague(league);
 
       return league;
@@ -79,12 +82,13 @@ export class ManualCatalogService {
         league: await requireLeague(tournaments, input.leagueId),
       });
 
-      event.slug = input.slug
-        ? await explicitEventSlug(events, input.slug, event.id)
-        : await allocateSlug(
-            eventSlug(input.name, null),
-            async (slug) => await events.slugTaken(slug, null),
-          );
+      event.slug =
+        input.slug !== undefined && input.slug !== ""
+          ? await explicitEventSlug(events, input.slug, event.id)
+          : await allocateSlug(
+              eventSlug(input.name, null),
+              async (slug) => await events.slugTaken(slug, null),
+            );
       await events.save(event);
 
       return event.id;

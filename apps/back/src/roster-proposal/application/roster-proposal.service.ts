@@ -487,7 +487,7 @@ export class RosterProposalService {
 
         return change.matchId;
       case "delete_team":
-        if (change.mergeIntoTeamId) {
+        if (change.mergeIntoTeamId !== undefined && change.mergeIntoTeamId !== "") {
           return (await this.merges.mergeTeams(change.mergeIntoTeamId, change.teamId)).kept.id;
         }
 
@@ -604,7 +604,7 @@ function referencedTeamIds(change: RosterChange): string[] {
     case "award_player":
       return [change.teamId];
     case "update_contract":
-      return change.teamId ? [change.teamId] : [];
+      return change.teamId !== undefined && change.teamId !== "" ? [change.teamId] : [];
     case "merge_teams":
       return [change.keptId, change.duplicateId];
     case "set_tournament_prizes":
@@ -619,7 +619,9 @@ function referencedTeamIds(change: RosterChange): string[] {
         ]),
       ];
     case "delete_team":
-      return change.mergeIntoTeamId ? [change.teamId, change.mergeIntoTeamId] : [change.teamId];
+      return change.mergeIntoTeamId !== undefined && change.mergeIntoTeamId !== ""
+        ? [change.teamId, change.mergeIntoTeamId]
+        : [change.teamId];
     case "create_player":
     case "update_player":
     case "create_team":
@@ -667,12 +669,13 @@ function streamChangeFor(change: StreamRosterChange): StreamChange {
 }
 
 function streamChangeOf(change: RosterChange): StreamChange | null {
-  switch (change.kind) {
-    case "set_event_streams":
-    case "set_tournament_streams":
-    case "set_match_streams":
-      return streamChangeFor(change);
-    default:
-      return null;
+  if (
+    change.kind === "set_event_streams" ||
+    change.kind === "set_tournament_streams" ||
+    change.kind === "set_match_streams"
+  ) {
+    return streamChangeFor(change);
   }
+
+  return null;
 }

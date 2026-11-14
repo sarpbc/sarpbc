@@ -36,7 +36,11 @@ export class PlayerService {
   }
 
   private async resolveMerged(player: Player | null): Promise<Player | null> {
-    return player?.mergedIntoId ? await this.players.findById(player.mergedIntoId) : player;
+    return player?.mergedIntoId !== null &&
+      player?.mergedIntoId !== undefined &&
+      player.mergedIntoId !== ""
+      ? await this.players.findById(player.mergedIntoId)
+      : player;
   }
 
   async create(dto: CreatePlayerInput): Promise<Player> {
@@ -45,7 +49,8 @@ export class PlayerService {
       player.name = dto.name;
       player.firstName = dto.firstName ?? null;
       player.lastName = dto.lastName ?? null;
-      player.birthday = dto.birthday ? new Date(dto.birthday) : null;
+      player.birthday =
+        dto.birthday !== undefined && dto.birthday !== "" ? new Date(dto.birthday) : null;
       player.nationality = dto.nationality ?? null;
       player.imageUrl = dto.imageUrl ?? null;
       player.slug = dto.slug ?? (toSlug(dto.name) || "player");
@@ -58,7 +63,8 @@ export class PlayerService {
         throw new ConflictError(`A player with slug "${player.slug}" already exists`);
       }
 
-      if (dto.teamId) player.team = await requireTeam(teams, dto.teamId);
+      if (dto.teamId !== undefined && dto.teamId !== "")
+        player.team = await requireTeam(teams, dto.teamId);
 
       await players.save(player);
 
@@ -88,7 +94,7 @@ export class PlayerService {
       if (dto.imageUrl !== undefined) {
         const archived = player.replaceProfilePhoto(dto.imageUrl);
 
-        if (archived) {
+        if (archived !== null && archived !== "") {
           const photo = new PlayerPhoto();
           photo.player = player;
           photo.url = archived;
@@ -178,7 +184,7 @@ export class PlayerService {
   }
 
   async delete(id: string): Promise<void> {
-    return await this.transaction.run(async ({ players, photos, contracts }) => {
+    await this.transaction.run(async ({ players, photos, contracts }) => {
       const player = await players.findById(id);
 
       if (!player) {
@@ -241,7 +247,7 @@ export class PlayerService {
   }
 
   async deletePhoto(playerId: string, photoId: string): Promise<void> {
-    return await this.transaction.run(async ({ photos }) => {
+    await this.transaction.run(async ({ photos }) => {
       const photo = await photos.findById(photoId);
 
       if (!photo || photo.player.id !== playerId) {
@@ -268,7 +274,7 @@ export class PlayerService {
 
       const archived = player.replaceProfilePhoto(photo.url);
 
-      if (archived) {
+      if (archived !== null && archived !== "") {
         const archivedPhoto = new PlayerPhoto();
         archivedPhoto.player = player;
         archivedPhoto.url = archived;
@@ -291,7 +297,7 @@ async function openContracts(contracts: ContractWriter, playerId: string): Promi
 function requireUnmerged(player: Player | null, id: string): Player {
   if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
 
-  if (player.mergedIntoId) {
+  if (player.mergedIntoId !== null && player.mergedIntoId !== "") {
     throw new InvalidInputError(
       `${player.name} was merged into player "${player.mergedIntoId}"; edit that player instead`,
     );
