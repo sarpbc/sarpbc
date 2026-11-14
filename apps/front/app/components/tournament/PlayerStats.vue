@@ -205,9 +205,7 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
           <caption class="sr-only">
-            {{
-              t("page.tournaments.stats.caption")
-            }}
+            {{ t("page.tournaments.stats.caption") }}
           </caption>
           <thead>
             <tr class="h-row border-b border-separator text-xs text-muted">

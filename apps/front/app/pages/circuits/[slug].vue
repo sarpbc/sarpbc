@@ -162,9 +162,7 @@ watch(
         >
           <table class="w-full text-sm">
             <caption class="sr-only">
-              {{
-                t("page.circuits.standings.caption", { name: standings.name })
-              }}
+              {{ t("page.circuits.standings.caption", { name: standings.name }) }}
             </caption>
             <thead>
               <tr class="h-row border-b border-separator text-xs text-muted">
