@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { VNode } from "vue";
+
 type CaptionAlign = "start" | "center";
 
 const { captionAlign = "center", class: className } = defineProps<{
@@ -7,8 +9,8 @@ const { captionAlign = "center", class: className } = defineProps<{
 }>();
 
 defineSlots<{
-  caption?(): unknown;
-  default(): unknown;
+  caption?(): VNode[];
+  default(): VNode[];
 }>();
 </script>
 

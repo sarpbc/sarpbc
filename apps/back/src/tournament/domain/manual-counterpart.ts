@@ -58,14 +58,13 @@ export function findManualCounterpart(
 ): CounterpartMatch {
   const name = nameKey(stage.eventName + " " + stage.stageName);
   if (!name) return { kind: "none" };
-  const ids = candidates
-    .filter(
-      (candidate) =>
-        nameKey(candidate.name) === name &&
-        (candidate.leagueId === null || candidate.leagueId === stage.leagueId) &&
-        overlaps(candidate, stage),
-    )
-    .map((candidate) => candidate.id);
+  const ids = candidates.flatMap((candidate) =>
+    nameKey(candidate.name) === name &&
+    (candidate.leagueId === null || candidate.leagueId === stage.leagueId) &&
+    overlaps(candidate, stage)
+      ? [candidate.id]
+      : [],
+  );
   if (ids.length === 1) return { kind: "unique", id: ids[0] };
   return ids.length ? { kind: "ambiguous", ids } : { kind: "none" };
 }
