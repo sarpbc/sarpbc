@@ -27,8 +27,8 @@ interface Span {
 function inkMask(frame: Frame, region: Region, threshold: number): Mask {
   const ink = new Uint8Array(region.width * region.height);
 
-  for (let y = 0; y < region.height; y++) {
-    for (let x = 0; x < region.width; x++) {
+  for (let y = 0; y < region.height; y += 1) {
+    for (let x = 0; x < region.width; x += 1) {
       const offset = ((region.y + y) * frame.width + region.x + x) * 3;
 
       const luminance =
@@ -46,7 +46,7 @@ function inkMask(frame: Frame, region: Region, threshold: number): Mask {
 function columnInk(mask: Mask, x: number): number {
   let total = 0;
 
-  for (let y = 0; y < mask.height; y++) total += mask.ink[y * mask.width + x] ?? 0;
+  for (let y = 0; y < mask.height; y += 1) total += mask.ink[y * mask.width + x] ?? 0;
 
   return total;
 }
@@ -57,7 +57,7 @@ function glyphSpans(mask: Mask): Span[] {
   let left = -1;
   let ink = 0;
 
-  for (let x = 0; x <= mask.width; x++) {
+  for (let x = 0; x <= mask.width; x += 1) {
     const column = x < mask.width ? columnInk(mask, x) : 0;
     const bridged = left >= 0 && x + 1 < mask.width && columnInk(mask, x + 1) > 0;
 
@@ -79,11 +79,11 @@ function lineExtent(mask: Mask, spans: readonly Span[]): { top: number; bottom: 
   let top = -1;
   let bottom = -1;
 
-  for (let y = 0; y < mask.height; y++) {
+  for (let y = 0; y < mask.height; y += 1) {
     let inked = 0;
 
     for (const span of spans) {
-      for (let x = span.left; x <= span.right; x++) inked += mask.ink[y * mask.width + x] ?? 0;
+      for (let x = span.left; x <= span.right; x += 1) inked += mask.ink[y * mask.width + x] ?? 0;
     }
 
     if (inked < 2) continue;
@@ -102,8 +102,8 @@ function coverage(mask: Mask, x0: number, x1: number, y0: number, y1: number): n
   const bottom = Math.max(top + 1, Math.ceil(y1));
   let inked = 0;
 
-  for (let y = top; y < bottom; y++) {
-    for (let x = left; x < right; x++) inked += mask.ink[y * mask.width + x] ?? 0;
+  for (let y = top; y < bottom; y += 1) {
+    for (let x = left; x < right; x += 1) inked += mask.ink[y * mask.width + x] ?? 0;
   }
 
   return inked / ((right - left) * (bottom - top));
@@ -125,11 +125,11 @@ export function glyphGrids(frame: Frame, region: Region, settings: GlyphSettings
     const offset = Math.floor((width - scaledWidth) / 2);
     const grid = new Float32Array(width * height);
 
-    for (let cy = 0; cy < height; cy++) {
+    for (let cy = 0; cy < height; cy += 1) {
       const y0 = line.top + (cy * lineHeight) / height;
       const y1 = line.top + ((cy + 1) * lineHeight) / height;
 
-      for (let cx = 0; cx < scaledWidth; cx++) {
+      for (let cx = 0; cx < scaledWidth; cx += 1) {
         const x0 = span.left + (cx * spanWidth) / scaledWidth;
         const x1 = span.left + ((cx + 1) * spanWidth) / scaledWidth;
         grid[cy * width + offset + cx] = coverage(mask, x0, x1, y0, y1);
@@ -147,8 +147,9 @@ function shiftedDistance(
   dy: number,
 ): number {
   let distance = 0;
-  template.rows.forEach((row, y) => {
-    for (let x = 0; x < row.length; x++) {
+
+  for (const [y, row] of template.rows.entries()) {
+    for (let x = 0; x < row.length; x += 1) {
       const expected = row[x] === "#" ? 1 : 0;
       const sx = x + dx;
       const sy = y + dy;
@@ -156,7 +157,7 @@ function shiftedDistance(
       const sampled = inside && (grid[sy * row.length + sx] ?? 0) >= 0.5 ? 1 : 0;
       distance += Math.abs(sampled - expected);
     }
-  });
+  }
 
   return distance / grid.length;
 }
@@ -182,7 +183,7 @@ function classify(
     best.set(template.char, Math.min(best.get(template.char) ?? Infinity, distance));
   }
 
-  const ranked = [...best].sort((a, b) => a[1] - b[1]);
+  const ranked = [...best].toSorted((a, b) => a[1] - b[1]);
   const [first, second] = ranked;
 
   if (first === undefined) return null;
@@ -219,10 +220,11 @@ export function readText(
 export function templateFromGrid(char: string, grid: Float32Array, size: Size): GlyphTemplate {
   const rows: string[] = [];
 
-  for (let y = 0; y < size.height; y++) {
+  for (let y = 0; y < size.height; y += 1) {
     let row = "";
 
-    for (let x = 0; x < size.width; x++) row += (grid[y * size.width + x] ?? 0) >= 0.5 ? "#" : ".";
+    for (let x = 0; x < size.width; x += 1)
+      row += (grid[y * size.width + x] ?? 0) >= 0.5 ? "#" : ".";
     rows.push(row);
   }
 

@@ -176,7 +176,9 @@ function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
 
   // Overlapping windows (a same-day rematch): the replay belongs to the latest match already begun.
   // Every windowed match qualifies for the early-start slack, so when none has begun it cannot decide.
-  const started = windowed.filter(({ begin }) => begin <= played).sort((a, b) => b.begin - a.begin);
+  const started = windowed
+    .filter(({ begin }) => begin <= played)
+    .toSorted((a, b) => b.begin - a.begin);
 
   if (started.length === 0 || (started.length > 1 && started[0].begin === started[1].begin))
     return { kind: "unmatched", reason: "ambiguous_match" };
@@ -227,6 +229,31 @@ export function byPlayedAt(a: ReplaySummary, b: ReplaySummary): number {
   return (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
 }
 
+function seriesAssignments(
+  matches: readonly CandidateMatch[],
+  series: ReadonlyMap<string, readonly SeriesGame[]>,
+): ReplayAssignment[] {
+  const assignments: ReplayAssignment[] = [];
+
+  for (const match of matches) {
+    const games = series.get(match.id);
+
+    if (!games) continue;
+    const problem = seriesProblem(match, games);
+
+    for (const [index, { replay, sides, storedNumber }] of games.entries()) {
+      if (storedNumber !== null) continue;
+      assignments.push(
+        problem
+          ? { kind: "unmatched", replay, reason: problem, matchId: match.id, sides }
+          : { kind: "matched", replay, matchId: match.id, gameNumber: index + 1, sides },
+      );
+    }
+  }
+
+  return assignments;
+}
+
 /**
  * `stored` locates replays already saved, in any match; they are reported where they are and never
  * fetched, moved or renumbered. `excluded` holds replays staff removed; they count as absent.
@@ -253,7 +280,7 @@ export function assignReplays(
 
   const seen = new Set<string>();
 
-  for (const replay of [...replays].sort(byPlayedAt)) {
+  for (const replay of replays.toSorted(byPlayedAt)) {
     if (excluded.has(replay.id)) {
       assignments.push({
         kind: "unmatched",
@@ -310,22 +337,7 @@ export function assignReplays(
     series.set(placement.matchId, games);
   }
 
-  for (const match of matches) {
-    const games = series.get(match.id);
-
-    if (!games) continue;
-    const problem = seriesProblem(match, games);
-    games.forEach(({ replay, sides, storedNumber }, index) => {
-      if (storedNumber !== null) return;
-      assignments.push(
-        problem
-          ? { kind: "unmatched", replay, reason: problem, matchId: match.id, sides }
-          : { kind: "matched", replay, matchId: match.id, gameNumber: index + 1, sides },
-      );
-    });
-  }
-
-  return assignments;
+  return [...assignments, ...seriesAssignments(matches, series)];
 }
 
 export function resolvePlayerId(

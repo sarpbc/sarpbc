@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Team } from "../../../roster/domain/roster";
-import { Match, TournamentParticipant, type TournamentSummary } from "../../domain/competition";
+import { Team } from "../../../roster/domain/team";
+import { Match, type TournamentSummary } from "../../domain/match";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapMatchBlockItem } from "./match-list.mapper";
 
 const NOW = new Date("2026-10-31T18:00:00Z");

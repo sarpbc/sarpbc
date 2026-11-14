@@ -11,16 +11,16 @@ import {
 const {
   matches,
   variant,
-  source,
-  liveMatchIds,
+  source = null,
+  liveMatchIds = null,
   showDate = true,
 } = defineProps<{
   matches: MatchRowItem[];
   variant: "live" | "upcoming" | "result";
   /** When set, links carry `?from=` and emit `match_row_clicked`. */
-  source?: MatchDiscoverySource;
+  source?: MatchDiscoverySource | null;
   /** Match ids treated as live when mixed into an upcoming schedule list. */
-  liveMatchIds?: ReadonlySet<string>;
+  liveMatchIds?: ReadonlySet<string> | null;
   showDate?: boolean;
 }>();
 

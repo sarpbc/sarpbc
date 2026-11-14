@@ -14,20 +14,23 @@ export class CompetitionAfterCommit {
     private readonly diagnostics: Pick<CompetitionDiagnostics, "error">,
   ) {}
   async settle({ tournamentIds = [], decidedMatchIds = [] }: CompetitionSettlement): Promise<void> {
-    for (const id of new Set(tournamentIds)) {
-      try {
-        await this.cache.invalidateTournament(id);
-      } catch (error) {
-        this.diagnostics.error("Tournament cache invalidation failed", error);
-      }
-    }
-
-    for (const matchId of new Set(decidedMatchIds)) {
-      try {
-        await this.events.publish(matchDecided(matchId));
-      } catch (error) {
-        this.diagnostics.error("MatchDecided publication failed", error);
-      }
-    }
+    await Promise.all(
+      [...new Set(tournamentIds)].map(async (id) => {
+        try {
+          await this.cache.invalidateTournament(id);
+        } catch (error) {
+          this.diagnostics.error("Tournament cache invalidation failed", error);
+        }
+      }),
+    );
+    await Promise.all(
+      [...new Set(decidedMatchIds)].map(async (matchId) => {
+        try {
+          await this.events.publish(matchDecided(matchId));
+        } catch (error) {
+          this.diagnostics.error("MatchDecided publication failed", error);
+        }
+      }),
+    );
   }
 }

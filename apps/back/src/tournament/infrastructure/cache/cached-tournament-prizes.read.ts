@@ -33,6 +33,16 @@ export function tournamentPrizesCacheKey(id: string): string {
   return `tournament-prizes:${id}`;
 }
 
+function diagnose(key: string, operation: string, error: Error): void {
+  log.warn({
+    component: "CachedTournamentPrizesRead",
+    message: "Optional tournament prizes cache failed",
+    key,
+    operation,
+    error,
+  });
+}
+
 export class CachedTournamentPrizesRead {
   constructor(
     private readonly prizes: Pick<TournamentPrizeService, "findByTournamentId">,
@@ -50,7 +60,7 @@ export class CachedTournamentPrizesRead {
     try {
       await this.redis.set(key, JSON.stringify(prizes), 60);
     } catch (error) {
-      this.diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
+      diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
     }
 
     return prizes;
@@ -65,26 +75,16 @@ export class CachedTournamentPrizesRead {
       const result = distribution.safeParse(decoded);
 
       if (!result.success) {
-        this.diagnose(key, "decode", result.error);
+        diagnose(key, "decode", result.error);
 
         return null;
       }
 
       return result.data;
     } catch (error) {
-      this.diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
+      diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
 
       return null;
     }
-  }
-
-  private diagnose(key: string, operation: string, error: Error): void {
-    log.warn({
-      component: CachedTournamentPrizesRead.name,
-      message: "Optional tournament prizes cache failed",
-      key,
-      operation,
-      error,
-    });
   }
 }

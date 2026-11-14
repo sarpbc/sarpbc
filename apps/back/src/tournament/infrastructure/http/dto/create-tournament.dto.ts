@@ -23,7 +23,7 @@ const tournamentWriteFields = {
         z
           .string()
           .max(255)
-          .pipe(z.url({ protocol: /^(https?|ftp)$/ })),
+          .pipe(z.url({ protocol: /^(?:https?|ftp)$/ })),
         z.literal(""),
       ]),
     )
@@ -53,7 +53,7 @@ export const createTournamentFields = {
 
 export const CreateTournamentDto = z.strictObject(createTournamentFields);
 
-export type CreateTournamentDto = z.infer<typeof CreateTournamentDto>;
+export type CreateTournamentInput = z.infer<typeof CreateTournamentDto>;
 
 const participantRoster = z.strictObject({
   teamId: z.uuidv4(),
@@ -77,4 +77,4 @@ export const updateTournamentFields = {
 
 export const UpdateTournamentDto = z.strictObject(updateTournamentFields);
 
-export type UpdateTournamentDto = z.infer<typeof UpdateTournamentDto>;
+export type UpdateTournamentInput = z.infer<typeof UpdateTournamentDto>;

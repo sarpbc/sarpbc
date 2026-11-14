@@ -12,19 +12,19 @@ const homePath = computed(() => localePath("/"));
 const matchesPath = computed(() => localePath("/matches"));
 const resultsPath = computed(() => localePath("/results"));
 
+function isExactPath(path: string): boolean {
+  const current = route.path.replace(/\/$/, "");
+  const target = path.replace(/\/$/, "");
+
+  return current === target;
+}
+
 function isNewsSection(): boolean {
   if (isExactPath(homePath.value)) {
     return true;
   }
 
   return /(?:^|\/)news(?:\/|$)/.test(route.path);
-}
-
-function isExactPath(path: string): boolean {
-  const current = route.path.replace(/\/$/, "");
-  const target = path.replace(/\/$/, "");
-
-  return current === target;
 }
 
 function toggleMenu() {

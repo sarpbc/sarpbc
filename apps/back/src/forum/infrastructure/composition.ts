@@ -1,7 +1,8 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import { authorReader } from "../../user/infrastructure/user-persistence";
 import { replyDeletion } from "../../reply/infrastructure/composition";
-import { MikroPostStore, MikroTopicStore } from "./persistence/forum.store";
+import { MikroPostStore } from "./persistence/post.store";
+import { MikroTopicStore } from "./persistence/topic.store";
 import type { ForumTransaction } from "../application/ports";
 
 export function transactionalForum(em: EntityManager): ForumTransaction {

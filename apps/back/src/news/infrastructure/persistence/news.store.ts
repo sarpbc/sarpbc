@@ -1,6 +1,6 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import type { NewsType } from "@sarpbc/types";
-import { ConflictError } from "../../../common/domain/errors";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { NewsArticle } from "./news-article.entity";
 import { User } from "../../../user/infrastructure/user-persistence";
@@ -53,13 +53,13 @@ export class MikroNewsStore implements NewsStore {
     return [rows.map(newsSnapshot), total];
   }
   async listWeek(start: Date, end: Date, limit: number) {
-    return (
-      await this.em.find(
-        NewsArticle,
-        { isDraft: false, type: WEEKLY_DIGEST_NEWS_TYPE, createdAt: { $gte: start, $lt: end } },
-        { populate: ["author"], orderBy: { createdAt: "DESC" }, limit },
-      )
-    ).map(newsSnapshot);
+    const rows = await this.em.find(
+      NewsArticle,
+      { isDraft: false, type: WEEKLY_DIGEST_NEWS_TYPE, createdAt: { $gte: start, $lt: end } },
+      { populate: ["author"], orderBy: { createdAt: "DESC" }, limit },
+    );
+
+    return rows.map(newsSnapshot);
   }
   async listAdmin(page: number, limit: number): Promise<[NewsArticleRecord[], number]> {
     const [rows, total] = await this.em.findAndCount(

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path from "node:path";
 import { test } from "node:test";
 import { migrationViolations } from "./check-migrations.mts";
 
@@ -14,14 +14,14 @@ interface Repository {
 }
 
 function repository(baseMigrations: string[]): Repository {
-  const root = mkdtempSync(join(tmpdir(), "check-migrations-"));
-  const directory = join(root, "migrations");
+  const root = mkdtempSync(path.join(tmpdir(), "check-migrations-"));
+  const directory = path.join(root, "migrations");
   mkdirSync(directory);
   const git = (...args: string[]) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
   git("init", "--quiet", "--initial-branch", "base");
 
-  for (const name of baseMigrations) writeFileSync(join(directory, name), "");
-  writeFileSync(join(directory, ".snapshot-sarpbc.json"), "{}");
+  for (const name of baseMigrations) writeFileSync(path.join(directory, name), "");
+  writeFileSync(path.join(directory, ".snapshot-sarpbc.json"), "{}");
   git("add", ".");
   git(
     "-c",
@@ -40,10 +40,10 @@ function repository(baseMigrations: string[]): Repository {
   return {
     directory,
     add: (name: string) => {
-      writeFileSync(join(directory, name), "");
+      writeFileSync(path.join(directory, name), "");
     },
     delete: (name: string) => {
-      rmSync(join(directory, name));
+      rmSync(path.join(directory, name));
     },
     remove: () => {
       rmSync(root, { recursive: true, force: true });

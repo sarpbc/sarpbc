@@ -1,7 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { IntegrationError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { IntegrationError } from "../../common/domain/errors/integration-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { TwimgImageGateway } from "../infrastructure/twimg-image.gateway";
 import { TweetImageService } from "./tweet-image.service";
+
+const image = (body: ConstructorParameters<typeof Response>[0], init: ResponseInit = {}) =>
+  new Response(body, { status: 200, headers: { "content-type": "image/jpeg" }, ...init });
 
 describe("TweetImageService", () => {
   const fetchMock = vi.fn<typeof fetch>();
@@ -19,9 +24,6 @@ describe("TweetImageService", () => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
-
-  const image = (body: ConstructorParameters<typeof Response>[0], init: ResponseInit = {}) =>
-    new Response(body, { status: 200, headers: { "content-type": "image/jpeg" }, ...init });
 
   it("loads an allowlisted image without a Referer and without following other hosts", async () => {
     fetchMock.mockResolvedValue(image(jpeg));

@@ -5,9 +5,9 @@ import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
+import nodePath from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
-import { fileURLToPath } from "node:url";
+import { mapSequentially } from "../src/common/application/sequentially.ts";
 import { verifyCircuits } from "./scenarios/circuits.mts";
 import { verifyCompetitionImport } from "./scenarios/competition-import.mts";
 import {
@@ -26,7 +26,13 @@ import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mts";
 import { verifyLineupProposals, verifyLineups } from "./scenarios/lineups.mts";
 import { verifyViewership, verifyViewershipProposals } from "./scenarios/viewership.mts";
 import { verifyTeamAliasProposals, verifyTeamAliases } from "./scenarios/team-aliases.mts";
-import { byJoined, reviewedProposal, toolFailure, toolProposal } from "./scenarios/support.mts";
+import {
+  byJoined,
+  byText,
+  reviewedProposal,
+  toolFailure,
+  toolProposal,
+} from "./scenarios/support.mts";
 import type {
   JsonResponse,
   Payload,
@@ -36,12 +42,12 @@ import type {
 } from "./scenarios/support.mts";
 import type { EntityClass, FilterQuery } from "@mikro-orm/core";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
-import type * as RosterRows from "../src/roster/infrastructure/persistence/player.entities.ts";
+import type { Contract as ContractEntity } from "../src/roster/infrastructure/persistence/contract.entity.ts";
 
 type Application = NestFastifyApplication;
 
-const root = resolve(import.meta.dirname, "..");
-const compose = readFileSync(resolve(root, "../../docker-compose.local.yml"), "utf-8");
+const root = nodePath.resolve(import.meta.dirname, "..");
+const compose = readFileSync(nodePath.resolve(root, "../../docker-compose.local.yml"), "utf-8");
 
 const identified = z.object({ id: z.string() });
 
@@ -106,7 +112,7 @@ const replyBody = identified.extend({ targetPath: z.string().optional() });
 
 const notificationBody = identified.extend({ targetPath: z.string() });
 
-type ContractWhere = FilterQuery<InstanceType<typeof RosterRows.Contract>>;
+type ContractWhere = FilterQuery<ContractEntity>;
 
 const mcpContract = identified.extend({
   team: identified,
@@ -196,19 +202,38 @@ function composeImage(name: string): string {
   return image;
 }
 
+function docker(...args: string[]): string {
+  return execFileSync("docker", args, {
+    encoding: "utf-8",
+    timeout: 30_000,
+  }).trim();
+}
+
+function cookies(response: JsonResponse): string {
+  const values = response.headers["set-cookie"];
+  assert.ok(Array.isArray(values) && values.length >= 2, "access and refresh cookies are returned");
+  assert.ok(
+    values.every((value) => /HttpOnly/i.test(value)),
+    "authentication cookies are HttpOnly",
+  );
+
+  return values.map((value) => value.split(";")[0]).join("; ");
+}
+
+const teamNames = (participants: { team: { name: string } }[]): string[] =>
+  participants.map(({ team }) => team.name).toSorted();
+
+const day = (value: Date | string | null | undefined) =>
+  value === null || value === undefined ? value : new Date(value).toISOString().slice(0, 10);
+
+const slug = (name: string): string => name.toLowerCase().replaceAll(" ", "-");
+
 test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations", async () => {
   const containers: string[] = [];
   const results: string[] = [];
   const failures: unknown[] = [];
   let application: Application | undefined;
   let redisClient: RedisClient | undefined;
-
-  function docker(...args: string[]): string {
-    return execFileSync("docker", args, {
-      encoding: "utf-8",
-      timeout: 30_000,
-    }).trim();
-  }
 
   async function container(
     service: string,
@@ -231,7 +256,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     );
     containers.push(name);
 
-    for (let attempt = 0; attempt < 60; attempt++) {
+    async function ready(attempt: number): Promise<number> {
+      if (attempt >= 60) throw new Error(`${service} did not become ready within 30 seconds`);
+
       try {
         docker("exec", name, ...readiness);
 
@@ -239,37 +266,27 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           JSON.parse(docker("inspect", "--format", "{{json .NetworkSettings.Ports}}", name)),
         );
 
-        const hostPort = binding[`${port}/tcp`]?.[0]?.HostPort;
+        const [published] = binding[`${port}/tcp`] ?? [];
 
-        if (hostPort === undefined) throw new Error(`${service} port ${port} is not published`);
+        if (published?.HostPort === undefined) {
+          throw new Error(`${service} port ${port} is not published`);
+        }
 
-        return Number(hostPort);
+        return Number(published.HostPort);
       } catch {
         await delay(500);
+
+        return await ready(attempt + 1);
       }
     }
 
-    throw new Error(`${service} did not become ready within 30 seconds`);
+    return await ready(0);
   }
 
   async function check(name: string, work: () => Promise<void>): Promise<void> {
     await work();
     results.push(name);
     process.stdout.write(`PASS ${name}\n`);
-  }
-
-  function cookies(response: JsonResponse): string {
-    const values = response.headers["set-cookie"];
-    assert.ok(
-      Array.isArray(values) && values.length >= 2,
-      "access and refresh cookies are returned",
-    );
-    assert.ok(
-      values.every((value) => /HttpOnly/i.test(value)),
-      "authentication cookies are HttpOnly",
-    );
-
-    return values.map((value) => value.split(";")[0]).join("; ");
   }
 
   try {
@@ -328,6 +345,24 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     application = app;
     await configureApp(app, ["http://127.0.0.1:4000", "http://127.0.0.1:4002"]);
     const orm = app.get(MikroORM);
+
+    const redirectOf = async (entity: EntityClass<Mergeable>, id: string) => {
+      const findOneOrFailResult5 = await orm.em
+        .fork()
+        .findOneOrFail(entity, { id }, { populate: ["mergedInto"] });
+
+      return findOneOrFailResult5.mergedInto?.id ?? null;
+    };
+
+    const insert = async (build: (em: ReturnType<typeof orm.em.fork>, id: string) => object) => {
+      const em = orm.em.fork();
+      const id = randomUUID();
+      em.persist(build(em, id));
+      await em.flush();
+
+      return id;
+    };
+
     const { default: Redis } = await import("ioredis");
     const redis = new Redis({ host: "127.0.0.1", port: redisPort });
     redisClient = redis;
@@ -357,10 +392,30 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     };
 
     const { User } = await import("../src/user/infrastructure/persistence/user.entity.ts");
-    const rosterRows = await import("../src/roster/infrastructure/persistence/player.entities.ts");
 
-    const { Reply, ReplyReport } =
-      await import("../src/reply/infrastructure/persistence/reply.entities.ts");
+    const [
+      { Player: PlayerRow },
+      { PlayerPhoto: PlayerPhotoRow },
+      { Contract: ContractRow },
+      { Team: TeamRow },
+    ] = await Promise.all([
+      import("../src/roster/infrastructure/persistence/player.entity.ts"),
+      import("../src/roster/infrastructure/persistence/player-photo.entity.ts"),
+      import("../src/roster/infrastructure/persistence/contract.entity.ts"),
+      import("../src/roster/infrastructure/persistence/team.entity.ts"),
+    ]);
+
+    const rosterRows = {
+      Player: PlayerRow,
+      PlayerPhoto: PlayerPhotoRow,
+      Contract: ContractRow,
+      Team: TeamRow,
+    };
+
+    const { Reply } = await import("../src/reply/infrastructure/persistence/reply.entity.ts");
+
+    const { ReplyReport } =
+      await import("../src/reply/infrastructure/persistence/reply-report.entity.ts");
 
     const { ReplyNotification } =
       await import("../src/notification/infrastructure/persistence/reply-notification.entity.ts");
@@ -381,7 +436,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       async () => {
         orm.config.set("migrations", {
           ...orm.config.get("migrations"),
-          path: resolve(root, "dist/infrastructure/database/migrations"),
+          path: nodePath.resolve(root, "dist/infrastructure/database/migrations"),
           pathTs: undefined,
           emit: "js",
           snapshot: false,
@@ -393,7 +448,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.equal(applied.length, pending.length);
         assert.deepEqual(await migrator.getPending(), []);
         assert.equal(await migrator.checkSchema(), false);
-        assert.equal((await orm.schema.getUpdateSchemaSQL()).trim(), "");
+        const getUpdateSchemaSQLResult = await orm.schema.getUpdateSchemaSQL();
+        assert.equal(getUpdateSchemaSQLResult.trim(), "");
         assert.deepEqual(await migrator.up(), []);
       },
     );
@@ -420,12 +476,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
         staffCookie = await signup("staff@example.test", "Integration Staff");
         memberCookie = await signup("member@example.test", "Integration Member");
-        staff = (await request("GET", "/user/profile", undefined, staffCookie)).json(
-          z.object({ user: userBody }),
-        ).user;
-        member = (await request("GET", "/user/profile", undefined, memberCookie)).json(
-          z.object({ user: userBody }),
-        ).user;
+        const response2 = await request("GET", "/user/profile", undefined, staffCookie);
+        staff = response2.json(z.object({ user: userBody })).user;
+        const response3 = await request("GET", "/user/profile", undefined, memberCookie);
+        member = response3.json(z.object({ user: userBody })).user;
         assert.ok(!("password" in staff) && !("googleId" in staff));
         await request("GET", "/user/profile", undefined, undefined, 401);
         await request("POST", "/team", { name: "Forbidden" }, memberCookie, 403);
@@ -446,9 +500,14 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         );
         await request("POST", "/team", { name: "Invalid", unexpected: true }, staffCookie, 400);
 
-        const patched = (
-          await request("PATCH", "/user/profile", { userName: "Integration Renamed" }, memberCookie)
-        ).json(z.object({ user: userBody }));
+        const response4 = await request(
+          "PATCH",
+          "/user/profile",
+          { userName: "Integration Renamed" },
+          memberCookie,
+        );
+
+        const patched = response4.json(z.object({ user: userBody }));
 
         assert.equal(patched.user.userName, "Integration Renamed");
       },
@@ -456,77 +515,73 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
     let article: ArticleBody;
     await check("news draft privacy, publication, French content and sitemap", async () => {
-      article = (
-        await request(
-          "POST",
-          "/news",
-          {
-            title: "Integration News",
-            content: "<p>Published report</p>",
-            titleFr: "Actualité intégration",
-            contentFr: "<p>Rapport français</p>",
-          },
-          staffCookie,
-          201,
-        )
-      ).json(articleBody);
-      await request("GET", `/news/${article.slug}`, undefined, undefined, 404);
-      assert.equal(
-        (await request("GET", `/news/admin/${article.slug}`, undefined, staffCookie)).json(
-          z.object({ isDraft: z.boolean() }),
-        ).isDraft,
-        true,
-      );
-      await request("PATCH", `/news/${article.slug}/publish`, {}, staffCookie, 204);
-      assert.equal(
-        (await request("GET", `/news/${article.slug}?locale=fr-FR`)).json(articleBody).title,
-        "Actualité intégration",
+      const response5 = await request(
+        "POST",
+        "/news",
+        {
+          title: "Integration News",
+          content: "<p>Published report</p>",
+          titleFr: "Actualité intégration",
+          contentFr: "<p>Rapport français</p>",
+        },
+        staffCookie,
+        201,
       );
 
-      const draft = (
-        await request(
-          "POST",
-          "/news",
-          { title: "Integration Secret Draft", content: "<p>Not public</p>" },
-          staffCookie,
-          201,
-        )
-      ).json(articleBody);
+      article = response5.json(articleBody);
+      await request("GET", `/news/${article.slug}`, undefined, undefined, 404);
+      const response6 = await request("GET", `/news/admin/${article.slug}`, undefined, staffCookie);
+      assert.equal(response6.json(z.object({ isDraft: z.boolean() })).isDraft, true);
+      await request("PATCH", `/news/${article.slug}/publish`, {}, staffCookie, 204);
+      const response7 = await request("GET", `/news/${article.slug}?locale=fr-FR`);
+      assert.equal(response7.json(articleBody).title, "Actualité intégration");
+
+      const response8 = await request(
+        "POST",
+        "/news",
+        { title: "Integration Secret Draft", content: "<p>Not public</p>" },
+        staffCookie,
+        201,
+      );
+
+      const draft = response8.json(articleBody);
 
       await request("GET", `/news/${draft.slug}`, undefined, undefined, 404);
+      const response9 = await request("GET", "/sitemap/news");
       assert.deepEqual(
-        (await request("GET", "/sitemap/news")).json(z.array(pathEntry)).map(({ path }) => path),
+        response9.json(z.array(pathEntry)).map(({ path }) => path),
         [`/news/${article.slug}`],
       );
 
-      const feed = (await request("GET", "/news?locale=en-US&page=0&limit=10")).json(
+      const response10 = await request("GET", "/news?locale=en-US&page=0&limit=10");
+
+      const feed = response10.json(
         z.intersection(counted, z.object({ data: z.array(articleBody) })),
       );
 
       assert.equal(feed.total, 1);
       assert.deepEqual(
-        feed.data.map(({ slug }) => slug),
+        feed.data.map((entry) => entry.slug),
         [article.slug],
       );
-      assert.equal(
-        (await request("GET", "/news?type=short&page=0&limit=10")).json(counted).total,
-        1,
+      const response11 = await request("GET", "/news?type=short&page=0&limit=10");
+      assert.equal(response11.json(counted).total, 1);
+      const response12 = await request("GET", "/news?type=article&page=0&limit=10");
+      assert.equal(response12.json(counted).total, 0);
+
+      const response13 = await request(
+        "GET",
+        "/news/admin?page=0&limit=10",
+        undefined,
+        staffCookie,
       );
-      assert.equal(
-        (await request("GET", "/news?type=article&page=0&limit=10")).json(counted).total,
-        0,
-      );
-      assert.equal(
-        (await request("GET", "/news/admin?page=0&limit=10", undefined, staffCookie)).json(counted)
-          .total,
-        2,
-      );
+
+      assert.equal(response13.json(counted).total, 2);
       await request("PATCH", `/news/${article.slug}/unpublish`, {}, staffCookie, 204);
-      assert.deepEqual((await request("GET", "/sitemap/news")).json(z.array(pathEntry)), []);
-      assert.equal(
-        (await request("GET", "/news?locale=en-US&page=0&limit=10")).json(counted).total,
-        0,
-      );
+      const response14 = await request("GET", "/sitemap/news");
+      assert.deepEqual(response14.json(z.array(pathEntry)), []);
+      const response15 = await request("GET", "/news?locale=en-US&page=0&limit=10");
+      assert.equal(response15.json(counted).total, 0);
       await request("PATCH", `/news/${article.slug}/publish`, {}, staffCookie, 204);
     });
 
@@ -534,82 +589,95 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     let otherTeam: TeamBody;
     let player: PlayerBody;
     await check("teams, players, roster contracts and profile photo selection", async () => {
-      team = (await request("POST", "/team", { name: "Integration Alpha" }, staffCookie, 201)).json(
-        z.object({ team: teamBody }),
-      ).team;
-      otherTeam = (
-        await request("POST", "/team", { name: "Integration Beta" }, staffCookie, 201)
-      ).json(z.object({ team: teamBody })).team;
-      player = (
-        await request(
-          "POST",
-          "/player",
-          {
-            name: "Integration Player",
-            teamId: team.id,
-            nationality: "FR",
-            imageUrl: "https://example.test/original.jpg",
-          },
-          staffCookie,
-          201,
-        )
-      ).json(z.object({ player: playerBody })).player;
+      const response16 = await request(
+        "POST",
+        "/team",
+        { name: "Integration Alpha" },
+        staffCookie,
+        201,
+      );
+
+      ({ team } = response16.json(z.object({ team: teamBody })));
+
+      const response17 = await request(
+        "POST",
+        "/team",
+        { name: "Integration Beta" },
+        staffCookie,
+        201,
+      );
+
+      otherTeam = response17.json(z.object({ team: teamBody })).team;
+
+      const response18 = await request(
+        "POST",
+        "/player",
+        {
+          name: "Integration Player",
+          teamId: team.id,
+          nationality: "FR",
+          imageUrl: "https://example.test/original.jpg",
+        },
+        staffCookie,
+        201,
+      );
+
+      ({ player } = response18.json(z.object({ player: playerBody })));
+      const response19 = await request("GET", `/player/${player.id}`);
       assert.equal(
-        (await request("GET", `/player/${player.id}`)).json(
-          z.object({ player: z.object({ team: identified }) }),
-        ).player.team.id,
+        response19.json(z.object({ player: z.object({ team: identified }) })).player.team.id,
         team.id,
       );
 
-      const { photo } = (
-        await request(
-          "POST",
-          `/player/${player.id}/photo`,
-          { url: "https://example.test/profile.jpg" },
-          staffCookie,
-          201,
-        )
-      ).json(z.object({ photo: photoBody }));
+      const response20 = await request(
+        "POST",
+        `/player/${player.id}/photo`,
+        { url: "https://example.test/profile.jpg" },
+        staffCookie,
+        201,
+      );
+
+      const { photo } = response20.json(z.object({ photo: photoBody }));
+
+      const response21 = await request(
+        "PATCH",
+        `/player/${player.id}/photo/${photo.id}/set-profile`,
+        {},
+        staffCookie,
+      );
 
       assert.equal(
-        (
-          await request(
-            "PATCH",
-            `/player/${player.id}/photo/${photo.id}/set-profile`,
-            {},
-            staffCookie,
-          )
-        ).json(z.object({ player: z.object({ imageUrl: z.string() }) })).player.imageUrl,
+        response21.json(z.object({ player: z.object({ imageUrl: z.string() }) })).player.imageUrl,
         photo.url,
       );
+      const response22 = await request("GET", `/player/slug/${player.slug}`);
       assert.equal(
-        (await request("GET", `/player/slug/${player.slug}`))
+        response22
           .json(z.object({ player: z.object({ photos: z.array(z.string()) }) }))
           .player.photos.includes("https://example.test/original.jpg"),
         true,
       );
 
-      const { contract } = (
-        await request(
-          "POST",
-          `/player/${player.id}/contract`,
-          { teamId: team.id, startDate: "2026-01-01" },
-          staffCookie,
-          201,
-        )
-      ).json(z.object({ contract: contractBody }));
+      const response23 = await request(
+        "POST",
+        `/player/${player.id}/contract`,
+        { teamId: team.id, startDate: "2026-01-01" },
+        staffCookie,
+        201,
+      );
+
+      const { contract } = response23.json(z.object({ contract: contractBody }));
 
       assert.equal(contract.team.id, team.id);
+      const response24 = await request("GET", `/team/${team.id}/contract`);
       assert.equal(
-        (await request("GET", `/team/${team.id}/contract`)).json(
-          z.object({ contracts: z.array(contractBody) }),
-        ).contracts.length,
+        response24.json(z.object({ contracts: z.array(contractBody) })).contracts.length,
         1,
       );
+      const response25 = await request("GET", `/team/${team.id}`);
       assert.equal(
-        (await request("GET", `/team/${team.id}`)).json(
-          z.object({ team: z.object({ players: z.array(identified) }) }),
-        ).team.players[0].id,
+        response25.json(z.object({ team: z.object({ players: z.array(identified) }) })).team
+          .players[0].id,
         player.id,
       );
 
@@ -621,10 +689,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         201,
       );
 
-      const movements = async (query: string): Promise<string[][]> =>
-        (await request("GET", `/transfers?${query}`))
+      const movements = async (query: string): Promise<string[][]> => {
+        const response26 = await request("GET", `/transfers?${query}`);
+
+        return response26
           .json(z.object({ transfers: z.array(transferBody) }))
-          .transfers.map(({ type, date, team: { slug } }) => [type, date, slug]);
+          .transfers.map(({ type, date, team: { slug: teamSlug } }) => [type, date, teamSlug]);
+      };
 
       assert.deepEqual(await movements(`player=${player.slug}`), [
         ["arrival", "2026-01-01", team.slug],
@@ -642,15 +713,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     await check(
       "manual tournament, real Redis DTO cache and TTL, match creation and reads",
       async () => {
-        tournament = (
-          await request(
-            "POST",
-            "/tournaments",
-            { name: "Integration Cup", teamIds: [team.id, otherTeam.id] },
-            staffCookie,
-            201,
-          )
-        ).json(z.object({ tournament: tournamentBody })).tournament;
+        const response27 = await request(
+          "POST",
+          "/tournaments",
+          { name: "Integration Cup", teamIds: [team.id, otherTeam.id] },
+          staffCookie,
+          201,
+        );
+
+        ({ tournament } = response27.json(z.object({ tournament: tournamentBody })));
         assert.equal(tournament.source, "manual");
         assert.equal(tournament.participants.length, 2);
         await request(
@@ -660,20 +731,21 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           staffCookie,
           201,
         );
-        match = (
-          await request(
-            "POST",
-            `/tournaments/${tournament.id}/matches`,
-            {
-              name: "Integration Final",
-              participantIds: tournament.participants.map((p) => p.id),
-              beginAt: new Date(Date.now() + 86_400_000).toISOString(),
-              status: "not_started",
-            },
-            staffCookie,
-            201,
-          )
-        ).json(z.object({ match: matchBody })).match;
+
+        const response28 = await request(
+          "POST",
+          `/tournaments/${tournament.id}/matches`,
+          {
+            name: "Integration Final",
+            participantIds: tournament.participants.map((p) => p.id),
+            beginAt: new Date(Date.now() + 86_400_000).toISOString(),
+            status: "not_started",
+          },
+          staffCookie,
+          201,
+        );
+
+        ({ match } = response28.json(z.object({ match: matchBody })));
         assert.ok(match.id);
         assert.ok(
           Number.isInteger(match.publicId) && match.publicId > 0,
@@ -681,13 +753,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         );
         assert.equal(match.slug, "integration-alpha-vs-integration-beta-integration-cup");
 
-        const byLegacyId = (await request("GET", `/matches/${match.id}`)).json(
-          z.object({ match: matchBody }),
-        );
+        const response29 = await request("GET", `/matches/${match.id}`);
+        const byLegacyId = response29.json(z.object({ match: matchBody }));
 
-        const byPublicId = (await request("GET", `/matches/${match.publicId}`)).json(
-          z.object({ match: matchBody }),
-        );
+        const response30 = await request("GET", `/matches/${match.publicId}`);
+        const byPublicId = response30.json(z.object({ match: matchBody }));
 
         assert.deepEqual(byPublicId.match, byLegacyId.match);
         assert.equal(byPublicId.match.id, match.id);
@@ -698,19 +768,16 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         await request("GET", "/matches/upcoming?limit=abc", undefined, undefined, 400);
         await request("GET", "/matches/results?offset=-1", undefined, undefined, 400);
 
-        const listed = (
-          await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`)
-        ).json(z.object({ upcoming: z.array(matchBody) }));
+        const response31 = await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`);
+        const listed = response31.json(z.object({ upcoming: z.array(matchBody) }));
 
         assert.equal(listed.upcoming[0].publicId, match.publicId);
         assert.equal(listed.upcoming[0].slug, match.slug);
-        assert.equal(
-          (await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`)).json(counted)
-            .total,
-          1,
-        );
+        const response32 = await request("GET", `/matches/upcoming?tournamentId=${tournament.id}`);
+        assert.equal(response32.json(counted).total, 1);
 
-        const firstBody = (await request("GET", `/tournaments/${tournament.id}`)).json(z.unknown());
+        const response33 = await request("GET", `/tournaments/${tournament.id}`);
+        const firstBody = response33.json(z.unknown());
 
         const first = z
           .object({
@@ -721,7 +788,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           })
           .parse(firstBody);
 
-        const second = (await request("GET", `/tournaments/${tournament.id}`)).json(z.unknown());
+        const response34 = await request("GET", `/tournaments/${tournament.id}`);
+        const second = response34.json(z.unknown());
         assert.deepEqual(firstBody, second);
         assert.match(first.tournament.matches[0].beginAt, /^\d{4}-\d{2}-\d{2}T/);
         assert.equal(first.tournament.participants[0].team.id, tournament.participants[0].team.id);
@@ -734,10 +802,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           staffCookie,
         );
         assert.equal(await redis.exists(`tournament:${tournament.id}`), 0);
+        const response35 = await request("GET", `/tournaments/${tournament.id}`);
         assert.equal(
-          (await request("GET", `/tournaments/${tournament.id}`)).json(
-            z.object({ tournament: z.object({ name: z.string() }) }),
-          ).tournament.name,
+          response35.json(z.object({ tournament: z.object({ name: z.string() }) })).tournament.name,
           "Integration Cup Updated",
         );
         const { RedisService } = await import("../src/infrastructure/redis/redis.service.ts");
@@ -760,7 +827,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             `select indexdef from pg_indexes where indexname = 'tournament_participant_team_id_index'`,
           );
 
-        assert.match(index.indexdef, /(team_id)/);
+        assert.match(index.indexdef, /team_id/);
 
         const keys = [
           `team:${team.id}:1`,
@@ -769,9 +836,12 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           "team:00000000-0000-4000-8000-000000000000:5",
         ];
 
-        const { blocks } = (
-          await request("GET", `/matches/blocks?${keys.map((key) => `block=${key}`).join("&")}`)
-        ).json(
+        const response36 = await request(
+          "GET",
+          `/matches/blocks?${keys.map((key) => `block=${key}`).join("&")}`,
+        );
+
+        const { blocks } = response36.json(
           z.object({
             blocks: z.record(z.string(), z.array(z.object({ id: z.string(), state: z.string() }))),
           }),
@@ -798,9 +868,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       await request("PUT", `/tournaments/matches/${match.id}/vods`, { vods }, memberCookie, 403);
 
-      const saved = (
-        await request("PUT", `/tournaments/matches/${match.id}/vods`, { vods }, staffCookie)
-      ).json(z.object({ match: z.object({ vods: z.array(vodBody) }) })).match.vods;
+      const response37 = await request(
+        "PUT",
+        `/tournaments/matches/${match.id}/vods`,
+        { vods },
+        staffCookie,
+      );
+
+      const saved = response37.json(z.object({ match: z.object({ vods: z.array(vodBody) }) })).match
+        .vods;
 
       const expected = [
         { game: 1, url: "https://www.twitch.tv/videos/1?t=95", language: "en", source: "twitch" },
@@ -808,10 +884,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       ];
 
       assert.deepEqual(saved, expected);
+      const response38 = await request("GET", `/matches/${match.publicId}`);
       assert.deepEqual(
-        (await request("GET", `/matches/${match.publicId}`)).json(
-          z.object({ match: z.object({ vods: z.array(vodBody) }) }),
-        ).match.vods,
+        response38.json(z.object({ match: z.object({ vods: z.array(vodBody) }) })).match.vods,
         expected,
       );
 
@@ -827,10 +902,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         staffCookie,
         400,
       );
+      const response39 = await request("GET", `/matches/${match.id}`);
       assert.deepEqual(
-        (await request("GET", `/matches/${match.id}`)).json(
-          z.object({ match: z.object({ vods: z.array(vodBody) }) }),
-        ).match.vods,
+        response39.json(z.object({ match: z.object({ vods: z.array(vodBody) }) })).match.vods,
         expected,
       );
       await request(
@@ -841,9 +915,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         404,
       );
 
-      const token = (
-        await request("POST", "/pat/tokens", { name: "VOD MCP" }, staffCookie, 201)
-      ).json(tokenBody);
+      const response40 = await request(
+        "POST",
+        "/pat/tokens",
+        { name: "VOD MCP" },
+        staffCookie,
+        201,
+      );
+
+      const token = response40.json(tokenBody);
 
       const setGameVods = async (game: number) =>
         await request(
@@ -872,8 +952,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         );
 
       await Promise.all([3, 4, 5].map(setGameVods));
+      const response41 = await request("GET", `/matches/${match.id}`);
       assert.deepEqual(
-        (await request("GET", `/matches/${match.id}`))
+        response41
           .json(z.object({ match: z.object({ vods: z.array(vodBody) }) }))
           .match.vods.map((vod) => vod.game),
         [1, 2, 3, 4, 5],
@@ -920,7 +1001,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         { slug: tournament.event.slug, name: tournament.event.name },
         { slug: "integration-cup", name: "Integration Cup" },
       );
-      const listed = (await request("GET", "/events?limit=100")).json(eventList);
+      const response42 = await request("GET", "/events?limit=100");
+      const listed = response42.json(eventList);
       const listedEvent = listed.events.find((event) => event.id === tournament.event.id);
       assert.ok(listedEvent, "the manual tournament is listed as an event");
       assert.ok(listed.count >= 1);
@@ -929,12 +1011,16 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         listedEvent.stages.map((stage) => [stage.id, stage.matches]),
         [[tournament.id, undefined]],
       );
-      const pickems = (await request("GET", "/events?pickems=false&limit=100")).json(eventList);
+      const response43 = await request("GET", "/events?pickems=false&limit=100");
+      const pickems = response43.json(eventList);
       assert.ok(!pickems.events.some((event) => event.id === tournament.event.id));
-      const active = (await request("GET", "/events?activeOnly=true&limit=100")).json(eventList);
+      const response44 = await request("GET", "/events?activeOnly=true&limit=100");
+      const active = response44.json(eventList);
       assert.ok(active.events.some((event) => event.id === tournament.event.id));
 
-      const event = (await request("GET", "/events/resolve/Integration-Cup")).json(
+      const response45 = await request("GET", "/events/resolve/Integration-Cup");
+
+      const event = response45.json(
         z.object({
           kind: z.string(),
           event: z.object({
@@ -949,16 +1035,17 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       assert.equal(event.event.stages[0].id, tournament.id);
       assert.equal(event.event.stages[0].matches[0].id, match.id);
 
-      const stage = (await request("GET", "/events/resolve/integration-cup/integration-cup")).json(
-        resolvedStage,
-      );
+      const response46 = await request("GET", "/events/resolve/integration-cup/integration-cup");
+      const stage = response46.json(resolvedStage);
 
       assert.deepEqual(
         [stage.kind, stage.tab, stage.tournament.id],
         ["stage", "overview", tournament.id],
       );
 
-      const legacy = (await request("GET", `/events/resolve/${tournament.id}`)).json(
+      const response47 = await request("GET", `/events/resolve/${tournament.id}`);
+
+      const legacy = response47.json(
         z.intersection(
           resolvedStage,
           z.object({
@@ -975,19 +1062,19 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         ["stage", "overview", "integration-cup", "integration-cup"],
       );
 
-      const legacyMatches = (await request("GET", `/events/resolve/${tournament.id}/matches`)).json(
-        resolvedStage,
-      );
+      const response48 = await request("GET", `/events/resolve/${tournament.id}/matches`);
+      const legacyMatches = response48.json(resolvedStage);
 
       assert.equal(legacyMatches.tab, "matches");
 
-      for (const path of [
-        "/events/resolve/no-such-event",
-        "/events/resolve/integration-cup/no-such-stage",
-        `/events/resolve/${tournament.id}/overview`,
-        "/events/resolve/7d4c1a52-3c1f-4f0e-8a7b-9e0d1c2b3a4f",
-      ])
-        await request("GET", path, undefined, undefined, 404);
+      await Promise.all(
+        [
+          "/events/resolve/no-such-event",
+          "/events/resolve/integration-cup/no-such-stage",
+          `/events/resolve/${tournament.id}/overview`,
+          "/events/resolve/7d4c1a52-3c1f-4f0e-8a7b-9e0d1c2b3a4f",
+        ].map(async (path) => await request("GET", path, undefined, undefined, 404)),
+      );
 
       await request(
         "POST",
@@ -997,20 +1084,26 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         409,
       );
 
-      const generated = (
-        await request("POST", "/tournaments", { name: "Integration Cup" }, staffCookie, 201)
-      ).json(z.object({ tournament: tournamentBody })).tournament;
+      const response49 = await request(
+        "POST",
+        "/tournaments",
+        { name: "Integration Cup" },
+        staffCookie,
+        201,
+      );
+
+      const generated = response49.json(z.object({ tournament: tournamentBody })).tournament;
 
       assert.equal(generated.event.slug, "integration-cup-2");
 
-      const renamed = (
-        await request(
-          "PATCH",
-          `/tournaments/${generated.id}`,
-          { slug: "integration-cup-replay" },
-          staffCookie,
-        )
-      ).json(z.object({ tournament: tournamentBody })).tournament;
+      const response50 = await request(
+        "PATCH",
+        `/tournaments/${generated.id}`,
+        { slug: "integration-cup-replay" },
+        staffCookie,
+      );
+
+      const renamed = response50.json(z.object({ tournament: tournamentBody })).tournament;
 
       assert.deepEqual(
         [renamed.slug, renamed.event.slug],
@@ -1050,21 +1143,25 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           staffCookie,
         );
         await request("POST", `/pickem/matches/${match.id}/validate`, {}, staffCookie, 201);
-        assert.equal(
-          (
-            await request("POST", `/pickem/matches/${match.id}/validate`, {}, staffCookie, 201)
-          ).json(z.object({ updated: z.number() })).updated,
-          0,
+
+        const response51 = await request(
+          "POST",
+          `/pickem/matches/${match.id}/validate`,
+          {},
+          staffCookie,
+          201,
         );
 
-        const { picks } = (
-          await request(
-            "GET",
-            `/pickem/tournament/${tournament.id}/user/picks`,
-            undefined,
-            memberCookie,
-          )
-        ).json(
+        assert.equal(response51.json(z.object({ updated: z.number() })).updated, 0);
+
+        const response52 = await request(
+          "GET",
+          `/pickem/tournament/${tournament.id}/user/picks`,
+          undefined,
+          memberCookie,
+        );
+
+        const { picks } = response52.json(
           z.object({
             picks: z.array(z.object({ points: z.number(), scored: z.boolean() })),
           }),
@@ -1073,10 +1170,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.equal(picks.length, 1);
         assert.equal(picks[0].points, 5);
         assert.equal(picks[0].scored, true);
+        const response53 = await request("GET", `/pickem/tournament/${tournament.id}/leaderboard`);
         assert.equal(
-          (await request("GET", `/pickem/tournament/${tournament.id}/leaderboard`)).json(
-            z.object({ leaderboard: z.array(z.object({ points: z.number() })) }),
-          ).leaderboard[0].points,
+          response53.json(z.object({ leaderboard: z.array(z.object({ points: z.number() })) }))
+            .leaderboard[0].points,
           5,
         );
         await request(
@@ -1094,35 +1191,36 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     await check(
       "comment threads, direct reply notifications, reporting and cascading deletion",
       async () => {
-        rootReply = (
-          await request(
-            "POST",
-            "/replies",
-            { content: "Root comment", newsArticleId: article.id },
-            staffCookie,
-            201,
-          )
-        ).json(z.object({ reply: replyBody })).reply;
-        childReply = (
-          await request(
-            "POST",
-            "/replies",
-            {
-              content: "A reply",
-              newsArticleId: article.id,
-              replyToId: rootReply.id,
-            },
-            memberCookie,
-            201,
-          )
-        ).json(z.object({ reply: replyBody })).reply;
+        const response54 = await request(
+          "POST",
+          "/replies",
+          { content: "Root comment", newsArticleId: article.id },
+          staffCookie,
+          201,
+        );
 
-        const thread = (
-          await request(
-            "GET",
-            `/replies?targetType=newsArticle&targetId=${article.id}&page=0&limit=10`,
-          )
-        ).json(
+        rootReply = response54.json(z.object({ reply: replyBody })).reply;
+
+        const response55 = await request(
+          "POST",
+          "/replies",
+          {
+            content: "A reply",
+            newsArticleId: article.id,
+            replyToId: rootReply.id,
+          },
+          memberCookie,
+          201,
+        );
+
+        childReply = response55.json(z.object({ reply: replyBody })).reply;
+
+        const response56 = await request(
+          "GET",
+          `/replies?targetType=newsArticle&targetId=${article.id}&page=0&limit=10`,
+        );
+
+        const thread = response56.json(
           z.intersection(
             counted,
             z.object({ replies: z.array(z.object({ replies: z.array(replyBody) })) }),
@@ -1131,25 +1229,33 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
         assert.equal(thread.total, 1);
         assert.equal(thread.replies[0].replies[0].id, childReply.id);
-        assert.equal(
-          (await request("GET", "/notifications/unread-count", undefined, staffCookie)).json(
-            z.object({ count: z.number() }),
-          ).count,
-          1,
+
+        const response57 = await request(
+          "GET",
+          "/notifications/unread-count",
+          undefined,
+          staffCookie,
         );
 
-        const { notifications } = (
-          await request("GET", "/notifications", undefined, staffCookie)
-        ).json(z.object({ notifications: z.array(notificationBody) }));
+        assert.equal(response57.json(z.object({ count: z.number() })).count, 1);
+
+        const response58 = await request("GET", "/notifications", undefined, staffCookie);
+
+        const { notifications } = response58.json(
+          z.object({ notifications: z.array(notificationBody) }),
+        );
 
         assert.equal(notifications.length, 1);
         await request("PATCH", "/notifications/read", { ids: [notifications[0].id] }, staffCookie);
-        assert.equal(
-          (await request("GET", "/notifications/unread-count", undefined, staffCookie)).json(
-            z.object({ count: z.number() }),
-          ).count,
-          0,
+
+        const response59 = await request(
+          "GET",
+          "/notifications/unread-count",
+          undefined,
+          staffCookie,
         );
+
+        assert.equal(response59.json(z.object({ count: z.number() })).count, 0);
         await request(
           "POST",
           `/replies/${rootReply.id}/report`,
@@ -1181,28 +1287,26 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       async () => {
         const postId = randomUUID();
 
-        const { topics } = (await request("GET", "/forum")).json(
-          z.object({ topics: z.array(identified) }),
+        const response60 = await request("GET", "/forum");
+        const { topics } = response60.json(z.object({ topics: z.array(identified) }));
+
+        const response61 = await request(
+          "POST",
+          "/posts",
+          {
+            id: postId,
+            title: "Linked Discussion",
+            content: "Body",
+            topicId: topics[0].id,
+          },
+          memberCookie,
+          201,
         );
 
-        const post = (
-          await request(
-            "POST",
-            "/posts",
-            {
-              id: postId,
-              title: "Linked Discussion",
-              content: "Body",
-              topicId: topics[0].id,
-            },
-            memberCookie,
-            201,
-          )
-        ).json(z.object({ publicId: z.number() }));
+        const post = response61.json(z.object({ publicId: z.number() }));
 
-        const renamed = (await request("GET", `/matches/${match.publicId}`)).json(
-          z.object({ match: matchBody }),
-        ).match;
+        const response62 = await request("GET", `/matches/${match.publicId}`);
+        const renamed = response62.json(z.object({ match: matchBody })).match;
 
         const targets = [
           {
@@ -1215,45 +1319,55 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           },
         ];
 
-        for (const { body, path } of targets) {
-          const root = (
-            await request("POST", "/replies", { content: "Root", ...body }, staffCookie, 201)
-          ).json(z.object({ reply: replyBody })).reply;
+        await mapSequentially(targets, async ({ body, path }) => {
+          const response63 = await request(
+            "POST",
+            "/replies",
+            { content: "Root", ...body },
+            staffCookie,
+            201,
+          );
+
+          const threadRoot = response63.json(z.object({ reply: replyBody })).reply;
 
           await request(
             "POST",
             "/replies",
-            { content: "Answer", ...body, replyToId: root.id },
+            { content: "Answer", ...body, replyToId: threadRoot.id },
             memberCookie,
             201,
           );
 
-          const { notifications } = (
-            await request("GET", "/notifications", undefined, staffCookie)
-          ).json(z.object({ notifications: z.array(notificationBody) }));
+          const response64 = await request("GET", "/notifications", undefined, staffCookie);
+
+          const { notifications } = response64.json(
+            z.object({ notifications: z.array(notificationBody) }),
+          );
 
           assert.equal(notifications[0].targetPath, path);
           await request("PATCH", "/notifications/read", {}, staffCookie);
           await request(
             "POST",
-            `/replies/${root.id}/report`,
+            `/replies/${threadRoot.id}/report`,
             { reason: "spam" },
             memberCookie,
             201,
           );
 
-          const moderated = (
-            await request("GET", "/moderation/replies", undefined, staffCookie)
-          ).json(z.union([z.array(replyBody), z.object({ replies: z.array(replyBody) })]));
+          const response65 = await request("GET", "/moderation/replies", undefined, staffCookie);
+
+          const moderated = response65.json(
+            z.union([z.array(replyBody), z.object({ replies: z.array(replyBody) })]),
+          );
 
           const reported = (Array.isArray(moderated) ? moderated : moderated.replies).find(
-            (reply) => reply.id === root.id,
+            (reply) => reply.id === threadRoot.id,
           );
 
           assert.ok(reported, "the reported reply is moderated");
           assert.equal(reported.targetPath, path);
-          await request("DELETE", `/replies/${root.id}`, undefined, staffCookie, 204);
-        }
+          await request("DELETE", `/replies/${threadRoot.id}`, undefined, staffCookie, 204);
+        });
 
         await request("DELETE", `/posts/${postId}`, undefined, staffCookie, 204);
       },
@@ -1359,9 +1473,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
     await check("real roster + photo transaction rolls back both flushed writes", async () => {
       const { MikroRosterTransaction } =
-        await import("../src/roster/infrastructure/persistence/roster.store.ts");
+        await import("../src/roster/infrastructure/persistence/roster.transaction.ts");
 
-      const { PlayerPhoto } = await import("../src/roster/domain/roster.ts");
+      const { PlayerPhoto } = await import("../src/roster/domain/player-photo.ts");
       const em = orm.em.fork();
 
       const before = await em.findOneOrFail(rosterRows.Player, {
@@ -1388,34 +1502,46 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
                 assert.ok(tx, "the adapter provides a real transaction context");
                 await tx.flush();
                 assert.equal(await tx.count(rosterRows.PlayerPhoto, { id: photo.id }), 1);
-                assert.equal(
-                  (await tx.findOneOrFail(rosterRows.Player, { id: player.id })).imageUrl,
-                  model.imageUrl,
-                );
+
+                const findOneOrFailResult = await tx.findOneOrFail(rosterRows.Player, {
+                  id: player.id,
+                });
+
+                assert.equal(findOneOrFailResult.imageUrl, model.imageUrl);
                 throw failure;
               }),
           ),
         (error) => error === failure,
       );
       assert.equal(await orm.em.fork().count(rosterRows.PlayerPhoto, { id: photo.id }), 0);
-      assert.equal(
-        (await orm.em.fork().findOneOrFail(rosterRows.Player, { id: player.id })).imageUrl,
-        original,
-      );
+
+      const findOneOrFailResult2 = await orm.em
+        .fork()
+        .findOneOrFail(rosterRows.Player, { id: player.id });
+
+      assert.equal(findOneOrFailResult2.imageUrl, original);
     });
 
     await check(
       "PAT secrets are hashed, use current roles, reject revoked tokens over HTTP",
       async () => {
-        const token = (
-          await request("POST", "/pat/tokens", { name: "Integration token" }, staffCookie, 201)
-        ).json(tokenBody);
+        const response66 = await request(
+          "POST",
+          "/pat/tokens",
+          { name: "Integration token" },
+          staffCookie,
+          201,
+        );
+
+        const token = response66.json(tokenBody);
 
         const stored = await orm.em.fork().findOneOrFail(PersonalAccessToken, { id: token.id });
         assert.notEqual(stored.tokenHash, token.token);
         assert.equal(stored.tokenHash, createHash("sha256").update(token.token).digest("hex"));
 
-        const listed = (await request("GET", "/pat/tokens", undefined, staffCookie)).json(
+        const response67 = await request("GET", "/pat/tokens", undefined, staffCookie);
+
+        const listed = response67.json(
           z.object({ tokens: z.array(z.looseObject({ id: z.string() })) }),
         ).tokens;
 
@@ -1440,19 +1566,27 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     );
 
     await check("MCP roster proposals, approval, merges and start.gg sources", async () => {
-      const token = (
-        await request("POST", "/pat/tokens", { name: "Roster MCP" }, staffCookie, 201)
-      ).json(tokenBody);
+      const response68 = await request(
+        "POST",
+        "/pat/tokens",
+        { name: "Roster MCP" },
+        staffCookie,
+        201,
+      );
+
+      const token = response68.json(tokenBody);
 
       let rpcId = 0;
 
       async function mcpResult(name: string, args: Payload): Promise<JsonValue> {
+        rpcId += 1;
+
         const response = await request(
           "POST",
           "/mcp",
           {
             jsonrpc: "2.0",
-            id: ++rpcId,
+            id: rpcId,
             method: "tools/call",
             params: { name, arguments: args },
           },
@@ -1549,7 +1683,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       await review(duplicate, "approve", 409);
 
-      const pending = (await request("GET", "/roster-proposals", undefined, staffCookie)).json(
+      const response69 = await request("GET", "/roster-proposals", undefined, staffCookie);
+
+      const pending = response69.json(
         z.object({
           proposals: z.array(z.object({ id: z.string(), status: z.string() })),
           names: z.record(z.string(), z.string()),
@@ -1562,7 +1698,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       );
       assert.equal(pending.names[staff.id], "Integration Staff");
       await request("GET", "/roster-proposals", undefined, memberCookie, 403);
-      assert.equal((await review(duplicate, "reject")).status, "rejected");
+      const reviewResult = await review(duplicate, "reject");
+      assert.equal(reviewResult.status, "rejected");
       await review(duplicate, "approve", 400);
 
       const created = await applied("create_player", {
@@ -1588,25 +1725,28 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         status: "retired",
       });
 
-      const contracts = async (where: ContractWhere) =>
-        (
-          await orm.em.fork().find(rosterRows.Contract, where, {
-            orderBy: { startDate: "asc" },
-          })
-        ).map((contract) => [
+      const contracts = async (where: ContractWhere) => {
+        const findResult = await orm.em.fork().find(rosterRows.Contract, where, {
+          orderBy: { startDate: "asc" },
+        });
+
+        return findResult.map((contract) => [
           contract.team.id,
           contract.joinSourceUrl,
           contract.endDate && new Date(contract.endDate).toISOString().slice(0, 10),
         ]);
+      };
 
       assert.deepEqual(await contracts({ player: created }), [
         [alpha, source, "2026-10-23"],
         [beta, source, "2026-10-24"],
       ]);
-      assert.equal(
-        (await orm.em.fork().findOneOrFail(rosterRows.Player, { id: created })).status,
-        "retired",
-      );
+
+      const findOneOrFailResult3 = await orm.em
+        .fork()
+        .findOneOrFail(rosterRows.Player, { id: created });
+
+      assert.equal(findOneOrFailResult3.status, "retired");
       await applied("update_team", {
         teamId: beta,
         active: false,
@@ -1649,24 +1789,24 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       });
 
       assert.equal(new Date(open.startDate).toISOString().slice(0, 10), "2026-09-01");
+      const response70 = await request("GET", `/player/${twin}/contract`);
       assert.equal(
-        (await request("GET", `/player/${twin}/contract`)).json(
-          z.object({ contracts: z.array(contractBody) }),
-        ).contracts.length,
+        response70.json(z.object({ contracts: z.array(contractBody) })).contracts.length,
         3,
         "a merged id serves the kept player sub-resources",
       );
 
-      const redirected = (await request("GET", "/player/slug/mcp-roster-twin")).json(
+      const response71 = await request("GET", "/player/slug/mcp-roster-twin");
+
+      const redirected = response71.json(
         z.object({ player: z.intersection(playerBody, z.object({ team: identified })) }),
       ).player;
 
       assert.equal(redirected.slug, "mcp-roster-player");
       assert.equal(redirected.team.id, alpha);
+      const response72 = await request("GET", "/player?name=MCP%20Roster");
       assert.deepEqual(
-        (await request("GET", "/player?name=MCP%20Roster"))
-          .json(z.object({ players: z.array(identified) }))
-          .players.map(({ id }) => id),
+        response72.json(z.object({ players: z.array(identified) })).players.map(({ id }) => id),
         [created],
       );
       assert.deepEqual(await callTool("merge_players", mergePlayers, toolFailure), {
@@ -1678,14 +1818,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         duplicateTeamId: beta,
         sourceUrl: source,
       });
+      const contractsResult = await contracts({ player: created });
       assert.deepEqual(
-        (await contracts({ player: created })).map(([teamId]) => teamId),
+        contractsResult.map(([teamId]) => teamId),
         [alpha, alpha, alpha],
       );
-      assert.equal(
-        (await request("GET", "/team/slug/mcp-beta")).json(z.object({ team: identified })).team.id,
-        alpha,
-      );
+      const response73 = await request("GET", "/team/slug/mcp-beta");
+      assert.equal(response73.json(z.object({ team: identified })).team.id, alpha);
       assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta }), 1);
 
       const gamma = await applied("create_team", { name: "MCP Gamma", sourceUrl: source });
@@ -1697,20 +1836,21 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       await applied("add_player_to_team", move(veteran, alpha, "2026-02-01"));
 
-      const career = async () =>
-        (
-          await callTool(
-            "list_contracts",
-            { idOrSlug: veteran },
-            z.object({ contracts: z.array(mcpContract) }),
-          )
-        ).contracts.map((contract) => [
+      const career = async () => {
+        const callToolResult = await callTool(
+          "list_contracts",
+          { idOrSlug: veteran },
+          z.object({ contracts: z.array(mcpContract) }),
+        );
+
+        return callToolResult.contracts.map((contract) => [
           contract.team.id,
           contract.startDate,
           contract.endDate,
           contract.role,
           contract.leaveSourceUrl,
         ]);
+      };
 
       const stint = {
         playerId: veteran,
@@ -1727,24 +1867,26 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         [alpha, "2026-02-01", null, "active", null],
       ]);
 
-      for (const invalid of [
-        { ...stint, sourceUrl: "https://liquipedia.net/rocketleague/Zen" },
-        { ...stint, endDate: "2023-12-31" },
-        { ...stint, endDate: "2025-02-30" },
-      ]) {
-        assert.deepEqual(await callTool("create_contract", invalid, toolFailure), { error: true });
-      }
+      const invalidResults = await Promise.all(
+        [
+          { ...stint, sourceUrl: "https://liquipedia.net/rocketleague/Zen" },
+          { ...stint, endDate: "2023-12-31" },
+          { ...stint, endDate: "2025-02-30" },
+        ].map(async (invalid) => await callTool("create_contract", invalid, toolFailure)),
+      );
+
+      for (const invalidResult of invalidResults) assert.deepEqual(invalidResult, { error: true });
 
       const conflicts: [Payload, number][] = [
         [{ ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" }, 422],
         [{ ...stint, startDate: "2026-03-01", endDate: undefined }, 400],
       ];
 
-      for (const [conflicting, status] of conflicts) {
+      await mapSequentially(conflicts, async ([conflicting, status]) => {
         const proposal = await callTool("create_contract", conflicting);
         await review(proposal, "approve", status);
         await review(proposal, "reject");
-      }
+      });
 
       const correction = "https://x.com/integration/status/3";
 
@@ -1756,32 +1898,27 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       });
 
       assert.equal(await applied("update_contract", revise({ endDate: "2025-11-30" })), stintId);
-      assert.deepEqual((await career())[0], [
-        gamma,
-        "2024-01-01",
-        "2025-11-30",
-        "loaned",
-        correction,
-      ]);
+      const careerResult = await career();
+      assert.deepEqual(careerResult[0], [gamma, "2024-01-01", "2025-11-30", "loaned", correction]);
 
-      const currentId = (
-        await callTool(
-          "list_contracts",
-          { idOrSlug: veteran },
-          z.object({ contracts: z.array(mcpContract) }),
-        )
-      ).contracts[1].id;
+      const callToolResult2 = await callTool(
+        "list_contracts",
+        { idOrSlug: veteran },
+        z.object({ contracts: z.array(mcpContract) }),
+      );
+
+      const currentId = callToolResult2.contracts[1].id;
 
       const invalidChanges: ContractChanges[] = [
         { endDate: null },
         { contractId: currentId, endDate: "2026-05-01" },
       ];
 
-      for (const changes of invalidChanges) {
+      await mapSequentially(invalidChanges, async (changes) => {
         const proposal = await callTool("update_contract", revise(changes));
         await review(proposal, "approve", 400);
         await review(proposal, "reject");
-      }
+      });
 
       assert.deepEqual(
         await callTool(
@@ -1795,7 +1932,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         ...move(veteran, alpha, "2026-06-01"),
         role: "coach",
       });
-      assert.deepEqual((await career()).slice(1), [
+      const careerResult2 = await career();
+      assert.deepEqual(careerResult2.slice(1), [
         [alpha, "2026-02-01", "2026-06-01", "active", source],
         [alpha, "2026-06-01", null, "coach", null],
       ]);
@@ -1828,56 +1966,75 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         sourceUrl: startgg,
       });
 
-      const pendingIds = async () =>
-        (
-          await callTool("list_roster_proposals", {}, z.object({ proposals: z.array(identified) }))
-        ).proposals.map(({ id }) => id);
+      const pendingIds = async () => {
+        const callToolResult3 = await callTool(
+          "list_roster_proposals",
+          {},
+          z.object({ proposals: z.array(identified) }),
+        );
 
-      assert.ok((await pendingIds()).includes(scoutProposal.proposalId));
-      const scouted = (await review(scoutProposal)).entityId;
-      assert.ok(!(await pendingIds()).includes(scoutProposal.proposalId));
+        return callToolResult3.proposals.map(({ id }) => id);
+      };
+
+      const pendingIdsResult = await pendingIds();
+      assert.ok(pendingIdsResult.includes(scoutProposal.proposalId));
+      const reviewResult2 = await review(scoutProposal);
+      const scouted = reviewResult2.entityId;
+      const pendingIdsResult2 = await pendingIds();
+      assert.ok(!pendingIdsResult2.includes(scoutProposal.proposalId));
+      const response74 = await request("GET", "/player/slug/mcp-startgg-player");
       assert.equal(
-        (await request("GET", "/player/slug/mcp-startgg-player")).json(
-          z.object({ player: z.object({ source: z.string() }) }),
-        ).player.source,
+        response74.json(z.object({ player: z.object({ source: z.string() }) })).player.source,
         "startgg",
       );
+
+      const callToolResult4 = await callTool(
+        "search_players",
+        { query: "MCP Startgg" },
+        z.array(sourcedBody),
+      );
+
       assert.deepEqual(
-        (await callTool("search_players", { query: "MCP Startgg" }, z.array(sourcedBody))).map(
-          ({ id, source }) => [id, source],
-        ),
+        callToolResult4.map(({ id, source: origin }) => [id, origin]),
         [[scouted, "startgg"]],
       );
-      assert.equal(
-        (await callTool("get_player", { idOrSlug: scouted }, sourcedBody)).source,
-        "startgg",
+      const callToolResult5 = await callTool("get_player", { idOrSlug: scouted }, sourcedBody);
+      assert.equal(callToolResult5.source, "startgg");
+
+      const callToolResult6 = await callTool(
+        "search_players",
+        { query: "MCP Roster" },
+        z.array(sourcedBody),
       );
-      assert.equal(
-        (await callTool("search_players", { query: "MCP Roster" }, z.array(sourcedBody)))[0].id,
-        created,
-      );
+
+      assert.equal(callToolResult6[0].id, created);
 
       const scoutedTeam = await applied("create_team", {
         name: "MCP Startgg Team",
         sourceUrl: startgg,
       });
 
-      assert.equal(
-        (await callTool("search_teams", { query: "MCP Startgg" }, z.array(identified)))[0].id,
-        scoutedTeam,
+      const callToolResult7 = await callTool(
+        "search_teams",
+        { query: "MCP Startgg" },
+        z.array(identified),
       );
-      assert.equal(
-        (await callTool("get_team", { idOrSlug: scoutedTeam }, sourcedBody)).source,
-        "startgg",
-      );
+
+      assert.equal(callToolResult7[0].id, scoutedTeam);
+      const callToolResult8 = await callTool("get_team", { idOrSlug: scoutedTeam }, sourcedBody);
+      assert.equal(callToolResult8.source, "startgg");
 
       const { TournamentParticipant: ParticipantRow } =
         await import("../src/tournament/infrastructure/competition-persistence.ts");
 
-      const participantIds = async (tournamentId: string): Promise<string[]> =>
-        (await orm.em.fork().find(ParticipantRow, { tournament: tournamentId })).map(
-          ({ id }) => id,
-        );
+      const participantIds = async (tournamentId: string): Promise<string[]> => {
+        const findResult2 = await orm.em
+          .fork()
+          .getRepository(ParticipantRow)
+          .find({ tournament: tournamentId });
+
+        return findResult2.map(({ id }) => id);
+      };
 
       const createCup = async <T,>(tournamentSource: string, schema: z.ZodType<T>): Promise<T> =>
         await callTool(
@@ -1892,9 +2049,6 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           schema,
         );
 
-      const teamNames = (participants: { team: { name: string } }[]): string[] =>
-        participants.map(({ team }) => team.name).sort();
-
       const manualCreated = await createCup("manual", mcpCreatedTournament);
       const manualCup = manualCreated.id;
       assert.deepEqual(teamNames(manualCreated.participants), ["MCP Alpha", "MCP Startgg Team"]);
@@ -1908,13 +2062,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const detail = await callTool("get_tournament", { id: manualCup }, mcpTournament);
       assert.deepEqual(
         detail.participants
-          .map(({ id, team }) => [id, team.id, team.slug, team.name])
-          .sort(byJoined),
+          .map(({ id, team: entrant }) => [id, entrant.id, entrant.slug, entrant.name])
+          .toSorted(byJoined),
         manualCreated.participants
-          .map(({ id, team }) => [id, team.id, team.slug, team.name])
-          .sort(byJoined),
+          .map(({ id, team: entrant }) => [id, entrant.id, entrant.slug, entrant.name])
+          .toSorted(byJoined),
       );
-      const slugs = detail.participants.map(({ team }) => team.slug);
+      const slugs = detail.participants.map((entrant) => entrant.team.slug);
 
       const bySlug = await callTool(
         "create_match",
@@ -1927,8 +2081,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       );
 
       assert.deepEqual(
-        bySlug.participants.map(({ id }) => id).sort(),
-        detail.participants.map(({ id }) => id).sort(),
+        bySlug.participants.map(({ id }) => id).toSorted(),
+        detail.participants.map(({ id }) => id).toSorted(),
       );
 
       const byTeamId = await callTool(
@@ -1936,7 +2090,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         {
           tournamentId: manualCup,
           name: "MCP manual by team id",
-          teams: detail.participants.map(({ team }) => team.id),
+          teams: detail.participants.map((entrant) => entrant.team.id),
         },
         mcpMatch,
       );
@@ -1990,17 +2144,17 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       );
 
       assert.deepEqual(
-        updated.participants.map(({ team }) => team.id).sort(),
-        [alpha, scoutedTeam].sort(),
+        updated.participants.map((entrant) => entrant.team.id).toSorted(),
+        [alpha, scoutedTeam].toSorted(),
       );
 
-      const manualMatches = (await callTool("get_tournament", { id: manualCup }, mcpTournament))
-        .matches;
+      const callToolResult9 = await callTool("get_tournament", { id: manualCup }, mcpTournament);
+      const manualMatches = callToolResult9.matches;
 
       assert.equal(manualMatches.length, 3);
 
-      for (const match of manualMatches) {
-        assert.deepEqual(teamNames(match.participants), ["MCP Alpha", "MCP Startgg Team"]);
+      for (const manualMatch of manualMatches) {
+        assert.deepEqual(teamNames(manualMatch.participants), ["MCP Alpha", "MCP Startgg Team"]);
       }
 
       const startggCreated = await createCup("startgg", mcpLimitedTournament);
@@ -2036,24 +2190,26 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         error: true,
       });
 
-      const listed = new Set(
-        (await callTool("get_tournaments", { limit: 100 }, z.array(identified))).map(
-          ({ id }) => id,
-        ),
+      const callToolResult10 = await callTool(
+        "get_tournaments",
+        { limit: 100 },
+        z.array(identified),
       );
+
+      const listed = new Set(callToolResult10.map(({ id }) => id));
 
       assert.ok(listed.has(manualCup));
       assert.ok(!listed.has(startggCup));
 
-      const results = await callTool(
+      const matchResults = await callTool(
         "get_match_results",
         {},
         z.intersection(counted, z.object({ results: z.array(identified) })),
       );
 
       assert.equal(
-        results.total,
-        results.results.length,
+        matchResults.total,
+        matchResults.results.length,
         "start.gg rows are excluded before counting",
       );
 
@@ -2117,7 +2273,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const { RosterMergeService } =
         await import("../src/roster/application/roster-merge.service.ts");
 
-      const { ConflictError } = await import("../src/common/domain/errors.ts");
+      const { ConflictError } = await import("../src/common/domain/errors/conflict-error.ts");
 
       const { TournamentParticipant, PlayerAward } =
         await import("../src/tournament/infrastructure/competition-persistence.ts");
@@ -2127,20 +2283,6 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const merge = async <T,>(
         work: (service: InstanceType<typeof RosterMergeService>) => Promise<T>,
       ) => await RequestContext.create(orm.em.fork(), async () => await work(merges));
-
-      const day = (value: Date | string | null | undefined) =>
-        value === null || value === undefined ? value : new Date(value).toISOString().slice(0, 10);
-
-      const slug = (name: string): string => name.toLowerCase().replaceAll(" ", "-");
-
-      const insert = async (build: (em: ReturnType<typeof orm.em.fork>, id: string) => object) => {
-        const em = orm.em.fork();
-        const id = randomUUID();
-        em.persist(build(em, id));
-        await em.flush();
-
-        return id;
-      };
 
       const newTeam = async (name: string, props: { mergedInto?: string } = {}) =>
         await insert((em, id) =>
@@ -2156,8 +2298,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         );
 
       const newContract = async (
-        player: string,
-        team: string,
+        playerId: string,
+        teamId: string,
         startDate: string,
         endDate: string | null = null,
       ) =>
@@ -2166,8 +2308,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
             rosterRows.Contract,
             {
               id,
-              player,
-              team,
+              player: playerId,
+              team: teamId,
               startDate: new Date(startDate),
               endDate: endDate === null ? null : new Date(endDate),
             },
@@ -2175,15 +2317,23 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           ),
         );
 
-      const newPhoto = async (player: string, url: string) =>
+      const newPhoto = async (playerId: string, url: string) =>
         await insert((em, id) =>
-          em.create(rosterRows.PlayerPhoto, { id, player, url }, { partial: true }),
+          em.create(rosterRows.PlayerPhoto, { id, player: playerId, url }, { partial: true }),
         );
 
       const newCup = async (name: string, teamIds: string[]) => {
-        const { id, participants } = (
-          await request("POST", "/tournaments", { name, teamIds }, staffCookie, 201)
-        ).json(z.object({ tournament: tournamentBody })).tournament;
+        const response75 = await request(
+          "POST",
+          "/tournaments",
+          { name, teamIds },
+          staffCookie,
+          201,
+        );
+
+        const { id, participants } = response75.json(
+          z.object({ tournament: tournamentBody }),
+        ).tournament;
 
         return {
           id,
@@ -2209,15 +2359,16 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         await em.flush();
       };
 
-      const members = async (participantId: string) =>
-        (
-          await orm.em
-            .fork()
-            .findOneOrFail(TournamentParticipant, { id: participantId }, { populate: ["players"] })
-        ).players
+      const members = async (participantId: string) => {
+        const findOneOrFailResult4 = await orm.em
+          .fork()
+          .findOneOrFail(TournamentParticipant, { id: participantId }, { populate: ["players"] });
+
+        return findOneOrFailResult4.players
           .getItems()
           .map(({ id }) => id)
-          .sort();
+          .toSorted();
+      };
 
       const award = async (
         cup: Identified,
@@ -2233,26 +2384,37 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           201,
         );
 
-      const awardsOf = async (player: string) =>
-        (await orm.em.fork().find(PlayerAward, { player })).map((row) => row.awardType).sort();
+      const awardsOf = async (playerId: string) => {
+        const findResult3 = await orm.em
+          .fork()
+          .getRepository(PlayerAward)
+          .find({ player: playerId });
 
-      const photosOf = async (player: string) =>
-        (await orm.em.fork().find(rosterRows.PlayerPhoto, { player })).map((row) => row.url).sort();
+        return findResult3.map((row) => row.awardType).toSorted();
+      };
 
-      const contractsOf = async (where: ContractWhere) =>
-        (
-          await orm.em.fork().find(rosterRows.Contract, where, { orderBy: { startDate: "asc" } })
-        ).map((row) => [row.team.id, day(row.startDate), day(row.endDate)]);
+      const photosOf = async (playerId: string) => {
+        const findResult4 = await orm.em
+          .fork()
+          .getRepository(rosterRows.PlayerPhoto)
+          .find({ player: playerId });
+
+        return findResult4.map((row) => row.url).toSorted(byText);
+      };
+
+      const contractsOf = async (where: ContractWhere) => {
+        const findResult5 = await orm.em
+          .fork()
+          .find(rosterRows.Contract, where, { orderBy: { startDate: "asc" } });
+
+        return findResult5.map((row) => [row.team.id, day(row.startDate), day(row.endDate)]);
+      };
 
       const playerRow = async (id: string) =>
         await orm.em.fork().findOneOrFail(rosterRows.Player, { id });
 
       const teamRow = async (id: string) =>
         await orm.em.fork().findOneOrFail(rosterRows.Team, { id });
-
-      const redirectOf = async (entity: EntityClass<Mergeable>, id: string) =>
-        (await orm.em.fork().findOneOrFail(entity, { id }, { populate: ["mergedInto"] })).mergedInto
-          ?.id ?? null;
 
       const playerTeam = async (id: string) => {
         const row = await orm.em
@@ -2299,9 +2461,15 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       await award(soloCup, soloEntry, duplicate, "mvp");
       await award(sharedCup, sharedEntry, duplicate, "defensive_mvp");
 
-      const referenceSeason = (
-        await request("POST", "/seasons", { name: "Reference Season" }, staffCookie, 201)
-      ).json(identified);
+      const response76 = await request(
+        "POST",
+        "/seasons",
+        { name: "Reference Season" },
+        staffCookie,
+        201,
+      );
+
+      const referenceSeason = response76.json(identified);
 
       await request(
         "POST",
@@ -2316,18 +2484,18 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       );
 
       const { SeasonAward } =
-        await import("../src/season/infrastructure/persistence/season.entities.ts");
+        await import("../src/season/infrastructure/persistence/season-award.entity.ts");
 
       const { UniqueConstraintViolationException } = await import("@mikro-orm/core");
 
-      const regularSeasonMvp = async (player: string) =>
+      const regularSeasonMvp = async (playerId: string) =>
         await insert((em, id) =>
           em.create(
             SeasonAward,
             {
               id,
               season: referenceSeason.id,
-              player,
+              player: playerId,
               awardType: "regular_season_mvp",
               region: null,
               sourceUrl: "https://example.test/reference-season/regular",
@@ -2373,8 +2541,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       ]);
       assert.deepEqual(await awardsOf(duplicate), []);
       assert.deepEqual(await awardsOf(kept), ["defensive_mvp", "mvp"]);
+      const response77 = await request("GET", `/player/${kept}/awards`);
       assert.deepEqual(
-        (await request("GET", `/player/${kept}/awards`))
+        response77
           .json(
             z.object({
               seasonAwards: z.array(z.object({ awardType: z.string(), season: identified })),
@@ -2405,7 +2574,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       await merge(async (service) => await service.mergeTeams(keeper, dropped));
 
-      assert.equal((await teamRow(dropped)).active, false);
+      const teamRowResult = await teamRow(dropped);
+      assert.equal(teamRowResult.active, false);
       assert.equal(await redirectOf(rosterRows.Team, dropped), keeper);
       assert.equal(
         await redirectOf(rosterRows.Team, redirectedTeam),
@@ -2418,7 +2588,11 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         [keeper, "2023-01-01", "2023-12-31"],
       ]);
 
-      for (const id of [first, second]) assert.equal(await playerTeam(id), keeper);
+      const playerTeams = await Promise.all(
+        [first, second].map(async (id) => await playerTeam(id)),
+      );
+
+      for (const owner of playerTeams) assert.equal(owner, keeper);
       assert.equal(await participantTeam(droppedEntry), keeper);
       assert.equal(await participantTeam(keeperCup.participantOf(keeper)), keeper);
       assert.equal(await participantTeam(droppedCup.participantOf(opponent)), opponent);
@@ -2437,7 +2611,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     await check(
       "forum topics, post translations, cooldown, recent activity and deletion",
       async () => {
-        const overview = (await request("GET", "/forum")).json(
+        const response78 = await request("GET", "/forum");
+
+        const overview = response78.json(
           z.object({ totalTopics: z.number(), topics: z.array(identified) }),
         );
 
@@ -2466,9 +2642,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
         const createdLocation = creation.json(z.object({ publicId: z.number(), slug: z.string() }));
 
-        const created = (await request("GET", `/posts/${id}`)).json(
-          z.object({ post: postBody }),
-        ).post;
+        const response79 = await request("GET", `/posts/${id}`);
+        const created = response79.json(z.object({ post: postBody })).post;
 
         assert.equal(created.title, "Integration Discussion");
         assert.ok(
@@ -2481,42 +2656,38 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           slug: created.slug,
         });
 
-        const byPublicId = (await request("GET", `/posts/${created.publicId}`)).json(
-          z.object({ post: postBody }),
-        ).post;
+        const response80 = await request("GET", `/posts/${created.publicId}`);
+        const byPublicId = response80.json(z.object({ post: postBody })).post;
 
         assert.equal(byPublicId.id, id);
-        assert.equal(
-          (await request("GET", `/posts/${created.publicId + 1000}`)).json(
-            z.object({ post: z.null() }),
-          ).post,
-          null,
-        );
+        const response81 = await request("GET", `/posts/${created.publicId + 1000}`);
+        assert.equal(response81.json(z.object({ post: z.null() })).post, null);
         await request("GET", "/posts/not-a-post", undefined, undefined, 404);
+
+        const response82 = await request("GET", `/posts/${id}`, undefined, undefined, 200, {
+          "accept-language": "fr-FR",
+        });
+
         assert.equal(
-          (
-            await request("GET", `/posts/${id}`, undefined, undefined, 200, {
-              "accept-language": "fr-FR",
-            })
-          ).json(z.object({ post: postBody })).post.title,
+          response82.json(z.object({ post: postBody })).post.title,
           "Discussion intégration",
         );
-        assert.equal(
-          (await request("GET", "/posts/creation-status", undefined, staffCookie)).json(
-            z.object({ canCreate: z.boolean() }),
-          ).canCreate,
-          false,
-        );
+        const response83 = await request("GET", "/posts/creation-status", undefined, staffCookie);
+        assert.equal(response83.json(z.object({ canCreate: z.boolean() })).canCreate, false);
 
-        const preview = (await request("GET", "/forum/preview")).json(
-          z.object({ recentPosts: z.array(postBody) }),
-        ).recentPosts[0];
+        const response84 = await request("GET", "/forum/preview");
+
+        const {
+          recentPosts: [preview],
+        } = response84.json(z.object({ recentPosts: z.array(postBody) }));
 
         assert.equal(preview.id, id);
         assert.equal(preview.publicId, created.publicId);
         assert.equal(preview.slug, "integration-discussion");
 
-        const listedPost = (await request("GET", "/posts"))
+        const response85 = await request("GET", "/posts");
+
+        const listedPost = response85
           .json(z.object({ posts: z.array(postBody) }))
           .posts.find((post) => post.id === id);
 
@@ -2525,19 +2696,16 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         assert.equal(listedPost.slug, "integration-discussion");
         await request("DELETE", `/posts/${id}`, undefined, memberCookie, 403);
         await request("DELETE", `/posts/${id}`, undefined, staffCookie, 204);
-        assert.equal(
-          (await request("GET", `/posts/${id}`)).json(z.object({ post: z.null() })).post,
-          null,
-        );
+        const response86 = await request("GET", `/posts/${id}`);
+        assert.equal(response86.json(z.object({ post: z.null() })).post, null);
       },
     );
 
     await check(
       "daily AirRiddle persistence and exact guess use the real player store",
       async () => {
-        const today = (await request("GET", "/air-riddle/today")).json(
-          z.object({ length: z.number() }),
-        );
+        const response87 = await request("GET", "/air-riddle/today");
+        const today = response87.json(z.object({ length: z.number() }));
 
         const { playerName } = await orm.em
           .fork()
@@ -2545,22 +2713,22 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
         assert.equal(today.length, playerName.length);
 
-        const guessed = (
-          await request(
-            "POST",
-            "/air-riddle/guess",
-            { guess: playerName, last: true },
-            undefined,
-            201,
-          )
-        ).json(z.object({ answer: z.string(), results: z.array(z.unknown()) }));
+        const response88 = await request(
+          "POST",
+          "/air-riddle/guess",
+          { guess: playerName, last: true },
+          undefined,
+          201,
+        );
+
+        const guessed = response88.json(
+          z.object({ answer: z.string(), results: z.array(z.unknown()) }),
+        );
 
         assert.equal(guessed.answer, playerName);
         assert.equal(guessed.results.length, playerName.length);
-        assert.equal(
-          (await request("GET", "/air-riddle/today")).json(z.object({ length: z.number() })).length,
-          today.length,
-        );
+        const response89 = await request("GET", "/air-riddle/today");
+        assert.equal(response89.json(z.object({ length: z.number() })).length, today.length);
       },
     );
 
@@ -2656,30 +2824,41 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     await check("random player draws only players that were not merged away", async () => {
       const { PlayerService } = await import("../src/roster/application/player.service.ts");
       const players = app.get(PlayerService);
-      const merged = await orm.em.fork().find(rosterRows.Player, { mergedInto: { $ne: null } });
+
+      const merged = await orm.em
+        .fork()
+        .getRepository(rosterRows.Player)
+        .find({ mergedInto: { $ne: null } });
+
       assert.ok(merged.length > 0, "the merge scenarios left redirect rows behind");
       const mergedIds = new Set(merged.map(({ id }) => id));
 
-      for (let draw = 0; draw < 40; draw++) {
-        const drawn = await RequestContext.create(
-          orm.em.fork(),
-          async () => await players.getRandomPlayer(),
-        );
+      const draws = await Promise.all(
+        Array.from(
+          { length: 40 },
+          async () =>
+            await RequestContext.create(orm.em.fork(), async () => await players.getRandomPlayer()),
+        ),
+      );
 
+      for (const drawn of draws) {
         assert.ok(drawn && !mergedIds.has(drawn.id), "a redirect row was drawn as a random player");
       }
     });
 
     await check("search projections and real PostgreSQL/Redis health", async () => {
       const { Tournament } =
-        await import("../src/tournament/infrastructure/persistence/tournament.entities.ts");
+        await import("../src/tournament/infrastructure/persistence/tournament.entity.ts");
 
       const winnerId = tournament.participants[0].id;
       await orm.em.fork().nativeUpdate(Tournament, { id: tournament.id }, { winner: winnerId });
 
-      const crowned = (
-        await request("GET", "/search?q=Integration+Cup&type=tournament&limit=15&offset=0")
-      ).json(
+      const response90 = await request(
+        "GET",
+        "/search?q=Integration+Cup&type=tournament&limit=15&offset=0",
+      );
+
+      const crowned = response90.json(
         z.object({
           tournaments: z.array(
             z.intersection(
@@ -2692,7 +2871,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       assert.equal(crowned.tournaments.find((t) => t.id === tournament.id)?.winner?.id, winnerId);
 
-      const found = (await request("GET", "/search?q=Integration&type=all&limit=20&offset=0")).json(
+      const response91 = await request("GET", "/search?q=Integration&type=all&limit=20&offset=0");
+
+      const found = response91.json(
         z.object({
           players: z.array(identified),
           teams: z.array(identified),
@@ -2703,12 +2884,12 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       assert.ok(found.players.some((p) => p.id === player.id));
       assert.ok(found.teams.some((t) => t.id === team.id));
       assert.ok(found.tournaments.some((t) => t.id === tournament.id));
-      assert.equal(
-        (await request("GET", "/health/live")).json(z.object({ status: z.string() })).status,
-        "ok",
-      );
+      const response92 = await request("GET", "/health/live");
+      assert.equal(response92.json(z.object({ status: z.string() })).status, "ok");
 
-      const ready = (await request("GET", "/health/ready")).json(
+      const response93 = await request("GET", "/health/ready");
+
+      const ready = response93.json(
         z.object({
           status: z.string(),
           info: z.object({
@@ -2738,7 +2919,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       }
     }
 
-    for (const name of containers.reverse()) {
+    for (const name of containers.toReversed()) {
       try {
         docker("rm", "--force", name);
       } catch (error) {

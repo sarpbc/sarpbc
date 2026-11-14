@@ -1,11 +1,15 @@
 <script lang="ts" setup>
 const { t } = useI18n();
 
-const props = defineProps<{
+const { search } = defineProps<{
   search: string;
 }>();
 
-const emit = defineEmits(["update:search", "focus", "blur"]);
+const emit = defineEmits<{
+  "update:search": [payload: string | null];
+  focus: [];
+  blur: [];
+}>();
 
 const inputRef = useTemplateRef("inputRef");
 
@@ -31,7 +35,7 @@ defineExpose({
     ref="inputRef"
     :placeholder="t('components.input.search')"
     :aria-label="t('components.input.search')"
-    :model-value="props.search"
+    :model-value="search"
     icon="i-fluent-search-24-regular"
     variant="soft"
     color="neutral"

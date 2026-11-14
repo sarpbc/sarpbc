@@ -1,4 +1,5 @@
-import { ForbiddenError, NotFoundError } from "../../common/domain/errors";
+import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { AuthenticatedUser } from "../../common/application/models/authenticated-user";
 import type { StaffRole } from "@sarpbc/types";
 import { isStaffRole } from "../../user/domain/staff-access";

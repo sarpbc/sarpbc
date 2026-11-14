@@ -1,8 +1,12 @@
 <script setup lang="ts">
-const { icon, title, hint } = defineProps<{
+const {
+  icon,
+  title,
+  hint = null,
+} = defineProps<{
   icon: string;
   title: string;
-  hint?: string;
+  hint?: string | null;
 }>();
 </script>
 

@@ -22,7 +22,7 @@ function totals(lines: ShareLine[]): PrizeAmount[] {
     byCurrency.set(entry.currency, (byCurrency.get(entry.currency) ?? 0) + minorUnits);
 
   return [...byCurrency]
-    .sort(([a], [b]) => a.localeCompare(b))
+    .toSorted(([a], [b]) => a.localeCompare(b))
     .map(([currency, amount]) => ({ currency, amount: amount / minorUnitScale(currency) }));
 }
 
@@ -45,7 +45,7 @@ export function summarizeEarnings(lines: EarningsLine[]): ProfileEarnings {
   for (const line of shares) years.set(line.year, [...(years.get(line.year) ?? []), line]);
 
   const grouped: EarningsYear[] = [...years]
-    .sort(([a], [b]) => (b ?? -Infinity) - (a ?? -Infinity))
+    .toSorted(([a], [b]) => (b ?? -Infinity) - (a ?? -Infinity))
     .map(([year, yearLines]) => ({
       year,
       totals: totals(yearLines),

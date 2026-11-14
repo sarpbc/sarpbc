@@ -95,37 +95,6 @@ function focusHiddenInput() {
   });
 }
 
-function onPhysicalKeydown(event: KeyboardEvent) {
-  if (isMobile.value || !canType.value) {
-    return;
-  }
-
-  if (event.ctrlKey || event.metaKey || event.altKey) {
-    return;
-  }
-
-  if (event.key === "Enter") {
-    event.preventDefault();
-    submitGuess();
-
-    return;
-  }
-
-  if (event.key === "Backspace") {
-    event.preventDefault();
-    removeFromGuess();
-    error.value = undefined;
-
-    return;
-  }
-
-  if (event.key.length === 1 && /^[a-zA-Z0-9 ]$/.test(event.key)) {
-    event.preventDefault();
-    appendToGuess(event.key);
-    error.value = undefined;
-  }
-}
-
 function onKeyboardLetter(letter: string) {
   appendToGuess(letter);
   error.value = undefined;
@@ -198,17 +167,6 @@ async function loadTodayRiddle() {
   }
 }
 
-onMounted(() => {
-  window.addEventListener("keydown", onPhysicalKeydown);
-  window.addEventListener("paste", onPaste);
-  void loadTodayRiddle();
-});
-
-onUnmounted(() => {
-  window.removeEventListener("keydown", onPhysicalKeydown);
-  window.removeEventListener("paste", onPaste);
-});
-
 watch(isMobile, () => {
   focusHiddenInput();
 });
@@ -277,9 +235,51 @@ async function submitGuess() {
   }
 }
 
+function onPhysicalKeydown(event: KeyboardEvent) {
+  if (isMobile.value || !canType.value) {
+    return;
+  }
+
+  if (event.ctrlKey || event.metaKey || event.altKey) {
+    return;
+  }
+
+  if (event.key === "Enter") {
+    event.preventDefault();
+    submitGuess();
+
+    return;
+  }
+
+  if (event.key === "Backspace") {
+    event.preventDefault();
+    removeFromGuess();
+    error.value = undefined;
+
+    return;
+  }
+
+  if (event.key.length === 1 && /^[a-zA-Z0-9 ]$/.test(event.key)) {
+    event.preventDefault();
+    appendToGuess(event.key);
+    error.value = undefined;
+  }
+}
+
 setPageSeo({
   title: t("page.game.airriddle.seo.title"),
   description: t("page.game.airriddle.seo.description"),
+});
+
+onMounted(() => {
+  window.addEventListener("keydown", onPhysicalKeydown);
+  window.addEventListener("paste", onPaste);
+  void loadTodayRiddle();
+});
+
+onUnmounted(() => {
+  window.removeEventListener("keydown", onPhysicalKeydown);
+  window.removeEventListener("paste", onPaste);
 });
 </script>
 

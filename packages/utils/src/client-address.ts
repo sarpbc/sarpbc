@@ -99,7 +99,7 @@ export function canonicalIp(value: string | undefined | null): string | undefine
   }
 
   const trimmed = value.trim().split("%")[0] ?? "";
-  const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i.exec(trimmed);
+  const mapped = /^::ffff:(?<ipv4>\d{1,3}(?:\.\d{1,3}){3})$/i.exec(trimmed);
   const candidate = mapped?.[1] ?? trimmed;
   const version = isIP(candidate);
 

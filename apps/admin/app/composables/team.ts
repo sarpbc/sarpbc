@@ -33,14 +33,18 @@ export async function getAllTeams(query: {
 }
 
 export async function getEveryTeam(): Promise<Team[]> {
-  const teams: Team[] = [];
+  const first = await getAllTeams({ limit: MAX_PAGE_SIZE, offset: 0 });
+  const remainingPages = Math.max(Math.ceil(first.total / MAX_PAGE_SIZE) - 1, 0);
 
-  for (;;) {
-    const page = await getAllTeams({ limit: MAX_PAGE_SIZE, offset: teams.length });
-    teams.push(...page.teams);
+  const rest = await Promise.all(
+    Array.from(
+      { length: remainingPages },
+      async (_, index) =>
+        await getAllTeams({ limit: MAX_PAGE_SIZE, offset: (index + 1) * MAX_PAGE_SIZE }),
+    ),
+  );
 
-    if (page.teams.length === 0 || teams.length >= page.total) return teams;
-  }
+  return [first, ...rest].flatMap(({ teams }) => teams);
 }
 
 export async function getTeamById(id: string): Promise<Team> {

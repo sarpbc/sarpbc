@@ -1,7 +1,9 @@
 import { playerColumns, teamColumns, toPlayer, toTeam } from "./roster.mapper";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
-import { Contract, Player, Team } from "./player.entities";
+import { Contract } from "./contract.entity";
+import { Player } from "./player.entity";
+import { Team } from "./team.entity";
 import {
   availablePlayerSlug,
   findAliasedPandascoreTeam,

@@ -1,7 +1,9 @@
 import { allocateSlug, stageSlug, toSlug } from "@sarpbc/utils";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { isUuid } from "../../common/domain/entity-ref";
-import type { Tournament } from "../domain/competition";
+import type { Tournament } from "../domain/tournament";
 import { toEventRef, type TournamentEvent } from "../domain/tournament-event";
 import type { EventWriter, TournamentWriter } from "./ports";
 

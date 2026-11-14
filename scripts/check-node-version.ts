@@ -5,7 +5,8 @@ const apps = ["back", "front", "admin"];
 
 const mismatches = apps.flatMap((app) => {
   const file = `apps/${app}/Dockerfile`;
-  const actual = /^ARG NODE_VERSION=(\S*)$/m.exec(readFileSync(file, "utf-8"))?.[1];
+  const found = /^ARG NODE_VERSION=(?<version>\S*)$/m.exec(readFileSync(file, "utf-8"));
+  const actual = found?.groups?.version;
 
   return actual === expected
     ? []

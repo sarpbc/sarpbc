@@ -14,6 +14,14 @@ import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api";
 
 const TOKEN = "internal-api-token-value";
 
+function forwarded(address: string) {
+  return forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: address } });
+}
+
+function withToken(value: string) {
+  return { headers: { [INTERNAL_API_HEADER]: value } };
+}
+
 void describe("client address", () => {
   void it("unwraps IPv4-mapped loopback and rejects junk", () => {
     assert.equal(canonicalIp("::ffff:127.0.0.1"), "127.0.0.1");
@@ -97,16 +105,12 @@ void describe("client address", () => {
   });
 
   void it("accepts a public forwarded client and ignores a private one", () => {
-    const forwarded = (address: string) =>
-      forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: address } });
-
     assert.equal(forwarded("203.0.113.10"), "203.0.113.10");
     assert.equal(forwarded("10.1.1.1"), undefined);
     assert.equal(forwarded("100.80.0.4"), undefined);
   });
 
   void it("accepts the internal token with a constant-time compare and ignores a wrong length", () => {
-    const withToken = (value: string) => ({ headers: { [INTERNAL_API_HEADER]: value } });
     assert.equal(internalApiTokenMatches(withToken(TOKEN), TOKEN), true);
     assert.equal(internalApiTokenMatches(withToken("nope"), TOKEN), false);
     assert.equal(internalApiTokenMatches(withToken(TOKEN), undefined), false);

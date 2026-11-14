@@ -71,9 +71,9 @@ const {
   error,
   refresh,
 } = useAdminList("admin-news-articles", async (range) => {
-  const { data, total } = await getNewsArticlesAdmin(range);
+  const response = await getNewsArticlesAdmin(range);
 
-  return { items: data, total };
+  return { items: response.data, total: response.total };
 });
 
 const articleToRename = ref<NewsArticleAdmin | null>(null);
@@ -88,6 +88,35 @@ const isPublishing = ref(false);
 function selectRow(e: Event, row: TableRow<NewsArticleAdmin>) {
   e.preventDefault();
   navigateTo(localePath(`/news/${row.original.slug}`));
+}
+
+function openRenameModal(article: NewsArticleAdmin) {
+  articleToRename.value = article;
+  renameTitle.value = article.title;
+  renameTitleFr.value = article.titleFr ?? "";
+  isRenameModalOpen.value = true;
+}
+
+async function togglePublish(article: NewsArticleAdmin) {
+  if (isPublishing.value) {
+    return;
+  }
+
+  isPublishing.value = true;
+
+  try {
+    await (article.isDraft ? publishNewsArticle(article.slug) : unpublishNewsArticle(article.slug));
+
+    article.isDraft = !article.isDraft;
+    toast.add({
+      title: article.isDraft ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
+      color: "success",
+    });
+  } catch (publishError) {
+    reportError(publishError, t("page.news.edit.publishFailed"));
+  } finally {
+    isPublishing.value = false;
+  }
 }
 
 function articleActions(article: NewsArticleAdmin): DropdownMenuItem[][] {
@@ -117,13 +146,6 @@ function articleActions(article: NewsArticleAdmin): DropdownMenuItem[][] {
   ];
 }
 
-function openRenameModal(article: NewsArticleAdmin) {
-  articleToRename.value = article;
-  renameTitle.value = article.title;
-  renameTitleFr.value = article.titleFr ?? "";
-  isRenameModalOpen.value = true;
-}
-
 async function saveTitle() {
   if (!articleToRename.value || !renameTitle.value.trim()) {
     return;
@@ -147,32 +169,6 @@ async function saveTitle() {
     reportError(renameError, t("page.news.actions.renameFailed"));
   } finally {
     isRenaming.value = false;
-  }
-}
-
-async function togglePublish(article: NewsArticleAdmin) {
-  if (isPublishing.value) {
-    return;
-  }
-
-  isPublishing.value = true;
-
-  try {
-    if (article.isDraft) {
-      await publishNewsArticle(article.slug);
-    } else {
-      await unpublishNewsArticle(article.slug);
-    }
-
-    article.isDraft = !article.isDraft;
-    toast.add({
-      title: article.isDraft ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
-      color: "success",
-    });
-  } catch (publishError) {
-    reportError(publishError, t("page.news.edit.publishFailed"));
-  } finally {
-    isPublishing.value = false;
   }
 }
 

@@ -1,12 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import {
-  ApplicationError,
-  ConflictError,
-  IntegrationError,
-  InvalidInputError,
-  NotFoundError,
-  UnprocessableError,
-} from "../../common/domain/errors";
+import { ApplicationError } from "../../common/domain/errors/application-error";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { IntegrationError } from "../../common/domain/errors/integration-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
 import type { CandidateMatch } from "../domain/replay-matching";
 import { ManualGameService } from "./manual-game.service";
 import type {
@@ -34,17 +32,6 @@ const match: CandidateMatch = {
   storedReplayIds: ["stored-1"],
 };
 
-const stats: ReplayStats = {
-  rocketLeagueId: "RL-1",
-  playedAt: PLAYED_AT,
-  blueGoals: 1,
-  orangeGoals: 3,
-  players: [
-    { ...line("Seikoo", "seikoo-id"), side: "blue" },
-    { ...line("Stand-in", "stand-in-id"), side: "orange" },
-  ],
-};
-
 function line(name: string, platformId: string) {
   return {
     name,
@@ -58,16 +45,25 @@ function line(name: string, platformId: string) {
   };
 }
 
+const stats: ReplayStats = {
+  rocketLeagueId: "RL-1",
+  playedAt: PLAYED_AT,
+  blueGoals: 1,
+  orangeGoals: 3,
+  players: [
+    { ...line("Seikoo", "seikoo-id"), side: "blue" },
+    { ...line("Stand-in", "stand-in-id"), side: "orange" },
+  ],
+};
+
 async function rejection(work: Promise<unknown>): Promise<ApplicationError> {
-  const error: unknown = await work.then(
-    () => {},
-    (error_: unknown) => error_,
-  );
+  const [settled] = await Promise.allSettled([work]);
 
-  if (!(error instanceof ApplicationError))
-    throw new Error("Expected an ApplicationError rejection", { cause: error });
+  if (settled.status === "rejected" && settled.reason instanceof ApplicationError) {
+    return settled.reason;
+  }
 
-  return error;
+  throw new Error("Expected an ApplicationError rejection", { cause: settled });
 }
 
 const input = {
@@ -149,7 +145,7 @@ describe("ManualGameService.attach", () => {
       orangeGoals: 3,
     });
     expect(source.replayStats).toHaveBeenCalledWith(REPLAY);
-    const record = games.save.mock.calls[0][0];
+    const [[record]] = games.save.mock.calls;
     expect(record).toMatchObject({ rocketLeagueId: "RL-1", playedAt: PLAYED_AT, number: 2 });
     expect(record.players.map((player) => [player.name, player.playerId])).toEqual([
       ["Seikoo", "seikoo"],
@@ -176,7 +172,7 @@ describe("ManualGameService.attach", () => {
 
     await service.attach("t1", { ...input, blueParticipantId: "p-seikoo" });
 
-    const [record] = games.save.mock.calls[0];
+    const [[record]] = games.save.mock.calls;
     expect(record).toMatchObject({
       blueParticipantId: "p-seikoo",
       orangeParticipantId: "p-stand-in",

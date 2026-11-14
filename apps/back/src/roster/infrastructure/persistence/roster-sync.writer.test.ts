@@ -1,5 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Contract, Player, Team, TeamAlias } from "./player.entities";
+import { Contract } from "./contract.entity";
+import { Player } from "./player.entity";
+import { Team } from "./team.entity";
+import { TeamAlias } from "./team-alias.entity";
 import { RosterSyncWriter } from "./roster-sync.writer";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { unconstructed } from "../../../../test/doubles";

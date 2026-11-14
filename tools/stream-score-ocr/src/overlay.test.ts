@@ -9,8 +9,8 @@ void describe("overlay config", () => {
     const overlay = await loadOverlay(OVERLAY_PATH);
     assert.equal(overlay.id, "coupe-de-france-slash-2026");
     assert.deepEqual(
-      [...new Set(overlay.templates.map((template) => template.char))].sort(),
-      "+0123456789:".split("").sort(),
+      [...new Set(overlay.templates.map((template) => template.char))].toSorted(),
+      "+0123456789:".split("").toSorted(),
     );
   });
 

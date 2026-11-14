@@ -1,6 +1,6 @@
 import { forumPostPath, forumPostSlug, matchPath, newsPath } from "@sarpbc/utils";
 import { REPLY_TARGET_TYPES, type ReplyTargetType } from "@sarpbc/types";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface ReplyTarget {
   kind: ReplyTargetType;

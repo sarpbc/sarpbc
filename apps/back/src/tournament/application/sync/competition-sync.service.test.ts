@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { present } from "../../../../test/doubles";
 import { CompetitionAfterCommit } from "../after-commit";
 import { CompetitionSyncService } from "./competition-sync.service";
-import { League, Match, Tournament, TournamentParticipant } from "../../domain/competition";
+import { League } from "../../domain/league";
+import { Match } from "../../domain/match";
+import { Tournament } from "../../domain/tournament";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
-import { Team } from "../../../roster/domain/roster";
+import { Team } from "../../../roster/domain/team";
 import type { CompetitionTransaction, EventWriter, TournamentWriter } from "../ports";
 import type {
   CompetitionIncident,
@@ -127,6 +131,37 @@ function memoryStore() {
   };
 }
 
+const serieIncident = (
+  change:
+    | { changeType: "creation" | "update"; command: UpsertSerieCommand }
+    | { changeType: "deletion"; deletion: ProviderDeletion },
+): CompetitionIncident =>
+  change.changeType === "deletion"
+    ? { id: 100, modifiedAt: new Date(), kind: "serie", ...change }
+    : { id: 100, modifiedAt: new Date(), kind: "serie", ...change };
+
+const finished = (endAt: string): MatchTiming => ({
+  status: "finished",
+  beginAt: new Date(endAt),
+  endAt: new Date(endAt),
+});
+
+const matchCommand = (pandascoreId: number, status: string) => ({
+  pandascoreId,
+  tournamentPandascoreId: 1,
+  name: `Match ${pandascoreId}`,
+  beginAt: new Date("2030-01-01"),
+  status,
+  opponentSlugs: [],
+  opponentPandascoreIds: [1, 2],
+  results: [
+    { teamPandascoreId: 1, score: 3 },
+    { teamPandascoreId: 2, score: 1 },
+  ],
+  previousMatches: [],
+  officialStreams: [],
+});
+
 describe("Competition synchronization", () => {
   const rosters = { upsertTeam: vi.fn(), upsertPlayer: vi.fn() };
 
@@ -136,6 +171,17 @@ describe("Competition synchronization", () => {
 
   const log: string[] = [];
   let store: ReturnType<typeof memoryStore>;
+
+  const seedManual = (id: string, name = "RLCS Major Paris 2026 Playoffs") =>
+    store.seedStage(store.seedEvent({ id: `event-${id}`, slug: id, name }), {
+      id,
+      source: "manual",
+      pandascoreId: null,
+      name,
+      slug: `manual-${id}`,
+      beginAt: new Date("2026-03-01T00:00Z"),
+      endAt: new Date("2026-03-02T00:00Z"),
+    });
 
   const tx: CompetitionTransaction = {
     run: async (work) => {
@@ -170,15 +216,6 @@ describe("Competition synchronization", () => {
     serie: parisSerie,
     ...fields,
   });
-
-  const serieIncident = (
-    change:
-      | { changeType: "creation" | "update"; command: UpsertSerieCommand }
-      | { changeType: "deletion"; deletion: ProviderDeletion },
-  ): CompetitionIncident =>
-    change.changeType === "deletion"
-      ? { id: 100, modifiedAt: new Date(), kind: "serie", ...change }
-      : { id: 100, modifiedAt: new Date(), kind: "serie", ...change };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -425,7 +462,7 @@ describe("Competition synchronization", () => {
     expect(placements?.get("dropped")).toBeNull();
     expect(placements?.has("unknown-team")).toBe(false);
     expect(
-      [...(placements?.values() ?? [])].sort((a, b) => (a ?? Infinity) - (b ?? Infinity)),
+      [...(placements?.values() ?? [])].toSorted((a, b) => (a ?? Infinity) - (b ?? Infinity)),
     ).toEqual([1, null]);
   });
 
@@ -443,19 +480,12 @@ describe("Competition synchronization", () => {
   });
 
   describe("end date", () => {
-    const finished = (endAt: string): MatchTiming => ({
-      status: "finished",
-      beginAt: new Date(endAt),
-      endAt: new Date(endAt),
-    });
-
     it("closes a stage once every match is finished and PandaScore has no end date", async () => {
       const event = store.seedEvent({ slug: "e", name: "E" });
       store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
       store.timings.set("stage", [finished("2025-03-01T10:00Z"), finished("2025-03-02T18:00Z")]);
-      expect((await service.upsertTournament(stageCommand({}))).endAt).toEqual(
-        new Date("2025-03-02T18:00Z"),
-      );
+      const upsertTournamentResult = await service.upsertTournament(stageCommand({}));
+      expect(upsertTournamentResult.endAt).toEqual(new Date("2025-03-02T18:00Z"));
     });
 
     it("keeps the stage open while a match remains", async () => {
@@ -465,7 +495,8 @@ describe("Competition synchronization", () => {
         finished("2025-03-01T10:00Z"),
         { status: "not_started", beginAt: new Date("2025-03-03T10:00Z"), endAt: null },
       ]);
-      expect((await service.upsertTournament(stageCommand({}))).endAt).toBeNull();
+      const upsertTournamentResult2 = await service.upsertTournament(stageCommand({}));
+      expect(upsertTournamentResult2.endAt).toBeNull();
     });
 
     it("keeps the stage open when the sync adds a match to a finished stage", async () => {
@@ -526,17 +557,6 @@ describe("Competition synchronization", () => {
   describe("manual counterparts", () => {
     const beginAt = new Date("2026-03-01T12:00Z");
 
-    const seedManual = (id: string, name = "RLCS Major Paris 2026 Playoffs") =>
-      store.seedStage(store.seedEvent({ id: `event-${id}`, slug: id, name }), {
-        id,
-        source: "manual",
-        pandascoreId: null,
-        name,
-        slug: `manual-${id}`,
-        beginAt: new Date("2026-03-01T00:00Z"),
-        endAt: new Date("2026-03-02T00:00Z"),
-      });
-
     it("links the manual tournament staff chose even when names differ", async () => {
       seedManual("manual", "MENA qualifier");
       const linked = await service.upsertTournament(stageCommand({ beginAt }), [], "manual");
@@ -560,22 +580,6 @@ describe("Competition synchronization", () => {
       }),
     );
 
-    const matchCommand = (pandascoreId: number, status: string) => ({
-      pandascoreId,
-      tournamentPandascoreId: 1,
-      name: `Match ${pandascoreId}`,
-      beginAt: new Date("2030-01-01"),
-      status,
-      opponentSlugs: [],
-      opponentPandascoreIds: [1, 2],
-      results: [
-        { teamPandascoreId: 1, score: 3 },
-        { teamPandascoreId: 2, score: 1 },
-      ],
-      previousMatches: [],
-      officialStreams: [],
-    });
-
     const saved: Match[] = [];
     beforeEach(() => {
       saved.length = 0;
@@ -595,7 +599,7 @@ describe("Competition synchronization", () => {
       ]);
       const decided = saved.find((match) => match.pandascoreId === 10);
       expect(published.publish).toHaveBeenCalledTimes(1);
-      expect(published.publish).toHaveBeenCalledWith(matchDecided(decided!.id));
+      expect(published.publish).toHaveBeenCalledWith(matchDecided(present(decided).id));
     });
 
     it("keeps the write when publication fails", async () => {

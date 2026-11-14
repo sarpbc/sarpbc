@@ -2,10 +2,10 @@
 import { NodeViewWrapper } from "@tiptap/vue-3";
 import type { NodeViewProps } from "@tiptap/vue-3";
 
-const props = defineProps<NodeViewProps>();
+const { node, selected } = defineProps<NodeViewProps>();
 
-const kind = computed(() => (props.node.type.name === "teamTag" ? "team" : "player"));
-const label = computed(() => String(props.node.attrs.label ?? ""));
+const kind = computed(() => (node.type.name === "teamTag" ? "team" : "player"));
+const label = computed(() => String(node.attrs.label ?? ""));
 
 const icon = computed(() =>
   kind.value === "team" ? "i-fluent-people-team-24-regular" : "i-fluent-person-24-regular",
@@ -16,7 +16,7 @@ const icon = computed(() =>
   <NodeViewWrapper as="span" class="inline">
     <span
       class="inline-flex items-center gap-1 rounded-md bg-primary/10 px-1.5 py-0.5 text-sm font-medium text-primary"
-      :class="{ 'ring-2 ring-primary': props.selected }"
+      :class="{ 'ring-2 ring-primary': selected }"
       contenteditable="false"
       translate="no"
       data-drag-handle

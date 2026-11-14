@@ -60,9 +60,7 @@ const teamNationalities = computed(() => {
 
   return activeRoster.value
     .map((player) => player.nationality)
-    .filter(
-      (nationality): nationality is string => nationality != null && nationality.trim() !== "",
-    );
+    .filter((nationality): nationality is string => Boolean(nationality?.trim()));
 });
 
 const showRosterHistory = computed(

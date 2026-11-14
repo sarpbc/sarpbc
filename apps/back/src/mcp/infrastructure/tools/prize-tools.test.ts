@@ -96,6 +96,8 @@ describe("propose_tournament_prize_update", () => {
   });
 });
 
+const setupAward = (role?: StaffRole) => setup(role, "propose_player_award");
+
 describe("propose_player_award", () => {
   const PLAYER_ID = "3a9d4c7e-5b1f-4e2a-8c6d-9f0e1d2c3b4a";
 
@@ -106,8 +108,6 @@ describe("propose_player_award", () => {
     awardType: "mvp",
     sourceUrl: SOURCE,
   };
-
-  const setupAward = (role?: StaffRole) => setup(role, "propose_player_award");
 
   it("queues a proposal instead of creating the award", async () => {
     const { call, rosterProposalService } = setupAward();

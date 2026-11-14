@@ -86,7 +86,13 @@ export function formatTournamentDateRange(
     return `${formatter.format(begin)} – ${formatter.format(end)}`;
   }
 
-  const single = new Date((beginAt ?? endAt)!);
+  const singleSource = isNonEmptyDateInput(beginAt) ? beginAt : endAt;
+
+  if (!isNonEmptyDateInput(singleSource)) {
+    return null;
+  }
+
+  const single = new Date(singleSource);
 
   if (Number.isNaN(single.getTime())) {
     return null;

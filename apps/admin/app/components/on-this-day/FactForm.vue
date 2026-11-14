@@ -22,8 +22,8 @@ interface Candidate {
   label: string;
 }
 
-const props = defineProps<{
-  fact?: OnThisDayFact;
+const { fact = null } = defineProps<{
+  fact?: OnThisDayFact | null;
   submitLabel: string;
   loading: boolean;
 }>();
@@ -38,16 +38,16 @@ function linkLabel(link: NonNullable<OnThisDayFact["link"]>): string {
   return link.kind === "tournament" ? tournamentStageLabel(link) : link.name;
 }
 
-const month = ref(props.fact?.month ?? 1);
-const day = ref(props.fact?.day ?? 1);
-const year = ref(props.fact?.year ? String(props.fact.year) : "");
-const textEn = ref(props.fact?.textEn ?? "");
-const textFr = ref(props.fact?.textFr ?? "");
-const sourceUrl = ref(props.fact?.sourceUrl ?? "");
-const linkKind = ref<OnThisDayLinkKind | typeof NO_LINK>(props.fact?.link?.kind ?? NO_LINK);
+const month = ref(fact?.month ?? 1);
+const day = ref(fact?.day ?? 1);
+const year = ref(fact?.year ? String(fact.year) : "");
+const textEn = ref(fact?.textEn ?? "");
+const textFr = ref(fact?.textFr ?? "");
+const sourceUrl = ref(fact?.sourceUrl ?? "");
+const linkKind = ref<OnThisDayLinkKind | typeof NO_LINK>(fact?.link?.kind ?? NO_LINK);
 
 const linked = ref<Candidate | null>(
-  props.fact?.link ? { id: props.fact.link.id, label: linkLabel(props.fact.link) } : null,
+  fact?.link ? { id: fact.link.id, label: linkLabel(fact.link) } : null,
 );
 
 const matchStage = ref<Candidate | null>(null);
@@ -111,16 +111,25 @@ const isValid = computed(
 
 async function search(kind: OnThisDayLinkKind, value: string): Promise<Candidate[]> {
   switch (kind) {
-    case "player":
-      return (await searchPlayers(value)).map(({ id, name }) => ({ id, label: name }));
-    case "team":
-      return (await searchTeams(value)).map(({ id, name }) => ({ id, label: name }));
+    case "player": {
+      const players = await searchPlayers(value);
+
+      return players.map(({ id, name }) => ({ id, label: name }));
+    }
+
+    case "team": {
+      const teams = await searchTeams(value);
+
+      return teams.map(({ id, name }) => ({ id, label: name }));
+    }
+
     case "tournament":
-    case "match":
-      return (await searchTournaments(value)).map((stage) => ({
-        id: stage.id,
-        label: tournamentStageLabel(stage),
-      }));
+    case "match": {
+      const stages = await searchTournaments(value);
+
+      return stages.map((stage) => ({ id: stage.id, label: tournamentStageLabel(stage) }));
+    }
+
     default: {
       const exhaustive: never = kind;
 

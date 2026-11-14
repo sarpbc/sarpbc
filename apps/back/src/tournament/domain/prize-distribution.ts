@@ -1,6 +1,7 @@
 import type { PrizeEntry, PrizeEntryPatch } from "@sarpbc/types";
 import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 
 export function assertPrizeDistribution(entries: PrizeEntry[]): void {
   if (entries.length > MAX_PRIZE_ENTRIES)

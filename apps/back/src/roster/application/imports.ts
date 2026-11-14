@@ -1,4 +1,4 @@
-import type { ImportedPlayerProfile, ImportedTeamProfile } from "../domain/roster";
+import type { ImportedPlayerProfile, ImportedTeamProfile } from "../domain/imported-profile";
 
 export interface UpsertPlayerCommand extends ImportedPlayerProfile {
   slug: string;

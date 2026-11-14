@@ -34,6 +34,17 @@ const { t } = useI18n();
 const toast = useToast();
 const reportError = useReportError();
 
+function emptyForm(): ViewershipForm {
+  return {
+    peakViewers: "",
+    averageViewers: "",
+    scope: "official",
+    measuredAt: "",
+    sourceName: "",
+    sourceUrl: "",
+  };
+}
+
 const form = ref<ViewershipForm>(emptyForm());
 const stored = ref(false);
 const loading = ref(false);
@@ -46,17 +57,6 @@ const scopeOptions = computed(() =>
     label: t(`page.tournaments.viewership.scopes.${scope}`),
   })),
 );
-
-function emptyForm(): ViewershipForm {
-  return {
-    peakViewers: "",
-    averageViewers: "",
-    scope: "official",
-    measuredAt: "",
-    sourceName: "",
-    sourceUrl: "",
-  };
-}
 
 function pad(value: number): string {
   return String(value).padStart(2, "0");
@@ -138,7 +138,9 @@ async function load() {
   loadFailed.value = false;
 
   try {
-    apply((await getViewership(path)).viewership);
+    const response = await getViewership(path);
+
+    apply(response.viewership);
   } catch {
     loadFailed.value = true;
   } finally {
@@ -158,7 +160,9 @@ async function save(viewership: Viewership | null, message: string) {
   saving.value = true;
 
   try {
-    apply((await setViewership(path, viewership)).viewership);
+    const response = await setViewership(path, viewership);
+
+    apply(response.viewership);
     toast.add({ title: message, color: "success" });
     open.value = false;
   } catch (error) {

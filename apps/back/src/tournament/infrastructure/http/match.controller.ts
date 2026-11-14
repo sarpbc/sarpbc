@@ -17,11 +17,11 @@ import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { nonBlank } from "../../../common/domain/text";
 
 function parseMatchBlockKeys(raw?: string | string[]): Map<string, MatchBlockSelector> {
-  const keys = [...new Set(raw === undefined ? [] : Array.isArray(raw) ? raw : [raw])];
+  const keys = [...new Set([raw ?? []].flat())];
 
   if (keys.length === 0 || keys.length > NEWS_MATCH_BLOCKS_PER_REQUEST) {
     throw new InvalidInputError(

@@ -3,9 +3,9 @@ import type { VNode } from "vue";
 
 type CaptionAlign = "start" | "center";
 
-const { captionAlign = "center", class: className } = defineProps<{
+const { captionAlign = "center", class: className = null } = defineProps<{
   captionAlign?: CaptionAlign;
-  class?: string;
+  class?: string | null;
 }>();
 
 defineSlots<{

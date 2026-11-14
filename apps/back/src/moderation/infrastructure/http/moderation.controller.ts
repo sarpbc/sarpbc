@@ -3,7 +3,10 @@ import type { ModerationReply } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { ListModerationRepliesQueryDto } from "./dto/list-moderation-replies-query.dto";
+import {
+  ListModerationRepliesQueryDto,
+  type ListModerationRepliesQueryInput,
+} from "./dto/list-moderation-replies-query.dto";
 import { ModerationService } from "../../application/moderation.service";
 
 @Controller("moderation")
@@ -14,7 +17,7 @@ export class ModerationController {
 
   @Get("replies")
   async listReplies(
-    @Query({ schema: ListModerationRepliesQueryDto }) query: ListModerationRepliesQueryDto,
+    @Query({ schema: ListModerationRepliesQueryDto }) query: ListModerationRepliesQueryInput,
   ): Promise<{ replies: ModerationReply[] }> {
     const replies = await this.moderationService.listRecentReplies(query.limit);
 

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { Author } from "../../common/domain/author";
 import type { ReplyTarget } from "../domain/reply";
 import type { ReplyRecord } from "./models";
@@ -10,6 +11,24 @@ import { ReplyService } from "./reply.service";
 type Match = NonNullable<ReplyRecord["match"]>;
 
 const matchFor = (id: string): Match => ({ id, publicId: 1, name: "Match", slug: "match" });
+
+function makeUser(id = "user-1"): Author {
+  return { id, userName: "fan" };
+}
+
+function makeReply(partial: Partial<ReplyRecord> & { id: string }): ReplyRecord {
+  return {
+    content: "hello",
+    createdAt: new Date("2026-01-01"),
+    author: makeUser(),
+    post: null,
+    newsArticle: null,
+    match: null,
+    replyTo: null,
+    hiddenAt: null,
+    ...partial,
+  };
+}
 
 describe("ReplyService", () => {
   let service: ReplyService;
@@ -63,24 +82,6 @@ describe("ReplyService", () => {
     service = new ReplyService(scope.replies, { run: async (work) => await work(scope) });
     vi.clearAllMocks();
   });
-
-  function makeUser(id = "user-1"): Author {
-    return { id, userName: "fan" };
-  }
-
-  function makeReply(partial: Partial<ReplyRecord> & { id: string }): ReplyRecord {
-    return {
-      content: "hello",
-      createdAt: new Date("2026-01-01"),
-      author: makeUser(),
-      post: null,
-      newsArticle: null,
-      match: null,
-      replyTo: null,
-      hiddenAt: null,
-      ...partial,
-    };
-  }
 
   describe("create target validation", () => {
     it("creates a match-targeted reply", async () => {

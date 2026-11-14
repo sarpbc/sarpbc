@@ -48,11 +48,15 @@ export async function allocateSlug(
   base: string,
   isTaken: (slug: string) => boolean | Promise<boolean>,
 ): Promise<string> {
-  for (let attempt = 1; ; attempt++) {
+  const allocate = async (attempt: number): Promise<string> => {
     const slug = attempt === 1 ? base : `${base}-${attempt}`;
 
     if (!UUID_PATTERN.test(slug) && !(await isTaken(slug))) return slug;
-  }
+
+    return await allocate(attempt + 1);
+  };
+
+  return await allocate(1);
 }
 
 function roundLabel(matchName: string | null | undefined): string | null {
@@ -66,14 +70,23 @@ function roundLabel(matchName: string | null | undefined): string | null {
   return /tbd/i.test(name) ? null : name;
 }
 
-export function isKnownTeamName(name: string | null | undefined): boolean {
+function knownTeamName(name: string | null | undefined): string | null {
   const trimmed = name?.trim();
 
-  return Boolean(trimmed) && !/^tbd$/i.test(trimmed!);
+  return isNonEmptyString(trimmed) && !/^tbd$/i.test(trimmed) ? trimmed : null;
 }
 
-export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchSlugInput): string {
-  const [teamA, teamB] = teamNames.map((name) => (isKnownTeamName(name) ? name!.trim() : null));
+export function isKnownTeamName(name: string | null | undefined): boolean {
+  return knownTeamName(name) !== null;
+}
+
+export function matchSlug({
+  teamNames,
+  matchName,
+  eventSlug: event,
+  stageSlug: stage,
+}: MatchSlugInput): string {
+  const [teamA = null, teamB = null] = teamNames.map(knownTeamName);
 
   const [first, second] =
     teamA !== null && teamB !== null && toSlug(teamA) > toSlug(teamB)
@@ -83,7 +96,7 @@ export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchS
   const lead = first !== null && second !== null ? [first, "vs", second] : [roundLabel(matchName)];
 
   // A manual tournament is the only stage of an event slugged after the same name.
-  return toSlug(...lead, eventSlug, stageSlug === eventSlug ? null : stageSlug) || "match";
+  return toSlug(...lead, event, stage === event ? null : stage) || "match";
 }
 
 export function forumPostSlug(title: string): string {

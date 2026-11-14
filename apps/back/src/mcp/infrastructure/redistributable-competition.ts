@@ -1,7 +1,7 @@
 import { isRedistributable } from "../../common/domain/data-source";
-import { NotFoundError } from "../../common/domain/errors";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { TournamentPlayerStatsService } from "../../match-stats/application/tournament-player-stats.service";
-import type { Tournament } from "../../tournament/domain/competition";
+import type { Tournament } from "../../tournament/domain/tournament";
 import type { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import type { MatchService } from "../../tournament/application/match/match.service";
 import type { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
@@ -129,7 +129,9 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     },
 
     async eventPlayerStats(idOrSlug: string) {
-      return await tournamentPlayerStatsService.forStages((await event(idOrSlug)).stages);
+      const { stages } = await event(idOrSlug);
+
+      return await tournamentPlayerStatsService.forStages(stages);
     },
   };
 }

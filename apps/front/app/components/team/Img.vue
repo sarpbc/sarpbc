@@ -3,7 +3,7 @@ import { resolveThemedLogoUrl, type ThemedLogo } from "@sarpbc/utils";
 
 interface Props {
   /** Left out while the match slot has no team yet: shows a generic icon instead of an initial. */
-  teamName?: string;
+  teamName?: string | null;
   logo?: ThemedLogo | null;
   size?: "xs" | "list" | "sm" | "md" | "lg" | "xl";
   /** Use for above-the-fold / LCP images */
@@ -67,7 +67,7 @@ const SIZES = {
   },
 };
 
-const { teamName, logo, size = "md", priority = false } = defineProps<Props>();
+const { teamName = null, logo = null, size = "md", priority = false } = defineProps<Props>();
 
 // The server cannot know the theme stored in the browser, and hydration does not patch src: let CSS pick the variant.
 const variants = computed(() => {

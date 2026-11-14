@@ -15,7 +15,7 @@ interface Selection {
   label: string;
 }
 
-const props = defineProps<{
+const { block: initialBlock, open } = defineProps<{
   open: boolean;
   block: MatchBlockSelector | null;
 }>();
@@ -100,15 +100,22 @@ async function resolveSource(initial: MatchBlockSelector): Promise<Selection | n
   return initial.kind === "tournament" ? { id: initial.id, label: initial.id } : null;
 }
 
+function initialMatchIds(initial: MatchBlockSelector | null): string[] {
+  if (initial?.kind === "match") {
+    return [initial.id];
+  }
+
+  return initial?.kind === "matches" ? [...initial.ids] : [];
+}
+
 async function reset() {
-  const initial = props.block;
+  const initial = initialBlock;
   kind.value = initial?.kind ?? "match";
   limit.value =
     initial?.kind === "tournament" || initial?.kind === "team"
       ? initial.limit
       : NEWS_MATCH_BLOCK_DEFAULT_LIMIT;
-  matchIds.value =
-    initial?.kind === "match" ? [initial.id] : initial?.kind === "matches" ? [...initial.ids] : [];
+  matchIds.value = initialMatchIds(initial);
   source.value = null;
   query.value = "";
   results.value = [];
@@ -124,7 +131,7 @@ async function reset() {
 }
 
 watch(
-  () => props.open,
+  () => open,
   (isOpen) => {
     if (isOpen) {
       void reset();
@@ -237,7 +244,7 @@ function close() {
   <UModal
     :open="open"
     :title="
-      props.block ? t('page.news.editor.matches.editTitle') : t('page.news.editor.matches.title')
+      initialBlock ? t('page.news.editor.matches.editTitle') : t('page.news.editor.matches.title')
     "
     @update:open="emit('update:open', $event)"
   >
@@ -337,7 +344,7 @@ function close() {
       <UButton
         icon="i-fluent-trophy-24-regular"
         :label="
-          props.block ? t('page.news.editor.matches.update') : t('page.news.editor.matches.insert')
+          initialBlock ? t('page.news.editor.matches.update') : t('page.news.editor.matches.insert')
         "
         :disabled="!block"
         @click="confirm"

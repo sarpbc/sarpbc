@@ -53,13 +53,15 @@ export function playSingleElim(
 
   if (teams.length === 0) return placements;
 
-  if (teams.length === 1) {
-    placements.set(teams[0]!.id, "winner");
+  const [onlyTeam] = teams;
+
+  if (teams.length === 1 && onlyTeam) {
+    placements.set(onlyTeam.id, "winner");
 
     return placements;
   }
 
-  const seeded = [...teams].sort((a, b) => b.strength - a.strength || a.id.localeCompare(b.id));
+  const seeded = teams.toSorted((a, b) => b.strength - a.strength || a.id.localeCompare(b.id));
   const size = nextPowerOfTwo(seeded.length);
   const order = seedSlots(size);
   let round: (BracketEntrant | null)[] = order.map((seed) => seeded[seed] ?? null);
@@ -85,7 +87,7 @@ export function playSingleElim(
     round = next;
   }
 
-  const champion = round[0];
+  const [champion] = round;
 
   if (champion) placements.set(champion.id, "winner");
 

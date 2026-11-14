@@ -1,5 +1,5 @@
 import { EntityRepository, type FilterQuery } from "@mikro-orm/core";
-import { Tournament } from "./tournament.entities";
+import { Tournament } from "./tournament.entity";
 import { TOURNAMENT_POPULATE } from "./tournament-populate";
 
 export class TournamentRepository extends EntityRepository<Tournament> {
@@ -18,7 +18,8 @@ export class TournamentRepository extends EntityRepository<Tournament> {
         }
       : {};
 
-    return await this.find(where, {
+    return await this.findAll({
+      where,
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
@@ -27,17 +28,15 @@ export class TournamentRepository extends EntityRepository<Tournament> {
   }
 
   async findPandascoreWithoutMatches(): Promise<Pick<Tournament, "id" | "name">[]> {
-    return await this.find(
-      {
+    return await this.findAll({
+      where: {
         source: "pandascore",
         pandascoreId: { $ne: null },
         matches: { $none: {} },
       },
-      {
-        fields: ["id", "name"],
-        orderBy: { beginAt: "DESC" },
-      },
-    );
+      fields: ["id", "name"],
+      orderBy: { beginAt: "DESC" },
+    });
   }
 
   async findPandascoreActive({
@@ -49,14 +48,14 @@ export class TournamentRepository extends EntityRepository<Tournament> {
     beganAfter: Date;
     endsAfter: Date;
   }): Promise<Pick<Tournament, "id">[]> {
-    return await this.find(
-      {
+    return await this.findAll({
+      where: {
         source: "pandascore",
         pandascoreId: { $ne: null },
         beginAt: { $lte: beginsBefore, $gte: beganAfter },
         $or: [{ endAt: null }, { endAt: { $gte: endsAfter } }],
       },
-      { fields: ["id"] },
-    );
+      fields: ["id"],
+    });
   }
 }

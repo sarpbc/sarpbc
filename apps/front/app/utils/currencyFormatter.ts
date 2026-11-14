@@ -20,19 +20,16 @@ function currencyCodeFor(name: string): string {
   return "USD";
 }
 
-export function formatPrizepool(
-  prizepool: string | undefined | null,
-  locale: string = "en-US",
-): string {
+export function formatPrizepool(prizepool: string | undefined | null, locale = "en-US"): string {
   if (!isNonEmptyString(prizepool)) return "";
 
   const parts = prizepool.trim().split(" ");
 
   if (parts.length < 2) return prizepool;
 
-  const amount = Number.parseFloat((parts[0] ?? "").replaceAll(",", ""));
+  const amount = Number((parts[0] ?? "").replaceAll(",", ""));
 
-  if (isNaN(amount)) return prizepool;
+  if (Number.isNaN(amount)) return prizepool;
 
   const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
 

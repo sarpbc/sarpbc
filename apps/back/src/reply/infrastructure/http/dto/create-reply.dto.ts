@@ -13,7 +13,7 @@ export const ReplyContentDto = z.strictObject({
   replyToId: z.uuidv4().optional(),
 });
 
-export type ReplyContentDto = z.infer<typeof ReplyContentDto>;
+export type ReplyContentInput = z.infer<typeof ReplyContentDto>;
 
 export const CreateReplyDto = ReplyContentDto.extend({
   postId: z.uuidv4().optional(),
@@ -28,4 +28,4 @@ export const CreateReplyDto = ReplyContentDto.extend({
   },
 );
 
-export type CreateReplyDto = z.infer<typeof CreateReplyDto>;
+export type CreateReplyInput = z.infer<typeof CreateReplyDto>;

@@ -1,9 +1,9 @@
 import { v4 } from "uuid";
 import type { TournamentEventRef, DataSource, Stream, Viewership } from "@sarpbc/types";
 import { isoDay } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { nonBlank } from "../../common/domain/text";
-import type { League } from "./competition";
+import type { League } from "./league";
 
 export class TournamentEvent {
   id = v4();

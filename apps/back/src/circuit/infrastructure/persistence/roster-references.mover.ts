@@ -1,11 +1,13 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
 import type { RosterReferenceMover } from "../../../roster/application/ports";
-import { CircuitStageTeam } from "./circuit.entities";
+import { CircuitStageTeam } from "./circuit-stage-team.entity";
 
 export class CircuitRosterReferences implements RosterReferenceMover {
   constructor(private readonly em: EntityManager) {}
 
-  async movePlayer(): Promise<void> {}
+  async movePlayer(): Promise<void> {
+    // No circuit row references a player.
+  }
 
   async moveTeam(from: string, to: string): Promise<void> {
     const entries = await this.em.find(

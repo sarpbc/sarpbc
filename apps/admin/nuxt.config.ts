@@ -1,4 +1,4 @@
-import { dirname } from "node:path";
+import path from "node:path";
 import { createRequire } from "node:module";
 import { localizedPath } from "@sarpbc/utils/entity-path";
 import { isNonEmptyString } from "@sarpbc/utils/text";
@@ -6,7 +6,7 @@ import { DEFAULT_API_BASE, SITE_ORIGIN, apiPreconnectLinks, i18nOptions } from "
 import { newsMdcComponents } from "./app/utils/newsMdcComponents";
 
 const require = createRequire(import.meta.url);
-const tiptapPmPath = dirname(dirname(require.resolve("@tiptap/pm/view")));
+const tiptapPmPath = path.dirname(path.dirname(require.resolve("@tiptap/pm/view")));
 
 function prosemirrorAlias(packageName: string) {
   const resolved = require.resolve(packageName, { paths: [tiptapPmPath] });

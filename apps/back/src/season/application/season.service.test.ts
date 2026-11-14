@@ -1,7 +1,9 @@
 import type { SeasonDetail } from "@sarpbc/types";
 import { beforeEach, describe, expect, it } from "vitest";
 import { memorySeasonStore } from "../../../test/season-store.memory";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { SeasonArchiveService } from "./season-archive.service";
 import { SeasonService } from "./season.service";
 
@@ -48,10 +50,13 @@ describe("SeasonService", () => {
       service.update(other.id, { name: "RLCS 2025", slug: "RLCS-2024" }),
     ).rejects.toThrow('A season with the slug "rlcs-2024" already exists.');
 
-    for (const slug of ["!!!", "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b"])
-      await expect(service.update(other.id, { name: "RLCS 2025", slug })).rejects.toBeInstanceOf(
-        InvalidInputError,
-      );
+    await Promise.all(
+      ["!!!", "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b"].map(async (slug) => {
+        await expect(service.update(other.id, { name: "RLCS 2025", slug })).rejects.toBeInstanceOf(
+          InvalidInputError,
+        );
+      }),
+    );
     expect(await service.update(other.id, { name: "RLCS 2025", slug: " " })).toMatchObject({
       slug: null,
     });
@@ -166,7 +171,8 @@ describe("SeasonService", () => {
 
     await seasonMvp();
     await expect(seasonMvp()).rejects.toBeInstanceOf(ConflictError);
-    expect((await service.detail(season.id)).awards).toHaveLength(3);
+    const detailResult = await service.detail(season.id);
+    expect(detailResult.awards).toHaveLength(3);
   });
 
   it("requires a region for a Regional MVP and refuses one for a Season MVP", async () => {
@@ -196,14 +202,17 @@ describe("SeasonService", () => {
   });
 
   it("refuses Liquipedia, non-http and overlong sources", async () => {
-    for (const sourceUrl of [
-      `${ANNOUNCEMENT}?${"a".repeat(2048)}`,
-      "https://liquipedia.net/rocketleague/Rocket_League_Championship_Series/2024",
-      "ftp://rlesports.com/award",
-    ])
-      await expect(
-        service.addAward(season.id, { playerId: "zen", awardType: "season_mvp", sourceUrl }),
-      ).rejects.toBeInstanceOf(InvalidInputError);
+    await Promise.all(
+      [
+        `${ANNOUNCEMENT}?${"a".repeat(2048)}`,
+        "https://liquipedia.net/rocketleague/Rocket_League_Championship_Series/2024",
+        "ftp://rlesports.com/award",
+      ].map(async (sourceUrl) => {
+        await expect(
+          service.addAward(season.id, { playerId: "zen", awardType: "season_mvp", sourceUrl }),
+        ).rejects.toBeInstanceOf(InvalidInputError);
+      }),
+    );
   });
 
   it("refuses unknown seasons and players and merged player ids", async () => {

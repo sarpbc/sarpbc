@@ -1,6 +1,5 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
 const repository = path.resolve(import.meta.dirname, "..");
@@ -17,7 +16,7 @@ const packageManifest = z.object({
 });
 
 const specifierPattern =
-  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
+  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["'](?<specifier>[^"']+)["']/g;
 
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -35,7 +34,9 @@ export function frameworkViolations(directory: string, root = directory): string
   for (const file of sourceFiles(directory)) {
     const text = readFileSync(file, "utf-8");
 
-    for (const [, specifier] of text.matchAll(specifierPattern)) {
+    for (const match of text.matchAll(specifierPattern)) {
+      const specifier = match.groups?.specifier ?? "";
+
       if (frameworkPackage.test(specifier)) {
         violations.push(`${path.relative(root, file)}: imports ${specifier}`);
       }

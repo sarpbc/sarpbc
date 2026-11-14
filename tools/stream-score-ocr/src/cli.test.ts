@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
-import { execFile } from "node:child_process";
+import { execFileSync } from "node:child_process";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path from "node:path";
 import { after, before, describe, it } from "node:test";
 import { fileURLToPath } from "node:url";
 import { OVERLAY_PATH } from "../fixtures/accuracy.ts";
@@ -11,23 +11,20 @@ import { parseOverlay } from "./overlay.ts";
 
 const CLI = fileURLToPath(new URL("cli.ts", import.meta.url));
 
-async function cli(args: readonly string[]): Promise<{ stdout: string; stderr: string }> {
-  return await new Promise((resolve, reject) => {
-    execFile(
-      process.execPath,
-      ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", CLI, ...args],
-      (error, stdout, stderr) => {
-        if (error === null) resolve({ stdout, stderr });
-        else reject(new Error(error.message, { cause: error }));
-      },
-    );
-  });
+async function cli(args: readonly string[]): Promise<{ stdout: string }> {
+  const stdout = execFileSync(
+    process.execPath,
+    ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", CLI, ...args],
+    { encoding: "utf-8", stdio: "pipe" },
+  );
+
+  return await Promise.resolve({ stdout });
 }
 
 void describe("stream-score-ocr cli", () => {
   let directory = "";
   before(async () => {
-    directory = await mkdtemp(join(tmpdir(), "stream-score-ocr-"));
+    directory = await mkdtemp(path.join(tmpdir(), "stream-score-ocr-"));
   });
   after(async () => {
     await rm(directory, { recursive: true, force: true });
@@ -35,7 +32,7 @@ void describe("stream-score-ocr cli", () => {
 
   void it("learns glyph templates from a labelled frame", async () => {
     const overlay = parseOverlay(await readFile(OVERLAY_PATH, "utf-8"));
-    const partial = join(directory, "overlay.json");
+    const partial = path.join(directory, "overlay.json");
     await writeFile(
       partial,
       JSON.stringify({
@@ -58,7 +55,7 @@ void describe("stream-score-ocr cli", () => {
       6,
     );
 
-    const ppm = join(directory, "frame.ppm");
+    const ppm = path.join(directory, "frame.ppm");
     await writeFile(
       ppm,
       Buffer.concat([Buffer.from(`P6\n${frame.width} ${frame.height}\n255\n`), frame.data]),
@@ -80,8 +77,8 @@ void describe("stream-score-ocr cli", () => {
 
     const learned = parseOverlay(stdout);
     assert.deepEqual(
-      [...new Set(learned.templates.map((template) => template.char))].sort(),
-      ["+", "0", "1", "2", "3", "4", "7", ":"].sort(),
+      [...new Set(learned.templates.map((template) => template.char))].toSorted(),
+      ["+", "0", "1", "2", "3", "4", "7", ":"].toSorted(),
     );
   });
 
@@ -92,7 +89,7 @@ void describe("stream-score-ocr cli", () => {
         "--overlay",
         OVERLAY_PATH,
         "--frame",
-        join(directory, "frame.ppm"),
+        path.join(directory, "frame.ppm"),
         "--blue",
         "17",
         "--orange",

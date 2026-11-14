@@ -94,15 +94,13 @@ async function loadUntilCommentLoaded(commentId: string): Promise<boolean> {
     return true;
   }
 
-  while (comments.value.length < total.value) {
-    await loadMore();
-
-    if (isCommentLoaded(commentId)) {
-      return true;
-    }
+  if (comments.value.length >= total.value) {
+    return false;
   }
 
-  return false;
+  await loadMore();
+
+  return await loadUntilCommentLoaded(commentId);
 }
 
 async function resolveHashTarget() {

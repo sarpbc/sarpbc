@@ -1,7 +1,11 @@
 import { participantName } from "@sarpbc/utils";
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import type { Player, Team } from "../../../roster/domain/roster";
-import type { Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
+import { mapSequentially } from "../../../common/application/sequentially";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import type { Player } from "../../../roster/domain/player";
+import type { Team } from "../../../roster/domain/team";
+import type { Tournament } from "../../../tournament/domain/tournament";
+import type { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
 import { findByIdOrSlug, type IdOrSlugLookup } from "./find-by-id-or-slug";
 
 export interface MatchParticipantsInput {
@@ -68,9 +72,16 @@ export async function resolveMatchParticipantIds(
     add(participant);
   }
 
-  for (const token of input.teams ?? []) {
+  const teamTokens = input.teams ?? [];
+
+  const foundTeams = await mapSequentially(
+    teamTokens,
+    async (token) => await findByIdOrSlug(lookups.teams, token),
+  );
+
+  for (const [index, token] of teamTokens.entries()) {
     rejectParticipantId(token, "teams");
-    const team = await findByIdOrSlug(lookups.teams, token);
+    const team = foundTeams[index];
 
     if (!team) {
       throw new NotFoundError(
@@ -89,9 +100,16 @@ export async function resolveMatchParticipantIds(
     add(participant);
   }
 
-  for (const token of input.players ?? []) {
+  const playerTokens = input.players ?? [];
+
+  const foundPlayers = await mapSequentially(
+    playerTokens,
+    async (token) => await findByIdOrSlug(lookups.players, token),
+  );
+
+  for (const [index, token] of playerTokens.entries()) {
     rejectParticipantId(token, "players");
-    const player = await findByIdOrSlug(lookups.players, token);
+    const player = foundPlayers[index];
 
     if (!player) {
       throw new NotFoundError(

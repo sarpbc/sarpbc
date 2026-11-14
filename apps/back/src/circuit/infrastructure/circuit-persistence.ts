@@ -1,1 +1,3 @@
-export { Circuit, CircuitStage } from "./persistence/circuit.entities";
+export { Circuit } from "./persistence/circuit.entity";
+
+export { CircuitStage } from "./persistence/circuit-stage.entity";

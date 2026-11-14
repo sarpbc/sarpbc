@@ -123,7 +123,7 @@ export function computeCircuitStandings(
       ),
       status: eventStatus(eventStages, now),
     }))
-    .sort(compareEvents);
+    .toSorted(compareEvents);
 
   const tallies = new Map<string, TeamTally>();
 
@@ -154,7 +154,7 @@ export function computeCircuitStandings(
 
   const order = new Map(events.map(({ event }, index) => [event.id, index]));
 
-  const sorted = [...tallies.values()].sort(
+  const sorted = [...tallies.values()].toSorted(
     (a, b) => b.points - a.points || a.team.name.localeCompare(b.team.name),
   );
 
@@ -162,7 +162,7 @@ export function computeCircuitStandings(
     rank: sorted.findIndex((other) => other.points === tally.points) + 1,
     points: tally.points,
     team: tally.team,
-    events: [...tally.cells.values()].sort(
+    events: [...tally.cells.values()].toSorted(
       (a, b) => (order.get(a.eventId) ?? 0) - (order.get(b.eventId) ?? 0),
     ),
   }));

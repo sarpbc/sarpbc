@@ -77,20 +77,20 @@ const canGenerateBracket = computed(
   () => editsBracket.value && tournament.value?.hasBracket === true && matches.value?.length === 0,
 );
 
-function openBracket(match: TournamentMatchListItem) {
-  const detailed = detailMatches.value.get(match.id);
-
-  if (!detailed) return;
-  bracketMatch.value = { match: detailed, label: matchLabel(match) };
-  bracketOpen.value = true;
-}
-
 function matchLabel(match: TournamentMatchListItem): string {
   const [teamA, teamB] = match.participants;
   const sides = `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
   const name = detailMatches.value.get(match.id)?.name;
 
   return name ? `${name} · ${sides}` : sides;
+}
+
+function openBracket(match: TournamentMatchListItem) {
+  const detailed = detailMatches.value.get(match.id);
+
+  if (!detailed) return;
+  bracketMatch.value = { match: detailed, label: matchLabel(match) };
+  bracketOpen.value = true;
 }
 
 function matchSourceUrl(match: TournamentMatchListItem): string | null {

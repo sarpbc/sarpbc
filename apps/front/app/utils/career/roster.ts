@@ -54,11 +54,18 @@ const SPARE_GAMERTAGS = [
 type DisplacementFate = "swap" | "free_agent" | "leave";
 
 function asRoster(ids: string[]): CareerRoster {
-  if (ids.length !== ROSTER_SIZE) {
+  const [first, second, third] = ids;
+
+  if (
+    ids.length !== ROSTER_SIZE ||
+    first === undefined ||
+    second === undefined ||
+    third === undefined
+  ) {
     throw new Error(`Roster must have ${ROSTER_SIZE} players`);
   }
 
-  return [ids[0]!, ids[1]!, ids[2]!];
+  return [first, second, third];
 }
 
 function cloneWorld(world: CareerWorldState): CareerWorldState {
@@ -250,7 +257,8 @@ export function createCareerWorld(careerId: string): CareerWorldState {
 
   for (const team of WORLD_TEAMS) {
     const ids: string[] = [];
-    team.players.forEach((name, slot) => {
+
+    for (const [slot, name] of team.players.entries()) {
       const rng = createRng(hashString(`${careerId}:${team.id}:p${slot}`));
       world.players[name] = {
         id: name,
@@ -260,19 +268,19 @@ export function createCareerWorld(careerId: string): CareerWorldState {
         region: team.region,
       };
       ids.push(name);
-    });
+    }
+
     world.rosters[team.id] = asRoster(ids);
   }
 
-  const usedNames = new Set(Object.keys(world.players));
+  const takenNames = new Set(Object.keys(world.players));
 
-  for (let i = 0; i < 8; i++) {
-    const name = SPARE_GAMERTAGS[i];
+  for (const [i, name] of SPARE_GAMERTAGS.slice(0, 8).entries()) {
+    if (takenNames.has(name)) continue;
 
-    if (!name || usedNames.has(name)) continue;
     const rng = createRng(hashString(`${careerId}:fa:${i}`));
     const regions: CareerRegion[] = ["na", "eu", "sam", "oce", "mena", "apac", "ssa"];
-    const region = regions[i % regions.length]!;
+    const region = regions[i % regions.length] ?? "na";
     world.players[name] = {
       id: name,
       name,
@@ -281,7 +289,7 @@ export function createCareerWorld(careerId: string): CareerWorldState {
       region,
     };
     world.freeAgentIds.push(name);
-    usedNames.add(name);
+    takenNames.add(name);
   }
 
   return world;
@@ -305,12 +313,12 @@ function pickPlayerToDisplace(
 ): string {
   const npcs = roster.filter((id) => id !== USER_ROSTER_ID);
 
-  const sorted = [...npcs].sort(
+  const sorted = npcs.toSorted(
     (a, b) =>
       getRosterPlayerRating(a, world, userRating) - getRosterPlayerRating(b, world, userRating),
   );
 
-  const worst = sorted[0];
+  const [worst] = sorted;
 
   if (!isNonEmptyString(worst)) {
     throw new Error("Cannot displace from an empty NPC roster");
@@ -322,7 +330,7 @@ function pickPlayerToDisplace(
     (id) => getRosterPlayerRating(id, world, userRating) <= floor + DISPLACE_CLOSE_MARGIN,
   );
 
-  return bottom[Math.floor(rng() * bottom.length)]!;
+  return bottom[Math.floor(rng() * bottom.length)] ?? worst;
 }
 
 function isSigned(playerId: string, world: CareerWorldState): boolean {
@@ -383,16 +391,19 @@ function takeReplacement(
   const pool = regional.length > 0 ? regional : any;
 
   if (pool.length > 0) {
-    const ranked = [...pool].sort(
+    const ranked = pool.toSorted(
       (a, b) =>
         getRosterPlayerRating(b, world, userRating) - getRosterPlayerRating(a, world, userRating),
     );
 
     const top = ranked.slice(0, Math.min(3, ranked.length));
-    const picked = top[Math.floor(rng() * top.length)]!;
-    world.freeAgentIds = world.freeAgentIds.filter((id) => id !== picked);
+    const picked = top[Math.floor(rng() * top.length)];
 
-    return picked;
+    if (picked !== undefined) {
+      world.freeAgentIds = world.freeAgentIds.filter((id) => id !== picked);
+
+      return picked;
+    }
   }
 
   const remaining = (world.rosters[team.id] ?? []).filter((id) => id !== USER_ROSTER_ID);
@@ -414,7 +425,7 @@ function releasePlayer(world: CareerWorldState, playerId: string, fate: Displace
 
       break;
     case "leave":
-      delete world.players[playerId];
+      Reflect.deleteProperty(world.players, playerId);
       world.freeAgentIds = world.freeAgentIds.filter((id) => id !== playerId);
       break;
     default: {

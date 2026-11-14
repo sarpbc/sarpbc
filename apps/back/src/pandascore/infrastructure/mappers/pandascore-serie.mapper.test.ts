@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { incidentSchema } from "../dto/incident.dto";
-import { PandascoreSerieMapper, parseProviderDeletion } from "./pandascore-serie.mapper";
+import { parseProviderDeletion, toUpsertSerieCommand } from "./pandascore-serie.mapper";
 
 interface DeletionObject {
   deleted_at?: string;
@@ -22,13 +22,13 @@ function deletionReason(object: DeletionObject | null): string | null {
   return incident.object;
 }
 
-describe("parseProviderDeletion", () => {
-  const deletion = (reason: string | null) => ({
-    deleted_at: "2026-10-01T00:00:00Z",
-    reason,
-    videogame_id: 14,
-  });
+const deletion = (reason: string | null) => ({
+  deleted_at: "2026-10-01T00:00:00Z",
+  reason,
+  videogame_id: 14,
+});
 
+describe("parseProviderDeletion", () => {
   it("reads a merge into another serie", () => {
     expect(parseProviderDeletion(deletionReason(deletion("Merged with 9417")))).toEqual({
       kind: "merged",
@@ -67,7 +67,7 @@ describe("serie incidents", () => {
 
     if (incident.change_type === "deletion" || incident.type !== "serie")
       throw new Error("expected a serie update");
-    expect(PandascoreSerieMapper.toUpsertCommand(incident.object)).toEqual({
+    expect(toUpsertSerieCommand(incident.object)).toEqual({
       pandascoreId: 9417,
       fullName: "Paris 2026",
       year: undefined,

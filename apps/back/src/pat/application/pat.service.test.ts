@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { createHash } from "node:crypto";
-import { ForbiddenError, NotFoundError } from "../../common/domain/errors";
+import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { User } from "../../user/domain/user";
 import { tokenSecrets } from "../infrastructure/token-secrets";
 import type { TokenStore } from "./ports/token-store";

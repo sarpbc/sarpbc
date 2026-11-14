@@ -17,4 +17,4 @@ export const updateNewsArticleFields = {
 
 export const UpdateNewsArticleDto = z.strictObject(updateNewsArticleFields);
 
-export type UpdateNewsArticleDto = z.infer<typeof UpdateNewsArticleDto>;
+export type UpdateNewsArticleInput = z.infer<typeof UpdateNewsArticleDto>;

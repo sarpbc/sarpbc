@@ -31,7 +31,7 @@ function nameKey(name: string): string {
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
 
-  return [...new Set(tokens)].sort().join(" ");
+  return [...new Set(tokens)].toSorted().join(" ");
 }
 
 function overlaps(candidate: ManualCandidate, stage: ProviderStage): boolean {

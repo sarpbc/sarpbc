@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const __dirname = import.meta.dirname;
 const FRONT_ROOT = path.resolve(__dirname, "..");
@@ -35,7 +34,7 @@ function readAutoImportNames(): string[] {
       process.exit(1);
     }
 
-    const names = [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+    const names = [...source.matchAll(/^\s*const (?<name>\$?\w+):/gm)].map((match) => match[1]);
 
     if (names.length === 0) {
       console.error(`No auto-import names found in ${file}. Nuxt changed its format?`);
@@ -48,7 +47,7 @@ function readAutoImportNames(): string[] {
 
 const globals = Object.fromEntries(
   [...new Set([...readAutoImportNames(), ...VUE_MACROS, ...NODE_AND_NUXT_GLOBALS])]
-    .sort()
+    .toSorted()
     .map((name) => [name, "readonly"]),
 );
 

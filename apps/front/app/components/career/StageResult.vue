@@ -2,7 +2,7 @@
 import type { CareerPlacement, CareerRegion, CareerSplitRecord, CareerStage } from "~/types/career";
 import { MAJOR_POINTS, REGIONAL_POINTS, regionalCircuitWeight } from "~/utils/career/simulation";
 
-const props = defineProps<{
+const { stage, split, worldsPlacement, seasonPoints, qualifiedForWorlds, region } = defineProps<{
   stage: CareerStage;
   split: CareerSplitRecord | null;
   worldsPlacement: CareerPlacement | null;
@@ -17,18 +17,17 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const isWorlds = computed(() => props.stage === "worlds");
-const showQualificationBanner = computed(() => !isWorlds.value && props.stage === "split2");
+const isWorlds = computed(() => stage === "worlds");
+const showQualificationBanner = computed(() => !isWorlds.value && stage === "split2");
 
 const showResultsRail = computed(
-  () =>
-    (!isWorlds.value && props.split !== null) || (isWorlds.value && props.worldsPlacement !== null),
+  () => (!isWorlds.value && split !== null) || (isWorlds.value && worldsPlacement !== null),
 );
 
 const railTitle = computed(() =>
   isWorlds.value
     ? t("page.game.career.results.worldsTitle")
-    : t("page.game.career.results.splitTitle", { split: props.split?.split ?? 1 }),
+    : t("page.game.career.results.splitTitle", { split: split?.split ?? 1 }),
 );
 
 const tooltipContent = {
@@ -38,7 +37,7 @@ const tooltipContent = {
 };
 
 function regionalPlacementPoints(placement: CareerPlacement): number {
-  const weight = props.region ? regionalCircuitWeight(props.region) : 1;
+  const weight = region ? regionalCircuitWeight(region) : 1;
 
   return Math.round(REGIONAL_POINTS[placement] * weight);
 }

@@ -1,9 +1,9 @@
 <script setup lang="ts">
 type HubColumnVariant = "rail" | "main";
 
-const { variant = "main", class: className } = defineProps<{
+const { variant = "main", class: className = null } = defineProps<{
   variant?: HubColumnVariant;
-  class?: string;
+  class?: string | null;
 }>();
 
 const variantClass = computed(() => {

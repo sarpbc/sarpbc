@@ -4,7 +4,7 @@ import { getApiErrorMessage, maxVodGame, participantName } from "@sarpbc/utils";
 
 const target = defineModel<StatsImportItem | null>("target", { required: true });
 
-const props = defineProps<{
+const { matches, matchLabel, games, tournamentId } = defineProps<{
   tournamentId: string;
   matches: TournamentMatchListItem[];
   games: TournamentStatsGame[];
@@ -29,19 +29,17 @@ const open = computed({
   },
 });
 
-const pickable = computed(() =>
-  props.matches.filter((match) => (match.participants?.length ?? 0) === 2),
-);
+const pickable = computed(() => matches.filter((match) => (match.participants?.length ?? 0) === 2));
 
 const match = computed(() => pickable.value.find((candidate) => candidate.id === matchId.value));
 
 const matchOptions = computed(() =>
-  pickable.value.map((candidate) => ({ value: candidate.id, label: props.matchLabel(candidate) })),
+  pickable.value.map((candidate) => ({ value: candidate.id, label: matchLabel(candidate) })),
 );
 
 const gameOptions = computed(() => {
   const taken = new Set(
-    props.games.filter((game) => game.matchId === matchId.value).map((game) => game.number),
+    games.filter((game) => game.matchId === matchId.value).map((game) => game.number),
   );
 
   return Array.from({ length: maxVodGame(match.value?.numberOfGames) }, (_, index) => ({
@@ -92,7 +90,7 @@ async function save() {
   saving.value = true;
 
   try {
-    const game = await attachStatsReplay(props.tournamentId, {
+    const game = await attachStatsReplay(tournamentId, {
       matchId: matchId.value,
       replay: item.replayId,
       gameNumber: gameNumber.value,

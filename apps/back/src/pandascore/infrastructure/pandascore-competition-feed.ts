@@ -4,37 +4,35 @@ import { PandascoreApiClient } from "./pandascore-api.client";
 import { standingSchema, tournamentSchema } from "./dto/tournament.dto";
 import { matchSchema } from "./dto/match.dto";
 import { incidentSchema } from "./dto/incident.dto";
-import { PandascoreTournamentMapper } from "./mappers/pandascore-tournament.mapper";
-import { PandascoreMatchMapper } from "./mappers/pandascore-match.mapper";
-import { PandascoreTeamMapper } from "./mappers/pandascore-team.mapper";
-import { PandascorePlayerMapper } from "./mappers/pandascore-player.mapper";
-import { PandascoreLeagueMapper } from "./mappers/pandascore-league.mapper";
-import { PandascoreSerieMapper, parseProviderDeletion } from "./mappers/pandascore-serie.mapper";
+import { toUpsertTournamentCommand } from "./mappers/pandascore-tournament.mapper";
+import { toUpsertMatchCommand } from "./mappers/pandascore-match.mapper";
+import { toUpsertTeamCommand } from "./mappers/pandascore-team.mapper";
+import { toImportedPlayer } from "./mappers/pandascore-player.mapper";
+import { toUpsertLeagueCommand } from "./mappers/pandascore-league.mapper";
+import { toUpsertSerieCommand, parseProviderDeletion } from "./mappers/pandascore-serie.mapper";
 
 @Injectable()
 export class PandascoreCompetitionFeed implements CompetitionFeed {
   constructor(private readonly apiClient: PandascoreApiClient) {}
   async getTournaments() {
-    return (await this.apiClient.getTournaments()).map((v) =>
-      PandascoreTournamentMapper.toUpsertCommand(tournamentSchema.parse(v)),
-    );
+    const tournaments = await this.apiClient.getTournaments();
+
+    return tournaments.map((v) => toUpsertTournamentCommand(tournamentSchema.parse(v)));
   }
   async getTournamentById(id: number) {
     const value = await this.apiClient.getTournamentById(id);
 
-    return value === null
-      ? null
-      : PandascoreTournamentMapper.toUpsertCommand(tournamentSchema.parse(value));
+    return value === null ? null : toUpsertTournamentCommand(tournamentSchema.parse(value));
   }
   async getTournamentBrackets(id: number) {
-    return (await this.apiClient.getTournamentBrackets(id)).map((v) =>
-      PandascoreMatchMapper.toUpsertCommand(matchSchema.parse(v)),
-    );
+    const brackets = await this.apiClient.getTournamentBrackets(id);
+
+    return brackets.map((v) => toUpsertMatchCommand(matchSchema.parse(v)));
   }
   async getTournamentMatches(id: number) {
-    return (await this.apiClient.getTournamentMatches(id)).map((v) =>
-      PandascoreMatchMapper.toUpsertCommand(matchSchema.parse(v)),
-    );
+    const matches = await this.apiClient.getTournamentMatches(id);
+
+    return matches.map((v) => toUpsertMatchCommand(matchSchema.parse(v)));
   }
   async getTournamentStandings(id: number) {
     const standings = await this.apiClient.getTournamentStandings(id);
@@ -48,7 +46,9 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
     });
   }
   async listIncidents(params: { since: Date }): Promise<CompetitionIncident[]> {
-    return (await this.apiClient.listIncidents(params)).map((v) => {
+    const incidents = await this.apiClient.listIncidents(params);
+
+    return incidents.map((v) => {
       const i = incidentSchema.parse(v);
       const base = { id: i.id, modifiedAt: new Date(i.modified_at) };
 
@@ -67,42 +67,42 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
             ...base,
             changeType,
             kind: i.type,
-            command: PandascoreTournamentMapper.toUpsertCommand(i.object),
+            command: toUpsertTournamentCommand(i.object),
           };
         case "match":
           return {
             ...base,
             changeType,
             kind: i.type,
-            command: PandascoreMatchMapper.toUpsertCommand(i.object),
+            command: toUpsertMatchCommand(i.object),
           };
         case "team":
           return {
             ...base,
             changeType,
             kind: i.type,
-            command: PandascoreTeamMapper.toUpsertCommand(i.object),
+            command: toUpsertTeamCommand(i.object),
           };
         case "player":
           return {
             ...base,
             changeType,
             kind: i.type,
-            command: PandascorePlayerMapper.toImportedPlayer(i.object),
+            command: toImportedPlayer(i.object),
           };
         case "league":
           return {
             ...base,
             changeType,
             kind: i.type,
-            command: PandascoreLeagueMapper.toUpsertCommand(i.object),
+            command: toUpsertLeagueCommand(i.object),
           };
         case "serie":
           return {
             ...base,
             changeType,
             kind: i.type,
-            command: PandascoreSerieMapper.toUpsertCommand(i.object),
+            command: toUpsertSerieCommand(i.object),
           };
         default: {
           const neverIncident: never = i;

@@ -12,6 +12,12 @@ const VALID: TeamAliasInput = {
   pandascoreId: null,
 };
 
+function error(input: Partial<TeamAliasInput>) {
+  const parsed = parseTeamAlias({ ...VALID, ...input });
+
+  return parsed.ok ? null : parsed.error;
+}
+
 void describe("parseTeamAlias", () => {
   void it("trims the name and normalizes the source URL", () => {
     assert.deepEqual(parseTeamAlias(VALID), {
@@ -22,12 +28,6 @@ void describe("parseTeamAlias", () => {
   });
 
   void it("refuses Liquipedia and its mirrors as a source or a logo", () => {
-    const error = (input: Partial<TeamAliasInput>) => {
-      const parsed = parseTeamAlias({ ...VALID, ...input });
-
-      return parsed.ok ? null : parsed.error;
-    };
-
     assert.equal(error({ sourceUrl: "https://liquipedia.net/rocketleague/X" }), "forbidden-source");
     assert.equal(error({ sourceUrl: "https://www.liquipedia.org/x" }), "forbidden-source");
     assert.equal(error({ sourceUrl: "https://liquipedia-mirror.example/x" }), "forbidden-source");
@@ -41,12 +41,6 @@ void describe("parseTeamAlias", () => {
   });
 
   void it("checks the name, the dates and the PandaScore id", () => {
-    const error = (input: Partial<TeamAliasInput>) => {
-      const parsed = parseTeamAlias({ ...VALID, ...input });
-
-      return parsed.ok ? null : parsed.error;
-    };
-
     assert.equal(error({ name: "  " }), "missing-name");
     assert.equal(error({ from: "2024-02-30" }), "invalid-from");
     assert.equal(error({ from: "2024-13-40" }), "invalid-from");

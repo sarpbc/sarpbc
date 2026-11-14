@@ -669,6 +669,12 @@
       "rules": {
         "no-empty-function": "off"
       }
+    },
+    {
+      "files": ["apps/back/src/**/*.controller.ts"],
+      "rules": {
+        "class-methods-use-this": "off"
+      }
     }
   ]
 }

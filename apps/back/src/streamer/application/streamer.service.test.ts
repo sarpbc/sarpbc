@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { TrackedStreamer } from "../domain/tracked-streamer";
 import type { LiveStreamSnapshot } from "./ports/live-stream-cache";
 import type { SourceStream } from "./ports/live-stream-source";
@@ -24,18 +25,18 @@ function live(login: string, viewerCount: number): SourceStream {
   };
 }
 
+const createStreamers = () => ({
+  list: vi.fn().mockResolvedValue([tracked("zenrll", "Zen"), tracked("kaydop")]),
+  add: vi.fn(),
+  remove: vi.fn(),
+});
+
+const createSource = () => ({
+  findLiveRocketLeague: vi.fn().mockResolvedValue([live("kaydop", 100), live("zenrll", 900)]),
+});
+
 describe("StreamerService", () => {
   let snapshot: LiveStreamSnapshot | null = null;
-
-  const createStreamers = () => ({
-    list: vi.fn().mockResolvedValue([tracked("zenrll", "Zen"), tracked("kaydop")]),
-    add: vi.fn(),
-    remove: vi.fn(),
-  });
-
-  const createSource = () => ({
-    findLiveRocketLeague: vi.fn().mockResolvedValue([live("kaydop", 100), live("zenrll", 900)]),
-  });
 
   const createCache = () => ({
     read: vi.fn(async () => snapshot),

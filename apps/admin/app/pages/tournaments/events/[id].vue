@@ -72,8 +72,8 @@ async function handleSubmit() {
   try {
     event.value = await updateEvent(event.value.id, payload);
     toast.add({ title: t("page.tournaments.events.edit.saved"), color: "success" });
-  } catch (error) {
-    reportError(error, t("page.tournaments.events.saveFailed"));
+  } catch (saveError) {
+    reportError(saveError, t("page.tournaments.events.saveFailed"));
   } finally {
     isSaving.value = false;
   }

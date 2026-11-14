@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { parseTweetUrl, tweetImageProxyPath, type TweetEmbed } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { url } = defineProps<{
   url: string;
 }>();
 
 const { t, locale } = useI18n();
 const config = useRuntimeConfig();
-const parsed = computed(() => parseTweetUrl(props.url ?? ""));
+const parsed = computed(() => parseTweetUrl(url ?? ""));
 
 const { data, status, error } = useAsyncData(
   computed(() => `tweet-embed-${parsed.value?.id ?? "invalid"}`),
@@ -20,13 +20,13 @@ const { data, status, error } = useAsyncData(
   },
 );
 
-function imageSrc(url: string): string {
-  const path = tweetImageProxyPath(url);
+function imageSrc(source: string): string {
+  const path = tweetImageProxyPath(source);
 
-  return path ? `${config.public.apiBase}${path}` : url;
+  return path ? `${config.public.apiBase}${path}` : source;
 }
 
-const href = computed(() => data.value?.url ?? parsed.value?.url ?? props.url);
+const href = computed(() => data.value?.url ?? parsed.value?.url ?? url);
 const showError = computed(() => !parsed.value || status.value === "error" || error.value);
 
 const postedAtLabel = computed(() =>

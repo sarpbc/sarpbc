@@ -1,6 +1,6 @@
 import { auth, oauth2, type oauth2_v2 } from "@googleapis/oauth2";
 import { z } from "zod";
-import { AuthenticationError } from "../../common/domain/errors";
+import { AuthenticationError } from "../../common/domain/errors/authentication-error";
 import type {
   GoogleIdentity,
   GoogleProfile,
@@ -39,7 +39,11 @@ export function createGoogleOAuthSession(
       client.setCredentials(tokens);
     },
     generateAuthUrl: (options) => client.generateAuthUrl(options),
-    userinfo: async () => (await oauth2("v2").userinfo.get({ auth: client })).data,
+    userinfo: async () => {
+      const { data } = await oauth2("v2").userinfo.get({ auth: client });
+
+      return data;
+    },
   };
 }
 

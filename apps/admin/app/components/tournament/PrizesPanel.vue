@@ -27,7 +27,7 @@ interface PrizeRow {
   sourceUrl: string;
 }
 
-const props = defineProps<{
+const { tournamentId, participants } = defineProps<{
   tournamentId: string;
   prizepool: string | null;
   participants: TournamentDetailParticipant[];
@@ -49,14 +49,14 @@ const {
   error,
   refresh,
 } = await useLazyAsyncData(
-  () => `admin-tournament-${props.tournamentId}-prizes`,
-  () => getTournamentPrizes(props.tournamentId),
-  { server: false, watch: [() => props.tournamentId] },
+  () => `admin-tournament-${tournamentId}-prizes`,
+  () => getTournamentPrizes(tournamentId),
+  { server: false, watch: [() => tournamentId] },
 );
 
 function toRows(value: TournamentPrizes | null | undefined): PrizeRow[] {
   return (value?.prizes ?? []).map((prize) => ({
-    key: nextKey++,
+    key: (nextKey += 1),
     placement: prize.placement,
     amount: prize.amount,
     currency: prize.currency,
@@ -69,8 +69,7 @@ function toRows(value: TournamentPrizes | null | undefined): PrizeRow[] {
 watch(distribution, (value) => (rows.value = toRows(value)), { immediate: true });
 
 const rosters = computed(
-  () =>
-    new Map(props.participants.flatMap(({ team, players }) => (team ? [[team.id, players]] : []))),
+  () => new Map(participants.flatMap(({ team, players }) => (team ? [[team.id, players]] : []))),
 );
 
 function isParticipant(teamId: string | undefined): boolean {
@@ -82,7 +81,7 @@ function isOnRoster(teamId: string | undefined, playerId: string): boolean {
 }
 
 const teamOptions = computed<Option[]>(() => {
-  const participants = props.participants.flatMap(({ team }) =>
+  const participantOptions = participants.flatMap(({ team }) =>
     team ? [{ value: team.id, label: team.name }] : [],
   );
 
@@ -93,7 +92,7 @@ const teamOptions = computed<Option[]>(() => {
       label: t("page.tournaments.prizes.notParticipantOption", { name: team.name }),
     }));
 
-  return [...participants, ...outsiders].sort((a, b) => a.label.localeCompare(b.label));
+  return [...participantOptions, ...outsiders].toSorted((a, b) => a.label.localeCompare(b.label));
 });
 
 function playerOptions(teamId: string | undefined): Option[] {
@@ -198,7 +197,7 @@ const prizeInputs = computed<TournamentPrizeInput[] | null>(() => {
 function addRow() {
   const last = rows.value.at(-1);
   rows.value.push({
-    key: nextKey++,
+    key: (nextKey += 1),
     placement: last ? last.placement + 1 : 1,
     amount: null,
     currency: last?.currency ?? "USD",
@@ -228,7 +227,7 @@ async function save() {
   saving.value = true;
 
   try {
-    distribution.value = await setTournamentPrizes(props.tournamentId, inputs);
+    distribution.value = await setTournamentPrizes(tournamentId, inputs);
     toast.add({ title: t("page.tournaments.prizes.saved"), color: "success" });
   } catch (saveError) {
     toast.add({

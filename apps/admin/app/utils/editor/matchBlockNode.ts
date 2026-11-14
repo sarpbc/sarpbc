@@ -16,16 +16,11 @@ const matchBlockTokenizer: MarkdownTokenizer = {
   tokenize: (src: string) => {
     const parsed = parseNewsMatchTag(src.trimStart());
 
-    if (!parsed) {
-      return;
-    }
-
     const leading = src.length - src.trimStart().length;
 
-    return {
-      type: "matchBlock",
-      raw: `${src.slice(0, leading)}${parsed.raw}`,
-    };
+    return parsed
+      ? { type: "matchBlock", raw: `${src.slice(0, leading)}${parsed.raw}` }
+      : undefined;
   },
 };
 

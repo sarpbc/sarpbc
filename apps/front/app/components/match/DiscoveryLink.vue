@@ -5,9 +5,13 @@ import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDi
 
 defineOptions({ inheritAttrs: false });
 
-const { match, source, status } = defineProps<{
+const {
+  match,
+  source = null,
+  status,
+} = defineProps<{
   match: MatchLinkTarget;
-  source?: MatchDiscoverySource;
+  source?: MatchDiscoverySource | null;
   status: MatchDiscoveryStatus;
 }>();
 

@@ -18,7 +18,9 @@ import {
 import { v4 } from "uuid";
 import { isUuid } from "../../common/domain/entity-ref";
 import { isRedistributable } from "../../common/domain/data-source";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import {
   assertCircuitSourceUrl,
   parseCircuitStageSettings,
@@ -87,6 +89,10 @@ function cleanSourceUrl(sourceUrl: string): string {
   return trimmed;
 }
 
+function key(value: string | null): string | null {
+  return value?.toLocaleLowerCase("en-US") ?? null;
+}
+
 export class CircuitService {
   constructor(
     private readonly store: CircuitStore,
@@ -106,9 +112,8 @@ export class CircuitService {
   async standings(idOrSlug: string): Promise<CircuitStandings> {
     const circuit = await this.require(idOrSlug);
 
-    const results = (await this.store.stageResults(circuit.id)).filter(({ source }) =>
-      isRedistributable(source),
-    );
+    const stageResults = await this.store.stageResults(circuit.id);
+    const results = stageResults.filter(({ source }) => isRedistributable(source));
 
     return { ...circuit, ...computeCircuitStandings(results, circuit.region, this.clock()) };
   }
@@ -210,7 +215,6 @@ export class CircuitService {
   }
 
   private async assertUnique({ id, name, season, region }: CircuitSummary): Promise<void> {
-    const key = (value: string | null) => value?.toLocaleLowerCase("en-US") ?? null;
     const twins = await this.store.withSeason(season);
 
     if (

@@ -273,7 +273,7 @@ function competitorFromTournament(
     return undefined;
   }
 
-  return [...competitors.values()].sort((a, b) => a.name.localeCompare(b.name));
+  return [...competitors.values()].toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
 function additionalProperties(

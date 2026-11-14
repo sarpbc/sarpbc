@@ -6,4 +6,4 @@ export const PaginationQueryDto = z.strictObject({
   limit: z.coerce.number().int().min(0).max(MAX_PAGE_SIZE).default(25),
 });
 
-export type PaginationQueryDto = z.infer<typeof PaginationQueryDto>;
+export type PaginationQueryInput = z.infer<typeof PaginationQueryDto>;

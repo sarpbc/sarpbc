@@ -19,7 +19,7 @@ export function mapEvent<Stage extends EventStage>(
   event: TournamentEvent,
   stages: Stage[],
 ): TournamentEventResponse<Stage> {
-  const ordered = [...stages].sort(compareStages);
+  const ordered = stages.toSorted(compareStages);
   const [newest] = ordered;
 
   // Only the main stage carries the prize pool; its type wins over qualifier stages.

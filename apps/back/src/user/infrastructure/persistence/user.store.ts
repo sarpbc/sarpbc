@@ -1,12 +1,6 @@
 import { EntityManager, type FilterQuery } from "@mikro-orm/postgresql";
 import { User as Account } from "../../domain/user";
-import type {
-  UserListQuery,
-  UserQueries,
-  UserTransaction,
-  UserWriteScope,
-  UserWriter,
-} from "../../application/ports/user-store";
+import type { UserListQuery, UserQueries, UserWriter } from "../../application/ports/user-store";
 import { User } from "./user.entity";
 
 export function toAccount(record: User): Account {
@@ -101,17 +95,5 @@ export class MikroUserStore implements UserQueries, UserWriter {
     record.createdAt = account.createdAt;
     await this.em.persist(record).flush();
     account.id = record.id;
-  }
-}
-
-export class MikroUserTransaction implements UserTransaction {
-  constructor(private readonly em: EntityManager) {}
-  async run<T>(work: (scope: UserWriteScope) => Promise<T>): Promise<T> {
-    return await this.em.transactional(async (tx) => {
-      const result = await work({ users: new MikroUserStore(tx) });
-      await tx.flush();
-
-      return result;
-    });
   }
 }

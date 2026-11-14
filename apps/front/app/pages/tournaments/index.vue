@@ -40,9 +40,9 @@ const { data: nextEvent } = useLazyAsyncData(
   async () => {
     const { events: active } = await getEvents({ limit: 50, activeOnly: true });
 
-    const next = active
+    const [next] = active
       .filter((event) => getTournamentStatus(event) === "upcoming")
-      .toSorted((a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime())[0];
+      .toSorted((a, b) => new Date(a.beginAt ?? 0).getTime() - new Date(b.beginAt ?? 0).getTime());
 
     if (!next) return null;
 

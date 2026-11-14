@@ -9,7 +9,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const { $i18n: i18n } = nuxtApp;
 
   const showAuthError = (code: string | (string | null)[] | null | undefined) => {
-    if (Array.isArray(code) || code == null || code === "") {
+    if (Array.isArray(code) || code === null || code === undefined || code === "") {
       return;
     }
 
@@ -23,8 +23,7 @@ export default defineNuxtPlugin((nuxtApp) => {
       color: "error",
     });
 
-    const query = { ...route.query };
-    delete query.authError;
+    const { authError: _authError, ...query } = route.query;
     void router.replace({ query });
   };
 

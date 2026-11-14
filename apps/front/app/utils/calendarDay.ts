@@ -42,6 +42,6 @@ export function filterMatchesTodayOrTomorrow<T extends MatchWithBeginAt>(
   return matches.filter((match) => {
     const beginAt = parseMatchDate(match.beginAt);
 
-    return beginAt != null && isTodayOrTomorrow(beginAt, now);
+    return beginAt !== null && beginAt !== undefined && isTodayOrTomorrow(beginAt, now);
   });
 }

@@ -51,9 +51,11 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
 
     if (scoredOnly === true) where.scored = true;
 
-    return (
-      await this.em.find(PickemChoice, where, { populate: ["user", "match", "pickedParticipant"] })
-    ).map(toNamedPick);
+    const rows = await this.em.find(PickemChoice, where, {
+      populate: ["user", "match", "pickedParticipant"],
+    });
+
+    return rows.map(toNamedPick);
   }
   async run<T>(work: (scope: PickemWrites) => Promise<T>): Promise<T> {
     return await this.em.transactional(async (tx) => {
@@ -74,13 +76,13 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
         unscored: async (matchId) => {
           await lockMatchPicks(tx, matchId);
 
-          return (
-            await tx.find(
-              PickemChoice,
-              { match: { id: matchId }, scored: false },
-              { populate: ["user", "match", "pickedParticipant"], refresh: true },
-            )
-          ).map(toPick);
+          const rows = await tx.find(
+            PickemChoice,
+            { match: { id: matchId }, scored: false },
+            { populate: ["user", "match", "pickedParticipant"], refresh: true },
+          );
+
+          return rows.map(toPick);
         },
         savePick: async (pick) => {
           const row = (await tx.findOne(PickemChoice, { id: pick.id })) ?? new PickemChoice();

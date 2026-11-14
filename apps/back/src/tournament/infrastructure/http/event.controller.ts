@@ -15,22 +15,30 @@ import {
 } from "@nestjs/common";
 import type { TournamentPathResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
-import { NotFoundError } from "../../../common/domain/errors";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { isRedistributable } from "../../../common/domain/data-source";
-import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
+import {
+  ListTournamentsQueryDto,
+  type ListTournamentsQueryInput,
+} from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { EventQueries } from "../../application/ports";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { StreamService } from "../../application/stream.service";
-import { SetStreamsDto } from "./dto/set-streams.dto";
+import { SetStreamsDto, type SetStreamsInput } from "./dto/set-streams.dto";
 import { ViewershipService } from "../../application/viewership.service";
-import { SetViewershipDto } from "./dto/set-viewership.dto";
+import { SetViewershipDto, type SetViewershipInput } from "./dto/set-viewership.dto";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EVENT_QUERIES } from "../competition-queries.tokens";
-import { CreateEventDto, UpdateEventDto } from "./dto/manual-catalog.dto";
+import {
+  CreateEventDto,
+  type CreateEventInput,
+  UpdateEventDto,
+  type UpdateEventInput,
+} from "./dto/manual-catalog.dto";
 import { mapEvent, mapStaffEvent } from "./event.mapper";
 import { mapTournamentListItem, type TournamentDetailResponse } from "./tournament.mapper";
 
@@ -48,7 +56,7 @@ export class EventController {
   ) {}
 
   @Get()
-  async list(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryDto) {
+  async list(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryInput) {
     const [listings, count] = await this.events.list({
       limit: query.limit,
       offset: query.offset,
@@ -83,14 +91,14 @@ export class EventController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
-  async create(@Body({ schema: CreateEventDto }) dto: CreateEventDto) {
+  async create(@Body({ schema: CreateEventDto }) dto: CreateEventInput) {
     return { event: mapStaffEvent(await this.catalogService.createEvent(dto)) };
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
-  async update(@Param("id") id: string, @Body({ schema: UpdateEventDto }) dto: UpdateEventDto) {
+  async update(@Param("id") id: string, @Body({ schema: UpdateEventDto }) dto: UpdateEventInput) {
     return { event: mapStaffEvent(await this.catalogService.updateEvent(id, dto)) };
   }
 
@@ -104,7 +112,10 @@ export class EventController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put(":id/streams")
-  async setStreams(@Param("id") id: string, @Body({ schema: SetStreamsDto }) body: SetStreamsDto) {
+  async setStreams(
+    @Param("id") id: string,
+    @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
+  ) {
     return await this.streamService.set({ kind: "event", id }, body.streams, "manual");
   }
 
@@ -120,7 +131,7 @@ export class EventController {
   @Put(":id/viewership")
   async setViewership(
     @Param("id") id: string,
-    @Body({ schema: SetViewershipDto }) body: SetViewershipDto,
+    @Body({ schema: SetViewershipDto }) body: SetViewershipInput,
   ) {
     return await this.viewershipService.set({ kind: "event", id }, body.viewership);
   }

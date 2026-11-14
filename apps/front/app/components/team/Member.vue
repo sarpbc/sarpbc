@@ -1,12 +1,18 @@
 <script lang="ts" setup>
 import { playerPath, staffPath } from "@sarpbc/utils";
 
-const { slug, staff = false } = defineProps<{
+const {
+  slug,
+  imageUrl = null,
+  nationality = null,
+  role = null,
+  staff = false,
+} = defineProps<{
   name: string;
   slug: string;
   imageUrl?: string | null;
   nationality?: string | null;
-  role?: string;
+  role?: string | null;
   staff?: boolean;
 }>();
 

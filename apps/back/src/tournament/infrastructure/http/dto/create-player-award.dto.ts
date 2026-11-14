@@ -7,4 +7,4 @@ export const CreatePlayerAwardDto = z.strictObject({
   awardType: z.enum(PLAYER_AWARD_TYPES),
 });
 
-export type CreatePlayerAwardDto = z.infer<typeof CreatePlayerAwardDto>;
+export type CreatePlayerAwardInput = z.infer<typeof CreatePlayerAwardDto>;

@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import type { DataSource, Stream, Viewership } from "@sarpbc/types";
-import { Player, Team } from "../../roster/domain/roster";
-import { Match, Tournament, TournamentParticipant } from "../../tournament/domain/competition";
+import { Player } from "../../roster/domain/player";
+import { Team } from "../../roster/domain/team";
+import { Match } from "../../tournament/domain/match";
+import { Tournament } from "../../tournament/domain/tournament";
+import { TournamentParticipant } from "../../tournament/domain/tournament-participant";
 import { TournamentEvent } from "../../tournament/domain/tournament-event";
 import {
   isRedistributableMatch,
@@ -31,41 +34,41 @@ describe("isRedistributableMatch", () => {
   });
 });
 
+function cup(source: DataSource) {
+  const club = Object.assign(new Team(), {
+    id: "team-kc",
+    slug: "karmine-corp",
+    name: "Karmine Corp",
+    source: "startgg",
+  });
+
+  return Object.assign(new Tournament(), {
+    id: "cup",
+    name: "Coupe",
+    slug: "coupe",
+    source,
+    imageUrl: null,
+    event: { id: "event", slug: "coupe", name: "Coupe" },
+    beginAt: null,
+    endAt: null,
+    pickemsEnabled: false,
+    league: null,
+    description: null,
+    tier: null,
+    hasBracket: false,
+    winner: null,
+    participants: [
+      Object.assign(new TournamentParticipant(), {
+        id: "part-kc",
+        team: club,
+        players: [Object.assign(new Player(), { id: "player-vatira", name: "Vatira" })],
+      }),
+    ],
+    matches: [match("startgg", source, "startgg")],
+  });
+}
+
 describe("mapTournamentDetail participants", () => {
-  function cup(source: DataSource) {
-    const club = Object.assign(new Team(), {
-      id: "team-kc",
-      slug: "karmine-corp",
-      name: "Karmine Corp",
-      source: "startgg",
-    });
-
-    return Object.assign(new Tournament(), {
-      id: "cup",
-      name: "Coupe",
-      slug: "coupe",
-      source,
-      imageUrl: null,
-      event: { id: "event", slug: "coupe", name: "Coupe" },
-      beginAt: null,
-      endAt: null,
-      pickemsEnabled: false,
-      league: null,
-      description: null,
-      tier: null,
-      hasBracket: false,
-      winner: null,
-      participants: [
-        Object.assign(new TournamentParticipant(), {
-          id: "part-kc",
-          team: club,
-          players: [Object.assign(new Player(), { id: "player-vatira", name: "Vatira" })],
-        }),
-      ],
-      matches: [match("startgg", source, "startgg")],
-    });
-  }
-
   it("lists participant ids, team identity and roster, including a start.gg team", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
     const detail = mapTournamentDetail(cup("manual"));
@@ -89,11 +92,11 @@ describe("mapTournamentDetail participants", () => {
   });
 });
 
-describe("MCP streams", () => {
-  function listed(url: string, source: DataSource): Stream {
-    return { url, platform: "twitch", channel: url, language: "en", kind: "official", source };
-  }
+function listed(url: string, source: DataSource): Stream {
+  return { url, platform: "twitch", channel: url, language: "en", kind: "official", source };
+}
 
+describe("MCP streams", () => {
   const manual = listed("https://twitch.tv/manual", "manual");
   const startgg = listed("https://twitch.tv/startgg", "startgg");
 
@@ -140,6 +143,15 @@ describe("MCP streams", () => {
   });
 });
 
+function stage(source: DataSource) {
+  return Object.assign(new Tournament(), {
+    id: `stage-${source}`,
+    slug: `stage-${source}`,
+    source,
+    event: { id: "event", slug: "coupe", name: "Coupe" },
+  });
+}
+
 describe("MCP viewership", () => {
   const viewership: Viewership = {
     peakViewers: 12_000,
@@ -149,15 +161,6 @@ describe("MCP viewership", () => {
     sourceName: "Esports Charts",
     sourceUrl: "https://escharts.com/tournaments/rl/fake-cup",
   };
-
-  function stage(source: DataSource) {
-    return Object.assign(new Tournament(), {
-      id: `stage-${source}`,
-      slug: `stage-${source}`,
-      source,
-      event: { id: "event", slug: "coupe", name: "Coupe" },
-    });
-  }
 
   function played(source: DataSource) {
     return Object.assign(new Match(), {

@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { TournamentDetailParticipant } from "@sarpbc/types";
 
-const props = defineProps<{
+const { participants, tournamentId } = defineProps<{
   tournamentId: string;
   participants: TournamentDetailParticipant[];
 }>();
@@ -14,7 +14,7 @@ const reportError = useReportError();
 const { normalizeSourceUrl, sourceUrlError } = useSourceUrl();
 
 const teamParticipants = computed(() =>
-  props.participants.flatMap(({ id, team, players, rosterSourceUrl }) =>
+  participants.flatMap(({ id, team, players, rosterSourceUrl }) =>
     team ? [{ id, team, players, rosterSourceUrl }] : [],
   ),
 );
@@ -24,9 +24,9 @@ const savingId = ref<string | null>(null);
 
 watch(
   teamParticipants,
-  (participants) => {
+  (sources) => {
     values.value = Object.fromEntries(
-      participants.map(({ id, rosterSourceUrl }) => [id, rosterSourceUrl ?? ""]),
+      sources.map(({ id, rosterSourceUrl }) => [id, rosterSourceUrl ?? ""]),
     );
   },
   { immediate: true },
@@ -36,7 +36,7 @@ async function save(participant: (typeof teamParticipants.value)[number]) {
   savingId.value = participant.id;
 
   try {
-    await updateTournament(props.tournamentId, {
+    await updateTournament(tournamentId, {
       rosters: [
         {
           teamId: participant.team.id,

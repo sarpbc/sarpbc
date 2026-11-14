@@ -74,7 +74,7 @@ export function useCareerSimulator() {
     if (state.value.currentSplits.length < SPLITS_PER_SEASON) return false;
     const rank = getTeamRank(worldRankings.value, state.value.currentTeamId);
 
-    if (rank == null) return false;
+    if (rank === null || rank === undefined) return false;
 
     return qualifiesForWorlds(rank, worldRankings.value.teams.length);
   });

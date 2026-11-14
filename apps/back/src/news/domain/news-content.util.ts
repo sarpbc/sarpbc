@@ -1,5 +1,5 @@
 import { NEWS_MATCH_BLOCK_MAX_MATCHES, findInvalidNewsMatchTags } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export function assertValidMatchBlocks(content: string): void {
   const [invalid] = findInvalidNewsMatchTags(content);

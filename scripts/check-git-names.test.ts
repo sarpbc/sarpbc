@@ -3,7 +3,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import type { SpawnSyncReturns } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
@@ -32,7 +32,7 @@ interface PullRequestFixture {
 }
 
 function fixture(t: TestContext): string {
-  const directory = mkdtempSync(join(tmpdir(), "sarpbc-git-names-"));
+  const directory = mkdtempSync(path.join(tmpdir(), "sarpbc-git-names-"));
   t.after(() => {
     rmSync(directory, { recursive: true, force: true });
   });
@@ -79,7 +79,7 @@ void test("branches reject agent prefixes and malformed names", () => {
 });
 
 void test("commit messages accept scopes, breaking changes and multiline bodies", (t) => {
-  const message = join(fixture(t), "commit message.txt");
+  const message = path.join(fixture(t), "commit message.txt");
 
   for (const subject of [
     ...types.map((type) => `${type}: update player search`),
@@ -93,7 +93,7 @@ void test("commit messages accept scopes, breaking changes and multiline bodies"
 });
 
 void test("commit messages reject agent prefixes and malformed subjects", (t) => {
-  const message = join(fixture(t), "COMMIT_EDITMSG");
+  const message = path.join(fixture(t), "COMMIT_EDITMSG");
 
   for (const subject of [
     "codex: update search",
@@ -115,7 +115,7 @@ void test("commit messages reject agent prefixes and malformed subjects", (t) =>
 });
 
 void test("commit messages reject agent co-authors and keep human ones", (t) => {
-  const message = join(fixture(t), "COMMIT_EDITMSG");
+  const message = path.join(fixture(t), "COMMIT_EDITMSG");
 
   for (const trailer of [
     "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
@@ -166,7 +166,7 @@ void test("PR checks inspect real commits and exclude existing history", (t) => 
         "-c",
         "user.email=naming@example.com",
         "-c",
-        `core.hooksPath=${join(directory, "no-hooks")}`,
+        `core.hooksPath=${path.join(directory, "no-hooks")}`,
         ...args,
       ],
       { cwd: directory, encoding: "utf-8", stdio: ["ignore", "pipe", "pipe"] },
@@ -178,7 +178,7 @@ void test("PR checks inspect real commits and exclude existing history", (t) => 
   git("switch", "-c", "feat/search");
   expectStatus(run(["branch"], { cwd: directory }), 0);
   git("commit", "--allow-empty", "-m", "feat(front): add player search");
-  const eventPath = join(directory, "event.json");
+  const eventPath = path.join(directory, "event.json");
 
   const pr: PullRequestFixture = {
     title: "feat(front): add player search",

@@ -28,11 +28,11 @@ const circuitFields = {
 
 export const CreateCircuitDto = z.strictObject(circuitFields);
 
-export type CreateCircuitDto = z.infer<typeof CreateCircuitDto>;
+export type CreateCircuitInput = z.infer<typeof CreateCircuitDto>;
 
 export const UpdateCircuitDto = z.strictObject(circuitFields).partial();
 
-export type UpdateCircuitDto = z.infer<typeof UpdateCircuitDto>;
+export type UpdateCircuitInput = z.infer<typeof UpdateCircuitDto>;
 
 const placement = z.number().int().min(1).max(MAX_CIRCUIT_PLACEMENT);
 
@@ -58,4 +58,4 @@ export const SetCircuitStageDto = z.strictObject({
     .optional(),
 });
 
-export type SetCircuitStageDto = z.infer<typeof SetCircuitStageDto>;
+export type SetCircuitStageInput = z.infer<typeof SetCircuitStageDto>;

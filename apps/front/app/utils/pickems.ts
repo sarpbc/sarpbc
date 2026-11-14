@@ -32,12 +32,12 @@ export function isPickemTournamentActive(
   return true;
 }
 
-export function isPickemOpenForMatch(match: Match, now = Date.now()): boolean {
-  return Boolean(match.tournament?.pickemsEnabled) && !isMatchLockedForPickem(match, now);
-}
-
 export function isMatchLockedForPickem(match: MatchLifecycle, now = Date.now()): boolean {
   return isMatchFinished(match) || isMatchLive(match, now);
+}
+
+export function isPickemOpenForMatch(match: Match, now = Date.now()): boolean {
+  return Boolean(match.tournament?.pickemsEnabled) && !isMatchLockedForPickem(match, now);
 }
 
 export interface PickemPickState {
@@ -54,7 +54,7 @@ export function getPickOutcome(
 
   if (!pick.scored) return "pending";
 
-  if (pick.points != null && pick.points > 0) return "correct";
+  if ((pick.points ?? 0) > 0) return "correct";
 
   if (isNonEmptyString(match.winnerId)) {
     return pick.pickedParticipant === match.winnerId ? "correct" : "incorrect";

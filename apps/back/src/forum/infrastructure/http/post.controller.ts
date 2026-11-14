@@ -19,7 +19,7 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
-import { CreatePostDto } from "./post/dto/create-post.dto";
+import { CreatePostDto, type CreatePostInput } from "./post/dto/create-post.dto";
 import { PostResponse } from "./post/dto/post-response.dto";
 import { postWithSlugResponse } from "./forum-response";
 import type { CreatedPost } from "../../application/models";
@@ -86,7 +86,7 @@ export class PostController {
   @Post()
   async create(
     @CurrentUserId() userId: string,
-    @Body({ schema: CreatePostDto }) createPostDto: CreatePostDto,
+    @Body({ schema: CreatePostDto }) createPostDto: CreatePostInput,
   ): Promise<CreatedPost> {
     return await this.postService.create(userId, createPostDto);
   }

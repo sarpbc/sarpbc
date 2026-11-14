@@ -33,11 +33,9 @@ function filesIn(dir: string): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);
 
-    return entry.isDirectory()
-      ? filesIn(file)
-      : file.endsWith(".ts") && !file.endsWith(".test.ts")
-        ? [file]
-        : [];
+    if (entry.isDirectory()) return filesIn(file);
+
+    return file.endsWith(".ts") && !file.endsWith(".test.ts") ? [file] : [];
   });
 }
 
@@ -176,7 +174,7 @@ function collectRoutes(sources: SourceText[]): Route[] {
     }
   }
 
-  return routes.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  return routes.toSorted((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 }
 
 const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf-8") }));

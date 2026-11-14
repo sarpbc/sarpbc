@@ -15,7 +15,7 @@ export type ScoreboardReading =
     };
 
 const SCORE_TEXT = /^\d{1,2}$/;
-const CLOCK_TEXT = /^(\+?)(\d{1,2}):(\d{2})$/;
+const CLOCK_TEXT = /^(?<overtime>\+?)(?<minutes>\d{1,2}):(?<seconds>\d{2})$/;
 const DIGITS = new Set("0123456789");
 const CLOCK_CHARS = new Set("0123456789:+");
 
@@ -57,7 +57,7 @@ export function readScoreboard(frame: Frame, overlay: Overlay): ScoreboardReadin
     return { kind: "unreadable" };
   }
 
-  const seconds = Number(clockParts[3]);
+  const seconds = Number(clockParts.groups?.seconds);
   const confidence = Math.min(blue.confidence, orange.confidence, clock.confidence);
 
   if (seconds > 59 || confidence < overlay.text.minConfidence) return { kind: "unreadable" };
@@ -66,8 +66,8 @@ export function readScoreboard(frame: Frame, overlay: Overlay): ScoreboardReadin
     kind: "score",
     blue: Number(blue.text),
     orange: Number(orange.text),
-    clock: Number(clockParts[2]) * 60 + seconds,
-    overtime: clockParts[1] === "+",
+    clock: Number(clockParts.groups?.minutes) * 60 + seconds,
+    overtime: clockParts.groups?.overtime === "+",
     confidence,
   };
 }

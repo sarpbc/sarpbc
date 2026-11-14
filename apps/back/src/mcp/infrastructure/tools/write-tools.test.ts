@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { Match, Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
-import { Team } from "../../../roster/domain/roster";
+import { Match } from "../../../tournament/domain/match";
+import { Tournament } from "../../../tournament/domain/tournament";
+import { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
+import { Team } from "../../../roster/domain/team";
 import type { McpTool, ToolArguments } from "../define-tool";
 import { jsonOf } from "../../../../test/mcp-result";
 import { writeTools, type WriteToolServices } from "./write-tools";
@@ -38,34 +40,34 @@ function textOf(result: { content: { type: string; text?: string }[] }): string 
   return result.content[0]?.text ?? "";
 }
 
+function setup(role: "admin" | "journalist") {
+  vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+
+  const match = Object.assign(new Match(), {
+    id: "m1",
+    publicId: 12,
+    name: "Final",
+    participants: [],
+    tournament: { slug: "playoffs", event: { slug: "worlds" } },
+    vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
+  });
+
+  const matchService = {
+    ...services().matchService,
+    setGameVods: vi.fn().mockResolvedValue(match),
+  };
+
+  const tool = defined(writeTools({ ...services(), matchService }), "set_match_game_vods");
+
+  return {
+    matchService,
+    tool,
+    run: async (input: ToolArguments) =>
+      await tool.run({ id: "u1", email: "staff@test.com", role }, input),
+  };
+}
+
 describe("set_match_game_vods", () => {
-  function setup(role: "admin" | "journalist") {
-    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-
-    const match = Object.assign(new Match(), {
-      id: "m1",
-      publicId: 12,
-      name: "Final",
-      participants: [],
-      tournament: { slug: "playoffs", event: { slug: "worlds" } },
-      vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
-    });
-
-    const matchService = {
-      ...services().matchService,
-      setGameVods: vi.fn().mockResolvedValue(match),
-    };
-
-    const tool = defined(writeTools({ ...services(), matchService }), "set_match_game_vods");
-
-    return {
-      matchService,
-      tool,
-      run: async (input: ToolArguments) =>
-        await tool.run({ id: "u1", email: "staff@test.com", role }, input),
-    };
-  }
-
   const links = [{ url: "https://youtu.be/g5?t=95", language: "fr" }];
 
   it("replaces one game's links and returns the match VODs", async () => {
@@ -93,101 +95,105 @@ describe("set_match_game_vods", () => {
 
   it("requires tournaments.manage", async () => {
     const { matchService, run } = setup("journalist");
-    expect((await run({ matchId: "m1", game: 5, links })).isError).toBe(true);
+    const runResult = await run({ matchId: "m1", game: 5, links });
+    expect(runResult.isError).toBe(true);
     expect(matchService.setGameVods).not.toHaveBeenCalled();
   });
 });
 
+function side(id: string, teamId: string, slug: string, name: string) {
+  return Object.assign(new TournamentParticipant(), {
+    id,
+    team: Object.assign(new Team(), { id: teamId, slug, name }),
+  });
+}
+
+function setupCreateMatch(
+  source: "manual" | "startgg" = "manual",
+  role: "admin" | "journalist" = "admin",
+) {
+  vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+  const kc = side("p-kc", "team-kc", "karmine-corp", "Karmine Corp");
+  const m8 = side("p-m8", "team-m8", "gentle-mates", "Gentle Mates");
+
+  const outsider = Object.assign(new Team(), {
+    id: "team-out",
+    slug: "outsider",
+    name: "Outsider",
+  });
+
+  const tournament = Object.assign(new Tournament(), {
+    id: "cup",
+    name: "Coupe",
+    slug: "coupe",
+    source,
+    imageUrl: null,
+    endAt: null,
+    event: { id: "event", slug: "cdf", name: "Coupe" },
+    participants: [kc, m8],
+  });
+
+  const match = Object.assign(new Match(), {
+    id: "m1",
+    publicId: 12,
+    name: "Bo5",
+    participants: [kc, m8],
+    tournament: { slug: "coupe", event: { slug: "cdf" } },
+  });
+
+  const clubs = [kc.team, m8.team, outsider];
+  const matchService = { createMatch: vi.fn().mockResolvedValue(match) };
+
+  const tournaments = {
+    findById: vi.fn(async (id: string) => (id === tournament.id ? tournament : null)),
+  };
+
+  const teamService = {
+    findById: vi.fn(async (id: string) => clubs.find((club) => club.id === id) ?? null),
+    findBySlug: vi.fn(async (slug: string) => clubs.find((club) => club.slug === slug) ?? null),
+  };
+
+  const manualTournamentService = {
+    create: vi.fn().mockResolvedValue(tournament),
+    update: vi.fn().mockResolvedValue(tournament),
+  };
+
+  const tools = writeTools({
+    ...services(),
+    matchService: { ...services().matchService, ...matchService },
+    tournaments,
+    teamService,
+    manualTournamentService,
+  });
+
+  const registered = (name: string) => defined(tools, name);
+
+  const call = async (
+    name: string,
+    args: {
+      tournamentId?: string;
+      name?: string;
+      teams?: string[];
+      participantIds?: string[];
+      beginAt?: string;
+      endAt?: string;
+      source?: "manual" | "startgg";
+      teamIds?: string[];
+      eventId?: string;
+    },
+  ) => {
+    const result = await registered(name).run({ id: "u1", email: "staff@test.com", role }, args);
+    const text = textOf(result);
+
+    return { result, text, body: result.isError === true ? null : jsonOf(result) };
+  };
+
+  return { matchService, tournaments, manualTournamentService, registered, call };
+}
+
 describe("create_match participants", () => {
-  function side(id: string, teamId: string, slug: string, name: string) {
-    return Object.assign(new TournamentParticipant(), {
-      id,
-      team: Object.assign(new Team(), { id: teamId, slug, name }),
-    });
-  }
-
-  function setup(source: "manual" | "startgg" = "manual", role: "admin" | "journalist" = "admin") {
-    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-    const kc = side("p-kc", "team-kc", "karmine-corp", "Karmine Corp");
-    const m8 = side("p-m8", "team-m8", "gentle-mates", "Gentle Mates");
-
-    const outsider = Object.assign(new Team(), {
-      id: "team-out",
-      slug: "outsider",
-      name: "Outsider",
-    });
-
-    const tournament = Object.assign(new Tournament(), {
-      id: "cup",
-      name: "Coupe",
-      slug: "coupe",
-      source,
-      imageUrl: null,
-      endAt: null,
-      event: { id: "event", slug: "cdf", name: "Coupe" },
-      participants: [kc, m8],
-    });
-
-    const match = Object.assign(new Match(), {
-      id: "m1",
-      publicId: 12,
-      name: "Bo5",
-      participants: [kc, m8],
-      tournament: { slug: "coupe", event: { slug: "cdf" } },
-    });
-
-    const clubs = [kc.team, m8.team, outsider];
-    const matchService = { createMatch: vi.fn().mockResolvedValue(match) };
-
-    const tournaments = {
-      findById: vi.fn(async (id: string) => (id === tournament.id ? tournament : null)),
-    };
-
-    const teamService = {
-      findById: vi.fn(async (id: string) => clubs.find((club) => club.id === id) ?? null),
-      findBySlug: vi.fn(async (slug: string) => clubs.find((club) => club.slug === slug) ?? null),
-    };
-
-    const manualTournamentService = {
-      create: vi.fn().mockResolvedValue(tournament),
-      update: vi.fn().mockResolvedValue(tournament),
-    };
-
-    const tools = writeTools({
-      ...services(),
-      matchService: { ...services().matchService, ...matchService },
-      tournaments,
-      teamService,
-      manualTournamentService,
-    });
-
-    const registered = (name: string) => defined(tools, name);
-
-    const call = async (
-      name: string,
-      args: {
-        tournamentId?: string;
-        name?: string;
-        teams?: string[];
-        participantIds?: string[];
-        beginAt?: string;
-        endAt?: string;
-        source?: "manual" | "startgg";
-        teamIds?: string[];
-        eventId?: string;
-      },
-    ) => {
-      const result = await registered(name).run({ id: "u1", email: "staff@test.com", role }, args);
-      const text = textOf(result);
-
-      return { result, text, body: result.isError === true ? null : jsonOf(result) };
-    };
-
-    return { matchService, tournaments, manualTournamentService, registered, call };
-  }
-
   it("resolves team slugs to participant ids and returns them", async () => {
-    const { matchService, call } = setup();
+    const { matchService, call } = setupCreateMatch();
 
     const { body } = await call("create_match", {
       tournamentId: "cup",
@@ -223,7 +229,7 @@ describe("create_match participants", () => {
   });
 
   it("still accepts participant ids", async () => {
-    const { matchService, call } = setup();
+    const { matchService, call } = setupCreateMatch();
     await call("create_match", {
       tournamentId: "cup",
       name: "Bo5",
@@ -236,7 +242,7 @@ describe("create_match participants", () => {
   });
 
   it("reports a missing tournament", async () => {
-    const { tournaments, matchService, call } = setup();
+    const { tournaments, matchService, call } = setupCreateMatch();
     tournaments.findById.mockResolvedValue(null);
 
     const { result, text } = await call("create_match", {
@@ -251,7 +257,7 @@ describe("create_match participants", () => {
   });
 
   it("rejects a team that is not registered without creating a match", async () => {
-    const { matchService, call } = setup();
+    const { matchService, call } = setupCreateMatch();
 
     const { result, text } = await call("create_match", {
       tournamentId: "cup",
@@ -265,7 +271,7 @@ describe("create_match participants", () => {
   });
 
   it("does not return participants of a start.gg tournament", async () => {
-    const { call } = setup("startgg");
+    const { call } = setupCreateMatch("startgg");
 
     const created = await call("create_match", {
       tournamentId: "cup",
@@ -293,7 +299,7 @@ describe("create_match participants", () => {
   });
 
   it("returns participants after creating or updating a manual tournament", async () => {
-    const { call } = setup();
+    const { call } = setupCreateMatch();
 
     const created = await call("create_tournament", {
       name: "Coupe",
@@ -307,7 +313,7 @@ describe("create_match participants", () => {
   });
 
   it("passes the target event of a stage and returns it", async () => {
-    const { manualTournamentService, call } = setup();
+    const { manualTournamentService, call } = setupCreateMatch();
     const eventId = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
     const created = await call("create_tournament", { name: "Finals", eventId });
     expect(manualTournamentService.create).toHaveBeenCalledWith({ name: "Finals", eventId });
@@ -317,7 +323,7 @@ describe("create_match participants", () => {
   });
 
   it("accepts teams without participantIds and requires tournaments.manage", async () => {
-    const { registered, matchService, call } = setup("manual", "journalist");
+    const { registered, matchService, call } = setupCreateMatch("manual", "journalist");
     const schema = z.object(registered("create_match").inputSchema);
     expect(
       schema.safeParse({
@@ -326,55 +332,59 @@ describe("create_match participants", () => {
         teams: ["karmine-corp", "gentle-mates"],
       }).success,
     ).toBe(true);
-    expect(
-      (await call("create_match", { tournamentId: "cup", name: "Bo5", teams: ["a", "b"] })).result
-        .isError,
-    ).toBe(true);
+
+    const callResult = await call("create_match", {
+      tournamentId: "cup",
+      name: "Bo5",
+      teams: ["a", "b"],
+    });
+
+    expect(callResult.result.isError).toBe(true);
     expect(matchService.createMatch).not.toHaveBeenCalled();
   });
 });
 
+function setupBracket(source: "manual" | "startgg") {
+  vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+  const stage = { slug: "finals", event: { slug: "cdf-2026" }, source, streams: [] };
+
+  const match = Object.assign(new Match(), {
+    id: "final",
+    publicId: 3,
+    name: "Grand Final",
+    source,
+    tournament: { ...stage, eventStreams: [] },
+    previousMatches: [
+      { id: "l1", match: { id: "final" }, previousMatch: { id: "semi-1" }, type: "winner" },
+    ],
+  });
+
+  const base = services();
+
+  const matchService = {
+    ...base.matchService,
+    updateMatch: vi.fn().mockResolvedValue(match),
+    setSource: vi.fn().mockResolvedValue(match),
+    createEmptyBracket: vi.fn().mockResolvedValue([match]),
+  };
+
+  const tournaments = {
+    findById: vi
+      .fn()
+      .mockResolvedValue(Object.assign(new Tournament(), { id: "finals", ...stage })),
+  };
+
+  const tools = writeTools({ ...base, matchService, tournaments });
+
+  const run = async (name: string, input: ToolArguments) =>
+    await defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
+
+  return { tools, matchService, run };
+}
+
 describe("bracket tools", () => {
-  function setup(source: "manual" | "startgg") {
-    vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-    const stage = { slug: "finals", event: { slug: "cdf-2026" }, source, streams: [] };
-
-    const match = Object.assign(new Match(), {
-      id: "final",
-      publicId: 3,
-      name: "Grand Final",
-      source,
-      tournament: { ...stage, eventStreams: [] },
-      previousMatches: [
-        { id: "l1", match: { id: "final" }, previousMatch: { id: "semi-1" }, type: "winner" },
-      ],
-    });
-
-    const base = services();
-
-    const matchService = {
-      ...base.matchService,
-      updateMatch: vi.fn().mockResolvedValue(match),
-      setSource: vi.fn().mockResolvedValue(match),
-      createEmptyBracket: vi.fn().mockResolvedValue([match]),
-    };
-
-    const tournaments = {
-      findById: vi
-        .fn()
-        .mockResolvedValue(Object.assign(new Tournament(), { id: "finals", ...stage })),
-    };
-
-    const tools = writeTools({ ...base, matchService, tournaments });
-
-    const run = async (name: string, input: ToolArguments) =>
-      await defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
-
-    return { tools, matchService, run };
-  }
-
   it("forwards bracket links and participants to update_match", async () => {
-    const { matchService, run } = setup("manual");
+    const { matchService, run } = setupBracket("manual");
     const previousMatches = [{ previousMatchId: "semi-1", type: "winner" }];
 
     const result = await run("update_match", {
@@ -391,7 +401,7 @@ describe("bracket tools", () => {
   });
 
   it("records or clears a match source and refuses BLAST.tv and Liquipedia mirrors", async () => {
-    const { tools, matchService, run } = setup("manual");
+    const { tools, matchService, run } = setupBracket("manual");
     const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
     await run("set_match_source", { matchId: "final", sourceUrl });
     expect(matchService.setSource).toHaveBeenCalledWith("final", sourceUrl);
@@ -404,7 +414,7 @@ describe("bracket tools", () => {
   });
 
   it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {
-    const { tools } = setup("manual");
+    const { tools } = setupBracket("manual");
     const update = z.object(defined(tools, "update_match").inputSchema);
     const link = { previousMatchId: "m", type: "winner" };
     expect(
@@ -416,7 +426,7 @@ describe("bracket tools", () => {
   });
 
   it("keeps generated start.gg matches out of the response", async () => {
-    const { matchService, run } = setup("startgg");
+    const { matchService, run } = setupBracket("startgg");
 
     const body = jsonOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 }));
 
@@ -429,7 +439,7 @@ describe("bracket tools", () => {
   });
 
   it("lists generated manual matches with their links", async () => {
-    const { run } = setup("manual");
+    const { run } = setupBracket("manual");
 
     const body = jsonOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 }));
 

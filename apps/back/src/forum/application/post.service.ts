@@ -5,7 +5,10 @@ import {
   type SupportedLocale,
 } from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
-import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
+import { mapSequentially } from "../../common/application/sequentially";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
 import type { EntityRef } from "../../common/domain/entity-ref";
 import { sanitizePlainText } from "../../common/domain/html";
 import { POST_CREATION_COOLDOWN_HOURS, POST_CREATION_COOLDOWN_MS } from "../domain/forum.constants";
@@ -123,19 +126,19 @@ export class PostService {
         createPostInput.translations?.length !== undefined &&
         createPostInput.translations.length !== 0
       ) {
-        for (const tr of createPostInput.translations) {
-          const t: TranslationRecord = {
-            id: this.id(),
-            post: { id: newPost.id },
-            locale: tr.locale,
-            title: sanitizePlainText(tr.title),
-            content: sanitizePlainText(tr.content),
-            createdAt: this.now(),
-            updatedAt: null,
-          };
+        const translations = createPostInput.translations.map((tr): TranslationRecord => ({
+          id: this.id(),
+          post: { id: newPost.id },
+          locale: tr.locale,
+          title: sanitizePlainText(tr.title),
+          content: sanitizePlainText(tr.content),
+          createdAt: this.now(),
+          updatedAt: null,
+        }));
 
-          await scope.posts.saveTranslation(t);
-        }
+        await mapSequentially(translations, async (translation) => {
+          await scope.posts.saveTranslation(translation);
+        });
       }
     });
     const created = await this.postRepository.findById(createPostInput.id);
@@ -145,7 +148,7 @@ export class PostService {
     return { publicId: created.publicId, slug: forumPostSlug(created.title) };
   }
 
-  async findRecentActivity(limit: number = 20) {
+  async findRecentActivity(limit = 20) {
     return await this.postRepository.findRecentActivity(limit);
   }
 

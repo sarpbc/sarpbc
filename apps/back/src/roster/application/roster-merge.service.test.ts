@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { ConflictError, InvalidInputError } from "../../common/domain/errors";
-import { Player, Team } from "../domain/roster";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { Player } from "../domain/player";
+import { Team } from "../domain/team";
 import type { RosterMergeWriteScope } from "./ports";
+import { present } from "../../../test/doubles";
 import { unusedContractWriter, unusedPhotoWriter } from "../../../test/roster-doubles";
 import { RosterMergeService } from "./roster-merge.service";
 
@@ -95,18 +98,18 @@ describe("RosterMergeService", () => {
   });
 
   it("refuses to merge two distinct PandaScore players", async () => {
-    players.get("zen")!.pandascoreId = 1;
+    present(players.get("zen")).pandascoreId = 1;
     await expect(service.mergePlayers("zen", "zen-dup")).rejects.toThrow(ConflictError);
     expect(movePlayer).not.toHaveBeenCalled();
   });
 
   it("refuses players on different current teams", async () => {
-    players.get("zen")!.team = teams.get("kc")!;
+    present(players.get("zen")).team = present(teams.get("kc"));
     await expect(service.mergePlayers("zen", "zen-dup")).rejects.toThrow(InvalidInputError);
   });
 
   it("refuses an already merged duplicate or a merged keeper", async () => {
-    players.get("zen-dup")!.mergedIntoId = "someone";
+    present(players.get("zen-dup")).mergedIntoId = "someone";
     await expect(service.mergePlayers("zen", "zen-dup")).rejects.toThrow(ConflictError);
     await expect(service.mergePlayers("zen-dup", "zen")).rejects.toThrow(InvalidInputError);
     await expect(service.mergePlayers("zen", "zen")).rejects.toThrow(InvalidInputError);

@@ -40,6 +40,7 @@ const hasNext = computed(() => offset.value + PLAYERS_PER_PAGE < totalPlayers.va
 interface HubListQuery {
   offset: string;
   start?: string;
+  [key: string]: string | undefined;
 }
 
 const previousPageQuery = computed(() => {

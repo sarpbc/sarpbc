@@ -1,20 +1,17 @@
+import { setTimeout as delay } from "node:timers/promises";
+
 export const HEALTH_PING_TIMEOUT_MS = 1000;
 
 export async function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
-  let timer: ReturnType<typeof setTimeout> | undefined;
+  const cancelTimer = new AbortController();
+
+  const timeout = delay(ms, undefined, { signal: cancelTimer.signal }).then(() => {
+    throw new Error(message);
+  });
 
   try {
-    return await Promise.race([
-      promise,
-      new Promise<never>((_, reject) => {
-        timer = setTimeout(() => {
-          reject(new Error(message));
-        }, ms);
-      }),
-    ]);
+    return await Promise.race([promise, timeout]);
   } finally {
-    if (timer !== undefined) {
-      clearTimeout(timer);
-    }
+    cancelTimer.abort();
   }
 }

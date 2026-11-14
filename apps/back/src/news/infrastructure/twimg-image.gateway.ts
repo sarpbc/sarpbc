@@ -4,7 +4,9 @@ import {
   isTweetImageUrl,
   MAX_IMAGE_BYTES,
 } from "@sarpbc/utils";
-import { ApplicationError, IntegrationError, NotFoundError } from "../../common/domain/errors";
+import { ApplicationError } from "../../common/domain/errors/application-error";
+import { IntegrationError } from "../../common/domain/errors/integration-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { TweetImage, TweetImageGateway } from "../application/tweet-image.service";
 
 const FETCH_TIMEOUT_MS = 5000;
@@ -32,39 +34,6 @@ function twimgUrl(input: string, base?: string): string | null {
   return `${TWIMG_ORIGIN}${url.pathname}${url.search}`;
 }
 
-export class TwimgImageGateway implements TweetImageGateway {
-  async load(url: string): Promise<TweetImage> {
-    const signal = AbortSignal.timeout(FETCH_TIMEOUT_MS);
-
-    try {
-      let target = twimgUrl(url);
-
-      for (let redirects = 0; ; redirects++) {
-        if (target === null || target === "") throw unavailable();
-
-        const response = await fetch(target, {
-          redirect: "manual",
-          signal,
-          headers: { Accept: "image/*" },
-        });
-
-        if (response.status < 300 || response.status >= 400) {
-          return await readImage(response);
-        }
-
-        await response.body?.cancel();
-        const location = response.headers.get("location");
-
-        if (location === null || location === "" || redirects >= MAX_REDIRECTS) throw unavailable();
-        target = twimgUrl(location, target);
-      }
-    } catch (error) {
-      if (error instanceof ApplicationError) throw error;
-      throw unavailable();
-    }
-  }
-}
-
 async function readImage(response: Response): Promise<TweetImage> {
   if (response.status === 404 || response.status === 410) {
     await response.body?.cancel();
@@ -83,24 +52,57 @@ async function readImage(response: Response): Promise<TweetImage> {
     throw unavailable();
   }
 
-  const reader = response.body.getReader();
   const chunks: Uint8Array[] = [];
   let size = 0;
 
-  for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read()) {
-    const value: unknown = chunk.value;
+  // Leaving the loop early cancels the stream.
+  for await (const chunk of response.body) {
+    const value: unknown = chunk;
 
     if (!(value instanceof Uint8Array)) throw unavailable();
 
     size += value.byteLength;
 
-    if (size > MAX_IMAGE_BYTES) {
-      await reader.cancel();
-      throw unavailable();
-    }
+    if (size > MAX_IMAGE_BYTES) throw unavailable();
 
     chunks.push(value);
   }
 
   return { contentType, body: Buffer.concat(chunks) };
+}
+
+async function fetchImage(
+  target: string | null,
+  redirects: number,
+  signal: AbortSignal,
+): Promise<TweetImage> {
+  if (target === null || target === "") throw unavailable();
+
+  const response = await fetch(target, {
+    redirect: "manual",
+    signal,
+    headers: { Accept: "image/*" },
+  });
+
+  if (response.status < 300 || response.status >= 400) {
+    return await readImage(response);
+  }
+
+  await response.body?.cancel();
+  const location = response.headers.get("location");
+
+  if (location === null || location === "" || redirects >= MAX_REDIRECTS) throw unavailable();
+
+  return await fetchImage(twimgUrl(location, target), redirects + 1, signal);
+}
+
+export class TwimgImageGateway implements TweetImageGateway {
+  async load(url: string): Promise<TweetImage> {
+    try {
+      return await fetchImage(twimgUrl(url), 0, AbortSignal.timeout(FETCH_TIMEOUT_MS));
+    } catch (error) {
+      if (error instanceof ApplicationError) throw error;
+      throw unavailable();
+    }
+  }
 }

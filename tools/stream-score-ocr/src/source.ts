@@ -76,12 +76,11 @@ export async function* streamFrames(settings: SourceSettings): AsyncGenerator<Ti
 
   const stop = stopOnExit(processes);
 
-  const exited = new Promise<number | null>((resolve, reject) => {
-    decoder.once("error", reject);
-    decoder.once("close", resolve);
-  });
+  const exited = Promise.withResolvers<number | null>();
 
-  exited.catch(() => {});
+  decoder.once("error", exited.reject);
+  decoder.once("close", exited.resolve);
+  exited.promise.catch(() => null);
 
   try {
     if (decoder.stdout === null) throw new Error("ffmpeg has no output stream.");
@@ -89,10 +88,10 @@ export async function* streamFrames(settings: SourceSettings): AsyncGenerator<Ti
 
     for await (const frame of readPpmFrames(decoder.stdout)) {
       yield { t: index * settings.intervalSeconds, frame };
-      index++;
+      index += 1;
     }
 
-    const code = await exited;
+    const code = await exited.promise;
 
     if (code !== 0) throw new Error(`ffmpeg exited with code ${code}.`);
   } finally {

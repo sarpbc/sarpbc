@@ -1,31 +1,33 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
-import {
-  AuthenticationError,
-  ConflictError,
-  ForbiddenError,
-  IntegrationError,
-  InvalidInputError,
-  NotFoundError,
-  UnprocessableError,
-} from "../../../domain/errors";
+import { AuthenticationError } from "../../../domain/errors/authentication-error";
+import { ConflictError } from "../../../domain/errors/conflict-error";
+import { ForbiddenError } from "../../../domain/errors/forbidden-error";
+import { IntegrationError } from "../../../domain/errors/integration-error";
+import { InvalidInputError } from "../../../domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../domain/errors/not-found-error";
+import { UnprocessableError } from "../../../domain/errors/unprocessable-error";
 import { HttpException, HttpStatus, InternalServerErrorException } from "@nestjs/common";
 import { log } from "evlog";
 import { AllExceptionsFilter } from "./all-exceptions.filter";
 
+interface FakeRequest {
+  url: string;
+  method: string;
+  user?: { id: string; email: string };
+}
+
+const NEWS_REQUEST: FakeRequest = {
+  url: "/news",
+  method: "GET",
+};
+
+function hostWith(send: Mock, sent = false, request = NEWS_REQUEST): ExecutionContextHost {
+  return new ExecutionContextHost([request, { sent, status: vi.fn().mockReturnThis(), send }]);
+}
+
 describe("AllExceptionsFilter", () => {
   const filter = new AllExceptionsFilter();
-
-  function hostWith(
-    send: Mock,
-    sent = false,
-    request: { url: string; method: string; user?: { id: string; email: string } } = {
-      url: "/news",
-      method: "GET",
-    },
-  ): ExecutionContextHost {
-    return new ExecutionContextHost([request, { sent, status: vi.fn().mockReturnThis(), send }]);
-  }
 
   const logError = vi.spyOn(log, "error");
 

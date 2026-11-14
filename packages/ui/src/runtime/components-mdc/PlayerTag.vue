@@ -4,7 +4,7 @@ import { resolveThemedLogoUrl } from "@sarpbc/utils";
 import { fetchPlayerTagWithCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
-const props = defineProps<{
+const { slug } = defineProps<{
   slug: string;
   label: string;
 }>();
@@ -17,7 +17,7 @@ const pending = ref(false);
 const error = ref(false);
 const player = ref<Player | null>(null);
 
-const href = computed(() => playerHref(props.slug));
+const href = computed(() => playerHref(slug));
 
 const colorMode = useColorMode();
 const teamLogoSrc = computed(() => resolveThemedLogoUrl(player.value?.team, colorMode.value));
@@ -41,8 +41,8 @@ async function loadPlayer() {
   error.value = false;
 
   try {
-    const response = await fetchPlayerTagWithCache(props.slug, () =>
-      apiFetch<{ player: Player | null }>(`/player/slug/${encodeURIComponent(props.slug)}`),
+    const response = await fetchPlayerTagWithCache(slug, () =>
+      apiFetch<{ player: Player | null }>(`/player/slug/${encodeURIComponent(slug)}`),
     );
 
     player.value = response.player;

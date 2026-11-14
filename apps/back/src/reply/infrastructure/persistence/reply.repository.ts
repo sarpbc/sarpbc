@@ -4,7 +4,7 @@ import { z } from "zod";
 import type { ReplyTargetType } from "@sarpbc/types";
 import type { ReplyFindOptions } from "../../application/ports";
 import { REPLY_TARGETS, replySortOrder, type ReplyTargetFields } from "../../domain/reply";
-import { Reply } from "./reply.entities";
+import { Reply } from "./reply.entity";
 import { REPLY_POPULATE } from "./reply.mapper";
 
 type ReplyTargetMatch = { id: string } | { $in: string[] };
@@ -36,7 +36,8 @@ export class ReplyRepository {
 
     if (rootsOnly) where.replyTo = null;
 
-    return await this.rows.find(where, {
+    return await this.rows.findAll({
+      where,
       populate: [...REPLY_POPULATE],
       orderBy: { createdAt: replySortOrder(targetType) },
       limit,
@@ -93,14 +94,15 @@ export class ReplyRepository {
       return [];
     }
 
-    const nonRoots = await this.rows.find(
-      {
+    const nonRoots = await this.rows.findAll({
+      where: {
         ...onTarget(targetType, { id: targetId }),
         hiddenAt: null,
         replyTo: { $ne: null },
       },
-      { populate: [...REPLY_POPULATE], orderBy: { createdAt: QueryOrder.ASC } },
-    );
+      populate: [...REPLY_POPULATE],
+      orderBy: { createdAt: QueryOrder.ASC },
+    });
 
     const collected = new Map<string, Reply>();
     let frontier = new Set(rootIds);
@@ -129,7 +131,10 @@ export class ReplyRepository {
   }
 
   async findChildren(replyId: string): Promise<Reply[]> {
-    return await this.rows.find({ replyTo: { id: replyId } }, { populate: [...REPLY_POPULATE] });
+    return await this.rows.findAll({
+      where: { replyTo: { id: replyId } },
+      populate: [...REPLY_POPULATE],
+    });
   }
 
   async findRecentForModeration(limit: number): Promise<{ reply: Reply; reportCount: number }[]> {
@@ -155,10 +160,10 @@ export class ReplyRepository {
       return [];
     }
 
-    const replies: Reply[] = await this.rows.find(
-      { id: { $in: ids } },
-      { populate: [...REPLY_POPULATE] },
-    );
+    const replies: Reply[] = await this.rows.findAll({
+      where: { id: { $in: ids } },
+      populate: [...REPLY_POPULATE],
+    });
 
     const replyById = new Map(replies.map((reply) => [reply.id, reply]));
     const countById = new Map(rows.map((row) => [row.id, row.report_count]));

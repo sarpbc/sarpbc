@@ -1,9 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Tournament, TournamentParticipant } from "../domain/competition";
+import { present } from "../../../test/doubles";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { Tournament } from "../domain/tournament";
+import { TournamentParticipant } from "../domain/tournament-participant";
 import { TournamentEvent } from "../domain/tournament-event";
 import type { ContractRole } from "@sarpbc/types";
-import { Player, Team } from "../../roster/domain/roster";
+import { Player } from "../../roster/domain/player";
+import { Team } from "../../roster/domain/team";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
@@ -15,6 +20,21 @@ import {
   tournamentQueries,
   tournamentWriter as tournamentWriterDouble,
 } from "../../../test/competition-doubles";
+
+const member = (id: string, contractRole: ContractRole | null, role: string | null = null) =>
+  Object.assign(new Player(), {
+    id,
+    team: Object.assign(new Team(), { id: "vitality" }),
+    contractRole,
+    role,
+  });
+
+const solo = (id: string, playerId: string) =>
+  Object.assign(new TournamentParticipant(), {
+    id,
+    team: null,
+    players: [Object.assign(new Player(), { id: playerId })],
+  });
 
 describe("ManualTournamentService", () => {
   const writer = {
@@ -29,6 +49,8 @@ describe("ManualTournamentService", () => {
     playersExist: vi.fn(),
     teamPlayers: vi.fn(),
   };
+
+  let tournament: Tournament;
 
   const stored = new Map<string, TournamentEvent>();
 
@@ -58,7 +80,6 @@ describe("ManualTournamentService", () => {
   const diagnostics = { error: vi.fn(), warn: vi.fn() };
   const reads = { findById: vi.fn(), leagues: vi.fn() };
 
-  let tournament: Tournament;
   const events: string[] = [];
 
   const tx: CompetitionTransaction = {
@@ -116,14 +137,6 @@ describe("ManualTournamentService", () => {
     writer.teamPlayers.mockResolvedValue([]);
     matchWriter.bracket.mockResolvedValue({ hasBracket: false, matches: [] });
   });
-
-  const member = (id: string, contractRole: ContractRole | null, role: string | null = null) =>
-    Object.assign(new Player(), {
-      id,
-      team: Object.assign(new Team(), { id: "vitality" }),
-      contractRole,
-      role,
-    });
 
   it("snapshots the active players of a team joining a manual tournament", async () => {
     tournament.source = "manual";
@@ -218,7 +231,8 @@ describe("ManualTournamentService", () => {
     expect(writer.league).not.toHaveBeenCalled();
   });
   it.each([null, ""])("clears synced artwork with %p", async (imageUrl) => {
-    expect((await service.update("ewc", { imageUrl })).imageUrl).toBeNull();
+    const updateResult = await service.update("ewc", { imageUrl });
+    expect(updateResult.imageUrl).toBeNull();
   });
   it.each<UpdateTournamentInput>([
     { name: "Changed" },
@@ -275,7 +289,7 @@ describe("ManualTournamentService", () => {
 
   function ownEvent() {
     tournament.source = "manual";
-    stored.get("event")!.name = tournament.name;
+    present(stored.get("event")).name = tournament.name;
   }
 
   it("allows manual details and artwork together and renames the event", async () => {
@@ -379,7 +393,8 @@ describe("ManualTournamentService", () => {
   });
   it("preserves committed success when optional invalidation fails", async () => {
     cache.invalidateTournament.mockRejectedValue(new Error("Redis down"));
-    expect((await service.update("ewc", { imageUrl: null })).imageUrl).toBeNull();
+    const updateResult2 = await service.update("ewc", { imageUrl: null });
+    expect(updateResult2.imageUrl).toBeNull();
     expect(diagnostics.error).toHaveBeenCalled();
   });
   it.each(["tournamentWinner", "matchParticipant", "matchWinner", "results"])(
@@ -404,13 +419,6 @@ describe("ManualTournamentService", () => {
     ).rejects.toBeInstanceOf(InvalidInputError);
   });
   describe("player participants", () => {
-    const solo = (id: string, playerId: string) =>
-      Object.assign(new TournamentParticipant(), {
-        id,
-        team: null,
-        players: [Object.assign(new Player(), { id: playerId })],
-      });
-
     beforeEach(() => {
       writer.save.mockImplementation(async (saved: Tournament) => {
         tournament = saved;
@@ -447,7 +455,8 @@ describe("ManualTournamentService", () => {
       );
     });
     it("defaults to a 3v3 team tournament", async () => {
-      expect((await service.create({ name: "Team Cup" })).format).toBe("3v3");
+      const createResult = await service.create({ name: "Team Cup" });
+      expect(createResult.format).toBe("3v3");
       await expect(
         service.create({ name: "Team Cup", playerParticipants: [["zen"]] }),
       ).rejects.toBeInstanceOf(InvalidInputError);

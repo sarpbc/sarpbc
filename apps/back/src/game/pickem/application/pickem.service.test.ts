@@ -25,8 +25,8 @@ describe("PickemService", () => {
     const scope: PickemWrites = {
       userExists: async () => true,
       participantExists: async () => true,
-      pick: async (user, match) =>
-        picks.find((p) => p.user.id === user && p.match.id === match) ?? null,
+      pick: async (user, matchId) =>
+        picks.find((p) => p.user.id === user && p.match.id === matchId) ?? null,
       unscored: async () => picks.filter((p) => !p.scored),
       savePick: async (pick) => {
         if (!picks.some((p) => p.id === pick.id)) picks.push(pick);

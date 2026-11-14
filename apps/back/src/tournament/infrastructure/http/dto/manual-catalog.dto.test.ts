@@ -1,3 +1,4 @@
+import { SCRIPT_URL } from "../../../../../test/doubles";
 import { describe, expect, it } from "vitest";
 import { CreateLeagueDto, UpdateEventDto, UpdateLeagueDto } from "./manual-catalog.dto";
 
@@ -20,9 +21,7 @@ describe("manual catalog DTOs", () => {
 
   it("rejects unknown fields and non-http URLs", () => {
     expect(CreateLeagueDto.safeParse({ name: "CDF", source: "manual" }).success).toBe(false);
-    expect(CreateLeagueDto.safeParse({ name: "CDF", url: "javascript:alert(1)" }).success).toBe(
-      false,
-    );
+    expect(CreateLeagueDto.safeParse({ name: "CDF", url: SCRIPT_URL }).success).toBe(false);
     expect(CreateLeagueDto.parse({ name: " CDF ", url: "https://cdf.gg" })).toEqual({
       name: "CDF",
       url: "https://cdf.gg",

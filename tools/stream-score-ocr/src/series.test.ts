@@ -10,9 +10,7 @@ function score(blue: number, orange: number, clock: number, overtime = false): S
 }
 
 function feed(tracker: SeriesTracker, readings: readonly ScoreboardReading[], from = 0): number {
-  readings.forEach((reading, index) => {
-    tracker.push(from + index, reading);
-  });
+  for (const [index, reading] of readings.entries()) tracker.push(from + index, reading);
 
   return from + readings.length;
 }

@@ -1,6 +1,36 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import { commentAnchorId, commentPermalinkHash, parseCommentHash } from "~/utils/commentPermalink";
 
+function focusCommentElement(commentId: string): HTMLElement | null {
+  const element = document.querySelector<HTMLElement>(`#${CSS.escape(commentAnchorId(commentId))}`);
+
+  if (!element) {
+    return null;
+  }
+
+  element.setAttribute("tabindex", "-1");
+  element.focus({ preventScroll: true });
+
+  return element;
+}
+
+function scrollToComment(commentId: string): boolean {
+  const element = document.querySelector<HTMLElement>(`#${CSS.escape(commentAnchorId(commentId))}`);
+
+  if (!element) {
+    return false;
+  }
+
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  element.scrollIntoView({
+    block: "center",
+    behavior: prefersReducedMotion ? "auto" : "smooth",
+  });
+  focusCommentElement(commentId);
+
+  return true;
+}
+
 export function useCommentPermalink() {
   const route = useRoute();
   const router = useRouter();
@@ -13,36 +43,6 @@ export function useCommentPermalink() {
       clearTimeout(highlightTimeout);
       highlightTimeout = null;
     }
-  }
-
-  function focusCommentElement(commentId: string): HTMLElement | null {
-    const element = document.getElementById(commentAnchorId(commentId));
-
-    if (!element) {
-      return null;
-    }
-
-    element.setAttribute("tabindex", "-1");
-    element.focus({ preventScroll: true });
-
-    return element;
-  }
-
-  function scrollToComment(commentId: string): boolean {
-    const element = document.getElementById(commentAnchorId(commentId));
-
-    if (!element) {
-      return false;
-    }
-
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    element.scrollIntoView({
-      block: "center",
-      behavior: prefersReducedMotion ? "auto" : "smooth",
-    });
-    focusCommentElement(commentId);
-
-    return true;
   }
 
   function highlightComment(commentId: string) {

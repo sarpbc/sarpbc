@@ -1,9 +1,10 @@
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, winnerFromResults } from "@sarpbc/utils";
 import { isRedistributable } from "../../../common/domain/data-source";
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
-import { Match, matchPublicSlug } from "../../domain/competition";
+import { Match, matchPublicSlug } from "../../domain/match";
 import { assertMatchDeletable } from "../../domain/match-deletion";
 import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks } from "./match-blocks";
@@ -58,6 +59,77 @@ export interface TeamForm {
 }
 
 export type TeamFormsMap = Record<string, TeamForm>;
+
+function teamMatchOutcome(match: Match, teamId: string): "win" | "loss" | null {
+  if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
+    return match.winner.team.id === teamId ? "win" : "loss";
+  }
+
+  const { participants } = match;
+
+  if (participants.length !== 2) {
+    return null;
+  }
+
+  const teamParticipant = participants.find((p) => p.team?.id === teamId);
+  const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
+
+  if (!teamParticipant || !opponentParticipant) {
+    return null;
+  }
+
+  const winnerParticipantId = winnerFromResults(
+    match.results
+      .filter(
+        (r) =>
+          r.participant.id === teamParticipant.id || r.participant.id === opponentParticipant.id,
+      )
+      .map((r) => ({ participantId: r.participant.id, score: r.score })),
+  );
+
+  if (winnerParticipantId === null) {
+    return null;
+  }
+
+  return winnerParticipantId === teamParticipant.id ? "win" : "loss";
+}
+
+function toTeamFormEntry(match: Match, teamId: string): TeamFormMatchEntry | null {
+  const { participants } = match;
+  const teamParticipant = participants.find((p) => p.team?.id === teamId);
+  const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
+  const opponent = opponentParticipant?.team;
+
+  if (!teamParticipant || !opponentParticipant || !opponent) {
+    return null;
+  }
+
+  const { results } = match;
+  const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score ?? null;
+
+  const opponentScore =
+    results.find((r) => r.participant.id === opponentParticipant.id)?.score ?? null;
+
+  return {
+    id: match.id,
+    publicId: match.publicId,
+    slug: matchPublicSlug(match),
+    beginAt: match.beginAt,
+    endAt: match.endAt,
+    opponent: {
+      id: opponent.id,
+      name: opponent.name,
+      slug: opponent.slug,
+      imageUrl: opponent.imageUrl,
+    },
+    score: { team: teamScore, opponent: opponentScore },
+    outcome: teamMatchOutcome(match, teamId),
+  };
+}
+
+async function assertDeletable(matches: MatchWriter, match: Match): Promise<void> {
+  assertMatchDeletable(match, await matches.references(match.id));
+}
 
 export class MatchService {
   constructor(
@@ -142,94 +214,19 @@ export class MatchService {
         });
 
         const entries = recent
-          .map((recentMatch) => this.mapTeamFormEntry(recentMatch, teamId))
+          .map((recentMatch) => toTeamFormEntry(recentMatch, teamId))
           .filter((entry): entry is TeamFormMatchEntry => entry !== null);
 
-        const record = entries.reduce<TeamFormRecord>(
-          (acc, entry) => {
-            if (entry.outcome === "win") {
-              acc.wins += 1;
-            } else if (entry.outcome === "loss") {
-              acc.losses += 1;
-            }
-
-            return acc;
-          },
-          { wins: 0, losses: 0 },
-        );
+        const record: TeamFormRecord = {
+          wins: entries.filter((entry) => entry.outcome === "win").length,
+          losses: entries.filter((entry) => entry.outcome === "loss").length,
+        };
 
         teamForms[teamId] = { recent: entries, record };
       }),
     );
 
     return teamForms;
-  }
-
-  private mapTeamFormEntry(match: Match, teamId: string): TeamFormMatchEntry | null {
-    const { participants } = match;
-    const teamParticipant = participants.find((p) => p.team?.id === teamId);
-    const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
-    const opponent = opponentParticipant?.team;
-
-    if (!teamParticipant || !opponentParticipant || !opponent) {
-      return null;
-    }
-
-    const { results } = match;
-    const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score ?? null;
-
-    const opponentScore =
-      results.find((r) => r.participant.id === opponentParticipant.id)?.score ?? null;
-
-    return {
-      id: match.id,
-      publicId: match.publicId,
-      slug: matchPublicSlug(match),
-      beginAt: match.beginAt,
-      endAt: match.endAt,
-      opponent: {
-        id: opponent.id,
-        name: opponent.name,
-        slug: opponent.slug,
-        imageUrl: opponent.imageUrl,
-      },
-      score: { team: teamScore, opponent: opponentScore },
-      outcome: this.getTeamMatchOutcome(match, teamId),
-    };
-  }
-
-  private getTeamMatchOutcome(match: Match, teamId: string): "win" | "loss" | null {
-    if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
-      return match.winner.team.id === teamId ? "win" : "loss";
-    }
-
-    const { participants } = match;
-
-    if (participants.length !== 2) {
-      return null;
-    }
-
-    const teamParticipant = participants.find((p) => p.team?.id === teamId);
-    const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
-
-    if (!teamParticipant || !opponentParticipant) {
-      return null;
-    }
-
-    const winnerParticipantId = winnerFromResults(
-      match.results
-        .filter(
-          (r) =>
-            r.participant.id === teamParticipant.id || r.participant.id === opponentParticipant.id,
-        )
-        .map((r) => ({ participantId: r.participant.id, score: r.score })),
-    );
-
-    if (winnerParticipantId === null) {
-      return null;
-    }
-
-    return winnerParticipantId === teamParticipant.id ? "win" : "loss";
   }
 
   async createMatch(tournamentId: string, input: ManualMatchInput): Promise<Match> {
@@ -338,8 +335,4 @@ export class MatchService {
   async getMatchesByTournament(id: string) {
     return await this.reads.byTournament(id);
   }
-}
-
-async function assertDeletable(matches: MatchWriter, match: Match): Promise<void> {
-  assertMatchDeletable(match, await matches.references(match.id));
 }

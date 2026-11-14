@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { Team } from "../../../roster/domain/roster";
-import { League, Match, Tournament, TournamentParticipant } from "../../domain/competition";
+import { Team } from "../../../roster/domain/team";
+import { League } from "../../domain/league";
+import { Match } from "../../domain/match";
+import { Tournament } from "../../domain/tournament";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapMatchListItem } from "./match-list.mapper";
 import { mapTournamentDetail } from "./tournament.mapper";
 

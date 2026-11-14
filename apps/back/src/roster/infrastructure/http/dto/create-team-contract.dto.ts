@@ -9,4 +9,4 @@ export const CreateTeamContractDto = z.strictObject({
   role: z.enum(CONTRACT_ROLES).optional(),
 });
 
-export type CreateTeamContractDto = z.infer<typeof CreateTeamContractDto>;
+export type CreateTeamContractInput = z.infer<typeof CreateTeamContractDto>;

@@ -40,6 +40,7 @@ export default defineConfig({
         "src/**/migrations/**",
         "src/**/*.entity.ts",
         "src/**/*.entities.ts",
+        "src/**/*.schemas.ts",
         "src/main.ts",
         "src/mikro-orm.config.ts",
         "src/mikro-orm.entities.ts",

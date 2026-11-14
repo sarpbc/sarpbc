@@ -6,7 +6,7 @@ import {
   parseMatchVodUrl,
   type MatchVodUrlError,
 } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface MatchVodLink {
   url: string;
@@ -40,7 +40,8 @@ export function normalizeMatchVods(
   const maxGame = maxVodGame(numberOfGames);
   const vods: MatchVod[] = [];
   const seen = new Set<string>();
-  inputs.forEach((input, index) => {
+
+  for (const [index, input] of inputs.entries()) {
     if (!isGameInRange(input.game, maxGame))
       throw invalid(index, `must target a game between 1 and ${maxGame}`);
     const parsed = parseMatchVodUrl(input.url);
@@ -55,16 +56,16 @@ export function normalizeMatchVods(
       throw invalid(index, "needs a two-letter ISO 639-1 language code (e.g. en, fr)");
     const key = `${input.game} ${parsed.url}`;
 
-    if (seen.has(key)) return;
+    if (seen.has(key)) continue;
     seen.add(key);
     vods.push({ game: input.game, url: parsed.url, language, source: parsed.source });
-  });
+  }
 
-  for (let game = 1; game <= maxGame; game++)
+  for (let game = 1; game <= maxGame; game += 1)
     if (vods.filter((vod) => vod.game === game).length > MAX_VODS_PER_GAME)
       throw new InvalidInputError(`Game ${game} has more than ${MAX_VODS_PER_GAME} VOD links.`);
 
-  return vods.sort((a, b) => a.game - b.game);
+  return vods.toSorted((a, b) => a.game - b.game);
 }
 
 export function replaceGameVods(
@@ -83,7 +84,7 @@ export function replaceGameVods(
     numberOfGames,
   );
 
-  return [...current.filter((vod) => vod.game !== game), ...replaced].sort(
+  return [...current.filter((vod) => vod.game !== game), ...replaced].toSorted(
     (a, b) => a.game - b.game,
   );
 }

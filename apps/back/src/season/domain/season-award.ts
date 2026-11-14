@@ -5,7 +5,7 @@ import {
   SEASON_AWARD_SOURCE_URL_MAX_LENGTH,
   isForbiddenSourceHost,
 } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface SeasonAwardFields {
   awardType: SeasonAwardType;

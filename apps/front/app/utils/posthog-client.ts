@@ -16,12 +16,6 @@ const autocapture: AutocaptureConfig = {
   capture_copied_text: false,
 };
 
-export function setPostHogConsent(accepted: boolean, apiBase: string): void {
-  consentGranted = accepted;
-  tracingHost = new URL(apiBase).hostname;
-  applyConsent();
-}
-
 function applyConsent(): void {
   if (!client) {
     return;
@@ -56,6 +50,12 @@ function applyConsent(): void {
     tracing_headers: [],
   });
   client.reset(true);
+}
+
+export function setPostHogConsent(accepted: boolean, apiBase: string): void {
+  consentGranted = accepted;
+  tracingHost = new URL(apiBase).hostname;
+  applyConsent();
 }
 
 export async function loadPostHogClient(config: PostHogPublicConfig): Promise<PostHog | null> {

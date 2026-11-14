@@ -6,16 +6,19 @@ import type {
   SeriesRecord,
 } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
-import type { Contract, Player } from "../../roster/domain/roster";
+import type { Contract } from "../../roster/domain/contract";
+import type { Player } from "../../roster/domain/player";
 import type { SeasonService } from "../../season/application/season.service";
 import type { MatchService } from "../../tournament/application/match/match.service";
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { TournamentQueries } from "../../tournament/application/ports";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
-import type { Match, Tournament } from "../../tournament/domain/competition";
+import type { Match } from "../../tournament/domain/match";
+import type { Tournament } from "../../tournament/domain/tournament";
 import { headToHead, seriesRecord } from "../domain/series-record";
 
 export interface PlayerComparisonSources {

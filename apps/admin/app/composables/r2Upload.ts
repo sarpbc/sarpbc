@@ -7,8 +7,8 @@ import {
 
 interface ImageUploadContext {
   target: ImageUploadTarget;
-  articleSlug?: string;
-  articleTitle?: string;
+  articleSlug?: string | null;
+  articleTitle?: string | null;
 }
 
 function messageFromNestBody(responseText: string): string | undefined {
@@ -55,45 +55,46 @@ export function useR2Upload() {
     }
 
     try {
-      const publicUrl = await new Promise<string>((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
+      const { promise, resolve, reject } = Promise.withResolvers<string>();
+      const xhr = new XMLHttpRequest();
 
-        xhr.upload.addEventListener("progress", (event) => {
-          if (event.lengthComputable) {
-            progress.value = Math.round((event.loaded / event.total) * 100);
-          }
-        });
-
-        xhr.addEventListener("load", () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            const parsed = parseR2UploadResponse(xhr.responseText);
-
-            if (parsed === undefined) {
-              reject(new Error("Upload succeeded but the server response was invalid."));
-            } else {
-              resolve(parsed.publicUrl);
-            }
-
-            return;
-          }
-
-          const serverMessage = messageFromNestBody(xhr.responseText);
-          const fallback = xhr.status >= 500 ? "" : `Upload failed with status ${xhr.status}`;
-          reject(new Error(serverMessage ?? fallback));
-        });
-
-        xhr.addEventListener("error", () => {
-          reject(new Error("Upload failed due to a network error"));
-        });
-
-        xhr.addEventListener("abort", () => {
-          reject(new Error("Upload was aborted"));
-        });
-
-        xhr.open("POST", `${config.public.apiBase}/storage/r2/upload`);
-        xhr.withCredentials = true;
-        xhr.send(formData);
+      xhr.upload.addEventListener("progress", (event) => {
+        if (event.lengthComputable) {
+          progress.value = Math.round((event.loaded / event.total) * 100);
+        }
       });
+
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          const parsed = parseR2UploadResponse(xhr.responseText);
+
+          if (parsed === undefined) {
+            reject(new Error("Upload succeeded but the server response was invalid."));
+          } else {
+            resolve(parsed.publicUrl);
+          }
+
+          return;
+        }
+
+        const serverMessage = messageFromNestBody(xhr.responseText);
+        const fallback = xhr.status >= 500 ? "" : `Upload failed with status ${xhr.status}`;
+        reject(new Error(serverMessage ?? fallback));
+      });
+
+      xhr.addEventListener("error", () => {
+        reject(new Error("Upload failed due to a network error"));
+      });
+
+      xhr.addEventListener("abort", () => {
+        reject(new Error("Upload was aborted"));
+      });
+
+      xhr.open("POST", `${config.public.apiBase}/storage/r2/upload`);
+      xhr.withCredentials = true;
+      xhr.send(formData);
+
+      const publicUrl = await promise;
 
       progress.value = 100;
 
@@ -102,7 +103,7 @@ export function useR2Upload() {
       const message = error_ instanceof Error ? error_.message : "Image upload failed";
       error.value = message;
       console.error("Error uploading to R2:", error_);
-      throw new Error(message);
+      throw new Error(message, { cause: error_ });
     } finally {
       isUploading.value = false;
     }

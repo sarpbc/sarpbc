@@ -1,4 +1,4 @@
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import type { DataSource } from "@sarpbc/types";
 
 export function assertTournamentUpdateAllowed(

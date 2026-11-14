@@ -1,5 +1,5 @@
 import type { RosterChange, RosterProposalStatus } from "@sarpbc/types";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export class RosterProposal {
   id = "";

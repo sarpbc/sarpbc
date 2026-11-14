@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { buildLineups, isStandIn, lineupsFromGames, normalizeLineups } from "./match-lineup";
 
 const player = (id: string) => ({
@@ -92,21 +92,21 @@ describe("normalizeLineups", () => {
   });
 });
 
+const game = (aPlayers: (string | null)[], bPlayers: (string | null)[]) => ({
+  teams: [
+    {
+      participantId: "side-a",
+      players: aPlayers.map((id) => ({ player: id === null ? null : { id } })),
+    },
+    {
+      participantId: "side-b",
+      players: bPlayers.map((id) => ({ player: id === null ? null : { id } })),
+    },
+  ],
+});
+
 describe("lineupsFromGames", () => {
   it("collects linked players per participant once, in first appearance order", () => {
-    const game = (aPlayers: (string | null)[], bPlayers: (string | null)[]) => ({
-      teams: [
-        {
-          participantId: "side-a",
-          players: aPlayers.map((id) => ({ player: id === null ? null : { id } })),
-        },
-        {
-          participantId: "side-b",
-          players: bPlayers.map((id) => ({ player: id === null ? null : { id } })),
-        },
-      ],
-    });
-
     expect(
       lineupsFromGames([
         game(["alpha", "bravo", null], [null, null, null]),

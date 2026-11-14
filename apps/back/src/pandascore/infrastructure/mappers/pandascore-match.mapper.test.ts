@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { matchSchema } from "../dto/match.dto";
-import { PandascoreMatchMapper } from "./pandascore-match.mapper";
+import { toUpsertMatchCommand } from "./pandascore-match.mapper";
 
 describe("PandascoreMatchMapper", () => {
   it("maps match dto to upsert command", () => {
@@ -30,7 +30,7 @@ describe("PandascoreMatchMapper", () => {
       previous_matches: [{ type: "winner", match_id: 88 }],
     });
 
-    const command = PandascoreMatchMapper.toUpsertCommand(dto);
+    const command = toUpsertMatchCommand(dto);
 
     expect(command).toEqual({
       pandascoreId: 99,
@@ -67,7 +67,7 @@ describe("PandascoreMatchMapper", () => {
       ],
     });
 
-    expect(PandascoreMatchMapper.toUpsertCommand(dto).officialStreams).toEqual([
+    expect(toUpsertMatchCommand(dto).officialStreams).toEqual([
       { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },
     ]);
   });

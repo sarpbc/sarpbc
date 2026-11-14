@@ -17,7 +17,12 @@ it("syncs every discovered tournament despite a failure, then reconciles inciden
     }),
   };
 
-  const incidents = { execute: vi.fn(async () => void steps.push("incidents")) };
+  const incidents = {
+    execute: vi.fn(async () => {
+      steps.push("incidents");
+    }),
+  };
+
   const diagnostics = { error: vi.fn(), warn: vi.fn() };
 
   const service = new SyncNewTournamentsUseCase(

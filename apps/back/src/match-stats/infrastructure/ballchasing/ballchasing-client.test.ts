@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { requestUrl } from "../../../../test/fetch-mock";
-import { IntegrationError } from "../../../common/domain/errors";
+import { IntegrationError } from "../../../common/domain/errors/integration-error";
 import { BALLCHASING_API_URL, BallchasingClient } from "./ballchasing-client";
 
 // Shapes follow the examples of https://ballchasing.com/doc/api (GET /groups/{id}, GET /replays, GET /groups).
@@ -58,10 +58,7 @@ function json(
   status = 200,
   headers: Record<string, string> = {},
 ): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json", ...headers },
-  });
+  return Response.json(body, { status, headers });
 }
 
 function client(routes: (url: string) => Response) {
@@ -323,10 +320,13 @@ describe("BallchasingClient.replayStats", () => {
       { ...detail, orange: { name: detail.orange.name, players: detail.orange.players } },
     ];
 
-    for (const body of bodies)
-      await expect(client(() => json(body)).instance.replayStats("r1")).rejects.toThrow(
-        IntegrationError,
-      );
+    await Promise.all(
+      bodies.map(async (body) => {
+        await expect(client(() => json(body)).instance.replayStats("r1")).rejects.toThrow(
+          IntegrationError,
+        );
+      }),
+    );
   });
 
   it("returns null while Ballchasing is still processing the replay", async () => {
@@ -357,11 +357,13 @@ describe("BallchasingClient rate limiting", () => {
   it("honours a positive Retry-After", async () => {
     let calls = 0;
 
-    const { instance, sleep } = client(() =>
-      ++calls === 1
+    const { instance, sleep } = client(() => {
+      calls += 1;
+
+      return calls === 1
         ? json({ error: "rate limited" }, 429, { "retry-after": "7" })
-        : json(replayDetail()),
-    );
+        : json(replayDetail());
+    });
 
     await instance.replayStats("r1");
 

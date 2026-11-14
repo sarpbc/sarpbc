@@ -6,7 +6,7 @@ import {
 import type { CircuitSummary } from "@sarpbc/types";
 import { unconstructed } from "../../../../test/doubles";
 import { describe, expect, it, vi } from "vitest";
-import { ConflictError } from "../../../common/domain/errors";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { CircuitPersistence } from "./circuit.store";
 
 const circuit: CircuitSummary = {

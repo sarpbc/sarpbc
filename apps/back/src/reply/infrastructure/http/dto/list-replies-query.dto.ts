@@ -7,4 +7,4 @@ export const ListRepliesQueryDto = PaginationQueryDto.extend({
   targetId: z.uuidv4(),
 });
 
-export type ListRepliesQueryDto = z.infer<typeof ListRepliesQueryDto>;
+export type ListRepliesQueryInput = z.infer<typeof ListRepliesQueryDto>;

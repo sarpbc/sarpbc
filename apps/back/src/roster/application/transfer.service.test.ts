@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Contract, Player, Team } from "../domain/roster";
+import { Contract } from "../domain/contract";
+import { Player } from "../domain/player";
+import { Team } from "../domain/team";
 import type { ContractQueries } from "./ports";
 import { TransferService } from "./transfer.service";
 
@@ -31,9 +33,9 @@ describe("TransferService", () => {
     contract("kb", kc, "2026-03-01", null, "benched"),
   ];
 
-  function fixture() {
-    const findMovements = async () => career;
+  const findMovements = async () => career;
 
+  function fixture() {
     const contracts: ContractQueries = {
       findByPlayer: async () => [],
       findPastContractsByPlayer: async () => [],
@@ -79,7 +81,7 @@ describe("TransferService", () => {
     const { service } = fixture();
 
     const june = await service.onDay(6, 1, now);
-    expect(june.map(({ id }) => id).sort()).toEqual(["k:join", "v:leave"]);
+    expect(june.map(({ id }) => id).toSorted()).toEqual(["k:join", "v:leave"]);
 
     const march = await service.onDay(3, 1, now);
     expect(march.map(({ id, type }) => [id, type])).toEqual([["kb:join", "benched"]]);

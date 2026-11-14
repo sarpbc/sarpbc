@@ -93,6 +93,20 @@ onMounted(async () => {
   creationStatusLoadState.value = "ready";
 });
 
+type CreateForumPostResult = Awaited<ReturnType<typeof createForumPost>>;
+
+function createFailureDescription(failure: Exclude<CreateForumPostResult, { ok: true }>): string {
+  if (failure.reason === "rate_limited") {
+    return failure.message ?? t("page.forum.new.messages.rateLimitDescription");
+  }
+
+  if (failure.reason === "unauthorized") {
+    return t("page.forum.new.messages.signInRequired");
+  }
+
+  return failure.message ?? t("page.forum.new.messages.errorDescription");
+}
+
 async function onSubmit(event: FormSubmitEvent<Schema>) {
   event.preventDefault();
 
@@ -134,12 +148,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     }
   }
 
-  const description =
-    createResult.reason === "rate_limited"
-      ? (createResult.message ?? t("page.forum.new.messages.rateLimitDescription"))
-      : createResult.reason === "unauthorized"
-        ? t("page.forum.new.messages.signInRequired")
-        : (createResult.message ?? t("page.forum.new.messages.errorDescription"));
+  const description = createFailureDescription(createResult);
 
   toast.add({
     title: t("page.forum.new.messages.errorTitle"),

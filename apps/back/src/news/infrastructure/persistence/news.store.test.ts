@@ -6,7 +6,7 @@ import {
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
 import { describe, expect, it, vi } from "vitest";
-import { ConflictError } from "../../../common/domain/errors";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import type { NewsArticleRecord } from "../../application/models";
 import { MikroNewsStore } from "./news.store";
 

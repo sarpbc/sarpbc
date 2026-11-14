@@ -14,7 +14,10 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { StatsImportService } from "../../application/stats-import.service";
 import type { StatsImport } from "../../domain/stats-import";
-import { RequestStatsImportDto } from "./dto/request-stats-import.dto";
+import {
+  RequestStatsImportDto,
+  type RequestStatsImportInput,
+} from "./dto/request-stats-import.dto";
 
 function present(statsImport: StatsImport): StatsImportResponse {
   return {
@@ -42,7 +45,7 @@ export class StatsImportController {
   @HttpCode(HttpStatus.ACCEPTED)
   async request(
     @Param("id") tournamentId: string,
-    @Body({ schema: RequestStatsImportDto }) dto: RequestStatsImportDto,
+    @Body({ schema: RequestStatsImportDto }) dto: RequestStatsImportInput,
   ) {
     return present(await this.service.request(tournamentId, dto.group));
   }
