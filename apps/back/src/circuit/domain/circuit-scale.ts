@@ -12,11 +12,10 @@ import {
 } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
-function isWhole(value: number, min: number, max: number): boolean {
-  return Number.isInteger(value) && value >= min && value <= max;
-}
+const isWhole = (value: number, min: number, max: number): boolean =>
+  Number.isInteger(value) && value >= min && value <= max;
 
-export function parseCircuitScale(tiers: readonly CircuitScaleTier[]): CircuitScaleTier[] {
+export const parseCircuitScale = (tiers: readonly CircuitScaleTier[]): CircuitScaleTier[] => {
   if (tiers.length > MAX_CIRCUIT_SCALE_TIERS) {
     throw new InvalidInputError(`A points scale has at most ${MAX_CIRCUIT_SCALE_TIERS} tiers.`);
   }
@@ -50,16 +49,15 @@ export function parseCircuitScale(tiers: readonly CircuitScaleTier[]): CircuitSc
   }
 
   return sorted;
-}
+};
 
-export function pointsForPlacement(
+export const pointsForPlacement = (
   scale: readonly CircuitScaleTier[],
   placement: number,
-): number | null {
-  return scale.find((tier) => tier.from <= placement && placement <= tier.to)?.points ?? null;
-}
+): number | null =>
+  scale.find((tier) => tier.from <= placement && placement <= tier.to)?.points ?? null;
 
-export function assertCircuitSourceUrl(value: string): void {
+export const assertCircuitSourceUrl = (value: string): void => {
   if (!URL.canParse(value) || !/^https?:$/u.test(new URL(value).protocol)) {
     throw new InvalidInputError("A circuit source must be an http(s) URL.");
   }
@@ -69,7 +67,7 @@ export function assertCircuitSourceUrl(value: string): void {
       "Liquipedia and BLAST.tv are not accepted sources; cite the official rules or announcement.",
     );
   }
-}
+};
 
 export interface CircuitStageSettings {
   scale: CircuitScaleTier[];
@@ -79,7 +77,7 @@ export interface CircuitStageSettings {
   finishes: CircuitStageFinishInput[];
 }
 
-function requireEventTeams(teamIds: readonly string[], eventTeamIds: ReadonlySet<string>): void {
+const requireEventTeams = (teamIds: readonly string[], eventTeamIds: ReadonlySet<string>): void => {
   if (teamIds.length > MAX_CIRCUIT_STAGE_TEAMS) {
     throw new InvalidInputError(`A circuit stage lists at most ${MAX_CIRCUIT_STAGE_TEAMS} teams.`);
   }
@@ -95,12 +93,12 @@ function requireEventTeams(teamIds: readonly string[], eventTeamIds: ReadonlySet
       `Team "${outsider}" did not take part in any stage of this tournament event.`,
     );
   }
-}
+};
 
-export function parseCircuitStageSettings(
+export const parseCircuitStageSettings = (
   input: CircuitStageScaleInput,
   eventTeamIds: ReadonlySet<string>,
-): CircuitStageSettings {
+): CircuitStageSettings => {
   assertCircuitSourceUrl(input.sourceUrl);
   const regionTeamIds = [...(input.regionTeamIds ?? [])];
   const finishes = (input.finishes ?? []).map(({ teamId, placement }) => ({ teamId, placement }));
@@ -123,4 +121,4 @@ export function parseCircuitStageSettings(
     regionTeamIds,
     finishes: finishes.toSorted((a, b) => a.placement - b.placement),
   };
-}
+};

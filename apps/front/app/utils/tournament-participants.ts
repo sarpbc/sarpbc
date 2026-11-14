@@ -11,13 +11,12 @@ export interface TournamentParticipantEntry {
   hasReliableRoster: boolean;
 }
 
-export function hasReliableParticipantRoster(players: ParticipantPlayer[]): boolean {
-  return players.some((player) => Boolean(player.slug));
-}
+export const hasReliableParticipantRoster = (players: ParticipantPlayer[]): boolean =>
+  players.some((player) => Boolean(player.slug));
 
-export function buildTournamentParticipantEntries(
+export const buildTournamentParticipantEntries = (
   tournament: Pick<TournamentDetail, "participants">,
-): TournamentParticipantEntry[] {
+): TournamentParticipantEntry[] => {
   const seen = new Set<string>();
   const result: TournamentParticipantEntry[] = [];
 
@@ -46,4 +45,4 @@ export function buildTournamentParticipantEntries(
   }
 
   return result.toSorted((a, b) => a.name.localeCompare(b.name));
-}
+};

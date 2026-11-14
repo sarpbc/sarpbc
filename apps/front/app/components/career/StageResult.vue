@@ -36,25 +36,25 @@ const tooltipContent = {
   sideOffset: 4,
 };
 
-function regionalPlacementPoints(placement: CareerPlacement): number {
+const regionalPlacementPoints = (placement: CareerPlacement): number => {
   const weight = region ? regionalCircuitWeight(region) : 1;
 
   return Math.round(REGIONAL_POINTS[placement] * weight);
-}
+};
 
-function majorPlacementPoints(placement: CareerPlacement | null): number {
+const majorPlacementPoints = (placement: CareerPlacement | null): number => {
   if (!placement) {
     return 0;
   }
 
   return MAJOR_POINTS[placement];
-}
+};
 
-function pointsTooltip(points: number): string {
+const pointsTooltip = (points: number): string => {
   const shown = points > 0 ? `+${points}` : `${points}`;
 
   return t("page.game.career.results.points", { points: shown });
-}
+};
 </script>
 
 <template>

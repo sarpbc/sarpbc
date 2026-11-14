@@ -65,13 +65,13 @@ const showUpcomingSectionTitle = computed(
     displayGroupedMatches.value.completed.length > 0,
 );
 
-function formatDayHeader(group: { date: Date | null; dateKey: string }) {
+const formatDayHeader = (group: { date: Date | null; dateKey: string }) => {
   if (!group.date) {
     return t("page.tournaments.id.matchSections.unknownDate");
   }
 
   return formatDayHeaderDate(group.date, locale.value);
-}
+};
 </script>
 
 <template>

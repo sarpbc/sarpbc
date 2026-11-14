@@ -45,9 +45,7 @@ const deltaGridClass = computed(() => {
   }
 });
 
-function formatDelta(value: number): string {
-  return value > 0 ? `+${value}` : `${value}`;
-}
+const formatDelta = (value: number): string => (value > 0 ? `+${value}` : `${value}`);
 </script>
 
 <template>

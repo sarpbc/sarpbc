@@ -22,131 +22,114 @@ import {
   tournamentUrl,
 } from "./urls";
 
-function days(dates: (Date | null)[]): number[] {
-  return dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
-}
+const days = (dates: (Date | null)[]): number[] =>
+  dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
 
-function timeOf(date: Date | null): number {
-  return date?.getTime() ?? Number.POSITIVE_INFINITY;
-}
+const timeOf = (date: Date | null): number => date?.getTime() ?? Number.POSITIVE_INFINITY;
 
 /** start.gg teams may play in a redistributable match; only the match and tournament source count. */
-export function isRedistributableMatch(match: Match): boolean {
-  return isRedistributable(match.source) && isRedistributable(match.tournament.source);
-}
+export const isRedistributableMatch = (match: Match): boolean =>
+  isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
-export function redistributableStreams(streams: readonly Stream[]): Stream[] {
-  return streams.filter((stream) => isRedistributable(stream.source));
-}
+export const redistributableStreams = (streams: readonly Stream[]): Stream[] =>
+  streams.filter((stream) => isRedistributable(stream.source));
 
-export function mapPlayerSummary(player: Player) {
-  return {
+export const mapPlayerSummary = (player: Player) => ({
+  id: player.id,
+  slug: player.slug,
+  name: player.name,
+  nationality: player.nationality,
+  status: player.status,
+  role: player.currentRole(),
+  source: player.source,
+  team: player.team
+    ? {
+        id: player.team.id,
+        slug: player.team.slug,
+        name: player.team.name,
+        source: player.team.source,
+        url: teamUrl(player.team.slug),
+      }
+    : null,
+  url: playerUrl(player.slug),
+});
+
+export const mapCareer = (player: Player, contracts: Contract[]) => ({
+  player: {
     id: player.id,
     slug: player.slug,
     name: player.name,
-    nationality: player.nationality,
-    status: player.status,
+    currentTeamId: player.team?.id ?? null,
+  },
+  contracts: contracts
+    .toSorted((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    .map((contract) => ({
+      id: contract.id,
+      team: { id: contract.team.id, slug: contract.team.slug, name: contract.team.name },
+      startDate: isoDay(contract.startDate),
+      endDate: contract.endDate ? isoDay(contract.endDate) : null,
+      role: contract.role,
+      joinSourceUrl: contract.joinSourceUrl,
+      leaveSourceUrl: contract.leaveSourceUrl,
+    })),
+});
+
+export const mapTeamAlias = (alias: TeamAlias) => ({
+  id: alias.id,
+  name: alias.name,
+  from: alias.from,
+  to: alias.to,
+  sourceUrl: alias.sourceUrl,
+  logoUrl: alias.logoUrl,
+  pandascoreId: alias.pandascoreId,
+});
+
+export const mapTeamSummary = (team: Team) => ({
+  id: team.id,
+  slug: team.slug,
+  name: team.name,
+  location: team.location,
+  active: team.active,
+  source: team.source,
+  logoLightUrl: team.logoLightUrl,
+  logoDarkUrl: team.logoDarkUrl,
+  formerNames: team.aliases.map(mapTeamAlias),
+  players: team.players.map((player) => ({
+    id: player.id,
+    slug: player.slug,
+    name: player.name,
     role: player.currentRole(),
     source: player.source,
-    team: player.team
-      ? {
-          id: player.team.id,
-          slug: player.team.slug,
-          name: player.team.name,
-          source: player.team.source,
-          url: teamUrl(player.team.slug),
-        }
-      : null,
     url: playerUrl(player.slug),
-  };
-}
+  })),
+  url: teamUrl(team.slug),
+});
 
-export function mapCareer(player: Player, contracts: Contract[]) {
-  return {
-    player: {
-      id: player.id,
-      slug: player.slug,
-      name: player.name,
-      currentTeamId: player.team?.id ?? null,
-    },
-    contracts: contracts
-      .toSorted((a, b) => a.startDate.getTime() - b.startDate.getTime())
-      .map((contract) => ({
-        id: contract.id,
-        team: { id: contract.team.id, slug: contract.team.slug, name: contract.team.name },
-        startDate: isoDay(contract.startDate),
-        endDate: contract.endDate ? isoDay(contract.endDate) : null,
-        role: contract.role,
-        joinSourceUrl: contract.joinSourceUrl,
-        leaveSourceUrl: contract.leaveSourceUrl,
-      })),
-  };
-}
+export const mapTournamentListItem = (tournament: Tournament) => ({
+  id: tournament.id,
+  name: tournament.name,
+  slug: tournament.slug,
+  source: tournament.source,
+  imageUrl: tournament.imageUrl,
+  event: tournament.event,
+  beginAt: tournament.beginAt,
+  endAt: tournament.endAt,
+  pickemsEnabled: tournament.pickemsEnabled,
+  league: tournament.league ? { id: tournament.league.id, name: tournament.league.name } : null,
+  url: tournamentUrl(tournament),
+});
 
-export function mapTeamAlias(alias: TeamAlias) {
-  return {
-    id: alias.id,
-    name: alias.name,
-    from: alias.from,
-    to: alias.to,
-    sourceUrl: alias.sourceUrl,
-    logoUrl: alias.logoUrl,
-    pandascoreId: alias.pandascoreId,
-  };
-}
-
-export function mapTeamSummary(team: Team) {
-  return {
-    id: team.id,
-    slug: team.slug,
-    name: team.name,
-    location: team.location,
-    active: team.active,
-    source: team.source,
-    logoLightUrl: team.logoLightUrl,
-    logoDarkUrl: team.logoDarkUrl,
-    formerNames: team.aliases.map(mapTeamAlias),
-    players: team.players.map((player) => ({
-      id: player.id,
-      slug: player.slug,
-      name: player.name,
-      role: player.currentRole(),
-      source: player.source,
-      url: playerUrl(player.slug),
-    })),
-    url: teamUrl(team.slug),
-  };
-}
-
-export function mapTournamentListItem(tournament: Tournament) {
-  return {
-    id: tournament.id,
-    name: tournament.name,
-    slug: tournament.slug,
-    source: tournament.source,
-    imageUrl: tournament.imageUrl,
-    event: tournament.event,
-    beginAt: tournament.beginAt,
-    endAt: tournament.endAt,
-    pickemsEnabled: tournament.pickemsEnabled,
-    league: tournament.league ? { id: tournament.league.id, name: tournament.league.name } : null,
-    url: tournamentUrl(tournament),
-  };
-}
-
-export function mapLeague(league: League) {
-  return {
-    id: league.id,
-    name: league.name,
-    slug: league.slug,
-    url: league.url,
-    imageUrl: league.imageUrl,
-    source: league.pandascoreId === null ? "manual" : "pandascore",
-  };
-}
+export const mapLeague = (league: League) => ({
+  id: league.id,
+  name: league.name,
+  slug: league.slug,
+  url: league.url,
+  imageUrl: league.imageUrl,
+  source: league.pandascoreId === null ? "manual" : "pandascore",
+});
 
 /** start.gg stages stay out of MCP reads. */
-export function mapEvent({ event, stages }: EventListing) {
+export const mapEvent = ({ event, stages }: EventListing) => {
   const phases = stages
     .filter((stage) => isRedistributable(stage.source))
     .toSorted((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
@@ -167,30 +150,31 @@ export function mapEvent({ event, stages }: EventListing) {
     viewership: stages.length === 0 || phases.length > 0 ? event.viewership : null,
     url: eventUrl(event.slug),
   };
-}
+};
 
-export function mapTournamentParticipant(participant: TournamentParticipant) {
-  return {
-    id: participant.id,
-    name: participantName(participant),
-    team: participant.team
-      ? { id: participant.team.id, slug: participant.team.slug, name: participant.team.name }
-      : null,
-    players: participant.players.map(({ id, name, slug }) => ({ id, name, slug })),
-    rosterSourceUrl: participant.rosterSourceUrl,
-  };
-}
+export const mapTournamentParticipant = (participant: TournamentParticipant) => ({
+  id: participant.id,
+  name: participantName(participant),
+  team: participant.team
+    ? { id: participant.team.id, slug: participant.team.slug, name: participant.team.name }
+    : null,
+  players: participant.players.map(({ id, name, slug }) => ({ id, name, slug })),
+  rosterSourceUrl: participant.rosterSourceUrl,
+});
 
 /** start.gg tournaments stay out of MCP responses, including write confirmations. */
-export function mapListedParticipants(source: DataSource, participants: TournamentParticipant[]) {
+export const mapListedParticipants = (
+  source: DataSource,
+  participants: TournamentParticipant[],
+) => {
   if (!isRedistributable(source)) {
     return {};
   }
 
   return { participants: participants.map(mapTournamentParticipant) };
-}
+};
 
-export function mapMatchListResponse(match: Match) {
+export const mapMatchListResponse = (match: Match) => {
   const item = mapMatchListItem(match);
   const winnerId = match.winner?.id ?? null;
   // List queries do not populate the winner relation; participants carry the team names.
@@ -211,44 +195,38 @@ export function mapMatchListResponse(match: Match) {
     sourceUrl: match.sourceUrl,
     url: matchUrl(item.publicId, item.slug),
   };
-}
+};
 
-export function mapTournamentDetail(tournament: Tournament) {
-  return {
-    ...mapTournamentListItem(tournament),
-    description: tournament.description,
-    tier: tournament.tier,
-    hasBracket: tournament.hasBracket,
-    winner: tournament.winner
-      ? { participantId: tournament.winner.id, name: participantName(tournament.winner) }
-      : null,
-    ...mapListedParticipants(tournament.source, tournament.participants),
-    matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
-    streams: redistributableStreams(tournament.watchStreams()),
-  };
-}
+export const mapTournamentDetail = (tournament: Tournament) => ({
+  ...mapTournamentListItem(tournament),
+  description: tournament.description,
+  tier: tournament.tier,
+  hasBracket: tournament.hasBracket,
+  winner: tournament.winner
+    ? { participantId: tournament.winner.id, name: participantName(tournament.winner) }
+    : null,
+  ...mapListedParticipants(tournament.source, tournament.participants),
+  matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
+  streams: redistributableStreams(tournament.watchStreams()),
+});
 
-export function mapNewsListItem(article: NewsArticleAdmin) {
-  return {
-    id: article.id,
-    title: article.title,
-    titleFr: article.titleFr,
-    slug: article.slug,
-    isDraft: article.isDraft,
-    hasFrench: article.hasFrench,
-    imageUrl: article.imageUrl,
-    createdAt: article.createdAt,
-    author: article.author,
-    type: article.type,
-    adminEditUrl: adminNewsEditUrl(article.slug),
-    url: newsUrl(article.slug),
-  };
-}
+export const mapNewsListItem = (article: NewsArticleAdmin) => ({
+  id: article.id,
+  title: article.title,
+  titleFr: article.titleFr,
+  slug: article.slug,
+  isDraft: article.isDraft,
+  hasFrench: article.hasFrench,
+  imageUrl: article.imageUrl,
+  createdAt: article.createdAt,
+  author: article.author,
+  type: article.type,
+  adminEditUrl: adminNewsEditUrl(article.slug),
+  url: newsUrl(article.slug),
+});
 
-export function mapNewsAdminArticle(article: NewsArticleAdmin) {
-  return {
-    ...mapNewsListItem(article),
-    content: article.content,
-    contentFr: article.contentFr,
-  };
-}
+export const mapNewsAdminArticle = (article: NewsArticleAdmin) => ({
+  ...mapNewsListItem(article),
+  content: article.content,
+  contentFr: article.contentFr,
+});

@@ -23,21 +23,24 @@ interface Tally {
 
 const COUNTS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
-function round(value: number, digits: number): number {
+const round = (value: number, digits: number): number => {
   const factor = 10 ** digits;
 
   return Math.round(value * factor) / factor;
-}
+};
 
-function percentage(part: number, whole: number): number | null {
-  return whole === 0 ? null : round((part * 100) / whole, 1);
-}
+const percentage = (part: number, whole: number): number | null =>
+  whole === 0 ? null : round((part * 100) / whole, 1);
 
-function emptyCounts(): PlayerStatCounts {
-  return { goals: 0, assists: 0, saves: 0, shots: 0, demolitions: 0 };
-}
+const emptyCounts = (): PlayerStatCounts => ({
+  goals: 0,
+  assists: 0,
+  saves: 0,
+  shots: 0,
+  demolitions: 0,
+});
 
-function toStats({ player, team, games, totals, teamGoals }: Tally): TournamentPlayerStats {
+const toStats = ({ player, team, games, totals, teamGoals }: Tally): TournamentPlayerStats => {
   const perGame = emptyCounts();
 
   for (const count of COUNTS) {
@@ -53,11 +56,11 @@ function toStats({ player, team, games, totals, teamGoals }: Tally): TournamentP
     shootingPercentage: percentage(totals.goals, totals.shots),
     goalParticipation: percentage(totals.goals + totals.assists, teamGoals),
   };
-}
+};
 
-export function aggregatePlayerStats(
+export const aggregatePlayerStats = (
   lines: readonly PlayerGameLine[],
-): TournamentPlayerStatsResponse {
+): TournamentPlayerStatsResponse => {
   const games = new Set<string>();
   const unlinked = new Set<string>();
   const tallies = new Map<string, Tally>();
@@ -103,4 +106,4 @@ export function aggregatePlayerStats(
       ),
     unlinkedAccounts: unlinked.size,
   };
-}
+};

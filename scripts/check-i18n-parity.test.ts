@@ -6,13 +6,13 @@ import { test } from "node:test";
 import { parityViolations } from "./check-i18n-parity.ts";
 import type { LocaleValue } from "./check-i18n-parity.ts";
 
-function locales(english: LocaleValue, french: LocaleValue): string {
+const locales = (english: LocaleValue, french: LocaleValue): string => {
   const directory = mkdtempSync(path.join(tmpdir(), "i18n-parity-"));
   writeFileSync(path.join(directory, "en-US.json"), JSON.stringify(english));
   writeFileSync(path.join(directory, "fr-FR.json"), JSON.stringify(french));
 
   return directory;
-}
+};
 
 void test("accepts locales with the same nested keys", () => {
   const directory = locales({ a: { b: "x" }, c: "y" }, { a: { b: "z" }, c: "w" });

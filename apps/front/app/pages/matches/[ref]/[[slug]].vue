@@ -75,19 +75,16 @@ const participants = computed(() => match.value?.participants ?? []);
 const teamA = computed(() => participants.value[0]);
 const teamB = computed(() => participants.value[1]);
 
-function participantLabel(participant?: TournamentParticipant) {
-  return (participant && participantName(participant)) || t("page.match.detail.unknownTeam");
-}
+const participantLabel = (participant?: TournamentParticipant) =>
+  (participant && participantName(participant)) || t("page.match.detail.unknownTeam");
 
-function isTbdTeam(participant?: TournamentParticipant): boolean {
-  return !participant || !participantName(participant).trim();
-}
+const isTbdTeam = (participant?: TournamentParticipant): boolean =>
+  !participant || !participantName(participant).trim();
 
 const isBothTeamsTbd = computed(() => isTbdTeam(teamA.value) && isTbdTeam(teamB.value));
 
-function getParticipantScore(currentMatch: Match, participantId: string): number | null {
-  return getMatchParticipantScore(currentMatch.results, participantId);
-}
+const getParticipantScore = (currentMatch: Match, participantId: string): number | null =>
+  getMatchParticipantScore(currentMatch.results, participantId);
 
 const matchStatus = computed(() => {
   if (!match.value) {
@@ -138,15 +135,15 @@ const heroScoreB = computed(() =>
     : "–",
 );
 
-function onVodsSaved(vods: MatchVod[]) {
+const onVodsSaved = (vods: MatchVod[]) => {
   if (!matchDetail.value) {
     return;
   }
 
   matchDetail.value = { ...matchDetail.value, match: { ...matchDetail.value.match, vods } };
-}
+};
 
-function heroScoreClass(participantId: string | undefined): string {
+const heroScoreClass = (participantId: string | undefined): string => {
   if (!winnerParticipantId.value) {
     return "font-medium text-highlighted";
   }
@@ -154,7 +151,7 @@ function heroScoreClass(participantId: string | undefined): string {
   return participantId === winnerParticipantId.value
     ? "font-medium text-highlighted"
     : "text-muted";
-}
+};
 
 watch(
   () => (match.value ? `${match.value.id}:${discoverySource.value ?? ""}` : null),
@@ -250,11 +247,11 @@ const seoDescription = computed(() => {
   }
 });
 
-function getMatchOgImageUrl(id: string): string {
+const getMatchOgImageUrl = (id: string): string => {
   const { origin } = new URL(getCanonicalUrl());
 
   return `${origin}/og/match/${id}.png?v=2`;
-}
+};
 
 watch(
   [seoTitle, seoDescription, match],

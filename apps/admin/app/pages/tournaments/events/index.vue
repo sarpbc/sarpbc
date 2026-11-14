@@ -17,9 +17,8 @@ const breadcrumbItems = computed(() => [
   { label: t("page.tournaments.events.title") },
 ]);
 
-function formatDate(date: string | null): string {
-  return date ? new Date(date).toLocaleDateString() : "-";
-}
+const formatDate = (date: string | null): string =>
+  date ? new Date(date).toLocaleDateString() : "-";
 
 const columns: TableColumn<ManualEvent>[] = [
   { accessorKey: "name", header: t("page.tournaments.events.columns.name") },
@@ -37,10 +36,10 @@ const columns: TableColumn<ManualEvent>[] = [
   },
 ];
 
-function selectRow(e: Event, row: TableRow<ManualEvent>) {
+const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
   e.preventDefault();
   navigateTo(localePath(`/tournaments/events/${row.original.id}`));
-}
+};
 </script>
 
 <template>

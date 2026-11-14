@@ -30,9 +30,9 @@ const {
 
 const loadError = computed(() => tournamentError.value ?? matchesError.value);
 
-async function reload() {
+const reload = async () => {
   await Promise.all([refreshTournament(), refreshMatches()]);
-}
+};
 
 const displayMatches = computed(() =>
   (matches.value ?? []).filter((match) => (match.participants?.length ?? 0) === 2),

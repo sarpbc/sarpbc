@@ -92,7 +92,7 @@ const canSave = computed(
   () => !!matchId.value && !!gameNumber.value && !!blueParticipantId.value && !saving.value,
 );
 
-async function save() {
+const save = async () => {
   const item = target.value;
 
   if (!item || !matchId.value || !gameNumber.value || !blueParticipantId.value) {
@@ -124,7 +124,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

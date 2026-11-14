@@ -3,7 +3,7 @@ import { loadPostHogClient } from "~/utils/posthog-client";
 
 type PostHogClient = Pick<PostHog, "capture">;
 
-export function usePostHog(): PostHogClient {
+export const usePostHog = function usePostHog(): PostHogClient {
   const { choice } = useCookieConsent();
   const config = useRuntimeConfig();
 
@@ -28,4 +28,4 @@ export function usePostHog(): PostHogClient {
       });
     },
   };
-}
+};

@@ -32,7 +32,7 @@ watch(open, (isOpen) => {
   }
 });
 
-async function submitReport() {
+const submitReport = async () => {
   if (!selectedReason.value || isSubmitting.value) {
     return;
   }
@@ -76,7 +76,7 @@ async function submitReport() {
     description: result.message ?? t("components.discussion.report.messages.error"),
     color: "error",
   });
-}
+};
 </script>
 
 <template>

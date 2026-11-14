@@ -37,9 +37,8 @@ const pending = computed(
   () => items.value === undefined && block.value !== null && blocks?.status.value === "pending",
 );
 
-function withState(state: MatchBlockState): MatchBlockItem[] {
-  return items.value?.filter((item) => item.state === state) ?? [];
-}
+const withState = (state: MatchBlockState): MatchBlockItem[] =>
+  items.value?.filter((item) => item.state === state) ?? [];
 
 const live = computed(() => withState("live"));
 const upcoming = computed(() => withState("upcoming"));
@@ -55,11 +54,10 @@ const dateFormatter = computed(
     }),
 );
 
-function teamName(item: MatchBlockItem, index: number): string {
-  return slotName(item.participants, index) ?? t("components.match.tbd");
-}
+const teamName = (item: MatchBlockItem, index: number): string =>
+  slotName(item.participants, index) ?? t("components.match.tbd");
 
-function summary(item: MatchBlockItem): string {
+const summary = (item: MatchBlockItem): string => {
   if (
     item.state === "upcoming" ||
     isConcealed({ matchId: item.id, tournamentId: item.tournament.id })
@@ -76,7 +74,7 @@ function summary(item: MatchBlockItem): string {
     scoreB: score(1),
     teamB: teamName(item, 1),
   });
-}
+};
 
 const stateLabel = useMatchStateLabel(t, (beginAt) =>
   t("newsTag.matchUtc", { date: dateFormatter.value.format(beginAt) }),

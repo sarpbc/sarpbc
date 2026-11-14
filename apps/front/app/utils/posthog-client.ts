@@ -16,7 +16,7 @@ const autocapture: AutocaptureConfig = {
   capture_copied_text: false,
 };
 
-function applyConsent(): void {
+const applyConsent = (): void => {
   if (!client) {
     return;
   }
@@ -50,15 +50,17 @@ function applyConsent(): void {
     tracing_headers: [],
   });
   client.reset(true);
-}
+};
 
-export function setPostHogConsent(accepted: boolean, apiBase: string): void {
+export const setPostHogConsent = (accepted: boolean, apiBase: string): void => {
   consentGranted = accepted;
   tracingHost = new URL(apiBase).hostname;
   applyConsent();
-}
+};
 
-export async function loadPostHogClient(config: PostHogPublicConfig): Promise<PostHog | null> {
+export const loadPostHogClient = async function loadPostHogClient(
+  config: PostHogPublicConfig,
+): Promise<PostHog | null> {
   if (import.meta.server || import.meta.dev || !config.publicKey || !consentGranted) {
     return null;
   }
@@ -135,8 +137,6 @@ export async function loadPostHogClient(config: PostHogPublicConfig): Promise<Po
     });
 
   return await loading;
-}
+};
 
-export function getLoadedPostHogClient(): PostHog | null {
-  return client;
-}
+export const getLoadedPostHogClient = (): PostHog | null => client;

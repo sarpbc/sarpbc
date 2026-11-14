@@ -10,9 +10,8 @@ interface StandingRow {
   player?: { id: number };
 }
 
-function respond(status: number, body: StandingRow[] | { error: string }) {
-  return Response.json(body, { status });
-}
+const respond = (status: number, body: StandingRow[] | { error: string }) =>
+  Response.json(body, { status });
 
 describe("PandascoreCompetitionFeed standings", () => {
   const client = new PandascoreApiClient(new ConfigService({ pandascore_api_token: "token" }));

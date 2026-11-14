@@ -14,13 +14,12 @@ interface NewsMatchBlocks {
 
 const NEWS_MATCH_BLOCKS: InjectionKey<NewsMatchBlocks> = Symbol("news-match-blocks");
 
-function chunk<T>(values: readonly T[], size: number): T[][] {
-  return Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
+const chunk = <T>(values: readonly T[], size: number): T[][] =>
+  Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
     values.slice(index * size, (index + 1) * size),
   );
-}
 
-export function provideNewsMatchBlocks(key: MaybeRefOrGetter<string>, contents: () => string[]) {
+export const provideNewsMatchBlocks = (key: MaybeRefOrGetter<string>, contents: () => string[]) => {
   const blockKeys = computed(() => [
     ...new Set(
       contents().flatMap((content) => extractNewsMatchBlocks(content).map(newsMatchBlockKey)),
@@ -50,8 +49,6 @@ export function provideNewsMatchBlocks(key: MaybeRefOrGetter<string>, contents: 
   useLiveMatchRefresh(key, () =>
     Object.values(data.value).some((items) => items.some((item) => item.state === "live")),
   );
-}
+};
 
-export function useNewsMatchBlocks(): NewsMatchBlocks | null {
-  return inject(NEWS_MATCH_BLOCKS, null);
-}
+export const useNewsMatchBlocks = (): NewsMatchBlocks | null => inject(NEWS_MATCH_BLOCKS, null);

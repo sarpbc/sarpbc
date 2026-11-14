@@ -21,7 +21,7 @@ interface LoadedOwner {
   save: (viewership: Viewership | null) => Promise<void>;
 }
 
-async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promise<LoadedOwner> {
+const loadOwner = async (scope: ViewershipScope, owner: ViewershipOwner): Promise<LoadedOwner> => {
   switch (owner.kind) {
     case "event": {
       const event = await scope.events.load(owner.id);
@@ -67,7 +67,7 @@ async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promis
       return exhaustive;
     }
   }
-}
+};
 
 export class ViewershipService {
   constructor(private readonly transaction: ViewershipTransaction) {}

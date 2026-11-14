@@ -323,10 +323,10 @@ describe(ManualTournamentService, () => {
     });
   });
 
-  function ownEvent() {
+  const ownEvent = () => {
     tournament.source = "manual";
     present(stored.get("event")).name = tournament.name;
-  }
+  };
 
   it("allows manual details and artwork together and renames the event", async () => {
     ownEvent();

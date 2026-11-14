@@ -3,7 +3,7 @@ import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/util
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 
-export function assertPrizeDistribution(entries: PrizeEntry[]): void {
+export const assertPrizeDistribution = (entries: PrizeEntry[]): void => {
   if (entries.length > MAX_PRIZE_ENTRIES) {
     throw new InvalidInputError(`A prize distribution has at most ${MAX_PRIZE_ENTRIES} entries`);
   }
@@ -40,14 +40,14 @@ export function assertPrizeDistribution(entries: PrizeEntry[]): void {
       players.add(playerId);
     }
   }
-}
+};
 
-export function patchPrizeEntry(
+export const patchPrizeEntry = (
   entries: PrizeEntry[],
   teamId: string,
   patch: PrizeEntryPatch,
   sourceUrl: string | null,
-): PrizeEntry[] {
+): PrizeEntry[] => {
   if (!entries.some((entry) => entry.teamId === teamId)) {
     throw new NotFoundError(`Team "${teamId}" has no prize in this tournament`);
   }
@@ -64,4 +64,4 @@ export function patchPrizeEntry(
         }
       : entry,
   );
-}
+};

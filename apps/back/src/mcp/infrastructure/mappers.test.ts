@@ -15,13 +15,12 @@ import {
   redistributableStreams,
 } from "./mappers";
 
-function match(source: DataSource, tournamentSource: DataSource, teamSource: DataSource): Match {
-  return Object.assign(new Match(), {
+const match = (source: DataSource, tournamentSource: DataSource, teamSource: DataSource): Match =>
+  Object.assign(new Match(), {
     source,
     tournament: { source: tournamentSource },
     participants: [{ team: { source: teamSource } }],
   });
-}
 
 describe(isRedistributableMatch, () => {
   it("keeps a redistributable match with a start.gg participant team", () => {
@@ -34,7 +33,7 @@ describe(isRedistributableMatch, () => {
   });
 });
 
-function cup(source: DataSource) {
+const cup = (source: DataSource) => {
   const club = Object.assign(new Team(), {
     id: "team-kc",
     slug: "karmine-corp",
@@ -66,7 +65,7 @@ function cup(source: DataSource) {
     ],
     matches: [match("startgg", source, "startgg")],
   });
-}
+};
 
 describe("mapTournamentDetail participants", () => {
   it("lists participant ids, team identity and roster, including a start.gg team", () => {
@@ -92,9 +91,14 @@ describe("mapTournamentDetail participants", () => {
   });
 });
 
-function listed(url: string, source: DataSource): Stream {
-  return { url, platform: "twitch", channel: url, language: "en", kind: "official", source };
-}
+const listed = (url: string, source: DataSource): Stream => ({
+  url,
+  platform: "twitch",
+  channel: url,
+  language: "en",
+  kind: "official",
+  source,
+});
 
 describe("MCP streams", () => {
   const manual = listed("https://twitch.tv/manual", "manual");
@@ -143,14 +147,13 @@ describe("MCP streams", () => {
   });
 });
 
-function stage(source: DataSource) {
-  return Object.assign(new Tournament(), {
+const stage = (source: DataSource) =>
+  Object.assign(new Tournament(), {
     id: `stage-${source}`,
     slug: `stage-${source}`,
     source,
     event: { id: "event", slug: "coupe", name: "Coupe" },
   });
-}
 
 describe("MCP viewership", () => {
   const viewership: Viewership = {
@@ -162,8 +165,8 @@ describe("MCP viewership", () => {
     sourceUrl: "https://escharts.com/tournaments/rl/fake-cup",
   };
 
-  function played(source: DataSource) {
-    return Object.assign(new Match(), {
+  const played = (source: DataSource) =>
+    Object.assign(new Match(), {
       publicId: 1,
       name: "Final",
       source,
@@ -182,7 +185,6 @@ describe("MCP viewership", () => {
         eventStreams: [],
       },
     });
-  }
 
   it("leaves the viewership of start.gg matches and start.gg-only events out", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");

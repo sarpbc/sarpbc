@@ -12,7 +12,7 @@ const official: StreamInput = {
 
 const costream: StreamInput = { url: "https://kick.com/kameto", language: "fr", kind: "costream" };
 
-function stream(url: string, source: Stream["source"] = "manual"): Stream {
+const stream = (url: string, source: Stream["source"] = "manual"): Stream => {
   const streamUrl = replaceStreams([], [{ url, language: "en", kind: "official" }], "manual").at(0);
 
   if (streamUrl === undefined) {
@@ -20,10 +20,10 @@ function stream(url: string, source: Stream["source"] = "manual"): Stream {
   }
 
   return { ...streamUrl, source };
-}
+};
 
-function matchIn(tournament: { streams: Stream[]; eventStreams: Stream[] }): Match {
-  return Object.assign(new Match(), {
+const matchIn = (tournament: { streams: Stream[]; eventStreams: Stream[] }): Match =>
+  Object.assign(new Match(), {
     tournament: {
       id: "stage",
       name: "Playoffs",
@@ -37,7 +37,6 @@ function matchIn(tournament: { streams: Stream[]; eventStreams: Stream[] }): Mat
       ...tournament,
     },
   });
-}
 
 describe(replaceStreams, () => {
   it("normalizes each stream and derives its platform and channel", () => {

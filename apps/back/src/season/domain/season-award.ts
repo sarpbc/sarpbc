@@ -22,7 +22,7 @@ export const SEASON_AWARD_LABELS = {
 
 type RegionRule = "required" | "optional" | "forbidden";
 
-function regionRule(awardType: SeasonAwardType): RegionRule {
+const regionRule = (awardType: SeasonAwardType): RegionRule => {
   switch (awardType) {
     case "season_mvp": {
       return "forbidden";
@@ -42,9 +42,9 @@ function regionRule(awardType: SeasonAwardType): RegionRule {
       return exhaustive;
     }
   }
-}
+};
 
-function optionalText(value: string | null | undefined, max: number, field: string) {
+const optionalText = (value: string | null | undefined, max: number, field: string) => {
   const trimmed = value?.trim() ?? "";
 
   if (trimmed.length > max) {
@@ -52,9 +52,9 @@ function optionalText(value: string | null | undefined, max: number, field: stri
   }
 
   return trimmed || null;
-}
+};
 
-function parseRegion(awardType: SeasonAwardType, value: string | null | undefined) {
+const parseRegion = (awardType: SeasonAwardType, value: string | null | undefined) => {
   const region = optionalText(value, SEASON_AWARD_REGION_MAX_LENGTH, "region");
   const rule = regionRule(awardType);
   const label = SEASON_AWARD_LABELS[awardType];
@@ -68,9 +68,9 @@ function parseRegion(awardType: SeasonAwardType, value: string | null | undefine
   }
 
   return region;
-}
+};
 
-export function assertAwardSourceUrl(value: string): void {
+export const assertAwardSourceUrl = (value: string): void => {
   if (value.length > SEASON_AWARD_SOURCE_URL_MAX_LENGTH) {
     throw new InvalidInputError(
       `The award source has at most ${SEASON_AWARD_SOURCE_URL_MAX_LENGTH} characters.`,
@@ -86,14 +86,14 @@ export function assertAwardSourceUrl(value: string): void {
       "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
     );
   }
-}
+};
 
-export function parseSeasonAward(input: {
+export const parseSeasonAward = (input: {
   awardType: SeasonAwardType;
   region?: string | null;
   presentedBy?: string | null;
   sourceUrl: string;
-}): SeasonAwardFields {
+}): SeasonAwardFields => {
   const sourceUrl = input.sourceUrl.trim();
   assertAwardSourceUrl(sourceUrl);
 
@@ -103,4 +103,4 @@ export function parseSeasonAward(input: {
     presentedBy: optionalText(input.presentedBy, SEASON_AWARD_PRESENTER_MAX_LENGTH, "presenter"),
     sourceUrl,
   };
-}
+};

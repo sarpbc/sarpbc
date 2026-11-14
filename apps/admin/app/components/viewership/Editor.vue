@@ -34,16 +34,14 @@ const { t } = useI18n();
 const toast = useToast();
 const reportError = useReportError();
 
-function emptyForm(): ViewershipForm {
-  return {
-    peakViewers: "",
-    averageViewers: "",
-    scope: "official",
-    measuredAt: "",
-    sourceName: "",
-    sourceUrl: "",
-  };
-}
+const emptyForm = (): ViewershipForm => ({
+  peakViewers: "",
+  averageViewers: "",
+  scope: "official",
+  measuredAt: "",
+  sourceName: "",
+  sourceUrl: "",
+});
 
 const form = ref<ViewershipForm>(emptyForm());
 const stored = ref(false);
@@ -58,11 +56,9 @@ const scopeOptions = computed(() =>
   })),
 );
 
-function pad(value: number): string {
-  return String(value).padStart(2, "0");
-}
+const pad = (value: number): string => String(value).padStart(2, "0");
 
-function toLocalInput(iso: string | null): string {
+const toLocalInput = (iso: string | null): string => {
   if (!iso) {
     return "";
   }
@@ -71,24 +67,20 @@ function toLocalInput(iso: string | null): string {
   const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
   return `${day}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
+};
 
-function toCount(value: string): number {
-  return value.trim() === "" ? Number.NaN : Number(value);
-}
+const toCount = (value: string): number => (value.trim() === "" ? Number.NaN : Number(value));
 
-function toViewership(values: ViewershipForm): Viewership {
-  return {
-    peakViewers: toCount(values.peakViewers),
-    averageViewers: values.averageViewers.trim() === "" ? null : toCount(values.averageViewers),
-    scope: values.scope,
-    measuredAt: values.measuredAt ? new Date(values.measuredAt).toISOString() : null,
-    sourceName: values.sourceName,
-    sourceUrl: values.sourceUrl,
-  };
-}
+const toViewership = (values: ViewershipForm): Viewership => ({
+  peakViewers: toCount(values.peakViewers),
+  averageViewers: values.averageViewers.trim() === "" ? null : toCount(values.averageViewers),
+  scope: values.scope,
+  measuredAt: values.measuredAt ? new Date(values.measuredAt).toISOString() : null,
+  sourceName: values.sourceName,
+  sourceUrl: values.sourceUrl,
+});
 
-function fieldOf(error: ViewershipError): ViewershipField {
+const fieldOf = (error: ViewershipError): ViewershipField => {
   switch (error) {
     case "invalid-peak": {
       return "peakViewers";
@@ -120,11 +112,11 @@ function fieldOf(error: ViewershipError): ViewershipField {
       return exhaustive;
     }
   }
-}
+};
 
 const parsed = computed(() => parseViewership(toViewership(form.value)));
 
-function feedback(field: ViewershipField): FieldFeedback {
+const feedback = (field: ViewershipField): FieldFeedback => {
   const result = parsed.value;
 
   if (result.ok || fieldOf(result.error) !== field) {
@@ -132,9 +124,9 @@ function feedback(field: ViewershipField): FieldFeedback {
   }
 
   return { error: t(`page.tournaments.viewership.errors.${result.error}`) };
-}
+};
 
-function apply(viewership: Viewership | null) {
+const apply = (viewership: Viewership | null) => {
   stored.value = viewership !== null;
   form.value = viewership
     ? {
@@ -146,9 +138,9 @@ function apply(viewership: Viewership | null) {
         sourceUrl: viewership.sourceUrl,
       }
     : emptyForm();
-}
+};
 
-async function load() {
+const load = async () => {
   loading.value = true;
   loadFailed.value = false;
 
@@ -161,7 +153,7 @@ async function load() {
   } finally {
     loading.value = false;
   }
-}
+};
 
 watch(
   open,
@@ -173,7 +165,7 @@ watch(
   { immediate: true },
 );
 
-async function save(viewership: Viewership | null, message: string) {
+const save = async (viewership: Viewership | null, message: string) => {
   saving.value = true;
 
   try {
@@ -187,15 +179,15 @@ async function save(viewership: Viewership | null, message: string) {
   } finally {
     saving.value = false;
   }
-}
+};
 
-function submit() {
+const submit = () => {
   const result = parsed.value;
 
   if (result.ok) {
     void save(result.viewership, t("page.tournaments.viewership.saved"));
   }
-}
+};
 </script>
 
 <template>

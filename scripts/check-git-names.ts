@@ -18,27 +18,25 @@ const pullRequestEvent = z.object({
   }),
 });
 
-function git(...args: string[]): string {
-  return execFileSync("git", args, { encoding: "utf-8" }).trim();
-}
+const git = (...args: string[]): string => execFileSync("git", args, { encoding: "utf-8" }).trim();
 
-function checkBranch(branch: string): void {
+const checkBranch = (branch: string): void => {
   if (branch !== "main" && !branchPattern.test(branch)) {
     throw new Error(
       `Invalid branch ${JSON.stringify(branch)}. Use <type>/<kebab-case-description>, e.g. feat/player-search. Allowed types: ${types.replaceAll("|", ", ")}.`,
     );
   }
-}
+};
 
-function checkSubject(subject: string, label: string): void {
+const checkSubject = (subject: string, label: string): void => {
   if (!subjectPattern.test(subject)) {
     throw new Error(
       `Invalid ${label} ${JSON.stringify(subject)}. Use <type>(optional-scope): description, e.g. fix(back): repair player sync. Allowed types: ${types.replaceAll("|", ", ")}.`,
     );
   }
-}
+};
 
-function checkTrailers(message: string, label: string): void {
+const checkTrailers = (message: string, label: string): void => {
   const trailer = agentTrailerPattern.exec(message)?.[0];
 
   if (trailer !== undefined) {
@@ -46,7 +44,7 @@ function checkTrailers(message: string, label: string): void {
       `Invalid ${label}: remove ${JSON.stringify(trailer.trim())}. Agents are not credited as co-authors.`,
     );
   }
-}
+};
 
 try {
   switch (process.argv[2]) {

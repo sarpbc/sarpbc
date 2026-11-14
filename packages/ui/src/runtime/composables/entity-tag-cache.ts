@@ -1,6 +1,6 @@
 import type { Player, Team } from "@sarpbc/types";
 
-function createEntityTagCache<T>() {
+const createEntityTagCache = <T>() => {
   const cache = new Map<string, Promise<T>>();
 
   return async (slug: string, fetcher: () => Promise<T>): Promise<T> => {
@@ -20,7 +20,7 @@ function createEntityTagCache<T>() {
       throw error;
     }
   };
-}
+};
 
 export const fetchPlayerTagWithCache = createEntityTagCache<{ player: Player | null }>();
 export const fetchTeamTagWithCache = createEntityTagCache<{ team: Team | null }>();

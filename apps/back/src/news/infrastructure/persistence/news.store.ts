@@ -8,22 +8,20 @@ import { WEEKLY_DIGEST_NEWS_TYPE } from "../../domain/news-type";
 import type { NewsArticleRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
 
-export function newsSnapshot(row: NewsArticle): NewsArticleRecord {
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    content: row.content,
-    titleFr: row.titleFr,
-    contentFr: row.contentFr,
-    author: { id: row.author.id, userName: row.author.userName },
-    createdAt: new Date(row.createdAt),
-    updatedAt: row.updatedAt ? new Date(row.updatedAt) : null,
-    isDraft: row.isDraft,
-    imageUrl: row.imageUrl,
-    type: row.type,
-  };
-}
+export const newsSnapshot = (row: NewsArticle): NewsArticleRecord => ({
+  id: row.id,
+  slug: row.slug,
+  title: row.title,
+  content: row.content,
+  titleFr: row.titleFr,
+  contentFr: row.contentFr,
+  author: { id: row.author.id, userName: row.author.userName },
+  createdAt: new Date(row.createdAt),
+  updatedAt: row.updatedAt ? new Date(row.updatedAt) : null,
+  isDraft: row.isDraft,
+  imageUrl: row.imageUrl,
+  type: row.type,
+});
 
 type NewsStore = NewsWriteScope["articles"];
 

@@ -19,7 +19,10 @@ interface LoadedOwner extends OwnedStreams {
   save: (streams: Stream[]) => Promise<void>;
 }
 
-async function loadOwner(scope: CompetitionWriteScope, owner: StreamOwner): Promise<LoadedOwner> {
+const loadOwner = async (
+  scope: CompetitionWriteScope,
+  owner: StreamOwner,
+): Promise<LoadedOwner> => {
   switch (owner.kind) {
     case "event": {
       const event = await requireEvent(scope.events, owner.id);
@@ -83,7 +86,7 @@ async function loadOwner(scope: CompetitionWriteScope, owner: StreamOwner): Prom
       return exhaustive;
     }
   }
-}
+};
 
 export class StreamService {
   constructor(

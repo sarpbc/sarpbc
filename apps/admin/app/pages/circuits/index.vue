@@ -35,7 +35,7 @@ const isCreateOpen = ref(false);
 const isCreating = ref(false);
 const circuitToDelete = ref<CircuitSummary | null>(null);
 
-async function create(input: CircuitInput) {
+const create = async (input: CircuitInput) => {
   isCreating.value = true;
 
   try {
@@ -48,7 +48,7 @@ async function create(input: CircuitInput) {
   } finally {
     isCreating.value = false;
   }
-}
+};
 </script>
 
 <template>

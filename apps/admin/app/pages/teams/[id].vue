@@ -55,7 +55,7 @@ watch(
   { immediate: true },
 );
 
-async function saveTeam() {
+const saveTeam = async () => {
   if (!teamForm.value.name) {
     return;
   }
@@ -79,7 +79,7 @@ async function saveTeam() {
   } finally {
     isSavingTeam.value = false;
   }
-}
+};
 
 const teamToDelete = ref<Team | null>(null);
 
@@ -135,7 +135,7 @@ const {
   default: () => [],
 });
 
-function openCreateContractModal() {
+const openCreateContractModal = () => {
   editingContract.value = null;
   contractForm.value = {
     playerId: "",
@@ -144,9 +144,9 @@ function openCreateContractModal() {
     endDate: "",
   };
   isContractModalOpen.value = true;
-}
+};
 
-function openEditContractModal(contract: TeamContract) {
+const openEditContractModal = (contract: TeamContract) => {
   editingContract.value = contract;
   contractForm.value = {
     playerId: contract.player.id,
@@ -155,9 +155,9 @@ function openEditContractModal(contract: TeamContract) {
     endDate: formatDateForInput(contract.endDate),
   };
   isContractModalOpen.value = true;
-}
+};
 
-async function saveContract() {
+const saveContract = async () => {
   if (!contractForm.value.playerId || !contractForm.value.startDate) {
     return;
   }
@@ -183,7 +183,7 @@ async function saveContract() {
   } finally {
     isSavingContract.value = false;
   }
-}
+};
 
 const contractModalTitle = computed(() =>
   editingContract.value

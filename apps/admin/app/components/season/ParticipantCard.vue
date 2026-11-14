@@ -34,11 +34,10 @@ const entryToRemove = ref<SeasonPathEntry | null>(null);
 
 const canAddEntry = computed(() => label.value.trim().length > 0 && result.value.trim().length > 0);
 
-function entryTournamentLabel(entry: SeasonPathEntry): string | null {
-  return entry.tournament ? tournamentStageLabel(entry.tournament) : null;
-}
+const entryTournamentLabel = (entry: SeasonPathEntry): string | null =>
+  entry.tournament ? tournamentStageLabel(entry.tournament) : null;
 
-async function saveNote() {
+const saveNote = async () => {
   savingNote.value = true;
 
   try {
@@ -50,17 +49,17 @@ async function saveNote() {
   } finally {
     savingNote.value = false;
   }
-}
+};
 
-function pickStage(picked: PickedStage) {
+const pickStage = (picked: PickedStage) => {
   stage.value = picked;
 
   if (!label.value.trim()) {
     label.value = picked.label.slice(0, SEASON_PATH_LABEL_MAX_LENGTH);
   }
-}
+};
 
-async function addEntry() {
+const addEntry = async () => {
   if (!canAddEntry.value) {
     return;
   }
@@ -82,7 +81,7 @@ async function addEntry() {
   } finally {
     addingEntry.value = false;
   }
-}
+};
 </script>
 
 <template>

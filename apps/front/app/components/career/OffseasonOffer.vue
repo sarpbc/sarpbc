@@ -90,11 +90,11 @@ const title = computed(() => {
   return t("page.game.career.offseason.unsignedTitle");
 });
 
-function setHoveredTeam(teamId: string | null): void {
+const setHoveredTeam = (teamId: string | null): void => {
   emit("update:hoveredTeamId", teamId);
-}
+};
 
-function offerRowClass(teamId: string, withBottomBorder: boolean): string[] {
+const offerRowClass = (teamId: string, withBottomBorder: boolean): string[] => {
   const highlighted = hoveredTeamId === teamId;
 
   return [
@@ -103,14 +103,14 @@ function offerRowClass(teamId: string, withBottomBorder: boolean): string[] {
     withBottomBorder ? "border-b border-separator" : "",
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
   ];
-}
+};
 
 const retireRowClass = [
   "grid grid-cols-[minmax(0,1fr)_max-content] items-center border-l-2 border-l-transparent",
   "hover:bg-elevated",
 ];
 
-function onRowLeave(event: MouseEvent, teamId: string): void {
+const onRowLeave = (event: MouseEvent, teamId: string): void => {
   const { currentTarget: current, relatedTarget: next } = event;
 
   if (current instanceof Node && next instanceof Node && current.contains(next)) {
@@ -120,9 +120,9 @@ function onRowLeave(event: MouseEvent, teamId: string): void {
   if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
-}
+};
 
-function onRowFocusOut(event: FocusEvent, teamId: string): void {
+const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
   const { currentTarget: current, relatedTarget: next } = event;
 
   if (current instanceof Node && next instanceof Node && current.contains(next)) {
@@ -132,7 +132,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
   if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
-}
+};
 </script>
 
 <template>

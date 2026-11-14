@@ -24,13 +24,13 @@ export interface PlayerAwardsContext {
   outsiderPlayerId: string;
 }
 
-export async function verifyPlayerAwards({
+export const verifyPlayerAwards = async ({
   request,
   staffCookie,
   memberCookie,
   competition,
   outsiderPlayerId,
-}: PlayerAwardsContext): Promise<void> {
+}: PlayerAwardsContext): Promise<void> => {
   const { tournamentId, participantId, playerId } = competition;
   const url = `/tournaments/${tournamentId}/awards`;
   const input = { participantId, playerId, awardType: "mvp" };
@@ -78,4 +78,4 @@ export async function verifyPlayerAwards({
   const response6 = await request("GET", `/player/${playerId}/awards`);
   assert.deepEqual(response6.json(profileBody).awards, []);
   await request("DELETE", `${url}/${award.id}`, undefined, staffCookie, 404);
-}
+};

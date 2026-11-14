@@ -5,7 +5,7 @@ import { Player as PlayerRow } from "./player.entity";
 import { Player } from "../../domain/player";
 import { MikroPlayerStore } from "./player.store";
 
-function fixture() {
+const fixture = () => {
   const execute = vi.fn<(query: string) => Promise<{ id: string }[]>>();
   const findOne = vi.fn<EntityManager["findOne"]>();
 
@@ -15,7 +15,7 @@ function fixture() {
   });
 
   return { execute, findOne, players: new MikroPlayerStore(manager) };
-}
+};
 
 describe("MikroPlayerStore.getRandomPlayer", () => {
   it("loads a single random row and maps it to a detached player", async () => {

@@ -78,13 +78,13 @@ const rateLimitMessage = computed(() => {
   });
 });
 
-async function loadTopics() {
+const loadTopics = async () => {
   try {
     topics.value = await getTopics();
   } catch {
     topicsLoadFailed.value = true;
   }
-}
+};
 
 onMounted(async () => {
   const [, status] = await Promise.all([loadTopics(), getForumPostCreationStatus()]);
@@ -101,7 +101,9 @@ onMounted(async () => {
 
 type CreateForumPostResult = Awaited<ReturnType<typeof createForumPost>>;
 
-function createFailureDescription(failure: Exclude<CreateForumPostResult, { ok: true }>): string {
+const createFailureDescription = (
+  failure: Exclude<CreateForumPostResult, { ok: true }>,
+): string => {
   if (failure.reason === "rate_limited") {
     return failure.message ?? t("page.forum.new.messages.rateLimitDescription");
   }
@@ -111,9 +113,9 @@ function createFailureDescription(failure: Exclude<CreateForumPostResult, { ok: 
   }
 
   return failure.message ?? t("page.forum.new.messages.errorDescription");
-}
+};
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   event.preventDefault();
 
   if (!canSubmit.value) {
@@ -161,7 +163,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     description,
     color: "error",
   });
-}
+};
 </script>
 
 <template>

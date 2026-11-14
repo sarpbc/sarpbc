@@ -25,7 +25,7 @@ export interface HeadToHead {
   recentMeetings: HeadToHeadMeeting[];
 }
 
-export function formatTournamentLabel(match: Match): string {
+export const formatTournamentLabel = (match: Match): string => {
   const league = match.tournament?.league?.name;
   const name = match.tournament?.name;
 
@@ -34,9 +34,9 @@ export function formatTournamentLabel(match: Match): string {
   }
 
   return name ?? "Unknown tournament";
-}
+};
 
-export function getWinnerTeamId(match: Match, teamAId: string, teamBId: string): string | null {
+export const getWinnerTeamId = (match: Match, teamAId: string, teamBId: string): string | null => {
   if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
     const winnerId = match.winner.team.id;
 
@@ -66,13 +66,13 @@ export function getWinnerTeamId(match: Match, teamAId: string, teamBId: string):
   }
 
   return winnerParticipantId === teamAParticipant.id ? teamAId : teamBId;
-}
+};
 
-export function mapHeadToHeadMeeting(
+export const mapHeadToHeadMeeting = (
   match: Match,
   teamAId: string,
   teamBId: string,
-): HeadToHeadMeeting | null {
+): HeadToHeadMeeting | null => {
   const { participants } = match;
   const teamAParticipant = participants.find((p) => p.team?.id === teamAId);
   const teamBParticipant = participants.find((p) => p.team?.id === teamBId);
@@ -98,14 +98,14 @@ export function mapHeadToHeadMeeting(
     scoreB,
     winnerTeamId: getWinnerTeamId(match, teamAId, teamBId),
   };
-}
+};
 
-export function buildHeadToHead(
+export const buildHeadToHead = (
   matches: Match[],
   teamAId: string,
   teamBId: string,
   recentLimit = 5,
-): HeadToHead {
+): HeadToHead => {
   const meetings = matches.flatMap((match) => mapHeadToHeadMeeting(match, teamAId, teamBId) ?? []);
 
   let teamAWins = 0;
@@ -127,4 +127,4 @@ export function buildHeadToHead(
     totalMeetings: meetings.length,
     recentMeetings: meetings.slice(0, recentLimit),
   };
-}
+};

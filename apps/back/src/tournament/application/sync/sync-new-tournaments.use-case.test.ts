@@ -6,7 +6,7 @@ import { SyncNewTournamentsUseCase } from "./sync-new-tournaments.use-case";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
 
-async function run() {
+const run = async () => {
   const steps: string[] = [];
 
   const additions = {
@@ -44,7 +44,7 @@ async function run() {
   const result = await service.execute();
 
   return { result, steps, diagnostics };
-}
+};
 
 describe(SyncNewTournamentsUseCase, () => {
   it("counts discovered, synced and failed tournament details", async () => {

@@ -28,7 +28,7 @@ export interface ParticipantReferences {
   results: boolean;
 }
 
-export function assertParticipantRemovable(refs: ParticipantReferences): void {
+export const assertParticipantRemovable = (refs: ParticipantReferences): void => {
   if (refs.tournamentWinner) {
     throw new InvalidInputError(
       "Cannot remove a participant that is the tournament winner. Clear the winner first.",
@@ -52,4 +52,4 @@ export function assertParticipantRemovable(refs: ParticipantReferences): void {
       "Cannot remove a participant that has match results. Remove those results first.",
     );
   }
-}
+};

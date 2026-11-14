@@ -37,15 +37,15 @@ const isValid = computed(
   () => name.value.trim().length > 0 && phases.value.every((phase) => phase.name.trim()),
 );
 
-function addPhase() {
+const addPhase = () => {
   phases.value.push({ name: "", description: null });
-}
+};
 
-function removePhase(index: number) {
+const removePhase = (index: number) => {
   phases.value.splice(index, 1);
-}
+};
 
-function submit() {
+const submit = () => {
   if (!isValid.value) {
     return;
   }
@@ -67,7 +67,7 @@ function submit() {
   }
 
   emit("submit", input);
-}
+};
 </script>
 
 <template>

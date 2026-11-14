@@ -2,13 +2,13 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import type { ProfileEarnings, ProfileMatchListItem, Team, TeamContract } from "@sarpbc/types";
 import type { Tournament } from "~/types/tournament";
 
-export async function getTeamFromSlug(slug: string): Promise<Team | null> {
+export const getTeamFromSlug = async (slug: string): Promise<Team | null> => {
   const res = await apiFetch<{ team: Team | null }>(`/team/slug/${slug}`, {
     method: "GET",
   });
 
   return res.team;
-}
+};
 
 interface TeamListParams {
   limit: number;
@@ -17,12 +17,12 @@ interface TeamListParams {
   name?: string;
 }
 
-export async function getAllTeams(query?: {
+export const getAllTeams = async (query?: {
   limit?: number;
   search?: string;
   offset?: number;
   start?: string;
-}): Promise<{ teams: Team[]; total: number }> {
+}): Promise<{ teams: Team[]; total: number }> => {
   const params: TeamListParams = {
     limit: query?.limit ?? 50,
   };
@@ -43,41 +43,41 @@ export async function getAllTeams(query?: {
   });
 
   return { teams: res.teams, total: res.count };
-}
+};
 
-export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
+export const getTeamContracts = async (teamId: string): Promise<TeamContract[]> => {
   const res = await apiFetch<{ contracts: TeamContract[] }>(`/team/${teamId}/contract`, {
     method: "GET",
   });
 
   return res.contracts;
-}
+};
 
-export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
+export const getTeamTrophies = async (teamId: string): Promise<Tournament[]> => {
   const res = await apiFetch<{ trophies: Tournament[] }>(`/team/${teamId}/trophies`, {
     method: "GET",
   });
 
   return res.trophies;
-}
+};
 
-export async function getTeamEarnings(teamId: string): Promise<ProfileEarnings> {
+export const getTeamEarnings = async (teamId: string): Promise<ProfileEarnings> => {
   const res = await apiFetch<{ earnings: ProfileEarnings }>(`/team/${teamId}/earnings`, {
     method: "GET",
   });
 
   return res.earnings;
-}
+};
 
-export async function getTeamTournaments(teamId: string): Promise<Tournament[]> {
+export const getTeamTournaments = async (teamId: string): Promise<Tournament[]> => {
   const res = await apiFetch<{ tournaments: Tournament[] }>(`/team/${teamId}/tournaments`, {
     method: "GET",
   });
 
   return res.tournaments;
-}
+};
 
-export async function getTeamMatches(teamId: string): Promise<ProfileMatchListItem[]> {
+export const getTeamMatches = async (teamId: string): Promise<ProfileMatchListItem[]> => {
   const res = await apiFetch<{ matches: ProfileMatchListItem[] }>(
     `/tournaments/matches/team/${teamId}`,
     {
@@ -86,4 +86,4 @@ export async function getTeamMatches(teamId: string): Promise<ProfileMatchListIt
   );
 
   return res.matches;
-}
+};

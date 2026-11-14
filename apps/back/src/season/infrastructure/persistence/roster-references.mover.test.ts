@@ -7,17 +7,15 @@ import { SeasonAward } from "./season-award.entity";
 import { SeasonParticipant } from "./season-participant.entity";
 import { SeasonPathEntry } from "./season-path-entry.entity";
 
-function award(id: string, playerId: string, seasonId: string, region: string | null) {
-  return {
-    id,
-    player: { id: playerId },
-    season: { id: seasonId },
-    awardType: "regular_season_mvp",
-    region,
-  };
-}
+const award = (id: string, playerId: string, seasonId: string, region: string | null) => ({
+  id,
+  player: { id: playerId },
+  season: { id: seasonId },
+  awardType: "regular_season_mvp",
+  region,
+});
 
-function awardMover(awards: ReturnType<typeof award>[]) {
+const awardMover = (awards: ReturnType<typeof award>[]) => {
   const find = vi.fn<EntityManager["find"]>().mockResolvedValue(awards);
   const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
   const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
@@ -27,7 +25,7 @@ function awardMover(awards: ReturnType<typeof award>[]) {
   );
 
   return { references, nativeDelete, nativeUpdate };
-}
+};
 
 describe("SeasonRosterReferences.movePlayer", () => {
   it("drops the duplicate's award the kept player already holds before moving the rest", async () => {
@@ -68,11 +66,14 @@ describe("SeasonRosterReferences.movePlayer", () => {
   });
 });
 
-function participant(id: string, teamId: string, seasonId: string, pathNote: string | null) {
-  return { id, team: { id: teamId }, season: { id: seasonId }, pathNote };
-}
+const participant = (id: string, teamId: string, seasonId: string, pathNote: string | null) => ({
+  id,
+  team: { id: teamId },
+  season: { id: seasonId },
+  pathNote,
+});
 
-function participantMover(participants: ReturnType<typeof participant>[]) {
+const participantMover = (participants: ReturnType<typeof participant>[]) => {
   const find = vi.fn<EntityManager["find"]>().mockResolvedValue(participants);
   const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
   const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
@@ -82,7 +83,7 @@ function participantMover(participants: ReturnType<typeof participant>[]) {
   );
 
   return { references, nativeDelete, nativeUpdate };
-}
+};
 
 describe("SeasonRosterReferences.moveTeam", () => {
   let nativeDelete: ReturnType<typeof participantMover>["nativeDelete"];

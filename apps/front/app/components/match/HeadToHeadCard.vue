@@ -21,13 +21,13 @@ const hasMeetings = computed(() => headToHead.totalMeetings > 0);
 
 const dateFormatter = computed(() => mediumDateFormatter(locale.value));
 
-function meetingDate(meeting: HeadToHead["recentMeetings"][number]) {
+const meetingDate = (meeting: HeadToHead["recentMeetings"][number]) => {
   const date = meeting.endAt ?? meeting.beginAt;
 
   return date ? dateFormatter.value.format(new Date(date)) : "";
-}
+};
 
-function winnerLabel(winnerTeamId: string | null) {
+const winnerLabel = (winnerTeamId: string | null) => {
   if (winnerTeamId === headToHead.teamAId) {
     return teamAName;
   }
@@ -37,7 +37,7 @@ function winnerLabel(winnerTeamId: string | null) {
   }
 
   return t("page.match.detail.h2h.draw");
-}
+};
 </script>
 
 <template>

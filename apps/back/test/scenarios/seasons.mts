@@ -69,14 +69,14 @@ const seasonArchiveList = z.object({
   seasons: z.array(z.object({ slug: z.string().nullable(), winner: idRef.nullish() })),
 });
 
-export async function verifySeasonAwards({
+export const verifySeasonAwards = async ({
   request,
   staffCookie,
   memberCookie,
   callTool,
   review,
   player,
-}: SeasonAwardsContext): Promise<void> {
+}: SeasonAwardsContext): Promise<void> => {
   const response = await request(
     "POST",
     "/player",
@@ -220,9 +220,9 @@ export async function verifySeasonAwards({
   await request("DELETE", `/seasons/${season.id}`, undefined, staffCookie, 204);
   const response6 = await request("GET", `/player/${player.id}/awards`);
   assert.deepEqual(response6.json(playerSeasonAwards).seasonAwards, []);
-}
+};
 
-export async function verifySeasonArchives({
+export const verifySeasonArchives = async ({
   request,
   staffCookie,
   memberCookie,
@@ -230,7 +230,7 @@ export async function verifySeasonArchives({
   otherTeam,
   tournament,
   startggCupId,
-}: SeasonArchivesContext): Promise<void> {
+}: SeasonArchivesContext): Promise<void> => {
   const slug = "fake-archive-2026";
   await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, memberCookie, 403);
 
@@ -331,4 +331,4 @@ export async function verifySeasonArchives({
 
   await request("DELETE", `/seasons/${season.id}`, undefined, staffCookie, 204);
   await request("GET", `/season-archives/${slug}`, undefined, undefined, 404);
-}
+};

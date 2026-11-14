@@ -67,13 +67,13 @@ const loadError = computed(
   () => tournamentError.value ?? leaguesError.value ?? eventsError.value ?? teamsError.value,
 );
 
-async function reload() {
+const reload = async () => {
   await Promise.all([refreshTournament(), refreshLeagues(), refreshEvents(), refreshTeams()]);
-}
+};
 
 const isManual = computed(() => tournament.value?.source !== "pandascore");
 
-async function handleSubmit() {
+const handleSubmit = async () => {
   if (!tournament.value || isSaving.value || isUploading.value) {
     return;
   }
@@ -107,7 +107,7 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false;
   }
-}
+};
 </script>
 
 <template>

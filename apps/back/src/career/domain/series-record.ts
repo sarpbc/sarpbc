@@ -2,15 +2,12 @@ import type { HeadToHead, SeriesRecord } from "@sarpbc/types";
 import type { Match } from "../../tournament/domain/match";
 import type { TournamentParticipant } from "../../tournament/domain/tournament-participant";
 
-function sideOf(match: Match, playerId: string): TournamentParticipant | undefined {
-  return match.participants.find(({ players }) => players.some(({ id }) => id === playerId));
-}
+const sideOf = (match: Match, playerId: string): TournamentParticipant | undefined =>
+  match.participants.find(({ players }) => players.some(({ id }) => id === playerId));
 
-function wonBy(match: Match, side: TournamentParticipant): boolean {
-  return match.winner?.id === side.id;
-}
+const wonBy = (match: Match, side: TournamentParticipant): boolean => match.winner?.id === side.id;
 
-export function seriesRecord(matches: Match[], playerId: string): SeriesRecord {
+export const seriesRecord = (matches: Match[], playerId: string): SeriesRecord => {
   const record: SeriesRecord = { wins: 0, losses: 0 };
 
   for (const match of matches) {
@@ -28,9 +25,9 @@ export function seriesRecord(matches: Match[], playerId: string): SeriesRecord {
   }
 
   return record;
-}
+};
 
-export function headToHead(matches: Match[], playerId: string, opponentId: string): HeadToHead {
+export const headToHead = (matches: Match[], playerId: string, opponentId: string): HeadToHead => {
   const record: HeadToHead = { a: 0, b: 0 };
 
   for (const match of matches) {
@@ -49,4 +46,4 @@ export function headToHead(matches: Match[], playerId: string, opponentId: strin
   }
 
   return record;
-}
+};

@@ -7,7 +7,7 @@ interface ImageUploadContext {
   articleTitle?: string | null;
 }
 
-function messageFromNestBody(responseText: string): string | undefined {
+const messageFromNestBody = (responseText: string): string | undefined => {
   try {
     const message = getApiErrorBody(JSON.parse(responseText))?.message;
 
@@ -27,15 +27,15 @@ function messageFromNestBody(responseText: string): string | undefined {
   }
 
   return undefined;
-}
+};
 
-export function useR2Upload() {
+export const useR2Upload = () => {
   const config = useRuntimeConfig();
   const progress = ref(0);
   const isUploading = ref(false);
   const error = ref<string | null>(null);
 
-  async function uploadFile(file: File, context: ImageUploadContext): Promise<string> {
+  const uploadFile = async (file: File, context: ImageUploadContext): Promise<string> => {
     isUploading.value = true;
     progress.value = 0;
     error.value = null;
@@ -105,7 +105,7 @@ export function useR2Upload() {
     } finally {
       isUploading.value = false;
     }
-  }
+  };
 
   return {
     uploadFile,
@@ -113,4 +113,4 @@ export function useR2Upload() {
     isUploading,
     error,
   };
-}
+};

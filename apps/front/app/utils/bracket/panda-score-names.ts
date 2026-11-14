@@ -8,7 +8,7 @@ export interface BracketRoundParse {
 /**
  * PandaScore match names encode section and column when feeder links are omitted.
  */
-export function parseBracketRoundFromName(name: string | undefined): BracketRoundParse | null {
+export const parseBracketRoundFromName = (name: string | undefined): BracketRoundParse | null => {
   const normalized = name?.trim().toLowerCase() ?? "";
 
   if (!normalized) {
@@ -58,13 +58,12 @@ export function parseBracketRoundFromName(name: string | undefined): BracketRoun
   }
 
   return null;
-}
+};
 
-export function getBracketSectionFromName(name: string | undefined): BracketSection | null {
-  return parseBracketRoundFromName(name)?.section ?? null;
-}
+export const getBracketSectionFromName = (name: string | undefined): BracketSection | null =>
+  parseBracketRoundFromName(name)?.section ?? null;
 
-export function getCombinedColumnFromName(name: string | undefined): number | null {
+export const getCombinedColumnFromName = (name: string | undefined): number | null => {
   const parsed = parseBracketRoundFromName(name);
 
   if (!parsed || parsed.section === "upper") {
@@ -72,9 +71,9 @@ export function getCombinedColumnFromName(name: string | undefined): number | nu
   }
 
   return parsed.column;
-}
+};
 
-export function getUpperColumnFromName(name: string | undefined): number | null {
+export const getUpperColumnFromName = (name: string | undefined): number | null => {
   const parsed = parseBracketRoundFromName(name);
 
   if (!parsed || parsed.section !== "upper") {
@@ -82,4 +81,4 @@ export function getUpperColumnFromName(name: string | undefined): number | null 
   }
 
   return parsed.column;
-}
+};

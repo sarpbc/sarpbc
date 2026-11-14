@@ -12,7 +12,7 @@ const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` })
 
 const DEFAULT_SIZE = { width: 512, height: 256 };
 
-function setup(bytes: Uint8Array, size = DEFAULT_SIZE) {
+const setup = (bytes: Uint8Array, size = DEFAULT_SIZE) => {
   const source = { download: vi.fn<TeamLogoSource["download"]>(async () => bytes) };
 
   const images = {
@@ -27,7 +27,7 @@ function setup(bytes: Uint8Array, size = DEFAULT_SIZE) {
   };
 
   return { source, images, storage, service: new TeamLogoService(source, images, storage) };
-}
+};
 
 describe(TeamLogoService, () => {
   const hash = "0123456789abcdef";

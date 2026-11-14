@@ -61,7 +61,7 @@ export interface TeamForm {
 
 export type TeamFormsMap = Record<string, TeamForm>;
 
-function teamMatchOutcome(match: Match, teamId: string): "win" | "loss" | null {
+const teamMatchOutcome = (match: Match, teamId: string): "win" | "loss" | null => {
   if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
     return match.winner.team.id === teamId ? "win" : "loss";
   }
@@ -93,9 +93,9 @@ function teamMatchOutcome(match: Match, teamId: string): "win" | "loss" | null {
   }
 
   return winnerParticipantId === teamParticipant.id ? "win" : "loss";
-}
+};
 
-function toTeamFormEntry(match: Match, teamId: string): TeamFormMatchEntry | null {
+const toTeamFormEntry = (match: Match, teamId: string): TeamFormMatchEntry | null => {
   const { participants } = match;
   const teamParticipant = participants.find((p) => p.team?.id === teamId);
   const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
@@ -126,11 +126,11 @@ function toTeamFormEntry(match: Match, teamId: string): TeamFormMatchEntry | nul
     score: { team: teamScore, opponent: opponentScore },
     outcome: teamMatchOutcome(match, teamId),
   };
-}
+};
 
-async function assertDeletable(matches: MatchWriter, match: Match): Promise<void> {
+const assertDeletable = async (matches: MatchWriter, match: Match): Promise<void> => {
   assertMatchDeletable(match, await matches.references(match.id));
-}
+};
 
 export class MatchService {
   constructor(

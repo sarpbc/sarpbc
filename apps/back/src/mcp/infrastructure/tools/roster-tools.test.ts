@@ -18,7 +18,7 @@ const input = {
   sourceUrl: "https://kcorp.gg/brand",
 };
 
-function setup(role: "admin" | "journalist") {
+const setup = (role: "admin" | "journalist") => {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
 
   const rosterProposalService = {
@@ -51,11 +51,10 @@ function setup(role: "admin" | "journalist") {
     await tool(name).run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
-}
+};
 
-function textOf(result: { content: { type: string; text?: string }[] }): string {
-  return result.content[0]?.text ?? "";
-}
+const textOf = (result: { content: { type: string; text?: string }[] }): string =>
+  result.content[0]?.text ?? "";
 
 describe("upload_team_logo", () => {
   it("proposes the logo and returns the stored asset for review", async () => {

@@ -2,7 +2,10 @@ import { useDocumentVisibility, useIntervalFn } from "@vueuse/core";
 
 const LIVE_MATCH_REFRESH_INTERVAL_MS = 20_000;
 
-export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () => boolean) {
+export const useLiveMatchRefresh = function useLiveMatchRefresh(
+  key: MaybeRefOrGetter<string>,
+  hasLive: () => boolean,
+) {
   if (import.meta.server) {
     return;
   }
@@ -49,4 +52,4 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
       stopWatch?.();
     });
   }
-}
+};

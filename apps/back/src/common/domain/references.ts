@@ -3,10 +3,10 @@ export type ReferenceNouns<K extends string> = Record<
   readonly [singular: string, plural: string]
 >;
 
-export function describeReferences<K extends string>(
+export const describeReferences = <K extends string>(
   counts: Record<K, number>,
   nouns: ReferenceNouns<K>,
-): string | null {
+): string | null => {
   const keys: K[] = Object.keys(nouns).filter((key): key is K => key in counts);
 
   const described = keys.flatMap((key) =>
@@ -14,4 +14,4 @@ export function describeReferences<K extends string>(
   );
 
   return described.length > 0 ? described.join(", ") : null;
-}
+};

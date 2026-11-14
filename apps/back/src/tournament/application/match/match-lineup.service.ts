@@ -22,11 +22,10 @@ export interface StandInMatch {
   match: Match;
 }
 
-export function lineupSource(match: Pick<Match, "source" | "tournament">): DataSource {
-  return isRedistributable(match.tournament.source) ? match.source : match.tournament.source;
-}
+export const lineupSource = (match: Pick<Match, "source" | "tournament">): DataSource =>
+  isRedistributable(match.tournament.source) ? match.source : match.tournament.source;
 
-async function requireMatch(matches: MatchWriter, id: string): Promise<Match> {
+const requireMatch = async (matches: MatchWriter, id: string): Promise<Match> => {
   const match = await matches.load(id);
 
   if (!match) {
@@ -34,13 +33,13 @@ async function requireMatch(matches: MatchWriter, id: string): Promise<Match> {
   }
 
   return match;
-}
+};
 
-async function validLineups(
+const validLineups = async (
   match: Match,
   lineups: LineupWriter,
   inputs: readonly MatchLineupInput[],
-): Promise<MatchLineupInput[]> {
+): Promise<MatchLineupInput[]> => {
   const normalized = normalizeLineups(
     match.participants.map(({ id }) => id),
     inputs,
@@ -53,7 +52,7 @@ async function validLineups(
   }
 
   return normalized;
-}
+};
 
 export class MatchLineupService {
   constructor(

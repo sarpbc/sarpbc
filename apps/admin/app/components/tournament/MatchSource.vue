@@ -22,7 +22,7 @@ watch(open, (isOpen) => {
   }
 });
 
-async function save() {
+const save = async () => {
   saving.value = true;
 
   try {
@@ -35,7 +35,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

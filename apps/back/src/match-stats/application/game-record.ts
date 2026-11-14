@@ -20,7 +20,7 @@ export interface GameTarget {
   sides: SideAssignment;
 }
 
-export function requireBallchasing(source: BallchasingSource | null): BallchasingSource {
+export const requireBallchasing = (source: BallchasingSource | null): BallchasingSource => {
   if (!source) {
     throw new IntegrationError({
       message: "Ballchasing is not configured. Set BALLCHASING_API_KEY on the API and restart it.",
@@ -29,35 +29,33 @@ export function requireBallchasing(source: BallchasingSource | null): Ballchasin
   }
 
   return source;
-}
+};
 
-export async function requireTournament(
+export const requireTournament = async (
   candidates: StatsCandidates,
   tournamentId: string,
-): Promise<void> {
+): Promise<void> => {
   if (!(await candidates.tournamentExists(tournamentId))) {
     throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
   }
-}
+};
 
-export function hasBothTeams(stats: ReplayStats): boolean {
-  return (["blue", "orange"] as const).every((side) =>
+export const hasBothTeams = (stats: ReplayStats): boolean =>
+  (["blue", "orange"] as const).every((side) =>
     stats.players.some((player) => player.side === side),
   );
-}
 
-export function platformAccounts(stats: ReplayStats): PlatformAccount[] {
-  return stats.players.flatMap(({ platform, platformId }) =>
+export const platformAccounts = (stats: ReplayStats): PlatformAccount[] =>
+  stats.players.flatMap(({ platform, platformId }) =>
     platformId !== null && platformId !== "" ? [{ platform, platformId }] : [],
   );
-}
 
-export function buildGameRecord(
+export const buildGameRecord = (
   { sides, ...target }: GameTarget,
   stats: ReplayStats,
   rosters: ReadonlyMap<string, RosterPlayer[]>,
   links: PlayerLink[],
-): GameRecord {
+): GameRecord => {
   const learnedLinks: PlayerLink[] = [];
 
   const players = stats.players.map((player) => {
@@ -89,4 +87,4 @@ export function buildGameRecord(
     players,
     learnedLinks,
   };
-}
+};

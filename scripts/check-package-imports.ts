@@ -18,8 +18,8 @@ const packageManifest = z.object({
 const specifierPattern =
   /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["'](?<specifier>[^"']+)["']/gu;
 
-function sourceFiles(directory: string): string[] {
-  return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+const sourceFiles = (directory: string): string[] =>
+  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
 
     if (entry.isDirectory()) {
@@ -28,9 +28,8 @@ function sourceFiles(directory: string): string[] {
 
     return /\.(?:ts|mts|mjs|js|vue)$/u.test(entry.name) ? [file] : [];
   });
-}
 
-export function frameworkViolations(directory: string, root = directory): string[] {
+export const frameworkViolations = (directory: string, root = directory): string[] => {
   const violations: string[] = [];
 
   for (const file of sourceFiles(directory)) {
@@ -61,7 +60,7 @@ export function frameworkViolations(directory: string, root = directory): string
   }
 
   return violations;
-}
+};
 
 if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const violations = frameworkFree.flatMap((directory) =>

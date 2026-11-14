@@ -9,11 +9,11 @@ export interface DayGroup<T> {
 }
 
 /** Items without a date go last in a group keyed `UNKNOWN_DAY_KEY`. */
-export function groupByDay<T>(
+export const groupByDay = <T>(
   items: T[],
   getDate: (item: T) => Date | string | null | undefined,
   order: "asc" | "desc",
-): DayGroup<T>[] {
+): DayGroup<T>[] => {
   const sign = order === "desc" ? -1 : 1;
   const timeOf = (item: T) => parseMatchDate(getDate(item))?.getTime() ?? 0;
   const unknown: T[] = [];
@@ -50,4 +50,4 @@ export function groupByDay<T>(
   }
 
   return groups;
-}
+};

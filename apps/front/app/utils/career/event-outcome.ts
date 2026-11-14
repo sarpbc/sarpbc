@@ -28,19 +28,18 @@ export interface ResolvedEventOutcome {
   failed: boolean;
 }
 
-function mean(values: readonly number[]): number {
+const mean = (values: readonly number[]): number => {
   if (values.length === 0) {
     return WORLD_STRENGTH_BASELINE;
   }
 
   return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
+};
 
-function gapChance(gap: number, scale: number, cap: number): number {
-  return Math.min(cap, Math.max(0, gap) / scale);
-}
+const gapChance = (gap: number, scale: number, cap: number): number =>
+  Math.min(cap, Math.max(0, gap) / scale);
 
-export function computeEventFailureChance(context: EventOutcomeContext): number {
+export const computeEventFailureChance = (context: EventOutcomeContext): number => {
   const pastPeak = getSeasonsPastPeak(context.season);
   let chance = 0.02;
 
@@ -70,13 +69,13 @@ export function computeEventFailureChance(context: EventOutcomeContext): number 
   }
 
   return Math.min(MAX_FAILURE_CHANCE, chance);
-}
+};
 
-function applyMalus(
+const applyMalus = (
   authored: Partial<CareerStats>,
   rng: () => number,
   pastPeak: number,
-): Partial<CareerStats> {
+): Partial<CareerStats> => {
   let ratingHit = rng() < 0.65 ? MIN_RATING_MALUS : MIN_RATING_MALUS + 1;
 
   if (pastPeak > 0 && rng() < 0.3) {
@@ -93,18 +92,17 @@ function applyMalus(
     form: (authored.form ?? 0) - formHit,
     morale: (authored.morale ?? 0) - moraleHit,
   };
-}
+};
 
-function malusSeed(context: EventOutcomeContext): number {
-  return hashString(
+const malusSeed = (context: EventOutcomeContext): number =>
+  hashString(
     `${context.careerId}:event-fail:${context.eventId}:${context.choiceId}:${context.season}`,
   );
-}
 
-export function buildEventOutcomeContext(
+export const buildEventOutcomeContext = (
   state: CareerState,
   choice: CareerEventChoiceDefinition,
-): EventOutcomeContext {
+): EventOutcomeContext => {
   const eventId = state.currentEventId;
 
   if (!isNonEmptyString(eventId)) {
@@ -134,12 +132,12 @@ export function buildEventOutcomeContext(
     missedWorldsLastSeason: lastSeason ? lastSeason.worlds === null : false,
     quitLeaning: state.destinyLeanings.quit,
   };
-}
+};
 
-export function resolveEventOutcome(
+export const resolveEventOutcome = (
   context: EventOutcomeContext,
   rng: () => number = createRng(malusSeed(context)),
-): ResolvedEventOutcome {
+): ResolvedEventOutcome => {
   const chance = computeEventFailureChance(context);
 
   if (rng() >= chance) {
@@ -152,4 +150,4 @@ export function resolveEventOutcome(
     delta: applyMalus(context.authoredDelta, rng, pastPeak),
     failed: true,
   };
-}
+};

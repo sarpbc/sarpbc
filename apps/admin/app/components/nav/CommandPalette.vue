@@ -35,7 +35,7 @@ defineShortcuts({
   },
 });
 
-async function runSearch(query: string) {
+const runSearch = async (query: string) => {
   const trimmed = query.trim();
 
   if (!trimmed) {
@@ -54,7 +54,7 @@ async function runSearch(query: string) {
   } finally {
     pending.value = false;
   }
-}
+};
 
 watchDebounced(searchTerm, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
@@ -75,12 +75,12 @@ watch(open, (isOpen) => {
   }
 });
 
-function closeAndGo(path: string) {
+const closeAndGo = (path: string) => {
   open.value = false;
   void navigateTo(localePath(path));
-}
+};
 
-function playerItems(): CommandPaletteItem[] {
+const playerItems = (): CommandPaletteItem[] => {
   if (!canPlayers.value) {
     return [];
   }
@@ -95,9 +95,9 @@ function playerItems(): CommandPaletteItem[] {
       closeAndGo(`/players/${player.id}`);
     },
   }));
-}
+};
 
-function teamItems(): CommandPaletteItem[] {
+const teamItems = (): CommandPaletteItem[] => {
   if (!canTeams.value) {
     return [];
   }
@@ -116,9 +116,9 @@ function teamItems(): CommandPaletteItem[] {
       },
     };
   });
-}
+};
 
-function tournamentItems(): CommandPaletteItem[] {
+const tournamentItems = (): CommandPaletteItem[] => {
   if (!canTournaments.value) {
     return [];
   }
@@ -132,9 +132,9 @@ function tournamentItems(): CommandPaletteItem[] {
       closeAndGo(`/tournaments/${tournament.id}`);
     },
   }));
-}
+};
 
-async function refreshEmptyTournaments(event?: Event) {
+const refreshEmptyTournaments = async (event?: Event) => {
   event?.preventDefault();
 
   if (refreshState.value === "loading" || !canTournaments.value) {
@@ -153,7 +153,7 @@ async function refreshEmptyTournaments(event?: Event) {
     refreshState.value = "error";
     reportError(refreshError);
   }
-}
+};
 
 const groups = computed<CommandPaletteGroup[]>(() => {
   const items: CommandPaletteGroup[] = [];

@@ -8,28 +8,26 @@ import { toEventRef } from "../../domain/tournament-event";
 import { Tournament } from "./tournament.entity";
 import { TournamentPrize } from "./tournament-prize.entities";
 
-function toPrizeItem(row: TournamentPrize): TournamentPrizeItem {
-  return {
-    id: row.id,
-    placement: row.placement,
-    amount: row.amount,
-    currency: row.currency,
-    team: {
-      id: row.team.id,
-      name: row.team.name,
-      slug: row.team.slug,
-      imageUrl: row.team.imageUrl,
-      darkModeImageUrl: row.team.darkModeImageUrl,
-    },
-    players: row.players
-      .getItems()
-      .map(({ id, name, slug }) => ({ id, name, slug }))
-      .toSorted((a, b) => a.name.localeCompare(b.name)),
-    sourceUrl: row.sourceUrl,
-  };
-}
+const toPrizeItem = (row: TournamentPrize): TournamentPrizeItem => ({
+  id: row.id,
+  placement: row.placement,
+  amount: row.amount,
+  currency: row.currency,
+  team: {
+    id: row.team.id,
+    name: row.team.name,
+    slug: row.team.slug,
+    imageUrl: row.team.imageUrl,
+    darkModeImageUrl: row.team.darkModeImageUrl,
+  },
+  players: row.players
+    .getItems()
+    .map(({ id, name, slug }) => ({ id, name, slug }))
+    .toSorted((a, b) => a.name.localeCompare(b.name)),
+  sourceUrl: row.sourceUrl,
+});
 
-function toEarningsLine(row: TournamentPrize, shares: number): EarningsLine {
+const toEarningsLine = (row: TournamentPrize, shares: number): EarningsLine => {
   const { tournament } = row;
 
   return {
@@ -49,7 +47,7 @@ function toEarningsLine(row: TournamentPrize, shares: number): EarningsLine {
       event: toEventRef(tournament.event),
     },
   };
-}
+};
 
 export class CompetitionPrizeQueries implements PrizeQueries {
   constructor(private readonly em: Pick<EntityManager, "find" | "findOne">) {}

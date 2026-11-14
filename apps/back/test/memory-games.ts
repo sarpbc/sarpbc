@@ -6,18 +6,16 @@ import type {
   PlayerLink,
 } from "../src/match-stats/application/ports";
 
-function toTournamentGame(game: GameRecord): TournamentStatsGame {
-  return {
-    matchId: game.matchId,
-    number: game.number,
-    ballchasingId: game.ballchasingId,
-    playedAt: null,
-    blueParticipantId: game.blueParticipantId,
-    orangeParticipantId: game.orangeParticipantId,
-    blueGoals: game.blueGoals,
-    orangeGoals: game.orangeGoals,
-  };
-}
+const toTournamentGame = (game: GameRecord): TournamentStatsGame => ({
+  matchId: game.matchId,
+  number: game.number,
+  ballchasingId: game.ballchasingId,
+  playedAt: null,
+  blueParticipantId: game.blueParticipantId,
+  orangeParticipantId: game.orangeParticipantId,
+  blueGoals: game.blueGoals,
+  orangeGoals: game.orangeGoals,
+});
 
 export class MemoryGames implements GameStatsStore {
   saved: GameRecord[] = [];

@@ -29,7 +29,7 @@ const incomplete = computed(() => {
 
 const available = computed(() => results.value.filter(({ id }) => !taken.value.has(id)));
 
-async function runSearch(searchQuery: string) {
+const runSearch = async (searchQuery: string) => {
   const trimmed = searchQuery.trim();
 
   if (!trimmed) {
@@ -48,11 +48,11 @@ async function runSearch(searchQuery: string) {
   } finally {
     pending.value = false;
   }
-}
+};
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
-function pick(player: Player) {
+const pick = (player: Player) => {
   const picked = { id: player.id, name: player.name, slug: player.slug };
   query.value = "";
   results.value = [];
@@ -62,14 +62,14 @@ function pick(player: Player) {
       ? [...modelValue.slice(0, -1), [...incomplete.value, picked]]
       : [...modelValue, [picked]],
   );
-}
+};
 
-function remove(index: number) {
+const remove = (index: number) => {
   emit(
     "update:modelValue",
     modelValue.filter((_, position) => position !== index),
   );
-}
+};
 </script>
 
 <template>

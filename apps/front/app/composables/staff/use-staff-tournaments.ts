@@ -4,7 +4,7 @@ import { getPlayerStaffTournaments } from "~/composables/player/api";
 import type { Tournament } from "~/types/tournament";
 import { splitTournaments } from "~/composables/entity/use-entity-tournaments";
 
-function coversTournament(contract: PlayerContract, tournament: Tournament): boolean {
+const coversTournament = (contract: PlayerContract, tournament: Tournament): boolean => {
   if (!tournament.beginAt) {
     return false;
   }
@@ -15,21 +15,21 @@ function coversTournament(contract: PlayerContract, tournament: Tournament): boo
     new Date(contract.startDate).getTime() <= beginAt &&
     (contract.endDate === null || beginAt <= new Date(contract.endDate).getTime())
   );
-}
+};
 
-function wonDuringTenure(tournament: Tournament, contracts: PlayerContract[]): boolean {
+const wonDuringTenure = (tournament: Tournament, contracts: PlayerContract[]): boolean => {
   const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
   const winnerTeamId = winner?.team instanceof Object ? winner.team.id : undefined;
 
   return contracts.some(
     (contract) => contract.team.id === winnerTeamId && coversTournament(contract, tournament),
   );
-}
+};
 
-export function useStaffTournaments(
+export const useStaffTournaments = (
   staffId: MaybeRef<string>,
   contracts: MaybeRef<PlayerContract[]>,
-) {
+) => {
   const idRef = toRef(staffId);
   const contractsRef = toRef(contracts);
 
@@ -62,4 +62,4 @@ export function useStaffTournaments(
     error,
     refresh,
   };
-}
+};

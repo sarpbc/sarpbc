@@ -11,14 +11,14 @@ setPageSeo({
   description: t("page.brand.metaDescription"),
 });
 
-async function copyHex(): Promise<void> {
+const copyHex = async (): Promise<void> => {
   try {
     await navigator.clipboard.writeText(BRAND_BLUE);
     toast.add({ title: t("page.brand.hexCopied"), color: "success" });
   } catch {
     toast.add({ title: t("page.brand.hexCopyFailed"), color: "error" });
   }
-}
+};
 </script>
 
 <template>

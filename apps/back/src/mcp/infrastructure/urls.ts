@@ -9,38 +9,22 @@ import {
 } from "@sarpbc/utils";
 import { adminUrl, frontUrl } from "../../infrastructure/config/env.validation";
 
-export function playerUrl(slug: string): string {
-  return `${frontUrl()}${playerPath(slug)}`;
-}
+export const playerUrl = (slug: string): string => `${frontUrl()}${playerPath(slug)}`;
 
-export function teamUrl(slug: string): string {
-  return `${frontUrl()}${teamPath(slug)}`;
-}
+export const teamUrl = (slug: string): string => `${frontUrl()}${teamPath(slug)}`;
 
-export function matchUrl(publicId: number, slug: string): string {
-  return `${frontUrl()}${matchPath(publicId, slug)}`;
-}
+export const matchUrl = (publicId: number, slug: string): string =>
+  `${frontUrl()}${matchPath(publicId, slug)}`;
 
-export function tournamentUrl(tournament: { slug: string; event: { slug: string } }): string {
-  return `${frontUrl()}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
-}
+export const tournamentUrl = (tournament: { slug: string; event: { slug: string } }): string =>
+  `${frontUrl()}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
 
-export function eventUrl(slug: string): string {
-  return `${frontUrl()}${tournamentEventPath(slug)}`;
-}
+export const eventUrl = (slug: string): string => `${frontUrl()}${tournamentEventPath(slug)}`;
 
-export function circuitUrl(slug: string): string {
-  return `${frontUrl()}${circuitPath(slug)}`;
-}
+export const circuitUrl = (slug: string): string => `${frontUrl()}${circuitPath(slug)}`;
 
-export function newsUrl(slug: string): string {
-  return `${frontUrl()}${newsPath(slug)}`;
-}
+export const newsUrl = (slug: string): string => `${frontUrl()}${newsPath(slug)}`;
 
-export function adminNewsEditUrl(slug: string): string {
-  return `${adminUrl()}/news/${slug}`;
-}
+export const adminNewsEditUrl = (slug: string): string => `${adminUrl()}/news/${slug}`;
 
-export function adminRosterProposalsUrl(): string {
-  return `${adminUrl()}/proposals`;
-}
+export const adminRosterProposalsUrl = (): string => `${adminUrl()}/proposals`;

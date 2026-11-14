@@ -28,11 +28,11 @@ watch(
   },
 );
 
-function close() {
+const close = () => {
   emit("update:open", false);
-}
+};
 
-function confirm() {
+const confirm = () => {
   submitted.value = true;
 
   if (!parsed.value) {
@@ -40,7 +40,7 @@ function confirm() {
   }
 
   emit("select", parsed.value.url);
-}
+};
 </script>
 
 <template>

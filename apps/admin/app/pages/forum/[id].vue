@@ -43,7 +43,7 @@ const breadcrumbItems = computed(() => [
 const flatReplies = computed(() => {
   const items: Reply[] = [];
 
-  function walk(replies: Reply[]) {
+  const walk = (replies: Reply[]) => {
     for (const reply of replies) {
       items.push(reply);
 
@@ -51,14 +51,14 @@ const flatReplies = computed(() => {
         walk(reply.replies);
       }
     }
-  }
+  };
 
   walk(thread.value?.replies ?? []);
 
   return items;
 });
 
-async function hideReply(reply: Reply) {
+const hideReply = async (reply: Reply) => {
   if (hidingReplyId.value) {
     return;
   }
@@ -77,7 +77,7 @@ async function hideReply(reply: Reply) {
   } finally {
     hidingReplyId.value = null;
   }
-}
+};
 </script>
 
 <template>

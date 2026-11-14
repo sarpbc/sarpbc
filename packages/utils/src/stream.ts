@@ -21,7 +21,7 @@ export type ParsedStreamUrl =
   | { ok: true; url: string; platform: StreamPlatform; channel: string | null }
   | { ok: false; error: StreamUrlError };
 
-function channelOf(url: URL, platform: StreamPlatform): string | null {
+const channelOf = (url: URL, platform: StreamPlatform): string | null => {
   const first = url.pathname.split("/").find(Boolean) ?? "";
 
   switch (platform) {
@@ -44,9 +44,9 @@ function channelOf(url: URL, platform: StreamPlatform): string | null {
       return exhaustive;
     }
   }
-}
+};
 
-export function parseStreamUrl(input: string): ParsedStreamUrl {
+export const parseStreamUrl = (input: string): ParsedStreamUrl => {
   let url: URL;
 
   try {
@@ -66,14 +66,14 @@ export function parseStreamUrl(input: string): ParsedStreamUrl {
   const platform = STREAM_HOSTS.get(url.hostname) ?? "other";
 
   return { ok: true, url: url.href, platform, channel: channelOf(url, platform) };
-}
+};
 
-export function orderStreams<T extends { language: string; kind: StreamKind }>(
+export const orderStreams = <T extends { language: string; kind: StreamKind }>(
   streams: readonly T[],
   language: string,
-): T[] {
+): T[] => {
   const rank = (stream: T) =>
     (stream.language === language ? 0 : 2) + (stream.kind === "official" ? 0 : 1);
 
   return streams.toSorted((a, b) => rank(a) - rank(b));
-}
+};

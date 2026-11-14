@@ -55,27 +55,27 @@ const proposalSchema = z.object({
   }),
 });
 
-export function winsNeeded(bestOf: number): number {
-  return Math.floor(bestOf / 2) + 1;
-}
+export const winsNeeded = (bestOf: number): number => Math.floor(bestOf / 2) + 1;
 
-export function gameWinner(game: Pick<StreamScoreGame, "blue" | "orange">): StreamScoreSide | null {
+export const gameWinner = (
+  game: Pick<StreamScoreGame, "blue" | "orange">,
+): StreamScoreSide | null => {
   if (game.blue === game.orange) {
     return null;
   }
 
   return game.blue > game.orange ? "blue" : "orange";
-}
+};
 
-function leadingSide(blue: number, orange: number, needed: number): StreamScoreSide | null {
+const leadingSide = (blue: number, orange: number, needed: number): StreamScoreSide | null => {
   if (blue >= needed) {
     return "blue";
   }
 
   return orange >= needed ? "orange" : null;
-}
+};
 
-function isConsistent(proposal: StreamScoreProposal): boolean {
+const isConsistent = (proposal: StreamScoreProposal): boolean => {
   const needed = winsNeeded(proposal.bestOf);
   const blue = proposal.games.filter((game) => game.winner === "blue").length;
   const orange = proposal.games.filter((game) => game.winner === "orange").length;
@@ -94,9 +94,9 @@ function isConsistent(proposal: StreamScoreProposal): boolean {
     proposal.series.orange === orange &&
     proposal.series.winner === seriesWinner
   );
-}
+};
 
-export function parseStreamScoreProposal(text: string): ParsedStreamScoreProposal {
+export const parseStreamScoreProposal = (text: string): ParsedStreamScoreProposal => {
   let json: unknown;
 
   try {
@@ -116,4 +116,4 @@ export function parseStreamScoreProposal(text: string): ParsedStreamScoreProposa
   }
 
   return { ok: true, proposal: parsed.data };
-}
+};

@@ -19,7 +19,7 @@ const games = computed(() => {
 
 const languageNames = computed(() => new Intl.DisplayNames([locale.value], { type: "language" }));
 
-function sourceLabel(source: MatchVodSource): string {
+const sourceLabel = (source: MatchVodSource): string => {
   switch (source) {
     case "twitch": {
       return t("page.match.detail.vods.sources.twitch");
@@ -35,15 +35,14 @@ function sourceLabel(source: MatchVodSource): string {
       return exhaustive;
     }
   }
-}
+};
 
-function linkLabel(vod: MatchVod): string {
-  return t("page.match.detail.vods.linkLabel", {
+const linkLabel = (vod: MatchVod): string =>
+  t("page.match.detail.vods.linkLabel", {
     game: vod.game,
     source: sourceLabel(vod.source),
     language: languageNames.value.of(vod.language) ?? vod.language,
   });
-}
 </script>
 
 <template>

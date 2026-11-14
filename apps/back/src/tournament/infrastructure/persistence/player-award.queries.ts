@@ -14,19 +14,17 @@ export const AWARD_LABELS = {
   breakthrough_player: "Breakthrough Player",
 } as const satisfies Record<PlayerAwardType, string>;
 
-export function toTournamentItem(row: PlayerAward): TournamentAwardListItem {
-  return {
-    id: row.id,
-    awardType: row.awardType,
-    player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
-    participant: {
-      id: row.participant.id,
-      team: row.participant.team
-        ? { id: row.participant.team.id, name: row.participant.team.name }
-        : undefined,
-    },
-  };
-}
+export const toTournamentItem = (row: PlayerAward): TournamentAwardListItem => ({
+  id: row.id,
+  awardType: row.awardType,
+  player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
+  participant: {
+    id: row.participant.id,
+    team: row.participant.team
+      ? { id: row.participant.team.id, name: row.participant.team.name }
+      : undefined,
+  },
+});
 
 export class CompetitionAwardQueries implements AwardQueries {
   constructor(private readonly em: EntityManager) {}

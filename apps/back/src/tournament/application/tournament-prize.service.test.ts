@@ -27,11 +27,11 @@ const RULES = "https://www.rocketleague.com/en/news/rlcs-official-rules";
 
 const rosterA: PrizeParticipant = { teamId: "team-a", playerIds: ["player-a", "player-b"] };
 
-function setup({
+const setup = ({
   exists = true,
   participants = [rosterA],
   source = "manual",
-}: { exists?: boolean; participants?: PrizeParticipant[]; source?: DataSource | null } = {}) {
+}: { exists?: boolean; participants?: PrizeParticipant[]; source?: DataSource | null } = {}) => {
   const writer = {
     tournamentExists: vi.fn<PrizeWriter["tournamentExists"]>().mockResolvedValue(exists),
     participants: vi.fn<PrizeWriter["participants"]>().mockResolvedValue(participants),
@@ -63,7 +63,7 @@ function setup({
   );
 
   return { service, reads, writer, cache, diagnostics };
-}
+};
 
 describe(TournamentPrizeService, () => {
   it("replaces the distribution inside the competition transaction", async () => {

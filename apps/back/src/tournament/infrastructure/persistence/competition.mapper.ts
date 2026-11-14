@@ -16,8 +16,8 @@ import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import { teamNameAt, toPlayer, toTeam } from "../../../roster/infrastructure/roster-persistence";
 import { teamAt } from "../../../roster/domain/team-alias";
 
-export function toLeague(row: LeagueRow): League {
-  return Object.assign(new League(), {
+export const toLeague = (row: LeagueRow): League =>
+  Object.assign(new League(), {
     id: row.id,
     pandascoreId: row.pandascoreId,
     name: row.name,
@@ -28,10 +28,9 @@ export function toLeague(row: LeagueRow): League {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
-}
 
-export function toTournamentEvent(row: TournamentEventRow): TournamentEvent {
-  return Object.assign(new TournamentEvent(), {
+export const toTournamentEvent = (row: TournamentEventRow): TournamentEvent =>
+  Object.assign(new TournamentEvent(), {
     id: row.id,
     pandascoreSerieId: row.pandascoreSerieId,
     slug: row.slug,
@@ -42,7 +41,6 @@ export function toTournamentEvent(row: TournamentEventRow): TournamentEvent {
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
-}
 
 export const MATCH_WRITE_POPULATE = [
   ...MATCH_TOURNAMENT_POPULATE,
@@ -54,23 +52,22 @@ export const MATCH_WRITE_POPULATE = [
   "previousMatches.previousMatch",
 ] as const;
 
-export function eventRefOf(row: TournamentEventRow): TournamentEventRef {
+export const eventRefOf = (row: TournamentEventRow): TournamentEventRef => {
   // An unpopulated reference would silently map to an empty slug and break every public URL.
   if (!wrap(row).isInitialized()) {
     throw new Error(`Tournament event ${row.id} is not populated`);
   }
 
   return toEventRef(row);
-}
+};
 
-function stageDate(tournament: TournamentRow): Date | null {
-  return wrap(tournament).isInitialized() ? tournament.beginAt : null;
-}
+const stageDate = (tournament: TournamentRow): Date | null =>
+  wrap(tournament).isInitialized() ? tournament.beginAt : null;
 
-export function toParticipant(
+export const toParticipant = (
   row: TournamentParticipantRow,
   at?: Date | null,
-): TournamentParticipant | null {
+): TournamentParticipant | null => {
   const { team } = row;
   const tournament: TournamentRow | undefined = row.tournament;
 
@@ -99,30 +96,26 @@ export function toParticipant(
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
-}
+};
 
-function matchDate(row: MatchRow): Date | null {
-  return row.beginAt ?? stageDate(row.tournament);
-}
+const matchDate = (row: MatchRow): Date | null => row.beginAt ?? stageDate(row.tournament);
 
-export function toTournamentSummary(row: TournamentRow): TournamentSummary {
-  return {
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    event: eventRefOf(row.event),
-    beginAt: row.beginAt,
-    league: row.league ? toLeague(row.league) : null,
-    pickemsEnabled: row.pickemsEnabled,
-    source: row.source,
-    pandascoreId: row.pandascoreId,
-    streams: row.streams ?? [],
-    eventStreams: row.event.streams ?? [],
-  };
-}
+export const toTournamentSummary = (row: TournamentRow): TournamentSummary => ({
+  id: row.id,
+  name: row.name,
+  slug: row.slug,
+  event: eventRefOf(row.event),
+  beginAt: row.beginAt,
+  league: row.league ? toLeague(row.league) : null,
+  pickemsEnabled: row.pickemsEnabled,
+  source: row.source,
+  pandascoreId: row.pandascoreId,
+  streams: row.streams ?? [],
+  eventStreams: row.event.streams ?? [],
+});
 
-export function toMatch(row: MatchRow): Match {
-  return Object.assign(new Match(), {
+export const toMatch = (row: MatchRow): Match =>
+  Object.assign(new Match(), {
     id: row.id,
     publicId: row.publicId,
     pandascoreId: row.pandascoreId,
@@ -163,10 +156,9 @@ export function toMatch(row: MatchRow): Match {
         }))
       : [],
   });
-}
 
-export function toTournament(row: TournamentRow): Tournament {
-  return Object.assign(new Tournament(), {
+export const toTournament = (row: TournamentRow): Tournament =>
+  Object.assign(new Tournament(), {
     id: row.id,
     pandascoreId: row.pandascoreId,
     source: row.source,
@@ -197,9 +189,8 @@ export function toTournament(row: TournamentRow): Tournament {
       : [],
     matches: row.matches.isInitialized() ? row.matches.getItems().map(toMatch) : [],
   });
-}
 
-export function toMatchSlug(row: MatchRow): string {
+export const toMatchSlug = (row: MatchRow): string => {
   const loaded = wrap(row).isInitialized();
 
   const rowTournament: TournamentRow | undefined = row.tournament;
@@ -224,4 +215,4 @@ export function toMatchSlug(row: MatchRow): string {
         : [],
     tournament: { slug: tournament?.slug ?? "", event: { slug: event?.slug ?? "" } },
   });
-}
+};

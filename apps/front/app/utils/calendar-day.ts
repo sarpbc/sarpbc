@@ -1,14 +1,11 @@
 import { isNonEmptyDateInput } from "@sarpbc/utils";
 
-function startOfLocalDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-}
+const startOfLocalDay = (date: Date): Date =>
+  new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-export function localDayKey(date: Date): string {
-  return startOfLocalDay(date).toDateString();
-}
+export const localDayKey = (date: Date): string => startOfLocalDay(date).toDateString();
 
-export function parseMatchDate(value: Date | string | null | undefined): Date | null {
+export const parseMatchDate = (value: Date | string | null | undefined): Date | null => {
   if (!isNonEmptyDateInput(value)) {
     return null;
   }
@@ -16,32 +13,31 @@ export function parseMatchDate(value: Date | string | null | undefined): Date | 
   const date = value instanceof Date ? value : new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;
-}
+};
 
-export function daysFromToday(date: Date, now: Date = new Date()): number {
+export const daysFromToday = (date: Date, now: Date = new Date()): number => {
   const today = startOfLocalDay(now).getTime();
   const target = startOfLocalDay(date).getTime();
 
   return Math.round((target - today) / 86_400_000);
-}
+};
 
-function isTodayOrTomorrow(date: Date, now: Date = new Date()): boolean {
+const isTodayOrTomorrow = (date: Date, now: Date = new Date()): boolean => {
   const offset = daysFromToday(date, now);
 
   return offset >= 0 && offset <= 1;
-}
+};
 
 interface MatchWithBeginAt {
   beginAt?: Date | string | null;
 }
 
-export function filterMatchesTodayOrTomorrow<T extends MatchWithBeginAt>(
+export const filterMatchesTodayOrTomorrow = <T extends MatchWithBeginAt>(
   matches: T[],
   now: Date = new Date(),
-): T[] {
-  return matches.filter((match) => {
+): T[] =>
+  matches.filter((match) => {
     const beginAt = parseMatchDate(match.beginAt);
 
     return beginAt !== null && beginAt !== undefined && isTodayOrTomorrow(beginAt, now);
   });
-}

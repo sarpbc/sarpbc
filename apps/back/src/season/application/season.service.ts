@@ -15,7 +15,7 @@ import { EMPTY_SEASON_FORMAT, parseSeasonFormat, parseSeasonSlug } from "../doma
 import { SEASON_AWARD_LABELS, parseSeasonAward } from "../domain/season-award";
 import type { SeasonRecord, SeasonStore } from "./ports";
 
-function cleanName(name: string): string {
+const cleanName = (name: string): string => {
   const trimmed = name.trim();
 
   if (!trimmed || trimmed.length > SEASON_NAME_MAX_LENGTH) {
@@ -25,7 +25,7 @@ function cleanName(name: string): string {
   }
 
   return trimmed;
-}
+};
 
 export class SeasonService {
   constructor(private readonly store: SeasonStore) {}

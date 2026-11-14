@@ -18,11 +18,10 @@ import {
 } from "./manual-tournament-lineup";
 import { nonBlank } from "../../common/domain/text";
 
-function optionalDate(value: string | null | undefined): Date | null {
-  return value !== null && value !== undefined && value !== "" ? new Date(value) : null;
-}
+const optionalDate = (value: string | null | undefined): Date | null =>
+  value !== null && value !== undefined && value !== "" ? new Date(value) : null;
 
-function draftTournament(input: CreateTournamentInput): Tournament {
+const draftTournament = (input: CreateTournamentInput): Tournament => {
   const tournament = new Tournament();
   tournament.source = input.source ?? "manual";
   tournament.pandascoreId = null;
@@ -40,13 +39,13 @@ function draftTournament(input: CreateTournamentInput): Tournament {
   tournament.assertDateOrder();
 
   return tournament;
-}
+};
 
-async function bracketToggle(
+const bracketToggle = async (
   matches: MatchWriter,
   tournamentId: string,
   hasBracket: boolean,
-): Promise<boolean> {
+): Promise<boolean> => {
   if (hasBracket) {
     return true;
   }
@@ -60,7 +59,7 @@ async function bracketToggle(
   }
 
   return false;
-}
+};
 
 export class ManualTournamentService {
   constructor(

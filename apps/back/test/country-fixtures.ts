@@ -16,9 +16,8 @@ export const vitality = Object.assign(new Team(), {
   slug: "team-vitality",
 });
 
-function countryPlayer(id: string, name: string, team: Team | null): Player {
-  return Object.assign(new Player(), { id, name, slug: id, nationality: "fr", team });
-}
+const countryPlayer = (id: string, name: string, team: Team | null): Player =>
+  Object.assign(new Player(), { id, name, slug: id, nationality: "fr", team });
 
 export const alpha54 = countryPlayer("alpha54", "Alpha54", vitality);
 export const zen = countryPlayer("zen", "zen", vitality);
@@ -37,11 +36,10 @@ export const countryMatches: Match[] = [
   }),
 ];
 
-function redistributable(match: Match): boolean {
-  return isRedistributable(match.source) && isRedistributable(match.tournament.source);
-}
+const redistributable = (match: Match): boolean =>
+  isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
-export function countrySources() {
+export const countrySources = () => {
   const findByNationality = vi.fn<CountrySources["players"]["findByNationality"]>(
     async (code: string) => (code === "FR" ? french : []),
   );
@@ -72,4 +70,4 @@ export function countrySources() {
   };
 
   return { sources, findByNationality, list };
-}
+};

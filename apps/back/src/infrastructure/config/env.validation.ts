@@ -73,7 +73,7 @@ const SECRET_FILES = {
   R2_SECRET_ACCESS_KEY: "sarpbc_r2_secret_access_key",
 } as const;
 
-export function readSecret(env: RawEnv, name: string, file: string): string | undefined {
+export const readSecret = (env: RawEnv, name: string, file: string): string | undefined => {
   const value = env[name];
 
   if (value !== undefined) {
@@ -89,9 +89,9 @@ export function readSecret(env: RawEnv, name: string, file: string): string | un
 
     throw error;
   }
-}
+};
 
-function withSecrets(env: RawEnv, files: Readonly<Record<string, string>>) {
+const withSecrets = (env: RawEnv, files: Readonly<Record<string, string>>) => {
   const secrets = Object.fromEntries(
     Object.entries(files).map(([name, file]): [string, string | undefined] => [
       name,
@@ -100,9 +100,9 @@ function withSecrets(env: RawEnv, files: Readonly<Record<string, string>>) {
   );
 
   return { ...env, ...secrets };
-}
+};
 
-function parse<T extends z.ZodType>(schema: T, env: RawEnv): z.infer<T> {
+const parse = <T extends z.ZodType>(schema: T, env: RawEnv): z.infer<T> => {
   const parsed = schema.safeParse(env);
 
   if (!parsed.success) {
@@ -114,40 +114,30 @@ function parse<T extends z.ZodType>(schema: T, env: RawEnv): z.infer<T> {
   }
 
   return parsed.data;
-}
+};
 
-function withProduction<T extends { NODE_ENV: string }>(data: T) {
-  return { ...data, production: data.NODE_ENV === "production" };
-}
+const withProduction = <T extends { NODE_ENV: string }>(data: T) => ({
+  ...data,
+  production: data.NODE_ENV === "production",
+});
 
-export function validateEnv(env: RawEnv) {
-  return withProduction(parse(envSchema, withSecrets(env, SECRET_FILES)));
-}
+export const validateEnv = (env: RawEnv) =>
+  withProduction(parse(envSchema, withSecrets(env, SECRET_FILES)));
 
-export function validateDatabaseEnv(env: RawEnv) {
-  return withProduction(
+export const validateDatabaseEnv = (env: RawEnv) =>
+  withProduction(
     parse(databaseSchema, withSecrets(env, { DB_PASSWORD: SECRET_FILES.DB_PASSWORD })),
   );
-}
 
-export function loadEnv() {
-  return validateEnv(process.env);
-}
+export const loadEnv = () => validateEnv(process.env);
 
-export function loadDatabaseEnv() {
-  return validateDatabaseEnv(process.env);
-}
+export const loadDatabaseEnv = () => validateDatabaseEnv(process.env);
 
-export function nodeEnvironment(): z.infer<typeof nodeEnvSchema> {
-  return nodeEnvSchema.parse(process.env.NODE_ENV);
-}
+export const nodeEnvironment = (): z.infer<typeof nodeEnvSchema> =>
+  nodeEnvSchema.parse(process.env.NODE_ENV);
 
-export function frontUrl(): string {
-  return urlSchema.parse(process.env.FRONT_URL);
-}
+export const frontUrl = (): string => urlSchema.parse(process.env.FRONT_URL);
 
-export function adminUrl(): string {
-  return urlSchema.parse(process.env.ADMIN_URL);
-}
+export const adminUrl = (): string => urlSchema.parse(process.env.ADMIN_URL);
 
 export type Env = ReturnType<typeof validateEnv>;

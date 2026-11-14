@@ -8,11 +8,11 @@ const { targets, label } = defineProps<{
 
 const { reveal } = useSpoilerFree();
 
-function revealAll() {
+const revealAll = () => {
   for (const target of targets) {
     reveal(target);
   }
-}
+};
 </script>
 
 <template>

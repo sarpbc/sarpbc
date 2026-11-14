@@ -2,9 +2,9 @@ import type { TournamentTab } from "@sarpbc/types";
 import { stageMatchesPath, stageStatsPath, tournamentStagePath } from "@sarpbc/utils";
 
 // Detected by route name, not path: a stage may itself be slugged `matches`.
-export function getTournamentTabFromRouteName(
+export const getTournamentTabFromRouteName = (
   routeBaseName: PropertyKey | undefined,
-): TournamentTab {
+): TournamentTab => {
   if (routeBaseName === "tournaments-event-stage-matches") {
     return "matches";
   }
@@ -14,9 +14,9 @@ export function getTournamentTabFromRouteName(
   }
 
   return "overview";
-}
+};
 
-export function tournamentTabPath(tab: TournamentTab, eventSlug: string, stageSlug: string) {
+export const tournamentTabPath = (tab: TournamentTab, eventSlug: string, stageSlug: string) => {
   switch (tab) {
     case "overview": {
       return tournamentStagePath(eventSlug, stageSlug);
@@ -36,4 +36,4 @@ export function tournamentTabPath(tab: TournamentTab, eventSlug: string, stageSl
       return unreachable;
     }
   }
-}
+};

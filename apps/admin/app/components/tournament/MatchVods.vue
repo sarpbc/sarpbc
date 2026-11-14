@@ -48,19 +48,17 @@ const languageNames = computed(
   () => new Intl.DisplayNames([locale.value], { type: "language", fallback: "none" }),
 );
 
-function normalizeLanguage(language: string): string {
-  return language.trim().toLowerCase();
-}
+const normalizeLanguage = (language: string): string => language.trim().toLowerCase();
 
-function languageFeedback(language: string): FieldFeedback {
+const languageFeedback = (language: string): FieldFeedback => {
   const code = normalizeLanguage(language);
 
   return isIso6391Code(code)
     ? { help: languageNames.value.of(code) }
     : { error: t("page.tournaments.vods.errors.invalid-language") };
-}
+};
 
-function sourceLabel(source: MatchVodSource): string {
+const sourceLabel = (source: MatchVodSource): string => {
   switch (source) {
     case "twitch": {
       return t("page.tournaments.vods.sources.twitch");
@@ -76,9 +74,9 @@ function sourceLabel(source: MatchVodSource): string {
       return exhaustive;
     }
   }
-}
+};
 
-function urlFeedback(url: string): FieldFeedback {
+const urlFeedback = (url: string): FieldFeedback => {
   if (!url.trim()) {
     return {};
   }
@@ -88,7 +86,7 @@ function urlFeedback(url: string): FieldFeedback {
   return parsed.ok
     ? { help: t("page.tournaments.vods.detectedSource", { source: sourceLabel(parsed.source) }) }
     : { error: t(`page.tournaments.vods.errors.${parsed.error}`) };
-}
+};
 
 const canSave = computed(() =>
   rows.value.every(
@@ -96,11 +94,10 @@ const canSave = computed(() =>
   ),
 );
 
-function toRows(vods: MatchVod[]): VodRow[] {
-  return vods.map(({ game, url, language }) => ({ key: (nextKey += 1), game, url, language }));
-}
+const toRows = (vods: MatchVod[]): VodRow[] =>
+  vods.map(({ game, url, language }) => ({ key: (nextKey += 1), game, url, language }));
 
-async function load() {
+const load = async () => {
   loading.value = true;
   loadFailed.value = false;
 
@@ -111,7 +108,7 @@ async function load() {
   } finally {
     loading.value = false;
   }
-}
+};
 
 watch(
   open,
@@ -123,7 +120,7 @@ watch(
   { immediate: true },
 );
 
-function addRow() {
+const addRow = () => {
   const last = rows.value.at(-1);
   rows.value.push({
     key: (nextKey += 1),
@@ -131,13 +128,13 @@ function addRow() {
     url: "",
     language: last?.language ?? "en",
   });
-}
+};
 
-function removeRow(key: number) {
+const removeRow = (key: number) => {
   rows.value = rows.value.filter((row) => row.key !== key);
-}
+};
 
-async function save() {
+const save = async () => {
   saving.value = true;
 
   try {
@@ -158,7 +155,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

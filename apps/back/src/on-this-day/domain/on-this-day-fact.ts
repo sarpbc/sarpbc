@@ -18,7 +18,7 @@ export interface OnThisDayFactFields {
   sourceUrl: string | null;
 }
 
-function requiredText(value: string, language: string): string {
+const requiredText = (value: string, language: string): string => {
   const text = value.trim();
 
   if (!text || text.length > ON_THIS_DAY_TEXT_MAX_LENGTH) {
@@ -28,9 +28,9 @@ function requiredText(value: string, language: string): string {
   }
 
   return text;
-}
+};
 
-function parseYear(year: number | null, month: number, day: number): number | null {
+const parseYear = (year: number | null, month: number, day: number): number | null => {
   if (year === null) {
     return null;
   }
@@ -46,9 +46,9 @@ function parseYear(year: number | null, month: number, day: number): number | nu
   }
 
   return year;
-}
+};
 
-export function parseFactSourceUrl(value: string | null): string | null {
+export const parseFactSourceUrl = (value: string | null): string | null => {
   const raw = value?.trim() ?? "";
 
   if (!raw) {
@@ -78,9 +78,9 @@ export function parseFactSourceUrl(value: string | null): string | null {
   }
 
   return url.href;
-}
+};
 
-export function parseOnThisDayFact(input: OnThisDayFactFields): OnThisDayFactFields {
+export const parseOnThisDayFact = (input: OnThisDayFactFields): OnThisDayFactFields => {
   if (!isMonthDay(input.month, input.day)) {
     throw new InvalidInputError("The month and day do not form a calendar date.");
   }
@@ -94,13 +94,10 @@ export function parseOnThisDayFact(input: OnThisDayFactFields): OnThisDayFactFie
     link: input.link,
     sourceUrl: parseFactSourceUrl(input.sourceUrl),
   };
-}
+};
 
-export function isFactShownOn(
+export const isFactShownOn = (
   fact: Pick<OnThisDayFactFields, "month" | "day" | "year">,
   on: { year: number; month: number; day: number },
-): boolean {
-  return (
-    fact.month === on.month && fact.day === on.day && (fact.year === null || fact.year <= on.year)
-  );
-}
+): boolean =>
+  fact.month === on.month && fact.day === on.day && (fact.year === null || fact.year <= on.year);

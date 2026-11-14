@@ -4,64 +4,58 @@ import { IntegrationError } from "../../../common/domain/errors/integration-erro
 import { BALLCHASING_API_URL, BallchasingClient } from "./ballchasing-client";
 
 // Shapes follow the examples of https://ballchasing.com/doc/api (GET /groups/{id}, GET /replays, GET /groups).
-function listedReplay(id: string, overrides: { date?: string; date_has_tz?: boolean } = {}) {
-  return {
-    id,
-    link: `${BALLCHASING_API_URL}/replays/${id}`,
-    rocket_league_id: `RL-${id}`,
-    replay_title: `Game ${id}`,
-    map_code: "stadium_p",
-    playlist_id: "private",
-    duration: 300,
-    overtime: false,
-    season: 14,
-    date: "2026-06-01T20:05:00+02:00",
-    date_has_tz: true,
-    visibility: "public",
-    created: "2026-06-01T20:30:00Z",
-    uploader: { steam_id: "1", name: "Uploader", profile_url: "", avatar: "" },
-    groups: [{ id: "pilot", name: "Pilot", link: "" }],
-    blue: {
-      name: "KARMINE CORP",
-      goals: 3,
-      players: [
-        {
-          start_time: 0,
-          end_time: 300,
-          name: "Vatira",
-          id: { platform: "epic", id: "a" },
-          score: 500,
-        },
-        {
-          start_time: 0,
-          end_time: 300,
-          name: "Atow",
-          id: { platform: "steam", id: "b" },
-          score: 300,
-        },
-      ],
-    },
-    orange: {
-      name: "BDS",
-      players: [
-        { start_time: 0, end_time: 300, name: "Seikoo", id: { platform: "epic", id: "c" } },
-      ],
-    },
-    ...overrides,
-  };
-}
+const listedReplay = (id: string, overrides: { date?: string; date_has_tz?: boolean } = {}) => ({
+  id,
+  link: `${BALLCHASING_API_URL}/replays/${id}`,
+  rocket_league_id: `RL-${id}`,
+  replay_title: `Game ${id}`,
+  map_code: "stadium_p",
+  playlist_id: "private",
+  duration: 300,
+  overtime: false,
+  season: 14,
+  date: "2026-06-01T20:05:00+02:00",
+  date_has_tz: true,
+  visibility: "public",
+  created: "2026-06-01T20:30:00Z",
+  uploader: { steam_id: "1", name: "Uploader", profile_url: "", avatar: "" },
+  groups: [{ id: "pilot", name: "Pilot", link: "" }],
+  blue: {
+    name: "KARMINE CORP",
+    goals: 3,
+    players: [
+      {
+        start_time: 0,
+        end_time: 300,
+        name: "Vatira",
+        id: { platform: "epic", id: "a" },
+        score: 500,
+      },
+      {
+        start_time: 0,
+        end_time: 300,
+        name: "Atow",
+        id: { platform: "steam", id: "b" },
+        score: 300,
+      },
+    ],
+  },
+  orange: {
+    name: "BDS",
+    players: [{ start_time: 0, end_time: 300, name: "Seikoo", id: { platform: "epic", id: "c" } }],
+  },
+  ...overrides,
+});
 
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
-function json(
+const json = (
   body: Record<string, Json>,
   status = 200,
   headers: Record<string, string> = {},
-): Response {
-  return Response.json(body, { status, headers });
-}
+): Response => Response.json(body, { status, headers });
 
-function client(routes: (url: string) => Response) {
+const client = (routes: (url: string) => Response) => {
   const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(requestUrl(input)));
   let clock = 0;
 
@@ -76,7 +70,7 @@ function client(routes: (url: string) => Response) {
   });
 
   return { instance, fetch, sleep, advance: (ms: number) => (clock += ms) };
-}
+};
 
 describe("BallchasingClient.groupReplays", () => {
   it("walks nested child groups and every page, with the raw key in Authorization", async () => {
@@ -191,52 +185,50 @@ describe("BallchasingClient.groupReplays", () => {
 });
 
 // Excerpt of a live GET /api/replays/{id} response.
-function replayDetail() {
-  return {
-    id: "r1",
-    status: "ok",
-    rocket_league_id: "RL-r1",
-    title: "Game r1",
-    date: "2026-06-01T20:05:00+02:00",
-    date_has_timezone: true,
-    blue: {
-      name: "REBELLION",
-      stats: { core: { goals: 2 } },
-      players: [
-        {
-          name: "Firstkiller",
-          id: { platform: "steam", id: "76561198327846028" },
-          stats: {
-            core: { goals: 2, assists: 0, saves: 3, shots: 6 },
-            demo: { inflicted: 0, taken: 1 },
-          },
+const replayDetail = () => ({
+  id: "r1",
+  status: "ok",
+  rocket_league_id: "RL-r1",
+  title: "Game r1",
+  date: "2026-06-01T20:05:00+02:00",
+  date_has_timezone: true,
+  blue: {
+    name: "REBELLION",
+    stats: { core: { goals: 2 } },
+    players: [
+      {
+        name: "Firstkiller",
+        id: { platform: "steam", id: "76561198327846028" },
+        stats: {
+          core: { goals: 2, assists: 0, saves: 3, shots: 6 },
+          demo: { inflicted: 0, taken: 1 },
         },
-        {
-          name: "Racer",
-          id: { platform: "steam", id: "76561198224723032" },
-          stats: {
-            core: { goals: 0, assists: 0, saves: 1, shots: 2 },
-            demo: { inflicted: 1, taken: 3 },
-          },
+      },
+      {
+        name: "Racer",
+        id: { platform: "steam", id: "76561198224723032" },
+        stats: {
+          core: { goals: 0, assists: 0, saves: 1, shots: 2 },
+          demo: { inflicted: 1, taken: 3 },
         },
-      ],
-    },
-    orange: {
-      name: "TEAM VITALITY",
-      stats: { core: { goals: 0 } },
-      players: [
-        {
-          name: "zen",
-          id: { platform: "steam", id: "76561198144145654" },
-          stats: {
-            core: { goals: 0, assists: 0, saves: 3, shots: 4 },
-            demo: { inflicted: 4, taken: 0 },
-          },
+      },
+    ],
+  },
+  orange: {
+    name: "TEAM VITALITY",
+    stats: { core: { goals: 0 } },
+    players: [
+      {
+        name: "zen",
+        id: { platform: "steam", id: "76561198144145654" },
+        stats: {
+          core: { goals: 0, assists: 0, saves: 3, shots: 4 },
+          demo: { inflicted: 4, taken: 0 },
         },
-      ],
-    },
-  };
-}
+      },
+    ],
+  },
+});
 
 describe("BallchasingClient.replayStats", () => {
   it("maps the date, team goals and each player's five stats", async () => {

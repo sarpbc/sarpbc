@@ -20,14 +20,12 @@ import { StreamerService } from "../../application/streamer.service";
 import { CreateStreamerDto } from "./dto/create-streamer.dto";
 import type { CreateStreamerInput } from "./dto/create-streamer.dto";
 
-function mapTrackedStreamer(streamer: TrackedStreamerRecord): TrackedStreamer {
-  return {
-    id: streamer.id,
-    login: streamer.login,
-    displayName: streamer.displayName,
-    createdAt: streamer.createdAt.toISOString(),
-  };
-}
+const mapTrackedStreamer = (streamer: TrackedStreamerRecord): TrackedStreamer => ({
+  id: streamer.id,
+  login: streamer.login,
+  displayName: streamer.displayName,
+  createdAt: streamer.createdAt.toISOString(),
+});
 
 @Controller("streamers")
 export class StreamerController {

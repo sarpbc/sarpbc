@@ -70,17 +70,17 @@ const mcpConfigSnippet = computed(() => {
   return `URL: ${MCP_URL}\nHeader: Authorization: Bearer ${revealedToken.value}`;
 });
 
-function openCreateModal() {
+const openCreateModal = () => {
   newTokenName.value = "";
   isCreateModalOpen.value = true;
-}
+};
 
-function openRevokeModal(token: PatToken) {
+const openRevokeModal = (token: PatToken) => {
   tokenToRevoke.value = token;
   isRevokeModalOpen.value = true;
-}
+};
 
-async function copyText(text: string, target: "token" | "config") {
+const copyText = async (text: string, target: "token" | "config") => {
   try {
     await navigator.clipboard.writeText(text);
     copied.value = target;
@@ -93,9 +93,9 @@ async function copyText(text: string, target: "token" | "config") {
       color: "error",
     });
   }
-}
+};
 
-async function confirmCreate() {
+const confirmCreate = async () => {
   const name = newTokenName.value.trim();
 
   if (!name) {
@@ -120,14 +120,14 @@ async function confirmCreate() {
   } finally {
     isCreating.value = false;
   }
-}
+};
 
-function closeRevealModal() {
+const closeRevealModal = () => {
   isRevealModalOpen.value = false;
   revealedToken.value = null;
-}
+};
 
-async function confirmRevoke() {
+const confirmRevoke = async () => {
   if (!tokenToRevoke.value) {
     return;
   }
@@ -151,7 +151,7 @@ async function confirmRevoke() {
   } finally {
     isRevoking.value = false;
   }
-}
+};
 </script>
 
 <template>

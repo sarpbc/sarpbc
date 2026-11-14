@@ -12,7 +12,7 @@ const FETCH_TOURNAMENTS = {
   player: getPlayerTournaments,
 } satisfies Record<EntityKind, (id: string) => Promise<Tournament[]>>;
 
-function wonBy(kind: EntityKind, tournament: Tournament, entityId: string): boolean {
+const wonBy = (kind: EntityKind, tournament: Tournament, entityId: string): boolean => {
   const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
 
   switch (kind) {
@@ -32,13 +32,13 @@ function wonBy(kind: EntityKind, tournament: Tournament, entityId: string): bool
       return exhaustive;
     }
   }
-}
+};
 
-export function splitTournaments(
+export const splitTournaments = (
   tournaments: Tournament[],
   isWinner: (tournament: Tournament) => boolean,
   now: number,
-): EntitySections<EntityEventListItem> {
+): EntitySections<EntityEventListItem> => {
   const live: Tournament[] = [];
   const upcoming: Tournament[] = [];
   const past: Tournament[] = [];
@@ -95,9 +95,9 @@ export function splitTournaments(
     upcoming: upcoming.map(toItem),
     past: past.slice(0, PAST_ENTRIES_LIMIT).map(toItem),
   };
-}
+};
 
-export function useEntityTournaments(kind: EntityKind, entityId: MaybeRef<string | undefined>) {
+export const useEntityTournaments = (kind: EntityKind, entityId: MaybeRef<string | undefined>) => {
   const idRef = toRef(entityId);
 
   const { data, pending, error, refresh } = useAsyncData(
@@ -129,4 +129,4 @@ export function useEntityTournaments(kind: EntityKind, entityId: MaybeRef<string
     error,
     refresh,
   };
-}
+};

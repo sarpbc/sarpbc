@@ -14,28 +14,28 @@ interface CalendarMatch extends MatchLinkTarget {
   participants?: NamedParticipant[];
 }
 
-function slotLabel(match: CalendarMatch, index: 0 | 1): string {
+const slotLabel = (match: CalendarMatch, index: 0 | 1): string => {
   const name = slotName(match.participants, index)?.trim();
 
   return isNonEmptyString(name) ? name : TBD_LABEL;
-}
+};
 
-export function isMatchOnCalendar(match: {
+export const isMatchOnCalendar = (match: {
   beginAt?: Date | string | null;
   status?: string | null;
-}): boolean {
+}): boolean => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return false;
   }
 
   return match.status !== "finished";
-}
+};
 
-export function matchToCalendarEvent(
+export const matchToCalendarEvent = (
   match: CalendarMatch,
   stage: { name: string; event: TournamentEventRef },
   dtStamp: Date,
-): CalendarEvent | null {
+): CalendarEvent | null => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }
@@ -55,4 +55,4 @@ export function matchToCalendarEvent(
     dtEnd: matchEndAt(beginAt, endAt, match.numberOfGames ?? undefined),
     dtStamp,
   };
-}
+};

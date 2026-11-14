@@ -35,17 +35,20 @@ const candidate: CandidateMatch = {
   storedReplayIds: [],
 };
 
-function summary(id: string, playedAt: string, kcBlue: boolean, blueGoals: number): ReplaySummary {
-  return {
-    id,
-    rocketLeagueId: `guid-${id}`,
-    title: id,
-    playedAt: new Date(playedAt),
-    playedAtHasTimezone: true,
-    blue: { name: null, goals: blueGoals, playerNames: kcBlue ? KC : BDS },
-    orange: { name: null, goals: blueGoals === 0 ? 1 : 0, playerNames: kcBlue ? BDS : KC },
-  };
-}
+const summary = (
+  id: string,
+  playedAt: string,
+  kcBlue: boolean,
+  blueGoals: number,
+): ReplaySummary => ({
+  id,
+  rocketLeagueId: `guid-${id}`,
+  title: id,
+  playedAt: new Date(playedAt),
+  playedAtHasTimezone: true,
+  blue: { name: null, goals: blueGoals, playerNames: kcBlue ? KC : BDS },
+  orange: { name: null, goals: blueGoals === 0 ? 1 : 0, playerNames: kcBlue ? BDS : KC },
+});
 
 const game1 = summary("r1", "2026-06-01T18:05:00Z", true, 2);
 const game2 = summary("r2", "2026-06-01T18:25:00Z", true, 0);
@@ -68,18 +71,13 @@ const side = (names: string[], team: "blue" | "orange") =>
     demolitions: index,
   }));
 
-function statsFor(replay: ReplaySummary): ReplayStats {
-  return {
-    rocketLeagueId: replay.rocketLeagueId,
-    playedAt: replay.playedAt,
-    blueGoals: replay.blue.goals,
-    orangeGoals: replay.orange.goals,
-    players: [
-      ...side(replay.blue.playerNames, "blue"),
-      ...side(replay.orange.playerNames, "orange"),
-    ],
-  };
-}
+const statsFor = (replay: ReplaySummary): ReplayStats => ({
+  rocketLeagueId: replay.rocketLeagueId,
+  playedAt: replay.playedAt,
+  blueGoals: replay.blue.goals,
+  orangeGoals: replay.orange.goals,
+  players: [...side(replay.blue.playerNames, "blue"), ...side(replay.orange.playerNames, "orange")],
+});
 
 class MemoryImports implements StatsImportStore {
   rows = new Map<string, StatsImport>();
@@ -116,7 +114,7 @@ class MemoryImports implements StatsImportStore {
   }
 }
 
-function setup(options: { replays?: ReplaySummary[] } = {}) {
+const setup = (options: { replays?: ReplaySummary[] } = {}) => {
   const source = {
     groupReplays: vi.fn<BallchasingSource["groupReplays"]>(
       async () => options.replays ?? [game2, stranger, game1],
@@ -158,7 +156,7 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
   );
 
   return { service, source, games, imports, scheduler, reportFailure };
-}
+};
 
 describe("StatsImportService.request", () => {
   it("queues a pending import for a valid group link and schedules its run", async () => {
@@ -208,7 +206,7 @@ describe("StatsImportService.request", () => {
   });
 });
 
-async function runImport() {
+const runImport = async () => {
   const context = setup();
   const { id } = await context.service.request("t1", "pilot-abc123");
 
@@ -221,7 +219,7 @@ async function runImport() {
   }
 
   return { ...context, done };
-}
+};
 
 describe("StatsImportService.run", () => {
   it("reports the rest and tracks progress", async () => {

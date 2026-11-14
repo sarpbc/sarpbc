@@ -17,40 +17,36 @@ import { PlayerPlatformLink } from "./player-platform-link.entity";
 import { nameOf } from "./participant-name";
 import { toLink } from "./player-link.store";
 
-function toTeam(game: MatchGame, side: Side): MatchGameTeamStats {
-  return {
-    participantId: (side === "blue" ? game.blueParticipant : game.orangeParticipant).id,
-    goals: side === "blue" ? game.blueGoals : game.orangeGoals,
-    players: game.players
-      .getItems()
-      .filter((row) => row.side === side)
-      .toSorted((a, b) => a.name.localeCompare(b.name))
-      .map((row) => ({
-        name: row.name,
-        player: row.player
-          ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
-          : null,
-        goals: row.goals,
-        assists: row.assists,
-        saves: row.saves,
-        shots: row.shots,
-        demolitions: row.demolitions,
-      })),
-  };
-}
+const toTeam = (game: MatchGame, side: Side): MatchGameTeamStats => ({
+  participantId: (side === "blue" ? game.blueParticipant : game.orangeParticipant).id,
+  goals: side === "blue" ? game.blueGoals : game.orangeGoals,
+  players: game.players
+    .getItems()
+    .filter((row) => row.side === side)
+    .toSorted((a, b) => a.name.localeCompare(b.name))
+    .map((row) => ({
+      name: row.name,
+      player: row.player
+        ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
+        : null,
+      goals: row.goals,
+      assists: row.assists,
+      saves: row.saves,
+      shots: row.shots,
+      demolitions: row.demolitions,
+    })),
+});
 
-function toTournamentGame(game: MatchGame): TournamentStatsGame {
-  return {
-    matchId: game.match.id,
-    number: game.number,
-    ballchasingId: game.ballchasingId,
-    playedAt: game.playedAt?.toISOString() ?? null,
-    blueParticipantId: game.blueParticipant.id,
-    orangeParticipantId: game.orangeParticipant.id,
-    blueGoals: game.blueGoals,
-    orangeGoals: game.orangeGoals,
-  };
-}
+const toTournamentGame = (game: MatchGame): TournamentStatsGame => ({
+  matchId: game.match.id,
+  number: game.number,
+  ballchasingId: game.ballchasingId,
+  playedAt: game.playedAt?.toISOString() ?? null,
+  blueParticipantId: game.blueParticipant.id,
+  orangeParticipantId: game.orangeParticipant.id,
+  blueGoals: game.blueGoals,
+  orangeGoals: game.orangeGoals,
+});
 
 export class MikroOrmGameStatsStore implements GameStatsStore {
   constructor(private readonly em: EntityManager) {}

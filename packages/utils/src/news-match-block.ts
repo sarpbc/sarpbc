@@ -33,11 +33,9 @@ const MAX_TAG_INDENT = 3;
 const SELECTORS = ["match", "ids", "tournament", "team"] as const;
 const ATTR_NAMES = new Set<string>([...SELECTORS, "limit"]);
 
-function isUuid(value: string): boolean {
-  return UUID_PATTERN.test(value);
-}
+const isUuid = (value: string): boolean => UUID_PATTERN.test(value);
 
-function parseLimit(value: string | number | null | undefined): number | null {
+const parseLimit = (value: string | number | null | undefined): number | null => {
   if (value === null || value === undefined || value === "") {
     return NEWS_MATCH_BLOCK_DEFAULT_LIMIT;
   }
@@ -51,9 +49,9 @@ function parseLimit(value: string | number | null | undefined): number | null {
   const limit = Number(text);
 
   return limit <= NEWS_MATCH_BLOCK_MAX_MATCHES ? limit : null;
-}
+};
 
-function parseIds(value: string): string[] | null {
+const parseIds = (value: string): string[] | null => {
   const ids = value
     .split(",")
     .map((id) => id.trim().toLowerCase())
@@ -64,9 +62,9 @@ function parseIds(value: string): string[] | null {
   }
 
   return new Set(ids).size === ids.length ? ids : null;
-}
+};
 
-function parseAttrs(inner: string): Record<string, string> | null {
+const parseAttrs = (inner: string): Record<string, string> | null => {
   const source = inner.trim();
 
   if (!ATTRS_PATTERN.test(source)) {
@@ -88,9 +86,9 @@ function parseAttrs(inner: string): Record<string, string> | null {
   }
 
   return attrs;
-}
+};
 
-export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): MatchBlockSelector | null {
+export const newsMatchBlockFromAttrs = (attrs: NewsMatchBlockAttrs): MatchBlockSelector | null => {
   const present = SELECTORS.filter((name) => {
     const value = attrs[name];
 
@@ -132,9 +130,9 @@ export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): MatchBlockS
       return exhaustive;
     }
   }
-}
+};
 
-export function newsMatchBlockToAttrs(block: MatchBlockSelector): NewsMatchBlockAttrs {
+export const newsMatchBlockToAttrs = (block: MatchBlockSelector): NewsMatchBlockAttrs => {
   switch (block.kind) {
     case "match": {
       return { match: block.id };
@@ -158,9 +156,9 @@ export function newsMatchBlockToAttrs(block: MatchBlockSelector): NewsMatchBlock
       return exhaustive;
     }
   }
-}
+};
 
-export function parseNewsMatchTag(raw: string): NewsMatchTag | null {
+export const parseNewsMatchTag = (raw: string): NewsMatchTag | null => {
   const match = raw.match(MATCH_TAG_PATTERN);
 
   if (!match) {
@@ -171,18 +169,18 @@ export function parseNewsMatchTag(raw: string): NewsMatchTag | null {
   const block = attrs ? newsMatchBlockFromAttrs(attrs) : null;
 
   return block ? { block, raw: match[0] } : null;
-}
+};
 
-export function serializeNewsMatchTag(block: MatchBlockSelector): string {
+export const serializeNewsMatchTag = (block: MatchBlockSelector): string => {
   const attrs = Object.entries(newsMatchBlockToAttrs(block))
     .filter(([, value]) => value !== null && value !== undefined)
     .map(([name, value]) => `${name}="${value}"`)
     .join(" ");
 
   return `:matches{${attrs}}`;
-}
+};
 
-export function newsMatchBlockKey(block: MatchBlockSelector): string {
+export const newsMatchBlockKey = (block: MatchBlockSelector): string => {
   switch (block.kind) {
     case "match": {
       return `match:${block.id}`;
@@ -206,9 +204,9 @@ export function newsMatchBlockKey(block: MatchBlockSelector): string {
       return exhaustive;
     }
   }
-}
+};
 
-export function parseNewsMatchBlockKey(key: string): MatchBlockSelector | null {
+export const parseNewsMatchBlockKey = (key: string): MatchBlockSelector | null => {
   const [kind, value, limit, ...rest] = key.split(":");
 
   if (rest.length > 0 || value === undefined) {
@@ -240,9 +238,9 @@ export function parseNewsMatchBlockKey(key: string): MatchBlockSelector | null {
   }
 
   return block && newsMatchBlockKey(block) === key ? block : null;
-}
+};
 
-function maskInlineCode(line: string): string {
+const maskInlineCode = (line: string): string => {
   const runs = [...line.matchAll(BACKTICK_RUN_PATTERN)].map((run) => ({
     start: run.index,
     length: run[0].length,
@@ -283,9 +281,9 @@ function maskInlineCode(line: string): string {
   }
 
   return masked + line.slice(copied);
-}
+};
 
-function maskCode(content: string): string {
+const maskCode = (content: string): string => {
   let fence: string | null = null;
 
   return content
@@ -315,13 +313,12 @@ function maskCode(content: string): string {
       return maskInlineCode(line);
     })
     .join("\n");
-}
+};
 
-function isLineSpace(char: string | undefined): boolean {
-  return char === " " || char === "\t" || char === "\r";
-}
+const isLineSpace = (char: string | undefined): boolean =>
+  char === " " || char === "\t" || char === "\r";
 
-function isOwnLine(text: string, start: number, end: number): boolean {
+const isOwnLine = (text: string, start: number, end: number): boolean => {
   let before = start;
 
   while (start - before < MAX_TAG_INDENT && text[before - 1] === " ") {
@@ -337,14 +334,14 @@ function isOwnLine(text: string, start: number, end: number): boolean {
   return (
     (before === 0 || text[before - 1] === "\n") && (after === text.length || text[after] === "\n")
   );
-}
+};
 
 interface ScannedMatchTag {
   raw: string;
   tag: NewsMatchTag | null;
 }
 
-function scanNewsMatchTags(content: string): ScannedMatchTag[] {
+const scanNewsMatchTags = (content: string): ScannedMatchTag[] => {
   const masked = maskCode(content);
 
   return [...masked.matchAll(MATCH_TAG_GLOBAL_PATTERN)].map((match) => {
@@ -354,9 +351,9 @@ function scanNewsMatchTags(content: string): ScannedMatchTag[] {
 
     return { raw, tag };
   });
-}
+};
 
-export function extractNewsMatchBlocks(content: string): MatchBlockSelector[] {
+export const extractNewsMatchBlocks = (content: string): MatchBlockSelector[] => {
   const blocks = new Map<string, MatchBlockSelector>();
 
   for (const { tag } of scanNewsMatchTags(content)) {
@@ -366,20 +363,18 @@ export function extractNewsMatchBlocks(content: string): MatchBlockSelector[] {
   }
 
   return [...blocks.values()];
-}
+};
 
-export function findInvalidNewsMatchTags(content: string): string[] {
-  return scanNewsMatchTags(content)
+export const findInvalidNewsMatchTags = (content: string): string[] =>
+  scanNewsMatchTags(content)
     .filter(({ tag }) => !tag)
     .map(({ raw }) => raw);
-}
 
-export function newsMatchTagStart(content: string): number {
+export const newsMatchTagStart = (content: string): number => {
   const block = content.indexOf(MATCH_BLOCK_OPENER);
 
   return block === -1 ? content.indexOf(MATCH_INLINE_OPENER) : block;
-}
+};
 
-export function stripNewsMatchTags(content: string): string {
-  return content.replaceAll(MATCH_TAG_GLOBAL_PATTERN, " ");
-}
+export const stripNewsMatchTags = (content: string): string =>
+  content.replaceAll(MATCH_TAG_GLOBAL_PATTERN, " ");

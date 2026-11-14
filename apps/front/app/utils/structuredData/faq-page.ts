@@ -18,8 +18,8 @@ export interface FaqPageLd extends JsonLdNode {
   }[];
 }
 
-export function buildFaqPage(items: FaqPageItem[]): FaqPageLd {
-  return compactJsonLd({
+export const buildFaqPage = (items: FaqPageItem[]): FaqPageLd =>
+  compactJsonLd({
     "@context": SCHEMA_ORG,
     "@type": "FAQPage",
     mainEntity: items.map((item) => ({
@@ -31,4 +31,3 @@ export function buildFaqPage(items: FaqPageItem[]): FaqPageLd {
       },
     })),
   });
-}

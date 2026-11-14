@@ -35,7 +35,7 @@ describe(TransferService, () => {
 
   const findMovements = async () => career;
 
-  function fixture() {
+  const fixture = () => {
     const contracts: ContractQueries = {
       findByPlayer: async () => [],
       findPastContractsByPlayer: async () => [],
@@ -48,7 +48,7 @@ describe(TransferService, () => {
     const service = new TransferService(contracts);
 
     return { service };
-  }
+  };
 
   it("filters by movement type and paginates the newest movements first", async () => {
     const { service } = fixture();

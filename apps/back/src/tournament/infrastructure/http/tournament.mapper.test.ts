@@ -9,15 +9,14 @@ import { mapTournamentDetail, mapTournamentListItem } from "./tournament.mapper"
 
 const event = { id: "event", slug: "fake-knockout", name: "Fake Knockout" };
 
-function solo(id: string, name: string) {
-  return Object.assign(new TournamentParticipant(), {
+const solo = (id: string, name: string) =>
+  Object.assign(new TournamentParticipant(), {
     id,
     team: null,
     players: [Object.assign(new Player(), { id: `player-${id}`, name, slug: name.toLowerCase() })],
   });
-}
 
-function knockout() {
+const knockout = () => {
   const zen = solo("zen", "Zen");
   const vatira = solo("vatira", "Vatira");
 
@@ -49,7 +48,7 @@ function knockout() {
   tournament.matches = [final];
 
   return { tournament, final };
-}
+};
 
 describe("player participants in public responses", () => {
   it("names the winner and the participants of a 1v1 tournament by their players", () => {

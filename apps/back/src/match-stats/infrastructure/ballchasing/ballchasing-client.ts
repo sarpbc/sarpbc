@@ -79,15 +79,13 @@ const replayDetail = z.object({
 
 type ListedReplay = z.infer<typeof replayList>["list"][number];
 
-function toTeam(side: z.infer<typeof team> | undefined): ReplayTeam {
-  return {
-    name: nonBlank(side?.name) ?? null,
-    goals: side?.goals ?? 0,
-    playerNames: (side?.players ?? []).map((player) => player.name),
-  };
-}
+const toTeam = (side: z.infer<typeof team> | undefined): ReplayTeam => ({
+  name: nonBlank(side?.name) ?? null,
+  goals: side?.goals ?? 0,
+  playerNames: (side?.players ?? []).map((player) => player.name),
+});
 
-function playedAt(raw: string | undefined, hasTimezone: boolean | undefined): Date | null {
+const playedAt = (raw: string | undefined, hasTimezone: boolean | undefined): Date | null => {
   if (raw === undefined || raw === "") {
     return null;
   }
@@ -97,22 +95,20 @@ function playedAt(raw: string | undefined, hasTimezone: boolean | undefined): Da
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;
-}
+};
 
-function toSummary(replay: ListedReplay): ReplaySummary {
-  return {
-    id: replay.id,
-    rocketLeagueId: replay.rocket_league_id ?? null,
-    title: replay.replay_title ?? replay.id,
-    playedAt: playedAt(replay.date, replay.date_has_tz),
-    playedAtHasTimezone: replay.date_has_tz === true,
-    blue: toTeam(replay.blue),
-    orange: toTeam(replay.orange),
-  };
-}
+const toSummary = (replay: ListedReplay): ReplaySummary => ({
+  id: replay.id,
+  rocketLeagueId: replay.rocket_league_id ?? null,
+  title: replay.replay_title ?? replay.id,
+  playedAt: playedAt(replay.date, replay.date_has_tz),
+  playedAtHasTimezone: replay.date_has_tz === true,
+  blue: toTeam(replay.blue),
+  orange: toTeam(replay.orange),
+});
 
-function toPlayers(side: Side, detail: z.infer<typeof detailSide>): ReplayPlayerStats[] {
-  return detail.players.map(({ name, id, stats }) => ({
+const toPlayers = (side: Side, detail: z.infer<typeof detailSide>): ReplayPlayerStats[] =>
+  detail.players.map(({ name, id, stats }) => ({
     name,
     platform: id?.platform ?? "unknown",
     platformId: id?.id === undefined || id.id === "" ? null : id.id,
@@ -123,7 +119,6 @@ function toPlayers(side: Side, detail: z.infer<typeof detailSide>): ReplayPlayer
     shots: stats.core.shots,
     demolitions: stats.demo.inflicted,
   }));
-}
 
 export interface BallchasingClientOptions {
   fetch?: typeof fetch;

@@ -9,10 +9,10 @@ interface AdminListPage<T> {
   total: number;
 }
 
-export function useAdminList<T>(
+export const useAdminList = <T>(
   key: string,
   fetchPage: (range: AdminListRange) => Promise<AdminListPage<T>>,
-) {
+) => {
   const limit = 25;
   const page = ref(1);
   const search = ref("");
@@ -41,4 +41,4 @@ export function useAdminList<T>(
   );
 
   return { items, total, page, search, limit, status, error, refresh };
-}
+};

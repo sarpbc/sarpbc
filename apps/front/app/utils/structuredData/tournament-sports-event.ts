@@ -101,11 +101,10 @@ export interface BuildTournamentSportsEventOptions {
   now?: number;
 }
 
-function isTournamentFormat(value: string): value is TournamentFormat {
-  return TOURNAMENT_FORMATS.some((format) => format === value);
-}
+const isTournamentFormat = (value: string): value is TournamentFormat =>
+  TOURNAMENT_FORMATS.some((format) => format === value);
 
-export function toIsoDate(value: Date | string | undefined | null): string | undefined {
+export const toIsoDate = (value: Date | string | undefined | null): string | undefined => {
   if (!isNonEmptyDateInput(value)) {
     return undefined;
   }
@@ -117,9 +116,9 @@ export function toIsoDate(value: Date | string | undefined | null): string | und
   }
 
   return date.toISOString();
-}
+};
 
-export function sportsEventStatusUrl(status: TournamentStatus | null): string | undefined {
+export const sportsEventStatusUrl = (status: TournamentStatus | null): string | undefined => {
   if (status === null) {
     return undefined;
   }
@@ -137,9 +136,9 @@ export function sportsEventStatusUrl(status: TournamentStatus | null): string | 
       return _exhaustive;
     }
   }
-}
+};
 
-export function formatLabel(type: string | null): string | undefined {
+export const formatLabel = (type: string | null): string | undefined => {
   if (!isNonEmptyString(type) || !isTournamentFormat(type)) {
     return undefined;
   }
@@ -157,15 +156,13 @@ export function formatLabel(type: string | null): string | undefined {
       return _exhaustive;
     }
   }
-}
+};
 
-function virtualLocation(url: string): VirtualLocationLd {
-  return { "@type": "VirtualLocation", url };
-}
+const virtualLocation = (url: string): VirtualLocationLd => ({ "@type": "VirtualLocation", url });
 
 const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
 
-function countryPlace(country: string | null | undefined): PlaceLd | undefined {
+const countryPlace = (country: string | null | undefined): PlaceLd | undefined => {
   const code = country?.trim().toUpperCase();
 
   if (!isNonEmptyString(code) || !/^[A-Z]{2}$/u.test(code)) {
@@ -177,24 +174,22 @@ function countryPlace(country: string | null | undefined): PlaceLd | undefined {
     name: COUNTRY_NAMES.of(code) ?? code,
     address: { "@type": "PostalAddress", addressCountry: code },
   };
-}
+};
 
-function onlineVenue(url: string): SportsEventVenueLd {
-  return {
-    eventAttendanceMode: `${SCHEMA_ORG}/OnlineEventAttendanceMode`,
-    location: virtualLocation(url),
-  };
-}
+const onlineVenue = (url: string): SportsEventVenueLd => ({
+  eventAttendanceMode: `${SCHEMA_ORG}/OnlineEventAttendanceMode`,
+  location: virtualLocation(url),
+});
 
 // Google treats an event without eventAttendanceMode as offline and rejects a
 // VirtualLocation there, and it rejects a Place without an address. So the mode
 // and location are always emitted together, falling back to the online venue
 // (every event is streamed) when no country is known.
-export function eventVenue(
+export const eventVenue = (
   type: string | null,
   country: string | null | undefined,
   url: string,
-): SportsEventVenueLd {
+): SportsEventVenueLd => {
   const place = countryPlace(country);
 
   if (!isNonEmptyString(type) || !isTournamentFormat(type) || !place) {
@@ -226,11 +221,11 @@ export function eventVenue(
       return _exhaustive;
     }
   }
-}
+};
 
-export function getTournamentChampion(
+export const getTournamentChampion = (
   tournament: Pick<TournamentDetail, "winner">,
-): ParticipantRef<TeamSummary> | null {
+): ParticipantRef<TeamSummary> | null => {
   const { winner } = tournament;
 
   if (!winner) {
@@ -240,11 +235,11 @@ export function getTournamentChampion(
   const listed = winner.team ? Boolean(winner.team.slug) : winner.players.length > 0;
 
   return listed ? winner : null;
-}
+};
 
-function competitorFromTournament(
+const competitorFromTournament = (
   tournament: Pick<TournamentDetail, "participants">,
-): CompetitorLd[] | undefined {
+): CompetitorLd[] | undefined => {
   const competitors = new Map<string, CompetitorLd>();
 
   for (const participant of tournament.participants) {
@@ -286,12 +281,12 @@ function competitorFromTournament(
   }
 
   return [...competitors.values()].toSorted((a, b) => a.name.localeCompare(b.name));
-}
+};
 
-function additionalProperties(
+const additionalProperties = (
   prizepool: string | undefined,
   format: string | undefined,
-): PropertyValueLd[] | undefined {
+): PropertyValueLd[] | undefined => {
   const properties: PropertyValueLd[] = [];
 
   if (isNonEmptyString(prizepool)) {
@@ -311,15 +306,15 @@ function additionalProperties(
   }
 
   return properties.length > 0 ? properties : undefined;
-}
+};
 
-function buildDescription(parts: {
+const buildDescription = (parts: {
   leagueName?: string;
   format?: string;
   prizepool?: string;
   championName?: string;
   status: TournamentStatus | null;
-}): string {
+}): string => {
   const sentences: string[] = [];
   const leagueSuffix = isNonEmptyString(parts.leagueName) ? ` (${parts.leagueName})` : "";
   sentences.push(`Rocket League tournament${leagueSuffix}`);
@@ -343,12 +338,12 @@ function buildDescription(parts: {
   }
 
   return `${sentences.join(". ")}.`;
-}
+};
 
-export function buildTournamentSportsEvent(
+export const buildTournamentSportsEvent = (
   tournament: TournamentDetail,
   options: BuildTournamentSportsEventOptions = {},
-): SportsEventLd {
+): SportsEventLd => {
   const url = `${SITE_ORIGIN}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
   const status = getTournamentStatus(tournament, options.now);
   const prizepool = formatPrizepool(tournament.prizepool) || undefined;
@@ -396,4 +391,4 @@ export function buildTournamentSportsEvent(
   }
 
   return event;
-}
+};

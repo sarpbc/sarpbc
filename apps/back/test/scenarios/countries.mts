@@ -23,12 +23,15 @@ export interface CountriesContext {
   staffCookie: string;
 }
 
-export async function verifyCountries({ request, staffCookie }: CountriesContext): Promise<void> {
-  async function created<T>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> {
+export const verifyCountries = async ({
+  request,
+  staffCookie,
+}: CountriesContext): Promise<void> => {
+  const created = async <T,>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> => {
     const response = await request("POST", path, body, staffCookie, 201);
 
     return response.json(schema);
-  }
+  };
 
   const teamBody = z.object({ team });
   const playerBody = z.looseObject({});
@@ -117,4 +120,4 @@ export async function verifyCountries({ request, staffCookie }: CountriesContext
 
   await request("GET", "/countries/tuvalu", undefined, undefined, 404);
   await request("GET", "/countries/zz", undefined, undefined, 404);
-}
+};

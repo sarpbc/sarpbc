@@ -22,22 +22,20 @@ const reply: ReplyRecord = {
   createdAt: new Date("2026-01-01"),
 };
 
-function entityManager(flushFailure: Error | null) {
-  return {
-    getRepository: vi.fn<() => object>().mockReturnValue({}),
-    findOne: vi.fn<() => Promise<{ id: string }>>().mockResolvedValue({ id: reply.id }),
-    getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
-      (_entity, id) => ({ id }),
-    ),
-    persist: vi.fn<EntityManager["persist"]>(),
-    remove: vi.fn<EntityManager["remove"]>(),
-    flush: vi.fn<() => Promise<void>>(async () => {
-      if (flushFailure) {
-        throw flushFailure;
-      }
-    }),
-  };
-}
+const entityManager = (flushFailure: Error | null) => ({
+  getRepository: vi.fn<() => object>().mockReturnValue({}),
+  findOne: vi.fn<() => Promise<{ id: string }>>().mockResolvedValue({ id: reply.id }),
+  getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
+    (_entity, id) => ({ id }),
+  ),
+  persist: vi.fn<EntityManager["persist"]>(),
+  remove: vi.fn<EntityManager["remove"]>(),
+  flush: vi.fn<() => Promise<void>>(async () => {
+    if (flushFailure) {
+      throw flushFailure;
+    }
+  }),
+});
 
 const asEntityManager = (em: ReturnType<typeof entityManager>): EntityManager =>
   Object.assign(unconstructed(EntityManager), em);

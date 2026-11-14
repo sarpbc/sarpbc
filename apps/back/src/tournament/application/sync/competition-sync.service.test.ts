@@ -34,7 +34,7 @@ import type { MatchTiming } from "../../domain/tournament-end";
 
 const copy = <T extends object>(type: new () => T, value: T): T => Object.assign(new type(), value);
 
-function memoryStore() {
+const memoryStore = () => {
   const tournaments = new Map<string, Tournament>();
   const events = new Map<string, TournamentEvent>();
   const leagues = new Map<number, League>();
@@ -97,19 +97,19 @@ function memoryStore() {
     },
   };
 
-  function seedEvent(fields: Partial<TournamentEvent>) {
+  const seedEvent = (fields: Partial<TournamentEvent>) => {
     const event = Object.assign(new TournamentEvent(), fields);
     events.set(event.id, event);
 
     return event;
-  }
+  };
 
-  function seedStage(event: TournamentEvent, fields: Partial<Tournament>) {
+  const seedStage = (event: TournamentEvent, fields: Partial<Tournament>) => {
     const stage = Object.assign(new Tournament(), { event: toEventRef(event), ...fields });
     tournaments.set(stage.id, stage);
 
     return stage;
-  }
+  };
 
   const eventOf = (tournamentId: string) => {
     const tournament = tournaments.get(tournamentId);
@@ -141,7 +141,7 @@ function memoryStore() {
     seedStage,
     eventOf,
   };
-}
+};
 
 const serieIncident = (
   change:

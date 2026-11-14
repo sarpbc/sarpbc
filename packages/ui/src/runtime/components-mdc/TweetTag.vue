@@ -21,11 +21,11 @@ const { data, status, error } = useAsyncData(
   },
 );
 
-function imageSrc(source: string): string {
+const imageSrc = (source: string): string => {
   const path = tweetImageProxyPath(source);
 
   return path ? `${config.public.apiBase}${path}` : source;
-}
+};
 
 const href = computed(() => data.value?.url ?? parsed.value?.url ?? url);
 const showError = computed(() => !parsed.value || status.value === "error" || error.value);

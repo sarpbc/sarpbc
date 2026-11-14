@@ -4,7 +4,9 @@ import type { TournamentBracketFormat, TournamentBracketRoundGroup } from "./typ
 import { TBD_LABEL } from "~/utils/tbd-label";
 import { sortMatchesByBeginAt } from "./rows";
 
-export function classifyTournamentBracket(tournament: TournamentDetail): TournamentBracketFormat {
+export const classifyTournamentBracket = (
+  tournament: TournamentDetail,
+): TournamentBracketFormat => {
   const matches = tournament.matches ?? [];
 
   if (matches.length === 0) {
@@ -32,11 +34,11 @@ export function classifyTournamentBracket(tournament: TournamentDetail): Tournam
   }
 
   return "flat-stage";
-}
+};
 
-export function groupMatchesByRound(
+export const groupMatchesByRound = (
   matches: TournamentDetailMatch[],
-): TournamentBracketRoundGroup[] {
+): TournamentBracketRoundGroup[] => {
   const groups = new Map<string, TournamentDetailMatch[]>();
 
   for (const match of matches) {
@@ -62,4 +64,4 @@ export function groupMatchesByRound(
 
       return dateA - dateB;
     });
-}
+};

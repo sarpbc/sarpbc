@@ -24,34 +24,27 @@ export interface CalendarFeed {
   dtStamp: Date;
 }
 
-export function tournamentCalendarPath(id: string): string {
-  return `/calendar/tournament/${id}.ics`;
-}
+export const tournamentCalendarPath = (id: string): string => `/calendar/tournament/${id}.ics`;
 
-export function matchPageUrl(match: MatchLinkTarget): string {
-  return `${SITE_ORIGIN}${matchPath(match.publicId, match.slug)}`;
-}
+export const matchPageUrl = (match: MatchLinkTarget): string =>
+  `${SITE_ORIGIN}${matchPath(match.publicId, match.slug)}`;
 
-export function matchEventUid(id: string): string {
-  return `match-${id}@sarpbc.org`;
-}
+export const matchEventUid = (id: string): string => `match-${id}@sarpbc.org`;
 
-function formatIcsUtc(date: Date): string {
-  return date
+const formatIcsUtc = (date: Date): string =>
+  date
     .toISOString()
     .replaceAll(/[-:]/gu, "")
     .replace(/\.\d{3}/u, "");
-}
 
-function escapeIcsText(value: string): string {
-  return value
+const escapeIcsText = (value: string): string =>
+  value
     .replaceAll("\\", "\\\\")
     .replaceAll("\n", "\\n")
     .replaceAll(";", "\\;")
     .replaceAll(",", "\\,");
-}
 
-function foldIcsLine(line: string): string {
+const foldIcsLine = (line: string): string => {
   const encoder = new TextEncoder();
 
   if (encoder.encode(line).length <= FOLD_OCTETS) {
@@ -77,13 +70,13 @@ function foldIcsLine(line: string): string {
   }
 
   return folded.join("\r\n");
-}
+};
 
-export function matchEndAt(
+export const matchEndAt = (
   beginAt: Date,
   endAt: Date | undefined,
   numberOfGames: number | undefined,
-): Date {
+): Date => {
   if (endAt && endAt.getTime() > beginAt.getTime()) {
     return endAt;
   }
@@ -94,9 +87,9 @@ export function matchEndAt(
       : DEFAULT_DURATION_MINUTES;
 
   return new Date(beginAt.getTime() + minutes * 60 * 1000);
-}
+};
 
-function eventLines(event: CalendarEvent): string[] {
+const eventLines = (event: CalendarEvent): string[] => {
   const lines = [
     "BEGIN:VEVENT",
     `UID:${event.uid}`,
@@ -117,9 +110,9 @@ function eventLines(event: CalendarEvent): string[] {
   lines.push("END:VEVENT");
 
   return lines;
-}
+};
 
-export function buildIcs(feed: CalendarFeed): string {
+export const buildIcs = (feed: CalendarFeed): string => {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -136,4 +129,4 @@ export function buildIcs(feed: CalendarFeed): string {
   lines.push("END:VCALENDAR");
 
   return `${lines.map(foldIcsLine).join("\r\n")}\r\n`;
-}
+};

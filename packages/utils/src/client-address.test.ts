@@ -14,13 +14,10 @@ import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api";
 
 const TOKEN = "internal-api-token-value";
 
-function forwarded(address: string) {
-  return forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: address } });
-}
+const forwarded = (address: string) =>
+  forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: address } });
 
-function withToken(value: string) {
-  return { headers: { [INTERNAL_API_HEADER]: value } };
-}
+const withToken = (value: string) => ({ headers: { [INTERNAL_API_HEADER]: value } });
 
 void describe("client address", () => {
   void it("unwraps IPv4-mapped loopback and rejects junk", () => {

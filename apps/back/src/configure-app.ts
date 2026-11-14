@@ -5,10 +5,10 @@ import cookie from "@fastify/cookie";
 import helmet from "@fastify/helmet";
 import multipart from "@fastify/multipart";
 
-export async function configureApp(
+export const configureApp = async (
   app: NestFastifyApplication,
   corsOrigins: string[],
-): Promise<void> {
+): Promise<void> => {
   app.enableCors({
     origin: corsOrigins,
     methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -31,4 +31,4 @@ export async function configureApp(
   await app.register(cookie);
 
   app.enableShutdownHooks();
-}
+};

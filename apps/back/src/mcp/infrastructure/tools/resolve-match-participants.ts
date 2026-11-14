@@ -20,11 +20,11 @@ export interface MatchParticipantLookups {
   players: IdOrSlugLookup<Player>;
 }
 
-export async function resolveMatchParticipantIds(
+export const resolveMatchParticipantIds = async (
   tournament: Tournament,
   input: MatchParticipantsInput,
   lookups: MatchParticipantLookups,
-): Promise<TournamentParticipant[]> {
+): Promise<TournamentParticipant[]> => {
   const byParticipantId = new Map(
     tournament.participants.map((participant) => [participant.id, participant]),
   );
@@ -142,4 +142,4 @@ export async function resolveMatchParticipantIds(
   }
 
   return resolved;
-}
+};

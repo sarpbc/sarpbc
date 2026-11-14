@@ -20,7 +20,7 @@ const circuit: CircuitSummary = {
   qualificationSpots: null,
 };
 
-function storeFailingWith(error: Error) {
+const storeFailingWith = (error: Error) => {
   const em = {
     findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
     persist: vi.fn<EntityManager["persist"]>().mockReturnThis(),
@@ -28,7 +28,7 @@ function storeFailingWith(error: Error) {
   };
 
   return new CircuitPersistence(Object.assign(unconstructed(EntityManager), em));
-}
+};
 
 describe("CircuitPersistence.save", () => {
   it("reports a unique violation from a concurrent twin as a conflict", async () => {

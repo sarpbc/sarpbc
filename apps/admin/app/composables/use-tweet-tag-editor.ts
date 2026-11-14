@@ -1,16 +1,16 @@
 import type { Editor } from "@tiptap/core";
 import { parseTweetUrl } from "@sarpbc/utils";
 
-export function useTweetTagEditor() {
+export const useTweetTagEditor = () => {
   const pickerOpen = ref(false);
   let activeEditor: Editor | null = null;
 
-  function openTweetPicker(editor: Editor) {
+  const openTweetPicker = (editor: Editor) => {
     activeEditor = editor;
     pickerOpen.value = true;
-  }
+  };
 
-  function insertTweetTag(url: string) {
+  const insertTweetTag = (url: string) => {
     if (!activeEditor) {
       return;
     }
@@ -31,7 +31,7 @@ export function useTweetTagEditor() {
       pickerOpen.value = false;
       activeEditor = null;
     }
-  }
+  };
 
   const tweetTagHandlers = {
     tweetTag: {
@@ -51,4 +51,4 @@ export function useTweetTagEditor() {
     tweetTagHandlers,
     insertTweetTag,
   };
-}
+};

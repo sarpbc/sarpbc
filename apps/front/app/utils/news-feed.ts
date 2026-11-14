@@ -9,7 +9,7 @@ export type NewsFeedEntry =
  * Folds every short of an ISO week into one entry headed by its newest short.
  * Expects newest-first input, so a past week's entry never changes once the week ends.
  */
-export function buildNewsFeed(items: readonly NewsArticleListItem[]): NewsFeedEntry[] {
+export const buildNewsFeed = (items: readonly NewsArticleListItem[]): NewsFeedEntry[] => {
   const seenWeeks = new Set<string>();
   const entries: NewsFeedEntry[] = [];
 
@@ -40,4 +40,4 @@ export function buildNewsFeed(items: readonly NewsArticleListItem[]): NewsFeedEn
   }
 
   return entries;
-}
+};

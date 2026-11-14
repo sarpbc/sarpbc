@@ -1,57 +1,34 @@
 import type { UiLocale } from "./locale";
 
-export function matchPath(publicId: number, slug: string): string {
-  return `/matches/${publicId}/${slug}`;
-}
+export const matchPath = (publicId: number, slug: string): string => `/matches/${publicId}/${slug}`;
 
-export function forumPostPath(publicId: number, slug: string): string {
-  return `/forum/post/${publicId}/${slug}`;
-}
+export const forumPostPath = (publicId: number, slug: string): string =>
+  `/forum/post/${publicId}/${slug}`;
 
-export function staffPath(slug: string): string {
-  return `/staff/${slug}`;
-}
+export const staffPath = (slug: string): string => `/staff/${slug}`;
 
-export function playerPath(slug: string): string {
-  return `/player/${slug}`;
-}
+export const playerPath = (slug: string): string => `/player/${slug}`;
 
-export function teamPath(slug: string): string {
-  return `/team/${slug}`;
-}
+export const teamPath = (slug: string): string => `/team/${slug}`;
 
-export function newsPath(slug: string): string {
-  return `/news/${slug}`;
-}
+export const newsPath = (slug: string): string => `/news/${slug}`;
 
-export function tournamentEventPath(eventSlug: string): string {
-  return `/tournaments/${eventSlug}`;
-}
+export const tournamentEventPath = (eventSlug: string): string => `/tournaments/${eventSlug}`;
 
-export function tournamentStagePath(eventSlug: string, stageSlug: string): string {
-  return `/tournaments/${eventSlug}/${stageSlug}`;
-}
+export const tournamentStagePath = (eventSlug: string, stageSlug: string): string =>
+  `/tournaments/${eventSlug}/${stageSlug}`;
 
-export function stageMatchesPath(eventSlug: string, stageSlug: string): string {
-  return `${tournamentStagePath(eventSlug, stageSlug)}/matches`;
-}
+export const stageMatchesPath = (eventSlug: string, stageSlug: string): string =>
+  `${tournamentStagePath(eventSlug, stageSlug)}/matches`;
 
-export function stageStatsPath(eventSlug: string, stageSlug: string): string {
-  return `${tournamentStagePath(eventSlug, stageSlug)}/stats`;
-}
+export const stageStatsPath = (eventSlug: string, stageSlug: string): string =>
+  `${tournamentStagePath(eventSlug, stageSlug)}/stats`;
 
-export function circuitPath(slug: string): string {
-  return `/circuits/${slug}`;
-}
+export const circuitPath = (slug: string): string => `/circuits/${slug}`;
 
-export function seasonArchivePath(slug: string): string {
-  return `/seasons/${slug}`;
-}
+export const seasonArchivePath = (slug: string): string => `/seasons/${slug}`;
 
-export function countryPath(code: string): string {
-  return `/countries/${code.toLowerCase()}`;
-}
+export const countryPath = (code: string): string => `/countries/${code.toLowerCase()}`;
 
-export function localizedPath(path: string, locale: UiLocale): string {
-  return locale === "fr" ? `/fr${path}` : path;
-}
+export const localizedPath = (path: string, locale: UiLocale): string =>
+  locale === "fr" ? `/fr${path}` : path;

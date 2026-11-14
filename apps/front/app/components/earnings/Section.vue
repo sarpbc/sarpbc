@@ -31,7 +31,7 @@ const hasStartgg = computed(() =>
   years.value.some((year) => year.entries.some((entry) => entry.tournament.source === "startgg")),
 );
 
-function entryMeta(entry: EarningsEntry): string {
+const entryMeta = (entry: EarningsEntry): string => {
   const parts = [distinctStageName(entry.tournament), formatPlacement(entry.placement)];
 
   if (owner === "player") {
@@ -39,7 +39,7 @@ function entryMeta(entry: EarningsEntry): string {
   }
 
   return parts.filter(Boolean).join(" · ");
-}
+};
 </script>
 
 <template>

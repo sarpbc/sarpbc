@@ -35,7 +35,7 @@ const ERRORS = {
   "invalid-pandascore-id": "The PandaScore team id must be a positive whole number.",
 } satisfies Record<TeamAliasError, string>;
 
-export function requireTeamAliasInput(input: TeamAliasInput): TeamAliasInput {
+export const requireTeamAliasInput = (input: TeamAliasInput): TeamAliasInput => {
   const parsed = parseTeamAlias(input);
 
   if (!parsed.ok) {
@@ -43,9 +43,9 @@ export function requireTeamAliasInput(input: TeamAliasInput): TeamAliasInput {
   }
 
   return parsed.alias;
-}
+};
 
-export function assertTeamAliasFits(alias: TeamAlias, team: Team): void {
+export const assertTeamAliasFits = (alias: TeamAlias, team: Team): void => {
   const overlap = team.aliases.find(
     (other) => other.id !== alias.id && teamAliasesOverlap(alias, other),
   );
@@ -61,9 +61,9 @@ export function assertTeamAliasFits(alias: TeamAlias, team: Team): void {
       `${team.name} already has PandaScore id ${alias.pandascoreId}; leave it off the alias.`,
     );
   }
-}
+};
 
-export function teamAt(team: Team, at: Date | null): Team {
+export const teamAt = (team: Team, at: Date | null): Team => {
   if (!at || team.aliases.length === 0) {
     return team;
   }
@@ -85,4 +85,4 @@ export function teamAt(team: Team, at: Date | null): Team {
       : {};
 
   return Object.assign(new Team(), team, { name: alias.name }, logo);
-}
+};

@@ -11,6 +11,5 @@ export interface NamedParticipant {
   players?: readonly { name: string }[];
 }
 
-export function participantName(participant: NamedParticipant): string {
-  return participant.team?.name ?? (participant.players ?? []).map(({ name }) => name).join(" / ");
-}
+export const participantName = (participant: NamedParticipant): string =>
+  participant.team?.name ?? (participant.players ?? []).map(({ name }) => name).join(" / ");

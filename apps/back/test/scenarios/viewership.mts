@@ -53,13 +53,13 @@ const SAVED = {
   sourceName: "Esports Charts",
 };
 
-export async function verifyViewership({
+export const verifyViewership = async ({
   request,
   staffCookie,
   memberCookie,
   tournament,
   match,
-}: ViewershipContext): Promise<void> {
+}: ViewershipContext): Promise<void> => {
   const matchPath = `/tournaments/matches/${match.id}/viewership`;
   const eventPath = `/events/${tournament.event.id}/viewership`;
 
@@ -140,9 +140,9 @@ export async function verifyViewership({
   assert.equal(publicMatchResult4.viewership, null);
   const publicEventResult2 = await publicEvent();
   assert.equal(publicEventResult2.viewership, null);
-}
+};
 
-export async function verifyViewershipProposals({
+export const verifyViewershipProposals = async ({
   request,
   staffCookie,
   callTool,
@@ -150,7 +150,7 @@ export async function verifyViewershipProposals({
   match,
   startggCupId,
   startggMatchId,
-}: ViewershipProposalsContext): Promise<void> {
+}: ViewershipProposalsContext): Promise<void> => {
   const sourceUrl = "https://escharts.com/tournaments/rl/integration-cup/final";
 
   const proposal = {
@@ -275,4 +275,4 @@ export async function verifyViewershipProposals({
     { viewership: null },
     staffCookie,
   );
-}
+};

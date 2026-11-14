@@ -24,15 +24,15 @@ export const IMAGE_UPLOAD_TARGETS = ["news", "tournament"] as const;
 
 export type ImageUploadTarget = (typeof IMAGE_UPLOAD_TARGETS)[number];
 
-export function canonicalImageContentType(contentType: string): string {
+export const canonicalImageContentType = (contentType: string): string => {
   const normalized = contentType.toLowerCase().split(";")[0]?.trim() ?? "";
 
   return IMAGE_CONTENT_TYPE_ALIASES.some((alias) => alias === normalized)
     ? "image/jpeg"
     : normalized;
-}
+};
 
-export function parseR2UploadResponse(text: string): R2UploadResponse | undefined {
+export const parseR2UploadResponse = (text: string): R2UploadResponse | undefined => {
   try {
     const parsed = r2UploadResponseSchema.safeParse(JSON.parse(text));
 
@@ -40,4 +40,4 @@ export function parseR2UploadResponse(text: string): R2UploadResponse | undefine
   } catch {
     return undefined;
   }
-}
+};

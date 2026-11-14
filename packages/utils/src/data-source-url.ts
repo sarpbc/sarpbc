@@ -2,7 +2,7 @@ import { isForbiddenSourceHost } from "./source-host";
 
 export const DATA_SOURCE_URL_MAX_LENGTH = 2048;
 
-export function isAcceptedDataSourceUrl(value: string): boolean {
+export const isAcceptedDataSourceUrl = (value: string): boolean => {
   if (value.length > DATA_SOURCE_URL_MAX_LENGTH || !URL.canParse(value)) {
     return false;
   }
@@ -18,4 +18,4 @@ export function isAcceptedDataSourceUrl(value: string): boolean {
   }
 
   return !isForbiddenSourceHost(url.hostname);
-}
+};

@@ -5,7 +5,7 @@ import { stripNewsTweetTags } from "./news-tweet-tag";
 export const NEWS_EXCERPT_MAX_LENGTH = 120;
 export const NEWS_SEO_DESCRIPTION_MAX_LENGTH = 160;
 
-export function newsContentToPlainText(content: string): string {
+export const newsContentToPlainText = (content: string): string => {
   const withLabels = replaceNewsEntityTagsWithLabels(
     stripNewsMatchTags(stripNewsTweetTags(content)),
   );
@@ -23,12 +23,12 @@ export function newsContentToPlainText(content: string): string {
     .replaceAll(/[*_~]+/gu, "")
     .replaceAll(/\s+/gu, " ")
     .trim();
-}
+};
 
-export function excerptFromNewsContent(
+export const excerptFromNewsContent = (
   content: string,
   maxLength = NEWS_EXCERPT_MAX_LENGTH,
-): string {
+): string => {
   const plain = newsContentToPlainText(content);
 
   if (plain.length <= maxLength) {
@@ -36,4 +36,4 @@ export function excerptFromNewsContent(
   }
 
   return `${plain.slice(0, maxLength).trimEnd()}…`;
-}
+};

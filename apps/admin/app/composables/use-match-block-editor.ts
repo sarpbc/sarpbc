@@ -10,7 +10,7 @@ type EditMatchBlock = (
 
 const editMatchBlockKey: InjectionKey<EditMatchBlock> = Symbol("editMatchBlock");
 
-export function useEditMatchBlock(): EditMatchBlock {
+export const useEditMatchBlock = (): EditMatchBlock => {
   const edit = inject(editMatchBlockKey);
 
   if (!edit) {
@@ -18,9 +18,9 @@ export function useEditMatchBlock(): EditMatchBlock {
   }
 
   return edit;
-}
+};
 
-export function useMatchBlockEditor() {
+export const useMatchBlockEditor = () => {
   const pickerOpen = ref(false);
   const pickerBlock = ref<MatchBlockSelector | null>(null);
   let applyBlock: ((block: MatchBlockSelector) => void) | null = null;
@@ -33,16 +33,16 @@ export function useMatchBlockEditor() {
 
   provide(editMatchBlockKey, openMatchBlockPicker);
 
-  function applyMatchBlock(block: MatchBlockSelector) {
+  const applyMatchBlock = (block: MatchBlockSelector) => {
     try {
       applyBlock?.(block);
     } finally {
       pickerOpen.value = false;
       applyBlock = null;
     }
-  }
+  };
 
-  function insertMatchBlock(editor: Editor) {
+  const insertMatchBlock = (editor: Editor) => {
     openMatchBlockPicker(null, (block) => {
       editor
         .chain()
@@ -53,7 +53,7 @@ export function useMatchBlockEditor() {
         ])
         .run();
     });
-  }
+  };
 
   const matchBlockHandlers = {
     matchBlock: {
@@ -74,4 +74,4 @@ export function useMatchBlockEditor() {
     matchBlockHandlers,
     applyMatchBlock,
   };
-}
+};

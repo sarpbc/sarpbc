@@ -30,34 +30,34 @@ const dayFormat = computed(
   () => new Intl.DateTimeFormat(locale.value, { month: "long", day: "numeric", timeZone: "UTC" }),
 );
 
-function dateLabel(fact: OnThisDayFact): string {
+const dateLabel = (fact: OnThisDayFact): string => {
   const day = dayFormat.value.format(new Date(Date.UTC(2024, fact.month - 1, fact.day)));
 
   return fact.year ? `${day} ${fact.year}` : day;
-}
+};
 
-function linkLabel(link: NonNullable<OnThisDayFact["link"]>): string {
+const linkLabel = (link: NonNullable<OnThisDayFact["link"]>): string => {
   const name = link.kind === "tournament" ? tournamentStageLabel(link) : link.name;
 
   return `${t(`page.onThisDay.form.link.kinds.${link.kind}`)} · ${name}`;
-}
+};
 
 const isFormOpen = ref(false);
 const isSaving = ref(false);
 const editing = ref<OnThisDayFact | null>(null);
 const factToDelete = ref<OnThisDayFact | null>(null);
 
-function openCreate() {
+const openCreate = () => {
   editing.value = null;
   isFormOpen.value = true;
-}
+};
 
-function openEdit(fact: OnThisDayFact) {
+const openEdit = (fact: OnThisDayFact) => {
   editing.value = fact;
   isFormOpen.value = true;
-}
+};
 
-async function save(input: OnThisDayFactInput) {
+const save = async (input: OnThisDayFactInput) => {
   isSaving.value = true;
   const current = editing.value;
 
@@ -77,7 +77,7 @@ async function save(input: OnThisDayFactInput) {
   } finally {
     isSaving.value = false;
   }
-}
+};
 </script>
 
 <template>

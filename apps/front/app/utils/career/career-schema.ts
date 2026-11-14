@@ -153,7 +153,7 @@ export const careerStateSchema = z.object({
 });
 
 /** Legacy saves may omit menu/resumePhase/splitFields — normalize without casting. */
-function normalizeLoadedCareerState(state: CareerState): CareerState {
+const normalizeLoadedCareerState = (state: CareerState): CareerState => {
   const withDefaults: CareerState = {
     ...state,
     resumePhase: state.resumePhase ?? null,
@@ -173,9 +173,9 @@ function normalizeLoadedCareerState(state: CareerState): CareerState {
   }
 
   return withDefaults;
-}
+};
 
-export function parseCareerStateJson(raw: string | null): CareerState | null {
+export const parseCareerStateJson = (raw: string | null): CareerState | null => {
   if (!isNonEmptyString(raw)) {
     return null;
   }
@@ -192,9 +192,9 @@ export function parseCareerStateJson(raw: string | null): CareerState | null {
   } catch {
     return null;
   }
-}
+};
 
-export function parseCareerResultJson(raw: string): CareerResult | null {
+export const parseCareerResultJson = (raw: string): CareerResult | null => {
   try {
     const result = careerResultSchema.safeParse(JSON.parse(raw));
 
@@ -202,11 +202,11 @@ export function parseCareerResultJson(raw: string): CareerResult | null {
   } catch {
     return null;
   }
-}
+};
 
 const careerResultsSchema = z.record(z.string(), careerResultSchema.nullable().catch(null));
 
-export function parseCareerResultsJson(raw: string | null): Map<string, CareerResult> {
+export const parseCareerResultsJson = (raw: string | null): Map<string, CareerResult> => {
   const results = new Map<string, CareerResult>();
 
   if (!isNonEmptyString(raw)) {
@@ -230,16 +230,15 @@ export function parseCareerResultsJson(raw: string | null): Map<string, CareerRe
   }
 
   return results;
-}
+};
 
-export function encodeCareerResultForShare(result: CareerResult): string {
-  return btoa(encodeURIComponent(JSON.stringify(result)))
+export const encodeCareerResultForShare = (result: CareerResult): string =>
+  btoa(encodeURIComponent(JSON.stringify(result)))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replace(/[=]+$/u, "");
-}
 
-export function decodeCareerResultFromShare(encoded: string): CareerResult | null {
+export const decodeCareerResultFromShare = (encoded: string): CareerResult | null => {
   try {
     const padded = encoded.replaceAll("-", "+").replaceAll("_", "/");
     const json = decodeURIComponent(atob(padded));
@@ -248,4 +247,4 @@ export function decodeCareerResultFromShare(encoded: string): CareerResult | nul
   } catch {
     return null;
   }
-}
+};

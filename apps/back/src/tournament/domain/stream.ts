@@ -24,15 +24,14 @@ const URL_ERRORS = {
   "not-https": "must use https",
 } satisfies Record<StreamUrlError, string>;
 
-function invalid(index: number, reason: string): InvalidInputError {
-  return new InvalidInputError(`Stream ${index + 1} ${reason}.`);
-}
+const invalid = (index: number, reason: string): InvalidInputError =>
+  new InvalidInputError(`Stream ${index + 1} ${reason}.`);
 
-export function replaceStreams(
+export const replaceStreams = (
   current: readonly Stream[],
   inputs: readonly StreamInput[],
   source: StreamEditSource,
-): Stream[] {
+): Stream[] => {
   if (inputs.length > MAX_STREAMS) {
     throw new InvalidInputError(`A stream list holds at most ${MAX_STREAMS} streams.`);
   }
@@ -83,14 +82,14 @@ export function replaceStreams(
   }
 
   return streams;
-}
+};
 
-export function effectiveStreams(...lists: readonly (readonly Stream[])[]): Stream[] {
-  return [...(lists.find((list) => list.length > 0) ?? [])];
-}
+export const effectiveStreams = (...lists: readonly (readonly Stream[])[]): Stream[] => [
+  ...(lists.find((list) => list.length > 0) ?? []),
+];
 
-export function pandascoreStreams(official: readonly OfficialMatchStream[]): Stream[] {
-  return official
+export const pandascoreStreams = (official: readonly OfficialMatchStream[]): Stream[] =>
+  official
     .toSorted((a, b) => Number(b.main) - Number(a.main))
     .flatMap((stream) => {
       const parsed = parseStreamUrl(stream.url.trim().replace(/^http:\/\//iu, "https://"));
@@ -111,4 +110,3 @@ export function pandascoreStreams(official: readonly OfficialMatchStream[]): Str
         },
       ];
     });
-}

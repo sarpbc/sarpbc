@@ -12,7 +12,7 @@ const { currentPage, totalPages, hasPrevious, hasNext, previousTo, nextTo } = de
 
 const { t } = useI18n();
 
-function scrollToTopOnNavigate(event: MouseEvent, enabled: boolean) {
+const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
   if (!enabled) {
     event.preventDefault();
 
@@ -32,7 +32,7 @@ function scrollToTopOnNavigate(event: MouseEvent, enabled: boolean) {
 
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
-}
+};
 </script>
 
 <template>

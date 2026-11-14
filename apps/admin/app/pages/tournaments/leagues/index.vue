@@ -45,11 +45,9 @@ const isSaving = ref(false);
 const isUploading = ref(false);
 const isSynced = computed(() => (editing.value?.pandascoreId ?? null) !== null);
 
-function isPandascore(league: League): boolean {
-  return league.pandascoreId !== null;
-}
+const isPandascore = (league: League): boolean => league.pandascoreId !== null;
 
-function openForm(league: League | null) {
+const openForm = (league: League | null) => {
   editing.value = league;
   form.value = {
     name: league?.name ?? "",
@@ -58,10 +56,10 @@ function openForm(league: League | null) {
     imageUrl: league?.imageUrl ?? "",
   };
   isOpen.value = true;
-}
+};
 
 /** PandaScore owns every league field except the image, and the API rejects any other change. */
-function buildPayload(): LeagueInput {
+const buildPayload = (): LeagueInput => {
   const imageUrl = form.value.imageUrl.trim() || null;
   const league = editing.value;
 
@@ -84,9 +82,9 @@ function buildPayload(): LeagueInput {
     url: form.value.url.trim() || null,
     imageUrl,
   };
-}
+};
 
-async function handleSubmit() {
+const handleSubmit = async () => {
   if (isSaving.value || isUploading.value) {
     return;
   }
@@ -116,7 +114,7 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false;
   }
-}
+};
 
 const uploadedImageUrl = computed({
   get: () => form.value.imageUrl || null,

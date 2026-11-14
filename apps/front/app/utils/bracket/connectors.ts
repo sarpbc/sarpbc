@@ -7,10 +7,10 @@ import type {
   BracketZone,
 } from "./types";
 
-export function buildConnectors(
+export const buildConnectors = (
   matches: TournamentDetailMatch[],
   matchIds: Set<string>,
-): BracketConnector[] {
+): BracketConnector[] => {
   const connectors: BracketConnector[] = [];
 
   for (const match of matches) {
@@ -27,39 +27,37 @@ export function buildConnectors(
   }
 
   return connectors;
-}
+};
 
-export function toLayoutMatch(
+export const toLayoutMatch = (
   match: TournamentDetailMatch,
   column: number,
   row: number,
   zone?: BracketZone,
-): BracketLayoutMatch {
-  return {
-    matchId: match.id,
-    publicId: match.publicId,
-    slug: match.slug,
-    column,
-    row,
-    zone,
-    name: match.name,
-    participantA: match.participants?.[0],
-    participantB: match.participants?.[1],
-    participantAId: match.participants?.[0]?.id,
-    participantBId: match.participants?.[1]?.id,
-    results: match.results,
-    winnerParticipantId: getMatchWinnerParticipantId(match),
-    beginAt: match.beginAt,
-    endAt: match.endAt,
-    status: match.status,
-  };
-}
+): BracketLayoutMatch => ({
+  matchId: match.id,
+  publicId: match.publicId,
+  slug: match.slug,
+  column,
+  row,
+  zone,
+  name: match.name,
+  participantA: match.participants?.[0],
+  participantB: match.participants?.[1],
+  participantAId: match.participants?.[0]?.id,
+  participantBId: match.participants?.[1]?.id,
+  results: match.results,
+  winnerParticipantId: getMatchWinnerParticipantId(match),
+  beginAt: match.beginAt,
+  endAt: match.endAt,
+  status: match.status,
+});
 
-export function finalizeSectionLayout(
+export const finalizeSectionLayout = (
   matches: TournamentDetailMatch[],
   layoutMatches: BracketLayoutMatch[],
   maxColumn: number,
-): BracketSectionLayout {
+): BracketSectionLayout => {
   const matchIds = new Set(matches.map((match) => match.id));
   const maxRow = Math.max(...layoutMatches.map((match) => match.row), 0);
 
@@ -69,4 +67,4 @@ export function finalizeSectionLayout(
     columnCount: maxColumn + 1,
     rowCount: maxRow + 2,
   };
-}
+};

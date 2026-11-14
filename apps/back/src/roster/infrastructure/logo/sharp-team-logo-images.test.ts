@@ -5,13 +5,12 @@ import { SharpTeamLogoImages } from "./sharp-team-logo-images";
 
 const images = new SharpTeamLogoImages();
 
-async function png(width: number, height: number) {
-  return await sharp({
+const png = async (width: number, height: number) =>
+  await sharp({
     create: { width, height, channels: 3, background: { r: 200, g: 20, b: 20 } },
   })
     .png()
     .toBuffer();
-}
 
 describe(SharpTeamLogoImages, () => {
   it("reads raster dimensions", async () => {

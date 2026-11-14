@@ -10,22 +10,20 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 const now = new Date("2026-10-15T12:00:00Z");
 const author: Author = { id: "author", userName: "Fan" };
 
-function reply(overrides: Partial<ReplyRecord> = {}): ReplyRecord {
-  return {
-    id: "parent",
-    author,
-    content: "hello",
-    post: { id: "p", publicId: 1, title: "Thread" },
-    newsArticle: null,
-    match: null,
-    replyTo: null,
-    hiddenAt: null,
-    createdAt: new Date(now.getTime() - 120_000),
-    ...overrides,
-  };
-}
+const reply = (overrides: Partial<ReplyRecord> = {}): ReplyRecord => ({
+  id: "parent",
+  author,
+  content: "hello",
+  post: { id: "p", publicId: 1, title: "Thread" },
+  newsArticle: null,
+  match: null,
+  replyTo: null,
+  hiddenAt: null,
+  createdAt: new Date(now.getTime() - 120_000),
+  ...overrides,
+});
 
-function setup() {
+const setup = () => {
   const saved: ReplyRecord[] = [];
   const notified: { recipientId: string; replyId: string }[] = [];
 
@@ -88,7 +86,7 @@ function setup() {
   );
 
   return { scope, replies, service, saved, notified, commits: () => commits };
-}
+};
 
 describe("reply invariants without Nest or ORM", () => {
   it("writes the direct notification in the same application transaction", async () => {

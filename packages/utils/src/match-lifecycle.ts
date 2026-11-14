@@ -13,11 +13,10 @@ export interface MatchResultScore {
 
 const toMillis = (value: Instant): number => new Date(value).getTime();
 
-export function isMatchFinished(match: MatchLifecycle): boolean {
-  return Boolean(match.endAt) || match.status === "finished";
-}
+export const isMatchFinished = (match: MatchLifecycle): boolean =>
+  Boolean(match.endAt) || match.status === "finished";
 
-export function isMatchLive(match: MatchLifecycle, now: Instant): boolean {
+export const isMatchLive = (match: MatchLifecycle, now: Instant): boolean => {
   const { beginAt } = match;
 
   return (
@@ -28,10 +27,10 @@ export function isMatchLive(match: MatchLifecycle, now: Instant): boolean {
     beginAt !== 0 &&
     toMillis(beginAt) <= toMillis(now)
   );
-}
+};
 
 /** The participant with the single highest score, or null when fewer than two scored or the top is tied. */
-export function winnerFromResults(results: readonly MatchResultScore[]): string | null {
+export const winnerFromResults = (results: readonly MatchResultScore[]): string | null => {
   const scored = results.filter((result) => result.participantId);
 
   if (scored.length < 2) {
@@ -44,4 +43,4 @@ export function winnerFromResults(results: readonly MatchResultScore[]): string 
   const leader: (typeof leaders)[number] | undefined = leaders[0];
 
   return leaders.length === 1 && leader !== undefined ? leader.participantId : null;
-}
+};
