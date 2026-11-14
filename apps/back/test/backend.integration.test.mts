@@ -512,6 +512,26 @@ describe("backend integration", () => {
           );
           await request("POST", "/team", { name: "Invalid", unexpected: true }, staffCookie, 400);
 
+          const cancelledGoogle = await request(
+            "GET",
+            "/auth/google/callback?error=access_denied&state=admin",
+            undefined,
+            undefined,
+            302,
+          );
+
+          assert.equal(cancelledGoogle.headers.location, "http://127.0.0.1:4002");
+
+          const failedGoogle = await request(
+            "GET",
+            "/auth/google/callback?error=server_error",
+            undefined,
+            undefined,
+            302,
+          );
+
+          assert.equal(failedGoogle.headers.location, "http://127.0.0.1:4000?authError=google");
+
           const response4 = await request(
             "PATCH",
             "/user/profile",

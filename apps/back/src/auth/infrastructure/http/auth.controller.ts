@@ -117,22 +117,29 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get("google/callback")
   async handleGoogleCallback(
-    @Query("code") code: string,
+    @Query("code") code: string | undefined,
+    @Query("error") error: string | undefined,
     @Query("state") state: string | undefined,
     @Res() res: FastifyReply,
   ) {
     const log = useLogger();
 
     const returnUrl = this.authService.resolveOAuthReturnUrl(parseOAuthReturnTo(state));
+    const separator = returnUrl.includes("?") ? "&" : "?";
+
+    if (code === undefined || code === "") {
+      return error === "access_denied"
+        ? await res.code(302).redirect(returnUrl)
+        : await res.code(302).redirect(`${returnUrl}${separator}authError=google`);
+    }
 
     try {
       const tokens = await this.authService.handleGoogleCallback(code);
       setAuthCookies(res, tokens, this.authCookie());
 
       return await res.code(302).redirect(returnUrl);
-    } catch (error) {
-      log.error(error instanceof Error ? error : new Error(String(error)));
-      const separator = returnUrl.includes("?") ? "&" : "?";
+    } catch (callbackError) {
+      log.error(callbackError instanceof Error ? callbackError : new Error(String(callbackError)));
 
       return await res.code(302).redirect(`${returnUrl}${separator}authError=google`);
     }
