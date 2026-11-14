@@ -1,5 +1,3 @@
-import type { Ref } from "vue";
-
 type AdminListRange = { limit: number; offset: number; search: string };
 
 type AdminListPage<T> = { items: T[]; total: number };
@@ -11,7 +9,7 @@ export function useAdminList<T>(
   const limit = 25;
   const page = ref(1);
   const search = ref("");
-  const items = ref([]) as Ref<T[]>;
+  const items = shallowRef<T[]>([]);
   const total = ref(0);
 
   const { status, data, error, refresh } = useLazyAsyncData(

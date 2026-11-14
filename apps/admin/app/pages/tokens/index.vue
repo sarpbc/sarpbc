@@ -25,13 +25,13 @@ const columns: TableColumn<PatToken>[] = [
   {
     accessorKey: "createdAt",
     header: t("page.tokens.columns.createdAt"),
-    cell: ({ getValue }) => dateFormatter.value.format(new Date(getValue() as string)),
+    cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
   },
   {
     accessorKey: "lastUsedAt",
     header: t("page.tokens.columns.lastUsedAt"),
-    cell: ({ getValue }) => {
-      const value = getValue() as string | null;
+    cell: ({ row }) => {
+      const value = row.original.lastUsedAt;
 
       return value ? dateFormatter.value.format(new Date(value)) : t("page.tokens.lastUsedNever");
     },
@@ -58,7 +58,7 @@ const {
   refresh,
   error,
 } = await useLazyAsyncData("admin-pat-tokens", () => getPatTokens(), {
-  default: () => [] as PatToken[],
+  default: (): PatToken[] => [],
   server: false,
 });
 

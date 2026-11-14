@@ -25,7 +25,7 @@ const columns: TableColumn<UserListItem>[] = [
   {
     accessorKey: "createdAt",
     header: t("page.users.columns.createdAt"),
-    cell: ({ getValue }) => dateFormatter.value.format(new Date(getValue() as string)),
+    cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
   },
 ];
 

@@ -20,7 +20,7 @@ const columns: TableColumn<Team>[] = [
   {
     accessorKey: "location",
     header: t("page.teams.columns.location"),
-    cell: ({ getValue }) => (getValue() as string) || "-",
+    cell: ({ row }) => row.original.location || "-",
   },
   {
     id: "actions",

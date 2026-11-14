@@ -5,7 +5,7 @@ const route = useRoute();
 const { t } = useI18n();
 const localePath = useLocalePath();
 
-const tournamentId = computed(() => route.params.id as string);
+const tournamentId = computed(() => String(route.params.id));
 
 const {
   data: tournament,

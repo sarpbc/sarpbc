@@ -22,7 +22,7 @@ const toast = useToast();
 const localePath = useLocalePath();
 const user = useUser();
 
-const tournamentId = computed(() => route.params.id as string);
+const tournamentId = computed(() => String(route.params.id));
 const isSignedIn = computed(() => Boolean(user.value));
 const sessionReady = computed(() => user.value !== undefined);
 

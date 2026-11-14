@@ -8,7 +8,7 @@ const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
 
-const tournamentId = computed(() => route.params.id as string);
+const tournamentId = computed(() => String(route.params.id));
 const settingWinnerMatchId = ref<string | null>(null);
 const vodsMatch = ref<TournamentMatchListItem | null>(null);
 const vodsOpen = ref(false);

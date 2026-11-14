@@ -7,7 +7,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const reportError = useReportError();
-const teamId = route.params.id as string;
+const teamId = String(route.params.id);
 
 const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
 
@@ -98,22 +98,22 @@ const contractColumns: TableColumn<TeamContract>[] = [
   {
     accessorKey: "player",
     header: t("page.teams.contracts.columns.player"),
-    cell: ({ getValue }) => (getValue() as TeamContract["player"]).name,
+    cell: ({ row }) => row.original.player.name,
   },
   {
     accessorKey: "role",
     header: t("page.teams.contracts.columns.role"),
-    cell: ({ getValue }) => t(`common.contractRole.${getValue() as ContractRole}`),
+    cell: ({ row }) => t(`common.contractRole.${row.original.role}`),
   },
   {
     accessorKey: "startDate",
     header: t("page.teams.contracts.columns.startDate"),
-    cell: ({ getValue }) => formatDate(getValue() as string),
+    cell: ({ row }) => formatDate(row.original.startDate),
   },
   {
     accessorKey: "endDate",
     header: t("page.teams.contracts.columns.endDate"),
-    cell: ({ getValue }) => formatDate(getValue() as string | null),
+    cell: ({ row }) => formatDate(row.original.endDate),
   },
   { id: "actions", header: "" },
 ];

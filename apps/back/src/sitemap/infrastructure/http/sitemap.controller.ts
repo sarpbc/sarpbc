@@ -4,7 +4,7 @@ import { NotFoundError } from "../../../common/domain/errors";
 import { SitemapService } from "../../application/sitemap.service";
 
 function isSitemapKind(value: string): value is SitemapKind {
-  return (SITEMAP_KINDS as readonly string[]).includes(value);
+  return SITEMAP_KINDS.some((kind) => kind === value);
 }
 
 @Controller("sitemap")
