@@ -48,30 +48,30 @@ catalog:
   "@types/node": ^26.6.6
   nuxt: ^4.6.4
   "@nuxt/kit": ^4.6.4
-  vue: 3.5.44
-  vue-router: ^5.4.0
+  vue: 3.5.45
+  vue-router: ^5.5.0
   vue-i18n: 11.4.18
   "@nuxt/ui": ^4.12.0
   "@nuxtjs/i18n": ^10.6.0
-  "@tiptap/core": ^3.32.2
-  "@tiptap/extension-table": ^3.32.2
-  "@tiptap/pm": ^3.32.2
-  "@tiptap/vue-3": ^3.32.2
+  "@tiptap/core": ^3.33.1
+  "@tiptap/extension-table": ^3.33.1
+  "@tiptap/pm": ^3.33.1
+  "@tiptap/vue-3": ^3.33.1
   vue-tsc: ^3.3.14
   "@iconify-json/fluent": ^1.2.61
-  "@iconify-json/lucide": ^1.2.151
+  "@iconify-json/lucide": ^1.2.153
   "@iconify-json/logos": ^1.2.19
-  evlog: ^2.33.1
+  evlog: ^2.35.1
   fastify: 5.12.8
-  "@nestjs/common": 12.3.3
-  "@nestjs/core": 12.3.3
-  "@nestjs/platform-fastify": 12.3.3
-  "@nestjs/testing": 12.3.3
-  "@mikro-orm/cli": ^7.2.7
-  "@mikro-orm/core": ^7.2.7
-  "@mikro-orm/decorators": ^7.2.7
-  "@mikro-orm/migrations": ^7.2.7
-  "@mikro-orm/postgresql": ^7.2.7
+  "@nestjs/common": 12.4.2
+  "@nestjs/core": 12.4.2
+  "@nestjs/platform-fastify": 12.4.2
+  "@nestjs/testing": 12.4.2
+  "@mikro-orm/cli": ^7.2.8
+  "@mikro-orm/core": ^7.2.8
+  "@mikro-orm/decorators": ^7.2.8
+  "@mikro-orm/migrations": ^7.2.8
+  "@mikro-orm/postgresql": ^7.2.8
 
 minimumReleaseAgeExclude:
   - "@nuxt/image@2.2.1"
