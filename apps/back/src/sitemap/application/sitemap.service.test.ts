@@ -4,7 +4,7 @@ import { SitemapService } from "./sitemap.service";
 
 const team = (name: string) => ({ team: { name } });
 
-describe("SitemapService", () => {
+describe(SitemapService, () => {
   const queries = {
     news: vi.fn(),
     stages: vi.fn(),

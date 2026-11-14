@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SearchService } from "./search.service";
 
-describe("SearchService", () => {
+describe(SearchService, () => {
   const playerService = { find: vi.fn() };
   const teamService = { find: vi.fn() };
   const tournamentService = { searchByName: vi.fn() };

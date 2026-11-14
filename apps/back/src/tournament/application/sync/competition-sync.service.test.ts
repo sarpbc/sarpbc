@@ -295,7 +295,9 @@ describe("Competition synchronization", () => {
       slug: "playoffs",
       imageUrl: "local-art",
     });
-    expect(await service.upsertTournament(stageCommand({ name: "Group A" }))).toMatchObject({
+    await expect(
+      service.upsertTournament(stageCommand({ name: "Group A" })),
+    ).resolves.toMatchObject({
       name: "Group A",
       slug: "playoffs",
       imageUrl: "local-art",
@@ -476,7 +478,7 @@ describe("Competition synchronization", () => {
     await expect(
       service.upsertTournament({ pandascoreId: 42, name: "Cup" }),
     ).resolves.toMatchObject({ name: "Cup" });
-    expect(diagnostics.error).toHaveBeenCalled();
+    expect(diagnostics.error).toHaveBeenCalledWith();
   });
 
   describe("end date", () => {
@@ -598,7 +600,7 @@ describe("Competition synchronization", () => {
         matchCommand(11, "running"),
       ]);
       const decided = saved.find((match) => match.pandascoreId === 10);
-      expect(published.publish).toHaveBeenCalledTimes(1);
+      expect(published.publish).toHaveBeenCalledOnce();
       expect(published.publish).toHaveBeenCalledWith(matchDecided(present(decided).id));
     });
 

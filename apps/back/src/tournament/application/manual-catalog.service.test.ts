@@ -19,7 +19,7 @@ import {
 const event = (id: string, pandascoreSerieId: number | null = null) =>
   Object.assign(new TournamentEvent(), { id, slug: id, name: id, pandascoreSerieId });
 
-describe("ManualCatalogService", () => {
+describe(ManualCatalogService, () => {
   const events = new Map<string, TournamentEvent>();
   const leagues = new Map<string, League>();
   let stages: EventStage[] = [];
@@ -175,9 +175,9 @@ describe("ManualCatalogService", () => {
   });
 
   it("edits only the image of a PandaScore league", async () => {
-    expect(
-      await service.updateLeague("rlcs", { imageUrl: "https://cdn.example/rlcs.png" }),
-    ).toMatchObject({ name: "RLCS", imageUrl: "https://cdn.example/rlcs.png" });
+    await expect(
+      service.updateLeague("rlcs", { imageUrl: "https://cdn.example/rlcs.png" }),
+    ).resolves.toMatchObject({ name: "RLCS", imageUrl: "https://cdn.example/rlcs.png" });
     await expect(service.updateLeague("rlcs", { name: "RLCS 2026" })).rejects.toBeInstanceOf(
       InvalidInputError,
     );

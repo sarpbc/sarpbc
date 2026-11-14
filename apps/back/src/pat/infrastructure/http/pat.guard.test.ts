@@ -21,7 +21,7 @@ const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
   return new ExecutionContextHost([request]);
 };
 
-describe("PatAuthGuard", () => {
+describe(PatAuthGuard, () => {
   let guard: PatAuthGuard;
 
   const patService = {

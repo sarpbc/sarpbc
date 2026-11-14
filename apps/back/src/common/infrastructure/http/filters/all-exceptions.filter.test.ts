@@ -26,7 +26,7 @@ function hostWith(send: Mock, sent = false, request = NEWS_REQUEST): ExecutionCo
   return new ExecutionContextHost([request, { sent, status: vi.fn().mockReturnThis(), send }]);
 }
 
-describe("AllExceptionsFilter", () => {
+describe(AllExceptionsFilter, () => {
   const filter = new AllExceptionsFilter();
 
   const logError = vi.spyOn(log, "error");
@@ -103,6 +103,6 @@ describe("AllExceptionsFilter", () => {
       message:
         "The server hit an unexpected error. Try again, or report this if it keeps happening.",
     });
-    expect(logError).toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledWith();
   });
 });

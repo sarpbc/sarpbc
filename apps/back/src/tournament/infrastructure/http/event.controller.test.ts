@@ -69,7 +69,7 @@ const stages = new Map(
   ].map((s) => [s.id, s]),
 );
 
-describe("EventController", () => {
+describe(EventController, () => {
   const playerLines = vi.fn(async (_ids: string[]) => []);
   const events = eventQueries();
   const listEvents = vi.spyOn(events, "list");
@@ -138,7 +138,7 @@ describe("EventController", () => {
       ],
     });
 
-    expect(await controller.playerStats(event.slug)).toEqual({
+    await expect(controller.playerStats(event.slug)).resolves.toEqual({
       games: 0,
       players: [],
       unlinkedAccounts: 0,
@@ -161,7 +161,7 @@ describe("EventController", () => {
   });
 
   it("resolves a stage by event and stage slugs", async () => {
-    expect(await controller.resolveStage(event.slug, "Playoffs")).toMatchObject({
+    await expect(controller.resolveStage(event.slug, "Playoffs")).resolves.toMatchObject({
       kind: "stage",
       tab: "overview",
       tournament: { id: "playoffs", slug: "playoffs", event: ref },
@@ -169,12 +169,12 @@ describe("EventController", () => {
   });
 
   it("resolves a legacy stage id with its tab so the page can redirect", async () => {
-    expect(await controller.resolveEvent(STAGE_ID.toUpperCase())).toMatchObject({
+    await expect(controller.resolveEvent(STAGE_ID.toUpperCase())).resolves.toMatchObject({
       kind: "stage",
       tab: "overview",
       tournament: { id: STAGE_ID, slug: "group-a" },
     });
-    expect(await controller.resolveStage(STAGE_ID, "matches")).toMatchObject({
+    await expect(controller.resolveStage(STAGE_ID, "matches")).resolves.toMatchObject({
       kind: "stage",
       tab: "matches",
     });
@@ -253,7 +253,7 @@ describe("EventController", () => {
   it("creates and updates events through the catalog", async () => {
     createEvent.mockResolvedValue({ event, stages: [] });
     updateEvent.mockResolvedValue({ event, stages: [] });
-    expect(await controller.create({ name: event.name })).toMatchObject({
+    await expect(controller.create({ name: event.name })).resolves.toMatchObject({
       event: { id: "event", slug: event.slug, stages: [] },
     });
     await controller.update("event", { leagueId: null });

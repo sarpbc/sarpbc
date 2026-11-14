@@ -27,7 +27,7 @@ let newGoogleSession: () => GoogleOAuthSession = () => {
   throw new Error("unused");
 };
 
-describe("AuthService", () => {
+describe(AuthService, () => {
   let service: AuthService;
 
   const userServiceMocks = {

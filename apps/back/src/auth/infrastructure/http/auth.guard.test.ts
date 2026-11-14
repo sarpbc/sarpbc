@@ -18,7 +18,7 @@ interface AuthGuardTestRequest {
   user?: AuthenticatedUser;
 }
 
-describe("AuthGuard", () => {
+describe(AuthGuard, () => {
   let guard: AuthGuard;
 
   const authService = {

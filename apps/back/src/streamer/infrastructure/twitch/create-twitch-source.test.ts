@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createTwitchSource } from "./create-twitch-source";
 import { TwitchHelixSource } from "./twitch-helix-source";
 
-describe("createTwitchSource", () => {
+describe(createTwitchSource, () => {
   afterEach(() => {
     vi.restoreAllMocks();
   });

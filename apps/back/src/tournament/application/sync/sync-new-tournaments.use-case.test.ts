@@ -5,7 +5,7 @@ import { SyncNewTournamentsUseCase } from "./sync-new-tournaments.use-case";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
 
-it("syncs every discovered tournament despite a failure, then reconciles incidents", async () => {
+test("syncs every discovered tournament despite a failure, then reconciles incidents", async () => {
   const steps: string[] = [];
   const additions = { execute: vi.fn().mockResolvedValue(["t1", "t2", "t3"]) };
 
@@ -32,7 +32,11 @@ it("syncs every discovered tournament despite a failure, then reconciles inciden
     diagnostics,
   );
 
-  expect(await service.execute()).toEqual({ discovered: 3, detailsSynced: 2, detailsFailed: 1 });
+  await expect(service.execute()).resolves.toEqual({
+    discovered: 3,
+    detailsSynced: 2,
+    detailsFailed: 1,
+  });
   expect(steps).toEqual(["details:t1", "details:t2", "details:t3", "incidents"]);
   expect(diagnostics.error).toHaveBeenCalledOnce();
 });

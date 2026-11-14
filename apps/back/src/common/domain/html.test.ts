@@ -5,7 +5,7 @@ function expectTerminates(run: () => string): void {
   expect(run()).toBeTypeOf("string");
 }
 
-describe("sanitizePlainText", () => {
+describe(sanitizePlainText, () => {
   it("strips HTML tags from replies and posts", () => {
     expect(sanitizePlainText('hello <script>alert("x")</script> world')).toBe("hello  world");
   });
@@ -47,7 +47,7 @@ describe("sanitizePlainText", () => {
   });
 });
 
-describe("sanitizeNewsHtml", () => {
+describe(sanitizeNewsHtml, () => {
   it("keeps safe tags and drops scripts", () => {
     const sanitized = sanitizeNewsHtml(
       '<p>Hello</p><script>alert("x")</script><img src="https://cdn.example/a.png" alt="logo">',

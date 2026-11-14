@@ -93,10 +93,10 @@ describe("PlayerAwardService by team", () => {
     await expect(service.createForTeam("cup", "kc", "zen", "mvp")).rejects.toThrow(
       "Fake Cup already has a mvp award",
     );
-    await expect(service.requireProposable("cup", "kc", "zen", "defensive_mvp")).resolves.toBe(
-      undefined,
-    );
-    expect(writer.create).toHaveBeenCalledTimes(1);
+    await expect(
+      service.requireProposable("cup", "kc", "zen", "defensive_mvp"),
+    ).resolves.toBeUndefined();
+    expect(writer.create).toHaveBeenCalledOnce();
   });
 
   it("holds every award type on one stage, including a separate Grand Finals MVP", async () => {

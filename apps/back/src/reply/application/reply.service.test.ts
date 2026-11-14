@@ -30,7 +30,7 @@ function makeReply(partial: Partial<ReplyRecord> & { id: string }): ReplyRecord 
   };
 }
 
-describe("ReplyService", () => {
+describe(ReplyService, () => {
   let service: ReplyService;
 
   const replyRepository = {
@@ -96,7 +96,7 @@ describe("ReplyService", () => {
         matchId: match.id,
       });
 
-      expect(replyRepository.save).toHaveBeenCalled();
+      expect(replyRepository.save).toHaveBeenCalledWith();
       expect(result.content).toBe("Great series");
       expect(result.author.userName).toBe("fan");
       expect(result.replies).toEqual([]);
@@ -200,7 +200,7 @@ describe("ReplyService", () => {
 
       const result = await service.report("reporter-1", "r1", "spam");
 
-      expect(replyReportRepository.save).toHaveBeenCalled();
+      expect(replyReportRepository.save).toHaveBeenCalledWith();
       expect(result.reason).toBe("spam");
     });
   });

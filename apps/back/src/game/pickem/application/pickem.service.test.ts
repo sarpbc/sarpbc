@@ -3,7 +3,7 @@ import { PickemService } from "./pickem.service";
 import type { NamedPick, Pick, PickMatch } from "../domain/pickem";
 import type { PickemWrites } from "./ports";
 
-describe("PickemService", () => {
+describe(PickemService, () => {
   let match: PickMatch;
   let picks: Pick[];
   let service: PickemService;
@@ -51,6 +51,7 @@ describe("PickemService", () => {
       { now: () => new Date("2026-01-01"), id: () => "pick-1", warn },
     );
   });
+
   it("awards five points once and leaves incorrect picks at zero", async () => {
     await service.makePick("u", "m", "a");
     picks.push({
@@ -63,25 +64,29 @@ describe("PickemService", () => {
       { participantId: "a", score: 4 },
       { participantId: "b", score: 2 },
     ];
-    expect(await service.validateMatchResult("m")).toEqual({ updated: 2 });
+    await expect(service.validateMatchResult("m")).resolves.toEqual({ updated: 2 });
     expect(picks.map((p) => p.points)).toEqual([5, 0]);
-    expect(await service.validateMatchResult("m")).toEqual({ updated: 0 });
+    await expect(service.validateMatchResult("m")).resolves.toEqual({ updated: 0 });
     expect(picks.map((p) => p.points)).toEqual([5, 0]);
   });
+
   it("rechecks current match eligibility for every edit", async () => {
     await service.makePick("u", "m", "a");
     match.beginAt = new Date("2025-01-01");
     await expect(service.makePick("u", "m", "b")).rejects.toThrow("already started");
     expect(picks[0].pickedParticipant.id).toBe("a");
   });
+
   it("does not accept participants outside the match", async () => {
     await expect(service.makePick("u", "m", "other")).rejects.toThrow("not part");
     expect(picks).toHaveLength(0);
   });
+
   it("keeps automatic scoring best effort when no winner can be derived", async () => {
     await expect(service.autoScoreMatch("m")).resolves.toBeUndefined();
-    expect(warn).toHaveBeenCalled();
+    expect(warn).toHaveBeenCalledWith();
   });
+
   it("does not choose a winner for a tied result", async () => {
     match.results = [
       { participantId: "a", score: 3 },

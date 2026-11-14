@@ -15,7 +15,7 @@ async function validateDto(plain: CreateReplyDtoPlain) {
   return result.success ? [] : result.error.issues;
 }
 
-describe("CreateReplyDto", () => {
+describe(CreateReplyDto, () => {
   it("accepts a single match target", async () => {
     const errors = await validateDto({
       content: "Nice clutch",

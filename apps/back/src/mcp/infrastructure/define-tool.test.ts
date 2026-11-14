@@ -47,7 +47,7 @@ const failing = (cause: Error) =>
     },
   });
 
-describe("defineTool", () => {
+describe(defineTool, () => {
   describe("write tools", () => {
     it("denies a role without the permission and never runs the handler", async () => {
       const handler = vi.fn(async () => ({ result: { ok: true } }));
@@ -120,7 +120,7 @@ describe("defineTool", () => {
       expect(result.isError).toBe(true);
       expect(textContent(result)).not.toContain("ECONNREFUSED");
       expect(textContent(result)).toContain("was logged");
-      expect(logError).toHaveBeenCalled();
+      expect(logError).toHaveBeenCalledWith();
     });
   });
 

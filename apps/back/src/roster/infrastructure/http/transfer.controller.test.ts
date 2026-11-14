@@ -8,7 +8,7 @@ import { TeamService } from "../../application/team.service";
 import { PlayerService } from "../../application/player.service";
 import { unconstructed } from "../../../../test/doubles";
 
-describe("TransferController", () => {
+describe(TransferController, () => {
   const kc = Object.assign(new Team(), {
     id: "kc",
     name: "Karmine Corp",

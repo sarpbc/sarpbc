@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { assertLineupFitsFormat, playerGroupKey } from "./tournament-format";
 
-describe("assertLineupFitsFormat", () => {
+describe(assertLineupFitsFormat, () => {
   it.each([
     { format: "1v1", teamIds: [], playerGroups: [["zen"], ["vatira"]] },
     { format: "2v2", teamIds: ["kc"], playerGroups: [["zen", "vatira"]] },
@@ -40,7 +40,7 @@ describe("assertLineupFitsFormat", () => {
   });
 });
 
-describe("playerGroupKey", () => {
+describe(playerGroupKey, () => {
   it("identifies a duo regardless of player order", () => {
     expect(playerGroupKey(["vatira", "zen"])).toBe(playerGroupKey(["zen", "vatira"]));
   });

@@ -28,7 +28,7 @@ function fixtureTeam(): Team {
   });
 }
 
-describe("teamAt", () => {
+describe(teamAt, () => {
   it("shows the name in force on the date and keeps the team identity", () => {
     const team = fixtureTeam();
     const then = teamAt(team, new Date("2021-03-10T18:00:00Z"));
@@ -61,7 +61,7 @@ describe("teamAt", () => {
   });
 });
 
-describe("assertTeamAliasFits", () => {
+describe(assertTeamAliasFits, () => {
   it("refuses a period that overlaps another alias of the team", () => {
     expect(() => {
       assertTeamAliasFits(alias({ name: "Overlap", from: "2022-01-01", to: null }), fixtureTeam());

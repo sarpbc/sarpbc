@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { unconstructed } from "../../../test/doubles";
 import { PostgresHealthIndicator } from "./postgres.health";
 
-describe("PostgresHealthIndicator", () => {
+describe(PostgresHealthIndicator, () => {
   const execute = vi.fn();
 
   const em = Object.assign(unconstructed(EntityManager), {

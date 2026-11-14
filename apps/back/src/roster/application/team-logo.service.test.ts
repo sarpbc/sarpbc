@@ -28,7 +28,7 @@ function setup(bytes: Uint8Array, size = DEFAULT_SIZE) {
   return { source, images, storage, service: new TeamLogoService(source, images, storage) };
 }
 
-describe("TeamLogoService", () => {
+describe(TeamLogoService, () => {
   const hash = "0123456789abcdef";
 
   it("normalizes a raster logo and stages it under the team's pending variant key", async () => {

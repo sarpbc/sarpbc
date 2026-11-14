@@ -27,7 +27,7 @@ function line(
   };
 }
 
-describe("summarizeEarnings", () => {
+describe(summarizeEarnings, () => {
   it("totals each currency separately without converting", () => {
     const earnings = summarizeEarnings([
       line("a", 1000, "USD", "2026-05-01T00:00:00Z"),

@@ -134,7 +134,7 @@ describe("ManualGameService.attach", () => {
   it("stores the replay as the chosen game with the chosen sides and resolves players", async () => {
     const { service, games, source } = setup();
 
-    expect(await service.attach("t1", input)).toEqual({
+    await expect(service.attach("t1", input)).resolves.toEqual({
       matchId: "m1",
       number: 2,
       ballchasingId: REPLAY,
@@ -295,7 +295,7 @@ describe("ManualGameService.remove", () => {
 
     games.remove.mockResolvedValueOnce(removed);
 
-    expect(await service.remove("t1", "m1", 1)).toEqual(removed);
+    await expect(service.remove("t1", "m1", 1)).resolves.toEqual(removed);
     expect(games.remove).toHaveBeenCalledWith("t1", { matchId: "m1", number: 1 });
   });
 
@@ -312,7 +312,7 @@ describe("ManualGameService.list", () => {
   it("lists the tournament's stored games", async () => {
     const { service, games } = setup();
 
-    expect(await service.list("t1")).toEqual([]);
+    await expect(service.list("t1")).resolves.toEqual([]);
     expect(games.inTournament).toHaveBeenCalledWith("t1");
     await expect(service.list("missing")).rejects.toBeInstanceOf(NotFoundError);
   });

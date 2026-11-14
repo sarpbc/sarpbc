@@ -49,7 +49,7 @@ const noPlayers: IdOrSlugLookup<Player> = {
   findBySlug: async () => null,
 };
 
-describe("resolveMatchParticipantIds", () => {
+describe(resolveMatchParticipantIds, () => {
   it("keeps tournament participant ids", async () => {
     const { cup, lookup, findById } = tournament();
 

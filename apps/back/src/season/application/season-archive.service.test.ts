@@ -9,7 +9,7 @@ import { SeasonService } from "./season.service";
 
 const ANNOUNCEMENT = "https://x.com/RLEsports/status/1";
 
-describe("SeasonArchiveService", () => {
+describe(SeasonArchiveService, () => {
   let seasons: SeasonService;
   let archives: SeasonArchiveService;
   let season: SeasonDetail;
@@ -24,10 +24,10 @@ describe("SeasonArchiveService", () => {
   it("renders an empty published season and hides seasons without a slug", async () => {
     await seasons.create({ name: "Draft season" });
 
-    expect(await archives.published()).toEqual([
+    await expect(archives.published()).resolves.toEqual([
       { slug: "rlcs-2024", name: "RLCS 2024", winner: null },
     ]);
-    expect(await archives.archive("rlcs-2024")).toEqual({
+    await expect(archives.archive("rlcs-2024")).resolves.toEqual({
       slug: "rlcs-2024",
       name: "RLCS 2024",
       format: { summary: null, phases: [] },
@@ -66,7 +66,7 @@ describe("SeasonArchiveService", () => {
       NotFoundError,
     );
 
-    expect(await archives.updatePathNote(season.id, participant.id, " ")).toMatchObject({
+    await expect(archives.updatePathNote(season.id, participant.id, " ")).resolves.toMatchObject({
       pathNote: null,
     });
     await expect(
@@ -85,9 +85,9 @@ describe("SeasonArchiveService", () => {
 
     expect(linked).toMatchObject({ label: "RLCS Major", result: "1st" });
     expect(linked.tournament).toMatchObject({ id: "major", source: "pandascore" });
-    expect(
-      await archives.addPathEntry(season.id, id, { label: "Regional 3", result: "Top 4" }),
-    ).toMatchObject({ tournament: null });
+    await expect(
+      archives.addPathEntry(season.id, id, { label: "Regional 3", result: "Top 4" }),
+    ).resolves.toMatchObject({ tournament: null });
 
     await expect(
       archives.addPathEntry(season.id, id, { label: "Major", result: "1st", tournamentId: "nope" }),
@@ -169,7 +169,7 @@ describe("SeasonArchiveService", () => {
       },
     ]);
     expect(JSON.stringify(archive)).not.toMatch(/startgg|Community Open|participant-|"source"/);
-    expect(await archives.published()).toEqual([
+    await expect(archives.published()).resolves.toEqual([
       { slug: "rlcs-2024", name: "RLCS 2024", winner: SEASON_TEAMS.vitality },
     ]);
   });

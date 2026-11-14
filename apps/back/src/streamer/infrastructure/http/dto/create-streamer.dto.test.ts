@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { CreateStreamerDto } from "./create-streamer.dto";
 
-describe("CreateStreamerDto", () => {
+describe(CreateStreamerDto, () => {
   it("normalizes the login and a blank display name", () => {
     expect(CreateStreamerDto.parse({ login: "  ZenRLL ", displayName: "  " })).toEqual({
       login: "zenrll",

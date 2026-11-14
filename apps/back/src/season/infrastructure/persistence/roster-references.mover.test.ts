@@ -109,7 +109,7 @@ describe("SeasonRosterReferences.moveTeam", () => {
       { id: "kept-2024" },
       { pathNote: "Won the Major." },
     );
-    expect(nativeDelete).toHaveBeenCalledTimes(1);
+    expect(nativeDelete).toHaveBeenCalledOnce();
     expect(nativeDelete).toHaveBeenCalledWith(SeasonParticipant, { id: "dup-2024" });
     expect(nativeUpdate).toHaveBeenLastCalledWith(
       SeasonParticipant,

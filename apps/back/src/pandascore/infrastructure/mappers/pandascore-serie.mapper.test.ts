@@ -28,7 +28,7 @@ const deletion = (reason: string | null) => ({
   videogame_id: 14,
 });
 
-describe("parseProviderDeletion", () => {
+describe(parseProviderDeletion, () => {
   it("reads a merge into another serie", () => {
     expect(parseProviderDeletion(deletionReason(deletion("Merged with 9417")))).toEqual({
       kind: "merged",

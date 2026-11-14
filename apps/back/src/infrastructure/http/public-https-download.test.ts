@@ -82,7 +82,7 @@ function serve(routes: Record<string, Reply>) {
 const download = async (url: string, overrides: Partial<typeof limits> = {}) =>
   await downloadPublicHttps(new URL(url), { ...limits, ...overrides }, transport);
 
-describe("isPublicAddress", () => {
+describe(isPublicAddress, () => {
   it.each([
     "127.0.0.1",
     "10.1.2.3",
@@ -111,7 +111,7 @@ describe("isPublicAddress", () => {
   });
 });
 
-describe("downloadPublicHttps", () => {
+describe(downloadPublicHttps, () => {
   beforeEach(() => {
     fakes.request.mockReset();
     resolveDns({

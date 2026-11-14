@@ -22,7 +22,7 @@ function prizeRow(playerCount: number) {
   };
 }
 
-describe("CompetitionPrizeQueries", () => {
+describe(CompetitionPrizeQueries, () => {
   it("reports an earnings line with its share count, amount and tournament source", async () => {
     const find = vi.fn().mockResolvedValue([prizeRow(3)]);
     const queries = new CompetitionPrizeQueries({ find, findOne: vi.fn() });
@@ -37,7 +37,7 @@ describe("CompetitionPrizeQueries", () => {
   });
 });
 
-describe("CompetitionPrizeWriter", () => {
+describe(CompetitionPrizeWriter, () => {
   it("lists each participant with its tournament roster", async () => {
     const find = vi.fn().mockResolvedValue([
       {
@@ -54,7 +54,7 @@ describe("CompetitionPrizeWriter", () => {
       persist: vi.fn(),
     });
 
-    expect(await writer.participants("cup")).toEqual([
+    await expect(writer.participants("cup")).resolves.toEqual([
       { teamId: "team-a", playerIds: ["player-a", "player-b"] },
     ]);
   });

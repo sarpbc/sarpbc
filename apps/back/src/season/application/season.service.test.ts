@@ -9,7 +9,7 @@ import { SeasonService } from "./season.service";
 
 const ANNOUNCEMENT = "https://x.com/RLEsports/status/1";
 
-describe("SeasonService", () => {
+describe(SeasonService, () => {
   let service: SeasonService;
   let archives: SeasonArchiveService;
   let season: SeasonDetail;
@@ -32,13 +32,13 @@ describe("SeasonService", () => {
     });
     await expect(service.create({ name: "RLCS 2024" })).rejects.toBeInstanceOf(ConflictError);
     await expect(service.create({ name: "   " })).rejects.toBeInstanceOf(InvalidInputError);
-    expect(await service.update(season.id, { name: "RLCS 2024" })).toEqual(season);
+    await expect(service.update(season.id, { name: "RLCS 2024" })).resolves.toEqual(season);
   });
 
   it("normalises the public slug and keeps it unique across seasons", async () => {
     const published = await service.update(season.id, { name: "RLCS 2024", slug: " RLCS 2024 " });
     expect(published.slug).toBe("rlcs-2024");
-    expect(await service.update(season.id, { name: "RLCS 2024 World" })).toMatchObject({
+    await expect(service.update(season.id, { name: "RLCS 2024 World" })).resolves.toMatchObject({
       slug: "rlcs-2024",
     });
 
@@ -57,9 +57,11 @@ describe("SeasonService", () => {
         );
       }),
     );
-    expect(await service.update(other.id, { name: "RLCS 2025", slug: " " })).toMatchObject({
-      slug: null,
-    });
+    await expect(service.update(other.id, { name: "RLCS 2025", slug: " " })).resolves.toMatchObject(
+      {
+        slug: null,
+      },
+    );
   });
 
   it("stores a trimmed format with ordered phases", async () => {
@@ -117,12 +119,12 @@ describe("SeasonService", () => {
     });
 
     expect(crowned.winnerTeamId).toBe("vitality");
-    expect(await service.update(season.id, { name: "RLCS 2024" })).toMatchObject({
+    await expect(service.update(season.id, { name: "RLCS 2024" })).resolves.toMatchObject({
       winnerTeamId: "vitality",
     });
-    expect(
-      await service.update(season.id, { name: "RLCS 2024", winnerTeamId: null }),
-    ).toMatchObject({ winnerTeamId: null });
+    await expect(
+      service.update(season.id, { name: "RLCS 2024", winnerTeamId: null }),
+    ).resolves.toMatchObject({ winnerTeamId: null });
   });
 
   it("records a Season MVP presented by a partner", async () => {
@@ -139,7 +141,7 @@ describe("SeasonService", () => {
       presentedBy: "Ally",
       sourceUrl: ANNOUNCEMENT,
     });
-    expect(await service.awardsOfPlayer("zen")).toEqual([
+    await expect(service.awardsOfPlayer("zen")).resolves.toEqual([
       expect.objectContaining({
         id: award.id,
         season: { id: season.id, name: season.name, slug: null },

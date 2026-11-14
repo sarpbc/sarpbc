@@ -14,7 +14,7 @@ const ON = { year: 2026, month: 12, day: 6 };
 
 const anySlug: unknown = expect.any(String);
 
-describe("OnThisDayService", () => {
+describe(OnThisDayService, () => {
   it("queries the requested month and day in the site time zone, before its year", async () => {
     const { sources, tournaments, transfers, facts } = onThisDaySources();
 

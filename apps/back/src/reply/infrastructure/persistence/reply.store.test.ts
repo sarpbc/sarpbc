@@ -57,7 +57,7 @@ describe("MikroReplyStore.delete", () => {
           "This comment could not be deleted because it is still referenced. Hide it instead.",
       },
     });
-    expect(em.remove).toHaveBeenCalled();
+    expect(em.remove).toHaveBeenCalledWith();
   });
 
   it("rethrows other database failures", async () => {

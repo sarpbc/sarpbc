@@ -146,7 +146,7 @@ const services: McpServices = {
   seasonService: unconstructed(SeasonService),
 };
 
-describe("McpServerFactory", () => {
+describe(McpServerFactory, () => {
   it("serves every tool with a JSON schema and a stated permission", async () => {
     const factory = new McpServerFactory(services);
     const server = factory.createServer({ id: "u1", email: "staff@test.com", role: "admin" });

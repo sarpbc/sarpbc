@@ -12,7 +12,7 @@ const input: OnThisDayFactFields = {
   sourceUrl: " https://www.rocketleague.com/news ",
 };
 
-describe("parseOnThisDayFact", () => {
+describe(parseOnThisDayFact, () => {
   it("trims the staff-written texts and the source", () => {
     expect(parseOnThisDayFact(input)).toEqual({
       ...input,
@@ -53,7 +53,7 @@ describe("parseOnThisDayFact", () => {
   });
 });
 
-describe("isFactShownOn", () => {
+describe(isFactShownOn, () => {
   const on = { year: 2026, month: 7, day: 7 };
 
   it("matches the month and day of any past year or of no year", () => {

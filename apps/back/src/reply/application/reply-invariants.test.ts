@@ -99,6 +99,7 @@ describe("reply invariants without Nest or ORM", () => {
     expect(f.notified).toEqual([{ recipientId: "other", replyId: "new-reply" }]);
     expect(f.commits()).toBe(1);
   });
+
   it("waits for notification completion before committing", async () => {
     const f = setup();
     f.replies.findById.mockResolvedValue(reply({ author: { id: "other", userName: "Other" } }));
@@ -111,16 +112,19 @@ describe("reply invariants without Nest or ORM", () => {
     ).rejects.toThrow("notification failed");
     expect(f.commits()).toBe(0);
   });
+
   it("does not notify an author replying to themselves", async () => {
     const f = setup();
     await f.service.create("author", { content: "Hi", postId: "p", replyToId: "parent" });
     expect(f.notified).toEqual([]);
   });
+
   it("does not notify on a root reply", async () => {
     const f = setup();
     await f.service.create("author", { content: "Hi", postId: "p" });
     expect(f.notified).toEqual([]);
   });
+
   it("rejects a parent from another target before saving", async () => {
     const f = setup();
     f.replies.findById.mockResolvedValue(
@@ -131,6 +135,7 @@ describe("reply invariants without Nest or ORM", () => {
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(f.saved).toEqual([]);
   });
+
   it("rejects a hidden parent before saving", async () => {
     const f = setup();
     f.replies.findById.mockResolvedValue(reply({ hiddenAt: now }));
@@ -139,6 +144,7 @@ describe("reply invariants without Nest or ORM", () => {
     ).rejects.toBeInstanceOf(NotFoundError);
     expect(f.saved).toEqual([]);
   });
+
   it("enforces the full one-minute cooldown including its boundary", async () => {
     const f = setup();
     f.replies.findLatestByUser.mockResolvedValue(
@@ -149,12 +155,14 @@ describe("reply invariants without Nest or ORM", () => {
     });
     expect(f.saved).toEqual([]);
   });
+
   it("rejects reports on the author own comment", async () => {
     const f = setup();
     await expect(f.service.report("author", "parent", "spam")).rejects.toBeInstanceOf(
       InvalidInputError,
     );
   });
+
   it("rejects a duplicate report with the existing public error code", async () => {
     const f = setup();
     f.replies.findById.mockResolvedValue(reply({ author: { id: "other", userName: "Other" } }));
@@ -170,6 +178,7 @@ describe("reply invariants without Nest or ORM", () => {
       detail: { code: "REPLY_ALREADY_REPORTED" },
     });
   });
+
   it("deletes child replies before their parent in one transaction", async () => {
     const f = setup();
     const order: string[] = [];

@@ -49,7 +49,7 @@ function setup(owner: string | null = null) {
   return { aliases, service: new TeamAliasService(transaction) };
 }
 
-describe("TeamAliasService", () => {
+describe(TeamAliasService, () => {
   it("stores a sourced alias with its trimmed name", async () => {
     const { aliases, service } = setup();
 

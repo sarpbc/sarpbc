@@ -40,7 +40,7 @@ const standInMatch = (id: string, source: "manual" | "startgg", publicId: number
     },
   });
 
-describe("PlayerController", () => {
+describe(PlayerController, () => {
   const kept = Object.assign(new Player(), { id: "kept", name: "Kept" });
   const findPlayerById = vi.fn();
   const getContractsByPlayer = vi.fn();

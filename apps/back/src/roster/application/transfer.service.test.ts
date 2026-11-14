@@ -5,7 +5,7 @@ import { Team } from "../domain/team";
 import type { ContractQueries } from "./ports";
 import { TransferService } from "./transfer.service";
 
-describe("TransferService", () => {
+describe(TransferService, () => {
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
   const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
@@ -86,6 +86,6 @@ describe("TransferService", () => {
     const march = await service.onDay(3, 1, now);
     expect(march.map(({ id, type }) => [id, type])).toEqual([["kb:join", "benched"]]);
 
-    expect(await service.onDay(1, 10, new Date("2021-12-31"))).toEqual([]);
+    await expect(service.onDay(1, 10, new Date("2021-12-31"))).resolves.toEqual([]);
   });
 });

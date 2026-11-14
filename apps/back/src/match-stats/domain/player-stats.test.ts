@@ -36,7 +36,7 @@ const games: PlayerGameLine[] = [
   line("g3", zen, vitality, 0, [0, 0, 4, 0, 3]),
 ];
 
-describe("aggregatePlayerStats", () => {
+describe(aggregatePlayerStats, () => {
   it("sums every game of a player into totals and derives averages from them", () => {
     const stats = aggregatePlayerStats(games);
 
