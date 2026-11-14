@@ -12,12 +12,12 @@ import { unusedTournamentQueries } from "../../../../test/unused-tournament-quer
 
 describe(TeamController, () => {
   const kept = Object.assign(new Team(), { id: "kept", name: "Kept" });
-  const findById = vi.fn();
-  const getFormerPlayersByTeam = vi.fn();
-  const getContractsByTeam = vi.fn();
-  const getTournamentsWonByTeam = vi.fn();
-  const getTournamentsByTeam = vi.fn();
-  const teamEarnings = vi.fn();
+  const findById = vi.fn<TeamService["findById"]>();
+  const getFormerPlayersByTeam = vi.fn<ContractService["getFormerPlayersByTeam"]>();
+  const getContractsByTeam = vi.fn<ContractService["getContractsByTeam"]>();
+  const getTournamentsWonByTeam = vi.fn<TournamentQueries["getTournamentsWonByTeam"]>();
+  const getTournamentsByTeam = vi.fn<TournamentQueries["getTournamentsByTeam"]>();
+  const teamEarnings = vi.fn<TournamentPrizeService["teamEarnings"]>();
 
   const tournaments: TournamentQueries = {
     ...unusedTournamentQueries,

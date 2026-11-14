@@ -2,6 +2,7 @@ import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { RosterChange } from "@sarpbc/types";
 import { vi } from "vitest";
 import { z } from "zod";
+import type { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
 
 export function textOf(result: CallToolResult): string {
@@ -16,10 +17,10 @@ export function jsonOf(result: CallToolResult) {
 
 export function pendingProposalService() {
   return {
-    propose: vi.fn(async (change: RosterChange) =>
+    propose: vi.fn<RosterProposalService["propose"]>(async (change: RosterChange) =>
       Object.assign(new RosterProposal(), { id: "proposal-1", change }),
     ),
-    proposeTeamLogo: vi.fn(),
-    list: vi.fn(),
+    proposeTeamLogo: vi.fn<RosterProposalService["proposeTeamLogo"]>(),
+    list: vi.fn<RosterProposalService["list"]>(),
   };
 }

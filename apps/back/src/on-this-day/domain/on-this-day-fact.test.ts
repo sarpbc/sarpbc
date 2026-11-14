@@ -14,7 +14,7 @@ const input: OnThisDayFactFields = {
 
 describe(parseOnThisDayFact, () => {
   it("trims the staff-written texts and the source", () => {
-    expect(parseOnThisDayFact(input)).toEqual({
+    expect(parseOnThisDayFact(input)).toStrictEqual({
       ...input,
       textEn: "Rocket League was released.",
       sourceUrl: "https://www.rocketleague.com/news",

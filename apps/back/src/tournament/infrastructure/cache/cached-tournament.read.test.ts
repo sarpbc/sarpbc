@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { log } from "evlog";
 import { Player } from "../../../roster/domain/player";
 import { Team } from "../../../roster/domain/team";
+import type { RedisService } from "../../../infrastructure/redis/redis.service";
+import type { TournamentQueries } from "../../application/ports";
 import { Match } from "../../domain/match";
 import { Tournament } from "../../domain/tournament";
 import { TournamentParticipant } from "../../domain/tournament-participant";
@@ -41,8 +43,13 @@ function fixture(): Tournament {
 
 describe(CachedTournamentRead, () => {
   const warn = vi.spyOn(log, "warn");
-  const redis = { get: vi.fn(), set: vi.fn() };
-  const tournaments = { findById: vi.fn() };
+
+  const redis = {
+    get: vi.fn<RedisService["get"]>(),
+    set: vi.fn<RedisService["set"]>(),
+  };
+
+  const tournaments = { findById: vi.fn<TournamentQueries["findById"]>() };
   const read = new CachedTournamentRead(tournaments, redis);
   let model: Tournament;
 
@@ -56,7 +63,7 @@ describe(CachedTournamentRead, () => {
 
   it("stores the public DTO with the established key and 60 second TTL", async () => {
     const result = await read.findById("t1");
-    expect(result).toEqual(mapTournamentDetail(model));
+    expect(result).toStrictEqual(mapTournamentDetail(model));
     expect(redis.set).toHaveBeenCalledWith("tournament:t1", JSON.stringify(result), 60);
     expect(JSON.stringify(result)).not.toContain("tournamentId");
   });
@@ -65,8 +72,8 @@ describe(CachedTournamentRead, () => {
     const miss = await read.findById("t1");
     redis.get.mockResolvedValue(JSON.stringify(miss));
     const hit = await read.findById("t1");
-    expect(JSON.stringify(hit)).toEqual(JSON.stringify(miss));
-    expect(hit).toEqual(miss);
+    expect(JSON.stringify(hit)).toStrictEqual(JSON.stringify(miss));
+    expect(hit).toStrictEqual(miss);
     expect(tournaments.findById).toHaveBeenCalledOnce();
     expect(redis.set).toHaveBeenCalledOnce();
   });
@@ -75,7 +82,7 @@ describe(CachedTournamentRead, () => {
     "treats malformed or incompatible cache data %p as a diagnosed miss",
     async (cached) => {
       redis.get.mockResolvedValue(cached);
-      await expect(read.findById("t1")).resolves.toEqual(mapTournamentDetail(model));
+      await expect(read.findById("t1")).resolves.toStrictEqual(mapTournamentDetail(model));
       expect(warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
     },
   );
@@ -93,19 +100,25 @@ describe(CachedTournamentRead, () => {
   it("never serves a cached value with fields outside the public response", async () => {
     const dto = mapTournamentDetail(model);
     redis.get.mockResolvedValue(JSON.stringify({ ...dto, internalSecret: "hidden" }));
-    await expect(read.findById("t1")).resolves.toEqual(dto);
+    await expect(read.findById("t1")).resolves.toStrictEqual(dto);
     expect(tournaments.findById).toHaveBeenCalledOnce();
     expect(warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
   });
 
-  it.each(["get", "set"] as const)(
-    "preserves database success when cache %s fails",
-    async (operation) => {
-      redis[operation].mockRejectedValue(new Error("Redis unavailable"));
-      await expect(read.findById("t1")).resolves.toEqual(mapTournamentDetail(model));
-      expect(warn).toHaveBeenCalledWith();
-    },
-  );
+  it.each([
+    ["get", "read"],
+    ["set", "write"],
+  ] as const)("preserves database success when cache %s fails", async (method, operation) => {
+    redis[method].mockRejectedValue(new Error("Redis unavailable"));
+    await expect(read.findById("t1")).resolves.toStrictEqual(mapTournamentDetail(model));
+    expect(warn).toHaveBeenCalledExactlyOnceWith({
+      component: "CachedTournamentRead",
+      error: new Error("Redis unavailable"),
+      key: "tournament:t1",
+      message: "Optional tournament cache failed",
+      operation,
+    });
+  });
 
   it("does not cache missing records", async () => {
     tournaments.findById.mockResolvedValue(null);

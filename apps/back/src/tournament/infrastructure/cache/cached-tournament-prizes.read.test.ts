@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TournamentPrizes } from "@sarpbc/types";
+import type { RedisService } from "../../../infrastructure/redis/redis.service";
+import type { TournamentPrizeService } from "../../application/tournament-prize.service";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { CachedTournamentPrizesRead } from "./cached-tournament-prizes.read";
 
@@ -26,8 +28,15 @@ const distribution: TournamentPrizes = {
 };
 
 describe(CachedTournamentPrizesRead, () => {
-  const redis = { get: vi.fn(), set: vi.fn() };
-  const prizes = { findByTournamentId: vi.fn() };
+  const redis = {
+    get: vi.fn<RedisService["get"]>(),
+    set: vi.fn<RedisService["set"]>(),
+  };
+
+  const prizes = {
+    findByTournamentId: vi.fn<TournamentPrizeService["findByTournamentId"]>(),
+  };
+
   const read = new CachedTournamentPrizesRead(prizes, redis);
 
   beforeEach(() => {
@@ -37,8 +46,8 @@ describe(CachedTournamentPrizesRead, () => {
   });
 
   it("stores the distribution for 60 seconds on a miss", async () => {
-    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
-    expect(redis.set).toHaveBeenCalledWith(
+    await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
+    expect(redis.set).toHaveBeenCalledExactlyOnceWith(
       "tournament-prizes:cup",
       JSON.stringify(distribution),
       60,
@@ -47,17 +56,17 @@ describe(CachedTournamentPrizesRead, () => {
 
   it("serves a cached distribution without reading the database", async () => {
     redis.get.mockResolvedValue(JSON.stringify(distribution));
-    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
+    await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
     expect(prizes.findByTournamentId).not.toHaveBeenCalled();
   });
 
   it("ignores an undecodable cache entry and an unavailable cache", async () => {
     redis.get.mockResolvedValueOnce(JSON.stringify({ prizes: "broken" }));
-    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
+    await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
 
     redis.get.mockRejectedValueOnce(new Error("down"));
     redis.set.mockRejectedValueOnce(new Error("down"));
-    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
+    await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
   });
 
   it("does not cache unknown tournaments", async () => {

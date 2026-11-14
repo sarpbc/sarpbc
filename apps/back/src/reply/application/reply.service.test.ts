@@ -4,11 +4,14 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { Author } from "../../common/domain/author";
 import type { ReplyTarget } from "../domain/reply";
 import type { ReplyRecord } from "./models";
-import type { ReplyWriteScope } from "./ports";
+import type { ReplyWrites, ReplyWriteScope } from "./ports";
 
 import { ReplyService } from "./reply.service";
 
 type Match = NonNullable<ReplyRecord["match"]>;
+
+const NOW = new Date("2026-06-01T12:00:00Z");
+const GENERATED_ID = "generated-id";
 
 const matchFor = (id: string): Match => ({ id, publicId: 1, name: "Match", slug: "match" });
 
@@ -34,28 +37,28 @@ describe(ReplyService, () => {
   let service: ReplyService;
 
   const replyRepository = {
-    findByTarget: vi.fn(),
-    findById: vi.fn(),
-    findLatestByUser: vi.fn(),
-    countRootsByTarget: vi.fn(),
-    countByTargetIds: vi.fn(),
-    findDescendantsForRoots: vi.fn(),
-    save: vi.fn(),
-    delete: vi.fn(),
-    findChildren: vi.fn(),
+    findByTarget: vi.fn<ReplyWrites["findByTarget"]>(),
+    findById: vi.fn<ReplyWrites["findById"]>(),
+    findLatestByUser: vi.fn<ReplyWrites["findLatestByUser"]>(),
+    countRootsByTarget: vi.fn<ReplyWrites["countRootsByTarget"]>(),
+    countByTargetIds: vi.fn<ReplyWrites["countByTargetIds"]>(),
+    findDescendantsForRoots: vi.fn<ReplyWrites["findDescendantsForRoots"]>(),
+    save: vi.fn<ReplyWrites["save"]>(),
+    delete: vi.fn<ReplyWrites["delete"]>(),
+    findChildren: vi.fn<ReplyWrites["findChildren"]>(),
   };
 
   const replyReportRepository = {
-    findByReplyAndReporter: vi.fn(),
-    save: vi.fn(),
+    findByReplyAndReporter: vi.fn<ReplyWriteScope["reports"]["findByReplyAndReporter"]>(),
+    save: vi.fn<ReplyWriteScope["reports"]["save"]>(),
   };
 
   const userService = {
-    findById: vi.fn(),
+    findById: vi.fn<ReplyWriteScope["users"]["findById"]>(),
   };
 
   const notificationService = {
-    createForDirectReply: vi.fn(),
+    createForDirectReply: vi.fn<ReplyWriteScope["notifications"]["createForDirectReply"]>(),
   };
 
   const em = {
@@ -64,7 +67,10 @@ describe(ReplyService, () => {
 
   beforeEach(async () => {
     const scope: ReplyWriteScope = {
-      replies: { ...replyRepository, findRecentForModeration: vi.fn() },
+      replies: {
+        ...replyRepository,
+        findRecentForModeration: vi.fn<ReplyWrites["findRecentForModeration"]>(),
+      },
       reports: replyReportRepository,
       users: userService,
       notifications: notificationService,
@@ -79,7 +85,12 @@ describe(ReplyService, () => {
       },
     };
 
-    service = new ReplyService(scope.replies, { run: async (work) => await work(scope) });
+    service = new ReplyService(
+      scope.replies,
+      { run: async (work) => await work(scope) },
+      () => NOW,
+      () => GENERATED_ID,
+    );
     vi.clearAllMocks();
   });
 
@@ -96,10 +107,20 @@ describe(ReplyService, () => {
         matchId: match.id,
       });
 
-      expect(replyRepository.save).toHaveBeenCalledWith();
+      expect(replyRepository.save).toHaveBeenCalledExactlyOnceWith({
+        id: GENERATED_ID,
+        content: "Great series",
+        author: makeUser(),
+        createdAt: NOW,
+        hiddenAt: null,
+        post: null,
+        newsArticle: null,
+        match,
+        replyTo: null,
+      });
       expect(result.content).toBe("Great series");
       expect(result.author.userName).toBe("fan");
-      expect(result.replies).toEqual([]);
+      expect(result.replies).toStrictEqual([]);
     });
 
     it("rejects empty trimmed content", async () => {
@@ -153,6 +174,20 @@ describe(ReplyService, () => {
       expect(result.replies[0].id).toBe("root");
       expect(result.replies[0].replies).toHaveLength(1);
       expect(result.replies[0].replies[0].id).toBe("child");
+    });
+
+    it("queries root replies of the target, then their descendants", async () => {
+      const root = makeReply({
+        id: "root",
+        match: matchFor("m1"),
+      });
+
+      replyRepository.countRootsByTarget.mockResolvedValue(1);
+      replyRepository.findByTarget.mockResolvedValue([root]);
+      replyRepository.findDescendantsForRoots.mockResolvedValue([]);
+
+      await service.findByTargetPaginated("match", "m1", 0, 25);
+
       expect(replyRepository.findByTarget).toHaveBeenCalledWith("match", "m1", {
         limit: 25,
         offset: 0,
@@ -200,7 +235,13 @@ describe(ReplyService, () => {
 
       const result = await service.report("reporter-1", "r1", "spam");
 
-      expect(replyReportRepository.save).toHaveBeenCalledWith();
+      expect(replyReportRepository.save).toHaveBeenCalledExactlyOnceWith({
+        id: GENERATED_ID,
+        reply,
+        reporter: makeUser("reporter-1"),
+        reason: "spam",
+        createdAt: NOW,
+      });
       expect(result.reason).toBe("spam");
     });
   });

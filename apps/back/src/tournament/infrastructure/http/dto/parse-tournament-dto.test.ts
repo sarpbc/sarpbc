@@ -5,13 +5,13 @@ import { parseDto } from "./parse-tournament-dto";
 
 describe("MCP tournament input", () => {
   it("uses the HTTP schema transformations and preserves null clears", () => {
-    expect(parseDto(CreateTournamentDto, { name: "  RLCS  ", tier: " S " })).toEqual({
+    expect(parseDto(CreateTournamentDto, { name: "  RLCS  ", tier: " S " })).toStrictEqual({
       name: "RLCS",
       tier: "S",
     });
     expect(
       parseDto(UpdateTournamentDto, { beginAt: null, endAt: null, leagueId: null, imageUrl: "  " }),
-    ).toEqual({ beginAt: null, endAt: null, leagueId: null, imageUrl: "" });
+    ).toStrictEqual({ beginAt: null, endAt: null, leagueId: null, imageUrl: "" });
   });
 
   it.each([

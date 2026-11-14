@@ -22,7 +22,7 @@ function candidate(overrides: Partial<ManualCandidate>): ManualCandidate {
 
 describe(findManualCounterpart, () => {
   it("matches the same words in any order with overlapping dates", () => {
-    expect(findManualCounterpart(stage, [candidate({})])).toEqual({
+    expect(findManualCounterpart(stage, [candidate({})])).toStrictEqual({
       kind: "unique",
       id: "manual-1",
     });
@@ -41,11 +41,13 @@ describe(findManualCounterpart, () => {
         }),
         candidate({ id: "undated", beginAt: null }),
       ]),
-    ).toEqual({ kind: "none" });
+    ).toStrictEqual({ kind: "none" });
   });
 
   it("reports several matches as ambiguous", () => {
-    expect(findManualCounterpart(stage, [candidate({}), candidate({ id: "manual-2" })])).toEqual({
+    expect(
+      findManualCounterpart(stage, [candidate({}), candidate({ id: "manual-2" })]),
+    ).toStrictEqual({
       kind: "ambiguous",
       ids: ["manual-1", "manual-2"],
     });

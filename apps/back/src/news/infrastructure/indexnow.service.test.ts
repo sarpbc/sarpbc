@@ -26,7 +26,7 @@ describe(IndexNowService, () => {
     const [endpoint, request] = fetch.mock.calls[0] ?? [];
     expect(endpoint).toBe("https://api.indexnow.org/indexnow");
     expect(request?.method).toBe("POST");
-    expect(JSON.parse(z.string().parse(request?.body))).toEqual({
+    expect(JSON.parse(z.string().parse(request?.body))).toStrictEqual({
       host: "sarpbc.org",
       key: TEST_KEY,
       keyLocation: `https://sarpbc.org/${TEST_KEY}.txt`,

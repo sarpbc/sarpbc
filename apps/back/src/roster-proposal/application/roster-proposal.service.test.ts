@@ -12,9 +12,9 @@ import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { Player } from "../../roster/domain/player";
-import type { RosterProposalService } from "./roster-proposal.service";
+import { RosterProposalService } from "./roster-proposal.service";
 
-describe("RosterProposalService", () => {
+describe(RosterProposalService, () => {
   const source = "https://x.com/KarmineCorp/status/1";
   let saved: ReturnType<typeof setup>["saved"];
   let store: ReturnType<typeof setup>["store"];
@@ -99,7 +99,7 @@ describe("RosterProposalService", () => {
     const { proposals, names } = await service.list("pending");
 
     expect(proposals).toHaveLength(2);
-    expect(names).toEqual({ zen: "zen", kc: "Karmine Corp" });
+    expect(names).toStrictEqual({ zen: "zen", kc: "Karmine Corp" });
     expect(store.names).toHaveBeenCalledExactlyOnceWith({
       players: ["zen"],
       teams: ["kc"],
@@ -276,7 +276,7 @@ describe("RosterProposalService", () => {
 
     const approved = await service.approve(id, "admin");
 
-    expect(staff.permissions).toEqual(["tournaments.manage"]);
+    expect(staff.permissions).toStrictEqual(["tournaments.manage"]);
     expect(prizes.setDistribution).toHaveBeenCalledWith("cup", [
       { ...prizeEntry, sourceUrl: source },
     ]);
@@ -292,7 +292,7 @@ describe("RosterProposalService", () => {
 
     const approved = await service.approve(id, "admin");
 
-    expect(staff.permissions).toEqual(["tournaments.manage"]);
+    expect(staff.permissions).toStrictEqual(["tournaments.manage"]);
     expect(prizes.updateEntry).toHaveBeenCalledWith("cup", "kc", {}, source);
     expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
   });
@@ -357,7 +357,7 @@ describe("RosterProposalService", () => {
 
     const approved = await service.approve(id, "admin");
 
-    expect(staff.permissions).toEqual(["tournaments.manage"]);
+    expect(staff.permissions).toStrictEqual(["tournaments.manage"]);
     expect(awards.createForTeam).toHaveBeenCalledWith("cup", "kc", "zen", "mvp");
     expect(approved).toMatchObject({ status: "applied", entityId: "award-1" });
   });
@@ -375,10 +375,14 @@ describe("RosterProposalService", () => {
     expect(awards.createForTeam).toHaveBeenCalledWith("cup", "kc", "zen", "grand_finals_mvp");
   });
 
-  it("rejects award proposals the tournament cannot take", async () => {
+  it("rejects award proposals for an unknown or start.gg tournament and an unknown player", async () => {
     await expect(propose({ tournamentId: "missing" })).rejects.toThrow(NotFoundError);
     await expect(propose({ tournamentId: "startgg-cup" })).rejects.toThrow(InvalidInputError);
     await expect(propose({ playerId: "bench" })).rejects.toThrow(NotFoundError);
+    expect(saved.size).toBe(0);
+  });
+
+  it("rejects award proposals for an unknown team or an award already given", async () => {
     await expect(propose({ teamId: "nope" })).rejects.toThrow(NotFoundError);
     awards.requireProposable.mockRejectedValueOnce(new InvalidInputError("already has"));
     await expect(propose({})).rejects.toThrow(InvalidInputError);
@@ -537,7 +541,7 @@ describe("RosterProposalService", () => {
 
       const approved = await service.approve(id, "admin");
 
-      expect(staff.permissions).toEqual(["tournaments.manage"]);
+      expect(staff.permissions).toStrictEqual(["tournaments.manage"]);
       expect(matches.deleteMatch).toHaveBeenCalledExactlyOnceWith("dup-match");
       expect(approved).toMatchObject({ status: "applied", entityId: "dup-match" });
     });
@@ -571,7 +575,7 @@ describe("RosterProposalService", () => {
 
       const approved = await service.approve(id, "admin");
 
-      expect(staff.permissions).toEqual(["teams.manage"]);
+      expect(staff.permissions).toStrictEqual(["teams.manage"]);
       expect(teams.delete).toHaveBeenCalledExactlyOnceWith("kc-copy");
       expect(approved).toMatchObject({ status: "applied", entityId: "kc-copy" });
     });
@@ -674,7 +678,7 @@ describe("RosterProposalService", () => {
       );
       const [, result] = streams.set.mock.results;
       const applied = result?.type === "return" ? await result.value : undefined;
-      expect(applied?.streams.map((stream) => stream.source)).toEqual(["startgg", "startgg"]);
+      expect(applied?.streams.map((stream) => stream.source)).toStrictEqual(["startgg", "startgg"]);
     });
 
     it("asks the reviewer for the tournament permission", async () => {
@@ -912,29 +916,48 @@ describe("RosterProposalService", () => {
       expect(saved.size).toBe(0);
     });
 
-    it("adds or updates the alias with the proposal source once a team manager approves", async () => {
-      const added = await service.propose(
-        { kind: "add_team_alias", teamId: "kc", alias },
-        source,
-        "journalist",
-      );
+    describe("approved by a team manager", () => {
+      let addedResult: Awaited<ReturnType<typeof service.approve>>;
+      let updatedResult: Awaited<ReturnType<typeof service.approve>>;
 
-      const updated = await service.propose(
-        { kind: "update_team_alias", teamId: "kc", aliasId: "alias-1", alias },
-        source,
-        "journalist",
-      );
+      beforeEach(async () => {
+        const added = await service.propose(
+          { kind: "add_team_alias", teamId: "kc", alias },
+          source,
+          "journalist",
+        );
 
-      await expect(service.approve(added.id, "admin")).resolves.toMatchObject({ entityId: "kc" });
-      await expect(service.approve(updated.id, "admin")).resolves.toMatchObject({ entityId: "kc" });
-      expect(teamAliases.add).toHaveBeenCalledWith("kc", { ...alias, sourceUrl: source });
-      expect(teamAliases.update).toHaveBeenCalledWith("kc", "alias-1", {
-        ...alias,
-        sourceUrl: source,
+        const updated = await service.propose(
+          { kind: "update_team_alias", teamId: "kc", aliasId: "alias-1", alias },
+          source,
+          "journalist",
+        );
+
+        addedResult = await service.approve(added.id, "admin");
+        updatedResult = await service.approve(updated.id, "admin");
       });
-      expect(teams.update).not.toHaveBeenCalled();
-      expect(merges.mergeTeams).not.toHaveBeenCalled();
-      expect(staff.permissions).toEqual(["teams.manage", "teams.manage"]);
+
+      it("applies both proposals to the team", () => {
+        expect(addedResult).toMatchObject({ entityId: "kc" });
+        expect(updatedResult).toMatchObject({ entityId: "kc" });
+      });
+
+      it("adds the alias with the proposal source", () => {
+        expect(teamAliases.add).toHaveBeenCalledWith("kc", { ...alias, sourceUrl: source });
+      });
+
+      it("updates the alias with the proposal source", () => {
+        expect(teamAliases.update).toHaveBeenCalledWith("kc", "alias-1", {
+          ...alias,
+          sourceUrl: source,
+        });
+      });
+
+      it("leaves the team untouched and requires the team permission for each approval", () => {
+        expect(teams.update).not.toHaveBeenCalled();
+        expect(merges.mergeTeams).not.toHaveBeenCalled();
+        expect(staff.permissions).toStrictEqual(["teams.manage", "teams.manage"]);
+      });
     });
   });
 });

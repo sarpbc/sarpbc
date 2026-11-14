@@ -65,14 +65,14 @@ describe("PlayerService profile photos", () => {
   it("archives the previous profile and consumes the selected gallery photo in one transaction", async () => {
     const setProfilePhotoResult = await service.setProfilePhoto(player.id, "selected");
     expect(setProfilePhotoResult.imageUrl).toBe("selected.png");
-    expect(gallery.map((photo) => photo.url)).toEqual(["old.png"]);
+    expect(gallery.map((photo) => photo.url)).toStrictEqual(["old.png"]);
     expect(transactions).toBe(1);
   });
 
   it("archives a replaced profile when editing player details", async () => {
     await service.update(player.id, { imageUrl: "new.png" });
     expect(player.imageUrl).toBe("new.png");
-    expect(gallery.map((photo) => photo.url)).toEqual(["selected.png", "old.png"]);
+    expect(gallery.map((photo) => photo.url)).toStrictEqual(["selected.png", "old.png"]);
     expect(transactions).toBe(1);
   });
 
@@ -80,7 +80,7 @@ describe("PlayerService profile photos", () => {
     gallery[0].player = Object.assign(new Player(), { id: "someone-else" });
     await expect(service.setProfilePhoto(player.id, "selected")).rejects.toThrow("not found");
     expect(player.imageUrl).toBe("old.png");
-    expect(gallery.map((photo) => photo.url)).toEqual(["selected.png"]);
+    expect(gallery.map((photo) => photo.url)).toStrictEqual(["selected.png"]);
   });
 
   it("rejects an unknown team on create and update like the contract writes do", async () => {
@@ -131,24 +131,29 @@ describe("PlayerService roster moves", () => {
     stores = {
       players: {
         findById: async (id) => (id === player.id ? player : null),
-        findBySlug: vi.fn(),
+        findBySlug: vi.fn<RosterWriteScope["players"]["findBySlug"]>(),
         save: savePlayer,
-        delete: vi.fn(),
+        delete: vi.fn<RosterWriteScope["players"]["delete"]>(),
       },
-      photos: { findByPlayer: vi.fn(), findById: vi.fn(), save: vi.fn(), delete: vi.fn() },
+      photos: {
+        findByPlayer: vi.fn<RosterWriteScope["photos"]["findByPlayer"]>(),
+        findById: vi.fn<RosterWriteScope["photos"]["findById"]>(),
+        save: vi.fn<RosterWriteScope["photos"]["save"]>(),
+        delete: vi.fn<RosterWriteScope["photos"]["delete"]>(),
+      },
       contracts: {
         findByPlayer: async () => history,
-        findByTeam: vi.fn(),
-        findById: vi.fn(),
+        findByTeam: vi.fn<RosterWriteScope["contracts"]["findByTeam"]>(),
+        findById: vi.fn<RosterWriteScope["contracts"]["findById"]>(),
         save: saveContract,
         delete: deleteContract,
       },
       teams: {
         findById: async (id) => teams.get(id) ?? null,
-        findBySlug: vi.fn(),
-        redirectCount: vi.fn(),
-        save: vi.fn(),
-        delete: vi.fn(),
+        findBySlug: vi.fn<RosterWriteScope["teams"]["findBySlug"]>(),
+        redirectCount: vi.fn<RosterWriteScope["teams"]["redirectCount"]>(),
+        save: vi.fn<RosterWriteScope["teams"]["save"]>(),
+        delete: vi.fn<RosterWriteScope["teams"]["delete"]>(),
       },
     };
     service = new PlayerService(unusedPlayerQueries, unusedPhotoQueries, {
@@ -162,13 +167,17 @@ describe("PlayerService roster moves", () => {
   it("closes the open contract and opens a sourced one when a player joins a team", async () => {
     await service.joinTeam(player.id, move(newTeam.id));
     expect(history[1]).toMatchObject({ endDate: new Date("2026-10-23"), leaveSourceUrl: source });
-    expect(history[0].endDate).toEqual(new Date("2025-01-01"));
+    expect(history[0].endDate).toStrictEqual(new Date("2025-01-01"));
     expect(lastSavedContract()).toMatchObject({
       team: newTeam,
       startDate: new Date("2026-10-23"),
       endDate: null,
       joinSourceUrl: source,
     });
+  });
+
+  it("moves the player to the new team without deleting any contract", async () => {
+    await service.joinTeam(player.id, move(newTeam.id));
     expect(player).toMatchObject({ team: newTeam, status: "active" });
     expect(saveContract).toHaveBeenCalledTimes(2);
     expect(deleteContract).not.toHaveBeenCalled();
@@ -270,7 +279,7 @@ describe("PlayerService roster moves", () => {
       ...move(newTeam.id),
       status: "retired",
     });
-    expect(history[2].endDate).toEqual(new Date("2026-10-23"));
+    expect(history[2].endDate).toStrictEqual(new Date("2026-10-23"));
     expect(player).toMatchObject({ team: oldTeam, status: "active" });
   });
 

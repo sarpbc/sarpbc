@@ -5,24 +5,24 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { UserService } from "./user.service";
 import type { PasswordHasher } from "./ports/password-hasher";
 import { User } from "../domain/user";
-import type { UserTransaction } from "./ports/user-store";
+import type { UserQueries, UserTransaction, UserWriter } from "./ports/user-store";
 
 describe(UserService, () => {
   let service: UserService;
 
   const userQueries = {
-    list: vi.fn(),
-    findByEmail: vi.fn(),
-    findById: vi.fn(),
-    findByGoogleId: vi.fn(),
-    findByEmailWithPassword: vi.fn(),
+    list: vi.fn<UserQueries["list"]>(),
+    findByEmail: vi.fn<UserQueries["findByEmail"]>(),
+    findById: vi.fn<UserQueries["findById"]>(),
+    findByGoogleId: vi.fn<UserQueries["findByGoogleId"]>(),
+    findByEmailWithPassword: vi.fn<UserQueries["findByEmailWithPassword"]>(),
   };
 
   const userWriter = {
-    findById: vi.fn(),
-    existsByEmail: vi.fn(),
-    existsByUserName: vi.fn(),
-    save: vi.fn(),
+    findById: vi.fn<UserWriter["findById"]>(),
+    existsByEmail: vi.fn<UserWriter["existsByEmail"]>(),
+    existsByUserName: vi.fn<UserWriter["existsByUserName"]>(),
+    save: vi.fn<UserWriter["save"]>(),
   };
 
   const transaction: UserTransaction = {

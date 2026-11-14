@@ -20,7 +20,7 @@ describe(OnThisDayService, () => {
 
     const day = await new OnThisDayService(sources).forDay(ON, NOW);
 
-    expect(day).toEqual({ date: "2026-12-06", events: [] });
+    expect(day).toStrictEqual({ date: "2026-12-06", events: [] });
     const query = { month: 12, day: 6, timeZone: "Europe/Paris", beforeYear: 2026 };
     expect(tournaments.wonOnDay).toHaveBeenCalledWith(query);
     expect(tournaments.finalsOnDay).toHaveBeenCalledWith(query);
@@ -67,7 +67,7 @@ describe(OnThisDayService, () => {
     };
 
     const vatira = { name: "Vatira", slug: "vatira" };
-    expect(events).toEqual([
+    expect(events).toStrictEqual([
       {
         kind: "title",
         year: 2024,
@@ -126,7 +126,7 @@ describe(OnThisDayService, () => {
 
     const { events } = await new OnThisDayService(sources).forDay(ON, NOW);
 
-    expect(events).toEqual([expect.objectContaining({ kind: "title", year: 2021 })]);
+    expect(events).toStrictEqual([expect.objectContaining({ kind: "title", year: 2021 })]);
   });
 
   it("shows only staff facts of this day that are not dated in a future year", async () => {
@@ -142,7 +142,7 @@ describe(OnThisDayService, () => {
 
     const { events } = await new OnThisDayService(sources).forDay(ON, NOW);
 
-    expect(events.map((event) => (event.kind === "fact" ? event.year : event.kind))).toEqual([
+    expect(events.map((event) => (event.kind === "fact" ? event.year : event.kind))).toStrictEqual([
       null,
       2015,
     ]);
@@ -166,7 +166,7 @@ describe(OnThisDayService, () => {
 
     const { events } = await new OnThisDayService(sources).forDay(ON, NOW);
 
-    expect(events[0]).toEqual({
+    expect(events[0]).toStrictEqual({
       kind: "fact",
       year: 2015,
       text: { en: written.textEn, fr: written.textFr },
@@ -174,6 +174,12 @@ describe(OnThisDayService, () => {
       sourceUrl: written.sourceUrl,
     });
     expect(events).toHaveLength(2);
-    expect(Object.keys(events[1] ?? {})).toEqual(["kind", "year", "date", "tournament", "winner"]);
+    expect(Object.keys(events[1] ?? {})).toStrictEqual([
+      "kind",
+      "year",
+      "date",
+      "tournament",
+      "winner",
+    ]);
   });
 });

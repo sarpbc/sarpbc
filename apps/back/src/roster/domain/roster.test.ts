@@ -57,7 +57,7 @@ describe("contracts", () => {
   it("closes a contract with its departure source", () => {
     const contract = Object.assign(new Contract(), { startDate: new Date("2026-01-10") });
     contract.close(new Date("2026-10-23"), "https://x.com/team/status/1");
-    expect(contract.endDate).toEqual(new Date("2026-10-23"));
+    expect(contract.endDate).toStrictEqual(new Date("2026-10-23"));
     expect(contract.leaveSourceUrl).toBe("https://x.com/team/status/1");
   });
 
@@ -88,17 +88,22 @@ describe("current role", () => {
     expect(player.currentRole()).toBe("analyst");
   });
 
-  it("falls back to the imported staff role when the current team has no contract", () => {
-    expect(role("Coach")).toBe("coach");
-    expect(role("Assistant Coach")).toBe("assistant_coach");
-    expect(role(" head-coach ")).toBe("coach");
-    expect(role("Co-Coach")).toBe("assistant_coach");
-    expect(role("Analyst")).toBe("analyst");
-    expect(role("Manager")).toBe("manager");
-    expect(role("Staff")).toBe("manager");
-    expect(role("Substitute")).toBe("active");
-    expect(role(null)).toBe("active");
-  });
+  it.each([
+    ["Coach", "coach"],
+    ["Assistant Coach", "assistant_coach"],
+    [" head-coach ", "coach"],
+    ["Co-Coach", "assistant_coach"],
+    ["Analyst", "analyst"],
+    ["Manager", "manager"],
+    ["Staff", "manager"],
+    ["Substitute", "active"],
+    [null, "active"],
+  ])(
+    "falls back to the imported staff role %p as %p when the current team has no contract",
+    (imported, expected) => {
+      expect(role(imported)).toBe(expected);
+    },
+  );
 
   it("normalizes a long separator run from an imported role", () => {
     const payload = `head${" -".repeat(50_000)}\tcoach${" ".repeat(50_000)}!`;

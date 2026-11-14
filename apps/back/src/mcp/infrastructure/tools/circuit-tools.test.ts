@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CircuitDetail, CircuitStandings, CircuitSummary, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
+import type { CircuitService } from "../../../circuit/application/circuit.service";
 import { circuitTools } from "./circuit-tools";
 import { rosterTools } from "./roster-tools";
 import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
@@ -27,6 +28,13 @@ function scaleTool() {
   if (!tool) throw new Error("set_circuit_stage_scale is not defined");
 
   return { rosterProposalService, tool };
+}
+
+interface ScaleInputOverrides {
+  sourceUrl: string | undefined;
+  scale: typeof SCALE;
+  regionTeamIds: string[];
+  finishes: { teamId: string; placement: number }[];
 }
 
 describe("set_circuit_stage_scale", () => {
@@ -80,27 +88,20 @@ describe("set_circuit_stage_scale", () => {
     );
   });
 
-  it("requires a sourceUrl outside Liquipedia and BLAST.tv, whole-number tiers and team UUIDs", () => {
+  it.each<[string, Partial<ScaleInputOverrides>, boolean]>([
+    ["the complete input", {}, true],
+    ["a missing sourceUrl", { sourceUrl: undefined }, false],
+    ["a Liquipedia sourceUrl", { sourceUrl: "https://liquipedia.net/rocketleague/Fake" }, false],
+    ["a BLAST.tv sourceUrl", { sourceUrl: "https://blast.tv/rl/leaderboard/2026" }, false],
+    ["a region team that is not a UUID", { regionTeamIds: ["karmine-corp"] }, false],
+    ["a placement below 1", { finishes: [{ teamId: TEAM_ID, placement: 0 }] }, false],
+    ["a placement of 9", { finishes: [{ teamId: TEAM_ID, placement: 9 }] }, true],
+    ["a tier starting below 1", { scale: [{ from: 0, to: 1, points: 3 }] }, false],
+    ["fractional tier points", { scale: [{ from: 1, to: 1, points: 2.5 }] }, false],
+  ])("validates %s", (_label, overrides, accepted) => {
     const schema = z.object(scaleTool().tool.inputSchema);
 
-    const accepts = (
-      overrides: Partial<{
-        sourceUrl: string;
-        scale: typeof SCALE;
-        regionTeamIds: string[];
-        finishes: { teamId: string; placement: number }[];
-      }>,
-    ) => schema.safeParse({ ...input, ...overrides }).success;
-
-    expect(accepts({})).toBe(true);
-    expect(accepts({ sourceUrl: undefined })).toBe(false);
-    expect(accepts({ sourceUrl: "https://liquipedia.net/rocketleague/Fake" })).toBe(false);
-    expect(accepts({ sourceUrl: "https://blast.tv/rl/leaderboard/2026" })).toBe(false);
-    expect(accepts({ regionTeamIds: ["karmine-corp"] })).toBe(false);
-    expect(accepts({ finishes: [{ teamId: TEAM_ID, placement: 0 }] })).toBe(false);
-    expect(accepts({ finishes: [{ teamId: TEAM_ID, placement: 9 }] })).toBe(true);
-    expect(accepts({ scale: [{ from: 0, to: 1, points: 3 }] })).toBe(false);
-    expect(accepts({ scale: [{ from: 1, to: 1, points: 2.5 }] })).toBe(false);
+    expect(schema.safeParse({ ...input, ...overrides }).success).toBe(accepted);
   });
 
   it("requires tournaments.manage", async () => {
@@ -161,11 +162,11 @@ describe("get_circuit", () => {
 
     const tool = circuitTools({
       circuitService: {
-        list: vi.fn(),
-        detail: vi.fn(async () => detail),
-        standings: vi.fn(async () => standings),
-        create: vi.fn(),
-        update: vi.fn(),
+        list: vi.fn<CircuitService["list"]>(),
+        detail: vi.fn<CircuitService["detail"]>(async () => detail),
+        standings: vi.fn<CircuitService["standings"]>(async () => standings),
+        create: vi.fn<CircuitService["create"]>(),
+        update: vi.fn<CircuitService["update"]>(),
       },
     }).find((candidate) => candidate.name === "get_circuit");
 
@@ -196,11 +197,11 @@ describe("create_circuit and update_circuit", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const circuitService = {
-      list: vi.fn(),
-      detail: vi.fn(),
-      standings: vi.fn(),
-      create: vi.fn(async () => circuit),
-      update: vi.fn(async () => circuit),
+      list: vi.fn<CircuitService["list"]>(),
+      detail: vi.fn<CircuitService["detail"]>(),
+      standings: vi.fn<CircuitService["standings"]>(),
+      create: vi.fn<CircuitService["create"]>(async () => circuit),
+      update: vi.fn<CircuitService["update"]>(async () => circuit),
     };
 
     const all = circuitTools({ circuitService });
@@ -237,23 +238,28 @@ describe("create_circuit and update_circuit", () => {
     });
   });
 
-  it("requires a slug, a season and a sourceUrl outside Liquipedia and BLAST.tv", () => {
+  it.each<[string, Record<string, string | number | undefined>, boolean]>([
+    ["the complete input", {}, true],
+    ["a missing region", { region: undefined }, true],
+    ["a missing slug", { slug: undefined }, false],
+    ["a missing season", { season: undefined }, false],
+    ["a fractional season", { season: 2026.5 }, false],
+    ["a missing sourceUrl", { sourceUrl: undefined }, false],
+    [
+      "a Liquipedia sourceUrl",
+      { sourceUrl: "https://liquipedia.net/rocketleague/RLCS/2026" },
+      false,
+    ],
+    ["a Liquipedia mirror sourceUrl", { sourceUrl: "https://www.liquipedia.org/mirror" }, false],
+    [
+      "a BLAST.tv sourceUrl",
+      { sourceUrl: "https://blast.tv/rl/leaderboard/2026/world-championship/eu" },
+      false,
+    ],
+  ])("validates %s", (_label, overrides, accepted) => {
     const schema = z.object(tools().create.inputSchema);
 
-    const accepts = (overrides: Record<string, string | number | undefined>) =>
-      schema.safeParse({ ...input, ...overrides }).success;
-
-    expect(accepts({})).toBe(true);
-    expect(accepts({ region: undefined })).toBe(true);
-    expect(accepts({ slug: undefined })).toBe(false);
-    expect(accepts({ season: undefined })).toBe(false);
-    expect(accepts({ season: 2026.5 })).toBe(false);
-    expect(accepts({ sourceUrl: undefined })).toBe(false);
-    expect(accepts({ sourceUrl: "https://liquipedia.net/rocketleague/RLCS/2026" })).toBe(false);
-    expect(accepts({ sourceUrl: "https://www.liquipedia.org/mirror" })).toBe(false);
-    expect(
-      accepts({ sourceUrl: "https://blast.tv/rl/leaderboard/2026/world-championship/eu" }),
-    ).toBe(false);
+    expect(schema.safeParse({ ...input, ...overrides }).success).toBe(accepted);
   });
 
   it("updates by id or slug and refuses an empty update", async () => {

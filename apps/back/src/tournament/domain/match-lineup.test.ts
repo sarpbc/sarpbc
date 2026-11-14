@@ -33,7 +33,7 @@ describe(buildLineups, () => {
       ],
     );
 
-    expect(lineups).toEqual([
+    expect(lineups).toStrictEqual([
       {
         participantId: "side-a",
         players: [
@@ -52,7 +52,7 @@ describe(buildLineups, () => {
         [{ participantId: "side-a", rosterIds: [] }],
         [{ participantId: "gone", player: player("alpha") }],
       ),
-    ).toEqual([]);
+    ).toStrictEqual([]);
   });
 });
 
@@ -65,7 +65,7 @@ describe(normalizeLineups, () => {
         { participantId: "side-b", playerIds: ["echo"] },
         { participantId: "side-a", playerIds: [] },
       ]),
-    ).toEqual([{ participantId: "side-b", playerIds: ["echo"] }]);
+    ).toStrictEqual([{ participantId: "side-b", playerIds: ["echo"] }]);
   });
 
   it("refuses a participant outside the match, a repeated side or player, and oversized lineups", () => {
@@ -112,7 +112,7 @@ describe(lineupsFromGames, () => {
         game(["alpha", "bravo", null], [null, null, null]),
         game(["alpha", "delta", "bravo"], [null, null, null]),
       ]),
-    ).toEqual([{ participantId: "side-a", playerIds: ["alpha", "bravo", "delta"] }]);
-    expect(lineupsFromGames([])).toEqual([]);
+    ).toStrictEqual([{ participantId: "side-a", playerIds: ["alpha", "bravo", "delta"] }]);
+    expect(lineupsFromGames([])).toStrictEqual([]);
   });
 });

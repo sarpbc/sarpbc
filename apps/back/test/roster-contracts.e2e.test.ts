@@ -137,15 +137,15 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
       "message",
       expect.stringContaining('overlaps contract "open"'),
     );
-    expect(career.find(({ id }) => id === "past")?.endDate).toEqual(new Date("2025-05-31"));
+    expect(career.find(({ id }) => id === "past")?.endDate).toStrictEqual(new Date("2025-05-31"));
   });
 
   it("still stores a back-to-back period", async () => {
-    await request(app.getHttpServer())
+    const response = await request(app.getHttpServer())
       .post("/player/zen/contract")
-      .send({ teamId: kcId, startDate: "2023-01-01", endDate: "2024-01-01" })
-      .expect(201);
+      .send({ teamId: kcId, startDate: "2023-01-01", endDate: "2024-01-01" });
 
+    expect(response.status).toBe(201);
     expect(career).toHaveLength(3);
   });
 });

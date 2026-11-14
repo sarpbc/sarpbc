@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { R2UploadDto } from "./r2-upload-url.dto";
 
-describe(R2UploadDto, () => {
+describe("r2-upload-url body", () => {
   it.each(["news", "tournament"])("accepts the %s upload destination", async (target) => {
-    expect(R2UploadDto.parse({ target })).toEqual({ target });
+    expect(R2UploadDto.parse({ target })).toStrictEqual({ target });
   });
 
   it.each([undefined, "../../private", "other"])(

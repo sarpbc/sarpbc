@@ -58,7 +58,10 @@ describe(TwitchHelixSource, () => {
     const [, init] = fetchMock.mock.calls[0] ?? [];
     const url = requestedUrl(fetchMock.mock.calls[0] ?? []);
     expect(`${url.origin}${url.pathname}`).toBe("https://api.twitch.tv/helix/streams");
-    expect(init?.headers).toEqual({ "Client-Id": "client", Authorization: "Bearer app-token" });
+    expect(init?.headers).toStrictEqual({
+      "Client-Id": "client",
+      Authorization: "Bearer app-token",
+    });
   });
 
   it("queries logins in batches of 100", async () => {
@@ -68,8 +71,8 @@ describe(TwitchHelixSource, () => {
     await source.findLiveRocketLeague(logins);
 
     const { calls } = fetchMock.mock;
-    expect(calls.map((call) => requestedLogins(call).length)).toEqual([100, 100, 50]);
-    expect(calls.flatMap(requestedLogins)).toEqual(logins);
+    expect(calls.map((call) => requestedLogins(call).length)).toStrictEqual([100, 100, 50]);
+    expect(calls.flatMap(requestedLogins)).toStrictEqual(logins);
   });
 
   it("keeps only Rocket League streams", async () => {
@@ -77,7 +80,7 @@ describe(TwitchHelixSource, () => {
       streamsResponse([helixStream("zenrll"), helixStream("kaydop", "509658")]),
     );
 
-    await expect(source.findLiveRocketLeague(["zenrll", "kaydop"])).resolves.toEqual([
+    await expect(source.findLiveRocketLeague(["zenrll", "kaydop"])).resolves.toStrictEqual([
       {
         login: "zenrll",
         displayName: "ZENRLL",
@@ -107,6 +110,6 @@ describe(TwitchHelixSource, () => {
   it("rejects a malformed Helix response", async () => {
     fetchMock.mockResolvedValueOnce(streamsResponse([{ user_login: "zenrll" }]));
 
-    await expect(source.findLiveRocketLeague(["zenrll"])).rejects.toThrow();
+    await expect(source.findLiveRocketLeague(["zenrll"])).rejects.toThrow(/user_name/);
   });
 });

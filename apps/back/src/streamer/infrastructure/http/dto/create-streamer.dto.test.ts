@@ -1,23 +1,23 @@
 import { describe, expect, it } from "vitest";
 import { CreateStreamerDto } from "./create-streamer.dto";
 
-describe(CreateStreamerDto, () => {
+describe("create-streamer body", () => {
   it("normalizes the login and a blank display name", () => {
-    expect(CreateStreamerDto.parse({ login: "  ZenRLL ", displayName: "  " })).toEqual({
+    expect(CreateStreamerDto.parse({ login: "  ZenRLL ", displayName: "  " })).toStrictEqual({
       login: "zenrll",
       displayName: null,
     });
   });
 
   it("keeps a display name", () => {
-    expect(CreateStreamerDto.parse({ login: "kaydop", displayName: " Kaydop " })).toEqual({
+    expect(CreateStreamerDto.parse({ login: "kaydop", displayName: " Kaydop " })).toStrictEqual({
       login: "kaydop",
       displayName: "Kaydop",
     });
   });
 
   it("accepts a login without a display name", () => {
-    expect(CreateStreamerDto.parse({ login: "rocket_league_1" })).toEqual({
+    expect(CreateStreamerDto.parse({ login: "rocket_league_1" })).toStrictEqual({
       login: "rocket_league_1",
       displayName: null,
     });

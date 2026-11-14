@@ -66,7 +66,7 @@ describe(compareStages, () => {
       stage("Undated", null),
     ];
 
-    expect(stages.toSorted(compareStages).map((s) => s.name)).toEqual([
+    expect(stages.toSorted(compareStages).map((s) => s.name)).toStrictEqual([
       "Group A",
       "Group B",
       "Swiss",

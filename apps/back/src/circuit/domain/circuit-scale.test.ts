@@ -9,7 +9,7 @@ describe(parseCircuitScale, () => {
         { from: 3, to: 4, points: 2 },
         { from: 1, to: 2, points: 5 },
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       { from: 1, to: 2, points: 5 },
       { from: 3, to: 4, points: 2 },
     ]);

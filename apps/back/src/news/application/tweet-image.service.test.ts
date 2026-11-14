@@ -30,7 +30,7 @@ describe(TweetImageService, () => {
 
     const result = await service.load(imageUrl);
 
-    expect(result).toEqual({ contentType: "image/jpeg", body: Buffer.from(jpeg) });
+    expect(result).toStrictEqual({ contentType: "image/jpeg", body: Buffer.from(jpeg) });
     expect(fetchMock).toHaveBeenCalledOnce();
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     expect(url).toBe(imageUrl);

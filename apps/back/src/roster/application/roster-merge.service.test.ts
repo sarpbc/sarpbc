@@ -49,12 +49,12 @@ describe(RosterMergeService, () => {
       ].map((team) => [team.id, team]),
     );
     shared = [];
-    savePlayer = vi.fn(async () => {});
+    savePlayer = vi.fn<RosterMergeWriteScope["players"]["save"]>(async () => {});
     deletePlayer = vi.fn<RosterMergeWriteScope["players"]["delete"]>();
-    saveTeam = vi.fn(async () => {});
+    saveTeam = vi.fn<RosterMergeWriteScope["teams"]["save"]>(async () => {});
     deleteTeam = vi.fn<RosterMergeWriteScope["teams"]["delete"]>();
-    movePlayer = vi.fn(async () => {});
-    moveTeam = vi.fn(async () => {});
+    movePlayer = vi.fn<RosterMergeWriteScope["references"]["movePlayer"]>(async () => {});
+    moveTeam = vi.fn<RosterMergeWriteScope["references"]["moveTeam"]>(async () => {});
     stores = {
       players: {
         findById: async (id) => players.get(id) ?? null,
@@ -80,21 +80,36 @@ describe(RosterMergeService, () => {
     service = new RosterMergeService({ run: async (work) => await work(stores) });
   });
 
-  it("moves references, fills missing profile fields and keeps the duplicate as a redirect", async () => {
-    const { kept, merged } = await service.mergePlayers("zen", "zen-dup");
+  describe("merging a duplicate player", () => {
+    let result: Awaited<ReturnType<RosterMergeService["mergePlayers"]>>;
 
-    expect(movePlayer).toHaveBeenCalledWith("zen-dup", "zen");
-    expect(kept).toMatchObject({
-      nationality: "FR",
-      pandascoreId: 42,
-      source: "pandascore",
-      birthday: new Date("2005-06-21"),
-      team: { id: "vitality" },
+    beforeEach(async () => {
+      result = await service.mergePlayers("zen", "zen-dup");
     });
-    expect(merged).toMatchObject({ mergedIntoId: "zen", pandascoreId: null, team: null });
-    expect(deletePlayer).not.toHaveBeenCalled();
-    expect(savePlayer).toHaveBeenCalledWith(merged);
-    expect(savePlayer).toHaveBeenCalledWith(kept);
+
+    it("moves the duplicate's references to the kept player", () => {
+      expect(movePlayer).toHaveBeenCalledExactlyOnceWith("zen-dup", "zen");
+    });
+
+    it("fills the missing profile fields of the kept player", () => {
+      expect(result.kept).toMatchObject({
+        nationality: "FR",
+        pandascoreId: 42,
+        source: "pandascore",
+        birthday: new Date("2005-06-21"),
+        team: { id: "vitality" },
+      });
+    });
+
+    it("keeps the duplicate as a redirect instead of deleting it", () => {
+      expect(result.merged).toMatchObject({ mergedIntoId: "zen", pandascoreId: null, team: null });
+      expect(deletePlayer).not.toHaveBeenCalled();
+    });
+
+    it("saves both players", () => {
+      expect(savePlayer).toHaveBeenCalledWith(result.merged);
+      expect(savePlayer).toHaveBeenCalledWith(result.kept);
+    });
   });
 
   it("refuses to merge two distinct PandaScore players", async () => {
@@ -118,7 +133,7 @@ describe(RosterMergeService, () => {
   it("merges teams into an inactive redirect", async () => {
     const { kept, merged } = await service.mergeTeams("kc", "kc-dup");
 
-    expect(moveTeam).toHaveBeenCalledWith("kc-dup", "kc");
+    expect(moveTeam).toHaveBeenCalledExactlyOnceWith("kc-dup", "kc");
     expect(kept).toMatchObject({ location: "FR", imageUrl: "kc.png", pandascoreId: 7 });
     expect(merged).toMatchObject({ mergedIntoId: "kc", active: false, pandascoreId: null });
     expect(deleteTeam).not.toHaveBeenCalled();

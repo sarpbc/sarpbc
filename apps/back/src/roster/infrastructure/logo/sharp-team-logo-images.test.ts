@@ -15,7 +15,7 @@ async function png(width: number, height: number) {
 
 describe(SharpTeamLogoImages, () => {
   it("reads raster dimensions", async () => {
-    await expect(images.dimensions(await png(300, 150))).resolves.toEqual({
+    await expect(images.dimensions(await png(300, 150))).resolves.toStrictEqual({
       width: 300,
       height: 150,
     });

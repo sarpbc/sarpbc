@@ -56,12 +56,12 @@ describe("player participants in public responses", () => {
     const { tournament } = knockout();
     const detail = mapTournamentDetail(tournament);
     expect(detail.format).toBe("1v1");
-    expect(detail.winner).toEqual({
+    expect(detail.winner).toStrictEqual({
       id: "zen",
       team: null,
       players: [{ id: "player-zen", name: "Zen", slug: "zen" }],
     });
-    expect(detail.participants.map((participant) => participant.team)).toEqual([null, null]);
+    expect(detail.participants.map((participant) => participant.team)).toStrictEqual([null, null]);
     expect(detail.matches[0]).toMatchObject({
       slug: "vatira-vs-zen-fake-knockout",
       winnerId: "zen",
@@ -70,7 +70,7 @@ describe("player participants in public responses", () => {
         { id: "vatira", team: null, players: [{ name: "Vatira" }] },
       ],
     });
-    expect(mapTournamentListItem(tournament).participants[1]).toEqual({
+    expect(mapTournamentListItem(tournament).participants[1]).toStrictEqual({
       id: "vatira",
       team: null,
       players: [{ id: "player-vatira", name: "Vatira", slug: "vatira" }],
@@ -110,6 +110,6 @@ describe("player participants in public responses", () => {
     const kcTeam: unknown = expect.objectContaining({ name: "Karmine Corp" });
 
     expect(mapTournamentListItem(cup).format).toBe("3v3");
-    expect(mapTournamentListItem(cup).participants).toEqual([{ id: "kc", team: kcTeam }]);
+    expect(mapTournamentListItem(cup).participants).toStrictEqual([{ id: "kc", team: kcTeam }]);
   });
 });

@@ -5,6 +5,7 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type {
   CompetitionCache,
   CompetitionDiagnostics,
+  CompetitionEvents,
   PrizeParticipant,
   PrizeQueries,
   PrizeTransaction,
@@ -54,7 +55,11 @@ function setup({
   const service = new TournamentPrizeService(
     reads,
     transaction,
-    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
+    new CompetitionAfterCommit(
+      cache,
+      { publish: vi.fn<CompetitionEvents["publish"]>() },
+      diagnostics,
+    ),
   );
 
   return { service, reads, writer, cache, diagnostics };

@@ -1,7 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceUnavailableException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { HealthCheckService, type HealthIndicatorResult } from "@nestjs/terminus";
+import {
+  HealthCheckService,
+  type HealthCheckResult,
+  type HealthIndicatorResult,
+} from "@nestjs/terminus";
 import { HealthController } from "./health.controller";
 import { PostgresHealthIndicator } from "./postgres.health";
 import { RedisHealthIndicator } from "./redis.health";
@@ -11,19 +15,20 @@ describe(HealthController, () => {
   let controller: HealthController;
 
   const health = {
-    check: vi.fn(),
+    check:
+      vi.fn<(indicators: (() => Promise<HealthIndicatorResult>)[]) => Promise<HealthCheckResult>>(),
   };
 
   const postgres = {
-    pingCheck: vi.fn(),
+    pingCheck: vi.fn<PostgresHealthIndicator["pingCheck"]>(),
   };
 
   const redis = {
-    pingCheck: vi.fn(),
+    pingCheck: vi.fn<RedisHealthIndicator["pingCheck"]>(),
   };
 
   const shutdownState = {
-    isShuttingDown: vi.fn().mockReturnValue(false),
+    isShuttingDown: vi.fn<ShutdownStateService["isShuttingDown"]>().mockReturnValue(false),
   };
 
   beforeEach(async () => {
@@ -43,21 +48,19 @@ describe(HealthController, () => {
   });
 
   it("live reports that the process is up", () => {
-    expect(controller.live()).toEqual({ status: "ok" });
+    expect(controller.live()).toStrictEqual({ status: "ok" });
   });
 
   it("ready pings postgres and redis", async () => {
-    health.check.mockImplementation(
-      async (indicators: (() => Promise<HealthIndicatorResult>)[]) => {
-        await Promise.all(indicators.map(async (indicator) => await indicator()));
+    health.check.mockImplementation(async (indicators) => {
+      await Promise.all(indicators.map(async (indicator) => await indicator()));
 
-        return { status: "ok" };
-      },
-    );
+      return { status: "ok", details: {} };
+    });
 
-    await expect(controller.ready()).resolves.toEqual({ status: "ok" });
-    expect(postgres.pingCheck).toHaveBeenCalledWith("postgres");
-    expect(redis.pingCheck).toHaveBeenCalledWith("redis");
+    await expect(controller.ready()).resolves.toStrictEqual({ status: "ok", details: {} });
+    expect(postgres.pingCheck).toHaveBeenCalledExactlyOnceWith("postgres");
+    expect(redis.pingCheck).toHaveBeenCalledExactlyOnceWith("redis");
   });
 
   it("ready returns 503 while shutting down", async () => {

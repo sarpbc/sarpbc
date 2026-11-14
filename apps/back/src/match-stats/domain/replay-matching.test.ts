@@ -135,7 +135,7 @@ describe("assignReplays with player participants", () => {
       { names: ["zen"], goals: 1 },
     );
 
-    expect(byReplay(assignReplays([game], [final]))).toEqual({
+    expect(byReplay(assignReplays([game], [final]))).toStrictEqual({
       [game.id]: "m1v1#1 blue=p-vatira",
     });
   });
@@ -152,7 +152,7 @@ describe("assignReplays with player participants", () => {
       { names: ["Rise"], goals: 1 },
     );
 
-    expect(byReplay(assignReplays([game], [final]))).toEqual({
+    expect(byReplay(assignReplays([game], [final]))).toStrictEqual({
       [game.id]: "unmatched:unknown_teams",
     });
   });
@@ -203,7 +203,7 @@ describe(assignReplays, () => {
       { names: KC_NAMES, goals: 4 },
     );
 
-    expect(byReplay(assignReplays([g2, g4, g1, g3], [final]))).toEqual({
+    expect(byReplay(assignReplays([g2, g4, g1, g3], [final]))).toStrictEqual({
       [g1.id]: "m1#1 blue=p-kc",
       [g2.id]: "m1#2 blue=p-bds",
       [g3.id]: "m1#3 blue=p-bds",
@@ -220,7 +220,7 @@ describe(assignReplays, () => {
       { names: ["BDS.M0nkey M00n", "seikoo", "Exotiik"], goals: 0, name: "ORANGE" },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({ [game.id]: "m1#1 blue=p-kc" });
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-kc" });
   });
 
   it("accepts one substitute on the roster majority", () => {
@@ -232,7 +232,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({ [game.id]: "m1#1 blue=p-kc" });
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-kc" });
   });
 
   it("needs the team name when two substitutes leave a single known player", () => {
@@ -250,7 +250,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([named, anonymous], [m]))).toEqual({
+    expect(byReplay(assignReplays([named, anonymous], [m]))).toStrictEqual({
       [named.id]: "m1#1 blue=p-kc",
       [anonymous.id]: "unmatched:unknown_teams",
     });
@@ -269,7 +269,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 1, name: "BDS" },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({ [game.id]: "m1#1 blue=p-vit" });
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-vit" });
   });
 
   it("recognises a former name of the team", () => {
@@ -285,7 +285,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 1, name: "BDS" },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({ [game.id]: "m1#1 blue=p-vit" });
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-vit" });
   });
 
   it("rejects a team name that contradicts the roster", () => {
@@ -297,7 +297,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0, name: "BDS" },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({
       [game.id]: "unmatched:unknown_teams",
     });
   });
@@ -324,7 +324,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([early, late], [groups, playoffs]))).toEqual({
+    expect(byReplay(assignReplays([early, late], [groups, playoffs]))).toStrictEqual({
       [early.id]: "groups#1 blue=p-kc",
       [late.id]: "playoffs#1 blue=p-kc",
     });
@@ -346,7 +346,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 2 },
     );
 
-    expect(byReplay(assignReplays([upperGame, grandGame], [upper, grand]))).toEqual({
+    expect(byReplay(assignReplays([upperGame, grandGame], [upper, grand]))).toStrictEqual({
       [upperGame.id]: "upper#1 blue=p-kc",
       [grandGame.id]: "grand#1 blue=p-kc",
     });
@@ -366,7 +366,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([lateUpperGame], [upper, grand]))).toEqual({
+    expect(byReplay(assignReplays([lateUpperGame], [upper, grand]))).toStrictEqual({
       [lateUpperGame.id]: "upper#1 blue=p-kc",
     });
   });
@@ -385,7 +385,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([earlyGame], [groups, final]))).toEqual({
+    expect(byReplay(assignReplays([earlyGame], [groups, final]))).toStrictEqual({
       [earlyGame.id]: "final#1 blue=p-kc",
     });
   });
@@ -400,7 +400,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([game], [first, second]))).toEqual({
+    expect(byReplay(assignReplays([game], [first, second]))).toStrictEqual({
       [game.id]: "unmatched:ambiguous_match",
     });
   });
@@ -415,7 +415,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([game], [first, second]))).toEqual({
+    expect(byReplay(assignReplays([game], [first, second]))).toStrictEqual({
       [game.id]: "unmatched:ambiguous_match",
     });
   });
@@ -431,7 +431,7 @@ describe(assignReplays, () => {
       { playedAtHasTimezone: false },
     );
 
-    expect(byReplay(assignReplays([game], [upper, grand]))).toEqual({
+    expect(byReplay(assignReplays([game], [upper, grand]))).toStrictEqual({
       [game.id]: "unmatched:ambiguous_match",
     });
   });
@@ -446,7 +446,7 @@ describe(assignReplays, () => {
       { playedAtHasTimezone: false },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({ [game.id]: "m1#1 blue=p-kc" });
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-kc" });
   });
 
   it("reports replays outside every match window, without a date or with unknown teams", () => {
@@ -478,7 +478,7 @@ describe(assignReplays, () => {
 
     expect(
       byReplay(assignReplays([tooLate, undated, strangers, unscheduledGame], [m, unscheduled])),
-    ).toEqual({
+    ).toStrictEqual({
       [tooLate.id]: "unmatched:outside_match_window",
       [undated.id]: "unmatched:missing_date",
       [strangers.id]: "unmatched:unknown_teams",
@@ -503,7 +503,7 @@ describe(assignReplays, () => {
       { rocketLeagueId: "same" },
     );
 
-    expect(byReplay(assignReplays([copy, original], [m]))).toEqual({
+    expect(byReplay(assignReplays([copy, original], [m]))).toStrictEqual({
       [original.id]: "m1#1 blue=p-kc",
       [copy.id]: "unmatched:duplicate_replay",
     });
@@ -523,7 +523,7 @@ describe(assignReplays, () => {
       replay("2026-06-01T18:45:00Z", { names: KC_NAMES, goals: 3 }, { names: BDS_NAMES, goals: 0 }),
     ];
 
-    expect(new Set(Object.values(byReplay(assignReplays(games, [m]))))).toEqual(
+    expect(new Set(Object.values(byReplay(assignReplays(games, [m]))))).toStrictEqual(
       new Set(["unmatched:incomplete_series@m1"]),
     );
   });
@@ -542,7 +542,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 2 },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({
       [game.id]: "unmatched:inconsistent_series@m1",
     });
   });
@@ -562,7 +562,7 @@ describe(assignReplays, () => {
       { names: VIT_NAMES, goals: 1 },
     );
 
-    expect(byReplay(assignReplays([...twice, drawn], [bo1, other]))).toEqual({
+    expect(byReplay(assignReplays([...twice, drawn], [bo1, other]))).toStrictEqual({
       [twice[0].id]: "unmatched:inconsistent_series@bo1",
       [twice[1].id]: "unmatched:inconsistent_series@bo1",
       [drawn.id]: "unmatched:inconsistent_series@other",
@@ -578,7 +578,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([game], [m]))).toEqual({
+    expect(byReplay(assignReplays([game], [m]))).toStrictEqual({
       [game.id]: "unmatched:match_has_other_stats@m1",
     });
   });
@@ -603,7 +603,7 @@ describe(assignReplays, () => {
       { names: VIT_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([liveGame, unscoredGame], [live, unscored]))).toEqual({
+    expect(byReplay(assignReplays([liveGame, unscoredGame], [live, unscored]))).toStrictEqual({
       [liveGame.id]: "unmatched:match_not_finished@live",
       [unscoredGame.id]: "unmatched:match_not_finished@unscored",
     });
@@ -632,7 +632,7 @@ describe(assignReplays, () => {
 
     const stored = new Map([[first.id, { matchId: "m1", number: 1 }]]);
 
-    expect(byReplay(assignReplays([second, first], [m], stored))).toEqual({
+    expect(byReplay(assignReplays([second, first], [m], stored))).toStrictEqual({
       [first.id]: "stored:m1#1",
       [second.id]: "m1#2 blue=p-bds",
     });
@@ -648,7 +648,7 @@ describe(assignReplays, () => {
         [g3.id, { matchId: "m1", number: 3 }],
       ]);
 
-      expect(byReplay(assignReplays([g1, g2, g3], [m], stored, new Set([g2.id])))).toEqual({
+      expect(byReplay(assignReplays([g1, g2, g3], [m], stored, new Set([g2.id])))).toStrictEqual({
         [g1.id]: "stored:m1#1",
         [g2.id]: "unmatched:excluded_by_staff",
         [g3.id]: "stored:m1#3",
@@ -658,7 +658,9 @@ describe(assignReplays, () => {
     it("counts a removed replay as absent, so new games of its series wait", () => {
       const [g1, g2, g3] = sweep();
 
-      expect(byReplay(assignReplays([g1, g2, g3], [bo5()], new Map(), new Set([g1.id])))).toEqual({
+      expect(
+        byReplay(assignReplays([g1, g2, g3], [bo5()], new Map(), new Set([g1.id]))),
+      ).toStrictEqual({
         [g1.id]: "unmatched:excluded_by_staff",
         [g2.id]: "unmatched:incomplete_series@m1",
         [g3.id]: "unmatched:incomplete_series@m1",
@@ -672,7 +674,7 @@ describe(assignReplays, () => {
 
       expect(
         byReplay(assignReplays([g1, removedCopy], [bo5()], new Map(), new Set([removedCopy.id]))),
-      ).toEqual({
+      ).toStrictEqual({
         [g1.id]: "unmatched:duplicate_replay",
         [removedCopy.id]: "unmatched:excluded_by_staff",
       });
@@ -684,7 +686,7 @@ describe(assignReplays, () => {
             new Map([[g1.id, { matchId: "m1", number: 1 }]]),
           ),
         ),
-      ).toEqual({
+      ).toStrictEqual({
         [g1.id]: "stored:m1#1",
         [storedCopy.id]: "unmatched:duplicate_replay",
       });
@@ -698,7 +700,7 @@ describe(assignReplays, () => {
         byReplay(
           assignReplays([g1, g2, g3], [m], new Map([[g1.id, { matchId: "m1", number: 3 }]])),
         ),
-      ).toEqual({
+      ).toStrictEqual({
         [g1.id]: "stored:m1#3",
         [g2.id]: "unmatched:match_has_other_stats@m1",
         [g3.id]: "unmatched:match_has_other_stats@m1",
@@ -720,7 +722,7 @@ describe(assignReplays, () => {
             new Map([[g1.id, { matchId: "other", number: 1 }]]),
           ),
         ),
-      ).toEqual({
+      ).toStrictEqual({
         [g1.id]: "stored:other#1",
         [g2.id]: "unmatched:incomplete_series@m1",
         [g3.id]: "unmatched:incomplete_series@m1",
@@ -731,7 +733,7 @@ describe(assignReplays, () => {
       const [g1, g2, g3] = sweep();
       const m = bo5({ storedReplayIds: ["manual"] });
 
-      expect(byReplay(assignReplays([g1, g2, g3], [m]))).toEqual({
+      expect(byReplay(assignReplays([g1, g2, g3], [m]))).toStrictEqual({
         [g1.id]: "unmatched:match_has_other_stats@m1",
         [g2.id]: "unmatched:match_has_other_stats@m1",
         [g3.id]: "unmatched:match_has_other_stats@m1",
@@ -746,7 +748,7 @@ describe(assignReplays, () => {
         byReplay(
           assignReplays([g1, g2, g3], [m], new Map([[g2.id, { matchId: "m1", number: 2 }]])),
         ),
-      ).toEqual({
+      ).toStrictEqual({
         [g1.id]: "m1#1 blue=p-kc",
         [g2.id]: "stored:m1#2",
         [g3.id]: "m1#3 blue=p-kc",
@@ -763,7 +765,7 @@ describe(assignReplays, () => {
       { names: BDS_NAMES, goals: 0 },
     );
 
-    expect(byReplay(assignReplays([game], [tbd]))).toEqual({
+    expect(byReplay(assignReplays([game], [tbd]))).toStrictEqual({
       [game.id]: "unmatched:unknown_teams",
     });
   });

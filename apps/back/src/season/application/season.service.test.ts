@@ -32,7 +32,7 @@ describe(SeasonService, () => {
     });
     await expect(service.create({ name: "RLCS 2024" })).rejects.toBeInstanceOf(ConflictError);
     await expect(service.create({ name: "   " })).rejects.toBeInstanceOf(InvalidInputError);
-    await expect(service.update(season.id, { name: "RLCS 2024" })).resolves.toEqual(season);
+    await expect(service.update(season.id, { name: "RLCS 2024" })).resolves.toStrictEqual(season);
   });
 
   it("normalises the public slug and keeps it unique across seasons", async () => {
@@ -76,7 +76,7 @@ describe(SeasonService, () => {
       },
     });
 
-    expect(updated.format).toEqual({
+    expect(updated.format).toStrictEqual({
       summary: "Open qualifiers feed two Majors and a World Championship.",
       phases: [
         { name: "Open Qualifiers", description: null },
@@ -141,7 +141,7 @@ describe(SeasonService, () => {
       presentedBy: "Ally",
       sourceUrl: ANNOUNCEMENT,
     });
-    await expect(service.awardsOfPlayer("zen")).resolves.toEqual([
+    await expect(service.awardsOfPlayer("zen")).resolves.toStrictEqual([
       expect.objectContaining({
         id: award.id,
         season: { id: season.id, name: season.name, slug: null },

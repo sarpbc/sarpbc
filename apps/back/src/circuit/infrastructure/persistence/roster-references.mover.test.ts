@@ -9,9 +9,9 @@ function entry(id: string, teamId: string, stageId: string) {
 }
 
 function mover(entries: ReturnType<typeof entry>[]) {
-  const find = vi.fn().mockResolvedValue(entries);
-  const nativeDelete = vi.fn();
-  const nativeUpdate = vi.fn();
+  const find = vi.fn<EntityManager["find"]>().mockResolvedValue(entries);
+  const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
+  const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
 
   const references = new CircuitRosterReferences(
     Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),

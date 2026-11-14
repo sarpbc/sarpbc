@@ -5,7 +5,7 @@ import { unconstructed } from "../../../test/doubles";
 import { PostgresHealthIndicator } from "./postgres.health";
 
 describe(PostgresHealthIndicator, () => {
-  const execute = vi.fn();
+  const execute = vi.fn<(sql: string) => Promise<Record<string, number>[]>>();
 
   const em = Object.assign(unconstructed(EntityManager), {
     getConnection: () => ({ execute }),
@@ -21,16 +21,16 @@ describe(PostgresHealthIndicator, () => {
   it("is up when SELECT 1 succeeds", async () => {
     execute.mockResolvedValue([{ "?column?": 1 }]);
 
-    await expect(indicator.pingCheck("postgres")).resolves.toEqual({
+    await expect(indicator.pingCheck("postgres")).resolves.toStrictEqual({
       postgres: { status: "up" },
     });
-    expect(execute).toHaveBeenCalledWith("SELECT 1");
+    expect(execute).toHaveBeenCalledExactlyOnceWith("SELECT 1");
   });
 
   it("is down when the query fails", async () => {
     execute.mockRejectedValue(new Error("connection refused"));
 
-    await expect(indicator.pingCheck("postgres")).resolves.toEqual({
+    await expect(indicator.pingCheck("postgres")).resolves.toStrictEqual({
       postgres: { status: "down", message: "connection refused" },
     });
   });

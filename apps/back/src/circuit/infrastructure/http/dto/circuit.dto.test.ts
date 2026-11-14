@@ -3,7 +3,7 @@ import { CreateCircuitDto, SetCircuitStageDto, UpdateCircuitDto } from "./circui
 
 const RULES = "https://example.org/rules";
 
-describe(CreateCircuitDto, () => {
+describe("create-circuit body", () => {
   it("requires a season and an http(s) rules source", () => {
     expect(
       CreateCircuitDto.safeParse({ name: "RLCS", season: 2026, sourceUrl: RULES }).success,
@@ -22,9 +22,9 @@ describe(CreateCircuitDto, () => {
   });
 });
 
-describe(UpdateCircuitDto, () => {
+describe("update-circuit body", () => {
   it("leaves omitted fields unchanged, clears optional fields and keeps the season and source", () => {
-    expect(UpdateCircuitDto.parse({ region: null, description: null })).toEqual({
+    expect(UpdateCircuitDto.parse({ region: null, description: null })).toStrictEqual({
       region: null,
       description: null,
     });
@@ -34,7 +34,7 @@ describe(UpdateCircuitDto, () => {
   });
 });
 
-describe(SetCircuitStageDto, () => {
+describe("set-circuit-stage body", () => {
   const TEAM = "11111111-1111-4111-8111-111111111111";
   const stage = { scale: [{ from: 9, to: 12, points: 2 }], sourceUrl: RULES };
 

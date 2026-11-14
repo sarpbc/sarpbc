@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { sanitizeNewsHtml, sanitizePlainText } from "./html";
 
-function expectTerminates(run: () => string): void {
-  expect(run()).toBeTypeOf("string");
-}
-
 describe(sanitizePlainText, () => {
   it("strips HTML tags from replies and posts", () => {
     expect(sanitizePlainText('hello <script>alert("x")</script> world')).toBe("hello  world");
@@ -40,10 +36,12 @@ describe(sanitizePlainText, () => {
   });
 
   it("terminates on pathological input", () => {
-    expectTerminates(() => sanitizePlainText("<!--".repeat(25_000)));
-    expectTerminates(() => sanitizePlainText("<script".repeat(10_000)));
-    expectTerminates(() => sanitizePlainText(`<script>${"</scriptx".repeat(20_000)}</script\t`));
-    expectTerminates(() => sanitizePlainText("<".repeat(50_000)));
+    expect(sanitizePlainText("<!--".repeat(25_000))).toBeTypeOf("string");
+    expect(sanitizePlainText("<script".repeat(10_000))).toBeTypeOf("string");
+    expect(sanitizePlainText(`<script>${"</scriptx".repeat(20_000)}</script\t`)).toBeTypeOf(
+      "string",
+    );
+    expect(sanitizePlainText("<".repeat(50_000))).toBeTypeOf("string");
   });
 });
 
@@ -79,7 +77,7 @@ describe(sanitizeNewsHtml, () => {
   });
 
   it("terminates on pathological dangerous blocks", () => {
-    expectTerminates(() => sanitizeNewsHtml("<!--".repeat(50_000)));
-    expectTerminates(() => sanitizeNewsHtml("<style>".repeat(30_000)));
+    expect(sanitizeNewsHtml("<!--".repeat(50_000))).toBeTypeOf("string");
+    expect(sanitizeNewsHtml("<style>".repeat(30_000))).toBeTypeOf("string");
   });
 });

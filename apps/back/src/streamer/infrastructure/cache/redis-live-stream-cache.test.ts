@@ -2,6 +2,9 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { StreamerService, type StreamerFailureReporter } from "../../application/streamer.service";
 import { TOKEN_REQUEST_TIMEOUT_MS } from "../twitch/twitch-app-token";
 import { STREAMS_REQUEST_TIMEOUT_MS } from "../twitch/twitch-helix-source";
+import type { RedisService } from "../../../infrastructure/redis/redis.service";
+import type { LiveStreamSource } from "../../application/ports/live-stream-source";
+import type { TrackedStreamerStore } from "../../application/ports/tracked-streamer-store";
 import {
   LIVE_STREAMS_KEY,
   LIVE_STREAMS_LOCK_KEY,
@@ -22,22 +25,20 @@ describe(RedisLiveStreamCache, () => {
   let store = new Map<string, string>();
 
   const createRedis = () => ({
-    get: vi.fn(async (key: string) => store.get(key) ?? null),
-    setIfAbsent: vi.fn(async (key: string, value: string, _ttl: number) => {
+    get: vi.fn<RedisService["get"]>(async (key) => store.get(key) ?? null),
+    setIfAbsent: vi.fn<RedisService["setIfAbsent"]>(async (key, value) => {
       if (store.has(key)) return false;
       store.set(key, value);
 
       return true;
     }),
-    setWhileHeld: vi.fn(
-      async (lockKey: string, lockValue: string, key: string, value: string, _ttl: number) => {
-        if (store.get(lockKey) !== lockValue) return false;
-        store.set(key, value);
+    setWhileHeld: vi.fn<RedisService["setWhileHeld"]>(async (lockKey, lockValue, key, value) => {
+      if (store.get(lockKey) !== lockValue) return false;
+      store.set(key, value);
 
-        return true;
-      },
-    ),
-    delete: vi.fn(async (key: string) => (store.delete(key) ? 1 : 0)),
+      return true;
+    }),
+    delete: vi.fn<RedisService["delete"]>(async (key) => (store.delete(key) ? 1 : 0)),
   });
 
   let redis = createRedis();
@@ -57,7 +58,7 @@ describe(RedisLiveStreamCache, () => {
 
     await expect(cache.write({ streams: [stream], fetchedAt }, claim)).resolves.toBe(true);
 
-    await expect(cache.read()).resolves.toEqual({ streams: [stream], fetchedAt });
+    await expect(cache.read()).resolves.toStrictEqual({ streams: [stream], fetchedAt });
     expect(redis.setWhileHeld).toHaveBeenCalledWith(
       LIVE_STREAMS_LOCK_KEY,
       claim,
@@ -87,7 +88,7 @@ describe(RedisLiveStreamCache, () => {
     store.set(LIVE_STREAMS_KEY, "{not json");
 
     const findLiveRocketLeague = vi
-      .fn()
+      .fn<LiveStreamSource["findLiveRocketLeague"]>()
       .mockResolvedValue([
         { login: "zenrll", displayName: "Zen", title: "ranked", viewerCount: 900 },
       ]);
@@ -95,12 +96,12 @@ describe(RedisLiveStreamCache, () => {
     const service = new StreamerService(
       {
         list: vi
-          .fn()
+          .fn<TrackedStreamerStore["list"]>()
           .mockResolvedValue([
             { id: "zenrll-id", login: "zenrll", displayName: "Zen", createdAt: now },
           ]),
-        add: vi.fn(),
-        remove: vi.fn(),
+        add: vi.fn<TrackedStreamerStore["add"]>(),
+        remove: vi.fn<TrackedStreamerStore["remove"]>(),
       },
       { findLiveRocketLeague },
       cache,
@@ -108,13 +109,13 @@ describe(RedisLiveStreamCache, () => {
       () => now,
     );
 
-    await expect(service.listLive()).resolves.toEqual([stream]);
+    await expect(service.listLive()).resolves.toStrictEqual([stream]);
     expect(findLiveRocketLeague).toHaveBeenCalledOnce();
-    await expect(cache.read()).resolves.toEqual({ streams: [stream], fetchedAt: now });
+    await expect(cache.read()).resolves.toStrictEqual({ streams: [stream], fetchedAt: now });
   });
 
   it("lets a single caller claim the refresh", async () => {
-    await expect(cache.claimRefresh()).resolves.toEqual(expect.any(String));
+    await expect(cache.claimRefresh()).resolves.toStrictEqual(expect.any(String));
     await expect(cache.claimRefresh()).resolves.toBeNull();
     expect(redis.setIfAbsent).toHaveBeenCalledWith(
       LIVE_STREAMS_LOCK_KEY,
@@ -152,6 +153,6 @@ describe(RedisLiveStreamCache, () => {
     await cache.clear();
 
     await expect(cache.read()).resolves.toBeNull();
-    await expect(cache.claimRefresh()).resolves.toEqual(expect.any(String));
+    await expect(cache.claimRefresh()).resolves.toStrictEqual(expect.any(String));
   });
 });

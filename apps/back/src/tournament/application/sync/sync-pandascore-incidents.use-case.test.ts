@@ -3,14 +3,27 @@ import { competitionFeed } from "../../../../test/competition-doubles";
 import { unconstructed } from "../../../../test/doubles";
 import { CompetitionSyncService } from "./competition-sync.service";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
-import type { CompetitionIncident } from "../feed";
+import type { CompetitionFeed, CompetitionIncident } from "../feed";
+import type { CompetitionDiagnostics, SyncCursor, TournamentQueries } from "../ports";
 
 describe("PandaScore incidents", () => {
-  const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() };
-  const cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() };
-  const reads = { findByPandascoreId: vi.fn() };
-  const sync = { applyIncident: vi.fn() };
-  const diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const feed = {
+    listIncidents: vi.fn<CompetitionFeed["listIncidents"]>(),
+    getTournamentById: vi.fn<CompetitionFeed["getTournamentById"]>(),
+  };
+
+  const cursor = {
+    getLastSyncAt: vi.fn<SyncCursor["getLastSyncAt"]>(),
+    setLastSyncAt: vi.fn<SyncCursor["setLastSyncAt"]>(),
+  };
+
+  const reads = { findByPandascoreId: vi.fn<TournamentQueries["findByPandascoreId"]>() };
+  const sync = { applyIncident: vi.fn<CompetitionSyncService["applyIncident"]>() };
+
+  const diagnostics = {
+    error: vi.fn<CompetitionDiagnostics["error"]>(),
+    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
+  };
 
   const now = new Date("2026-10-15T12:00:00Z");
 
@@ -57,7 +70,7 @@ describe("PandaScore incidents", () => {
   it.each([null, { pandascoreId: 7, name: "Current", slug: "current" }])(
     "preserves explicit current membership update %p",
     async (currentTeam) => {
-      const incident = {
+      const incident: CompetitionIncident = {
         ...base,
         kind: "player",
         command: { player: { pandascoreId: 1, name: "Player", slug: "player" }, currentTeam },
@@ -115,7 +128,7 @@ describe("PandaScore incidents", () => {
   });
 
   it("hands deletions to the sync without a backfill and advances the cursor", async () => {
-    const incident = {
+    const incident: CompetitionIncident = {
       ...base,
       kind: "serie",
       changeType: "deletion",
@@ -130,10 +143,18 @@ describe("PandaScore incidents", () => {
   });
 
   it("fetches missing tournament before the incident write", async () => {
-    const incident = {
+    const incident: CompetitionIncident = {
       ...base,
       kind: "match",
-      command: { pandascoreId: 8, tournamentPandascoreId: 42 },
+      command: {
+        pandascoreId: 8,
+        tournamentPandascoreId: 42,
+        name: "Final",
+        opponentSlugs: [],
+        results: [],
+        previousMatches: [],
+        officialStreams: [],
+      },
     };
 
     feed.listIncidents.mockResolvedValue([incident]);

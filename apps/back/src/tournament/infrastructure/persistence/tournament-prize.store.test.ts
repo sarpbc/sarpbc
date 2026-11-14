@@ -1,6 +1,15 @@
+import type { EntityName, FindOptions } from "@mikro-orm/core";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { describe, expect, it, vi } from "vitest";
+import { unconstructed } from "../../../../test/doubles";
 import { CompetitionPrizeQueries } from "./tournament-prize.queries";
 import { CompetitionPrizeWriter } from "./tournament-prize.writer";
+
+type Find = (
+  entity: EntityName<object>,
+  where: Parameters<EntityManager["find"]>[1],
+  options?: FindOptions<object>,
+) => Promise<unknown[]>;
 
 function prizeRow(playerCount: number) {
   return {
@@ -24,8 +33,14 @@ function prizeRow(playerCount: number) {
 
 describe(CompetitionPrizeQueries, () => {
   it("reports an earnings line with its share count, amount and tournament source", async () => {
-    const find = vi.fn().mockResolvedValue([prizeRow(3)]);
-    const queries = new CompetitionPrizeQueries({ find, findOne: vi.fn() });
+    const find = vi.fn<Find>().mockResolvedValue([prizeRow(3)]);
+
+    const queries = new CompetitionPrizeQueries(
+      Object.assign(unconstructed(EntityManager), {
+        find,
+        findOne: vi.fn<() => Promise<null>>(),
+      }),
+    );
 
     const [line] = await queries.byPlayer("player-a", { redistributableOnly: false });
 
@@ -39,22 +54,24 @@ describe(CompetitionPrizeQueries, () => {
 
 describe(CompetitionPrizeWriter, () => {
   it("lists each participant with its tournament roster", async () => {
-    const find = vi.fn().mockResolvedValue([
+    const find = vi.fn<Find>().mockResolvedValue([
       {
         team: { id: "team-a" },
         players: { getItems: () => [{ id: "player-a" }, { id: "player-b" }] },
       },
     ]);
 
-    const writer = new CompetitionPrizeWriter({
-      count: vi.fn(),
-      find,
-      nativeDelete: vi.fn(),
-      getReference: vi.fn(),
-      persist: vi.fn(),
-    });
+    const writer = new CompetitionPrizeWriter(
+      Object.assign(unconstructed(EntityManager), {
+        count: vi.fn<() => Promise<number>>(),
+        find,
+        nativeDelete: vi.fn<() => Promise<number>>(),
+        getReference: vi.fn<() => object>(),
+        persist: vi.fn<() => void>(),
+      }),
+    );
 
-    await expect(writer.participants("cup")).resolves.toEqual([
+    await expect(writer.participants("cup")).resolves.toStrictEqual([
       { teamId: "team-a", playerIds: ["player-a", "player-b"] },
     ]);
   });

@@ -2,7 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NewsService } from "./news.service";
 import type { NewsArticleRecord } from "./models";
-import type { NewsQueries, NewsTransaction, NewsWriteScope } from "./ports";
+import type {
+  NewsComments,
+  NewsIndexing,
+  NewsQueries,
+  NewsTransaction,
+  NewsWriteScope,
+} from "./ports";
 
 const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
 
@@ -39,7 +45,7 @@ describe("NewsService findPublishedShortsByWeek", () => {
 
     await service.findPublishedShortsByWeek("2026-W36", "en-US");
 
-    expect(newsRepository.listWeek).toHaveBeenCalledWith(
+    expect(newsRepository.listWeek).toHaveBeenCalledExactlyOnceWith(
       new Date("2026-08-31T00:00:00.000Z"),
       new Date("2026-09-07T00:00:00.000Z"),
       expect.any(Number),
@@ -51,24 +57,28 @@ describe("news publication notifications", () => {
   let article: NewsArticleRecord;
   let committed = false;
 
-  const commit = vi.fn(async () => {
+  let committedAtSubmission: boolean[] = [];
+
+  const commit = vi.fn<() => Promise<void>>(async () => {
     committed = true;
   });
 
   const articles = {
-    findBySlug: vi.fn(),
-    findById: vi.fn(),
-    listPublished: vi.fn(),
-    listWeek: vi.fn(),
-    listAdmin: vi.fn(),
-    save: vi.fn(),
-    delete: vi.fn(),
+    findBySlug: vi.fn<NewsWriteScope["articles"]["findBySlug"]>(),
+    findById: vi.fn<NewsWriteScope["articles"]["findById"]>(),
+    listPublished: vi.fn<NewsWriteScope["articles"]["listPublished"]>(),
+    listWeek: vi.fn<NewsWriteScope["articles"]["listWeek"]>(),
+    listAdmin: vi.fn<NewsWriteScope["articles"]["listAdmin"]>(),
+    save: vi.fn<NewsWriteScope["articles"]["save"]>(),
+    delete: vi.fn<NewsWriteScope["articles"]["delete"]>(),
   };
 
   const scope: NewsWriteScope = {
     articles,
-    users: { findById: vi.fn() },
-    replies: { deleteAllForTarget: vi.fn() },
+    users: { findById: vi.fn<NewsWriteScope["users"]["findById"]>() },
+    replies: {
+      deleteAllForTarget: vi.fn<NewsWriteScope["replies"]["deleteAllForTarget"]>(),
+    },
   };
 
   const transaction: NewsTransaction = {
@@ -81,16 +91,22 @@ describe("news publication notifications", () => {
   };
 
   const indexing = {
-    submitNewsSlugs: vi.fn(async (_slugs: string[]) => {
-      expect(committed).toBe(true);
+    submitNewsSlugs: vi.fn<NewsIndexing["submitNewsSlugs"]>(async () => {
+      committedAtSubmission.push(committed);
     }),
   };
 
-  const service = new NewsService(articles, transaction, { countByTargetIds: vi.fn() }, indexing);
+  const service = new NewsService(
+    articles,
+    transaction,
+    { countByTargetIds: vi.fn<NewsComments["countByTargetIds"]>() },
+    indexing,
+  );
 
   beforeEach(() => {
     vi.clearAllMocks();
     committed = false;
+    committedAtSubmission = [];
     article = {
       id: "news-1",
       slug: "old-slug",
@@ -105,14 +121,15 @@ describe("news publication notifications", () => {
       imageUrl: null,
       type: "article",
     };
-    articles.findBySlug.mockImplementation(async (slug: string) =>
+    articles.findBySlug.mockImplementation(async (slug) =>
       slug === article.slug ? article : null,
     );
   });
 
   it("notifies both the old and new URLs only after the article transaction commits", async () => {
     await service.update("old-slug", { slug: "new-slug" });
-    expect(indexing.submitNewsSlugs).toHaveBeenCalledWith(["old-slug", "new-slug"]);
+    expect(indexing.submitNewsSlugs).toHaveBeenCalledExactlyOnceWith(["old-slug", "new-slug"]);
+    expect(committedAtSubmission).toStrictEqual([true]);
   });
 
   it("does not expose changes to unpublished drafts", async () => {
@@ -124,7 +141,8 @@ describe("news publication notifications", () => {
   it.each([true, false])("notifies when draft status changes to %s", async (draft) => {
     article.isDraft = !draft;
     await service.setDraftStatus("old-slug", draft);
-    expect(indexing.submitNewsSlugs).toHaveBeenCalledWith(["old-slug"]);
+    expect(indexing.submitNewsSlugs).toHaveBeenCalledExactlyOnceWith(["old-slug"]);
+    expect(committedAtSubmission).toStrictEqual([true]);
   });
 
   it("does not notify when publishing an already published article", async () => {
@@ -134,7 +152,8 @@ describe("news publication notifications", () => {
 
   it("notifies after a published article is deleted", async () => {
     await service.delete("old-slug");
-    expect(indexing.submitNewsSlugs).toHaveBeenCalledWith(["old-slug"]);
+    expect(indexing.submitNewsSlugs).toHaveBeenCalledExactlyOnceWith(["old-slug"]);
+    expect(committedAtSubmission).toStrictEqual([true]);
   });
 
   it("does not notify when deleting a draft", async () => {

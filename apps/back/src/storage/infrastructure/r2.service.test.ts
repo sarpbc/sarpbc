@@ -57,13 +57,15 @@ describe(R2Service, () => {
   });
 
   it("logs R2 failures with image context and returns a safe 500", async () => {
-    sendSpy.mockRejectedValue(new Error("AccessDenied"));
+    const failure = new Error("AccessDenied");
+
+    sendSpy.mockRejectedValue(failure);
 
     await expect(
       service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "news"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
 
-    expect(logError).toHaveBeenCalledWith();
+    expect(logError).toHaveBeenCalledExactlyOnceWith(failure);
   });
 
   it("stores tournament artwork separately from news covers", async () => {
@@ -86,7 +88,7 @@ describe(R2Service, () => {
     const bytes = new Uint8Array([1, 2, 3]);
     const key = "teams/kc/logo-light-0123456789abcdef.webp";
 
-    await expect(r2.putObject(key, bytes, "image/webp")).resolves.toEqual({
+    await expect(r2.putObject(key, bytes, "image/webp")).resolves.toStrictEqual({
       key,
       publicUrl: `https://cdn.example/${key}`,
     });
@@ -104,12 +106,14 @@ describe(R2Service, () => {
   });
 
   it("hides R2 failures behind a safe 500 when storing an object", async () => {
-    sendSpy.mockRejectedValue(new Error("AccessDenied"));
+    const failure = new Error("AccessDenied");
+
+    sendSpy.mockRejectedValue(failure);
 
     await expect(
       r2.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
-    expect(logError).toHaveBeenCalledWith();
+    expect(logError).toHaveBeenCalledExactlyOnceWith(failure);
   });
 
   it("publishes a pending object by copying it under its final key", async () => {
@@ -118,7 +122,7 @@ describe(R2Service, () => {
         "pending/teams/kc/logo-dark-0123456789abcdef.webp",
         "teams/kc/logo-dark-0123456789abcdef.webp",
       ),
-    ).resolves.toEqual({
+    ).resolves.toStrictEqual({
       key: "teams/kc/logo-dark-0123456789abcdef.webp",
       publicUrl: "https://cdn.example/teams/kc/logo-dark-0123456789abcdef.webp",
     });
@@ -134,7 +138,9 @@ describe(R2Service, () => {
   });
 
   it("hides R2 failures behind a safe 500 when copying an object", async () => {
-    sendSpy.mockRejectedValue(new Error("AccessDenied"));
+    const failure = new Error("AccessDenied");
+
+    sendSpy.mockRejectedValue(failure);
 
     await expect(
       r2.copyObject("pending/teams/kc/a.webp", "teams/kc/a.webp"),

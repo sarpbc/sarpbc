@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { ReplyService } from "./reply.service";
-import type { ReplyWriteScope, ReplyTransaction } from "./ports";
+import type { ReplyWriteScope, ReplyTransaction, ReplyWrites } from "./ports";
 import type { Author } from "../../common/domain/author";
 import type { ReplyRecord } from "./models";
 import { FORUM_ERROR_CODES } from "@sarpbc/types";
@@ -30,35 +30,42 @@ function setup() {
   const notified: { recipientId: string; replyId: string }[] = [];
 
   const replies = {
-    findByTarget: vi.fn().mockResolvedValue([]),
-    findById: vi.fn().mockResolvedValue(reply()),
-    findLatestByUser: vi.fn().mockResolvedValue(null),
-    countRootsByTarget: vi.fn().mockResolvedValue(0),
-    countByTargetIds: vi.fn().mockResolvedValue(new Map()),
-    findDescendantsForRoots: vi.fn().mockResolvedValue([]),
-    findRecentForModeration: vi.fn().mockResolvedValue([]),
-    findChildren: vi.fn().mockResolvedValue([]),
-    save: vi.fn(async (model: ReplyRecord) => {
+    findByTarget: vi.fn<ReplyWrites["findByTarget"]>().mockResolvedValue([]),
+    findById: vi.fn<ReplyWrites["findById"]>().mockResolvedValue(reply()),
+    findLatestByUser: vi.fn<ReplyWrites["findLatestByUser"]>().mockResolvedValue(null),
+    countRootsByTarget: vi.fn<ReplyWrites["countRootsByTarget"]>().mockResolvedValue(0),
+    countByTargetIds: vi.fn<ReplyWrites["countByTargetIds"]>().mockResolvedValue(new Map()),
+    findDescendantsForRoots: vi.fn<ReplyWrites["findDescendantsForRoots"]>().mockResolvedValue([]),
+    findRecentForModeration: vi.fn<ReplyWrites["findRecentForModeration"]>().mockResolvedValue([]),
+    findChildren: vi.fn<ReplyWrites["findChildren"]>().mockResolvedValue([]),
+    save: vi.fn<ReplyWrites["save"]>(async (model) => {
       saved.push(model);
     }),
-    delete: vi.fn(),
+    delete: vi.fn<ReplyWrites["delete"]>(),
   };
 
   const scope: ReplyWriteScope = {
     replies,
-    reports: { findByReplyAndReporter: vi.fn().mockResolvedValue(null), save: vi.fn() },
-    users: { findById: vi.fn().mockResolvedValue(author) },
+    reports: {
+      findByReplyAndReporter: vi
+        .fn<ReplyWriteScope["reports"]["findByReplyAndReporter"]>()
+        .mockResolvedValue(null),
+      save: vi.fn<ReplyWriteScope["reports"]["save"]>(),
+    },
+    users: { findById: vi.fn<ReplyWriteScope["users"]["findById"]>().mockResolvedValue(author) },
     targets: {
-      find: vi.fn().mockResolvedValue({
+      find: vi.fn<ReplyWriteScope["targets"]["find"]>().mockResolvedValue({
         post: { id: "p", publicId: 1, title: "Thread" },
         newsArticle: null,
         match: null,
       }),
     },
     notifications: {
-      createForDirectReply: vi.fn(async (recipientId: string, replyId: string) => {
-        notified.push({ recipientId, replyId });
-      }),
+      createForDirectReply: vi.fn<ReplyWriteScope["notifications"]["createForDirectReply"]>(
+        async (recipientId, replyId) => {
+          notified.push({ recipientId, replyId });
+        },
+      ),
     },
   };
 
@@ -96,7 +103,7 @@ describe("reply invariants without Nest or ORM", () => {
 
     expect(result.content).toBe("Hello");
     expect(f.saved).toHaveLength(1);
-    expect(f.notified).toEqual([{ recipientId: "other", replyId: "new-reply" }]);
+    expect(f.notified).toStrictEqual([{ recipientId: "other", replyId: "new-reply" }]);
     expect(f.commits()).toBe(1);
   });
 
@@ -116,13 +123,13 @@ describe("reply invariants without Nest or ORM", () => {
   it("does not notify an author replying to themselves", async () => {
     const f = setup();
     await f.service.create("author", { content: "Hi", postId: "p", replyToId: "parent" });
-    expect(f.notified).toEqual([]);
+    expect(f.notified).toStrictEqual([]);
   });
 
   it("does not notify on a root reply", async () => {
     const f = setup();
     await f.service.create("author", { content: "Hi", postId: "p" });
-    expect(f.notified).toEqual([]);
+    expect(f.notified).toStrictEqual([]);
   });
 
   it("rejects a parent from another target before saving", async () => {
@@ -133,7 +140,7 @@ describe("reply invariants without Nest or ORM", () => {
     await expect(
       f.service.create("author", { content: "Hi", postId: "p", replyToId: "parent" }),
     ).rejects.toBeInstanceOf(InvalidInputError);
-    expect(f.saved).toEqual([]);
+    expect(f.saved).toStrictEqual([]);
   });
 
   it("rejects a hidden parent before saving", async () => {
@@ -142,7 +149,7 @@ describe("reply invariants without Nest or ORM", () => {
     await expect(
       f.service.create("author", { content: "Hi", postId: "p", replyToId: "parent" }),
     ).rejects.toBeInstanceOf(NotFoundError);
-    expect(f.saved).toEqual([]);
+    expect(f.saved).toStrictEqual([]);
   });
 
   it("enforces the full one-minute cooldown including its boundary", async () => {
@@ -153,7 +160,7 @@ describe("reply invariants without Nest or ORM", () => {
     await expect(f.service.create("author", { content: "Hi", postId: "p" })).rejects.toMatchObject({
       detail: { code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED },
     });
-    expect(f.saved).toEqual([]);
+    expect(f.saved).toStrictEqual([]);
   });
 
   it("rejects reports on the author own comment", async () => {
@@ -191,7 +198,7 @@ describe("reply invariants without Nest or ORM", () => {
       order.push(model.id);
     });
     await f.service.delete("parent");
-    expect(order).toEqual(["child", "parent"]);
+    expect(order).toStrictEqual(["child", "parent"]);
     expect(f.commits()).toBe(1);
   });
 });

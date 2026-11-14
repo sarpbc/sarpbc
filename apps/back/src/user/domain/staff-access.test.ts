@@ -3,12 +3,12 @@ import { describe, expect, it } from "vitest";
 import { isStaffRole, permissionsForRole, roleHasPermission } from "./staff-access";
 
 describe("staff-access", () => {
-  it("recognizes staff roles only", () => {
-    expect(isStaffRole("admin")).toBe(true);
-    expect(isStaffRole("moderator")).toBe(true);
-    expect(isStaffRole("journalist")).toBe(true);
-    expect(isStaffRole(null)).toBe(false);
-    expect(isStaffRole("member")).toBe(false);
+  it.each(["admin", "moderator", "journalist"])("recognizes %s as a staff role", (role) => {
+    expect(isStaffRole(role)).toBe(true);
+  });
+
+  it.each([null, "member"])("rejects %s as a staff role", (role) => {
+    expect(isStaffRole(role)).toBe(false);
   });
 
   it("grants admin all permissions", () => {
@@ -17,13 +17,19 @@ describe("staff-access", () => {
     }
   });
 
-  it("limits journalist and moderator to their bundles", () => {
+  it("limits the journalist to its bundle", () => {
     expect(roleHasPermission("journalist", "news.manage")).toBe(true);
     expect(roleHasPermission("journalist", "forum.moderate")).toBe(false);
+    expect(roleHasPermission("journalist", "users.manage")).toBe(false);
+  });
+
+  it("limits the moderator to its bundle", () => {
     expect(roleHasPermission("moderator", "forum.moderate")).toBe(true);
     expect(roleHasPermission("moderator", "players.manage")).toBe(false);
-    expect(roleHasPermission("journalist", "users.manage")).toBe(false);
     expect(roleHasPermission("moderator", "users.manage")).toBe(false);
-    expect(permissionsForRole(null)).toEqual([]);
+  });
+
+  it("grants no permission without a role", () => {
+    expect(permissionsForRole(null)).toStrictEqual([]);
   });
 });

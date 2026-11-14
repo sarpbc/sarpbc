@@ -26,11 +26,11 @@ describe(RedisService, () => {
 
   it("awaits quit on module destroy", async () => {
     await service.onModuleDestroy();
-    expect(quit).toHaveBeenCalledWith();
+    expect(quit).toHaveBeenCalledExactlyOnceWith();
   });
 
   it("pings the redis client", async () => {
     await expect(service.ping()).resolves.toBe("PONG");
-    expect(ping).toHaveBeenCalledWith();
+    expect(ping).toHaveBeenCalledExactlyOnceWith();
   });
 });
