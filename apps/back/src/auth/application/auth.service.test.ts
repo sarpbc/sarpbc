@@ -1,19 +1,15 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AuthenticationError } from "../../common/domain/errors";
 import { AuthService } from "./auth.service";
-import { GoogleIdentityGateway } from "../infrastructure/google-identity.gateway";
+import {
+  GoogleIdentityGateway,
+  type GoogleOAuthSession,
+} from "../infrastructure/google-identity.gateway";
 import { JwtTokenGateway } from "../infrastructure/jwt-token.gateway";
 import { User } from "../../user/domain/user";
 import type { GoogleIdentity } from "./ports/authentication";
 import { UserService } from "../../user/application/user.service";
 import { unconstructed } from "../../../test/doubles";
-
-const googleOAuth2 = vi.hoisted(() => ({ OAuth2: vi.fn(), oauth2: vi.fn() }));
-
-vi.mock("@googleapis/oauth2", () => ({
-  auth: { OAuth2: googleOAuth2.OAuth2 },
-  oauth2: googleOAuth2.oauth2,
-}));
 
 async function waitUntil(predicate: () => boolean): Promise<void> {
   const startedAt = Date.now();
@@ -31,6 +27,10 @@ async function waitUntil(predicate: () => boolean): Promise<void> {
 
 describe("AuthService", () => {
   let service: AuthService;
+
+  let newGoogleSession: () => GoogleOAuthSession = () => {
+    throw new Error("unused");
+  };
 
   const userServiceMocks = {
     signIn: vi.fn(),
@@ -50,7 +50,7 @@ describe("AuthService", () => {
   beforeEach(async () => {
     service = new AuthService(
       new JwtTokenGateway({ ...jwtService, verifyAsync: vi.fn() }, "secret"),
-      new GoogleIdentityGateway("client-id", "secret", "http://localhost/callback"),
+      new GoogleIdentityGateway(() => newGoogleSession()),
       userService,
       { frontUrl: "http://localhost:4000", adminUrl: "http://localhost:4002" },
     );
@@ -160,51 +160,41 @@ describe("AuthService", () => {
 
       let getTokenStarted = 0;
 
-      interface OAuthClientCredentials {
-        access_token?: string;
-      }
-
-      const initialCredentials: OAuthClientCredentials = {};
-
       const profiles = {
         "code-a": { id: "google-a", email: "a@example.com", name: "Alice" },
         "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
       } as const;
 
-      const oauth2Mock = googleOAuth2.OAuth2;
-      oauth2Mock.mockImplementation(function () {
-        const client = {
-          credentials: initialCredentials,
-          getToken: vi.fn(async (code: string) => {
+      newGoogleSession = () => {
+        let accessToken: string | null | undefined;
+
+        return {
+          getToken: async (code) => {
             getTokenStarted += 1;
             await holdGetToken;
 
             return { tokens: { access_token: code } };
-          }),
-          setCredentials: vi.fn((tokens: { access_token: string }) => {
-            client.credentials = tokens;
-          }),
-          generateAuthUrl: vi.fn(),
-        };
-
-        return client;
-      });
-
-      const oauth2ApiMock = googleOAuth2.oauth2;
-      oauth2ApiMock.mockReturnValue({
-        userinfo: {
-          get: vi.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {
-            const code = auth.credentials.access_token;
-            const profile = code === "code-a" || code === "code-b" ? profiles[code] : undefined;
+          },
+          setCredentials: (tokens) => {
+            accessToken = tokens.access_token;
+          },
+          generateAuthUrl: () => {
+            throw new Error("unused");
+          },
+          userinfo: async () => {
+            const profile =
+              accessToken === "code-a" || accessToken === "code-b"
+                ? profiles[accessToken]
+                : undefined;
 
             if (!profile) {
-              throw new Error(`Unknown Google token ${code}`);
+              throw new Error(`Unknown Google token ${accessToken}`);
             }
 
-            return { data: profile };
-          }),
-        },
-      });
+            return profile;
+          },
+        };
+      };
 
       userService.findOneByGoogleId.mockResolvedValue(null);
       userService.findOneByEmail.mockResolvedValue(null);

@@ -1,21 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Test, TestingModule } from "@nestjs/testing";
-import { MikroORM } from "@mikro-orm/postgresql";
-import { TournamentCron } from "./tournament.cron";
+import { TournamentSyncRunner } from "./tournament-sync.runner";
 import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
 import { MatchService } from "../../application/match/match.service";
 import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
 
-vi.mock("@mikro-orm/decorators/legacy", async (importOriginal) => ({
-  ...(await importOriginal<typeof import("@mikro-orm/decorators/legacy")>()),
-  CreateRequestContext:
-    () => (_target: TournamentCron, _key: string | symbol, descriptor: PropertyDescriptor) =>
-      descriptor,
-}));
-
-describe("TournamentCron", () => {
-  let cron: TournamentCron;
+describe("TournamentSyncRunner", () => {
+  let cron: TournamentSyncRunner;
   const syncNewTournamentsUseCase = { execute: vi.fn() };
   const syncPandascoreTournamentUseCase = { execute: vi.fn() };
 
@@ -29,8 +21,7 @@ describe("TournamentCron", () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
-        TournamentCron,
-        { provide: MikroORM, useValue: {} },
+        TournamentSyncRunner,
         { provide: SyncNewTournamentsUseCase, useValue: syncNewTournamentsUseCase },
         { provide: SyncPandascoreTournamentUseCase, useValue: syncPandascoreTournamentUseCase },
         { provide: MatchService, useValue: matchService },
@@ -38,7 +29,7 @@ describe("TournamentCron", () => {
       ],
     }).compile();
 
-    cron = module.get(TournamentCron);
+    cron = module.get(TournamentSyncRunner);
     vi.clearAllMocks();
     matchService.list.mockResolvedValue([[], 0]);
     matchService.findRecentlyEnded.mockResolvedValue([]);

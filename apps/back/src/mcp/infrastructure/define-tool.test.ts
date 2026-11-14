@@ -1,3 +1,4 @@
+import { log } from "evlog";
 import { describe, expect, it, vi } from "vitest";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
@@ -5,9 +6,8 @@ import { NotFoundError } from "../../common/domain/errors";
 import type { PatUser } from "../../pat/application/pat.service";
 import { defineTool } from "./define-tool";
 
-const { logInfo, logError } = vi.hoisted(() => ({ logInfo: vi.fn(), logError: vi.fn() }));
-
-vi.mock("evlog", () => ({ log: { info: logInfo, error: logError } }));
+const logInfo = vi.spyOn(log, "info");
+const logError = vi.spyOn(log, "error");
 
 function textContent(result: CallToolResult): string {
   const block = result.content[0];

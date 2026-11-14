@@ -21,6 +21,7 @@ import { CompetitionEventQueries } from "./persistence/event.queries";
 import { EVENT_QUERIES, TOURNAMENT_QUERIES } from "./competition-queries.tokens";
 import { CompetitionAfterCommit } from "../application/after-commit";
 import { TournamentCron } from "./jobs/tournament.cron";
+import { TournamentSyncRunner } from "./jobs/tournament-sync.runner";
 import { ManualTournamentService } from "../application/manual-tournament.service";
 import { ManualCatalogService } from "../application/manual-catalog.service";
 import { MatchService } from "../application/match/match.service";
@@ -91,6 +92,7 @@ import { RedisService } from "../../infrastructure/redis/redis.service";
     },
     CompetitionCacheAdapter,
     CompetitionEventsAdapter,
+    TournamentSyncRunner,
     TournamentCron,
     {
       provide: CompetitionQueries,

@@ -489,7 +489,7 @@ describe("StatsImportService.run", () => {
 
   it("fails the import with the Ballchasing message when the group cannot be listed", async () => {
     const { service, imports, source, reportFailure } = setup();
-    vi.mocked(source.groupReplays).mockRejectedValueOnce(
+    source.groupReplays.mockRejectedValueOnce(
       new IntegrationError("Ballchasing rejected the API key. Check BALLCHASING_API_KEY."),
     );
     const { id } = await service.request("t1", "pilot-abc123");
@@ -505,7 +505,7 @@ describe("StatsImportService.run", () => {
 
   it("hides unexpected errors behind a generic message and reports them", async () => {
     const { service, imports, source, reportFailure } = setup();
-    vi.mocked(source.groupReplays).mockRejectedValueOnce(new Error("socket hang up"));
+    source.groupReplays.mockRejectedValueOnce(new Error("socket hang up"));
     const { id } = await service.request("t1", "pilot-abc123");
 
     await service.run(id);
@@ -518,7 +518,7 @@ describe("StatsImportService.run", () => {
     const { service, source } = setup();
     const { id } = await service.request("t1", "pilot-abc123");
     await service.run(id);
-    vi.mocked(source.groupReplays).mockClear();
+    source.groupReplays.mockClear();
 
     await service.run(id);
     await service.run("unknown");
