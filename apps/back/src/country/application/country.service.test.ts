@@ -13,11 +13,11 @@ import { CountryService } from "./country.service";
 
 const firstPage = { limit: 25, offset: 0 };
 
-describe("CountryService", () => {
+describe(CountryService, () => {
   it("lists the nationalities stored on player profiles", async () => {
     const { sources } = countrySources();
 
-    await expect(new CountryService(sources).list()).resolves.toEqual([
+    await expect(new CountryService(sources).list()).resolves.toStrictEqual([
       { code: "FR", players: 4 },
       { code: "US", players: 1 },
     ]);
@@ -29,8 +29,8 @@ describe("CountryService", () => {
 
     expect(findByNationality).toHaveBeenCalledWith("FR");
     expect(page.code).toBe("FR");
-    expect(page.players).toEqual([alpha54, exotiik, vatira, zen]);
-    expect(page.teams).toEqual([kc, vitality]);
+    expect(page.players).toStrictEqual([alpha54, exotiik, vatira, zen]);
+    expect(page.teams).toStrictEqual([kc, vitality]);
     expect(list).toHaveBeenCalledWith("results", {
       ...firstPage,
       playerIds: ["alpha54", "exotiik", "vatira", "zen"],
@@ -42,7 +42,7 @@ describe("CountryService", () => {
     const { sources } = countrySources();
     const page = await new CountryService(sources).detail("FR", firstPage);
 
-    expect(page.matches.map(({ id }) => id)).toEqual(["final"]);
+    expect(page.matches.map(({ id }) => id)).toStrictEqual(["final"]);
     expect(page.matchTotal).toBe(1);
   });
 

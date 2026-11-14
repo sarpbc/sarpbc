@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { careerMatch, mawkzy, vatira, zen } from "../../../test/career-fixtures";
 import { headToHead, seriesRecord } from "./series-record";
 
-describe("seriesRecord", () => {
+describe(seriesRecord, () => {
   it("counts decided series on the player's side only", () => {
     const matches = [
       careerMatch({ id: "won", sides: [[zen], [vatira]], winner: 0 }),
@@ -11,17 +11,17 @@ describe("seriesRecord", () => {
       careerMatch({ id: "elsewhere", sides: [[vatira], [mawkzy]], winner: 0 }),
     ];
 
-    expect(seriesRecord(matches, zen.id)).toEqual({ wins: 1, losses: 1 });
+    expect(seriesRecord(matches, zen.id)).toStrictEqual({ wins: 1, losses: 1 });
   });
 
   it("does not count a finished series without a winner", () => {
     const matches = [careerMatch({ id: "void", sides: [[zen], [vatira]], winner: null })];
 
-    expect(seriesRecord(matches, zen.id)).toEqual({ wins: 0, losses: 0 });
+    expect(seriesRecord(matches, zen.id)).toStrictEqual({ wins: 0, losses: 0 });
   });
 });
 
-describe("headToHead", () => {
+describe(headToHead, () => {
   it("counts the series each player won against the other", () => {
     const matches = [
       careerMatch({ id: "first", sides: [[zen], [vatira]], winner: 0 }),
@@ -29,7 +29,7 @@ describe("headToHead", () => {
       careerMatch({ id: "third", sides: [[vatira], [zen]], winner: 0 }),
     ];
 
-    expect(headToHead(matches, zen.id, vatira.id)).toEqual({ a: 1, b: 2 });
+    expect(headToHead(matches, zen.id, vatira.id)).toStrictEqual({ a: 1, b: 2 });
   });
 
   it("ignores series where both players shared a side or one did not play", () => {
@@ -39,6 +39,6 @@ describe("headToHead", () => {
       careerMatch({ id: "pending", sides: [[zen], [vatira]], winner: null, finished: false }),
     ];
 
-    expect(headToHead(matches, zen.id, vatira.id)).toEqual({ a: 0, b: 0 });
+    expect(headToHead(matches, zen.id, vatira.id)).toStrictEqual({ a: 0, b: 0 });
   });
 });

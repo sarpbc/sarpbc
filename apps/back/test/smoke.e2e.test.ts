@@ -17,9 +17,13 @@ import { PostHogService } from "../src/infrastructure/telemetry/posthog.service"
 import { NewsController } from "../src/news/infrastructure/http/news.controller";
 import { NewsService } from "../src/news/application/news.service";
 import { TweetEmbedService } from "../src/news/application/tweet-embed.service";
-import { TweetImageService } from "../src/news/application/tweet-image.service";
+import {
+  TweetImageService,
+  type TweetImageGateway,
+} from "../src/news/application/tweet-image.service";
 import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
+import type { GameStatsStore } from "../src/match-stats/application/ports";
 import { GAME_STATS_STORE } from "../src/match-stats/infrastructure/game-stats.tokens";
 import { MatchService } from "../src/tournament/application/match/match.service";
 import { MatchLineupService } from "../src/tournament/application/match/match-lineup.service";
@@ -31,7 +35,6 @@ import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/a
 import { IntegrationError } from "../src/common/domain/errors/integration-error";
 import { NotFoundError } from "../src/common/domain/errors/not-found-error";
 import { configureApp } from "../src/configure-app";
-import type { EntityRef } from "../src/common/domain/entity-ref";
 import { League } from "../src/tournament/domain/league";
 import { Match } from "../src/tournament/domain/match";
 import { TournamentParticipant } from "../src/tournament/domain/tournament-participant";
@@ -43,23 +46,34 @@ describe("API smoke (e2e)", () => {
   const user = Object.assign(new User("fan@sarpbc.org", "fan", "hash"), { id: "user-1" });
 
   const userService = {
-    signIn: vi.fn().mockResolvedValue(user),
-    findById: vi.fn().mockResolvedValue(user),
-    create: vi.fn(),
-    findOneByGoogleId: vi.fn(),
-    findOneByEmail: vi.fn(),
-    createGoogleUser: vi.fn(),
-    linkGoogleAccount: vi.fn(),
+    signIn: vi.fn<UserService["signIn"]>().mockResolvedValue(user),
+    findById: vi.fn<UserService["findById"]>().mockResolvedValue(user),
+    create: vi.fn<UserService["create"]>(),
+    findOneByGoogleId: vi.fn<UserService["findOneByGoogleId"]>(),
+    findOneByEmail: vi.fn<UserService["findOneByEmail"]>(),
+    createGoogleUser: vi.fn<UserService["createGoogleUser"]>(),
+    linkGoogleAccount: vi.fn<UserService["linkGoogleAccount"]>(),
   };
 
   const newsService = {
-    findAllPublishedArticle: vi.fn().mockResolvedValue({
-      data: [{ id: "n1", title: "Hello", slug: "hello" }],
+    findAllPublishedArticle: vi.fn<NewsService["findAllPublishedArticle"]>().mockResolvedValue({
+      data: [
+        {
+          id: "n1",
+          title: "Hello",
+          slug: "hello",
+          createdAt: new Date("2026-06-01T00:00:00.000Z"),
+          imageUrl: null,
+          excerpt: "Hello world",
+          commentCount: 0,
+          type: "article",
+        },
+      ],
       total: 1,
       page: 0,
       limit: 25,
     }),
-    findPublishedShortsByWeek: vi.fn(async (week: string) => {
+    findPublishedShortsByWeek: vi.fn<NewsService["findPublishedShortsByWeek"]>(async (week) => {
       if (week === "2026-W99") {
         throw new BadRequestException("Week must be an ISO week id (e.g. 2026-W36).");
       }
@@ -74,7 +88,7 @@ describe("API smoke (e2e)", () => {
   };
 
   const tweetImages = {
-    load: vi.fn(async (url: string) => {
+    load: vi.fn<TweetImageGateway["load"]>(async (url) => {
       if (url.endsWith("/removed.jpg")) {
         throw new NotFoundError("This image is no longer available on X.");
       }
@@ -107,17 +121,14 @@ describe("API smoke (e2e)", () => {
   });
 
   const matchService = {
-    findDetail: vi.fn(async (ref: EntityRef) => {
+    findDetail: vi.fn<MatchService["findDetail"]>(async (ref) => {
       if (ref.kind === "id" && ref.value === MISSING_MATCH_ID) {
         throw new NotFoundError("This match could not be found.");
       }
 
       return { match: grandFinal, teamForms: {}, headToHead: null };
     }),
-    findUpcomingAndCount: vi.fn(),
-    findLiveAndCount: vi.fn(),
-    findResultsAndCount: vi.fn(),
-    findBlocks: vi.fn(async (blocks: unknown[]) => blocks.map(() => [grandFinal])),
+    findBlocks: vi.fn<MatchService["findBlocks"]>(async (blocks) => blocks.map(() => [grandFinal])),
   };
 
   const games: MatchGameStats[] = [
@@ -145,9 +156,11 @@ describe("API smoke (e2e)", () => {
     },
   ];
 
-  const matchGames = { byMatch: vi.fn(async () => games) };
+  const matchGames = { byMatch: vi.fn<GameStatsStore["byMatch"]>(async () => games) };
 
-  const transferService = { findAndCount: vi.fn().mockResolvedValue([[], 0]) };
+  const transferService = {
+    findAndCount: vi.fn<TransferService["findAndCount"]>().mockResolvedValue([[], 0]),
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -176,21 +189,31 @@ describe("API smoke (e2e)", () => {
         { provide: UserService, useValue: userService },
         {
           provide: PostHogService,
-          useValue: { capture: vi.fn(), flush: vi.fn().mockResolvedValue(undefined) },
+          useValue: {
+            capture: vi.fn<PostHogService["capture"]>(),
+            flush: vi.fn<PostHogService["flush"]>().mockResolvedValue(undefined),
+          },
         },
         { provide: NewsService, useValue: newsService },
-        { provide: TweetEmbedService, useValue: { embed: vi.fn() } },
+        { provide: TweetEmbedService, useValue: { embed: vi.fn<TweetEmbedService["embed"]>() } },
         { provide: TweetImageService, useValue: new TweetImageService(tweetImages) },
         {
           provide: ReplyService,
-          useValue: { countByTargetIds: vi.fn(async () => new Map([[grandFinal.id, 2]])) },
+          useValue: {
+            countByTargetIds: vi.fn<ReplyService["countByTargetIds"]>(
+              async () => new Map([[grandFinal.id, 2]]),
+            ),
+          },
         },
         { provide: MatchService, useValue: matchService },
-        { provide: MatchLineupService, useValue: { forMatch: vi.fn(async () => []) } },
+        {
+          provide: MatchLineupService,
+          useValue: { forMatch: vi.fn<MatchLineupService["forMatch"]>(async () => []) },
+        },
         { provide: GAME_STATS_STORE, useValue: matchGames },
         { provide: TransferService, useValue: transferService },
-        { provide: TeamService, useValue: { findBySlug: vi.fn() } },
-        { provide: PlayerService, useValue: { findBySlug: vi.fn() } },
+        { provide: TeamService, useValue: { findBySlug: vi.fn<TeamService["findBySlug"]>() } },
+        { provide: PlayerService, useValue: { findBySlug: vi.fn<PlayerService["findBySlug"]>() } },
         { provide: APP_GUARD, useClass: ThrottlerGuard },
         { provide: APP_FILTER, useClass: AllExceptionsFilter },
       ],
@@ -225,39 +248,41 @@ describe("API smoke (e2e)", () => {
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
   });
 
-  it("rejects non-whitelisted news query params", async () => {
-    await request(app.getHttpServer()).get("/news?foo=bar").expect(400);
+  it.each([
+    ["/news?foo=bar", 400],
+    ["/news?type=short", 200],
+    ["/news?type=brief", 400],
+    ["/news/weeks/2026-W36", 200],
+    ["/news/weeks/2026-W99", 400],
+    ["/news/embed/tweet/image", 400],
+  ])("answers GET %s with %i", async (path, status) => {
+    const response = await request(app.getHttpServer()).get(path);
+
+    expect(response.status).toBe(status);
   });
 
-  it("accepts a news type filter", async () => {
-    await request(app.getHttpServer()).get("/news?type=short").expect(200);
-  });
+  const TWEET_IMAGE_URL = "https://pbs.twimg.com/media/photo.png";
 
-  it("rejects an invalid news type filter", async () => {
-    await request(app.getHttpServer()).get("/news?type=brief").expect(400);
-  });
-
-  it("lists short news for an ISO week", async () => {
-    await request(app.getHttpServer()).get("/news/weeks/2026-W36").expect(200);
-  });
-
-  it("rejects a malformed ISO week id", async () => {
-    await request(app.getHttpServer()).get("/news/weeks/2026-W99").expect(400);
-  });
+  const fetchTweetImage = async (url: string) =>
+    await request(app.getHttpServer()).get(
+      `/news/embed/tweet/image?url=${encodeURIComponent(url)}`,
+    );
 
   it("proxies allowlisted tweet images with a short public cache", async () => {
-    const url = "https://pbs.twimg.com/media/photo.png";
+    const response = await fetchTweetImage(TWEET_IMAGE_URL);
 
-    const response = await request(app.getHttpServer())
-      .get(`/news/embed/tweet/image?url=${encodeURIComponent(url)}`)
-      .expect(200);
-
-    expect(tweetImages.load).toHaveBeenLastCalledWith(url);
+    expect(response.status).toBe(200);
     expect(response.headers["content-type"]).toBe("image/png");
     expect(response.headers["cache-control"]).toBe("public, max-age=3600");
+    expect(Buffer.from(response.body).toString()).toBe("png");
+  });
+
+  it("locks down proxied tweet images", async () => {
+    const response = await fetchTweetImage(TWEET_IMAGE_URL);
+
+    expect(tweetImages.load).toHaveBeenLastCalledWith(TWEET_IMAGE_URL);
     expect(response.headers["content-security-policy"]).toBe("default-src 'none'");
     expect(response.headers["x-content-type-options"]).toBe("nosniff");
-    expect(Buffer.from(response.body).toString()).toBe("png");
   });
 
   it.each([
@@ -266,15 +291,10 @@ describe("API smoke (e2e)", () => {
     ["https://pbs.twimg.com/media/removed.jpg", 404],
     ["https://pbs.twimg.com/media/broken.jpg", 500],
   ])("answers %s with %i", async (url, status) => {
-    const response = await request(app.getHttpServer())
-      .get(`/news/embed/tweet/image?url=${encodeURIComponent(url)}`)
-      .expect(status);
+    const response = await fetchTweetImage(url);
 
+    expect(response.status).toBe(status);
     expect(response.headers["cache-control"]).toBeUndefined();
-  });
-
-  it("requires a tweet image URL", async () => {
-    await request(app.getHttpServer()).get("/news/embed/tweet/image").expect(400);
   });
 
   it("serves a match by public id with its computed slug", async () => {
@@ -291,16 +311,20 @@ describe("API smoke (e2e)", () => {
   });
 
   it("serves a match by its legacy id", async () => {
-    await request(app.getHttpServer()).get(`/matches/${grandFinal.id}`).expect(200);
+    const response = await request(app.getHttpServer()).get(`/matches/${grandFinal.id}`);
+
+    expect(response.status).toBe(200);
     expect(matchService.findDetail).toHaveBeenLastCalledWith({ kind: "id", value: grandFinal.id });
   });
 
-  it("answers 404 for unknown and malformed match references", async () => {
-    await request(app.getHttpServer()).get(`/matches/${MISSING_MATCH_ID}`).expect(404);
-    await request(app.getHttpServer()).get("/matches/missing").expect(404);
-    await request(app.getHttpServer()).get("/matches/0").expect(404);
-    await request(app.getHttpServer()).get("/matches/-4").expect(404);
-  });
+  it.each([MISSING_MATCH_ID, "missing", "0", "-4"])(
+    "answers 404 for the unknown match reference %s",
+    async (reference) => {
+      const response = await request(app.getHttpServer()).get(`/matches/${reference}`);
+
+      expect(response.status).toBe(404);
+    },
+  );
 
   it("resolves article match blocks in one batched call", async () => {
     const team = "c9e1a3b5-7d9f-4b1d-a3c5-e7f9b1d3f544";
@@ -322,7 +346,7 @@ describe("API smoke (e2e)", () => {
       .object({ blocks: z.record(z.string(), z.array(z.unknown())) })
       .parse(response.body);
 
-    expect(Object.keys(blocks)).toEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
+    expect(Object.keys(blocks)).toStrictEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
     expect(blocks[`team:${team}:5`]?.[0]).toMatchObject({
       publicId: 7250,
       state: "upcoming",
@@ -330,25 +354,26 @@ describe("API smoke (e2e)", () => {
     });
   });
 
-  it("rejects missing or malformed match blocks", async () => {
-    await request(app.getHttpServer()).get("/matches/blocks").expect(400);
-    await request(app.getHttpServer()).get("/matches/blocks?block=team:falcons:5").expect(400);
+  const tooManyBlocks = Array.from(
+    { length: 21 },
+    (_, index) => `block=match:0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f${String(index).padStart(2, "0")}`,
+  ).join("&");
 
-    const tooMany = Array.from(
-      { length: 21 },
-      (_, index) =>
-        `block=match:0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f${String(index).padStart(2, "0")}`,
-    ).join("&");
+  it.each(["", "?block=team:falcons:5", `?${tooManyBlocks}`])(
+    "rejects the malformed match blocks query %#",
+    async (query) => {
+      const response = await request(app.getHttpServer()).get(`/matches/blocks${query}`);
 
-    await request(app.getHttpServer()).get(`/matches/blocks?${tooMany}`).expect(400);
-  });
+      expect(response.status).toBe(400);
+    },
+  );
 
   it("lists transfers with coerced pagination and period filters", async () => {
     const response = await request(app.getHttpServer())
       .get("/transfers?type=loan&from=2026-01-01&to=2026-06-30&limit=5")
       .expect(200);
 
-    expect(response.body).toEqual({ transfers: [], count: 0 });
+    expect(response.body).toStrictEqual({ transfers: [], count: 0 });
     expect(transferService.findAndCount).toHaveBeenLastCalledWith(
       expect.objectContaining({
         type: "loan",
@@ -360,10 +385,12 @@ describe("API smoke (e2e)", () => {
     );
   });
 
-  it("rejects invalid transfer filters", async () => {
-    await request(app.getHttpServer()).get("/transfers?type=coach").expect(400);
-    await request(app.getHttpServer()).get("/transfers?from=yesterday").expect(400);
-    await request(app.getHttpServer()).get("/transfers?limit=500").expect(400);
-    await request(app.getHttpServer()).get("/transfers?season=2026").expect(400);
-  });
+  it.each(["type=coach", "from=yesterday", "limit=500", "season=2026"])(
+    "rejects the invalid transfer filter %s",
+    async (query) => {
+      const response = await request(app.getHttpServer()).get(`/transfers?${query}`);
+
+      expect(response.status).toBe(400);
+    },
+  );
 });

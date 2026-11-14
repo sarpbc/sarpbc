@@ -10,7 +10,7 @@ const player = (id: string) => ({
   nationality: null,
 });
 
-describe("isStandIn", () => {
+describe(isStandIn, () => {
   it("is false for a player on the participant roster and true otherwise", () => {
     expect(isStandIn(["alpha", "bravo", "charlie"], "bravo")).toBe(false);
     expect(isStandIn(["alpha", "bravo", "charlie"], "delta")).toBe(true);
@@ -18,7 +18,7 @@ describe("isStandIn", () => {
   });
 });
 
-describe("buildLineups", () => {
+describe(buildLineups, () => {
   it("flags only the players outside the participant roster, in lineup order", () => {
     const lineups = buildLineups(
       [
@@ -33,7 +33,7 @@ describe("buildLineups", () => {
       ],
     );
 
-    expect(lineups).toEqual([
+    expect(lineups).toStrictEqual([
       {
         participantId: "side-a",
         players: [
@@ -52,11 +52,11 @@ describe("buildLineups", () => {
         [{ participantId: "side-a", rosterIds: [] }],
         [{ participantId: "gone", player: player("alpha") }],
       ),
-    ).toEqual([]);
+    ).toStrictEqual([]);
   });
 });
 
-describe("normalizeLineups", () => {
+describe(normalizeLineups, () => {
   const sides = ["side-a", "side-b"];
 
   it("orders lineups like the match participants and drops empty ones", () => {
@@ -65,7 +65,7 @@ describe("normalizeLineups", () => {
         { participantId: "side-b", playerIds: ["echo"] },
         { participantId: "side-a", playerIds: [] },
       ]),
-    ).toEqual([{ participantId: "side-b", playerIds: ["echo"] }]);
+    ).toStrictEqual([{ participantId: "side-b", playerIds: ["echo"] }]);
   });
 
   it("refuses a participant outside the match, a repeated side or player, and oversized lineups", () => {
@@ -105,14 +105,14 @@ const game = (aPlayers: (string | null)[], bPlayers: (string | null)[]) => ({
   ],
 });
 
-describe("lineupsFromGames", () => {
+describe(lineupsFromGames, () => {
   it("collects linked players per participant once, in first appearance order", () => {
     expect(
       lineupsFromGames([
         game(["alpha", "bravo", null], [null, null, null]),
         game(["alpha", "delta", "bravo"], [null, null, null]),
       ]),
-    ).toEqual([{ participantId: "side-a", playerIds: ["alpha", "bravo", "delta"] }]);
-    expect(lineupsFromGames([])).toEqual([]);
+    ).toStrictEqual([{ participantId: "side-a", playerIds: ["alpha", "bravo", "delta"] }]);
+    expect(lineupsFromGames([])).toStrictEqual([]);
   });
 });

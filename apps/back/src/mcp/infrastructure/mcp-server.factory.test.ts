@@ -146,7 +146,7 @@ const services: McpServices = {
   seasonService: unconstructed(SeasonService),
 };
 
-describe("McpServerFactory", () => {
+describe(McpServerFactory, () => {
   it("serves every tool with a JSON schema and a stated permission", async () => {
     const factory = new McpServerFactory(services);
     const server = factory.createServer({ id: "u1", email: "staff@test.com", role: "admin" });
@@ -156,11 +156,16 @@ describe("McpServerFactory", () => {
 
     const { tools } = await client.listTools();
 
-    expect(tools.map((tool) => tool.name).toSorted()).toEqual(TOOL_NAMES.toSorted());
+    expect(tools.map((tool) => tool.name).toSorted()).toStrictEqual(TOOL_NAMES.toSorted());
 
-    for (const tool of tools.filter((candidate) => candidate.name.startsWith("create_"))) {
-      expect(tool.description, tool.name).toMatch(/Requires \w+\.manage\.$/);
-    }
+    const unstated = tools
+      .filter(
+        ({ name, description }) =>
+          name.startsWith("create_") && !/Requires \w+\.manage\.$/.test(description ?? ""),
+      )
+      .map(({ name }) => name);
+
+    expect(unstated).toStrictEqual([]);
 
     await client.close();
   });

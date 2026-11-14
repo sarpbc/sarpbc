@@ -14,10 +14,10 @@ function stream(overrides: Partial<MatchStreamDto> = {}): MatchStreamDto {
   };
 }
 
-describe("mapOfficialMatchStreams", () => {
+describe(mapOfficialMatchStreams, () => {
   it("returns an empty list when streams are missing", () => {
-    expect(mapOfficialMatchStreams(undefined)).toEqual([]);
-    expect(mapOfficialMatchStreams([])).toEqual([]);
+    expect(mapOfficialMatchStreams(undefined)).toStrictEqual([]);
+    expect(mapOfficialMatchStreams([])).toStrictEqual([]);
   });
 
   it("keeps official http(s) streams and drops unofficial or invalid urls", () => {
@@ -29,7 +29,7 @@ describe("mapOfficialMatchStreams", () => {
         stream({ raw_url: "not-a-url" }),
         stream({ raw_url: "  https://www.twitch.tv/rocketleague  ", language: "en" }),
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       { url: "https://www.twitch.tv/rocketbaguette", language: "fr", main: true },
       { url: "https://www.twitch.tv/rocketleague", language: "en", main: false },
     ]);
@@ -47,7 +47,7 @@ describe("mapOfficialMatchStreams", () => {
 
     const mapped = mapOfficialMatchStreams(streams);
     expect(mapped).toHaveLength(12);
-    expect(mapped[0]).toEqual({
+    expect(mapped[0]).toStrictEqual({
       url: "https://www.twitch.tv/channel-0",
       language: "fr",
       main: false,

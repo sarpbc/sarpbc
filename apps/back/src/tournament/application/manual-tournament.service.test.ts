@@ -12,7 +12,16 @@ import { Team } from "../../roster/domain/team";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualTournamentService } from "./manual-tournament.service";
 import type { UpdateTournamentInput } from "./inputs";
-import type { CompetitionTransaction, TournamentWriter } from "./ports";
+import type {
+  CompetitionCache,
+  CompetitionDiagnostics,
+  CompetitionEvents,
+  CompetitionTransaction,
+  EventWriter,
+  MatchWriter,
+  TournamentQueries,
+  TournamentWriter,
+} from "./ports";
 import {
   competitionScope,
   eventWriter as eventWriterDouble,
@@ -36,18 +45,18 @@ const solo = (id: string, playerId: string) =>
     players: [Object.assign(new Player(), { id: playerId })],
   });
 
-describe("ManualTournamentService", () => {
+describe(ManualTournamentService, () => {
   const writer = {
-    load: vi.fn(),
-    save: vi.fn(),
-    participants: vi.fn(),
-    teamsExist: vi.fn(),
-    participantReferences: vi.fn(),
-    removeParticipant: vi.fn(),
+    load: vi.fn<TournamentWriter["load"]>(),
+    save: vi.fn<TournamentWriter["save"]>(),
+    participants: vi.fn<TournamentWriter["participants"]>(),
+    teamsExist: vi.fn<TournamentWriter["teamsExist"]>(),
+    participantReferences: vi.fn<TournamentWriter["participantReferences"]>(),
+    removeParticipant: vi.fn<TournamentWriter["removeParticipant"]>(),
     saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
-    league: vi.fn(),
-    playersExist: vi.fn(),
-    teamPlayers: vi.fn(),
+    league: vi.fn<TournamentWriter["league"]>(),
+    playersExist: vi.fn<TournamentWriter["playersExist"]>(),
+    teamPlayers: vi.fn<TournamentWriter["teamPlayers"]>(),
   };
 
   let tournament: Tournament;
@@ -55,30 +64,38 @@ describe("ManualTournamentService", () => {
   const stored = new Map<string, TournamentEvent>();
 
   const eventWriter = {
-    load: vi.fn(async (id: string) => {
+    load: vi.fn<EventWriter["load"]>(async (id) => {
       const event = stored.get(id);
 
       return event ? Object.assign(new TournamentEvent(), event) : null;
     }),
-    slugTaken: vi.fn(async (slug: string, except: string | null) =>
+    slugTaken: vi.fn<EventWriter["slugTaken"]>(async (slug, except) =>
       [...stored.values()].some((event) => event.slug === slug && event.id !== except),
     ),
-    save: vi.fn(async (event: TournamentEvent) => {
+    save: vi.fn<EventWriter["save"]>(async (event) => {
       stored.set(event.id, Object.assign(new TournamentEvent(), event));
     }),
-    stages: vi.fn(async (eventId: string) =>
+    stages: vi.fn<EventWriter["stages"]>(async (eventId) =>
       tournament.event.id === eventId
         ? [{ id: tournament.id, name: tournament.name, source: tournament.source }]
         : [],
     ),
-    stageSlugTaken: vi.fn(async (_event: string, _slug: string) => false),
+    stageSlugTaken: vi.fn<EventWriter["stageSlugTaken"]>(async () => false),
   };
 
-  const matchWriter = { bracket: vi.fn() };
+  const matchWriter = { bracket: vi.fn<MatchWriter["bracket"]>() };
 
-  const cache = { invalidateTournament: vi.fn() };
-  const diagnostics = { error: vi.fn(), warn: vi.fn() };
-  const reads = { findById: vi.fn(), leagues: vi.fn() };
+  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
+
+  const diagnostics = {
+    error: vi.fn<CompetitionDiagnostics["error"]>(),
+    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
+  };
+
+  const reads = {
+    findById: vi.fn<TournamentQueries["findById"]>(),
+    leagues: vi.fn<TournamentQueries["leagues"]>(),
+  };
 
   const events: string[] = [];
 
@@ -101,7 +118,11 @@ describe("ManualTournamentService", () => {
   const service = new ManualTournamentService(
     tournamentQueries(reads),
     tx,
-    new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
+    new CompetitionAfterCommit(
+      cache,
+      { publish: vi.fn<CompetitionEvents["publish"]>() },
+      diagnostics,
+    ),
   );
 
   beforeEach(() => {
@@ -153,6 +174,7 @@ describe("ManualTournamentService", () => {
       expect.objectContaining({ teamId: "vitality", playerIds: ["diaz", "legacy"] }),
     );
   });
+
   it("keeps the roster of a team that is already participating", async () => {
     tournament.source = "manual";
     const team = Object.assign(new Team(), { id: "vitality" });
@@ -163,6 +185,7 @@ describe("ManualTournamentService", () => {
     expect(writer.teamPlayers).not.toHaveBeenCalled();
     expect(writer.saveParticipant).not.toHaveBeenCalled();
   });
+
   it("replaces the roster of listed participants only", async () => {
     tournament.source = "manual";
     const team = Object.assign(new Team(), { id: "ikkaku" });
@@ -181,6 +204,7 @@ describe("ManualTournamentService", () => {
       rosterSourceUrl: null,
     });
   });
+
   it("sets, keeps and refuses a roster source", async () => {
     tournament.source = "manual";
     const team = Object.assign(new Team(), { id: "ikkaku" });
@@ -204,6 +228,7 @@ describe("ManualTournamentService", () => {
       }),
     ).rejects.toThrow(/BLAST/);
   });
+
   it("rejects a roster for a team that is not participating", async () => {
     tournament.source = "manual";
     await expect(
@@ -211,6 +236,7 @@ describe("ManualTournamentService", () => {
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(writer.save).not.toHaveBeenCalled();
   });
+
   it("rejects a roster with unknown players", async () => {
     tournament.source = "manual";
     writer.playersExist.mockResolvedValue(false);
@@ -219,6 +245,7 @@ describe("ManualTournamentService", () => {
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(writer.saveParticipant).not.toHaveBeenCalled();
   });
+
   it("edits artwork and invalidates only after commit", async () => {
     const result = await service.update("ewc", { imageUrl: " https://cdn.example/ewc.png " });
     expect(result).toMatchObject({
@@ -227,13 +254,15 @@ describe("ManualTournamentService", () => {
       pandascoreId: 123,
       imageUrl: "https://cdn.example/ewc.png",
     });
-    expect(events).toEqual(["commit", "invalidate"]);
+    expect(events).toStrictEqual(["commit", "invalidate"]);
     expect(writer.league).not.toHaveBeenCalled();
   });
+
   it.each([null, ""])("clears synced artwork with %p", async (imageUrl) => {
     const updateResult = await service.update("ewc", { imageUrl });
     expect(updateResult.imageUrl).toBeNull();
   });
+
   it.each<UpdateTournamentInput>([
     { name: "Changed" },
     { slug: "changed" },
@@ -250,15 +279,18 @@ describe("ManualTournamentService", () => {
     expect(writer.save).not.toHaveBeenCalled();
     expect(cache.invalidateTournament).not.toHaveBeenCalled();
   });
+
   it("marks a synced end date as corrected until staff clear it", async () => {
     const corrected = await service.update("ewc", { endAt: "2025-03-02" });
     expect(corrected).toMatchObject({ endAt: new Date("2025-03-02"), endAtCorrected: true });
     const cleared = await service.update("ewc", { endAt: null });
     expect(cleared).toMatchObject({ endAt: null, endAtCorrected: false });
   });
+
   it("rejects an empty synced patch", async () => {
     await expect(service.update("ewc", {})).rejects.toBeInstanceOf(InvalidInputError);
   });
+
   it("refuses to change the bracket of a PandaScore stage", async () => {
     await expect(service.update("ewc", { hasBracket: true })).rejects.toThrow(/PandaScore/);
     await expect(service.update("ewc", { hasBracket: false, imageUrl: null })).rejects.toThrow(
@@ -266,10 +298,14 @@ describe("ManualTournamentService", () => {
     );
     expect(writer.save).not.toHaveBeenCalled();
   });
+
   it("enables the bracket of a manual stage", async () => {
     tournament.source = "manual";
-    expect(await service.update("ewc", { hasBracket: true })).toMatchObject({ hasBracket: true });
+    await expect(service.update("ewc", { hasBracket: true })).resolves.toMatchObject({
+      hasBracket: true,
+    });
   });
+
   it("keeps the bracket of a manual stage while its matches are linked", async () => {
     tournament.source = "manual";
     tournament.hasBracket = true;
@@ -282,7 +318,7 @@ describe("ManualTournamentService", () => {
       hasBracket: true,
       matches: [{ id: "final", previousMatches: [] }],
     });
-    expect(await service.update("ewc", { hasBracket: false })).toMatchObject({
+    await expect(service.update("ewc", { hasBracket: false })).resolves.toMatchObject({
       hasBracket: false,
     });
   });
@@ -294,13 +330,16 @@ describe("ManualTournamentService", () => {
 
   it("allows manual details and artwork together and renames the event", async () => {
     ownEvent();
-    expect(await service.update("ewc", { name: "Community Cup", imageUrl: null })).toMatchObject({
+    await expect(
+      service.update("ewc", { name: "Community Cup", imageUrl: null }),
+    ).resolves.toMatchObject({
       name: "Community Cup",
       slug: "group-a",
       event: { slug: "ewc-2026", name: "Community Cup" },
       imageUrl: null,
     });
   });
+
   it("creates a single-stage event with a generated, deduplicated slug", async () => {
     stored.set(
       "taken",
@@ -317,28 +356,31 @@ describe("ManualTournamentService", () => {
     });
     expect(stored.get(created.event.id)).toMatchObject({ slug: "community-cup-2" });
   });
+
   it("uses an explicit staff slug for the event and rejects one that is taken", async () => {
     writer.save.mockImplementation(async (saved: Tournament) => {
       tournament = saved;
     });
-    expect(await service.create({ name: "Cup", slug: "My Cup" })).toMatchObject({
+    await expect(service.create({ name: "Cup", slug: "My Cup" })).resolves.toMatchObject({
       event: { slug: "my-cup" },
     });
     await expect(service.create({ name: "Other", slug: "ewc-2026" })).rejects.toBeInstanceOf(
       ConflictError,
     );
   });
+
   it("edits the event slug of a manual tournament", async () => {
     ownEvent();
     stored.set("other", Object.assign(new TournamentEvent(), { id: "other", slug: "taken" }));
-    expect(await service.update("ewc", { slug: "ewc-renamed" })).toMatchObject({
+    await expect(service.update("ewc", { slug: "ewc-renamed" })).resolves.toMatchObject({
       event: { slug: "ewc-renamed" },
     });
-    expect(await service.update("ewc", { slug: "ewc-renamed" })).toMatchObject({
+    await expect(service.update("ewc", { slug: "ewc-renamed" })).resolves.toMatchObject({
       event: { slug: "ewc-renamed" },
     });
     await expect(service.update("ewc", { slug: "taken" })).rejects.toBeInstanceOf(ConflictError);
   });
+
   it.each(["???", "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b"])(
     "rejects the unusable event slug %p",
     async (slug) => {
@@ -346,9 +388,12 @@ describe("ManualTournamentService", () => {
       await expect(service.update("ewc", { slug })).rejects.toBeInstanceOf(InvalidInputError);
     },
   );
+
   it("leaves a shared event alone when one of its stages changes", async () => {
     tournament.source = "manual";
-    expect(await service.update("ewc", { name: "Finals", slug: "ewc-2026" })).toMatchObject({
+    await expect(
+      service.update("ewc", { name: "Finals", slug: "ewc-2026" }),
+    ).resolves.toMatchObject({
       name: "Finals",
       event: { slug: "ewc-2026", name: "EWC" },
     });
@@ -357,6 +402,7 @@ describe("ManualTournamentService", () => {
     );
     expect(stored.get("event")).toMatchObject({ name: "EWC", slug: "ewc-2026" });
   });
+
   it("moves a manual tournament into another event under a slug free there", async () => {
     tournament.source = "manual";
     stored.set(
@@ -366,7 +412,7 @@ describe("ManualTournamentService", () => {
     eventWriter.stageSlugTaken.mockImplementationOnce(
       async (_event: string, slug: string) => slug === "group-a",
     );
-    expect(await service.update("ewc", { eventId: "cdf" })).toMatchObject({
+    await expect(service.update("ewc", { eventId: "cdf" })).resolves.toMatchObject({
       slug: "group-a-2",
       event: { id: "cdf", slug: "cdf-2026", name: "CDF" },
     });
@@ -378,25 +424,31 @@ describe("ManualTournamentService", () => {
       NotFoundError,
     );
   });
+
   it("creates a tournament as a stage of an existing event", async () => {
     writer.save.mockImplementation(async (saved: Tournament) => {
       tournament = saved;
     });
-    expect(await service.create({ name: "Finals", eventId: "event" })).toMatchObject({
+    await expect(service.create({ name: "Finals", eventId: "event" })).resolves.toMatchObject({
       slug: "finals",
       event: { id: "event", slug: "ewc-2026", name: "EWC" },
     });
-    expect([...stored.keys()]).toEqual(["event"]);
+    expect([...stored.keys()]).toStrictEqual(["event"]);
     await expect(
       service.create({ name: "Finals", eventId: "event", slug: "finals" }),
     ).rejects.toBeInstanceOf(InvalidInputError);
   });
+
   it("preserves committed success when optional invalidation fails", async () => {
     cache.invalidateTournament.mockRejectedValue(new Error("Redis down"));
     const updateResult2 = await service.update("ewc", { imageUrl: null });
     expect(updateResult2.imageUrl).toBeNull();
-    expect(diagnostics.error).toHaveBeenCalled();
+    expect(diagnostics.error).toHaveBeenCalledExactlyOnceWith(
+      "Tournament cache invalidation failed",
+      new Error("Redis down"),
+    );
   });
+
   it.each(["tournamentWinner", "matchParticipant", "matchWinner", "results"])(
     "protects referenced participant %s",
     async (reference) => {
@@ -405,13 +457,20 @@ describe("ManualTournamentService", () => {
       writer.participants.mockResolvedValue([
         Object.assign(new TournamentParticipant(), { id: "p", team }),
       ]);
-      writer.participantReferences.mockResolvedValue({ [reference]: true });
+      writer.participantReferences.mockResolvedValue({
+        tournamentWinner: false,
+        matchParticipant: false,
+        matchWinner: false,
+        results: false,
+        [reference]: true,
+      });
       await expect(service.update("ewc", { teamIds: [] })).rejects.toBeInstanceOf(
         InvalidInputError,
       );
       expect(writer.removeParticipant).not.toHaveBeenCalled();
     },
   );
+
   it("rejects reversed dates", async () => {
     tournament.source = "manual";
     await expect(
@@ -424,6 +483,7 @@ describe("ManualTournamentService", () => {
         tournament = saved;
       });
     });
+
     it("creates a 1v1 tournament whose participants are existing players, without a team", async () => {
       const created = await service.create({
         name: "Fake Knockout",
@@ -435,11 +495,12 @@ describe("ManualTournamentService", () => {
       expect(writer.playersExist).toHaveBeenCalledWith(["zen", "vatira"]);
       expect(writer.teamsExist).not.toHaveBeenCalled();
       expect(writer.teamPlayers).not.toHaveBeenCalled();
-      expect(writer.saveParticipant.mock.calls.map(([participant]) => participant)).toEqual([
+      expect(writer.saveParticipant.mock.calls.map(([participant]) => participant)).toStrictEqual([
         expect.objectContaining({ teamId: null, playerIds: ["zen"] }),
         expect.objectContaining({ teamId: null, playerIds: ["vatira"] }),
       ]);
     });
+
     it("creates a 2v2 tournament with a free duo and an official team", async () => {
       await service.create({
         name: "Fake Duo Cup",
@@ -454,6 +515,7 @@ describe("ManualTournamentService", () => {
         expect.objectContaining({ teamId: null, playerIds: ["zen", "vatira"] }),
       );
     });
+
     it("defaults to a 3v3 team tournament", async () => {
       const createResult = await service.create({ name: "Team Cup" });
       expect(createResult.format).toBe("3v3");
@@ -461,6 +523,7 @@ describe("ManualTournamentService", () => {
         service.create({ name: "Team Cup", playerParticipants: [["zen"]] }),
       ).rejects.toBeInstanceOf(InvalidInputError);
     });
+
     it("rejects a team in a 1v1 tournament and an unknown player", async () => {
       await expect(
         service.create({ name: "Knockout", format: "1v1", teamIds: ["vitality"] }),
@@ -471,6 +534,7 @@ describe("ManualTournamentService", () => {
       ).rejects.toBeInstanceOf(InvalidInputError);
       expect(writer.saveParticipant).not.toHaveBeenCalled();
     });
+
     it("replaces the players of a 1v1 tournament and keeps those still listed", async () => {
       tournament = Object.assign(tournament, { source: "manual", format: "1v1" });
       ownEvent();
@@ -483,11 +547,11 @@ describe("ManualTournamentService", () => {
       });
       await service.update("ewc", { playerParticipants: [["zen"], ["vatira"]] });
       expect(writer.removeParticipant).toHaveBeenCalledWith("p-atow");
-      expect(writer.saveParticipant).toHaveBeenCalledTimes(1);
-      expect(writer.saveParticipant).toHaveBeenCalledWith(
+      expect(writer.saveParticipant).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ teamId: null, playerIds: ["vatira"] }),
       );
     });
+
     it("refuses a format change the current participants do not fit", async () => {
       tournament = Object.assign(tournament, { source: "manual", format: "1v1" });
       ownEvent();
@@ -499,6 +563,7 @@ describe("ManualTournamentService", () => {
         InvalidInputError,
       );
     });
+
     it("refuses to change the format of a PandaScore tournament", async () => {
       await expect(service.update("ewc", { format: "1v1" })).rejects.toBeInstanceOf(
         InvalidInputError,

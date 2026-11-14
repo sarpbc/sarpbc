@@ -3,6 +3,7 @@ import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import type { ToolArguments } from "../define-tool";
 import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
+import { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
 import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -75,14 +76,13 @@ describe("stream tools", () => {
   it("hides start.gg sourced stream lists from list_roster_proposals", async () => {
     const { tool: _, rosterProposalService } = setup("set_match_streams");
 
-    const proposal = (sourceUrl: string) => ({
-      id: sourceUrl,
-      change: { kind: "set_match_streams", matchId: MATCH_ID, streams: STREAMS },
-      sourceUrl,
-      status: "pending",
-      entityId: null,
-      createdAt: new Date(0),
-    });
+    const proposal = (sourceUrl: string) =>
+      Object.assign(new RosterProposal(), {
+        id: sourceUrl,
+        change: { kind: "set_match_streams", matchId: MATCH_ID, streams: STREAMS },
+        sourceUrl,
+        createdAt: new Date(0),
+      });
 
     rosterProposalService.list.mockResolvedValue({
       proposals: [proposal("https://www.start.gg/tournament/fake"), proposal(SOURCE)],

@@ -151,7 +151,7 @@ describe("ContractService sourced career periods", () => {
     });
 
     expect(revised).toMatchObject({ joinSourceUrl: null, leaveSourceUrl: source });
-    expect(revised.endDate).toEqual(new Date("2025-05-15"));
+    expect(revised.endDate).toStrictEqual(new Date("2025-05-15"));
     await expect(
       service.revisePeriod("zen", "vitality-2022-01-10", { endDate: null, sourceUrl: source }),
     ).rejects.toThrow("current team");
@@ -192,6 +192,6 @@ describe("ContractService staff contracts", () => {
 
     const staff = await service.getStaffContractsByPlayer("zen");
 
-    expect(staff.map(({ id }) => id)).toEqual(["coach", "analyst"]);
+    expect(staff.map(({ id }) => id)).toStrictEqual(["coach", "analyst"]);
   });
 });

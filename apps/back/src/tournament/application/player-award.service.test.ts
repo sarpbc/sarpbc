@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { PlayerAwardService } from "./player-award.service";
-import type { AwardTransaction, AwardWriter } from "./ports";
+import type { AwardQueries, AwardTransaction, AwardWriter } from "./ports";
 import { mapSequentially } from "../../common/application/sequentially";
 
 function setup(source: "manual" | "startgg" = "manual") {
@@ -37,7 +37,14 @@ function setup(source: "manual" | "startgg" = "manual") {
   } satisfies AwardWriter;
 
   const transaction: AwardTransaction = { run: async (work) => await work({ awards: writer }) };
-  const service = new PlayerAwardService({ byPlayer: vi.fn(), byTournament: vi.fn() }, transaction);
+
+  const service = new PlayerAwardService(
+    {
+      byPlayer: vi.fn<AwardQueries["byPlayer"]>(),
+      byTournament: vi.fn<AwardQueries["byTournament"]>(),
+    },
+    transaction,
+  );
 
   return { service, writer };
 }
@@ -93,10 +100,10 @@ describe("PlayerAwardService by team", () => {
     await expect(service.createForTeam("cup", "kc", "zen", "mvp")).rejects.toThrow(
       "Fake Cup already has a mvp award",
     );
-    await expect(service.requireProposable("cup", "kc", "zen", "defensive_mvp")).resolves.toBe(
-      undefined,
-    );
-    expect(writer.create).toHaveBeenCalledTimes(1);
+    await expect(
+      service.requireProposable("cup", "kc", "zen", "defensive_mvp"),
+    ).resolves.toBeUndefined();
+    expect(writer.create).toHaveBeenCalledOnce();
   });
 
   it("holds every award type on one stage, including a separate Grand Finals MVP", async () => {
@@ -107,7 +114,7 @@ describe("PlayerAwardService by team", () => {
       async (awardType) => await service.createForTeam("cup", "kc", "zen", awardType),
     );
 
-    expect(writer.create.mock.calls.map(([input]) => input.awardType)).toEqual([
+    expect(writer.create.mock.calls.map(([input]) => input.awardType)).toStrictEqual([
       "mvp",
       "grand_finals_mvp",
       "offensive_mvp",

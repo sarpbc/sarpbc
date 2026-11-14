@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { MAX_TEAM_LOGO_BYTES } from "../domain/team-logo";
+import type { TeamLogoImages, TeamLogoSource, TeamLogoStorage } from "./ports";
 import { TeamLogoService } from "./team-logo.service";
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2, 3]);
@@ -12,39 +13,46 @@ const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` })
 const DEFAULT_SIZE = { width: 512, height: 256 };
 
 function setup(bytes: Uint8Array, size = DEFAULT_SIZE) {
-  const source = { download: vi.fn(async () => bytes) };
+  const source = { download: vi.fn<TeamLogoSource["download"]>(async () => bytes) };
 
   const images = {
-    dimensions: vi.fn(async () => size),
-    normalize: vi.fn(async () => WEBP_OUTPUT),
+    dimensions: vi.fn<TeamLogoImages["dimensions"]>(async () => size),
+    normalize: vi.fn<TeamLogoImages["normalize"]>(async () => WEBP_OUTPUT),
   };
 
   const storage = {
-    put: vi.fn(async (key: string) => stored(key)),
-    copy: vi.fn(async (_sourceKey: string, key: string) => stored(key)),
-    delete: vi.fn(async () => {}),
+    put: vi.fn<TeamLogoStorage["put"]>(async (key) => stored(key)),
+    copy: vi.fn<TeamLogoStorage["copy"]>(async (_sourceKey, key) => stored(key)),
+    delete: vi.fn<TeamLogoStorage["delete"]>(async () => {}),
   };
 
   return { source, images, storage, service: new TeamLogoService(source, images, storage) };
 }
 
-describe("TeamLogoService", () => {
+describe(TeamLogoService, () => {
   const hash = "0123456789abcdef";
 
-  it("normalizes a raster logo and stages it under the team's pending variant key", async () => {
-    const { source, images, storage, service } = setup(PNG);
+  it("downloads and normalizes a raster logo", async () => {
+    const { source, images, service } = setup(PNG);
 
-    const logo = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
+    await service.upload("kc", "light", "https://kcorp.gg/logo.png");
 
-    expect(source.download).toHaveBeenCalledWith(
+    expect(source.download).toHaveBeenCalledExactlyOnceWith(
       new URL("https://kcorp.gg/logo.png"),
       MAX_TEAM_LOGO_BYTES,
     );
-    expect(images.dimensions).toHaveBeenCalledWith(PNG);
-    expect(images.normalize).toHaveBeenCalledWith(PNG, "png", expect.any(Number));
+    expect(images.dimensions).toHaveBeenCalledExactlyOnceWith(PNG);
+    expect(images.normalize).toHaveBeenCalledExactlyOnceWith(PNG, "png", expect.any(Number));
+  });
+
+  it("stages a raster logo under the team's pending variant key", async () => {
+    const { storage, service } = setup(PNG);
+
+    const logo = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
+
     expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-light-[0-9a-f]{16}\.webp$/);
     expect(logo.url).toBe(`https://cdn.sarpbc.test/${logo.key}`);
-    expect(storage.put).toHaveBeenCalledWith(logo.key, WEBP_OUTPUT, "image/webp");
+    expect(storage.put).toHaveBeenCalledExactlyOnceWith(logo.key, WEBP_OUTPUT, "image/webp");
   });
 
   it("names the staged asset after its content", async () => {
@@ -65,9 +73,9 @@ describe("TeamLogoService", () => {
     const logo = await service.upload("kc", "dark", "https://kcorp.gg/logo.svg");
 
     expect(images.dimensions).not.toHaveBeenCalled();
-    expect(images.normalize).toHaveBeenCalledWith(SVG, "svg", expect.any(Number));
+    expect(images.normalize).toHaveBeenCalledExactlyOnceWith(SVG, "svg", expect.any(Number));
     expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-dark-/);
-    expect(storage.put).toHaveBeenCalledWith(logo.key, WEBP_OUTPUT, "image/webp");
+    expect(storage.put).toHaveBeenCalledExactlyOnceWith(logo.key, WEBP_OUTPUT, "image/webp");
   });
 
   it("refuses unsafe URLs before downloading", async () => {
@@ -110,11 +118,14 @@ describe("TeamLogoService", () => {
     const { storage, service } = setup(PNG);
     const pendingKey = `pending/teams/kc/logo-dark-${hash}.webp`;
 
-    await expect(service.publish(pendingKey)).resolves.toEqual({
+    await expect(service.publish(pendingKey)).resolves.toStrictEqual({
       key: `teams/kc/logo-dark-${hash}.webp`,
       url: `https://cdn.sarpbc.test/teams/kc/logo-dark-${hash}.webp`,
     });
-    expect(storage.copy).toHaveBeenCalledWith(pendingKey, `teams/kc/logo-dark-${hash}.webp`);
+    expect(storage.copy).toHaveBeenCalledExactlyOnceWith(
+      pendingKey,
+      `teams/kc/logo-dark-${hash}.webp`,
+    );
     expect(storage.delete).toHaveBeenCalledExactlyOnceWith(pendingKey);
   });
 

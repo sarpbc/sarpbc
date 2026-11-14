@@ -15,7 +15,7 @@ function configure(env: Record<string, string>) {
   return toConfiguration(validateEnv({ ...requiredEnv, ...env }));
 }
 
-describe("toConfiguration", () => {
+describe(toConfiguration, () => {
   it("derives production origins and the cookie domain from the front and admin URLs", () => {
     const config = configure({
       NODE_ENV: "production",
@@ -23,12 +23,12 @@ describe("toConfiguration", () => {
       ADMIN_URL: "https://admin.sarpbc.org",
     });
 
-    expect(config.corsOrigins).toEqual([
+    expect(config.corsOrigins).toStrictEqual([
       "https://sarpbc.org",
       "https://www.sarpbc.org",
       "https://admin.sarpbc.org",
     ]);
-    expect(config.authCookie).toEqual({ secure: true, domain: ".sarpbc.org" });
+    expect(config.authCookie).toStrictEqual({ secure: true, domain: ".sarpbc.org" });
   });
 
   it("adds localhost origins and host-only cookies outside production", () => {
@@ -37,11 +37,11 @@ describe("toConfiguration", () => {
       ADMIN_URL: "http://localhost:4002",
     });
 
-    expect(config.corsOrigins).toEqual([
+    expect(config.corsOrigins).toStrictEqual([
       "http://localhost:4000",
       "http://localhost:4002",
       "http://localhost:4001",
     ]);
-    expect(config.authCookie).toEqual({ secure: false, domain: undefined });
+    expect(config.authCookie).toStrictEqual({ secure: false, domain: undefined });
   });
 });

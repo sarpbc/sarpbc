@@ -1,10 +1,20 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { PlayerService } from "../../roster/application/player.service";
+import type { TeamService } from "../../roster/application/team.service";
+import type { TournamentQueries } from "../../tournament/application/ports";
+import { Player } from "../../roster/domain/player";
+import { Team } from "../../roster/domain/team";
+import { Tournament } from "../../tournament/domain/tournament";
 import { SearchService } from "./search.service";
 
-describe("SearchService", () => {
-  const playerService = { find: vi.fn() };
-  const teamService = { find: vi.fn() };
-  const tournamentService = { searchByName: vi.fn() };
+const player = (id: string) => Object.assign(new Player(), { id });
+const team = (id: string) => Object.assign(new Team(), { id });
+const tournament = (id: string, name = id) => Object.assign(new Tournament(), { id, name });
+
+describe(SearchService, () => {
+  const playerService = { find: vi.fn<PlayerService["find"]>() };
+  const teamService = { find: vi.fn<TeamService["find"]>() };
+  const tournamentService = { searchByName: vi.fn<TournamentQueries["searchByName"]>() };
   let service: SearchService;
 
   beforeEach(() => {
@@ -13,9 +23,10 @@ describe("SearchService", () => {
   });
 
   it("includes tournaments when type is all", async () => {
-    playerService.find.mockResolvedValue([{ id: "p1" }]);
-    teamService.find.mockResolvedValue([{ id: "tm1" }]);
-    tournamentService.searchByName.mockResolvedValue([{ id: "t1", name: "RLCS" }]);
+    const rlcs = tournament("t1", "RLCS");
+    playerService.find.mockResolvedValue([player("p1")]);
+    teamService.find.mockResolvedValue([team("tm1")]);
+    tournamentService.searchByName.mockResolvedValue([rlcs]);
 
     const result = await service.search({
       query: "rl",
@@ -24,7 +35,7 @@ describe("SearchService", () => {
       offset: 0,
     });
 
-    expect(result.tournaments).toEqual([{ id: "t1", name: "RLCS" }]);
+    expect(result.tournaments).toStrictEqual([rlcs]);
     expect(result.total.tournaments).toBe(1);
     expect(tournamentService.searchByName).toHaveBeenCalledWith({
       name: "rl",
@@ -46,15 +57,15 @@ describe("SearchService", () => {
   });
 
   it.each([
-    ["player", playerService.find],
-    ["team", teamService.find],
-  ] as const)("searches only %ss when type is %s", async (type, source) => {
-    source.mockResolvedValue([{ id: "x" }]);
+    ["player", () => playerService.find.mockResolvedValue([player("x")]), playerService.find],
+    ["team", () => teamService.find.mockResolvedValue([team("x")]), teamService.find],
+  ] as const)("searches only %ss when type is %s", async (type, seed, source) => {
+    seed();
 
     const result = await service.search({ query: "rl", type, limit: 4, offset: 1 });
 
     expect(source).toHaveBeenCalledWith({ name: "rl", limit: 4, offset: 1 });
-    expect(result.total).toEqual({
+    expect(result.total).toStrictEqual({
       players: type === "player" ? 1 : 0,
       teams: type === "team" ? 1 : 0,
       tournaments: 0,
@@ -63,7 +74,7 @@ describe("SearchService", () => {
   });
 
   it("searches only tournaments when type is tournament", async () => {
-    tournamentService.searchByName.mockResolvedValue([{ id: "t1" }]);
+    tournamentService.searchByName.mockResolvedValue([tournament("t1")]);
 
     const result = await service.search({
       query: "major",
@@ -74,8 +85,8 @@ describe("SearchService", () => {
 
     expect(playerService.find).not.toHaveBeenCalled();
     expect(teamService.find).not.toHaveBeenCalled();
-    expect(result.players).toEqual([]);
-    expect(result.teams).toEqual([]);
+    expect(result.players).toStrictEqual([]);
+    expect(result.teams).toStrictEqual([]);
     expect(tournamentService.searchByName).toHaveBeenCalledWith({
       name: "major",
       limit: 8,

@@ -10,6 +10,7 @@ import type {
   CompetitionTransaction,
   CompetitionWriteScope,
   LineupWriter,
+  MatchQueries,
   MatchWriter,
   PlayerLineupRow,
 } from "../ports";
@@ -58,7 +59,7 @@ function match(id: string, source: DataSource, tournamentSource: DataSource = "m
   });
 }
 
-describe("MatchLineupService", () => {
+describe(MatchLineupService, () => {
   const matches = new Map<string, Match>();
   const replaced: { matchId: string; lineups: MatchLineupInput[] }[] = [];
   let stored: LineupRow[] = [];
@@ -106,7 +107,7 @@ describe("MatchLineupService", () => {
 
   const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };
 
-  const byIds = vi.fn(async (ids: string[]) =>
+  const byIds = vi.fn<MatchQueries["byIds"]>(async (ids) =>
     ids.flatMap((id) => {
       const found = matches.get(id);
 
@@ -154,13 +155,13 @@ describe("MatchLineupService", () => {
       { participantId: "side-a", playerIds: ["alpha", "delta"] },
     ]);
 
-    expect(replaced).toEqual([
+    expect(replaced).toStrictEqual([
       {
         matchId: "manual-match",
         lineups: [{ participantId: "side-a", playerIds: ["alpha", "delta"] }],
       },
     ]);
-    expect(result).toEqual({
+    expect(result).toStrictEqual({
       source: "manual",
       lineups: [
         {
@@ -176,7 +177,7 @@ describe("MatchLineupService", () => {
 
   it("clears every lineup when given none", async () => {
     await service.set("manual-match", []);
-    expect(replaced).toEqual([{ matchId: "manual-match", lineups: [] }]);
+    expect(replaced).toStrictEqual([{ matchId: "manual-match", lineups: [] }]);
   });
 
   it("refuses a missing match, a foreign participant and an unknown or merged player", async () => {
@@ -188,7 +189,7 @@ describe("MatchLineupService", () => {
     await expect(
       service.set("manual-match", [{ participantId: "side-a", playerIds: ["delta"] }]),
     ).rejects.toThrow("must exist");
-    expect(replaced).toEqual([]);
+    expect(replaced).toStrictEqual([]);
   });
 
   it("reports start.gg as the source of a start.gg match or stage", async () => {
@@ -208,7 +209,7 @@ describe("MatchLineupService", () => {
     await expect(service.requireProposable("startgg-stage-match", lineups)).rejects.toThrow(
       "start.gg",
     );
-    expect(replaced).toEqual([]);
+    expect(replaced).toStrictEqual([]);
   });
 
   describe("stand-in history", () => {
@@ -223,7 +224,9 @@ describe("MatchLineupService", () => {
     it("lists only the series played outside the participant roster, start.gg included for the site", async () => {
       const standIns = await service.standIns("delta");
 
-      expect(standIns.map(({ participantId, match: { id } }) => ({ participantId, id }))).toEqual([
+      expect(
+        standIns.map(({ participantId, match: { id } }) => ({ participantId, id })),
+      ).toStrictEqual([
         { participantId: "side-b", id: "startgg-match" },
         { participantId: "side-a", id: "manual-match" },
       ]);
@@ -231,12 +234,12 @@ describe("MatchLineupService", () => {
 
     it("skips a side that no longer plays the match after a sync", async () => {
       playerRows = [{ matchId: "manual-match", participantId: "side-gone", rosterIds: [] }];
-      expect(await service.standIns("delta")).toEqual([]);
+      await expect(service.standIns("delta")).resolves.toStrictEqual([]);
     });
 
     it("does not read matches for a player who never stood in", async () => {
       playerRows = [{ matchId: "manual-match", participantId: "side-a", rosterIds: ["delta"] }];
-      expect(await service.standIns("delta")).toEqual([]);
+      await expect(service.standIns("delta")).resolves.toStrictEqual([]);
       expect(byIds).not.toHaveBeenCalled();
     });
   });

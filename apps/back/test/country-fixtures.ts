@@ -42,9 +42,11 @@ function redistributable(match: Match): boolean {
 }
 
 export function countrySources() {
-  const findByNationality = vi.fn(async (code: string) => (code === "FR" ? french : []));
+  const findByNationality = vi.fn<CountrySources["players"]["findByNationality"]>(
+    async (code: string) => (code === "FR" ? french : []),
+  );
 
-  const list = vi.fn(
+  const list = vi.fn<CountrySources["matches"]["list"]>(
     async (
       kind: MatchListKind,
       options: MatchListQueryOptions = {},

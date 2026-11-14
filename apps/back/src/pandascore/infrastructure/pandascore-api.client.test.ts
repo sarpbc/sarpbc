@@ -5,7 +5,7 @@ import { requestUrl } from "../../../test/fetch-mock";
 import { PandascoreApiClient } from "./pandascore-api.client";
 import { PandascoreApiError } from "./pandascore-api.errors";
 
-describe("PandascoreApiClient", () => {
+describe(PandascoreApiClient, () => {
   const fetchMock = vi.fn<typeof fetch>();
   let client: PandascoreApiClient;
 
@@ -16,7 +16,7 @@ describe("PandascoreApiClient", () => {
         {
           provide: ConfigService,
           useValue: {
-            get: vi.fn().mockReturnValue("test-token"),
+            get: vi.fn<(key: string) => string | undefined>().mockReturnValue("test-token"),
           },
         },
       ],
@@ -38,35 +38,44 @@ describe("PandascoreApiClient", () => {
           PandascoreApiClient,
           {
             provide: ConfigService,
-            useValue: { get: vi.fn().mockReturnValue(undefined) },
+            useValue: {
+              get: vi.fn<(key: string) => string | undefined>().mockReturnValue(undefined),
+            },
           },
         ],
       }).compile(),
     ).rejects.toThrow("PandaScore API token not configured");
   });
 
-  it("listIncidents builds query params and paginates", async () => {
-    fetchMock
-      .mockResolvedValueOnce(
-        Response.json([{ id: 1, type: "match", modified_at: "2025-01-01T00:00:00Z" }]),
-      )
-      .mockResolvedValueOnce(Response.json([]));
+  describe("listIncidents", () => {
+    let incidents: Awaited<ReturnType<PandascoreApiClient["listIncidents"]>>;
 
-    const since = new Date("2025-01-01T00:00:00Z");
+    beforeEach(async () => {
+      fetchMock
+        .mockResolvedValueOnce(
+          Response.json([{ id: 1, type: "match", modified_at: "2025-01-01T00:00:00Z" }]),
+        )
+        .mockResolvedValueOnce(Response.json([]));
 
-    const incidents = await client.listIncidents({
-      since,
-      perPage: 1,
+      incidents = await client.listIncidents({
+        since: new Date("2025-01-01T00:00:00Z"),
+        perPage: 1,
+      });
     });
 
-    expect(incidents).toHaveLength(1);
-    expect(fetchMock).toHaveBeenCalledTimes(2);
+    it("paginates until an empty page", () => {
+      expect(incidents).toHaveLength(1);
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    });
 
-    const firstCallUrl = requestUrl(fetchMock.mock.calls[0]?.[0]);
-    expect(firstCallUrl).toContain("/incidents");
-    expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
-    expect(firstCallUrl).toContain("videogame=rl");
-    expect(firstCallUrl).not.toContain("videogame%5B%5D=");
+    it("builds the query params", () => {
+      const firstCallUrl = requestUrl(fetchMock.mock.calls[0]?.[0]);
+
+      expect(firstCallUrl).toContain("/incidents");
+      expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
+      expect(firstCallUrl).toContain("videogame=rl");
+      expect(firstCallUrl).not.toContain("videogame%5B%5D=");
+    });
   });
 
   it("getTournaments merges past, upcoming, and running", async () => {
@@ -82,7 +91,7 @@ describe("PandascoreApiClient", () => {
 
     const tournaments = await client.getTournaments();
 
-    expect(tournaments).toEqual([
+    expect(tournaments).toStrictEqual([
       { id: 1, name: "Past" },
       { id: 2, name: "Upcoming" },
       { id: 3, name: "Running" },

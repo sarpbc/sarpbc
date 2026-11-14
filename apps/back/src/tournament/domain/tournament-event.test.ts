@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { compareStages, eventDisplayName } from "./tournament-event";
 
-describe("eventDisplayName", () => {
+describe(eventDisplayName, () => {
   it("prefixes the league to a serie that does not name it", () => {
     expect(
       eventDisplayName({
@@ -57,7 +57,7 @@ const stage = (name: string, beginAt: string | null) => ({
   beginAt: beginAt === null ? null : new Date(beginAt),
 });
 
-describe("compareStages", () => {
+describe(compareStages, () => {
   it("orders newest day first, then name within a day", () => {
     const stages = [
       stage("Swiss", "2026-05-01T10:00:00Z"),
@@ -66,7 +66,7 @@ describe("compareStages", () => {
       stage("Undated", null),
     ];
 
-    expect(stages.toSorted(compareStages).map((s) => s.name)).toEqual([
+    expect(stages.toSorted(compareStages).map((s) => s.name)).toStrictEqual([
       "Group A",
       "Group B",
       "Swiss",

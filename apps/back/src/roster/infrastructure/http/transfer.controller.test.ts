@@ -8,7 +8,7 @@ import { TeamService } from "../../application/team.service";
 import { PlayerService } from "../../application/player.service";
 import { unconstructed } from "../../../../test/doubles";
 
-describe("TransferController", () => {
+describe(TransferController, () => {
   const kc = Object.assign(new Team(), {
     id: "kc",
     name: "Karmine Corp",
@@ -28,9 +28,9 @@ describe("TransferController", () => {
     joinSourceUrl: "https://x.com/KarmineCorp/status/1",
   });
 
-  const findAndCount = vi.fn();
-  const teamBySlug = vi.fn();
-  const playerBySlug = vi.fn();
+  const findAndCount = vi.fn<TransferService["findAndCount"]>();
+  const teamBySlug = vi.fn<TeamService["findBySlug"]>();
+  const playerBySlug = vi.fn<PlayerService["findBySlug"]>();
 
   const controller = new TransferController(
     Object.assign(unconstructed(TransferService), { findAndCount }),
@@ -59,7 +59,7 @@ describe("TransferController", () => {
   });
 
   it("presents transfers with their player, team and calendar day", async () => {
-    await expect(controller.find(page)).resolves.toEqual({
+    await expect(controller.find(page)).resolves.toStrictEqual({
       transfers: [
         {
           id: "c1:join",
@@ -115,7 +115,7 @@ describe("TransferController", () => {
   it("returns an empty page for an unknown team or player", async () => {
     teamBySlug.mockResolvedValue(null);
 
-    await expect(controller.find({ ...page, team: "missing" })).resolves.toEqual({
+    await expect(controller.find({ ...page, team: "missing" })).resolves.toStrictEqual({
       transfers: [],
       count: 0,
     });

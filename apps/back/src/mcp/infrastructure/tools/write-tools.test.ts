@@ -10,21 +10,42 @@ import { writeTools, type WriteToolServices } from "./write-tools";
 
 function services(): WriteToolServices {
   return {
-    newsService: { create: vi.fn(), update: vi.fn(), findOneAdminByIdOrSlug: vi.fn() },
-    tournaments: { findById: vi.fn() },
-    teamService: { findById: vi.fn(), findBySlug: vi.fn() },
-    playerService: { findById: vi.fn(), findBySlug: vi.fn() },
-    matchService: {
-      createMatch: vi.fn(),
-      createEmptyBracket: vi.fn(),
-      setMatchWinner: vi.fn(),
-      setGameVods: vi.fn(),
-      updateMatch: vi.fn(),
-      setSource: vi.fn(),
+    newsService: {
+      create: vi.fn<WriteToolServices["newsService"]["create"]>(),
+      update: vi.fn<WriteToolServices["newsService"]["update"]>(),
+      findOneAdminByIdOrSlug: vi.fn<WriteToolServices["newsService"]["findOneAdminByIdOrSlug"]>(),
     },
-    manualTournamentService: { create: vi.fn(), update: vi.fn() },
-    pandascoreTournamentSync: { execute: vi.fn(), executeByPandascoreId: vi.fn() },
-    pandascoreNewTournamentsSync: { execute: vi.fn() },
+    tournaments: {
+      findById: vi.fn<WriteToolServices["tournaments"]["findById"]>(),
+    },
+    teamService: {
+      findById: vi.fn<WriteToolServices["teamService"]["findById"]>(),
+      findBySlug: vi.fn<WriteToolServices["teamService"]["findBySlug"]>(),
+    },
+    playerService: {
+      findById: vi.fn<WriteToolServices["playerService"]["findById"]>(),
+      findBySlug: vi.fn<WriteToolServices["playerService"]["findBySlug"]>(),
+    },
+    matchService: {
+      createMatch: vi.fn<WriteToolServices["matchService"]["createMatch"]>(),
+      createEmptyBracket: vi.fn<WriteToolServices["matchService"]["createEmptyBracket"]>(),
+      setMatchWinner: vi.fn<WriteToolServices["matchService"]["setMatchWinner"]>(),
+      setGameVods: vi.fn<WriteToolServices["matchService"]["setGameVods"]>(),
+      updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>(),
+      setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>(),
+    },
+    manualTournamentService: {
+      create: vi.fn<WriteToolServices["manualTournamentService"]["create"]>(),
+      update: vi.fn<WriteToolServices["manualTournamentService"]["update"]>(),
+    },
+    pandascoreTournamentSync: {
+      execute: vi.fn<WriteToolServices["pandascoreTournamentSync"]["execute"]>(),
+      executeByPandascoreId:
+        vi.fn<WriteToolServices["pandascoreTournamentSync"]["executeByPandascoreId"]>(),
+    },
+    pandascoreNewTournamentsSync: {
+      execute: vi.fn<WriteToolServices["pandascoreNewTournamentsSync"]["execute"]>(),
+    },
   };
 }
 
@@ -54,7 +75,7 @@ function setup(role: "admin" | "journalist") {
 
   const matchService = {
     ...services().matchService,
-    setGameVods: vi.fn().mockResolvedValue(match),
+    setGameVods: vi.fn<WriteToolServices["matchService"]["setGameVods"]>().mockResolvedValue(match),
   };
 
   const tool = defined(writeTools({ ...services(), matchService }), "set_match_game_vods");
@@ -76,7 +97,7 @@ describe("set_match_game_vods", () => {
     expect(matchService.setGameVods).toHaveBeenCalledWith("m1", 5, links);
     const matchUrl: unknown = expect.stringMatching(/^https:\/\/sarpbc\.test\/matches\/12\//);
 
-    expect(jsonOf(result)).toEqual({
+    expect(jsonOf(result)).toStrictEqual({
       id: "m1",
       vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
       url: matchUrl,
@@ -142,20 +163,33 @@ function setupCreateMatch(
   });
 
   const clubs = [kc.team, m8.team, outsider];
-  const matchService = { createMatch: vi.fn().mockResolvedValue(match) };
+
+  const matchService = {
+    createMatch: vi.fn<WriteToolServices["matchService"]["createMatch"]>().mockResolvedValue(match),
+  };
 
   const tournaments = {
-    findById: vi.fn(async (id: string) => (id === tournament.id ? tournament : null)),
+    findById: vi.fn<WriteToolServices["tournaments"]["findById"]>(async (id) =>
+      id === tournament.id ? tournament : null,
+    ),
   };
 
   const teamService = {
-    findById: vi.fn(async (id: string) => clubs.find((club) => club.id === id) ?? null),
-    findBySlug: vi.fn(async (slug: string) => clubs.find((club) => club.slug === slug) ?? null),
+    findById: vi.fn<WriteToolServices["teamService"]["findById"]>(
+      async (id) => clubs.find((club) => club.id === id) ?? null,
+    ),
+    findBySlug: vi.fn<WriteToolServices["teamService"]["findBySlug"]>(
+      async (slug) => clubs.find((club) => club.slug === slug) ?? null,
+    ),
   };
 
   const manualTournamentService = {
-    create: vi.fn().mockResolvedValue(tournament),
-    update: vi.fn().mockResolvedValue(tournament),
+    create: vi
+      .fn<WriteToolServices["manualTournamentService"]["create"]>()
+      .mockResolvedValue(tournament),
+    update: vi
+      .fn<WriteToolServices["manualTournamentService"]["update"]>()
+      .mockResolvedValue(tournament),
   };
 
   const tools = writeTools({
@@ -363,14 +397,16 @@ function setupBracket(source: "manual" | "startgg") {
 
   const matchService = {
     ...base.matchService,
-    updateMatch: vi.fn().mockResolvedValue(match),
-    setSource: vi.fn().mockResolvedValue(match),
-    createEmptyBracket: vi.fn().mockResolvedValue([match]),
+    updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>().mockResolvedValue(match),
+    setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>().mockResolvedValue(match),
+    createEmptyBracket: vi
+      .fn<WriteToolServices["matchService"]["createEmptyBracket"]>()
+      .mockResolvedValue([match]),
   };
 
   const tournaments = {
     findById: vi
-      .fn()
+      .fn<WriteToolServices["tournaments"]["findById"]>()
       .mockResolvedValue(Object.assign(new Tournament(), { id: "finals", ...stage })),
   };
 

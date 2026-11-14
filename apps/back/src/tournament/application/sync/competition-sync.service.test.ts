@@ -9,7 +9,15 @@ import { TournamentParticipant } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
 import { Team } from "../../../roster/domain/team";
-import type { CompetitionTransaction, EventWriter, TournamentWriter } from "../ports";
+import type {
+  CompetitionCache,
+  CompetitionDiagnostics,
+  CompetitionEvents,
+  CompetitionTransaction,
+  EventWriter,
+  RosterIdentityWriter,
+  TournamentWriter,
+} from "../ports";
 import type {
   CompetitionIncident,
   ProviderDeletion,
@@ -34,25 +42,27 @@ function memoryStore() {
   const all = () => [...tournaments.values()];
 
   const tournamentWriter = {
-    byPandascoreId: vi.fn(async (id: number) => {
+    byPandascoreId: vi.fn<TournamentWriter["byPandascoreId"]>(async (id) => {
       const found = all().find((t) => t.pandascoreId === id);
 
       return found ? copy(Tournament, found) : null;
     }),
-    load: vi.fn(async (id: string) => {
+    load: vi.fn<TournamentWriter["load"]>(async (id) => {
       const found = tournaments.get(id);
 
       return found ? copy(Tournament, found) : null;
     }),
-    manualCandidates: vi.fn(async () => []),
-    save: vi.fn(async (tournament: Tournament) => {
+    manualCandidates: vi.fn<TournamentWriter["manualCandidates"]>(async () => []),
+    save: vi.fn<TournamentWriter["save"]>(async (tournament) => {
       tournaments.set(tournament.id, copy(Tournament, tournament));
     }),
-    participants: vi.fn(async (): Promise<TournamentParticipant[]> => []),
+    participants: vi.fn<TournamentWriter["participants"]>(async () => []),
     saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
     setPlacements: vi.fn<TournamentWriter["setPlacements"]>(),
-    leagueByPandascoreId: vi.fn(async (id: number) => leagues.get(id) ?? null),
-    saveLeague: vi.fn(async (league: League) => {
+    leagueByPandascoreId: vi.fn<TournamentWriter["leagueByPandascoreId"]>(
+      async (id) => leagues.get(id) ?? null,
+    ),
+    saveLeague: vi.fn<TournamentWriter["saveLeague"]>(async (league) => {
       if (league.pandascoreId !== null) leagues.set(league.pandascoreId, copy(League, league));
     }),
   };
@@ -163,11 +173,18 @@ const matchCommand = (pandascoreId: number, status: string) => ({
 });
 
 describe("Competition synchronization", () => {
-  const rosters = { upsertTeam: vi.fn(), upsertPlayer: vi.fn() };
+  const rosters = {
+    upsertTeam: vi.fn<RosterIdentityWriter["upsertTeam"]>(),
+    upsertPlayer: vi.fn<RosterIdentityWriter["upsertPlayer"]>(),
+  };
 
-  const cache = { invalidateTournament: vi.fn() };
-  const published = { publish: vi.fn() };
-  const diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
+  const published = { publish: vi.fn<CompetitionEvents["publish"]>() };
+
+  const diagnostics = {
+    error: vi.fn<CompetitionDiagnostics["error"]>(),
+    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
+  };
 
   const log: string[] = [];
   let store: ReturnType<typeof memoryStore>;
@@ -251,14 +268,14 @@ describe("Competition synchronization", () => {
       name: "RLCS Major Paris 2026",
       league: { name: "RLCS Major" },
     });
-    expect(log).toEqual(["commit", `invalidate ${created.id}`]);
+    expect(log).toStrictEqual(["commit", `invalidate ${created.id}`]);
   });
 
   it("files every stage of a serie under one event with distinct stage slugs", async () => {
     const first = await service.upsertTournament(stageCommand({ pandascoreId: 1 }));
     const second = await service.upsertTournament(stageCommand({ pandascoreId: 2 }));
     expect(second.event.id).toBe(first.event.id);
-    expect([first.slug, second.slug]).toEqual(["playoffs", "playoffs-2"]);
+    expect([first.slug, second.slug]).toStrictEqual(["playoffs", "playoffs-2"]);
     expect(store.events.size).toBe(1);
   });
 
@@ -283,7 +300,7 @@ describe("Competition synchronization", () => {
       slug: "rlcs-major-paris-2026",
       name: "RLCS Major Paris Major 2026",
     });
-    expect(log).toEqual(["commit", `invalidate ${created.id}`, `invalidate ${sibling.id}`]);
+    expect(log).toStrictEqual(["commit", `invalidate ${created.id}`, `invalidate ${sibling.id}`]);
   });
 
   it("keeps local artwork while updating feed-owned fields", async () => {
@@ -295,7 +312,9 @@ describe("Competition synchronization", () => {
       slug: "playoffs",
       imageUrl: "local-art",
     });
-    expect(await service.upsertTournament(stageCommand({ name: "Group A" }))).toMatchObject({
+    await expect(
+      service.upsertTournament(stageCommand({ name: "Group A" })),
+    ).resolves.toMatchObject({
       name: "Group A",
       slug: "playoffs",
       imageUrl: "local-art",
@@ -342,7 +361,7 @@ describe("Competition synchronization", () => {
       slug: "rlcs-major-paris-2026",
       name: "RLCS Major Major Paris 2026",
     });
-    expect(log).toEqual(["commit", `invalidate ${stage.id}`]);
+    expect(log).toStrictEqual(["commit", `invalidate ${stage.id}`]);
   });
 
   it("ignores a serie update that has no event yet", async () => {
@@ -380,7 +399,7 @@ describe("Competition synchronization", () => {
       event: { id: target.event.id },
     });
     expect(store.events.has(oldEventId)).toBe(false);
-    expect(log).toEqual(["commit", `invalidate ${merged.id}`]);
+    expect(log).toStrictEqual(["commit", `invalidate ${merged.id}`]);
     await service.applyIncident(
       serieIncident({ changeType: "deletion", deletion: { kind: "merged", intoId: 300 } }),
     );
@@ -396,29 +415,26 @@ describe("Competition synchronization", () => {
     },
   );
 
-  it.each([false, true])(
-    "historical rosters never update current membership (existing=%s)",
-    async (existing) => {
-      if (existing)
-        store.tournamentWriter.participants.mockResolvedValue([
-          Object.assign(new TournamentParticipant(), {
-            id: "participant",
-            team: Object.assign(new Team(), { id: "team" }),
-          }),
-        ]);
-      await service.upsertTournament({
-        pandascoreId: 42,
-        name: "Past Cup",
-        expectedRoster: [
-          {
-            team: { pandascoreId: 8, name: "Past team", slug: "past-team" },
-            players: [
-              { pandascoreId: 1, name: "Player", slug: "player" },
-              { pandascoreId: 3, name: "Sub", slug: "sub" },
-            ],
-          },
-        ],
-      });
+  const upsertPastCup = async () => {
+    await service.upsertTournament({
+      pandascoreId: 42,
+      name: "Past Cup",
+      expectedRoster: [
+        {
+          team: { pandascoreId: 8, name: "Past team", slug: "past-team" },
+          players: [
+            { pandascoreId: 1, name: "Player", slug: "player" },
+            { pandascoreId: 3, name: "Sub", slug: "sub" },
+          ],
+        },
+      ],
+    });
+  };
+
+  describe("historical rosters", () => {
+    it("registers the players without updating current membership", async () => {
+      await upsertPastCup();
+
       expect(rosters.upsertPlayer).toHaveBeenCalledWith({
         pandascoreId: 1,
         name: "Player",
@@ -429,16 +445,31 @@ describe("Competition synchronization", () => {
         name: "Sub",
         slug: "sub",
       });
+    });
+
+    it("saves the participant with its players", async () => {
+      await upsertPastCup();
+
       expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
         expect.objectContaining({ teamId: "team", playerIds: ["1", "3"] }),
       );
+    });
 
-      if (existing)
-        expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
-          expect.objectContaining({ id: "participant" }),
-        );
-    },
-  );
+    it("updates the participant the tournament already has", async () => {
+      store.tournamentWriter.participants.mockResolvedValue([
+        Object.assign(new TournamentParticipant(), {
+          id: "participant",
+          team: Object.assign(new Team(), { id: "team" }),
+        }),
+      ]);
+
+      await upsertPastCup();
+
+      expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
+        expect.objectContaining({ id: "participant", teamId: "team", playerIds: ["1", "3"] }),
+      );
+    });
+  });
 
   it("stores PandaScore final ranks as participant placements and clears missing ones", async () => {
     store.tournamentWriter.participants.mockResolvedValue([
@@ -463,7 +494,7 @@ describe("Competition synchronization", () => {
     expect(placements?.has("unknown-team")).toBe(false);
     expect(
       [...(placements?.values() ?? [])].toSorted((a, b) => (a ?? Infinity) - (b ?? Infinity)),
-    ).toEqual([1, null]);
+    ).toStrictEqual([1, null]);
   });
 
   it("leaves placements untouched when the feed carries no standings", async () => {
@@ -476,7 +507,10 @@ describe("Competition synchronization", () => {
     await expect(
       service.upsertTournament({ pandascoreId: 42, name: "Cup" }),
     ).resolves.toMatchObject({ name: "Cup" });
-    expect(diagnostics.error).toHaveBeenCalled();
+    expect(diagnostics.error).toHaveBeenCalledExactlyOnceWith(
+      "Tournament cache invalidation failed",
+      expect.any(Error),
+    );
   });
 
   describe("end date", () => {
@@ -485,7 +519,7 @@ describe("Competition synchronization", () => {
       store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
       store.timings.set("stage", [finished("2025-03-01T10:00Z"), finished("2025-03-02T18:00Z")]);
       const upsertTournamentResult = await service.upsertTournament(stageCommand({}));
-      expect(upsertTournamentResult.endAt).toEqual(new Date("2025-03-02T18:00Z"));
+      expect(upsertTournamentResult.endAt).toStrictEqual(new Date("2025-03-02T18:00Z"));
     });
 
     it("keeps the stage open while a match remains", async () => {
@@ -532,7 +566,7 @@ describe("Competition synchronization", () => {
         changeType: "update",
         command: stageCommand({}),
       });
-      expect(store.tournaments.get("stage")?.endAt).toEqual(new Date("2025-03-02T18:00Z"));
+      expect(store.tournaments.get("stage")?.endAt).toStrictEqual(new Date("2025-03-02T18:00Z"));
     });
 
     it("keeps a staff-corrected end date over PandaScore", async () => {
@@ -550,7 +584,7 @@ describe("Competition synchronization", () => {
         stageCommand({ endAt: new Date("2025-04-01") }),
       );
 
-      expect(synced.endAt).toEqual(new Date("2025-03-05"));
+      expect(synced.endAt).toStrictEqual(new Date("2025-03-05"));
     });
   });
 
@@ -598,8 +632,7 @@ describe("Competition synchronization", () => {
         matchCommand(11, "running"),
       ]);
       const decided = saved.find((match) => match.pandascoreId === 10);
-      expect(published.publish).toHaveBeenCalledTimes(1);
-      expect(published.publish).toHaveBeenCalledWith(matchDecided(present(decided).id));
+      expect(published.publish).toHaveBeenCalledExactlyOnceWith(matchDecided(present(decided).id));
     });
 
     it("keeps the write when publication fails", async () => {

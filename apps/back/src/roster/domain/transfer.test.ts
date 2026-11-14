@@ -4,7 +4,7 @@ import { Player } from "./player";
 import { Team } from "./team";
 import { deriveTransfers } from "./transfer";
 
-describe("deriveTransfers", () => {
+describe(deriveTransfers, () => {
   const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
@@ -41,7 +41,7 @@ describe("deriveTransfers", () => {
         contract("v", vitality, "2022-01-10", "2025-06-01"),
         contract("k", kc, "2025-06-01", null),
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       ["arrival", "2025-06-01", "kc"],
       ["departure", "2025-06-01", "vitality"],
       ["arrival", "2022-01-10", "vitality"],
@@ -55,7 +55,7 @@ describe("deriveTransfers", () => {
         contract("bench", kc, "2025-03-01", "2025-08-01", "benched"),
         contract("loan", vitality, "2025-04-01", "2025-07-01", "loaned"),
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       ["departure", "2025-08-01", "kc"],
       ["departure", "2025-07-01", "vitality"],
       ["loan", "2025-04-01", "vitality"],
@@ -70,7 +70,7 @@ describe("deriveTransfers", () => {
         contract("bench", kc, "2025-01-01", "2025-05-01", "benched"),
         contract("starter", kc, "2025-05-01", null),
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       ["arrival", "2025-05-01", "kc"],
       ["benched", "2025-01-01", "kc"],
     ]);
@@ -83,7 +83,7 @@ describe("deriveTransfers", () => {
         contract("coach", kc, "2025-09-01", "2026-06-01", "coach"),
         contract("analyst", vitality, "2026-07-01", null, "analyst"),
       ]),
-    ).toEqual([
+    ).toStrictEqual([
       ["staff", "2026-07-01", "vitality"],
       ["departure", "2026-06-01", "kc"],
       ["staff", "2025-09-01", "kc"],
@@ -102,8 +102,8 @@ describe("deriveTransfers", () => {
   });
 
   it("leaves out movements dated after the reference day", () => {
-    expect(summary([contract("k", kc, "2026-11-15", null)])).toEqual([]);
-    expect(summary([contract("v", vitality, "2026-01-01", "2026-12-01")])).toEqual([
+    expect(summary([contract("k", kc, "2026-11-15", null)])).toStrictEqual([]);
+    expect(summary([contract("v", vitality, "2026-01-01", "2026-12-01")])).toStrictEqual([
       ["arrival", "2026-01-01", "vitality"],
     ]);
   });

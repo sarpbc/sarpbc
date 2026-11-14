@@ -13,9 +13,9 @@ async function png(width: number, height: number) {
     .toBuffer();
 }
 
-describe("SharpTeamLogoImages", () => {
+describe(SharpTeamLogoImages, () => {
   it("reads raster dimensions", async () => {
-    expect(await images.dimensions(await png(300, 150))).toEqual({
+    await expect(images.dimensions(await png(300, 150))).resolves.toStrictEqual({
       width: 300,
       height: 150,
     });
@@ -38,7 +38,7 @@ describe("SharpTeamLogoImages", () => {
 
     const output = await images.normalize(svg, "svg", 512);
 
-    expect(await sharp(output).metadata()).toMatchObject({
+    await expect(sharp(output).metadata()).resolves.toMatchObject({
       format: "webp",
       width: 512,
       height: 512,
@@ -53,7 +53,7 @@ describe("SharpTeamLogoImages", () => {
 
     const output = await images.normalize(svg, "svg", 512);
 
-    expect(await sharp(output).metadata()).toMatchObject({
+    await expect(sharp(output).metadata()).resolves.toMatchObject({
       format: "webp",
       width: 512,
       height: 512,

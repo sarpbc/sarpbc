@@ -5,7 +5,7 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { Team } from "../domain/team";
 import { TeamAlias } from "../domain/team-alias";
-import type { TeamAliasTransaction } from "./ports";
+import type { TeamAliasTransaction, TeamAliasWriter, TeamWriter } from "./ports";
 import { TeamAliasService } from "./team-alias.service";
 
 const INPUT: TeamAliasInput = {
@@ -35,28 +35,32 @@ function setup(owner: string | null = null) {
   const merged = Object.assign(new Team(), { id: "merged", name: "Old", mergedIntoId: "team" });
 
   const aliases = {
-    pandascoreOwner: vi.fn(async () => owner),
-    save: vi.fn(async (_teamId: string, alias: TeamAlias) => {
+    pandascoreOwner: vi.fn<TeamAliasWriter["pandascoreOwner"]>(async () => owner),
+    save: vi.fn<TeamAliasWriter["save"]>(async (_teamId, alias) => {
       alias.id ||= "new-alias";
     }),
-    delete: vi.fn(async () => {}),
+    delete: vi.fn<TeamAliasWriter["delete"]>(async () => {}),
   };
 
   const known = new Map([team, merged].map((entry) => [entry.id, entry]));
-  const teams = { findById: vi.fn(async (id: string) => known.get(id) ?? null) };
+
+  const teams = {
+    findById: vi.fn<TeamWriter["findById"]>(async (id) => known.get(id) ?? null),
+  };
+
   const transaction: TeamAliasTransaction = { run: async (work) => await work({ teams, aliases }) };
 
   return { aliases, service: new TeamAliasService(transaction) };
 }
 
-describe("TeamAliasService", () => {
+describe(TeamAliasService, () => {
   it("stores a sourced alias with its trimmed name", async () => {
     const { aliases, service } = setup();
 
     const alias = await service.add("team", INPUT);
 
     expect(alias).toMatchObject({ id: "new-alias", name: "Fixture Origins", to: "2022-06-01" });
-    expect(aliases.save).toHaveBeenCalledWith("team", alias);
+    expect(aliases.save).toHaveBeenCalledExactlyOnceWith("team", alias);
   });
 
   it("refuses Liquipedia, overlapping periods, unknown and merged teams", async () => {
@@ -77,7 +81,7 @@ describe("TeamAliasService", () => {
     await expect(service.add("team", { ...INPUT, pandascoreId: 99 })).rejects.toThrow(
       ConflictError,
     );
-    expect(aliases.pandascoreOwner).toHaveBeenCalledWith(99, "");
+    expect(aliases.pandascoreOwner).toHaveBeenCalledExactlyOnceWith(99, "");
   });
 
   it("updates and deletes only an alias of the team", async () => {
@@ -93,7 +97,7 @@ describe("TeamAliasService", () => {
     await service.delete("team", "a1");
 
     expect(updated).toMatchObject({ id: "a1", from: "2022-07-01" });
-    expect(aliases.delete).toHaveBeenCalledWith(expect.objectContaining({ id: "a1" }));
+    expect(aliases.delete).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ id: "a1" }));
     await expect(service.update("team", "other", INPUT)).rejects.toThrow(NotFoundError);
   });
 

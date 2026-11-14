@@ -5,9 +5,9 @@ import { MATCH_DECIDED, matchDecided } from "../../../tournament/domain/match-de
 import { PickemService } from "../application/pickem.service";
 import { MatchDecidedListener } from "./match-decided.listener";
 
-describe("MatchDecidedListener", () => {
+describe(MatchDecidedListener, () => {
   it("scores a match when the decided event is emitted on the application bus", async () => {
-    const autoScoreMatch = vi.fn().mockResolvedValue(undefined);
+    const autoScoreMatch = vi.fn<PickemService["autoScoreMatch"]>().mockResolvedValue(undefined);
 
     const module = await Test.createTestingModule({
       imports: [EventEmitterModule.forRoot()],

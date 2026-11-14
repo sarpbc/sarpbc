@@ -9,14 +9,17 @@ function prize(id: string, teamId: string, tournamentId: string, playerIds: stri
     id,
     team: { id: teamId },
     tournament: { id: tournamentId },
-    players: { add: vi.fn(), getItems: () => playerIds.map((playerId) => ({ id: playerId })) },
+    players: {
+      add: vi.fn<(items: { id: string }[]) => void>(),
+      getItems: () => playerIds.map((playerId) => ({ id: playerId })),
+    },
   };
 }
 
 function mover(prizes: ReturnType<typeof prize>[]) {
-  const find = vi.fn().mockResolvedValue(prizes);
-  const nativeDelete = vi.fn();
-  const nativeUpdate = vi.fn();
+  const find = vi.fn<EntityManager["find"]>().mockResolvedValue(prizes);
+  const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
+  const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
 
   const references = new TournamentRosterReferences(
     Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),

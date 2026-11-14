@@ -44,9 +44,10 @@ describe("country pages (e2e)", () => {
   });
 
   it("lists the nationalities in use", async () => {
-    const response = await request(app.getHttpServer()).get("/countries").expect(200);
+    const response = await request(app.getHttpServer()).get("/countries");
 
-    expect(response.body).toEqual({
+    expect(response.status).toBe(200);
+    expect(response.body).toStrictEqual({
       countries: [
         { code: "FR", playerCount: 4 },
         { code: "US", playerCount: 1 },
@@ -54,12 +55,19 @@ describe("country pages (e2e)", () => {
     });
   });
 
-  it("returns the players, teams and matches of a country without start.gg matches", async () => {
-    const response = await request(app.getHttpServer()).get("/countries/fr").expect(200);
-    const { country } = countryBody.parse(response.body);
+  const frenchCountry = async () => {
+    const response = await request(app.getHttpServer()).get("/countries/fr");
+
+    expect(response.status).toBe(200);
+
+    return countryBody.parse(response.body).country;
+  };
+
+  it("returns the players of a country", async () => {
+    const country = await frenchCountry();
 
     expect(country.code).toBe("FR");
-    expect(country.players.map(({ slug }) => slug)).toEqual([
+    expect(country.players.map(({ slug }) => slug)).toStrictEqual([
       "alpha54",
       "exotiik",
       "vatira",
@@ -69,27 +77,39 @@ describe("country pages (e2e)", () => {
       nationality: "fr",
       team: { id: "vitality", slug: "team-vitality" },
     });
-    expect(country.teams.map(({ slug }) => slug)).toEqual(["karmine-corp", "team-vitality"]);
-    expect(country.matches.map(({ id }) => id)).toEqual(["final"]);
+  });
+
+  it("returns the teams and matches of a country without start.gg matches", async () => {
+    const country = await frenchCountry();
+
+    expect(country.teams.map(({ slug }) => slug)).toStrictEqual(["karmine-corp", "team-vitality"]);
+    expect(country.matches.map(({ id }) => id)).toStrictEqual(["final"]);
     expect(country.matchTotal).toBe(1);
     expect(JSON.stringify(country)).not.toContain("startgg");
   });
 
   it("pages the matches", async () => {
-    await request(app.getHttpServer()).get("/countries/FR?limit=5&offset=10").expect(200);
+    const response = await request(app.getHttpServer()).get("/countries/FR?limit=5&offset=10");
 
+    expect(response.status).toBe(200);
     expect(list).toHaveBeenLastCalledWith(
       "results",
       expect.objectContaining({ limit: 5, offset: 10, redistributableOnly: true }),
     );
   });
 
-  it("answers 404 for a code no player holds or a malformed code", async () => {
-    await request(app.getHttpServer()).get("/countries/de").expect(404);
-    await request(app.getHttpServer()).get("/countries/france").expect(404);
-  });
+  it.each(["de", "france"])(
+    "answers 404 for the code %s that no player holds or that is malformed",
+    async (code) => {
+      const response = await request(app.getHttpServer()).get(`/countries/${code}`);
+
+      expect(response.status).toBe(404);
+    },
+  );
 
   it("refuses an invalid match page", async () => {
-    await request(app.getHttpServer()).get("/countries/fr?limit=0").expect(400);
+    const response = await request(app.getHttpServer()).get("/countries/fr?limit=0");
+
+    expect(response.status).toBe(400);
   });
 });

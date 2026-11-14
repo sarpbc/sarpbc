@@ -7,14 +7,14 @@ import { tokenSecrets } from "../infrastructure/token-secrets";
 import type { TokenStore } from "./ports/token-store";
 import { PatService } from "./pat.service";
 
-describe("PatService", () => {
+describe(PatService, () => {
   const now = new Date("2026-10-15T12:00:00Z");
   let owner: User;
   let revoked: boolean;
   let savedHash: string | null;
   let lastUsedAt: Date | null;
   let service: PatService;
-  const touch = vi.fn();
+  const touch = vi.fn<(at: Date) => void>();
 
   beforeEach(() => {
     owner = new User("staff@test.com", "staff", "hash");
@@ -71,7 +71,7 @@ describe("PatService", () => {
 
   it("resolves the owner and records usage", async () => {
     const token = await service.createToken(owner.id, "CI");
-    await expect(service.resolveUser(token.token)).resolves.toEqual({
+    await expect(service.resolveUser(token.token)).resolves.toStrictEqual({
       id: owner.id,
       email: owner.email,
       role: "admin",
