@@ -4,13 +4,20 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { migrationViolations } from "./check-migrations.mjs";
+import { migrationViolations } from "./check-migrations.mts";
 
-function repository(baseMigrations) {
+interface Repository {
+  directory: string;
+  add: (name: string) => void;
+  delete: (name: string) => void;
+  remove: () => void;
+}
+
+function repository(baseMigrations: string[]): Repository {
   const root = mkdtempSync(join(tmpdir(), "check-migrations-"));
   const directory = join(root, "migrations");
   mkdirSync(directory);
-  const git = (...args) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
+  const git = (...args: string[]) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
   git("init", "--quiet", "--initial-branch", "base");
 
   for (const name of baseMigrations) writeFileSync(join(directory, name), "");
@@ -32,8 +39,8 @@ function repository(baseMigrations) {
 
   return {
     directory,
-    add: (name) => writeFileSync(join(directory, name), ""),
-    delete: (name) => rmSync(join(directory, name)),
+    add: (name: string) => writeFileSync(join(directory, name), ""),
+    delete: (name: string) => rmSync(join(directory, name)),
     remove: () => rmSync(root, { recursive: true, force: true }),
   };
 }

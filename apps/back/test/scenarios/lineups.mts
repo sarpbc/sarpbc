@@ -1,12 +1,72 @@
 import assert from "node:assert/strict";
+import type {
+  MatchLineup,
+  MatchLineupsResponse,
+  PlayerStandIn,
+  TournamentDetail,
+} from "@sarpbc/types";
+import type { CallTool, Request, Review } from "./support.mts";
 
-const sides = (lineups) =>
+type SideRow = [participantId: string, players: [id: string, standIn: boolean][]];
+
+interface Participant {
+  id: string;
+  team: { id: string };
+}
+
+interface Identified {
+  id: string;
+}
+
+interface Tournament {
+  participants: Participant[];
+}
+
+interface CreatedPlayer {
+  player: Identified;
+}
+
+interface LineupsContext {
+  request: Request;
+  staffCookie: string;
+  memberCookie: string;
+  tournament: Tournament;
+  match: Identified;
+  player: Identified;
+}
+
+export interface LineupFixtures {
+  standIn: Identified;
+  startggMatch: Identified;
+}
+
+interface LineupProposalsContext extends LineupFixtures {
+  request: Request;
+  staffCookie: string;
+  callTool: CallTool;
+  review: Review;
+  tournament: Tournament;
+  match: Identified;
+  player: Identified;
+}
+
+interface MatchDetail {
+  lineups: MatchLineup[];
+  match: { tournament: { source: string } };
+}
+
+interface MatchLineupsTool {
+  lineups: MatchLineup[];
+}
+
+const sides = (lineups: MatchLineup[]): SideRow[] =>
   lineups.map(({ participantId, players }) => [
     participantId,
-    players.map(({ id, standIn }) => [id, standIn]),
+    players.map(({ id, standIn }): [string, boolean] => [id, standIn]),
   ]);
 
-const bySide = (lineups) => Object.fromEntries(sides(lineups));
+const bySide = (lineups: MatchLineup[]): Partial<Record<string, SideRow[1]>> =>
+  Object.fromEntries(sides(lineups));
 
 export async function verifyLineups({
   request,
@@ -15,15 +75,16 @@ export async function verifyLineups({
   tournament,
   match,
   player,
-}) {
+}: LineupsContext): Promise<LineupFixtures> {
   const lineupPath = `/tournaments/matches/${match.id}/lineups`;
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
 
-  const detailLineups = async (matchId) =>
-    (await request("GET", `/matches/${matchId}`)).json().lineups;
+  const detailLineups = async (matchId: string): Promise<MatchLineup[]> =>
+    (await request("GET", `/matches/${matchId}`)).json<MatchDetail>().lineups;
 
-  const standIns = async (playerId) =>
-    (await request("GET", `/player/${playerId}/stand-ins`)).json().standIns;
+  const standIns = async (playerId: string): Promise<PlayerStandIn[]> =>
+    (await request("GET", `/player/${playerId}/stand-ins`)).json<{ standIns: PlayerStandIn[] }>()
+      .standIns;
 
   await request("GET", lineupPath, undefined, memberCookie, 403);
   await request("PUT", lineupPath, { lineups: [] }, memberCookie, 403);
@@ -31,7 +92,7 @@ export async function verifyLineups({
 
   const standIn = (
     await request("POST", "/player", { name: "Integration Stand-in" }, staffCookie, 201)
-  ).json().player;
+  ).json<CreatedPlayer>().player;
 
   const saved = (
     await request(
@@ -40,7 +101,7 @@ export async function verifyLineups({
       { lineups: [{ participantId: alpha, playerIds: [player.id, standIn.id] }] },
       staffCookie,
     )
-  ).json();
+  ).json<MatchLineupsResponse>();
 
   assert.equal(saved.source, "manual");
   assert.deepEqual(saved.suggested, []);
@@ -110,7 +171,7 @@ export async function verifyLineups({
       { lineups: [{ participantId: beta, playerIds: [standIn.id] }] },
       staffCookie,
     )
-  ).json();
+  ).json<MatchLineupsResponse>();
 
   assert.deepEqual(
     sides(replaced.lineups),
@@ -134,7 +195,7 @@ export async function verifyLineups({
       staffCookie,
       201,
     )
-  ).json().tournament;
+  ).json<{ tournament: TournamentDetail }>().tournament;
 
   const startggMatch = (
     await request(
@@ -149,7 +210,7 @@ export async function verifyLineups({
       staffCookie,
       201,
     )
-  ).json().match;
+  ).json<{ match: Identified }>().match;
 
   const startggLineups = (
     await request(
@@ -158,10 +219,10 @@ export async function verifyLineups({
       { lineups: [{ participantId: startggCup.participants[0].id, playerIds: [standIn.id] }] },
       staffCookie,
     )
-  ).json();
+  ).json<MatchLineupsResponse>();
 
   assert.equal(startggLineups.source, "startgg");
-  const startggDetail = (await request("GET", `/matches/${startggMatch.id}`)).json();
+  const startggDetail = (await request("GET", `/matches/${startggMatch.id}`)).json<MatchDetail>();
   assert.deepEqual(
     sides(startggDetail.lineups),
     [[startggCup.participants[0].id, [[standIn.id, true]]]],
@@ -190,7 +251,7 @@ export async function verifyLineupProposals({
   player,
   standIn,
   startggMatch,
-}) {
+}: LineupProposalsContext): Promise<void> {
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
   const sourceUrl = "https://x.com/integration/status/lineups";
 
@@ -199,7 +260,8 @@ export async function verifyLineupProposals({
     { participantId: beta, playerIds: [standIn.id] },
   ];
 
-  const detail = async () => (await request("GET", `/matches/${match.id}`)).json().lineups;
+  const detail = async (): Promise<MatchLineup[]> =>
+    (await request("GET", `/matches/${match.id}`)).json<MatchDetail>().lineups;
 
   assert.deepEqual(
     await callTool("set_match_lineups", { matchId: match.id, lineups }),
@@ -236,14 +298,17 @@ export async function verifyLineupProposals({
   assert.deepEqual(await detail(), before, "nothing changes before approval");
   const applied = await review(proposal);
   assert.deepEqual([applied.status, applied.entityId], ["applied", match.id]);
-  assert.deepEqual(bySide((await callTool("get_match_lineups", { matchId: match.id })).lineups), {
-    [alpha]: [[player.id, false]],
-    [beta]: [[standIn.id, true]],
-  });
+  assert.deepEqual(
+    bySide((await callTool<MatchLineupsTool>("get_match_lineups", { matchId: match.id })).lineups),
+    {
+      [alpha]: [[player.id, false]],
+      [beta]: [[standIn.id, true]],
+    },
+  );
 
   const duplicate = (
     await request("POST", "/player", { name: "Integration Stand-in Copy" }, staffCookie, 201)
-  ).json().player;
+  ).json<CreatedPlayer>().player;
 
   await request(
     "PUT",

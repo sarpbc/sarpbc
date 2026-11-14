@@ -1,4 +1,38 @@
 import assert from "node:assert/strict";
+import type { Viewership, ViewershipResponse } from "@sarpbc/types";
+import type { CallTool, Request, Review, ToolFailure } from "./support.mts";
+
+interface CreditedMatch {
+  viewership: Viewership | null;
+}
+
+interface McpMatches {
+  live?: { id: string; viewership?: Viewership }[];
+  upcoming?: { id: string; viewership?: Viewership }[];
+}
+
+interface EventRef {
+  id: string;
+  slug: string;
+}
+
+export interface ViewershipContext {
+  request: Request;
+  staffCookie: string;
+  memberCookie: string;
+  tournament: { event: EventRef };
+  match: { id: string };
+}
+
+export interface ViewershipProposalsContext {
+  request: Request;
+  staffCookie: string;
+  callTool: CallTool;
+  review: Review;
+  match: { id: string };
+  startggCupId: string;
+  startggMatchId: string;
+}
 
 const ENTRY = {
   peakViewers: 54_321,
@@ -15,13 +49,23 @@ const SAVED = {
   sourceName: "Esports Charts",
 };
 
-export async function verifyViewership({ request, staffCookie, memberCookie, tournament, match }) {
+export async function verifyViewership({
+  request,
+  staffCookie,
+  memberCookie,
+  tournament,
+  match,
+}: ViewershipContext): Promise<void> {
   const matchPath = `/tournaments/matches/${match.id}/viewership`;
   const eventPath = `/events/${tournament.event.id}/viewership`;
-  const publicMatch = async () => (await request("GET", `/matches/${match.id}`)).json().match;
 
-  const publicEvent = async () =>
-    (await request("GET", `/events/resolve/${tournament.event.slug}`)).json().event;
+  const publicMatch = async (): Promise<CreditedMatch> =>
+    (await request("GET", `/matches/${match.id}`)).json<{ match: CreditedMatch }>().match;
+
+  const publicEvent = async (): Promise<CreditedMatch> =>
+    (await request("GET", `/events/resolve/${tournament.event.slug}`)).json<{
+      event: CreditedMatch;
+    }>().event;
 
   await request("GET", matchPath, undefined, memberCookie, 403);
   await request("PUT", matchPath, { viewership: ENTRY }, memberCookie, 403);
@@ -42,12 +86,16 @@ export async function verifyViewership({ request, staffCookie, memberCookie, tou
   await request("PUT", matchPath, { viewership: uncredited }, staffCookie, 400);
   assert.equal((await publicMatch()).viewership, null, "a refused entry stores nothing");
 
-  assert.deepEqual((await request("PUT", matchPath, { viewership: ENTRY }, staffCookie)).json(), {
-    viewership: SAVED,
-  });
-  assert.deepEqual((await request("GET", matchPath, undefined, staffCookie)).json(), {
-    viewership: SAVED,
-  });
+  assert.deepEqual(
+    (
+      await request("PUT", matchPath, { viewership: ENTRY }, staffCookie)
+    ).json<ViewershipResponse>(),
+    { viewership: SAVED },
+  );
+  assert.deepEqual(
+    (await request("GET", matchPath, undefined, staffCookie)).json<ViewershipResponse>(),
+    { viewership: SAVED },
+  );
   assert.deepEqual((await publicMatch()).viewership, SAVED, "the site shows the credited numbers");
 
   await request(
@@ -62,7 +110,7 @@ export async function verifyViewership({ request, staffCookie, memberCookie, tou
     scope: "official",
     measuredAt: null,
   });
-  const listed = (await request("GET", "/events?limit=100")).json().events;
+  const listed = (await request("GET", "/events?limit=100")).json<{ events: EventRef[] }>().events;
   assert.ok(
     listed.every((event) => !("viewership" in event)),
     "event listings do not carry viewership",
@@ -89,7 +137,7 @@ export async function verifyViewershipProposals({
   match,
   startggCupId,
   startggMatchId,
-}) {
+}: ViewershipProposalsContext): Promise<void> {
   const sourceUrl = "https://escharts.com/tournaments/rl/integration-cup/final";
 
   const proposal = {
@@ -100,12 +148,12 @@ export async function verifyViewershipProposals({
   };
 
   assert.deepEqual(
-    await callTool("set_match_viewership", { matchId: match.id, ...proposal }),
+    await callTool<ToolFailure>("set_match_viewership", { matchId: match.id, ...proposal }),
     { error: true },
     "set_match_viewership requires a sourceUrl",
   );
   assert.deepEqual(
-    await callTool("set_match_viewership", {
+    await callTool<ToolFailure>("set_match_viewership", {
       matchId: match.id,
       ...proposal,
       sourceUrl: "https://blast.tv/rl/integration-cup",
@@ -122,17 +170,19 @@ export async function verifyViewershipProposals({
 
   assert.equal(pending.status, "pending");
   assert.equal(
-    (await request("GET", `/matches/${match.id}`)).json().match.viewership,
+    (await request("GET", `/matches/${match.id}`)).json<{ match: CreditedMatch }>().match
+      .viewership,
     null,
     "nothing changes before approval",
   );
   assert.equal((await review(pending)).status, "applied");
   const credited = { ...proposal, measuredAt: null, sourceUrl };
   assert.deepEqual(
-    (await request("GET", `/matches/${match.id}`)).json().match.viewership,
+    (await request("GET", `/matches/${match.id}`)).json<{ match: CreditedMatch }>().match
+      .viewership,
     credited,
   );
-  const upcoming = await callTool("get_upcoming_matches", {});
+  const upcoming = await callTool<McpMatches>("get_upcoming_matches", {});
 
   const mcpMatch = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? [])].find(
     (candidate) => candidate.id === match.id,
@@ -147,23 +197,32 @@ export async function verifyViewershipProposals({
     { viewership: startggEntry },
     staffCookie,
   );
-  const site = (await request("GET", `/matches/${startggMatchId}`)).json().match;
+
+  const site = (await request("GET", `/matches/${startggMatchId}`)).json<{
+    match: CreditedMatch & { tournament: { source: string } };
+  }>().match;
+
   assert.deepEqual(site.viewership, startggEntry, "the site shows start.gg match numbers");
   assert.equal(site.tournament.source, "startgg", "the site can credit start.gg");
   assert.deepEqual(
-    await callTool("set_match_viewership", { matchId: startggMatchId, ...proposal, sourceUrl }),
+    await callTool<ToolFailure>("set_match_viewership", {
+      matchId: startggMatchId,
+      ...proposal,
+      sourceUrl,
+    }),
     { error: true },
     "start.gg matches are refused",
   );
-  const results = await callTool("get_match_results", {});
+  const results = await callTool<{ results: { id: string }[] }>("get_match_results", {});
   const reads = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? []), ...results.results];
   assert.ok(
     reads.every((candidate) => candidate.id !== startggMatchId),
     "MCP reads leave start.gg matches and their numbers out",
   );
 
-  const startggEvent = (await request("GET", `/tournaments/${startggCupId}`)).json().tournament
-    .event;
+  const startggEvent = (await request("GET", `/tournaments/${startggCupId}`)).json<{
+    tournament: { event: EventRef };
+  }>().tournament.event;
 
   await request(
     "PUT",
@@ -172,12 +231,19 @@ export async function verifyViewershipProposals({
     staffCookie,
   );
   assert.deepEqual(
-    (await request("GET", `/events/resolve/${startggEvent.slug}`)).json().event.viewership,
+    (await request("GET", `/events/resolve/${startggEvent.slug}`)).json<{ event: CreditedMatch }>()
+      .event.viewership,
     startggEntry,
   );
-  assert.deepEqual(await callTool("get_event", { idOrSlug: startggEvent.id }), { error: true });
+  assert.deepEqual(await callTool<ToolFailure>("get_event", { idOrSlug: startggEvent.id }), {
+    error: true,
+  });
   assert.deepEqual(
-    await callTool("set_event_viewership", { eventId: startggEvent.id, ...proposal, sourceUrl }),
+    await callTool<ToolFailure>("set_event_viewership", {
+      eventId: startggEvent.id,
+      ...proposal,
+      sourceUrl,
+    }),
     { error: true },
     "start.gg events are refused",
   );

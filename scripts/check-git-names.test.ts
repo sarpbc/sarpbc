@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import { execFileSync, spawnSync } from "node:child_process";
+import type { SpawnSyncReturns } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import type { TestContext } from "node:test";
 
-const script = fileURLToPath(new URL("./check-git-names.mjs", import.meta.url));
+const script = fileURLToPath(new URL("./check-git-names.ts", import.meta.url));
 
 const types = [
   "feat",
@@ -22,18 +24,31 @@ const types = [
   "revert",
 ];
 
-function fixture(t) {
+interface PullRequestFixture {
+  title: string;
+  body?: string;
+  base: { sha: string };
+  head: { ref: string; sha: string };
+}
+
+function fixture(t: TestContext): string {
   const directory = mkdtempSync(join(tmpdir(), "sarpbc-git-names-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
 
   return directory;
 }
 
-function run(args, options = {}) {
+interface RunOptions {
+  cwd?: string;
+  env?: NodeJS.ProcessEnv;
+  input?: string;
+}
+
+function run(args: string[], options: RunOptions = {}): SpawnSyncReturns<string> {
   return spawnSync(process.execPath, [script, ...args], { encoding: "utf8", ...options });
 }
 
-function expectStatus(result, status) {
+function expectStatus(result: SpawnSyncReturns<string>, status: number): void {
   assert.equal(result.status, status, result.stderr);
 }
 
@@ -140,7 +155,7 @@ test("pushes check destination branches, including refspecs and multiple refs", 
 test("PR checks inspect real commits and exclude existing history", (t) => {
   const directory = fixture(t);
 
-  const git = (...args) =>
+  const git = (...args: string[]) =>
     execFileSync(
       "git",
       [
@@ -163,7 +178,7 @@ test("PR checks inspect real commits and exclude existing history", (t) => {
   git("commit", "--allow-empty", "-m", "feat(front): add player search");
   const eventPath = join(directory, "event.json");
 
-  const pr = {
+  const pr: PullRequestFixture = {
     title: "feat(front): add player search",
     base: { sha: base },
     head: { ref: "feat/search", sha: git("rev-parse", "HEAD") },

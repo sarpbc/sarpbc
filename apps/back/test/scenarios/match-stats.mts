@@ -1,5 +1,48 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import type {
+  MatchGameStats,
+  StatsImport,
+  StatsPlayerAccounts,
+  StatsPlayerLinkInput,
+  StatsPlayerLinkResult,
+  TournamentDetail,
+  TournamentPlayerStatsResponse,
+  TournamentStatsGame,
+} from "@sarpbc/types";
+import type {
+  GamePlayerRecord,
+  GameRecord,
+  PlayerLink,
+} from "../../src/match-stats/application/ports.ts";
+import type { Side } from "../../src/match-stats/domain/replay-matching.ts";
+import type { Application, JsonResponse, Orm, Request } from "./support.mts";
+
+interface MatchStatsContext {
+  app: Application;
+  orm: Orm;
+  request: Request;
+  staffCookie: string;
+  memberCookie: string;
+  competition: {
+    tournamentId: string;
+    participantId: string;
+    rivalParticipantId: string;
+    playerId: string;
+    matchId: string;
+  };
+}
+
+interface ErrorBody {
+  code: string;
+}
+
+interface DeletedGame {
+  number: number;
+  ballchasingId: string;
+}
+
+const statKeys = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
 export async function verifyMatchStats({
   app,
@@ -8,7 +51,7 @@ export async function verifyMatchStats({
   staffCookie,
   memberCookie,
   competition,
-}) {
+}: MatchStatsContext): Promise<void> {
   const { RequestContext } = await import("@mikro-orm/core");
 
   const { MikroOrmGameStatsStore, MikroOrmStatsCandidates, MikroOrmStatsImportStore } =
@@ -31,14 +74,18 @@ export async function verifyMatchStats({
 
   const unconfigured = (
     await request("POST", importsUrl, { group: "pilot-group" }, staffCookie, 500)
-  ).json();
+  ).json<ErrorBody>();
 
   assert.equal(unconfigured.code, "ballchasing_not_configured");
-  assert.deepEqual((await request("GET", importsUrl, undefined, staffCookie)).json().imports, []);
+  assert.deepEqual(
+    (await request("GET", importsUrl, undefined, staffCookie)).json<{ imports: StatsImport[] }>()
+      .imports,
+    [],
+  );
 
   const stat = { platform: "epic", goals: 1, assists: 0, saves: 2, shots: 3, demolitions: 1 };
 
-  const game = {
+  const game: GameRecord = {
     matchId,
     number: 1,
     ballchasingId: "integration-replay-1",
@@ -83,7 +130,10 @@ export async function verifyMatchStats({
     [["integration-replay-1", { matchId, number: 1 }]],
   );
 
-  const [shown] = (await request("GET", `/matches/${matchId}`)).json().games;
+  const [shown] = (await request("GET", `/matches/${matchId}`)).json<{
+    games: MatchGameStats[];
+  }>().games;
+
   assert.equal(shown.number, 1);
   assert.equal(shown.ballchasingId, "integration-replay-1");
   assert.deepEqual(
@@ -93,7 +143,7 @@ export async function verifyMatchStats({
       [rivalParticipantId, 0],
     ],
   );
-  assert.equal(shown.teams[0].players[0].player.id, playerId);
+  assert.equal(shown.teams[0].players[0].player?.id, playerId);
   assert.equal(shown.teams[1].players[0].player, null);
   assert.equal(shown.teams[1].players[0].name, "Stand-in");
 
@@ -101,6 +151,7 @@ export async function verifyMatchStats({
     (match) => match.id === matchId,
   );
 
+  assert(candidate, "the match is a stats candidate");
   assert.deepEqual(candidate.storedReplayIds, ["integration-replay-1"]);
   assert.equal(candidate.participants.length, 2);
   assert.equal(candidate.scores.size, 2);
@@ -121,14 +172,26 @@ export async function verifyMatchStats({
     finishedAt: null,
   });
   assert.equal(await new MikroOrmStatsImportStore(orm.em.fork()).failUnfinished("restarted"), 1);
-  const [listed] = (await request("GET", importsUrl, undefined, staffCookie)).json().imports;
+
+  const [listed] = (await request("GET", importsUrl, undefined, staffCookie)).json<{
+    imports: StatsImport[];
+  }>().imports;
+
   assert.equal(listed.status, "failed");
   assert.equal(listed.error, "restarted");
   assert.equal(listed.processed, 1);
 
   const em = orm.em.fork();
   const duplicateId = randomUUID();
-  em.persist(em.create(Player, { id: duplicateId, name: "KC Veteran Twin", slug: duplicateId }));
+  em.persist(
+    em.create(Player, {
+      id: duplicateId,
+      name: "KC Veteran Twin",
+      slug: duplicateId,
+      status: "active",
+      source: "manual",
+    }),
+  );
   await em.flush();
   await new MikroOrmGameStatsStore(orm.em.fork()).save({
     ...game,
@@ -141,11 +204,17 @@ export async function verifyMatchStats({
   });
   const merges = app.get(RosterMergeService);
   await RequestContext.create(orm.em.fork(), () => merges.mergePlayers(playerId, duplicateId));
-  const statRows = (player) => orm.em.fork().count(MatchGamePlayer, { player });
+
+  const statRows = (player: string): Promise<number> =>
+    orm.em.fork().count(MatchGamePlayer, { player });
+
   assert.equal(await statRows(duplicateId), 0, "a player merge leaves no stats on the duplicate");
   assert.equal(await statRows(playerId), 2, "a player merge moves stats to the kept player");
 
-  const stageStats = (await request("GET", `/tournaments/${tournamentId}/player-stats`)).json();
+  const stageStats = (
+    await request("GET", `/tournaments/${tournamentId}/player-stats`)
+  ).json<TournamentPlayerStatsResponse>();
+
   assert.equal(stageStats.games, 2);
   assert.equal(stageStats.unlinkedAccounts, 1, "an unlinked account is counted, not listed");
   assert.equal(stageStats.players.length, 1);
@@ -157,16 +226,22 @@ export async function verifyMatchStats({
     .fork()
     .find(MatchGamePlayer, { player: playerId, game: { match: { tournament: tournamentId } } });
 
-  for (const key of ["goals", "assists", "saves", "shots", "demolitions"])
+  for (const key of statKeys)
     assert.equal(
       veteran.totals[key],
       veteranRows.reduce((sum, row) => sum + row[key], 0),
       `${key} totals match the sum of the games`,
     );
   assert.equal(veteran.goalParticipation, 100);
-  const { event } = (await request("GET", `/tournaments/${tournamentId}`)).json().tournament;
+
+  const { event } = (await request("GET", `/tournaments/${tournamentId}`)).json<{
+    tournament: TournamentDetail;
+  }>().tournament;
+
   assert.deepEqual(
-    (await request("GET", `/events/${event.slug}/player-stats`)).json(),
+    (
+      await request("GET", `/events/${event.slug}/player-stats`)
+    ).json<TournamentPlayerStatsResponse>(),
     stageStats,
     "an event of one stage aggregates like the stage",
   );
@@ -187,8 +262,20 @@ export async function verifyMatchStats({
   const twinId = randomUUID();
   const setup = orm.em.fork();
   setup.persist([
-    setup.create(Player, { id: otherId, name: "Rival Regular", slug: otherId }),
-    setup.create(Player, { id: twinId, name: "Rival Twin", slug: twinId }),
+    setup.create(Player, {
+      id: otherId,
+      name: "Rival Regular",
+      slug: otherId,
+      status: "active",
+      source: "manual",
+    }),
+    setup.create(Player, {
+      id: twinId,
+      name: "Rival Twin",
+      slug: twinId,
+      status: "active",
+      source: "manual",
+    }),
   ]);
   await setup.flush();
 
@@ -199,7 +286,11 @@ export async function verifyMatchStats({
   rival.players.add(setup.getReference(Player, otherId));
   await setup.flush();
 
-  const saveGame = (number, players, learnedLinks = []) =>
+  const saveGame = (
+    number: number,
+    players: GamePlayerRecord[],
+    learnedLinks: PlayerLink[] = [],
+  ): Promise<TournamentStatsGame> =>
     new MikroOrmGameStatsStore(orm.em.fork()).save({
       ...game,
       number,
@@ -209,7 +300,12 @@ export async function verifyMatchStats({
       learnedLinks,
     });
 
-  const steam = (platformId, name, side, rowPlayerId = null) => ({
+  const steam = (
+    platformId: string,
+    name: string,
+    side: Side,
+    rowPlayerId: string | null = null,
+  ): GamePlayerRecord => ({
     ...stat,
     platform: "steam",
     platformId,
@@ -218,11 +314,11 @@ export async function verifyMatchStats({
     playerId: rowPlayerId,
   });
 
-  const linkOf = async (platformId) =>
+  const linkOf = async (platformId: string): Promise<string | null> =>
     (await orm.em.fork().findOne(PlayerPlatformLink, { platform: "steam", platformId }))?.player
       .id ?? null;
 
-  const rowPlayers = async (platformId) =>
+  const rowPlayers = async (platformId: string): Promise<(string | null)[]> =>
     (
       await orm.em
         .fork()
@@ -242,7 +338,9 @@ export async function verifyMatchStats({
     "learning links earlier unlinked rows of the account",
   );
 
-  const accounts = async () => (await request("GET", linksUrl, undefined, staffCookie)).json();
+  const accounts = async (): Promise<StatsPlayerAccounts> =>
+    (await request("GET", linksUrl, undefined, staffCookie)).json<StatsPlayerAccounts>();
+
   const known = await accounts();
   const unlinked = known.players.filter((account) => account.player === null);
   assert.deepEqual(unlinked, [
@@ -256,7 +354,7 @@ export async function verifyMatchStats({
     },
   ]);
   assert.equal(
-    known.players.find((account) => account.platformId === "s-learn").player.id,
+    known.players.find((account) => account.platformId === "s-learn")?.player?.id,
     playerId,
     "linked accounts are listed with their player so a wrong link can be corrected",
   );
@@ -265,21 +363,25 @@ export async function verifyMatchStats({
     "rows without a platform id cannot be linked and are not listed",
   );
 
-  const rosterIds = (participant) =>
-    known.rosters
-      .find((roster) => roster.participantId === participant)
-      .players.map((player) => player.id);
+  const rosterIds = (participant: string): string[] => {
+    const roster = known.rosters.find((entry) => entry.participantId === participant);
+    assert(roster, "the participant has a roster");
+
+    return roster.players.map((player) => player.id);
+  };
 
   assert(rosterIds(rivalParticipantId).includes(otherId));
   assert(rosterIds(participantId).includes(playerId), "every roster of the tournament is offered");
 
-  const link = (body, status) => request("PUT", `${linksUrl}/link`, body, staffCookie, status);
+  const link = (body: StatsPlayerLinkInput, status?: number): Promise<JsonResponse> =>
+    request("PUT", `${linksUrl}/link`, body, staffCookie, status);
+
   await link({ platform: "steam", platformId: " ", playerId }, 400);
   await link({ platform: "steam", platformId: "s-renamed", playerId: twinId }, 400);
 
   const outsider = (
     await link({ platform: "steam", platformId: "s-renamed", playerId: randomUUID() }, 400)
-  ).json();
+  ).json<ErrorBody>();
 
   assert.equal(outsider.code, "player_not_on_tournament_roster");
   await request(
@@ -292,11 +394,15 @@ export async function verifyMatchStats({
   assert.equal(await linkOf("s-renamed"), null, "a rejected link writes nothing");
 
   assert.deepEqual(
-    (await link({ platform: "steam", platformId: "s-renamed", playerId: otherId })).json(),
+    (
+      await link({ platform: "steam", platformId: "s-renamed", playerId: otherId })
+    ).json<StatsPlayerLinkResult>(),
     { link: { platform: "steam", platformId: "s-renamed", playerId: otherId }, linkedRows: 1 },
   );
   assert.deepEqual(
-    (await link({ platform: "steam", platformId: "s-learn", playerId: otherId })).json().linkedRows,
+    (
+      await link({ platform: "steam", platformId: "s-learn", playerId: otherId })
+    ).json<StatsPlayerLinkResult>().linkedRows,
     2,
     "a staff link repoints rows already linked to another player",
   );
@@ -314,13 +420,18 @@ export async function verifyMatchStats({
   );
   assert.equal(await linkOf("s-learn"), otherId, "learning never overwrites an existing link");
 
-  const games = (await request("GET", `/matches/${matchId}`)).json().games;
+  const games = (await request("GET", `/matches/${matchId}`)).json<{
+    games: MatchGameStats[];
+  }>().games;
 
-  const repaired = games
-    .find((shownGame) => shownGame.number === 3)
-    .teams.flatMap((team) => team.players)
+  const thirdGame = games.find((shownGame) => shownGame.number === 3);
+  assert(thirdGame, "game 3 is shown");
+
+  const repaired = thirdGame.teams
+    .flatMap((team) => team.players)
     .find((row) => row.name === "Racer");
 
+  assert(repaired, "the renamed racer is shown");
   assert.deepEqual(repaired.player, { id: otherId, name: "Rival Regular", slug: otherId });
   assert(!JSON.stringify(games).includes("s-renamed"), "the public match omits platform ids");
 
@@ -350,19 +461,25 @@ export async function verifyMatchStats({
   await request("POST", gamesUrl, attach, memberCookie, 403);
   await request("DELETE", `${gamesUrl}/${matchId}/3`, undefined, memberCookie, 403);
   assert.equal(
-    (await request("POST", gamesUrl, attach, staffCookie, 500)).json().code,
+    (await request("POST", gamesUrl, attach, staffCookie, 500)).json<ErrorBody>().code,
     "ballchasing_not_configured",
   );
   assert.deepEqual(
     (await request("GET", gamesUrl, undefined, staffCookie))
-      .json()
+      .json<{ games: TournamentStatsGame[] }>()
       .games.map((stored) => [stored.matchId, stored.number, stored.ballchasingId]),
     [1, 2, 3, 4, 5].map((number) => [matchId, number, `integration-replay-${number}`]),
   );
 
   const store = () => new MikroOrmGameStatsStore(orm.em.fork());
-  const { tournament } = (await request("GET", `/tournaments/${tournamentId}`)).json();
-  const teamName = (id) => tournament.participants.find((entry) => entry.id === id).team.name;
+
+  const { tournament } = (await request("GET", `/tournaments/${tournamentId}`)).json<{
+    tournament: TournamentDetail;
+  }>();
+
+  const teamName = (id: string): string | undefined =>
+    tournament.participants.find((entry) => entry.id === id)?.team?.name;
+
   assert.deepEqual(await store().attachment("integration-replay-3"), {
     matchId,
     number: 3,
@@ -373,7 +490,7 @@ export async function verifyMatchStats({
 
   const removed = (
     await request("DELETE", `${gamesUrl}/${matchId}/3`, undefined, staffCookie)
-  ).json();
+  ).json<DeletedGame>();
 
   assert.deepEqual([removed.number, removed.ballchasingId], [3, "integration-replay-3"]);
   assert.equal(await rowPlayers("s-renamed").then((rows) => rows.length), 0, "player rows go too");
@@ -398,6 +515,7 @@ export async function verifyMatchStats({
     await new MikroOrmStatsCandidates(orm.em.fork()).matches(tournamentId)
   ).find((match) => match.id === matchId);
 
+  assert(candidateAfter, "the match is still a stats candidate");
   assert(!candidateAfter.storedReplayIds.includes("integration-replay-3"));
 
   await saveGame(3, [steam("s-renamed", "Racer", "orange", otherId)]);

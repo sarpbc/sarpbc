@@ -25,7 +25,7 @@ export default defineConfig({
       },
       {
         extends: true,
-        test: { name: "integration", include: ["test/**/*.integration.test.mjs"] },
+        test: { name: "integration", include: ["test/**/*.integration.test.mts"] },
       },
     ],
     coverage: {

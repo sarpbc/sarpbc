@@ -6,8 +6,8 @@
     "build": "nest build",
     "dev": "nest start --watch",
     "start:prod": "node dist/main",
-    "lint": "node scripts/check-architecture.mjs && oxlint --deny-warnings .",
-    "lint:fix": "oxlint . --fix && node scripts/check-architecture.mjs",
+    "lint": "node scripts/check-architecture.mts && oxlint --deny-warnings .",
+    "lint:fix": "oxlint . --fix && node scripts/check-architecture.mts",
     "fmt": "oxfmt .",
     "fmt:check": "oxfmt . --check",
     "premikro:migrate": "pnpm --filter @sarpbc/utils... run build",
@@ -19,9 +19,9 @@
     "test:e2e": "vitest run --project e2e",
     "typecheck": "tsc -p tsconfig.build.json --noEmit --incremental false",
     "typecheck:tests": "tsc -p tsconfig.test.json --incremental false",
-    "test:architecture": "node --test scripts/check-architecture.test.mjs && node scripts/check-architecture.mjs",
-    "test:migrations": "node --test scripts/check-migrations.test.mjs && node scripts/check-migrations.mjs",
-    "test:contracts": "node scripts/check-http-contract.mjs",
+    "test:architecture": "node --test scripts/check-architecture.test.mts && node scripts/check-architecture.mts",
+    "test:migrations": "node --test scripts/check-migrations.test.mts && node scripts/check-migrations.mts",
+    "test:contracts": "node scripts/check-http-contract.mts",
     "test:integration": "pnpm run build && vitest run --project integration"
   },
   "dependencies": {

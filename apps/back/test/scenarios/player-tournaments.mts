@@ -1,4 +1,42 @@
 import assert from "node:assert/strict";
+import type { MatchResultsResponse, TournamentDetail } from "@sarpbc/types";
+import type { Application, Orm, Request, RequestContextType } from "./support.mts";
+
+export interface PlayerTournamentsContext {
+  app: Application;
+  orm: Orm;
+  request: Request;
+  staffCookie: string;
+  memberCookie: string;
+  RequestContext: RequestContextType;
+}
+
+interface PlayerRef {
+  id: string;
+  name: string;
+  slug: string;
+}
+
+interface SoloParticipant {
+  id: string;
+  team: null;
+  players: PlayerRef[];
+}
+
+interface SoloTournament {
+  id: string;
+  format: string;
+  participants: SoloParticipant[];
+}
+
+interface SoloMatch {
+  id: string;
+  slug: string;
+}
+
+interface GameBody {
+  games: { teams: { participantId: string; players: { player: { id: string } }[] }[] }[];
+}
 
 export async function verifyPlayerTournaments({
   app,
@@ -7,7 +45,7 @@ export async function verifyPlayerTournaments({
   staffCookie,
   memberCookie,
   RequestContext,
-}) {
+}: PlayerTournamentsContext): Promise<void> {
   const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
 
   const { RosterMergeService } =
@@ -21,8 +59,9 @@ export async function verifyPlayerTournaments({
 
   const { assignReplays } = await import("../../src/match-stats/domain/replay-matching.ts");
 
-  const createPlayer = async (name) =>
-    (await request("POST", "/player", { name }, staffCookie, 201)).json().player;
+  const createPlayer = async (name: string): Promise<PlayerRef> =>
+    (await request("POST", "/player", { name }, staffCookie, 201)).json<{ player: PlayerRef }>()
+      .player;
 
   const solo = await createPlayer("Fake Solo One");
   const rival = await createPlayer("Fake Solo Two");
@@ -51,7 +90,7 @@ export async function verifyPlayerTournaments({
       staffCookie,
       201,
     )
-  ).json().tournament;
+  ).json<{ tournament: SoloTournament }>().tournament;
 
   assert.equal(tournament.format, "1v1");
   assert(tournament.participants.every((participant) => participant.team === null));
@@ -61,8 +100,12 @@ export async function verifyPlayerTournaments({
   );
   assert.equal(await orm.em.fork().count(Team, {}), teamsBefore, "no team is created for players");
 
-  const participantOf = (playerId) =>
-    tournament.participants.find((participant) => participant.players[0].id === playerId).id;
+  const participantOf = (playerId: string): string => {
+    const participant = tournament.participants.find((entry) => entry.players[0].id === playerId);
+    assert(participant, "the tournament has the player");
+
+    return participant.id;
+  };
 
   const soloParticipant = participantOf(solo.id);
   const rivalParticipant = participantOf(rival.id);
@@ -85,7 +128,7 @@ export async function verifyPlayerTournaments({
       staffCookie,
       201,
     )
-  ).json().match;
+  ).json<{ match: SoloMatch }>().match;
 
   assert.equal(match.slug, "fake-solo-one-vs-fake-solo-two-fake-knockout");
 
@@ -99,9 +142,13 @@ export async function verifyPlayerTournaments({
     }),
   );
 
+  assert(scored.winner, "the scored match has a winner");
   assert.equal(scored.winner.id, soloParticipant);
 
-  const detail = (await request("GET", `/tournaments/${tournament.id}`)).json().tournament;
+  const detail = (await request("GET", `/tournaments/${tournament.id}`)).json<{
+    tournament: TournamentDetail;
+  }>().tournament;
+
   assert.equal(detail.format, "1v1");
   assert.deepEqual(detail.matches[0].winnerId, soloParticipant);
   assert.deepEqual(
@@ -112,10 +159,18 @@ export async function verifyPlayerTournaments({
       players: [{ id: solo.id, name: solo.name, slug: solo.slug }],
     },
   );
-  const results = (await request("GET", `/matches/results?tournamentId=${tournament.id}`)).json();
+
+  const results = (
+    await request("GET", `/matches/results?tournamentId=${tournament.id}`)
+  ).json<MatchResultsResponse>();
+
   assert.equal(results.results[0].participants[0].team, null);
-  assert.equal(results.results[0].participants[0].players.length, 1);
-  const played = (await request("GET", `/player/${solo.id}/tournaments`)).json().tournaments;
+  assert.equal(results.results[0].participants[0].players?.length, 1);
+
+  const played = (await request("GET", `/player/${solo.id}/tournaments`)).json<{
+    tournaments: { id: string }[];
+  }>().tournaments;
+
   assert.deepEqual(
     played.map(({ id }) => id),
     [tournament.id],
@@ -145,7 +200,7 @@ export async function verifyPlayerTournaments({
   assert.equal(assignment.kind, "matched");
   assert.deepEqual(assignment.sides, { blue: rivalParticipant, orange: soloParticipant });
 
-  const stat = { platform: "epic", assists: 0, saves: 1, shots: 2, demolitions: 0 };
+  const stat = { platform: "epic", assists: 0, saves: 1, shots: 2, demolitions: 0 } as const;
   await new MikroOrmGameStatsStore(orm.em.fork()).save({
     matchId: match.id,
     number: 1,
@@ -176,7 +231,7 @@ export async function verifyPlayerTournaments({
     ],
     learnedLinks: [],
   });
-  const [game] = (await request("GET", `/matches/${match.id}`)).json().games;
+  const [game] = (await request("GET", `/matches/${match.id}`)).json<GameBody>().games;
   assert.deepEqual(
     game.teams.map(({ participantId, players }) => [participantId, players[0].player.id]),
     [
@@ -185,6 +240,7 @@ export async function verifyPlayerTournaments({
     ],
   );
   const attachment = await new MikroOrmGameStatsStore(orm.em.fork()).attachment("fake-1v1-replay");
+  assert(attachment, "the replay is attached");
   assert.deepEqual(attachment.teams, ["Fake Solo Two", "Fake Solo One"]);
   await assert.rejects(
     RequestContext.create(orm.em.fork(), () =>

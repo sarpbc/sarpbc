@@ -2,12 +2,34 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { z } from "zod";
 
 const project = path.resolve(import.meta.dirname, "..");
 const sourceRoot = path.join(project, "src");
 const snapshot = path.join(project, "test/contracts/http-routes.json");
 
-function filesIn(dir) {
+const routeSchema = z.strictObject({
+  controller: z.string(),
+  verb: z.string(),
+  path: z.string(),
+  status: z.string().nullable(),
+  guards: z.array(z.string()),
+  permissions: z.array(z.string()),
+});
+
+type Route = z.infer<typeof routeSchema>;
+
+interface Decorator {
+  name: string;
+  args: string[];
+}
+
+interface SourceText {
+  file: string;
+  text: string;
+}
+
+function filesIn(dir: string): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);
 
@@ -68,7 +90,7 @@ function stringConstants() {
 
 const constants = stringConstants();
 
-function decoratorArguments(expression, source) {
+function decoratorArguments(expression: ts.CallExpression, source: ts.SourceFile): string[] {
   return expression.arguments.flatMap((argument) => {
     if (!ts.isSpreadElement(argument)) return [argument.getText(source)];
     const values = constants.get(argument.expression.getText(source));
@@ -81,7 +103,7 @@ function decoratorArguments(expression, source) {
   });
 }
 
-function decorators(node, source) {
+function decorators(node: ts.Node, source: ts.SourceFile): Decorator[] {
   return (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
     const expression = decorator.expression;
 
@@ -96,8 +118,8 @@ function decorators(node, source) {
   });
 }
 
-function collectRoutes(sources) {
-  const routes = [];
+function collectRoutes(sources: SourceText[]): Route[] {
+  const routes: Route[] = [];
 
   for (const { file, text } of sources) {
     const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
@@ -167,7 +189,7 @@ if (process.argv.includes("--write")) {
 } else {
   assert.deepEqual(
     actual,
-    JSON.parse(fs.readFileSync(snapshot, "utf8")),
+    z.array(routeSchema).parse(JSON.parse(fs.readFileSync(snapshot, "utf8"))),
     "HTTP routes, status overrides, guards and permissions changed. If intended, run `pnpm --filter back test:contracts --write` then `pnpm --filter back fmt`, and commit test/contracts/http-routes.json.",
   );
   process.stdout.write(`Verified ${actual.length} HTTP route contracts.\n`);

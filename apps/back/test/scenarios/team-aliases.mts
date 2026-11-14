@@ -1,4 +1,53 @@
 import assert from "node:assert/strict";
+import type { TeamAlias } from "@sarpbc/types";
+import type { CallTool, Request, Review, ToolFailure } from "./support.mts";
+
+interface AliasedTeam {
+  id: string;
+  slug: string;
+  name: string;
+  aliases: TeamAlias[];
+}
+
+interface ParticipantTeam {
+  id: string;
+  name: string;
+  slug: string;
+  logoLightUrl: string | null;
+}
+
+interface StageParticipant {
+  id: string;
+  team: ParticipantTeam | null;
+}
+
+interface MatchParticipant {
+  team: { id: string; name: string } | null;
+}
+
+interface AliasList {
+  aliases: TeamAlias[];
+}
+
+export interface TeamAliasesContext {
+  request: Request;
+  staffCookie: string;
+  memberCookie: string;
+}
+
+export interface TeamAliasFixtures {
+  team: { id: string; slug: string };
+  origins: TeamAlias;
+}
+
+export interface TeamAliasProposalsContext extends TeamAliasFixtures {
+  request: Request;
+  callTool: CallTool;
+  review: Review;
+}
+
+const teamOf = async (request: Request, id: string): Promise<AliasedTeam> =>
+  (await request("GET", `/team/${id}`)).json<{ team: AliasedTeam }>().team;
 
 const SOURCE = "https://www.rlesports.com/news/integration-rebrand";
 
@@ -11,9 +60,13 @@ const ORIGINS = {
   pandascoreId: null,
 };
 
-export async function verifyTeamAliases({ request, staffCookie, memberCookie }) {
-  const create = async (name) =>
-    (await request("POST", "/team", { name }, staffCookie, 201)).json().team;
+export async function verifyTeamAliases({
+  request,
+  staffCookie,
+  memberCookie,
+}: TeamAliasesContext): Promise<TeamAliasFixtures> {
+  const create = async (name: string): Promise<AliasedTeam> =>
+    (await request("POST", "/team", { name }, staffCookie, 201)).json<{ team: AliasedTeam }>().team;
 
   const team = await create("Integration Renamed");
   const opponent = await create("Integration Opponent");
@@ -33,9 +86,12 @@ export async function verifyTeamAliases({ request, staffCookie, memberCookie }) 
 
   const { sourceUrl: _, ...unsourced } = ORIGINS;
   await request("POST", aliasesPath, unsourced, staffCookie, 400);
-  assert.deepEqual((await request("GET", `/team/${team.id}`)).json().team.aliases, []);
+  assert.deepEqual((await teamOf(request, team.id)).aliases, []);
 
-  const origins = (await request("POST", aliasesPath, ORIGINS, staffCookie, 201)).json().alias;
+  const origins = (await request("POST", aliasesPath, ORIGINS, staffCookie, 201)).json<{
+    alias: TeamAlias;
+  }>().alias;
+
   assert.deepEqual(origins, { id: origins.id, ...ORIGINS });
   await request(
     "POST",
@@ -53,20 +109,20 @@ export async function verifyTeamAliases({ request, staffCookie, memberCookie }) 
       staffCookie,
       201,
     )
-  ).json().alias;
+  ).json<{ alias: TeamAlias }>().alias;
 
   assert.deepEqual(
-    (await request("GET", `/team/${team.id}`)).json().team.aliases.map(({ name }) => name),
+    (await teamOf(request, team.id)).aliases.map(({ name }) => name),
     ["Integration Origins", "Integration Sponsored"],
   );
 
-  const found = (await request("GET", "/search/teams?q=origins")).json();
+  const found = (await request("GET", "/search/teams?q=origins")).json<{ id: string }[]>();
   assert.deepEqual(
     found.map(({ id }) => id),
     [team.id],
     "search finds a team by a former name",
   );
-  assert.equal((await request("GET", "/team?name=sponsored")).json().count, 1);
+  assert.equal((await request("GET", "/team?name=sponsored")).json<{ count: number }>().count, 1);
 
   const stage = (
     await request(
@@ -76,7 +132,7 @@ export async function verifyTeamAliases({ request, staffCookie, memberCookie }) 
       staffCookie,
       201,
     )
-  ).json().tournament;
+  ).json<{ tournament: { id: string; participants: { id: string }[] } }>().tournament;
 
   const later = (
     await request(
@@ -91,23 +147,31 @@ export async function verifyTeamAliases({ request, staffCookie, memberCookie }) 
       staffCookie,
       201,
     )
-  ).json().match;
+  ).json<{ match: { publicId: number } }>().match;
 
-  const detail = (await request("GET", `/tournaments/${stage.id}`)).json().tournament;
-  const renamed = detail.participants.find(({ team: entry }) => entry?.id === team.id).team;
+  const detail = (await request("GET", `/tournaments/${stage.id}`)).json<{
+    tournament: { participants: StageParticipant[] };
+  }>().tournament;
+
+  const renamed = detail.participants.find(({ team: entry }) => entry?.id === team.id)?.team;
+  assert(renamed, "the stage lists the renamed team");
   assert.deepEqual(
     { name: renamed.name, slug: renamed.slug, logo: renamed.logoLightUrl },
     { name: "Integration Origins", slug: team.slug, logo: ORIGINS.logoUrl },
     "a stage shows the name and logo in force when it began",
   );
-  const publicMatch = (await request("GET", `/matches/${later.publicId}`)).json().match;
+
+  const publicMatch = (await request("GET", `/matches/${later.publicId}`)).json<{
+    match: { slug: string; participants: MatchParticipant[] };
+  }>().match;
+
   assert.equal(
-    publicMatch.participants.find(({ team: entry }) => entry?.id === team.id).team.name,
+    publicMatch.participants.find(({ team: entry }) => entry?.id === team.id)?.team?.name,
     "Integration Sponsored",
     "a match shows the name in force on its date",
   );
   assert.match(publicMatch.slug, /^integration-opponent-vs-integration-sponsored-/);
-  assert.equal((await request("GET", `/team/${team.id}`)).json().team.name, "Integration Renamed");
+  assert.equal((await teamOf(request, team.id)).name, "Integration Renamed");
 
   const corrected = (
     await request(
@@ -116,7 +180,7 @@ export async function verifyTeamAliases({ request, staffCookie, memberCookie }) 
       { ...ORIGINS, name: "Integration Sponsored", from: "2022-06-01", to: "2024-01-01" },
       staffCookie,
     )
-  ).json().alias;
+  ).json<{ alias: TeamAlias }>().alias;
 
   assert.equal(corrected.to, "2024-01-01");
   await request("PUT", `${aliasesPath}/${origins.id}`, ORIGINS, memberCookie, 403);
@@ -129,14 +193,20 @@ export async function verifyTeamAliases({ request, staffCookie, memberCookie }) 
   );
   await request("DELETE", `${aliasesPath}/${sponsored.id}`, undefined, staffCookie, 204);
   assert.deepEqual(
-    (await request("GET", `/team/${team.id}`)).json().team.aliases.map(({ id }) => id),
+    (await teamOf(request, team.id)).aliases.map(({ id }) => id),
     [origins.id],
   );
 
   return { team, origins };
 }
 
-export async function verifyTeamAliasProposals({ request, callTool, review, team, origins }) {
+export async function verifyTeamAliasProposals({
+  request,
+  callTool,
+  review,
+  team,
+  origins,
+}: TeamAliasProposalsContext): Promise<void> {
   const proposal = {
     teamId: team.id,
     name: "Integration Founders",
@@ -146,18 +216,24 @@ export async function verifyTeamAliasProposals({ request, callTool, review, team
   };
 
   assert.deepEqual(
-    await callTool("add_team_alias", {
+    await callTool<ToolFailure>("add_team_alias", {
       ...proposal,
       sourceUrl: "https://liquipedia.net/rocketleague/Integration_Founders",
     }),
     { error: true },
   );
-  assert.deepEqual(await callTool("add_team_alias", { ...proposal, to: "2021-01-01" }), {
-    error: true,
-  });
+  assert.deepEqual(
+    await callTool<ToolFailure>("add_team_alias", { ...proposal, to: "2021-01-01" }),
+    {
+      error: true,
+    },
+  );
   const queued = await callTool("add_team_alias", proposal);
   assert.equal(queued.status, "pending");
-  assert.equal((await callTool("list_team_aliases", { idOrSlug: team.slug })).aliases.length, 1);
+  assert.equal(
+    (await callTool<AliasList>("list_team_aliases", { idOrSlug: team.slug })).aliases.length,
+    1,
+  );
   assert.equal((await review(queued)).entityId, team.id);
 
   const updated = await callTool("update_team_alias", {
@@ -170,7 +246,7 @@ export async function verifyTeamAliasProposals({ request, callTool, review, team
   });
 
   await review(updated);
-  const { aliases } = await callTool("list_team_aliases", { idOrSlug: team.id });
+  const { aliases } = await callTool<AliasList>("list_team_aliases", { idOrSlug: team.id });
   assert.deepEqual(
     aliases.map(({ name, sourceUrl, logoUrl }) => [name, sourceUrl, logoUrl]),
     [
@@ -178,6 +254,5 @@ export async function verifyTeamAliasProposals({ request, callTool, review, team
       ["Integration Origins", "https://www.pandascore.co/rl/teams/integration", null],
     ],
   );
-  const listed = (await request("GET", `/team/${team.id}`)).json().team.aliases;
-  assert.equal(listed.length, 2);
+  assert.equal((await teamOf(request, team.id)).aliases.length, 2);
 }
