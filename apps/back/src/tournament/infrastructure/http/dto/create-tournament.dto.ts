@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { TOURNAMENT_FORMATS } from "@sarpbc/types";
+import { DATA_SOURCE_URL_MAX_LENGTH } from "@sarpbc/utils";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
 const tournamentWriteFields = {
   eventId: z.uuidv4({ message: "Choose a valid event." }).optional(),
@@ -53,6 +54,7 @@ const participantRoster = z.strictObject({
   playerIds: z
     .array(z.uuidv4())
     .refine((ids) => new Set(ids).size === ids.length, "Each player can only be listed once."),
+  sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable().optional(),
 });
 export const updateTournamentFields = {
   ...tournamentWriteFields,

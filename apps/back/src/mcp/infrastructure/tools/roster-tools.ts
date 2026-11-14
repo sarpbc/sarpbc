@@ -14,9 +14,6 @@ import {
 } from "@sarpbc/types";
 import {
   MAX_LINEUP_PLAYERS,
-  MAX_PRIZE_AMOUNT,
-  MAX_PRIZE_ENTRIES,
-  MAX_PRIZE_PLAYERS,
   MAX_CIRCUIT_PLACEMENT,
   MAX_CIRCUIT_POINTS,
   MAX_CIRCUIT_SCALE_TIERS,
@@ -31,22 +28,15 @@ import {
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
-  isForbiddenCircuitSourceHost,
   isForbiddenViewershipSource,
   isLiquipediaSourceHost,
-  isIso4217Code,
 } from "@sarpbc/utils";
 import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-source";
 import { InvalidInputError } from "../../../common/domain/errors";
-import {
-  MAX_TEAM_LOGO_BYTES,
-  MIN_TEAM_LOGO_PIXELS,
-  isLiquipediaHost,
-} from "../../../roster/domain/team-logo";
+import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
-import type { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
-import { defineTool, type McpTool, type ToolWrite } from "../define-tool";
-import { adminRosterProposalsUrl } from "../urls";
+import { defineTool, type McpTool } from "../define-tool";
+import { proposalSourceUrlSchema as sourceUrlSchema, proposed, proposer } from "./proposals";
 import { requireUpdateFields } from "./update-fields";
 
 const DEFAULT_PLAYER_STATUS = "free_agent" satisfies PlayerStatus;
@@ -54,18 +44,9 @@ const DEFAULT_PROPOSAL_STATUS = "pending" satisfies RosterProposalStatus;
 
 const withoutLiquipedia = (use: string) =>
   [
-    (url: string) => !URL.canParse(url) || !isLiquipediaHost(new URL(url).hostname),
+    (url: string) => !URL.canParse(url) || !isLiquipediaSourceHost(new URL(url).hostname),
     `Liquipedia is not an accepted source; ${use}`,
   ] as const;
-
-const sourceUrlSchema = z
-  .string()
-  .url()
-  .regex(/^https?:\/\//, "Use an http(s) URL")
-  .refine(...withoutLiquipedia("cite the official announcement it relies on"))
-  .describe(
-    "Required public source: the official team or player announcement, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
-  );
 
 const streamsSchema = z
   .array(
@@ -119,14 +100,9 @@ const circuitScaleSchema = z
     "The complete official scale of this stage, copied from the cited source; ranges must not overlap. Never estimate or invent points. An empty list keeps the stage in the circuit without awarding points.",
   );
 
-const circuitSourceUrlSchema = sourceUrlSchema
-  .refine(
-    (url) => !URL.canParse(url) || !isForbiddenCircuitSourceHost(new URL(url).hostname),
-    "Liquipedia and BLAST.tv are not accepted circuit sources",
-  )
-  .describe(
-    "Required public page of the official rules or announcement that publishes the scale. Never Liquipedia or BLAST.tv.",
-  );
+const circuitSourceUrlSchema = sourceUrlSchema.describe(
+  "Required public page of the official rules or announcement that publishes the scale. Never Liquipedia, a mirror of it or BLAST.tv.",
+);
 
 const circuitWorldwideSchema = z
   .boolean()
@@ -211,14 +187,9 @@ const effectiveDateSchema = contractDateSchema.describe(
   "Date the move takes effect according to the source (YYYY-MM-DD).",
 );
 
-const aliasSourceUrlSchema = sourceUrlSchema
-  .refine(
-    (url) => !URL.canParse(url) || !isLiquipediaSourceHost(new URL(url).hostname),
-    "Liquipedia and its mirrors are not accepted sources",
-  )
-  .describe(
-    "Required official source for the name and its dates: the team, one of its players, the organiser, BLAST, RLEsports or PandaScore. Never Liquipedia or a mirror of it, not even as a lead.",
-  );
+const aliasSourceUrlSchema = sourceUrlSchema.describe(
+  "Required official source for the name and its dates: the team, one of its players, the organiser, RLEsports or PandaScore. Never Liquipedia, a mirror of it or BLAST.tv, not even as a lead.",
+);
 
 const teamAliasInput = {
   teamId: z.string().uuid().describe("UUID of the team that used the name."),
@@ -264,9 +235,6 @@ const countrySchema = z
 
 const playerStatusSchema = z.enum(PLAYER_STATUSES).describe("Career status.");
 
-const REVIEW_NOTE =
-  "Nothing changed yet. A staff member must approve this proposal in the admin app before it applies.";
-
 const LOGO_LIMITS = `at most ${MAX_TEAM_LOGO_BYTES / (1024 * 1024)} MB, at least ${MIN_TEAM_LOGO_PIXELS}x${MIN_TEAM_LOGO_PIXELS} pixels`;
 
 export interface RosterToolServices {
@@ -284,24 +252,8 @@ function redistributableChange(change: RosterChange, sourceUrl: string): RosterC
   }
 }
 
-function proposed(proposal: RosterProposal, sourceUrl: string | undefined): ToolWrite {
-  return {
-    entityId: proposal.id,
-    sourceUrl,
-    result: {
-      proposalId: proposal.id,
-      kind: proposal.change.kind,
-      change: proposal.change,
-      status: proposal.status,
-      reviewUrl: adminRosterProposalsUrl(),
-      note: REVIEW_NOTE,
-    },
-  };
-}
-
 export function rosterTools({ rosterProposalService }: RosterToolServices): McpTool[] {
-  const propose = async (change: RosterChange, sourceUrl: string, userId: string) =>
-    proposed(await rosterProposalService.propose(change, sourceUrl, userId), sourceUrl);
+  const propose = proposer(rosterProposalService);
 
   return [
     defineTool({
@@ -620,61 +572,6 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
     }),
 
     defineTool({
-      name: "propose_tournament_prizes",
-      description:
-        "Propose the prize distribution of one tournament stage. Once approved, it replaces the whole distribution of that stage, so list every paid placement. Read get_tournament_prizes first. Every team must be a participant of the stage and every listed player must be on that team's stage roster. start.gg tournaments are refused. Enter each amount in the currency the source states; never convert it.",
-      write: true,
-      permission: "tournaments.manage",
-      input: {
-        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
-        prizes: z
-          .array(
-            z.object({
-              placement: z
-                .number()
-                .int()
-                .min(1)
-                .describe("Final placement; tied teams share the same placement."),
-              amount: z
-                .number()
-                .int()
-                .min(1)
-                .max(MAX_PRIZE_AMOUNT)
-                .describe("Whole amount in the stated currency."),
-              currency: z
-                .string()
-                .refine(isIso4217Code, "Use an ISO 4217 currency code")
-                .describe("ISO 4217 currency code as stated by the source (e.g. USD, EUR)."),
-              teamId: z.string().uuid().describe("Team UUID."),
-              playerIds: z
-                .array(z.string().uuid())
-                .max(MAX_PRIZE_PLAYERS)
-                .optional()
-                .describe(
-                  "Optional player UUIDs from the team's stage roster who share this prize.",
-                ),
-            }),
-          )
-          .max(MAX_PRIZE_ENTRIES)
-          .describe("Every paid placement of the stage."),
-        sourceUrl: sourceUrlSchema,
-      },
-      handler: ({ tournamentId, prizes, sourceUrl }, user) =>
-        propose(
-          {
-            kind: "set_tournament_prizes",
-            tournamentId,
-            prizes: prizes.map(({ playerIds, ...prize }) => ({
-              ...prize,
-              playerIds: playerIds ?? [],
-            })),
-          },
-          sourceUrl,
-          user.id,
-        ),
-    }),
-
-    defineTool({
       name: "propose_player_award",
       description:
         "Propose a player award of one tournament stage. Only propose awards the organiser officially announced. Use mvp for the tournament or World Championship MVP and grand_finals_mvp for a separate Grand Finals MVP. Read get_tournament_awards first: a stage holds several awards but at most one of each type. The team must be a participant of the stage and the player must be on that team's stage roster. start.gg tournaments are refused.",
@@ -951,7 +848,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
 
     defineTool({
       name: "list_roster_proposals",
-      description: `List roster proposals, ${DEFAULT_PROPOSAL_STATUS} by default. Check pending proposals before proposing a change so the same player, team or move is not proposed twice. Applied proposals carry the created or updated entityId.`,
+      description: `List every staff-reviewed proposal (players, teams, contracts, prizes, awards, streams, lineups, viewership, circuits, deletions), ${DEFAULT_PROPOSAL_STATUS} by default, with its change, status and sourceUrl. Check pending proposals before proposing a change so the same change is not proposed twice. Applied proposals carry the created or updated entityId.`,
       permission: ROSTER_PROPOSAL_PERMISSIONS,
       input: {
         status: z

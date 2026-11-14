@@ -24,6 +24,7 @@ interface PrizeRow {
   currency: string;
   teamId: string | undefined;
   playerIds: string[];
+  sourceUrl: string;
 }
 
 const props = defineProps<{
@@ -35,7 +36,10 @@ const props = defineProps<{
 const { t, n } = useI18n();
 const toast = useToast();
 
+const { normalizeSourceUrl, sourceUrlError } = useSourceUrl();
+
 const rows = ref<PrizeRow[]>([]);
+const bulkSourceUrl = ref("");
 const saving = ref(false);
 let nextKey = 0;
 
@@ -58,6 +62,7 @@ function toRows(value: TournamentPrizes | null | undefined): PrizeRow[] {
     currency: prize.currency,
     teamId: prize.team.id,
     playerIds: prize.players.map(({ id }) => id),
+    sourceUrl: prize.sourceUrl ?? "",
   }));
 }
 
@@ -154,7 +159,8 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
     !Number.isInteger(row.placement) ||
     row.placement < MIN_PRIZE_PLACEMENT ||
     !isValidAmount(amount) ||
-    currencyError(row.currency)
+    currencyError(row.currency) ||
+    sourceUrlError(row.sourceUrl)
   )
     return null;
   return {
@@ -163,6 +169,7 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
     currency: normalizeCurrency(row.currency),
     teamId,
     playerIds: row.playerIds,
+    sourceUrl: normalizeSourceUrl(row.sourceUrl),
   };
 }
 
@@ -186,7 +193,12 @@ function addRow() {
     currency: last?.currency ?? "USD",
     teamId: undefined,
     playerIds: [],
+    sourceUrl: bulkSourceUrl.value.trim(),
   });
+}
+
+function applySourceToAll() {
+  for (const row of rows.value) row.sourceUrl = bulkSourceUrl.value.trim();
 }
 
 function removeRow(key: number) {
@@ -253,6 +265,24 @@ async function save() {
       <p v-if="rows.length === 0" class="text-sm text-muted">
         {{ t("page.tournaments.prizes.empty") }}
       </p>
+
+      <div v-if="rows.length > 0" class="flex flex-col gap-2 sm:flex-row sm:items-start">
+        <UFormField
+          :label="t('page.tournaments.prizes.bulkSource')"
+          :hint="t('page.tournaments.prizes.bulkSourceHint')"
+          :error="sourceUrlError(bulkSourceUrl)"
+          class="min-w-0 flex-1"
+        >
+          <UInput v-model="bulkSourceUrl" type="url" autocomplete="off" class="w-full" />
+        </UFormField>
+        <UButton
+          class="sm:mt-6"
+          variant="soft"
+          :label="t('page.tournaments.prizes.applySource')"
+          :disabled="!!sourceUrlError(bulkSourceUrl)"
+          @click="applySourceToAll"
+        />
+      </div>
 
       <div
         v-for="row in rows"
@@ -331,6 +361,24 @@ async function save() {
           :aria-label="t('page.tournaments.prizes.remove')"
           @click="removeRow(row.key)"
         />
+
+        <UFormField
+          :label="t('common.sourceUrl')"
+          :error="sourceUrlError(row.sourceUrl)"
+          class="sm:col-span-full"
+        >
+          <UInput v-model="row.sourceUrl" type="url" autocomplete="off" class="w-full" />
+          <template v-if="row.sourceUrl.trim() && !sourceUrlError(row.sourceUrl)" #help>
+            <ULink
+              :to="row.sourceUrl.trim()"
+              external
+              target="_blank"
+              class="break-all text-primary hover:underline"
+            >
+              {{ t("common.openSource") }}
+            </ULink>
+          </template>
+        </UFormField>
       </div>
 
       <p v-if="duplicateTeam" class="text-sm text-error">

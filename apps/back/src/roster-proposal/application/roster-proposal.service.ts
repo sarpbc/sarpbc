@@ -1,12 +1,18 @@
 import type {
   CircuitStageScaleInput,
+  PrizeEntry,
+  ProposedPrizeEntry,
   RosterChange,
   RosterProposalStatus,
   StreamInput,
   TeamLogoVariant,
 } from "@sarpbc/types";
-import { requiredPermission } from "@sarpbc/utils";
-import { isRedistributable, sourceFromUrl } from "../../common/domain/data-source";
+import { isAcceptedDataSourceUrl, requiredPermission } from "@sarpbc/utils";
+import {
+  REFUSED_DATA_SOURCE_MESSAGE,
+  isRedistributable,
+  sourceFromUrl,
+} from "../../common/domain/data-source";
 import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
@@ -39,7 +45,10 @@ type Teams = Pick<TeamService, "findById" | "create" | "update" | "requireDeleta
 type Contracts = Pick<ContractService, "getContractsByPlayer" | "recordPeriod" | "revisePeriod">;
 type Merges = Pick<RosterMergeService, "mergePlayers" | "mergeTeams">;
 type Staff = Pick<UserService, "hasAnyPermission">;
-type Prizes = Pick<TournamentPrizeService, "requireProposableTournament" | "setDistribution">;
+type Prizes = Pick<
+  TournamentPrizeService,
+  "requireProposableTournament" | "requireProposablePrize" | "setDistribution" | "updateEntry"
+>;
 type Awards = Pick<PlayerAwardService, "requireProposable" | "createForTeam">;
 type Logos = Pick<TeamLogoService, "upload" | "publish" | "discard">;
 type Matches = Pick<MatchService, "requireProposableDeletion" | "deleteMatch">;
@@ -97,13 +106,19 @@ export class RosterProposalService {
     sourceUrl: string,
     proposedById: string,
   ): Promise<RosterProposal> {
+    if (sourceUrl !== "" && !isAcceptedDataSourceUrl(sourceUrl))
+      throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
     await this.requireReferences(change);
     if (change.kind === "update_contract") {
       await this.requireContract(change.playerId, change.contractId);
     }
     if (change.kind === "set_tournament_prizes") {
-      assertPrizeDistribution(change.prizes);
+      assertPrizeDistribution(sourcedPrizes(change.prizes, sourceUrl));
       await this.prizes.requireProposableTournament(change.tournamentId);
+    }
+    if (change.kind === "update_tournament_prize") {
+      const { tournamentId, teamId, patch } = change;
+      await this.prizes.requireProposablePrize(tournamentId, teamId, patch);
     }
     if (change.kind === "award_player") {
       const { tournamentId, teamId, playerId, awardType } = change;
@@ -207,6 +222,7 @@ export class RosterProposalService {
         ...new Set(
           proposals.flatMap(({ change }) =>
             change.kind === "set_tournament_prizes" ||
+            change.kind === "update_tournament_prize" ||
             change.kind === "award_player" ||
             change.kind === "set_tournament_streams" ||
             change.kind === "set_circuit_stage_scale"
@@ -344,8 +360,16 @@ export class RosterProposalService {
         return (await this.contracts.revisePeriod(playerId, contractId, input)).id;
       }
       case "set_tournament_prizes":
-        await this.prizes.setDistribution(change.tournamentId, change.prizes);
+        await this.prizes.setDistribution(
+          change.tournamentId,
+          sourcedPrizes(change.prizes, sourceUrl),
+        );
         return change.tournamentId;
+      case "update_tournament_prize": {
+        const { tournamentId, teamId, patch } = change;
+        await this.prizes.updateEntry(tournamentId, teamId, patch, sourceUrl);
+        return tournamentId;
+      }
       case "award_player": {
         const { tournamentId, teamId, playerId, awardType } = change;
         return (await this.awards.createForTeam(tournamentId, teamId, playerId, awardType)).id;
@@ -448,6 +472,8 @@ function referencedPlayerIds(change: RosterChange): string[] {
       return [change.keptId, change.duplicateId];
     case "set_tournament_prizes":
       return change.prizes.flatMap(({ playerIds }) => playerIds);
+    case "update_tournament_prize":
+      return change.patch.playerIds ?? [];
     case "set_match_lineups":
       return change.lineups.flatMap(({ playerIds }) => playerIds);
     case "create_player":
@@ -491,6 +517,8 @@ function referencedTeamIds(change: RosterChange): string[] {
       return [change.keptId, change.duplicateId];
     case "set_tournament_prizes":
       return change.prizes.map(({ teamId }) => teamId);
+    case "update_tournament_prize":
+      return [change.teamId];
     case "set_circuit_stage_scale":
       return [
         ...new Set([
@@ -518,6 +546,10 @@ function referencedTeamIds(change: RosterChange): string[] {
       return exhaustive;
     }
   }
+}
+
+function sourcedPrizes(prizes: ProposedPrizeEntry[], sourceUrl: string): PrizeEntry[] {
+  return prizes.map((prize) => ({ ...prize, sourceUrl }));
 }
 
 type StreamRosterChange = Extract<

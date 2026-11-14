@@ -17,6 +17,7 @@ function services(): WriteToolServices {
       setMatchWinner: vi.fn(),
       setGameVods: vi.fn(),
       updateMatch: vi.fn(),
+      setSource: vi.fn(),
     },
     manualTournamentService: { create: vi.fn(), update: vi.fn() },
     pandascoreTournamentSync: { execute: vi.fn(), executeByPandascoreId: vi.fn() },
@@ -185,12 +186,14 @@ describe("create_match participants", () => {
         name: "Karmine Corp",
         team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
         players: [],
+        rosterSourceUrl: null,
       },
       {
         id: "p-m8",
         name: "Gentle Mates",
         team: { id: "team-m8", slug: "gentle-mates", name: "Gentle Mates" },
         players: [],
+        rosterSourceUrl: null,
       },
     ]);
   });
@@ -316,6 +319,7 @@ describe("bracket tools", () => {
     const matchService = {
       ...base.matchService,
       updateMatch: vi.fn().mockResolvedValue(match),
+      setSource: vi.fn().mockResolvedValue(match),
       createEmptyBracket: vi.fn().mockResolvedValue([match]),
     };
     const tournaments = {
@@ -342,6 +346,18 @@ describe("bracket tools", () => {
       expect.objectContaining({ participantIds: ["a"], previousMatches }),
     );
     expect(JSON.parse(textOf(result)).previousMatches).toEqual(previousMatches);
+  });
+
+  it("records or clears a match source and refuses BLAST.tv and Liquipedia mirrors", async () => {
+    const { tools, matchService, run } = setup("manual");
+    const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
+    await run("set_match_source", { matchId: "final", sourceUrl });
+    expect(matchService.setSource).toHaveBeenCalledWith("final", sourceUrl);
+
+    const input = z.object(defined(tools, "set_match_source").inputSchema);
+    expect(input.safeParse({ matchId: "final", sourceUrl: null }).success).toBe(true);
+    for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"])
+      expect(input.safeParse({ matchId: "final", sourceUrl: refused }).success).toBe(false);
   });
 
   it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {

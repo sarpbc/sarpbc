@@ -1,4 +1,5 @@
 import type { TeamLogoVariant } from "@sarpbc/types";
+import { isLiquipediaSourceHost } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 
 export type TeamLogoFormat = "png" | "webp" | "svg";
@@ -54,17 +55,13 @@ export function publishedTeamLogoKey(pendingKey: string): string {
   return pendingKey.slice(PENDING_TEAM_LOGO_PREFIX.length);
 }
 
-export function isLiquipediaHost(hostname: string): boolean {
-  return /(^|\.)liquipedia\.net\.?$/i.test(hostname);
-}
-
 export function requireTeamLogoUrl(value: string): URL {
   if (!URL.canParse(value)) throw new InvalidInputError("The logo imageUrl is not a valid URL.");
   const url = new URL(value);
   if (url.protocol !== "https:") {
     throw new InvalidInputError("The logo imageUrl must use https.");
   }
-  if (isLiquipediaHost(url.hostname)) {
+  if (isLiquipediaSourceHost(url.hostname)) {
     throw new InvalidInputError(
       "Liquipedia is not an accepted logo source; use the team's official asset.",
     );

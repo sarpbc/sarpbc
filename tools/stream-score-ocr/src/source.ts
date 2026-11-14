@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from "node:child_process";
-import { isLiquipediaSourceHost } from "@sarpbc/utils/team-alias";
+import { isLiquipediaSourceHost } from "@sarpbc/utils/source-host";
 import { readPpmFrames, type Frame } from "./frame.ts";
 
 const URL_INPUT = /^[a-z][a-z0-9+.-]*:\/\//i;

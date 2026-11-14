@@ -253,8 +253,44 @@ describe("RosterProposalService", () => {
     const approved = await service.approve(id, "admin");
 
     expect(staff.permissions).toEqual(["tournaments.manage"]);
-    expect(prizes.setDistribution).toHaveBeenCalledWith("cup", [prizeEntry]);
+    expect(prizes.setDistribution).toHaveBeenCalledWith("cup", [
+      { ...prizeEntry, sourceUrl: source },
+    ]);
     expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
+  });
+
+  it("applies a prize row correction with the proposal's source", async () => {
+    const { id } = await service.propose(
+      { kind: "update_tournament_prize", tournamentId: "cup", teamId: "kc", patch: {} },
+      source,
+      "journalist",
+    );
+    const approved = await service.approve(id, "admin");
+
+    expect(staff.permissions).toEqual(["tournaments.manage"]);
+    expect(prizes.updateEntry).toHaveBeenCalledWith("cup", "kc", {}, source);
+    expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
+  });
+
+  it("refuses a prize row correction for a team without a prize", async () => {
+    await expect(
+      service.propose(
+        { kind: "update_tournament_prize", tournamentId: "cup", teamId: "zen", patch: {} },
+        source,
+        "journalist",
+      ),
+    ).rejects.toThrow(NotFoundError);
+  });
+
+  it("refuses a BLAST.tv or Liquipedia mirror source for any proposal", async () => {
+    for (const sourceUrl of ["https://blast.tv/rl/open", "https://liquipedia-mirror.example/x"])
+      await expect(
+        service.propose(
+          { kind: "update_tournament_prize", tournamentId: "cup", teamId: "kc", patch: {} },
+          sourceUrl,
+          "journalist",
+        ),
+      ).rejects.toThrow(InvalidInputError);
   });
 
   it("rejects prize proposals with an unknown or start.gg tournament, team or invalid currency", async () => {

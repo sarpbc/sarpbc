@@ -3,7 +3,7 @@ import {
   ON_THIS_DAY_MIN_YEAR,
   ON_THIS_DAY_SOURCE_URL_MAX_LENGTH,
   ON_THIS_DAY_TEXT_MAX_LENGTH,
-  isForbiddenFactSource,
+  isForbiddenSourceHost,
   isMonthDay,
 } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
@@ -48,7 +48,7 @@ export function parseFactSourceUrl(value: string | null): string | null {
   const url = new URL(raw);
   if (!/^https?:$/.test(url.protocol) || url.username || url.password)
     throw new InvalidInputError("The source must be an http(s) URL.");
-  if (isForbiddenFactSource(url.hostname))
+  if (isForbiddenSourceHost(url.hostname))
     throw new InvalidInputError(
       "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
     );

@@ -29,6 +29,7 @@ describe("parseTeamAlias", () => {
     assert.equal(error({ sourceUrl: "https://liquipedia.net/rocketleague/X" }), "forbidden-source");
     assert.equal(error({ sourceUrl: "https://www.liquipedia.org/x" }), "forbidden-source");
     assert.equal(error({ sourceUrl: "https://liquipedia-mirror.example/x" }), "forbidden-source");
+    assert.equal(error({ sourceUrl: "https://blast.tv/rl/teams/x" }), "forbidden-source");
     assert.equal(
       error({ logoUrl: "https://liquipedia.net/commons/images/logo.png" }),
       "forbidden-logo-source",

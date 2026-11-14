@@ -159,7 +159,12 @@ export function setupRosterProposalService() {
         );
       if (id !== "cup") throw new NotFoundError(`Tournament with id "${id}" not found`);
     }),
+    requireProposablePrize: vi.fn(async (tournamentId: string, teamId: string) => {
+      if (tournamentId !== "cup") throw new NotFoundError(`Tournament "${tournamentId}" not found`);
+      if (teamId !== "kc") throw new NotFoundError(`Team "${teamId}" has no prize`);
+    }),
     setDistribution: vi.fn(),
+    updateEntry: vi.fn(),
   };
   const awardError = (tournamentId: string, playerId: string) => {
     if (tournamentId === "startgg-cup")

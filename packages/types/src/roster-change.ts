@@ -3,7 +3,7 @@ import type { ContractRole } from "./contract";
 import type { MatchLineupInput } from "./lineup";
 import type { PlayerAwardType } from "./player-award";
 import type { PlayerStatus } from "./player";
-import type { PrizeEntry } from "./prize";
+import type { PrizeEntryPatch, ProposedPrizeEntry } from "./prize";
 import type { SeasonAwardType } from "./season";
 import type { StreamInput } from "./stream";
 import type { TeamAliasInput, TeamLogoVariant } from "./team";
@@ -80,7 +80,13 @@ export type RosterChange =
       endDate?: string | null;
       contractRole?: ContractRole;
     }
-  | { kind: "set_tournament_prizes"; tournamentId: string; prizes: PrizeEntry[] }
+  | { kind: "set_tournament_prizes"; tournamentId: string; prizes: ProposedPrizeEntry[] }
+  | {
+      kind: "update_tournament_prize";
+      tournamentId: string;
+      teamId: string;
+      patch: PrizeEntryPatch;
+    }
   | {
       kind: "award_player";
       tournamentId: string;

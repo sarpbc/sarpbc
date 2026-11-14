@@ -12,7 +12,10 @@
       "assistant_coach": "Assistant Coach",
       "analyst": "Analyst",
       "manager": "Manager"
-    }
+    },
+    "sourceUrlInvalid": "Enter a valid http or https URL. Liquipedia and BLAST.tv are not accepted sources.",
+    "sourceUrl": "Source URL",
+    "openSource": "Open source"
   },
   "imageUpload": {
     "hint": "JPEG, PNG, WebP or GIF, up to {max} MB",
@@ -238,6 +241,7 @@
         "create_contract": "New contract",
         "update_contract": "Contract update",
         "set_tournament_prizes": "Prize distribution",
+        "update_tournament_prize": "Prize source or fix",
         "set_event_streams": "Event streams",
         "set_tournament_streams": "Tournament streams",
         "set_match_streams": "Match streams",
@@ -313,7 +317,9 @@
         "ongoing": "Ongoing",
         "noPrizes": "Clear the distribution",
         "noStreams": "Clear the list",
-        "noLineups": "Clear the lineups"
+        "noLineups": "Clear the lineups",
+        "sourceOnly": "Source only",
+        "noPlayers": "Clear the players"
       },
       "messages": {
         "approved": "Proposal approved and applied",
@@ -345,6 +351,15 @@
         "manual": "Manual",
         "pandascore": "PandaScore",
         "startgg": "start.gg"
+      },
+      "matchSource": {
+        "action": "Source",
+        "title": "Source · {match}",
+        "description": "The page that backs this match's result. Leave empty to remove the source.",
+        "save": "Save Source",
+        "saved": "Match source saved",
+        "saveError": "Could not save the match source",
+        "none": "No source"
       },
       "create": {
         "action": "Create Tournament",
@@ -744,7 +759,10 @@
           "tooManyPlayers": "A placement can credit up to {max} players.",
           "currency": "Use an ISO 4217 code such as USD or EUR.",
           "duplicateTeam": "Each team can appear only once."
-        }
+        },
+        "bulkSource": "Source for every prize",
+        "bulkSourceHint": "Fills the source of every prize below, for example with the official rulebook. Save to apply.",
+        "applySource": "Apply to All"
       },
       "events": {
         "title": "Events",
@@ -844,6 +862,13 @@
         "confirm": "Remove the stats of game {number} of {match}? Later imports will leave this replay out until it is attached again.",
         "confirmButton": "Remove",
         "removed": "Game {number} removed"
+      },
+      "rosterSources": {
+        "title": "Roster Sources",
+        "hint": "The page each team's roster for this tournament comes from. Leave empty to remove the source.",
+        "save": "Save",
+        "saved": "Roster source saved",
+        "saveError": "Could not save the roster source"
       }
     },
     "pickems": {
@@ -1105,7 +1130,7 @@
           "invalid-to": "Enter a valid date or leave it empty.",
           "to-not-after-from": "The end date must come after the start date.",
           "invalid-source-url": "Enter the http(s) URL of an official source.",
-          "forbidden-source": "Liquipedia is not an accepted source.",
+          "forbidden-source": "Liquipedia and BLAST.tv are not accepted sources.",
           "invalid-logo-url": "Enter an https URL.",
           "forbidden-logo-source": "Liquipedia is not an accepted logo source.",
           "invalid-pandascore-id": "Enter a positive whole number."
@@ -1265,9 +1290,7 @@
           "incomplete": "Fill in all three values.",
           "range": "The last place cannot be before the first place.",
           "numbers": "Use whole numbers: places from 1 to {maxPlacement}, points from 0 to {maxPoints}.",
-          "overlap": "Place ranges cannot overlap.",
-          "sourceUrl": "Enter a valid http or https URL.",
-          "sourceBlocked": "This website is not accepted as a source. Use the official rules page or announcement."
+          "overlap": "Place ranges cannot overlap."
         },
         "teamPlacement": "{name} (place {placement})",
         "teamsLoading": "Loading the teams of this event…",
@@ -1467,8 +1490,6 @@
         "textHint": "One short sentence, as it will appear.",
         "sourceUrl": "Official source",
         "sourceUrlHint": "Optional. Liquipedia and BLAST.tv are not accepted.",
-        "sourceInvalid": "Enter an http(s) URL.",
-        "sourceForbidden": "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
         "link": {
           "label": "Link",
           "hint": "Optional. A player, team, stage or match already on the site.",

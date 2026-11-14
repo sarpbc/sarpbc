@@ -37,6 +37,7 @@ export function requiredPermission(change: RosterChange): StaffPermission {
     case "delete_team":
       return "teams.manage";
     case "set_tournament_prizes":
+    case "update_tournament_prize":
     case "award_player":
     case "award_season_player":
     case "set_event_streams":

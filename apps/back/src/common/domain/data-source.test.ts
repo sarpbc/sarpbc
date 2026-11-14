@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isRedistributable, sourceFromUrl } from "./data-source";
+import { isRedistributable, parseDataSourceUrl, sourceFromUrl } from "./data-source";
 
 describe("data source", () => {
   it("flags start.gg URLs, including subdomains", () => {
@@ -13,5 +13,14 @@ describe("data source", () => {
     expect(isRedistributable("pandascore")).toBe(true);
     expect(isRedistributable("manual")).toBe(true);
     expect(isRedistributable("startgg")).toBe(false);
+  });
+
+  it("parses a staff source URL, clearing blanks and refusing BLAST.tv", () => {
+    expect(parseDataSourceUrl(" https://www.rocketleague.com/rules ")).toBe(
+      "https://www.rocketleague.com/rules",
+    );
+    expect(parseDataSourceUrl("  ")).toBeNull();
+    expect(parseDataSourceUrl(null)).toBeNull();
+    expect(() => parseDataSourceUrl("https://blast.tv/rl")).toThrow(/BLAST/);
   });
 });

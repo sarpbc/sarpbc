@@ -3,7 +3,6 @@ export const ON_THIS_DAY_TEXT_MAX_LENGTH = 280;
 export const ON_THIS_DAY_SOURCE_URL_MAX_LENGTH = 2048;
 export const ON_THIS_DAY_MIN_YEAR = 2008;
 
-const FORBIDDEN_FACT_SOURCE_HOSTS = ["liquipedia.net", "blast.tv"] as const;
 const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] as const;
 const ISO_DAY = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -16,13 +15,6 @@ export interface CalendarDay {
 export function isMonthDay(month: number, day: number): boolean {
   if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12) return false;
   return day >= 1 && day <= (DAYS_IN_MONTH[month - 1] ?? 0);
-}
-
-export function isForbiddenFactSource(hostname: string): boolean {
-  const host = hostname.toLowerCase().replace(/\.$/, "");
-  return FORBIDDEN_FACT_SOURCE_HOSTS.some(
-    (forbidden) => host === forbidden || host.endsWith(`.${forbidden}`),
-  );
 }
 
 export function calendarDayIn(date: Date, timeZone: string): CalendarDay {

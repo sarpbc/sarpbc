@@ -139,7 +139,31 @@ describe("ManualTournamentService", () => {
       tournamentId: "ewc",
       teamId: "ikkaku",
       playerIds: ["exotiik", "rezears", "yujin"],
+      rosterSourceUrl: null,
     });
+  });
+  it("sets, keeps and refuses a roster source", async () => {
+    tournament.source = "manual";
+    const team = Object.assign(new Team(), { id: "ikkaku" });
+    const rules = "https://esportsworldcup.com/en/rules";
+    writer.participants.mockResolvedValue([
+      Object.assign(new TournamentParticipant(), { id: "p", team, rosterSourceUrl: rules }),
+    ]);
+    await service.update("ewc", { rosters: [{ teamId: "ikkaku", playerIds: ["yujin"] }] });
+    expect(writer.saveParticipant).toHaveBeenLastCalledWith(
+      expect.objectContaining({ rosterSourceUrl: rules }),
+    );
+    await service.update("ewc", {
+      rosters: [{ teamId: "ikkaku", playerIds: ["yujin"], sourceUrl: null }],
+    });
+    expect(writer.saveParticipant).toHaveBeenLastCalledWith(
+      expect.objectContaining({ rosterSourceUrl: null }),
+    );
+    await expect(
+      service.update("ewc", {
+        rosters: [{ teamId: "ikkaku", playerIds: ["yujin"], sourceUrl: "https://blast.tv/rl" }],
+      }),
+    ).rejects.toThrow(/BLAST/);
   });
   it("rejects a roster for a team that is not participating", async () => {
     tournament.source = "manual";

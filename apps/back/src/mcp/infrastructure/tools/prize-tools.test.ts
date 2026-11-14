@@ -2,6 +2,7 @@ import type { ToolArguments } from "../define-tool";
 import { describe, expect, it, vi } from "vitest";
 import type { RosterChange, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
+import { prizeTools } from "./prize-tools";
 import { rosterTools } from "./roster-tools";
 
 const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -19,9 +20,10 @@ function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes"
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
-  const tool = rosterTools({ rosterProposalService }).find(
-    (candidate) => candidate.name === toolName,
-  );
+  const tool = [
+    ...rosterTools({ rosterProposalService }),
+    ...prizeTools({ rosterProposalService }),
+  ].find((candidate) => candidate.name === toolName);
   if (!tool) throw new Error(`${toolName} is not defined`);
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
   return { rosterProposalService, tool, call };
@@ -69,6 +71,30 @@ describe("propose_tournament_prizes", () => {
     expect(
       schema.safeParse({ ...input, prizes: [{ ...prizes[0], currency: "XYZ" }] }).success,
     ).toBe(false);
+  });
+});
+
+describe("propose_tournament_prize_update", () => {
+  const RULES = "https://www.rocketleague.com/en/news/rlcs-official-rules";
+
+  it("queues a source-only correction with an empty patch", async () => {
+    const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
+    await call({ tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, sourceUrl: RULES });
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      { kind: "update_tournament_prize", tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, patch: {} },
+      RULES,
+      "u1",
+    );
+  });
+
+  it("queues only the corrected fields", async () => {
+    const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
+    await call({ tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, amount: 1800, sourceUrl: RULES });
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      expect.objectContaining({ patch: { amount: 1800 } }),
+      RULES,
+      "u1",
+    );
   });
 });
 

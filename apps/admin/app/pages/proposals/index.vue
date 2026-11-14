@@ -60,6 +60,14 @@ function formatAmount(amount: number, currency: string): string {
   }).format(amount);
 }
 
+function optionalRow(
+  key: string,
+  label: string,
+  value: string | undefined,
+): { key: string; label: string; value: string }[] {
+  return value === undefined ? [] : [{ key, label, value }];
+}
+
 function streamRows(
   targetKey: "eventId" | "tournamentId" | "matchId",
   targetId: string,
@@ -101,29 +109,23 @@ function viewershipRows(
       label: t("page.tournaments.viewership.peakViewers"),
       value: count.format(viewership.peakViewers),
     },
-    ...(viewership.averageViewers === null
-      ? []
-      : [
-          {
-            key: "averageViewers",
-            label: t("page.tournaments.viewership.averageViewers"),
-            value: count.format(viewership.averageViewers),
-          },
-        ]),
+    ...optionalRow(
+      "averageViewers",
+      t("page.tournaments.viewership.averageViewers"),
+      viewership.averageViewers === null ? undefined : count.format(viewership.averageViewers),
+    ),
     {
       key: "scope",
       label: t("page.tournaments.viewership.scope"),
       value: t(`page.tournaments.viewership.scopes.${viewership.scope}`),
     },
-    ...(viewership.measuredAt === null
-      ? []
-      : [
-          {
-            key: "measuredAt",
-            label: t("page.tournaments.viewership.measuredAt"),
-            value: dateFormatter.value.format(new Date(viewership.measuredAt)),
-          },
-        ]),
+    ...optionalRow(
+      "measuredAt",
+      t("page.tournaments.viewership.measuredAt"),
+      viewership.measuredAt === null
+        ? undefined
+        : dateFormatter.value.format(new Date(viewership.measuredAt)),
+    ),
     {
       key: "sourceName",
       label: t("page.tournaments.viewership.sourceName"),
@@ -162,6 +164,50 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
               ...(prize.playerIds.length > 0 ? [prize.playerIds.map(nameOf).join(", ")] : []),
             ].join(" · "),
           }))),
+    ];
+  }
+  if (change.kind === "update_tournament_prize") {
+    const { patch } = change;
+    const patched = [
+      ...optionalRow(
+        "placement",
+        t("page.tournaments.prizes.placement"),
+        patch.placement === undefined ? undefined : String(patch.placement),
+      ),
+      ...optionalRow(
+        "amount",
+        t("page.tournaments.prizes.amount"),
+        patch.amount === undefined
+          ? undefined
+          : patch.currency === undefined
+            ? String(patch.amount)
+            : formatAmount(patch.amount, patch.currency),
+      ),
+      ...optionalRow("currency", t("page.tournaments.prizes.currency"), patch.currency),
+      ...optionalRow(
+        "playerIds",
+        t("page.tournaments.prizes.players"),
+        patch.playerIds === undefined
+          ? undefined
+          : patch.playerIds.map(nameOf).join(", ") || t("page.proposals.values.noPlayers"),
+      ),
+    ];
+    return [
+      {
+        key: "tournamentId",
+        label: t("page.proposals.fields.tournamentId"),
+        value: nameOf(change.tournamentId),
+      },
+      { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
+      ...(patched.length === 0
+        ? [
+            {
+              key: "patch",
+              label: t("page.proposals.fields.prizes"),
+              value: t("page.proposals.values.sourceOnly"),
+            },
+          ]
+        : patched),
     ];
   }
   if (change.kind === "set_circuit_stage_scale") {

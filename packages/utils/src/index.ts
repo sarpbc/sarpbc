@@ -89,7 +89,6 @@ export {
 export {
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
-  isLiquipediaSourceHost,
   parseTeamAlias,
   teamAliasInForce,
   teamAliasesOverlap,
@@ -184,7 +183,6 @@ export {
   MAX_CIRCUIT_STAGE_TEAMS,
   MIN_CIRCUIT_SEASON,
   WORLDWIDE_CIRCUIT_REGION,
-  isForbiddenCircuitSourceHost,
   isWorldwideCircuitRegion,
 } from "./circuit";
 export {
@@ -225,8 +223,9 @@ export {
   SITE_TIME_ZONE,
   calendarDayIn,
   formatIsoDay,
-  isForbiddenFactSource,
   isMonthDay,
   parseIsoDay,
   type CalendarDay,
 } from "./on-this-day";
+export { DATA_SOURCE_URL_MAX_LENGTH, isAcceptedDataSourceUrl } from "./data-source-url";
+export { isForbiddenSourceHost, isLiquipediaSourceHost } from "./source-host";

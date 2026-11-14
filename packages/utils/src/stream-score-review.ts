@@ -4,7 +4,7 @@ import type {
   StreamScoreSeries,
   StreamScoreSide,
 } from "@sarpbc/types";
-import { isLiquipediaSourceHost } from "./team-alias";
+import { isLiquipediaSourceHost } from "./source-host";
 
 const LOW_CONFIDENCE = 0.9;
 

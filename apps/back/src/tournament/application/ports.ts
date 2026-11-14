@@ -191,6 +191,7 @@ export interface PrizeParticipant {
 export interface PrizeWriter {
   tournamentExists(id: string): Promise<boolean>;
   participants(tournamentId: string): Promise<PrizeParticipant[]>;
+  entries(tournamentId: string): Promise<PrizeEntry[]>;
   replace(tournamentId: string, entries: PrizeEntry[]): Promise<void>;
 }
 export interface PrizeTransaction {

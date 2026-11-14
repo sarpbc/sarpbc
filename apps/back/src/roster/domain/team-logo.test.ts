@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
 import {
   detectTeamLogoFormat,
-  isLiquipediaHost,
   pendingTeamLogoKey,
   publishedTeamLogoKey,
   requireSafeSvg,
@@ -88,8 +87,6 @@ describe("team logo rules", () => {
     expect(() => requireTeamLogoUrl("https://liquipedia.net/commons/images/kc.png")).toThrow(
       "Liquipedia",
     );
-    expect(isLiquipediaHost("LIQUIPEDIA.NET.")).toBe(true);
-    expect(isLiquipediaHost("notliquipedia.net")).toBe(false);
   });
 
   it("stages each variant under a pending content-addressed key until it is published", () => {

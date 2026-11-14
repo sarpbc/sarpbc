@@ -78,6 +78,7 @@ export function toParticipant(
           .filter((player) => wrap(player).isInitialized())
           .map(toPlayer)
       : [],
+    rosterSourceUrl: row.rosterSourceUrl,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   });
@@ -118,6 +119,7 @@ export function toMatch(row: Row.Match): Match {
     streams: row.streams ?? [],
     viewership: row.viewership ?? null,
     vods: row.vods ?? [],
+    sourceUrl: row.sourceUrl,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     tournament: toTournamentSummary(row.tournament),

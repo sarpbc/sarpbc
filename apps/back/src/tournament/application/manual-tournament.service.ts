@@ -22,6 +22,7 @@ import type {
   TournamentWriter,
 } from "./ports";
 import { explicitEventSlug, placeStage, requireEvent, requireLeague } from "./event-placement";
+import { parseDataSourceUrl } from "../../common/domain/data-source";
 export class ManualTournamentService {
   constructor(
     private readonly reads: TournamentQueries,
@@ -178,6 +179,7 @@ export class ManualTournamentService {
           tournamentId: tournament.id,
           teamId,
           playerIds: await this.activeRoster(writer, teamId),
+          rosterSourceUrl: null,
         });
     }
   }
@@ -207,6 +209,7 @@ export class ManualTournamentService {
           tournamentId: tournament.id,
           teamId: null,
           playerIds: group,
+          rosterSourceUrl: null,
         });
     }
   }
@@ -258,6 +261,10 @@ export class ManualTournamentService {
         tournamentId: tournament.id,
         teamId: roster.teamId,
         playerIds: roster.playerIds,
+        rosterSourceUrl:
+          roster.sourceUrl === undefined
+            ? participant.rosterSourceUrl
+            : parseDataSourceUrl(roster.sourceUrl),
       });
     }
   }

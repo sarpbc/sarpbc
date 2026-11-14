@@ -89,6 +89,13 @@ export async function setMatchResult(
   });
 }
 
+export async function setMatchSource(matchId: string, sourceUrl: string | null): Promise<void> {
+  await apiFetch(`/tournaments/matches/${matchId}/source`, {
+    method: "PUT",
+    body: { sourceUrl },
+  });
+}
+
 export async function getMatchLineups(matchId: string): Promise<MatchLineupsResponse> {
   return apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
     method: "GET",
@@ -125,6 +132,7 @@ export interface ManualTournamentInput {
   format?: TournamentFormat;
   teamIds?: string[];
   playerParticipants?: string[][];
+  rosters?: { teamId: string; playerIds: string[]; sourceUrl?: string | null }[];
   hasBracket?: boolean;
 }
 
@@ -225,6 +233,7 @@ export interface TournamentPrizeInput {
   currency: string;
   teamId: string;
   playerIds: string[];
+  sourceUrl: string | null;
 }
 
 export async function getTournamentPrizes(tournamentId: string): Promise<TournamentPrizes> {

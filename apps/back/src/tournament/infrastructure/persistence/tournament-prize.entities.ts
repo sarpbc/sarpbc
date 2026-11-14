@@ -10,6 +10,7 @@ export class TournamentPrize {
   currency!: string;
   team!: Team;
   players = new Collection<Player>(this);
+  sourceUrl: string | null = null;
   createdAt = new Date();
 }
 
@@ -24,6 +25,7 @@ export const TournamentPrizeSchema = defineEntity({
     currency: p.text(),
     team: p.manyToOne(Team),
     players: p.manyToMany(Player),
+    sourceUrl: p.text().nullable(),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });

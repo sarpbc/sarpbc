@@ -22,6 +22,7 @@ export class TournamentParticipant {
   tournamentId = "";
   team: Team | null = null;
   players: Player[] = [];
+  rosterSourceUrl: string | null = null;
   createdAt = new Date();
   updatedAt = new Date();
 }
@@ -68,6 +69,7 @@ export class Match {
   streams: Stream[] = [];
   viewership: Viewership | null = null;
   vods: MatchVod[] = [];
+  sourceUrl: string | null = null;
   createdAt = new Date();
   updatedAt = new Date();
   tournament!: TournamentSummary;
@@ -148,6 +150,7 @@ export interface ParticipantSnapshot {
   tournamentId: string;
   teamId: string | null;
   playerIds: string[];
+  rosterSourceUrl: string | null;
 }
 export interface ParticipantReferences {
   tournamentWinner: boolean;

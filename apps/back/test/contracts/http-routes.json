@@ -1586,6 +1586,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "PUT",
+    "path": "\"matches/:matchId/source\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
     "path": "\"matches/:matchId/streams\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],

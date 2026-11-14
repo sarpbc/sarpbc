@@ -8,7 +8,7 @@ import {
   MAX_CIRCUIT_POINTS,
   MAX_CIRCUIT_SCALE_TIERS,
   MAX_CIRCUIT_STAGE_TEAMS,
-  isForbiddenCircuitSourceHost,
+  isForbiddenSourceHost,
 } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
 
@@ -52,7 +52,7 @@ export function pointsForPlacement(
 export function assertCircuitSourceUrl(value: string): void {
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
     throw new InvalidInputError("A circuit source must be an http(s) URL.");
-  if (isForbiddenCircuitSourceHost(new URL(value).hostname))
+  if (isForbiddenSourceHost(new URL(value).hostname))
     throw new InvalidInputError(
       "Liquipedia and BLAST.tv are not accepted sources; cite the official rules or announcement.",
     );

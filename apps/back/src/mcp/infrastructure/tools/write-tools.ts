@@ -21,13 +21,17 @@ import { tournamentNotFound } from "../redistributable-competition";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
 import { BODY_TAGS } from "./news-syntax";
 import { resolveMatchParticipantIds } from "./resolve-match-participants";
-import { describeFields, toPatchedDate } from "./tool-input";
+import { dataSourceUrlField, describeFields, toPatchedDate } from "./tool-input";
 import {
   bracketLinksSchema,
   emptyBracketTeamsSchema,
 } from "../../../tournament/infrastructure/http/dto/create-match.dto";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { requireUpdateFields } from "./update-fields";
+
+const matchSourceUrlInput = dataSourceUrlField(
+  "Public page the match, its schedule or its score was taken from: the organiser's announcement, the official Rocket League rules or the start.gg or PandaScore page. Never Liquipedia, a mirror of it or BLAST.tv.",
+);
 
 const matchResultSchema = z.object({
   participantId: z.string().nullable(),
@@ -48,7 +52,12 @@ export interface WriteToolServices {
   playerService: Pick<PlayerService, "findById" | "findBySlug">;
   matchService: Pick<
     MatchService,
-    "createMatch" | "createEmptyBracket" | "setMatchWinner" | "setGameVods" | "updateMatch"
+    | "createMatch"
+    | "createEmptyBracket"
+    | "setMatchWinner"
+    | "setGameVods"
+    | "updateMatch"
+    | "setSource"
   >;
   manualTournamentService: Pick<ManualTournamentService, "create" | "update">;
   pandascoreTournamentSync: Pick<
@@ -185,6 +194,7 @@ export function writeTools({
             "Per-participant scores, keyed by tournament participant UUID from get_tournament. Sets the winner when status is finished.",
           ),
         previousMatches: previousMatchesInput.optional(),
+        sourceUrl: matchSourceUrlInput.optional(),
       },
       handler: async ({
         tournamentId,
@@ -198,6 +208,7 @@ export function writeTools({
         players,
         results,
         previousMatches,
+        sourceUrl,
       }) => {
         const tournament = await tournaments.findById(tournamentId);
         if (!tournament) throw tournamentNotFound(tournamentId);
@@ -215,6 +226,7 @@ export function writeTools({
           participantIds: participants.map((participant) => participant.id),
           results,
           previousMatches,
+          sourceUrl,
         });
 
         return {
@@ -296,7 +308,7 @@ export function writeTools({
     defineTool({
       name: "update_match",
       description:
-        "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them.",
+        "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_match_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them.",
       write: true,
       permission: "tournaments.manage",
       input: {
@@ -348,6 +360,22 @@ export function writeTools({
           participantIds,
           previousMatches,
         });
+        return { entityId: match.id, result: mapMatchListResponse(match) };
+      },
+    }),
+
+    defineTool({
+      name: "set_match_source",
+      description:
+        "Record or clear the public source of a match: where its schedule, sides or score were taken from. Works on any match, PandaScore included, and changes nothing else.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        matchId: z.string().min(1).describe("Match UUID."),
+        sourceUrl: matchSourceUrlInput.nullable().describe("Public source, or null to clear it."),
+      },
+      handler: async ({ matchId, sourceUrl }) => {
+        const match = await matchService.setSource(matchId, sourceUrl);
         return { entityId: match.id, result: mapMatchListResponse(match) };
       },
     }),
@@ -458,7 +486,7 @@ export function writeTools({
           playerParticipants:
             "Replace the participants without a team (1v1 players, 2v2 duos) with this list; each entry lists the player UUIDs of one participant. Team participants are kept. The response lists each participant id.",
           rosters:
-            "Manual tournaments only. Replace the tournament roster of the listed participants (teamId of an existing participant, playerIds who played this tournament for the team); other participants keep theirs. Applied after teamIds.",
+            "Manual tournaments only. Replace the tournament roster of the listed participants (teamId of an existing participant, playerIds who played this tournament for the team, and optionally sourceUrl: the public page the roster comes from, null to clear it, never Liquipedia or BLAST.tv; omitted keeps the current source); other participants keep theirs. Applied after teamIds.",
           hasBracket:
             "Manual tournaments only. true shows the stage as a bracket tree once its matches are linked; false is refused while any of its matches still has bracket links.",
         }),

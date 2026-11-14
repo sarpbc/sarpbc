@@ -20,6 +20,7 @@ export interface CreateTournamentInput extends ManualTournamentFields {
 export interface ParticipantRosterInput {
   teamId: string;
   playerIds: string[];
+  sourceUrl?: string | null;
 }
 export interface UpdateTournamentInput extends ManualTournamentFields {
   name?: string;
@@ -58,6 +59,7 @@ export interface MatchFields {
 }
 export interface ManualMatchInput extends MatchFields {
   previousMatches?: BracketLinkInput[];
+  sourceUrl?: string | null;
 }
 export interface EmptyBracketInput {
   teams: EmptyBracketSize;

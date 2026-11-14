@@ -1,6 +1,6 @@
-import type { PrizeEntry } from "@sarpbc/types";
+import type { PrizeEntry, PrizeEntryPatch } from "@sarpbc/types";
 import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 
 export function assertPrizeDistribution(entries: PrizeEntry[]): void {
   if (entries.length > MAX_PRIZE_ENTRIES)
@@ -25,4 +25,26 @@ export function assertPrizeDistribution(entries: PrizeEntry[]): void {
       players.add(playerId);
     }
   }
+}
+
+export function patchPrizeEntry(
+  entries: PrizeEntry[],
+  teamId: string,
+  patch: PrizeEntryPatch,
+  sourceUrl: string | null,
+): PrizeEntry[] {
+  if (!entries.some((entry) => entry.teamId === teamId))
+    throw new NotFoundError(`Team "${teamId}" has no prize in this tournament`);
+  return entries.map((entry) =>
+    entry.teamId === teamId
+      ? {
+          ...entry,
+          placement: patch.placement ?? entry.placement,
+          amount: patch.amount ?? entry.amount,
+          currency: patch.currency ?? entry.currency,
+          playerIds: patch.playerIds ?? entry.playerIds,
+          sourceUrl,
+        }
+      : entry,
+  );
 }

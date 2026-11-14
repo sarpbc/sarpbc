@@ -24,6 +24,7 @@ import {
   CreateMatchDto,
   SetMatchBracketDto,
   SetMatchResultDto,
+  SetMatchSourceDto,
   SetMatchVodsDto,
   SetMatchWinnerDto,
 } from "./dto/create-match.dto";
@@ -339,6 +340,17 @@ export class TournamentController {
     @Body({ schema: SetMatchVodsDto }) body: SetMatchVodsDto,
   ) {
     const match = await this.matchService.setVods(matchId, body.vods);
+    return { match: withPublicSlug(match) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/source")
+  async setMatchSource(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchSourceDto }) body: SetMatchSourceDto,
+  ) {
+    const match = await this.matchService.setSource(matchId, body.sourceUrl);
     return { match: withPublicSlug(match) };
   }
 

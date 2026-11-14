@@ -145,6 +145,7 @@ function mapDetailParticipant(participant: TournamentParticipant): TournamentDet
       slug: player.slug,
       nationality: player.nationality,
     })),
+    rosterSourceUrl: participant.rosterSourceUrl,
   };
 }
 
@@ -199,6 +200,7 @@ export function mapTournamentDetail(tournament: Tournament): TournamentDetailRes
         previousMatch: link.previousMatch.id,
         type: link.type,
       })),
+      sourceUrl: match.sourceUrl,
     })),
     watchStreams: tournament.watchStreams(),
   };

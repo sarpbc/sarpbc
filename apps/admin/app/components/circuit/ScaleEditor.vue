@@ -11,7 +11,6 @@ import {
   MAX_CIRCUIT_SCALE_TIERS,
   MAX_CIRCUIT_STAGE_TEAMS,
   getApiErrorMessage,
-  isForbiddenCircuitSourceHost,
   isWorldwideCircuitRegion,
 } from "@sarpbc/utils";
 
@@ -49,6 +48,7 @@ const target = defineModel<ScaleEditorTarget | null>("target", { required: true 
 const emit = defineEmits<{ saved: [circuit: CircuitDetail] }>();
 
 const { t } = useI18n();
+const { sourceUrlError: checkSourceUrl } = useSourceUrl();
 
 const rows = ref<TierRow[]>([]);
 const sourceUrl = ref("");
@@ -200,17 +200,7 @@ const hasOverlap = computed(() => {
   return sorted.some((tier, index) => index > 0 && tier.from <= (sorted[index - 1]?.to ?? 0));
 });
 
-const sourceUrlError = computed<string | undefined>(() => {
-  const value = sourceUrl.value.trim();
-  if (value === "") return undefined;
-  const url = URL.parse(value);
-  if (url === null || (url.protocol !== "https:" && url.protocol !== "http:")) {
-    return t("page.circuits.scale.errors.sourceUrl");
-  }
-  return isForbiddenCircuitSourceHost(url.hostname)
-    ? t("page.circuits.scale.errors.sourceBlocked")
-    : undefined;
-});
+const sourceUrlError = computed(() => checkSourceUrl(sourceUrl.value));
 
 const canSave = computed(
   () =>

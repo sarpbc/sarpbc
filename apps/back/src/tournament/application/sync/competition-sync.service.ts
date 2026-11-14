@@ -261,6 +261,7 @@ export class CompetitionSyncService {
         tournamentId: tournament.id,
         teamId: team.id,
         playerIds,
+        rosterSourceUrl: existingParticipant?.rosterSourceUrl ?? null,
       });
       if (roster.team.pandascoreId === command.winnerPandascoreTeamId) {
         // Winner identity is sufficient for persistence; full roster views are reloaded after commit.
@@ -270,6 +271,7 @@ export class CompetitionSyncService {
           team:
             existingParticipant?.team ?? Object.assign(new Team(), { ...roster.team, id: team.id }),
           players: [],
+          rosterSourceUrl: existingParticipant?.rosterSourceUrl ?? null,
           createdAt: existingParticipant?.createdAt ?? new Date(),
           updatedAt: new Date(),
         };

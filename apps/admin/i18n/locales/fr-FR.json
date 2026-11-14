@@ -12,7 +12,10 @@
       "assistant_coach": "Coach adjoint",
       "analyst": "Analyste",
       "manager": "Manager"
-    }
+    },
+    "sourceUrlInvalid": "Saisissez une URL http ou https valide. Liquipedia et BLAST.tv ne sont pas des sources acceptées.",
+    "sourceUrl": "URL de la source",
+    "openSource": "Ouvrir la source"
   },
   "imageUpload": {
     "hint": "JPEG, PNG, WebP ou GIF, jusqu’à {max} Mo",
@@ -238,6 +241,7 @@
         "create_contract": "Nouveau contrat",
         "update_contract": "Modification du contrat",
         "set_tournament_prizes": "Répartition des gains",
+        "update_tournament_prize": "Source ou correction de gain",
         "award_player": "Récompense joueur",
         "award_season_player": "Récompense de saison",
         "set_event_streams": "Streams de l'événement",
@@ -313,7 +317,9 @@
         "ongoing": "En cours",
         "noPrizes": "Vider la répartition",
         "noStreams": "Vider la liste",
-        "noLineups": "Vider les alignements"
+        "noLineups": "Vider les alignements",
+        "sourceOnly": "Source uniquement",
+        "noPlayers": "Retirer les joueurs"
       },
       "messages": {
         "approved": "Proposition validée et appliquée",
@@ -345,6 +351,15 @@
         "manual": "Manuel",
         "pandascore": "PandaScore",
         "startgg": "start.gg"
+      },
+      "matchSource": {
+        "action": "Source",
+        "title": "Source · {match}",
+        "description": "La page qui atteste le résultat de ce match. Laissez vide pour retirer la source.",
+        "save": "Enregistrer la source",
+        "saved": "Source du match enregistrée",
+        "saveError": "Impossible d’enregistrer la source du match",
+        "none": "Aucune source"
       },
       "create": {
         "action": "Créer un Tournoi",
@@ -744,7 +759,10 @@
           "tooManyPlayers": "Une place peut créditer jusqu’à {max} joueurs.",
           "currency": "Utilisez un code ISO 4217 comme USD ou EUR.",
           "duplicateTeam": "Chaque équipe ne peut apparaître qu’une fois."
-        }
+        },
+        "bulkSource": "Source de tous les gains",
+        "bulkSourceHint": "Renseigne la source de chaque gain ci-dessous, par exemple avec le règlement officiel. Enregistrez pour appliquer.",
+        "applySource": "Appliquer à tous"
       },
       "events": {
         "title": "Événements",
@@ -844,6 +862,13 @@
         "confirm": "Retirer les stats de la game {number} de {match} ? Les prochains imports ignoreront ce replay tant qu’il n’est pas rattaché à nouveau.",
         "confirmButton": "Retirer",
         "removed": "Game {number} retirée"
+      },
+      "rosterSources": {
+        "title": "Sources des effectifs",
+        "hint": "La page d’où provient l’effectif de chaque équipe pour ce tournoi. Laissez vide pour retirer la source.",
+        "save": "Enregistrer",
+        "saved": "Source de l’effectif enregistrée",
+        "saveError": "Impossible d’enregistrer la source de l’effectif"
       }
     },
     "pickems": {
@@ -1105,7 +1130,7 @@
           "invalid-to": "Saisissez une date valide ou laissez vide.",
           "to-not-after-from": "La date de fin doit suivre la date de début.",
           "invalid-source-url": "Saisissez l'URL http(s) d'une source officielle.",
-          "forbidden-source": "Liquipedia n'est pas une source acceptée.",
+          "forbidden-source": "Liquipedia et BLAST.tv ne sont pas des sources acceptées.",
           "invalid-logo-url": "Saisissez une URL https.",
           "forbidden-logo-source": "Liquipedia n'est pas une source de logo acceptée.",
           "invalid-pandascore-id": "Saisissez un nombre entier positif."
@@ -1265,9 +1290,7 @@
           "incomplete": "Renseignez les trois valeurs.",
           "range": "La dernière place ne peut pas précéder la première.",
           "numbers": "Utilisez des nombres entiers : places de 1 à {maxPlacement}, points de 0 à {maxPoints}.",
-          "overlap": "Les tranches de places ne doivent pas se chevaucher.",
-          "sourceUrl": "Saisissez une URL http ou https valide.",
-          "sourceBlocked": "Ce site n'est pas accepté comme source. Utilisez la page de règles officielle ou l'annonce."
+          "overlap": "Les tranches de places ne doivent pas se chevaucher."
         },
         "teamPlacement": "{name} ({placement}e place)",
         "teamsLoading": "Chargement des équipes de cet événement…",
@@ -1467,8 +1490,6 @@
         "textHint": "Une phrase courte, telle qu'elle s'affichera.",
         "sourceUrl": "Source officielle",
         "sourceUrlHint": "Facultatif. Liquipedia et BLAST.tv ne sont pas acceptés.",
-        "sourceInvalid": "Saisissez une URL http(s).",
-        "sourceForbidden": "Liquipedia et BLAST.tv ne sont pas des sources acceptées ; citez l'annonce officielle.",
         "link": {
           "label": "Lien",
           "hint": "Facultatif. Un joueur, une équipe, une phase ou un match déjà sur le site.",
