@@ -9,31 +9,31 @@ import type {
 import { getApiErrorStatus } from "@sarpbc/utils";
 import type { CreateForumPostResult } from "~/types/forum";
 
-export async function getRecentForumActivities(): Promise<PostPreview[]> {
+export const getRecentForumActivities = async (): Promise<PostPreview[]> => {
   const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
     method: "GET",
   });
 
   return res.recentPosts;
-}
+};
 
-export async function getTopics(): Promise<ForumTopic[]> {
+export const getTopics = async (): Promise<ForumTopic[]> => {
   const res = await apiFetch<{ topics: ForumTopic[] }>(`/forum/topics`, {
     method: "GET",
   });
 
   return res.topics;
-}
+};
 
-export async function getPosts(): Promise<ForumPostListItem[]> {
+export const getPosts = async (): Promise<ForumPostListItem[]> => {
   const res = await apiFetch<{ posts: ForumPostListItem[] }>(`/posts`, {
     method: "GET",
   });
 
   return res.posts;
-}
+};
 
-export async function getPostById(id: string): Promise<ForumPost | null> {
+export const getPostById = async (id: string): Promise<ForumPost | null> => {
   try {
     const res = await apiFetch<{ post: ForumPost }>(`/posts/${id}`, {
       method: "GET",
@@ -47,9 +47,9 @@ export async function getPostById(id: string): Promise<ForumPost | null> {
 
     throw error;
   }
-}
+};
 
-export async function getForumPostCreationStatus(): Promise<ForumPostCreationStatus | null> {
+export const getForumPostCreationStatus = async (): Promise<ForumPostCreationStatus | null> => {
   try {
     return await apiFetch<ForumPostCreationStatus>("/posts/creation-status", {
       method: "GET",
@@ -59,14 +59,14 @@ export async function getForumPostCreationStatus(): Promise<ForumPostCreationSta
 
     return null;
   }
-}
+};
 
-export async function createForumPost(data: {
+export const createForumPost = async (data: {
   id: string;
   title: string;
   content: string;
   topicId: string;
-}): Promise<CreateForumPostResult> {
+}): Promise<CreateForumPostResult> => {
   try {
     const post = await apiFetch<{ publicId: number; slug: string }>("/posts", {
       method: "POST",
@@ -80,4 +80,4 @@ export async function createForumPost(data: {
       statuses: { 409: "conflict" },
     });
   }
-}
+};

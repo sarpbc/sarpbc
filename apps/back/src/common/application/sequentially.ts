@@ -2,10 +2,10 @@
  * Runs `task` over `items` one at a time, in order. Use it only where each step depends on the
  * previous one (shared transaction state, generated slugs); independent work belongs in Promise.all.
  */
-export async function mapSequentially<Item, Result>(
+export const mapSequentially = async <Item, Result>(
   items: readonly Item[],
   task: (item: Item, index: number) => Promise<Result>,
-): Promise<Result[]> {
+): Promise<Result[]> => {
   const results: Result[] = [];
 
   const step = async (index: number): Promise<void> => {
@@ -20,4 +20,4 @@ export async function mapSequentially<Item, Result>(
   await step(0);
 
   return results;
-}
+};

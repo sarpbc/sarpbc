@@ -39,7 +39,7 @@ const isValid = computed(
     (!requiresRegion.value || region.value.trim().length > 0),
 );
 
-async function runSearch(value: string) {
+const runSearch = async (value: string) => {
   const trimmed = value.trim();
 
   if (!trimmed) {
@@ -58,24 +58,24 @@ async function runSearch(value: string) {
   } finally {
     searching.value = false;
   }
-}
+};
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
-function pick(candidate: Player) {
+const pick = (candidate: Player) => {
   player.value = { id: candidate.id, name: candidate.name };
   query.value = "";
   results.value = [];
-}
+};
 
-function reset() {
+const reset = () => {
   player.value = null;
   region.value = "";
   presentedBy.value = "";
   sourceUrl.value = "";
-}
+};
 
-function submit() {
+const submit = () => {
   if (!isValid.value || !player.value) {
     return;
   }
@@ -87,7 +87,7 @@ function submit() {
     presentedBy: presentedBy.value.trim() || null,
     sourceUrl: sourceUrl.value.trim(),
   });
-}
+};
 
 defineExpose({ reset });
 </script>

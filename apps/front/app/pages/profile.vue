@@ -69,14 +69,13 @@ const unreadNotifications = computed(
   () => notifications.value?.filter((notification) => !notification.readAt) ?? [],
 );
 
-function notificationMessage(notification: AppNotification): string {
-  return t("page.profile.notifications.replied", {
+const notificationMessage = (notification: AppNotification): string =>
+  t("page.profile.notifications.replied", {
     user: notification.reply.author.userName,
     target: notification.targetLabel,
   });
-}
 
-async function saveUserName(event: FormSubmitEvent<UsernameSchema>) {
+const saveUserName = async (event: FormSubmitEvent<UsernameSchema>) => {
   event.preventDefault();
 
   if (isSavingUserName.value) {
@@ -108,9 +107,9 @@ async function saveUserName(event: FormSubmitEvent<UsernameSchema>) {
   } finally {
     isSavingUserName.value = false;
   }
-}
+};
 
-async function markAllRead() {
+const markAllRead = async () => {
   if (isMarkingRead.value || unreadNotifications.value.length === 0) {
     return;
   }
@@ -123,21 +122,21 @@ async function markAllRead() {
   } finally {
     isMarkingRead.value = false;
   }
-}
+};
 
-async function onNotificationClick(notification: AppNotification) {
+const onNotificationClick = async (notification: AppNotification) => {
   if (notification.readAt) {
     return;
   }
 
   await markNotificationsRead([notification.id]);
   await Promise.all([refreshNotifications(), refreshUnreadCount()]);
-}
+};
 
-function openEditProfile() {
+const openEditProfile = () => {
   menuOpen.value = false;
   editOpen.value = true;
-}
+};
 
 const handleLogout = async () => {
   menuOpen.value = false;

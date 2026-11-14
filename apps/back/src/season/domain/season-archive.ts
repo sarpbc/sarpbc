@@ -20,7 +20,7 @@ export interface SeasonPathEntryFields {
 
 export const EMPTY_SEASON_FORMAT: SeasonFormat = { summary: null, phases: [] };
 
-function optionalText(value: string | null | undefined, max: number, field: string) {
+const optionalText = (value: string | null | undefined, max: number, field: string) => {
   const trimmed = value?.trim() ?? "";
 
   if (trimmed.length > max) {
@@ -28,9 +28,9 @@ function optionalText(value: string | null | undefined, max: number, field: stri
   }
 
   return trimmed || null;
-}
+};
 
-function requiredText(value: string, max: number, field: string) {
+const requiredText = (value: string, max: number, field: string) => {
   const text = optionalText(value, max, field);
 
   if (text === null) {
@@ -38,9 +38,9 @@ function requiredText(value: string, max: number, field: string) {
   }
 
   return text;
-}
+};
 
-export function parseSeasonSlug(raw: string | null): string | null {
+export const parseSeasonSlug = (raw: string | null): string | null => {
   if (raw === null || !raw.trim()) {
     return null;
   }
@@ -54,9 +54,9 @@ export function parseSeasonSlug(raw: string | null): string | null {
   }
 
   return slug;
-}
+};
 
-export function parseSeasonFormat(format: SeasonFormat): SeasonFormat {
+export const parseSeasonFormat = (format: SeasonFormat): SeasonFormat => {
   if (format.phases.length > MAX_SEASON_FORMAT_PHASES) {
     throw new InvalidInputError(`A season format has at most ${MAX_SEASON_FORMAT_PHASES} phases.`);
   }
@@ -72,16 +72,13 @@ export function parseSeasonFormat(format: SeasonFormat): SeasonFormat {
       ),
     })),
   };
-}
+};
 
-export function parsePathNote(value: string | null | undefined): string | null {
-  return optionalText(value, SEASON_PATH_NOTE_MAX_LENGTH, "path note");
-}
+export const parsePathNote = (value: string | null | undefined): string | null =>
+  optionalText(value, SEASON_PATH_NOTE_MAX_LENGTH, "path note");
 
-export function parsePathEntry(input: SeasonPathEntryInput): SeasonPathEntryFields {
-  return {
-    label: requiredText(input.label, SEASON_PATH_LABEL_MAX_LENGTH, "path entry label"),
-    result: requiredText(input.result, SEASON_PATH_RESULT_MAX_LENGTH, "path entry result"),
-    tournamentId: input.tournamentId ?? null,
-  };
-}
+export const parsePathEntry = (input: SeasonPathEntryInput): SeasonPathEntryFields => ({
+  label: requiredText(input.label, SEASON_PATH_LABEL_MAX_LENGTH, "path entry label"),
+  result: requiredText(input.result, SEASON_PATH_RESULT_MAX_LENGTH, "path entry result"),
+  tournamentId: input.tournamentId ?? null,
+});

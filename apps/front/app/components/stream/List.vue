@@ -14,7 +14,7 @@ const languageNames = computed(
   () => new Intl.DisplayNames([locale.value], { type: "language", fallback: "code" }),
 );
 
-function platformLabel(platform: StreamPlatform): string {
+const platformLabel = (platform: StreamPlatform): string => {
   switch (platform) {
     case "twitch": {
       return t("page.match.detail.watch.platforms.twitch");
@@ -38,9 +38,9 @@ function platformLabel(platform: StreamPlatform): string {
       return _exhaustive;
     }
   }
-}
+};
 
-function kindLabel(kind: StreamKind): string {
+const kindLabel = (kind: StreamKind): string => {
   switch (kind) {
     case "official": {
       return t("page.match.detail.watch.kinds.official");
@@ -56,7 +56,7 @@ function kindLabel(kind: StreamKind): string {
       return _exhaustive;
     }
   }
-}
+};
 
 const rows = computed(() =>
   orderStreams(streams, locale.value.slice(0, 2)).map((stream) => {

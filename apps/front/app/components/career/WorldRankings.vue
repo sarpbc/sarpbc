@@ -26,11 +26,9 @@ const { t } = useI18n();
 const topTeams = computed(() => (teams ?? []).slice(0, 16));
 const topPlayers = computed(() => (players ?? []).slice(0, 20));
 
-function playerKey(player: RankedPlayer): string {
-  return `${player.name}-${player.teamName}`;
-}
+const playerKey = (player: RankedPlayer): string => `${player.name}-${player.teamName}`;
 
-function playerListKey(item: PlayerListItem): string {
+const playerListKey = (item: PlayerListItem): string => {
   switch (item.type) {
     case "divider": {
       return "roster-divider";
@@ -46,7 +44,7 @@ function playerListKey(item: PlayerListItem): string {
       return _exhaustive;
     }
   }
-}
+};
 
 const topPlayerKeys = computed(() => {
   const keys = new Set<string>();
@@ -58,11 +56,11 @@ const topPlayerKeys = computed(() => {
   return keys;
 });
 
-function setHoveredTeam(teamId: string | null): void {
+const setHoveredTeam = (teamId: string | null): void => {
   emit("update:hoveredTeamId", teamId);
-}
+};
 
-function onRowLeave(event: MouseEvent, teamId: string): void {
+const onRowLeave = (event: MouseEvent, teamId: string): void => {
   const { currentTarget: current, relatedTarget: next } = event;
 
   if (current instanceof Node && next instanceof Node && current.contains(next)) {
@@ -72,7 +70,7 @@ function onRowLeave(event: MouseEvent, teamId: string): void {
   if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
-}
+};
 
 const highlightedRosterExtras = computed(() => {
   const teamId = hoveredTeamId;
@@ -197,7 +195,7 @@ const title = computed(() => {
   }
 });
 
-function teamRowClass(entry: RankedTeam): string[] {
+const teamRowClass = (entry: RankedTeam): string[] => {
   const highlighted = hoveredTeamId === entry.team.id;
 
   return [
@@ -207,9 +205,9 @@ function teamRowClass(entry: RankedTeam): string[] {
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isPlayerTeam ? "bg-elevated font-medium" : "",
   ];
-}
+};
 
-function playerRowClass(entry: RankedPlayer): string[] {
+const playerRowClass = (entry: RankedPlayer): string[] => {
   const highlighted = hoveredTeamId === entry.teamId;
 
   return [
@@ -219,9 +217,9 @@ function playerRowClass(entry: RankedPlayer): string[] {
     highlighted ? "border-l-primary bg-elevated" : "border-l-transparent",
     entry.isUser ? "bg-elevated font-medium" : "",
   ];
-}
+};
 
-function onTeamFocusOut(event: FocusEvent, teamId: string): void {
+const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
   const { currentTarget: current, relatedTarget: next } = event;
 
   if (current instanceof Node && next instanceof Node && current.contains(next)) {
@@ -231,7 +229,7 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
   if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
-}
+};
 </script>
 
 <template>

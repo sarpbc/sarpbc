@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { GameStatsStore } from "./ports";
 import { TournamentPlayerStatsService } from "./tournament-player-stats.service";
 
-function setup() {
+const setup = () => {
   const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
     ids.map((id) => ({
       gameId: `game-${id}`,
@@ -19,7 +19,7 @@ function setup() {
   );
 
   return { playerLines, service: new TournamentPlayerStatsService({ playerLines }) };
-}
+};
 
 describe(TournamentPlayerStatsService, () => {
   it("aggregates every redistributable stage of an event together", async () => {

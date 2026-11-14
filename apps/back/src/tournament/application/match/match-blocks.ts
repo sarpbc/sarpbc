@@ -11,7 +11,7 @@ type ScopedMatchBlock = Extract<MatchBlockSelector, { kind: "tournament" | "team
 
 export type MatchBlockReads = Pick<MatchQueries, "byIds" | "page">;
 
-export function isMatchBlockLive(match: Match, now: Date): boolean {
+export const isMatchBlockLive = (match: Match, now: Date): boolean => {
   const { beginAt } = match;
 
   return (
@@ -19,22 +19,19 @@ export function isMatchBlockLive(match: Match, now: Date): boolean {
     isMatchLive(match, now) &&
     now.getTime() - beginAt.getTime() <= MATCH_BLOCK_LIVE_WINDOW_MS
   );
-}
+};
 
-function isScoped(block: MatchBlockSelector): block is ScopedMatchBlock {
-  return block.kind === "tournament" || block.kind === "team";
-}
+const isScoped = (block: MatchBlockSelector): block is ScopedMatchBlock =>
+  block.kind === "tournament" || block.kind === "team";
 
-function scopeKey(block: ScopedMatchBlock): string {
-  return `${block.kind}:${block.id}`;
-}
+const scopeKey = (block: ScopedMatchBlock): string => `${block.kind}:${block.id}`;
 
-async function findScope(
+const findScope = async (
   reads: MatchBlockReads,
   block: ScopedMatchBlock,
   limit: number,
   now: Date,
-): Promise<Match[]> {
+): Promise<Match[]> => {
   const scope: MatchListQueryOptions =
     block.kind === "tournament" ? { limit, tournamentId: block.id } : { limit, teamId: block.id };
 
@@ -48,9 +45,9 @@ async function findScope(
   ]);
 
   return [...live, ...upcoming, ...results];
-}
+};
 
-function referencedMatchIds(block: MatchBlockSelector): readonly string[] {
+const referencedMatchIds = (block: MatchBlockSelector): readonly string[] => {
   switch (block.kind) {
     case "match": {
       return [block.id];
@@ -71,13 +68,13 @@ function referencedMatchIds(block: MatchBlockSelector): readonly string[] {
       return exhaustive;
     }
   }
-}
+};
 
-export async function findMatchBlocks(
+export const findMatchBlocks = async (
   reads: MatchBlockReads,
   blocks: readonly MatchBlockSelector[],
   now: Date,
-): Promise<Match[][]> {
+): Promise<Match[][]> => {
   const ids = [...new Set(blocks.flatMap(referencedMatchIds))];
 
   const byId = new Map(
@@ -129,4 +126,4 @@ export async function findMatchBlocks(
       }
     }
   });
-}
+};

@@ -32,7 +32,7 @@ watch(
   { immediate: true },
 );
 
-async function save(participant: (typeof teamParticipants.value)[number]) {
+const save = async (participant: (typeof teamParticipants.value)[number]) => {
   savingId.value = participant.id;
 
   try {
@@ -52,7 +52,7 @@ async function save(participant: (typeof teamParticipants.value)[number]) {
   } finally {
     savingId.value = null;
   }
-}
+};
 </script>
 
 <template>

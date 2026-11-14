@@ -9,7 +9,7 @@ export interface Transfer {
   sourceUrl: string | null;
 }
 
-function joinType(role: ContractRole): TransferType {
+const joinType = (role: ContractRole): TransferType => {
   switch (role) {
     case "active": {
       return "arrival";
@@ -36,13 +36,12 @@ function joinType(role: ContractRole): TransferType {
       return unreachable;
     }
   }
-}
+};
 
-function stint(contract: Contract, day: Date): string {
-  return `${contract.player.id}:${contract.team.id}:${day.getTime()}`;
-}
+const stint = (contract: Contract, day: Date): string =>
+  `${contract.player.id}:${contract.team.id}:${day.getTime()}`;
 
-export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] {
+export const deriveTransfers = (contracts: Contract[], until: Date): Transfer[] => {
   const starts = new Set(contracts.map((contract) => stint(contract, contract.startDate)));
 
   const transfers: Transfer[] = [];
@@ -70,4 +69,4 @@ export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] 
   return transfers
     .filter((transfer) => transfer.date <= until)
     .toSorted((a, b) => b.date.getTime() - a.date.getTime() || a.id.localeCompare(b.id));
-}
+};

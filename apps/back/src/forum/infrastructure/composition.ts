@@ -5,20 +5,18 @@ import { MikroPostStore } from "./persistence/post.store";
 import { MikroTopicStore } from "./persistence/topic.store";
 import type { ForumTransaction } from "../application/ports";
 
-export function transactionalForum(em: EntityManager): ForumTransaction {
-  return {
-    run: async (work) =>
-      await em.transactional(async (tx) => {
-        const result = await work({
-          posts: new MikroPostStore(tx),
-          topics: new MikroTopicStore(tx),
-          replies: replyDeletion(tx),
-          users: authorReader(tx),
-        });
+export const transactionalForum = (em: EntityManager): ForumTransaction => ({
+  run: async (work) =>
+    await em.transactional(async (tx) => {
+      const result = await work({
+        posts: new MikroPostStore(tx),
+        topics: new MikroTopicStore(tx),
+        replies: replyDeletion(tx),
+        users: authorReader(tx),
+      });
 
-        await tx.flush();
+      await tx.flush();
 
-        return result;
-      }),
-  };
-}
+      return result;
+    }),
+});

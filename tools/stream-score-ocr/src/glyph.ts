@@ -24,7 +24,7 @@ interface Span {
   right: number;
 }
 
-function inkMask(frame: Frame, region: Region, threshold: number): Mask {
+const inkMask = (frame: Frame, region: Region, threshold: number): Mask => {
   const ink = new Uint8Array(region.width * region.height);
 
   for (let y = 0; y < region.height; y += 1) {
@@ -41,9 +41,9 @@ function inkMask(frame: Frame, region: Region, threshold: number): Mask {
   }
 
   return { width: region.width, height: region.height, ink };
-}
+};
 
-function columnInk(mask: Mask, x: number): number {
+const columnInk = (mask: Mask, x: number): number => {
   let total = 0;
 
   for (let y = 0; y < mask.height; y += 1) {
@@ -51,9 +51,9 @@ function columnInk(mask: Mask, x: number): number {
   }
 
   return total;
-}
+};
 
-function glyphSpans(mask: Mask): Span[] {
+const glyphSpans = (mask: Mask): Span[] => {
   const minInk = Math.max(2, Math.round(mask.height * 0.1));
   const spans: Span[] = [];
   let left = -1;
@@ -81,9 +81,9 @@ function glyphSpans(mask: Mask): Span[] {
   }
 
   return spans;
-}
+};
 
-function lineExtent(mask: Mask, spans: readonly Span[]): { top: number; bottom: number } | null {
+const lineExtent = (mask: Mask, spans: readonly Span[]): { top: number; bottom: number } | null => {
   let top = -1;
   let bottom = -1;
 
@@ -108,9 +108,9 @@ function lineExtent(mask: Mask, spans: readonly Span[]): { top: number; bottom: 
   }
 
   return top < 0 ? null : { top, bottom };
-}
+};
 
-function coverage(mask: Mask, x0: number, x1: number, y0: number, y1: number): number {
+const coverage = (mask: Mask, x0: number, x1: number, y0: number, y1: number): number => {
   const left = Math.floor(x0);
   const right = Math.max(left + 1, Math.ceil(x1));
   const top = Math.floor(y0);
@@ -124,9 +124,13 @@ function coverage(mask: Mask, x0: number, x1: number, y0: number, y1: number): n
   }
 
   return inked / ((right - left) * (bottom - top));
-}
+};
 
-export function glyphGrids(frame: Frame, region: Region, settings: GlyphSettings): Float32Array[] {
+export const glyphGrids = (
+  frame: Frame,
+  region: Region,
+  settings: GlyphSettings,
+): Float32Array[] => {
   const mask = inkMask(frame, region, settings.threshold);
   const spans = glyphSpans(mask);
   const line = lineExtent(mask, spans);
@@ -158,14 +162,14 @@ export function glyphGrids(frame: Frame, region: Region, settings: GlyphSettings
 
     return grid;
   });
-}
+};
 
-function shiftedDistance(
+const shiftedDistance = (
   grid: Float32Array,
   template: GlyphTemplate,
   dx: number,
   dy: number,
-): number {
+): number => {
   let distance = 0;
 
   for (const [y, row] of template.rows.entries()) {
@@ -180,9 +184,9 @@ function shiftedDistance(
   }
 
   return distance / grid.length;
-}
+};
 
-function templateDistance(grid: Float32Array, template: GlyphTemplate): number {
+const templateDistance = (grid: Float32Array, template: GlyphTemplate): number => {
   let best = Infinity;
 
   for (const dy of SHIFTS) {
@@ -192,12 +196,12 @@ function templateDistance(grid: Float32Array, template: GlyphTemplate): number {
   }
 
   return best;
-}
+};
 
-function classify(
+const classify = (
   grid: Float32Array,
   templates: readonly GlyphTemplate[],
-): { char: string; confidence: number } | null {
+): { char: string; confidence: number } | null => {
   const best = new Map<string, number>();
 
   for (const template of templates) {
@@ -216,14 +220,14 @@ function classify(
     second === undefined || second[1] === 0 ? 1 - first[1] : 1 - first[1] / second[1];
 
   return { char: first[0], confidence };
-}
+};
 
-export function readText(
+export const readText = (
   frame: Frame,
   region: Region,
   settings: GlyphSettings,
   templates: readonly GlyphTemplate[],
-): TextRead | null {
+): TextRead | null => {
   const grids = glyphGrids(frame, region, settings);
 
   if (grids.length === 0) {
@@ -245,9 +249,9 @@ export function readText(
   }
 
   return { text, confidence };
-}
+};
 
-export function templateFromGrid(char: string, grid: Float32Array, size: Size): GlyphTemplate {
+export const templateFromGrid = (char: string, grid: Float32Array, size: Size): GlyphTemplate => {
   const rows: string[] = [];
 
   for (let y = 0; y < size.height; y += 1) {
@@ -261,4 +265,4 @@ export function templateFromGrid(char: string, grid: Float32Array, size: Size): 
   }
 
   return { char, rows };
-}
+};

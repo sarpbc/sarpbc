@@ -34,20 +34,20 @@ watch(title, (next) => {
   }
 });
 
-function onSlugInput(value: string) {
+const onSlugInput = (value: string) => {
   slugTouched.value = true;
   articleSlug.value = value;
-}
+};
 
-function openSaveModal() {
+const openSaveModal = () => {
   if (!slugTouched.value && title.value) {
     articleSlug.value = toSlug(title.value);
   }
 
   isModalOpen.value = true;
-}
+};
 
-async function saveArticle() {
+const saveArticle = async () => {
   if (!title.value || !content.value) {
     return;
   }
@@ -78,7 +78,7 @@ async function saveArticle() {
   } finally {
     isSaving.value = false;
   }
-}
+};
 </script>
 
 <template>

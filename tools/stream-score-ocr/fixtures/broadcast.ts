@@ -41,8 +41,8 @@ const RESOLUTIONS: readonly Size[] = [
   { width: 960, height: 540 },
 ];
 
-export function finalScores(script: SeriesScript): FinalScore[] {
-  return script.games.map((game) => {
+export const finalScores = (script: SeriesScript): FinalScore[] =>
+  script.games.map((game) => {
     const goals = game.overtime === null ? game.goals : [...game.goals, game.overtime];
 
     return {
@@ -50,9 +50,8 @@ export function finalScores(script: SeriesScript): FinalScore[] {
       orange: goals.filter((goal) => goal.side === "orange").length,
     };
   });
-}
 
-function scriptedGame(random: () => number, winner: StreamScoreSide): GameScript {
+const scriptedGame = (random: () => number, winner: StreamScoreSide): GameScript => {
   const loser: StreamScoreSide = winner === "blue" ? "orange" : "blue";
   const overtime = random() < 0.2;
   const loserGoals = Math.floor(random() * 4);
@@ -81,9 +80,9 @@ function scriptedGame(random: () => number, winner: StreamScoreSide): GameScript
     overtime: overtime ? { seconds: 5 + Math.floor(random() * 150), side: winner } : null,
     pauseAt: random() < 0.15 ? 60 + Math.floor(random() * 180) : null,
   };
-}
+};
 
-export function generateSeries(count: number, seed: number): SeriesScript[] {
+export const generateSeries = (count: number, seed: number): SeriesScript[] => {
   const random = seededRandom(seed);
 
   return Array.from({ length: count }, (_, index) => {
@@ -107,17 +106,23 @@ export function generateSeries(count: number, seed: number): SeriesScript[] {
       games,
     };
   });
-}
+};
 
-function scorebug(score: FinalScore, clock: number, overtime: boolean): ScorebugScene {
-  return { kind: "scorebug", ...score, clock, overtime, replay: false, fade: 1, glitch: false };
-}
+const scorebug = (score: FinalScore, clock: number, overtime: boolean): ScorebugScene => ({
+  kind: "scorebug",
+  ...score,
+  clock,
+  overtime,
+  replay: false,
+  fade: 1,
+  glitch: false,
+});
 
-export function* broadcast(script: SeriesScript): Generator<TimedScene> {
+export const broadcast = function* broadcast(script: SeriesScript): Generator<TimedScene> {
   const random = seededRandom(script.seed);
   let t = 0;
 
-  function* hold(scene: Scene, seconds: number): Generator<TimedScene> {
+  const hold = function* hold(scene: Scene, seconds: number): Generator<TimedScene> {
     for (let second = 0; second < seconds; second += 1) {
       const glitch = scene.kind === "scorebug" && random() < 0.02;
       const cut = scene.kind === "scorebug" && random() < 0.01;
@@ -132,7 +137,7 @@ export function* broadcast(script: SeriesScript): Generator<TimedScene> {
       yield { t, scene: shown };
       t += 1;
     }
-  }
+  };
 
   yield* hold({ kind: "hidden", variant: 0 }, 20);
 
@@ -189,4 +194,4 @@ export function* broadcast(script: SeriesScript): Generator<TimedScene> {
   }
 
   yield* hold({ kind: "hidden", variant: 1 }, 20);
-}
+};

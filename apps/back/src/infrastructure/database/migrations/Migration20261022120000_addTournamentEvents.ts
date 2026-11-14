@@ -17,17 +17,17 @@ const GENERIC_STAGE_NAMES = new Set([
   "finals",
 ]);
 
-function nonBlank(value: string | null | undefined): string | undefined {
+const nonBlank = (value: string | null | undefined): string | undefined => {
   const trimmed = value?.trim();
 
   return trimmed === undefined || trimmed === "" ? undefined : trimmed;
-}
+};
 
-function eventDisplayName(input: {
+const eventDisplayName = (input: {
   leagueName: string | null;
   serieName: string | null;
   stageName: string;
-}): string {
+}): string => {
   const league = nonBlank(input.leagueName);
   const serie = nonBlank(input.serieName);
   const stage = input.stageName.trim();
@@ -51,18 +51,14 @@ function eventDisplayName(input: {
   }
 
   return stage || (league ?? "");
-}
+};
 
-function utcDay(date: Date | null): string {
-  return date ? date.toISOString().slice(0, 10) : "";
-}
+const utcDay = (date: Date | null): string => (date ? date.toISOString().slice(0, 10) : "");
 
-function compareStages(
+const compareStages = (
   a: { beginAt: Date | null; name: string },
   b: { beginAt: Date | null; name: string },
-): number {
-  return utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);
-}
+): number => utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);
 
 const stageRow = z
   .object({
@@ -88,10 +84,10 @@ const stageRow = z
 
 type StageRow = z.infer<typeof stageRow>;
 
-function chronology(
+const chronology = (
   a: { beginAt: Date | null; id: string },
   b: { beginAt: Date | null; id: string },
-) {
+) => {
   const at = a.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
   const bt = b.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
 
@@ -100,12 +96,12 @@ function chronology(
   }
 
   return at < bt ? -1 : 1;
-}
+};
 
-async function inOrder<Item>(
+const inOrder = async <Item>(
   items: readonly Item[],
   task: (item: Item) => Promise<void>,
-): Promise<void> {
+): Promise<void> => {
   const step = async (index: number): Promise<void> => {
     if (index === items.length) {
       return;
@@ -116,13 +112,13 @@ async function inOrder<Item>(
   };
 
   await step(0);
-}
+};
 
-function groupKey(stage: StageRow): string {
+const groupKey = (stage: StageRow): string => {
   const serie = nonBlank(stage.serie);
 
   return serie === undefined ? `stage::${stage.id}` : `${stage.leagueId ?? ""}::${serie}`;
-}
+};
 
 export class Migration20261022120000_addTournamentEvents extends Migration {
   override name = "Migration20261022120000_addTournamentEvents";

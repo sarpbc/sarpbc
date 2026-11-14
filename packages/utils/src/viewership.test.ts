@@ -12,11 +12,11 @@ const VALID: Viewership = {
   sourceUrl: " https://escharts.com/tournaments/rl/fake-open ",
 };
 
-function error(input: Partial<Viewership>) {
+const error = (input: Partial<Viewership>) => {
   const parsed = parseViewership({ ...VALID, ...input });
 
   return parsed.ok ? null : parsed.error;
-}
+};
 
 void describe("parseViewership", () => {
   void it("normalizes the credit, the source URL and the measured date", () => {

@@ -29,10 +29,10 @@ const layer = (file: string, root: string): string =>
 
 const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|node:crypto)(?:$|\/)/u;
 
-function importsOf(source: ts.SourceFile): string[] {
+const importsOf = (source: ts.SourceFile): string[] => {
   const imports: string[] = [];
 
-  function visit(node: ts.Node): void {
+  const visit = function visit(node: ts.Node): void {
     if (
       (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
       node.moduleSpecifier &&
@@ -56,12 +56,12 @@ function importsOf(source: ts.SourceFile): string[] {
     }
 
     ts.forEachChild(node, visit);
-  }
+  };
 
   visit(source);
 
   return imports;
-}
+};
 
 const persistenceFacade = /^[^/]+\/infrastructure\/[^/]+-persistence\.ts$/u;
 
@@ -70,19 +70,19 @@ const isInner = (file: string, root: string): boolean =>
 
 const featureOf = (file: string, root: string): string => normalized(file, root).split("/")[0];
 
-function defined<T>(value: T | undefined): T {
+const defined = <T,>(value: T | undefined): T => {
   if (value === undefined) {
     throw new Error("Expected a value in the feature graph.");
   }
 
   return value;
-}
+};
 
 type FeatureEdge = [from: string, target: string, via: string];
 
 type FeatureGraph = Map<string, Map<string, string[]>>;
 
-function stronglyConnected(graph: FeatureGraph): string[][] {
+const stronglyConnected = (graph: FeatureGraph): string[][] => {
   const index = new Map<string, number>();
   const low = new Map<string, number>();
   const stack: string[] = [];
@@ -90,7 +90,7 @@ function stronglyConnected(graph: FeatureGraph): string[][] {
   const components: string[][] = [];
   let counter = 0;
 
-  function visit(node: string): void {
+  const visit = (node: string): void => {
     index.set(node, counter);
     low.set(node, counter);
     counter += 1;
@@ -118,7 +118,7 @@ function stronglyConnected(graph: FeatureGraph): string[][] {
 
       components.push(component.toSorted());
     }
-  }
+  };
 
   for (const node of [...graph.keys()].toSorted()) {
     if (!index.has(node)) {
@@ -127,15 +127,15 @@ function stronglyConnected(graph: FeatureGraph): string[][] {
   }
 
   return components;
-}
+};
 
-function cyclePath(component: string[], graph: FeatureGraph): string[] | undefined {
+const cyclePath = (component: string[], graph: FeatureGraph): string[] | undefined => {
   const members = new Set(component);
   const [start] = component;
   const trail = [start];
   const seen = new Set([start]);
 
-  function walk(node: string): string[] | undefined {
+  const walk = (node: string): string[] | undefined => {
     for (const next of [...defined(graph.get(node)).keys()].toSorted()) {
       if (!members.has(next)) {
         continue;
@@ -161,12 +161,12 @@ function cyclePath(component: string[], graph: FeatureGraph): string[] | undefin
     }
 
     return undefined;
-  }
+  };
 
   return walk(start);
-}
+};
 
-function featureCycles(edges: FeatureEdge[]): string[] {
+const featureCycles = (edges: FeatureEdge[]): string[] => {
   const graph: FeatureGraph = new Map();
 
   for (const [from, target, via] of edges) {
@@ -198,7 +198,7 @@ function featureCycles(edges: FeatureEdge[]): string[] {
         "\n",
       );
     });
-}
+};
 
 interface ImportSite {
   file: string;
@@ -208,11 +208,11 @@ interface ImportSite {
   resolved: string | undefined;
 }
 
-function innerLayerViolations(
+const innerLayerViolations = (
   site: ImportSite,
   root: string,
   featureEdges: FeatureEdge[],
-): string[] {
+): string[] => {
   const { file, origin, originLayer, specifier, resolved } = site;
   const external = !specifier.startsWith(".") && !specifier.startsWith("src/");
 
@@ -240,9 +240,9 @@ function innerLayerViolations(
   }
 
   return violations;
-}
+};
 
-function crossFeatureViolations(site: ImportSite, root: string): string[] {
+const crossFeatureViolations = (site: ImportSite, root: string): string[] => {
   const { origin, resolved } = site;
 
   if (resolved === undefined || !resolved.startsWith(root)) {
@@ -272,9 +272,13 @@ function crossFeatureViolations(site: ImportSite, root: string): string[] {
   }
 
   return violations;
-}
+};
 
-function importViolations(site: ImportSite, root: string, featureEdges: FeatureEdge[]): string[] {
+const importViolations = (
+  site: ImportSite,
+  root: string,
+  featureEdges: FeatureEdge[],
+): string[] => {
   const violations: string[] = [];
 
   if (site.specifier.startsWith("src/")) {
@@ -288,9 +292,9 @@ function importViolations(site: ImportSite, root: string, featureEdges: FeatureE
   }
 
   return [...violations, ...crossFeatureViolations(site, root)];
-}
+};
 
-export function architectureViolations(sourceFiles = files, root = sourceRoot): string[] {
+export const architectureViolations = (sourceFiles = files, root = sourceRoot): string[] => {
   const violations: string[] = [];
   const featureEdges: FeatureEdge[] = [];
 
@@ -322,7 +326,7 @@ export function architectureViolations(sourceFiles = files, root = sourceRoot): 
   }
 
   return [...violations, ...featureCycles(featureEdges)];
-}
+};
 
 if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const violations = architectureViolations();

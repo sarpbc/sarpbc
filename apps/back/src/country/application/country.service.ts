@@ -25,7 +25,7 @@ export interface CountryMatchPage {
   offset: number;
 }
 
-function currentTeams(players: Player[]): Team[] {
+const currentTeams = (players: Player[]): Team[] => {
   const teams = new Map<string, Team>();
 
   for (const { team } of players) {
@@ -35,7 +35,7 @@ function currentTeams(players: Player[]): Team[] {
   }
 
   return [...teams.values()].toSorted((a, b) => a.name.localeCompare(b.name, "en"));
-}
+};
 
 export class CountryService {
   constructor(private readonly sources: CountrySources) {}

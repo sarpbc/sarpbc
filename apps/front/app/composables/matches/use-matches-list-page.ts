@@ -1,11 +1,10 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchListItem, UpcomingMatchesResponse } from "@sarpbc/types";
 
-function matchBeginTime(match: MatchListItem): number {
-  return isNonEmptyString(match.beginAt) ? new Date(match.beginAt).getTime() : 0;
-}
+const matchBeginTime = (match: MatchListItem): number =>
+  isNonEmptyString(match.beginAt) ? new Date(match.beginAt).getTime() : 0;
 
-export function useMatchesListPage() {
+export const useMatchesListPage = () => {
   const page = useOffsetMatchListPage<UpcomingMatchesResponse>({
     keyPrefix: "matches-schedule",
     fetch: getUpcomingMatches,
@@ -30,4 +29,4 @@ export function useMatchesListPage() {
   const hasMatches = computed(() => scheduleMatches.value.length > 0);
 
   return { ...page, scheduleMatches, liveMatchIds, hasMatches };
-}
+};

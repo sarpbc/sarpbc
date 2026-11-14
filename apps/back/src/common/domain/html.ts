@@ -39,7 +39,7 @@ const NEWS_ALLOWED_ATTRS = {
   th: new Set(["colspan", "rowspan"]),
 } as const;
 
-function isSafeUrl(value: string): boolean {
+const isSafeUrl = (value: string): boolean => {
   const trimmed = value.trim().toLowerCase();
 
   return (
@@ -48,17 +48,14 @@ function isSafeUrl(value: string): boolean {
     trimmed.startsWith("mailto:") ||
     trimmed.startsWith("/")
   );
-}
+};
 
-function asciiLowerCase(value: string): string {
-  return value.replaceAll(/[A-Z]/gu, (char) => char.toLowerCase());
-}
+const asciiLowerCase = (value: string): string =>
+  value.replaceAll(/[A-Z]/gu, (char) => char.toLowerCase());
 
-function isWordChar(char: string): boolean {
-  return /\w/u.test(char);
-}
+const isWordChar = (char: string): boolean => /\w/u.test(char);
 
-function rawTextElementAt(lower: string, index: number): RawTextElement | null {
+const rawTextElementAt = (lower: string, index: number): RawTextElement | null => {
   for (const name of RAW_TEXT_ELEMENTS) {
     if (lower.startsWith(`<${name}`, index) && !isWordChar(lower.charAt(index + name.length + 1))) {
       return name;
@@ -66,9 +63,9 @@ function rawTextElementAt(lower: string, index: number): RawTextElement | null {
   }
 
   return null;
-}
+};
 
-function findEndTag(lower: string, name: RawTextElement, from: number): number {
+const findEndTag = (lower: string, name: RawTextElement, from: number): number => {
   let index = lower.indexOf(`</${name}`, from);
 
   while (index !== -1) {
@@ -80,9 +77,9 @@ function findEndTag(lower: string, name: RawTextElement, from: number): number {
   }
 
   return -1;
-}
+};
 
-function stripDangerousBlocks(value: string): string {
+const stripDangerousBlocks = (value: string): string => {
   const lower = asciiLowerCase(value);
   const unclosed = new Set<RawTextElement | "comment">();
   let result = "";
@@ -129,9 +126,9 @@ function stripDangerousBlocks(value: string): string {
   }
 
   return result + value.slice(copiedUntil);
-}
+};
 
-function stripTags(value: string): string {
+const stripTags = (value: string): string => {
   let result = "";
   let copiedUntil = 0;
   let index = value.indexOf("<");
@@ -152,14 +149,12 @@ function stripTags(value: string): string {
   }
 
   return result + value.slice(copiedUntil);
-}
+};
 
-export function sanitizePlainText(value: string): string {
-  return stripTags(stripDangerousBlocks(value));
-}
+export const sanitizePlainText = (value: string): string => stripTags(stripDangerousBlocks(value));
 
-export function sanitizeNewsHtml(value: string): string {
-  return stripDangerousBlocks(value).replaceAll(
+export const sanitizeNewsHtml = (value: string): string =>
+  stripDangerousBlocks(value).replaceAll(
     /<\/?(?<tag>[a-zA-Z][\w:-]*)\b(?<attrs>[^>]*)>/gu,
     (full: string, rawName: string, rawAttrs: string) => {
       const name = rawName.toLowerCase();
@@ -210,4 +205,3 @@ export function sanitizeNewsHtml(value: string): string {
       return `<${name}${attrString}>`;
     },
   );
-}

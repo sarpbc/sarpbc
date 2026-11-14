@@ -104,13 +104,13 @@ watch([scoreA, scoreB], () => {
 
 onBeforeUnmount(() => clearTimeout(flashTimer));
 
-function liveScoreClass(score: number | null, other: number | null): string {
+const liveScoreClass = (score: number | null, other: number | null): string => {
   if (score === null || other === null || score === other) {
     return "text-highlighted";
   }
 
   return score > other ? "text-highlighted" : "text-muted";
-}
+};
 </script>
 
 <template>

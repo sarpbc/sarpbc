@@ -7,15 +7,14 @@ import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapMatchListItem } from "./match-list.mapper";
 import { mapTournamentDetail } from "./tournament.mapper";
 
-function participant(name: string): TournamentParticipant {
-  return Object.assign(new TournamentParticipant(), {
+const participant = (name: string): TournamentParticipant =>
+  Object.assign(new TournamentParticipant(), {
     id: `participant-${name}`,
     team: Object.assign(new Team(), { id: `team-${name}`, name, slug: name.toLowerCase() }),
   });
-}
 
-function tournament(): Tournament {
-  return Object.assign(new Tournament(), {
+const tournament = (): Tournament =>
+  Object.assign(new Tournament(), {
     id: "tournament",
     name: "Playoffs",
     slug: "playoffs",
@@ -23,17 +22,15 @@ function tournament(): Tournament {
     beginAt: new Date("2026-03-01T00:00:00Z"),
     league: Object.assign(new League(), { id: "league", name: "RLCS Major" }),
   });
-}
 
-function match(overrides: Partial<Match>): Match {
-  return Object.assign(new Match(), {
+const match = (overrides: Partial<Match>): Match =>
+  Object.assign(new Match(), {
     id: "match",
     publicId: 7250,
     name: "Upper bracket final: Karmine Corp vs Team Falcons",
     slug: "stored-pandascore-slug",
     ...overrides,
   });
-}
 
 describe("match links in API payloads", () => {
   it("adds the public id and computed slug to match list items", () => {

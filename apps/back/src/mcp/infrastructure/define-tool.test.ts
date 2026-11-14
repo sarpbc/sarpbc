@@ -9,11 +9,11 @@ import { defineTool } from "./define-tool";
 const logInfo = vi.spyOn(log, "info");
 const logError = vi.spyOn(log, "error");
 
-function textContent(result: CallToolResult): string {
+const textContent = (result: CallToolResult): string => {
   const [block] = result.content;
 
   return block?.type === "text" ? block.text : "";
-}
+};
 
 const admin: PatUser = { id: "user-1", email: "admin@test.com", role: "admin" };
 const journalist: PatUser = { id: "user-2", email: "journalist@test.com", role: "journalist" };

@@ -85,19 +85,19 @@ const isRenaming = ref(false);
 const articleToDelete = ref<NewsArticleAdmin | null>(null);
 const isPublishing = ref(false);
 
-function selectRow(e: Event, row: TableRow<NewsArticleAdmin>) {
+const selectRow = (e: Event, row: TableRow<NewsArticleAdmin>) => {
   e.preventDefault();
   navigateTo(localePath(`/news/${row.original.slug}`));
-}
+};
 
-function openRenameModal(article: NewsArticleAdmin) {
+const openRenameModal = (article: NewsArticleAdmin) => {
   articleToRename.value = article;
   renameTitle.value = article.title;
   renameTitleFr.value = article.titleFr ?? "";
   isRenameModalOpen.value = true;
-}
+};
 
-async function togglePublish(article: NewsArticleAdmin) {
+const togglePublish = async (article: NewsArticleAdmin) => {
   if (isPublishing.value) {
     return;
   }
@@ -117,36 +117,34 @@ async function togglePublish(article: NewsArticleAdmin) {
   } finally {
     isPublishing.value = false;
   }
-}
+};
 
-function articleActions(article: NewsArticleAdmin): DropdownMenuItem[][] {
-  return [
-    [
-      {
-        label: t("page.news.actions.editName"),
-        icon: "i-fluent-edit-24-regular",
-        onSelect: () => openRenameModal(article),
-      },
-      {
-        label: article.isDraft ? t("page.news.edit.publish") : t("page.news.edit.unpublish"),
-        icon: article.isDraft
-          ? "i-fluent-checkmark-circle-24-regular"
-          : "i-fluent-eye-off-24-regular",
-        onSelect: () => togglePublish(article),
-      },
-    ],
-    [
-      {
-        label: t("page.news.actions.delete"),
-        icon: "i-fluent-delete-24-regular",
-        color: "error",
-        onSelect: () => (articleToDelete.value = article),
-      },
-    ],
-  ];
-}
+const articleActions = (article: NewsArticleAdmin): DropdownMenuItem[][] => [
+  [
+    {
+      label: t("page.news.actions.editName"),
+      icon: "i-fluent-edit-24-regular",
+      onSelect: () => openRenameModal(article),
+    },
+    {
+      label: article.isDraft ? t("page.news.edit.publish") : t("page.news.edit.unpublish"),
+      icon: article.isDraft
+        ? "i-fluent-checkmark-circle-24-regular"
+        : "i-fluent-eye-off-24-regular",
+      onSelect: () => togglePublish(article),
+    },
+  ],
+  [
+    {
+      label: t("page.news.actions.delete"),
+      icon: "i-fluent-delete-24-regular",
+      color: "error",
+      onSelect: () => (articleToDelete.value = article),
+    },
+  ],
+];
 
-async function saveTitle() {
+const saveTitle = async () => {
   if (!articleToRename.value || !renameTitle.value.trim()) {
     return;
   }
@@ -170,15 +168,15 @@ async function saveTitle() {
   } finally {
     isRenaming.value = false;
   }
-}
+};
 
-async function onDeleted() {
+const onDeleted = async () => {
   toast.add({
     title: t("page.news.actions.deleted"),
     color: "success",
   });
   await refresh();
-}
+};
 </script>
 
 <template>

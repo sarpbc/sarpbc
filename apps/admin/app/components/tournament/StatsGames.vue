@@ -18,21 +18,20 @@ const toast = useToast();
 
 const toRemove = ref<TournamentStatsGame | null>(null);
 
-function teamName(match: TournamentMatchListItem, participantId: string): string {
+const teamName = (match: TournamentMatchListItem, participantId: string): string => {
   const participant = match.participants.find((candidate) => candidate.id === participantId);
 
   return participant ? participantName(participant) : t("page.tournaments.statsGames.unknownTeam");
-}
+};
 
-function gameLabel(match: TournamentMatchListItem, game: TournamentStatsGame): string {
-  return t("page.tournaments.statsGames.score", {
+const gameLabel = (match: TournamentMatchListItem, game: TournamentStatsGame): string =>
+  t("page.tournaments.statsGames.score", {
     number: game.number,
     blue: teamName(match, game.blueParticipantId),
     blueGoals: game.blueGoals,
     orange: teamName(match, game.orangeParticipantId),
     orangeGoals: game.orangeGoals,
   });
-}
 
 const rows = computed(() => {
   const loaded = games ?? [];
@@ -54,22 +53,22 @@ const rows = computed(() => {
   );
 });
 
-function confirmMessage(game: TournamentStatsGame): string {
+const confirmMessage = (game: TournamentStatsGame): string => {
   const match = matches.find((candidate) => candidate.id === game.matchId);
 
   return t("page.tournaments.statsGames.confirm", {
     number: game.number,
     match: match ? matchLabel(match) : "",
   });
-}
+};
 
-async function remove(game: TournamentStatsGame): Promise<void> {
+const remove = async (game: TournamentStatsGame): Promise<void> => {
   await removeStatsGame(tournamentId, game.matchId, game.number);
   toast.add({
     title: t("page.tournaments.statsGames.removed", { number: game.number }),
     color: "success",
   });
-}
+};
 </script>
 
 <template>

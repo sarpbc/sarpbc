@@ -25,7 +25,7 @@ export interface DatedTeamName {
   to: string | null;
 }
 
-function isIsoDay(value: string): boolean {
+const isIsoDay = (value: string): boolean => {
   if (!/^\d{4}-\d{2}-\d{2}$/u.test(value)) {
     return false;
   }
@@ -33,9 +33,9 @@ function isIsoDay(value: string): boolean {
   const time = Date.parse(`${value}T00:00:00Z`);
 
   return !Number.isNaN(time) && new Date(time).toISOString().startsWith(value);
-}
+};
 
-function parseUrl(value: string, protocols: readonly string[]): URL | null {
+const parseUrl = (value: string, protocols: readonly string[]): URL | null => {
   if (value.length > TEAM_ALIAS_URL_MAX_LENGTH || !URL.canParse(value)) {
     return null;
   }
@@ -47,9 +47,9 @@ function parseUrl(value: string, protocols: readonly string[]): URL | null {
   }
 
   return url;
-}
+};
 
-export function parseTeamAlias(input: TeamAliasInput): ParsedTeamAlias {
+export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
   const name = input.name.trim();
 
   if (!name) {
@@ -116,12 +116,12 @@ export function parseTeamAlias(input: TeamAliasInput): ParsedTeamAlias {
       pandascoreId: input.pandascoreId,
     },
   };
-}
+};
 
-export function teamAliasInForce<T extends DatedTeamName>(
+export const teamAliasInForce = <T extends DatedTeamName>(
   aliases: readonly T[],
   day: string,
-): T | null {
+): T | null => {
   let found: T | null = null;
 
   for (const alias of aliases) {
@@ -135,10 +135,7 @@ export function teamAliasInForce<T extends DatedTeamName>(
   }
 
   return found;
-}
+};
 
-export function teamAliasesOverlap(first: DatedTeamName, second: DatedTeamName): boolean {
-  return (
-    (second.to === null || first.from < second.to) && (first.to === null || second.from < first.to)
-  );
-}
+export const teamAliasesOverlap = (first: DatedTeamName, second: DatedTeamName): boolean =>
+  (second.to === null || first.from < second.to) && (first.to === null || second.from < first.to);

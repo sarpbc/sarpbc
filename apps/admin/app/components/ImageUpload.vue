@@ -33,11 +33,11 @@ const displayError = computed(() => {
   return error.value || t("imageUpload.uploadServerError");
 });
 
-function openFilePicker() {
+const openFilePicker = () => {
   fileInput.value?.click();
-}
+};
 
-async function onFileChange(event: Event) {
+const onFileChange = async (event: Event) => {
   const input = event.target;
 
   if (!(input instanceof HTMLInputElement)) {
@@ -65,11 +65,11 @@ async function onFileChange(event: Event) {
       color: "error",
     });
   }
-}
+};
 
-function clearCover() {
+const clearCover = () => {
   imageUrl.value = null;
-}
+};
 </script>
 
 <template>

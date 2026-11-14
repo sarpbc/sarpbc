@@ -2,7 +2,7 @@ import { isNonEmptyDateInput } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getParentIds } from "./graph";
 
-function getMatchBeginAtTime(match: TournamentDetailMatch): number | null {
+const getMatchBeginAtTime = (match: TournamentDetailMatch): number | null => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }
@@ -10,9 +10,9 @@ function getMatchBeginAtTime(match: TournamentDetailMatch): number | null {
   const time = new Date(match.beginAt).getTime();
 
   return Number.isNaN(time) ? null : time;
-}
+};
 
-function getMatchDayKey(match: TournamentDetailMatch): string | null {
+const getMatchDayKey = (match: TournamentDetailMatch): string | null => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }
@@ -20,9 +20,9 @@ function getMatchDayKey(match: TournamentDetailMatch): string | null {
   const date = new Date(match.beginAt);
 
   return Number.isNaN(date.getTime()) ? null : date.toDateString();
-}
+};
 
-export function compressColumnIndices(columns: Map<string, number>): Map<string, number> {
+export const compressColumnIndices = (columns: Map<string, number>): Map<string, number> => {
   const usedColumns = [...new Set(columns.values())].toSorted((a, b) => a - b);
   const columnRemap = new Map(usedColumns.map((column, index) => [column, index]));
   const compressed = new Map<string, number>();
@@ -32,13 +32,15 @@ export function compressColumnIndices(columns: Map<string, number>): Map<string,
   }
 
   return compressed;
-}
+};
 
 /**
  * Columns follow match calendar order (beginAt day buckets), then are pushed right
  * so a match never appears before any of its feeder matches.
  */
-export function computeChronologicalColumns(matches: TournamentDetailMatch[]): Map<string, number> {
+export const computeChronologicalColumns = (
+  matches: TournamentDetailMatch[],
+): Map<string, number> => {
   const matchIds = new Set(matches.map((match) => match.id));
   const columns = new Map<string, number>();
   const dayOrder = new Map<string, number>();
@@ -138,12 +140,12 @@ export function computeChronologicalColumns(matches: TournamentDetailMatch[]): M
   }
 
   return compressColumnIndices(columns);
-}
+};
 
-export function computeLowerProgressionDepths(
+export const computeLowerProgressionDepths = (
   matches: TournamentDetailMatch[],
   crossBracketFinalIds: Set<string>,
-): Map<string, number> {
+): Map<string, number> => {
   const matchIds = new Set(matches.map((match) => match.id));
   const depths = new Map<string, number>();
   const progressionMatches = matches.filter((match) => !crossBracketFinalIds.has(match.id));
@@ -198,12 +200,12 @@ export function computeLowerProgressionDepths(
   }
 
   return depths;
-}
+};
 
-export function remapDepthsToColumnRange(
+export const remapDepthsToColumnRange = (
   depths: Map<string, number>,
   targetMaxColumn: number,
-): Map<string, number> {
+): Map<string, number> => {
   if (depths.size === 0) {
     return new Map();
   }
@@ -229,4 +231,4 @@ export function remapDepthsToColumnRange(
   }
 
   return remapped;
-}
+};

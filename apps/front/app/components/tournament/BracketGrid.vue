@@ -24,9 +24,7 @@ const containerWidth = computed(
   () => layout.columnCount * BRACKET_MATCH_WIDTH + (layout.columnCount - 1) * BRACKET_COLUMN_GAP,
 );
 
-function matchTop(row: number): number {
-  return bracketMatchTop(row);
-}
+const matchTop = (row: number): number => bracketMatchTop(row);
 
 const connectorPaths = computed(() => {
   const matchMap = new Map(layout.matches.map((match) => [match.matchId, match]));
@@ -60,13 +58,12 @@ const connectorPaths = computed(() => {
     .filter((path): path is NonNullable<typeof path> => path !== null);
 });
 
-function bracketMatchStatus(match: (typeof layout.matches)[number]) {
-  return resolveMatchDiscoveryStatus({
+const bracketMatchStatus = (match: (typeof layout.matches)[number]) =>
+  resolveMatchDiscoveryStatus({
     endAt: match.endAt,
     beginAt: match.beginAt,
     status: match.status,
   });
-}
 </script>
 
 <template>

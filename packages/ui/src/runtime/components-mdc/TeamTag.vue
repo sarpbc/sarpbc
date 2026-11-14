@@ -28,7 +28,7 @@ const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? [
 const colorMode = useColorMode();
 const logoSrc = computed(() => resolveThemedLogoUrl(team.value, colorMode.value));
 
-async function loadTeam() {
+const loadTeam = async () => {
   if (team.value || pending.value) {
     return;
   }
@@ -48,7 +48,7 @@ async function loadTeam() {
   } finally {
     pending.value = false;
   }
-}
+};
 
 watch(open, (isOpen) => {
   if (isOpen) {

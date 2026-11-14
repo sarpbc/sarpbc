@@ -30,7 +30,7 @@ onMounted(async () => {
   }
 });
 
-async function onSubmit(event: Event) {
+const onSubmit = async (event: Event) => {
   event.preventDefault();
 
   if (pending.value) {
@@ -81,11 +81,11 @@ async function onSubmit(event: Event) {
   } finally {
     pending.value = false;
   }
-}
+};
 
-function googleLogin() {
+const googleLogin = () => {
   window.location.href = `${config.public.apiBase}/auth/google?returnTo=admin`;
-}
+};
 </script>
 
 <template>

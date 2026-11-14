@@ -7,18 +7,17 @@ import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
 import type { Tournament } from "../../tournament/domain/tournament";
 
-function pageForEachKind({ type, limit, offset }: SearchParams) {
+const pageForEachKind = ({ type, limit, offset }: SearchParams) => {
   const mixed = type === "all";
 
   return {
     limit: mixed ? Math.ceil(limit / 2) : limit,
     offset: mixed ? Math.floor(offset / 2) : offset,
   };
-}
+};
 
-function includes(type: SearchType, kind: Exclude<SearchType, "all">): boolean {
-  return type === "all" || type === kind;
-}
+const includes = (type: SearchType, kind: Exclude<SearchType, "all">): boolean =>
+  type === "all" || type === kind;
 
 export class SearchService {
   constructor(

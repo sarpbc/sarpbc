@@ -34,7 +34,7 @@ const placeholder = computed(() =>
     : t("page.news.editor.picker.placeholderTeam"),
 );
 
-async function runSearch(searchQuery: string) {
+const runSearch = async (searchQuery: string) => {
   const trimmed = searchQuery.trim();
 
   if (!trimmed) {
@@ -53,7 +53,7 @@ async function runSearch(searchQuery: string) {
   } finally {
     pending.value = false;
   }
-}
+};
 
 watch(
   () => open,
@@ -67,22 +67,22 @@ watch(
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
-function onSelect(item: Player | Team) {
+const onSelect = (item: Player | Team) => {
   emit("update:open", false);
   emit("select", { slug: item.slug, label: item.name });
-}
+};
 
-function close() {
+const close = () => {
   emit("update:open", false);
-}
+};
 
-function itemLogoSrc(item: Player | Team) {
+const itemLogoSrc = (item: Player | Team) => {
   if (kind === "team") {
     return resolveThemedLogoUrl(item, colorMode.value);
   }
 
   return item.imageUrl ?? undefined;
-}
+};
 </script>
 
 <template>

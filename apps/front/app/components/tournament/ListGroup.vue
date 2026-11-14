@@ -12,17 +12,16 @@ const { t, te } = useI18n();
 const localePath = useLocalePath();
 const { formatTournamentPrizepool } = useCurrency();
 
-function eventMeta(event: TournamentEvent<TournamentListItem>): string {
+const eventMeta = (event: TournamentEvent<TournamentListItem>): string => {
   const typeKey = `components.tournaments.${event.type}`;
 
   return [event.type && te(typeKey) ? t(typeKey) : "", formatTournamentPrizepool(event.prizepool)]
     .filter(Boolean)
     .join(" · ");
-}
+};
 
-function stageHref(event: TournamentEvent<TournamentListItem>, stage: TournamentListItem): string {
-  return to ? to(stage) : localePath(tournamentStagePath(event.slug, stage.slug));
-}
+const stageHref = (event: TournamentEvent<TournamentListItem>, stage: TournamentListItem): string =>
+  to ? to(stage) : localePath(tournamentStagePath(event.slug, stage.slug));
 </script>
 
 <template>

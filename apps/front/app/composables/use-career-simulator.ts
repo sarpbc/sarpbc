@@ -31,11 +31,11 @@ import { getPlayerAge, getSeasonsPastPeak, SPLITS_PER_SEASON } from "~/types/car
 
 const careerSimulatorKey = Symbol("careerSimulator");
 
-export function useCareerSimulator() {
+export const useCareerSimulator = () => {
   const state = ref(createInitialCareerState());
   const hydrated = ref(false);
 
-  function dispatch(action: CareerAction) {
+  const dispatch = (action: CareerAction) => {
     const { state: next, finishedResult } = reduceCareerState(state.value, action);
     state.value = next;
 
@@ -49,18 +49,18 @@ export function useCareerSimulator() {
     if (next.phase !== "career_end") {
       saveActiveCareer(next);
     }
-  }
+  };
 
-  function hydrate() {
+  const hydrate = () => {
     const stored = loadActiveCareer();
     state.value = stored ?? createInitialCareerState();
     hydrated.value = true;
-  }
+  };
 
-  function resetCareer() {
+  const resetCareer = () => {
     clearActiveCareer();
     state.value = createInitialCareerState();
-  }
+  };
 
   const worldRankings = computed(() => computeStateRankings(state.value));
 
@@ -219,9 +219,9 @@ export function useCareerSimulator() {
   provide(careerSimulatorKey, api);
 
   return api;
-}
+};
 
-export function useCareerSimulatorContext() {
+export const useCareerSimulatorContext = () => {
   const context = inject<ReturnType<typeof useCareerSimulator>>(careerSimulatorKey);
 
   if (!context) {
@@ -229,4 +229,4 @@ export function useCareerSimulatorContext() {
   }
 
   return context;
-}
+};

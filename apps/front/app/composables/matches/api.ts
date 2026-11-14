@@ -11,7 +11,7 @@ export interface MatchesListQuery {
   tournamentId?: string;
 }
 
-function matchesPath(path: string, query?: MatchesListQuery): string {
+const matchesPath = (path: string, query?: MatchesListQuery): string => {
   const params = new URLSearchParams();
 
   if (query?.limit !== undefined) {
@@ -33,7 +33,7 @@ function matchesPath(path: string, query?: MatchesListQuery): string {
   const search = params.toString();
 
   return search ? `${path}?${search}` : path;
-}
+};
 
 const SIDEBAR_MAX_AGE_MS = 30_000;
 
@@ -50,7 +50,7 @@ interface SidebarCache<T> {
 const upcomingSidebar: SidebarCache<UpcomingMatchesResponse> = {};
 const resultsSidebar: SidebarCache<MatchResultsResponse> = {};
 
-async function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise<T> {
+const loadSidebar = async <T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise<T> => {
   if (cache.slot && cache.slot.expiresAt > Date.now()) {
     return await Promise.resolve(cache.slot.value);
   }
@@ -72,36 +72,36 @@ async function loadSidebar<T>(cache: SidebarCache<T>, load: () => Promise<T>): P
   cache.pending = request;
 
   return await request;
-}
+};
 
-export async function getUpcomingMatches(
+export const getUpcomingMatches = async (
   query?: MatchesListQuery,
-): Promise<UpcomingMatchesResponse> {
-  return await apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
+): Promise<UpcomingMatchesResponse> =>
+  await apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
     method: "GET",
   });
-}
 
-export async function getMatchesResults(query?: MatchesListQuery): Promise<MatchResultsResponse> {
-  return await apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
+export const getMatchesResults = async (query?: MatchesListQuery): Promise<MatchResultsResponse> =>
+  await apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
     method: "GET",
   });
-}
 
 /** Rendered on every SSR page: share one response across requests instead of calling the API each time. */
-export async function getSidebarUpcomingMatches(): Promise<UpcomingMatchesResponse> {
-  return import.meta.server
-    ? await loadSidebar(upcomingSidebar, getUpcomingMatches)
-    : await getUpcomingMatches();
-}
+export const getSidebarUpcomingMatches =
+  async function getSidebarUpcomingMatches(): Promise<UpcomingMatchesResponse> {
+    return import.meta.server
+      ? await loadSidebar(upcomingSidebar, getUpcomingMatches)
+      : await getUpcomingMatches();
+  };
 
-export async function getSidebarMatchesResults(): Promise<MatchResultsResponse> {
-  return import.meta.server
-    ? await loadSidebar(resultsSidebar, getMatchesResults)
-    : await getMatchesResults();
-}
+export const getSidebarMatchesResults =
+  async function getSidebarMatchesResults(): Promise<MatchResultsResponse> {
+    return import.meta.server
+      ? await loadSidebar(resultsSidebar, getMatchesResults)
+      : await getMatchesResults();
+  };
 
-export async function getMatchById(id: string): Promise<MatchDetailResponse> {
+export const getMatchById = async (id: string): Promise<MatchDetailResponse> => {
   const response = await apiFetch<MatchDetailWire>(`/matches/${id}`, {
     method: "GET",
   });
@@ -116,16 +116,16 @@ export async function getMatchById(id: string): Promise<MatchDetailResponse> {
       })),
     },
   };
-}
+};
 
-export async function setMatchVods(
+export const setMatchVods = async (
   matchId: string,
   vods: Omit<MatchVod, "source">[],
-): Promise<MatchVod[]> {
+): Promise<MatchVod[]> => {
   const response = await apiFetch<{ match: { vods: MatchVod[] } }>(
     `/tournaments/matches/${matchId}/vods`,
     { method: "PUT", body: { vods } },
   );
 
   return response.match.vods;
-}
+};

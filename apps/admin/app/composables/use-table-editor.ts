@@ -3,17 +3,15 @@ import type { EditorToolbarItem } from "@nuxt/ui";
 
 const DEFAULT_TABLE = { rows: 3, cols: 3, withHeaderRow: true } as const;
 
-function shouldShowTableToolbar({
+const shouldShowTableToolbar = ({
   editor,
   view,
 }: {
   editor: Editor;
   view: { hasFocus: () => boolean };
-}) {
-  return editor.isActive("table") && view.hasFocus();
-}
+}) => editor.isActive("table") && view.hasFocus();
 
-export function useTableEditor() {
+export const useTableEditor = () => {
   const { t } = useI18n();
 
   const tableHandlers = {
@@ -25,70 +23,68 @@ export function useTableEditor() {
     },
   };
 
-  function tableToolbarItems(editor: Editor): EditorToolbarItem[][] {
-    return [
-      [
-        {
-          icon: "i-lucide-arrow-up-to-line",
-          tooltip: { text: t("page.news.editor.tableAddRowBefore") },
-          onClick: () => {
-            editor.chain().focus().addRowBefore().run();
-          },
+  const tableToolbarItems = (editor: Editor): EditorToolbarItem[][] => [
+    [
+      {
+        icon: "i-lucide-arrow-up-to-line",
+        tooltip: { text: t("page.news.editor.tableAddRowBefore") },
+        onClick: () => {
+          editor.chain().focus().addRowBefore().run();
         },
-        {
-          icon: "i-lucide-arrow-down-to-line",
-          tooltip: { text: t("page.news.editor.tableAddRowAfter") },
-          onClick: () => {
-            editor.chain().focus().addRowAfter().run();
-          },
+      },
+      {
+        icon: "i-lucide-arrow-down-to-line",
+        tooltip: { text: t("page.news.editor.tableAddRowAfter") },
+        onClick: () => {
+          editor.chain().focus().addRowAfter().run();
         },
-        {
-          icon: "i-lucide-trash-2",
-          tooltip: { text: t("page.news.editor.tableDeleteRow") },
-          onClick: () => {
-            editor.chain().focus().deleteRow().run();
-          },
+      },
+      {
+        icon: "i-lucide-trash-2",
+        tooltip: { text: t("page.news.editor.tableDeleteRow") },
+        onClick: () => {
+          editor.chain().focus().deleteRow().run();
         },
-      ],
-      [
-        {
-          icon: "i-lucide-arrow-left-to-line",
-          tooltip: { text: t("page.news.editor.tableAddColumnBefore") },
-          onClick: () => {
-            editor.chain().focus().addColumnBefore().run();
-          },
+      },
+    ],
+    [
+      {
+        icon: "i-lucide-arrow-left-to-line",
+        tooltip: { text: t("page.news.editor.tableAddColumnBefore") },
+        onClick: () => {
+          editor.chain().focus().addColumnBefore().run();
         },
-        {
-          icon: "i-lucide-arrow-right-to-line",
-          tooltip: { text: t("page.news.editor.tableAddColumnAfter") },
-          onClick: () => {
-            editor.chain().focus().addColumnAfter().run();
-          },
+      },
+      {
+        icon: "i-lucide-arrow-right-to-line",
+        tooltip: { text: t("page.news.editor.tableAddColumnAfter") },
+        onClick: () => {
+          editor.chain().focus().addColumnAfter().run();
         },
-        {
-          icon: "i-lucide-trash-2",
-          tooltip: { text: t("page.news.editor.tableDeleteColumn") },
-          onClick: () => {
-            editor.chain().focus().deleteColumn().run();
-          },
+      },
+      {
+        icon: "i-lucide-trash-2",
+        tooltip: { text: t("page.news.editor.tableDeleteColumn") },
+        onClick: () => {
+          editor.chain().focus().deleteColumn().run();
         },
-      ],
-      [
-        {
-          icon: "i-lucide-table-2",
-          color: "error" as const,
-          tooltip: { text: t("page.news.editor.tableDeleteTable") },
-          onClick: () => {
-            editor.chain().focus().deleteTable().run();
-          },
+      },
+    ],
+    [
+      {
+        icon: "i-lucide-table-2",
+        color: "error" as const,
+        tooltip: { text: t("page.news.editor.tableDeleteTable") },
+        onClick: () => {
+          editor.chain().focus().deleteTable().run();
         },
-      ],
-    ];
-  }
+      },
+    ],
+  ];
 
   return {
     tableHandlers,
     tableToolbarItems,
     shouldShowTableToolbar,
   };
-}
+};

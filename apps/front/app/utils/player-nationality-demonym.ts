@@ -2,15 +2,14 @@ import { isNonEmptyString } from "@sarpbc/utils";
 
 const DEMONYM_KEY_PREFIX = "nationalities.demonym.";
 
-export function playerNationalityDemonymKey(code: string): string {
-  return `${DEMONYM_KEY_PREFIX}${code.trim().toUpperCase()}`;
-}
+export const playerNationalityDemonymKey = (code: string): string =>
+  `${DEMONYM_KEY_PREFIX}${code.trim().toUpperCase()}`;
 
-export function resolvePlayerNationalityDemonym(
+export const resolvePlayerNationalityDemonym = (
   nationality: string | undefined | null,
   te: (key: string) => boolean,
   t: (key: string) => string,
-): string | null {
+): string | null => {
   const code = nationality?.trim().toUpperCase();
 
   if (!isNonEmptyString(code)) {
@@ -24,4 +23,4 @@ export function resolvePlayerNationalityDemonym(
   }
 
   return t(key);
-}
+};

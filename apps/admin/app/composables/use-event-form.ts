@@ -6,12 +6,17 @@ export interface EventFormState {
   leagueId: string;
 }
 
-export function eventToFormState(event: ManualEvent | null): EventFormState {
-  return { name: event?.name ?? "", slug: event?.slug ?? "", leagueId: event?.league?.id ?? "" };
-}
+export const eventToFormState = (event: ManualEvent | null): EventFormState => ({
+  name: event?.name ?? "",
+  slug: event?.slug ?? "",
+  leagueId: event?.league?.id ?? "",
+});
 
 /** Sends only what changed so an update never trips the backend's "change at least one field". */
-export function buildEventPayload(state: EventFormState, original: ManualEvent | null): EventInput {
+export const buildEventPayload = (
+  state: EventFormState,
+  original: ManualEvent | null,
+): EventInput => {
   const before = eventToFormState(original);
   const payload: EventInput = {};
   const name = state.name.trim();
@@ -30,4 +35,4 @@ export function buildEventPayload(state: EventFormState, original: ManualEvent |
   }
 
   return payload;
-}
+};

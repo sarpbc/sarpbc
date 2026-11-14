@@ -83,19 +83,15 @@ const unnamedSuggestedCount = computed(
     usableSuggestion.value.reduce((total, suggestion) => total + suggestion.picks.length, 0),
 );
 
-function sideOf(participantId: string): LineupPick[] {
-  return lineups.value[participantId] ?? [];
-}
+const sideOf = (participantId: string): LineupPick[] => lineups.value[participantId] ?? [];
 
-function isFull(participantId: string): boolean {
-  return sideOf(participantId).length >= MAX_LINEUP_PLAYERS;
-}
+const isFull = (participantId: string): boolean =>
+  sideOf(participantId).length >= MAX_LINEUP_PLAYERS;
 
-function isStandIn(participantId: string, playerId: string): boolean {
-  return !rosterIds.value.get(participantId)?.has(playerId);
-}
+const isStandIn = (participantId: string, playerId: string): boolean =>
+  !rosterIds.value.get(participantId)?.has(playerId);
 
-function rosterOptions(participantId: string): SelectItem[][] {
+const rosterOptions = (participantId: string): SelectItem[][] => {
   const own = participants.filter((participant) => participant.id === participantId);
   const others = participants.filter((participant) => participant.id !== participantId);
 
@@ -113,9 +109,9 @@ function rosterOptions(participantId: string): SelectItem[][] {
       ],
     ];
   });
-}
+};
 
-function rememberNames(picks: LineupPick[]) {
+const rememberNames = (picks: LineupPick[]) => {
   const names = new Map(knownNames.value);
 
   for (const pick of picks) {
@@ -123,9 +119,9 @@ function rememberNames(picks: LineupPick[]) {
   }
 
   knownNames.value = names;
-}
+};
 
-function apply(response: MatchLineupsResponse) {
+const apply = (response: MatchLineupsResponse) => {
   const rosterPicks = participants.flatMap((participant) => participant.players);
   const lineupPicks = response.lineups.flatMap((lineup) => lineup.players);
   knownNames.value = new Map();
@@ -138,9 +134,9 @@ function apply(response: MatchLineupsResponse) {
   );
   suggested.value = response.suggested;
   selectedPick.value = {};
-}
+};
 
-async function load() {
+const load = async () => {
   loading.value = true;
   loadFailed.value = false;
 
@@ -151,7 +147,7 @@ async function load() {
   } finally {
     loading.value = false;
   }
-}
+};
 
 watch(
   open,
@@ -163,7 +159,7 @@ watch(
   { immediate: true },
 );
 
-async function runSearch(searchQuery: string) {
+const runSearch = async (searchQuery: string) => {
   const trimmed = searchQuery.trim();
 
   if (!trimmed) {
@@ -182,20 +178,20 @@ async function runSearch(searchQuery: string) {
   } finally {
     searching.value = false;
   }
-}
+};
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
-function add(participantId: string, pick: LineupPick) {
+const add = (participantId: string, pick: LineupPick) => {
   if (taken.value.has(pick.id) || isFull(participantId)) {
     return;
   }
 
   rememberNames([pick]);
   lineups.value = { ...lineups.value, [participantId]: [...sideOf(participantId), pick] };
-}
+};
 
-function addFromRoster(participantId: string) {
+const addFromRoster = (participantId: string) => {
   const playerId = selectedPick.value[participantId];
   const name = playerId ? knownNames.value.get(playerId) : undefined;
 
@@ -205,20 +201,20 @@ function addFromRoster(participantId: string) {
 
   add(participantId, { id: playerId, name });
   selectedPick.value = { ...selectedPick.value, [participantId]: undefined };
-}
+};
 
-function addFromSearch(participantId: string, player: Player) {
+const addFromSearch = (participantId: string, player: Player) => {
   add(participantId, { id: player.id, name: player.name });
-}
+};
 
-function remove(participantId: string, playerId: string) {
+const remove = (participantId: string, playerId: string) => {
   lineups.value = {
     ...lineups.value,
     [participantId]: sideOf(participantId).filter((pick) => pick.id !== playerId),
   };
-}
+};
 
-function fillFromRoster(participantId: string) {
+const fillFromRoster = (participantId: string) => {
   const otherIds = new Set(
     Object.entries(lineups.value)
       .filter(([id]) => id !== participantId)
@@ -233,22 +229,21 @@ function fillFromRoster(participantId: string) {
       .slice(0, MAX_LINEUP_PLAYERS)
       .map(({ id, name }) => ({ id, name })),
   };
-}
+};
 
-function hasRoster(participantId: string): boolean {
-  return (rosterIds.value.get(participantId)?.size ?? 0) > 0;
-}
+const hasRoster = (participantId: string): boolean =>
+  (rosterIds.value.get(participantId)?.size ?? 0) > 0;
 
-function fillFromSuggestion() {
+const fillFromSuggestion = () => {
   lineups.value = Object.fromEntries(
     usableSuggestion.value.map((suggestion) => [
       suggestion.participantId,
       suggestion.picks.slice(0, MAX_LINEUP_PLAYERS),
     ]),
   );
-}
+};
 
-async function save() {
+const save = async () => {
   saving.value = true;
 
   try {
@@ -268,7 +263,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

@@ -4,8 +4,8 @@ import { getParentIds } from "./graph";
 
 export const MIN_ROW_GAP = 2;
 
-export function sortMatchesByBeginAt(matches: TournamentDetailMatch[]): TournamentDetailMatch[] {
-  return matches.toSorted((a, b) => {
+export const sortMatchesByBeginAt = (matches: TournamentDetailMatch[]): TournamentDetailMatch[] =>
+  matches.toSorted((a, b) => {
     const dateA = isNonEmptyDateInput(a.beginAt) ? new Date(a.beginAt).getTime() : Number.NaN;
     const dateB = isNonEmptyDateInput(b.beginAt) ? new Date(b.beginAt).getTime() : Number.NaN;
     const hasDateA = !Number.isNaN(dateA);
@@ -29,13 +29,11 @@ export function sortMatchesByBeginAt(matches: TournamentDetailMatch[]): Tourname
 
     return a.id.localeCompare(b.id);
   });
-}
 
-function isRowTaken(row: number, takenRows: number[]): boolean {
-  return takenRows.some((taken) => Math.abs(taken - row) < MIN_ROW_GAP);
-}
+const isRowTaken = (row: number, takenRows: number[]): boolean =>
+  takenRows.some((taken) => Math.abs(taken - row) < MIN_ROW_GAP);
 
-export function nextAvailableRow(idealRow: number, takenRows: number[]): number {
+export const nextAvailableRow = (idealRow: number, takenRows: number[]): number => {
   let row = idealRow;
 
   while (isRowTaken(row, takenRows)) {
@@ -43,12 +41,12 @@ export function nextAvailableRow(idealRow: number, takenRows: number[]): number 
   }
 
   return row;
-}
+};
 
-export function assignMatchRows(
+export const assignMatchRows = (
   matches: TournamentDetailMatch[],
   columns: Map<string, number>,
-): Map<string, number> {
+): Map<string, number> => {
   const matchIds = new Set(matches.map((match) => match.id));
   const maxColumn = Math.max(0, ...columns.values());
   const rows = new Map<string, number>();
@@ -99,4 +97,4 @@ export function assignMatchRows(
   }
 
   return rows;
-}
+};

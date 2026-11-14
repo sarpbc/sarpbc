@@ -29,13 +29,13 @@ interface ReplyTargetSpec {
   describe: (fields: ReplyTargetFields) => { id: string; label: string; path: string } | null;
 }
 
-function replyTargetSpec<F extends keyof ReplyTargetFields>(spec: {
+const replyTargetSpec = <F extends keyof ReplyTargetFields>(spec: {
   field: F;
   inputKey: ReplyTargetSpec["inputKey"];
   label: string;
   sortOrder: ReplyTargetSpec["sortOrder"];
   link: (target: NonNullable<ReplyTargetFields[F]>) => { id: string; label: string; path: string };
-}): ReplyTargetSpec {
+}): ReplyTargetSpec => {
   const { link, ...rest } = spec;
 
   return {
@@ -46,7 +46,7 @@ function replyTargetSpec<F extends keyof ReplyTargetFields>(spec: {
       return target ? link(target) : null;
     },
   };
-}
+};
 
 export const REPLY_TARGETS = {
   forumPost: replyTargetSpec({
@@ -80,11 +80,11 @@ export const REPLY_TARGETS = {
   }),
 } satisfies Record<ReplyTargetType, ReplyTargetSpec>;
 
-export function replyTarget(input: {
+export const replyTarget = (input: {
   postId?: string;
   newsArticleId?: string;
   matchId?: string;
-}): ReplyTarget {
+}): ReplyTarget => {
   const targets = REPLY_TARGET_TYPES.flatMap((kind) => {
     const id = input[REPLY_TARGETS[kind].inputKey];
 
@@ -96,25 +96,23 @@ export function replyTarget(input: {
   }
 
   return targets[0];
-}
+};
 
-export function sameReplyTarget(
+export const sameReplyTarget = (
   child: Record<keyof ReplyTargetFields, { id: string } | null>,
   parent: Record<keyof ReplyTargetFields, { id: string } | null>,
-): boolean {
-  return REPLY_TARGET_TYPES.some((kind) => {
+): boolean =>
+  REPLY_TARGET_TYPES.some((kind) => {
     const { field } = REPLY_TARGETS[kind];
     const id = child[field]?.id;
 
     return Boolean(id) && parent[field]?.id === id;
   });
-}
 
-export function replySortOrder(kind: ReplyTargetType): "asc" | "desc" {
-  return REPLY_TARGETS[kind].sortOrder;
-}
+export const replySortOrder = (kind: ReplyTargetType): "asc" | "desc" =>
+  REPLY_TARGETS[kind].sortOrder;
 
-export function resolveReplyTargetLink(reply: ReplyTargetFields): ReplyTargetLink | null {
+export const resolveReplyTargetLink = (reply: ReplyTargetFields): ReplyTargetLink | null => {
   for (const kind of REPLY_TARGET_TYPES) {
     const link = REPLY_TARGETS[kind].describe(reply);
 
@@ -129,4 +127,4 @@ export function resolveReplyTargetLink(reply: ReplyTargetFields): ReplyTargetLin
   }
 
   return null;
-}
+};

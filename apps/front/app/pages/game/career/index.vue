@@ -32,7 +32,7 @@ setPageSeo({
   description: t("page.game.career.seo.description"),
 });
 
-function handleShare() {
+const handleShare = () => {
   if (!state.value.result) {
     return;
   }
@@ -40,11 +40,11 @@ function handleShare() {
   const encoded = encodeCareerResultForShare(state.value.result);
   const url = `${window.location.origin}${localePath(`/game/career/${state.value.result.id}`)}?d=${encoded}`;
   void navigator.clipboard.writeText(url);
-}
+};
 
-function handlePlayAgain() {
+const handlePlayAgain = () => {
   resetCareer();
-}
+};
 
 type PendingConfirm = "abandon" | "newCareer";
 
@@ -87,11 +87,11 @@ const confirmCopy = computed(() => {
   }
 });
 
-function handleAbandon() {
+const handleAbandon = () => {
   pendingConfirm.value = "abandon";
-}
+};
 
-function handleNewCareer() {
+const handleNewCareer = () => {
   if (canContinue.value) {
     pendingConfirm.value = "newCareer";
 
@@ -99,9 +99,9 @@ function handleNewCareer() {
   }
 
   startOnboarding();
-}
+};
 
-function confirmPending() {
+const confirmPending = () => {
   const confirmed = pendingConfirm.value;
   pendingConfirm.value = undefined;
 
@@ -110,11 +110,11 @@ function confirmPending() {
   } else if (confirmed === "newCareer") {
     startOnboarding();
   }
-}
+};
 
-function handleContinue() {
+const handleContinue = () => {
   continueFromMenu();
-}
+};
 </script>
 
 <template>

@@ -13,11 +13,12 @@ import {
 import { matchPublicSlug } from "../../tournament/domain/match";
 import type { MatchSitemapRow, SitemapQueries, StageSitemapRow } from "./ports";
 
-function dated(path: string, lastmod: Date): SitemapEntry {
-  return { path, lastmod: lastmod.toISOString() };
-}
+const dated = (path: string, lastmod: Date): SitemapEntry => ({
+  path,
+  lastmod: lastmod.toISOString(),
+});
 
-function tournamentEntries(stages: StageSitemapRow[]): SitemapEntry[] {
+const tournamentEntries = (stages: StageSitemapRow[]): SitemapEntry[] => {
   const eventLastmods = new Map<string, Date>();
 
   for (const { eventSlug, lastmod } of stages) {
@@ -34,14 +35,11 @@ function tournamentEntries(stages: StageSitemapRow[]): SitemapEntry[] {
       dated(tournamentStagePath(eventSlug, slug), lastmod),
     ),
   ];
-}
+};
 
-function isListedMatch({ status, participants }: MatchSitemapRow): boolean {
-  return (
-    status !== "canceled" &&
-    participants.filter((participant) => isKnownTeamName(participantName(participant))).length === 2
-  );
-}
+const isListedMatch = ({ status, participants }: MatchSitemapRow): boolean =>
+  status !== "canceled" &&
+  participants.filter((participant) => isKnownTeamName(participantName(participant))).length === 2;
 
 export class SitemapService {
   constructor(private readonly queries: SitemapQueries) {}

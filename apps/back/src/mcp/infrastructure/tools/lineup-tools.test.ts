@@ -16,7 +16,7 @@ const LINEUPS = [
   { participantId: "part-fake-b", playerIds: ["af3b5d4c-6e7a-4b82-9c9d-3e4f5a6b7c8d"] },
 ];
 
-function setup(role: StaffRole = "admin") {
+const setup = (role: StaffRole = "admin") => {
   const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
@@ -31,7 +31,7 @@ function setup(role: StaffRole = "admin") {
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
-}
+};
 
 describe("set_match_lineups", () => {
   it("queues a pending proposal that replaces the match lineups", async () => {

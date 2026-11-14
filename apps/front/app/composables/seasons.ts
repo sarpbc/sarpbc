@@ -1,15 +1,15 @@
 import type { SeasonArchive, SeasonArchiveSummary } from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
 
-export async function getSeasonArchives(): Promise<SeasonArchiveSummary[]> {
+export const getSeasonArchives = async (): Promise<SeasonArchiveSummary[]> => {
   const res = await apiFetch<{ seasons: SeasonArchiveSummary[] }>("/season-archives", {
     method: "GET",
   });
 
   return res.seasons;
-}
+};
 
-export async function getSeasonArchive(slug: string): Promise<SeasonArchive | null> {
+export const getSeasonArchive = async (slug: string): Promise<SeasonArchive | null> => {
   try {
     return await apiFetch<SeasonArchive>(`/season-archives/${encodeURIComponent(slug)}`, {
       method: "GET",
@@ -21,4 +21,4 @@ export async function getSeasonArchive(slug: string): Promise<SeasonArchive | nu
 
     throw error;
   }
-}
+};

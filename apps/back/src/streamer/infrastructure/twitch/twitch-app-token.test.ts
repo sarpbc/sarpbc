@@ -1,9 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TwitchAppToken } from "./twitch-app-token";
 
-function tokenResponse(accessToken: string, expiresIn = 3600) {
-  return Response.json({ access_token: accessToken, expires_in: expiresIn });
-}
+const tokenResponse = (accessToken: string, expiresIn = 3600) =>
+  Response.json({ access_token: accessToken, expires_in: expiresIn });
 
 describe(TwitchAppToken, () => {
   const fetchMock = vi.fn<typeof fetch>();

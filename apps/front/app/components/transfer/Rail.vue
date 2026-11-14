@@ -9,18 +9,17 @@ const localePath = useLocalePath();
 
 const { transfers, pending, error, refresh } = useLatestTransfers(undefined, RAIL_TRANSFERS);
 
-function isTeamMove(transfer: Transfer): boolean {
-  return transfer.type === "arrival" || transfer.type === "departure";
-}
+const isTeamMove = (transfer: Transfer): boolean =>
+  transfer.type === "arrival" || transfer.type === "departure";
 
-function transferLabel(transfer: Transfer): string {
+const transferLabel = (transfer: Transfer): string => {
   const type =
     transfer.type === "staff"
       ? t(`common.contractRole.${transfer.role}`)
       : t(`components.transfer.type.${transfer.type}`);
 
   return `${transfer.player.name} · ${type} · ${transfer.team.name}`;
-}
+};
 </script>
 
 <template>

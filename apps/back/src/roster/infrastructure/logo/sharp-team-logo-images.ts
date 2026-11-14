@@ -11,7 +11,7 @@ type SharpFactory = (input: Uint8Array, options: SharpOptions) => Sharp;
 
 let sharpFactory: Promise<SharpFactory> | undefined;
 
-async function loadSharp(): Promise<SharpFactory> {
+const loadSharp = async (): Promise<SharpFactory> => {
   sharpFactory ??= import("sharp").then(({ default: sharp }) => {
     sharp.cache(false);
     sharp.concurrency(1);
@@ -20,7 +20,7 @@ async function loadSharp(): Promise<SharpFactory> {
   });
 
   return await sharpFactory;
-}
+};
 
 export class SharpTeamLogoImages implements TeamLogoImages {
   async dimensions(bytes: Uint8Array): Promise<{ width: number; height: number }> {

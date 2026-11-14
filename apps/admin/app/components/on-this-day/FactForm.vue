@@ -30,9 +30,8 @@ const { t, locale } = useI18n();
 const { sourceUrlError: checkSourceUrl } = useSourceUrl();
 const reportError = useReportError();
 
-function linkLabel(link: NonNullable<OnThisDayFact["link"]>): string {
-  return link.kind === "tournament" ? tournamentStageLabel(link) : link.name;
-}
+const linkLabel = (link: NonNullable<OnThisDayFact["link"]>): string =>
+  link.kind === "tournament" ? tournamentStageLabel(link) : link.name;
 
 const month = ref(fact?.month ?? 1);
 const day = ref(fact?.day ?? 1);
@@ -107,7 +106,7 @@ const isValid = computed(
     (linkKind.value === NO_LINK || linked.value !== null),
 );
 
-async function search(kind: OnThisDayLinkKind, value: string): Promise<Candidate[]> {
+const search = async (kind: OnThisDayLinkKind, value: string): Promise<Candidate[]> => {
   switch (kind) {
     case "player": {
       const players = await searchPlayers(value);
@@ -134,9 +133,9 @@ async function search(kind: OnThisDayLinkKind, value: string): Promise<Candidate
       return exhaustive;
     }
   }
-}
+};
 
-async function runSearch(value: string) {
+const runSearch = async (value: string) => {
   const trimmed = value.trim();
   const kind = linkKind.value;
 
@@ -156,14 +155,14 @@ async function runSearch(value: string) {
   } finally {
     searching.value = false;
   }
-}
+};
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 const stageMatches = ref<Candidate[]>([]);
 const loadingMatches = ref(false);
 
-async function pickStageForMatch(stage: Candidate) {
+const pickStageForMatch = async (stage: Candidate) => {
   matchStage.value = stage;
   loadingMatches.value = true;
 
@@ -179,9 +178,9 @@ async function pickStageForMatch(stage: Candidate) {
   } finally {
     loadingMatches.value = false;
   }
-}
+};
 
-function pick(candidate: Candidate) {
+const pick = (candidate: Candidate) => {
   query.value = "";
   results.value = [];
 
@@ -192,15 +191,15 @@ function pick(candidate: Candidate) {
   }
 
   linked.value = candidate;
-}
+};
 
-function clearLink() {
+const clearLink = () => {
   linked.value = null;
   matchStage.value = null;
   stageMatches.value = [];
-}
+};
 
-function submit() {
+const submit = () => {
   if (!isValid.value) {
     return;
   }
@@ -217,7 +216,7 @@ function submit() {
         : null,
     sourceUrl: sourceUrl.value.trim() || null,
   });
-}
+};
 </script>
 
 <template>

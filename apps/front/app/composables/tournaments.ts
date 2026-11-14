@@ -15,7 +15,7 @@ interface TournamentListQuery {
   activeOnly?: boolean;
 }
 
-function listPath(path: string, query: TournamentListQuery): string {
+const listPath = (path: string, query: TournamentListQuery): string => {
   const { limit, offset, pickems, activeOnly } = query;
   const params = new URLSearchParams();
 
@@ -38,11 +38,11 @@ function listPath(path: string, query: TournamentListQuery): string {
   const search = params.toString();
 
   return search ? `${path}?${search}` : path;
-}
+};
 
-export async function getAllTournaments(
+export const getAllTournaments = async (
   query: TournamentListQuery = {},
-): Promise<{ tournaments: TournamentListItem[]; total: number }> {
+): Promise<{ tournaments: TournamentListItem[]; total: number }> => {
   const res = await apiFetch<{ tournaments?: TournamentListItem[]; count?: number }>(
     listPath("/tournaments", query),
     { method: "GET" },
@@ -51,23 +51,23 @@ export async function getAllTournaments(
   const tournaments = res.tournaments ?? [];
 
   return { tournaments, total: res.count ?? tournaments.length };
-}
+};
 
-export async function getEvents(
+export const getEvents = async (
   query: TournamentListQuery,
-): Promise<{ events: TournamentEvent<TournamentListItem>[]; total: number }> {
+): Promise<{ events: TournamentEvent<TournamentListItem>[]; total: number }> => {
   const res = await apiFetch<{ events: TournamentEvent<TournamentListItem>[]; count: number }>(
     listPath("/events", query),
     { method: "GET" },
   );
 
   return { events: res.events, total: res.count };
-}
+};
 
 /** Resolves `/tournaments/{segments}`, legacy stage ids included. A 404 resolves to null. */
-export async function resolveTournamentPath(
+export const resolveTournamentPath = async (
   segments: readonly string[],
-): Promise<TournamentPathResponse | null> {
+): Promise<TournamentPathResponse | null> => {
   const path = segments.map((segment) => encodeURIComponent(segment)).join("/");
 
   try {
@@ -81,9 +81,9 @@ export async function resolveTournamentPath(
 
     throw error;
   }
-}
+};
 
-export async function getTournamentById(id: string): Promise<TournamentDetail | null> {
+export const getTournamentById = async (id: string): Promise<TournamentDetail | null> => {
   try {
     const res = await apiFetch<{ tournament?: TournamentDetail }>(`/tournaments/${id}`, {
       method: "GET",
@@ -97,35 +97,30 @@ export async function getTournamentById(id: string): Promise<TournamentDetail | 
 
     throw error;
   }
-}
+};
 
-export async function getTournamentMatches(
+export const getTournamentMatches = async (
   tournamentId: string,
-): Promise<TournamentMatchListItem[]> {
+): Promise<TournamentMatchListItem[]> => {
   const res = await apiFetch<{ matches?: TournamentMatchListItem[] }>(
     `/tournaments/${tournamentId}/matches`,
     { method: "GET" },
   );
 
   return res.matches ?? [];
-}
+};
 
-export async function getTournamentPlayerStats(
+export const getTournamentPlayerStats = async (
   tournamentId: string,
-): Promise<TournamentPlayerStatsResponse> {
-  return await apiFetch<TournamentPlayerStatsResponse>(
-    `/tournaments/${tournamentId}/player-stats`,
-    {
-      method: "GET",
-    },
-  );
-}
+): Promise<TournamentPlayerStatsResponse> =>
+  await apiFetch<TournamentPlayerStatsResponse>(`/tournaments/${tournamentId}/player-stats`, {
+    method: "GET",
+  });
 
-export async function getEventPlayerStats(
+export const getEventPlayerStats = async (
   eventSlug: string,
-): Promise<TournamentPlayerStatsResponse> {
-  return await apiFetch<TournamentPlayerStatsResponse>(
+): Promise<TournamentPlayerStatsResponse> =>
+  await apiFetch<TournamentPlayerStatsResponse>(
     `/events/${encodeURIComponent(eventSlug)}/player-stats`,
     { method: "GET" },
   );
-}

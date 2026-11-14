@@ -1,6 +1,6 @@
 import type { Reply } from "@sarpbc/types";
 
-export function findCommentInTree(comments: Reply[], commentId: string): boolean {
+export const findCommentInTree = (comments: Reply[], commentId: string): boolean => {
   for (const comment of comments) {
     if (comment.id === commentId) {
       return true;
@@ -12,4 +12,4 @@ export function findCommentInTree(comments: Reply[], commentId: string): boolean
   }
 
   return false;
-}
+};

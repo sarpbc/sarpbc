@@ -29,9 +29,7 @@ interface QueryToken<T> {
   readonly provides?: T;
 }
 
-function query<T>(token: symbol): QueryToken<T> {
-  return { token };
-}
+const query = <T>(token: symbol): QueryToken<T> => ({ token });
 
 const SERVICES = {
   playerService: PlayerService,

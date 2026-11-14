@@ -8,31 +8,30 @@ interface MatchDetailViewedProperties {
   source?: MatchDiscoverySource;
 }
 
-export function useMatchDiscoveryAnalytics() {
+export const useMatchDiscoveryAnalytics = () => {
   const posthog = usePostHog();
   const localePath = useLocalePath();
 
-  function matchDetailTo(match: MatchLinkTarget, source: MatchDiscoverySource) {
-    return buildMatchDetailTo(localePath, match, source);
-  }
+  const matchDetailTo = (match: MatchLinkTarget, source: MatchDiscoverySource) =>
+    buildMatchDetailTo(localePath, match, source);
 
-  function trackMatchRowClicked(input: {
+  const trackMatchRowClicked = (input: {
     matchId: string;
     source: MatchDiscoverySource;
     status: MatchDiscoveryStatus;
-  }) {
+  }) => {
     posthog.capture("match_row_clicked", {
       match_id: input.matchId,
       source: input.source,
       status: input.status,
     });
-  }
+  };
 
-  function trackMatchDetailViewed(input: {
+  const trackMatchDetailViewed = (input: {
     matchId: string;
     status: MatchDiscoveryStatus;
     source: MatchDiscoverySource | null;
-  }) {
+  }) => {
     const properties: MatchDetailViewedProperties = {
       match_id: input.matchId,
       status: input.status,
@@ -43,11 +42,11 @@ export function useMatchDiscoveryAnalytics() {
     }
 
     posthog.capture("match_detail_viewed", properties);
-  }
+  };
 
   return {
     matchDetailTo,
     trackMatchRowClicked,
     trackMatchDetailViewed,
   };
-}
+};

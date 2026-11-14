@@ -4,9 +4,8 @@ export const LANGUAGE_CODE_LENGTH = 2;
 const LANGUAGE_CODE_PATTERN = new RegExp(`^[a-z]{${LANGUAGE_CODE_LENGTH}}$`, "u");
 const LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { type: "language", fallback: "none" });
 
-export function isIso6391Code(value: string): boolean {
-  return LANGUAGE_CODE_PATTERN.test(value) && LANGUAGE_NAMES.of(value) !== undefined;
-}
+export const isIso6391Code = (value: string): boolean =>
+  LANGUAGE_CODE_PATTERN.test(value) && LANGUAGE_NAMES.of(value) !== undefined;
 
 const VOD_HOSTS: ReadonlyMap<string, MatchVodSource> = new Map([
   ["twitch.tv", "twitch"],
@@ -30,7 +29,7 @@ export type ParsedMatchVodUrl =
   | { ok: true; url: string; source: MatchVodSource }
   | { ok: false; error: MatchVodUrlError };
 
-export function parseMatchVodUrl(input: string): ParsedMatchVodUrl {
+export const parseMatchVodUrl = (input: string): ParsedMatchVodUrl => {
   let url: URL;
 
   try {
@@ -54,13 +53,12 @@ export function parseMatchVodUrl(input: string): ParsedMatchVodUrl {
   }
 
   return { ok: true, url: url.href, source };
-}
+};
 
 export const MAX_VODS_PER_GAME = 10;
 const MAX_VOD_GAME = 9;
 
-export function maxVodGame(numberOfGames: number | null | undefined): number {
-  return numberOfGames !== null && numberOfGames !== undefined && numberOfGames > 0
+export const maxVodGame = (numberOfGames: number | null | undefined): number =>
+  numberOfGames !== null && numberOfGames !== undefined && numberOfGames > 0
     ? numberOfGames
     : MAX_VOD_GAME;
-}

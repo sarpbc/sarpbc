@@ -61,7 +61,7 @@ watch(open, (isOpen) => {
   language.value = locale.value.slice(0, 2);
 });
 
-async function submit() {
+const submit = async () => {
   if (!parsedUrl.value.ok || !languageValid.value || saving.value) {
     return;
   }
@@ -93,7 +93,7 @@ async function submit() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

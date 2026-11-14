@@ -22,7 +22,7 @@ const ERRORS = {
   "invalid-measured-at": "The measurement date is not a valid date.",
 } satisfies Record<ViewershipError, string>;
 
-export function requireViewership(input: Viewership): Viewership {
+export const requireViewership = (input: Viewership): Viewership => {
   const parsed = parseViewership(input);
 
   if (!parsed.ok) {
@@ -30,4 +30,4 @@ export function requireViewership(input: Viewership): Viewership {
   }
 
   return parsed.viewership;
-}
+};

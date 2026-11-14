@@ -16,8 +16,8 @@ import { eventTools } from "./event-tools";
 
 const EVENT_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 
-function stage(id: string, source: DataSource, beginAt: string | null) {
-  return Object.assign(new Tournament(), {
+const stage = (id: string, source: DataSource, beginAt: string | null) =>
+  Object.assign(new Tournament(), {
     id,
     name: id,
     slug: id,
@@ -27,7 +27,6 @@ function stage(id: string, source: DataSource, beginAt: string | null) {
     endAt: beginAt === null ? null : new Date(beginAt),
     event: { id: "cdf", slug: "cdf-2026", name: "CDF 2026" },
   });
-}
 
 interface ToolInput extends Record<string, unknown> {
   idOrSlug?: string;
@@ -36,7 +35,7 @@ interface ToolInput extends Record<string, unknown> {
   name?: string;
 }
 
-function setup(role: "admin" | "journalist" = "admin") {
+const setup = (role: "admin" | "journalist" = "admin") => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
   const event = Object.assign(new TournamentEvent(), {
@@ -106,7 +105,7 @@ function setup(role: "admin" | "journalist" = "admin") {
   };
 
   return { catalogService, eventQueries, tool, listing };
-}
+};
 
 describe("event tools", () => {
   it("returns an event's redistributable stages earliest first with its overall dates", async () => {

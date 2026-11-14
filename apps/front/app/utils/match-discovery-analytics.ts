@@ -25,27 +25,27 @@ export interface MatchDiscoveryDetailTo {
 
 const SOURCE_SET = new Set<string>(MATCH_DISCOVERY_SOURCES);
 
-function isMatchDiscoverySource(value: MatchDiscoveryQueryValue): value is MatchDiscoverySource {
+const isMatchDiscoverySource = (value: MatchDiscoveryQueryValue): value is MatchDiscoverySource => {
   if (value === null || value === undefined || Array.isArray(value)) {
     return false;
   }
 
   return SOURCE_SET.has(value);
-}
+};
 
-export function parseMatchDiscoverySource(
+export const parseMatchDiscoverySource = (
   value: MatchDiscoveryQueryValue,
-): MatchDiscoverySource | null {
+): MatchDiscoverySource | null => {
   if (Array.isArray(value)) {
     return parseMatchDiscoverySource(value[0]);
   }
 
   return isMatchDiscoverySource(value) ? value : null;
-}
+};
 
-export function listVariantToDiscoveryStatus(
+export const listVariantToDiscoveryStatus = (
   variant: "live" | "upcoming" | "result",
-): MatchDiscoveryStatus {
+): MatchDiscoveryStatus => {
   switch (variant) {
     case "live": {
       return "live";
@@ -65,28 +65,26 @@ export function listVariantToDiscoveryStatus(
       return _exhaustive;
     }
   }
-}
+};
 
-export function resolveMatchDiscoveryStatus(input: {
+export const resolveMatchDiscoveryStatus = (input: {
   endAt?: Date | string | null;
   beginAt?: Date | string | null;
   status?: string | null;
   now?: number;
-}): MatchDiscoveryStatus {
+}): MatchDiscoveryStatus => {
   if (isMatchFinished(input)) {
     return "finished";
   }
 
   return isMatchLive(input, input.now ?? Date.now()) ? "live" : "upcoming";
-}
+};
 
-export function buildMatchDetailTo(
+export const buildMatchDetailTo = (
   localePath: (path: string) => string,
   match: MatchLinkTarget,
   source: MatchDiscoverySource,
-): MatchDiscoveryDetailTo {
-  return {
-    path: localePath(matchPath(match.publicId, match.slug)),
-    query: { [MATCH_DISCOVERY_FROM_QUERY]: source },
-  };
-}
+): MatchDiscoveryDetailTo => ({
+  path: localePath(matchPath(match.publicId, match.slug)),
+  query: { [MATCH_DISCOVERY_FROM_QUERY]: source },
+});

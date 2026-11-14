@@ -14,7 +14,11 @@ const staffTournamentsBody = z.object({ tournaments: z.array(z.object({ id: z.st
 
 const sitemapEntries = z.array(z.object({ path: z.string() }));
 
-export async function verifySitemap({ orm, request, tournament }: SitemapContext): Promise<void> {
+export const verifySitemap = async ({
+  orm,
+  request,
+  tournament,
+}: SitemapContext): Promise<void> => {
   const { Match } = await import("../../src/tournament/infrastructure/persistence/match.entity.ts");
 
   const { Tournament } =
@@ -150,4 +154,4 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
   ]);
   stage.beginAt = stageBeginAt;
   await em.flush();
-}
+};

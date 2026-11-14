@@ -1,10 +1,9 @@
 const GUESS_PATTERN = /[^A-Z0-9 ]/gu;
 
-export function sanitizeAirRiddleGuess(value: string, maxLength: number): string {
-  return value.toUpperCase().replaceAll(GUESS_PATTERN, "").slice(0, maxLength);
-}
+export const sanitizeAirRiddleGuess = (value: string, maxLength: number): string =>
+  value.toUpperCase().replaceAll(GUESS_PATTERN, "").slice(0, maxLength);
 
-export function useAirRiddleGuess(maxLength: Ref<number>) {
+export const useAirRiddleGuess = (maxLength: Ref<number>) => {
   const currentGuess = ref("");
 
   watch(maxLength, (length) => {
@@ -13,25 +12,25 @@ export function useAirRiddleGuess(maxLength: Ref<number>) {
     }
   });
 
-  function setGuess(value: string) {
+  const setGuess = (value: string) => {
     currentGuess.value = sanitizeAirRiddleGuess(value, maxLength.value);
-  }
+  };
 
-  function appendToGuess(value: string) {
+  const appendToGuess = (value: string) => {
     if (!value || currentGuess.value.length >= maxLength.value) {
       return;
     }
 
     currentGuess.value = sanitizeAirRiddleGuess(currentGuess.value + value, maxLength.value);
-  }
+  };
 
-  function removeFromGuess() {
+  const removeFromGuess = () => {
     currentGuess.value = currentGuess.value.slice(0, -1);
-  }
+  };
 
-  function clearGuess() {
+  const clearGuess = () => {
     currentGuess.value = "";
-  }
+  };
 
   const canSubmit = computed(
     () => currentGuess.value.length === maxLength.value && maxLength.value > 0,
@@ -45,4 +44,4 @@ export function useAirRiddleGuess(maxLength: Ref<number>) {
     removeFromGuess,
     clearGuess,
   };
-}
+};

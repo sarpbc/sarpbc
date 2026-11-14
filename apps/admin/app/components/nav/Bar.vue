@@ -23,20 +23,20 @@ const { start: scheduleCloseNav, stop: cancelCloseNav } = useTimeoutFn(
   { immediate: false },
 );
 
-function openNav() {
+const openNav = () => {
   cancelCloseNav();
   navOpen.value = true;
-}
+};
 
-function onNavEnter() {
+const onNavEnter = () => {
   pointerInNav.value = true;
   openNav();
-}
+};
 
-function onNavLeave() {
+const onNavLeave = () => {
   pointerInNav.value = false;
   scheduleCloseNav();
-}
+};
 
 watch(userMenuOpen, (open) => {
   if (open) {

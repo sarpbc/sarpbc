@@ -52,15 +52,15 @@ const FINISHED_POPULATE = [
   ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 
-function buildUpcomingQuery(todayOnly: boolean): MatchListFilter {
+const buildUpcomingQuery = (todayOnly: boolean): MatchListFilter => {
   const now = new Date();
   const endOfDay = new Date(now);
   endOfDay.setHours(23, 59, 59, 999);
 
   return todayOnly ? { beginAt: { $gte: now, $lte: endOfDay } } : { beginAt: { $gte: now } };
-}
+};
 
-function buildLiveQuery(todayOnly: boolean, liveSince?: Date): MatchListFilter {
+const buildLiveQuery = (todayOnly: boolean, liveSince?: Date): MatchListFilter => {
   const now = new Date();
   const startOfDay = new Date(now);
   startOfDay.setHours(0, 0, 0, 0);
@@ -73,11 +73,11 @@ function buildLiveQuery(todayOnly: boolean, liveSince?: Date): MatchListFilter {
   return since
     ? { beginAt: { $lte: now, $gte: since }, endAt: null }
     : { beginAt: { $lte: now }, endAt: null };
-}
+};
 
-function buildTournamentFilter(
+const buildTournamentFilter = (
   scope: MatchListScopeFilters,
-): MatchTournamentScopeFilter | undefined {
+): MatchTournamentScopeFilter | undefined => {
   const { tournamentId, leagueId, redistributableOnly } = scope;
 
   if (
@@ -103,9 +103,12 @@ function buildTournamentFilter(
   }
 
   return filter;
-}
+};
 
-function mergeScopeFilters(base: MatchListFilter, scope: MatchListScopeFilters): MatchListFilter {
+const mergeScopeFilters = (
+  base: MatchListFilter,
+  scope: MatchListScopeFilters,
+): MatchListFilter => {
   const query: MatchListFilter = { ...base };
   const tournamentFilter = buildTournamentFilter(scope);
 
@@ -125,12 +128,12 @@ function mergeScopeFilters(base: MatchListFilter, scope: MatchListScopeFilters):
   }
 
   return query;
-}
+};
 
-function listQuery(
+const listQuery = (
   kind: MatchListKind,
   { limit, offset = 0, todayOnly = false, liveSince, ...scope }: MatchListQueryOptions,
-) {
+) => {
   switch (kind) {
     case "upcoming": {
       return {
@@ -165,7 +168,7 @@ function listQuery(
       return unreachable;
     }
   }
-}
+};
 
 export class MatchRepository extends EntityRepository<Match> {
   async list(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]> {

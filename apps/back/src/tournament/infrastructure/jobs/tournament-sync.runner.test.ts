@@ -10,11 +10,10 @@ import { Tournament } from "../../domain/tournament";
 import type { TournamentQueries } from "../../application/ports";
 import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
 
-function matchIn(tournamentId: string): Match {
-  return Object.assign(new Match(), {
+const matchIn = (tournamentId: string): Match =>
+  Object.assign(new Match(), {
     tournament: Object.assign(new Tournament(), { id: tournamentId }),
   });
-}
 
 describe(TournamentSyncRunner, () => {
   let cron: TournamentSyncRunner;

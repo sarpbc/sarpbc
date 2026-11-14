@@ -5,10 +5,10 @@ import path from "node:path";
 import { test } from "node:test";
 import { frameworkViolations } from "./check-package-imports.ts";
 
-function packageWith(
+const packageWith = (
   files: Record<string, string>,
   manifest: { dependencies?: Record<string, string> } = {},
-): string {
+): string => {
   const directory = mkdtempSync(path.join(tmpdir(), "package-imports-"));
   mkdirSync(path.join(directory, "src"));
   writeFileSync(path.join(directory, "package.json"), JSON.stringify(manifest));
@@ -18,7 +18,7 @@ function packageWith(
   }
 
   return directory;
-}
+};
 
 void test("accepts framework-free sources", () => {
   const directory = packageWith({

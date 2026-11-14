@@ -58,11 +58,9 @@ watchDebounced(
   { debounce: SEARCH_DEBOUNCE_MS },
 );
 
-function roleOf(user: UserListItem): AssignableRole {
-  return user.role ?? "member";
-}
+const roleOf = (user: UserListItem): AssignableRole => user.role ?? "member";
 
-async function applyRoleChange(user: UserListItem, role: AssignableRole) {
+const applyRoleChange = async (user: UserListItem, role: AssignableRole) => {
   savingId.value = user.id;
 
   try {
@@ -80,9 +78,9 @@ async function applyRoleChange(user: UserListItem, role: AssignableRole) {
     savingId.value = null;
     await refresh();
   }
-}
+};
 
-function requestRoleChange(user: UserListItem, role: AssignableRole) {
+const requestRoleChange = (user: UserListItem, role: AssignableRole) => {
   if (role === roleOf(user)) {
     return;
   }
@@ -95,9 +93,9 @@ function requestRoleChange(user: UserListItem, role: AssignableRole) {
   }
 
   void applyRoleChange(user, role);
-}
+};
 
-async function confirmChange() {
+const confirmChange = async () => {
   const change = pendingChange.value;
 
   if (!change) {
@@ -107,7 +105,7 @@ async function confirmChange() {
   isConfirmOpen.value = false;
   pendingChange.value = null;
   await applyRoleChange(change.user, change.role);
-}
+};
 </script>
 
 <template>

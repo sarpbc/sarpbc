@@ -20,7 +20,7 @@ const { event } = defineProps<{ event: OnThisDayEvent }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
-function sidePath(side: Omit<OnThisDaySide, "score">): string | null {
+const sidePath = (side: Omit<OnThisDaySide, "score">): string | null => {
   if (side.team) {
     return localePath(teamPath(side.team.slug));
   }
@@ -28,18 +28,17 @@ function sidePath(side: Omit<OnThisDaySide, "score">): string | null {
   const [only, ...others] = side.players;
 
   return only && others.length === 0 ? localePath(playerPath(only.slug)) : null;
-}
+};
 
-function tournamentPath(tournament: OnThisDayTournament): string {
-  return localePath(tournamentStagePath(tournament.event.slug, tournament.slug));
-}
+const tournamentPath = (tournament: OnThisDayTournament): string =>
+  localePath(tournamentStagePath(tournament.event.slug, tournament.slug));
 
 interface LinkTarget {
   label: string;
   to: string;
 }
 
-function linkTarget(link: OnThisDayLink): LinkTarget {
+const linkTarget = (link: OnThisDayLink): LinkTarget => {
   switch (link.kind) {
     case "player": {
       return { label: link.name, to: localePath(playerPath(link.slug)) };
@@ -66,7 +65,7 @@ function linkTarget(link: OnThisDayLink): LinkTarget {
       return exhaustive;
     }
   }
-}
+};
 
 const factText = computed(() =>
   event.kind === "fact" ? event.text[uiLocale(locale.value)] : null,

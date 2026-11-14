@@ -1,14 +1,14 @@
 import type { LiveStreamer } from "@sarpbc/types";
 
-export async function getLiveStreamers(): Promise<LiveStreamer[]> {
+export const getLiveStreamers = async (): Promise<LiveStreamer[]> => {
   const res = await apiFetch<{ streamers?: LiveStreamer[] }>("/streamers/live", {
     method: "GET",
   });
 
   return res.streamers ?? [];
-}
+};
 
-export function useLiveStreamers() {
+export const useLiveStreamers = () => {
   const { data, execute } = useLazyAsyncData(
     "live-streamers",
     async () => await getLiveStreamers(),
@@ -20,4 +20,4 @@ export function useLiveStreamers() {
   );
 
   return { streamers: data, load: execute };
-}
+};

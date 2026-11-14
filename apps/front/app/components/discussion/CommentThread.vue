@@ -48,10 +48,10 @@ const total = computed(() => pageData.value?.total ?? 0);
 const pageSize = computed(() => pageData.value?.limit ?? 25);
 const hasMore = computed(() => comments.value.length < total.value);
 
-function resetExtraPages() {
+const resetExtraPages = () => {
   loadedExtraPages.value = 0;
   appendedReplies.value = [];
-}
+};
 
 watch(
   () => [targetType, targetId] as const,
@@ -60,7 +60,7 @@ watch(
   },
 );
 
-async function loadMore() {
+const loadMore = async () => {
   if (loadingMore.value || !hasMore.value) {
     return;
   }
@@ -75,21 +75,20 @@ async function loadMore() {
   } finally {
     loadingMore.value = false;
   }
-}
+};
 
-async function onChanged() {
+const onChanged = async () => {
   const pagesLoaded = loadedExtraPages.value + 1;
   const limit = refetchLimitForLoadedPages(pagesLoaded, pageSize.value);
   const result = await getCommentsByTarget(targetType, targetId, 0, limit);
   pageData.value = result;
   resetExtraPages();
-}
+};
 
-function isCommentLoaded(commentId: string): boolean {
-  return findCommentInTree(comments.value, commentId);
-}
+const isCommentLoaded = (commentId: string): boolean =>
+  findCommentInTree(comments.value, commentId);
 
-async function loadUntilCommentLoaded(commentId: string): Promise<boolean> {
+const loadUntilCommentLoaded = async (commentId: string): Promise<boolean> => {
   if (isCommentLoaded(commentId)) {
     return true;
   }
@@ -101,9 +100,9 @@ async function loadUntilCommentLoaded(commentId: string): Promise<boolean> {
   await loadMore();
 
   return await loadUntilCommentLoaded(commentId);
-}
+};
 
-async function resolveHashTarget() {
+const resolveHashTarget = async () => {
   const commentId = parseCommentHash(route.hash);
 
   if (!commentId) {
@@ -112,7 +111,7 @@ async function resolveHashTarget() {
 
   await loadUntilCommentLoaded(commentId);
   tryScrollFromHash();
-}
+};
 
 watch(
   () => route.hash,

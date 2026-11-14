@@ -6,11 +6,10 @@ export interface NewsTagAttr {
 const WORD_CHAR = /\w/u;
 const NOT_LINE_TERMINATOR = /./u;
 
-function isWordChar(char: string | undefined): boolean {
-  return char !== undefined && WORD_CHAR.test(char);
-}
+const isWordChar = (char: string | undefined): boolean =>
+  char !== undefined && WORD_CHAR.test(char);
 
-function findClosingQuote(raw: string, from: number): number {
+const findClosingQuote = (raw: string, from: number): number => {
   let index = from;
 
   while (index < raw.length) {
@@ -35,17 +34,15 @@ function findClosingQuote(raw: string, from: number): number {
   }
 
   return -1;
-}
+};
 
-export function escapeNewsTagAttrValue(value: string): string {
-  return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
-}
+export const escapeNewsTagAttrValue = (value: string): string =>
+  value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 
-function unescapeAttrValue(value: string): string {
-  return value.replaceAll('\\"', '"').replaceAll("\\\\", "\\");
-}
+const unescapeAttrValue = (value: string): string =>
+  value.replaceAll('\\"', '"').replaceAll("\\\\", "\\");
 
-export function parseNewsTagAttrs(raw: string): NewsTagAttr[] {
+export const parseNewsTagAttrs = (raw: string): NewsTagAttr[] => {
   const attrs: NewsTagAttr[] = [];
   let index = 0;
 
@@ -78,4 +75,4 @@ export function parseNewsTagAttrs(raw: string): NewsTagAttr[] {
   }
 
   return attrs;
-}
+};

@@ -15,8 +15,8 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { parsePathEntry, parsePathNote } from "../domain/season-archive";
 import type { SeasonRecord, SeasonStore } from "./ports";
 
-function publicPath(path: SeasonPathEntry[]): SeasonArchivePathEntry[] {
-  return path.flatMap(({ label, result, tournament }): SeasonArchivePathEntry[] => {
+const publicPath = (path: SeasonPathEntry[]): SeasonArchivePathEntry[] =>
+  path.flatMap(({ label, result, tournament }): SeasonArchivePathEntry[] => {
     if (!tournament) {
       return [{ label, result, tournament: null }];
     }
@@ -29,37 +29,32 @@ function publicPath(path: SeasonPathEntry[]): SeasonArchivePathEntry[] {
 
     return [{ label, result, tournament: { id, name, slug, event } }];
   });
-}
 
-function publicAward({ awardType, region, presentedBy, sourceUrl, player }: SeasonAward) {
-  return {
-    awardType,
-    region,
-    presentedBy,
-    sourceUrl,
-    player: { name: player.name, slug: player.slug },
-  };
-}
+const publicAward = ({ awardType, region, presentedBy, sourceUrl, player }: SeasonAward) => ({
+  awardType,
+  region,
+  presentedBy,
+  sourceUrl,
+  player: { name: player.name, slug: player.slug },
+});
 
-function toSeasonArchive(
+const toSeasonArchive = (
   slug: string,
   season: SeasonRecord,
   participants: SeasonParticipant[],
   awards: SeasonAward[],
-): SeasonArchive {
-  return {
-    slug,
-    name: season.name,
-    format: season.format,
-    winner: participants.find(({ team }) => team.id === season.winnerTeamId)?.team ?? null,
-    participants: participants.map(({ team, pathNote, path }) => ({
-      team,
-      pathNote,
-      path: publicPath(path),
-    })),
-    awards: awards.map(publicAward),
-  };
-}
+): SeasonArchive => ({
+  slug,
+  name: season.name,
+  format: season.format,
+  winner: participants.find(({ team }) => team.id === season.winnerTeamId)?.team ?? null,
+  participants: participants.map(({ team, pathNote, path }) => ({
+    team,
+    pathNote,
+    path: publicPath(path),
+  })),
+  awards: awards.map(publicAward),
+});
 
 export class SeasonArchiveService {
   constructor(private readonly store: SeasonStore) {}

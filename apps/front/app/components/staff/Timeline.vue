@@ -12,7 +12,7 @@ const headingId = useId();
 
 const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
-function formatRange(contract: PlayerContract): string {
+const formatRange = (contract: PlayerContract): string => {
   const start = mediumDate.value.format(new Date(contract.startDate));
 
   const end = contract.endDate
@@ -20,7 +20,7 @@ function formatRange(contract: PlayerContract): string {
     : t("page.staff.slug.timeline.present");
 
   return `${start} – ${end}`;
-}
+};
 </script>
 
 <template>

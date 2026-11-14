@@ -18,21 +18,19 @@ const VIEWERSHIP: Viewership = {
   sourceUrl: "https://escharts.com/tournaments/rl/fake-open",
 };
 
-function stage(source: DataSource): TournamentSummary {
-  return {
-    id: `stage-${source}`,
-    name: "Main Event",
-    slug: "main-event",
-    event: { id: "event", slug: "fake-open", name: "Fake Open" },
-    beginAt: null,
-    league: null,
-    pickemsEnabled: false,
-    source,
-    pandascoreId: null,
-    streams: [],
-    eventStreams: [],
-  };
-}
+const stage = (source: DataSource): TournamentSummary => ({
+  id: `stage-${source}`,
+  name: "Main Event",
+  slug: "main-event",
+  event: { id: "event", slug: "fake-open", name: "Fake Open" },
+  beginAt: null,
+  league: null,
+  pickemsEnabled: false,
+  source,
+  pandascoreId: null,
+  streams: [],
+  eventStreams: [],
+});
 
 describe(ViewershipService, () => {
   const events = new Map<string, TournamentEvent>();

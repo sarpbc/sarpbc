@@ -26,20 +26,15 @@ export interface StreamScoreSeriesResult {
   score: number;
 }
 
-export function streamScoreGameNeedsCheck(game: StreamScoreGame): boolean {
-  return (
-    game.confidence < LOW_CONFIDENCE || game.endedBy === "reset" || game.endedBy === "stream_end"
-  );
-}
+export const streamScoreGameNeedsCheck = (game: StreamScoreGame): boolean =>
+  game.confidence < LOW_CONFIDENCE || game.endedBy === "reset" || game.endedBy === "stream_end";
 
-export function streamScoreBestOfMismatch(
+export const streamScoreBestOfMismatch = (
   proposal: StreamScoreProposal,
   numberOfGames: number | null,
-): boolean {
-  return numberOfGames !== null && numberOfGames !== proposal.bestOf;
-}
+): boolean => numberOfGames !== null && numberOfGames !== proposal.bestOf;
 
-export function isForbiddenStreamScoreSource(source: string): boolean {
+export const isForbiddenStreamScoreSource = (source: string): boolean => {
   let url: URL;
 
   try {
@@ -51,12 +46,12 @@ export function isForbiddenStreamScoreSource(source: string): boolean {
   return (
     (url.protocol === "http:" || url.protocol === "https:") && isLiquipediaSourceHost(url.hostname)
   );
-}
+};
 
-export function streamScoreConfirmBlockers(
+export const streamScoreConfirmBlockers = (
   proposal: StreamScoreProposal,
   review: StreamScoreReview,
-): StreamScoreConfirmBlocker[] {
+): StreamScoreConfirmBlocker[] => {
   const blockers: StreamScoreConfirmBlocker[] = [];
 
   if (proposal.series.winner === null) {
@@ -87,14 +82,12 @@ export function streamScoreConfirmBlockers(
   }
 
   return blockers;
-}
+};
 
-export function streamScoreSeriesResults(
+export const streamScoreSeriesResults = (
   series: StreamScoreSeries,
   participants: Record<StreamScoreSide, string>,
-): StreamScoreSeriesResult[] {
-  return [
-    { participantId: participants.blue, score: series.blue },
-    { participantId: participants.orange, score: series.orange },
-  ];
-}
+): StreamScoreSeriesResult[] => [
+  { participantId: participants.blue, score: series.blue },
+  { participantId: participants.orange, score: series.orange },
+];

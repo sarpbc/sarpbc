@@ -111,14 +111,14 @@ const storedGames = z.object({
 
 const statKeys = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
-export async function verifyMatchStats({
+export const verifyMatchStats = async ({
   app,
   orm,
   request,
   staffCookie,
   memberCookie,
   competition,
-}: MatchStatsContext): Promise<void> {
+}: MatchStatsContext): Promise<void> => {
   const { RequestContext } = await import("@mikro-orm/core");
 
   const { MikroOrmGameStatsStore } =
@@ -602,4 +602,4 @@ export async function verifyMatchStats({
   await saveGame(3, [steam("s-renamed", "Racer", "orange", otherId)]);
   const excludedResult = await store().excluded(["integration-replay-3"]);
   assert.equal(excludedResult.size, 0, "attaching a removed replay again clears its exclusion");
-}
+};

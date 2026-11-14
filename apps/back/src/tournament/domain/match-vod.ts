@@ -20,18 +20,16 @@ const URL_ERRORS = {
   "invalid-timestamp": "has an invalid t= timestamp (use seconds or 1h2m3s)",
 } satisfies Record<MatchVodUrlError, string>;
 
-function invalid(index: number, reason: string): InvalidInputError {
-  return new InvalidInputError(`VOD link ${index + 1} ${reason}.`);
-}
+const invalid = (index: number, reason: string): InvalidInputError =>
+  new InvalidInputError(`VOD link ${index + 1} ${reason}.`);
 
-function isGameInRange(game: number, maxGame: number): boolean {
-  return Number.isInteger(game) && game >= 1 && game <= maxGame;
-}
+const isGameInRange = (game: number, maxGame: number): boolean =>
+  Number.isInteger(game) && game >= 1 && game <= maxGame;
 
-export function normalizeMatchVods(
+export const normalizeMatchVods = (
   inputs: readonly MatchVodInput[],
   numberOfGames: number | null,
-): MatchVod[] {
+): MatchVod[] => {
   const maxGame = maxVodGame(numberOfGames);
   const vods: MatchVod[] = [];
   const seen = new Set<string>();
@@ -74,14 +72,14 @@ export function normalizeMatchVods(
   }
 
   return vods.toSorted((a, b) => a.game - b.game);
-}
+};
 
-export function replaceGameVods(
+export const replaceGameVods = (
   current: readonly MatchVod[],
   game: number,
   links: readonly MatchVodLink[],
   numberOfGames: number | null,
-): MatchVod[] {
+): MatchVod[] => {
   const maxGame = maxVodGame(numberOfGames);
 
   if (!isGameInRange(game, maxGame)) {
@@ -96,4 +94,4 @@ export function replaceGameVods(
   return [...current.filter((vod) => vod.game !== game), ...replaced].toSorted(
     (a, b) => a.game - b.game,
   );
-}
+};

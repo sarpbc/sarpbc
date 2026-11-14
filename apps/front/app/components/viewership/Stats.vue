@@ -15,7 +15,7 @@ const dateTimeFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-function scopeLabel(scope: ViewershipScope): string {
+const scopeLabel = (scope: ViewershipScope): string => {
   switch (scope) {
     case "official": {
       return t("components.viewership.scope.official");
@@ -31,7 +31,7 @@ function scopeLabel(scope: ViewershipScope): string {
       return _exhaustive;
     }
   }
-}
+};
 
 const stats = computed(() => {
   const rows = [

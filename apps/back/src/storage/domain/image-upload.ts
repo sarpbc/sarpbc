@@ -2,7 +2,7 @@ import { canonicalImageContentType, IMAGE_CONTENT_TYPES } from "@sarpbc/utils";
 import type { ImageContentType } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
-export function imageContentType(value: string): ImageContentType {
+export const imageContentType = (value: string): ImageContentType => {
   const canonical = canonicalImageContentType(value);
   const supported = IMAGE_CONTENT_TYPES.find((type) => type === canonical);
 
@@ -13,4 +13,4 @@ export function imageContentType(value: string): ImageContentType {
   }
 
   return supported;
-}
+};

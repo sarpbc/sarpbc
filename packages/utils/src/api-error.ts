@@ -22,7 +22,7 @@ const apiErrorSchema = z.object({
   code: z.optional(z.string()),
 });
 
-export function getApiErrorStatus(cause: unknown): number | undefined {
+export const getApiErrorStatus = (cause: unknown): number | undefined => {
   const parsed = apiErrorSchema.safeParse(cause);
 
   if (!parsed.success) {
@@ -30,9 +30,9 @@ export function getApiErrorStatus(cause: unknown): number | undefined {
   }
 
   return parsed.data.statusCode ?? parsed.data.status;
-}
+};
 
-export function getApiErrorBody(cause: unknown): ApiErrorBody | undefined {
+export const getApiErrorBody = (cause: unknown): ApiErrorBody | undefined => {
   const parsed = apiErrorSchema.safeParse(cause);
 
   if (!parsed.success) {
@@ -48,9 +48,9 @@ export function getApiErrorBody(cause: unknown): ApiErrorBody | undefined {
     code: parsed.data.code,
     statusCode: parsed.data.statusCode,
   };
-}
+};
 
-export function getApiErrorMessage(cause: unknown): string | undefined {
+export const getApiErrorMessage = (cause: unknown): string | undefined => {
   const body = getApiErrorBody(cause);
 
   if (body?.message === undefined || body.message === "") {
@@ -62,8 +62,6 @@ export function getApiErrorMessage(cause: unknown): string | undefined {
   }
 
   return body.message;
-}
+};
 
-export function getApiErrorCode(cause: unknown): string | undefined {
-  return getApiErrorBody(cause)?.code;
-}
+export const getApiErrorCode = (cause: unknown): string | undefined => getApiErrorBody(cause)?.code;

@@ -2,7 +2,7 @@
  * One click listener for a list of plain `<a href>` rows, so long lists get
  * client-side navigation without hydrating a NuxtLink per row.
  */
-export function useLinkDelegation(onLinkClick?: (link: HTMLAnchorElement) => void) {
+export const useLinkDelegation = (onLinkClick?: (link: HTMLAnchorElement) => void) => {
   const router = useRouter();
 
   return function onClick(event: MouseEvent) {
@@ -34,4 +34,4 @@ export function useLinkDelegation(onLinkClick?: (link: HTMLAnchorElement) => voi
     event.preventDefault();
     void router.push(link.pathname + link.search + link.hash);
   };
-}
+};

@@ -7,7 +7,7 @@ import { PlayerAwardService } from "./player-award.service";
 import type { AwardQueries, AwardTransaction, AwardWriter } from "./ports";
 import { mapSequentially } from "../../common/application/sequentially";
 
-function setup(source: "manual" | "startgg" = "manual") {
+const setup = (source: "manual" | "startgg" = "manual") => {
   const given = new Set<PlayerAwardType>();
 
   const writer = {
@@ -48,7 +48,7 @@ function setup(source: "manual" | "startgg" = "manual") {
   );
 
   return { service, writer };
-}
+};
 
 describe("PlayerAwardService by team", () => {
   it("resolves the participant from the team and creates the award", async () => {

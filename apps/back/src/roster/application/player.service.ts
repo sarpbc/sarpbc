@@ -17,13 +17,13 @@ import type {
 import { requireTeam } from "./require-team";
 import type { DirectorySearchProps } from "./search-props";
 
-async function openContracts(contracts: ContractWriter, playerId: string): Promise<Contract[]> {
+const openContracts = async (contracts: ContractWriter, playerId: string): Promise<Contract[]> => {
   const all = await contracts.findByPlayer(playerId);
 
   return all.filter((contract) => contract.endDate === null);
-}
+};
 
-function requireUnmerged(player: Player | null, id: string): Player {
+const requireUnmerged = (player: Player | null, id: string): Player => {
   if (!player) {
     throw new NotFoundError(`Player with id "${id}" not found`);
   }
@@ -35,7 +35,7 @@ function requireUnmerged(player: Player | null, id: string): Player {
   }
 
   return player;
-}
+};
 
 export class PlayerService {
   constructor(

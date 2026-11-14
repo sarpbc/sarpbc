@@ -46,22 +46,24 @@ const saving = ref(false);
 const editing = ref<TeamAlias | null>(null);
 const aliasToDelete = ref<TeamAlias | null>(null);
 
-function emptyForm(): AliasForm {
-  return { name: "", from: "", to: "", sourceUrl: "", logoUrl: "", pandascoreId: "" };
-}
+const emptyForm = (): AliasForm => ({
+  name: "",
+  from: "",
+  to: "",
+  sourceUrl: "",
+  logoUrl: "",
+  pandascoreId: "",
+});
 
 const form = ref<AliasForm>(emptyForm());
 
-function formatDay(day: string): string {
-  return dateFormatter.value.format(new Date(`${day}T00:00:00Z`));
-}
+const formatDay = (day: string): string => dateFormatter.value.format(new Date(`${day}T00:00:00Z`));
 
-function period(alias: TeamAlias): string {
-  return t("page.teams.aliases.period", {
+const period = (alias: TeamAlias): string =>
+  t("page.teams.aliases.period", {
     from: formatDay(alias.from),
     to: alias.to ? formatDay(alias.to) : t("page.teams.aliases.ongoing"),
   });
-}
 
 const columns: TableColumn<TeamAlias>[] = [
   { accessorKey: "name", header: t("page.teams.aliases.columns.name") },
@@ -70,7 +72,7 @@ const columns: TableColumn<TeamAlias>[] = [
   { id: "actions", header: "" },
 ];
 
-function toInput(values: AliasForm): TeamAliasInput {
+const toInput = (values: AliasForm): TeamAliasInput => {
   const pandascoreId = values.pandascoreId.trim();
 
   return {
@@ -81,9 +83,9 @@ function toInput(values: AliasForm): TeamAliasInput {
     logoUrl: values.logoUrl.trim() || null,
     pandascoreId: pandascoreId === "" ? null : Number(pandascoreId),
   };
-}
+};
 
-function fieldOf(error: TeamAliasError): AliasField {
+const fieldOf = (error: TeamAliasError): AliasField => {
   switch (error) {
     case "missing-name":
     case "name-too-long": {
@@ -119,11 +121,11 @@ function fieldOf(error: TeamAliasError): AliasField {
       return exhaustive;
     }
   }
-}
+};
 
 const parsed = computed(() => parseTeamAlias(toInput(form.value)));
 
-function feedback(field: AliasField): FieldFeedback {
+const feedback = (field: AliasField): FieldFeedback => {
   const result = parsed.value;
 
   if (result.ok || fieldOf(result.error) !== field) {
@@ -131,15 +133,15 @@ function feedback(field: AliasField): FieldFeedback {
   }
 
   return { error: t(`page.teams.aliases.errors.${result.error}`) };
-}
+};
 
-function openCreate() {
+const openCreate = () => {
   editing.value = null;
   form.value = emptyForm();
   isOpen.value = true;
-}
+};
 
-function openEdit(alias: TeamAlias) {
+const openEdit = (alias: TeamAlias) => {
   editing.value = alias;
   form.value = {
     name: alias.name,
@@ -150,9 +152,9 @@ function openEdit(alias: TeamAlias) {
     pandascoreId: alias.pandascoreId === null ? "" : String(alias.pandascoreId),
   };
   isOpen.value = true;
-}
+};
 
-async function submit() {
+const submit = async () => {
   const result = parsed.value;
 
   if (!result.ok || saving.value) {
@@ -174,7 +176,7 @@ async function submit() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

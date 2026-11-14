@@ -4,11 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 import { CircuitStageTeam } from "./circuit-stage-team.entity";
 import { CircuitRosterReferences } from "./roster-references.mover";
 
-function entry(id: string, teamId: string, stageId: string) {
-  return { id, team: { id: teamId }, stage: { id: stageId } };
-}
+const entry = (id: string, teamId: string, stageId: string) => ({
+  id,
+  team: { id: teamId },
+  stage: { id: stageId },
+});
 
-function mover(entries: ReturnType<typeof entry>[]) {
+const mover = (entries: ReturnType<typeof entry>[]) => {
   const find = vi.fn<EntityManager["find"]>().mockResolvedValue(entries);
   const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
   const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
@@ -18,7 +20,7 @@ function mover(entries: ReturnType<typeof entry>[]) {
   );
 
   return { references, nativeDelete, nativeUpdate };
-}
+};
 
 describe("CircuitRosterReferences.moveTeam", () => {
   it("drops the duplicate's entry in a stage the kept team already has, then moves the rest", async () => {

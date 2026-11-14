@@ -12,11 +12,11 @@ const VALID: TeamAliasInput = {
   pandascoreId: null,
 };
 
-function error(input: Partial<TeamAliasInput>) {
+const error = (input: Partial<TeamAliasInput>) => {
   const parsed = parseTeamAlias({ ...VALID, ...input });
 
   return parsed.ok ? null : parsed.error;
-}
+};
 
 void describe("parseTeamAlias", () => {
   void it("trims the name and normalizes the source URL", () => {

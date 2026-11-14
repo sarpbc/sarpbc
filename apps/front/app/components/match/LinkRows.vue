@@ -26,23 +26,22 @@ const {
 const localePath = useLocalePath();
 const { trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
-function isLive(matchId: string): boolean {
-  return variant === "live" || Boolean(liveMatchIds?.has(matchId));
-}
+const isLive = (matchId: string): boolean =>
+  variant === "live" || Boolean(liveMatchIds?.has(matchId));
 
-function statusFor(matchId: string): MatchDiscoveryStatus {
+const statusFor = (matchId: string): MatchDiscoveryStatus => {
   if (variant === "result") {
     return listVariantToDiscoveryStatus(variant);
   }
 
   return isLive(matchId) ? "live" : "upcoming";
-}
+};
 
-function href(match: MatchRowItem): string {
+const href = (match: MatchRowItem): string => {
   const path = localePath(matchPath(match.publicId, match.slug));
 
   return source ? `${path}?${MATCH_DISCOVERY_FROM_QUERY}=${source}` : path;
-}
+};
 
 const onClick = useLinkDelegation((link) => {
   const { matchId } = link.dataset;

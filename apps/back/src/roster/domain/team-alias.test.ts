@@ -2,12 +2,11 @@ import { describe, expect, it } from "vitest";
 import { Team } from "./team";
 import { TeamAlias, assertTeamAliasFits, teamAt } from "./team-alias";
 
-function alias(fields: Partial<TeamAlias>): TeamAlias {
-  return Object.assign(new TeamAlias(), { sourceUrl: "https://x.com/fixture/status/1" }, fields);
-}
+const alias = (fields: Partial<TeamAlias>): TeamAlias =>
+  Object.assign(new TeamAlias(), { sourceUrl: "https://x.com/fixture/status/1" }, fields);
 
-function fixtureTeam(): Team {
-  return Object.assign(new Team(), {
+const fixtureTeam = (): Team =>
+  Object.assign(new Team(), {
     id: "team",
     name: "Fixture Now",
     slug: "fixture-now",
@@ -26,7 +25,6 @@ function fixtureTeam(): Team {
       }),
     ],
   });
-}
 
 describe(teamAt, () => {
   it("shows the name in force on the date and keeps the team identity", () => {

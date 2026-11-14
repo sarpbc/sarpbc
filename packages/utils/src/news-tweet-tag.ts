@@ -40,7 +40,7 @@ const WHITESPACE = /\s/u;
 const TWEET_BLOCK_OPENER = "::tweet{";
 const TWEET_INLINE_OPENER = ":tweet{";
 
-export function parseTweetUrl(input: string): ParsedTweetUrl | null {
+export const parseTweetUrl = (input: string): ParsedTweetUrl | null => {
   const trimmed = input.trim();
   const match = TWEET_STATUS_PATTERN.exec(trimmed);
 
@@ -58,9 +58,9 @@ export function parseTweetUrl(input: string): ParsedTweetUrl | null {
     handle,
     url: `https://x.com/${pathHandle}/status/${id}`,
   };
-}
+};
 
-export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
+export const parseNewsTweetTag = (raw: string): NewsTweetTag | null => {
   const match = TWEET_TAG_PATTERN.exec(raw);
 
   if (!match) {
@@ -86,22 +86,22 @@ export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
     parsed,
     raw: match[0],
   };
-}
+};
 
-export function serializeNewsTweetTag(url: string): string {
+export const serializeNewsTweetTag = (url: string): string => {
   const parsed = parseTweetUrl(url);
   const canonical = parsed?.url ?? url.trim();
 
   return `:tweet{url="${escapeNewsTagAttrValue(canonical)}"}`;
-}
+};
 
-export function newsTweetTagStart(content: string): number {
+export const newsTweetTagStart = (content: string): number => {
   const block = content.indexOf(TWEET_BLOCK_OPENER);
 
   return block === -1 ? content.indexOf(TWEET_INLINE_OPENER) : block;
-}
+};
 
-function blockTagEnd(content: string, afterBrace: number): number {
+const blockTagEnd = (content: string, afterBrace: number): number => {
   let index = afterBrace;
 
   while (index < content.length && WHITESPACE.test(content.charAt(index))) {
@@ -109,13 +109,13 @@ function blockTagEnd(content: string, afterBrace: number): number {
   }
 
   return content.startsWith("::", index) ? index + 2 : -1;
-}
+};
 
-function replaceTweetTags(
+const replaceTweetTags = (
   content: string,
   opener: string,
   tagEnd: (afterBrace: number) => number,
-): string {
+): string => {
   let result = "";
   let copiedUntil = 0;
   let searchFrom = 0;
@@ -146,17 +146,16 @@ function replaceTweetTags(
   }
 
   return result + content.slice(copiedUntil);
-}
+};
 
-export function stripNewsTweetTags(content: string): string {
-  return replaceTweetTags(
+export const stripNewsTweetTags = (content: string): string =>
+  replaceTweetTags(
     replaceTweetTags(content, TWEET_BLOCK_OPENER, (afterBrace) => blockTagEnd(content, afterBrace)),
     TWEET_INLINE_OPENER,
     (afterBrace) => afterBrace,
   );
-}
 
-export function isTweetImageUrl(input: string): boolean {
+export const isTweetImageUrl = (input: string): boolean => {
   let url: URL;
 
   try {
@@ -172,8 +171,7 @@ export function isTweetImageUrl(input: string): boolean {
     url.username === "" &&
     url.password === ""
   );
-}
+};
 
-export function tweetImageProxyPath(url: string): string | null {
-  return isTweetImageUrl(url) ? `/news/embed/tweet/image?url=${encodeURIComponent(url)}` : null;
-}
+export const tweetImageProxyPath = (url: string): string | null =>
+  isTweetImageUrl(url) ? `/news/embed/tweet/image?url=${encodeURIComponent(url)}` : null;

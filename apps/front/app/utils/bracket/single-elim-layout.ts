@@ -4,9 +4,9 @@ import { finalizeSectionLayout, toLayoutMatch } from "./connectors";
 import { assignMatchRows } from "./rows";
 import type { BracketSectionLayout } from "./types";
 
-export function buildBracketSectionLayout(
+export const buildBracketSectionLayout = (
   matches: TournamentDetailMatch[],
-): BracketSectionLayout | null {
+): BracketSectionLayout | null => {
   if (matches.length === 0) {
     return null;
   }
@@ -20,4 +20,4 @@ export function buildBracketSectionLayout(
   );
 
   return finalizeSectionLayout(matches, layoutMatches, maxColumn);
-}
+};

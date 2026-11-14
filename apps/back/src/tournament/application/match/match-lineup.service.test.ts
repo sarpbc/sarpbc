@@ -16,9 +16,9 @@ import type {
 } from "../ports";
 import { MatchLineupService } from "./match-lineup.service";
 
-function unused(): never {
+const unused = (): never => {
   throw new Error("Not part of a lineup operation");
-}
+};
 
 const player = (id: string) => Object.assign(new Player(), { id, name: id, slug: id });
 
@@ -30,12 +30,11 @@ const lineupPlayer = (id: string) => ({
   nationality: null,
 });
 
-function participant(id: string, rosterIds: string[]) {
-  return Object.assign(new TournamentParticipant(), { id, players: rosterIds.map(player) });
-}
+const participant = (id: string, rosterIds: string[]) =>
+  Object.assign(new TournamentParticipant(), { id, players: rosterIds.map(player) });
 
-function match(id: string, source: DataSource, tournamentSource: DataSource = "manual") {
-  return Object.assign(new Match(), {
+const match = (id: string, source: DataSource, tournamentSource: DataSource = "manual") =>
+  Object.assign(new Match(), {
     id,
     source,
     beginAt: new Date("2026-11-07T18:00:00Z"),
@@ -57,7 +56,6 @@ function match(id: string, source: DataSource, tournamentSource: DataSource = "m
       eventStreams: [],
     },
   });
-}
 
 describe(MatchLineupService, () => {
   const matches = new Map<string, Match>();

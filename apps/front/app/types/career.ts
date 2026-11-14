@@ -51,7 +51,7 @@ export type CareerStage = (typeof CAREER_STAGES)[number];
 
 export const DEFAULT_PLAYER_NAME = "Rookie";
 
-export function getSplitNumber(stage: CareerStage): number | null {
+export const getSplitNumber = (stage: CareerStage): number | null => {
   switch (stage) {
     case "split1": {
       return 1;
@@ -71,9 +71,9 @@ export function getSplitNumber(stage: CareerStage): number | null {
       return _exhaustive;
     }
   }
-}
+};
 
-export function getSplitStage(split: number): CareerStage {
+export const getSplitStage = (split: number): CareerStage => {
   switch (split) {
     case 1: {
       return "split1";
@@ -87,7 +87,7 @@ export function getSplitStage(split: number): CareerStage {
       throw new Error(`Invalid split number: ${split}`);
     }
   }
-}
+};
 
 export type CareerEventPool = "split" | "worlds";
 
@@ -278,34 +278,28 @@ export const MIN_STAT = 0;
 /** Hard ceiling. 100 is reachable but gated to roughly 1 career in 1000. */
 export const MAX_STAT = 100;
 
-export function getPlayerAge(season: number): number {
-  return STARTING_AGE + season - 1;
-}
+export const getPlayerAge = (season: number): number => STARTING_AGE + season - 1;
 
-export function getSeasonsPastPeak(season: number): number {
-  return Math.max(0, season - PEAK_SEASONS);
-}
+export const getSeasonsPastPeak = (season: number): number => Math.max(0, season - PEAK_SEASONS);
 
-export function getRetiredAge(seasonsPlayed: number): number {
-  return STARTING_AGE + seasonsPlayed;
-}
+export const getRetiredAge = (seasonsPlayed: number): number => STARTING_AGE + seasonsPlayed;
 
-export function emptyDestinyLeanings(): CareerDestinyLeanings {
-  return { quit: 0, streamer: 0, coach: 0 };
-}
+export const emptyDestinyLeanings = (): CareerDestinyLeanings => ({
+  quit: 0,
+  streamer: 0,
+  coach: 0,
+});
 
-export function applyDestinyLeanings(
+export const applyDestinyLeanings = (
   current: CareerDestinyLeanings,
   delta: Partial<CareerDestinyLeanings>,
-): CareerDestinyLeanings {
-  return {
-    quit: current.quit + (delta.quit ?? 0),
-    streamer: current.streamer + (delta.streamer ?? 0),
-    coach: current.coach + (delta.coach ?? 0),
-  };
-}
+): CareerDestinyLeanings => ({
+  quit: current.quit + (delta.quit ?? 0),
+  streamer: current.streamer + (delta.streamer ?? 0),
+  coach: current.coach + (delta.coach ?? 0),
+});
 
-export function getRecommendedDestiny(leanings: CareerDestinyLeanings): CareerDestiny {
+export const getRecommendedDestiny = (leanings: CareerDestinyLeanings): CareerDestiny => {
   const order: CareerDestiny[] = ["quit", "streamer", "coach"];
   let best: CareerDestiny = "quit";
   let bestScore = Number.NEGATIVE_INFINITY;
@@ -318,4 +312,4 @@ export function getRecommendedDestiny(leanings: CareerDestinyLeanings): CareerDe
   }
 
   return best;
-}
+};

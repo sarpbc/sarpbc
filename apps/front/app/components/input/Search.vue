@@ -17,13 +17,13 @@ const updateSearch = (payload: string | null): void => {
   emit("update:search", payload);
 };
 
-function handleFocus(): void {
+const handleFocus = (): void => {
   emit("focus");
-}
+};
 
-function handleBlur(): void {
+const handleBlur = (): void => {
   emit("blur");
-}
+};
 
 defineExpose({
   blur: () => inputRef.value?.inputRef?.blur(),

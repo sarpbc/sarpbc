@@ -96,7 +96,7 @@ const tournament = z.strictObject({
 
 export const tournamentCacheKey = (id: string): string => `tournament:${id}`;
 
-function diagnose(key: string, operation: string, error: Error): void {
+const diagnose = (key: string, operation: string, error: Error): void => {
   log.warn({
     component: "CachedTournamentRead",
     message: "Optional tournament cache failed",
@@ -104,7 +104,7 @@ function diagnose(key: string, operation: string, error: Error): void {
     operation,
     error,
   });
-}
+};
 
 export class CachedTournamentRead {
   constructor(

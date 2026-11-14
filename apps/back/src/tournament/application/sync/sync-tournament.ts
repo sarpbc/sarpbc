@@ -16,12 +16,12 @@ import type { CompetitionDiagnostics, CompetitionWriteScope, EventWriter } from 
 import type { AppliedTournament } from "./sync-applied";
 import { applyLeague } from "./sync-catalog";
 
-async function manualCounterpart(
+const manualCounterpart = async (
   scope: CompetitionWriteScope,
   diagnostics: CompetitionDiagnostics,
   command: UpsertTournamentCommand,
   league: League | null,
-): Promise<string | null> {
+): Promise<string | null> => {
   const eventName = eventDisplayName({
     leagueName: league?.name ?? null,
     serieName: command.serie?.fullName ?? null,
@@ -69,15 +69,15 @@ async function manualCounterpart(
       return neverMatch;
     }
   }
-}
+};
 
-async function syncTarget(
+const syncTarget = async (
   scope: CompetitionWriteScope,
   diagnostics: CompetitionDiagnostics,
   command: UpsertTournamentCommand,
   league: League | null,
   linkTournamentId: string | undefined,
-): Promise<Tournament | null> {
+): Promise<Tournament | null> => {
   const synced = await scope.tournaments.byPandascoreId(command.pandascoreId);
 
   if (synced) {
@@ -110,12 +110,12 @@ async function syncTarget(
   claimForPandascore(manual, command.pandascoreId, command.endAt ?? null);
 
   return manual;
-}
+};
 
-export async function settleEndAt(
+export const settleEndAt = async (
   scope: CompetitionWriteScope,
   tournament: Tournament,
-): Promise<void> {
+): Promise<void> => {
   if (tournament.endAt || tournament.endAtCorrected) {
     return;
   }
@@ -129,15 +129,15 @@ export async function settleEndAt(
 
   tournament.endAt = endAt;
   await scope.tournaments.save(tournament);
-}
+};
 
-async function findExistingEvent(
+const findExistingEvent = async (
   events: EventWriter,
   command: UpsertTournamentCommand,
   currentEventId: string | null,
   league: League | null,
   name: string,
-): Promise<TournamentEvent | null> {
+): Promise<TournamentEvent | null> => {
   const { serie } = command;
 
   const current =
@@ -154,15 +154,15 @@ async function findExistingEvent(
     unclaimedCurrent ??
     (await events.unclaimedByName(league?.id ?? null, name))
   );
-}
+};
 
 /** Backfilled events claim their serie on first sync instead of duplicating under a `-2` slug. */
-async function resolveEvent(
+const resolveEvent = async (
   events: EventWriter,
   currentEventId: string | null,
   command: UpsertTournamentCommand,
   league: League | null,
-): Promise<{ event: TournamentEvent; renamed: boolean }> {
+): Promise<{ event: TournamentEvent; renamed: boolean }> => {
   const { serie } = command;
 
   const name = eventDisplayName({
@@ -189,13 +189,13 @@ async function resolveEvent(
   await events.save(event);
 
   return { event, renamed };
-}
+};
 
-function copyTournamentFields(
+const copyTournamentFields = (
   tournament: Tournament,
   command: UpsertTournamentCommand,
   league: League | null,
-): void {
+): void => {
   tournament.source = "pandascore";
   tournament.name = command.name;
   tournament.tier = command.tier ?? null;
@@ -211,13 +211,13 @@ function copyTournamentFields(
   tournament.hasBracket = command.hasBracket ?? false;
   tournament.winnerType = command.winnerType ?? null;
   tournament.league = league;
-}
+};
 
-async function dropEmptyPreviousEvent(
+const dropEmptyPreviousEvent = async (
   events: EventWriter,
   previousEventId: string,
   event: TournamentEvent,
-): Promise<void> {
+): Promise<void> => {
   const remaining = await events.stages(previousEventId);
 
   if (remaining.length) {
@@ -232,13 +232,13 @@ async function dropEmptyPreviousEvent(
   }
 
   await events.remove(previousEventId);
-}
+};
 
-async function importExpectedRoster(
+const importExpectedRoster = async (
   scope: CompetitionWriteScope,
   tournament: Tournament,
   command: UpsertTournamentCommand,
-): Promise<void> {
+): Promise<void> => {
   const participants = await scope.tournaments.participants(tournament.id);
 
   const pandascoreTeams = new Map(
@@ -298,14 +298,14 @@ async function importExpectedRoster(
       new Map([...pandascoreTeams].map(([id, teamId]) => [id, ranks.get(teamId) ?? null])),
     );
   }
-}
+};
 
-export async function applyTournament(
+export const applyTournament = async (
   scope: CompetitionWriteScope,
   diagnostics: CompetitionDiagnostics,
   command: UpsertTournamentCommand,
   linkTournamentId?: string,
-): Promise<AppliedTournament> {
+): Promise<AppliedTournament> => {
   const league = command.league ? await applyLeague(scope, command.league) : null;
   const existing = await syncTarget(scope, diagnostics, command, league, linkTournamentId);
 
@@ -340,4 +340,4 @@ export async function applyTournament(
     tournament,
     stageIds: [...new Set([tournament.id, ...siblings.map((stage) => stage.id)])],
   };
-}
+};

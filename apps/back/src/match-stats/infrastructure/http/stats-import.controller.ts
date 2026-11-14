@@ -17,14 +17,12 @@ import type { StatsImport } from "../../domain/stats-import";
 import { RequestStatsImportDto } from "./dto/request-stats-import.dto";
 import type { RequestStatsImportInput } from "./dto/request-stats-import.dto";
 
-function present(statsImport: StatsImport): StatsImportResponse {
-  return {
-    ...statsImport,
-    createdAt: statsImport.createdAt.toISOString(),
-    startedAt: statsImport.startedAt?.toISOString() ?? null,
-    finishedAt: statsImport.finishedAt?.toISOString() ?? null,
-  };
-}
+const present = (statsImport: StatsImport): StatsImportResponse => ({
+  ...statsImport,
+  createdAt: statsImport.createdAt.toISOString(),
+  startedAt: statsImport.startedAt?.toISOString() ?? null,
+  finishedAt: statsImport.finishedAt?.toISOString() ?? null,
+});
 
 @Controller("tournaments/:id/stats-imports")
 @UseGuards(AuthGuard, PermissionGuard)

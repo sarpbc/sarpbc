@@ -3,14 +3,12 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { replySortOrder, replyTarget, resolveReplyTargetLink, sameReplyTarget } from "./reply";
 import type { ReplyTargetFields } from "./reply";
 
-function makeReply(partial: Partial<ReplyTargetFields>): ReplyTargetFields {
-  return {
-    post: null,
-    newsArticle: null,
-    match: null,
-    ...partial,
-  };
-}
+const makeReply = (partial: Partial<ReplyTargetFields>): ReplyTargetFields => ({
+  post: null,
+  newsArticle: null,
+  match: null,
+  ...partial,
+});
 
 describe(resolveReplyTargetLink, () => {
   it("resolves forum post targets", () => {

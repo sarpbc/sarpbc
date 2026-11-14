@@ -7,31 +7,28 @@ import { mapMatchBlockItem } from "./match-list.mapper";
 
 const NOW = new Date("2026-10-31T18:00:00Z");
 
-function participant(name: string): TournamentParticipant {
-  return Object.assign(new TournamentParticipant(), {
+const participant = (name: string): TournamentParticipant =>
+  Object.assign(new TournamentParticipant(), {
     id: `participant-${name}`,
     team: Object.assign(new Team(), { id: `team-${name}`, name, slug: name.toLowerCase() }),
   });
-}
 
-function tournament(source: TournamentSummary["source"]): TournamentSummary {
-  return {
-    id: "tournament",
-    name: "Playoffs",
-    slug: "playoffs",
-    event: { id: "event", slug: "rlcs-worlds-2026", name: "RLCS Worlds 2026" },
-    beginAt: null,
-    league: null,
-    pickemsEnabled: false,
-    source,
-    pandascoreId: null,
-    streams: [],
-    eventStreams: [],
-  };
-}
+const tournament = (source: TournamentSummary["source"]): TournamentSummary => ({
+  id: "tournament",
+  name: "Playoffs",
+  slug: "playoffs",
+  event: { id: "event", slug: "rlcs-worlds-2026", name: "RLCS Worlds 2026" },
+  beginAt: null,
+  league: null,
+  pickemsEnabled: false,
+  source,
+  pandascoreId: null,
+  streams: [],
+  eventStreams: [],
+});
 
-function match(overrides: Partial<Match>): Match {
-  return Object.assign(new Match(), {
+const match = (overrides: Partial<Match>): Match =>
+  Object.assign(new Match(), {
     id: "match",
     publicId: 42,
     name: "Grand final",
@@ -40,7 +37,6 @@ function match(overrides: Partial<Match>): Match {
     tournament: tournament("pandascore"),
     ...overrides,
   });
-}
 
 describe(mapMatchBlockItem, () => {
   it("derives the state the public lists use", () => {

@@ -21,14 +21,14 @@ const STATIC_EXTENSIONS = new Set([
   "xml",
 ]);
 
-function lastSegment(pathname: string): string {
+const lastSegment = (pathname: string): string => {
   const trimmed = pathname.replace(/\/+$/u, "");
   const slash = trimmed.lastIndexOf("/");
 
   return slash === -1 ? trimmed : trimmed.slice(slash + 1);
-}
+};
 
-function isInternalOrAssetPath(pathname: string): boolean {
+const isInternalOrAssetPath = (pathname: string): boolean => {
   if (SKIP_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(prefix))) {
     return true;
   }
@@ -43,21 +43,21 @@ function isInternalOrAssetPath(pathname: string): boolean {
   const ext = segment.slice(dot + 1).toLowerCase();
 
   return STATIC_EXTENSIONS.has(ext);
-}
+};
 
 const PRIVATE_HTML_PATHS = new Set(
   ["/login", "/register", "/profile"].flatMap((path) => [path, localizedPath(path, "fr")]),
 );
 
-export function isMarkdownPagePath(pathname: string): boolean {
+export const isMarkdownPagePath = (pathname: string): boolean => {
   if (!pathname.endsWith(".md")) {
     return false;
   }
 
   return !isInternalOrAssetPath(pathname.replace(/\.md$/u, ""));
-}
+};
 
-export function isMarkdownEligibleHtmlPath(pathname: string): boolean {
+export const isMarkdownEligibleHtmlPath = (pathname: string): boolean => {
   if (isInternalOrAssetPath(pathname) || pathname.endsWith(".md")) {
     return false;
   }
@@ -65,9 +65,9 @@ export function isMarkdownEligibleHtmlPath(pathname: string): boolean {
   const normalized = pathname.replace(/\/+$/u, "") || "/";
 
   return !PRIVATE_HTML_PATHS.has(normalized);
-}
+};
 
-export function htmlPathFromMarkdownPath(pathname: string): string {
+export const htmlPathFromMarkdownPath = (pathname: string): string => {
   const withoutMd = pathname.endsWith(".md") ? pathname.slice(0, -3) : pathname;
 
   if (withoutMd === "/index" || withoutMd === "") {
@@ -79,9 +79,9 @@ export function htmlPathFromMarkdownPath(pathname: string): string {
   }
 
   return withoutMd || "/";
-}
+};
 
-export function markdownPathFromHtmlPath(pathname: string): string {
+export const markdownPathFromHtmlPath = (pathname: string): string => {
   const normalized = pathname.replace(/\/+$/u, "") || "/";
 
   if (normalized === "/") {
@@ -93,4 +93,4 @@ export function markdownPathFromHtmlPath(pathname: string): string {
   }
 
   return `${normalized}.md`;
-}
+};

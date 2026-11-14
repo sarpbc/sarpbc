@@ -23,8 +23,8 @@ const VUE_MACROS = [
   "withDefaults",
 ];
 
-function readAutoImportNames(): string[] {
-  return IMPORTS_TYPES.flatMap((file) => {
+const readAutoImportNames = (): string[] =>
+  IMPORTS_TYPES.flatMap((file) => {
     let source: string;
 
     try {
@@ -43,7 +43,6 @@ function readAutoImportNames(): string[] {
 
     return names;
   });
-}
 
 const globals = Object.fromEntries(
   [...new Set([...readAutoImportNames(), ...VUE_MACROS, ...NODE_AND_NUXT_GLOBALS])]

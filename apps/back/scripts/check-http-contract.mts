@@ -29,8 +29,8 @@ interface SourceText {
   text: string;
 }
 
-function filesIn(dir: string): string[] {
-  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+const filesIn = (dir: string): string[] =>
+  fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);
 
     if (entry.isDirectory()) {
@@ -39,11 +39,10 @@ function filesIn(dir: string): string[] {
 
     return file.endsWith(".ts") && !file.endsWith(".test.ts") ? [file] : [];
   });
-}
 
 const packagesRoot = path.resolve(project, "../../packages");
 
-function stringConstants(): Map<string, string[]> {
+const stringConstants = (): Map<string, string[]> => {
   const constants = new Map<string, string[]>();
 
   for (const pkg of fs.readdirSync(packagesRoot)) {
@@ -90,11 +89,14 @@ function stringConstants(): Map<string, string[]> {
   }
 
   return constants;
-}
+};
 
 const constants = stringConstants();
 
-function decoratorArguments(expression: ts.CallExpression, source: ts.SourceFile): string[] {
+const decoratorArguments = function decoratorArguments(
+  expression: ts.CallExpression,
+  source: ts.SourceFile,
+): string[] {
   return expression.arguments.flatMap((argument) => {
     if (!ts.isSpreadElement(argument)) {
       return [argument.getText(source)];
@@ -108,10 +110,10 @@ function decoratorArguments(expression: ts.CallExpression, source: ts.SourceFile
 
     return values;
   });
-}
+};
 
-function decorators(node: ts.Node, source: ts.SourceFile): Decorator[] {
-  return (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
+const decorators = (node: ts.Node, source: ts.SourceFile): Decorator[] =>
+  (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
     const { expression } = decorator;
 
     return ts.isCallExpression(expression) && ts.isIdentifier(expression.expression)
@@ -123,9 +125,8 @@ function decorators(node: ts.Node, source: ts.SourceFile): Decorator[] {
         ]
       : [];
   });
-}
 
-function collectRoutes(sources: SourceText[]): Route[] {
+const collectRoutes = (sources: SourceText[]): Route[] => {
   const routes: Route[] = [];
 
   for (const { file, text } of sources) {
@@ -197,7 +198,7 @@ function collectRoutes(sources: SourceText[]): Route[] {
   }
 
   return routes.toSorted((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
-}
+};
 
 const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf-8") }));
 const actual = collectRoutes(sources);

@@ -1,18 +1,18 @@
 import type { Editor } from "@tiptap/core";
 import type { NewsEntityTagKind } from "@sarpbc/utils";
 
-export function useEntityTagEditor() {
+export const useEntityTagEditor = () => {
   const pickerOpen = ref(false);
   const pickerKind = ref<NewsEntityTagKind>("player");
   let activeEditor: Editor | null = null;
 
-  function openEntityTagPicker(kind: NewsEntityTagKind, editor: Editor) {
+  const openEntityTagPicker = (kind: NewsEntityTagKind, editor: Editor) => {
     pickerKind.value = kind;
     activeEditor = editor;
     pickerOpen.value = true;
-  }
+  };
 
-  function insertEntityTag(payload: { slug: string; label: string }) {
+  const insertEntityTag = (payload: { slug: string; label: string }) => {
     if (!activeEditor) {
       return;
     }
@@ -32,20 +32,18 @@ export function useEntityTagEditor() {
       pickerOpen.value = false;
       activeEditor = null;
     }
-  }
+  };
 
-  function createEntityTagHandler(kind: NewsEntityTagKind) {
-    return {
-      canExecute: () => true,
-      execute: (editor: Editor) => {
-        openEntityTagPicker(kind, editor);
+  const createEntityTagHandler = (kind: NewsEntityTagKind) => ({
+    canExecute: () => true,
+    execute: (editor: Editor) => {
+      openEntityTagPicker(kind, editor);
 
-        return editor.chain();
-      },
-      isActive: () => false,
-      isDisabled: () => false,
-    };
-  }
+      return editor.chain();
+    },
+    isActive: () => false,
+    isDisabled: () => false,
+  });
 
   const entityTagHandlers = {
     playerTag: createEntityTagHandler("player"),
@@ -58,4 +56,4 @@ export function useEntityTagEditor() {
     entityTagHandlers,
     insertEntityTag,
   };
-}
+};

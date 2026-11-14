@@ -45,25 +45,19 @@ interface CurrentGame {
 
 const CLOCK_REWIND_SECONDS = 5;
 
-function isKickoff(current: CurrentGame, reading: ScoreReading): boolean {
-  return (
-    reading.blue === 0 &&
-    reading.orange === 0 &&
-    !reading.overtime &&
-    current.lastClock >= 0 &&
-    (current.overtime || reading.clock > current.lastClock + CLOCK_REWIND_SECONDS)
-  );
-}
+const isKickoff = (current: CurrentGame, reading: ScoreReading): boolean =>
+  reading.blue === 0 &&
+  reading.orange === 0 &&
+  !reading.overtime &&
+  current.lastClock >= 0 &&
+  (current.overtime || reading.clock > current.lastClock + CLOCK_REWIND_SECONDS);
 
-function isNextGoal(current: CurrentGame, candidate: Candidate): boolean {
-  return (
-    candidate.blue >= current.blue &&
-    candidate.orange >= current.orange &&
-    candidate.blue + candidate.orange === current.blue + current.orange + 1
-  );
-}
+const isNextGoal = (current: CurrentGame, candidate: Candidate): boolean =>
+  candidate.blue >= current.blue &&
+  candidate.orange >= current.orange &&
+  candidate.blue + candidate.orange === current.blue + current.orange + 1;
 
-function adoptUnconfirmed(current: CurrentGame): void {
+const adoptUnconfirmed = (current: CurrentGame): void => {
   const { unconfirmed } = current;
 
   if (current.blue !== current.orange || unconfirmed === null) {
@@ -74,7 +68,7 @@ function adoptUnconfirmed(current: CurrentGame): void {
   current.orange = unconfirmed.orange;
   current.lastSeen = unconfirmed.since;
   current.agreeing += unconfirmed.count;
-}
+};
 
 export class SeriesTracker {
   readonly #settings: TrackerSettings;

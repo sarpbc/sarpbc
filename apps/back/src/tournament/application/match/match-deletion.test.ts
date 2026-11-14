@@ -13,9 +13,9 @@ import type {
 } from "../ports";
 import { MatchService } from "./match.service";
 
-function unused(): never {
+const unused = (): never => {
   throw new Error("Not part of a match deletion");
-}
+};
 
 const match = (fields: Partial<Match> = {}) =>
   Object.assign(new Match(), {

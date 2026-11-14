@@ -1,10 +1,10 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchResult, MatchStatus } from "~/types/matches";
 
-export function getMatchParticipantScore(
+export const getMatchParticipantScore = (
   results: MatchResult[] | undefined,
   participantId: string | undefined,
-): number | null {
+): number | null => {
   if (!results || !isNonEmptyString(participantId) || results.length === 0) {
     return null;
   }
@@ -12,13 +12,12 @@ export function getMatchParticipantScore(
   const result = results.find((entry) => entry.participant === participantId);
 
   return result?.score ?? null;
-}
+};
 
-export function shouldShowMatchScores(status: MatchStatus): boolean {
-  return status === "live" || status === "finished";
-}
+export const shouldShowMatchScores = (status: MatchStatus): boolean =>
+  status === "live" || status === "finished";
 
-export function displayMatchScore(score: number | null, status: MatchStatus): string | null {
+export const displayMatchScore = (score: number | null, status: MatchStatus): string | null => {
   if (!shouldShowMatchScores(status)) {
     return null;
   }
@@ -28,4 +27,4 @@ export function displayMatchScore(score: number | null, status: MatchStatus): st
   }
 
   return String(score);
-}
+};

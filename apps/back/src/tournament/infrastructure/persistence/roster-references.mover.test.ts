@@ -4,19 +4,17 @@ import { unconstructed } from "../../../../test/doubles";
 import { TournamentRosterReferences } from "./roster-references.mover";
 import { TournamentPrize } from "./tournament-prize.entities";
 
-function prize(id: string, teamId: string, tournamentId: string, playerIds: string[]) {
-  return {
-    id,
-    team: { id: teamId },
-    tournament: { id: tournamentId },
-    players: {
-      add: vi.fn<(items: { id: string }[]) => void>(),
-      getItems: () => playerIds.map((playerId) => ({ id: playerId })),
-    },
-  };
-}
+const prize = (id: string, teamId: string, tournamentId: string, playerIds: string[]) => ({
+  id,
+  team: { id: teamId },
+  tournament: { id: tournamentId },
+  players: {
+    add: vi.fn<(items: { id: string }[]) => void>(),
+    getItems: () => playerIds.map((playerId) => ({ id: playerId })),
+  },
+});
 
-function mover(prizes: ReturnType<typeof prize>[]) {
+const mover = (prizes: ReturnType<typeof prize>[]) => {
   const find = vi.fn<EntityManager["find"]>().mockResolvedValue(prizes);
   const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
   const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
@@ -31,7 +29,7 @@ function mover(prizes: ReturnType<typeof prize>[]) {
     ] ?? 0;
 
   return { references, nativeDelete, nativeUpdate, prizeUpdateOrder };
-}
+};
 
 describe("TournamentRosterReferences.moveTeam prizes", () => {
   it("folds a duplicate prize on a shared tournament into the kept team before moving the rest", async () => {

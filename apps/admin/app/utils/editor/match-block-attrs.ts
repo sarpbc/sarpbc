@@ -10,6 +10,7 @@ export const EMPTY_MATCH_BLOCK_ATTRS: Required<NewsMatchBlockAttrs> = {
   limit: null,
 };
 
-export function matchBlockNodeAttrs(block: MatchBlockSelector): Required<NewsMatchBlockAttrs> {
-  return { ...EMPTY_MATCH_BLOCK_ATTRS, ...newsMatchBlockToAttrs(block) };
-}
+export const matchBlockNodeAttrs = (block: MatchBlockSelector): Required<NewsMatchBlockAttrs> => ({
+  ...EMPTY_MATCH_BLOCK_ATTRS,
+  ...newsMatchBlockToAttrs(block),
+});

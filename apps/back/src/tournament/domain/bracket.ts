@@ -19,11 +19,11 @@ export interface StageBracket {
 
 export const MAX_INCOMING_BRACKET_LINKS = 2;
 
-export function assertManualBracketMatch(match: {
+export const assertManualBracketMatch = (match: {
   source: DataSource;
   pandascoreId: number | null;
   tournament: { source: DataSource };
-}): void {
+}): void => {
   if (
     match.source === "pandascore" ||
     match.pandascoreId !== null ||
@@ -33,9 +33,13 @@ export function assertManualBracketMatch(match: {
       "PandaScore manages the participants and bracket links of this match.",
     );
   }
-}
+};
 
-function feeds(ancestorId: string, id: string, byId: ReadonlyMap<string, BracketMatch>): boolean {
+const feeds = (
+  ancestorId: string,
+  id: string,
+  byId: ReadonlyMap<string, BracketMatch>,
+): boolean => {
   const seen = new Set<string>();
   const pending = [id];
 
@@ -56,13 +60,13 @@ function feeds(ancestorId: string, id: string, byId: ReadonlyMap<string, Bracket
   }
 
   return false;
-}
+};
 
-export function assertBracketLinks(
+export const assertBracketLinks = (
   matchId: string,
   links: readonly BracketLinkInput[],
   stage: StageBracket,
-): void {
+): void => {
   if (links.length === 0) {
     return;
   }
@@ -117,18 +121,17 @@ export function assertBracketLinks(
   if (previousIds.some((id) => feeds(matchId, id, byId))) {
     throw new InvalidInputError("These links would create a cycle in the bracket.");
   }
-}
+};
 
 export interface EmptyBracketMatch {
   name: string;
   previousMatches: { index: number; type: BracketLinkType }[];
 }
 
-export function isEmptyBracketSize(teams: number): teams is EmptyBracketSize {
-  return EMPTY_BRACKET_SIZES.some((size) => size === teams);
-}
+export const isEmptyBracketSize = (teams: number): teams is EmptyBracketSize =>
+  EMPTY_BRACKET_SIZES.some((size) => size === teams);
 
-function roundName(size: number): string {
+const roundName = (size: number): string => {
   switch (size) {
     case 4: {
       return "Semifinal";
@@ -142,9 +145,9 @@ function roundName(size: number): string {
       return `Round of ${size}`;
     }
   }
-}
+};
 
-export function emptySingleEliminationBracket(teams: EmptyBracketSize): EmptyBracketMatch[] {
+export const emptySingleEliminationBracket = (teams: EmptyBracketSize): EmptyBracketMatch[] => {
   const matches: EmptyBracketMatch[] = [];
   let previousRound: number[] = [];
 
@@ -164,4 +167,4 @@ export function emptySingleEliminationBracket(teams: EmptyBracketSize): EmptyBra
   }
 
   return matches;
-}
+};

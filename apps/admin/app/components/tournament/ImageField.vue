@@ -14,10 +14,10 @@ const uploadedImageUrl = computed({
   },
 });
 
-function onUploading(value: boolean) {
+const onUploading = (value: boolean) => {
   uploading.value = value;
   emit("update:uploading", value);
-}
+};
 </script>
 
 <template>

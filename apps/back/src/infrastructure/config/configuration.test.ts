@@ -11,9 +11,8 @@ const requiredEnv = {
   GOOGLE_REDIRECT_URI: "https://api.sarpbc.org/auth/google/callback",
 };
 
-function configure(env: Record<string, string>) {
-  return toConfiguration(validateEnv({ ...requiredEnv, ...env }));
-}
+const configure = (env: Record<string, string>) =>
+  toConfiguration(validateEnv({ ...requiredEnv, ...env }));
 
 describe(toConfiguration, () => {
   it("derives production origins and the cookie domain from the front and admin URLs", () => {

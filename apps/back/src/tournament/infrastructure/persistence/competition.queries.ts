@@ -23,13 +23,11 @@ import type {
   MatchListQueryOptions,
 } from "../../application/match/match-list-filters";
 
-function onDay(column: string): string {
-  return `extract(month from ${column} at time zone ?) = ? AND extract(day from ${column} at time zone ?) = ? AND extract(year from ${column} at time zone ?) < ?`;
-}
+const onDay = (column: string): string =>
+  `extract(month from ${column} at time zone ?) = ? AND extract(day from ${column} at time zone ?) = ? AND extract(year from ${column} at time zone ?) < ?`;
 
-function terminalBracketMatch(alias: string): string {
-  return `EXISTS (SELECT 1 FROM bracket_link fed WHERE fed.match_id = ${alias}.id) AND NOT EXISTS (SELECT 1 FROM bracket_link feeds WHERE feeds.previous_match_id = ${alias}.id)`;
-}
+const terminalBracketMatch = (alias: string): string =>
+  `EXISTS (SELECT 1 FROM bracket_link fed WHERE fed.match_id = ${alias}.id) AND NOT EXISTS (SELECT 1 FROM bracket_link feeds WHERE feeds.previous_match_id = ${alias}.id)`;
 
 const TOURNAMENT_DETAIL_POPULATE = [
   "league",

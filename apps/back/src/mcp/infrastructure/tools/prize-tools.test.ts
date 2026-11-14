@@ -10,7 +10,7 @@ const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
 const TEAM_ID = "6f1c1f9e-2a4b-4c55-9d1e-0f3a2b1c4d5e";
 const SOURCE = "https://example.com/fake-cup/prizes";
 
-function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes") {
+const setup = (role: StaffRole = "admin", toolName = "propose_tournament_prizes") => {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
 
   const rosterProposalService = pendingProposalService();
@@ -28,7 +28,7 @@ function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes"
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
-}
+};
 
 describe("propose_tournament_prizes", () => {
   const prizes = [{ placement: 1, amount: 500, currency: "EUR", teamId: TEAM_ID }];

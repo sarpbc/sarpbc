@@ -48,11 +48,10 @@ const breadcrumbItems = computed(() => [
   { label: event.value?.name ?? eventId.value },
 ]);
 
-function formatDate(date: Date | string | null): string {
-  return date ? new Date(date).toLocaleDateString() : "-";
-}
+const formatDate = (date: Date | string | null): string =>
+  date ? new Date(date).toLocaleDateString() : "-";
 
-async function handleSubmit() {
+const handleSubmit = async () => {
   if (!event.value || isSaving.value) {
     return;
   }
@@ -81,7 +80,7 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false;
   }
-}
+};
 </script>
 
 <template>

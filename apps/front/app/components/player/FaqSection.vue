@@ -18,7 +18,7 @@ const faqItems = computed(() => {
   const teamName = player.team?.name;
   const demonym = resolvePlayerNationalityDemonym(player.nationality, te, t);
 
-  function whoAnswerText(): string {
+  const whoAnswerText = (): string => {
     if (teamName && demonym) {
       return t("page.player.slug.faq.who.answerWithTeam", {
         name,
@@ -36,7 +36,7 @@ const faqItems = computed(() => {
     }
 
     return t("page.player.slug.faq.who.answerFreeAgentGeneric", { name });
-  }
+  };
 
   const whoAnswer = whoAnswerText();
 

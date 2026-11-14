@@ -7,26 +7,24 @@ const solary = { id: "team-sly", name: "Solary", slug: "solary" };
 const zen = { id: "zen", name: "zen", slug: "zen" };
 const kaydop = { id: "kaydop", name: "Kaydop", slug: "kaydop" };
 
-function line(
+const line = (
   gameId: string,
   player: PlayerGameLine["player"],
   team: PlayerGameLine["team"],
   teamGoals: number,
   [goals, assists, saves, shots, demolitions]: [number, number, number, number, number],
-): PlayerGameLine {
-  return {
-    gameId,
-    account: JSON.stringify(["steam", player?.id ?? `unlinked-${team.name}`]),
-    player,
-    team,
-    teamGoals,
-    goals,
-    assists,
-    saves,
-    shots,
-    demolitions,
-  };
-}
+): PlayerGameLine => ({
+  gameId,
+  account: JSON.stringify(["steam", player?.id ?? `unlinked-${team.name}`]),
+  player,
+  team,
+  teamGoals,
+  goals,
+  assists,
+  saves,
+  shots,
+  demolitions,
+});
 
 const games: PlayerGameLine[] = [
   line("g1", zen, vitality, 3, [2, 1, 1, 4, 0]),

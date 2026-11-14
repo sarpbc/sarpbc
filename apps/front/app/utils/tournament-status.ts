@@ -2,10 +2,10 @@ import { isNonEmptyDateInput } from "@sarpbc/utils";
 
 export type TournamentStatus = "live" | "upcoming" | "finished";
 
-export function getTournamentStatus(
+export const getTournamentStatus = (
   tournament: { beginAt?: Date | string | null; endAt?: Date | string | null },
   now = Date.now(),
-): TournamentStatus | null {
+): TournamentStatus | null => {
   const beginAt = isNonEmptyDateInput(tournament.beginAt)
     ? new Date(tournament.beginAt).getTime()
     : null;
@@ -25,9 +25,9 @@ export function getTournamentStatus(
   }
 
   return "upcoming";
-}
+};
 
-export function tournamentStatusLabelKey(status: TournamentStatus): string {
+export const tournamentStatusLabelKey = (status: TournamentStatus): string => {
   switch (status) {
     case "live": {
       return "page.tournaments.id.status.live";
@@ -47,13 +47,13 @@ export function tournamentStatusLabelKey(status: TournamentStatus): string {
       return _exhaustive;
     }
   }
-}
+};
 
-export function formatTournamentShortDateRange(
+export const formatTournamentShortDateRange = (
   beginAt: Date | string | null | undefined,
   endAt: Date | string | null | undefined,
   locale: string,
-): string | null {
+): string | null => {
   const begin = isNonEmptyDateInput(beginAt) ? new Date(beginAt) : null;
 
   if (!begin || Number.isNaN(begin.getTime())) {
@@ -68,13 +68,13 @@ export function formatTournamentShortDateRange(
   }
 
   return formatter.formatRange(begin, end);
-}
+};
 
-export function formatTournamentDateRange(
+export const formatTournamentDateRange = (
   beginAt: Date | string | null | undefined,
   endAt: Date | string | null | undefined,
   locale: string,
-): string | null {
+): string | null => {
   if (!isNonEmptyDateInput(beginAt) && !isNonEmptyDateInput(endAt)) {
     return null;
   }
@@ -105,4 +105,4 @@ export function formatTournamentDateRange(
   }
 
   return formatter.format(single);
-}
+};

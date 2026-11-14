@@ -6,7 +6,7 @@ const { size = null } = defineProps<{
   size?: CardSize | null;
 }>();
 
-function cardSizeClasses(value: CardSize): string {
+const cardSizeClasses = (value: CardSize): string => {
   switch (value) {
     case "s": {
       return "min-h-card-s h-row-snap";
@@ -26,7 +26,7 @@ function cardSizeClasses(value: CardSize): string {
       return _exhaustive;
     }
   }
-}
+};
 </script>
 
 <template>

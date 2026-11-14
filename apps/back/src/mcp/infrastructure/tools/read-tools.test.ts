@@ -22,7 +22,7 @@ import type { TournamentPrizeService } from "../../../tournament/application/tou
 
 const user = { id: "u1", email: "staff@test.com", role: "journalist" } as const;
 
-function setup() {
+const setup = () => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
   const team = Object.assign(new Team(), {
@@ -200,7 +200,7 @@ function setup() {
     call,
     json,
   };
-}
+};
 
 describe("MCP read tools", () => {
   it("excludes start.gg rows in the list queries so totals and pages stay consistent", async () => {

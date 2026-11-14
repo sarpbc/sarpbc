@@ -1,7 +1,5 @@
 import type { LocationQueryValue } from "vue-router";
 
-export function routeQueryString(
+export const routeQueryString = (
   value: LocationQueryValue | LocationQueryValue[] | undefined,
-): string {
-  return Array.isArray(value) ? "" : (value ?? "").trim();
-}
+): string => (Array.isArray(value) ? "" : (value ?? "").trim());

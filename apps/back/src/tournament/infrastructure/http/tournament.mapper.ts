@@ -50,7 +50,7 @@ export interface TournamentResponse {
   participants: TournamentParticipantResponse[];
 }
 
-export function mapLeague(league: League | null | undefined): LeagueResponse | null {
+export const mapLeague = (league: League | null | undefined): LeagueResponse | null => {
   if (league?.id === undefined || league?.id === "") {
     return null;
   }
@@ -63,143 +63,133 @@ export function mapLeague(league: League | null | undefined): LeagueResponse | n
     url: league.url,
     imageUrl: league.imageUrl,
   };
-}
+};
 
-function mapParticipant(participant: TournamentParticipant): TournamentParticipantResponse {
-  return {
-    id: participant.id,
-    team: participant.team ? mapTeamSummary(participant.team) : null,
-    players: participant.players.map((player) => mapPlayer(player)),
-    createdAt: participant.createdAt,
-    updatedAt: participant.updatedAt,
-  };
-}
+const mapParticipant = (participant: TournamentParticipant): TournamentParticipantResponse => ({
+  id: participant.id,
+  team: participant.team ? mapTeamSummary(participant.team) : null,
+  players: participant.players.map((player) => mapPlayer(player)),
+  createdAt: participant.createdAt,
+  updatedAt: participant.updatedAt,
+});
 
-export function mapTournamentListItem(
+export const mapTournamentListItem = (
   tournament: Tournament,
-): TournamentListItem & Pick<TournamentResponse, "beginAt" | "endAt"> {
-  return {
-    id: tournament.id,
-    source: tournament.source,
-    format: tournament.format,
-    name: tournament.name,
-    slug: tournament.slug,
-    event: toEventRef(tournament.event),
-    type: tournament.type,
-    prizepool: tournament.prizepool,
-    imageUrl: tournament.imageUrl,
-    beginAt: tournament.beginAt,
-    endAt: tournament.endAt,
-    pickemsEnabled: tournament.pickemsEnabled,
-    winnerId: tournament.winner?.id ?? null,
-    league: tournament.league
-      ? {
-          id: tournament.league.id,
-          name: tournament.league.name,
-          imageUrl: tournament.league.imageUrl,
-        }
-      : null,
-    participants: tournament.participants.map((participant) =>
-      mapParticipantRef(participant, mapTeamSummary),
-    ),
-  };
-}
+): TournamentListItem & Pick<TournamentResponse, "beginAt" | "endAt"> => ({
+  id: tournament.id,
+  source: tournament.source,
+  format: tournament.format,
+  name: tournament.name,
+  slug: tournament.slug,
+  event: toEventRef(tournament.event),
+  type: tournament.type,
+  prizepool: tournament.prizepool,
+  imageUrl: tournament.imageUrl,
+  beginAt: tournament.beginAt,
+  endAt: tournament.endAt,
+  pickemsEnabled: tournament.pickemsEnabled,
+  winnerId: tournament.winner?.id ?? null,
+  league: tournament.league
+    ? {
+        id: tournament.league.id,
+        name: tournament.league.name,
+        imageUrl: tournament.league.imageUrl,
+      }
+    : null,
+  participants: tournament.participants.map((participant) =>
+    mapParticipantRef(participant, mapTeamSummary),
+  ),
+});
 
-export function mapTournament(tournament: Tournament): TournamentResponse {
-  return {
-    id: tournament.id,
-    pandascoreId: tournament.pandascoreId,
-    source: tournament.source,
-    format: tournament.format,
-    name: tournament.name,
-    description: tournament.description,
-    slug: tournament.slug,
-    event: toEventRef(tournament.event),
-    tier: tournament.tier,
-    beginAt: tournament.beginAt,
-    endAt: tournament.endAt,
-    winnerType: tournament.winnerType,
-    type: tournament.type,
-    country: tournament.country,
-    prizepool: tournament.prizepool,
-    imageUrl: tournament.imageUrl,
-    pickemsEnabled: tournament.pickemsEnabled,
-    hasBracket: tournament.hasBracket,
-    createdAt: tournament.createdAt,
-    updatedAt: tournament.updatedAt,
-    league: mapLeague(tournament.league),
-    winner: tournament.winner ? mapParticipant(tournament.winner) : null,
-    participants: tournament.participants.map(mapParticipant),
-  };
-}
+export const mapTournament = (tournament: Tournament): TournamentResponse => ({
+  id: tournament.id,
+  pandascoreId: tournament.pandascoreId,
+  source: tournament.source,
+  format: tournament.format,
+  name: tournament.name,
+  description: tournament.description,
+  slug: tournament.slug,
+  event: toEventRef(tournament.event),
+  tier: tournament.tier,
+  beginAt: tournament.beginAt,
+  endAt: tournament.endAt,
+  winnerType: tournament.winnerType,
+  type: tournament.type,
+  country: tournament.country,
+  prizepool: tournament.prizepool,
+  imageUrl: tournament.imageUrl,
+  pickemsEnabled: tournament.pickemsEnabled,
+  hasBracket: tournament.hasBracket,
+  createdAt: tournament.createdAt,
+  updatedAt: tournament.updatedAt,
+  league: mapLeague(tournament.league),
+  winner: tournament.winner ? mapParticipant(tournament.winner) : null,
+  participants: tournament.participants.map(mapParticipant),
+});
 
-function mapDetailParticipant(participant: TournamentParticipant): TournamentDetailParticipant {
-  return {
-    id: participant.id,
-    team: participant.team ? mapTeamSummary(participant.team) : null,
-    players: participant.players.map((player) => ({
-      id: player.id,
-      name: player.name,
-      slug: player.slug,
-      nationality: player.nationality,
-    })),
-    rosterSourceUrl: participant.rosterSourceUrl,
-  };
-}
+const mapDetailParticipant = (participant: TournamentParticipant): TournamentDetailParticipant => ({
+  id: participant.id,
+  team: participant.team ? mapTeamSummary(participant.team) : null,
+  players: participant.players.map((player) => ({
+    id: player.id,
+    name: player.name,
+    slug: player.slug,
+    nationality: player.nationality,
+  })),
+  rosterSourceUrl: participant.rosterSourceUrl,
+});
 
 export type TournamentDetailResponse = TournamentDetail &
   Pick<TournamentResponse, "beginAt" | "endAt">;
 
-export function mapTournamentDetail(tournament: Tournament): TournamentDetailResponse {
-  return {
-    id: tournament.id,
-    source: tournament.source,
-    format: tournament.format,
-    name: tournament.name,
-    slug: tournament.slug,
-    event: toEventRef(tournament.event),
-    tier: tournament.tier,
-    type: tournament.type,
-    country: tournament.country,
-    prizepool: tournament.prizepool,
-    imageUrl: tournament.imageUrl,
-    beginAt: tournament.beginAt,
-    endAt: tournament.endAt,
-    pickemsEnabled: tournament.pickemsEnabled,
-    hasBracket: tournament.hasBracket,
-    league: tournament.league
-      ? {
-          id: tournament.league.id,
-          name: tournament.league.name,
-          imageUrl: tournament.league.imageUrl,
-          url: tournament.league.url,
-        }
-      : null,
-    winner: tournament.winner ? mapParticipantRef(tournament.winner, mapTeamSummary) : null,
-    participants: tournament.participants.map(mapDetailParticipant),
-    matches: tournament.matches.map((match) => ({
-      id: match.id,
-      publicId: match.publicId,
-      slug: matchPublicSlug({ name: match.name, participants: match.participants, tournament }),
-      name: match.name,
-      status: match.status,
-      beginAt: match.beginAt,
-      endAt: match.endAt,
-      numberOfGames: match.numberOfGames,
-      winnerId: match.winner?.id ?? null,
-      participants: match.participants.map((participant) =>
-        mapParticipantRef(participant, mapTeamSummary),
-      ),
-      results: match.results.map((result) => ({
-        participant: result.participant.id,
-        score: result.score,
-      })),
-      previousMatches: match.previousMatches.map((link) => ({
-        previousMatch: link.previousMatch.id,
-        type: link.type,
-      })),
-      sourceUrl: match.sourceUrl,
+export const mapTournamentDetail = (tournament: Tournament): TournamentDetailResponse => ({
+  id: tournament.id,
+  source: tournament.source,
+  format: tournament.format,
+  name: tournament.name,
+  slug: tournament.slug,
+  event: toEventRef(tournament.event),
+  tier: tournament.tier,
+  type: tournament.type,
+  country: tournament.country,
+  prizepool: tournament.prizepool,
+  imageUrl: tournament.imageUrl,
+  beginAt: tournament.beginAt,
+  endAt: tournament.endAt,
+  pickemsEnabled: tournament.pickemsEnabled,
+  hasBracket: tournament.hasBracket,
+  league: tournament.league
+    ? {
+        id: tournament.league.id,
+        name: tournament.league.name,
+        imageUrl: tournament.league.imageUrl,
+        url: tournament.league.url,
+      }
+    : null,
+  winner: tournament.winner ? mapParticipantRef(tournament.winner, mapTeamSummary) : null,
+  participants: tournament.participants.map(mapDetailParticipant),
+  matches: tournament.matches.map((match) => ({
+    id: match.id,
+    publicId: match.publicId,
+    slug: matchPublicSlug({ name: match.name, participants: match.participants, tournament }),
+    name: match.name,
+    status: match.status,
+    beginAt: match.beginAt,
+    endAt: match.endAt,
+    numberOfGames: match.numberOfGames,
+    winnerId: match.winner?.id ?? null,
+    participants: match.participants.map((participant) =>
+      mapParticipantRef(participant, mapTeamSummary),
+    ),
+    results: match.results.map((result) => ({
+      participant: result.participant.id,
+      score: result.score,
     })),
-    watchStreams: tournament.watchStreams(),
-  };
-}
+    previousMatches: match.previousMatches.map((link) => ({
+      previousMatch: link.previousMatch.id,
+      type: link.type,
+    })),
+    sourceUrl: match.sourceUrl,
+  })),
+  watchStreams: tournament.watchStreams(),
+});

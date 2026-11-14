@@ -80,7 +80,7 @@ const block = computed((): MatchBlockSelector | null => {
   }
 });
 
-function matchLabel(match: TournamentMatchListItem): string {
+const matchLabel = (match: TournamentMatchListItem): string => {
   const [teamA, teamB] = match.participants;
   const tbd = t("newsTag.matchTbd");
   const teams = `${teamA ? participantName(teamA) : tbd} – ${teamB ? participantName(teamB) : tbd}`;
@@ -88,9 +88,9 @@ function matchLabel(match: TournamentMatchListItem): string {
   return match.beginAt
     ? `${teams} · ${dateFormatter.value.format(new Date(match.beginAt))}`
     : teams;
-}
+};
 
-async function resolveSource(initial: MatchBlockSelector): Promise<Selection | null> {
+const resolveSource = async (initial: MatchBlockSelector): Promise<Selection | null> => {
   if (initial.kind === "team") {
     const team = await getTeamById(initial.id);
 
@@ -106,17 +106,17 @@ async function resolveSource(initial: MatchBlockSelector): Promise<Selection | n
   }
 
   return initial.kind === "tournament" ? { id: initial.id, label: initial.id } : null;
-}
+};
 
-function initialMatchIds(initial: MatchBlockSelector | null): string[] {
+const initialMatchIds = (initial: MatchBlockSelector | null): string[] => {
   if (initial?.kind === "match") {
     return [initial.id];
   }
 
   return initial?.kind === "matches" ? [...initial.ids] : [];
-}
+};
 
-async function reset() {
+const reset = async () => {
   const initial = initialBlock;
   kind.value = initial?.kind ?? "match";
   limit.value =
@@ -136,7 +136,7 @@ async function reset() {
       reportError(resolveError);
     }
   }
-}
+};
 
 watch(
   () => open,
@@ -177,7 +177,7 @@ watch([source, picksMatches], async ([selected, picking]) => {
   }
 });
 
-async function runSearch(value: string) {
+const runSearch = async (value: string) => {
   const trimmed = value.trim();
 
   if (!trimmed) {
@@ -205,18 +205,18 @@ async function runSearch(value: string) {
   } finally {
     searching.value = false;
   }
-}
+};
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
-function choose(selection: Selection) {
+const choose = (selection: Selection) => {
   source.value = selection;
   matchIds.value = [];
   results.value = [];
   query.value = "";
-}
+};
 
-function toggleMatch(id: string, checked: boolean | "indeterminate") {
+const toggleMatch = (id: string, checked: boolean | "indeterminate") => {
   if (kind.value === "match") {
     matchIds.value = checked === true ? [id] : [];
 
@@ -227,25 +227,22 @@ function toggleMatch(id: string, checked: boolean | "indeterminate") {
     checked === true
       ? [...matchIds.value.filter((existing) => existing !== id), id]
       : matchIds.value.filter((existing) => existing !== id);
-}
+};
 
-function canToggle(id: string): boolean {
-  return (
-    kind.value === "match" ||
-    matchIds.value.includes(id) ||
-    matchIds.value.length < NEWS_MATCH_BLOCK_MAX_MATCHES
-  );
-}
+const canToggle = (id: string): boolean =>
+  kind.value === "match" ||
+  matchIds.value.includes(id) ||
+  matchIds.value.length < NEWS_MATCH_BLOCK_MAX_MATCHES;
 
-function confirm() {
+const confirm = () => {
   if (block.value) {
     emit("select", block.value);
   }
-}
+};
 
-function close() {
+const close = () => {
   emit("update:open", false);
-}
+};
 </script>
 
 <template>
