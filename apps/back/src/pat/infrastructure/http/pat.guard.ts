@@ -3,7 +3,7 @@ import { FastifyRequest } from "fastify";
 import { AuthenticationError } from "../../../common/domain/errors/authentication-error";
 import { PatService } from "../../application/pat.service";
 
-const BEARER_PREFIX = /^bearer\s+/i;
+const BEARER_PREFIX = /^bearer\s+/iu;
 
 @Injectable()
 export class PatAuthGuard implements CanActivate {

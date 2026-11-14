@@ -210,7 +210,7 @@ export async function verifyTeamAliases({
     "Integration Sponsored",
     "a match shows the name in force on its date",
   );
-  assert.match(publicMatch.slug, /^integration-opponent-vs-integration-sponsored-/);
+  assert.match(publicMatch.slug, /^integration-opponent-vs-integration-sponsored-/u);
   const teamOfResult3 = await teamOf(request, team.id);
   assert.equal(teamOfResult3.name, "Integration Renamed");
 

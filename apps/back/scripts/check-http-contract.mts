@@ -33,7 +33,9 @@ function filesIn(dir: string): string[] {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);
 
-    if (entry.isDirectory()) return filesIn(file);
+    if (entry.isDirectory()) {
+      return filesIn(file);
+    }
 
     return file.endsWith(".ts") && !file.endsWith(".test.ts") ? [file] : [];
   });
@@ -47,7 +49,9 @@ function stringConstants(): Map<string, string[]> {
   for (const pkg of fs.readdirSync(packagesRoot)) {
     const dir = path.join(packagesRoot, pkg, "src");
 
-    if (!fs.existsSync(dir)) continue;
+    if (!fs.existsSync(dir)) {
+      continue;
+    }
 
     for (const file of filesIn(dir)) {
       const source = ts.createSourceFile(
@@ -58,7 +62,9 @@ function stringConstants(): Map<string, string[]> {
       );
 
       for (const statement of source.statements) {
-        if (!ts.isVariableStatement(statement)) continue;
+        if (!ts.isVariableStatement(statement)) {
+          continue;
+        }
 
         for (const declaration of statement.declarationList.declarations) {
           let value = declaration.initializer;
@@ -90,7 +96,10 @@ const constants = stringConstants();
 
 function decoratorArguments(expression: ts.CallExpression, source: ts.SourceFile): string[] {
   return expression.arguments.flatMap((argument) => {
-    if (!ts.isSpreadElement(argument)) return [argument.getText(source)];
+    if (!ts.isSpreadElement(argument)) {
+      return [argument.getText(source)];
+    }
+
     const values = constants.get(argument.expression.getText(source));
     assert.ok(
       values,
@@ -123,15 +132,23 @@ function collectRoutes(sources: SourceText[]): Route[] {
     const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
 
     for (const statement of source.statements) {
-      if (!ts.isClassDeclaration(statement)) continue;
+      if (!ts.isClassDeclaration(statement)) {
+        continue;
+      }
+
       const classDecorators = decorators(statement, source);
       const controller = classDecorators.find((decorator) => decorator.name === "Controller");
 
-      if (!controller) continue;
+      if (!controller) {
+        continue;
+      }
+
       const prefix = controller.args[0] ?? '""';
 
       for (const method of statement.members) {
-        if (!ts.isMethodDeclaration(method)) continue;
+        if (!ts.isMethodDeclaration(method)) {
+          continue;
+        }
 
         for (const parameter of method.parameters) {
           const dto = parameter.type?.getText(source);
@@ -140,9 +157,14 @@ function collectRoutes(sources: SourceText[]): Route[] {
             ["Body", "Query"].includes(decorator.name),
           );
 
-          if (input === undefined || dto?.endsWith("Dto") !== true) continue;
+          if (input === undefined || dto?.endsWith("Dto") !== true) {
+            continue;
+          }
+
           assert.ok(
-            input.args.some((argument) => new RegExp(`\\bschema:\\s*${dto}\\b`).test(argument)),
+            input.args.some((argument) =>
+              new RegExp(`\\bschema:\\s*${dto}\\b`, "u").test(argument),
+            ),
             `${file}: ${method.name.getText(source)} must attach the ${dto} schema to @${input.name}`,
           );
         }

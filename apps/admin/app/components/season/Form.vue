@@ -46,7 +46,9 @@ function removePhase(index: number) {
 }
 
 function submit() {
-  if (!isValid.value) return;
+  if (!isValid.value) {
+    return;
+  }
 
   const input: SeasonInput = {
     name: name.value.trim(),
@@ -60,7 +62,10 @@ function submit() {
     },
   };
 
-  if (season) input.winnerTeamId = winner.value === NO_WINNER ? null : winner.value;
+  if (season) {
+    input.winnerTeamId = winner.value === NO_WINNER ? null : winner.value;
+  }
+
   emit("submit", input);
 }
 </script>

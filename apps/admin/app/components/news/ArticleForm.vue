@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { localizedNewsFields, parseLocale } from "@sarpbc/utils";
-import { newsSurfaceClass } from "~/utils/newsEditorLayout";
+import { newsSurfaceClass } from "~/utils/news-editor-layout";
 
 const title = defineModel<string>("title", { required: true });
 const titleFr = defineModel<string>("titleFr", { required: true });

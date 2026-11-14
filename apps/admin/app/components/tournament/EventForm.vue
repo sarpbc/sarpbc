@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { League } from "@sarpbc/types";
-import type { EventFormState } from "~/composables/useEventForm";
+import type { EventFormState } from "~/composables/use-event-form";
 
 const state = defineModel<EventFormState>({ required: true });
 const { leagues } = defineProps<{ leagues: League[]; disabled?: boolean }>();

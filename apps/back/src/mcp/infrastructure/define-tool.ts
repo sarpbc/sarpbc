@@ -43,7 +43,7 @@ export interface McpTool {
   readonly name: string;
   readonly description: string;
   readonly inputSchema: Record<string, z.ZodType>;
-  run(user: PatUser, input: ToolArguments): Promise<CallToolResult>;
+  run: (user: PatUser, input: ToolArguments) => Promise<CallToolResult>;
 }
 
 function listOr(items: readonly string[]): string {
@@ -84,12 +84,15 @@ export function defineTool<Fields extends Record<string, z.ZodType>>(
       try {
         const parsed = z.object(spec.input).safeParse(input);
 
-        if (!parsed.success) return toolErrorResult(z.prettifyError(parsed.error));
+        if (!parsed.success) {
+          return toolErrorResult(z.prettifyError(parsed.error));
+        }
 
         const fields = parsed.data;
 
-        if (spec.write !== true)
+        if (spec.write !== true) {
           return textToolResult(JSON.stringify(await spec.handler(fields, user), null, 2));
+        }
 
         const { result, entityId, sourceUrl } = await spec.handler(fields, user);
         log.info({

@@ -30,7 +30,7 @@ export default defineNuxtModule({
     // Host apps that show news tags link to the public site when this is set; empty keeps routes relative.
     addImports({
       name: "useMatchStateLabel",
-      from: resolver.resolve("./runtime/composables/useMatchStateLabel"),
+      from: resolver.resolve("./runtime/composables/use-match-state-label"),
     });
 
     nuxt.options.runtimeConfig.public.publicSiteUrl ??= "";

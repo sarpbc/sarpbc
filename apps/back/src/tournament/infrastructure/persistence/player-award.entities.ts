@@ -1,5 +1,6 @@
 import { defineEntity, p } from "@mikro-orm/core";
-import { PLAYER_AWARD_TYPES, type PlayerAwardType } from "@sarpbc/types";
+import { PLAYER_AWARD_TYPES } from "@sarpbc/types";
+import type { PlayerAwardType } from "@sarpbc/types";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament } from "./tournament.entity";
 import { TournamentParticipant } from "./tournament-participant.entity";

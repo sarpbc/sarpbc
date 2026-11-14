@@ -6,7 +6,10 @@ export class SyncPandascoreTeamsUseCase {
     private readonly source: CurrentRosterSource,
   ) {}
   async seed(): Promise<void> {
-    if (await this.writer.hasTeams()) return;
+    if (await this.writer.hasTeams()) {
+      return;
+    }
+
     await this.sync();
   }
   async sync(): Promise<void> {

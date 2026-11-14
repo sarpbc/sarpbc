@@ -4,7 +4,7 @@ export const ON_THIS_DAY_SOURCE_URL_MAX_LENGTH = 2048;
 export const ON_THIS_DAY_MIN_YEAR = 2008;
 
 const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] as const;
-const ISO_DAY = /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})$/;
+const ISO_DAY = /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})$/u;
 
 export interface CalendarDay {
   year: number;
@@ -13,7 +13,9 @@ export interface CalendarDay {
 }
 
 export function isMonthDay(month: number, day: number): boolean {
-  if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12) return false;
+  if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12) {
+    return false;
+  }
 
   return day >= 1 && day <= (DAYS_IN_MONTH[month - 1] ?? 0);
 }
@@ -35,7 +37,10 @@ export function calendarDayIn(date: Date, timeZone: string): CalendarDay {
 export function parseIsoDay(value: string): CalendarDay | null {
   const match = ISO_DAY.exec(value);
 
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
+
   const [year, month, day] = [Number(match[1]), Number(match[2]), Number(match[3])];
   const date = new Date(Date.UTC(year, month - 1, day));
 

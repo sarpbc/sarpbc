@@ -72,6 +72,8 @@ export class MikroPostStore implements PostStore {
   async delete(post: PostRecord) {
     const row = await this.rows.findById(post.id);
 
-    if (row) this.em.remove(row);
+    if (row) {
+      this.em.remove(row);
+    }
   }
 }

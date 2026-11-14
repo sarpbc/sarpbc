@@ -5,11 +5,8 @@ import type { TrackedStreamer } from "../domain/tracked-streamer";
 import type { LiveStreamCache, LiveStreamSnapshot } from "./ports/live-stream-cache";
 import type { LiveStreamSource, SourceStream } from "./ports/live-stream-source";
 import type { TrackedStreamerStore } from "./ports/tracked-streamer-store";
-import {
-  LIVE_STREAMS_FRESH_MS,
-  StreamerService,
-  type StreamerFailureReporter,
-} from "./streamer.service";
+import { LIVE_STREAMS_FRESH_MS, StreamerService } from "./streamer.service";
+import type { StreamerFailureReporter } from "./streamer.service";
 
 const now = new Date("2026-10-31T20:00:00Z");
 

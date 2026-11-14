@@ -53,7 +53,9 @@ export class TeamService {
       team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
       team.slug = dto.slug ?? (toSlug(dto.name) || "team");
 
-      if (dto.source !== undefined) team.source = dto.source;
+      if (dto.source !== undefined) {
+        team.source = dto.source;
+      }
 
       if (await teams.findBySlug(team.slug)) {
         throw new ConflictError(`A team with slug "${team.slug}" already exists`);
@@ -79,19 +81,33 @@ export class TeamService {
         );
       }
 
-      if (dto.name !== undefined) team.name = dto.name;
+      if (dto.name !== undefined) {
+        team.name = dto.name;
+      }
 
-      if (dto.location !== undefined) team.location = dto.location;
+      if (dto.location !== undefined) {
+        team.location = dto.location;
+      }
 
-      if (dto.imageUrl !== undefined) team.imageUrl = dto.imageUrl;
+      if (dto.imageUrl !== undefined) {
+        team.imageUrl = dto.imageUrl;
+      }
 
-      if (dto.darkModeImageUrl !== undefined) team.darkModeImageUrl = dto.darkModeImageUrl;
+      if (dto.darkModeImageUrl !== undefined) {
+        team.darkModeImageUrl = dto.darkModeImageUrl;
+      }
 
-      if (dto.logoLightUrl !== undefined) team.logoLightUrl = dto.logoLightUrl;
+      if (dto.logoLightUrl !== undefined) {
+        team.logoLightUrl = dto.logoLightUrl;
+      }
 
-      if (dto.logoDarkUrl !== undefined) team.logoDarkUrl = dto.logoDarkUrl;
+      if (dto.logoDarkUrl !== undefined) {
+        team.logoDarkUrl = dto.logoDarkUrl;
+      }
 
-      if (dto.slug !== undefined) team.slug = dto.slug;
+      if (dto.slug !== undefined) {
+        team.slug = dto.slug;
+      }
 
       if (dto.active === false && team.players.length > 0) {
         throw new InvalidInputError(
@@ -99,7 +115,9 @@ export class TeamService {
         );
       }
 
-      if (dto.active !== undefined) team.active = dto.active;
+      if (dto.active !== undefined) {
+        team.active = dto.active;
+      }
 
       await teams.save(team);
 
@@ -120,7 +138,10 @@ export class TeamService {
   private async deletable({ teams, contracts }: RosterWriteScope, id: string): Promise<Team> {
     const team = await teams.findById(id);
 
-    if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
+    if (!team) {
+      throw new NotFoundError(`Team with id "${id}" not found`);
+    }
+
     const teamContracts = await contracts.findByTeam(id);
     const references = await this.usage.teamReferences(id);
 

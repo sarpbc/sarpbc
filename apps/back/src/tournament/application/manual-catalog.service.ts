@@ -24,10 +24,11 @@ import type {
 function leagueSlug(raw: string): string {
   const slug = toSlug(raw);
 
-  if (!slug)
+  if (!slug) {
     throw new InvalidInputError(
       "Enter a valid slug using letters, numbers, and hyphens (e.g. rlcs).",
     );
+  }
 
   return slug;
 }
@@ -60,17 +61,28 @@ export class ManualCatalogService {
     return await this.transaction.run(async ({ tournaments }) => {
       const league = await requireLeague(tournaments, id);
 
-      if (!league) throw new NotFoundError(`League with id "${id}" was not found.`);
+      if (!league) {
+        throw new NotFoundError(`League with id "${id}" was not found.`);
+      }
+
       assertLeagueUpdateAllowed(league, input);
 
-      if (input.name !== undefined) league.name = input.name;
+      if (input.name !== undefined) {
+        league.name = input.name;
+      }
 
-      if (input.slug !== undefined)
+      if (input.slug !== undefined) {
         league.slug = input.slug === null ? null : leagueSlug(input.slug);
+      }
 
-      if (input.url !== undefined) league.url = nonBlank(input.url) ?? null;
+      if (input.url !== undefined) {
+        league.url = nonBlank(input.url) ?? null;
+      }
 
-      if (input.imageUrl !== undefined) league.imageUrl = nonBlank(input.imageUrl) ?? null;
+      if (input.imageUrl !== undefined) {
+        league.imageUrl = nonBlank(input.imageUrl) ?? null;
+      }
+
       await tournaments.saveLeague(league);
 
       return league;
@@ -84,7 +96,9 @@ export class ManualCatalogService {
   async findEvent(idOrSlug: string): Promise<EventListing> {
     const found = await this.events.find(idOrSlug);
 
-    if (!found) throw new NotFoundError(`Event "${idOrSlug}" was not found.`);
+    if (!found) {
+      throw new NotFoundError(`Event "${idOrSlug}" was not found.`);
+    }
 
     return found;
   }
@@ -115,12 +129,18 @@ export class ManualCatalogService {
       const stages = await events.stages(event.id);
       assertEventEditable(event, stages);
 
-      if (input.name !== undefined) event.name = input.name;
+      if (input.name !== undefined) {
+        event.name = input.name;
+      }
 
-      if (input.leagueId !== undefined)
+      if (input.leagueId !== undefined) {
         event.league = await requireLeague(tournaments, input.leagueId);
+      }
 
-      if (input.slug !== undefined) event.slug = await explicitEventSlug(events, input.slug, id);
+      if (input.slug !== undefined) {
+        event.slug = await explicitEventSlug(events, input.slug, id);
+      }
+
       await events.save(event);
 
       return stages.map((stage) => stage.id);
@@ -136,10 +156,12 @@ export class ManualCatalogService {
       const stages = await events.stages(event.id);
       assertEventEditable(event, stages);
 
-      if (stages.length > 0)
+      if (stages.length > 0) {
         throw new ConflictError(
           `${event.name} still has ${stages.length} ${stages.length === 1 ? "stage" : "stages"}; delete or move them first`,
         );
+      }
+
       await events.remove(event.id);
     });
   }

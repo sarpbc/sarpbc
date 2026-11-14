@@ -2,11 +2,8 @@ import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { Match } from "./match";
 import { Tournament } from "./tournament";
-import {
-  TournamentParticipant,
-  assertParticipantRemovable,
-  type ParticipantReferences,
-} from "./tournament-participant";
+import { TournamentParticipant, assertParticipantRemovable } from "./tournament-participant";
+import type { ParticipantReferences } from "./tournament-participant";
 
 describe("Match outcome", () => {
   const winner = new TournamentParticipant();

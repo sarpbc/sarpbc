@@ -1,11 +1,12 @@
 import type { TournamentDetail, TournamentMatchListItem } from "@sarpbc/types";
 import type { H3Event } from "h3";
-import { apiFetch } from "@sarpbc/composables/apiFetch";
+import { apiFetch } from "@sarpbc/composables/api-fetch";
 import type { Match } from "~/types/matches";
-import { rethrowApiError } from "./apiError";
+import { rethrowApiError } from "./api-error";
 import { getMatchById } from "~/composables/matches/api";
-import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
-import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
+import { buildIcs } from "~/utils/calendar/ics";
+import type { CalendarFeed } from "~/utils/calendar/ics";
+import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/match-event";
 import { tournamentStageLabel } from "@sarpbc/utils";
 
 interface TournamentResponse {
@@ -26,7 +27,7 @@ export function sendIcs(event: H3Event, ics: string, filename: string): string {
 
 export function parseIcsSlug(pathname: string): string | null {
   const segment = pathname.split("/").pop() ?? "";
-  const match = /^(?<slug>.+)\.ics$/i.exec(segment);
+  const match = /^(?<slug>.+)\.ics$/iu.exec(segment);
 
   return match?.groups?.slug ?? null;
 }
@@ -105,7 +106,7 @@ export function buildTournamentIcs(
 }
 
 export function icsFilename(prefix: string, id: string): string {
-  const safe = id.replaceAll(/[^a-zA-Z0-9_-]/g, "").slice(0, 48) || "event";
+  const safe = id.replaceAll(/[^a-zA-Z0-9_-]/gu, "").slice(0, 48) || "event";
 
   return `sarpbc-${prefix}-${safe}.ics`;
 }

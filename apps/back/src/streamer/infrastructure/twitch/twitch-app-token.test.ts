@@ -28,7 +28,9 @@ describe(TwitchAppToken, () => {
     const [url, init] = fetchMock.mock.calls[0] ?? [];
     const body = init?.body;
 
-    if (!(body instanceof URLSearchParams)) throw new Error("Expected a form-encoded body");
+    if (!(body instanceof URLSearchParams)) {
+      throw new TypeError("Expected a form-encoded body");
+    }
 
     expect(url).toBe("https://id.twitch.tv/oauth2/token");
     expect(init?.method).toBe("POST");

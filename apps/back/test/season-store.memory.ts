@@ -162,7 +162,10 @@ export function memorySeasonStore() {
         (award) => award.seasonId === seasonId && award.id === awardId,
       );
 
-      if (index === -1) return false;
+      if (index === -1) {
+        return false;
+      }
+
       awards.splice(index, 1);
 
       return true;
@@ -201,14 +204,19 @@ export function memorySeasonStore() {
     updatePathNote: async (participantId, pathNote) => {
       const found = participants.find((participant) => participant.id === participantId);
 
-      if (found) found.pathNote = pathNote;
+      if (found) {
+        found.pathNote = pathNote;
+      }
     },
     removeParticipant: async (seasonId, participantId) => {
       const index = participants.findIndex(
         (participant) => participant.seasonId === seasonId && participant.id === participantId,
       );
 
-      if (index === -1) return false;
+      if (index === -1) {
+        return false;
+      }
+
       participants.splice(index, 1);
 
       return true;
@@ -229,7 +237,10 @@ export function memorySeasonStore() {
       const found = participants.find((participant) => participant.id === participantId);
       const index = found?.path.findIndex((entry) => entry.id === entryId) ?? -1;
 
-      if (!found || index < 0) return false;
+      if (!found || index < 0) {
+        return false;
+      }
+
       found.path.splice(index, 1);
 
       return true;

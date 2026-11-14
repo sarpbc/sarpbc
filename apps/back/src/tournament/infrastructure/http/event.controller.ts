@@ -17,30 +17,27 @@ import type { TournamentPathResponse, TournamentPlayerStatsResponse } from "@sar
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { isRedistributable } from "../../../common/domain/data-source";
-import {
-  ListTournamentsQueryDto,
-  type ListTournamentsQueryInput,
-} from "./dto/list-tournaments-query.dto";
+import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
+import type { ListTournamentsQueryInput } from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { EventQueries } from "../../application/ports";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { StreamService } from "../../application/stream.service";
-import { SetStreamsDto, type SetStreamsInput } from "./dto/set-streams.dto";
+import { SetStreamsDto } from "./dto/set-streams.dto";
+import type { SetStreamsInput } from "./dto/set-streams.dto";
 import { ViewershipService } from "../../application/viewership.service";
-import { SetViewershipDto, type SetViewershipInput } from "./dto/set-viewership.dto";
+import { SetViewershipDto } from "./dto/set-viewership.dto";
+import type { SetViewershipInput } from "./dto/set-viewership.dto";
 import { parseTournamentPath } from "../../domain/tournament-path";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EVENT_QUERIES } from "../competition-queries.tokens";
-import {
-  CreateEventDto,
-  type CreateEventInput,
-  UpdateEventDto,
-  type UpdateEventInput,
-} from "./dto/manual-catalog.dto";
+import { CreateEventDto, UpdateEventDto } from "./dto/manual-catalog.dto";
+import type { CreateEventInput, UpdateEventInput } from "./dto/manual-catalog.dto";
 import { mapEvent, mapStaffEvent } from "./event.mapper";
-import { mapTournamentListItem, type TournamentDetailResponse } from "./tournament.mapper";
+import { mapTournamentListItem } from "./tournament.mapper";
+import type { TournamentDetailResponse } from "./tournament.mapper";
 
 const MISSING = "This tournament page does not exist. Check the address or browse all tournaments.";
 
@@ -171,15 +168,21 @@ export class EventController {
   private async resolve(segments: string[]): Promise<TournamentPathResponse> {
     const path = parseTournamentPath(segments);
 
-    if (!path) throw new NotFoundError(MISSING);
+    if (!path) {
+      throw new NotFoundError(MISSING);
+    }
 
     switch (path.kind) {
-      case "legacyStage":
+      case "legacyStage": {
         return { kind: "stage", tournament: await this.stage(path.id), tab: path.tab };
+      }
+
       case "stage": {
         const id = await this.events.stageId(path.eventSlug, path.stageSlug);
 
-        if (id === null || id === "") throw new NotFoundError(MISSING);
+        if (id === null || id === "") {
+          throw new NotFoundError(MISSING);
+        }
 
         return { kind: "stage", tournament: await this.stage(id), tab: "overview" };
       }
@@ -188,8 +191,10 @@ export class EventController {
         const found = await this.events.find(path.eventSlug);
 
         // An event left empty by moving its stages elsewhere stays stored but is not public.
-        if (found?.stages.length === undefined || found?.stages.length === 0)
+        if (found?.stages.length === undefined || found?.stages.length === 0) {
           throw new NotFoundError(MISSING);
+        }
+
         const stages = await Promise.all(found.stages.map(async ({ id }) => await this.stage(id)));
 
         return {
@@ -209,7 +214,9 @@ export class EventController {
   private async stage(id: string): Promise<TournamentDetailResponse> {
     const tournament = await this.tournamentRead.findById(id);
 
-    if (!tournament) throw new NotFoundError(MISSING);
+    if (!tournament) {
+      throw new NotFoundError(MISSING);
+    }
 
     return tournament;
   }

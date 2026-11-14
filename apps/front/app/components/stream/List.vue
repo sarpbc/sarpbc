@@ -16,14 +16,22 @@ const languageNames = computed(
 
 function platformLabel(platform: StreamPlatform): string {
   switch (platform) {
-    case "twitch":
+    case "twitch": {
       return t("page.match.detail.watch.platforms.twitch");
-    case "youtube":
+    }
+
+    case "youtube": {
       return t("page.match.detail.watch.platforms.youtube");
-    case "kick":
+    }
+
+    case "kick": {
       return t("page.match.detail.watch.platforms.kick");
-    case "other":
+    }
+
+    case "other": {
       return t("page.match.detail.watch.platforms.other");
+    }
+
     default: {
       const _exhaustive: never = platform;
 
@@ -34,10 +42,14 @@ function platformLabel(platform: StreamPlatform): string {
 
 function kindLabel(kind: StreamKind): string {
   switch (kind) {
-    case "official":
+    case "official": {
       return t("page.match.detail.watch.kinds.official");
-    case "costream":
+    }
+
+    case "costream": {
       return t("page.match.detail.watch.kinds.costream");
+    }
+
     default: {
       const _exhaustive: never = kind;
 

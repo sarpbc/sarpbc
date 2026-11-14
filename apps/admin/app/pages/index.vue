@@ -4,9 +4,9 @@ import {
   getApiErrorMessage,
   parseLocale,
   participantName,
-  type NamedParticipant,
 } from "@sarpbc/utils";
-import { canAccessSection } from "~/utils/adminSections";
+import type { NamedParticipant } from "@sarpbc/utils";
+import { canAccessSection } from "~/utils/admin-sections";
 
 const ARTICLE_LIMIT = 5;
 const MATCH_LIMIT = 5;

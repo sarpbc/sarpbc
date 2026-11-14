@@ -105,11 +105,12 @@ class MemoryImports implements StatsImportStore {
   async failUnfinished(error: string) {
     let changed = 0;
 
-    for (const row of this.rows.values())
+    for (const row of this.rows.values()) {
       if (row.status === "pending" || row.status === "running") {
         Object.assign(row, { status: "failed", error, finishedAt: new Date() });
         changed += 1;
       }
+    }
 
     return changed;
   }
@@ -123,7 +124,9 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
     replayStats: vi.fn<BallchasingSource["replayStats"]>(async (id) => {
       const replay = [game1, game2].find((known) => known.id === id);
 
-      if (replay === undefined) throw new Error(`Unknown replay ${id}`);
+      if (replay === undefined) {
+        throw new Error(`Unknown replay ${id}`);
+      }
 
       return statsFor(replay);
     }),
@@ -213,7 +216,9 @@ async function runImport() {
 
   const done = context.imports.rows.get(id);
 
-  if (done === undefined) throw new Error("Import was not stored");
+  if (done === undefined) {
+    throw new Error("Import was not stored");
+  }
 
   return { ...context, done };
 }
@@ -458,7 +463,7 @@ describe("StatsImportService.run", () => {
 
     await service.run(id);
 
-    expect(imports.rows.get(id)?.error).toMatch(/unexpectedly/);
+    expect(imports.rows.get(id)?.error).toMatch(/unexpectedly/u);
     expect(reportFailure).toHaveBeenCalledOnce();
   });
 

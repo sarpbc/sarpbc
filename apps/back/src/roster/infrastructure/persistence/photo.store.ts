@@ -28,7 +28,10 @@ export class MikroPhotoStore implements PhotoQueries, PhotoWriter {
   async save(model: PlayerPhoto) {
     const row = new PlayerPhotoRow();
 
-    if (!model.id) model.id = v4();
+    if (!model.id) {
+      model.id = v4();
+    }
+
     Object.assign(row, {
       id: model.id,
       player: this.em.getReference(PlayerRow, model.player.id),

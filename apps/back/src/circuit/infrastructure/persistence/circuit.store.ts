@@ -128,10 +128,12 @@ export class CircuitPersistence implements CircuitStore {
     try {
       await this.em.persist(row).flush();
     } catch (error) {
-      if (isUniqueViolation(error))
+      if (isUniqueViolation(error)) {
         throw new ConflictError(
           `A circuit with the slug "${circuit.slug}", or named "${circuit.name}" for this season and region, already exists.`,
         );
+      }
+
       throw error;
     }
   }
@@ -200,7 +202,9 @@ export class CircuitPersistence implements CircuitStore {
       { fields: ["event"] },
     );
 
-    if (!tournament) return null;
+    if (!tournament) {
+      return null;
+    }
 
     const participants = await this.em.find(
       TournamentParticipant,
@@ -211,7 +215,10 @@ export class CircuitPersistence implements CircuitStore {
     const teams = new Map<string, CircuitEventTeam>();
 
     for (const { tournament: stage, team, placement } of participants) {
-      if (!team) continue;
+      if (!team) {
+        continue;
+      }
+
       const current = teams.get(team.id);
       const own = stage.id === tournamentId ? placement : null;
       teams.set(team.id, { team: toTeam(team), placement: own ?? current?.placement ?? null });
@@ -244,7 +251,7 @@ export class CircuitPersistence implements CircuitStore {
       const placements = new Map(settings.finishes.map((f) => [f.teamId, f.placement]));
       const region = new Set(settings.regionTeamIds);
 
-      for (const teamId of new Set([...region, ...placements.keys()]))
+      for (const teamId of new Set([...region, ...placements.keys()])) {
         em.persist(
           Object.assign(new CircuitStageTeam(), {
             stage: row,
@@ -253,6 +260,7 @@ export class CircuitPersistence implements CircuitStore {
             regionMember: region.has(teamId),
           }),
         );
+      }
     });
   }
 

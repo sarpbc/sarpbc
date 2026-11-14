@@ -9,7 +9,9 @@ export async function mapSequentially<Item, Result>(
   const results: Result[] = [];
 
   const step = async (index: number): Promise<void> => {
-    if (index === items.length) return;
+    if (index === items.length) {
+      return;
+    }
 
     results.push(await task(items[index], index));
     await step(index + 1);

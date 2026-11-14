@@ -17,8 +17,9 @@ describe("create-circuit body", () => {
       { name: "RLCS", season: 2026, sourceUrl: null },
       { name: "RLCS", season: 2026, sourceUrl: "" },
       { name: "RLCS", season: 2026, sourceUrl: "ftp://example.org/rules" },
-    ])
+    ]) {
       expect(CreateCircuitDto.safeParse(body).success).toBe(false);
+    }
   });
 });
 
@@ -55,7 +56,8 @@ describe("set-circuit-stage body", () => {
       { ...stage, regionTeamIds: ["kc"] },
       { ...stage, finishes: [{ teamId: TEAM, placement: 0 }] },
       { ...stage, finishes: [{ teamId: "kc", placement: 9 }] },
-    ])
+    ]) {
       expect(SetCircuitStageDto.safeParse(body).success).toBe(false);
+    }
   });
 });

@@ -59,8 +59,9 @@ async function editContract(
     throw new NotFoundError(`Contract with id "${contractId}" not found`);
   }
 
-  if (dto.teamId !== undefined && dto.teamId !== "")
+  if (dto.teamId !== undefined && dto.teamId !== "") {
     contract.team = await requireTeam(teams, dto.teamId);
+  }
 
   if (dto.startDate !== undefined) {
     contract.startDate = new Date(dto.startDate);
@@ -157,11 +158,17 @@ export class ContractService {
 
       const updateDto: UpdateContractInput = {};
 
-      if (dto.startDate !== undefined) updateDto.startDate = dto.startDate;
+      if (dto.startDate !== undefined) {
+        updateDto.startDate = dto.startDate;
+      }
 
-      if (dto.endDate !== undefined) updateDto.endDate = dto.endDate ?? undefined;
+      if (dto.endDate !== undefined) {
+        updateDto.endDate = dto.endDate ?? undefined;
+      }
 
-      if (dto.role !== undefined) updateDto.role = dto.role;
+      if (dto.role !== undefined) {
+        updateDto.role = dto.role;
+      }
 
       return await applyContractUpdate(scope, contract.player.id, contractId, updateDto);
     });
@@ -196,7 +203,10 @@ export class ContractService {
       const contract = await buildContract(scope, playerId, dto);
       contract.joinSourceUrl = sourceUrl;
 
-      if (contract.endDate) contract.leaveSourceUrl = sourceUrl;
+      if (contract.endDate) {
+        contract.leaveSourceUrl = sourceUrl;
+      }
+
       await saveContractInCareer(scope, contract);
 
       return contract;

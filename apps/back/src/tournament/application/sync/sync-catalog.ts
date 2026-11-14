@@ -38,7 +38,10 @@ export async function applySerie(
   const event = await events.bySerieId(command.pandascoreId);
   const serieName = command.fullName?.trim();
 
-  if (!event || serieName === undefined || serieName === "") return null;
+  if (!event || serieName === undefined || serieName === "") {
+    return null;
+  }
+
   const stages = await events.stages(event.id);
   event.name = eventDisplayName({
     leagueName: event.league?.name ?? null,
@@ -57,7 +60,10 @@ async function mergeSerie(
 ): Promise<Applied | null> {
   const from = await scope.events.bySerieId(serieId);
 
-  if (!from) return null;
+  if (!from) {
+    return null;
+  }
+
   const stages = await scope.events.stages(from.id);
   const stageIds = stages.map((stage) => stage.id);
   const into = await scope.events.bySerieId(intoId);
@@ -73,7 +79,10 @@ async function mergeSerie(
   await mapSequentially(stages, async (stage) => {
     const tournament = await scope.tournaments.load(stage.id);
 
-    if (!tournament) return;
+    if (!tournament) {
+      return;
+    }
+
     await placeStage(scope.events, tournament, into);
     await scope.tournaments.save(tournament);
   });
@@ -94,11 +103,15 @@ async function applySerieDeletion(
   deletion: ProviderDeletion,
 ): Promise<Applied | null> {
   switch (deletion.kind) {
-    case "merged":
+    case "merged": {
       return await mergeSerie(scope, serieId, deletion.intoId);
+    }
+
     case "replaced":
-    case "deleted":
+    case "deleted": {
       return null;
+    }
+
     default: {
       const neverDeletion: never = deletion;
 
@@ -112,14 +125,18 @@ export async function applyDeletion(
   incident: IncidentDeletion,
 ): Promise<Applied | null> {
   switch (incident.kind) {
-    case "serie":
+    case "serie": {
       return await applySerieDeletion(scope, incident.id, incident.deletion);
+    }
+
     case "league":
     case "match":
     case "player":
     case "team":
-    case "tournament":
+    case "tournament": {
       return null;
+    }
+
     default: {
       const neverKind: never = incident.kind;
 

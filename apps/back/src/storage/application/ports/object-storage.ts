@@ -10,16 +10,16 @@ export interface ObjectUploadUrl extends StoredObject {
 }
 
 export interface ObjectStorage {
-  createImageUploadUrl(
+  createImageUploadUrl: (
     contentType: ImageContentType,
     target: ImageUploadTarget,
-  ): Promise<ObjectUploadUrl>;
-  uploadImage(
+  ) => Promise<ObjectUploadUrl>;
+  uploadImage: (
     bytes: Uint8Array,
     contentType: ImageContentType,
     target: ImageUploadTarget,
-  ): Promise<StoredObject>;
-  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject>;
-  copyObject(sourceKey: string, key: string): Promise<StoredObject>;
-  deleteObject(key: string): Promise<void>;
+  ) => Promise<StoredObject>;
+  putObject: (key: string, bytes: Uint8Array, contentType: string) => Promise<StoredObject>;
+  copyObject: (sourceKey: string, key: string) => Promise<StoredObject>;
+  deleteObject: (key: string) => Promise<void>;
 }

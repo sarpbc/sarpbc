@@ -50,7 +50,7 @@ describe(TeamLogoService, () => {
 
     const logo = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
 
-    expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-light-[0-9a-f]{16}\.webp$/);
+    expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-light-[0-9a-f]{16}\.webp$/u);
     expect(logo.url).toBe(`https://cdn.sarpbc.test/${logo.key}`);
     expect(storage.put).toHaveBeenCalledExactlyOnceWith(logo.key, WEBP_OUTPUT, "image/webp");
   });
@@ -74,7 +74,7 @@ describe(TeamLogoService, () => {
 
     expect(images.dimensions).not.toHaveBeenCalled();
     expect(images.normalize).toHaveBeenCalledExactlyOnceWith(SVG, "svg", expect.any(Number));
-    expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-dark-/);
+    expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-dark-/u);
     expect(storage.put).toHaveBeenCalledExactlyOnceWith(logo.key, WEBP_OUTPUT, "image/webp");
   });
 

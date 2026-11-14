@@ -97,7 +97,9 @@ function setup(role: "admin" | "journalist" = "admin") {
   const tool = (name: string) => {
     const found = tools.find((candidate) => candidate.name === name);
 
-    if (!found) throw new Error(`${name} is not defined`);
+    if (!found) {
+      throw new Error(`${name} is not defined`);
+    }
 
     return async (input: ToolInput) =>
       await found.run({ id: "u1", email: "staff@test.com", role }, input);

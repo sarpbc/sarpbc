@@ -51,11 +51,11 @@ function isSafeUrl(value: string): boolean {
 }
 
 function asciiLowerCase(value: string): string {
-  return value.replaceAll(/[A-Z]/g, (char) => char.toLowerCase());
+  return value.replaceAll(/[A-Z]/gu, (char) => char.toLowerCase());
 }
 
 function isWordChar(char: string): boolean {
-  return /\w/.test(char);
+  return /\w/u.test(char);
 }
 
 function rawTextElementAt(lower: string, index: number): RawTextElement | null {
@@ -72,7 +72,7 @@ function findEndTag(lower: string, name: RawTextElement, from: number): number {
   let index = lower.indexOf(`</${name}`, from);
 
   while (index !== -1) {
-    if (/^[\t\n\f\r />]$/.test(lower.charAt(index + name.length + 2))) {
+    if (/^[\t\n\f\r />]$/u.test(lower.charAt(index + name.length + 2))) {
       return index;
     }
 
@@ -160,7 +160,7 @@ export function sanitizePlainText(value: string): string {
 
 export function sanitizeNewsHtml(value: string): string {
   return stripDangerousBlocks(value).replaceAll(
-    /<\/?(?<tag>[a-zA-Z][\w:-]*)\b(?<attrs>[^>]*)>/g,
+    /<\/?(?<tag>[a-zA-Z][\w:-]*)\b(?<attrs>[^>]*)>/gu,
     (full: string, rawName: string, rawAttrs: string) => {
       const name = rawName.toLowerCase();
 
@@ -184,7 +184,7 @@ export function sanitizeNewsHtml(value: string): string {
       const attrs: string[] = [];
 
       const attrRe =
-        /(?<name>[a-zA-Z_:][\w:.-]*)\s*=\s*(?:"(?<double>[^"]*)"|'(?<single>[^']*)'|(?<bare>\S+))/g;
+        /(?<name>[a-zA-Z_:][\w:.-]*)\s*=\s*(?:"(?<double>[^"]*)"|'(?<single>[^']*)'|(?<bare>\S+))/gu;
 
       let match = attrRe.exec(rawAttrs);
 

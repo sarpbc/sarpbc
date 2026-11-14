@@ -27,11 +27,13 @@ export const validateFile = async (
 ): Promise<string | undefined> => {
   const validators: FileValidator[] = [];
 
-  if (options.maxFileSize !== undefined && options.maxFileSize !== 0)
+  if (options.maxFileSize !== undefined && options.maxFileSize !== 0) {
     validators.push(new MaxFileSizeValidator({ maxSize: options.maxFileSize }));
+  }
 
-  if (options.fileType !== undefined && options.fileType !== "")
+  if (options.fileType !== undefined && options.fileType !== "") {
     validators.push(new FileTypeValidator({ fileType: options.fileType }));
+  }
 
   const checked = await Promise.all(
     validators.map(async (validator) => ({ validator, valid: await validator.isValid(file) })),

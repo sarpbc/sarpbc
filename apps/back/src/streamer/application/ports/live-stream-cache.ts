@@ -6,8 +6,8 @@ export interface LiveStreamSnapshot {
 }
 
 export interface LiveStreamCache {
-  read(): Promise<LiveStreamSnapshot | null>;
-  claimRefresh(): Promise<string | null>;
-  write(snapshot: LiveStreamSnapshot, claim: string): Promise<boolean>;
-  clear(): Promise<void>;
+  read: () => Promise<LiveStreamSnapshot | null>;
+  claimRefresh: () => Promise<string | null>;
+  write: (snapshot: LiveStreamSnapshot, claim: string) => Promise<boolean>;
+  clear: () => Promise<void>;
 }

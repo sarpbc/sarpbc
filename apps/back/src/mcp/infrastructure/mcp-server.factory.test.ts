@@ -161,7 +161,7 @@ describe(McpServerFactory, () => {
     const unstated = tools
       .filter(
         ({ name, description }) =>
-          name.startsWith("create_") && !/Requires \w+\.manage\.$/.test(description ?? ""),
+          name.startsWith("create_") && !/Requires \w+\.manage\.$/u.test(description ?? ""),
       )
       .map(({ name }) => name);
 

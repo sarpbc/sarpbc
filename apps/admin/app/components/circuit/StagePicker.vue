@@ -54,7 +54,10 @@ async function runSearch(value: string) {
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 watch(open, (isOpen) => {
-  if (isOpen) return;
+  if (isOpen) {
+    return;
+  }
+
   query.value = "";
   results.value = [];
   searched.value = false;

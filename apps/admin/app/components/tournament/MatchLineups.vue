@@ -102,7 +102,9 @@ function rosterOptions(participantId: string): SelectItem[][] {
   return [...own, ...others].flatMap((participant): SelectItem[][] => {
     const players = participant.players.filter((player) => !taken.value.has(player.id));
 
-    if (players.length === 0) return [];
+    if (players.length === 0) {
+      return [];
+    }
 
     return [
       [
@@ -116,7 +118,10 @@ function rosterOptions(participantId: string): SelectItem[][] {
 function rememberNames(picks: LineupPick[]) {
   const names = new Map(knownNames.value);
 
-  for (const pick of picks) names.set(pick.id, pick.name);
+  for (const pick of picks) {
+    names.set(pick.id, pick.name);
+  }
+
   knownNames.value = names;
 }
 
@@ -151,7 +156,9 @@ async function load() {
 watch(
   open,
   (isOpen) => {
-    if (isOpen) void load();
+    if (isOpen) {
+      void load();
+    }
   },
   { immediate: true },
 );
@@ -180,7 +187,10 @@ async function runSearch(searchQuery: string) {
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 function add(participantId: string, pick: LineupPick) {
-  if (taken.value.has(pick.id) || isFull(participantId)) return;
+  if (taken.value.has(pick.id) || isFull(participantId)) {
+    return;
+  }
+
   rememberNames([pick]);
   lineups.value = { ...lineups.value, [participantId]: [...sideOf(participantId), pick] };
 }
@@ -189,7 +199,10 @@ function addFromRoster(participantId: string) {
   const playerId = selectedPick.value[participantId];
   const name = playerId ? knownNames.value.get(playerId) : undefined;
 
-  if (!playerId || !name) return;
+  if (!playerId || !name) {
+    return;
+  }
+
   add(participantId, { id: playerId, name });
   selectedPick.value = { ...selectedPick.value, [participantId]: undefined };
 }

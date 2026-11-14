@@ -14,7 +14,9 @@ export class CompetitionLineupWriter implements LineupWriter {
   async activePlayersExist(ids: string[]) {
     const unique = [...new Set(ids)];
 
-    if (unique.length === 0) return true;
+    if (unique.length === 0) {
+      return true;
+    }
 
     return (
       (await this.em.count(Player, { id: { $in: unique }, mergedInto: null })) === unique.length

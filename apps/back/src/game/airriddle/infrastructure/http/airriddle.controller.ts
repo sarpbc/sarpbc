@@ -3,7 +3,8 @@ import type { FastifyRequest } from "fastify";
 import { AirRiddleService } from "../../application/airriddle.service";
 import { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
 import { captureRequestEvent } from "../../../../infrastructure/telemetry/capture-request-event";
-import { GuessDto, type GuessInput } from "./dto/guess.dto";
+import { GuessDto } from "./dto/guess.dto";
+import type { GuessInput } from "./dto/guess.dto";
 
 @Controller("air-riddle")
 export class AirRiddleController {

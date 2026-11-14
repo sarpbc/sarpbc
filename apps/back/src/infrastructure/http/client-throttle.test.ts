@@ -89,7 +89,9 @@ describe("client throttle behind a trusted proxy", () => {
       Array.from({ length: PUBLIC_LIMIT }, async () => await hit(visitor)),
     );
 
-    for (const response of responses) expect(response.statusCode).toBe(200);
+    for (const response of responses) {
+      expect(response.statusCode).toBe(200);
+    }
 
     const response2 = await hit(visitor);
     expect(response2.statusCode).toBe(429);
@@ -117,7 +119,9 @@ describe("client throttle behind a trusted proxy", () => {
       ),
     );
 
-    for (const response of responses) expect(response.statusCode).toBe(200);
+    for (const response of responses) {
+      expect(response.statusCode).toBe(200);
+    }
 
     const response5 = await hit({ ...options, connectingIp: "198.51.100.200" });
     expect(response5.statusCode).toBe(429);
@@ -142,7 +146,9 @@ describe("client throttle behind a trusted proxy", () => {
       Array.from({ length: PUBLIC_LIMIT }, async (_, attempt) => await forged(attempt)),
     );
 
-    for (const response of responses) expect(response.statusCode).toBe(200);
+    for (const response of responses) {
+      expect(response.statusCode).toBe(200);
+    }
 
     const blocked = await app.getHttpAdapter().getInstance().inject({
       method: "GET",
@@ -158,7 +164,9 @@ describe("client throttle behind a trusted proxy", () => {
       Array.from({ length: 4 }, async () => await hit({ remoteAddress: "127.0.0.1" })),
     );
 
-    for (const response of responses) expect(response.statusCode).toBe(200);
+    for (const response of responses) {
+      expect(response.statusCode).toBe(200);
+    }
   });
 
   const callInternal = async (client: string) =>
@@ -177,7 +185,9 @@ describe("client throttle behind a trusted proxy", () => {
       Array.from({ length: SSR_LIMIT }, async () => await callInternal("203.0.113.50")),
     );
 
-    for (const response of responses) expect(response.statusCode).toBe(200);
+    for (const response of responses) {
+      expect(response.statusCode).toBe(200);
+    }
 
     const callResult2 = await callInternal("203.0.113.50");
     expect(callResult2.statusCode).toBe(429);
@@ -198,7 +208,9 @@ describe("client throttle behind a trusted proxy", () => {
       ),
     );
 
-    for (const response of responses) expect(response.statusCode).toBe(200);
+    for (const response of responses) {
+      expect(response.statusCode).toBe(200);
+    }
 
     const response8 = await hit({ ...base, client: "203.0.113.200" });
     expect(response8.statusCode).toBe(429);
@@ -212,7 +224,9 @@ describe("client throttle behind a trusted proxy", () => {
       ),
     );
 
-    for (const response of responses) expect(response.statusCode).toBe(200);
+    for (const response of responses) {
+      expect(response.statusCode).toBe(200);
+    }
 
     const callResult5 = await callPrivateHop("10.9.9.2");
     expect(callResult5.statusCode).toBe(429);

@@ -2,11 +2,8 @@ import type { LookupAddress } from "node:dns";
 import { PassThrough } from "node:stream";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
-import {
-  downloadPublicHttps,
-  isPublicAddress,
-  type PublicHttpsTransport,
-} from "./public-https-download";
+import { downloadPublicHttps, isPublicAddress } from "./public-https-download";
+import type { PublicHttpsTransport } from "./public-https-download";
 
 const fakes = {
   addresses: new Map<string, string[]>(),
@@ -28,7 +25,7 @@ const limits = {
   maxBytes: 16,
   timeoutMs: 1000,
   maxRedirects: 2,
-  isAllowedHost: (hostname: string) => !/(?:^|\.)liquipedia\.net$/i.test(hostname),
+  isAllowedHost: (hostname: string) => !/(?:^|\.)liquipedia\.net$/iu.test(hostname),
 };
 
 function resolveDns(addresses: Record<string, string[]>) {
@@ -39,7 +36,9 @@ function serve(routes: Record<string, Reply>) {
   fakes.request.mockImplementation((url, options) => {
     const { lookup, signal } = options;
 
-    if (!lookup || !signal) throw new Error("The request must use the guarded lookup and a signal");
+    if (!lookup || !signal) {
+      throw new Error("The request must use the guarded lookup and a signal");
+    }
 
     const req = Object.assign(new PassThrough(), {
       end: () => {
@@ -52,7 +51,9 @@ function serve(routes: Record<string, Reply>) {
 
           const reply: Reply | undefined = routes[url.href];
 
-          if (reply === undefined) throw new Error(`Unexpected request to ${url.href}`);
+          if (reply === undefined) {
+            throw new Error(`Unexpected request to ${url.href}`);
+          }
 
           if (reply === "hang") {
             signal.addEventListener("abort", () => {
@@ -69,7 +70,10 @@ function serve(routes: Record<string, Reply>) {
 
           req.emit("response", response);
 
-          for (const chunk of reply.body ?? []) response.write(chunk);
+          for (const chunk of reply.body ?? []) {
+            response.write(chunk);
+          }
+
           response.end();
         });
       },

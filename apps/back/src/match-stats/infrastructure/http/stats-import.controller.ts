@@ -14,10 +14,8 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { StatsImportService } from "../../application/stats-import.service";
 import type { StatsImport } from "../../domain/stats-import";
-import {
-  RequestStatsImportDto,
-  type RequestStatsImportInput,
-} from "./dto/request-stats-import.dto";
+import { RequestStatsImportDto } from "./dto/request-stats-import.dto";
+import type { RequestStatsImportInput } from "./dto/request-stats-import.dto";
 
 function present(statsImport: StatsImport): StatsImportResponse {
   return {

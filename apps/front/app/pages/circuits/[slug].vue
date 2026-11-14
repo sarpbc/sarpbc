@@ -43,7 +43,10 @@ const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
 const tableRows = computed<StandingTableRow[]>(() => {
   const current = standings.value;
 
-  if (!current) return [];
+  if (!current) {
+    return [];
+  }
+
   const spots = current.qualificationSpots;
   const cutoffIndex = spots === null ? -1 : current.rows.findLastIndex((row) => row.rank <= spots);
 
@@ -66,16 +69,26 @@ const regionalRegion = computed(() => {
 
 function statusLabel(status: CircuitEventStatus): string | null {
   switch (status) {
-    case "scale_missing":
+    case "scale_missing": {
       return t("page.circuits.standings.status.scaleMissing");
-    case "upcoming":
+    }
+
+    case "upcoming": {
       return t("page.circuits.standings.status.upcoming");
-    case "in_progress":
+    }
+
+    case "in_progress": {
       return t("page.circuits.standings.status.inProgress");
-    case "awaiting_results":
+    }
+
+    case "awaiting_results": {
       return t("page.circuits.standings.status.awaitingResults");
-    case "counted":
+    }
+
+    case "counted": {
       return null;
+    }
+
     default: {
       const _exhaustive: never = status;
 
@@ -85,7 +98,7 @@ function statusLabel(status: CircuitEventStatus): string | null {
 }
 
 function sourceLabel(url: string): string {
-  return url.replace(/^https?:\/\//, "");
+  return url.replace(/^https?:\/\//u, "");
 }
 
 watch(

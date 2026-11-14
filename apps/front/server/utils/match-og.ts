@@ -1,11 +1,11 @@
 import { existsSync } from "node:fs";
 import path from "node:path";
 import type { MatchDetailResponse } from "~/types/matches";
-import { getMatchParticipantScore } from "~/utils/matchScore";
-import { TBD_LABEL } from "~/utils/tbdLabel";
-import { rethrowApiError } from "./apiError";
+import { getMatchParticipantScore } from "~/utils/match-score";
+import { TBD_LABEL } from "~/utils/tbd-label";
+import { rethrowApiError } from "./api-error";
 import { getMatchById } from "~/composables/matches/api";
-import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import { resolveMatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 import { participantName, tournamentStageLabel } from "@sarpbc/utils";
 
 const MATCH_OG_FONT_FAMILY = "Inter";

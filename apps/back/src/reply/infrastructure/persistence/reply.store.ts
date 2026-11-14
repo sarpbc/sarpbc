@@ -78,13 +78,19 @@ export class MikroReplyStore implements ReplyWrites {
   async delete(model: ReplyRecord) {
     const row = await this.em.findOne(Reply, { id: model.id });
 
-    if (!row) return;
+    if (!row) {
+      return;
+    }
+
     this.em.remove(row);
 
     try {
       await this.em.flush();
     } catch (error) {
-      if (isForeignKeyViolation(error)) throw replyStillReferenced();
+      if (isForeignKeyViolation(error)) {
+        throw replyStillReferenced();
+      }
+
       throw error;
     }
   }
@@ -123,7 +129,10 @@ export function replyReports(em: EntityManager) {
       try {
         await em.flush();
       } catch (error) {
-        if (isUniqueViolation(error)) throw replyAlreadyReported();
+        if (isUniqueViolation(error)) {
+          throw replyAlreadyReported();
+        }
+
         throw error;
       }
     },

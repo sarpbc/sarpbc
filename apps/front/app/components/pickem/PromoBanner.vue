@@ -11,10 +11,14 @@ const eventName = computed(() => tournament.event.name);
 
 const title = computed(() => {
   switch (variant) {
-    case "match":
+    case "match": {
       return t("page.game.pickems.matchCta.title");
-    case "homepage":
+    }
+
+    case "homepage": {
       return t("page.game.pickems.banner.title", { event: eventName.value });
+    }
+
     default: {
       const _exhaustive: never = variant;
 
@@ -25,10 +29,14 @@ const title = computed(() => {
 
 const ctaLabel = computed(() => {
   switch (variant) {
-    case "match":
+    case "match": {
       return t("page.game.pickems.matchCta.cta");
-    case "homepage":
+    }
+
+    case "homepage": {
       return t("page.game.pickems.banner.cta");
+    }
+
     default: {
       const _exhaustive: never = variant;
 

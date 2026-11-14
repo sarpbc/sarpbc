@@ -8,10 +8,8 @@ import {
   STREAM_KINDS,
   TEAM_LOGO_VARIANTS,
   VIEWERSHIP_SCOPES,
-  type PlayerStatus,
-  type RosterChange,
-  type RosterProposalStatus,
 } from "@sarpbc/types";
+import type { PlayerStatus, RosterChange, RosterProposalStatus } from "@sarpbc/types";
 import {
   MAX_LINEUP_PLAYERS,
   MAX_CIRCUIT_PLACEMENT,
@@ -35,7 +33,8 @@ import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-so
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool } from "../define-tool";
 import { proposalSourceUrlSchema as sourceUrlSchema, proposed, proposer } from "./proposals";
 import { requireUpdateFields } from "./update-fields";
 
@@ -135,7 +134,7 @@ const STREAMS_NOTE =
   "An event list is inherited by its tournaments that have no list of their own, and a tournament list by its matches that have none; a list set lower down replaces the inherited one entirely. PandaScore entities are accepted. start.gg tournaments and matches are refused. A start.gg sourceUrl marks the streams as start.gg data: the site shows them with credit and they stay out of the MCP.";
 
 const viewershipSourceUrlSchema = sourceUrlSchema
-  .regex(/^https:\/\//, "Use an https URL")
+  .regex(/^https:\/\//u, "Use an https URL")
   .refine(
     (url) => !URL.canParse(url) || !isForbiddenViewershipSource(new URL(url).hostname),
     "Liquipedia, BLAST.tv and start.gg are not accepted viewership sources",
@@ -203,7 +202,7 @@ const teamAliasInput = {
   logoUrl: z
     .url()
     .max(TEAM_ALIAS_URL_MAX_LENGTH)
-    .regex(/^https:\/\//, "Use an https URL")
+    .regex(/^https:\/\//u, "Use an https URL")
     .refine(...withoutLiquipedia("use the team's official asset"))
     .optional()
     .describe("Optional https URL of the official logo used with this name. Never Liquipedia."),
@@ -229,7 +228,7 @@ const contractRoleSchema = z
 
 const countrySchema = z
   .string()
-  .regex(/^[A-Z]{2}$/, "Use an ISO 3166-1 alpha-2 code")
+  .regex(/^[A-Z]{2}$/u, "Use an ISO 3166-1 alpha-2 code")
   .describe("ISO 3166-1 alpha-2 country code (e.g. FR).");
 
 const playerStatusSchema = z.enum(PLAYER_STATUSES).describe("Career status.");
@@ -410,7 +409,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
           .describe("light for display on light backgrounds, dark for dark backgrounds."),
         imageUrl: z
           .url()
-          .regex(/^https:\/\//, "Use an https URL")
+          .regex(/^https:\/\//u, "Use an https URL")
           .refine(...withoutLiquipedia("use the team's official asset"))
           .describe(
             "Direct https URL of the official logo file (PNG, WebP or SVG). Never Liquipedia.",

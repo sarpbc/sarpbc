@@ -74,7 +74,9 @@ function buildPayload(): LeagueInput {
     };
   }
 
-  if (isPandascore(league)) return { imageUrl };
+  if (isPandascore(league)) {
+    return { imageUrl };
+  }
 
   return {
     name: form.value.name.trim(),
@@ -85,7 +87,9 @@ function buildPayload(): LeagueInput {
 }
 
 async function handleSubmit() {
-  if (isSaving.value || isUploading.value) return;
+  if (isSaving.value || isUploading.value) {
+    return;
+  }
 
   if (!isSynced.value && !form.value.name.trim()) {
     toast.add({ title: t("page.tournaments.leagues.form.nameRequired"), color: "error" });

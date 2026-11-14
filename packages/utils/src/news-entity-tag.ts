@@ -16,8 +16,8 @@ interface NewsEntityTagAttrs {
 }
 
 const ENTITY_TAG_SOURCE = String.raw`:(player|team)\{([^}]*)\}`;
-const NEWS_ENTITY_TAG_PATTERN = new RegExp(`^${ENTITY_TAG_SOURCE}`);
-const NEWS_ENTITY_TAG_GLOBAL_PATTERN = new RegExp(ENTITY_TAG_SOURCE, "g");
+const NEWS_ENTITY_TAG_PATTERN = new RegExp(`^${ENTITY_TAG_SOURCE}`, "u");
+const NEWS_ENTITY_TAG_GLOBAL_PATTERN = new RegExp(ENTITY_TAG_SOURCE, "gu");
 
 function parseAttrs(rawAttrs: string): NewsEntityTagAttrs {
   const attrs: NewsEntityTagAttrs = {};

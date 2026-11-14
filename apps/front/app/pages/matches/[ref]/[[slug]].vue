@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import type { MatchVod } from "@sarpbc/types";
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import { displayMatchScore, getMatchParticipantScore } from "~/utils/matchScore";
+import { displayMatchScore, getMatchParticipantScore } from "~/utils/match-score";
 import type { TournamentParticipant } from "~/types/tournament";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
   parseMatchDiscoverySource,
   resolveMatchDiscoveryStatus,
-} from "~/utils/matchDiscoveryAnalytics";
+} from "~/utils/match-discovery-analytics";
 import { getApiErrorStatus, matchPath, participantName, tournamentStageLabel } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
@@ -108,7 +108,9 @@ const historyConcealed = computed(
 const concealed = computed(() => historyConcealed.value && matchStatus.value !== "upcoming");
 
 const winnerParticipantId = computed(() => {
-  if (concealed.value || !match.value || !teamA.value || !teamB.value) return null;
+  if (concealed.value || !match.value || !teamA.value || !teamB.value) {
+    return null;
+  }
 
   if (match.value.winner?.id) {
     return match.value.winner.id;
@@ -137,12 +139,17 @@ const heroScoreB = computed(() =>
 );
 
 function onVodsSaved(vods: MatchVod[]) {
-  if (!matchDetail.value) return;
+  if (!matchDetail.value) {
+    return;
+  }
+
   matchDetail.value = { ...matchDetail.value, match: { ...matchDetail.value.match, vods } };
 }
 
 function heroScoreClass(participantId: string | undefined): string {
-  if (!winnerParticipantId.value) return "font-medium text-highlighted";
+  if (!winnerParticipantId.value) {
+    return "font-medium text-highlighted";
+  }
 
   return participantId === winnerParticipantId.value
     ? "font-medium text-highlighted"
@@ -195,13 +202,15 @@ const seoDescription = computed(() => {
   const teamBName = participantLabel(teamB.value);
 
   switch (matchStatus.value) {
-    case "live":
+    case "live": {
       return t("page.match.detail.seoDescriptionLive", {
         teamA: teamAName,
         teamB: teamBName,
         tournament,
       });
-    case "upcoming":
+    }
+
+    case "upcoming": {
       return t("page.match.detail.seoDescriptionUpcoming", {
         teamA: teamAName,
         teamB: teamBName,
@@ -210,6 +219,8 @@ const seoDescription = computed(() => {
           ? dateTimeFormatter.value.format(new Date(match.value.beginAt))
           : "",
       });
+    }
+
     case "finished": {
       if (concealed.value) {
         return t("page.match.detail.seoDescriptionSpoilerFree", {

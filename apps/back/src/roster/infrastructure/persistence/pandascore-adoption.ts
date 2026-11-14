@@ -46,7 +46,10 @@ export async function findAliasedPandascoreTeam(
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number | undefined,
 ): Promise<string | null> {
-  if (pandascoreId === undefined || (await em.findOne(Team, { pandascoreId }))) return null;
+  if (pandascoreId === undefined || (await em.findOne(Team, { pandascoreId }))) {
+    return null;
+  }
+
   const alias = await em.findOne(TeamAlias, { pandascoreId });
 
   return alias ? alias.team.id : null;

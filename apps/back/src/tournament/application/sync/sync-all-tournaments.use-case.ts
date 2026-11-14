@@ -15,7 +15,10 @@ export class SyncAllTournamentsUseCase {
 
     // Each upsert may create the league, serie or event the next one reuses, so run them in order.
     const upserted = await mapSequentially(commands, async (command) => {
-      if (known.has(command.pandascoreId)) return null;
+      if (known.has(command.pandascoreId)) {
+        return null;
+      }
+
       const tournament = await this.synchronization.upsertTournament(command);
       known.add(command.pandascoreId);
 

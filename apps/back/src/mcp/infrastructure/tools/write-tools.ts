@@ -18,7 +18,8 @@ import {
   createTournamentFields,
   updateTournamentFields,
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
-import { defineTool, type McpTool, type ToolWrite } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool, ToolWrite } from "../define-tool";
 import { mapListedParticipants, mapMatchListResponse } from "../mappers";
 import { tournamentNotFound } from "../redistributable-competition";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
@@ -220,7 +221,9 @@ export function writeTools({
       }) => {
         const tournament = await tournaments.findById(tournamentId);
 
-        if (!tournament) throw tournamentNotFound(tournamentId);
+        if (!tournament) {
+          throw tournamentNotFound(tournamentId);
+        }
 
         const participants = await resolveMatchParticipantIds(
           tournament,
@@ -414,7 +417,9 @@ export function writeTools({
       handler: async ({ tournamentId, teams, numberOfGames }) => {
         const tournament = await tournaments.findById(tournamentId);
 
-        if (!tournament) throw tournamentNotFound(tournamentId);
+        if (!tournament) {
+          throw tournamentNotFound(tournamentId);
+        }
 
         const matches = await matchService.createEmptyBracket(tournamentId, {
           teams,

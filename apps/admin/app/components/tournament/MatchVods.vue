@@ -62,10 +62,14 @@ function languageFeedback(language: string): FieldFeedback {
 
 function sourceLabel(source: MatchVodSource): string {
   switch (source) {
-    case "twitch":
+    case "twitch": {
       return t("page.tournaments.vods.sources.twitch");
-    case "youtube":
+    }
+
+    case "youtube": {
       return t("page.tournaments.vods.sources.youtube");
+    }
+
     default: {
       const exhaustive: never = source;
 
@@ -75,7 +79,10 @@ function sourceLabel(source: MatchVodSource): string {
 }
 
 function urlFeedback(url: string): FieldFeedback {
-  if (!url.trim()) return {};
+  if (!url.trim()) {
+    return {};
+  }
+
   const parsed = parseMatchVodUrl(url);
 
   return parsed.ok
@@ -109,7 +116,9 @@ async function load() {
 watch(
   open,
   (isOpen) => {
-    if (isOpen) void load();
+    if (isOpen) {
+      void load();
+    }
   },
   { immediate: true },
 );

@@ -31,15 +31,21 @@ export class PickemService {
   }
   async makePick(userId: string, matchId: string, participantId: string): Promise<void> {
     await this.transaction.run(async (scope) => {
-      if (!(await scope.userExists(userId)))
+      if (!(await scope.userExists(userId))) {
         throw new NotFoundError("User not found. Sign in and try again.");
+      }
+
       const existing = await scope.pick(userId, matchId);
       const match = await this.matches.find(matchId);
 
-      if (!match) throw new NotFoundError("Match not found. Refresh the page and try again.");
+      if (!match) {
+        throw new NotFoundError("Match not found. Refresh the page and try again.");
+      }
 
-      if (!(await scope.participantExists(participantId)))
+      if (!(await scope.participantExists(participantId))) {
         throw new NotFoundError("Participant not found. Refresh the page and try again.");
+      }
+
       assertPickAllowed(match, participantId, this.runtime.now(), existing?.scored ?? false);
       await scope.savePick({
         id: this.runtime.id(),
@@ -56,21 +62,29 @@ export class PickemService {
   async validateMatchResult(matchId: string): Promise<{ updated: number }> {
     const match = await this.matches.find(matchId);
 
-    if (!match) throw new NotFoundError(`Match #${matchId} not found`);
+    if (!match) {
+      throw new NotFoundError(`Match #${matchId} not found`);
+    }
+
     const winner = derivePickWinner(match);
 
-    if (winner === null || winner === "")
+    if (winner === null || winner === "") {
       throw new InvalidInputError(
         "Match has no winner set yet. Wait for the series result and try again.",
       );
+    }
 
-    if (match.winnerId === null || match.winnerId === "")
+    if (match.winnerId === null || match.winnerId === "") {
       await this.matches.decide(matchId, winner);
+    }
 
     return await this.transaction.run(async (scope) => {
       const picks = await scope.unscored(matchId);
 
-      for (const pick of picks) scorePick(pick, winner);
+      for (const pick of picks) {
+        scorePick(pick, winner);
+      }
+
       await mapSequentially(picks, async (pick) => {
         await scope.savePick(pick);
       });

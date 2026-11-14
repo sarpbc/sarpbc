@@ -17,7 +17,9 @@ async function run() {
     execute: vi.fn<SyncPandascoreTournamentUseCase["execute"]>(async (id) => {
       steps.push(`details:${id}`);
 
-      if (id === "t2") throw new Error("boom");
+      if (id === "t2") {
+        throw new Error("boom");
+      }
     }),
   };
 

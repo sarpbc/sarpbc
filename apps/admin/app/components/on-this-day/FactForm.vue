@@ -1,11 +1,7 @@
 <script lang="ts" setup>
 import { watchDebounced } from "@vueuse/core";
-import {
-  ON_THIS_DAY_LINK_KINDS,
-  type OnThisDayFact,
-  type OnThisDayFactInput,
-  type OnThisDayLinkKind,
-} from "@sarpbc/types";
+import { ON_THIS_DAY_LINK_KINDS } from "@sarpbc/types";
+import type { OnThisDayFact, OnThisDayFactInput, OnThisDayLinkKind } from "@sarpbc/types";
 import {
   ON_THIS_DAY_MIN_YEAR,
   ON_THIS_DAY_SOURCE_URL_MAX_LENGTH,
@@ -79,7 +75,9 @@ const linkKindOptions = computed(() => [
 ]);
 
 watch(month, () => {
-  if (!isMonthDay(month.value, day.value)) day.value = 1;
+  if (!isMonthDay(month.value, day.value)) {
+    day.value = 1;
+  }
 });
 
 watch(linkKind, () => {
@@ -203,7 +201,10 @@ function clearLink() {
 }
 
 function submit() {
-  if (!isValid.value) return;
+  if (!isValid.value) {
+    return;
+  }
+
   emit("submit", {
     month: month.value,
     day: day.value,

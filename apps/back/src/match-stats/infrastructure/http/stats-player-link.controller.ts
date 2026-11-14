@@ -4,7 +4,8 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { StatsPlayerLinkService } from "../../application/stats-player-link.service";
-import { LinkStatsPlayerDto, type LinkStatsPlayerInput } from "./dto/link-stats-player.dto";
+import { LinkStatsPlayerDto } from "./dto/link-stats-player.dto";
+import type { LinkStatsPlayerInput } from "./dto/link-stats-player.dto";
 
 @Controller("tournaments/:id/stats-players")
 @UseGuards(AuthGuard, PermissionGuard)

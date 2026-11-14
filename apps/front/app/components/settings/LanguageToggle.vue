@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { uiLocale, type UiLocale } from "@sarpbc/utils";
+import { uiLocale } from "@sarpbc/utils";
+import type { UiLocale } from "@sarpbc/utils";
 import type { TextToggleOption } from "~/components/s/TextToggle.vue";
 
 const { locale, setLocale, t } = useI18n();

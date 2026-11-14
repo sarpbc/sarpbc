@@ -1,0 +1,92 @@
+import { isMatchFinished, isMatchLive, matchPath } from "@sarpbc/utils";
+import type { MatchLinkTarget } from "~/types/matches";
+
+export const MATCH_DISCOVERY_FROM_QUERY = "from";
+
+export const MATCH_DISCOVERY_SOURCES = [
+  "matches_list",
+  "results_list",
+  "home_strip",
+  "lateral_bar",
+  "tournament_hub",
+  "news_article",
+] as const;
+
+export type MatchDiscoverySource = (typeof MATCH_DISCOVERY_SOURCES)[number];
+
+export type MatchDiscoveryStatus = "live" | "upcoming" | "finished";
+
+export type MatchDiscoveryQueryValue = string | (string | null)[] | null | undefined;
+
+export interface MatchDiscoveryDetailTo {
+  path: string;
+  query: { from: MatchDiscoverySource };
+}
+
+const SOURCE_SET = new Set<string>(MATCH_DISCOVERY_SOURCES);
+
+function isMatchDiscoverySource(value: MatchDiscoveryQueryValue): value is MatchDiscoverySource {
+  if (value === null || value === undefined || Array.isArray(value)) {
+    return false;
+  }
+
+  return SOURCE_SET.has(value);
+}
+
+export function parseMatchDiscoverySource(
+  value: MatchDiscoveryQueryValue,
+): MatchDiscoverySource | null {
+  if (Array.isArray(value)) {
+    return parseMatchDiscoverySource(value[0]);
+  }
+
+  return isMatchDiscoverySource(value) ? value : null;
+}
+
+export function listVariantToDiscoveryStatus(
+  variant: "live" | "upcoming" | "result",
+): MatchDiscoveryStatus {
+  switch (variant) {
+    case "live": {
+      return "live";
+    }
+
+    case "upcoming": {
+      return "upcoming";
+    }
+
+    case "result": {
+      return "finished";
+    }
+
+    default: {
+      const _exhaustive: never = variant;
+
+      return _exhaustive;
+    }
+  }
+}
+
+export function resolveMatchDiscoveryStatus(input: {
+  endAt?: Date | string | null;
+  beginAt?: Date | string | null;
+  status?: string | null;
+  now?: number;
+}): MatchDiscoveryStatus {
+  if (isMatchFinished(input)) {
+    return "finished";
+  }
+
+  return isMatchLive(input, input.now ?? Date.now()) ? "live" : "upcoming";
+}
+
+export function buildMatchDetailTo(
+  localePath: (path: string) => string,
+  match: MatchLinkTarget,
+  source: MatchDiscoverySource,
+): MatchDiscoveryDetailTo {
+  return {
+    path: localePath(matchPath(match.publicId, match.slug)),
+    query: { [MATCH_DISCOVERY_FROM_QUERY]: source },
+  };
+}

@@ -1,7 +1,7 @@
 export type EntityRef = { kind: "publicId"; value: number } | { kind: "id"; value: string };
 
-const PUBLIC_ID = /^[1-9]\d{0,9}$/;
-const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const PUBLIC_ID = /^[1-9]\d{0,9}$/u;
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const MAX_PUBLIC_ID = 2_147_483_647;
 
 export function isUuid(raw: string): boolean {

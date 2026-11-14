@@ -21,12 +21,12 @@ void describe("checkInput", () => {
   void it("refuses Liquipedia, plain http and live sources that are not URLs", () => {
     assert.throws(() => {
       checkInput("https://liquipedia.net/rocketleague/Coupe", false);
-    }, /Liquipedia/);
+    }, /Liquipedia/u);
     assert.throws(() => {
       checkInput("http://www.twitch.tv/slash", true);
-    }, /https/);
+    }, /https/u);
     assert.throws(() => {
       checkInput("match.mp4", true);
-    }, /stream URL/);
+    }, /stream URL/u);
   });
 });

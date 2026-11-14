@@ -3,9 +3,9 @@ import {
   getApiErrorMessage,
   resolveThemedLogoUrl,
   tournamentStageLabel,
-  type ThemedLogo,
   participantName,
 } from "@sarpbc/utils";
+import type { ThemedLogo } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const localePath = useLocalePath();

@@ -23,7 +23,9 @@ function setup(role: StaffRole = "admin") {
     (candidate) => candidate.name === "set_match_lineups",
   );
 
-  if (!tool) throw new Error("set_match_lineups is not defined");
+  if (!tool) {
+    throw new Error("set_match_lineups is not defined");
+  }
 
   const call = async (args: ToolArguments) =>
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);

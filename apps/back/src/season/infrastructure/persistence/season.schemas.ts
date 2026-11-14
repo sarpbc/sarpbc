@@ -1,5 +1,6 @@
 import { defineEntity, p } from "@mikro-orm/core";
-import { SEASON_AWARD_TYPES, type SeasonFormatPhase } from "@sarpbc/types";
+import { SEASON_AWARD_TYPES } from "@sarpbc/types";
+import type { SeasonFormatPhase } from "@sarpbc/types";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import { Season } from "./season.entity";

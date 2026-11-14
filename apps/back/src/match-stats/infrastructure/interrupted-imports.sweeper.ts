@@ -1,4 +1,5 @@
-import { Injectable, type OnApplicationBootstrap } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import type { OnApplicationBootstrap } from "@nestjs/common";
 import { MikroORM, RequestContext } from "@mikro-orm/core";
 import { log } from "evlog";
 import { StatsImportService } from "../application/stats-import.service";
@@ -17,11 +18,12 @@ export class InterruptedImportsSweeper implements OnApplicationBootstrap {
       async () => await this.imports.failInterrupted(),
     );
 
-    if (interrupted > 0)
+    if (interrupted > 0) {
       log.warn({
         component: InterruptedImportsSweeper.name,
         message: "Interrupted stats imports",
         interrupted,
       });
+    }
   }
 }

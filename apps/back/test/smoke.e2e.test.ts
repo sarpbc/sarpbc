@@ -1,8 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { BadRequestException } from "@nestjs/common";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
-import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
+import type { NestFastifyApplication } from "@nestjs/platform-fastify";
+import { FastifyAdapter } from "@nestjs/platform-fastify";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "@nestjs/config";
@@ -17,10 +19,8 @@ import { PostHogService } from "../src/infrastructure/telemetry/posthog.service"
 import { NewsController } from "../src/news/infrastructure/http/news.controller";
 import { NewsService } from "../src/news/application/news.service";
 import { TweetEmbedService } from "../src/news/application/tweet-embed.service";
-import {
-  TweetImageService,
-  type TweetImageGateway,
-} from "../src/news/application/tweet-image.service";
+import { TweetImageService } from "../src/news/application/tweet-image.service";
+import type { TweetImageGateway } from "../src/news/application/tweet-image.service";
 import { ReplyService } from "../src/reply/application/reply.service";
 import { MatchController } from "../src/tournament/infrastructure/http/match.controller";
 import type { GameStatsStore } from "../src/match-stats/application/ports";

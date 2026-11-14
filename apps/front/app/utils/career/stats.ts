@@ -27,7 +27,10 @@ export function clampStat(value: number): number {
 }
 
 function gainCost(current: number): number {
-  if (current < SOFT_STAT_CEILING) return 1;
+  if (current < SOFT_STAT_CEILING) {
+    return 1;
+  }
+
   const over = current - SOFT_STAT_CEILING;
 
   return Math.min(5, 1 + (over * over) / 50);
@@ -38,9 +41,13 @@ export function applyStatChange(
   delta: number,
   rng: StatRng = denyMythicRoll,
 ): number {
-  if (delta === 0) return clampStat(current);
+  if (delta === 0) {
+    return clampStat(current);
+  }
 
-  if (delta < 0) return clampStat(current + delta);
+  if (delta < 0) {
+    return clampStat(current + delta);
+  }
 
   let budget = delta;
   let value = current;
@@ -48,7 +55,10 @@ export function applyStatChange(
   while (budget > 0 && value < ELITE_STAT_CAP) {
     const cost = gainCost(value);
 
-    if (budget + 1e-9 < cost) break;
+    if (budget + 1e-9 < cost) {
+      break;
+    }
+
     value += 1;
     budget -= cost;
   }
@@ -74,14 +84,22 @@ export function applyStatDelta(
 
 function getBackgroundBaseStats(background: CareerBackground): CareerStats {
   switch (background) {
-    case "prodigy":
+    case "prodigy": {
       return { rating: 72, form: 55, morale: 60 };
-    case "grinder":
+    }
+
+    case "grinder": {
       return { rating: 62, form: 70, morale: 65 };
-    case "oneVOne":
+    }
+
+    case "oneVOne": {
       return { rating: 70, form: 68, morale: 55 };
-    case "freestyler":
+    }
+
+    case "freestyler": {
       return { rating: 66, form: 52, morale: 78 };
+    }
+
     default: {
       const _exhaustive: never = background;
 
@@ -92,12 +110,18 @@ function getBackgroundBaseStats(background: CareerBackground): CareerStats {
 
 function getRoleDelta(role: CareerRole): Partial<CareerStats> {
   switch (role) {
-    case "offense":
+    case "offense": {
       return { rating: 3, form: -2 };
-    case "technical":
+    }
+
+    case "technical": {
       return { form: 3, morale: -2 };
-    case "defense":
+    }
+
+    case "defense": {
       return { morale: 3, rating: -2 };
+    }
+
     default: {
       const _exhaustive: never = role;
 
@@ -113,7 +137,9 @@ export function getStartingStats(background: CareerBackground, role: CareerRole)
 export function getAgeDecline(season: number): Partial<CareerStats> {
   const pastPeak = getSeasonsPastPeak(season);
 
-  if (pastPeak <= 0) return {};
+  if (pastPeak <= 0) {
+    return {};
+  }
 
   return {
     rating: -(1 + pastPeak),
@@ -124,12 +150,18 @@ export function getAgeDecline(season: number): Partial<CareerStats> {
 
 export function computeComposite(stats: CareerStats, role: CareerRole): number {
   switch (role) {
-    case "offense":
+    case "offense": {
       return stats.rating * 0.55 + stats.form * 0.3 + stats.morale * 0.15;
-    case "technical":
+    }
+
+    case "technical": {
       return stats.rating * 0.5 + stats.form * 0.35 + stats.morale * 0.15;
-    case "defense":
+    }
+
+    case "defense": {
       return stats.rating * 0.45 + stats.form * 0.3 + stats.morale * 0.25;
+    }
+
     default: {
       const _exhaustive: never = role;
 
@@ -139,7 +171,9 @@ export function computeComposite(stats: CareerStats, role: CareerRole): number {
 }
 
 export function computePerformance(stats: CareerStats, role?: CareerRole | null): number {
-  if (role) return computeComposite(stats, role);
+  if (role) {
+    return computeComposite(stats, role);
+  }
 
   return stats.rating * 0.5 + stats.form * 0.3 + stats.morale * 0.2;
 }

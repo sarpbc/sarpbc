@@ -31,12 +31,17 @@ const statRows = computed(() => {
 
 const deltaGridClass = computed(() => {
   switch (statRows.value.length) {
-    case 1:
+    case 1: {
       return "grid-cols-1";
-    case 2:
+    }
+
+    case 2: {
       return "grid-cols-2";
-    default:
+    }
+
+    default: {
       return "grid-cols-3";
+    }
   }
 });
 

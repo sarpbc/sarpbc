@@ -13,7 +13,7 @@ export interface Size {
   height: number;
 }
 
-const PPM_HEADER = /^P6\s+(?<width>\d+)\s+(?<height>\d+)\s+255\s/;
+const PPM_HEADER = /^P6\s+(?<width>\d+)\s+(?<height>\d+)\s+255\s/u;
 const MAX_PPM_HEADER = 64;
 
 export function scaleRegion(region: Region, reference: Size, frame: Frame): Region {
@@ -58,7 +58,9 @@ function parsePpmHeader(bytes: Uint8Array): { width: number; height: number; siz
   const match = PPM_HEADER.exec(text);
 
   if (match === null) {
-    if (bytes.length >= MAX_PPM_HEADER) throw new Error("Invalid PPM header.");
+    if (bytes.length >= MAX_PPM_HEADER) {
+      throw new Error("Invalid PPM header.");
+    }
 
     return null;
   }
@@ -66,7 +68,9 @@ function parsePpmHeader(bytes: Uint8Array): { width: number; height: number; siz
   const width = Number(match.groups?.width);
   const height = Number(match.groups?.height);
 
-  if (width < 1 || height < 1) throw new Error("Invalid PPM size.");
+  if (width < 1 || height < 1) {
+    throw new Error("Invalid PPM size.");
+  }
 
   return { width, height, size: match[0].length };
 }
@@ -114,5 +118,7 @@ export async function* readPpmFrames(chunks: AsyncIterable<Uint8Array>): AsyncGe
     }
   }
 
-  if (target !== null || header.length > 0) throw new Error("Truncated PPM stream.");
+  if (target !== null || header.length > 0) {
+    throw new Error("Truncated PPM stream.");
+  }
 }

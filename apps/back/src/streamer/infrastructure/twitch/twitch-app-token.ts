@@ -36,7 +36,9 @@ export class TwitchAppToken {
   }
 
   invalidate(rejected: string): void {
-    if (this.cached?.value === rejected) this.cached = null;
+    if (this.cached?.value === rejected) {
+      this.cached = null;
+    }
   }
 
   private async request(): Promise<string> {

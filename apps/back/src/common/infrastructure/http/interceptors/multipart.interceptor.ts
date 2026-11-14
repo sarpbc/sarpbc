@@ -46,8 +46,9 @@ export function MultipartInterceptor(
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
       const req = context.switchToHttp().getRequest<FastifyRequest>();
 
-      if (!req.isMultipart())
+      if (!req.isMultipart()) {
         throw new HttpException("The request should be a form-data", HttpStatus.BAD_REQUEST);
+      }
 
       const files: StoredFilesByField = {};
       const body: MultipartFormFields = {};
@@ -62,8 +63,9 @@ export function MultipartInterceptor(
           const file = await getFileFromPart(part);
           const validationResult = await validateFile(file, options);
 
-          if (validationResult !== undefined)
+          if (validationResult !== undefined) {
             throw new HttpException(validationResult, HttpStatus.UNPROCESSABLE_ENTITY);
+          }
 
           const existing: Storage.MultipartFile[] | undefined = files[part.fieldname];
           files[part.fieldname] = [...(existing ?? []), file];

@@ -83,7 +83,10 @@ export class PandascoreApiClient {
     try {
       return await this.request(`/tournaments/${tournamentId}`);
     } catch (error) {
-      if (error instanceof PandascoreApiError && error.status === 404) return null;
+      if (error instanceof PandascoreApiError && error.status === 404) {
+        return null;
+      }
+
       throw error;
     }
   }
@@ -100,11 +103,18 @@ export class PandascoreApiClient {
     try {
       return await this.paginateAll(`/tournaments/${tournamentId}/standings`);
     } catch (error) {
-      if (!(error instanceof PandascoreApiError)) throw error;
+      if (!(error instanceof PandascoreApiError)) {
+        throw error;
+      }
 
-      if (error.status === 404) return [];
+      if (error.status === 404) {
+        return [];
+      }
 
-      if (error.status !== 403) throw error;
+      if (error.status !== 403) {
+        throw error;
+      }
+
       log.warn({
         component: PandascoreApiClient.name,
         message: "PandaScore standings are not available with this API plan",
@@ -141,7 +151,10 @@ export class PandascoreApiClient {
         }),
       );
 
-      if (items.length < perPage) return items;
+      if (items.length < perPage) {
+        return items;
+      }
+
       await sleep(rateLimitMs);
 
       return [...items, ...(await fetchFrom(page + 1))];

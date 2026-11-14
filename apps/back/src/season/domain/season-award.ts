@@ -24,12 +24,18 @@ type RegionRule = "required" | "optional" | "forbidden";
 
 function regionRule(awardType: SeasonAwardType): RegionRule {
   switch (awardType) {
-    case "season_mvp":
+    case "season_mvp": {
       return "forbidden";
-    case "regular_season_mvp":
+    }
+
+    case "regular_season_mvp": {
       return "optional";
-    case "regional_mvp":
+    }
+
+    case "regional_mvp": {
       return "required";
+    }
+
     default: {
       const exhaustive: never = awardType;
 
@@ -41,8 +47,9 @@ function regionRule(awardType: SeasonAwardType): RegionRule {
 function optionalText(value: string | null | undefined, max: number, field: string) {
   const trimmed = value?.trim() ?? "";
 
-  if (trimmed.length > max)
+  if (trimmed.length > max) {
     throw new InvalidInputError(`The ${field} has at most ${max} characters.`);
+  }
 
   return trimmed || null;
 }
@@ -52,28 +59,33 @@ function parseRegion(awardType: SeasonAwardType, value: string | null | undefine
   const rule = regionRule(awardType);
   const label = SEASON_AWARD_LABELS[awardType];
 
-  if (rule === "required" && region === null)
+  if (rule === "required" && region === null) {
     throw new InvalidInputError(`A ${label} names its region.`);
+  }
 
-  if (rule === "forbidden" && region !== null)
+  if (rule === "forbidden" && region !== null) {
     throw new InvalidInputError(`A ${label} covers the whole season and has no region.`);
+  }
 
   return region;
 }
 
 export function assertAwardSourceUrl(value: string): void {
-  if (value.length > SEASON_AWARD_SOURCE_URL_MAX_LENGTH)
+  if (value.length > SEASON_AWARD_SOURCE_URL_MAX_LENGTH) {
     throw new InvalidInputError(
       `The award source has at most ${SEASON_AWARD_SOURCE_URL_MAX_LENGTH} characters.`,
     );
+  }
 
-  if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
+  if (!URL.canParse(value) || !/^https?:$/u.test(new URL(value).protocol)) {
     throw new InvalidInputError("The award source must be an http(s) URL.");
+  }
 
-  if (isForbiddenSourceHost(new URL(value).hostname))
+  if (isForbiddenSourceHost(new URL(value).hostname)) {
     throw new InvalidInputError(
       "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
     );
+  }
 }
 
 export function parseSeasonAward(input: {

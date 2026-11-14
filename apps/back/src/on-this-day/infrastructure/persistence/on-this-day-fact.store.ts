@@ -36,12 +36,15 @@ function matchName(match: Match): string {
 }
 
 function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["link"] {
-  if (player)
+  if (player) {
     return { kind: "player", id: player.id, name: player.name, slug: player.slug, source: null };
+  }
 
-  if (team) return { kind: "team", id: team.id, name: team.name, slug: team.slug, source: null };
+  if (team) {
+    return { kind: "team", id: team.id, name: team.name, slug: team.slug, source: null };
+  }
 
-  if (tournament)
+  if (tournament) {
     return {
       kind: "tournament",
       id: tournament.id,
@@ -50,8 +53,9 @@ function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["
       event: { name: tournament.event.name, slug: tournament.event.slug },
       source: tournament.source,
     };
+  }
 
-  if (match)
+  if (match) {
     return {
       kind: "match",
       id: match.id,
@@ -60,6 +64,7 @@ function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["
       slug: toMatchSlug(match),
       source: matchSource(match),
     };
+  }
 
   return null;
 }
@@ -111,14 +116,22 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
 
   async linkExists({ kind, id }: OnThisDayFactLinkInput) {
     switch (kind) {
-      case "player":
+      case "player": {
         return (await this.em.count(Player, { id, mergedInto: null })) > 0;
-      case "team":
+      }
+
+      case "team": {
         return (await this.em.count(Team, { id, mergedInto: null })) > 0;
-      case "tournament":
+      }
+
+      case "tournament": {
         return (await this.em.count(Tournament, { id })) > 0;
-      case "match":
+      }
+
+      case "match": {
         return (await this.em.count(Match, { id })) > 0;
+      }
+
       default: {
         const exhaustive: never = kind;
 

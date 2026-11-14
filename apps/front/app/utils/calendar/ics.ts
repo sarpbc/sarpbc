@@ -39,8 +39,8 @@ export function matchEventUid(id: string): string {
 function formatIcsUtc(date: Date): string {
   return date
     .toISOString()
-    .replaceAll(/[-:]/g, "")
-    .replace(/\.\d{3}/, "");
+    .replaceAll(/[-:]/gu, "")
+    .replace(/\.\d{3}/u, "");
 }
 
 function escapeIcsText(value: string): string {

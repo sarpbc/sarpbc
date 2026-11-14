@@ -6,9 +6,10 @@ import {
   displayMatchScore,
   getMatchParticipantScore,
   shouldShowMatchScores,
-} from "~/utils/matchScore";
-import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
-import { getPickOutcome, isMatchLockedForPickem, type PickemPickState } from "~/utils/pickems";
+} from "~/utils/match-score";
+import { resolveMatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
+import { getPickOutcome, isMatchLockedForPickem } from "~/utils/pickems";
+import type { PickemPickState } from "~/utils/pickems";
 
 const LEADERBOARD_TOP = 10;
 
@@ -80,7 +81,9 @@ const {
 const { data: personalRank, refresh: refreshPersonalRank } = useLazyAsyncData(
   () => `pickem-me-${tournamentId.value}-${user.value?.id ?? "guest"}`,
   async () => {
-    if (!user.value) return null;
+    if (!user.value) {
+      return null;
+    }
 
     try {
       return await getPickemPersonalRanking(tournamentId.value);
@@ -128,12 +131,16 @@ interface PickemDayGroup {
 }
 
 const matchesByDay = computed(() => {
-  if (!tournament.value?.matches) return [];
+  if (!tournament.value?.matches) {
+    return [];
+  }
 
   const grouped = new Map<string, PickemDayGroup>();
 
   for (const match of tournament.value.matches) {
-    if (match.participants?.length !== 2 || !match.beginAt) continue;
+    if (match.participants?.length !== 2 || !match.beginAt) {
+      continue;
+    }
 
     const matchDate = new Date(match.beginAt);
     const dayKey = matchDate.toDateString();
@@ -170,10 +177,14 @@ function tabTo(tab: PickemDetailTab) {
   const path = localePath(`/game/pickems/${tournamentId.value}`);
 
   switch (tab) {
-    case "pickem":
+    case "pickem": {
       return { path };
-    case "leaderboard":
+    }
+
+    case "leaderboard": {
       return { path, query: { tab: "leaderboard" } };
+    }
+
     default: {
       const _exhaustive: never = tab;
 
@@ -194,7 +205,9 @@ function loginRedirectPath() {
 function matchScoreLabel(match: TournamentDetailMatch): string | null {
   const status = resolveMatchDiscoveryStatus(match);
 
-  if (!shouldShowMatchScores(status)) return null;
+  if (!shouldShowMatchScores(status)) {
+    return null;
+  }
 
   const scoreA = displayMatchScore(
     getMatchParticipantScore(match.results, match.participants?.[0]?.id),
@@ -206,7 +219,9 @@ function matchScoreLabel(match: TournamentDetailMatch): string | null {
     status,
   );
 
-  if (scoreA === null && scoreB === null) return null;
+  if (scoreA === null && scoreB === null) {
+    return null;
+  }
 
   return `${scoreA ?? "–"}–${scoreB ?? "–"}`;
 }
@@ -214,9 +229,13 @@ function matchScoreLabel(match: TournamentDetailMatch): string | null {
 function matchCenterPrimary(match: TournamentDetailMatch): string | null {
   const score = matchScoreLabel(match);
 
-  if (score) return score;
+  if (score) {
+    return score;
+  }
 
-  if (!match.beginAt) return null;
+  if (!match.beginAt) {
+    return null;
+  }
 
   return pickemTimeDf.value.format(new Date(match.beginAt));
 }
@@ -232,22 +251,33 @@ function teamButtonColor(
   match: TournamentDetailMatch,
   participantId: string | undefined,
 ): "neutral" | "success" | "error" | "primary" {
-  if (!participantId || !picks.value) return "neutral";
+  if (!participantId || !picks.value) {
+    return "neutral";
+  }
+
   const pick = picks.value.get(match.id);
 
-  if (!pick || pick.pickedParticipant !== participantId) return "neutral";
+  if (!pick || pick.pickedParticipant !== participantId) {
+    return "neutral";
+  }
 
   const outcome = getPickOutcome(match, pick);
 
-  if (outcome === "correct") return "success";
+  if (outcome === "correct") {
+    return "success";
+  }
 
-  if (outcome === "incorrect") return "error";
+  if (outcome === "incorrect") {
+    return "error";
+  }
 
   return "primary";
 }
 
 async function pickTeam(matchId: string, participantId: string) {
-  if (!participantId || submittingMatchId.value) return;
+  if (!participantId || submittingMatchId.value) {
+    return;
+  }
 
   if (!user.value) {
     await navigateTo(loginRedirectPath());

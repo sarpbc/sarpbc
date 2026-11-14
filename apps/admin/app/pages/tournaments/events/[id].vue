@@ -35,7 +35,9 @@ const { data: leagues } = await useLazyAsyncData(
 watch(
   event,
   (value) => {
-    if (value) formState.value = eventToFormState(value);
+    if (value) {
+      formState.value = eventToFormState(value);
+    }
   },
   { immediate: true },
 );
@@ -51,7 +53,9 @@ function formatDate(date: Date | string | null): string {
 }
 
 async function handleSubmit() {
-  if (!event.value || isSaving.value) return;
+  if (!event.value || isSaving.value) {
+    return;
+  }
 
   if (!formState.value.name.trim()) {
     toast.add({ title: t("page.tournaments.events.form.nameRequired"), color: "error" });

@@ -96,7 +96,9 @@ function npcSplitPointsByTeam(
 ): Map<string, number> {
   const stored = storedSplitPoints(world, player.season, split);
 
-  if (stored) return new Map(Object.entries(stored));
+  if (stored) {
+    return new Map(Object.entries(stored));
+  }
 
   return new Map();
 }

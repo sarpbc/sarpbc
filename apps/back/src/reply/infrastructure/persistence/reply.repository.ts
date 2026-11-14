@@ -1,9 +1,11 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { QueryOrder, type FilterQuery } from "@mikro-orm/core";
+import { QueryOrder } from "@mikro-orm/core";
+import type { FilterQuery } from "@mikro-orm/core";
 import { z } from "zod";
 import type { ReplyTargetType } from "@sarpbc/types";
 import type { ReplyFindOptions } from "../../application/ports";
-import { REPLY_TARGETS, replySortOrder, type ReplyTargetFields } from "../../domain/reply";
+import { REPLY_TARGETS, replySortOrder } from "../../domain/reply";
+import type { ReplyTargetFields } from "../../domain/reply";
 import { Reply } from "./reply.entity";
 import { REPLY_POPULATE } from "./reply.mapper";
 
@@ -32,9 +34,13 @@ export class ReplyRepository {
 
     const where: FilterQuery<Reply> = onTarget(targetType, { id: targetId });
 
-    if (!includeHidden) where.hiddenAt = null;
+    if (!includeHidden) {
+      where.hiddenAt = null;
+    }
 
-    if (rootsOnly) where.replyTo = null;
+    if (rootsOnly) {
+      where.replyTo = null;
+    }
 
     return await this.rows.findAll({
       where,

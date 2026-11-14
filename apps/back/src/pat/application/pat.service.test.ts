@@ -35,7 +35,10 @@ describe(PatService, () => {
       findActive: async (hash) =>
         !revoked && hash === savedHash ? { id: "token-1", owner, lastUsedAt } : null,
       revokeOwned: async (ownerId, id) => {
-        if (ownerId !== owner.id || id !== "token-1" || revoked) return false;
+        if (ownerId !== owner.id || id !== "token-1" || revoked) {
+          return false;
+        }
+
         revoked = true;
 
         return true;
@@ -57,7 +60,7 @@ describe(PatService, () => {
   it("returns plaintext once and stores only its hash", async () => {
     const created = await service.createToken(owner.id, "CI token");
     expect(created).toMatchObject({ id: "token-1", name: "CI token", createdAt: now });
-    expect(created.token).toMatch(/^sarpbc_pat_/);
+    expect(created.token).toMatch(/^sarpbc_pat_/u);
     expect(savedHash).toBe(createHash("sha256").update(created.token).digest("hex"));
     expect(savedHash).not.toBe(created.token);
   });

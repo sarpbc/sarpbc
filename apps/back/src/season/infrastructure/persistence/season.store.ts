@@ -1,13 +1,13 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import {
-  SEASON_AWARD_TYPES,
-  type PlayerSeasonAward,
-  type SeasonArchiveSummary,
-  type SeasonAward as SeasonAwardItem,
-  type SeasonParticipant as SeasonParticipantItem,
-  type SeasonPathEntry as SeasonPathEntryItem,
-  type SeasonSummary,
-  type SeasonTeam,
+import { SEASON_AWARD_TYPES } from "@sarpbc/types";
+import type {
+  PlayerSeasonAward,
+  SeasonArchiveSummary,
+  SeasonAward as SeasonAwardItem,
+  SeasonParticipant as SeasonParticipantItem,
+  SeasonPathEntry as SeasonPathEntryItem,
+  SeasonSummary,
+  SeasonTeam,
 } from "@sarpbc/types";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
@@ -170,12 +170,14 @@ export class SeasonPersistence implements SeasonStore {
     try {
       await this.em.persist(row).flush();
     } catch (error) {
-      if (isUniqueViolation(error))
+      if (isUniqueViolation(error)) {
         throw new ConflictError(
           `Another season already uses the name "${season.name}"${
             season.slug !== null && season.slug !== "" ? ` or the slug "${season.slug}".` : "."
           }`,
         );
+      }
+
       throw error;
     }
   }
@@ -241,10 +243,12 @@ export class SeasonPersistence implements SeasonStore {
     try {
       await this.em.persist(row).flush();
     } catch (error) {
-      if (isUniqueViolation(error))
+      if (isUniqueViolation(error)) {
         throw new ConflictError(
           `${row.season.name} already has this award. Remove the current award before assigning another player.`,
         );
+      }
+
       throw error;
     }
 
@@ -307,8 +311,10 @@ export class SeasonPersistence implements SeasonStore {
     try {
       await this.em.persist(row).flush();
     } catch (error) {
-      if (isUniqueViolation(error))
+      if (isUniqueViolation(error)) {
         throw new ConflictError(`${row.team.name} already takes part in this season.`);
+      }
+
       throw error;
     }
 

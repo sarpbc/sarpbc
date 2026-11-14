@@ -6,7 +6,8 @@ import type { Player } from "../../../roster/domain/player";
 import type { Team } from "../../../roster/domain/team";
 import type { Tournament } from "../../../tournament/domain/tournament";
 import type { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
-import { findByIdOrSlug, type IdOrSlugLookup } from "./find-by-id-or-slug";
+import { findByIdOrSlug } from "./find-by-id-or-slug";
+import type { IdOrSlugLookup } from "./find-by-id-or-slug";
 
 export interface MatchParticipantsInput {
   participantIds?: readonly string[];
@@ -46,7 +47,10 @@ export async function resolveMatchParticipantIds(
   const seen = new Set<string>();
 
   const add = (participant: TournamentParticipant) => {
-    if (seen.has(participant.id)) return;
+    if (seen.has(participant.id)) {
+      return;
+    }
+
     seen.add(participant.id);
     resolved.push(participant);
   };
@@ -54,7 +58,10 @@ export async function resolveMatchParticipantIds(
   const rejectParticipantId = (token: string, field: "teams" | "players") => {
     const asParticipant = byParticipantId.get(token);
 
-    if (!asParticipant) return;
+    if (!asParticipant) {
+      return;
+    }
+
     throw new InvalidInputError(
       `"${token}" is a tournament participant id for ${participantName(asParticipant)}. Pass it in participantIds, or pass a slug in ${field}.`,
     );

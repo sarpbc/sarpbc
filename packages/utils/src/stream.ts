@@ -26,12 +26,18 @@ function channelOf(url: URL, platform: StreamPlatform): string | null {
 
   switch (platform) {
     case "twitch":
-    case "kick":
+    case "kick": {
       return first || null;
-    case "youtube":
+    }
+
+    case "youtube": {
       return first.startsWith("@") ? first : null;
-    case "other":
-      return url.hostname.replace(/^www\./, "");
+    }
+
+    case "other": {
+      return url.hostname.replace(/^www\./u, "");
+    }
+
     default: {
       const exhaustive: never = platform;
 
@@ -49,9 +55,14 @@ export function parseStreamUrl(input: string): ParsedStreamUrl {
     return { ok: false, error: "invalid-url" };
   }
 
-  if (url.protocol !== "https:") return { ok: false, error: "not-https" };
+  if (url.protocol !== "https:") {
+    return { ok: false, error: "not-https" };
+  }
 
-  if (url.port || url.username || url.password) return { ok: false, error: "invalid-url" };
+  if (url.port || url.username || url.password) {
+    return { ok: false, error: "invalid-url" };
+  }
+
   const platform = STREAM_HOSTS.get(url.hostname) ?? "other";
 
   return { ok: true, url: url.href, platform, channel: channelOf(url, platform) };

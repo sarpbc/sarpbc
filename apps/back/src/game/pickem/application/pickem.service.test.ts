@@ -29,7 +29,9 @@ describe(PickemService, () => {
         picks.find((p) => p.user.id === user && p.match.id === matchId) ?? null,
       unscored: async () => picks.filter((p) => !p.scored),
       savePick: async (pick) => {
-        if (!picks.some((p) => p.id === pick.id)) picks.push(pick);
+        if (!picks.some((p) => p.id === pick.id)) {
+          picks.push(pick);
+        }
       },
     };
 

@@ -53,7 +53,7 @@ watch(editOpen, (isOpen) => {
   }
 });
 
-const adminHomeUrl = computed(() => config.public.adminUrl.replace(/\/$/, ""));
+const adminHomeUrl = computed(() => config.public.adminUrl.replace(/\/$/u, ""));
 
 const showStaffConsole = computed(() => isStaffUser(user.value));
 

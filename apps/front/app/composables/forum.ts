@@ -1,10 +1,10 @@
-import {
-  FORUM_ERROR_CODES,
-  type ForumPost,
-  type ForumPostCreationStatus,
-  type ForumPostListItem,
-  type ForumTopic,
-  type PostPreview,
+import { FORUM_ERROR_CODES } from "@sarpbc/types";
+import type {
+  ForumPost,
+  ForumPostCreationStatus,
+  ForumPostListItem,
+  ForumTopic,
+  PostPreview,
 } from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
 import type { CreateForumPostResult } from "~/types/forum";

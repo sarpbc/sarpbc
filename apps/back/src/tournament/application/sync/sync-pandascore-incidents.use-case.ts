@@ -50,12 +50,15 @@ export class SyncPandascoreIncidentsUseCase {
     let earliestFailure: Date | null = null;
 
     for (const incident of incidents) {
-      if (incident.modifiedAt > latest) latest = incident.modifiedAt;
+      if (incident.modifiedAt > latest) {
+        latest = incident.modifiedAt;
+      }
     }
 
     for (const failedAt of failures) {
-      if (failedAt !== null && (!earliestFailure || failedAt < earliestFailure))
+      if (failedAt !== null && (!earliestFailure || failedAt < earliestFailure)) {
         earliestFailure = failedAt;
+      }
     }
 
     await this.cursor.setLastSyncAt(

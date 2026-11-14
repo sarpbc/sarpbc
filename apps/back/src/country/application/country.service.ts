@@ -28,7 +28,11 @@ export interface CountryMatchPage {
 function currentTeams(players: Player[]): Team[] {
   const teams = new Map<string, Team>();
 
-  for (const { team } of players) if (team) teams.set(team.id, team);
+  for (const { team } of players) {
+    if (team) {
+      teams.set(team.id, team);
+    }
+  }
 
   return [...teams.values()].toSorted((a, b) => a.name.localeCompare(b.name, "en"));
 }

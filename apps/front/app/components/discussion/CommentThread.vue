@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { PaginatedReplies, Reply, ReplyTargetType } from "@sarpbc/types";
-import { parseCommentHash } from "~/utils/commentPermalink";
-import { findCommentInTree } from "~/utils/commentTree";
+import { parseCommentHash } from "~/utils/comment-permalink";
+import { findCommentInTree } from "~/utils/comment-tree";
 
 const {
   targetType,

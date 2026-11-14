@@ -1,10 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { CookieSerializeOptions } from "@fastify/cookie";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
-import { ExecutionContext } from "@nestjs/common";
+import type { ExecutionContext } from "@nestjs/common";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
-import { AuthenticatedUser } from "../../../common/application/models/authenticated-user";
+import type { AuthenticatedUser } from "../../../common/application/models/authenticated-user";
 import { AuthenticationError } from "../../../common/domain/errors/authentication-error";
 import { AuthService } from "../../application/auth.service";
 import { AuthGuard } from "./auth.guard";

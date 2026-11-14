@@ -23,11 +23,12 @@ export class StatsPlayerLinkService {
   async link(tournamentId: string, link: PlayerLink): Promise<number> {
     await requireTournament(this.candidates, tournamentId);
 
-    if (!(await this.links.onTournamentRoster(tournamentId, link.playerId)))
+    if (!(await this.links.onTournamentRoster(tournamentId, link.playerId))) {
       throw new InvalidInputError({
         message: "Choose a player from a roster of this tournament.",
         code: "player_not_on_tournament_roster",
       });
+    }
 
     return await this.links.link(link);
   }

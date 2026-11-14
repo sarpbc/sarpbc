@@ -14,9 +14,13 @@ export function stageFilter({
 }: Pick<TournamentListOptions, "pickems" | "activeOnly" | "redistributableOnly">): StageFilter {
   const where: StageFilter = {};
 
-  if (pickems !== undefined) where.pickemsEnabled = pickems;
+  if (pickems !== undefined) {
+    where.pickemsEnabled = pickems;
+  }
 
-  if (redistributableOnly) where.source = { $ne: "startgg" };
+  if (redistributableOnly) {
+    where.source = { $ne: "startgg" };
+  }
 
   if (activeOnly) {
     where.winner = null;

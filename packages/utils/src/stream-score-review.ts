@@ -59,9 +59,13 @@ export function streamScoreConfirmBlockers(
 ): StreamScoreConfirmBlocker[] {
   const blockers: StreamScoreConfirmBlocker[] = [];
 
-  if (proposal.series.winner === null) blockers.push("no-winner");
+  if (proposal.series.winner === null) {
+    blockers.push("no-winner");
+  }
 
-  if (proposal.games.some((game) => game.winner === null)) blockers.push("unread-game");
+  if (proposal.games.some((game) => game.winner === null)) {
+    blockers.push("unread-game");
+  }
 
   if (
     proposal.games.some(
@@ -70,13 +74,17 @@ export function streamScoreConfirmBlockers(
         streamScoreGameNeedsCheck(game) &&
         !review.checkedGames.has(game.number),
     )
-  )
+  ) {
     blockers.push("unchecked-game");
+  }
 
-  if (streamScoreBestOfMismatch(proposal, review.numberOfGames) && !review.bestOfAcknowledged)
+  if (streamScoreBestOfMismatch(proposal, review.numberOfGames) && !review.bestOfAcknowledged) {
     blockers.push("best-of-mismatch");
+  }
 
-  if (isForbiddenStreamScoreSource(proposal.source)) blockers.push("forbidden-source");
+  if (isForbiddenStreamScoreSource(proposal.source)) {
+    blockers.push("forbidden-source");
+  }
 
   return blockers;
 }

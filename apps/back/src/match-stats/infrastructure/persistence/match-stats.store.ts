@@ -56,7 +56,9 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   constructor(private readonly em: EntityManager) {}
 
   async locations(replayIds: string[]): Promise<Map<string, GameLocation>> {
-    if (replayIds.length === 0) return new Map();
+    if (replayIds.length === 0) {
+      return new Map();
+    }
 
     const rows = await this.em.find(
       MatchGame,
@@ -70,7 +72,9 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   }
 
   async excluded(replayIds: string[]): Promise<Set<string>> {
-    if (replayIds.length === 0) return new Set();
+    if (replayIds.length === 0) {
+      return new Set();
+    }
 
     const rows = await this.em.findAll(MatchGameExclusion, {
       where: { ballchasingId: { $in: replayIds } },
@@ -105,7 +109,10 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   }
 
   async links(accounts: PlatformAccount[]): Promise<PlayerLink[]> {
-    if (accounts.length === 0) return [];
+    if (accounts.length === 0) {
+      return [];
+    }
+
     const rows = await this.em.findAll(PlayerPlatformLink, { where: { $or: accounts } });
 
     return rows.map(toLink);
@@ -142,7 +149,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         createdAt: new Date(),
       });
 
-      for (const player of game.players)
+      for (const player of game.players) {
         em.create(MatchGamePlayer, {
           game: row,
           side: player.side,
@@ -156,6 +163,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
           shots: player.shots,
           demolitions: player.demolitions,
         });
+      }
 
       return toTournamentGame(row);
     });
@@ -233,7 +241,10 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         number: location.number,
       });
 
-      if (!game) return null;
+      if (!game) {
+        return null;
+      }
+
       const removed = toTournamentGame(game);
       await em.nativeDelete(MatchGame, { id: game.id });
       await em.upsert(

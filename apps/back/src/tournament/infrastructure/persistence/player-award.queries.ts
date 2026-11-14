@@ -31,7 +31,9 @@ export function toTournamentItem(row: PlayerAward): TournamentAwardListItem {
 export class CompetitionAwardQueries implements AwardQueries {
   constructor(private readonly em: EntityManager) {}
   async byPlayer(id: string): Promise<PlayerProfileAward[] | null> {
-    if (!(await this.em.findOne(Player, { id }))) return null;
+    if (!(await this.em.findOne(Player, { id }))) {
+      return null;
+    }
 
     const rows = await this.em.find(
       PlayerAward,
@@ -53,7 +55,9 @@ export class CompetitionAwardQueries implements AwardQueries {
     }));
   }
   async byTournament(id: string): Promise<TournamentAwardListItem[] | null> {
-    if (!(await this.em.findOne(Tournament, { id }))) return null;
+    if (!(await this.em.findOne(Tournament, { id }))) {
+      return null;
+    }
 
     const rows = await this.em.find(
       PlayerAward,

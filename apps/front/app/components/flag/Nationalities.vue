@@ -17,7 +17,9 @@ type StringLookup = Readonly<Record<string, string>>;
 
 function lookupStringMap(map: StringLookup, key: string): string | undefined {
   for (const [entryKey, value] of Object.entries(map)) {
-    if (entryKey === key) return value;
+    if (entryKey === key) {
+      return value;
+    }
   }
 
   return undefined;
@@ -216,13 +218,17 @@ const getContinent = (countryCode: string): string => {
 };
 
 const flagToDisplay = computed(() => {
-  if (!nationalities) return null;
+  if (!nationalities) {
+    return null;
+  }
 
   const nationalitiesArray = Array.isArray(nationalities) ? nationalities : [nationalities];
 
   const validNationalities = nationalitiesArray.filter((n) => n && n.trim());
 
-  if (validNationalities.length === 0) return null;
+  if (validNationalities.length === 0) {
+    return null;
+  }
 
   if (validNationalities.length === 1) {
     return validNationalities[0]?.toLowerCase() || null;
@@ -274,13 +280,17 @@ const flagToDisplay = computed(() => {
 });
 
 const tooltipText = computed(() => {
-  if (!nationalities) return "";
+  if (!nationalities) {
+    return "";
+  }
 
   const nationalitiesArray = Array.isArray(nationalities) ? nationalities : [nationalities];
 
   const validNationalities = nationalitiesArray.filter((n) => n && n.trim());
 
-  if (validNationalities.length <= 1) return "";
+  if (validNationalities.length <= 1) {
+    return "";
+  }
 
   return `Nationalities: ${validNationalities.join(", ")}`;
 });

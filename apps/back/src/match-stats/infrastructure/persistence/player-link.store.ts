@@ -34,7 +34,10 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
     for (const row of rows) {
       const { platformId } = row;
 
-      if (platformId === null) continue;
+      if (platformId === null) {
+        continue;
+      }
+
       const key = JSON.stringify([row.platform, platformId]);
       const known = accounts.get(key);
 

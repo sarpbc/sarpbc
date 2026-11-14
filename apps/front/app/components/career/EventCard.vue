@@ -18,12 +18,18 @@ const eventKey = computed(() => `page.game.career.events.${event.id}`);
 
 const stageLabel = computed(() => {
   switch (stage) {
-    case "split1":
+    case "split1": {
       return t("page.game.career.event.split", { split: 1 });
-    case "split2":
+    }
+
+    case "split2": {
       return t("page.game.career.event.split", { split: 2 });
-    case "worlds":
+    }
+
+    case "worlds": {
       return t("page.game.career.event.worlds");
+    }
+
     default: {
       const _exhaustive: never = stage;
 
@@ -33,7 +39,9 @@ const stageLabel = computed(() => {
 });
 
 const decisionLabel = computed(() => {
-  if (decisionCount <= 1) return "";
+  if (decisionCount <= 1) {
+    return "";
+  }
 
   return t("page.game.career.event.decision", {
     current: decisionIndex,

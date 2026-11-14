@@ -3,8 +3,8 @@ export interface NewsTagAttr {
   value: string;
 }
 
-const WORD_CHAR = /\w/;
-const NOT_LINE_TERMINATOR = /./;
+const WORD_CHAR = /\w/u;
+const NOT_LINE_TERMINATOR = /./u;
 
 function isWordChar(char: string | undefined): boolean {
   return char !== undefined && WORD_CHAR.test(char);

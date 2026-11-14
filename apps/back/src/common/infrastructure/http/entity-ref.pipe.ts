@@ -1,6 +1,8 @@
-import { Injectable, type PipeTransform } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import type { PipeTransform } from "@nestjs/common";
 import { NotFoundError } from "../../domain/errors/not-found-error";
-import { parseEntityRef, type EntityRef } from "../../domain/entity-ref";
+import { parseEntityRef } from "../../domain/entity-ref";
+import type { EntityRef } from "../../domain/entity-ref";
 
 @Injectable()
 export class EntityRefPipe implements PipeTransform<string, EntityRef> {

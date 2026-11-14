@@ -46,7 +46,9 @@ function inkMask(frame: Frame, region: Region, threshold: number): Mask {
 function columnInk(mask: Mask, x: number): number {
   let total = 0;
 
-  for (let y = 0; y < mask.height; y += 1) total += mask.ink[y * mask.width + x] ?? 0;
+  for (let y = 0; y < mask.height; y += 1) {
+    total += mask.ink[y * mask.width + x] ?? 0;
+  }
 
   return total;
 }
@@ -62,12 +64,18 @@ function glyphSpans(mask: Mask): Span[] {
     const bridged = left >= 0 && x + 1 < mask.width && columnInk(mask, x + 1) > 0;
 
     if (column > 0 || bridged) {
-      if (left < 0) left = x;
+      if (left < 0) {
+        left = x;
+      }
+
       ink += column;
       continue;
     }
 
-    if (left >= 0 && ink >= minInk) spans.push({ left, right: x - 1 });
+    if (left >= 0 && ink >= minInk) {
+      spans.push({ left, right: x - 1 });
+    }
+
     left = -1;
     ink = 0;
   }
@@ -83,12 +91,19 @@ function lineExtent(mask: Mask, spans: readonly Span[]): { top: number; bottom: 
     let inked = 0;
 
     for (const span of spans) {
-      for (let x = span.left; x <= span.right; x += 1) inked += mask.ink[y * mask.width + x] ?? 0;
+      for (let x = span.left; x <= span.right; x += 1) {
+        inked += mask.ink[y * mask.width + x] ?? 0;
+      }
     }
 
-    if (inked < 2) continue;
+    if (inked < 2) {
+      continue;
+    }
 
-    if (top < 0) top = y;
+    if (top < 0) {
+      top = y;
+    }
+
     bottom = y;
   }
 
@@ -103,7 +118,9 @@ function coverage(mask: Mask, x0: number, x1: number, y0: number, y1: number): n
   let inked = 0;
 
   for (let y = top; y < bottom; y += 1) {
-    for (let x = left; x < right; x += 1) inked += mask.ink[y * mask.width + x] ?? 0;
+    for (let x = left; x < right; x += 1) {
+      inked += mask.ink[y * mask.width + x] ?? 0;
+    }
   }
 
   return inked / ((right - left) * (bottom - top));
@@ -114,7 +131,10 @@ export function glyphGrids(frame: Frame, region: Region, settings: GlyphSettings
   const spans = glyphSpans(mask);
   const line = lineExtent(mask, spans);
 
-  if (line === null) return [];
+  if (line === null) {
+    return [];
+  }
+
   const { width, height } = settings.size;
   const lineHeight = line.bottom - line.top + 1;
   const scale = height / lineHeight;
@@ -166,7 +186,9 @@ function templateDistance(grid: Float32Array, template: GlyphTemplate): number {
   let best = Infinity;
 
   for (const dy of SHIFTS) {
-    for (const dx of SHIFTS) best = Math.min(best, shiftedDistance(grid, template, dx, dy));
+    for (const dx of SHIFTS) {
+      best = Math.min(best, shiftedDistance(grid, template, dx, dy));
+    }
   }
 
   return best;
@@ -186,7 +208,9 @@ function classify(
   const ranked = [...best].toSorted((a, b) => a[1] - b[1]);
   const [first, second] = ranked;
 
-  if (first === undefined) return null;
+  if (first === undefined) {
+    return null;
+  }
 
   const confidence =
     second === undefined || second[1] === 0 ? 1 - first[1] : 1 - first[1] / second[1];
@@ -202,14 +226,20 @@ export function readText(
 ): TextRead | null {
   const grids = glyphGrids(frame, region, settings);
 
-  if (grids.length === 0) return null;
+  if (grids.length === 0) {
+    return null;
+  }
+
   let text = "";
   let confidence = 1;
 
   for (const grid of grids) {
     const glyph = classify(grid, templates);
 
-    if (glyph === null) return null;
+    if (glyph === null) {
+      return null;
+    }
+
     text += glyph.char;
     confidence = Math.min(confidence, glyph.confidence);
   }
@@ -223,8 +253,10 @@ export function templateFromGrid(char: string, grid: Float32Array, size: Size): 
   for (let y = 0; y < size.height; y += 1) {
     let row = "";
 
-    for (let x = 0; x < size.width; x += 1)
+    for (let x = 0; x < size.width; x += 1) {
       row += (grid[y * size.width + x] ?? 0) >= 0.5 ? "#" : ".";
+    }
+
     rows.push(row);
   }
 

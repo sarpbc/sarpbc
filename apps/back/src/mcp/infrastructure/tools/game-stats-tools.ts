@@ -11,7 +11,8 @@ import type { StatsImport } from "../../../match-stats/domain/stats-import";
 import { attachReplayFields } from "../../../match-stats/infrastructure/http/dto/attach-replay.dto";
 import { linkStatsPlayerFields } from "../../../match-stats/infrastructure/http/dto/link-stats-player.dto";
 import { requestStatsImportFields } from "../../../match-stats/infrastructure/http/dto/request-stats-import.dto";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool } from "../define-tool";
 import { describeFields } from "./tool-input";
 
 const OTHER_STAGE_REASONS: readonly StatsImportUnmatchedReason[] = [
@@ -30,7 +31,9 @@ export function summarizeStatsImport(statsImport: StatsImport, includeOtherStage
   for (const item of statsImport.items) {
     counts[item.status] += 1;
 
-    if (item.status === "unmatched" && isOtherStage(item)) otherStages[item.reason] += 1;
+    if (item.status === "unmatched" && isOtherStage(item)) {
+      otherStages[item.reason] += 1;
+    }
   }
 
   return {

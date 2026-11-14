@@ -5,7 +5,7 @@
   "type": "module",
   "exports": {
     ".": "./src/module.ts",
-    "./apiFetch": "./src/runtime/composables/apiFetch.ts"
+    "./api-fetch": "./src/runtime/composables/api-fetch.ts"
   },
   "scripts": {
     "lint": "oxlint --deny-warnings .",

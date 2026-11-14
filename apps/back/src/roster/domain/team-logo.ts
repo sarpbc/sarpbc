@@ -11,26 +11,30 @@ export const TEAM_LOGO_PIXELS = 512;
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 const UNSAFE_SVG_PATTERNS: [RegExp, string][] = [
-  [/<!DOCTYPE|<!ENTITY/i, "a DOCTYPE or entity declaration"],
-  [/<script[\s>/]/i, "a script element"],
-  [/<foreignObject[\s>/]/i, "a foreignObject element"],
-  [/<(?:iframe|embed|object|audio|video)[\s>/]/i, "an embedded element"],
-  [/\son[a-z]+\s*=/i, "an event handler attribute"],
-  [/javascript:/i, "a javascript: URL"],
+  [/<!DOCTYPE|<!ENTITY/iu, "a DOCTYPE or entity declaration"],
+  [/<script[\s>/]/iu, "a script element"],
+  [/<foreignObject[\s>/]/iu, "a foreignObject element"],
+  [/<(?:iframe|embed|object|audio|video)[\s>/]/iu, "an embedded element"],
+  [/\son[a-z]+\s*=/iu, "an event handler attribute"],
+  [/javascript:/iu, "a javascript: URL"],
   [
-    /(?:href|src)\s*=\s*(?!["']?\s*(?:#|data:image\/(?:png|jpeg|webp|gif)[;,]))/i,
+    /(?:href|src)\s*=\s*(?!["']?\s*(?:#|data:image\/(?:png|jpeg|webp|gif)[;,]))/iu,
     "an external reference",
   ],
-  [/url\(\s*(?!["']?\s*#)/i, "an external url() reference"],
-  [/@import/i, "a stylesheet import"],
+  [/url\(\s*(?!["']?\s*#)/iu, "an external url() reference"],
+  [/@import/iu, "a stylesheet import"],
 ];
 
 export function teamLogoField(variant: TeamLogoVariant): "logoLightUrl" | "logoDarkUrl" {
   switch (variant) {
-    case "light":
+    case "light": {
       return "logoLightUrl";
-    case "dark":
+    }
+
+    case "dark": {
       return "logoDarkUrl";
+    }
+
     default: {
       const exhaustive: never = variant;
 
@@ -58,7 +62,10 @@ export function publishedTeamLogoKey(pendingKey: string): string {
 }
 
 export function requireTeamLogoUrl(value: string): URL {
-  if (!URL.canParse(value)) throw new InvalidInputError("The logo imageUrl is not a valid URL.");
+  if (!URL.canParse(value)) {
+    throw new InvalidInputError("The logo imageUrl is not a valid URL.");
+  }
+
   const url = new URL(value);
 
   if (url.protocol !== "https:") {
@@ -80,14 +87,20 @@ function skipSvgPrologue(head: string): string {
   if (rest.startsWith("<?xml")) {
     const end = rest.indexOf(">");
 
-    if (end === -1) return rest;
+    if (end === -1) {
+      return rest;
+    }
+
     rest = rest.slice(end + 1).trimStart();
   }
 
   while (rest.startsWith("<!--")) {
     const end = rest.indexOf("-->", 4);
 
-    if (end === -1) return rest;
+    if (end === -1) {
+      return rest;
+    }
+
     rest = rest.slice(end + 3).trimStart();
   }
 
@@ -99,12 +112,20 @@ function ascii(bytes: Uint8Array, start: number, end: number): string {
 }
 
 export function detectTeamLogoFormat(bytes: Uint8Array): TeamLogoFormat {
-  if (PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) return "png";
+  if (PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) {
+    return "png";
+  }
 
-  if (ascii(bytes, 0, 4) === "RIFF" && ascii(bytes, 8, 12) === "WEBP") return "webp";
+  if (ascii(bytes, 0, 4) === "RIFF" && ascii(bytes, 8, 12) === "WEBP") {
+    return "webp";
+  }
+
   const head = new TextDecoder().decode(bytes.subarray(0, 1024));
 
-  if (/^<svg[\s>]/i.test(skipSvgPrologue(head))) return "svg";
+  if (/^<svg[\s>]/iu.test(skipSvgPrologue(head))) {
+    return "svg";
+  }
+
   throw new InvalidInputError("The logo must be a PNG, WebP or SVG image.");
 }
 

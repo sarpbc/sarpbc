@@ -138,7 +138,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return await this.tournamentsByParticipants({ team: { id } });
   }
   async getTournamentsByTeamTenures(tenures: TeamTenure[]) {
-    if (tenures.length === 0) return [];
+    if (tenures.length === 0) {
+      return [];
+    }
 
     return await this.tournamentsByParticipants({
       $or: tenures.map(({ teamId, from, to }) => ({
@@ -178,7 +180,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       day,
     );
 
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
 
     const rows = await this.em.find(
       Tournament,
@@ -202,7 +206,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       day,
     );
 
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
 
     const rows = await this.em.find(
       Match,

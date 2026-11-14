@@ -1,10 +1,6 @@
 import { defineEntity, p } from "@mikro-orm/core";
-import {
-  CONTRACT_ROLES,
-  PLAYER_STATUSES,
-  type DataSource,
-  type TeamAlias as TeamAliasRecord,
-} from "@sarpbc/types";
+import { CONTRACT_ROLES, PLAYER_STATUSES } from "@sarpbc/types";
+import type { DataSource, TeamAlias as TeamAliasRecord } from "@sarpbc/types";
 import { Team } from "./team.entity";
 import { TeamAlias } from "./team-alias.entity";
 import { Player } from "./player.entity";

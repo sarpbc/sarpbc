@@ -1,6 +1,7 @@
 import type { StreamScoreSide } from "@sarpbc/types";
 import type { Size } from "../src/frame.ts";
-import { seededRandom, type Scene, type ScorebugScene } from "./render.ts";
+import { seededRandom } from "./render.ts";
+import type { Scene, ScorebugScene } from "./render.ts";
 
 export interface Goal {
   clock: number;
@@ -64,7 +65,10 @@ function scriptedGame(random: () => number, winner: StreamScoreSide): GameScript
 
   const clocks = new Set<number>();
 
-  while (clocks.size < sides.length) clocks.add(10 + Math.floor(random() * (GAME_SECONDS - 20)));
+  while (clocks.size < sides.length) {
+    clocks.add(10 + Math.floor(random() * (GAME_SECONDS - 20)));
+  }
+
   const ordered = [...clocks].toSorted((a, b) => b - a);
 
   const shuffled = sides
@@ -119,8 +123,12 @@ export function* broadcast(script: SeriesScript): Generator<TimedScene> {
       const cut = scene.kind === "scorebug" && random() < 0.01;
       let shown: Scene = scene;
 
-      if (cut) shown = { kind: "hidden", variant: 4 };
-      else if (scene.kind === "scorebug") shown = { ...scene, glitch };
+      if (cut) {
+        shown = { kind: "hidden", variant: 4 };
+      } else if (scene.kind === "scorebug") {
+        shown = { ...scene, glitch };
+      }
+
       yield { t, scene: shown };
       t += 1;
     }
@@ -143,15 +151,24 @@ export function* broadcast(script: SeriesScript): Generator<TimedScene> {
       clock -= 1;
       yield* hold(scorebug(score, clock, false), 1);
 
-      if (clock === game.pauseAt) yield* hold(scorebug(score, clock, false), 15);
+      if (clock === game.pauseAt) {
+        yield* hold(scorebug(score, clock, false), 15);
+      }
+
       const tick = clock;
       const goal = game.goals.find((candidate) => candidate.clock === tick);
 
-      if (goal === undefined) continue;
+      if (goal === undefined) {
+        continue;
+      }
+
       score[goal.side] += 1;
       yield* hold(scorebug(score, clock, false), 3);
 
-      if (clock === 0) break;
+      if (clock === 0) {
+        break;
+      }
+
       yield* hold({ ...scorebug(score, clock, false), replay: true }, 6);
       yield* hold(scorebug(score, clock, false), 3);
     }

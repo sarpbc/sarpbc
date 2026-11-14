@@ -11,8 +11,9 @@ export function createTwitchSource(
     clientId === "" ||
     clientSecret === undefined ||
     clientSecret === ""
-  )
+  ) {
     return null;
+  }
 
   return new TwitchHelixSource(clientId, new TwitchAppToken({ clientId, clientSecret }));
 }

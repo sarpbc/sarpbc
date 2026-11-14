@@ -32,37 +32,48 @@ export function assertPickAllowed(
   now: Date,
   scored: boolean,
 ): void {
-  if (!match.pickemsEnabled)
+  if (!match.pickemsEnabled) {
     throw new InvalidInputError(
       "Pick'ems are not enabled for this tournament. Choose another tournament.",
     );
+  }
 
-  if (match.beginAt && match.beginAt <= now)
+  if (match.beginAt && match.beginAt <= now) {
     throw new InvalidInputError(
       "This match has already started. Picks are locked for this series.",
     );
+  }
 
-  if (isMatchFinished(match))
+  if (isMatchFinished(match)) {
     throw new InvalidInputError("This match is finished. Picks are locked.");
+  }
 
-  if (!match.participantIds.includes(participantId))
+  if (!match.participantIds.includes(participantId)) {
     throw new InvalidInputError(
       "That team is not part of this match. Refresh the page and try again.",
     );
+  }
 
-  if (scored)
+  if (scored) {
     throw new InvalidInputError("This pick has already been scored and cannot be changed.");
+  }
 }
 
 export function derivePickWinner(match: PickMatch): string | null {
-  if (match.winnerId !== null && match.winnerId !== "") return match.winnerId;
+  if (match.winnerId !== null && match.winnerId !== "") {
+    return match.winnerId;
+  }
+
   const leader = winnerFromResults(match.results);
 
   return leader !== null && leader !== "" && match.participantIds.includes(leader) ? leader : null;
 }
 
 export function scorePick(pick: Pick, winnerId: string): void {
-  if (pick.scored) return;
+  if (pick.scored) {
+    return;
+  }
+
   pick.points = pick.pickedParticipant.id === winnerId ? 5 : 0;
   pick.scored = true;
 }

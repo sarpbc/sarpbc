@@ -45,8 +45,9 @@ describe(SearchService, () => {
   });
 
   it("splits an odd page across the kinds of an all search without losing a row", async () => {
-    for (const source of [playerService.find, teamService.find, tournamentService.searchByName])
+    for (const source of [playerService.find, teamService.find, tournamentService.searchByName]) {
       source.mockResolvedValue([]);
+    }
 
     await service.search({ query: "rl", type: "all", limit: 5, offset: 3 });
 

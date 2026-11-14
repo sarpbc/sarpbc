@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { TournamentDetailMatch } from "@sarpbc/types";
-import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import { resolveMatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 
 const { match, tournamentId } = defineProps<{
   match: TournamentDetailMatch;

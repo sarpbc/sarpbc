@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { before, describe, it } from "node:test";
 import { OVERLAY_PATH } from "../fixtures/accuracy.ts";
-import { FixtureRenderer, type Scene, type ScorebugScene } from "../fixtures/render.ts";
-import { loadOverlay, type Overlay } from "./overlay.ts";
+import { FixtureRenderer } from "../fixtures/render.ts";
+import type { Scene, ScorebugScene } from "../fixtures/render.ts";
+import { loadOverlay } from "./overlay.ts";
+import type { Overlay } from "./overlay.ts";
 import { readScoreboard } from "./scoreboard.ts";
 
 const SIZES = [
@@ -40,7 +42,10 @@ void describe("readScoreboard", () => {
 
         assert.equal(reading.kind, "score", `${size.height}p ${blue}-${orange} ${clock}`);
 
-        if (reading.kind !== "score") continue;
+        if (reading.kind !== "score") {
+          continue;
+        }
+
         assert.deepEqual(
           [reading.blue, reading.orange, reading.clock, reading.overtime],
           [blue, orange, clock, overtime],
@@ -75,7 +80,10 @@ void describe("readScoreboard", () => {
           overlay,
         );
 
-        if (reading.kind !== "score") continue;
+        if (reading.kind !== "score") {
+          continue;
+        }
+
         assert.deepEqual([reading.blue, reading.orange, reading.clock], [3, 1, 187]);
       }
     }

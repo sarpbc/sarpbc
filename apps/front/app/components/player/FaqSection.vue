@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import type { EntityTrophyListItem } from "~/types/entity";
 import type { Player } from "@sarpbc/types";
-import { resolvePlayerNationalityDemonym } from "~/utils/playerNationalityDemonym";
-import { buildFaqPage } from "~/utils/structuredData/faqPage";
-import { formatTrophyHighlightNames } from "~/utils/trophyHighlights";
+import { resolvePlayerNationalityDemonym } from "~/utils/player-nationality-demonym";
+import { buildFaqPage } from "~/utils/structuredData/faq-page";
+import { formatTrophyHighlightNames } from "~/utils/trophy-highlights";
 
 const { player, trophies } = defineProps<{
   player: Player;

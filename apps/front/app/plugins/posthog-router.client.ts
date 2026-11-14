@@ -22,7 +22,7 @@ export default defineNuxtPlugin(() => {
     }
 
     lastPageview = fullPath;
-    const [path] = fullPath.split(/[?#]/);
+    const [path] = fullPath.split(/[?#]/u);
     client.capture("$pageview", {
       $current_url: `${window.location.origin}${path}`,
       page_path: path,

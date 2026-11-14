@@ -24,7 +24,9 @@ async function openContracts(contracts: ContractWriter, playerId: string): Promi
 }
 
 function requireUnmerged(player: Player | null, id: string): Player {
-  if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
+  if (!player) {
+    throw new NotFoundError(`Player with id "${id}" not found`);
+  }
 
   if (player.mergedIntoId !== null && player.mergedIntoId !== "") {
     throw new InvalidInputError(
@@ -78,16 +80,21 @@ export class PlayerService {
       player.imageUrl = dto.imageUrl ?? null;
       player.slug = dto.slug ?? (toSlug(dto.name) || "player");
 
-      if (dto.status !== undefined) player.status = dto.status;
+      if (dto.status !== undefined) {
+        player.status = dto.status;
+      }
 
-      if (dto.source !== undefined) player.source = dto.source;
+      if (dto.source !== undefined) {
+        player.source = dto.source;
+      }
 
       if (await players.findBySlug(player.slug)) {
         throw new ConflictError(`A player with slug "${player.slug}" already exists`);
       }
 
-      if (dto.teamId !== undefined && dto.teamId !== "")
+      if (dto.teamId !== undefined && dto.teamId !== "") {
         player.team = await requireTeam(teams, dto.teamId);
+      }
 
       await players.save(player);
 
@@ -99,20 +106,33 @@ export class PlayerService {
     return await this.transaction.run(async ({ players, photos, teams }) => {
       const player = requireUnmerged(await players.findById(id), id);
 
-      if (dto.name !== undefined) player.name = dto.name;
+      if (dto.name !== undefined) {
+        player.name = dto.name;
+      }
 
-      if (dto.firstName !== undefined) player.firstName = dto.firstName;
+      if (dto.firstName !== undefined) {
+        player.firstName = dto.firstName;
+      }
 
-      if (dto.lastName !== undefined) player.lastName = dto.lastName;
+      if (dto.lastName !== undefined) {
+        player.lastName = dto.lastName;
+      }
 
-      if (dto.birthday !== undefined)
+      if (dto.birthday !== undefined) {
         player.birthday = dto.birthday ? new Date(dto.birthday) : null;
+      }
 
-      if (dto.nationality !== undefined) player.nationality = dto.nationality;
+      if (dto.nationality !== undefined) {
+        player.nationality = dto.nationality;
+      }
 
-      if (dto.slug !== undefined) player.slug = dto.slug;
+      if (dto.slug !== undefined) {
+        player.slug = dto.slug;
+      }
 
-      if (dto.status !== undefined) player.status = dto.status;
+      if (dto.status !== undefined) {
+        player.status = dto.status;
+      }
 
       if (dto.imageUrl !== undefined) {
         const archived = player.replaceProfilePhoto(dto.imageUrl);
@@ -142,9 +162,13 @@ export class PlayerService {
       const player = requireUnmerged(await players.findById(playerId), playerId);
       const team = await teams.findById(input.teamId);
 
-      if (!team) throw new NotFoundError(`Team with id "${input.teamId}" not found`);
+      if (!team) {
+        throw new NotFoundError(`Team with id "${input.teamId}" not found`);
+      }
 
-      if (!team.active) throw new InvalidInputError(`Team "${team.name}" is inactive`);
+      if (!team.active) {
+        throw new InvalidInputError(`Team "${team.name}" is inactive`);
+      }
 
       const effectiveDate = new Date(input.effectiveDate);
       const role = input.role ?? "active";

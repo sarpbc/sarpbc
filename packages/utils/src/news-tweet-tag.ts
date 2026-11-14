@@ -32,10 +32,10 @@ export interface TweetEmbed {
 }
 
 const TWEET_STATUS_PATTERN =
-  /^https?:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(?:i\/(?:web\/)?status|(?<handle>[A-Za-z0-9_]{1,15})\/status)\/(?<id>\d+)/i;
+  /^https?:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(?:i\/(?:web\/)?status|(?<handle>[A-Za-z0-9_]{1,15})\/status)\/(?<id>\d+)/iu;
 
-const TWEET_TAG_PATTERN = /^(?::{1,2})tweet\{(?<attrs>[^}]*)\}(?:\s*\n?::)?/;
-const WHITESPACE = /\s/;
+const TWEET_TAG_PATTERN = /^(?::{1,2})tweet\{(?<attrs>[^}]*)\}(?:\s*\n?::)?/u;
+const WHITESPACE = /\s/u;
 
 const TWEET_BLOCK_OPENER = "::tweet{";
 const TWEET_INLINE_OPENER = ":tweet{";

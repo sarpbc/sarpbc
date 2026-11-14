@@ -55,7 +55,10 @@ function expectStatus(result: SpawnSyncReturns<string>, status: number): void {
 }
 
 void test("branches accept every allowed type and main", () => {
-  for (const type of types) expectStatus(run(["branch", `${type}/159-player-search`]), 0);
+  for (const type of types) {
+    expectStatus(run(["branch", `${type}/159-player-search`]), 0);
+  }
+
   expectStatus(run(["branch", "main"]), 0);
 });
 
@@ -204,7 +207,7 @@ void test("PR checks inspect real commits and exclude existing history", (t) => 
   pr.head.sha = git("rev-parse", "HEAD");
   const result = checkPr();
   expectStatus(result, 1);
-  assert.match(result.stderr, /cursor: generated update/);
+  assert.match(result.stderr, /cursor: generated update/u);
   pr.base.sha = pr.head.sha;
   git(
     "commit",
@@ -215,7 +218,7 @@ void test("PR checks inspect real commits and exclude existing history", (t) => 
     "Co-authored-by: Codex <codex@openai.com>",
   );
   pr.head.sha = git("rev-parse", "HEAD");
-  assert.match(checkPr().stderr, /Co-authored-by: Codex/);
+  assert.match(checkPr().stderr, /Co-authored-by: Codex/u);
   git("commit", "--amend", "--allow-empty", "-m", "fix: repair search");
   pr.head.sha = git("rev-parse", "HEAD");
   expectStatus(checkPr(), 0);

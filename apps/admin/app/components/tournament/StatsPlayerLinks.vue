@@ -68,7 +68,10 @@ async function save(player: StatsPlayerAccount) {
   const key = keyOf(player);
   const playerId = selected.value[key];
 
-  if (!playerId) return;
+  if (!playerId) {
+    return;
+  }
+
   savingKey.value = key;
 
   try {

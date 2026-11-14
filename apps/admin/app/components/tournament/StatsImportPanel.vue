@@ -94,12 +94,18 @@ const attention = computed(() =>
 function statusColor(status: StatsImportStatus) {
   switch (status) {
     case "pending":
-    case "running":
+    case "running": {
       return "info" as const;
-    case "completed":
+    }
+
+    case "completed": {
       return "success" as const;
-    case "failed":
+    }
+
+    case "failed": {
       return "error" as const;
+    }
+
     default: {
       const exhaustive: never = status;
 
@@ -144,13 +150,19 @@ function itemMeta(item: StatsImportItem): string {
 
 function itemReason(item: StatsImportItem): string {
   switch (item.status) {
-    case "unmatched":
+    case "unmatched": {
       return t(`page.tournaments.statsImport.unmatched.${item.reason}`);
-    case "failed":
+    }
+
+    case "failed": {
       return t(`page.tournaments.statsImport.failed.${item.reason}`);
+    }
+
     case "imported":
-    case "already_imported":
+    case "already_imported": {
       return "";
+    }
+
     default: {
       const exhaustive: never = item;
 
@@ -160,7 +172,10 @@ function itemReason(item: StatsImportItem): string {
 }
 
 async function submit() {
-  if (!group.value.trim()) return;
+  if (!group.value.trim()) {
+    return;
+  }
+
   submitting.value = true;
 
   try {
