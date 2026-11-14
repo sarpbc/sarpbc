@@ -29,11 +29,9 @@ const distribution = z.object({
   ),
 }) satisfies z.ZodType<TournamentPrizes>;
 
-export function tournamentPrizesCacheKey(id: string): string {
-  return `tournament-prizes:${id}`;
-}
+export const tournamentPrizesCacheKey = (id: string): string => `tournament-prizes:${id}`;
 
-function diagnose(key: string, operation: string, error: Error): void {
+const diagnose = (key: string, operation: string, error: Error): void => {
   log.warn({
     component: "CachedTournamentPrizesRead",
     message: "Optional tournament prizes cache failed",
@@ -41,7 +39,7 @@ function diagnose(key: string, operation: string, error: Error): void {
     operation,
     error,
   });
-}
+};
 
 export class CachedTournamentPrizesRead {
   constructor(

@@ -9,48 +9,46 @@ import { jsonOf } from "../../../../test/mcp-result";
 import { writeTools } from "./write-tools";
 import type { WriteToolServices } from "./write-tools";
 
-function services(): WriteToolServices {
-  return {
-    newsService: {
-      create: vi.fn<WriteToolServices["newsService"]["create"]>(),
-      update: vi.fn<WriteToolServices["newsService"]["update"]>(),
-      findOneAdminByIdOrSlug: vi.fn<WriteToolServices["newsService"]["findOneAdminByIdOrSlug"]>(),
-    },
-    tournaments: {
-      findById: vi.fn<WriteToolServices["tournaments"]["findById"]>(),
-    },
-    teamService: {
-      findById: vi.fn<WriteToolServices["teamService"]["findById"]>(),
-      findBySlug: vi.fn<WriteToolServices["teamService"]["findBySlug"]>(),
-    },
-    playerService: {
-      findById: vi.fn<WriteToolServices["playerService"]["findById"]>(),
-      findBySlug: vi.fn<WriteToolServices["playerService"]["findBySlug"]>(),
-    },
-    matchService: {
-      createMatch: vi.fn<WriteToolServices["matchService"]["createMatch"]>(),
-      createEmptyBracket: vi.fn<WriteToolServices["matchService"]["createEmptyBracket"]>(),
-      setMatchWinner: vi.fn<WriteToolServices["matchService"]["setMatchWinner"]>(),
-      setGameVods: vi.fn<WriteToolServices["matchService"]["setGameVods"]>(),
-      updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>(),
-      setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>(),
-    },
-    manualTournamentService: {
-      create: vi.fn<WriteToolServices["manualTournamentService"]["create"]>(),
-      update: vi.fn<WriteToolServices["manualTournamentService"]["update"]>(),
-    },
-    pandascoreTournamentSync: {
-      execute: vi.fn<WriteToolServices["pandascoreTournamentSync"]["execute"]>(),
-      executeByPandascoreId:
-        vi.fn<WriteToolServices["pandascoreTournamentSync"]["executeByPandascoreId"]>(),
-    },
-    pandascoreNewTournamentsSync: {
-      execute: vi.fn<WriteToolServices["pandascoreNewTournamentsSync"]["execute"]>(),
-    },
-  };
-}
+const services = (): WriteToolServices => ({
+  newsService: {
+    create: vi.fn<WriteToolServices["newsService"]["create"]>(),
+    update: vi.fn<WriteToolServices["newsService"]["update"]>(),
+    findOneAdminByIdOrSlug: vi.fn<WriteToolServices["newsService"]["findOneAdminByIdOrSlug"]>(),
+  },
+  tournaments: {
+    findById: vi.fn<WriteToolServices["tournaments"]["findById"]>(),
+  },
+  teamService: {
+    findById: vi.fn<WriteToolServices["teamService"]["findById"]>(),
+    findBySlug: vi.fn<WriteToolServices["teamService"]["findBySlug"]>(),
+  },
+  playerService: {
+    findById: vi.fn<WriteToolServices["playerService"]["findById"]>(),
+    findBySlug: vi.fn<WriteToolServices["playerService"]["findBySlug"]>(),
+  },
+  matchService: {
+    createMatch: vi.fn<WriteToolServices["matchService"]["createMatch"]>(),
+    createEmptyBracket: vi.fn<WriteToolServices["matchService"]["createEmptyBracket"]>(),
+    setMatchWinner: vi.fn<WriteToolServices["matchService"]["setMatchWinner"]>(),
+    setGameVods: vi.fn<WriteToolServices["matchService"]["setGameVods"]>(),
+    updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>(),
+    setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>(),
+  },
+  manualTournamentService: {
+    create: vi.fn<WriteToolServices["manualTournamentService"]["create"]>(),
+    update: vi.fn<WriteToolServices["manualTournamentService"]["update"]>(),
+  },
+  pandascoreTournamentSync: {
+    execute: vi.fn<WriteToolServices["pandascoreTournamentSync"]["execute"]>(),
+    executeByPandascoreId:
+      vi.fn<WriteToolServices["pandascoreTournamentSync"]["executeByPandascoreId"]>(),
+  },
+  pandascoreNewTournamentsSync: {
+    execute: vi.fn<WriteToolServices["pandascoreNewTournamentsSync"]["execute"]>(),
+  },
+});
 
-function defined(tools: McpTool[], name: string): McpTool {
+const defined = (tools: McpTool[], name: string): McpTool => {
   const tool = tools.find((candidate) => candidate.name === name);
 
   if (!tool) {
@@ -58,13 +56,12 @@ function defined(tools: McpTool[], name: string): McpTool {
   }
 
   return tool;
-}
+};
 
-function textOf(result: { content: { type: string; text?: string }[] }): string {
-  return result.content[0]?.text ?? "";
-}
+const textOf = (result: { content: { type: string; text?: string }[] }): string =>
+  result.content[0]?.text ?? "";
 
-function setup(role: "admin" | "journalist") {
+const setup = (role: "admin" | "journalist") => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
   const match = Object.assign(new Match(), {
@@ -89,7 +86,7 @@ function setup(role: "admin" | "journalist") {
     run: async (input: ToolArguments) =>
       await tool.run({ id: "u1", email: "staff@test.com", role }, input),
   };
-}
+};
 
 describe("set_match_game_vods", () => {
   const links = [{ url: "https://youtu.be/g5?t=95", language: "fr" }];
@@ -125,17 +122,16 @@ describe("set_match_game_vods", () => {
   });
 });
 
-function side(id: string, teamId: string, slug: string, name: string) {
-  return Object.assign(new TournamentParticipant(), {
+const side = (id: string, teamId: string, slug: string, name: string) =>
+  Object.assign(new TournamentParticipant(), {
     id,
     team: Object.assign(new Team(), { id: teamId, slug, name }),
   });
-}
 
-function setupCreateMatch(
+const setupCreateMatch = (
   source: "manual" | "startgg" = "manual",
   role: "admin" | "journalist" = "admin",
-) {
+) => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
   const kc = side("p-kc", "team-kc", "karmine-corp", "Karmine Corp");
   const m8 = side("p-m8", "team-m8", "gentle-mates", "Gentle Mates");
@@ -226,7 +222,7 @@ function setupCreateMatch(
   };
 
   return { matchService, tournaments, manualTournamentService, registered, call };
-}
+};
 
 describe("create_match participants", () => {
   it("resolves team slugs to participant ids and returns them", async () => {
@@ -381,7 +377,7 @@ describe("create_match participants", () => {
   });
 });
 
-function setupBracket(source: "manual" | "startgg") {
+const setupBracket = (source: "manual" | "startgg") => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
   const stage = { slug: "finals", event: { slug: "cdf-2026" }, source, streams: [] };
 
@@ -419,7 +415,7 @@ function setupBracket(source: "manual" | "startgg") {
     await defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
 
   return { tools, matchService, run };
-}
+};
 
 describe("bracket tools", () => {
   it("forwards bracket links and participants to update_match", async () => {

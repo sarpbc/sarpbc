@@ -5,7 +5,7 @@ import type { Contract } from "./contract";
 import type { PlayerPhoto } from "./player-photo";
 import type { Team } from "./team";
 
-function roleFromPandascore(role: string | null): ContractRole {
+const roleFromPandascore = (role: string | null): ContractRole => {
   switch (
     role
       ?.trim()
@@ -36,7 +36,7 @@ function roleFromPandascore(role: string | null): ContractRole {
       return "active";
     }
   }
-}
+};
 
 export class Player {
   id = "";

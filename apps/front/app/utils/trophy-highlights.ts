@@ -1,9 +1,9 @@
 import { isNonEmptyDateInput } from "@sarpbc/utils";
 
-export function formatTrophyHighlightNames(
+export const formatTrophyHighlightNames = (
   trophies: readonly { displayName: string; endAt: Date | string | null }[],
   limit = 3,
-): string {
+): string => {
   const sorted = trophies.toSorted((a, b) => {
     const aTime = isNonEmptyDateInput(a.endAt) ? new Date(a.endAt).getTime() : 0;
     const bTime = isNonEmptyDateInput(b.endAt) ? new Date(b.endAt).getTime() : 0;
@@ -28,4 +28,4 @@ export function formatTrophyHighlightNames(
   }
 
   return names.join(", ");
-}
+};

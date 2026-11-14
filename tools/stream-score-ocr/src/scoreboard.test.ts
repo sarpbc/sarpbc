@@ -13,9 +13,21 @@ const SIZES = [
   { width: 960, height: 540 },
 ] as const;
 
-function scorebug(blue: number, orange: number, clock: number, overtime: boolean): ScorebugScene {
-  return { kind: "scorebug", blue, orange, clock, overtime, replay: false, fade: 1, glitch: false };
-}
+const scorebug = (
+  blue: number,
+  orange: number,
+  clock: number,
+  overtime: boolean,
+): ScorebugScene => ({
+  kind: "scorebug",
+  blue,
+  orange,
+  clock,
+  overtime,
+  replay: false,
+  fade: 1,
+  glitch: false,
+});
 
 void describe("readScoreboard", () => {
   let overlay: Overlay;

@@ -29,21 +29,19 @@ export interface CompetitionSyncContext {
   RequestContext: RequestContextType;
 }
 
-export async function verifyCompetitionSyncLookups({
+export const verifyCompetitionSyncLookups = async ({
   app,
   orm,
   request,
   staffCookie,
   RequestContext,
-}: CompetitionSyncContext): Promise<void> {
+}: CompetitionSyncContext): Promise<void> => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
   const sync = app.get(CompetitionSyncService);
 
-  function run<T>(work: () => T): T {
-    return RequestContext.create(orm.em.fork(), work);
-  }
+  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
   const league = { pandascoreId: 9701, name: "Lookup League", slug: "lookup-league" };
 
@@ -199,15 +197,15 @@ export async function verifyCompetitionSyncLookups({
   for (const { source } of views) {
     assert.equal(source, "manual");
   }
-}
+};
 
-export async function verifyPandascoreAdoption({
+export const verifyPandascoreAdoption = async ({
   app,
   orm,
   request,
   staffCookie,
   RequestContext,
-}: CompetitionSyncContext): Promise<void> {
+}: CompetitionSyncContext): Promise<void> => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
@@ -215,9 +213,7 @@ export async function verifyPandascoreAdoption({
   const { randomUUID } = await import("node:crypto");
   const sync = app.get(CompetitionSyncService);
 
-  function run<T>(work: () => T): T {
-    return RequestContext.create(orm.em.fork(), work);
-  }
+  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
   const importPlayer = async (pandascoreId: number, slug: string): Promise<void> => {
     await run(async () => {
@@ -270,15 +266,15 @@ export async function verifyPandascoreAdoption({
     null,
     "the start.gg row keeps its source and has no provider id",
   );
-}
+};
 
-export async function verifyRedistributableScope({
+export const verifyRedistributableScope = async ({
   app,
   orm,
   request,
   staffCookie,
   RequestContext,
-}: CompetitionSyncContext): Promise<void> {
+}: CompetitionSyncContext): Promise<void> => {
   const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
 
   const { TournamentPrizeService } =
@@ -287,15 +283,13 @@ export async function verifyRedistributableScope({
   const matches = app.get(MatchService);
   const prizes = app.get(TournamentPrizeService);
 
-  function run<T>(work: () => T): T {
-    return RequestContext.create(orm.em.fork(), work);
-  }
+  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
-  async function created<T>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> {
+  const created = async <T,>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> => {
     const response6 = await request("POST", path, body, staffCookie, 201);
 
     return response6.json(schema);
-  }
+  };
 
   const teamBody = z.object({ team: idRef });
   const response7 = await created("/team", { name: "Scope Alpha" }, teamBody);
@@ -386,4 +380,4 @@ export async function verifyRedistributableScope({
   );
 
   await verifyCountries({ request, staffCookie });
-}
+};

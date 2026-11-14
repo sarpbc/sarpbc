@@ -12,7 +12,7 @@ interface Fixture {
   cleanup: () => void;
 }
 
-function fixture(): Fixture {
+const fixture = (): Fixture => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "architecture-"));
 
   return {
@@ -29,7 +29,7 @@ function fixture(): Fixture {
       fs.rmSync(root, { recursive: true, force: true });
     },
   };
-}
+};
 
 void test("reports a cycle between features' inner layers once and accepts a one-way import", () => {
   const { write, violations, cleanup } = fixture();

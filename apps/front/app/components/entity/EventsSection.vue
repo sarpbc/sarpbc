@@ -40,15 +40,14 @@ const live = computed(() => (tab.value === "upcoming" ? liveEvents : []));
 
 const hasEvents = computed(() => live.value.length > 0 || activeEvents.value.length > 0);
 
-function eventMeta(event: EntityEventListItem): string {
-  return [
+const eventMeta = (event: EntityEventListItem): string =>
+  [
     distinctStageName(event),
     event.formatLabel,
     formatTournamentDateRange(event.beginAt, event.endAt, locale.value),
   ]
     .filter(Boolean)
     .join(" · ");
-}
 </script>
 
 <template>

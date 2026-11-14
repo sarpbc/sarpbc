@@ -4,7 +4,7 @@ import * as z from "zod/mini";
 const urlPropertySchema = z.string();
 const heatmapSchema = z.record(z.string(), z.array(z.looseObject({})));
 
-export function sanitizePostHogUrl(value: string): string {
+export const sanitizePostHogUrl = (value: string): string => {
   try {
     const url = new URL(value);
 
@@ -16,9 +16,9 @@ export function sanitizePostHogUrl(value: string): string {
   } catch {
     return "";
   }
-}
+};
 
-export function sanitizePostHogEvent(event: CaptureResult): CaptureResult {
+export const sanitizePostHogEvent = (event: CaptureResult): CaptureResult => {
   const { properties } = event;
 
   for (const key of [
@@ -65,4 +65,4 @@ export function sanitizePostHogEvent(event: CaptureResult): CaptureResult {
   Reflect.deleteProperty(event, "$set_once");
 
   return event;
-}
+};

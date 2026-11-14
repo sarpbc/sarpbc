@@ -1,13 +1,13 @@
 type AuthEvent = "user_logged_in" | "user_signed_up";
 
-export function useAuthFlow() {
+export const useAuthFlow = () => {
   const route = useRoute();
   const localePath = useLocalePath();
   const posthog = usePostHog();
   const user = useUser();
   const { apiBase } = useRuntimeConfig().public;
 
-  function redirectTarget(): string {
+  const redirectTarget = (): string => {
     const raw = route.query.redirect;
 
     if (
@@ -21,9 +21,9 @@ export function useAuthFlow() {
     }
 
     return raw;
-  }
+  };
 
-  async function leaveIfSignedIn(): Promise<void> {
+  const leaveIfSignedIn = async (): Promise<void> => {
     if (user.value === undefined) {
       user.value = await getProfile();
     }
@@ -31,13 +31,13 @@ export function useAuthFlow() {
     if (user.value) {
       void navigateTo(redirectTarget());
     }
-  }
+  };
 
-  async function submit(
+  const submit = async (
     path: "/auth/login" | "/auth/signup",
     body: Record<string, string>,
     event: AuthEvent,
-  ): Promise<boolean> {
+  ): Promise<boolean> => {
     const res = await apiFetch<{ success?: boolean }>(path, { method: "POST", body });
 
     if (res.success !== true) {
@@ -54,11 +54,11 @@ export function useAuthFlow() {
     void navigateTo(redirectTarget());
 
     return true;
-  }
+  };
 
-  function googleLogin(): void {
+  const googleLogin = (): void => {
     window.location.href = `${apiBase}/auth/google`;
-  }
+  };
 
   return { leaveIfSignedIn, submit, googleLogin };
-}
+};

@@ -8,23 +8,18 @@ declare module "nuxt/schema" {
   }
 }
 
-export function useEntityTagLink() {
+export const useEntityTagLink = () => {
   const localePath = useLocalePath();
   const { publicSiteUrl } = useRuntimeConfig().public;
 
-  function href(path: string): string {
-    return publicSiteUrl === "" ? localePath(path) : `${publicSiteUrl}${path}`;
-  }
+  const href = (path: string): string =>
+    publicSiteUrl === "" ? localePath(path) : `${publicSiteUrl}${path}`;
 
-  function playerHref(slug: string): string {
-    return href(playerPath(slug));
-  }
+  const playerHref = (slug: string): string => href(playerPath(slug));
 
-  function teamHref(slug: string): string {
-    return href(teamPath(slug));
-  }
+  const teamHref = (slug: string): string => href(teamPath(slug));
 
   const linkAttrs = publicSiteUrl === "" ? {} : { target: "_blank", rel: "noopener noreferrer" };
 
   return { playerHref, teamHref, linkAttrs };
-}
+};

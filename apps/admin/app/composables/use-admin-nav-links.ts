@@ -1,6 +1,6 @@
 import { visibleAdminSections } from "~/utils/admin-sections";
 
-export function useAdminSections() {
+export const useAdminSections = () => {
   const { t } = useI18n();
   const localePath = useLocalePath();
   const user = useUser();
@@ -12,9 +12,9 @@ export function useAdminSections() {
       to: localePath(section.path),
     })),
   );
-}
+};
 
-export function useAdminNavLinks() {
+export const useAdminNavLinks = () => {
   const { t } = useI18n();
   const localePath = useLocalePath();
   const sections = useAdminSections();
@@ -34,4 +34,4 @@ export function useAdminNavLinks() {
       target: "_blank",
     },
   ]);
-}
+};

@@ -17,22 +17,22 @@ interface TournamentMatchesResponse {
   matches?: TournamentMatchListItem[];
 }
 
-export function sendIcs(event: H3Event, ics: string, filename: string): string {
+export const sendIcs = (event: H3Event, ics: string, filename: string): string => {
   setHeader(event, "Content-Type", "text/calendar; charset=utf-8");
   setHeader(event, "Content-Disposition", `inline; filename="${filename}"`);
   setHeader(event, "Cache-Control", "public, max-age=300");
 
   return ics;
-}
+};
 
-export function parseIcsSlug(pathname: string): string | null {
+export const parseIcsSlug = (pathname: string): string | null => {
   const segment = pathname.split("/").pop() ?? "";
   const match = /^(?<slug>.+)\.ics$/iu.exec(segment);
 
   return match?.groups?.slug ?? null;
-}
+};
 
-export async function fetchMatchForCalendar(id: string): Promise<Match> {
+export const fetchMatchForCalendar = async (id: string): Promise<Match> => {
   try {
     const { match } = await getMatchById(id);
 
@@ -43,11 +43,11 @@ export async function fetchMatchForCalendar(id: string): Promise<Match> {
       badGateway: "Could not load match for calendar",
     });
   }
-}
+};
 
-export async function fetchTournamentForCalendar(
+export const fetchTournamentForCalendar = async (
   id: string,
-): Promise<{ tournament: TournamentDetail; matches: TournamentMatchListItem[] }> {
+): Promise<{ tournament: TournamentDetail; matches: TournamentMatchListItem[] }> => {
   let tournamentRes: TournamentResponse;
   let matchesRes: TournamentMatchesResponse;
 
@@ -71,9 +71,9 @@ export async function fetchTournamentForCalendar(
     tournament: tournamentRes.tournament,
     matches: matchesRes.matches ?? [],
   };
-}
+};
 
-export function buildMatchIcs(match: Match, now: Date): string {
+export const buildMatchIcs = (match: Match, now: Date): string => {
   const event = matchToCalendarEvent(match, match.tournament, now);
 
   if (!event) {
@@ -87,13 +87,13 @@ export function buildMatchIcs(match: Match, now: Date): string {
   };
 
   return buildIcs(feed);
-}
+};
 
-export function buildTournamentIcs(
+export const buildTournamentIcs = (
   tournament: TournamentDetail,
   matches: TournamentMatchListItem[],
   now: Date,
-): string {
+): string => {
   const events = matches.flatMap((match) =>
     isMatchOnCalendar(match) ? (matchToCalendarEvent(match, tournament, now) ?? []) : [],
   );
@@ -103,10 +103,10 @@ export function buildTournamentIcs(
     dtStamp: now,
     events,
   });
-}
+};
 
-export function icsFilename(prefix: string, id: string): string {
+export const icsFilename = (prefix: string, id: string): string => {
   const safe = id.replaceAll(/[^a-zA-Z0-9_-]/gu, "").slice(0, 48) || "event";
 
   return `sarpbc-${prefix}-${safe}.ics`;
-}
+};

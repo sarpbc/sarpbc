@@ -11,31 +11,28 @@ import { participantName, tournamentStageLabel } from "@sarpbc/utils";
 const MATCH_OG_FONT_FAMILY = "Inter";
 const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
 
-function escapeXml(value: string): string {
-  return value
+const escapeXml = (value: string): string =>
+  value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
-}
 
-function truncate(value: string, maxLength: number): string {
+const truncate = (value: string, maxLength: number): string => {
   if (value.length <= maxLength) {
     return value;
   }
 
   return `${value.slice(0, maxLength - 1)}…`;
-}
+};
 
-function getParticipantScore(
+const getParticipantScore = (
   match: MatchDetailResponse["match"],
   participantId: string,
-): number | null {
-  return getMatchParticipantScore(match.results, participantId);
-}
+): number | null => getMatchParticipantScore(match.results, participantId);
 
-export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
+export const buildMatchOgSvg = (matchDetail: MatchDetailResponse): string => {
   const { match } = matchDetail;
   const participants = match.participants ?? [];
   const [teamA, teamB] = participants;
@@ -82,9 +79,9 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   <text x="600" y="500" fill="#a1a1aa" font-family="${MATCH_OG_FONT_FAMILY}" font-size="24" text-anchor="middle">${escapeXml(statusLine)}</text>
   <text x="600" y="560" fill="#71717a" font-family="${MATCH_OG_FONT_FAMILY}" font-size="22" text-anchor="middle">sarpbc.org</text>
 </svg>`;
-}
+};
 
-export function resolveMatchOgFontFiles(): string[] {
+export const resolveMatchOgFontFiles = (): string[] => {
   const dirs = [
     path.join(process.cwd(), "public", "fonts", "og"),
     path.join(process.cwd(), "apps", "front", "public", "fonts", "og"),
@@ -99,18 +96,16 @@ export function resolveMatchOgFontFiles(): string[] {
   }
 
   throw new Error(`Match OG fonts missing (looked in: ${dirs.join(", ")})`);
-}
+};
 
-export function getMatchOgResvgFontOptions() {
-  return {
-    fontFiles: resolveMatchOgFontFiles(),
-    // Alpine runtime images have no system fonts; Resvg drops <text> when none resolve.
-    loadSystemFonts: false,
-    defaultFontFamily: MATCH_OG_FONT_FAMILY,
-  };
-}
+export const getMatchOgResvgFontOptions = () => ({
+  fontFiles: resolveMatchOgFontFiles(),
+  // Alpine runtime images have no system fonts; Resvg drops <text> when none resolve.
+  loadSystemFonts: false,
+  defaultFontFamily: MATCH_OG_FONT_FAMILY,
+});
 
-export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
+export const fetchMatchDetailForOg = async (id: string): Promise<MatchDetailResponse> => {
   try {
     return await getMatchById(id);
   } catch (error) {
@@ -119,4 +114,4 @@ export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResp
       badGateway: "Could not load match for OG image",
     });
   }
-}
+};

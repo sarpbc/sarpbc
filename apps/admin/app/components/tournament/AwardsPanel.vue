@@ -87,7 +87,7 @@ watch(
   { immediate: true },
 );
 
-async function handleAssignAward() {
+const handleAssignAward = async () => {
   const entry = selectedEntry.value;
   const awardType = selectedAwardType.value;
 
@@ -117,9 +117,9 @@ async function handleAssignAward() {
   } finally {
     assigning.value = false;
   }
-}
+};
 
-async function handleRemoveAward(award: TournamentAwardListItem) {
+const handleRemoveAward = async (award: TournamentAwardListItem) => {
   removingAwardId.value = award.id;
 
   try {
@@ -136,7 +136,7 @@ async function handleRemoveAward(award: TournamentAwardListItem) {
   } finally {
     removingAwardId.value = null;
   }
-}
+};
 
 defineExpose({ refreshAwards });
 </script>

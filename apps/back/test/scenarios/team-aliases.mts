@@ -95,11 +95,11 @@ const ORIGINS = {
   pandascoreId: null,
 };
 
-export async function verifyTeamAliases({
+export const verifyTeamAliases = async ({
   request,
   staffCookie,
   memberCookie,
-}: TeamAliasesContext): Promise<TeamAliasFixtures> {
+}: TeamAliasesContext): Promise<TeamAliasFixtures> => {
   const create = async (name: string): Promise<AliasedTeam> => {
     const response2 = await request("POST", "/team", { name }, staffCookie, 201);
 
@@ -240,15 +240,15 @@ export async function verifyTeamAliases({
   );
 
   return { team, origins };
-}
+};
 
-export async function verifyTeamAliasProposals({
+export const verifyTeamAliasProposals = async ({
   request,
   callTool,
   review,
   team,
   origins,
-}: TeamAliasProposalsContext): Promise<void> {
+}: TeamAliasProposalsContext): Promise<void> => {
   const proposal = {
     teamId: team.id,
     name: "Integration Founders",
@@ -301,4 +301,4 @@ export async function verifyTeamAliasProposals({
   );
   const teamOfResult5 = await teamOf(request, team.id);
   assert.equal(teamOfResult5.aliases.length, 2);
-}
+};

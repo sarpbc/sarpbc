@@ -10,7 +10,7 @@ const ALIAS_ID = "1c7f4e9b-2a3d-4f6e-9b0c-8d7e6f5a4b3c";
 const SOURCE = "https://www.rlesports.com/news/fixture-rebrand";
 const INPUT = { teamId: TEAM_ID, name: "Fixture Origins", from: "2020-01-01", sourceUrl: SOURCE };
 
-function setup(toolName: string, role: StaffRole = "admin") {
+const setup = (toolName: string, role: StaffRole = "admin") => {
   const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
@@ -25,7 +25,7 @@ function setup(toolName: string, role: StaffRole = "admin") {
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
-}
+};
 
 describe("team alias tools", () => {
   it("add_team_alias queues a proposal sourced by its sourceUrl", async () => {

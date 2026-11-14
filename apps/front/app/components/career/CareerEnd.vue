@@ -14,10 +14,10 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const toast = useToast();
 
-function onShare() {
+const onShare = () => {
   emit("share");
   toast.add({ title: t("page.game.career.end.shareCopied") });
-}
+};
 
 const TROPHY_TYPES = ["worlds", "major", "regional"] as const;
 
@@ -33,7 +33,7 @@ const trophyLines = computed(() => {
 
 const nickname = computed(() => t(`page.game.career.end.nicknames.${result.nicknameKey}`));
 
-function majorSummary(season: CareerSeasonRecord, split: number): string {
+const majorSummary = (season: CareerSeasonRecord, split: number): string => {
   const record = season.splits.find((entry) => entry.split === split);
 
   if (!record) {
@@ -43,7 +43,7 @@ function majorSummary(season: CareerSeasonRecord, split: number): string {
   return record.major
     ? t(`page.game.career.placements.${record.major}`)
     : t("page.game.career.results.majorNotQualified");
-}
+};
 </script>
 
 <template>

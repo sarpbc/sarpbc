@@ -37,59 +37,55 @@ type PlayerColumn =
   | "source";
 
 /** The scalar columns a team row stores; the merge redirect is a relation the store sets itself. */
-export function teamColumns<S extends Pick<TeamRow, TeamColumn>>(model: S): Pick<S, TeamColumn> {
-  return {
-    id: model.id,
-    name: model.name,
-    slug: model.slug,
-    pandascoreId: model.pandascoreId,
-    active: model.active,
-    source: model.source,
-    location: model.location,
-    imageUrl: model.imageUrl,
-    darkModeImageUrl: model.darkModeImageUrl,
-    logoLightUrl: model.logoLightUrl,
-    logoDarkUrl: model.logoDarkUrl,
-  };
-}
+export const teamColumns = <S extends Pick<TeamRow, TeamColumn>>(
+  model: S,
+): Pick<S, TeamColumn> => ({
+  id: model.id,
+  name: model.name,
+  slug: model.slug,
+  pandascoreId: model.pandascoreId,
+  active: model.active,
+  source: model.source,
+  location: model.location,
+  imageUrl: model.imageUrl,
+  darkModeImageUrl: model.darkModeImageUrl,
+  logoLightUrl: model.logoLightUrl,
+  logoDarkUrl: model.logoDarkUrl,
+});
 
 /** `contractRole` is a read-only formula column and is never written. */
-export function playerColumns<S extends Pick<PlayerRow, PlayerColumn>>(
+export const playerColumns = <S extends Pick<PlayerRow, PlayerColumn>>(
   model: S,
-): Pick<S, PlayerColumn> {
-  return {
-    id: model.id,
-    name: model.name,
-    slug: model.slug,
-    pandascoreId: model.pandascoreId,
-    birthday: model.birthday,
-    nationality: model.nationality,
-    firstName: model.firstName,
-    lastName: model.lastName,
-    imageUrl: model.imageUrl,
-    role: model.role,
-    status: model.status,
-    source: model.source,
-  };
-}
+): Pick<S, PlayerColumn> => ({
+  id: model.id,
+  name: model.name,
+  slug: model.slug,
+  pandascoreId: model.pandascoreId,
+  birthday: model.birthday,
+  nationality: model.nationality,
+  firstName: model.firstName,
+  lastName: model.lastName,
+  imageUrl: model.imageUrl,
+  role: model.role,
+  status: model.status,
+  source: model.source,
+});
 
-export function toPhoto(row: PlayerPhotoRow): PlayerPhoto {
-  return Object.assign(new PlayerPhoto(), {
+export const toPhoto = (row: PlayerPhotoRow): PlayerPhoto =>
+  Object.assign(new PlayerPhoto(), {
     id: row.id,
     player: Object.assign(new Player(), { id: row.player.id }),
     url: row.url,
     createdAt: new Date(row.createdAt),
   });
-}
 
-function toBareTeam(row: TeamRow): Team {
-  return Object.assign(new Team(), teamColumns(row), {
+const toBareTeam = (row: TeamRow): Team =>
+  Object.assign(new Team(), teamColumns(row), {
     mergedIntoId: row.mergedInto?.id ?? null,
     aliases: (row.aliases ?? []).map((alias) => Object.assign(new TeamAlias(), alias)),
   });
-}
 
-export function toPlayer(row: PlayerRow): Player {
+export const toPlayer = (row: PlayerRow): Player => {
   const player = Object.assign(new Player(), playerColumns(row), {
     birthday: row.birthday ? new Date(row.birthday) : null,
     contractRole: row.contractRole,
@@ -102,9 +98,9 @@ export function toPlayer(row: PlayerRow): Player {
   }
 
   return player;
-}
+};
 
-export function toTeam(row: TeamRow, includePlayers = true): Team {
+export const toTeam = (row: TeamRow, includePlayers = true): Team => {
   const team = toBareTeam(row);
 
   if (includePlayers && row.players.isInitialized()) {
@@ -112,10 +108,10 @@ export function toTeam(row: TeamRow, includePlayers = true): Team {
   }
 
   return team;
-}
+};
 
-export function toContract(row: ContractRow): Contract {
-  return Object.assign(new Contract(), {
+export const toContract = (row: ContractRow): Contract =>
+  Object.assign(new Contract(), {
     id: row.id,
     player: toPlayer(row.player),
     team: toBareTeam(row.team),
@@ -126,12 +122,11 @@ export function toContract(row: ContractRow): Contract {
     leaveSourceUrl: row.leaveSourceUrl,
     createdAt: new Date(row.createdAt),
   });
-}
 
-export function teamNameAt(row: Pick<TeamRow, "name" | "aliases">, at: Date | null): string {
+export const teamNameAt = (row: Pick<TeamRow, "name" | "aliases">, at: Date | null): string => {
   if (!at) {
     return row.name;
   }
 
   return teamAliasInForce(row.aliases ?? [], isoDay(new Date(at)))?.name ?? row.name;
-}
+};

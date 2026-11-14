@@ -1,9 +1,9 @@
 import type { PlayerAwardType, SeasonAwardType } from "@sarpbc/types";
 
-export function usePlayerAwardLabels() {
+export const usePlayerAwardLabels = () => {
   const { t } = useI18n();
 
-  function awardTypeLabel(awardType: PlayerAwardType): string {
+  const awardTypeLabel = (awardType: PlayerAwardType): string => {
     switch (awardType) {
       case "mvp": {
         return t("page.player.slug.awards.types.mvp");
@@ -31,9 +31,9 @@ export function usePlayerAwardLabels() {
         return _exhaustive;
       }
     }
-  }
+  };
 
-  function seasonAwardTypeLabel(awardType: SeasonAwardType): string {
+  const seasonAwardTypeLabel = (awardType: SeasonAwardType): string => {
     switch (awardType) {
       case "season_mvp": {
         return t("page.player.slug.awards.seasonTypes.season_mvp");
@@ -53,7 +53,7 @@ export function usePlayerAwardLabels() {
         return _exhaustive;
       }
     }
-  }
+  };
 
   return { awardTypeLabel, seasonAwardTypeLabel };
-}
+};

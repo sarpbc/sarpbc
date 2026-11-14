@@ -32,18 +32,16 @@ export interface RedistributableCompetitionServices {
  * An event whose stages all come from start.gg may not be redistributed, so it is hidden.
  * An event without stages stays visible: staff reuse it once its stages have moved elsewhere.
  */
-function isHiddenEvent({ stages }: EventListing): boolean {
-  return stages.length > 0 && !stages.some((stage) => isRedistributable(stage.source));
-}
+const isHiddenEvent = ({ stages }: EventListing): boolean =>
+  stages.length > 0 && !stages.some((stage) => isRedistributable(stage.source));
 
-export function tournamentNotFound(id: string): NotFoundError {
-  return new NotFoundError(
+export const tournamentNotFound = (id: string): NotFoundError =>
+  new NotFoundError(
     `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
   );
-}
 
 /** The only way read tools reach competition data: every query already excludes start.gg. */
-export function redistributableCompetition(services: RedistributableCompetitionServices) {
+export const redistributableCompetition = (services: RedistributableCompetitionServices) => {
   const {
     tournaments: tournamentQueries,
     events: eventQueries,
@@ -55,7 +53,7 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     tournamentPlayerStatsService,
   } = services;
 
-  async function tournament(id: string): Promise<Tournament> {
+  const tournament = async (id: string): Promise<Tournament> => {
     const found = await tournamentQueries.findById(id);
 
     if (!found || !isRedistributable(found.source)) {
@@ -63,9 +61,9 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     }
 
     return found;
-  }
+  };
 
-  async function event(idOrSlug: string): Promise<EventListing> {
+  const event = async (idOrSlug: string): Promise<EventListing> => {
     const listing = await catalogService.findEvent(idOrSlug);
 
     if (isHiddenEvent(listing)) {
@@ -73,7 +71,7 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     }
 
     return listing;
-  }
+  };
 
   return {
     async tournaments(options: { activeOnly: boolean; limit: number }): Promise<Tournament[]> {
@@ -142,6 +140,6 @@ export function redistributableCompetition(services: RedistributableCompetitionS
       return await tournamentPlayerStatsService.forStages(stages);
     },
   };
-}
+};
 
 export type RedistributableCompetition = ReturnType<typeof redistributableCompetition>;

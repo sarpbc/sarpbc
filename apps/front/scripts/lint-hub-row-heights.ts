@@ -31,7 +31,7 @@ interface Violation {
 
 const SKIPPED_DIRECTORIES = new Set(["node_modules", ".nuxt", "dist"]);
 
-async function collectFiles(dir: string): Promise<string[]> {
+const collectFiles = async (dir: string): Promise<string[]> => {
   const entries = await readdir(dir, { withFileTypes: true });
 
   const nested = await Promise.all(
@@ -47,9 +47,9 @@ async function collectFiles(dir: string): Promise<string[]> {
   );
 
   return nested.flat();
-}
+};
 
-function scanFile(filePath: string, content: string): Violation[] {
+const scanFile = (filePath: string, content: string): Violation[] => {
   const violations: Violation[] = [];
   const lines = content.split("\n");
 
@@ -69,9 +69,9 @@ function scanFile(filePath: string, content: string): Violation[] {
   }
 
   return violations;
-}
+};
 
-async function main(): Promise<void> {
+const main = async (): Promise<void> => {
   const rootFiles = await Promise.all(SCAN_ROOTS.map(async (root) => await collectFiles(root)));
 
   const fileViolations = await Promise.all(
@@ -96,7 +96,7 @@ async function main(): Promise<void> {
     "\nUse grid-module tokens (h-row, h-row-compact, h-row-header). See apps/front/DESIGN.md.",
   );
   process.exit(1);
-}
+};
 
 try {
   await main();

@@ -75,18 +75,14 @@ const teamReferences: ReferenceTable = {
   delete_match: none,
 };
 
-function referencesOf<K extends Kind>(
+const referencesOf = <K extends Kind>(
   table: ReferenceTable,
   kind: K,
   change: ChangeMap[K],
-): string[] {
-  return table[kind](change);
-}
+): string[] => table[kind](change);
 
-export function referencedPlayerIds(change: RosterChange): string[] {
-  return referencesOf(playerReferences, change.kind, change);
-}
+export const referencedPlayerIds = (change: RosterChange): string[] =>
+  referencesOf(playerReferences, change.kind, change);
 
-export function referencedTeamIds(change: RosterChange): string[] {
-  return referencesOf(teamReferences, change.kind, change);
-}
+export const referencedTeamIds = (change: RosterChange): string[] =>
+  referencesOf(teamReferences, change.kind, change);

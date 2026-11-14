@@ -13,30 +13,29 @@ export const ROLE_PERMISSIONS = {
   moderator: ["forum.moderate"],
 } as const satisfies Readonly<Record<StaffRole, readonly StaffPermission[]>>;
 
-export function isStaffRole(value: string | null | undefined): value is StaffRole {
-  return STAFF_ROLES.some((role) => role === value);
-}
+export const isStaffRole = (value: string | null | undefined): value is StaffRole =>
+  STAFF_ROLES.some((role) => role === value);
 
-export function permissionsForRole(role: StaffRole | null | undefined): readonly StaffPermission[] {
+export const permissionsForRole = (
+  role: StaffRole | null | undefined,
+): readonly StaffPermission[] => {
   if (!isStaffRole(role)) {
     return [];
   }
 
   return ROLE_PERMISSIONS[role];
-}
+};
 
-export function roleHasPermission(
+export const roleHasPermission = (
   role: StaffRole | null | undefined,
   permission: StaffPermission,
-): boolean {
-  return permissionsForRole(role).includes(permission);
-}
+): boolean => permissionsForRole(role).includes(permission);
 
-export function roleHasAnyPermission(
+export const roleHasAnyPermission = (
   role: StaffRole | null | undefined,
   permissions: readonly StaffPermission[],
-): boolean {
+): boolean => {
   const granted = permissionsForRole(role);
 
   return permissions.some((permission) => granted.includes(permission));
-}
+};

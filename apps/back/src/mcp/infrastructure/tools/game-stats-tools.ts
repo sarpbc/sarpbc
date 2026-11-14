@@ -20,11 +20,10 @@ const OTHER_STAGE_REASONS: readonly StatsImportUnmatchedReason[] = [
   "outside_match_window",
 ];
 
-function isOtherStage(item: StatsImportItem): boolean {
-  return item.status === "unmatched" && OTHER_STAGE_REASONS.includes(item.reason);
-}
+const isOtherStage = (item: StatsImportItem): boolean =>
+  item.status === "unmatched" && OTHER_STAGE_REASONS.includes(item.reason);
 
-export function summarizeStatsImport(statsImport: StatsImport, includeOtherStages: boolean) {
+export const summarizeStatsImport = (statsImport: StatsImport, includeOtherStages: boolean) => {
   const counts = { imported: 0, already_imported: 0, unmatched: 0, failed: 0 };
   const otherStages = Object.fromEntries(OTHER_STAGE_REASONS.map((reason) => [reason, 0]));
 
@@ -51,13 +50,12 @@ export function summarizeStatsImport(statsImport: StatsImport, includeOtherStage
     ),
     otherStageReplays: includeOtherStages ? statsImport.items.filter(isOtherStage) : null,
   };
-}
+};
 
-function filterAccounts(accounts: StatsPlayerAccounts, includeLinked: boolean) {
-  return includeLinked
+const filterAccounts = (accounts: StatsPlayerAccounts, includeLinked: boolean) =>
+  includeLinked
     ? accounts
     : { ...accounts, players: accounts.players.filter((account) => account.player === null) };
-}
 
 export interface GameStatsToolServices {
   statsImportService: Pick<StatsImportService, "request" | "recent">;
@@ -65,11 +63,11 @@ export interface GameStatsToolServices {
   manualGameService: Pick<ManualGameService, "attach" | "remove">;
 }
 
-export function gameStatsTools({
+export const gameStatsTools = ({
   statsImportService,
   statsPlayerLinkService,
   manualGameService,
-}: GameStatsToolServices): McpTool[] {
+}: GameStatsToolServices): McpTool[] => {
   const tournamentId = z.string().min(1).describe("Tournament UUID from get_tournaments.");
 
   return [
@@ -196,4 +194,4 @@ export function gameStatsTools({
       },
     }),
   ];
-}
+};

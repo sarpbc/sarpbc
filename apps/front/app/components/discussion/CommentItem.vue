@@ -36,22 +36,22 @@ const replies = computed(() => comment.replies ?? []);
 const hasReplies = computed(() => replies.value.length > 0);
 const lastReplyIndex = computed(() => replies.value.length - 1);
 
-function onCommentCreated() {
+const onCommentCreated = () => {
   displayReply.value = false;
   emit("changed");
-}
+};
 
-function onPermalinkClick() {
+const onPermalinkClick = () => {
   menuOpen.value = false;
   permalink?.navigateToComment(comment.id);
-}
+};
 
-function onReportClick() {
+const onReportClick = () => {
   menuOpen.value = false;
   displayReport.value = true;
-}
+};
 
-async function onHide() {
+const onHide = async () => {
   menuOpen.value = false;
   isModerating.value = true;
   const ok = await hideComment(comment.id);
@@ -69,9 +69,9 @@ async function onHide() {
     description: t("components.discussion.messages.moderateError"),
     color: "error",
   });
-}
+};
 
-async function onDelete() {
+const onDelete = async () => {
   menuOpen.value = false;
   isModerating.value = true;
   const ok = await deleteComment(comment.id);
@@ -89,7 +89,7 @@ async function onDelete() {
     description: t("components.discussion.messages.moderateError"),
     color: "error",
   });
-}
+};
 </script>
 
 <template>

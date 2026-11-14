@@ -38,41 +38,41 @@ const countriesForRegion = computed<readonly CareerCountry[]>(() =>
   region ? CAREER_COUNTRIES[region] : [],
 );
 
-function goTo(nextStep: OnboardingStep) {
+const goTo = (nextStep: OnboardingStep) => {
   emit("update:step", nextStep);
-}
+};
 
-function onIntroNext() {
+const onIntroNext = () => {
   if (!playerName.trim()) {
     return;
   }
 
   goTo("region");
-}
+};
 
-function onRegionNext() {
+const onRegionNext = () => {
   if (region) {
     goTo("country");
   }
-}
+};
 
-function onCountryNext() {
+const onCountryNext = () => {
   if (country) {
     goTo("role");
   }
-}
+};
 
-function onRoleNext() {
+const onRoleNext = () => {
   if (role) {
     goTo("background");
   }
-}
+};
 
-function onStart() {
+const onStart = () => {
   if (background) {
     emit("complete");
   }
-}
+};
 </script>
 
 <template>

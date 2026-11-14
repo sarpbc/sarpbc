@@ -44,13 +44,13 @@ export interface StreamProposalsContext {
 
 const urls = (streams: { url: string }[]): string[] => streams.map((entry) => entry.url);
 
-export async function verifyStreams({
+export const verifyStreams = async ({
   request,
   staffCookie,
   memberCookie,
   tournament,
   match,
-}: StreamsContext): Promise<void> {
+}: StreamsContext): Promise<void> => {
   const eventPath = `/events/${tournament.event.id}/streams`;
   const tournamentPath = `/tournaments/${tournament.id}/streams`;
   const matchPath = `/tournaments/matches/${match.id}/streams`;
@@ -214,16 +214,16 @@ export async function verifyStreams({
   await request("PUT", tournamentPath, { streams: [] }, staffCookie);
   await request("PUT", eventPath, { streams: [] }, staffCookie);
   assert.deepEqual(await watched(), []);
-}
+};
 
-export async function verifyStreamProposals({
+export const verifyStreamProposals = async ({
   request,
   staffCookie,
   callTool,
   review,
   tournament,
   match,
-}: StreamProposalsContext): Promise<void> {
+}: StreamProposalsContext): Promise<void> => {
   const proposed = {
     url: "https://twitch.tv/integration_startgg",
     language: "en",
@@ -308,4 +308,4 @@ export async function verifyStreamProposals({
 
   await request("PUT", `/tournaments/matches/${match.id}/streams`, { streams: [] }, staffCookie);
   await request("PUT", `/tournaments/${tournament.id}/streams`, { streams: [] }, staffCookie);
-}
+};

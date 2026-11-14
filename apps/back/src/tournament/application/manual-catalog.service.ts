@@ -21,7 +21,7 @@ import type {
   TournamentQueries,
 } from "./ports";
 
-function leagueSlug(raw: string): string {
+const leagueSlug = (raw: string): string => {
   const slug = toSlug(raw);
 
   if (!slug) {
@@ -31,7 +31,7 @@ function leagueSlug(raw: string): string {
   }
 
   return slug;
-}
+};
 
 export class ManualCatalogService {
   constructor(

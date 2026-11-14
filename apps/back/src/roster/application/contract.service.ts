@@ -12,11 +12,11 @@ import { Contract } from "../domain/contract";
 import type { ContractQueries, RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
 import { requireTeam } from "./require-team";
 
-async function removeContract(
+const removeContract = async (
   { contracts }: RosterWriteScope,
   playerId: string,
   contractId: string,
-): Promise<void> {
+): Promise<void> => {
   const contract = await contracts.findById(contractId);
 
   if (!contract || contract.player.id !== playerId) {
@@ -24,13 +24,13 @@ async function removeContract(
   }
 
   await contracts.delete(contract);
-}
+};
 
-async function buildContract(
+const buildContract = async (
   { players, teams }: RosterWriteScope,
   playerId: string,
   dto: CreateContractInput,
-): Promise<Contract> {
+): Promise<Contract> => {
   const player = await players.findById(playerId);
 
   if (!player) {
@@ -45,14 +45,14 @@ async function buildContract(
   contract.role = dto.role ?? "active";
 
   return contract;
-}
+};
 
-async function editContract(
+const editContract = async (
   { contracts, teams }: RosterWriteScope,
   playerId: string,
   contractId: string,
   dto: UpdateContractInput,
-): Promise<Contract> {
+): Promise<Contract> => {
   const contract = await contracts.findById(contractId);
 
   if (!contract || contract.player.id !== playerId) {
@@ -76,29 +76,29 @@ async function editContract(
   }
 
   return contract;
-}
+};
 
-async function saveContractInCareer(
+const saveContractInCareer = async (
   { players, contracts }: RosterWriteScope,
   contract: Contract,
-): Promise<void> {
+): Promise<void> => {
   const player = await players.findById(contract.player.id);
   const career = await contracts.findByPlayer(contract.player.id);
   contract.assertFitsCareer(career, player?.team?.id ?? null);
   await contracts.save(contract);
-}
+};
 
-async function applyContractUpdate(
+const applyContractUpdate = async (
   scope: RosterWriteScope,
   playerId: string,
   contractId: string,
   dto: UpdateContractInput,
-): Promise<Contract> {
+): Promise<Contract> => {
   const contract = await editContract(scope, playerId, contractId, dto);
   await saveContractInCareer(scope, contract);
 
   return contract;
-}
+};
 
 export class ContractService {
   constructor(

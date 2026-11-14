@@ -80,14 +80,14 @@ const sides = (lineups: MatchLineup[]): SideRow[] =>
 const bySide = (lineups: MatchLineup[]): Partial<Record<string, SideRow[1]>> =>
   Object.fromEntries(sides(lineups));
 
-export async function verifyLineups({
+export const verifyLineups = async ({
   request,
   staffCookie,
   memberCookie,
   tournament,
   match,
   player,
-}: LineupsContext): Promise<LineupFixtures> {
+}: LineupsContext): Promise<LineupFixtures> => {
   const lineupPath = `/tournaments/matches/${match.id}/lineups`;
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
 
@@ -267,9 +267,9 @@ export async function verifyLineups({
   );
 
   return { standIn, startggMatch };
-}
+};
 
-export async function verifyLineupProposals({
+export const verifyLineupProposals = async ({
   request,
   staffCookie,
   callTool,
@@ -279,7 +279,7 @@ export async function verifyLineupProposals({
   player,
   standIn,
   startggMatch,
-}: LineupProposalsContext): Promise<void> {
+}: LineupProposalsContext): Promise<void> => {
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
   const sourceUrl = "https://x.com/integration/status/lineups";
 
@@ -381,4 +381,4 @@ export async function verifyLineupProposals({
 
   await request("PUT", `/tournaments/matches/${match.id}/lineups`, { lineups: [] }, staffCookie);
   assert.deepEqual(await detail(), []);
-}
+};

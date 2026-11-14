@@ -13,28 +13,27 @@ import type {
   PickemWrites,
 } from "../../application/ports";
 
-function toPick(row: PickemChoice): Pick {
-  return {
-    id: row.id,
-    user: { id: row.user.id },
-    match: { id: row.match.id },
-    pickedParticipant: { id: row.pickedParticipant.id },
-    points: row.points,
-    scored: row.scored,
-    createdAt: new Date(row.createdAt),
-  };
-}
+const toPick = (row: PickemChoice): Pick => ({
+  id: row.id,
+  user: { id: row.user.id },
+  match: { id: row.match.id },
+  pickedParticipant: { id: row.pickedParticipant.id },
+  points: row.points,
+  scored: row.scored,
+  createdAt: new Date(row.createdAt),
+});
 
-function toNamedPick(row: PickemChoice): NamedPick {
-  return { ...toPick(row), user: { id: row.user.id, userName: row.user.userName } };
-}
+const toNamedPick = (row: PickemChoice): NamedPick => ({
+  ...toPick(row),
+  user: { id: row.user.id, userName: row.user.userName },
+});
 
 /** Serializes picks and scoring of one match, so a pick is never read as unscored while it is being scored. */
-async function lockMatchPicks(tx: EntityManager, matchId: string): Promise<void> {
+const lockMatchPicks = async (tx: EntityManager, matchId: string): Promise<void> => {
   await tx.execute("select pg_advisory_xact_lock(hashtextextended(?, 0))", [
     `pickem:match:${matchId}`,
   ]);
-}
+};
 
 interface TournamentPickFilter {
   match: { tournament: { id: string } };

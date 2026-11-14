@@ -12,15 +12,13 @@ const KC_ID = "11111111-1111-4111-8111-111111111111";
 const M8_ID = "22222222-2222-4222-8222-222222222222";
 const OUT_ID = "33333333-3333-4333-8333-333333333333";
 
-function team(id: string, slug: string, name: string) {
-  return Object.assign(new Team(), { id, slug, name });
-}
+const team = (id: string, slug: string, name: string) =>
+  Object.assign(new Team(), { id, slug, name });
 
-function participant(id: string, club: Team) {
-  return Object.assign(new TournamentParticipant(), { id, team: club });
-}
+const participant = (id: string, club: Team) =>
+  Object.assign(new TournamentParticipant(), { id, team: club });
 
-function tournament() {
+const tournament = () => {
   const kc = team(KC_ID, "karmine-corp", "Karmine Corp");
   const m8 = team(M8_ID, "gentle-mates", "Gentle Mates");
   const outsider = team(OUT_ID, "outsider", "Outsider");
@@ -42,7 +40,7 @@ function tournament() {
   const lookup: IdOrSlugLookup<Team> = { findById, findBySlug };
 
   return { cup, kc, m8, lookup, findById };
-}
+};
 
 const noPlayers: IdOrSlugLookup<Player> = {
   findById: async () => null,

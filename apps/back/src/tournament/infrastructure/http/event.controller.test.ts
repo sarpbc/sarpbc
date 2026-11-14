@@ -46,9 +46,8 @@ const event = Object.assign(new TournamentEvent(), {
 
 const ref = { id: event.id, slug: event.slug, name: event.name };
 
-function stage(fields: Partial<Tournament>): Tournament {
-  return Object.assign(new Tournament(), { event: ref, league, ...fields });
-}
+const stage = (fields: Partial<Tournament>): Tournament =>
+  Object.assign(new Tournament(), { event: ref, league, ...fields });
 
 const stages = new Map(
   [

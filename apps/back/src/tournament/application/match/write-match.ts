@@ -23,11 +23,11 @@ import {
 import type { BracketLinkInput } from "@sarpbc/types";
 import { parseDataSourceUrl } from "../../../common/domain/data-source";
 
-async function requireParticipants(
+const requireParticipants = async (
   writer: MatchWriter,
   tournamentId: string,
   participantIds: string[],
-) {
+) => {
   const available = await writer.participants(tournamentId);
   const ids = new Set(participantIds);
   const participants = available.filter((p) => ids.has(p.id));
@@ -37,33 +37,32 @@ async function requireParticipants(
   }
 
   return participants;
-}
+};
 
-function toBracketLinks(matchId: string, links: readonly BracketLinkInput[]) {
-  return links.map((link) => ({
+const toBracketLinks = (matchId: string, links: readonly BracketLinkInput[]) =>
+  links.map((link) => ({
     id: v4(),
     match: { id: matchId },
     previousMatch: { id: link.previousMatchId },
     type: link.type,
   }));
-}
 
-async function setBracketLinks(
+const setBracketLinks = async (
   writer: MatchWriter,
   match: Match,
   links: readonly BracketLinkInput[],
-): Promise<void> {
+): Promise<void> => {
   assertManualBracketMatch(match);
   assertBracketLinks(match.id, links, await writer.bracket(match.tournament.id));
   match.previousMatches = toBracketLinks(match.id, links);
-}
+};
 
-async function saveMatch(
+const saveMatch = async (
   writer: MatchWriter,
   match: Match,
   participants: TournamentParticipant[],
   input: MatchFields,
-): Promise<Match> {
+): Promise<Match> => {
   const previousEndAt = match.endAt;
   match.name = input.name;
   match.beginAt = input.beginAt ?? null;
@@ -109,13 +108,13 @@ async function saveMatch(
   await writer.save(match);
 
   return match;
-}
+};
 
-export async function createMatchInTransaction(
+export const createMatchInTransaction = async (
   writer: MatchWriter,
   tournamentId: string,
   input: ManualMatchInput,
-): Promise<Match> {
+): Promise<Match> => {
   const tournament = await writer.tournament(tournamentId);
 
   if (!tournament) {
@@ -133,13 +132,13 @@ export async function createMatchInTransaction(
   }
 
   return await saveMatch(writer, match, participants, input);
-}
+};
 
-export async function createEmptyBracketInTransaction(
+export const createEmptyBracketInTransaction = async (
   writer: MatchWriter,
   tournamentId: string,
   input: EmptyBracketInput,
-): Promise<Match[]> {
+): Promise<Match[]> => {
   const tournament = await writer.tournament(tournamentId);
 
   if (!tournament) {
@@ -188,13 +187,13 @@ export async function createEmptyBracketInTransaction(
   });
 
   return planned.map(({ match }) => match);
-}
+};
 
-export async function upsertSyncedMatchInTransaction(
+export const upsertSyncedMatchInTransaction = async (
   writer: MatchWriter,
   tournamentId: string,
   input: SyncedMatchInput,
-): Promise<Match> {
+): Promise<Match> => {
   const tournament = await writer.tournament(tournamentId);
 
   if (!tournament) {
@@ -236,13 +235,13 @@ export async function upsertSyncedMatchInTransaction(
   }
 
   return await saveMatch(writer, match, participants, input);
-}
+};
 
-export async function setWinnerInTransaction(
+export const setWinnerInTransaction = async (
   writer: MatchWriter,
   id: string,
   winnerId: string,
-): Promise<Match> {
+): Promise<Match> => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -261,14 +260,14 @@ export async function setWinnerInTransaction(
   await writer.save(match);
 
   return match;
-}
+};
 
-async function replaceParticipants(
+const replaceParticipants = async (
   writer: MatchWriter,
   match: Match,
   participantIds: readonly string[],
   rescored: boolean,
-): Promise<void> {
+): Promise<void> => {
   assertManualBracketMatch(match);
 
   if (new Set(participantIds).size !== participantIds.length) {
@@ -292,13 +291,13 @@ async function replaceParticipants(
   if (match.winner && !participantIds.includes(match.winner.id)) {
     match.winner = null;
   }
-}
+};
 
-export async function updateMatchInTransaction(
+export const updateMatchInTransaction = async (
   writer: MatchWriter,
   id: string,
   input: UpdateMatchInput,
-): Promise<Match> {
+): Promise<Match> => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -376,13 +375,13 @@ export async function updateMatchInTransaction(
   await writer.save(match);
 
   return match;
-}
+};
 
-export async function setVodsInTransaction(
+export const setVodsInTransaction = async (
   writer: MatchWriter,
   id: string,
   vods: readonly MatchVodInput[],
-): Promise<Match> {
+): Promise<Match> => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -393,13 +392,13 @@ export async function setVodsInTransaction(
   await writer.save(match);
 
   return match;
-}
+};
 
-export async function setSourceInTransaction(
+export const setSourceInTransaction = async (
   writer: MatchWriter,
   id: string,
   sourceUrl: string | null,
-): Promise<Match> {
+): Promise<Match> => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -410,14 +409,14 @@ export async function setSourceInTransaction(
   await writer.save(match);
 
   return match;
-}
+};
 
-export async function setGameVodsInTransaction(
+export const setGameVodsInTransaction = async (
   writer: MatchWriter,
   id: string,
   game: number,
   links: readonly MatchVodLink[],
-): Promise<Match> {
+): Promise<Match> => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -428,4 +427,4 @@ export async function setGameVodsInTransaction(
   await writer.save(match);
 
   return match;
-}
+};

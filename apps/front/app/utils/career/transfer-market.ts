@@ -13,21 +13,21 @@ interface UserStanding {
   rank: number;
 }
 
-function getUserStanding(rankings: WorldRankings): UserStanding {
+const getUserStanding = (rankings: WorldRankings): UserStanding => {
   const user = rankings.players.find((player) => player.isUser);
 
   return {
     rating: user?.rating ?? 0,
     rank: user?.rank ?? rankings.players.length + 1,
   };
-}
+};
 
 /** Matching the 8th-best rating counts as elite, even when listed just outside the cut. */
-function marketPlayerRank(
+const marketPlayerRank = (
   rankings: WorldRankings,
   playerRating: number,
   playerRank: number,
-): number {
+): number => {
   const eighthRating = rankings.players[7]?.rating;
 
   if (eighthRating !== undefined && playerRating >= eighthRating) {
@@ -41,9 +41,9 @@ function marketPlayerRank(
   }
 
   return playerRank;
-}
+};
 
-function weakestRosterRating(team: RankedTeam): number {
+const weakestRosterRating = (team: RankedTeam): number => {
   let min = Infinity;
 
   for (const member of team.roster) {
@@ -53,13 +53,12 @@ function weakestRosterRating(team: RankedTeam): number {
   }
 
   return min;
-}
+};
 
-function teamWantsPlayer(team: RankedTeam, playerRating: number): boolean {
-  return playerRating >= weakestRosterRating(team) - TRANSFER_UPGRADE_MARGIN;
-}
+const teamWantsPlayer = (team: RankedTeam, playerRating: number): boolean =>
+  playerRating >= weakestRosterRating(team) - TRANSFER_UPGRADE_MARGIN;
 
-function shuffleTeams(teams: RankedTeam[], rng: () => number): RankedTeam[] {
+const shuffleTeams = (teams: RankedTeam[], rng: () => number): RankedTeam[] => {
   const shuffled = [...teams];
 
   for (let i = shuffled.length - 1; i > 0; i -= 1) {
@@ -74,13 +73,13 @@ function shuffleTeams(teams: RankedTeam[], rng: () => number): RankedTeam[] {
   }
 
   return shuffled;
-}
+};
 
-export function getTransferBand(
+export const getTransferBand = (
   seasonPoints: number,
   currentRank: number,
   playerWorldRank: number,
-): { minRank: number; maxRank: number; maxOffers: number } | null {
+): { minRank: number; maxRank: number; maxOffers: number } | null => {
   const betterMax = Math.max(1, currentRank - 1);
 
   if (playerWorldRank <= ELITE_PLAYER_RANK) {
@@ -116,22 +115,22 @@ export function getTransferBand(
   }
 
   return { minRank: 1, maxRank: Math.max(6, currentRank), maxOffers: 3 };
-}
+};
 
-function rollOfferCount(rng: () => number, threeChance: number, twoChance: number): number {
+const rollOfferCount = (rng: () => number, threeChance: number, twoChance: number): number => {
   if (rng() < threeChance) {
     return 3;
   }
 
   return rng() < twoChance ? 2 : 1;
-}
+};
 
-export function pickOffseasonOffers(
+export const pickOffseasonOffers = (
   currentTeamId: string,
   seasonPoints: number,
   rankings: WorldRankings,
   seed: number,
-): string[] {
+): string[] => {
   const currentRank = getTeamRank(rankings, currentTeamId) ?? rankings.teams.length;
   const { rating: playerRating, rank: listedRank } = getUserStanding(rankings);
   const playerWorldRank = marketPlayerRank(rankings, playerRating, listedRank);
@@ -184,9 +183,9 @@ export function pickOffseasonOffers(
   return shuffleTeams(shortlist, rng)
     .slice(0, count)
     .map((entry) => entry.team.id);
-}
+};
 
-function renewalPerformanceModifier(seasonPoints: number): number {
+const renewalPerformanceModifier = (seasonPoints: number): number => {
   if (seasonPoints >= 42) {
     return 0.15;
   }
@@ -196,9 +195,9 @@ function renewalPerformanceModifier(seasonPoints: number): number {
   }
 
   return seasonPoints < 10 ? -0.15 : 0;
-}
+};
 
-function pickWeakestOtherTeam(currentTeamId: string, rankings: WorldRankings): string {
+const pickWeakestOtherTeam = (currentTeamId: string, rankings: WorldRankings): string => {
   const others = rankings.teams.filter((entry) => entry.team.id !== currentTeamId);
   const [weakest] = others.toSorted((a, b) => b.rank - a.rank);
 
@@ -207,7 +206,7 @@ function pickWeakestOtherTeam(currentTeamId: string, rankings: WorldRankings): s
   }
 
   return weakest.team.id;
-}
+};
 
 export interface OffseasonResolution {
   transferTeamIds: string[];
@@ -215,13 +214,13 @@ export interface OffseasonResolution {
   lastChanceTeamId: string | null;
 }
 
-export function resolveOffseasonContracts(
+export const resolveOffseasonContracts = (
   seasonJustFinished: number,
   seasonPoints: number,
   currentTeamId: string,
   rankings: WorldRankings,
   seed: number,
-): OffseasonResolution {
+): OffseasonResolution => {
   const rng = createRng(seed);
   const pastPeak = getSeasonsPastPeak(seasonJustFinished + 1);
   const transferTeamIds = pickOffseasonOffers(currentTeamId, seasonPoints, rankings, seed);
@@ -250,4 +249,4 @@ export function resolveOffseasonContracts(
   }
 
   return { transferTeamIds, renewalOffered, lastChanceTeamId };
-}
+};

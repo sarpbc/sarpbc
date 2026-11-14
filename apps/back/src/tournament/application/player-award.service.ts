@@ -9,7 +9,7 @@ import type {
   AwardWriter,
 } from "./ports";
 
-async function requireEligibleAward(
+const requireEligibleAward = async (
   awards: AwardWriter,
   tournamentId: string,
   participantRef: AwardParticipantRef,
@@ -17,7 +17,7 @@ async function requireEligibleAward(
 ): Promise<{
   tournament: NonNullable<AwardContext["tournament"]>;
   participant: NonNullable<AwardContext["participant"]>;
-}> {
+}> => {
   const { tournament, participant, player } = await awards.context(
     tournamentId,
     participantRef,
@@ -51,15 +51,15 @@ async function requireEligibleAward(
   }
 
   return { tournament, participant };
-}
+};
 
-async function requireProposableAward(
+const requireProposableAward = async (
   awards: AwardWriter,
   tournamentId: string,
   teamId: string,
   playerId: string,
   awardType: PlayerAwardType,
-): Promise<string> {
+): Promise<string> => {
   const { tournament, participant } = await requireEligibleAward(
     awards,
     tournamentId,
@@ -81,7 +81,7 @@ async function requireProposableAward(
   }
 
   return participant.id;
-}
+};
 
 export class PlayerAwardService {
   constructor(

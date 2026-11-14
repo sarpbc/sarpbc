@@ -27,9 +27,8 @@ const description = ref(circuit?.description ?? "");
 const sourceUrl = ref(circuit?.sourceUrl ?? "");
 const qualificationSpots = ref<number | null>(circuit?.qualificationSpots ?? null);
 
-function inRange(value: number | null, min: number, max: number): boolean {
-  return value === null || (Number.isInteger(value) && value >= min && value <= max);
-}
+const inRange = (value: number | null, min: number, max: number): boolean =>
+  value === null || (Number.isInteger(value) && value >= min && value <= max);
 
 const sourceUrlError = computed(() => checkSourceUrl(sourceUrl.value));
 
@@ -43,7 +42,7 @@ const isValid = computed(
     sourceUrlError.value === undefined,
 );
 
-function submit() {
+const submit = () => {
   const seasonValue = season.value;
 
   if (!isValid.value || seasonValue === null) {
@@ -66,7 +65,7 @@ function submit() {
   }
 
   emit("submit", input);
-}
+};
 </script>
 
 <template>

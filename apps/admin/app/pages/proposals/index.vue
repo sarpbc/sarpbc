@@ -13,13 +13,11 @@ const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short"
 const user = useUser();
 const reviewingId = ref<string | null>(null);
 
-function isDeletion({ change }: RosterProposal): boolean {
-  return change.kind === "delete_match" || change.kind === "delete_team";
-}
+const isDeletion = ({ change }: RosterProposal): boolean =>
+  change.kind === "delete_match" || change.kind === "delete_team";
 
-function canReview(proposal: RosterProposal): boolean {
-  return hasPermission(user.value, requiredPermission(proposal.change));
-}
+const canReview = (proposal: RosterProposal): boolean =>
+  hasPermission(user.value, requiredPermission(proposal.change));
 
 const { status, data, error, refresh } = await useLazyAsyncData(
   "admin-roster-proposals",
@@ -30,11 +28,9 @@ const { status, data, error, refresh } = await useLazyAsyncData(
 const proposals = computed(() => data.value?.proposals ?? []);
 const names = computed(() => data.value?.names ?? {});
 
-function nameOf(id: string): string {
-  return names.value[id] ?? id;
-}
+const nameOf = (id: string): string => names.value[id] ?? id;
 
-function formatValue(key: string, value: string | boolean | null): string {
+const formatValue = (key: string, value: string | boolean | null): string => {
   if (value === null) {
     return t("page.proposals.values.ongoing");
   }
@@ -68,57 +64,53 @@ function formatValue(key: string, value: string | boolean | null): string {
       return nameOf(value);
     }
   }
-}
+};
 
-function formatAmount(amount: number, currency: string): string {
-  return new Intl.NumberFormat(parseLocale(locale.value), {
+const formatAmount = (amount: number, currency: string): string =>
+  new Intl.NumberFormat(parseLocale(locale.value), {
     style: "currency",
     currency,
     maximumFractionDigits: 0,
   }).format(amount);
-}
 
-function optionalRow(
+const optionalRow = (
   key: string,
   label: string,
   value: string | undefined,
-): { key: string; label: string; value: string }[] {
-  return value === undefined ? [] : [{ key, label, value }];
-}
+): { key: string; label: string; value: string }[] =>
+  value === undefined ? [] : [{ key, label, value }];
 
-function streamRows(
+const streamRows = (
   targetKey: "eventId" | "tournamentId" | "matchId",
   targetId: string,
   streams: StreamInput[],
-): { key: string; label: string; value: string }[] {
-  return [
-    { key: targetKey, label: t(`page.proposals.fields.${targetKey}`), value: nameOf(targetId) },
-    ...(streams.length === 0
-      ? [
-          {
-            key: "streams",
-            label: t("page.proposals.fields.streams"),
-            value: t("page.proposals.values.noStreams"),
-          },
-        ]
-      : streams.map((stream, index) => ({
-          key: `stream-${index}`,
-          label: t("page.proposals.fields.stream", { number: index + 1 }),
-          value: [
-            stream.url,
-            stream.language,
-            t(`page.tournaments.streams.kinds.${stream.kind}`),
-            ...(stream.channel ? [stream.channel] : []),
-          ].join(" · "),
-        }))),
-  ];
-}
+): { key: string; label: string; value: string }[] => [
+  { key: targetKey, label: t(`page.proposals.fields.${targetKey}`), value: nameOf(targetId) },
+  ...(streams.length === 0
+    ? [
+        {
+          key: "streams",
+          label: t("page.proposals.fields.streams"),
+          value: t("page.proposals.values.noStreams"),
+        },
+      ]
+    : streams.map((stream, index) => ({
+        key: `stream-${index}`,
+        label: t("page.proposals.fields.stream", { number: index + 1 }),
+        value: [
+          stream.url,
+          stream.language,
+          t(`page.tournaments.streams.kinds.${stream.kind}`),
+          ...(stream.channel ? [stream.channel] : []),
+        ].join(" · "),
+      }))),
+];
 
-function viewershipRows(
+const viewershipRows = (
   targetKey: "eventId" | "matchId",
   targetId: string,
   viewership: Viewership,
-): { key: string; label: string; value: string }[] {
+): { key: string; label: string; value: string }[] => {
   const count = new Intl.NumberFormat(parseLocale(locale.value));
 
   return [
@@ -151,7 +143,7 @@ function viewershipRows(
       value: viewership.sourceName,
     },
   ];
-}
+};
 
 interface ProposalRow {
   key: string;
@@ -159,50 +151,51 @@ interface ProposalRow {
   value: string;
 }
 
-function prizesRows(
+const prizesRows = (
   change: Extract<RosterProposal["change"], { kind: "set_tournament_prizes" }>,
-): ProposalRow[] {
-  return [
-    {
-      key: "tournamentId",
-      label: t("page.proposals.fields.tournamentId"),
-      value: nameOf(change.tournamentId),
-    },
-    ...(change.prizes.length === 0
-      ? [
-          {
-            key: "prizes",
-            label: t("page.proposals.fields.prizes"),
-            value: t("page.proposals.values.noPrizes"),
-          },
-        ]
-      : change.prizes.map((prize) => ({
-          key: `prize-${prize.teamId}`,
-          label: t(
-            "page.proposals.fields.placement",
-            { placement: prize.placement },
-            prize.placement,
-          ),
-          value: [
-            nameOf(prize.teamId),
-            formatAmount(prize.amount, prize.currency),
-            ...(prize.playerIds.length > 0 ? [prize.playerIds.map(nameOf).join(", ")] : []),
-          ].join(" · "),
-        }))),
-  ];
-}
+): ProposalRow[] => [
+  {
+    key: "tournamentId",
+    label: t("page.proposals.fields.tournamentId"),
+    value: nameOf(change.tournamentId),
+  },
+  ...(change.prizes.length === 0
+    ? [
+        {
+          key: "prizes",
+          label: t("page.proposals.fields.prizes"),
+          value: t("page.proposals.values.noPrizes"),
+        },
+      ]
+    : change.prizes.map((prize) => ({
+        key: `prize-${prize.teamId}`,
+        label: t(
+          "page.proposals.fields.placement",
+          { placement: prize.placement },
+          prize.placement,
+        ),
+        value: [
+          nameOf(prize.teamId),
+          formatAmount(prize.amount, prize.currency),
+          ...(prize.playerIds.length > 0 ? [prize.playerIds.map(nameOf).join(", ")] : []),
+        ].join(" · "),
+      }))),
+];
 
-function amountText(amount: number | undefined, currency: string | undefined): string | undefined {
+const amountText = (
+  amount: number | undefined,
+  currency: string | undefined,
+): string | undefined => {
   if (amount === undefined) {
     return undefined;
   }
 
   return currency === undefined ? String(amount) : formatAmount(amount, currency);
-}
+};
 
-function prizeUpdateRows(
+const prizeUpdateRows = (
   change: Extract<RosterProposal["change"], { kind: "update_tournament_prize" }>,
-): ProposalRow[] {
+): ProposalRow[] => {
   const { patch } = change;
 
   const patched = [
@@ -243,86 +236,82 @@ function prizeUpdateRows(
         ]
       : patched),
   ];
-}
+};
 
-function circuitScaleRows(
+const circuitScaleRows = (
   change: Extract<RosterProposal["change"], { kind: "set_circuit_stage_scale" }>,
-): ProposalRow[] {
-  return [
-    {
-      key: "circuitId",
-      label: t("page.proposals.fields.circuitId"),
-      value: nameOf(change.circuitId),
-    },
-    {
-      key: "tournamentId",
-      label: t("page.proposals.fields.tournamentId"),
-      value: nameOf(change.tournamentId),
-    },
-    ...change.scale.map((tier) => ({
-      key: `tier-${tier.from}`,
-      label: t("page.proposals.fields.tier", { number: tier.from }),
-      value: `${tier.from === tier.to ? tier.from : `${tier.from}–${tier.to}`}: ${tier.points}`,
-    })),
-    {
-      key: "worldwide",
-      label: t("page.proposals.fields.worldwide"),
-      value: change.worldwide ? t("page.proposals.values.yes") : t("page.proposals.values.no"),
-    },
-    ...(change.regionTeamIds?.length
-      ? [
-          {
-            key: "regionTeamIds",
-            label: t("page.proposals.fields.regionTeams"),
-            value: change.regionTeamIds.map(nameOf).join(", "),
-          },
-        ]
-      : []),
-    ...(change.finishes ?? []).map((finish) => ({
-      key: `finish-${finish.teamId}`,
-      label: t("page.proposals.fields.finish", { placement: finish.placement }),
-      value: nameOf(finish.teamId),
-    })),
-  ];
-}
+): ProposalRow[] => [
+  {
+    key: "circuitId",
+    label: t("page.proposals.fields.circuitId"),
+    value: nameOf(change.circuitId),
+  },
+  {
+    key: "tournamentId",
+    label: t("page.proposals.fields.tournamentId"),
+    value: nameOf(change.tournamentId),
+  },
+  ...change.scale.map((tier) => ({
+    key: `tier-${tier.from}`,
+    label: t("page.proposals.fields.tier", { number: tier.from }),
+    value: `${tier.from === tier.to ? tier.from : `${tier.from}–${tier.to}`}: ${tier.points}`,
+  })),
+  {
+    key: "worldwide",
+    label: t("page.proposals.fields.worldwide"),
+    value: change.worldwide ? t("page.proposals.values.yes") : t("page.proposals.values.no"),
+  },
+  ...(change.regionTeamIds?.length
+    ? [
+        {
+          key: "regionTeamIds",
+          label: t("page.proposals.fields.regionTeams"),
+          value: change.regionTeamIds.map(nameOf).join(", "),
+        },
+      ]
+    : []),
+  ...(change.finishes ?? []).map((finish) => ({
+    key: `finish-${finish.teamId}`,
+    label: t("page.proposals.fields.finish", { placement: finish.placement }),
+    value: nameOf(finish.teamId),
+  })),
+];
 
-function seasonAwardRows(
+const seasonAwardRows = (
   change: Extract<RosterProposal["change"], { kind: "award_season_player" }>,
-): ProposalRow[] {
-  return [
-    {
-      key: "seasonId",
-      label: t("page.proposals.fields.seasonId"),
-      value: nameOf(change.seasonId),
-    },
-    {
-      key: "playerId",
-      label: t("page.proposals.fields.playerId"),
-      value: nameOf(change.playerId),
-    },
-    {
-      key: "awardType",
-      label: t("page.proposals.fields.awardType"),
-      value: t(`page.seasons.awards.types.${change.awardType}`),
-    },
-    ...(change.region
-      ? [{ key: "region", label: t("page.proposals.fields.region"), value: change.region }]
-      : []),
-    ...(change.presentedBy
-      ? [
-          {
-            key: "presentedBy",
-            label: t("page.proposals.fields.presentedBy"),
-            value: change.presentedBy,
-          },
-        ]
-      : []),
-  ];
-}
+): ProposalRow[] => [
+  {
+    key: "seasonId",
+    label: t("page.proposals.fields.seasonId"),
+    value: nameOf(change.seasonId),
+  },
+  {
+    key: "playerId",
+    label: t("page.proposals.fields.playerId"),
+    value: nameOf(change.playerId),
+  },
+  {
+    key: "awardType",
+    label: t("page.proposals.fields.awardType"),
+    value: t(`page.seasons.awards.types.${change.awardType}`),
+  },
+  ...(change.region
+    ? [{ key: "region", label: t("page.proposals.fields.region"), value: change.region }]
+    : []),
+  ...(change.presentedBy
+    ? [
+        {
+          key: "presentedBy",
+          label: t("page.proposals.fields.presentedBy"),
+          value: change.presentedBy,
+        },
+      ]
+    : []),
+];
 
-function lineupRows(
+const lineupRows = (
   change: Extract<RosterProposal["change"], { kind: "set_match_lineups" }>,
-): ProposalRow[] {
+): ProposalRow[] => {
   const lineups = change.lineups.flatMap((lineup, index) =>
     lineup.playerIds.length > 0
       ? [
@@ -347,11 +336,11 @@ function lineupRows(
         ]
       : lineups),
   ];
-}
+};
 
-function aliasRows(
+const aliasRows = (
   change: Extract<RosterProposal["change"], { kind: "add_team_alias" | "update_team_alias" }>,
-): ProposalRow[] {
+): ProposalRow[] => {
   const { alias } = change;
 
   return [
@@ -382,9 +371,9 @@ function aliasRows(
           },
         ]),
   ];
-}
+};
 
-function changeRows(proposal: RosterProposal): ProposalRow[] {
+const changeRows = (proposal: RosterProposal): ProposalRow[] => {
   const { change } = proposal;
 
   if (change.kind === "set_tournament_prizes") {
@@ -441,14 +430,14 @@ function changeRows(proposal: RosterProposal): ProposalRow[] {
       ? []
       : [{ key, label: t(`page.proposals.fields.${key}`), value: formatValue(key, value) }],
   );
-}
+};
 
 const logoBackgrounds = [
   { key: "light", class: "bg-white" },
   { key: "dark", class: "bg-neutral-950" },
 ] as const;
 
-async function review(proposal: RosterProposal, action: "approve" | "reject") {
+const review = async (proposal: RosterProposal, action: "approve" | "reject") => {
   if (reviewingId.value) {
     return;
   }
@@ -470,7 +459,7 @@ async function review(proposal: RosterProposal, action: "approve" | "reject") {
   } finally {
     reviewingId.value = null;
   }
-}
+};
 </script>
 
 <template>

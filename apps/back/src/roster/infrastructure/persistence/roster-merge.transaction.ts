@@ -17,10 +17,10 @@ export interface RosterMergeParticipants extends SharedTournaments {
   movers: readonly RosterReferenceMover[];
 }
 
-function rosterReferences(
+const rosterReferences = (
   em: EntityManager,
   others: RosterMergeParticipants,
-): RosterReferenceMover & SharedTournaments {
+): RosterReferenceMover & SharedTournaments => {
   const mergeOpenContracts = async (owner: "player" | "team", from: string, to: string) => {
     const shared = owner === "player" ? "team" : "player";
 
@@ -83,7 +83,7 @@ function rosterReferences(
     sharedTournamentIds: async (teamId, otherTeamId) =>
       await others.sharedTournamentIds(teamId, otherTeamId),
   };
-}
+};
 
 export class MikroRosterMergeTransaction implements RosterMergeTransaction {
   constructor(

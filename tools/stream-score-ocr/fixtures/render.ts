@@ -53,7 +53,7 @@ const NOISE_TABLE_SIZE = 2 ** 20;
 const PRNG_MODULUS = 2_147_483_647;
 const PRNG_MULTIPLIER = 48_271;
 
-export function seededRandom(seed: number): () => number {
+export const seededRandom = (seed: number): (() => number) => {
   let state = (Math.abs(Math.trunc(seed)) % (PRNG_MODULUS - 1)) + 1;
 
   return () => {
@@ -61,27 +61,23 @@ export function seededRandom(seed: number): () => number {
 
     return state / PRNG_MODULUS;
   };
-}
+};
 
-export function formatClock(seconds: number, overtime: boolean): string {
+export const formatClock = (seconds: number, overtime: boolean): string => {
   const minutes = Math.floor(seconds / 60);
 
   return `${overtime ? "+" : ""}${minutes}:${String(seconds % 60).padStart(2, "0")}`;
-}
+};
 
-function overlap(a0: number, a1: number, b0: number, b1: number): number {
-  return Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
-}
+const overlap = (a0: number, a1: number, b0: number, b1: number): number =>
+  Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
 
-function rectCoverage(region: Region, x0: number, x1: number, y0: number, y1: number): number {
-  return (
-    (overlap(x0, x1, region.x, region.x + region.width) *
-      overlap(y0, y1, region.y, region.y + region.height)) /
-    ((x1 - x0) * (y1 - y0))
-  );
-}
+const rectCoverage = (region: Region, x0: number, x1: number, y0: number, y1: number): number =>
+  (overlap(x0, x1, region.x, region.x + region.width) *
+    overlap(y0, y1, region.y, region.y + region.height)) /
+  ((x1 - x0) * (y1 - y0));
 
-function textInk(text: string) {
+const textInk = (text: string) => {
   const glyphs = Array.from(text, (char) => {
     const rows = FONT.get(char);
 
@@ -107,15 +103,15 @@ function textInk(text: string) {
   }
 
   return { columns: ink[0]?.length ?? 0, ink };
-}
+};
 
-function backgroundAt(x: number, y: number): Rgb {
-  return [40 + ((x * 7 + y * 3) % 50), 70 + ((x + y) % 40), 60 + ((x * 3 + y * 5) % 45)];
-}
+const backgroundAt = (x: number, y: number): Rgb => [
+  40 + ((x * 7 + y * 3) % 50),
+  70 + ((x + y) % 40),
+  60 + ((x * 3 + y * 5) % 45),
+];
 
-function mix(a: number, b: number, amount: number): number {
-  return a + (b - a) * amount;
-}
+const mix = (a: number, b: number, amount: number): number => a + (b - a) * amount;
 
 export class FixtureRenderer {
   readonly frame: Frame;

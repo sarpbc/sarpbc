@@ -9,7 +9,7 @@ const localeObject = z.record(z.string(), localeValue);
 
 export type LocaleValue = z.infer<typeof localeValue>;
 
-function leafKeys(value: LocaleValue, prefix = ""): string[] {
+const leafKeys = (value: LocaleValue, prefix = ""): string[] => {
   const object = localeObject.safeParse(value);
 
   if (!object.success) {
@@ -19,9 +19,9 @@ function leafKeys(value: LocaleValue, prefix = ""): string[] {
   return Object.entries(object.data).flatMap(([key, child]) =>
     leafKeys(child, prefix ? `${prefix}.${key}` : key),
   );
-}
+};
 
-export function parityViolations(directory: string): string[] {
+export const parityViolations = (directory: string): string[] => {
   const keys = (locale: string): Set<string> =>
     new Set(
       leafKeys(
@@ -38,7 +38,7 @@ export function parityViolations(directory: string): string[] {
     ...[...english.difference(french)].map((key) => `${key}: missing in fr-FR`),
     ...[...french.difference(english)].map((key) => `${key}: missing in en-US`),
   ];
-}
+};
 
 if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const candidates = [

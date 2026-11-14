@@ -11,7 +11,7 @@ const PLAYER_ID = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
 const ANNOUNCEMENT = "https://x.com/RLEsports/status/1";
 const user = (role: StaffRole) => ({ id: "u1", email: "staff@test.com", role });
 
-function awardTool() {
+const awardTool = () => {
   const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
@@ -23,7 +23,7 @@ function awardTool() {
   }
 
   return { rosterProposalService, tool };
-}
+};
 
 describe("propose_season_award", () => {
   const input = {

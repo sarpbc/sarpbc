@@ -46,21 +46,19 @@ export interface McpTool {
   run: (user: PatUser, input: ToolArguments) => Promise<CallToolResult>;
 }
 
-function listOr(items: readonly string[]): string {
-  return items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join("");
-}
+const listOr = (items: readonly string[]): string =>
+  items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join("");
 
-function asError(cause: unknown): Error {
-  return cause instanceof Error ? cause : new Error(String(cause));
-}
+const asError = (cause: unknown): Error =>
+  cause instanceof Error ? cause : new Error(String(cause));
 
 /**
  * The one way to declare an MCP tool: it owns the permission gate, the logging and the
  * "Requires …" description suffix, so a tool states its name and permission once.
  */
-export function defineTool<Fields extends Record<string, z.ZodType>>(
+export const defineTool = <Fields extends Record<string, z.ZodType>>(
   spec: ReadToolSpec<Fields> | WriteToolSpec<Fields>,
-): McpTool {
+): McpTool => {
   const permissions = [spec.permission ?? []].flat();
 
   return {
@@ -118,9 +116,13 @@ export function defineTool<Fields extends Record<string, z.ZodType>>(
       }
     },
   };
-}
+};
 
-export function registerTools(server: McpServer, user: PatUser, tools: readonly McpTool[]): void {
+export const registerTools = (
+  server: McpServer,
+  user: PatUser,
+  tools: readonly McpTool[],
+): void => {
   for (const tool of tools) {
     server.registerTool(
       tool.name,
@@ -128,4 +130,4 @@ export function registerTools(server: McpServer, user: PatUser, tools: readonly 
       async (input) => await tool.run(user, input),
     );
   }
-}
+};

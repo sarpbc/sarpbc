@@ -70,13 +70,13 @@ export interface CompetitionImportResult {
   rivalParticipantId: string;
 }
 
-export async function verifyCompetitionImport({
+export const verifyCompetitionImport = async ({
   app,
   orm,
   request,
   staffCookie,
   RequestContext,
-}: CompetitionImportContext): Promise<CompetitionImportResult> {
+}: CompetitionImportContext): Promise<CompetitionImportResult> => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
@@ -88,9 +88,7 @@ export async function verifyCompetitionImport({
   const sync = app.get(CompetitionSyncService);
   const tournaments = app.get<symbol, TournamentQueries>(TOURNAMENT_QUERIES);
 
-  function run<T>(work: () => T): T {
-    return RequestContext.create(orm.em.fork(), work);
-  }
+  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
   const veteran = {
     pandascoreId: 9101,
@@ -190,11 +188,11 @@ export async function verifyCompetitionImport({
     async () => await sync.upsertTournament(tournamentCommand, [final, semifinal]),
   );
 
-  async function read<T>(path: string, schema: z.ZodType<T>): Promise<T> {
+  const read = async <T,>(path: string, schema: z.ZodType<T>): Promise<T> => {
     const response = await request("GET", path);
 
     return response.json(schema);
-  }
+  };
 
   const playerView = async (): Promise<PlayerView> => {
     const readResult = await read(`/player/${player.id}`, z.object({ player: playerRecord }));
@@ -442,4 +440,4 @@ export async function verifyCompetitionImport({
     matchId: semiView.id,
     rivalParticipantId: rivalParticipant.id,
   };
-}
+};

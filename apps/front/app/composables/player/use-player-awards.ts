@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import type { PlayerAwards } from "./api";
 
-export function usePlayerAwards(playerId: MaybeRef<string | undefined>) {
+export const usePlayerAwards = (playerId: MaybeRef<string | undefined>) => {
   const playerIdRef = toRef(playerId);
 
   const { data, pending, error, refresh } = useAsyncData<PlayerAwards>(
@@ -31,4 +31,4 @@ export function usePlayerAwards(playerId: MaybeRef<string | undefined>) {
     error,
     refresh,
   };
-}
+};

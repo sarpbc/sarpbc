@@ -1,6 +1,6 @@
 import type { DirectorySearchProps } from "../../application/search-props";
 
-function namePattern(name: string | undefined, start: string | undefined): string | null {
+const namePattern = (name: string | undefined, start: string | undefined): string | null => {
   if (name !== undefined && name !== "") {
     return `%${name}%`;
   }
@@ -10,10 +10,10 @@ function namePattern(name: string | undefined, start: string | undefined): strin
   }
 
   return null;
-}
+};
 
 /** A name search wins over a first-letter filter; both leave out merged duplicates. */
-export function directoryQuery({ name, start, limit, offset }: Partial<DirectorySearchProps>) {
+export const directoryQuery = ({ name, start, limit, offset }: Partial<DirectorySearchProps>) => {
   const pattern = namePattern(name, start);
 
   return {
@@ -23,4 +23,4 @@ export function directoryQuery({ name, start, limit, offset }: Partial<Directory
     },
     page: { limit: limit ?? 25, offset: offset ?? 0, orderBy: { name: "asc" as const } },
   };
-}
+};

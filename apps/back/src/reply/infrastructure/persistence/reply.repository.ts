@@ -13,9 +13,9 @@ type ReplyTargetMatch = { id: string } | { $in: string[] };
 
 type ReplyTargetFilter = Partial<Record<keyof ReplyTargetFields, ReplyTargetMatch>>;
 
-function onTarget(targetType: ReplyTargetType, target: ReplyTargetMatch): ReplyTargetFilter {
-  return { [REPLY_TARGETS[targetType].field]: target };
-}
+const onTarget = (targetType: ReplyTargetType, target: ReplyTargetMatch): ReplyTargetFilter => ({
+  [REPLY_TARGETS[targetType].field]: target,
+});
 
 const moderationRows = z.array(z.object({ id: z.string(), report_count: z.coerce.number() }));
 

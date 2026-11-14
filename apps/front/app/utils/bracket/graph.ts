@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getMatchParticipantScore } from "~/utils/match-score";
 
-export function getMatchWinnerParticipantId(match: TournamentDetailMatch): string | null {
+export const getMatchWinnerParticipantId = (match: TournamentDetailMatch): string | null => {
   if (isNonEmptyString(match.winnerId)) {
     return match.winnerId;
   }
@@ -25,29 +25,23 @@ export function getMatchWinnerParticipantId(match: TournamentDetailMatch): strin
   }
 
   return null;
-}
+};
 
-export function getParentIds(match: TournamentDetailMatch, matchIds: Set<string>): string[] {
-  return (match.previousMatches ?? [])
-    .map((link) => link.previousMatch)
-    .filter((id) => matchIds.has(id));
-}
+export const getParentIds = (match: TournamentDetailMatch, matchIds: Set<string>): string[] =>
+  (match.previousMatches ?? []).map((link) => link.previousMatch).filter((id) => matchIds.has(id));
 
-export function getWinnerParentIds(match: TournamentDetailMatch, matchIds: Set<string>): string[] {
-  return (match.previousMatches ?? [])
+export const getWinnerParentIds = (match: TournamentDetailMatch, matchIds: Set<string>): string[] =>
+  (match.previousMatches ?? [])
     .filter((link) => link.type === "winner")
     .map((link) => link.previousMatch)
     .filter((id) => matchIds.has(id));
-}
 
-export function getWinnerParentIdsFromLinks(match: TournamentDetailMatch): string[] {
-  return (match.previousMatches ?? [])
+export const getWinnerParentIdsFromLinks = (match: TournamentDetailMatch): string[] =>
+  (match.previousMatches ?? [])
     .filter((link) => link.type === "winner")
     .map((link) => link.previousMatch);
-}
 
-export function hasUpperWinnerFeed(match: TournamentDetailMatch, upperIds: Set<string>): boolean {
-  return (match.previousMatches ?? []).some(
+export const hasUpperWinnerFeed = (match: TournamentDetailMatch, upperIds: Set<string>): boolean =>
+  (match.previousMatches ?? []).some(
     (link) => link.type === "winner" && upperIds.has(link.previousMatch),
   );
-}

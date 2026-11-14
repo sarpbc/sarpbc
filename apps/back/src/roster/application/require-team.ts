@@ -2,7 +2,10 @@ import { UnprocessableError } from "../../common/domain/errors/unprocessable-err
 import type { Team } from "../domain/team";
 import type { TeamWriter } from "./ports";
 
-export async function requireTeam(teams: Pick<TeamWriter, "findById">, id: string): Promise<Team> {
+export const requireTeam = async (
+  teams: Pick<TeamWriter, "findById">,
+  id: string,
+): Promise<Team> => {
   const team = await teams.findById(id);
 
   if (!team) {
@@ -10,4 +13,4 @@ export async function requireTeam(teams: Pick<TeamWriter, "findById">, id: strin
   }
 
   return team;
-}
+};

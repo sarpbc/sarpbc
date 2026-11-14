@@ -55,26 +55,26 @@ const newTeam = ref({
   imageUrl: "",
 });
 
-function selectRow(e: Event, row: TableRow<Team>) {
+const selectRow = (e: Event, row: TableRow<Team>) => {
   e.preventDefault();
   navigateTo(localePath(`/teams/${row.original.id}`));
-}
+};
 
-function openDeleteModal(e: Event, team: Team) {
+const openDeleteModal = (e: Event, team: Team) => {
   e.stopPropagation();
   teamToDelete.value = team;
-}
+};
 
-function openCreateModal() {
+const openCreateModal = () => {
   newTeam.value = {
     name: "",
     location: "",
     imageUrl: "",
   };
   isCreateModalOpen.value = true;
-}
+};
 
-async function confirmCreate() {
+const confirmCreate = async () => {
   if (!newTeam.value.name) {
     return;
   }
@@ -100,9 +100,9 @@ async function confirmCreate() {
   } finally {
     isCreating.value = false;
   }
-}
+};
 
-async function onSyncTeams() {
+const onSyncTeams = async () => {
   if (isSyncing.value) {
     return;
   }
@@ -117,7 +117,7 @@ async function onSyncTeams() {
   } finally {
     isSyncing.value = false;
   }
-}
+};
 </script>
 
 <template>

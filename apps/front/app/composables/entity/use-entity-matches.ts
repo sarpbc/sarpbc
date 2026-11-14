@@ -13,13 +13,10 @@ const FETCH_MATCHES = {
   player: getPlayerMatches,
 } satisfies Record<EntityKind, (id: string) => Promise<ProfileMatchListItem[]>>;
 
-function isLive(match: ProfileMatchListItem, now: number): boolean {
-  return (
-    (isNonEmptyString(match.status) && LIVE_STATUSES.has(match.status)) || isMatchLive(match, now)
-  );
-}
+const isLive = (match: ProfileMatchListItem, now: number): boolean =>
+  (isNonEmptyString(match.status) && LIVE_STATUSES.has(match.status)) || isMatchLive(match, now);
 
-function splitMatches(matches: ProfileMatchListItem[], now: number): EntityMatchSections {
+const splitMatches = (matches: ProfileMatchListItem[], now: number): EntityMatchSections => {
   const live: ProfileMatchListItem[] = [];
   const upcoming: ProfileMatchListItem[] = [];
   const past: ProfileMatchListItem[] = [];
@@ -39,9 +36,9 @@ function splitMatches(matches: ProfileMatchListItem[], now: number): EntityMatch
   past.sort(byEndAtDesc);
 
   return { live, upcoming, past: past.slice(0, PAST_ENTRIES_LIMIT) };
-}
+};
 
-export function useEntityMatches(kind: EntityKind, entityId: MaybeRef<string | undefined>) {
+export const useEntityMatches = (kind: EntityKind, entityId: MaybeRef<string | undefined>) => {
   const idRef = toRef(entityId);
 
   const { data, pending, error, refresh } = useAsyncData(
@@ -69,4 +66,4 @@ export function useEntityMatches(kind: EntityKind, entityId: MaybeRef<string | u
     error,
     refresh,
   };
-}
+};

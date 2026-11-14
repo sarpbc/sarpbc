@@ -10,95 +10,92 @@ import type {
   SeasonSummary,
 } from "@sarpbc/types";
 
-export async function getSeasons(): Promise<SeasonSummary[]> {
+export const getSeasons = async (): Promise<SeasonSummary[]> => {
   const res = await apiFetch<{ seasons: SeasonSummary[] }>("/seasons", { method: "GET" });
 
   return res.seasons;
-}
+};
 
-export async function getSeason(id: string): Promise<SeasonDetail> {
-  return await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "GET" });
-}
+export const getSeason = async (id: string): Promise<SeasonDetail> =>
+  await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "GET" });
 
-export async function createSeason(input: SeasonInput): Promise<SeasonDetail> {
-  return await apiFetch<SeasonDetail>("/seasons", { method: "POST", body: input });
-}
+export const createSeason = async (input: SeasonInput): Promise<SeasonDetail> =>
+  await apiFetch<SeasonDetail>("/seasons", { method: "POST", body: input });
 
-export async function updateSeason(id: string, input: SeasonInput): Promise<SeasonDetail> {
-  return await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "PATCH", body: input });
-}
+export const updateSeason = async (id: string, input: SeasonInput): Promise<SeasonDetail> =>
+  await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "PATCH", body: input });
 
-export async function deleteSeason(id: string): Promise<void> {
+export const deleteSeason = async (id: string): Promise<void> => {
   await apiFetch(`/seasons/${id}`, { method: "DELETE" });
-}
+};
 
-export async function createSeasonAward(
+export const createSeasonAward = async (
   seasonId: string,
   input: SeasonAwardInput,
-): Promise<SeasonAward> {
+): Promise<SeasonAward> => {
   const res = await apiFetch<{ award: SeasonAward }>(`/seasons/${seasonId}/awards`, {
     method: "POST",
     body: input,
   });
 
   return res.award;
-}
+};
 
-export async function deleteSeasonAward(seasonId: string, awardId: string): Promise<void> {
+export const deleteSeasonAward = async (seasonId: string, awardId: string): Promise<void> => {
   await apiFetch(`/seasons/${seasonId}/awards/${awardId}`, { method: "DELETE" });
-}
+};
 
-export async function createSeasonParticipant(
+export const createSeasonParticipant = async (
   seasonId: string,
   input: SeasonParticipantInput,
-): Promise<SeasonParticipant> {
+): Promise<SeasonParticipant> => {
   const res = await apiFetch<{ participant: SeasonParticipant }>(
     `/seasons/${seasonId}/participants`,
     { method: "POST", body: input },
   );
 
   return res.participant;
-}
+};
 
-export async function updateSeasonPathNote(
+export const updateSeasonPathNote = async (
   seasonId: string,
   participantId: string,
   pathNote: string | null,
-): Promise<SeasonParticipant> {
+): Promise<SeasonParticipant> => {
   const res = await apiFetch<{ participant: SeasonParticipant }>(
     `/seasons/${seasonId}/participants/${participantId}`,
     { method: "PATCH", body: { pathNote } },
   );
 
   return res.participant;
-}
+};
 
-export async function deleteSeasonParticipant(
+export const deleteSeasonParticipant = async (
   seasonId: string,
   participantId: string,
-): Promise<void> {
+): Promise<void> => {
   await apiFetch(`/seasons/${seasonId}/participants/${participantId}`, { method: "DELETE" });
-}
+};
 
-export async function createSeasonPathEntry(
+export const createSeasonPathEntry = async (
   seasonId: string,
   participantId: string,
   input: SeasonPathEntryInput,
-): Promise<SeasonPathEntry> {
+): Promise<SeasonPathEntry> => {
   const res = await apiFetch<{ entry: SeasonPathEntry }>(
     `/seasons/${seasonId}/participants/${participantId}/path`,
     { method: "POST", body: input },
   );
 
   return res.entry;
-}
+};
 
-export async function deleteSeasonPathEntry(
+export const deleteSeasonPathEntry = async (
   seasonId: string,
   participantId: string,
   entryId: string,
-): Promise<void> {
+): Promise<void> => {
   await apiFetch(`/seasons/${seasonId}/participants/${participantId}/path/${entryId}`, {
     method: "DELETE",
   });
-}
+};

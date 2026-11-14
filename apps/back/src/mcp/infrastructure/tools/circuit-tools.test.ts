@@ -18,7 +18,7 @@ const SCALE = [
 
 const user = (role: StaffRole) => ({ id: "u1", email: "staff@test.com", role });
 
-function scaleTool() {
+const scaleTool = () => {
   const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
@@ -30,7 +30,7 @@ function scaleTool() {
   }
 
   return { rosterProposalService, tool };
-}
+};
 
 interface ScaleInputOverrides {
   sourceUrl: string | undefined;
@@ -197,7 +197,7 @@ describe("create_circuit and update_circuit", () => {
     qualificationSpots: null,
   };
 
-  function tools() {
+  const tools = () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const circuitService = {
@@ -221,7 +221,7 @@ describe("create_circuit and update_circuit", () => {
     };
 
     return { circuitService, create: named("create_circuit"), update: named("update_circuit") };
-  }
+  };
 
   const input = {
     name: "RLCS 2026",

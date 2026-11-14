@@ -42,13 +42,13 @@ const winnerParticipantId = computed(() => {
   return null;
 });
 
-function participantClass(participantId: string | undefined): string {
+const participantClass = (participantId: string | undefined): string => {
   if (participantId && winnerParticipantId.value === participantId) {
     return "font-medium text-highlighted";
   }
 
   return winnerParticipantId.value ? "text-muted" : "text-toned";
-}
+};
 </script>
 
 <template>

@@ -18,7 +18,7 @@ export interface TimedFrame {
   frame: Frame;
 }
 
-export function checkInput(input: string, live: boolean): void {
+export const checkInput = (input: string, live: boolean): void => {
   if (!URL_INPUT.test(input)) {
     if (live) {
       throw new Error("A live source must be a stream URL.");
@@ -36,19 +36,21 @@ export function checkInput(input: string, live: boolean): void {
   if (isLiquipediaSourceHost(url.hostname)) {
     throw new Error("Liquipedia is not an accepted source.");
   }
-}
+};
 
-function stopOnExit(processes: readonly ChildProcess[]): () => void {
-  return () => {
+const stopOnExit =
+  (processes: readonly ChildProcess[]): (() => void) =>
+  () => {
     for (const child of processes) {
       if (child.exitCode === null) {
         child.kill();
       }
     }
   };
-}
 
-export async function* streamFrames(settings: SourceSettings): AsyncGenerator<TimedFrame> {
+export const streamFrames = async function* streamFrames(
+  settings: SourceSettings,
+): AsyncGenerator<TimedFrame> {
   checkInput(settings.input, settings.live);
   const decoderInput = settings.live ? "pipe:0" : settings.input;
 
@@ -113,4 +115,4 @@ export async function* streamFrames(settings: SourceSettings): AsyncGenerator<Ti
   } finally {
     stop();
   }
-}
+};

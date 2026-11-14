@@ -1,11 +1,9 @@
 import type { MatchBlockItem } from "@sarpbc/types";
 import { isNonEmptyString } from "@sarpbc/utils";
 
-export function useMatchStateLabel(
-  t: (key: string) => string,
-  formatBeginAt: (beginAt: Date) => string,
-) {
-  return (item: MatchBlockItem): string => {
+export const useMatchStateLabel =
+  (t: (key: string) => string, formatBeginAt: (beginAt: Date) => string) =>
+  (item: MatchBlockItem): string => {
     switch (item.state) {
       case "live": {
         return t("newsTag.matchLive");
@@ -28,4 +26,3 @@ export function useMatchStateLabel(
       }
     }
   };
-}

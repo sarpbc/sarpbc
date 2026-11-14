@@ -17,7 +17,7 @@ const INPUT: TeamAliasInput = {
   pandascoreId: null,
 };
 
-function setup(owner: string | null = null) {
+const setup = (owner: string | null = null) => {
   const team = Object.assign(new Team(), {
     id: "team",
     name: "Fixture Now",
@@ -51,7 +51,7 @@ function setup(owner: string | null = null) {
   const transaction: TeamAliasTransaction = { run: async (work) => await work({ teams, aliases }) };
 
   return { aliases, service: new TeamAliasService(transaction) };
-}
+};
 
 describe(TeamAliasService, () => {
   it("stores a sourced alias with its trimmed name", async () => {

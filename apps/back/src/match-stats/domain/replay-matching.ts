@@ -76,24 +76,18 @@ const LATE_END_MS = HOUR_MS;
 const OPEN_MATCH_DURATION_MS = 6 * HOUR_MS;
 const UNKNOWN_TIMEZONE_MS = 14 * HOUR_MS;
 
-function majority(size: number): number {
-  return Math.floor(size / 2) + 1;
-}
+const majority = (size: number): number => Math.floor(size / 2) + 1;
 
-function rosterOverlap(team: ReplayTeam, participant: CandidateParticipant): number {
-  return team.playerNames.filter((name) =>
+const rosterOverlap = (team: ReplayTeam, participant: CandidateParticipant): number =>
+  team.playerNames.filter((name) =>
     participant.players.some((player) => playerNameMatches(name, player.name)),
   ).length;
-}
 
-function rosterIdentifies(team: ReplayTeam, participant: CandidateParticipant): boolean {
-  return (
-    team.playerNames.length > 0 &&
-    rosterOverlap(team, participant) >= majority(team.playerNames.length)
-  );
-}
+const rosterIdentifies = (team: ReplayTeam, participant: CandidateParticipant): boolean =>
+  team.playerNames.length > 0 &&
+  rosterOverlap(team, participant) >= majority(team.playerNames.length);
 
-function identifies(team: ReplayTeam, participant: CandidateParticipant): boolean {
+const identifies = (team: ReplayTeam, participant: CandidateParticipant): boolean => {
   if (rosterIdentifies(team, participant)) {
     return true;
   }
@@ -105,9 +99,12 @@ function identifies(team: ReplayTeam, participant: CandidateParticipant): boolea
     participant.teamNames.some((teamName) => teamNameMatches(replayName, teamName));
 
   return named && (rosterOverlap(team, participant) >= 1 || participant.players.length === 0);
-}
+};
 
-function orient(replay: ReplaySummary, match: CandidateMatch): SideAssignment | "ambiguous" | null {
+const orient = (
+  replay: ReplaySummary,
+  match: CandidateMatch,
+): SideAssignment | "ambiguous" | null => {
   if (match.participants.length !== 2) {
     return null;
   }
@@ -136,27 +133,27 @@ function orient(replay: ReplaySummary, match: CandidateMatch): SideAssignment | 
   }
 
   return null;
-}
+};
 
-function windowContains(
+const windowContains = (
   replay: ReplaySummary,
   played: number,
   begin: number,
   end: number | null,
-): boolean {
+): boolean => {
   const slack = replay.playedAtHasTimezone ? 0 : UNKNOWN_TIMEZONE_MS;
 
   return (
     played >= begin - EARLY_START_MS - slack &&
     played <= (end ?? begin + OPEN_MATCH_DURATION_MS) + LATE_END_MS + slack
   );
-}
+};
 
 type Placement =
   | { kind: "placed"; matchId: string; sides: SideAssignment }
   | { kind: "unmatched"; reason: UnmatchedReason };
 
-function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Placement {
+const place = (replay: ReplaySummary, matches: readonly CandidateMatch[]): Placement => {
   const compatible: { match: CandidateMatch; sides: SideAssignment }[] = [];
 
   for (const match of matches) {
@@ -211,7 +208,7 @@ function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
   }
 
   return { kind: "placed", matchId: started[0].matchId, sides: started[0].sides };
-}
+};
 
 interface SeriesGame {
   replay: ReplaySummary;
@@ -219,10 +216,10 @@ interface SeriesGame {
   storedNumber: number | null;
 }
 
-function seriesProblem(
+const seriesProblem = (
   match: CandidateMatch,
   games: readonly SeriesGame[],
-): UnmatchedReason | null {
+): UnmatchedReason | null => {
   if (match.storedReplayIds.some((id) => !games.some((game) => game.replay.id === id))) {
     return "match_has_other_stats";
   }
@@ -264,16 +261,15 @@ function seriesProblem(
   }
 
   return null;
-}
+};
 
-export function byPlayedAt(a: ReplaySummary, b: ReplaySummary): number {
-  return (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
-}
+export const byPlayedAt = (a: ReplaySummary, b: ReplaySummary): number =>
+  (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
 
-function seriesAssignments(
+const seriesAssignments = (
   matches: readonly CandidateMatch[],
   series: ReadonlyMap<string, readonly SeriesGame[]>,
-): ReplayAssignment[] {
+): ReplayAssignment[] => {
   const assignments: ReplayAssignment[] = [];
 
   for (const match of matches) {
@@ -299,18 +295,18 @@ function seriesAssignments(
   }
 
   return assignments;
-}
+};
 
 /**
  * `stored` locates replays already saved, in any match; they are reported where they are and never
  * fetched, moved or renumbered. `excluded` holds replays staff removed; they count as absent.
  */
-export function assignReplays(
+export const assignReplays = (
   replays: readonly ReplaySummary[],
   matches: readonly CandidateMatch[],
   stored: ReadonlyMap<string, GameLocation> = new Map(),
   excluded: ReadonlySet<string> = new Set(),
-): ReplayAssignment[] {
+): ReplayAssignment[] => {
   const assignments: ReplayAssignment[] = [];
   const series = new Map<string, SeriesGame[]>();
 
@@ -390,13 +386,13 @@ export function assignReplays(
   }
 
   return [...assignments, ...seriesAssignments(matches, series)];
-}
+};
 
-export function resolvePlayerId(
+export const resolvePlayerId = (
   inGameName: string,
   roster: readonly RosterPlayer[],
-): string | null {
+): string | null => {
   const found = roster.filter((player) => playerNameMatches(inGameName, player.name));
 
   return found.length === 1 ? found[0].id : null;
-}
+};

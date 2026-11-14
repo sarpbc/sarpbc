@@ -18,11 +18,11 @@ export interface SpoilerReveals {
 
 export const NO_SPOILER_REVEALS: SpoilerReveals = { matchIds: [], tournamentIds: [] };
 
-export function isSpoilerConcealed(
+export const isSpoilerConcealed = (
   enabled: boolean,
   reveals: SpoilerReveals,
   scope: SpoilerScope,
-): boolean {
+): boolean => {
   if (!enabled) {
     return false;
   }
@@ -34,12 +34,12 @@ export function isSpoilerConcealed(
   return !(
     isNonEmptyString(scope.tournamentId) && reveals.tournamentIds.includes(scope.tournamentId)
   );
-}
+};
 
-export function revealSpoilers(
+export const revealSpoilers = (
   reveals: SpoilerReveals,
   target: SpoilerRevealTarget,
-): SpoilerReveals {
+): SpoilerReveals => {
   switch (target.kind) {
     case "match": {
       return reveals.matchIds.includes(target.id)
@@ -59,4 +59,4 @@ export function revealSpoilers(
       return exhaustive;
     }
   }
-}
+};

@@ -5,14 +5,12 @@ import type { TrackedStreamerStore } from "../../application/ports/tracked-strea
 import type { TrackedStreamer } from "../../domain/tracked-streamer";
 import { TwitchStreamer } from "./twitch-streamer.entity";
 
-function detached(streamer: TwitchStreamer): TrackedStreamer {
-  return {
-    id: streamer.id,
-    login: streamer.login,
-    displayName: streamer.displayName,
-    createdAt: streamer.createdAt,
-  };
-}
+const detached = (streamer: TwitchStreamer): TrackedStreamer => ({
+  id: streamer.id,
+  login: streamer.login,
+  displayName: streamer.displayName,
+  createdAt: streamer.createdAt,
+});
 
 @Injectable()
 export class TwitchStreamerRepository implements TrackedStreamerStore {

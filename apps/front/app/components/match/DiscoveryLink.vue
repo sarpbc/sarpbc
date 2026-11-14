@@ -31,13 +31,13 @@ const delegatedAttrs = computed(() => {
   return rest;
 });
 
-function onClick() {
+const onClick = () => {
   if (!source) {
     return;
   }
 
   trackMatchRowClicked({ matchId: match.id, source, status });
-}
+};
 </script>
 
 <template>

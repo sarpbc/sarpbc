@@ -21,7 +21,7 @@ const teamItems = computed(() =>
   })),
 );
 
-async function create() {
+const create = async () => {
   creating.value = true;
 
   try {
@@ -37,7 +37,7 @@ async function create() {
   } finally {
     creating.value = false;
   }
-}
+};
 </script>
 
 <template>

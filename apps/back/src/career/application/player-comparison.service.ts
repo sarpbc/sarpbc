@@ -47,9 +47,8 @@ export interface Comparison {
   headToHead: HeadToHead;
 }
 
-function isRedistributableMatch(match: Match): boolean {
-  return isRedistributable(match.source) && isRedistributable(match.tournament.source);
-}
+const isRedistributableMatch = (match: Match): boolean =>
+  isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
 export class PlayerComparisonService {
   constructor(private readonly sources: PlayerComparisonSources) {}

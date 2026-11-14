@@ -7,6 +7,4 @@ export const TWITCH_LOGIN_PATTERN = new RegExp(
 
 export const TRACKED_STREAMER_NAME_MAX_LENGTH = 100;
 
-export function twitchChannelUrl(login: string): string {
-  return `https://twitch.tv/${login}`;
-}
+export const twitchChannelUrl = (login: string): string => `https://twitch.tv/${login}`;

@@ -22,7 +22,7 @@ type StoredFilesByField = Record<string, Storage.MultipartFile[]>;
 
 type MultipartFormFields = Record<string, string>;
 
-function isMultipartFileTooLarge(cause: unknown): boolean {
+const isMultipartFileTooLarge = (cause: unknown): boolean => {
   if (!(cause instanceof Error)) {
     return false;
   }
@@ -31,17 +31,17 @@ function isMultipartFileTooLarge(cause: unknown): boolean {
   const statusCode = "statusCode" in cause ? cause.statusCode : undefined;
 
   return code === "FST_REQ_FILE_TOO_LARGE" || statusCode === 413;
-}
+};
 
 export interface MultipartMessages {
   tooLarge: string;
   unreadable: string;
 }
 
-export function MultipartInterceptor(
+export const MultipartInterceptor = (
   options: MultipartOptions,
   messages: MultipartMessages,
-): Type<NestInterceptor> {
+): Type<NestInterceptor> => {
   class MixinInterceptor implements NestInterceptor {
     async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
       const req = context.switchToHttp().getRequest<FastifyRequest>();
@@ -98,4 +98,4 @@ export function MultipartInterceptor(
   }
 
   return mixin(MixinInterceptor);
-}
+};

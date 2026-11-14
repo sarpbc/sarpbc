@@ -18,7 +18,7 @@ const DEBOUNCE_MS = 150;
 
 let latestRequest = 0;
 
-async function refreshSearch() {
+const refreshSearch = async () => {
   latestRequest += 1;
   const request = latestRequest;
   const query = search.value;
@@ -33,23 +33,23 @@ async function refreshSearch() {
   teamQuery.value = query;
   playerList.value = players;
   searching.value = false;
-}
+};
 
 const pendingSearch = useTimeoutFn(refreshSearch, DEBOUNCE_MS, { immediate: false });
 
-function resetResults() {
+const resetResults = () => {
   pendingSearch.stop();
   latestRequest += 1;
   searching.value = false;
   teamList.value = [];
   playerList.value = [];
-}
+};
 
-function handleFocus() {
+const handleFocus = () => {
   open.value = teamList.value.length > 0 || playerList.value.length > 0 || search.value.length > 0;
-}
+};
 
-function updateSearch(value: string | null) {
+const updateSearch = (value: string | null) => {
   search.value = value ?? "";
 
   if (search.value.length === 0) {
@@ -60,24 +60,24 @@ function updateSearch(value: string | null) {
   }
 
   handleFocus();
-}
+};
 
-function handleBlur(): void {
+const handleBlur = (): void => {
   open.value = false;
-}
+};
 
-function handleMouseDown(event: MouseEvent): void {
+const handleMouseDown = (event: MouseEvent): void => {
   event.preventDefault();
-}
+};
 
-function handleLinkClick(event: MouseEvent): void {
+const handleLinkClick = (event: MouseEvent): void => {
   if (event.target instanceof Element && event.target.closest("a")) {
     search.value = "";
     resetResults();
     open.value = false;
     inputRef.value?.blur();
   }
-}
+};
 </script>
 
 <template>

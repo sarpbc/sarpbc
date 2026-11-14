@@ -10,20 +10,18 @@ import { REPLY_CREATION_COOLDOWN_MS } from "../domain/reply-limits";
 import type { ReplyRecord, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
 
-function toReplyDto(reply: ReplyRecord, nested: Reply[]): Reply {
-  return {
-    id: reply.id,
-    content: reply.content,
-    author: {
-      id: reply.author.id,
-      userName: reply.author.userName,
-    },
-    createdAt: reply.createdAt.toISOString(),
-    replies: nested,
-  };
-}
+const toReplyDto = (reply: ReplyRecord, nested: Reply[]): Reply => ({
+  id: reply.id,
+  content: reply.content,
+  author: {
+    id: reply.author.id,
+    userName: reply.author.userName,
+  },
+  createdAt: reply.createdAt.toISOString(),
+  replies: nested,
+});
 
-function toThreadedDtos(replies: ReplyRecord[]): Reply[] {
+const toThreadedDtos = (replies: ReplyRecord[]): Reply[] => {
   const dtos = replies.map((reply) => ({ reply, dto: toReplyDto(reply, []) }));
   const byId = new Map(dtos.map(({ reply, dto }) => [reply.id, dto]));
   const roots: Reply[] = [];
@@ -39,7 +37,7 @@ function toThreadedDtos(replies: ReplyRecord[]): Reply[] {
   }
 
   return roots;
-}
+};
 
 export class ReplyService {
   constructor(

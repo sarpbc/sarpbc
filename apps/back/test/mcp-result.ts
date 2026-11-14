@@ -5,22 +5,19 @@ import { z } from "zod";
 import type { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
 
-export function textOf(result: CallToolResult): string {
+export const textOf = (result: CallToolResult): string => {
   const [block] = result.content;
 
   return block?.type === "text" ? block.text : "";
-}
+};
 
-export function jsonOf(result: CallToolResult) {
-  return z.json().parse(JSON.parse(textOf(result) || "null"));
-}
+export const jsonOf = (result: CallToolResult) =>
+  z.json().parse(JSON.parse(textOf(result) || "null"));
 
-export function pendingProposalService() {
-  return {
-    propose: vi.fn<RosterProposalService["propose"]>(async (change: RosterChange) =>
-      Object.assign(new RosterProposal(), { id: "proposal-1", change }),
-    ),
-    proposeTeamLogo: vi.fn<RosterProposalService["proposeTeamLogo"]>(),
-    list: vi.fn<RosterProposalService["list"]>(),
-  };
-}
+export const pendingProposalService = () => ({
+  propose: vi.fn<RosterProposalService["propose"]>(async (change: RosterChange) =>
+    Object.assign(new RosterProposal(), { id: "proposal-1", change }),
+  ),
+  proposeTeamLogo: vi.fn<RosterProposalService["proposeTeamLogo"]>(),
+  list: vi.fn<RosterProposalService["list"]>(),
+});

@@ -7,9 +7,9 @@ export interface TransferQuery {
   offset?: number;
 }
 
-export async function getTransfers(
+export const getTransfers = async (
   query: TransferQuery,
-): Promise<{ transfers: Transfer[]; total: number }> {
+): Promise<{ transfers: Transfer[]; total: number }> => {
   const res = await apiFetch<{ transfers?: Transfer[]; count?: number }>(`/transfers`, {
     method: "GET",
     query,
@@ -18,9 +18,9 @@ export async function getTransfers(
   const transfers = res.transfers ?? [];
 
   return { transfers, total: res.count ?? transfers.length };
-}
+};
 
-export function useLatestTransfers(team: MaybeRef<string | undefined>, limit = 5) {
+export const useLatestTransfers = (team: MaybeRef<string | undefined>, limit = 5) => {
   const teamRef = toRef(team);
 
   const { data, pending, error, refresh } = useLazyAsyncData(
@@ -35,4 +35,4 @@ export function useLatestTransfers(team: MaybeRef<string | undefined>, limit = 5
   const transfers = computed(() => data.value?.transfers ?? []);
 
   return { transfers, pending, error, refresh };
-}
+};

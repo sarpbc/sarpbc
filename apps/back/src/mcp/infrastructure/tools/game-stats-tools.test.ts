@@ -98,7 +98,7 @@ const game: TournamentStatsGame = {
   orangeGoals: 1,
 };
 
-function setup(role: "admin" | "journalist") {
+const setup = (role: "admin" | "journalist") => {
   const statsImportService = {
     request: vi.fn<StatsImportService["request"]>(async () => ({
       ...statsImport,
@@ -134,7 +134,7 @@ function setup(role: "admin" | "journalist") {
   };
 
   return { tools, call, statsImportService, statsPlayerLinkService, manualGameService };
-}
+};
 
 describe(summarizeStatsImport, () => {
   it("counts other-stage replays and lists only the ones staff should review", () => {

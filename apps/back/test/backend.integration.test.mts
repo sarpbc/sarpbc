@@ -194,7 +194,7 @@ const rpcMessage = z.object({
 
 const portBindings = z.record(z.string(), z.array(z.object({ HostPort: z.string() })).nullable());
 
-function composeImage(name: string): string {
+const composeImage = (name: string): string => {
   const image = new RegExp(`image: (${name}:\\S+)`, "u").exec(compose)?.[1];
 
   if (image === undefined) {
@@ -202,16 +202,15 @@ function composeImage(name: string): string {
   }
 
   return image;
-}
+};
 
-function docker(...args: string[]): string {
-  return execFileSync("docker", args, {
+const docker = (...args: string[]): string =>
+  execFileSync("docker", args, {
     encoding: "utf-8",
     timeout: 30_000,
   }).trim();
-}
 
-function cookies(response: JsonResponse): string {
+const cookies = (response: JsonResponse): string => {
   const values = response.headers["set-cookie"];
   assert.ok(Array.isArray(values) && values.length >= 2, "access and refresh cookies are returned");
   assert.ok(
@@ -220,7 +219,7 @@ function cookies(response: JsonResponse): string {
   );
 
   return values.map((value) => value.split(";")[0]).join("; ");
-}
+};
 
 const teamNames = (participants: { team: { name: string } }[]): string[] =>
   participants.map(({ team }) => team.name).toSorted();
@@ -238,13 +237,13 @@ describe("backend integration", () => {
     let application: Application | undefined;
     let redisClient: RedisClient | undefined;
 
-    async function container(
+    const container = async (
       service: string,
       image: string,
       port: number,
       environment: Record<string, string>,
       readiness: string[],
-    ): Promise<number> {
+    ): Promise<number> => {
       const name = `sarpbc-integration-${service}-${randomUUID()}`;
       docker(
         "run",
@@ -259,7 +258,7 @@ describe("backend integration", () => {
       );
       containers.push(name);
 
-      async function ready(attempt: number): Promise<number> {
+      const ready = async (attempt: number): Promise<number> => {
         if (attempt >= 60) {
           throw new Error(`${service} did not become ready within 30 seconds`);
         }
@@ -283,16 +282,16 @@ describe("backend integration", () => {
 
           return await ready(attempt + 1);
         }
-      }
+      };
 
       return await ready(0);
-    }
+    };
 
-    async function check(name: string, work: () => Promise<void>): Promise<void> {
+    const check = async (name: string, work: () => Promise<void>): Promise<void> => {
       await work();
       results.push(name);
       process.stdout.write(`PASS ${name}\n`);
-    }
+    };
 
     try {
       const pgPort = await container(
@@ -1635,7 +1634,10 @@ describe("backend integration", () => {
 
         let rpcId = 0;
 
-        async function mcpResult(name: string, args: Payload): Promise<JsonValue> {
+        const mcpResult = async function mcpResult(
+          name: string,
+          args: Payload,
+        ): Promise<JsonValue> {
           rpcId += 1;
 
           const response = await request(
@@ -1676,7 +1678,7 @@ describe("backend integration", () => {
           assert.ok(text !== undefined, "the MCP result carries content");
 
           return jsonValue.parse(JSON.parse(text));
-        }
+        };
 
         function callTool(name: string, args: Payload): Promise<ToolProposal>;
         function callTool<T>(name: string, args: Payload, schema: z.ZodType<T>): Promise<T>;

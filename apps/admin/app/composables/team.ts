@@ -20,19 +20,19 @@ interface TeamContractDto {
   endDate?: string | null;
 }
 
-export async function getAllTeams(query: {
+export const getAllTeams = async (query: {
   limit: number;
   offset: number;
-}): Promise<{ teams: Team[]; total: number }> {
+}): Promise<{ teams: Team[]; total: number }> => {
   const res = await apiFetch<{ teams: Team[]; count: number }>("/team", {
     method: "GET",
     query,
   });
 
   return { teams: res.teams, total: res.count };
-}
+};
 
-export async function getEveryTeam(): Promise<Team[]> {
+export const getEveryTeam = async (): Promise<Team[]> => {
   const first = await getAllTeams({ limit: MAX_PAGE_SIZE, offset: 0 });
   const remainingPages = Math.max(Math.ceil(first.total / MAX_PAGE_SIZE) - 1, 0);
 
@@ -45,9 +45,9 @@ export async function getEveryTeam(): Promise<Team[]> {
   );
 
   return [first, ...rest].flatMap(({ teams }) => teams);
-}
+};
 
-export async function getTeamById(id: string): Promise<Team> {
+export const getTeamById = async (id: string): Promise<Team> => {
   const res = await apiFetch<{ team: Team | null }>(`/team/${id}`, { method: "GET" });
 
   if (!res.team) {
@@ -55,87 +55,87 @@ export async function getTeamById(id: string): Promise<Team> {
   }
 
   return res.team;
-}
+};
 
-export async function createTeam(body: CreateTeamDto): Promise<Team> {
+export const createTeam = async (body: CreateTeamDto): Promise<Team> => {
   const res = await apiFetch<{ team: Team }>("/team", { method: "POST", body });
 
   return res.team;
-}
+};
 
-export async function updateTeam(id: string, body: UpdateTeamDto): Promise<Team> {
+export const updateTeam = async (id: string, body: UpdateTeamDto): Promise<Team> => {
   const res = await apiFetch<{ team: Team }>(`/team/${id}`, { method: "PATCH", body });
 
   return res.team;
-}
+};
 
-export async function deleteTeam(id: string): Promise<void> {
+export const deleteTeam = async (id: string): Promise<void> => {
   await apiFetch(`/team/${id}`, { method: "DELETE" });
-}
+};
 
-export async function syncTeamFromPandascore(): Promise<void> {
+export const syncTeamFromPandascore = async (): Promise<void> => {
   await apiFetch("/team/sync", { method: "POST" });
-}
+};
 
-export async function getTeamContracts(teamId: string): Promise<TeamContract[]> {
+export const getTeamContracts = async (teamId: string): Promise<TeamContract[]> => {
   const res = await apiFetch<{ contracts: TeamContract[] }>(`/team/${teamId}/contract`, {
     method: "GET",
   });
 
   return res.contracts;
-}
+};
 
-export async function createTeamContract(
+export const createTeamContract = async (
   teamId: string,
   body: TeamContractDto,
-): Promise<TeamContract> {
+): Promise<TeamContract> => {
   const res = await apiFetch<{ contract: TeamContract }>(`/team/${teamId}/contract`, {
     method: "POST",
     body,
   });
 
   return res.contract;
-}
+};
 
-export async function updateTeamContract(
+export const updateTeamContract = async (
   teamId: string,
   contractId: string,
   body: Partial<TeamContractDto>,
-): Promise<TeamContract> {
+): Promise<TeamContract> => {
   const res = await apiFetch<{ contract: TeamContract }>(`/team/${teamId}/contract/${contractId}`, {
     method: "PATCH",
     body,
   });
 
   return res.contract;
-}
+};
 
-export async function deleteTeamContract(teamId: string, contractId: string): Promise<void> {
+export const deleteTeamContract = async (teamId: string, contractId: string): Promise<void> => {
   await apiFetch(`/team/${teamId}/contract/${contractId}`, { method: "DELETE" });
-}
+};
 
-export async function addTeamAlias(teamId: string, body: TeamAliasInput): Promise<TeamAlias> {
+export const addTeamAlias = async (teamId: string, body: TeamAliasInput): Promise<TeamAlias> => {
   const res = await apiFetch<{ alias: TeamAlias }>(`/team/${teamId}/aliases`, {
     method: "POST",
     body,
   });
 
   return res.alias;
-}
+};
 
-export async function updateTeamAlias(
+export const updateTeamAlias = async (
   teamId: string,
   aliasId: string,
   body: TeamAliasInput,
-): Promise<TeamAlias> {
+): Promise<TeamAlias> => {
   const res = await apiFetch<{ alias: TeamAlias }>(`/team/${teamId}/aliases/${aliasId}`, {
     method: "PUT",
     body,
   });
 
   return res.alias;
-}
+};
 
-export async function deleteTeamAlias(teamId: string, aliasId: string): Promise<void> {
+export const deleteTeamAlias = async (teamId: string, aliasId: string): Promise<void> => {
   await apiFetch(`/team/${teamId}/aliases/${aliasId}`, { method: "DELETE" });
-}
+};

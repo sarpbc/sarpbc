@@ -15,7 +15,7 @@ interface AirRiddleAttemptLike {
   results?: AirRiddleResultEnum[];
 }
 
-function resultToStatus(result: AirRiddleResultEnum): AirRiddleLetterStatus {
+const resultToStatus = (result: AirRiddleResultEnum): AirRiddleLetterStatus => {
   switch (result) {
     case AirRiddleResultEnum.CORRECT: {
       return "correct";
@@ -35,9 +35,9 @@ function resultToStatus(result: AirRiddleResultEnum): AirRiddleLetterStatus {
       return exhaustive;
     }
   }
-}
+};
 
-export function deriveAirRiddleLetterStatuses(attempts: AirRiddleAttemptLike[]) {
+export const deriveAirRiddleLetterStatuses = (attempts: AirRiddleAttemptLike[]) => {
   const statuses = new Map<string, AirRiddleLetterStatus>();
 
   for (const attempt of attempts) {
@@ -59,4 +59,4 @@ export function deriveAirRiddleLetterStatuses(attempts: AirRiddleAttemptLike[]) 
   }
 
   return Object.fromEntries(statuses) satisfies Record<string, AirRiddleLetterStatus>;
-}
+};

@@ -54,11 +54,11 @@ const PROPOSAL: StreamScoreProposal = {
   frames: { read: 800, accepted: 700, hidden: 80, unreadable: 15, rejected: 5 },
 };
 
-function error(proposal: StreamScoreProposal): string | null {
+const error = (proposal: StreamScoreProposal): string | null => {
   const parsed = parseStreamScoreProposal(JSON.stringify(proposal));
 
   return parsed.ok ? null : parsed.error;
-}
+};
 
 void describe("parseStreamScoreProposal", () => {
   void it("accepts a decided series and an unfinished one", () => {

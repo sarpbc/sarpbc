@@ -10,17 +10,15 @@ const FETCH_TROPHIES = {
   player: getPlayerTrophies,
 } satisfies Record<EntityKind, (id: string) => Promise<Tournament[]>>;
 
-function toTrophyListItem(tournament: Tournament): EntityTrophyListItem {
-  return {
-    id: tournament.id,
-    path: tournamentStagePath(tournament.event.slug, tournament.slug),
-    displayName: tournament.event.name,
-    formatLabel: nonDefaultFormatLabel(tournament.format),
-    endAt: tournament.endAt ?? null,
-  };
-}
+const toTrophyListItem = (tournament: Tournament): EntityTrophyListItem => ({
+  id: tournament.id,
+  path: tournamentStagePath(tournament.event.slug, tournament.slug),
+  displayName: tournament.event.name,
+  formatLabel: nonDefaultFormatLabel(tournament.format),
+  endAt: tournament.endAt ?? null,
+});
 
-export function useEntityTrophies(kind: EntityKind, entityId: MaybeRef<string | undefined>) {
+export const useEntityTrophies = (kind: EntityKind, entityId: MaybeRef<string | undefined>) => {
   const idRef = toRef(entityId);
 
   const { data, pending, error, refresh } = useAsyncData<Tournament[]>(
@@ -40,4 +38,4 @@ export function useEntityTrophies(kind: EntityKind, entityId: MaybeRef<string | 
     error,
     refresh,
   };
-}
+};

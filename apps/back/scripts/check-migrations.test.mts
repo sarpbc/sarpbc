@@ -13,7 +13,7 @@ interface Repository {
   remove: () => void;
 }
 
-function repository(baseMigrations: string[]): Repository {
+const repository = (baseMigrations: string[]): Repository => {
   const root = mkdtempSync(path.join(tmpdir(), "check-migrations-"));
   const directory = path.join(root, "migrations");
   mkdirSync(directory);
@@ -52,7 +52,7 @@ function repository(baseMigrations: string[]): Repository {
       rmSync(root, { recursive: true, force: true });
     },
   };
-}
+};
 
 void test("accepts unique migrations newer than every migration on base", () => {
   const repo = repository(["Migration20250815162622.ts", "Migration20250817144821_addPlayer.ts"]);

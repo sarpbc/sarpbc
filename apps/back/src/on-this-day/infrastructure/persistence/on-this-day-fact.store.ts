@@ -21,11 +21,10 @@ const FACT_POPULATE = [
   "match.participants.players",
 ] as const;
 
-function matchSource(match: Match): DataSource {
-  return isRedistributable(match.source) ? match.tournament.source : match.source;
-}
+const matchSource = (match: Match): DataSource =>
+  isRedistributable(match.source) ? match.tournament.source : match.source;
 
-function matchName(match: Match): string {
+const matchName = (match: Match): string => {
   const sides = match.participants
     .getItems()
     .map((participant) =>
@@ -33,9 +32,9 @@ function matchName(match: Match): string {
     );
 
   return sides.length === 2 ? sides.join(" vs ") : match.name;
-}
+};
 
-function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["link"] {
+const toLink = ({ player, team, tournament, match }: OnThisDayFact): StaffFact["link"] => {
   if (player) {
     return { kind: "player", id: player.id, name: player.name, slug: player.slug, source: null };
   }
@@ -67,20 +66,18 @@ function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["
   }
 
   return null;
-}
+};
 
-function toFact(row: OnThisDayFact): StaffFact {
-  return {
-    id: row.id,
-    month: row.month,
-    day: row.day,
-    year: row.year,
-    textEn: row.textEn,
-    textFr: row.textFr,
-    link: toLink(row),
-    sourceUrl: row.sourceUrl,
-  };
-}
+const toFact = (row: OnThisDayFact): StaffFact => ({
+  id: row.id,
+  month: row.month,
+  day: row.day,
+  year: row.year,
+  textEn: row.textEn,
+  textFr: row.textFr,
+  link: toLink(row),
+  sourceUrl: row.sourceUrl,
+});
 
 export class OnThisDayFactPersistence implements OnThisDayFactStore {
   constructor(private readonly em: EntityManager) {}

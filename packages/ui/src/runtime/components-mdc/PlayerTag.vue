@@ -32,7 +32,7 @@ const fullName = computed(() => {
   return parts.length > 0 ? parts.join(" ") : null;
 });
 
-async function loadPlayer() {
+const loadPlayer = async () => {
   if (player.value || pending.value) {
     return;
   }
@@ -52,7 +52,7 @@ async function loadPlayer() {
   } finally {
     pending.value = false;
   }
-}
+};
 
 watch(open, (isOpen) => {
   if (isOpen) {

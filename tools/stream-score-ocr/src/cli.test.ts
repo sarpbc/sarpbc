@@ -11,7 +11,7 @@ import { parseOverlay } from "./overlay.ts";
 
 const CLI = fileURLToPath(new URL("cli.ts", import.meta.url));
 
-async function cli(args: readonly string[]): Promise<{ stdout: string }> {
+const cli = async (args: readonly string[]): Promise<{ stdout: string }> => {
   const stdout = execFileSync(
     process.execPath,
     ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", CLI, ...args],
@@ -19,7 +19,7 @@ async function cli(args: readonly string[]): Promise<{ stdout: string }> {
   );
 
   return await Promise.resolve({ stdout });
-}
+};
 
 void describe("stream-score-ocr cli", () => {
   let directory = "";

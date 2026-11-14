@@ -17,19 +17,17 @@ interface NormalizedContract {
   endMs: number | null;
 }
 
-function toMember(contract: TeamContract): TeamRosterEraMember {
-  return {
-    contractId: contract.id,
-    playerId: contract.player.id,
-    name: contract.player.name,
-    slug: contract.player.slug,
-    imageUrl: contract.player.imageUrl,
-    role: contract.role,
-  };
-}
+const toMember = (contract: TeamContract): TeamRosterEraMember => ({
+  contractId: contract.id,
+  playerId: contract.player.id,
+  name: contract.player.name,
+  slug: contract.player.slug,
+  imageUrl: contract.player.imageUrl,
+  role: contract.role,
+});
 
-function sortMembers(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
-  return members.toSorted((a, b) => {
+const sortMembers = (members: TeamRosterEraMember[]): TeamRosterEraMember[] =>
+  members.toSorted((a, b) => {
     const roleDiff = CONTRACT_ROLES.indexOf(a.role) - CONTRACT_ROLES.indexOf(b.role);
 
     if (roleDiff !== 0) {
@@ -38,9 +36,8 @@ function sortMembers(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
 
     return a.name.localeCompare(b.name, "en");
   });
-}
 
-function normalizeContracts(contracts: TeamContract[], now: number): NormalizedContract[] {
+const normalizeContracts = (contracts: TeamContract[], now: number): NormalizedContract[] => {
   const result: NormalizedContract[] = [];
 
   for (const contract of contracts) {
@@ -66,9 +63,9 @@ function normalizeContracts(contracts: TeamContract[], now: number): NormalizedC
   }
 
   return result;
-}
+};
 
-function getMembersAt(normalized: NormalizedContract[], timeMs: number): TeamRosterEraMember[] {
+const getMembersAt = (normalized: NormalizedContract[], timeMs: number): TeamRosterEraMember[] => {
   const members: TeamRosterEraMember[] = [];
   const seen = new Set<string>();
 
@@ -96,13 +93,12 @@ function getMembersAt(normalized: NormalizedContract[], timeMs: number): TeamRos
   }
 
   return members;
-}
+};
 
-function sortByPlayerId(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
-  return members.toSorted((left, right) => left.playerId.localeCompare(right.playerId));
-}
+const sortByPlayerId = (members: TeamRosterEraMember[]): TeamRosterEraMember[] =>
+  members.toSorted((left, right) => left.playerId.localeCompare(right.playerId));
 
-function sameRoster(a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean {
+const sameRoster = (a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean => {
   if (a.length !== b.length) {
     return false;
   }
@@ -114,17 +110,17 @@ function sameRoster(a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean
     (member, index) =>
       member.playerId === sortedB[index]?.playerId && member.role === sortedB[index]?.role,
   );
-}
+};
 
 interface RosterMemberDiff {
   joined: TeamRosterEraMember[];
   left: TeamRosterEraMember[];
 }
 
-function diffMembers(
+const diffMembers = (
   previous: TeamRosterEraMember[] | null,
   current: TeamRosterEraMember[],
-): RosterMemberDiff {
+): RosterMemberDiff => {
   if (!previous) {
     return { joined: current, left: [] };
   }
@@ -136,16 +132,16 @@ function diffMembers(
     joined: current.filter((member) => !previousIds.has(member.playerId)),
     left: previous.filter((member) => !currentIds.has(member.playerId)),
   };
-}
+};
 
-function mergeAdjacentEras(
+const mergeAdjacentEras = (
   eras: {
     startMs: number;
     endMs: number | null;
     isCurrent: boolean;
     members: TeamRosterEraMember[];
   }[],
-): typeof eras {
+): typeof eras => {
   if (eras.length <= 1) {
     return eras;
   }
@@ -165,9 +161,9 @@ function mergeAdjacentEras(
   }
 
   return merged;
-}
+};
 
-function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRosterEra[] {
+const buildTeamRosterEras = (contracts: TeamContract[], now: number): TeamRosterEra[] => {
   const normalized = normalizeContracts(contracts, now);
 
   if (normalized.length === 0) {
@@ -254,9 +250,9 @@ function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRoster
   }
 
   return eras.toReversed();
-}
+};
 
-export function useTeamRosterHistory(teamId: MaybeRef<string | undefined>) {
+export const useTeamRosterHistory = (teamId: MaybeRef<string | undefined>) => {
   const teamIdRef = toRef(teamId);
 
   const { data, pending, error, refresh } = useAsyncData<TeamRosterHistoryPayload>(
@@ -281,4 +277,4 @@ export function useTeamRosterHistory(teamId: MaybeRef<string | undefined>) {
     error,
     refresh,
   };
-}
+};

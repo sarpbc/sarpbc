@@ -14,7 +14,7 @@ const STREAMS = [
   { url: "https://twitch.tv/fakecup_fr", language: "fr", kind: "costream", channel: "Fake Cup FR" },
 ];
 
-function setup(toolName: string, role: StaffRole = "admin") {
+const setup = (toolName: string, role: StaffRole = "admin") => {
   const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
@@ -29,7 +29,7 @@ function setup(toolName: string, role: StaffRole = "admin") {
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
-}
+};
 
 describe("stream tools", () => {
   it.each([

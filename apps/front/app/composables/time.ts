@@ -14,11 +14,9 @@ const TIME_AGO_UNITS: UseTimeAgoUnit[] = [
   { max: Number.POSITIVE_INFINITY, value: 31_536_000_000, name: "year" },
 ];
 
-function pf(past: boolean): string {
-  return past ? ".past" : ".future";
-}
+const pf = (past: boolean): string => (past ? ".past" : ".future");
 
-export function formatLocaleTimeAgo(date: Date) {
+export const formatLocaleTimeAgo = (date: Date) => {
   const { t, locale } = useI18n();
 
   const now = new Date();
@@ -76,4 +74,4 @@ export function formatLocaleTimeAgo(date: Date) {
     messages,
     units: TIME_AGO_UNITS,
   });
-}
+};

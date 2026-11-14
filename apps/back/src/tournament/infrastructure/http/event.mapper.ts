@@ -11,16 +11,16 @@ type EventStage = Pick<
   "name" | "beginAt" | "endAt" | "imageUrl" | "prizepool" | "type"
 >;
 
-function bound(dates: (Date | null)[], pick: (...times: number[]) => number): string | null {
+const bound = (dates: (Date | null)[], pick: (...times: number[]) => number): string | null => {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
 
   return times.length ? new Date(pick(...times)).toISOString() : null;
-}
+};
 
-export function mapEvent<Stage extends EventStage>(
+export const mapEvent = <Stage extends EventStage>(
   event: TournamentEvent,
   stages: Stage[],
-): TournamentEventResponse<Stage> {
+): TournamentEventResponse<Stage> => {
   const ordered = stages.toSorted(compareStages);
   const [newest] = ordered;
 
@@ -46,11 +46,9 @@ export function mapEvent<Stage extends EventStage>(
     ),
     stages: ordered,
   };
-}
+};
 
-export function mapStaffEvent({ event, stages }: EventListing): ManualEvent {
-  return {
-    ...mapEvent(event, stages.map(mapTournamentListItem)),
-    editable: !isEventSynced(event, stages),
-  };
-}
+export const mapStaffEvent = ({ event, stages }: EventListing): ManualEvent => ({
+  ...mapEvent(event, stages.map(mapTournamentListItem)),
+  editable: !isEventSynced(event, stages),
+});

@@ -96,45 +96,40 @@ export class MikroReplyStore implements ReplyWrites {
   }
 }
 
-export function replyReports(em: EntityManager) {
-  return {
-    async findByReplyAndReporter(
-      replyId: string,
-      userId: string,
-    ): Promise<ReplyReportRecord | null> {
-      const row = await em.findOne(ReplyReport, {
-        reply: { id: replyId },
-        reporter: { id: userId },
-      });
+export const replyReports = (em: EntityManager) => ({
+  async findByReplyAndReporter(replyId: string, userId: string): Promise<ReplyReportRecord | null> {
+    const row = await em.findOne(ReplyReport, {
+      reply: { id: replyId },
+      reporter: { id: userId },
+    });
 
-      return row
-        ? {
-            id: row.id,
-            reply: { id: row.reply.id },
-            reporter: { id: row.reporter.id },
-            reason: row.reason,
-            createdAt: new Date(row.createdAt),
-          }
-        : null;
-    },
-    async save(model: ReplyReportRecord) {
-      const row = new ReplyReport();
-      row.id = model.id;
-      row.reply = em.getReference(Reply, model.reply.id);
-      row.reporter = em.getReference(User, model.reporter.id);
-      row.reason = model.reason;
-      row.createdAt = model.createdAt;
-      em.persist(row);
-
-      try {
-        await em.flush();
-      } catch (error) {
-        if (isUniqueViolation(error)) {
-          throw replyAlreadyReported();
+    return row
+      ? {
+          id: row.id,
+          reply: { id: row.reply.id },
+          reporter: { id: row.reporter.id },
+          reason: row.reason,
+          createdAt: new Date(row.createdAt),
         }
+      : null;
+  },
+  async save(model: ReplyReportRecord) {
+    const row = new ReplyReport();
+    row.id = model.id;
+    row.reply = em.getReference(Reply, model.reply.id);
+    row.reporter = em.getReference(User, model.reporter.id);
+    row.reason = model.reason;
+    row.createdAt = model.createdAt;
+    em.persist(row);
 
-        throw error;
+    try {
+      await em.flush();
+    } catch (error) {
+      if (isUniqueViolation(error)) {
+        throw replyAlreadyReported();
       }
-    },
-  };
-}
+
+      throw error;
+    }
+  },
+});

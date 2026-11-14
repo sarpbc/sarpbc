@@ -10,22 +10,22 @@ export interface IdOrSlugLookup<Entity> {
  * A UUID is read as an id first, then as a slug (slugs may look like UUIDs).
  * Anything else is a slug only, so a database never sees a malformed id.
  */
-export async function findByIdOrSlug<Entity>(
+export const findByIdOrSlug = async <Entity>(
   lookup: IdOrSlugLookup<Entity>,
   token: string,
-): Promise<Entity | null> {
+): Promise<Entity | null> => {
   if (!isUuid(token)) {
     return await lookup.findBySlug(token);
   }
 
   return await ((await lookup.findById(token)) ?? lookup.findBySlug(token));
-}
+};
 
-export async function requireByIdOrSlug<Entity>(
+export const requireByIdOrSlug = async <Entity>(
   lookup: IdOrSlugLookup<Entity>,
   token: string,
   kind: "Player" | "Team",
-): Promise<Entity> {
+): Promise<Entity> => {
   const entity = await findByIdOrSlug(lookup, token);
 
   if (entity === null) {
@@ -36,4 +36,4 @@ export async function requireByIdOrSlug<Entity>(
   }
 
   return entity;
-}
+};

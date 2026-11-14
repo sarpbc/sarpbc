@@ -10,9 +10,8 @@ import {
   newsMdcComponentMap,
 } from "@sarpbc/ui/config";
 
-function envOr(value: string | undefined, fallback: string): string {
-  return isNonEmptyString(value) ? value : fallback;
-}
+const envOr = (value: string | undefined, fallback: string): string =>
+  isNonEmptyString(value) ? value : fallback;
 
 const apiBase = envOr(process.env.NUXT_PUBLIC_API_BASE, DEFAULT_API_BASE);
 const adminUrl = envOr(process.env.NUXT_PUBLIC_ADMIN_URL, "https://admin.sarpbc.org");
@@ -21,14 +20,13 @@ const contentSwr = { swr: 300 } as const;
 
 type RouteRules = NonNullable<NuxtConfig["routeRules"]>;
 
-function localizedRouteRules(rules: RouteRules): RouteRules {
-  return Object.fromEntries(
+const localizedRouteRules = (rules: RouteRules): RouteRules =>
+  Object.fromEntries(
     Object.entries(rules).flatMap(([path, rule]) => [
       [path, rule],
       [localizedPath(path, "fr"), rule],
     ]),
   );
-}
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -38,7 +36,7 @@ const posthogPublicKey = isProduction
 
 const posthogHost = envOr(process.env.NUXT_PUBLIC_POSTHOG_HOST, "https://t.sarpbc.org");
 
-function hostnameFromUrl(base: string | undefined): string | undefined {
+const hostnameFromUrl = (base: string | undefined): string | undefined => {
   if (!isNonEmptyString(base)) {
     return undefined;
   }
@@ -48,7 +46,7 @@ function hostnameFromUrl(base: string | undefined): string | undefined {
   } catch {
     return undefined;
   }
-}
+};
 
 const r2ImageHost = hostnameFromUrl(process.env.NUXT_PUBLIC_R2_PUBLIC_BASE_URL);
 

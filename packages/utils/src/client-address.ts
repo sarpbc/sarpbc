@@ -34,7 +34,7 @@ const CLOUDFLARE_IPV6 = [
 const cloudflare = new BlockList();
 const nonPublic = new BlockList();
 
-function addCidrs(list: BlockList, cidrs: readonly string[], family: "ipv4" | "ipv6"): void {
+const addCidrs = (list: BlockList, cidrs: readonly string[], family: "ipv4" | "ipv6"): void => {
   for (const cidr of cidrs) {
     const [address, prefix] = cidr.split("/");
 
@@ -44,7 +44,7 @@ function addCidrs(list: BlockList, cidrs: readonly string[], family: "ipv4" | "i
 
     list.addSubnet(address, Number(prefix), family);
   }
-}
+};
 
 const trustedProxy = new BlockList();
 
@@ -93,7 +93,7 @@ export interface ClientRequest {
   raw?: { socket?: { remoteAddress?: string | null } };
 }
 
-export function canonicalIp(value: string | undefined | null): string | undefined {
+export const canonicalIp = (value: string | undefined | null): string | undefined => {
   if (!isNonEmptyString(value)) {
     return undefined;
   }
@@ -108,13 +108,11 @@ export function canonicalIp(value: string | undefined | null): string | undefine
   }
 
   return version === 4 ? candidate : candidate.toLowerCase();
-}
+};
 
-function ipFamily(ip: string): "ipv4" | "ipv6" {
-  return isIP(ip) === 6 ? "ipv6" : "ipv4";
-}
+const ipFamily = (ip: string): "ipv4" | "ipv6" => (isIP(ip) === 6 ? "ipv6" : "ipv4");
 
-export function isCloudflareIp(value: string | undefined): boolean {
+export const isCloudflareIp = (value: string | undefined): boolean => {
   const ip = canonicalIp(value);
 
   if (!isNonEmptyString(ip)) {
@@ -122,9 +120,9 @@ export function isCloudflareIp(value: string | undefined): boolean {
   }
 
   return cloudflare.check(ip, ipFamily(ip));
-}
+};
 
-export function isTrustedProxy(value: string | undefined): boolean {
+export const isTrustedProxy = (value: string | undefined): boolean => {
   const ip = canonicalIp(value);
 
   if (!isNonEmptyString(ip)) {
@@ -132,9 +130,9 @@ export function isTrustedProxy(value: string | undefined): boolean {
   }
 
   return trustedProxy.check(ip, ipFamily(ip));
-}
+};
 
-export function isPublicIp(value: string | undefined): boolean {
+export const isPublicIp = (value: string | undefined): boolean => {
   const ip = canonicalIp(value);
 
   if (!isNonEmptyString(ip)) {
@@ -142,9 +140,9 @@ export function isPublicIp(value: string | undefined): boolean {
   }
 
   return !nonPublic.check(ip, ipFamily(ip));
-}
+};
 
-function header(headers: ClientRequest["headers"], name: string): string | undefined {
+const header = (headers: ClientRequest["headers"], name: string): string | undefined => {
   const value = headers?.[name] ?? headers?.[name.toLowerCase()];
 
   if (Array.isArray(value)) {
@@ -156,9 +154,9 @@ function header(headers: ClientRequest["headers"], name: string): string | undef
   const trimmed = value?.trim();
 
   return isNonEmptyString(trimmed) ? trimmed : undefined;
-}
+};
 
-export function resolveClientAddress(request: ClientRequest): string {
+export const resolveClientAddress = (request: ClientRequest): string => {
   const seen = canonicalIp(request.ip);
 
   if (!isNonEmptyString(seen)) {
@@ -174,24 +172,24 @@ export function resolveClientAddress(request: ClientRequest): string {
   }
 
   return seen;
-}
+};
 
-export function peerAddress(request: ClientRequest): string | undefined {
+export const peerAddress = (request: ClientRequest): string | undefined => {
   const address = request.socket?.remoteAddress ?? request.raw?.socket?.remoteAddress;
 
   return isNonEmptyString(address) ? canonicalIp(address) : undefined;
-}
+};
 
-export function isDirectLoopback(request: ClientRequest): boolean {
+export const isDirectLoopback = (request: ClientRequest): boolean => {
   const peer = peerAddress(request);
 
   return peer === "127.0.0.1" || peer === "::1";
-}
+};
 
-export function addressSeenByTrustedProxy(
+export const addressSeenByTrustedProxy = (
   socketAddress: string | undefined | null,
   forwardedFor: string | undefined | null,
-): string | undefined {
+): string | undefined => {
   const socket = canonicalIp(socketAddress);
 
   if (!isNonEmptyString(socket)) {
@@ -211,29 +209,29 @@ export function addressSeenByTrustedProxy(
   }
 
   return chain[index];
-}
+};
 
-function joinedHeader(value: string | string[] | undefined | null): string | undefined {
+const joinedHeader = (value: string | string[] | undefined | null): string | undefined => {
   if (Array.isArray(value)) {
     return value.join(",");
   }
 
   return value ?? undefined;
-}
+};
 
-function singleHeader(value: string | string[] | undefined | null): string | undefined {
+const singleHeader = (value: string | string[] | undefined | null): string | undefined => {
   if (Array.isArray(value)) {
     return value.length === 1 ? value[0] : undefined;
   }
 
   return value ?? undefined;
-}
+};
 
-export function visitorAddressFromProxy(input: {
+export const visitorAddressFromProxy = (input: {
   socketAddress?: string | null;
   forwardedFor?: string | string[] | null;
   connectingIp?: string | string[] | null;
-}): string | undefined {
+}): string | undefined => {
   const seen = addressSeenByTrustedProxy(input.socketAddress, joinedHeader(input.forwardedFor));
 
   if (!isNonEmptyString(seen)) {
@@ -246,9 +244,9 @@ export function visitorAddressFromProxy(input: {
   });
 
   return isPublicIp(resolved) ? resolved : undefined;
-}
+};
 
-export function forwardedPublicClient(request: ClientRequest): string | undefined {
+export const forwardedPublicClient = (request: ClientRequest): string | undefined => {
   const client = canonicalIp(header(request.headers, INTERNAL_CLIENT_HEADER));
 
   if (!isNonEmptyString(client) || !isPublicIp(client)) {
@@ -256,12 +254,12 @@ export function forwardedPublicClient(request: ClientRequest): string | undefine
   }
 
   return client;
-}
+};
 
-export function internalApiTokenMatches(
+export const internalApiTokenMatches = (
   request: ClientRequest,
   expected: string | undefined,
-): boolean {
+): boolean => {
   const token = expected?.trim();
 
   if (!isNonEmptyString(token)) {
@@ -282,4 +280,4 @@ export function internalApiTokenMatches(
   }
 
   return timingSafeEqual(left, right);
-}
+};

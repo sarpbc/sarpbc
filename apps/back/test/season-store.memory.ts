@@ -49,14 +49,13 @@ export const SEASON_TOURNAMENTS = {
   },
 } satisfies Record<string, SeasonPathTournament>;
 
-function tournamentOf(id: string): SeasonPathTournament | null {
-  return Object.values(SEASON_TOURNAMENTS).find((tournament) => tournament.id === id) ?? null;
-}
+const tournamentOf = (id: string): SeasonPathTournament | null =>
+  Object.values(SEASON_TOURNAMENTS).find((tournament) => tournament.id === id) ?? null;
 
 const teamOf = (id: string): SeasonTeam =>
   Object.values(SEASON_TEAMS).find((candidate) => candidate.id === id) ?? team(id, id);
 
-export function memorySeasonStore() {
+export const memorySeasonStore = () => {
   const seasons = new Map<string, SeasonRecord>();
   const awards: StoredAward[] = [];
   const participants: StoredParticipant[] = [];
@@ -248,4 +247,4 @@ export function memorySeasonStore() {
   };
 
   return { store, awards, participants };
-}
+};

@@ -64,16 +64,14 @@ export const REPLY_TARGET_LOADERS = {
   (em: EntityManager, id: string) => Promise<Partial<ReplyTargetFields> | null>
 >;
 
-export function replySnapshot(row: Reply): ReplyRecord {
-  return {
-    id: row.id,
-    content: row.content,
-    createdAt: new Date(row.createdAt),
-    hiddenAt: row.hiddenAt ? new Date(row.hiddenAt) : null,
-    author: { id: row.author.id, userName: row.author.userName },
-    replyTo: row.replyTo ? { id: row.replyTo.id } : null,
-    post: row.post ? postFields(row.post) : null,
-    newsArticle: row.newsArticle ? newsArticleFields(row.newsArticle) : null,
-    match: row.match ? matchFields(row.match) : null,
-  };
-}
+export const replySnapshot = (row: Reply): ReplyRecord => ({
+  id: row.id,
+  content: row.content,
+  createdAt: new Date(row.createdAt),
+  hiddenAt: row.hiddenAt ? new Date(row.hiddenAt) : null,
+  author: { id: row.author.id, userName: row.author.userName },
+  replyTo: row.replyTo ? { id: row.replyTo.id } : null,
+  post: row.post ? postFields(row.post) : null,
+  newsArticle: row.newsArticle ? newsArticleFields(row.newsArticle) : null,
+  match: row.match ? matchFields(row.match) : null,
+});

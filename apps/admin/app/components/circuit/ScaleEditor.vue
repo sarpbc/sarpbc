@@ -71,7 +71,7 @@ const open = computed({
   },
 });
 
-async function loadTeams(tournamentId: string) {
+const loadTeams = async (tournamentId: string) => {
   teamsStatus.value = "pending";
   eventTeams.value = [];
 
@@ -89,7 +89,7 @@ async function loadTeams(tournamentId: string) {
       teamsStatus.value = "error";
     }
   }
-}
+};
 
 watch(
   target,
@@ -122,13 +122,13 @@ const teamOptions = computed(() =>
   })),
 );
 
-function toggleRegionTeam(teamId: string, selected: boolean) {
+const toggleRegionTeam = (teamId: string, selected: boolean) => {
   regionTeamIds.value = selected
     ? [...regionTeamIds.value, teamId]
     : regionTeamIds.value.filter((id) => id !== teamId);
-}
+};
 
-function toFinish(row: FinishRow): CircuitStageFinishInput | null {
+const toFinish = (row: FinishRow): CircuitStageFinishInput | null => {
   const { teamId, placement } = row;
 
   if (
@@ -142,7 +142,7 @@ function toFinish(row: FinishRow): CircuitStageFinishInput | null {
   }
 
   return { teamId, placement };
-}
+};
 
 const finishes = computed<CircuitStageFinishInput[] | null>(() => {
   const valid = finishRows.value.flatMap((row) => toFinish(row) ?? []);
@@ -156,7 +156,7 @@ const hasRepeatedFinish = computed(() => {
   return new Set(teamIds).size !== teamIds.length;
 });
 
-function finishError(row: FinishRow): string | undefined {
+const finishError = (row: FinishRow): string | undefined => {
   if (toFinish(row) !== null) {
     return undefined;
   }
@@ -168,17 +168,17 @@ function finishError(row: FinishRow): string | undefined {
   return t("page.circuits.scale.finishes.errors.placement", {
     maxPlacement: MAX_CIRCUIT_PLACEMENT,
   });
-}
+};
 
-function addFinish() {
+const addFinish = () => {
   finishRows.value.push({ key: (nextKey += 1), teamId: undefined, placement: null });
-}
+};
 
-function removeFinish(key: number) {
+const removeFinish = (key: number) => {
   finishRows.value = finishRows.value.filter((row) => row.key !== key);
-}
+};
 
-function toTier(row: TierRow): ValidTier | null {
+const toTier = (row: TierRow): ValidTier | null => {
   const { from, to, points } = row;
 
   if (
@@ -198,9 +198,9 @@ function toTier(row: TierRow): ValidTier | null {
   }
 
   return { from, to, points };
-}
+};
 
-function rowError(row: TierRow): string | undefined {
+const rowError = (row: TierRow): string | undefined => {
   if (toTier(row) !== null) {
     return undefined;
   }
@@ -217,7 +217,7 @@ function rowError(row: TierRow): string | undefined {
     maxPlacement: MAX_CIRCUIT_PLACEMENT,
     maxPoints: MAX_CIRCUIT_POINTS,
   });
-}
+};
 
 const tiers = computed<ValidTier[] | null>(() => {
   const valid = rows.value.flatMap((row) => toTier(row) ?? []);
@@ -244,7 +244,7 @@ const canSave = computed(
     !hasRepeatedFinish.value,
 );
 
-function addRow() {
+const addRow = () => {
   const last = tiers.value?.toSorted((a, b) => a.to - b.to).at(-1);
   rows.value.push({
     key: (nextKey += 1),
@@ -252,13 +252,13 @@ function addRow() {
     to: null,
     points: null,
   });
-}
+};
 
-function removeRow(key: number) {
+const removeRow = (key: number) => {
   rows.value = rows.value.filter((row) => row.key !== key);
-}
+};
 
-async function save() {
+const save = async () => {
   const current = target.value;
   const scale = tiers.value;
   const finishList = finishes.value;
@@ -286,7 +286,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

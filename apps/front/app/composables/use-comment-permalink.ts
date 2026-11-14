@@ -1,7 +1,7 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import { commentAnchorId, commentPermalinkHash, parseCommentHash } from "~/utils/comment-permalink";
 
-function focusCommentElement(commentId: string): HTMLElement | null {
+const focusCommentElement = (commentId: string): HTMLElement | null => {
   const element = document.querySelector<HTMLElement>(`#${CSS.escape(commentAnchorId(commentId))}`);
 
   if (!element) {
@@ -12,9 +12,9 @@ function focusCommentElement(commentId: string): HTMLElement | null {
   element.focus({ preventScroll: true });
 
   return element;
-}
+};
 
-function scrollToComment(commentId: string): boolean {
+const scrollToComment = (commentId: string): boolean => {
   const element = document.querySelector<HTMLElement>(`#${CSS.escape(commentAnchorId(commentId))}`);
 
   if (!element) {
@@ -29,47 +29,47 @@ function scrollToComment(commentId: string): boolean {
   focusCommentElement(commentId);
 
   return true;
-}
+};
 
-export function useCommentPermalink() {
+export const useCommentPermalink = () => {
   const route = useRoute();
   const router = useRouter();
 
   const highlightedCommentId = ref<string | null>(null);
   let highlightTimeout: ReturnType<typeof setTimeout> | null = null;
 
-  function clearHighlightTimer() {
+  const clearHighlightTimer = () => {
     if (highlightTimeout) {
       clearTimeout(highlightTimeout);
       highlightTimeout = null;
     }
-  }
+  };
 
-  function highlightComment(commentId: string) {
+  const highlightComment = (commentId: string) => {
     clearHighlightTimer();
     highlightedCommentId.value = commentId;
     highlightTimeout = setTimeout(() => {
       highlightedCommentId.value = null;
       highlightTimeout = null;
     }, HIGHLIGHT_MS);
-  }
+  };
 
-  function navigateToComment(commentId: string) {
+  const navigateToComment = (commentId: string) => {
     void router.replace({ hash: commentPermalinkHash(commentId) });
     void nextTick(() => {
       if (scrollToComment(commentId)) {
         highlightComment(commentId);
       }
     });
-  }
+  };
 
-  function tryScrollFromHash() {
+  const tryScrollFromHash = () => {
     const commentId = parseCommentHash(route.hash);
 
     if (isNonEmptyString(commentId) && scrollToComment(commentId)) {
       highlightComment(commentId);
     }
-  }
+  };
 
   onBeforeUnmount(clearHighlightTimer);
 
@@ -78,4 +78,4 @@ export function useCommentPermalink() {
     navigateToComment,
     tryScrollFromHash,
   };
-}
+};

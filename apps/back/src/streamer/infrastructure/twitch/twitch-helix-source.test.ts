@@ -2,22 +2,18 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { TwitchAppToken } from "./twitch-app-token";
 import { ROCKET_LEAGUE_GAME_ID, TwitchHelixSource } from "./twitch-helix-source";
 
-function helixStream(login: string, gameId = ROCKET_LEAGUE_GAME_ID) {
-  return {
-    user_login: login,
-    user_name: login.toUpperCase(),
-    game_id: gameId,
-    type: "live",
-    title: `${login} live`,
-    viewer_count: 42,
-  };
-}
+const helixStream = (login: string, gameId = ROCKET_LEAGUE_GAME_ID) => ({
+  user_login: login,
+  user_name: login.toUpperCase(),
+  game_id: gameId,
+  type: "live",
+  title: `${login} live`,
+  viewer_count: 42,
+});
 
-function streamsResponse(data: unknown[], status = 200) {
-  return Response.json({ data }, { status });
-}
+const streamsResponse = (data: unknown[], status = 200) => Response.json({ data }, { status });
 
-function requestedUrl(call: Parameters<typeof fetch>): URL {
+const requestedUrl = (call: Parameters<typeof fetch>): URL => {
   const [input] = call;
 
   if (!(input instanceof URL)) {
@@ -25,11 +21,10 @@ function requestedUrl(call: Parameters<typeof fetch>): URL {
   }
 
   return input;
-}
+};
 
-function requestedLogins(call: Parameters<typeof fetch>): string[] {
-  return requestedUrl(call).searchParams.getAll("user_login");
-}
+const requestedLogins = (call: Parameters<typeof fetch>): string[] =>
+  requestedUrl(call).searchParams.getAll("user_login");
 
 describe(TwitchHelixSource, () => {
   const fetchMock = vi.fn<typeof fetch>();

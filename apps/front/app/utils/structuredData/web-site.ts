@@ -17,8 +17,8 @@ export interface BuildWebSiteOptions {
   inLanguage?: string[];
 }
 
-export function buildWebSite(options: BuildWebSiteOptions): WebSiteLd {
-  return compactJsonLd<WebSiteLd>({
+export const buildWebSite = (options: BuildWebSiteOptions): WebSiteLd =>
+  compactJsonLd<WebSiteLd>({
     "@context": SCHEMA_ORG,
     "@type": "WebSite",
     name: "sarpbc.org",
@@ -29,4 +29,3 @@ export function buildWebSite(options: BuildWebSiteOptions): WebSiteLd {
       "@id": ORGANIZATION_ID,
     },
   });
-}

@@ -44,11 +44,11 @@ const state = reactive<Partial<Schema>>({
 
 const contentInputRef = useTemplateRef("contentInput");
 
-function focusContentInput() {
+const focusContentInput = () => {
   nextTick(() => {
     contentInputRef.value?.textareaRef?.focus();
   });
-}
+};
 
 onMounted(() => {
   if (autofocus) {
@@ -58,7 +58,7 @@ onMounted(() => {
 
 type CreateCommentResult = Awaited<ReturnType<typeof createComment>>;
 
-function createFailureDescription(failure: Exclude<CreateCommentResult, { ok: true }>): string {
+const createFailureDescription = (failure: Exclude<CreateCommentResult, { ok: true }>): string => {
   if (failure.reason === "unauthorized") {
     return t("components.discussion.messages.signInRequired");
   }
@@ -68,9 +68,9 @@ function createFailureDescription(failure: Exclude<CreateCommentResult, { ok: tr
   }
 
   return failure.message ?? t("components.discussion.messages.errorDescription");
-}
+};
 
-async function submitComment() {
+const submitComment = async () => {
   if (!user.value || isSubmitting.value) {
     return;
   }
@@ -113,17 +113,17 @@ async function submitComment() {
     description,
     color: "error",
   });
-}
+};
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   event.preventDefault();
   await submitComment();
-}
+};
 
-function onEnterKey(event: KeyboardEvent) {
+const onEnterKey = (event: KeyboardEvent) => {
   event.preventDefault();
   void submitComment();
-}
+};
 </script>
 
 <template>

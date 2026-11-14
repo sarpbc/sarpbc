@@ -17,11 +17,10 @@ interface ProfileTabQuery {
   [key: string]: string | undefined;
 }
 
-function parseProfileTab(value: LocationQuery[string] | number | undefined): EntityProfileTab {
-  return PROFILE_TABS.find((tab) => tab === value) ?? "info";
-}
+const parseProfileTab = (value: LocationQuery[string] | number | undefined): EntityProfileTab =>
+  PROFILE_TABS.find((tab) => tab === value) ?? "info";
 
-export function useEntityTabs(kind: EntityKind) {
+export const useEntityTabs = (kind: EntityKind) => {
   const route = useRoute();
   const router = useRouter();
   const { t } = useI18n();
@@ -32,7 +31,7 @@ export function useEntityTabs(kind: EntityKind) {
     PROFILE_TABS.map((value) => ({ value, label: t(`page.${kind}.slug.tabs.${value}`) })),
   );
 
-  function setTab(value: string | number) {
+  const setTab = (value: string | number) => {
     const next = parseProfileTab(value);
 
     if (next === "info") {
@@ -52,12 +51,12 @@ export function useEntityTabs(kind: EntityKind) {
     }
 
     void router.replace({ query });
-  }
+  };
 
   return { tab, tabItems, setTab };
-}
+};
 
-export function useEntityListTab(key: EntityListTabKey) {
+export const useEntityListTab = (key: EntityListTabKey) => {
   const route = useRoute();
   const router = useRouter();
 
@@ -69,7 +68,7 @@ export function useEntityListTab(key: EntityListTabKey) {
       : "i-fluent-calendar-clock-24-regular",
   );
 
-  function setTab(value: string | number) {
+  const setTab = (value: string | number) => {
     if (value === "past") {
       void router.replace({ query: { ...route.query, [key]: "past" } });
 
@@ -78,7 +77,7 @@ export function useEntityListTab(key: EntityListTabKey) {
 
     const { [key]: _removed, ...query } = route.query;
     void router.replace({ query });
-  }
+  };
 
   return { tab, emptyIcon, setTab };
-}
+};

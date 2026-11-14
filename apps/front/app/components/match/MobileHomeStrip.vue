@@ -41,9 +41,7 @@ const upcomingTitle = computed(() => {
   }
 });
 
-function isLive(matchId: string): boolean {
-  return liveMatches.value.some((m) => m.id === matchId);
-}
+const isLive = (matchId: string): boolean => liveMatches.value.some((m) => m.id === matchId);
 </script>
 
 <template>

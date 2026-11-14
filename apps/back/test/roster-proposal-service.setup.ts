@@ -68,7 +68,7 @@ const awardError = (tournamentId: string, playerId: string) => {
   return null;
 };
 
-export function setupRosterProposalService() {
+export const setupRosterProposalService = () => {
   const saved = new Map<string, RosterProposal>();
   let sequence = 0;
 
@@ -370,4 +370,4 @@ export function setupRosterProposalService() {
     seasons,
     service,
   };
-}
+};

@@ -27,7 +27,7 @@ const { status, data, error, refresh } = await useLazyAsyncData(
 
 const replies = computed(() => data.value ?? []);
 
-function targetTypeLabel(targetType: ModerationReply["targetType"]): string {
+const targetTypeLabel = (targetType: ModerationReply["targetType"]): string => {
   switch (targetType) {
     case "forumPost": {
       return t("page.moderation.targetTypes.forumPost");
@@ -47,13 +47,12 @@ function targetTypeLabel(targetType: ModerationReply["targetType"]): string {
       return String(_exhaustive);
     }
   }
-}
+};
 
-function publicTargetUrl(reply: ModerationReply): string {
-  return `${config.public.publicSiteUrl}${reply.targetPath}`;
-}
+const publicTargetUrl = (reply: ModerationReply): string =>
+  `${config.public.publicSiteUrl}${reply.targetPath}`;
 
-async function hideReply(reply: ModerationReply) {
+const hideReply = async (reply: ModerationReply) => {
   if (hidingReplyId.value) {
     return;
   }
@@ -72,15 +71,15 @@ async function hideReply(reply: ModerationReply) {
   } finally {
     hidingReplyId.value = null;
   }
-}
+};
 
-async function onReplyDeleted() {
+const onReplyDeleted = async () => {
   toast.add({
     title: t("page.moderation.messages.deleted"),
     color: "success",
   });
   await refresh();
-}
+};
 </script>
 
 <template>

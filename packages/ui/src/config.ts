@@ -8,7 +8,7 @@ export const DEFAULT_API_BASE = "https://api.sarpbc.org";
 
 export const SITE_ORIGIN = "https://sarpbc.org";
 
-export function apiPreconnectLinks(apiBase: string): PreconnectLink[] {
+export const apiPreconnectLinks = (apiBase: string): PreconnectLink[] => {
   try {
     const { origin } = new URL(apiBase);
 
@@ -19,7 +19,7 @@ export function apiPreconnectLinks(apiBase: string): PreconnectLink[] {
   } catch {
     return [];
   }
-}
+};
 
 export const i18nOptions: NuxtI18nOptions = {
   langDir: "locales",
@@ -40,11 +40,9 @@ export const i18nOptions: NuxtI18nOptions = {
   },
 };
 
-export function newsMdcComponentMap(matchesComponent: string) {
-  return {
-    player: "SarpPlayerTag",
-    team: "SarpTeamTag",
-    tweet: "SarpTweetTag",
-    matches: matchesComponent,
-  };
-}
+export const newsMdcComponentMap = (matchesComponent: string) => ({
+  player: "SarpPlayerTag",
+  team: "SarpTeamTag",
+  tweet: "SarpTweetTag",
+  matches: matchesComponent,
+});

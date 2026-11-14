@@ -42,11 +42,11 @@ const [
 
 const optionsError = computed(() => leaguesError.value ?? eventsError.value ?? teamsError.value);
 
-async function refreshOptions() {
+const refreshOptions = async () => {
   await Promise.all([refreshLeagues(), refreshEvents(), refreshTeams()]);
-}
+};
 
-async function handleSubmit() {
+const handleSubmit = async () => {
   if (isSaving.value || isUploading.value) {
     return;
   }
@@ -73,7 +73,7 @@ async function handleSubmit() {
   } finally {
     isSaving.value = false;
   }
-}
+};
 </script>
 
 <template>

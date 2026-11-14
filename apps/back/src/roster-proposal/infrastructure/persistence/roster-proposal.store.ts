@@ -15,12 +15,10 @@ import { Circuit } from "../../../circuit/infrastructure/circuit-persistence";
 import { Season } from "../../../season/infrastructure/season-persistence";
 import * as Row from "./roster-proposal.entity";
 
-function entry(id: string, label: string): [string, string] {
-  return [id, label];
-}
+const entry = (id: string, label: string): [string, string] => [id, label];
 
-function toProposal(row: Row.RosterProposal): RosterProposal {
-  return Object.assign(new RosterProposal(), {
+const toProposal = (row: Row.RosterProposal): RosterProposal =>
+  Object.assign(new RosterProposal(), {
     id: row.id,
     change: row.change,
     sourceUrl: row.sourceUrl,
@@ -31,119 +29,119 @@ function toProposal(row: Row.RosterProposal): RosterProposal {
     entityId: row.entityId,
     createdAt: row.createdAt,
   });
-}
 
-export function rosterProposalStore(em: EntityManager, inTransaction = false): RosterProposalStore {
-  return {
-    findById: async (id) => {
-      const row = await em.findOne(
-        Row.RosterProposal,
-        { id },
-        inTransaction ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {},
-      );
+export const rosterProposalStore = (
+  em: EntityManager,
+  inTransaction = false,
+): RosterProposalStore => ({
+  findById: async (id) => {
+    const row = await em.findOne(
+      Row.RosterProposal,
+      { id },
+      inTransaction ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {},
+    );
 
-      return row ? toProposal(row) : null;
-    },
-    list: async (status, limit) => {
-      const rows = await em.find(
-        Row.RosterProposal,
-        { status },
-        { orderBy: { createdAt: "asc" }, limit },
-      );
+    return row ? toProposal(row) : null;
+  },
+  list: async (status, limit) => {
+    const rows = await em.find(
+      Row.RosterProposal,
+      { status },
+      { orderBy: { createdAt: "asc" }, limit },
+    );
 
-      return rows.map(toProposal);
-    },
-    save: async (model) => {
-      const row = model.id
-        ? await em.findOneOrFail(Row.RosterProposal, { id: model.id })
-        : new Row.RosterProposal();
+    return rows.map(toProposal);
+  },
+  save: async (model) => {
+    const row = model.id
+      ? await em.findOneOrFail(Row.RosterProposal, { id: model.id })
+      : new Row.RosterProposal();
 
-      if (!model.id) {
-        model.id = v4();
-        row.id = model.id;
-        row.createdAt = model.createdAt;
-      }
+    if (!model.id) {
+      model.id = v4();
+      row.id = model.id;
+      row.createdAt = model.createdAt;
+    }
 
-      Object.assign(row, {
-        change: model.change,
-        sourceUrl: model.sourceUrl,
-        status: model.status,
-        proposedBy: em.getReference(User, model.proposedById),
-        reviewedBy:
-          model.reviewedById !== null && model.reviewedById !== ""
-            ? em.getReference(User, model.reviewedById)
-            : null,
-        reviewedAt: model.reviewedAt,
-        entityId: model.entityId,
-      });
-      em.persist(row);
+    Object.assign(row, {
+      change: model.change,
+      sourceUrl: model.sourceUrl,
+      status: model.status,
+      proposedBy: em.getReference(User, model.proposedById),
+      reviewedBy:
+        model.reviewedById !== null && model.reviewedById !== ""
+          ? em.getReference(User, model.reviewedById)
+          : null,
+      reviewedAt: model.reviewedAt,
+      entityId: model.entityId,
+    });
+    em.persist(row);
 
-      if (!inTransaction) {
-        await em.flush();
-      }
-    },
-    names: async (ids) => {
-      const [players, teams, users, tournaments, matches, events, circuits, seasons] =
-        await Promise.all([
-          ids.players.length
-            ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
-            : [],
-          ids.teams.length
-            ? em.find(Team, { id: { $in: ids.teams } }, { fields: ["id", "name"] })
-            : [],
-          ids.users.length
-            ? em.find(User, { id: { $in: ids.users } }, { fields: ["id", "userName"] })
-            : [],
-          ids.tournaments.length
-            ? em.find(Tournament, { id: { $in: ids.tournaments } }, { populate: ["event"] })
-            : [],
-          ids.matches.length
-            ? em.find(
-                Match,
-                { id: { $in: ids.matches } },
-                { populate: ["participants.team", "participants.players", "tournament.event"] },
-              )
-            : [],
-          ids.events.length
-            ? em.find(TournamentEvent, { id: { $in: ids.events } }, { fields: ["id", "name"] })
-            : [],
-          ids.circuits.length
-            ? em.find(Circuit, { id: { $in: ids.circuits } }, { fields: ["id", "name"] })
-            : [],
-          ids.seasons.length
-            ? em.find(Season, { id: { $in: ids.seasons } }, { fields: ["id", "name"] })
-            : [],
-        ]);
-
-      return Object.fromEntries([
-        ...players.map((player) => entry(player.id, player.name)),
-        ...teams.map((team) => entry(team.id, team.name)),
-        ...users.map((user) => entry(user.id, user.userName)),
-        ...events.map((event) => entry(event.id, event.name)),
-        ...circuits.map((circuit) => entry(circuit.id, circuit.name)),
-        ...seasons.map((season) => entry(season.id, season.name)),
-        ...tournaments.map((tournament) =>
-          entry(tournament.id, `${tournament.event.name} · ${tournament.name}`),
-        ),
-        ...matches.map((match) =>
-          entry(
-            match.id,
-            [
-              match.participants
-                .map(({ team, players: lineup }) =>
-                  participantName({ team, players: lineup.getItems() }),
-                )
-                .join(" vs "),
-              match.tournament.event.name,
-              match.tournament.name,
-              match.name,
-            ].join(" · "),
-          ),
-        ),
+    if (!inTransaction) {
+      await em.flush();
+    }
+  },
+  names: async (ids) => {
+    const [players, teams, users, tournaments, matches, events, circuits, seasons] =
+      await Promise.all([
+        ids.players.length
+          ? em.find(Player, { id: { $in: ids.players } }, { fields: ["id", "name"] })
+          : [],
+        ids.teams.length
+          ? em.find(Team, { id: { $in: ids.teams } }, { fields: ["id", "name"] })
+          : [],
+        ids.users.length
+          ? em.find(User, { id: { $in: ids.users } }, { fields: ["id", "userName"] })
+          : [],
+        ids.tournaments.length
+          ? em.find(Tournament, { id: { $in: ids.tournaments } }, { populate: ["event"] })
+          : [],
+        ids.matches.length
+          ? em.find(
+              Match,
+              { id: { $in: ids.matches } },
+              { populate: ["participants.team", "participants.players", "tournament.event"] },
+            )
+          : [],
+        ids.events.length
+          ? em.find(TournamentEvent, { id: { $in: ids.events } }, { fields: ["id", "name"] })
+          : [],
+        ids.circuits.length
+          ? em.find(Circuit, { id: { $in: ids.circuits } }, { fields: ["id", "name"] })
+          : [],
+        ids.seasons.length
+          ? em.find(Season, { id: { $in: ids.seasons } }, { fields: ["id", "name"] })
+          : [],
       ]);
-    },
-  };
-}
+
+    return Object.fromEntries([
+      ...players.map((player) => entry(player.id, player.name)),
+      ...teams.map((team) => entry(team.id, team.name)),
+      ...users.map((user) => entry(user.id, user.userName)),
+      ...events.map((event) => entry(event.id, event.name)),
+      ...circuits.map((circuit) => entry(circuit.id, circuit.name)),
+      ...seasons.map((season) => entry(season.id, season.name)),
+      ...tournaments.map((tournament) =>
+        entry(tournament.id, `${tournament.event.name} · ${tournament.name}`),
+      ),
+      ...matches.map((match) =>
+        entry(
+          match.id,
+          [
+            match.participants
+              .map(({ team, players: lineup }) =>
+                participantName({ team, players: lineup.getItems() }),
+              )
+              .join(" vs "),
+            match.tournament.event.name,
+            match.tournament.name,
+            match.name,
+          ].join(" · "),
+        ),
+      ),
+    ]);
+  },
+});
 
 export class MikroRosterProposalTransaction implements RosterProposalTransaction {
   constructor(private readonly em: EntityManager) {}

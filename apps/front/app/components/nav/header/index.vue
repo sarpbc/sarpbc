@@ -12,34 +12,34 @@ const homePath = computed(() => localePath("/"));
 const matchesPath = computed(() => localePath("/matches"));
 const resultsPath = computed(() => localePath("/results"));
 
-function isExactPath(path: string): boolean {
+const isExactPath = (path: string): boolean => {
   const current = route.path.replace(/\/$/u, "");
   const target = path.replace(/\/$/u, "");
 
   return current === target;
-}
+};
 
-function isNewsSection(): boolean {
+const isNewsSection = (): boolean => {
   if (isExactPath(homePath.value)) {
     return true;
   }
 
   return /(?:^|\/)news(?:\/|$)/u.test(route.path);
-}
+};
 
-function toggleMenu() {
+const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
-}
+};
 
-function closeMenu() {
+const closeMenu = () => {
   menuOpen.value = false;
-}
+};
 
-function handleMobileMenuClick(event: MouseEvent) {
+const handleMobileMenuClick = (event: MouseEvent) => {
   if (event.target instanceof Element && event.target.closest("a")) {
     closeMenu();
   }
-}
+};
 
 watch(menuOpen, (open) => {
   document.documentElement.classList.toggle("overflow-hidden", open);

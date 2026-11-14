@@ -8,19 +8,20 @@ import type { Player } from "../../domain/player";
 import type { Team } from "../../domain/team";
 import type { TeamAlias } from "../../domain/team-alias";
 
-export function mapTeamSummary(team: Team): TeamSummary {
-  return {
-    id: team.id,
-    name: team.name,
-    slug: team.slug,
-    imageUrl: team.imageUrl,
-    logoLightUrl: team.logoLightUrl,
-    logoDarkUrl: team.logoDarkUrl,
-    location: team.location,
-  };
-}
+export const mapTeamSummary = (team: Team): TeamSummary => ({
+  id: team.id,
+  name: team.name,
+  slug: team.slug,
+  imageUrl: team.imageUrl,
+  logoLightUrl: team.logoLightUrl,
+  logoDarkUrl: team.logoDarkUrl,
+  location: team.location,
+});
 
-export function mapPlayer(player: Player, options?: { includePhotos?: boolean }): PlayerResponse {
+export const mapPlayer = (
+  player: Player,
+  options?: { includePhotos?: boolean },
+): PlayerResponse => {
   const response: PlayerResponse = {
     id: player.id,
     name: player.name,
@@ -40,26 +41,22 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
   }
 
   return response;
-}
+};
 
-export function mapTeamAlias(alias: TeamAlias): TeamAliasResponse {
-  return {
-    id: alias.id,
-    name: alias.name,
-    from: alias.from,
-    to: alias.to,
-    sourceUrl: alias.sourceUrl,
-    logoUrl: alias.logoUrl,
-    pandascoreId: alias.pandascoreId,
-  };
-}
+export const mapTeamAlias = (alias: TeamAlias): TeamAliasResponse => ({
+  id: alias.id,
+  name: alias.name,
+  from: alias.from,
+  to: alias.to,
+  sourceUrl: alias.sourceUrl,
+  logoUrl: alias.logoUrl,
+  pandascoreId: alias.pandascoreId,
+});
 
-export function mapTeam(team: Team): TeamResponse {
-  return {
-    ...mapTeamSummary(team),
-    pandascoreId: team.pandascoreId,
-    source: team.source,
-    players: team.players.map((player) => mapPlayer(player)),
-    aliases: team.aliases.map(mapTeamAlias),
-  };
-}
+export const mapTeam = (team: Team): TeamResponse => ({
+  ...mapTeamSummary(team),
+  pandascoreId: team.pandascoreId,
+  source: team.source,
+  players: team.players.map((player) => mapPlayer(player)),
+  aliases: team.aliases.map(mapTeamAlias),
+});

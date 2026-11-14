@@ -29,15 +29,15 @@ export interface Measure {
   results: SeriesResult[];
 }
 
-function seriesOutcome(winner: string | null, expectedWinner: string): SeriesOutcome {
+const seriesOutcome = (winner: string | null, expectedWinner: string): SeriesOutcome => {
   if (winner === null) {
     return "undetermined";
   }
 
   return winner === expectedWinner ? "correct" : "wrong";
-}
+};
 
-async function replay(script: SeriesScript, intervalSeconds: number): Promise<SeriesResult> {
+const replay = async (script: SeriesScript, intervalSeconds: number): Promise<SeriesResult> => {
   const overlay = await loadOverlay(OVERLAY_PATH);
   const renderer = new FixtureRenderer(script.size, script.seed);
   const tracker = new SeriesTracker({ bestOf: script.bestOf, stableReadings: 2 });
@@ -85,9 +85,9 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
     undecidedGames: parsed.proposal.games.filter((game) => game.winner === null).length,
     series: seriesOutcome(winner, expectedWinner),
   };
-}
+};
 
-export async function measureFixtures(intervalSeconds: number): Promise<Measure> {
+export const measureFixtures = async (intervalSeconds: number): Promise<Measure> => {
   const results = await Promise.all(
     generateSeries(12, 20_261_102).map(async (script) => await replay(script, intervalSeconds)),
   );
@@ -97,9 +97,9 @@ export async function measureFixtures(intervalSeconds: number): Promise<Measure>
   const undecidedGames = results.reduce((total, result) => total + result.undecidedGames, 0);
 
   return { games, correctGames, undecidedGames, rate: correctGames / games, results };
-}
+};
 
-export function describeMeasure(measure: Measure): string[] {
+export const describeMeasure = (measure: Measure): string[] => {
   const wrongGames = measure.games - measure.correctGames - measure.undecidedGames;
 
   return [
@@ -109,4 +109,4 @@ export function describeMeasure(measure: Measure): string[] {
     ),
     `game scores: ${measure.correctGames}/${measure.games} correct (${(measure.rate * 100).toFixed(1)}%), ${measure.undecidedGames} undecided, ${wrongGames} wrong`,
   ];
-}
+};

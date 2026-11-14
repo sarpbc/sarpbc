@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import type { PlayerStandIn } from "@sarpbc/types";
 
-export function usePlayerStandIns(playerId: MaybeRef<string | undefined>) {
+export const usePlayerStandIns = (playerId: MaybeRef<string | undefined>) => {
   const playerIdRef = toRef(playerId);
 
   const { data, pending, error, refresh } = useLazyAsyncData<PlayerStandIn[]>(
@@ -26,4 +26,4 @@ export function usePlayerStandIns(playerId: MaybeRef<string | undefined>) {
     error,
     refresh,
   };
-}
+};

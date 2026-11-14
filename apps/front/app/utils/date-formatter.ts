@@ -17,11 +17,11 @@ const dayHeaderFormatter = (locale: string) =>
     year: "numeric",
   });
 
-export function formatDayHeaderDate(date: Date, locale: string): string {
+export const formatDayHeaderDate = (date: Date, locale: string): string => {
   const formatted = dayHeaderFormatter(locale).format(date);
 
   return formatted.charAt(0).toLocaleUpperCase(locale) + formatted.slice(1);
-}
+};
 
 export const mediumCalendarDayFormatter = (locale: string) =>
   new DateFormatter(locale, { dateStyle: "medium", timeZone: "UTC" });

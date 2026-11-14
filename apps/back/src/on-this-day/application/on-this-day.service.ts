@@ -29,30 +29,29 @@ export interface OnThisDaySources {
   facts: Pick<OnThisDayFactStore, "onDay">;
 }
 
-function toTeam(team: Team): OnThisDayTeam {
-  return {
-    name: team.name,
-    slug: team.slug,
-    imageUrl: team.imageUrl,
-    darkModeImageUrl: team.darkModeImageUrl,
-    logoLightUrl: team.logoLightUrl,
-    logoDarkUrl: team.logoDarkUrl,
-  };
-}
+const toTeam = (team: Team): OnThisDayTeam => ({
+  name: team.name,
+  slug: team.slug,
+  imageUrl: team.imageUrl,
+  darkModeImageUrl: team.darkModeImageUrl,
+  logoLightUrl: team.logoLightUrl,
+  logoDarkUrl: team.logoDarkUrl,
+});
 
-function toPlayer(player: Pick<Player, "name" | "slug">): OnThisDayPlayer {
-  return { name: player.name, slug: player.slug };
-}
+const toPlayer = (player: Pick<Player, "name" | "slug">): OnThisDayPlayer => ({
+  name: player.name,
+  slug: player.slug,
+});
 
-function toTournament(
+const toTournament = (
   tournament: Pick<TournamentSummary, "name" | "slug" | "event">,
-): OnThisDayTournament {
+): OnThisDayTournament => {
   const { name, slug, event } = tournament;
 
   return { name, slug, event: { name: event.name, slug: event.slug } };
-}
+};
 
-function toSide(participant: TournamentParticipant, match: Match): OnThisDaySide {
+const toSide = (participant: TournamentParticipant, match: Match): OnThisDaySide => {
   const result = match.results.find((entry) => entry.participant.id === participant.id);
 
   return {
@@ -60,15 +59,15 @@ function toSide(participant: TournamentParticipant, match: Match): OnThisDaySide
     players: participant.players.map(toPlayer),
     score: result?.score ?? null,
   };
-}
+};
 
-function dated(at: Date) {
+const dated = (at: Date) => {
   const day = calendarDayIn(at, SITE_TIME_ZONE);
 
   return { year: day.year, date: formatIsoDay(day) };
-}
+};
 
-function title(tournament: Tournament): OnThisDayEvent[] {
+const title = (tournament: Tournament): OnThisDayEvent[] => {
   const { winner, endAt } = tournament;
 
   if (!winner || !endAt || !isRedistributable(tournament.source)) {
@@ -86,9 +85,9 @@ function title(tournament: Tournament): OnThisDayEvent[] {
       },
     },
   ];
-}
+};
 
-function final(match: Match): OnThisDayEvent[] {
+const final = (match: Match): OnThisDayEvent[] => {
   const { winner, endAt, tournament } = match;
 
   if (!winner || !endAt) {
@@ -115,20 +114,18 @@ function final(match: Match): OnThisDayEvent[] {
       loser: toSide(loser, match),
     },
   ];
-}
+};
 
-function transfer({ type, date, contract }: Transfer): OnThisDayEvent {
-  return {
-    kind: "transfer",
-    year: date.getUTCFullYear(),
-    date: date.toISOString().slice(0, 10),
-    type,
-    player: toPlayer(contract.player),
-    team: toTeam(contract.team),
-  };
-}
+const transfer = ({ type, date, contract }: Transfer): OnThisDayEvent => ({
+  kind: "transfer",
+  year: date.getUTCFullYear(),
+  date: date.toISOString().slice(0, 10),
+  type,
+  player: toPlayer(contract.player),
+  team: toTeam(contract.team),
+});
 
-function publicLink(link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink {
+const publicLink = (link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink => {
   switch (link.kind) {
     case "player": {
       return { kind: "player", name: link.name, slug: link.slug };
@@ -157,9 +154,9 @@ function publicLink(link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink {
       return exhaustive;
     }
   }
-}
+};
 
-function fact({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisDayEvent[] {
+const fact = ({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisDayEvent[] => {
   if (link?.source && !isRedistributable(link.source)) {
     return [];
   }
@@ -173,9 +170,9 @@ function fact({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisD
       sourceUrl,
     },
   ];
-}
+};
 
-function rank(event: OnThisDayEvent): number {
+const rank = (event: OnThisDayEvent): number => {
   switch (event.kind) {
     case "fact": {
       return 0;
@@ -196,13 +193,12 @@ function rank(event: OnThisDayEvent): number {
       return exhaustive;
     }
   }
-}
+};
 
 const yearOf = ({ year }: OnThisDayEvent) => year ?? Number.MAX_SAFE_INTEGER;
 
-function byInterest(a: OnThisDayEvent, b: OnThisDayEvent): number {
-  return rank(a) - rank(b) || yearOf(b) - yearOf(a);
-}
+const byInterest = (a: OnThisDayEvent, b: OnThisDayEvent): number =>
+  rank(a) - rank(b) || yearOf(b) - yearOf(a);
 
 export class OnThisDayService {
   constructor(private readonly sources: OnThisDaySources) {}

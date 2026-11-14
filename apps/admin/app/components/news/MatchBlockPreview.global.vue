@@ -45,20 +45,20 @@ const dateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-function teamName(item: MatchBlockItem, index: number): string {
+const teamName = (item: MatchBlockItem, index: number): string => {
   const participant = item.participants[index];
 
   return (participant && participantName(participant)) || t("newsTag.matchTbd");
-}
+};
 
-function score(item: MatchBlockItem, index: number): string {
+const score = (item: MatchBlockItem, index: number): string => {
   const participant = item.participants[index];
   const result = item.results.find((entry) => entry.participant === participant?.id);
 
   return result ? String(result.score) : "–";
-}
+};
 
-function stateColor(state: MatchBlockState): "error" | "info" | "neutral" {
+const stateColor = (state: MatchBlockState): "error" | "info" | "neutral" => {
   switch (state) {
     case "live": {
       return "error";
@@ -78,7 +78,7 @@ function stateColor(state: MatchBlockState): "error" | "info" | "neutral" {
       return exhaustive;
     }
   }
-}
+};
 
 const stateLabel = useMatchStateLabel(t, (beginAt) => dateFormatter.value.format(beginAt));
 </script>

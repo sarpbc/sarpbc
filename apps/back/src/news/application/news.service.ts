@@ -52,23 +52,23 @@ export interface NewsWeekResponse {
   items: NewsArticleResponse[];
 }
 
-function newsContent(value: string): string {
+const newsContent = (value: string): string => {
   assertValidMatchBlocks(value);
 
   return sanitizeNewsHtml(value);
-}
+};
 
-async function firstFreeSlug(base: string, articles: NewsQueries, suffix = 0): Promise<string> {
+const firstFreeSlug = async (base: string, articles: NewsQueries, suffix = 0): Promise<string> => {
   const slug = suffix === 0 ? base : `${base}-${suffix}`;
 
   return (await articles.findBySlug(slug)) ? await firstFreeSlug(base, articles, suffix + 1) : slug;
-}
+};
 
-function mapListArticle(
+const mapListArticle = (
   article: NewsArticleRecord,
   locale: SupportedLocale,
   commentCount = 0,
-): NewsArticleListItemResponse {
+): NewsArticleListItemResponse => {
   const { title, content } = localizedNewsFields(article, locale);
 
   return {
@@ -81,9 +81,9 @@ function mapListArticle(
     commentCount,
     type: article.type,
   };
-}
+};
 
-function mapArticle(article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse {
+const mapArticle = (article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse => {
   const { title, content } = localizedNewsFields(article, locale);
 
   return {
@@ -97,19 +97,17 @@ function mapArticle(article: NewsArticleRecord, locale: SupportedLocale): NewsAr
     imageUrl: article.imageUrl,
     type: article.type,
   };
-}
+};
 
-function mapAdminArticle(article: NewsArticleRecord): NewsArticleAdmin {
-  return {
-    ...mapArticle(article, "en-US"),
-    createdAt: article.createdAt.toISOString(),
-    titleFr: article.titleFr,
-    contentFr: article.contentFr,
-    hasFrench: hasFrenchTranslation(article),
-  };
-}
+const mapAdminArticle = (article: NewsArticleRecord): NewsArticleAdmin => ({
+  ...mapArticle(article, "en-US"),
+  createdAt: article.createdAt.toISOString(),
+  titleFr: article.titleFr,
+  contentFr: article.contentFr,
+  hasFrench: hasFrenchTranslation(article),
+});
 
-async function generateUniqueSlug(source: string, articles: NewsQueries): Promise<string> {
+const generateUniqueSlug = async (source: string, articles: NewsQueries): Promise<string> => {
   const base = toSlug(source);
 
   if (!base) {
@@ -119,13 +117,13 @@ async function generateUniqueSlug(source: string, articles: NewsQueries): Promis
   }
 
   return await firstFreeSlug(base, articles);
-}
+};
 
-async function assertSlugAvailable(
+const assertSlugAvailable = async (
   articles: NewsQueries,
   slug: string,
   excludeArticleId?: string,
-): Promise<void> {
+): Promise<void> => {
   const existing = await articles.findBySlug(slug);
 
   if (existing && existing.id !== excludeArticleId) {
@@ -133,7 +131,7 @@ async function assertSlugAvailable(
       `An article with the slug "${slug}" already exists. Choose a different slug.`,
     );
   }
-}
+};
 
 export class NewsService {
   constructor(

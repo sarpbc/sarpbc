@@ -7,36 +7,32 @@ import type { ReplyTarget } from "../domain/reply";
 import { REPLY_TARGET_LOADERS } from "./persistence/reply.mapper";
 import { MikroReplyStore, replyReports } from "./persistence/reply.store";
 
-export function replyWriteScope(em: EntityManager): ReplyWriteScope {
-  return {
-    replies: new MikroReplyStore(em),
-    reports: replyReports(em),
-    notifications: directReplyNotifications(em),
-    users: authorReader(em),
-    targets: {
-      async find(target: ReplyTarget) {
-        const found = await REPLY_TARGET_LOADERS[target.kind](em, target.id);
+export const replyWriteScope = (em: EntityManager): ReplyWriteScope => ({
+  replies: new MikroReplyStore(em),
+  reports: replyReports(em),
+  notifications: directReplyNotifications(em),
+  users: authorReader(em),
+  targets: {
+    async find(target: ReplyTarget) {
+      const found = await REPLY_TARGET_LOADERS[target.kind](em, target.id);
 
-        return found && { post: null, newsArticle: null, match: null, ...found };
-      },
+      return found && { post: null, newsArticle: null, match: null, ...found };
     },
-  };
-}
+  },
+});
 
-export function transactionalReplies(em: EntityManager): ReplyTransaction {
-  return {
-    run: async (work) =>
-      await em.transactional(async (tx) => {
-        const result = await work(replyWriteScope(tx));
-        await tx.flush();
+export const transactionalReplies = (em: EntityManager): ReplyTransaction => ({
+  run: async (work) =>
+    await em.transactional(async (tx) => {
+      const result = await work(replyWriteScope(tx));
+      await tx.flush();
 
-        return result;
-      }),
-  };
-}
+      return result;
+    }),
+});
 
 // The caller already owns the transaction; never open an independent unit of work.
-export function replyDeletion(em: EntityManager) {
+export const replyDeletion = (em: EntityManager) => {
   const scope = replyWriteScope(em);
   const service = new ReplyService(scope.replies, { run: async (work) => await work(scope) });
 
@@ -48,4 +44,4 @@ export function replyDeletion(em: EntityManager) {
       await service.deleteAllForTarget(type, id);
     },
   };
-}
+};

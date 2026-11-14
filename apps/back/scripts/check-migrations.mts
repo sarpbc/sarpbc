@@ -10,11 +10,10 @@ const defaultDirectory = path.resolve(
 const migrationPattern = /^Migration(?<timestamp>\d{14})(?:_[A-Za-z0-9]+)?\.ts$/u;
 const snapshotPattern = /^\.snapshot-[^/]+\.json$/u;
 
-function timestampOf(name: string): string | undefined {
-  return migrationPattern.exec(name)?.groups?.timestamp;
-}
+const timestampOf = (name: string): string | undefined =>
+  migrationPattern.exec(name)?.groups?.timestamp;
 
-function baseMigrationNames(directory: string, baseRef: string): string[] | undefined {
+const baseMigrationNames = (directory: string, baseRef: string): string[] | undefined => {
   try {
     execFileSync("git", ["rev-parse", "--verify", "--quiet", `${baseRef}^{commit}`], {
       cwd: directory,
@@ -33,9 +32,9 @@ function baseMigrationNames(directory: string, baseRef: string): string[] | unde
     .split(/\r?\n/u)
     .map((file) => path.posix.basename(file))
     .filter((name) => timestampOf(name) !== undefined);
-}
+};
 
-export function migrationViolations(directory = defaultDirectory, baseRef = ""): string[] {
+export const migrationViolations = (directory = defaultDirectory, baseRef = ""): string[] => {
   const files = readdirSync(directory).toSorted();
   const names = files.filter((name) => timestampOf(name) !== undefined);
 
@@ -100,7 +99,7 @@ export function migrationViolations(directory = defaultDirectory, baseRef = ""):
   }
 
   return violations;
-}
+};
 
 if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const baseRef = process.env.BASE_REF ?? "";

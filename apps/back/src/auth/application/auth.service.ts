@@ -11,9 +11,8 @@ import type {
   SessionTokens,
 } from "./ports/authentication";
 
-export function parseOAuthReturnTo(state: string | undefined): OAuthReturnTo {
-  return state === "admin" ? "admin" : "front";
-}
+export const parseOAuthReturnTo = (state: string | undefined): OAuthReturnTo =>
+  state === "admin" ? "admin" : "front";
 
 export class AuthService {
   constructor(

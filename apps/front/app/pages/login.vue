@@ -27,7 +27,7 @@ const errorMessage = ref<string | null>(null);
 
 onMounted(leaveIfSignedIn);
 
-async function onSubmit(event: Event) {
+const onSubmit = async (event: Event) => {
   event.preventDefault();
 
   if (pending.value) {
@@ -52,7 +52,7 @@ async function onSubmit(event: Event) {
   } finally {
     pending.value = false;
   }
-}
+};
 </script>
 
 <template>

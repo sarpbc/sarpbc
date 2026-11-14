@@ -4,8 +4,8 @@ import { newsEntityTagStart, parseNewsEntityTag, serializeNewsEntityTag } from "
 import type { NewsEntityTagKind } from "@sarpbc/utils";
 import EntityTagNodeView from "~/components/news/EntityTagNodeView.vue";
 
-function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
-  return Node.create({
+const createEntityTagNode = (kind: NewsEntityTagKind, nodeName: string) =>
+  Node.create({
     name: nodeName,
     group: "inline",
     inline: true,
@@ -59,7 +59,6 @@ function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
         label: String(node.attrs?.label ?? ""),
       }),
   });
-}
 
 const PlayerTagNode = createEntityTagNode("player", "playerTag");
 const TeamTagNode = createEntityTagNode("team", "teamTag");

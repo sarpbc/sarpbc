@@ -29,15 +29,15 @@ const letterRows = [
 
 const numberRow = ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] as const;
 
-function onLetterPress(letter: string) {
+const onLetterPress = (letter: string) => {
   if (disabled) {
     return;
   }
 
   emit("letter", letter);
-}
+};
 
-function keyLabel(letter: string): string {
+const keyLabel = (letter: string): string => {
   const status = letterStatuses[letter.toUpperCase()];
 
   switch (status) {
@@ -64,9 +64,9 @@ function keyLabel(letter: string): string {
       return exhaustive;
     }
   }
-}
+};
 
-function keyClass(letter: string): string {
+const keyClass = (letter: string): string => {
   const status = letterStatuses[letter.toUpperCase()];
 
   switch (status) {
@@ -93,7 +93,7 @@ function keyClass(letter: string): string {
       return exhaustive;
     }
   }
-}
+};
 </script>
 
 <template>

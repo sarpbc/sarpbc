@@ -12,7 +12,7 @@ export interface RosterMerge<T> {
 
 type Mergeable = Pick<Player | Team, "id" | "name" | "pandascoreId" | "mergedIntoId">;
 
-function assertMergeable(kind: "player" | "team", kept: Mergeable, merged: Mergeable): void {
+const assertMergeable = (kind: "player" | "team", kept: Mergeable, merged: Mergeable): void => {
   if (kept.mergedIntoId !== null && kept.mergedIntoId !== "") {
     throw new InvalidInputError(
       `${kept.name} was already merged into ${kind} "${kept.mergedIntoId}"; keep that ${kind} instead`,
@@ -36,7 +36,7 @@ function assertMergeable(kind: "player" | "team", kept: Mergeable, merged: Merge
       `${kept.name} and ${merged.name} are distinct PandaScore ${kind}s (${kept.pandascoreId}, ${merged.pandascoreId})`,
     );
   }
-}
+};
 
 export class RosterMergeService {
   constructor(private readonly transaction: RosterMergeTransaction) {}

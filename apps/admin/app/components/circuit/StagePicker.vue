@@ -24,7 +24,7 @@ const results = ref<PickedStage[]>([]);
 const searching = ref(false);
 const searched = ref(false);
 
-async function runSearch(value: string) {
+const runSearch = async (value: string) => {
   const trimmed = value.trim();
 
   if (!trimmed) {
@@ -49,7 +49,7 @@ async function runSearch(value: string) {
   } finally {
     searching.value = false;
   }
-}
+};
 
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
@@ -63,10 +63,10 @@ watch(open, (isOpen) => {
   searched.value = false;
 });
 
-function choose(stage: PickedStage) {
+const choose = (stage: PickedStage) => {
   open.value = false;
   emit("select", stage);
-}
+};
 </script>
 
 <template>

@@ -11,25 +11,23 @@ type Find = (
   options?: FindOptions<object>,
 ) => Promise<unknown[]>;
 
-function prizeRow(playerCount: number) {
-  return {
-    id: "prize-1",
-    placement: 2,
-    amount: 900,
-    currency: "EUR",
-    team: { id: "team-a", name: "Team A", slug: "team-a", imageUrl: null, darkModeImageUrl: null },
-    players: { length: playerCount, getItems: () => [] },
-    tournament: {
-      id: "t1",
-      name: "Main Event",
-      slug: "main-event",
-      source: "startgg",
-      beginAt: null,
-      endAt: new Date("2026-02-01T00:00:00Z"),
-      event: { id: "e1", slug: "fake-cup", name: "Fake Cup" },
-    },
-  };
-}
+const prizeRow = (playerCount: number) => ({
+  id: "prize-1",
+  placement: 2,
+  amount: 900,
+  currency: "EUR",
+  team: { id: "team-a", name: "Team A", slug: "team-a", imageUrl: null, darkModeImageUrl: null },
+  players: { length: playerCount, getItems: () => [] },
+  tournament: {
+    id: "t1",
+    name: "Main Event",
+    slug: "main-event",
+    source: "startgg",
+    beginAt: null,
+    endAt: new Date("2026-02-01T00:00:00Z"),
+    event: { id: "e1", slug: "fake-cup", name: "Fake Cup" },
+  },
+});
 
 describe(CompetitionPrizeQueries, () => {
   it("reports an earnings line with its share count, amount and tournament source", async () => {

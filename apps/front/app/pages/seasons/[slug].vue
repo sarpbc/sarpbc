@@ -22,14 +22,14 @@ if (!season.value) {
   });
 }
 
-function awardTitle(award: SeasonArchiveAward): string {
+const awardTitle = (award: SeasonArchiveAward): string => {
   const type = seasonAwardTypeLabel(award.awardType);
 
   return award.region ? `${type} · ${award.region}` : type;
-}
+};
 
-function awardMeta(award: SeasonArchiveAward): string {
-  return [
+const awardMeta = (award: SeasonArchiveAward): string =>
+  [
     award.presentedBy
       ? t("page.seasons.archive.awards.presentedBy", { name: award.presentedBy })
       : null,
@@ -37,7 +37,6 @@ function awardMeta(award: SeasonArchiveAward): string {
   ]
     .filter(Boolean)
     .join(" · ");
-}
 
 watch(
   season,

@@ -9,7 +9,7 @@ import { buildBracketSectionLayout } from "./single-elim-layout";
 import type { TournamentBracketView } from "./types";
 
 /** Matches with no in-set feeder links (shown as flat fallback rows). */
-function getOrphanMatches(matches: TournamentDetailMatch[]): TournamentDetailMatch[] {
+const getOrphanMatches = (matches: TournamentDetailMatch[]): TournamentDetailMatch[] => {
   const ids = new Set(matches.map((match) => match.id));
   const connected = new Set<string>();
 
@@ -25,9 +25,9 @@ function getOrphanMatches(matches: TournamentDetailMatch[]): TournamentDetailMat
   }
 
   return sortMatchesByBeginAt(matches.filter((match) => !connected.has(match.id)));
-}
+};
 
-export function buildTournamentBracketView(tournament: TournamentDetail): TournamentBracketView {
+export const buildTournamentBracketView = (tournament: TournamentDetail): TournamentBracketView => {
   const format = classifyTournamentBracket(tournament);
   const matches = tournament.matches ?? [];
 
@@ -85,4 +85,4 @@ export function buildTournamentBracketView(tournament: TournamentDetail): Tourna
       return exhaustiveCheck;
     }
   }
-}
+};

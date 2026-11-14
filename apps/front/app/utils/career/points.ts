@@ -18,7 +18,7 @@ export const MAJOR_POINTS = {
   unavailable: 0,
 } satisfies Record<CareerPlacement, number>;
 
-export function regionalCircuitWeight(region: CareerRegion): number {
+export const regionalCircuitWeight = (region: CareerRegion): number => {
   switch (region) {
     case "eu": {
       return 1;
@@ -48,12 +48,10 @@ export function regionalCircuitWeight(region: CareerRegion): number {
       return _exhaustive;
     }
   }
-}
+};
 
-export function computeSeasonPoints(splits: CareerSplitRecord[]): number {
-  return splits.reduce((sum, split) => sum + split.points, 0);
-}
+export const computeSeasonPoints = (splits: CareerSplitRecord[]): number =>
+  splits.reduce((sum, split) => sum + split.points, 0);
 
-export function computeCircuitPoints(splits: CareerSplitRecord[]): number {
-  return computeSeasonPoints(splits);
-}
+export const computeCircuitPoints = (splits: CareerSplitRecord[]): number =>
+  computeSeasonPoints(splits);

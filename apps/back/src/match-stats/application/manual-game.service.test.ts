@@ -32,18 +32,16 @@ const match: CandidateMatch = {
   storedReplayIds: ["stored-1"],
 };
 
-function line(name: string, platformId: string) {
-  return {
-    name,
-    platform: "steam",
-    platformId,
-    goals: 1,
-    assists: 0,
-    saves: 2,
-    shots: 3,
-    demolitions: 0,
-  };
-}
+const line = (name: string, platformId: string) => ({
+  name,
+  platform: "steam",
+  platformId,
+  goals: 1,
+  assists: 0,
+  saves: 2,
+  shots: 3,
+  demolitions: 0,
+});
 
 const stats: ReplayStats = {
   rocketLeagueId: "RL-1",
@@ -56,7 +54,7 @@ const stats: ReplayStats = {
   ],
 };
 
-async function rejection(work: Promise<unknown>): Promise<ApplicationError> {
+const rejection = async (work: Promise<unknown>): Promise<ApplicationError> => {
   const [settled] = await Promise.allSettled([work]);
 
   if (settled.status === "rejected" && settled.reason instanceof ApplicationError) {
@@ -64,7 +62,7 @@ async function rejection(work: Promise<unknown>): Promise<ApplicationError> {
   }
 
   throw new Error("Expected an ApplicationError rejection", { cause: settled });
-}
+};
 
 const input = {
   matchId: "m1",
@@ -73,13 +71,13 @@ const input = {
   blueParticipantId: "p-bds",
 };
 
-function setup(
+const setup = (
   options: {
     source?: boolean;
     numberOfGames?: number | null;
     participants?: CandidateMatch["participants"];
   } = {},
-) {
+) => {
   const source = {
     groupReplays: vi.fn<BallchasingSource["groupReplays"]>(),
     replayStats: vi.fn<BallchasingSource["replayStats"]>(async () => stats),
@@ -128,7 +126,7 @@ function setup(
   );
 
   return { service, source, games };
-}
+};
 
 describe("ManualGameService.attach", () => {
   it("stores the replay as the chosen game with the chosen sides and resolves players", async () => {

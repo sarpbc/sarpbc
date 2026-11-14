@@ -2,10 +2,8 @@ import type { SupportedLocale } from "@sarpbc/types";
 
 export type UiLocale = "en" | "fr";
 
-export function parseLocale(raw?: string | null): SupportedLocale {
-  return raw?.trim().toLowerCase().startsWith("fr") === true ? "fr-FR" : "en-US";
-}
+export const parseLocale = (raw?: string | null): SupportedLocale =>
+  raw?.trim().toLowerCase().startsWith("fr") === true ? "fr-FR" : "en-US";
 
-export function uiLocale(raw?: string | null): UiLocale {
-  return parseLocale(raw) === "fr-FR" ? "fr" : "en";
-}
+export const uiLocale = (raw?: string | null): UiLocale =>
+  parseLocale(raw) === "fr-FR" ? "fr" : "en";

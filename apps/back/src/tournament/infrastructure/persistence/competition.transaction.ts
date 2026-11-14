@@ -8,7 +8,7 @@ import { CompetitionTournamentWriter } from "./tournament.writer";
 import { CompetitionMatchWriter } from "./match.writer";
 import { CompetitionEventWriter } from "./event.writer";
 
-function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
+const lazyWriteScope = (em: EntityManager): CompetitionWriteScope => {
   let tournaments: CompetitionTournamentWriter | undefined;
   let events: CompetitionEventWriter | undefined;
   let matches: CompetitionMatchWriter | undefined;
@@ -41,7 +41,7 @@ function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
       return (lineups ??= new CompetitionLineupWriter(em));
     },
   };
-}
+};
 
 export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
   constructor(private readonly em: EntityManager) {}

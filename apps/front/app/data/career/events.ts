@@ -252,20 +252,18 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
   },
 ];
 
-export function getEventsForPool(pool: CareerEventPool): CareerEventDefinition[] {
-  return CAREER_EVENTS.filter((event) => event.pool === pool);
-}
+export const getEventsForPool = (pool: CareerEventPool): CareerEventDefinition[] =>
+  CAREER_EVENTS.filter((event) => event.pool === pool);
 
-function firstNonEmpty(...lists: CareerEventDefinition[][]): CareerEventDefinition[] {
-  return lists.find((list) => list.length > 0) ?? [];
-}
+const firstNonEmpty = (...lists: CareerEventDefinition[][]): CareerEventDefinition[] =>
+  lists.find((list) => list.length > 0) ?? [];
 
-export function pickRandomEvent(
+export const pickRandomEvent = (
   pool: CareerEventPool,
   usedIds: string[],
   seed: number,
   season = 1,
-): CareerEventDefinition {
+): CareerEventDefinition => {
   const eligible = getEventsForPool(pool).filter((event) => (event.minSeason ?? 1) <= season);
   const unused = eligible.filter((event) => !usedIds.includes(event.id));
   const lateUnused = unused.filter((event) => (event.minSeason ?? 1) >= 5);
@@ -277,8 +275,7 @@ export function pickRandomEvent(
   }
 
   return picked;
-}
+};
 
-export function getEventById(id: string): CareerEventDefinition | undefined {
-  return CAREER_EVENTS.find((event) => event.id === id);
-}
+export const getEventById = (id: string): CareerEventDefinition | undefined =>
+  CAREER_EVENTS.find((event) => event.id === id);

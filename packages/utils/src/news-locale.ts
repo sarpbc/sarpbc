@@ -16,19 +16,18 @@ export interface LocalizedNewsFields {
   content: string;
 }
 
-export function hasFrenchTranslation(
+export const hasFrenchTranslation = (
   article: NewsTranslationFields,
-): article is { titleFr: string; contentFr: string } {
-  return isNonEmptyString(article.titleFr?.trim()) && isNonEmptyString(article.contentFr?.trim());
-}
+): article is { titleFr: string; contentFr: string } =>
+  isNonEmptyString(article.titleFr?.trim()) && isNonEmptyString(article.contentFr?.trim());
 
-export function localizedNewsFields(
+export const localizedNewsFields = (
   article: NewsLocalizableFields,
   locale: SupportedLocale,
-): LocalizedNewsFields {
+): LocalizedNewsFields => {
   if (locale === "fr-FR" && hasFrenchTranslation(article)) {
     return { title: article.titleFr, content: article.contentFr };
   }
 
   return { title: article.title, content: article.content };
-}
+};

@@ -10,18 +10,19 @@ import type { StreamerFailureReporter } from "./streamer.service";
 
 const now = new Date("2026-10-31T20:00:00Z");
 
-function tracked(login: string, displayName: string | null = null): TrackedStreamer {
-  return { id: `${login}-id`, login, displayName, createdAt: now };
-}
+const tracked = (login: string, displayName: string | null = null): TrackedStreamer => ({
+  id: `${login}-id`,
+  login,
+  displayName,
+  createdAt: now,
+});
 
-function live(login: string, viewerCount: number): SourceStream {
-  return {
-    login,
-    displayName: login.toUpperCase(),
-    title: `${login} ranked`,
-    viewerCount,
-  };
-}
+const live = (login: string, viewerCount: number): SourceStream => ({
+  login,
+  displayName: login.toUpperCase(),
+  title: `${login} ranked`,
+  viewerCount,
+});
 
 const createStreamers = () => ({
   list: vi

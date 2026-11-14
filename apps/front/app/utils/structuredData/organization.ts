@@ -26,7 +26,7 @@ export interface BuildOrganizationOptions {
   contactPagePath?: string;
 }
 
-export function buildOrganization(options: BuildOrganizationOptions = {}): OrganizationLd {
+export const buildOrganization = (options: BuildOrganizationOptions = {}): OrganizationLd => {
   const contactPagePath = options.contactPagePath ?? "/contact";
 
   return compactJsonLd({
@@ -47,4 +47,4 @@ export function buildOrganization(options: BuildOrganizationOptions = {}): Organ
       }),
     ],
   });
-}
+};

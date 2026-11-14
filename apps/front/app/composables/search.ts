@@ -6,7 +6,11 @@ export interface SearchResult {
   total: { teams: number; players: number };
 }
 
-export async function searchTeamsAndPlayers({ query }: { query?: string }): Promise<SearchResult> {
+export const searchTeamsAndPlayers = async ({
+  query,
+}: {
+  query?: string;
+}): Promise<SearchResult> => {
   try {
     return await apiFetch<SearchResult>(`/search`, {
       method: "GET",
@@ -18,4 +22,4 @@ export async function searchTeamsAndPlayers({ query }: { query?: string }): Prom
   } catch {
     return { teams: [], players: [], total: { teams: 0, players: 0 } };
   }
-}
+};

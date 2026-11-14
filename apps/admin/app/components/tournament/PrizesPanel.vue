@@ -54,8 +54,8 @@ const {
   { server: false, watch: [() => tournamentId] },
 );
 
-function toRows(value: TournamentPrizes | null | undefined): PrizeRow[] {
-  return (value?.prizes ?? []).map((prize) => ({
+const toRows = (value: TournamentPrizes | null | undefined): PrizeRow[] =>
+  (value?.prizes ?? []).map((prize) => ({
     key: (nextKey += 1),
     placement: prize.placement,
     amount: prize.amount,
@@ -64,7 +64,6 @@ function toRows(value: TournamentPrizes | null | undefined): PrizeRow[] {
     playerIds: prize.players.map(({ id }) => id),
     sourceUrl: prize.sourceUrl ?? "",
   }));
-}
 
 watch(distribution, (value) => (rows.value = toRows(value)), { immediate: true });
 
@@ -72,13 +71,11 @@ const rosters = computed(
   () => new Map(participants.flatMap(({ team, players }) => (team ? [[team.id, players]] : []))),
 );
 
-function isParticipant(teamId: string | undefined): boolean {
-  return teamId !== undefined && rosters.value.has(teamId);
-}
+const isParticipant = (teamId: string | undefined): boolean =>
+  teamId !== undefined && rosters.value.has(teamId);
 
-function isOnRoster(teamId: string | undefined, playerId: string): boolean {
-  return (rosters.value.get(teamId ?? "") ?? []).some(({ id }) => id === playerId);
-}
+const isOnRoster = (teamId: string | undefined, playerId: string): boolean =>
+  (rosters.value.get(teamId ?? "") ?? []).some(({ id }) => id === playerId);
 
 const teamOptions = computed<Option[]>(() => {
   const participantOptions = participants.flatMap(({ team }) =>
@@ -95,7 +92,7 @@ const teamOptions = computed<Option[]>(() => {
   return [...participantOptions, ...outsiders].toSorted((a, b) => a.label.localeCompare(b.label));
 });
 
-function playerOptions(teamId: string | undefined): Option[] {
+const playerOptions = (teamId: string | undefined): Option[] => {
   const roster = (rosters.value.get(teamId ?? "") ?? []).map(({ id, name }) => ({
     value: id,
     label: name,
@@ -111,15 +108,14 @@ function playerOptions(teamId: string | undefined): Option[] {
     }));
 
   return [...roster, ...outsiders];
-}
+};
 
-function teamError(row: PrizeRow): string | undefined {
-  return row.teamId && !isParticipant(row.teamId)
+const teamError = (row: PrizeRow): string | undefined =>
+  row.teamId && !isParticipant(row.teamId)
     ? t("page.tournaments.prizes.errors.notParticipant")
     : undefined;
-}
 
-function playersError(row: PrizeRow): string | undefined {
+const playersError = (row: PrizeRow): string | undefined => {
   if (row.playerIds.length > MAX_PRIZE_PLAYERS) {
     return t("page.tournaments.prizes.errors.tooManyPlayers", { max: MAX_PRIZE_PLAYERS });
   }
@@ -128,26 +124,20 @@ function playersError(row: PrizeRow): string | undefined {
     row.playerIds.some((playerId) => !isOnRoster(row.teamId, playerId))
     ? t("page.tournaments.prizes.errors.notOnRoster")
     : undefined;
-}
+};
 
-function normalizeCurrency(currency: string): string {
-  return currency.trim().toUpperCase();
-}
+const normalizeCurrency = (currency: string): string => currency.trim().toUpperCase();
 
-function isValidAmount(amount: number | null): amount is number {
-  return (
-    amount !== null &&
-    Number.isInteger(amount) &&
-    amount >= MIN_PRIZE_AMOUNT &&
-    amount <= MAX_PRIZE_AMOUNT
-  );
-}
+const isValidAmount = (amount: number | null): amount is number =>
+  amount !== null &&
+  Number.isInteger(amount) &&
+  amount >= MIN_PRIZE_AMOUNT &&
+  amount <= MAX_PRIZE_AMOUNT;
 
-function currencyError(currency: string): string | undefined {
-  return isIso4217Code(normalizeCurrency(currency))
+const currencyError = (currency: string): string | undefined =>
+  isIso4217Code(normalizeCurrency(currency))
     ? undefined
     : t("page.tournaments.prizes.errors.currency");
-}
 
 const duplicateTeam = computed(() => {
   const teamIds = rows.value.map(({ teamId }) => teamId).filter(Boolean);
@@ -155,7 +145,7 @@ const duplicateTeam = computed(() => {
   return new Set(teamIds).size !== teamIds.length;
 });
 
-function toInput(row: PrizeRow): TournamentPrizeInput | null {
+const toInput = (row: PrizeRow): TournamentPrizeInput | null => {
   const { teamId, amount } = row;
 
   if (
@@ -179,7 +169,7 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
     playerIds: row.playerIds,
     sourceUrl: normalizeSourceUrl(row.sourceUrl),
   };
-}
+};
 
 const prizeInputs = computed<TournamentPrizeInput[] | null>(() => {
   if (duplicateTeam.value) {
@@ -201,7 +191,7 @@ const prizeInputs = computed<TournamentPrizeInput[] | null>(() => {
   return inputs;
 });
 
-function addRow() {
+const addRow = () => {
   const last = rows.value.at(-1);
   rows.value.push({
     key: (nextKey += 1),
@@ -212,24 +202,24 @@ function addRow() {
     playerIds: [],
     sourceUrl: bulkSourceUrl.value.trim(),
   });
-}
+};
 
-function applySourceToAll() {
+const applySourceToAll = () => {
   for (const row of rows.value) {
     row.sourceUrl = bulkSourceUrl.value.trim();
   }
-}
+};
 
-function removeRow(key: number) {
+const removeRow = (key: number) => {
   rows.value = rows.value.filter((row) => row.key !== key);
-}
+};
 
-function selectTeam(row: PrizeRow, teamId: string | undefined) {
+const selectTeam = (row: PrizeRow, teamId: string | undefined) => {
   row.teamId = teamId;
   row.playerIds = [];
-}
+};
 
-async function save() {
+const save = async () => {
   const inputs = prizeInputs.value;
 
   if (!inputs) {
@@ -250,7 +240,7 @@ async function save() {
   } finally {
     saving.value = false;
   }
-}
+};
 </script>
 
 <template>

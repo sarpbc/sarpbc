@@ -46,7 +46,7 @@ const orangeId = computed(() =>
     : undefined,
 );
 
-function sideId(side: StreamScoreSide): string | undefined {
+const sideId = (side: StreamScoreSide): string | undefined => {
   switch (side) {
     case "blue": {
       return blueId.value;
@@ -62,16 +62,16 @@ function sideId(side: StreamScoreSide): string | undefined {
       return exhaustive;
     }
   }
-}
+};
 
-function sideName(side: StreamScoreSide): string {
+const sideName = (side: StreamScoreSide): string => {
   const id = sideId(side);
 
   return (
     sides.value.find((candidate) => candidate.value === id)?.label ??
     t(`page.tournaments.streamScore.side.${side}`)
   );
-}
+};
 
 const bestOfMismatch = computed(
   () => proposal.value !== null && streamScoreBestOfMismatch(proposal.value, match.numberOfGames),
@@ -100,19 +100,19 @@ const results = computed(() => {
 
 const canConfirm = computed(() => results.value !== null && blockers.value.length === 0);
 
-function formatOffset(seconds: number): string {
+const formatOffset = (seconds: number): string => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const rest = String(Math.floor(seconds % 60)).padStart(2, "0");
 
   return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}` : `${minutes}:${rest}`;
-}
+};
 
-function setGameChecked(number: number, checked: boolean) {
+const setGameChecked = (number: number, checked: boolean) => {
   checkedGames.value = checked
     ? [...checkedGames.value, number]
     : checkedGames.value.filter((game) => game !== number);
-}
+};
 
 watch(proposal, () => {
   checkedGames.value = [];
@@ -128,7 +128,7 @@ watch(open, (isOpen) => {
   blueId.value = undefined;
 });
 
-async function confirm() {
+const confirm = async () => {
   const series = results.value;
 
   if (!series || !canConfirm.value) {
@@ -147,7 +147,7 @@ async function confirm() {
   } finally {
     confirming.value = false;
   }
-}
+};
 </script>
 
 <template>

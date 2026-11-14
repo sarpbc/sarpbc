@@ -5,10 +5,10 @@ import type { UpsertMatchCommand } from "../feed";
 import { upsertSyncedMatchInTransaction } from "../match/write-match";
 import type { CompetitionWriteScope } from "../ports";
 
-function opponentParticipantIds(
+const opponentParticipantIds = (
   command: UpsertMatchCommand,
   participants: TournamentParticipant[],
-): string[] {
+): string[] => {
   const ids =
     command.opponentPandascoreIds?.length !== undefined &&
     command.opponentPandascoreIds.length !== 0
@@ -18,13 +18,13 @@ function opponentParticipantIds(
       : command.opponentSlugs.map((slug) => participants.find((p) => p.team?.slug === slug)?.id);
 
   return ids.filter((id): id is string => Boolean(id));
-}
+};
 
-export async function applyMatches(
+export const applyMatches = async (
   scope: CompetitionWriteScope,
   tournament: Tournament,
   commands: UpsertMatchCommand[],
-): Promise<string[]> {
+): Promise<string[]> => {
   const participants = await scope.tournaments.participants(tournament.id);
 
   // Bracket links only resolve to matches already written, so earlier matches go first.
@@ -50,4 +50,4 @@ export async function applyMatches(
   );
 
   return decided.filter((id): id is string => id !== null);
-}
+};

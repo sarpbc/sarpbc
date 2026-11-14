@@ -31,12 +31,12 @@ const state = computed({
   set: (value) => emit("update:modelValue", value),
 });
 
-function updateField<K extends keyof ManualTournamentFormState>(
+const updateField = <K extends keyof ManualTournamentFormState>(
   key: K,
   value: ManualTournamentFormState[K],
-) {
+) => {
   emit("update:modelValue", { ...modelValue, [key]: value });
-}
+};
 
 const imageUrl = computed({
   get: () => modelValue.imageUrl,
@@ -105,20 +105,20 @@ const filteredTeams = computed(() => {
 });
 
 // One emit: modelValue stays stale until the parent re-renders, so a second emit would drop the name.
-function onNameInput(value: string) {
+const onNameInput = (value: string) => {
   emit("update:modelValue", {
     ...modelValue,
     name: value,
     slug: slugAuto ? toSlug(value) : modelValue.slug,
   });
-}
+};
 
-function onSlugInput(value: string) {
+const onSlugInput = (value: string) => {
   emit("update:slugAuto", false);
   updateField("slug", value);
-}
+};
 
-function toggleTeam(teamId: string, checked: boolean) {
+const toggleTeam = (teamId: string, checked: boolean) => {
   const next = new Set(state.value.teamIds);
 
   if (checked) {
@@ -128,11 +128,9 @@ function toggleTeam(teamId: string, checked: boolean) {
   }
 
   updateField("teamIds", [...next]);
-}
+};
 
-function isTeamSelected(teamId: string): boolean {
-  return state.value.teamIds.includes(teamId);
-}
+const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes(teamId);
 </script>
 
 <template>

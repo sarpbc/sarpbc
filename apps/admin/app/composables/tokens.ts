@@ -1,20 +1,19 @@
 import type { CreatedPatToken, PatToken } from "@sarpbc/types";
 
-export async function getPatTokens(): Promise<PatToken[]> {
+export const getPatTokens = async (): Promise<PatToken[]> => {
   const res = await apiFetch<{ tokens: PatToken[] }>("/pat/tokens", {
     method: "GET",
   });
 
   return res.tokens ?? [];
-}
+};
 
-export async function createPatToken(name: string): Promise<CreatedPatToken> {
-  return await apiFetch<CreatedPatToken>("/pat/tokens", {
+export const createPatToken = async (name: string): Promise<CreatedPatToken> =>
+  await apiFetch<CreatedPatToken>("/pat/tokens", {
     method: "POST",
     body: { name },
   });
-}
 
-export async function revokePatToken(id: string): Promise<void> {
+export const revokePatToken = async (id: string): Promise<void> => {
   await apiFetch(`/pat/tokens/${id}`, { method: "DELETE" });
-}
+};

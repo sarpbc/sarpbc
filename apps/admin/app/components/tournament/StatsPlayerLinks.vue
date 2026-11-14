@@ -30,18 +30,14 @@ const selected = ref<Record<string, string | undefined>>({});
 const editing = ref<string | null>(null);
 const savingKey = ref<string | null>(null);
 
-function keyOf(player: StatsPlayerAccount): string {
-  return `${player.platform}:${player.platformId}`;
-}
+const keyOf = (player: StatsPlayerAccount): string => `${player.platform}:${player.platformId}`;
 
-function rosterGroup(roster: StatsRoster): SelectItem[] {
-  return [
-    { type: "label", label: roster.teamName },
-    ...roster.players.map((member) => ({ value: member.id, label: member.name })),
-  ];
-}
+const rosterGroup = (roster: StatsRoster): SelectItem[] => [
+  { type: "label", label: roster.teamName },
+  ...roster.players.map((member) => ({ value: member.id, label: member.name })),
+];
 
-function rosterOptions(player: StatsPlayerAccount): SelectItem[][] {
+const rosterOptions = (player: StatsPlayerAccount): SelectItem[][] => {
   const rosters = accounts.value?.rosters ?? [];
   const own = rosters.filter((roster) => roster.participantId === player.team.participantId);
   const others = rosters.filter((roster) => roster.participantId !== player.team.participantId);
@@ -49,10 +45,10 @@ function rosterOptions(player: StatsPlayerAccount): SelectItem[][] {
   return [...own, ...others].flatMap((roster) =>
     roster.players.length > 0 ? [rosterGroup(roster)] : [],
   );
-}
+};
 
-function meta(player: StatsPlayerAccount): string {
-  return t(
+const meta = (player: StatsPlayerAccount): string =>
+  t(
     "page.tournaments.statsLinks.meta",
     {
       team: player.team.name,
@@ -62,9 +58,8 @@ function meta(player: StatsPlayerAccount): string {
     },
     player.games,
   );
-}
 
-async function save(player: StatsPlayerAccount) {
+const save = async (player: StatsPlayerAccount) => {
   const key = keyOf(player);
   const playerId = selected.value[key];
 
@@ -96,7 +91,7 @@ async function save(player: StatsPlayerAccount) {
   } finally {
     savingKey.value = null;
   }
-}
+};
 
 const ROW_CLASS =
   "flex flex-col gap-2 py-2 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4";
