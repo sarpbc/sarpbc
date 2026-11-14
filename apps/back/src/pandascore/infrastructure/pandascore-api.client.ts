@@ -26,6 +26,10 @@ export interface ListIncidentsClientParams {
 
 const VIDEOGAME = "rl";
 
+const jsonSchema = z.json();
+
+export type PandascoreJson = z.infer<typeof jsonSchema>;
+
 @Injectable()
 export class PandascoreApiClient {
   private readonly baseUrl = "https://api.pandascore.co";
@@ -43,19 +47,22 @@ export class PandascoreApiClient {
     this.apiToken = apiToken;
   }
 
-  async listIncidents({ since, perPage = 100 }: ListIncidentsClientParams): Promise<unknown[]> {
+  async listIncidents({
+    since,
+    perPage = 100,
+  }: ListIncidentsClientParams): Promise<PandascoreJson[]> {
     return this.paginateAll("/incidents", {
       params: { sort: "modified_at", since: since.toISOString(), videogame: [VIDEOGAME] },
       perPage,
     });
   }
 
-  async getTournaments(): Promise<unknown[]> {
+  async getTournaments(): Promise<PandascoreJson[]> {
     const pastTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/past`);
     const upcomingTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/upcoming`);
     const runningTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/running`);
     const allTournaments = [...pastTournaments, ...upcomingTournaments, ...runningTournaments];
-    const byId = new Map<number, unknown>();
+    const byId = new Map<number, PandascoreJson>();
     for (const tournament of allTournaments) {
       const { id } = z.object({ id: z.number().int() }).parse(tournament);
       if (!byId.has(id)) {
@@ -65,7 +72,7 @@ export class PandascoreApiClient {
     return Array.from(byId.values());
   }
 
-  async getTournamentById(tournamentId: number): Promise<unknown | null> {
+  async getTournamentById(tournamentId: number): Promise<PandascoreJson | null> {
     try {
       return await this.request(`/tournaments/${tournamentId}`);
     } catch (error) {
@@ -74,15 +81,15 @@ export class PandascoreApiClient {
     }
   }
 
-  async getTournamentBrackets(tournamentId: number): Promise<unknown[]> {
+  async getTournamentBrackets(tournamentId: number): Promise<PandascoreJson[]> {
     return this.paginateAll(`/tournaments/${tournamentId}/brackets`);
   }
 
-  async getTournamentMatches(tournamentId: number): Promise<unknown[]> {
+  async getTournamentMatches(tournamentId: number): Promise<PandascoreJson[]> {
     return this.paginateAll(`/tournaments/${tournamentId}/matches`);
   }
 
-  async getTournamentStandings(tournamentId: number): Promise<unknown[] | null> {
+  async getTournamentStandings(tournamentId: number): Promise<PandascoreJson[] | null> {
     try {
       return await this.paginateAll(`/tournaments/${tournamentId}/standings`);
     } catch (error) {
@@ -98,7 +105,7 @@ export class PandascoreApiClient {
     }
   }
 
-  async getRocketLeaguePlayers(): Promise<unknown[]> {
+  async getRocketLeaguePlayers(): Promise<PandascoreJson[]> {
     return this.paginateAll(`/${VIDEOGAME}/players`, {
       params: { sort: "name" },
       rateLimitMs: 200,
@@ -108,15 +115,15 @@ export class PandascoreApiClient {
   private async paginateAll(
     path: string,
     options: PandascoreRequestOptions = {},
-  ): Promise<unknown[]> {
+  ): Promise<PandascoreJson[]> {
     const perPage = options.perPage ?? 100;
     const rateLimitMs = options.rateLimitMs ?? 100;
-    const allItems: unknown[] = [];
+    const allItems: PandascoreJson[] = [];
     let page = 1;
     let hasMore = true;
 
     while (hasMore) {
-      const items = z.array(z.unknown()).parse(
+      const items = z.array(jsonSchema).parse(
         await this.request(path, {
           ...options,
           params: {
@@ -145,7 +152,10 @@ export class PandascoreApiClient {
     return allItems;
   }
 
-  private async request(path: string, options: PandascoreRequestOptions = {}): Promise<unknown> {
+  private async request(
+    path: string,
+    options: PandascoreRequestOptions = {},
+  ): Promise<PandascoreJson> {
     const url = new URL(`${this.baseUrl}${path}`);
 
     if (options.params) {
@@ -180,7 +190,7 @@ export class PandascoreApiClient {
       );
     }
 
-    return response.json();
+    return jsonSchema.parse(await response.json());
   }
 
   private sleep(ms: number): Promise<void> {

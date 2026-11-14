@@ -96,16 +96,16 @@ function isStandIn(participantId: string, playerId: string): boolean {
 function rosterOptions(participantId: string): SelectItem[][] {
   const own = participants.filter((participant) => participant.id === participantId);
   const others = participants.filter((participant) => participant.id !== participantId);
-  return [...own, ...others]
-    .map((participant) => ({
-      participant,
-      players: participant.players.filter((player) => !taken.value.has(player.id)),
-    }))
-    .filter(({ players }) => players.length > 0)
-    .map(({ participant, players }): SelectItem[] => [
-      { type: "label", label: participantName(participant) },
-      ...players.map((player) => ({ value: player.id, label: player.name })),
-    ]);
+  return [...own, ...others].flatMap((participant): SelectItem[][] => {
+    const players = participant.players.filter((player) => !taken.value.has(player.id));
+    if (players.length === 0) return [];
+    return [
+      [
+        { type: "label", label: participantName(participant) },
+        ...players.map((player) => ({ value: player.id, label: player.name })),
+      ],
+    ];
+  });
 }
 
 function rememberNames(picks: LineupPick[]) {

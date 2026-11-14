@@ -45,10 +45,7 @@ const hasPlayerCareer = computed(() =>
 );
 
 const realName = computed(() =>
-  [person.value.firstName, person.value.lastName]
-    .map((part) => part?.trim())
-    .filter(Boolean)
-    .join(" "),
+  [person.value.firstName, person.value.lastName].flatMap((part) => part?.trim() || []).join(" "),
 );
 
 const {

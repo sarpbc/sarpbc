@@ -102,8 +102,7 @@ const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const realName = computed(() =>
   [currentPlayer.value.firstName, currentPlayer.value.lastName]
-    .map((part) => part?.trim())
-    .filter(Boolean)
+    .flatMap((part) => part?.trim() || [])
     .join(" "),
 );
 

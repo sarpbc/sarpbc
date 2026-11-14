@@ -107,7 +107,7 @@ export function memorySeasonStore() {
     },
     remove: async (id) => seasons.delete(id),
     awards: async (seasonId) =>
-      awards.filter((award) => award.seasonId === seasonId).map(stripAward),
+      awards.flatMap((award) => (award.seasonId === seasonId ? [stripAward(award)] : [])),
     awardsOfPlayer: async (playerId) =>
       awards
         .filter((award) => award.player.id === playerId)

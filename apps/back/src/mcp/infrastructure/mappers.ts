@@ -144,7 +144,7 @@ export function mapEvent({ event, stages }: EventListing) {
     .filter((stage) => isRedistributable(stage.source))
     .sort((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
   const days = (dates: Array<Date | null>) =>
-    dates.filter((date): date is Date => date !== null).map((date) => date.getTime());
+    dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
   const starts = days(phases.map((phase) => phase.beginAt)),
     ends = days(phases.map((phase) => phase.endAt));
   return {
