@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { AirRiddle } from "./airriddle.entity";
 import type { DailyRiddles } from "../../application/ports";
 import type { DailyRiddle } from "../../domain/airriddle";

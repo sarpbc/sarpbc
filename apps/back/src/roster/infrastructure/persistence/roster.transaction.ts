@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { RosterTransaction, RosterWriteScope } from "../../application/ports";
 import { MikroPlayerStore } from "./player.store";
 import { MikroTeamStore } from "./team.store";

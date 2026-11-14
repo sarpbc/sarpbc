@@ -3,7 +3,7 @@ import { Post } from "./post.entity";
 import { PostTranslation } from "./post-translation.entity";
 import { Topic } from "./topic.entity";
 import { User } from "../../../user/infrastructure/user-persistence";
-import type { PostRepository } from "./post.repository";
+import { PostRepository } from "./post.repository";
 import { postSnapshot } from "./forum.mapper";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { NewPostRecord, PostRecord, TranslationRecord } from "../../application/models";

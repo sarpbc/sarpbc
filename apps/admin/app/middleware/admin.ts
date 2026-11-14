@@ -1,5 +1,5 @@
 import { isStaffUser } from "@sarpbc/utils";
-import { canAccessRoute } from "~/utils/adminSections";
+import { canAccessRoute } from "~/utils/admin-sections";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   const baseName = useRouteBaseName()(to);

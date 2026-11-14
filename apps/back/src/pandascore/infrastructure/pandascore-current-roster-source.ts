@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import type { ImportedPlayer } from "../../roster/application/imports";
 import type { CurrentRosterSource } from "../../roster/application/ports";
-import type { PandascoreApiClient } from "./pandascore-api.client";
+import { PandascoreApiClient } from "./pandascore-api.client";
 import { currentPlayerSchema } from "./dto/incident.dto";
 import { toImportedPlayer } from "./mappers/pandascore-player.mapper";
 

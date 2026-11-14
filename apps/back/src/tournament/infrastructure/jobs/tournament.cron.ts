@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
-import type { MikroORM } from "@mikro-orm/postgresql";
+import { MikroORM } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
-import type { TournamentSyncRunner } from "./tournament-sync.runner";
+import { TournamentSyncRunner } from "./tournament-sync.runner";
 
 @Injectable()
 export class TournamentCron {

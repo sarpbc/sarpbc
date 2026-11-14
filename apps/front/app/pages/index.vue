@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { buildOrganization } from "~/utils/structuredData/organization";
-import { buildWebSite } from "~/utils/structuredData/webSite";
-import { buildNewsFeed } from "~/utils/newsFeed";
+import { buildWebSite } from "~/utils/structuredData/web-site";
+import { buildNewsFeed } from "~/utils/news-feed";
 
 const HOMEPAGE_NEWS_LIMIT = 30;
 

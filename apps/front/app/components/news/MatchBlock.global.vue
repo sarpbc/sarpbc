@@ -6,7 +6,7 @@ import {
   newsMatchBlockKey,
   tournamentStageLabel,
 } from "@sarpbc/utils";
-import { getMatchParticipantScore } from "~/utils/matchScore";
+import { getMatchParticipantScore } from "~/utils/match-score";
 
 const {
   match = null,

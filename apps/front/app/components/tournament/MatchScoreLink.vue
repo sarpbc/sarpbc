@@ -2,9 +2,9 @@
 import { matchPath } from "@sarpbc/utils";
 import type { ThemedLogo } from "@sarpbc/utils";
 import type { MatchLinkTarget, MatchResult, MatchStatus } from "~/types/matches";
-import { displayMatchScore, getMatchParticipantScore } from "~/utils/matchScore";
-import { shortTeamName } from "~/utils/shortTeamName";
-import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import { displayMatchScore, getMatchParticipantScore } from "~/utils/match-score";
+import { shortTeamName } from "~/utils/short-team-name";
+import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 
 const { t } = useI18n();
 const localePath = useLocalePath();

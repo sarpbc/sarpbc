@@ -12,7 +12,7 @@ import type { StatsImport as StatsImportResponse } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import type { StatsImportService } from "../../application/stats-import.service";
+import { StatsImportService } from "../../application/stats-import.service";
 import type { StatsImport } from "../../domain/stats-import";
 import { RequestStatsImportDto } from "./dto/request-stats-import.dto";
 import type { RequestStatsImportInput } from "./dto/request-stats-import.dto";

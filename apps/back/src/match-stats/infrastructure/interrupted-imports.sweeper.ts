@@ -1,9 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import type { OnApplicationBootstrap } from "@nestjs/common";
-import type { MikroORM } from "@mikro-orm/core";
-import { RequestContext } from "@mikro-orm/core";
+import { MikroORM, RequestContext } from "@mikro-orm/core";
 import { log } from "evlog";
-import type { StatsImportService } from "../application/stats-import.service";
+import { StatsImportService } from "../application/stats-import.service";
 
 /** Status lives in PostgreSQL; an import cut short by a restart is marked failed at boot. */
 @Injectable()

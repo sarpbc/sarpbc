@@ -4,8 +4,8 @@ import type { MatchRowItem } from "~/types/matches";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
   listVariantToDiscoveryStatus,
-} from "~/utils/matchDiscoveryAnalytics";
-import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+} from "~/utils/match-discovery-analytics";
+import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 
 const {
   matches,

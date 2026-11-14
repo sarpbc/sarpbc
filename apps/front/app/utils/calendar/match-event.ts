@@ -2,8 +2,8 @@ import type { TournamentEventRef } from "@sarpbc/types";
 import type { MatchLinkTarget } from "~/types/matches";
 import { isNonEmptyDateInput, isNonEmptyString, tournamentStageLabel } from "@sarpbc/utils";
 import type { NamedParticipant } from "@sarpbc/utils";
-import { slotName } from "~/utils/participantSlot";
-import { TBD_LABEL } from "~/utils/tbdLabel";
+import { slotName } from "~/utils/participant-slot";
+import { TBD_LABEL } from "~/utils/tbd-label";
 import { matchEndAt, matchEventUid, matchPageUrl } from "./ics";
 import type { CalendarEvent } from "./ics";
 

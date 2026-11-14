@@ -2,8 +2,8 @@
 import CareerMenu from "~/components/career/Menu.vue";
 import CareerPhaseView from "~/components/career/CareerPhaseView.vue";
 import CareerEnd from "~/components/career/CareerEnd.vue";
-import { encodeCareerResultForShare } from "~/composables/useCareerStorage";
-import { useCareerSimulator } from "~/composables/useCareerSimulator";
+import { encodeCareerResultForShare } from "~/composables/use-career-storage";
+import { useCareerSimulator } from "~/composables/use-career-simulator";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();

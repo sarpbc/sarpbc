@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder } from "@mikro-orm/core";
 import type { LineupQueries } from "../../application/ports";
 import { MatchLineupPlayer } from "./match-lineup.entities";

@@ -1,10 +1,9 @@
 import { Controller, Get, ServiceUnavailableException } from "@nestjs/common";
-import type { HealthCheckService } from "@nestjs/terminus";
-import { HealthCheck } from "@nestjs/terminus";
+import { HealthCheck, HealthCheckService } from "@nestjs/terminus";
 import { SkipThrottle } from "@nestjs/throttler";
-import type { PostgresHealthIndicator } from "./postgres.health";
-import type { RedisHealthIndicator } from "./redis.health";
-import type { ShutdownStateService } from "./shutdown-state.service";
+import { PostgresHealthIndicator } from "./postgres.health";
+import { RedisHealthIndicator } from "./redis.health";
+import { ShutdownStateService } from "./shutdown-state.service";
 
 @SkipThrottle()
 @Controller("health")

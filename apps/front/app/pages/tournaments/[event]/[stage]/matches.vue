@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { Tournament } from "~/types/tournament";
-import { formatDayHeaderDate } from "~/utils/dateFormatter";
-import { getTournamentStatus } from "~/utils/tournamentStatus";
+import { formatDayHeaderDate } from "~/utils/date-formatter";
+import { getTournamentStatus } from "~/utils/tournament-status";
 
 const { tournament } = defineProps<{
   tournament: Tournament;

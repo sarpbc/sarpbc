@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { MatchGameStats, MatchGameTeamStats, TournamentStatsGame } from "@sarpbc/types";
 import { mapSequentially } from "../../../common/application/sequentially";
 import type {

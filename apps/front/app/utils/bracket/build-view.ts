@@ -3,9 +3,9 @@ import { classifyTournamentBracket, groupMatchesByRound } from "./classify";
 import {
   buildUnifiedDoubleEliminationLayout,
   splitDoubleEliminationMatches,
-} from "./doubleElimLayout";
+} from "./double-elim-layout";
 import { sortMatchesByBeginAt } from "./rows";
-import { buildBracketSectionLayout } from "./singleElimLayout";
+import { buildBracketSectionLayout } from "./single-elim-layout";
 import type { TournamentBracketView } from "./types";
 
 /** Matches with no in-set feeder links (shown as flat fallback rows). */

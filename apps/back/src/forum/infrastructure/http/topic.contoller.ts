@@ -1,5 +1,5 @@
 import { Controller, Get, Param } from "@nestjs/common";
-import type { TopicService } from "../../application/topic.service";
+import { TopicService } from "../../application/topic.service";
 import { topicResponse } from "./forum-response";
 
 @Controller("forum/topics")

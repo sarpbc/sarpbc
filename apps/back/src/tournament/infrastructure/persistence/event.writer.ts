@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { FilterQuery } from "@mikro-orm/core";
 import { Tournament as TournamentRow } from "./tournament.entity";
 import { League as LeagueRow } from "./league.entity";

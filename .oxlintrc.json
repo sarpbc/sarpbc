@@ -787,6 +787,13 @@
           }
         ]
       }
+    },
+    {
+      "files": ["apps/back/src/**/*.ts"],
+      "excludeFiles": ["apps/back/src/**/*.test.ts"],
+      "rules": {
+        "typescript/consistent-type-imports": "off"
+      }
     }
   ]
 }

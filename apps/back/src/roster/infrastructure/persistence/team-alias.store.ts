@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Team as TeamRow } from "./team.entity";
 import { TeamAlias as TeamAliasRow } from "./team-alias.entity";

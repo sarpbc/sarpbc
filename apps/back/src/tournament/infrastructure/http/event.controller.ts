@@ -14,7 +14,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import type { TournamentPathResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
-import type { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
@@ -23,15 +23,15 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { EventQueries } from "../../application/ports";
-import type { ManualCatalogService } from "../../application/manual-catalog.service";
-import type { StreamService } from "../../application/stream.service";
+import { ManualCatalogService } from "../../application/manual-catalog.service";
+import { StreamService } from "../../application/stream.service";
 import { SetStreamsDto } from "./dto/set-streams.dto";
 import type { SetStreamsInput } from "./dto/set-streams.dto";
-import type { ViewershipService } from "../../application/viewership.service";
+import { ViewershipService } from "../../application/viewership.service";
 import { SetViewershipDto } from "./dto/set-viewership.dto";
 import type { SetViewershipInput } from "./dto/set-viewership.dto";
 import { parseTournamentPath } from "../../domain/tournament-path";
-import type { CachedTournamentRead } from "../cache/cached-tournament.read";
+import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EVENT_QUERIES } from "../competition-queries.tokens";
 import { CreateEventDto, UpdateEventDto } from "./dto/manual-catalog.dto";
 import type { CreateEventInput, UpdateEventInput } from "./dto/manual-catalog.dto";

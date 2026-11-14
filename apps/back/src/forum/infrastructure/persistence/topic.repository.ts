@@ -1,6 +1,6 @@
 import { EntityRepository } from "@mikro-orm/core";
 
-import type { Topic } from "./topic.entity";
+import { Topic } from "./topic.entity";
 
 export class TopicRepository extends EntityRepository<Topic> {
   async findAllTopics(): Promise<Topic[]> {

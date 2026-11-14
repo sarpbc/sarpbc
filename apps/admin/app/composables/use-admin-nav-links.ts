@@ -1,4 +1,4 @@
-import { visibleAdminSections } from "~/utils/adminSections";
+import { visibleAdminSections } from "~/utils/admin-sections";
 
 export function useAdminSections() {
   const { t } = useI18n();

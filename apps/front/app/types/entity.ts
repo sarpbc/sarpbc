@@ -1,5 +1,5 @@
 import type { ProfileMatchListItem, TournamentEventRef } from "@sarpbc/types";
-import type { TournamentStatus } from "~/utils/tournamentStatus";
+import type { TournamentStatus } from "~/utils/tournament-status";
 
 export type EntityKind = "team" | "player";
 

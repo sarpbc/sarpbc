@@ -1,5 +1,5 @@
 import type { TransferType, ContractRole } from "@sarpbc/types";
-import type { Contract } from "./contract";
+import { Contract } from "./contract";
 
 export interface Transfer {
   id: string;

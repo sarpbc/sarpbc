@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import type { StatsImportStore } from "../../application/ports";
 import { ACTIVE_IMPORT_STATUSES } from "../../domain/stats-import";
 import type { StatsImport } from "../../domain/stats-import";

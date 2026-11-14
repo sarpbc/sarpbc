@@ -1,13 +1,13 @@
 <script lang="ts" setup>
 import type { MatchVod } from "@sarpbc/types";
 import type { Match, MatchDetailResponse } from "~/types/matches";
-import { displayMatchScore, getMatchParticipantScore } from "~/utils/matchScore";
+import { displayMatchScore, getMatchParticipantScore } from "~/utils/match-score";
 import type { TournamentParticipant } from "~/types/tournament";
 import {
   MATCH_DISCOVERY_FROM_QUERY,
   parseMatchDiscoverySource,
   resolveMatchDiscoveryStatus,
-} from "~/utils/matchDiscoveryAnalytics";
+} from "~/utils/match-discovery-analytics";
 import { getApiErrorStatus, matchPath, participantName, tournamentStageLabel } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();

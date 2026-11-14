@@ -5,8 +5,8 @@ import { tournamentCalendarPath } from "~/utils/calendar/ics";
 import {
   buildTournamentSportsEvent,
   getTournamentChampion,
-} from "~/utils/structuredData/tournamentSportsEvent";
-import { getTournamentTabFromRouteName, tournamentTabPath } from "~/utils/tournamentTabRoute";
+} from "~/utils/structuredData/tournament-sports-event";
+import { getTournamentTabFromRouteName, tournamentTabPath } from "~/utils/tournament-tab-route";
 
 definePageMeta({ viewTransition: false });
 

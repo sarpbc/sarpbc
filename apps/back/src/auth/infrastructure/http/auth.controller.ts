@@ -2,17 +2,16 @@ import { Body, Controller, Get, Post, Query, Request, Res, UseGuards } from "@ne
 import { Throttle } from "@nestjs/throttler";
 import { useLogger } from "evlog/nestjs";
 import { AuthGuard } from "./auth.guard";
-import type { AuthService } from "../../application/auth.service";
-import { parseOAuthReturnTo } from "../../application/auth.service";
+import { AuthService, parseOAuthReturnTo } from "../../application/auth.service";
 import { CreateUserDto } from "../../../user/infrastructure/http/dto/create-user.dto";
 import type { CreateUserInput } from "../../../user/infrastructure/http/dto/create-user.dto";
 import { SignInUserDto } from "../../../user/infrastructure/http/dto/signin-user.dto";
 import type { SignInUserInput } from "../../../user/infrastructure/http/dto/signin-user.dto";
 import type { FastifyReply, FastifyRequest } from "fastify";
-import type { ConfigService } from "@nestjs/config";
-import type { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
+import { ConfigService } from "@nestjs/config";
+import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { captureRequestEvent } from "../../../infrastructure/telemetry/capture-request-event";
-import type { PostHogService } from "../../../infrastructure/telemetry/posthog.service";
+import { PostHogService } from "../../../infrastructure/telemetry/posthog.service";
 import { REFRESH_TOKEN_COOKIE, clearAuthCookies, setAuthCookies } from "./auth-cookies";
 import type { AuthCookieConfig } from "./auth-cookies";
 

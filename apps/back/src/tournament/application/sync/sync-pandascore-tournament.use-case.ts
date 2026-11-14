@@ -3,7 +3,7 @@ import type { CompetitionFeed, UpsertTournamentCommand } from "../feed";
 import type { TournamentQueries } from "../ports";
 import { assertPandascoreSyncAllowed } from "../../domain/tournament-source";
 import type { Tournament } from "../../domain/tournament";
-import type { CompetitionSyncService } from "./competition-sync.service";
+import { CompetitionSyncService } from "./competition-sync.service";
 
 export class SyncPandascoreTournamentUseCase {
   constructor(

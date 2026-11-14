@@ -1,8 +1,7 @@
-import type { OnModuleInit } from "@nestjs/common";
-import { Injectable } from "@nestjs/common";
-import type { MikroORM } from "@mikro-orm/postgresql";
+import { Injectable, OnModuleInit } from "@nestjs/common";
+import { MikroORM } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
-import type { TopicService } from "../application/topic.service";
+import { TopicService } from "../application/topic.service";
 
 @Injectable()
 export class TopicInitializer implements OnModuleInit {

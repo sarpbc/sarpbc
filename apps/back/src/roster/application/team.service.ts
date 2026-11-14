@@ -2,7 +2,7 @@ import { toSlug } from "@sarpbc/utils";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type { CreateTeamInput, UpdateTeamInput } from "./inputs";
+import { CreateTeamInput, UpdateTeamInput } from "./inputs";
 import { Team } from "../domain/team";
 import { assertTeamDeletable } from "../domain/team-deletion";
 import type {

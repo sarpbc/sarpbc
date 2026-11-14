@@ -1,10 +1,7 @@
-import type { OnModuleInit } from "@nestjs/common";
-import { Module } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
-import { ConfigModule } from "@nestjs/config";
+import { Module, OnModuleInit } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
-import type { MikroORM } from "@mikro-orm/postgresql";
-import { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager, MikroORM } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 import { League } from "./persistence/league.entity";
 import { Match } from "./persistence/match.entity";

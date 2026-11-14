@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { Cron } from "@nestjs/schedule";
-import type { MikroORM } from "@mikro-orm/core";
+import { MikroORM } from "@mikro-orm/core";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
-import type { AirRiddleService } from "../application/airriddle.service";
+import { AirRiddleService } from "../application/airriddle.service";
 import { RIDDLE_TIME_ZONE } from "./riddle-time-zone";
 
 @Injectable()

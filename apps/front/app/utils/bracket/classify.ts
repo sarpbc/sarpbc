@@ -1,7 +1,7 @@
 import { isNonEmptyDateInput } from "@sarpbc/utils";
 import type { TournamentDetail, TournamentDetailMatch } from "@sarpbc/types";
 import type { TournamentBracketFormat, TournamentBracketRoundGroup } from "./types";
-import { TBD_LABEL } from "~/utils/tbdLabel";
+import { TBD_LABEL } from "~/utils/tbd-label";
 import { sortMatchesByBeginAt } from "./rows";
 
 export function classifyTournamentBracket(tournament: TournamentDetail): TournamentBracketFormat {

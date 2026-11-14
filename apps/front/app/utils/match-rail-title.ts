@@ -1,4 +1,4 @@
-import { daysFromToday, parseMatchDate } from "./calendarDay";
+import { daysFromToday, parseMatchDate } from "./calendar-day";
 
 export type MatchRailTitleKind = "today" | "tomorrow" | "upcoming";
 

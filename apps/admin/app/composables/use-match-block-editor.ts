@@ -1,7 +1,7 @@
 import type { InjectionKey } from "vue";
 import type { Editor } from "@tiptap/core";
 import type { MatchBlockSelector } from "@sarpbc/types";
-import { matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
+import { matchBlockNodeAttrs } from "~/utils/editor/match-block-attrs";
 
 type EditMatchBlock = (
   block: MatchBlockSelector | null,

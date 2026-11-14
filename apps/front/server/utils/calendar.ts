@@ -1,12 +1,12 @@
 import type { TournamentDetail, TournamentMatchListItem } from "@sarpbc/types";
 import type { H3Event } from "h3";
-import { apiFetch } from "@sarpbc/composables/apiFetch";
+import { apiFetch } from "@sarpbc/composables/api-fetch";
 import type { Match } from "~/types/matches";
-import { rethrowApiError } from "./apiError";
+import { rethrowApiError } from "./api-error";
 import { getMatchById } from "~/composables/matches/api";
 import { buildIcs } from "~/utils/calendar/ics";
 import type { CalendarFeed } from "~/utils/calendar/ics";
-import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
+import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/match-event";
 import { tournamentStageLabel } from "@sarpbc/utils";
 
 interface TournamentResponse {

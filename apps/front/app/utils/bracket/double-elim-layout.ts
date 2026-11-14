@@ -10,7 +10,7 @@ import {
   getBracketSectionFromName,
   getCombinedColumnFromName,
   getUpperColumnFromName,
-} from "./pandaScoreNames";
+} from "./panda-score-names";
 import { MIN_ROW_GAP, assignMatchRows, nextAvailableRow, sortMatchesByBeginAt } from "./rows";
 import type { BracketLayoutMatch, BracketSectionLayout } from "./types";
 

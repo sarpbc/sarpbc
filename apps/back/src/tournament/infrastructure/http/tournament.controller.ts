@@ -17,8 +17,8 @@ import {
   Inject,
 } from "@nestjs/common";
 import type { MatchLineupsResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
-import type { CachedTournamentRead } from "../cache/cached-tournament.read";
-import type { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
+import { CachedTournamentRead } from "../cache/cached-tournament.read";
+import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import {
   CreateEmptyBracketDto,
   CreateMatchDto,
@@ -45,33 +45,31 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import type { TournamentQueries } from "../../application/ports";
-import type { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
-import type { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
+import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
+import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
 import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
-import type { ManualTournamentService } from "../../application/manual-tournament.service";
-import type { ManualCatalogService } from "../../application/manual-catalog.service";
-import type { MatchService } from "../../application/match/match.service";
-import type { StreamService } from "../../application/stream.service";
+import { ManualTournamentService } from "../../application/manual-tournament.service";
+import { ManualCatalogService } from "../../application/manual-catalog.service";
+import { MatchService } from "../../application/match/match.service";
+import { StreamService } from "../../application/stream.service";
 import { SetStreamsDto } from "./dto/set-streams.dto";
 import type { SetStreamsInput } from "./dto/set-streams.dto";
-import type {
-  MatchLineupService,
-  MatchLineups,
-} from "../../application/match/match-lineup.service";
+import { MatchLineupService } from "../../application/match/match-lineup.service";
+import type { MatchLineups } from "../../application/match/match-lineup.service";
 import { lineupsFromGames } from "../../domain/match-lineup";
 import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
 import type { SetMatchLineupsInput } from "./dto/set-match-lineups.dto";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
-import type { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
+import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { isRedistributable } from "../../../common/domain/data-source";
-import type { ViewershipService } from "../../application/viewership.service";
+import { ViewershipService } from "../../application/viewership.service";
 import { SetViewershipDto } from "./dto/set-viewership.dto";
 import type { SetViewershipInput } from "./dto/set-viewership.dto";
-import type { PlayerAwardService } from "../../application/player-award.service";
+import { PlayerAwardService } from "../../application/player-award.service";
 import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
 import type { CreatePlayerAwardInput } from "./dto/create-player-award.dto";
-import type { TournamentPrizeService } from "../../application/tournament-prize.service";
+import { TournamentPrizeService } from "../../application/tournament-prize.service";
 import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
 import type { SetTournamentPrizesInput } from "./dto/set-tournament-prizes.dto";
 import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";

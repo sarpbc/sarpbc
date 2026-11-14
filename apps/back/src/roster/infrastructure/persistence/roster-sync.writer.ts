@@ -1,5 +1,5 @@
 import { playerColumns, teamColumns, toPlayer, toTeam } from "./roster.mapper";
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Contract } from "./contract.entity";
 import { Player } from "./player.entity";

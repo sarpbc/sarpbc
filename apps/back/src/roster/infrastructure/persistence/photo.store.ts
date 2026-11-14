@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Player as PlayerRow } from "./player.entity";
 import { PlayerPhoto as PlayerPhotoRow } from "./player-photo.entity";

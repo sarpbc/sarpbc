@@ -1,5 +1,5 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import type { SearchService } from "../../application/search.service";
+import { SearchService } from "../../application/search.service";
 import { SearchQueryDto } from "./dto/search-query.dto";
 import type { SearchQueryInput } from "./dto/search-query.dto";
 import { mapPlayer, mapTeam } from "../../../roster/infrastructure/http/player.mapper";

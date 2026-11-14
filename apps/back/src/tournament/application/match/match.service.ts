@@ -4,8 +4,7 @@ import { InvalidInputError } from "../../../common/domain/errors/invalid-input-e
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
-import type { Match } from "../../domain/match";
-import { matchPublicSlug } from "../../domain/match";
+import { Match, matchPublicSlug } from "../../domain/match";
 import { assertMatchDeletable } from "../../domain/match-deletion";
 import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks } from "./match-blocks";

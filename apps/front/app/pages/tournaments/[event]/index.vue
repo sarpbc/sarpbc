@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import { stageMatchesPath, tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
 import type { TournamentDetail } from "@sarpbc/types";
-import { getTournamentChampion } from "~/utils/structuredData/tournamentSportsEvent";
+import { getTournamentChampion } from "~/utils/structuredData/tournament-sports-event";
 import {
   formatTournamentShortDateRange,
   getTournamentStatus,
   tournamentStatusLabelKey,
-} from "~/utils/tournamentStatus";
+} from "~/utils/tournament-status";
 
 const route = useRoute();
 const { t, locale } = useI18n();

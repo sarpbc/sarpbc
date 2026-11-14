@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { SEASON_AWARD_TYPES } from "@sarpbc/types";
 import type {
   PlayerSeasonAward,

@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import type { ConfigService } from "@nestjs/config";
+import { ConfigService } from "@nestjs/config";
 import { localizedPath, newsPath } from "@sarpbc/utils";
 import { createLogger } from "evlog";
 import type { NewsIndexing } from "../application/ports";

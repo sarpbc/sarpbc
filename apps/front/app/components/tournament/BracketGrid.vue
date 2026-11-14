@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { participantName } from "@sarpbc/utils";
 import type { BracketSectionLayout } from "~/utils/bracket/types";
-import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
+import { resolveMatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 import {
   BRACKET_COLUMN_GAP,
   BRACKET_MATCH_HEIGHT,

@@ -8,11 +8,11 @@ import type {
   MatchResultsResponse,
   UpcomingMatchesResponse,
 } from "@sarpbc/types";
-import type { MatchService } from "../../application/match/match.service";
-import type { MatchLineupService } from "../../application/match/match-lineup.service";
+import { MatchService } from "../../application/match/match.service";
+import { MatchLineupService } from "../../application/match/match-lineup.service";
 import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
 import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
-import type { ReplyService } from "../../../reply/application/reply.service";
+import { ReplyService } from "../../../reply/application/reply.service";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";

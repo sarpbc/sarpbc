@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { mapSequentially } from "../../../common/application/sequentially";
 import { Team } from "./team.entity";
 import { RosterSyncWriter } from "./roster-sync.writer";

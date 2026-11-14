@@ -6,7 +6,7 @@ import { ListNotificationsQueryDto } from "./dto/list-notifications-query.dto";
 import type { ListNotificationsQueryInput } from "./dto/list-notifications-query.dto";
 import { MarkNotificationsReadDto } from "./dto/mark-notifications-read.dto";
 import type { MarkNotificationsReadInput } from "./dto/mark-notifications-read.dto";
-import type { NotificationService } from "../../application/notification.service";
+import { NotificationService } from "../../application/notification.service";
 
 @Controller("notifications")
 @UseGuards(AuthGuard)

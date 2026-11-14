@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { CompetitionFeed, CompetitionIncident } from "../../tournament/application/feed";
-import type { PandascoreApiClient } from "./pandascore-api.client";
+import { PandascoreApiClient } from "./pandascore-api.client";
 import { standingSchema, tournamentSchema } from "./dto/tournament.dto";
 import { matchSchema } from "./dto/match.dto";
 import { incidentSchema } from "./dto/incident.dto";

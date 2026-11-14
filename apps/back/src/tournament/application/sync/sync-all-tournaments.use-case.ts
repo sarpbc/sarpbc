@@ -1,7 +1,7 @@
 import { mapSequentially } from "../../../common/application/sequentially";
 import type { CompetitionFeed } from "../feed";
 import type { TournamentQueries } from "../ports";
-import type { CompetitionSyncService } from "./competition-sync.service";
+import { CompetitionSyncService } from "./competition-sync.service";
 
 export class SyncAllTournamentsUseCase {
   constructor(

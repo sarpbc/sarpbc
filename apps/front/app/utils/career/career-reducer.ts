@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import { getEventById, pickRandomEvent } from "~/data/career/events";
 import { getWorldTeamById } from "~/data/career/world";
 import { applyStatDelta, getAgeDecline, getStartingStats } from "~/utils/career/stats";
-import { resolveEventOutcome, buildEventOutcomeContext } from "~/utils/career/eventOutcome";
+import { resolveEventOutcome, buildEventOutcomeContext } from "~/utils/career/event-outcome";
 import { createCareerWorld, moveUserToTeam, tickNpcRatings } from "~/utils/career/roster";
 import {
   computeCircuitPoints,

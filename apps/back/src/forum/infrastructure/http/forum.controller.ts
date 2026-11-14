@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, UseGuards, HttpCode, HttpStatus } from "@nestjs/common";
-import type { TopicService } from "../../application/topic.service";
-import type { PostService } from "../../application/post.service";
-import type { ReplyService } from "../../../reply/application/reply.service";
+import { TopicService } from "../../application/topic.service";
+import { PostService } from "../../application/post.service";
+import { ReplyService } from "../../../reply/application/reply.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreateReplyDto } from "../../../reply/infrastructure/http/dto/create-reply.dto";

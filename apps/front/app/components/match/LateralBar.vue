@@ -1,6 +1,6 @@
 <script lang="ts" setup>
-import { filterMatchesTodayOrTomorrow } from "~/utils/calendarDay";
-import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
+import { filterMatchesTodayOrTomorrow } from "~/utils/calendar-day";
+import { resolveMatchRailTitleKind } from "~/utils/match-rail-title";
 
 const { t } = useI18n();
 const { data } = await useUpcomingMatches();

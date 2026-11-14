@@ -1,4 +1,4 @@
-import type { EntityManager } from "@mikro-orm/postgresql";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder, raw } from "@mikro-orm/core";
 import { Tournament } from "./tournament.entity";
 import { TournamentEvent } from "./tournament-event.entity";

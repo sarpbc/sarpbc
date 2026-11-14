@@ -4,8 +4,8 @@ import { getPlayerTournaments } from "~/composables/player/api";
 import { getTeamTournaments } from "~/composables/team/api";
 import type { EntityEventListItem, EntityKind, EntitySections } from "~/types/entity";
 import type { Tournament } from "~/types/tournament";
-import { getTournamentStatus } from "~/utils/tournamentStatus";
-import { byBeginAtAsc, byEndAtDesc, PAST_ENTRIES_LIMIT } from "./entitySort";
+import { getTournamentStatus } from "~/utils/tournament-status";
+import { byBeginAtAsc, byEndAtDesc, PAST_ENTRIES_LIMIT } from "./entity-sort";
 
 const FETCH_TOURNAMENTS = {
   team: getTeamTournaments,

@@ -2,7 +2,7 @@ import type { SearchType } from "@sarpbc/types";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentQueries } from "../../tournament/application/ports";
-import type { SearchResult, SearchParams } from "./models/search-result";
+import { SearchResult, SearchParams } from "./models/search-result";
 import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
 import type { Tournament } from "../../tournament/domain/tournament";

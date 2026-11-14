@@ -9,12 +9,12 @@ import {
   isNonEmptyDateInput,
 } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
-import { formatPrizepool } from "~/utils/currencyFormatter";
-import { resolveSiteUrl } from "~/utils/siteUrl";
-import { getTournamentStatus } from "~/utils/tournamentStatus";
-import type { TournamentStatus } from "~/utils/tournamentStatus";
-import { compactJsonLd, SCHEMA_ORG } from "./jsonLd";
-import type { JsonLdNode } from "./jsonLd";
+import { formatPrizepool } from "~/utils/currency-formatter";
+import { resolveSiteUrl } from "~/utils/site-url";
+import { getTournamentStatus } from "~/utils/tournament-status";
+import type { TournamentStatus } from "~/utils/tournament-status";
+import { compactJsonLd, SCHEMA_ORG } from "./json-ld";
+import type { JsonLdNode } from "./json-ld";
 
 export const ROCKET_LEAGUE_SPORT = "Rocket League";
 

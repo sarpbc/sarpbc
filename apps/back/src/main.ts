@@ -1,5 +1,5 @@
 import { NestFactory } from "@nestjs/core";
-import type { NestFastifyApplication } from "@nestjs/platform-fastify";
+import { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { ConfigService } from "@nestjs/config";
 import { initLogger } from "evlog";
 import { AppModule } from "./app.module";

@@ -1,6 +1,6 @@
 import { isStaffContractRole } from "@sarpbc/utils";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type {
+import {
   CreateContractInput,
   CreateTeamContractInput,
   SourcedContractInput,
