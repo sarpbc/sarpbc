@@ -23,7 +23,14 @@ const RULES = [
   { id: "py-[", pattern: /\bpy-\[/ },
 ];
 
-async function collectFiles(dir, files = []) {
+interface Violation {
+  file: string;
+  line: number;
+  rule: string;
+  text: string;
+}
+
+async function collectFiles(dir: string, files: string[] = []): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -48,8 +55,8 @@ async function collectFiles(dir, files = []) {
   return files;
 }
 
-function scanFile(filePath, content) {
-  const violations = [];
+function scanFile(filePath: string, content: string): Violation[] {
+  const violations: Violation[] = [];
   const lines = content.split("\n");
 
   for (let index = 0; index < lines.length; index += 1) {
@@ -70,14 +77,14 @@ function scanFile(filePath, content) {
   return violations;
 }
 
-async function main() {
-  const files = [];
+async function main(): Promise<void> {
+  const files: string[] = [];
 
   for (const root of SCAN_ROOTS) {
     await collectFiles(root, files);
   }
 
-  const violations = [];
+  const violations: Violation[] = [];
 
   for (const file of files) {
     const content = await readFile(file, "utf8");

@@ -276,6 +276,9 @@ importers:
       '@oxlint/plugins':
         specifier: 1.91.0
         version: 1.91.0
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.6.6
       lefthook:
         specifier: ^2.2.2
         version: 2.2.2
@@ -291,6 +294,12 @@ importers:
       turbo:
         specifier: ^2.11.10
         version: 2.11.10
+      typescript:
+        specifier: 'catalog:'
+        version: 6.0.3
+      zod:
+        specifier: ^4.6.7
+        version: 4.6.7
 
   apps/admin:
     dependencies:

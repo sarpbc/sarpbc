@@ -24,9 +24,9 @@ const VUE_MACROS = [
   "withDefaults",
 ];
 
-function readAutoImportNames() {
+function readAutoImportNames(): string[] {
   return IMPORTS_TYPES.flatMap((file) => {
-    let source;
+    let source: string;
 
     try {
       source = readFileSync(file, "utf8");

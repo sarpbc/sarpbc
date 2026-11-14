@@ -121,6 +121,9 @@ jobs:
       - name: Typecheck packages
         run: pnpm exec turbo run typecheck --filter="./packages/*"
 
+      - name: Typecheck scripts
+        run: pnpm typecheck:scripts
+
       - name: Stream score OCR tool
         run: |
           pnpm --filter @sarpbc/stream-score-ocr typecheck

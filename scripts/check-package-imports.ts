@@ -1,15 +1,25 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { z } from "zod";
 
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const frameworkFree = ["packages/types", "packages/utils"];
 const frameworkPackage = /^(?:vue(?:$|[/-])|@vue\/|nuxt(?:$|[/-])|@nuxt\/|@nuxtjs\/|#)/;
 
+const dependencyFields = ["dependencies", "devDependencies", "peerDependencies"] as const;
+const dependencies = z.record(z.string(), z.string()).optional();
+
+const packageManifest = z.object({
+  dependencies,
+  devDependencies: dependencies,
+  peerDependencies: dependencies,
+});
+
 const specifierPattern =
   /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
 
-function sourceFiles(directory) {
+function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
 
@@ -19,8 +29,8 @@ function sourceFiles(directory) {
   });
 }
 
-export function frameworkViolations(directory, root = directory) {
-  const violations = [];
+export function frameworkViolations(directory: string, root = directory): string[] {
+  const violations: string[] = [];
 
   for (const file of sourceFiles(directory)) {
     const text = readFileSync(file, "utf8");
@@ -37,9 +47,9 @@ export function frameworkViolations(directory, root = directory) {
   }
 
   const manifestPath = path.join(directory, "package.json");
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const manifest = packageManifest.parse(JSON.parse(readFileSync(manifestPath, "utf8")));
 
-  for (const field of ["dependencies", "devDependencies", "peerDependencies"]) {
+  for (const field of dependencyFields) {
     for (const name of Object.keys(manifest[field] ?? {})) {
       if (frameworkPackage.test(name)) {
         violations.push(`${path.relative(root, manifestPath)}: ${field} lists ${name}`);
