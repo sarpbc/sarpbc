@@ -7,6 +7,7 @@ import { MikroPlayerStore } from "./roster.store";
 function fixture() {
   const execute = vi.fn();
   const findOne = vi.fn();
+
   const manager: Pick<EntityManager, "getConnection" | "findOne"> = {
     getConnection: vi.fn().mockReturnValue({ execute }),
     findOne,
@@ -18,11 +19,13 @@ function fixture() {
 describe("MikroPlayerStore.getRandomPlayer", () => {
   it("loads a single random row and maps it to a detached player", async () => {
     const { execute, findOne, players } = fixture();
+
     const row = Object.assign(new PlayerRow(), {
       id: "p1",
       name: "Vatira",
       slug: "vatira",
     });
+
     execute.mockResolvedValue([{ id: row.id }]);
     findOne.mockResolvedValue(row);
 

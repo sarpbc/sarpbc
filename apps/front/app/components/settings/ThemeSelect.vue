@@ -19,11 +19,13 @@ const startViewTransition = (event: MouseEvent) => {
 
   if (!document.startViewTransition || reducedMotion) {
     switchTheme();
+
     return;
   }
 
   const x = event.clientX;
   const y = event.clientY;
+
   const endRadius = Math.hypot(
     Math.max(x, window.innerWidth - x),
     Math.max(y, window.innerHeight - y),

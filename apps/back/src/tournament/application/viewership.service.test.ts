@@ -35,6 +35,7 @@ describe("ViewershipService", () => {
   const events = new Map<string, TournamentEvent>();
   const matches = new Map<string, Match>();
   let stages: EventStage[] = [];
+
   const scope: ViewershipScope = {
     events: {
       load: async (id) => events.get(id) ?? null,
@@ -50,6 +51,7 @@ describe("ViewershipService", () => {
       },
     },
   };
+
   const service = new ViewershipService({ run: (work) => work(scope) });
 
   beforeEach(() => {

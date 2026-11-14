@@ -16,7 +16,9 @@ function deletionReason(object: DeletionObject | null): string | null {
     type: "serie",
     object,
   });
+
   if (incident.change_type !== "deletion") throw new Error("expected a deletion");
+
   return incident.object;
 }
 
@@ -62,6 +64,7 @@ describe("serie incidents", () => {
       type: "serie",
       object: { id: 9417, full_name: "Paris 2026", year: "2026", league: { id: 4 } },
     });
+
     if (incident.change_type === "deletion" || incident.type !== "serie")
       throw new Error("expected a serie update");
     expect(PandascoreSerieMapper.toUpsertCommand(incident.object)).toEqual({

@@ -55,6 +55,7 @@ import { MatchStatsModule } from "../../match-stats/infrastructure/match-stats.m
 import { CachedTournamentRead } from "./cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "./cache/cached-tournament-prizes.read";
 import { RedisService } from "../../infrastructure/redis/redis.service";
+
 @Module({
   imports: [
     MikroOrmModule.forFeature([

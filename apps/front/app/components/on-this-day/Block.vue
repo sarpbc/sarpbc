@@ -8,6 +8,7 @@ const { events, date, pending, error, refresh } = useOnThisDay();
 
 const shown = computed(() => (limit ? events.value.slice(0, limit) : events.value));
 const hasMore = computed(() => limit !== undefined && events.value.length > limit);
+
 const dayLabel = computed(() =>
   date.value
     ? new Intl.DateTimeFormat(locale.value, {

@@ -15,15 +15,20 @@ type NestErrorBody = {
 function messageFromNestBody(responseText: string): string | undefined {
   try {
     const parsed = JSON.parse(responseText) as NestErrorBody;
+
     if (Array.isArray(parsed.message)) {
       const joined = parsed.message.filter((item) => item.trim().length > 0).join(" ");
+
       return joined.length > 0 ? joined : undefined;
     }
+
     const text = parsed.message?.trim();
+
     if (text) return text;
   } catch {
     return undefined;
   }
+
   return undefined;
 }
 
@@ -41,9 +46,11 @@ export function useR2Upload() {
     const formData = new FormData();
     formData.append("file", file);
     formData.append("target", context.target);
+
     if (context.articleSlug) {
       formData.append("articleSlug", context.articleSlug);
     }
+
     if (context.articleTitle) {
       formData.append("articleTitle", context.articleTitle);
     }
@@ -66,6 +73,7 @@ export function useR2Upload() {
             } catch {
               reject(new Error("Upload succeeded but the server response was invalid."));
             }
+
             return;
           }
 
@@ -88,6 +96,7 @@ export function useR2Upload() {
       });
 
       progress.value = 100;
+
       return publicUrl;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Image upload failed";

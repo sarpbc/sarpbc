@@ -10,6 +10,7 @@ const snapshot = path.join(project, "test/contracts/http-routes.json");
 function filesIn(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);
+
     return entry.isDirectory()
       ? filesIn(file)
       : file.endsWith(".ts") && !file.endsWith(".test.ts")
@@ -22,9 +23,12 @@ const packagesRoot = path.resolve(project, "../../packages");
 
 function stringConstants() {
   const constants = new Map();
+
   for (const pkg of fs.readdirSync(packagesRoot)) {
     const dir = path.join(packagesRoot, pkg, "src");
+
     if (!fs.existsSync(dir)) continue;
+
     for (const file of filesIn(dir)) {
       const source = ts.createSourceFile(
         file,
@@ -32,13 +36,17 @@ function stringConstants() {
         ts.ScriptTarget.Latest,
         true,
       );
+
       for (const statement of source.statements) {
         if (!ts.isVariableStatement(statement)) continue;
+
         for (const declaration of statement.declarationList.declarations) {
           let value = declaration.initializer;
+
           while (value && (ts.isAsExpression(value) || ts.isSatisfiesExpression(value))) {
             value = value.expression;
           }
+
           if (
             ts.isIdentifier(declaration.name) &&
             value &&
@@ -54,6 +62,7 @@ function stringConstants() {
       }
     }
   }
+
   return constants;
 }
 
@@ -67,6 +76,7 @@ function decoratorArguments(expression, source) {
       values,
       `${source.fileName}: cannot resolve ${argument.getText(source)} to a workspace string array constant`,
     );
+
     return values;
   });
 }
@@ -74,6 +84,7 @@ function decoratorArguments(expression, source) {
 function decorators(node, source) {
   return (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
     const expression = decorator.expression;
+
     return ts.isCallExpression(expression) && ts.isIdentifier(expression.expression)
       ? [
           {
@@ -87,28 +98,37 @@ function decorators(node, source) {
 
 function collectRoutes(sources) {
   const routes = [];
+
   for (const { file, text } of sources) {
     const source = ts.createSourceFile(file, text, ts.ScriptTarget.Latest, true);
+
     for (const statement of source.statements) {
       if (!ts.isClassDeclaration(statement)) continue;
       const classDecorators = decorators(statement, source);
       const controller = classDecorators.find((decorator) => decorator.name === "Controller");
+
       if (!controller) continue;
       const prefix = controller.args[0] ?? '""';
+
       for (const method of statement.members) {
         if (!ts.isMethodDeclaration(method)) continue;
+
         for (const parameter of method.parameters) {
           const dto = parameter.type?.getText(source);
+
           const input = decorators(parameter, source).find((decorator) =>
             ["Body", "Query"].includes(decorator.name),
           );
+
           if (!input || !dto?.endsWith("Dto")) continue;
           assert(
             input.args.some((argument) => new RegExp(`\\bschema:\\s*${dto}\\b`).test(argument)),
             `${file}: ${method.name.getText(source)} must attach the ${dto} schema to @${input.name}`,
           );
         }
+
         const methodDecorators = decorators(method, source);
+
         for (const route of methodDecorators.filter((decorator) =>
           ["Get", "Post", "Put", "Patch", "Delete", "Head", "Options", "All"].includes(
             decorator.name,
@@ -133,11 +153,13 @@ function collectRoutes(sources) {
       }
     }
   }
+
   return routes.sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
 }
 
 const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf8") }));
 const actual = collectRoutes(sources);
+
 if (process.argv.includes("--write")) {
   fs.mkdirSync(path.dirname(snapshot), { recursive: true });
   fs.writeFileSync(snapshot, `${JSON.stringify(actual, null, 2)}\n`);

@@ -13,10 +13,13 @@ export async function verifySeasonAwards({
   const otherPlayer = (
     await request("POST", "/player", { name: "Season Award Rival" }, staffCookie, 201)
   ).json().player;
+
   await request("POST", "/seasons", { name: "Fake League 2026" }, memberCookie, 403);
+
   const season = (
     await request("POST", "/seasons", { name: "Fake League 2026" }, staffCookie, 201)
   ).json();
+
   await request("POST", "/seasons", { name: "Fake League 2026" }, staffCookie, 409);
   await request("GET", "/seasons", undefined, undefined, 401);
   assert(
@@ -26,12 +29,14 @@ export async function verifySeasonAwards({
   );
 
   const awardsUrl = `/seasons/${season.id}/awards`;
+
   const seasonMvp = {
     playerId: player.id,
     awardType: "season_mvp",
     presentedBy: "Fake Partner",
     sourceUrl: ANNOUNCEMENT,
   };
+
   await request("POST", awardsUrl, seasonMvp, memberCookie, 403);
   await request(
     "POST",
@@ -59,6 +64,7 @@ export async function verifySeasonAwards({
     region,
     sourceUrl: ANNOUNCEMENT,
   });
+
   assert.deepEqual(
     await callTool("propose_season_award", { ...regional("Europe", player.id), sourceUrl: "" }),
     { error: true },
@@ -75,10 +81,12 @@ export async function verifySeasonAwards({
   const europe = await callTool("propose_season_award", regional("Europe", player.id));
   assert.equal(europe.status, "pending");
   assert.equal((await review(europe)).status, "applied");
+
   const northAmerica = await callTool(
     "propose_season_award",
     regional("North America", otherPlayer.id),
   );
+
   assert.equal((await review(northAmerica)).status, "applied");
   assert.deepEqual(
     await callTool("propose_season_award", regional("Europe", otherPlayer.id)),
@@ -127,9 +135,11 @@ export async function verifySeasonArchives({
 }) {
   const slug = "fake-archive-2026";
   await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, memberCookie, 403);
+
   const season = (
     await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, staffCookie, 201)
   ).json();
+
   assert.equal(season.slug, slug);
   await request("POST", "/seasons", { name: "Fake Archive copy", slug }, staffCookie, 409);
   await request("GET", "/season-archives/fake-archive-unknown", undefined, undefined, 404);
@@ -144,6 +154,7 @@ export async function verifySeasonArchives({
 
   const participantsUrl = `/seasons/${season.id}/participants`;
   await request("POST", participantsUrl, { teamId: team.id }, memberCookie, 403);
+
   const winner = (
     await request(
       "POST",
@@ -153,10 +164,12 @@ export async function verifySeasonArchives({
       201,
     )
   ).json().participant;
+
   await request("POST", participantsUrl, { teamId: team.id }, staffCookie, 409);
   await request("POST", participantsUrl, { teamId: otherTeam.id }, staffCookie, 201);
 
   const pathUrl = `${participantsUrl}/${winner.id}/path`;
+
   for (const entry of [
     { label: "Fake Open", result: "Qualified", tournamentId: startggCupId },
     { label: "Fake Major", result: "1st", tournamentId: tournament.id },

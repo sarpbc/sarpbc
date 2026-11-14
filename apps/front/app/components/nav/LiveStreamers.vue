@@ -6,6 +6,7 @@ const { t, locale } = useI18n();
 const { streamers, load } = useLiveStreamers();
 
 const root = useTemplateRef("root");
+
 const { stop } = useIntersectionObserver(
   root,
   ([entry]) => {
@@ -19,6 +20,7 @@ const { stop } = useIntersectionObserver(
 const viewerFormatter = computed(
   () => new Intl.NumberFormat(locale.value, { notation: "compact", maximumFractionDigits: 1 }),
 );
+
 const viewerPlurals = computed(() => new Intl.PluralRules(locale.value));
 
 function viewers(streamer: LiveStreamer): string {

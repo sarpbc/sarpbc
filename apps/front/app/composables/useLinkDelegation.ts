@@ -9,7 +9,9 @@ export function useLinkDelegation(onLinkClick?: (link: HTMLAnchorElement) => voi
     if (!(event.target instanceof Element) || !(event.currentTarget instanceof Element)) {
       return;
     }
+
     const link = event.target.closest("a");
+
     if (!link || !event.currentTarget.contains(link)) {
       return;
     }
@@ -24,6 +26,7 @@ export function useLinkDelegation(onLinkClick?: (link: HTMLAnchorElement) => voi
       event.altKey ||
       Boolean(link.target) ||
       link.origin !== window.location.origin;
+
     if (event.defaultPrevented || opensElsewhere) {
       return;
     }

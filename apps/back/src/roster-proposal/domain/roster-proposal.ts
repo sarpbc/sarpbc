@@ -26,6 +26,7 @@ export class RosterProposal {
     if (this.status !== "pending") {
       throw new InvalidInputError(`This proposal was already ${this.status}`);
     }
+
     this.reviewedById = reviewerId;
     this.reviewedAt = at;
   }

@@ -153,10 +153,13 @@ export const careerStateSchema = z.object({
 
 export function parseCareerStateJson(raw: string | null): CareerState | null {
   if (!raw) return null;
+
   try {
     const parsed: unknown = JSON.parse(raw);
     const result = careerStateSchema.safeParse(parsed);
+
     if (!result.success) return null;
+
     return normalizeLoadedCareerState(result.data);
   } catch {
     return null;
@@ -166,6 +169,7 @@ export function parseCareerStateJson(raw: string | null): CareerState | null {
 export function parseCareerResultJson(raw: string): CareerResult | null {
   try {
     const result = careerResultSchema.safeParse(JSON.parse(raw));
+
     return result.success ? result.data : null;
   } catch {
     return null;
@@ -176,16 +180,21 @@ const careerResultsSchema = z.record(z.string(), careerResultSchema.nullable().c
 
 export function parseCareerResultsJson(raw: string | null): Map<string, CareerResult> {
   const results = new Map<string, CareerResult>();
+
   if (!raw) return results;
+
   try {
     const parsed = careerResultsSchema.safeParse(JSON.parse(raw));
+
     if (!parsed.success) return results;
+
     for (const [id, result] of Object.entries(parsed.data)) {
       if (result) results.set(id, result);
     }
   } catch {
     return new Map();
   }
+
   return results;
 }
 
@@ -223,6 +232,7 @@ export function decodeCareerResultFromShare(encoded: string): CareerResult | nul
   try {
     const padded = encoded.replace(/-/g, "+").replace(/_/g, "/");
     const json = decodeURIComponent(atob(padded));
+
     return parseCareerResultJson(json);
   } catch {
     return null;

@@ -11,10 +11,12 @@ describe("SitemapService", () => {
     staffSlugs: vi.fn(),
     teamSlugs: vi.fn(),
   };
+
   const service = new SitemapService(queries);
   const older = new Date("2026-02-01T00:00:00.000Z");
   const lastmod = new Date("2026-03-01T12:00:00.000Z");
   const team = (name: string) => ({ team: { name } });
+
   const match = (overrides: Partial<MatchSitemapRow>): MatchSitemapRow => ({
     publicId: 42,
     name: "Grand Final",

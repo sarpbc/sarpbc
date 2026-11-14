@@ -18,13 +18,16 @@ function memoryStore() {
   const leagues = new Map<number, League>();
   const timings = new Map<string, MatchTiming[]>();
   const all = () => [...tournaments.values()];
+
   const tournamentWriter = {
     byPandascoreId: vi.fn(async (id: number) => {
       const found = all().find((t) => t.pandascoreId === id);
+
       return found ? copy(found) : null;
     }),
     load: vi.fn(async (id: string) => {
       const found = tournaments.get(id);
+
       return found ? copy(found) : null;
     }),
     manualCandidates: vi.fn(async () => []),
@@ -39,13 +42,16 @@ function memoryStore() {
       if (league.pandascoreId !== null) leagues.set(league.pandascoreId, copy(league));
     }),
   };
+
   const eventWriter: EventWriter = {
     load: async (id) => {
       const found = events.get(id);
+
       return found ? copy(found) : null;
     },
     bySerieId: async (id) => {
       const found = [...events.values()].find((e) => e.pandascoreSerieId === id);
+
       return found ? copy(found) : null;
     },
     unclaimedByName: async () => null,
@@ -64,20 +70,27 @@ function memoryStore() {
       events.delete(id);
     },
   };
+
   function seedEvent(fields: Partial<TournamentEvent>) {
     const event = Object.assign(new TournamentEvent(), fields);
     events.set(event.id, event);
+
     return event;
   }
+
   function seedStage(event: TournamentEvent, fields: Partial<Tournament>) {
     const stage = Object.assign(new Tournament(), { event: toEventRef(event), ...fields });
     tournaments.set(stage.id, stage);
+
     return stage;
   }
+
   const eventOf = (tournamentId: string) => {
     const tournament = tournaments.get(tournamentId);
+
     return tournament ? events.get(tournament.event.id) : undefined;
   };
+
   const matchWriter = {
     timings: async (id: string) => timings.get(id) ?? [],
     tournament: async (id: string) => tournaments.get(id) ?? null,
@@ -90,6 +103,7 @@ function memoryStore() {
       ]);
     },
   };
+
   return {
     tournaments,
     events,
@@ -105,11 +119,14 @@ function memoryStore() {
 
 describe("Competition synchronization", () => {
   const rosters = { upsertTeam: vi.fn(), upsertPlayer: vi.fn() };
+
   const cache = { invalidateTournament: vi.fn() },
     published = { publish: vi.fn() },
     diagnostics = { error: vi.fn(), warn: vi.fn() };
+
   const log: string[] = [];
   let store: ReturnType<typeof memoryStore>;
+
   const tx = {
     run: async <T>(work: (scope: CompetitionWriteScope) => Promise<T>) => {
       const scope = {
@@ -118,18 +135,23 @@ describe("Competition synchronization", () => {
         matches: store.matchWriter,
         rosters,
       };
+
       const result = await work(scope as never);
       log.push("commit");
+
       return result;
     },
   };
+
   const service = new CompetitionSyncService(
     tx,
     new CompetitionAfterCommit(cache, published, diagnostics),
     diagnostics,
   );
+
   const rlcsMajor = { pandascoreId: 7, name: "RLCS Major", slug: "rlcs-major" };
   const parisSerie = { pandascoreId: 100, fullName: "Paris 2026", year: 2026 };
+
   const stageCommand = (fields: Partial<UpsertTournamentCommand>): UpsertTournamentCommand => ({
     pandascoreId: 1,
     name: "Playoffs",
@@ -137,6 +159,7 @@ describe("Competition synchronization", () => {
     serie: parisSerie,
     ...fields,
   });
+
   const serieIncident = (
     change: Partial<CompetitionIncident> & Pick<CompetitionIncident, "changeType">,
   ) => ({ id: 100, modifiedAt: new Date(), kind: "serie", ...change }) as CompetitionIncident;
@@ -188,16 +211,20 @@ describe("Competition synchronization", () => {
 
   it("keeps the event slug and stage slug when PandaScore renames them", async () => {
     const created = await service.upsertTournament(stageCommand({}));
+
     const sibling = await service.upsertTournament(
       stageCommand({ pandascoreId: 2, name: "Swiss" }),
     );
+
     log.length = 0;
+
     const renamed = await service.upsertTournament(
       stageCommand({
         name: "Grand Finals",
         serie: { ...parisSerie, fullName: "Paris Major 2026" },
       }),
     );
+
     expect(renamed.slug).toBe("playoffs");
     expect(store.eventOf(created.id)).toMatchObject({
       slug: "rlcs-major-paris-2026",
@@ -241,6 +268,7 @@ describe("Competition synchronization", () => {
     const created = await service.upsertTournament(
       stageCommand({ serie: undefined, name: "Winter Cup", beginAt: new Date("2025-02-01") }),
     );
+
     expect(store.eventOf(created.id)).toMatchObject({
       pandascoreSerieId: null,
       slug: "rlcs-major-winter-cup-2025",
@@ -287,6 +315,7 @@ describe("Competition synchronization", () => {
     const target = await service.upsertTournament(
       stageCommand({ pandascoreId: 9, serie: { pandascoreId: 300, fullName: "Paris Major 2026" } }),
     );
+
     const merged = await service.upsertTournament(stageCommand({}));
     const oldEventId = merged.event.id;
     log.length = 0;
@@ -350,6 +379,7 @@ describe("Competition synchronization", () => {
       expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
         expect.objectContaining({ teamId: "team", playerIds: ["1", "3"] }),
       );
+
       if (existing)
         expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
           expect.objectContaining({ id: "participant" }),
@@ -424,6 +454,7 @@ describe("Competition synchronization", () => {
       const event = store.seedEvent({ slug: "e", name: "E" });
       store.seedStage(event, { id: "stage", pandascoreId: 1, name: "Playoffs", slug: "playoffs" });
       store.timings.set("stage", [finished("2025-03-01T10:00Z")]);
+
       const synced = await service.upsertTournament(stageCommand({}), [
         {
           pandascoreId: 10,
@@ -437,6 +468,7 @@ describe("Competition synchronization", () => {
           officialStreams: [],
         },
       ]);
+
       expect(synced.endAt).toBeNull();
     });
 
@@ -464,15 +496,18 @@ describe("Competition synchronization", () => {
         endAt: new Date("2025-03-05"),
         endAtCorrected: true,
       });
+
       const synced = await service.upsertTournament(
         stageCommand({ endAt: new Date("2025-04-01") }),
       );
+
       expect(synced.endAt).toEqual(new Date("2025-03-05"));
     });
   });
 
   describe("manual counterparts", () => {
     const beginAt = new Date("2026-03-01T12:00Z");
+
     const seedManual = (id: string, name = "RLCS Major Paris 2026 Playoffs") =>
       store.seedStage(store.seedEvent({ id: "event-" + id, slug: id, name }), {
         id,
@@ -506,6 +541,7 @@ describe("Competition synchronization", () => {
         team: Object.assign(new Team(), { id: `team-${pandascoreId}`, pandascoreId }),
       }),
     );
+
     const matchCommand = (pandascoreId: number, status: string) => ({
       pandascoreId,
       tournamentPandascoreId: 1,
@@ -521,6 +557,7 @@ describe("Competition synchronization", () => {
       previousMatches: [],
       officialStreams: [],
     });
+
     const saved: Match[] = [];
     beforeEach(() => {
       saved.length = 0;

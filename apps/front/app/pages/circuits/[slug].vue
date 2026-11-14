@@ -42,9 +42,11 @@ const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
 
 const tableRows = computed<StandingTableRow[]>(() => {
   const current = standings.value;
+
   if (!current) return [];
   const spots = current.qualificationSpots;
   const cutoffIndex = spots === null ? -1 : current.rows.findLastIndex((row) => row.rank <= spots);
+
   return current.rows.map((row, index) => ({
     row,
     cells: current.events.map(
@@ -58,6 +60,7 @@ const hasCutoff = computed(() => tableRows.value.some((entry) => entry.cutoffBel
 
 const regionalRegion = computed(() => {
   const region = standings.value?.region ?? null;
+
   return region !== null && !isWorldwideCircuitRegion(region) ? region : null;
 });
 
@@ -75,6 +78,7 @@ function statusLabel(status: CircuitEventStatus): string | null {
       return null;
     default: {
       const _exhaustive: never = status;
+
       return _exhaustive;
     }
   }

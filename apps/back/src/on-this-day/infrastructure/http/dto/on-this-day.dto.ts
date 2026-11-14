@@ -7,6 +7,7 @@ import {
 } from "@sarpbc/utils";
 
 export const OnThisDayQueryDto = z.strictObject({ date: z.iso.date().optional() });
+
 export type OnThisDayQueryDto = z.infer<typeof OnThisDayQueryDto>;
 
 export const OnThisDayFactDto = z.strictObject({
@@ -18,4 +19,5 @@ export const OnThisDayFactDto = z.strictObject({
   link: z.strictObject({ kind: z.enum(ON_THIS_DAY_LINK_KINDS), id: z.uuid() }).nullable(),
   sourceUrl: z.string().trim().max(ON_THIS_DAY_SOURCE_URL_MAX_LENGTH).nullable(),
 });
+
 export type OnThisDayFactDto = z.infer<typeof OnThisDayFactDto>;

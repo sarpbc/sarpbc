@@ -1,6 +1,7 @@
 import type { SupportedLocale } from "@sarpbc/types";
 import type { Author } from "../../common/domain/author";
 import type { PostType } from "../domain/post-type.enum";
+
 export interface TopicRecord {
   id: string;
   title: string;
@@ -9,6 +10,7 @@ export interface TopicRecord {
   updatedAt: Date | null;
   posts: PostRecord[];
 }
+
 export interface PostSummary {
   id: string;
   publicId: number;
@@ -20,6 +22,7 @@ export interface PostSummary {
   postType: PostType;
   topic: { id: string; title: string };
 }
+
 export interface PostActivity {
   id: string;
   publicId: number;
@@ -27,6 +30,7 @@ export interface PostActivity {
   messageCount: number;
   lastActivity: Date;
 }
+
 export interface TranslationRecord {
   id: string;
   post: { id: string };
@@ -36,10 +40,13 @@ export interface TranslationRecord {
   createdAt: Date;
   updatedAt: Date | null;
 }
+
 export interface PostRecord extends PostSummary {
   translations: TranslationRecord[];
 }
+
 export type NewPostRecord = Omit<PostRecord, "publicId">;
+
 export interface CreatePostInput {
   id: string;
   title: string;
@@ -47,6 +54,7 @@ export interface CreatePostInput {
   topicId: string;
   translations?: { locale: SupportedLocale; title: string; content: string }[];
 }
+
 export interface CreatedPost {
   publicId: number;
   slug: string;

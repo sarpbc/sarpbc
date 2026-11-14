@@ -6,12 +6,14 @@ import type { AwardTransaction, AwardWriter } from "./ports";
 
 function setup(source: "manual" | "startgg" = "manual") {
   const given = new Set<PlayerAwardType>();
+
   const writer = {
     context: vi.fn<AwardWriter["context"]>(async (tournamentId, participant, playerId) => {
       const onTeam =
         "teamId" in participant
           ? participant.teamId === "kc"
           : participant.participantId === "part-kc";
+
       return {
         tournament: tournamentId === "cup" ? { id: "cup", name: "Fake Cup", source } : null,
         participant: onTeam ? { id: "part-kc", name: "Karmine Corp", playerIds: ["zen"] } : null,
@@ -21,6 +23,7 @@ function setup(source: "manual" | "startgg" = "manual") {
     awardTaken: vi.fn<AwardWriter["awardTaken"]>(async (_, awardType) => given.has(awardType)),
     create: vi.fn<AwardWriter["create"]>(async (input) => {
       given.add(input.awardType);
+
       return {
         id: "award-1",
         awardType: input.awardType,
@@ -30,8 +33,10 @@ function setup(source: "manual" | "startgg" = "manual") {
     }),
     remove: vi.fn<AwardWriter["remove"]>(),
   } satisfies AwardWriter;
+
   const transaction: AwardTransaction = { run: (work) => work({ awards: writer }) };
   const service = new PlayerAwardService({ byPlayer: vi.fn(), byTournament: vi.fn() }, transaction);
+
   return { service, writer };
 }
 

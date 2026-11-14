@@ -28,8 +28,10 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
   setHeader(event, "vary", "Accept, Sec-Fetch-Dest");
 
   const location = response.headers.get("location");
+
   if (response.status >= 300 && response.status < 400 && location) {
     const target = new URL(location, getRequestURL(event).origin);
+
     return sendRedirect(
       event,
       `${markdownPathFromHtmlPath(target.pathname)}${target.search}`,
@@ -41,13 +43,16 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
   setHeader(event, "x-robots-tag", "noindex");
 
   const contentType = response.headers.get("content-type") ?? "";
+
   if (!contentType.includes("text/html")) {
     setResponseStatus(event, response.status || 404);
+
     return "Page not found.\n";
   }
 
   const html = await response.text();
   setResponseStatus(event, response.status);
+
   return htmlToMarkdown(html, {
     origin: getRequestURL(event).origin,
     plugins: [
@@ -85,9 +90,11 @@ export default defineEventHandler(async (event) => {
 
   if (isMarkdownPagePath(pathname)) {
     const htmlPath = htmlPathFromMarkdownPath(pathname);
+
     if (!isMarkdownEligibleHtmlPath(htmlPath)) {
       return;
     }
+
     return sendMarkdown(event, htmlPath, url.search);
   }
 
@@ -97,6 +104,7 @@ export default defineEventHandler(async (event) => {
 
   if (shouldServeMarkdown(getHeader(event, "accept"), getHeader(event, "sec-fetch-dest"))) {
     setHeader(event, "cache-control", "private, no-store");
+
     return sendMarkdown(event, pathname, url.search);
   }
 

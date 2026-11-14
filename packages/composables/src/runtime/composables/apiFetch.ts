@@ -23,6 +23,7 @@ function privateApiConfig(): PrivateApiConfig {
 
 function apiBase(): string {
   const config = privateApiConfig();
+
   return resolveApiBase(config.public.apiBase, config.apiBaseServer, import.meta.server === true);
 }
 
@@ -34,8 +35,10 @@ export function createApiClient() {
       if (!import.meta.server) {
         return;
       }
+
       const headers = new Headers(options.headers);
       let event: ServerRequest | undefined;
+
       try {
         // Nitro routes call apiFetch with no Nuxt context: their type program has no
         // useRequestEvent, and at runtime the call throws.
@@ -44,27 +47,35 @@ export function createApiClient() {
       } catch {
         event = undefined;
       }
+
       const cookie = event?.node.req.headers.cookie;
+
       if (cookie && !Array.isArray(cookie)) {
         headers.set("cookie", cookie);
       }
+
       const config = privateApiConfig();
       const token = config.apiInternalToken?.trim();
       const serverBase = config.apiBaseServer?.trim();
+
       if (token && serverBase) {
         headers.set(INTERNAL_API_HEADER, token);
+
         if (event) {
           const { visitorAddressFromProxy } = await import("@sarpbc/utils/client-address");
+
           const visitor = visitorAddressFromProxy({
             socketAddress: event.node.req.socket?.remoteAddress,
             forwardedFor: event.node.req.headers["x-forwarded-for"],
             connectingIp: event.node.req.headers["cf-connecting-ip"],
           });
+
           if (visitor) {
             headers.set(INTERNAL_CLIENT_HEADER, visitor);
           }
         }
       }
+
       options.headers = headers;
     },
   });

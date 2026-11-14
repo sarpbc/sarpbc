@@ -23,6 +23,7 @@ export type ParsedStreamUrl =
 
 function channelOf(url: URL, platform: StreamPlatform): string | null {
   const first = url.pathname.split("/").find(Boolean) ?? "";
+
   switch (platform) {
     case "twitch":
     case "kick":
@@ -33,6 +34,7 @@ function channelOf(url: URL, platform: StreamPlatform): string | null {
       return url.hostname.replace(/^www\./, "");
     default: {
       const exhaustive: never = platform;
+
       return exhaustive;
     }
   }
@@ -40,14 +42,18 @@ function channelOf(url: URL, platform: StreamPlatform): string | null {
 
 export function parseStreamUrl(input: string): ParsedStreamUrl {
   let url: URL;
+
   try {
     url = new URL(input.trim());
   } catch {
     return { ok: false, error: "invalid-url" };
   }
+
   if (url.protocol !== "https:") return { ok: false, error: "not-https" };
+
   if (url.port || url.username || url.password) return { ok: false, error: "invalid-url" };
   const platform = STREAM_HOSTS.get(url.hostname) ?? "other";
+
   return { ok: true, url: url.href, platform, channel: channelOf(url, platform) };
 }
 
@@ -57,5 +63,6 @@ export function orderStreams<T extends { language: string; kind: StreamKind }>(
 ): T[] {
   const rank = (stream: T) =>
     (stream.language === language ? 0 : 2) + (stream.kind === "official" ? 0 : 1);
+
   return [...streams].sort((a, b) => rank(a) - rank(b));
 }

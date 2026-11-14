@@ -46,8 +46,10 @@ const {
     if (!user.value) {
       return new Map<string, PickemPickState>();
     }
+
     try {
       const newPicks = await getUserPickemsForTournament(tournamentId.value);
+
       return new Map<string, PickemPickState>(
         newPicks.map((pick) => [
           pick.match,
@@ -79,6 +81,7 @@ const { data: personalRank, refresh: refreshPersonalRank } = useLazyAsyncData(
   () => `pickem-me-${tournamentId.value}-${user.value?.id ?? "guest"}`,
   async () => {
     if (!user.value) return null;
+
     try {
       return await getPickemPersonalRanking(tournamentId.value);
     } catch {
@@ -132,10 +135,12 @@ const matchesByDay = computed(() => {
   );
 
   const grouped = new Map<string, PickemDayGroup>();
+
   for (const match of validMatches) {
     const matchDate = new Date(match.beginAt!);
     const dayKey = matchDate.toDateString();
     const existing = grouped.get(dayKey);
+
     if (existing) {
       existing.matches.push(match);
     } else {
@@ -158,12 +163,14 @@ const activeTab = computed<PickemDetailTab>(() =>
 );
 
 const topLeaderboard = computed(() => (leaderboard.value ?? []).slice(0, LEADERBOARD_TOP));
+
 const hasScoredPicks = computed(() =>
   [...(picks.value?.values() ?? [])].some((pick) => pick.scored),
 );
 
 function tabTo(tab: PickemDetailTab) {
   const path = localePath(`/game/pickems/${tournamentId.value}`);
+
   switch (tab) {
     case "pickem":
       return { path };
@@ -171,6 +178,7 @@ function tabTo(tab: PickemDetailTab) {
       return { path, query: { tab: "leaderboard" } };
     default: {
       const _exhaustive: never = tab;
+
       return _exhaustive;
     }
   }
@@ -187,24 +195,31 @@ function loginRedirectPath() {
 
 function matchScoreLabel(match: TournamentDetailMatch): string | null {
   const status = resolveMatchDiscoveryStatus(match);
+
   if (!shouldShowMatchScores(status)) return null;
 
   const scoreA = displayMatchScore(
     getMatchParticipantScore(match.results, match.participants?.[0]?.id),
     status,
   );
+
   const scoreB = displayMatchScore(
     getMatchParticipantScore(match.results, match.participants?.[1]?.id),
     status,
   );
+
   if (scoreA == null && scoreB == null) return null;
+
   return `${scoreA ?? "–"}–${scoreB ?? "–"}`;
 }
 
 function matchCenterPrimary(match: TournamentDetailMatch): string | null {
   const score = matchScoreLabel(match);
+
   if (score) return score;
+
   if (!match.beginAt) return null;
+
   return pickemTimeDf.value.format(new Date(match.beginAt));
 }
 
@@ -221,11 +236,15 @@ function teamButtonColor(
 ): "neutral" | "success" | "error" | "primary" {
   if (!participantId || !picks.value) return "neutral";
   const pick = picks.value.get(match.id);
+
   if (!pick || pick.pickedParticipant !== participantId) return "neutral";
 
   const outcome = getPickOutcome(match, pick);
+
   if (outcome === "correct") return "success";
+
   if (outcome === "incorrect") return "error";
+
   return "primary";
 }
 
@@ -234,10 +253,12 @@ async function pickTeam(matchId: string, participantId: string) {
 
   if (!user.value) {
     await navigateTo(loginRedirectPath());
+
     return;
   }
 
   submittingMatchId.value = matchId;
+
   try {
     await updatePickemForMatch(matchId, participantId);
     posthog?.capture("pickem_pick_submitted", {

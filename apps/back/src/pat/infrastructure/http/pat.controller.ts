@@ -23,6 +23,7 @@ export class PatController {
   @Get("tokens")
   async listTokens(@CurrentUserId() userId: string): Promise<{ tokens: PatToken[] }> {
     const tokens = await this.patService.listTokens(userId);
+
     return {
       tokens: tokens.map((token) => ({
         id: token.id,
@@ -41,6 +42,7 @@ export class PatController {
     @Body({ schema: CreateTokenDto }) dto: CreateTokenDto,
   ): Promise<CreatedPatToken> {
     const created = await this.patService.createToken(userId, dto.name);
+
     return {
       id: created.id,
       name: created.name,

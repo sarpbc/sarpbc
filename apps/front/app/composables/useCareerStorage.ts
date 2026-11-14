@@ -17,6 +17,7 @@ export function parseCareerState(raw: string | null): CareerState | null {
 
 export function loadActiveCareer(): CareerState | null {
   if (!import.meta.client) return null;
+
   return parseCareerState(localStorage.getItem(CAREER_ACTIVE_STORAGE_KEY));
 }
 
@@ -32,6 +33,7 @@ export function clearActiveCareer(): void {
 
 export function loadCareerResults(): Map<string, CareerResult> {
   if (!import.meta.client) return new Map();
+
   return parseCareerResultsJson(localStorage.getItem(CAREER_RESULTS_STORAGE_KEY));
 }
 

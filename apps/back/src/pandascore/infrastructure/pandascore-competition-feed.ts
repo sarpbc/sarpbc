@@ -10,6 +10,7 @@ import { PandascoreTeamMapper } from "./mappers/pandascore-team.mapper";
 import { PandascorePlayerMapper } from "./mappers/pandascore-player.mapper";
 import { PandascoreLeagueMapper } from "./mappers/pandascore-league.mapper";
 import { PandascoreSerieMapper, parseProviderDeletion } from "./mappers/pandascore-serie.mapper";
+
 @Injectable()
 export class PandascoreCompetitionFeed implements CompetitionFeed {
   constructor(private readonly apiClient: PandascoreApiClient) {}
@@ -20,6 +21,7 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
   }
   async getTournamentById(id: number) {
     const value = await this.apiClient.getTournamentById(id);
+
     return value === null
       ? null
       : PandascoreTournamentMapper.toUpsertCommand(tournamentSchema.parse(value));
@@ -36,9 +38,12 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
   }
   async getTournamentStandings(id: number) {
     const standings = await this.apiClient.getTournamentStandings(id);
+
     if (standings === null) return null;
+
     return standings.flatMap((value) => {
       const { rank, team } = standingSchema.parse(value);
+
       return team ? [{ teamPandascoreId: team.id, rank }] : [];
     });
   }
@@ -46,6 +51,7 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
     return (await this.apiClient.listIncidents(params)).map((v) => {
       const i = incidentSchema.parse(v),
         base = { id: i.id, modifiedAt: new Date(i.modified_at) };
+
       if (i.change_type === "deletion")
         return {
           ...base,
@@ -54,6 +60,7 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           deletion: parseProviderDeletion(i.object),
         };
       const changeType = i.change_type;
+
       switch (i.type) {
         case "tournament":
           return {
@@ -99,6 +106,7 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
           };
         default: {
           const neverIncident: never = i;
+
           return neverIncident;
         }
       }

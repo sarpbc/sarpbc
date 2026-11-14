@@ -7,6 +7,7 @@ import type { CircuitStore, StoredStageResult } from "./ports";
 
 const SOURCE = "https://example.org/official-rules";
 const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
+
 const team = (id: string) => ({
   id,
   name: id.toUpperCase(),
@@ -17,6 +18,7 @@ const team = (id: string) => ({
 
 function setup() {
   const circuits = new Map<string, CircuitSummary>();
+
   const eventTeams = new Map<string, CircuitEventTeam[]>(
     ["ps-stage", "startgg-stage", "manual-stage"].map((id) => [
       id,
@@ -26,8 +28,10 @@ function setup() {
       ],
     ]),
   );
+
   const saved = new Map<string, CircuitStageSettings>();
   const results: StoredStageResult[] = [];
+
   const store: CircuitStore = {
     list: vi.fn(async () => [...circuits.values()]),
     find: vi.fn(
@@ -54,7 +58,9 @@ function setup() {
       saved.delete(`${circuitId}:${tournamentId}`),
     ),
   };
+
   const service = new CircuitService(store, () => new Date("2026-06-01T00:00:00Z"));
+
   return { service, saved, results };
 }
 
@@ -95,6 +101,7 @@ describe("CircuitService", () => {
       description: "",
       sourceUrl: ` ${SOURCE} `,
     });
+
     expect(await service.detail("season-2026")).toMatchObject({
       id: rlcs.id,
       season: 2026,
@@ -116,6 +123,7 @@ describe("CircuitService", () => {
     await expect(
       service.create({ name: "Other", slug: "season-2026", season: 2027, ...sourced }),
     ).rejects.toThrow(ConflictError);
+
     const europe = await service.create({
       name: "RLCS 2026",
       slug: "season-2026-eu",
@@ -123,6 +131,7 @@ describe("CircuitService", () => {
       region: "EU",
       ...sourced,
     });
+
     await service.create({ name: "RLCS 2026", slug: "season-2027", season: 2027, ...sourced });
     await expect(
       service.create({
@@ -151,6 +160,7 @@ describe("CircuitService", () => {
     const valid = { name: "x", season: 2026, sourceUrl: SOURCE };
     await expect(service.create({ ...valid, season: 1999 })).rejects.toThrow(InvalidInputError);
     await expect(service.create({ ...valid, season: 2026.5 })).rejects.toThrow(InvalidInputError);
+
     for (const sourceUrl of [
       "",
       " ",
@@ -210,6 +220,7 @@ describe("CircuitService", () => {
 
   it("refuses teams outside the event, repeated teams and invalid final placements", async () => {
     const stage = { scale, sourceUrl: SOURCE };
+
     for (const refused of [
       { regionTeamIds: ["bds"] },
       { regionTeamIds: ["kc", "kc"] },
@@ -311,7 +322,9 @@ describe("CircuitService", () => {
         { from: 2, to: 2, points: 20 },
       ],
     };
+
     results.push(result(major));
+
     const europe = await service.create({
       name: "RLCS 2026 EU",
       season: 2026,

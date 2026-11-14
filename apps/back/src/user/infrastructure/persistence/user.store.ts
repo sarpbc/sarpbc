@@ -17,9 +17,11 @@ export function toAccount(record: User): Account {
     record.googleId,
     record.avatarUrl,
   );
+
   account.id = record.id;
   account.role = record.role;
   account.createdAt = record.createdAt;
+
   return account;
 }
 
@@ -28,6 +30,7 @@ export class MikroUserStore implements UserQueries, UserWriter {
 
   private async find(where: FilterQuery<User>): Promise<Account | null> {
     const record = await this.em.findOne(User, where);
+
     return record ? toAccount(record) : null;
   }
 
@@ -43,6 +46,7 @@ export class MikroUserStore implements UserQueries, UserWriter {
         : {},
       { orderBy: { createdAt: "desc", id: "asc" }, limit, offset },
     );
+
     return { users: records.map(toAccount), total };
   }
 
@@ -85,6 +89,7 @@ export class MikroUserStore implements UserQueries, UserWriter {
           account.googleId,
           account.avatarUrl,
         );
+
     record.email = account.email;
     record.userName = account.userName;
     record.password = account.password;
@@ -103,6 +108,7 @@ export class MikroUserTransaction implements UserTransaction {
     return this.em.transactional(async (tx) => {
       const result = await work({ users: new MikroUserStore(tx) });
       await tx.flush();
+
       return result;
     });
   }

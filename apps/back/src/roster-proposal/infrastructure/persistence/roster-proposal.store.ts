@@ -37,6 +37,7 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         { id },
         inTransaction ? { lockMode: LockMode.PESSIMISTIC_WRITE } : {},
       );
+
       return row ? toProposal(row) : null;
     },
     list: async (status, limit) =>
@@ -47,11 +48,13 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
       const row = model.id
         ? await em.findOneOrFail(Row.RosterProposal, { id: model.id })
         : new Row.RosterProposal();
+
       if (!model.id) {
         model.id = v4();
         row.id = model.id;
         row.createdAt = model.createdAt;
       }
+
       Object.assign(row, {
         change: model.change,
         sourceUrl: model.sourceUrl,
@@ -62,6 +65,7 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
         entityId: model.entityId,
       });
       em.persist(row);
+
       if (!inTransaction) await em.flush();
     },
     names: async (ids) => {
@@ -96,6 +100,7 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
             ? em.find(Season, { id: { $in: ids.seasons } }, { fields: ["id", "name"] })
             : [],
         ]);
+
       return Object.fromEntries([
         ...players.map((player) => [player.id, player.name]),
         ...teams.map((team) => [team.id, team.name]),
@@ -130,6 +135,7 @@ export class MikroRosterProposalTransaction implements RosterProposalTransaction
     return this.em.transactional(async (tx) => {
       const result = await work(rosterProposalStore(tx, true));
       await tx.flush();
+
       return result;
     });
   }

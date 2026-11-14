@@ -18,6 +18,7 @@ export class ForumController {
   @Get()
   async getOverview() {
     const topics = await this.topicService.find();
+
     return {
       totalTopics: topics.length,
       topics: topics.map((topic) => ({
@@ -33,6 +34,7 @@ export class ForumController {
   @Get("preview")
   async getPreview() {
     const recentPosts = await this.postService.findRecentActivity(20);
+
     return {
       recentPosts: recentPosts.map(postActivityResponse),
     };

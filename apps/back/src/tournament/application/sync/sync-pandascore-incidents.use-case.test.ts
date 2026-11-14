@@ -1,13 +1,16 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 import type { CompetitionIncident } from "../feed";
+
 describe("PandaScore incidents", () => {
   const feed = { listIncidents: vi.fn(), getTournamentById: vi.fn() },
     cursor = { getLastSyncAt: vi.fn(), setLastSyncAt: vi.fn() },
     reads = { findByPandascoreId: vi.fn() },
     sync = { applyIncident: vi.fn() },
     diagnostics = { error: vi.fn(), warn: vi.fn() };
+
   const now = new Date("2026-10-15T12:00:00Z");
+
   const service = new SyncPandascoreIncidentsUseCase(
     feed as never,
     cursor,
@@ -16,11 +19,13 @@ describe("PandaScore incidents", () => {
     diagnostics,
     () => now,
   );
+
   const base = {
     id: 1,
     changeType: "update" as const,
     modifiedAt: new Date("2026-10-15T10:00:00Z"),
   };
+
   beforeEach(() => {
     vi.clearAllMocks();
     cursor.getLastSyncAt.mockResolvedValue(new Date("2026-10-14"));
@@ -51,11 +56,13 @@ describe("PandaScore incidents", () => {
         kind: "player",
         command: { player: { pandascoreId: 1, name: "Player", slug: "player" }, currentTeam },
       };
+
       feed.listIncidents.mockResolvedValue([incident]);
       await service.execute();
       expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
     },
   );
+
   const team = (id: number, modifiedAt: string): CompetitionIncident => ({
     ...base,
     id,
@@ -63,6 +70,7 @@ describe("PandaScore incidents", () => {
     kind: "team",
     command: { name: "T" + id, slug: "t" + id },
   });
+
   it("keeps processing after a failure but does not move the cursor past it", async () => {
     const incidents = [team(1, "2026-10-15T10:00:00Z"), team(2, "2026-10-15T11:00:00Z")];
     feed.listIncidents.mockResolvedValue(incidents);
@@ -82,6 +90,7 @@ describe("PandaScore incidents", () => {
       team(2, "2026-10-15T10:00:00Z"),
       team(3, "2026-10-15T11:00:00Z"),
     ];
+
     feed.listIncidents.mockResolvedValue(incidents);
     sync.applyIncident
       .mockResolvedValueOnce(undefined)
@@ -103,6 +112,7 @@ describe("PandaScore incidents", () => {
       changeType: "deletion",
       deletion: { kind: "merged", intoId: 9 },
     };
+
     feed.listIncidents.mockResolvedValue([incident]);
     await service.execute();
     expect(feed.getTournamentById).not.toHaveBeenCalled();
@@ -115,6 +125,7 @@ describe("PandaScore incidents", () => {
       kind: "match",
       command: { pandascoreId: 8, tournamentPandascoreId: 42 },
     };
+
     feed.listIncidents.mockResolvedValue([incident]);
     reads.findByPandascoreId.mockResolvedValue(null);
     const tournament = { pandascoreId: 42, name: "Cup" };

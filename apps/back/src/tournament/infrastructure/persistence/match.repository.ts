@@ -55,11 +55,13 @@ const FINISHED_POPULATE = [
 export class MatchRepository extends EntityRepository<Match> {
   list(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]> {
     const { where, orderBy, limit, offset } = this.listQuery(kind, options);
+
     return this.find(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
   }
 
   listAndCount(kind: MatchListKind, options: MatchListQueryOptions): Promise<[Match[], number]> {
     const { where, orderBy, limit, offset } = this.listQuery(kind, options);
+
     return this.findAndCount(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
   }
 
@@ -69,6 +71,7 @@ export class MatchRepository extends EntityRepository<Match> {
 
   async findDetail(ref: EntityRef): Promise<Match | null> {
     const where = ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value };
+
     return this.findOne(where, { populate: [...DETAIL_POPULATE] });
   }
 
@@ -173,6 +176,7 @@ export class MatchRepository extends EntityRepository<Match> {
         };
       default: {
         const unreachable: never = kind;
+
         return unreachable;
       }
     }
@@ -190,9 +194,11 @@ export class MatchRepository extends EntityRepository<Match> {
     const now = new Date();
     const startOfDay = new Date(now);
     startOfDay.setHours(0, 0, 0, 0);
+
     const floors = [todayOnly ? startOfDay : null, liveSince ?? null].filter(
       (date) => date !== null,
     );
+
     const since =
       floors.length > 0 ? new Date(Math.max(...floors.map((date) => date.getTime()))) : null;
 
@@ -204,16 +210,20 @@ export class MatchRepository extends EntityRepository<Match> {
   private mergeScopeFilters(base: MatchListFilter, scope: MatchListScopeFilters): MatchListFilter {
     const query: MatchListFilter = { ...base };
     const tournamentFilter = this.buildTournamentFilter(scope);
+
     if (tournamentFilter) query.tournament = tournamentFilter;
+
     if (scope.teamId || scope.playerIds) {
       query.participants = {
         ...(scope.teamId && { team: { id: scope.teamId } }),
         ...(scope.playerIds && { players: { id: { $in: scope.playerIds } } }),
       };
     }
+
     if (scope.redistributableOnly) {
       query.source = { $ne: "startgg" };
     }
+
     return query;
   }
 
@@ -221,17 +231,21 @@ export class MatchRepository extends EntityRepository<Match> {
     scope: MatchListScopeFilters,
   ): MatchTournamentScopeFilter | undefined {
     const { tournamentId, leagueId, redistributableOnly } = scope;
+
     if (!tournamentId && !leagueId && !redistributableOnly) {
       return undefined;
     }
 
     const filter: MatchTournamentScopeFilter = {};
+
     if (tournamentId) {
       filter.id = tournamentId;
     }
+
     if (leagueId) {
       filter.league = { id: leagueId };
     }
+
     if (redistributableOnly) {
       filter.source = { $ne: "startgg" };
     }

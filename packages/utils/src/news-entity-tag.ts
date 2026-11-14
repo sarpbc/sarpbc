@@ -20,6 +20,7 @@ const NEWS_ENTITY_TAG_GLOBAL_PATTERN = new RegExp(ENTITY_TAG_SOURCE, "g");
 
 function parseAttrs(rawAttrs: string): NewsEntityTagAttrs {
   const attrs: NewsEntityTagAttrs = {};
+
   for (const { name, value } of parseNewsTagAttrs(rawAttrs)) {
     if (name === "slug") {
       attrs.slug = value;
@@ -27,11 +28,13 @@ function parseAttrs(rawAttrs: string): NewsEntityTagAttrs {
       attrs.label = value;
     }
   }
+
   return attrs;
 }
 
 export function parseNewsEntityTag(raw: string): NewsEntityTag | null {
   const match = raw.match(NEWS_ENTITY_TAG_PATTERN);
+
   if (!match) {
     return null;
   }
@@ -60,6 +63,7 @@ export function serializeNewsEntityTag(input: {
 }): string {
   const slug = escapeNewsTagAttrValue(input.slug.trim());
   const label = escapeNewsTagAttrValue(input.label.trim());
+
   return `:${input.kind}{slug="${slug}" label="${label}"}`;
 }
 

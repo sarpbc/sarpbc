@@ -8,6 +8,7 @@ function createTeam(id: string, name: string): Team {
   team.id = id;
   team.name = name;
   team.slug = name.toLowerCase().replace(/\s+/g, "-");
+
   return team;
 }
 
@@ -16,6 +17,7 @@ function createParticipant(id: string, team: Team): TournamentParticipant {
   participant.id = id;
   participant.team = team;
   participant.players = [];
+
   return participant;
 }
 
@@ -140,6 +142,7 @@ describe("match-head-to-head", () => {
       scoreA: 3,
       scoreB: 3,
     });
+
     match.winner = null;
 
     const headToHead = buildHeadToHead([match], teamVitality.id, teamKarmine.id);
@@ -158,6 +161,7 @@ describe("match-head-to-head", () => {
       scoreA: 4,
       scoreB: 1,
     });
+
     match.winner = null;
 
     expect(getWinnerTeamId(match, teamVitality.id, teamKarmine.id)).toBe(teamVitality.id);

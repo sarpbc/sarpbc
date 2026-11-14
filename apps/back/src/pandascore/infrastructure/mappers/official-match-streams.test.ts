@@ -41,6 +41,7 @@ describe("mapOfficialMatchStreams", () => {
         language: "en",
       }),
     );
+
     streams.unshift(stream({ raw_url: "https://www.twitch.tv/channel-0", language: "fr" }));
 
     const mapped = mapOfficialMatchStreams(streams);

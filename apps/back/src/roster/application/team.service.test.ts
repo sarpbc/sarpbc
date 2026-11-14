@@ -48,19 +48,24 @@ describe("Roster workflows", () => {
       },
     };
     transactions = 0;
+
     const transaction: RosterTransaction = {
       run: async (work) => {
         transactions += 1;
+
         return work(stores);
       },
     };
+
     competition = { participations: 0, matches: 0, prizes: 0 };
+
     const queries: TeamQueries = {
       search: vi.fn(),
       searchAndCount: vi.fn(),
       findById: vi.fn(),
       findBySlug: vi.fn(),
     };
+
     service = new TeamService(queries, transaction, {
       teamReferences: async () => competition,
     });

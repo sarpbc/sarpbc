@@ -73,6 +73,7 @@ const { teamName, logo, size = "md", priority = false } = defineProps<Props>();
 const variants = computed(() => {
   const light = resolveThemedLogoUrl(logo, "light");
   const dark = resolveThemedLogoUrl(logo, "dark");
+
   return light === dark
     ? [{ src: light, imgClass: "", fallbackClass: "flex" }]
     : [
@@ -80,6 +81,7 @@ const variants = computed(() => {
         { src: dark, imgClass: "hidden dark:block", fallbackClass: "hidden dark:flex" },
       ];
 });
+
 const initial = computed(() =>
   teamName
     ? shortTeamName(teamName)
@@ -87,6 +89,7 @@ const initial = computed(() =>
         ?.toUpperCase()
     : undefined,
 );
+
 const spec = computed(() => SIZES[size]);
 const failedSrcs = ref(new Set<string>());
 </script>

@@ -41,8 +41,10 @@ function onNavLeave() {
 watch(userMenuOpen, (open) => {
   if (open) {
     openNav();
+
     return;
   }
+
   scheduleCloseNav();
 });
 
@@ -52,8 +54,10 @@ defineShortcuts({
     handler: () => {
       if (userMenuOpen.value) {
         userMenuOpen.value = false;
+
         return;
       }
+
       if (navOpen.value) {
         navOpen.value = false;
       }

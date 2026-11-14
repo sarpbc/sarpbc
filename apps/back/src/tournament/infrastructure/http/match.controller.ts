@@ -21,17 +21,21 @@ import { InvalidInputError } from "../../../common/domain/errors";
 
 function parseMatchBlockKeys(raw?: string | string[]): Map<string, MatchBlockSelector> {
   const keys = [...new Set(raw === undefined ? [] : Array.isArray(raw) ? raw : [raw])];
+
   if (keys.length === 0 || keys.length > NEWS_MATCH_BLOCKS_PER_REQUEST) {
     throw new InvalidInputError(
       `Request between 1 and ${NEWS_MATCH_BLOCKS_PER_REQUEST} match blocks.`,
     );
   }
+
   return new Map(
     keys.map((key) => {
       const block = parseNewsMatchBlockKey(key);
+
       if (!block) {
         throw new InvalidInputError(`Invalid match block "${key}".`);
       }
+
       return [key, block];
     }),
   );
@@ -48,10 +52,13 @@ function parsePagingValue(name: string, value?: string): number | undefined {
   if (!value) {
     return undefined;
   }
+
   const parsed = Number(value);
+
   if (!Number.isSafeInteger(parsed) || parsed < 0) {
     throw new InvalidInputError(`Invalid ${name} "${value}".`);
   }
+
   return parsed;
 }
 
@@ -141,6 +148,7 @@ export class MatchController {
     const blocks = parseMatchBlockKeys(block);
     const now = new Date();
     const found = await this.matchService.findBlocks([...blocks.values()], now);
+
     const commentCounts = await this.replyService.countByTargetIds("match", [
       ...new Set(found.flat().map((match) => match.id)),
     ]);
@@ -160,10 +168,12 @@ export class MatchController {
   @Get(":ref")
   async findOne(@Param("ref", EntityRefPipe) ref: EntityRef) {
     const detail = await this.matchService.findDetail(ref);
+
     const [games, lineups] = await Promise.all([
       this.gameStats.byMatch(detail.match.id),
       this.lineupService.forMatch(detail.match),
     ]);
+
     return {
       ...detail,
       match: { ...withPublicSlug(detail.match), watchStreams: detail.match.watchStreams() },

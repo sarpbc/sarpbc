@@ -12,9 +12,11 @@ describe("CircuitRosterReferences.moveTeam", () => {
     const find = vi.fn().mockResolvedValue(entries);
     const nativeDelete = vi.fn();
     const nativeUpdate = vi.fn();
+
     const references = new CircuitRosterReferences(
       Object.assign(Object.create(EntityManager.prototype), { find, nativeDelete, nativeUpdate }),
     );
+
     return { references, nativeDelete, nativeUpdate };
   }
 

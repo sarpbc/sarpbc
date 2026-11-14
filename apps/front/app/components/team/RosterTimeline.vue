@@ -31,15 +31,19 @@ const hasHiddenEras = computed(() => eras.length > VISIBLE_ERAS);
 
 const formatDate = (value: string | null) => {
   if (!value) return null;
+
   return mediumDate.value.format(new Date(value));
 };
 
 const formatEraRange = (era: TeamRosterEra) => {
   const start = formatDate(era.start);
+
   if (era.isCurrent) {
     return `${start} – ${t("page.team.slug.rosterHistory.present")}`;
   }
+
   const end = formatDate(era.end);
+
   return end ? `${start} – ${end}` : start;
 };
 

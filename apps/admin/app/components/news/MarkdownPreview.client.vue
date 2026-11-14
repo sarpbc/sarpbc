@@ -14,8 +14,10 @@ const proseClass =
 
 async function refreshPreview(markdown: string) {
   const trimmed = markdown.trim();
+
   if (!trimmed) {
     parsed.value = null;
+
     return;
   }
 

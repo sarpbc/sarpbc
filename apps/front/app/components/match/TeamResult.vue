@@ -15,12 +15,15 @@ const href = computed(() => {
   if (participant?.team) {
     return participant.team.slug ? teamPath(participant.team.slug) : null;
   }
+
   const [player, ...others] = participant?.players ?? [];
+
   return player && others.length === 0 ? playerPath(player.slug) : null;
 });
 
 const nameClass = computed(() => {
   if (winner === undefined) return "font-medium text-highlighted";
+
   return winner ? "font-medium text-highlighted" : "text-muted";
 });
 </script>

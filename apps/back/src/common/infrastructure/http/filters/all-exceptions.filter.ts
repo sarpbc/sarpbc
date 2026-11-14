@@ -27,6 +27,7 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
 
     if (exception instanceof ApplicationError) {
       const { status, error } = failureResponses[exception.kind];
+
       if (status >= 500) {
         log.error({
           component: AllExceptionsFilter.name,
@@ -35,15 +36,19 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
           error: exception,
         });
       }
+
       const body = exception.detail.code
         ? exception.detail
         : { statusCode: status, error, ...exception.detail };
+
       void response.status(status).send(body);
+
       return;
     }
 
     if (exception instanceof HttpException) {
       const status = exception.getStatus();
+
       if (status >= 500) {
         log.error({
           component: AllExceptionsFilter.name,
@@ -55,12 +60,14 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
       }
 
       const exceptionResponse = exception.getResponse();
+
       const body =
         exceptionResponse instanceof Object
           ? exceptionResponse
           : { statusCode: status, message: exceptionResponse };
 
       void response.status(status).send(body);
+
       return;
     }
 

@@ -11,6 +11,7 @@ const { t } = useI18n();
 const open = ref(false);
 const dialogId = computed(() => `tournament-roster-${entry.id}`);
 const titleId = computed(() => `tournament-roster-title-${entry.id}`);
+
 const soloPlayer = computed(() =>
   !entry.team && entry.players.length === 1 ? entry.players[0] : undefined,
 );

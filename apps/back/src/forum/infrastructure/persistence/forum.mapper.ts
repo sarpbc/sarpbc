@@ -1,5 +1,6 @@
 import type { Post, Topic } from "./forum.entities";
 import type { PostRecord, TopicRecord } from "../../application/models";
+
 export function postSnapshot(row: Post): PostRecord {
   return {
     id: row.id,
@@ -24,6 +25,7 @@ export function postSnapshot(row: Post): PostRecord {
       : [],
   };
 }
+
 export function topicSnapshot(row: Topic): TopicRecord {
   return {
     id: row.id,

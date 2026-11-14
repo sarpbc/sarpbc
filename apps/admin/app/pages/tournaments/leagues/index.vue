@@ -64,6 +64,7 @@ function openForm(league: League | null) {
 function buildPayload(): LeagueInput {
   const imageUrl = form.value.imageUrl.trim() || null;
   const league = editing.value;
+
   if (!league) {
     return {
       name: form.value.name.trim(),
@@ -72,7 +73,9 @@ function buildPayload(): LeagueInput {
       imageUrl: imageUrl ?? undefined,
     };
   }
+
   if (isPandascore(league)) return { imageUrl };
+
   return {
     name: form.value.name.trim(),
     slug: form.value.slug.trim() || null,
@@ -83,11 +86,15 @@ function buildPayload(): LeagueInput {
 
 async function handleSubmit() {
   if (isSaving.value || isUploading.value) return;
+
   if (!isSynced.value && !form.value.name.trim()) {
     toast.add({ title: t("page.tournaments.leagues.form.nameRequired"), color: "error" });
+
     return;
   }
+
   isSaving.value = true;
+
   try {
     if (editing.value) await updateLeague(editing.value.id, buildPayload());
     else await createLeague(buildPayload());

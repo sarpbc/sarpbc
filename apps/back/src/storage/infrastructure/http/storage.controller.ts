@@ -52,6 +52,7 @@ export class StorageController {
     @Body({ schema: R2UploadDto }) dto: R2UploadDto,
   ): Promise<R2UploadResponse> {
     const file = files?.file?.[0];
+
     if (!file) {
       throw new BadRequestException("Choose an image file to upload.");
     }
@@ -67,6 +68,7 @@ export class StorageController {
         imageSize: file.size,
       },
     });
+
     return this.r2Service.uploadImage(file.buffer, file.mimetype, dto.target);
   }
 }

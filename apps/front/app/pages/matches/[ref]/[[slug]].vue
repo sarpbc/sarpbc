@@ -17,6 +17,7 @@ const { setPageSeo, getCanonicalUrl } = useSarpbcSeo();
 
 const matchRef = computed(() => route.params.ref as string);
 const { trackMatchDetailViewed } = useMatchDiscoveryAnalytics();
+
 const discoverySource = computed(() =>
   parseMatchDiscoverySource(route.query[MATCH_DISCOVERY_FROM_QUERY]),
 );
@@ -56,13 +57,16 @@ const match = computed(() => matchDetail.value?.match ?? null);
 
 const { publicId, slug } = matchDetail.value.match;
 const canonicalPath = localePath(matchPath(publicId, slug));
+
 if (route.path !== canonicalPath) {
   await redirectToCanonical(route, canonicalPath);
 }
+
 const teamForms = computed(() => matchDetail.value?.teamForms ?? {});
 const headToHead = computed(() => matchDetail.value?.headToHead ?? null);
 const games = computed(() => matchDetail.value?.games ?? []);
 const lineups = computed(() => matchDetail.value?.lineups ?? []);
+
 const startgg = computed(
   () => match.value?.source === "startgg" || match.value?.tournament.source === "startgg",
 );
@@ -106,15 +110,18 @@ const matchStatus = computed(() => {
   if (!match.value) {
     return "upcoming" as const;
   }
+
   return resolveMatchDiscoveryStatus(match.value);
 });
 
 const { isConcealed } = useSpoilerFree();
+
 const historyConcealed = computed(
   () =>
     match.value !== null &&
     isConcealed({ matchId: match.value.id, tournamentId: match.value.tournament?.id }),
 );
+
 const concealed = computed(() => historyConcealed.value && matchStatus.value !== "upcoming");
 
 const heroScoreA = computed(() =>
@@ -122,6 +129,7 @@ const heroScoreA = computed(() =>
     ? displayMatchScore(getParticipantScore(match.value, teamA.value.id), matchStatus.value)
     : "–",
 );
+
 const heroScoreB = computed(() =>
   match.value && teamB.value
     ? displayMatchScore(getParticipantScore(match.value, teamB.value.id), matchStatus.value)
@@ -135,6 +143,7 @@ function onVodsSaved(vods: MatchVod[]) {
 
 function heroScoreClass(participantId: string | undefined): string {
   if (!winnerParticipantId.value) return "font-medium text-highlighted";
+
   return participantId === winnerParticipantId.value
     ? "font-medium text-highlighted"
     : "text-muted";
@@ -209,8 +218,10 @@ const seoDescription = computed(() => {
           tournament,
         });
       }
+
       const scoreA = teamA.value ? getParticipantScore(match.value, teamA.value.id) : null;
       const scoreB = teamB.value ? getParticipantScore(match.value, teamB.value.id) : null;
+
       return t("page.match.detail.seoDescriptionFinished", {
         teamA: teamAName,
         teamB: teamBName,
@@ -219,8 +230,10 @@ const seoDescription = computed(() => {
         scoreB: scoreB ?? "-",
       });
     }
+
     default: {
       const _exhaustive: never = matchStatus.value;
+
       return _exhaustive;
     }
   }
@@ -228,6 +241,7 @@ const seoDescription = computed(() => {
 
 function getMatchOgImageUrl(id: string): string {
   const origin = new URL(getCanonicalUrl()).origin;
+
   return `${origin}/og/match/${id}.png?v=2`;
 }
 
@@ -246,11 +260,14 @@ watch(
 const scoreboardLabel = computed(() => {
   const a = participantLabel(teamA.value);
   const b = participantLabel(teamB.value);
+
   if (!match.value || matchStatus.value === "upcoming" || concealed.value) {
     return `${a} vs ${b}`;
   }
+
   const scoreA = teamA.value ? (getParticipantScore(match.value, teamA.value.id) ?? "-") : "-";
   const scoreB = teamB.value ? (getParticipantScore(match.value, teamB.value.id) ?? "-") : "-";
+
   return `${a} ${scoreA} - ${scoreB} ${b}`;
 });
 </script>

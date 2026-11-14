@@ -12,6 +12,7 @@ export type NewsFeedEntry =
 export function buildNewsFeed(items: readonly NewsArticleListItem[]): NewsFeedEntry[] {
   const seenWeeks = new Set<string>();
   const entries: NewsFeedEntry[] = [];
+
   for (const item of items) {
     switch (item.type) {
       case "article":
@@ -19,17 +20,22 @@ export function buildNewsFeed(items: readonly NewsArticleListItem[]): NewsFeedEn
         break;
       case "short": {
         const week = isoWeekIdFromDate(new Date(item.createdAt));
+
         if (!seenWeeks.has(week)) {
           seenWeeks.add(week);
           entries.push({ kind: "shortWeek", week, latest: item });
         }
+
         break;
       }
+
       default: {
         const _exhaustive: never = item.type;
+
         return _exhaustive;
       }
     }
   }
+
   return entries;
 }

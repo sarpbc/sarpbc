@@ -46,6 +46,7 @@ export class TeamService {
       team.imageUrl = dto.imageUrl ?? null;
       team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
       team.slug = dto.slug ?? (toSlug(dto.name) || "team");
+
       if (dto.source !== undefined) team.source = dto.source;
 
       if (await teams.findBySlug(team.slug)) {
@@ -53,6 +54,7 @@ export class TeamService {
       }
 
       await teams.save(team);
+
       return team;
     });
   }
@@ -60,9 +62,11 @@ export class TeamService {
   async update(id: string, dto: UpdateTeamInput): Promise<Team> {
     return this.transaction.run(async ({ teams }) => {
       const team = await teams.findById(id);
+
       if (!team) {
         throw new NotFoundError(`Team with id "${id}" not found`);
       }
+
       if (team.mergedIntoId) {
         throw new InvalidInputError(
           `${team.name} was merged into team "${team.mergedIntoId}"; edit that team instead`,
@@ -70,20 +74,29 @@ export class TeamService {
       }
 
       if (dto.name !== undefined) team.name = dto.name;
+
       if (dto.location !== undefined) team.location = dto.location;
+
       if (dto.imageUrl !== undefined) team.imageUrl = dto.imageUrl;
+
       if (dto.darkModeImageUrl !== undefined) team.darkModeImageUrl = dto.darkModeImageUrl;
+
       if (dto.logoLightUrl !== undefined) team.logoLightUrl = dto.logoLightUrl;
+
       if (dto.logoDarkUrl !== undefined) team.logoDarkUrl = dto.logoDarkUrl;
+
       if (dto.slug !== undefined) team.slug = dto.slug;
+
       if (dto.active === false && team.players.length > 0) {
         throw new InvalidInputError(
           `Remove the ${team.players.length} current players before marking "${team.name}" inactive`,
         );
       }
+
       if (dto.active !== undefined) team.active = dto.active;
 
       await teams.save(team);
+
       return team;
     });
   }
@@ -100,6 +113,7 @@ export class TeamService {
 
   private async deletable({ teams, contracts }: RosterWriteScope, id: string): Promise<Team> {
     const team = await teams.findById(id);
+
     if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
     assertTeamDeletable(team, {
       players: team.players.length,
@@ -107,6 +121,7 @@ export class TeamService {
       redirects: await teams.redirectCount(id),
       ...(await this.usage.teamReferences(id)),
     });
+
     return team;
   }
 }

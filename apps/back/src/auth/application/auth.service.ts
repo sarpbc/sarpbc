@@ -29,21 +29,25 @@ export class AuthService {
 
   async refreshSession(refreshToken: string): Promise<AuthSession | null> {
     const user = await this.currentUser(await this.tokens.verify(refreshToken, "refresh"));
+
     return user ? { user, tokens: await this.signTokenPair(user) } : null;
   }
 
   private async currentUser(payload: AuthenticatedUser | null): Promise<AuthenticatedUser | null> {
     const user = payload ? await this.userService.findById(payload.id) : null;
+
     return user ? { id: user.id, email: user.email } : null;
   }
 
   async signIn(input: SignInInput): Promise<AuthTokenPair> {
     const user = await this.userService.signIn(input);
+
     if (!user) {
       throw new AuthenticationError(
         "Email or password is incorrect. Check your credentials and try again.",
       );
     }
+
     return this.signTokenPair(user);
   }
 
@@ -54,6 +58,7 @@ export class AuthService {
   async handleGoogleCallback(code: string): Promise<AuthTokenPair> {
     const profile = await this.google.profile(code);
     let user = await this.userService.findOneByGoogleId(profile.id);
+
     if (!user) {
       const existing = await this.userService.findOneByEmail(profile.email);
       user = existing
@@ -65,6 +70,7 @@ export class AuthService {
             profile.picture,
           );
     }
+
     return this.signTokenPair(user);
   }
 

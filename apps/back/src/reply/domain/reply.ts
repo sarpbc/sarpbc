@@ -33,10 +33,12 @@ function replyTargetSpec<F extends keyof ReplyTargetFields>(spec: {
   link: (target: NonNullable<ReplyTargetFields[F]>) => { id: string; label: string; path: string };
 }): ReplyTargetSpec {
   const { link, ...rest } = spec;
+
   return {
     ...rest,
     describe(fields) {
       const target = fields[spec.field];
+
       return target ? link(target) : null;
     },
   };
@@ -81,10 +83,13 @@ export function replyTarget(input: {
 }): ReplyTarget {
   const targets = REPLY_TARGET_TYPES.flatMap((kind) => {
     const id = input[REPLY_TARGETS[kind].inputKey];
+
     return id ? [{ kind, id }] : [];
   });
+
   if (targets.length !== 1)
     throw new InvalidInputError("Provide exactly one of postId, newsArticleId, or matchId.");
+
   return targets[0]!;
 }
 
@@ -95,6 +100,7 @@ export function sameReplyTarget(
   return REPLY_TARGET_TYPES.some((kind) => {
     const { field } = REPLY_TARGETS[kind];
     const id = child[field]?.id;
+
     return Boolean(id) && parent[field]?.id === id;
   });
 }
@@ -106,6 +112,7 @@ export function replySortOrder(kind: ReplyTargetType): "asc" | "desc" {
 export function resolveReplyTargetLink(reply: ReplyTargetFields): ReplyTargetLink | null {
   for (const kind of REPLY_TARGET_TYPES) {
     const link = REPLY_TARGETS[kind].describe(reply);
+
     if (link) {
       return {
         targetType: kind,
@@ -115,5 +122,6 @@ export function resolveReplyTargetLink(reply: ReplyTargetFields): ReplyTargetLin
       };
     }
   }
+
   return null;
 }

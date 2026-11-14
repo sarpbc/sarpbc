@@ -36,6 +36,7 @@ export class StreamerController {
   @Header("Cache-Control", "public, max-age=60")
   async listLive() {
     const streamers = await this.streamerService.listLive();
+
     return { streamers };
   }
 
@@ -44,6 +45,7 @@ export class StreamerController {
   @Get()
   async list(): Promise<{ streamers: TrackedStreamer[] }> {
     const streamers = await this.streamerService.list();
+
     return { streamers: streamers.map(mapTrackedStreamer) };
   }
 

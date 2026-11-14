@@ -27,6 +27,8 @@ const ERRORS = {
 
 export function requireViewership(input: Viewership): Viewership {
   const parsed = parseViewership(input);
+
   if (!parsed.ok) throw new InvalidInputError(ERRORS[parsed.error]);
+
   return parsed.viewership;
 }

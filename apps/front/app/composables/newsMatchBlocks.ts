@@ -35,6 +35,7 @@ export function provideNewsMatchBlocks(key: MaybeRefOrGetter<string>, contents: 
           apiFetch<MatchBlocksResponse>("/matches/blocks", { method: "GET", query: { block } }),
         ),
       );
+
       return Object.fromEntries(responses.flatMap((response) => Object.entries(response.blocks)));
     },
     { watch: [blockKeys], default: () => ({}) },

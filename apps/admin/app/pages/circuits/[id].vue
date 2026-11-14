@@ -40,8 +40,10 @@ function setCircuit(value: CircuitDetail) {
 
 async function save(input: CircuitInput) {
   isSaving.value = true;
+
   try {
     const summary = await updateCircuit(circuitId.value, input);
+
     if (circuit.value) setCircuit({ ...circuit.value, ...summary });
     toast.add({ title: t("page.circuits.edit.saved"), color: "success" });
   } catch (saveError) {
@@ -81,10 +83,13 @@ function editStage(stage: CircuitStage) {
 
 function regionSummary(stage: CircuitStage): string | null {
   if (!stage.worldwide) return null;
+
   if (isWorldwideCircuitRegion(circuit.value?.region)) {
     return t("page.circuits.stages.worldwide");
   }
+
   const count = stage.regionTeams.length;
+
   return t("page.circuits.stages.regionTeams", { count }, count);
 }
 
@@ -92,6 +97,7 @@ function formatDates(stage: CircuitStage): string {
   const { beginAt, endAt } = stage.tournament;
   const begin = beginAt ? dateFormatter.value.format(new Date(beginAt)) : null;
   const end = endAt ? dateFormatter.value.format(new Date(endAt)) : null;
+
   return [begin, end].filter((date) => date !== null).join(" – ") || "—";
 }
 </script>

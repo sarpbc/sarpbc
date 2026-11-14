@@ -10,6 +10,7 @@ function setup() {
     tournamentExists: vi.fn(async (id: string) => id === "t1"),
     matches: vi.fn(),
   };
+
   const links = {
     accounts: vi.fn<PlayerLinkStore["accounts"]>(async () => []),
     rosters: vi.fn<PlayerLinkStore["rosters"]>(async () => [
@@ -20,6 +21,7 @@ function setup() {
     ),
     link: vi.fn<PlayerLinkStore["link"]>(async () => 3),
   } satisfies PlayerLinkStore;
+
   return { service: new StatsPlayerLinkService(candidates, links), links };
 }
 

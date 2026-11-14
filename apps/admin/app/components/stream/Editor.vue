@@ -26,6 +26,7 @@ const { path, title } = defineProps<{
   path: string;
   title: string;
 }>();
+
 const open = defineModel<boolean>("open", { default: false });
 
 const { t, locale } = useI18n();
@@ -53,6 +54,7 @@ function normalizeLanguage(language: string): string {
 
 function languageFeedback(language: string): FieldFeedback {
   const code = normalizeLanguage(language);
+
   return isIso6391Code(code)
     ? { help: languageNames.value.of(code) }
     : { error: t("page.tournaments.streams.errors.invalid-language") };
@@ -70,6 +72,7 @@ function platformLabel(platform: StreamPlatform): string {
       return t("page.tournaments.streams.platforms.other");
     default: {
       const exhaustive: never = platform;
+
       return exhaustive;
     }
   }
@@ -78,6 +81,7 @@ function platformLabel(platform: StreamPlatform): string {
 function urlFeedback(url: string): FieldFeedback {
   if (!url.trim()) return {};
   const parsed = parseStreamUrl(url);
+
   return parsed.ok
     ? {
         help: t("page.tournaments.streams.detectedPlatform", {
@@ -89,11 +93,13 @@ function urlFeedback(url: string): FieldFeedback {
 
 function derivedChannel(url: string): string | null {
   const parsed = parseStreamUrl(url);
+
   return parsed.ok ? parsed.channel : null;
 }
 
 function channelFeedback(row: StreamRow): FieldFeedback {
   if (row.channel.trim() || derivedChannel(row.url) || !row.url.trim()) return {};
+
   return { error: t("page.tournaments.streams.errors.channel-required") };
 }
 
@@ -121,6 +127,7 @@ function apply(response: StreamsResponse) {
 async function load() {
   loading.value = true;
   loadFailed.value = false;
+
   try {
     apply(await getStreams(path));
   } catch {
@@ -155,6 +162,7 @@ function removeRow(key: number) {
 
 async function save() {
   saving.value = true;
+
   try {
     apply(
       await setStreams(

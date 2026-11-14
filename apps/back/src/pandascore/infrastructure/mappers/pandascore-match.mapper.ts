@@ -5,9 +5,11 @@ import { mapOfficialMatchStreams } from "./official-match-streams";
 export class PandascoreMatchMapper {
   static toUpsertCommand(dto: MatchDto): UpsertMatchCommand {
     const opponentSlugs: string[] = [];
+
     if (dto.opponents) {
       for (const opponentWrapper of dto.opponents) {
         const slug = opponentWrapper.opponent?.slug;
+
         if (slug) {
           opponentSlugs.push(slug);
         }

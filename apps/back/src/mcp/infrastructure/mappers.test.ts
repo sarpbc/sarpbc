@@ -39,6 +39,7 @@ describe("mapTournamentDetail participants", () => {
       name: "Karmine Corp",
       source: "startgg",
     });
+
     return Object.assign(new Tournament(), {
       id: "cup",
       name: "Coupe",
@@ -92,11 +93,13 @@ describe("MCP streams", () => {
   function listed(url: string, source: DataSource): Stream {
     return { url, platform: "twitch", channel: url, language: "en", kind: "official", source };
   }
+
   const manual = listed("https://twitch.tv/manual", "manual");
   const startgg = listed("https://twitch.tv/startgg", "startgg");
 
   it("drops start.gg streams from tournament and event reads", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+
     const tournament = Object.assign(new Tournament(), {
       id: "cup",
       slug: "coupe",
@@ -104,6 +107,7 @@ describe("MCP streams", () => {
       event: { id: "event", slug: "coupe", name: "Coupe" },
       streams: [startgg, manual],
     });
+
     expect(mapTournamentDetail(tournament).streams).toEqual([manual]);
 
     const event = Object.assign(new TournamentEvent(), { slug: "coupe", streams: [startgg] });
@@ -112,6 +116,7 @@ describe("MCP streams", () => {
 
   it("drops start.gg streams a match inherits from its tournament", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+
     const inherited = Object.assign(new Match(), {
       publicId: 1,
       name: "Final",
@@ -129,6 +134,7 @@ describe("MCP streams", () => {
         eventStreams: [],
       },
     });
+
     expect(mapMatchListResponse(inherited).streams).toEqual([manual]);
     expect(redistributableStreams([startgg])).toEqual([]);
   });
@@ -143,6 +149,7 @@ describe("MCP viewership", () => {
     sourceName: "Esports Charts",
     sourceUrl: "https://escharts.com/tournaments/rl/fake-cup",
   };
+
   function stage(source: DataSource) {
     return Object.assign(new Tournament(), {
       id: `stage-${source}`,
@@ -151,6 +158,7 @@ describe("MCP viewership", () => {
       event: { id: "event", slug: "coupe", name: "Coupe" },
     });
   }
+
   function played(source: DataSource) {
     return Object.assign(new Match(), {
       publicId: 1,

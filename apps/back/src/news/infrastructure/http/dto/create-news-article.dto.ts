@@ -1,11 +1,13 @@
 import { z } from "zod";
 import { NEWS_TEXT_MAX_LENGTH } from "../../../domain/news-limits";
 import { NEWS_TYPES } from "@sarpbc/types";
+
 export const NewsCoverImageUrl = z
   .string()
   .trim()
   .max(NEWS_TEXT_MAX_LENGTH)
   .pipe(z.url({ protocol: /^(https?|ftp)$/, message: "Enter a valid cover image URL." }));
+
 export const createNewsArticleFields = {
   title: z.string().min(1).max(NEWS_TEXT_MAX_LENGTH),
   content: z.string().min(1),
@@ -29,6 +31,7 @@ export const createNewsArticleFields = {
     .optional(),
   type: z.enum(NEWS_TYPES).optional(),
 };
+
 export const CreateNewsArticleDto = z.strictObject(createNewsArticleFields);
 
 export type CreateNewsArticleDto = z.infer<typeof CreateNewsArticleDto>;

@@ -23,6 +23,7 @@ const { t } = useI18n();
 const SEARCH_LIMIT = 8;
 
 const searchTerm = ref("");
+
 const query = refDebounced(
   computed(() => searchTerm.value.trim()),
   200,

@@ -76,8 +76,10 @@ watch(
   (options) => {
     if (options.length === 0) {
       selectedAwardType.value = undefined;
+
       return;
     }
+
     if (
       !selectedAwardType.value ||
       !options.some((option) => option.value === selectedAwardType.value)
@@ -91,11 +93,13 @@ watch(
 async function handleAssignAward() {
   const entry = selectedEntry.value;
   const awardType = selectedAwardType.value;
+
   if (!entry || !awardType) {
     return;
   }
 
   assigning.value = true;
+
   try {
     await createTournamentAward(props.tournamentId, {
       participantId: entry.participantId,
@@ -120,6 +124,7 @@ async function handleAssignAward() {
 
 async function handleRemoveAward(award: TournamentAwardListItem) {
   removingAwardId.value = award.id;
+
   try {
     await deleteTournamentAward(props.tournamentId, award.id);
     toast.add({

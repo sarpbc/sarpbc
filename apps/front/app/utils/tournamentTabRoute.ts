@@ -25,6 +25,7 @@ export function tournamentTabPath(tab: TournamentTab, eventSlug: string, stageSl
       return stageStatsPath(eventSlug, stageSlug);
     default: {
       const unreachable: never = tab;
+
       return unreachable;
     }
   }

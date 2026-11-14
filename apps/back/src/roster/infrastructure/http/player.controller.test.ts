@@ -10,18 +10,23 @@ import { PlayerController } from "./player.controller";
 describe("PlayerController", () => {
   const kept = Object.assign(new Player(), { id: "kept", name: "Kept" });
   const players = { findById: vi.fn() };
+
   const contracts = {
     getContractsByPlayer: vi.fn(),
     getOldTeamsByPlayer: vi.fn(),
     getStaffContractsByPlayer: vi.fn(),
   };
+
   const matches = { getMatchesByPlayer: vi.fn() };
+
   const tournaments = {
     getTournamentsWonByPlayer: vi.fn(),
     getTournamentsByPlayer: vi.fn(),
     getTournamentsByTeamTenures: vi.fn(),
   };
+
   const awards = { findByPlayerId: vi.fn() };
+
   const seasonStore: SeasonStore = {
     list: vi.fn(),
     find: vi.fn(),
@@ -48,8 +53,10 @@ describe("PlayerController", () => {
     savePathEntry: vi.fn(),
     removePathEntry: vi.fn(),
   };
+
   const playerEarnings = vi.fn();
   const prizes = { playerEarnings } as never;
+
   const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
     Object.assign(new Match(), {
       id,
@@ -74,20 +81,25 @@ describe("PlayerController", () => {
         eventStreams: [],
       },
     });
+
   const standInMatches = [
     standInMatch("startgg-final", "startgg", 7),
     standInMatch("cup-final", "manual", 8),
   ];
+
   const lineupRows: PlayerLineupRow[] = [
     { matchId: "startgg-final", participantId: "startgg-final-a", rosterIds: [] },
     { matchId: "cup-final", participantId: "cup-final-b", rosterIds: ["kept"] },
   ];
+
   const byPlayer = vi.fn(async () => lineupRows);
+
   const lineups = new MatchLineupService(
     { byMatch: async () => [], byPlayer },
     { byIds: async () => standInMatches },
     { run: () => Promise.reject(new Error("unused")) },
   );
+
   const controller = new PlayerController(
     players as never,
     contracts as never,

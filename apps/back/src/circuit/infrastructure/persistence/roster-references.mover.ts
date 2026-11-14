@@ -13,10 +13,13 @@ export class CircuitRosterReferences implements RosterReferenceMover {
       { team: { $in: [from, to] } },
       { disableIdentityMap: true },
     );
+
     const kept = new Set(entries.filter(({ team }) => team.id === to).map(({ stage }) => stage.id));
+
     const duplicates = entries
       .filter(({ team, stage }) => team.id === from && kept.has(stage.id))
       .map(({ id }) => id);
+
     if (duplicates.length)
       await this.em.nativeDelete(CircuitStageTeam, { id: { $in: duplicates } });
     await this.em.nativeUpdate(CircuitStageTeam, { team: from }, { team: to });

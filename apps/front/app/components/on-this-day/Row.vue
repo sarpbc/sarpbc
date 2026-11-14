@@ -23,6 +23,7 @@ const localePath = useLocalePath();
 function sidePath(side: Omit<OnThisDaySide, "score">): string | null {
   if (side.team) return localePath(teamPath(side.team.slug));
   const [only, ...others] = side.players;
+
   return only && others.length === 0 ? localePath(playerPath(only.slug)) : null;
 }
 
@@ -50,6 +51,7 @@ function linkTarget(link: OnThisDayLink): LinkTarget {
       return { label: link.name, to: localePath(matchPath(link.publicId, link.slug)) };
     default: {
       const exhaustive: never = link;
+
       return exhaustive;
     }
   }
@@ -58,9 +60,11 @@ function linkTarget(link: OnThisDayLink): LinkTarget {
 const factText = computed(() =>
   event.kind === "fact" ? event.text[uiLocale(locale.value)] : null,
 );
+
 const factLink = computed(() =>
   event.kind === "fact" && event.link ? linkTarget(event.link) : null,
 );
+
 const finalScore = computed(() =>
   event.kind === "final" && event.winner.score !== null && event.loser.score !== null
     ? t("components.onThisDay.score", { winner: event.winner.score, loser: event.loser.score })

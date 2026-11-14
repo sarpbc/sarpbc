@@ -9,6 +9,7 @@ export function useSourceUrl() {
 
   function sourceUrlError(value: string): string | undefined {
     const url = normalizeSourceUrl(value);
+
     return url === null || isAcceptedDataSourceUrl(url) ? undefined : t("common.sourceUrlInvalid");
   }
 

@@ -33,6 +33,7 @@ function playerListKey(item: PlayerListItem): string {
       return playerKey(item.entry);
     default: {
       const _exhaustive: never = item;
+
       return _exhaustive;
     }
   }
@@ -40,9 +41,11 @@ function playerListKey(item: PlayerListItem): string {
 
 const topPlayerKeys = computed(() => {
   const keys = new Set<string>();
+
   for (const player of topPlayers.value) {
     keys.add(playerKey(player));
   }
+
   return keys;
 });
 
@@ -53,9 +56,11 @@ function setHoveredTeam(teamId: string | null): void {
 function onRowLeave(event: MouseEvent, teamId: string): void {
   const current = event.currentTarget as HTMLElement;
   const next = event.relatedTarget as Node | null;
+
   if (next && current.contains(next)) {
     return;
   }
+
   if (props.hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
@@ -63,9 +68,11 @@ function onRowLeave(event: MouseEvent, teamId: string): void {
 
 const highlightedRosterExtras = computed(() => {
   const teamId = props.hoveredTeamId;
+
   if (!teamId) {
     return [];
   }
+
   return (props.players ?? [])
     .filter((player) => player.teamId === teamId && !topPlayerKeys.value.has(playerKey(player)))
     .sort((a, b) => a.rank - b.rank);
@@ -75,38 +82,49 @@ const userEntry = computed(() => props.players?.find((player) => player.isUser) 
 
 const userExtra = computed(() => {
   const user = userEntry.value;
+
   if (!user) {
     return null;
   }
+
   const key = playerKey(user);
+
   if (topPlayerKeys.value.has(key)) {
     return null;
   }
+
   if (highlightedRosterExtras.value.some((player) => playerKey(player) === key)) {
     return null;
   }
+
   return user;
 });
 
 const playerFooterItems = computed((): PlayerListItem[] => {
   const items: PlayerListItem[] = [];
+
   if (highlightedRosterExtras.value.length > 0) {
     items.push({ type: "divider" });
+
     for (const entry of highlightedRosterExtras.value) {
       items.push({ type: "player", entry });
     }
   }
+
   if (userExtra.value) {
     items.push({ type: "player", entry: userExtra.value });
   }
+
   return items;
 });
 
 const playerTeamEntry = computed(() => props.teams?.find((team) => team.isPlayerTeam) ?? null);
+
 const playerTeamFooter = computed(() => {
   if (!playerTeamEntry.value || playerTeamEntry.value.rank <= topTeams.value.length) {
     return null;
   }
+
   return playerTeamEntry.value;
 });
 
@@ -118,6 +136,7 @@ const extraTeams = computed((): RankedTeam[] => {
     if (!entry || seen.has(entry.team.id)) {
       return;
     }
+
     seen.add(entry.team.id);
     extras.push(entry);
   };
@@ -125,6 +144,7 @@ const extraTeams = computed((): RankedTeam[] => {
   add(playerTeamFooter.value ?? undefined);
 
   const hoveredId = props.hoveredTeamId;
+
   if (hoveredId) {
     add((props.teams ?? []).find((entry) => entry.team.id === hoveredId));
   }
@@ -134,9 +154,11 @@ const extraTeams = computed((): RankedTeam[] => {
 
 const teamSections = computed(() => {
   const sections: RankedTeam[][] = [topTeams.value];
+
   if (extraTeams.value.length > 0) {
     sections.push(extraTeams.value);
   }
+
   return sections;
 });
 
@@ -157,6 +179,7 @@ const title = computed(() => {
       return t("page.game.career.rankings.bestPlayers");
     default: {
       const _exhaustive: never = props.kind;
+
       return _exhaustive;
     }
   }
@@ -164,6 +187,7 @@ const title = computed(() => {
 
 function teamRowClass(entry: RankedTeam): string[] {
   const highlighted = props.hoveredTeamId === entry.team.id;
+
   return [
     rankingGridClass,
     "h-row-compact min-h-row-compact border-b border-separator border-l-2 text-left text-sm",
@@ -175,6 +199,7 @@ function teamRowClass(entry: RankedTeam): string[] {
 
 function playerRowClass(entry: RankedPlayer): string[] {
   const highlighted = props.hoveredTeamId === entry.teamId;
+
   return [
     rankingGridClass,
     "h-row-compact min-h-row-compact border-b border-separator border-l-2 text-sm",
@@ -187,9 +212,11 @@ function playerRowClass(entry: RankedPlayer): string[] {
 function onTeamFocusOut(event: FocusEvent, teamId: string): void {
   const current = event.currentTarget as HTMLElement;
   const next = event.relatedTarget as Node | null;
+
   if (next && current.contains(next)) {
     return;
   }
+
   if (props.hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }

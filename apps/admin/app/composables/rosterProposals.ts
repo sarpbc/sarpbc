@@ -14,5 +14,6 @@ export async function reviewRosterProposal(
   const res = await apiFetch<{ proposal: RosterProposal }>(`/roster-proposals/${id}/${action}`, {
     method: "POST",
   });
+
   return res.proposal;
 }

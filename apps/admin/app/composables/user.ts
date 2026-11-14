@@ -5,6 +5,7 @@ export async function getProfile(): Promise<User | null> {
     const res = await apiFetch<{ user?: User }>("/user/profile", {
       method: "GET",
     });
+
     return res.user ?? null;
   } catch {
     return null;
@@ -22,13 +23,17 @@ export function useLogout() {
     if (loggingOut.value) {
       return;
     }
+
     loggingOut.value = true;
+
     try {
       let confirmed = false;
+
       try {
         const res = await apiFetch<{ success?: boolean }>("/auth/logout", {
           method: "GET",
         });
+
         confirmed = res.success === true;
       } catch (error) {
         console.error("Logout failed:", error);
@@ -36,8 +41,10 @@ export function useLogout() {
 
       if (!confirmed) {
         toast.add({ title: $i18n.t("page.home.logoutFailed"), color: "error" });
+
         return;
       }
+
       user.value = null;
       await navigateTo(localePath("/login"));
     } finally {

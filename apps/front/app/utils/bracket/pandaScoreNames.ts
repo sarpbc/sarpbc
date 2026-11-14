@@ -10,12 +10,14 @@ export type BracketRoundParse = {
  */
 export function parseBracketRoundFromName(name: string | undefined): BracketRoundParse | null {
   const normalized = name?.trim().toLowerCase() ?? "";
+
   if (!normalized) {
     return null;
   }
 
   if (normalized.includes("upper bracket")) {
     let column: number | null = null;
+
     if (normalized.includes("upper bracket quarterfinal")) {
       column = 2;
     } else if (normalized.includes("upper bracket semifinal")) {
@@ -23,11 +25,13 @@ export function parseBracketRoundFromName(name: string | undefined): BracketRoun
     } else if (normalized.includes("upper bracket final")) {
       column = 4;
     }
+
     return { section: "upper", column };
   }
 
   if (normalized.includes("lower bracket")) {
     let column: number | null = null;
+
     if (normalized.includes("lower bracket round 1")) {
       column = 0;
     } else if (normalized.includes("lower bracket round 2")) {
@@ -35,17 +39,21 @@ export function parseBracketRoundFromName(name: string | undefined): BracketRoun
     } else if (normalized.includes("lower bracket quarterfinal")) {
       column = 2;
     }
+
     return { section: "lower", column };
   }
 
   if (normalized.includes("grand final") || normalized.includes("semifinal")) {
     let column: number | null = null;
+
     if (normalized.includes("semifinal")) {
       column = 3;
     }
+
     if (normalized.includes("grand final")) {
       column = 4;
     }
+
     return { section: "finals", column };
   }
 
@@ -58,16 +66,20 @@ export function getBracketSectionFromName(name: string | undefined): BracketSect
 
 export function getCombinedColumnFromName(name: string | undefined): number | null {
   const parsed = parseBracketRoundFromName(name);
+
   if (!parsed || parsed.section === "upper") {
     return null;
   }
+
   return parsed.column;
 }
 
 export function getUpperColumnFromName(name: string | undefined): number | null {
   const parsed = parseBracketRoundFromName(name);
+
   if (!parsed || parsed.section !== "upper") {
     return null;
   }
+
   return parsed.column;
 }

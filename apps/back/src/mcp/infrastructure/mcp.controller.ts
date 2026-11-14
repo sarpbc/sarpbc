@@ -28,6 +28,7 @@ export class McpController {
     @Res() reply: FastifyReply,
   ): Promise<void> {
     const server = this.mcpServerFactory.createServer(request.user);
+
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });

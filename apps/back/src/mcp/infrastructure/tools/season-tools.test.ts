@@ -19,15 +19,19 @@ function awardTool() {
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
+
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === "propose_season_award",
   );
+
   if (!tool) throw new Error("propose_season_award is not defined");
+
   return { rosterProposalService, tool };
 }
 
 function parsed(result: { content: { type: string; text?: string }[] }) {
   const block = result.content[0];
+
   return JSON.parse(block?.type === "text" && block.text ? block.text : "null");
 }
 
@@ -63,6 +67,7 @@ describe("propose_season_award", () => {
 
   it("requires a non-Liquipedia sourceUrl and a season award type", () => {
     const schema = z.object(awardTool().tool.inputSchema);
+
     const accepts = (overrides: Partial<Record<keyof typeof input, string | undefined>>) =>
       schema.safeParse({ ...input, ...overrides }).success;
 
@@ -85,6 +90,7 @@ describe("propose_season_award", () => {
 describe("get_season", () => {
   it("returns the awards with a link to each player and leaves the archive out", async () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+
     const detail: SeasonDetail = {
       id: SEASON_ID,
       name: "RLCS 2024",
@@ -123,9 +129,11 @@ describe("get_season", () => {
         },
       ],
     };
+
     const tool = seasonTools({
       seasonService: { list: vi.fn(), detail: vi.fn(async () => detail) },
     }).find((candidate) => candidate.name === "get_season");
+
     if (!tool) throw new Error("get_season is not defined");
 
     const body = parsed(await tool.run(user("journalist"), { id: SEASON_ID }));

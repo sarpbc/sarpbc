@@ -42,6 +42,7 @@ const {
 );
 
 const latest = computed<StatsImport | null>(() => imports.value?.[0] ?? null);
+
 const active = computed(
   () => latest.value?.status === "pending" || latest.value?.status === "running",
 );
@@ -70,10 +71,12 @@ async function onGamesChanged() {
 }
 
 const poll = useIntervalFn(() => refresh(), POLL_MS, { immediate: false });
+
 watch(active, (isActive) => (isActive ? poll.resume() : poll.pause()), { immediate: true });
 
 const counts = computed(() => {
   const items = latest.value?.items ?? [];
+
   return {
     imported: items.filter((item) => item.status === "imported").length,
     already: items.filter((item) => item.status === "already_imported").length,
@@ -99,6 +102,7 @@ function statusColor(status: StatsImportStatus) {
       return "error" as const;
     default: {
       const exhaustive: never = status;
+
       return exhaustive;
     }
   }
@@ -107,11 +111,13 @@ function statusColor(status: StatsImportStatus) {
 function labelOf(match: TournamentMatchListItem): string {
   const [a, b] = match.participants ?? [];
   const teams = `${a ? participantName(a) : "TBD"} vs ${b ? participantName(b) : "TBD"}`;
+
   return match.beginAt ? `${teams} · ${formatDate(match.beginAt)}` : teams;
 }
 
 function matchLabel(matchId: string | null): string | null {
   const match = props.matches.find((candidate) => candidate.id === matchId);
+
   return match ? labelOf(match) : null;
 }
 
@@ -124,11 +130,13 @@ function replayUrl(item: StatsImportItem): string {
 
 function itemMeta(item: StatsImportItem): string {
   const label = matchLabel(item.matchId);
+
   const target = !label
     ? "—"
     : item.status === "unmatched"
       ? label
       : t("page.tournaments.statsImport.game", { match: label, number: item.gameNumber });
+
   return `${formatDate(item.playedAt)} · ${target}`;
 }
 
@@ -143,6 +151,7 @@ function itemReason(item: StatsImportItem): string {
       return "";
     default: {
       const exhaustive: never = item;
+
       return exhaustive;
     }
   }
@@ -151,6 +160,7 @@ function itemReason(item: StatsImportItem): string {
 async function submit() {
   if (!group.value.trim()) return;
   submitting.value = true;
+
   try {
     const created = await requestStatsImport(props.tournamentId, group.value.trim());
     imports.value = [created, ...(imports.value ?? [])];

@@ -28,11 +28,13 @@ type ToolInput = {
 
 function setup(role: "admin" | "journalist" = "admin") {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+
   const event = Object.assign(new TournamentEvent(), {
     id: "cdf",
     slug: "cdf-2026",
     name: "CDF 2026",
   });
+
   const listing = {
     event,
     stages: [
@@ -41,6 +43,7 @@ function setup(role: "admin" | "journalist" = "admin") {
       stage("pool", "manual", "2026-11-05T18:00:00Z"),
     ],
   };
+
   const catalogService = {
     leagues: vi.fn(),
     findEvent: vi.fn().mockResolvedValue(listing),
@@ -49,7 +52,9 @@ function setup(role: "admin" | "journalist" = "admin") {
     createLeague: vi.fn(),
     updateLeague: vi.fn(),
   };
+
   const eventQueries = { list: vi.fn().mockResolvedValue([[listing], 1]) };
+
   const tools = eventTools({
     catalogService,
     competition: redistributableCompetition({
@@ -67,16 +72,21 @@ function setup(role: "admin" | "journalist" = "admin") {
       playerAwardService: { findByTournamentId: vi.fn() },
     }),
   });
+
   const tool = (name: string) => {
     const found = tools.find((candidate) => candidate.name === name);
+
     if (!found) throw new Error(`${name} is not defined`);
+
     return (input: ToolInput) => found.run({ id: "u1", email: "staff@test.com", role }, input);
   };
+
   return { catalogService, eventQueries, tool, listing };
 }
 
 const json = (result: CallToolResult) => {
   const block = result.content[0];
+
   return JSON.parse(block?.type === "text" ? block.text : "null");
 };
 

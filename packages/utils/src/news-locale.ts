@@ -28,5 +28,6 @@ export function localizedNewsFields(
   if (locale === "fr-FR" && hasFrenchTranslation(article)) {
     return { title: article.titleFr, content: article.contentFr };
   }
+
   return { title: article.title, content: article.content };
 }

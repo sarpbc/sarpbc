@@ -18,6 +18,7 @@ import type {
   CreatedPost,
 } from "./models";
 import type { PostStore, ForumTransaction } from "./ports";
+
 interface PostCreationEligibility {
   canCreate: boolean;
   nextAvailableAt: Date | null;
@@ -45,6 +46,7 @@ export class PostService {
 
   async findByIdDto(ref: EntityRef, locale: SupportedLocale): Promise<ForumPost | null> {
     const post = await this.findById(ref);
+
     if (!post) return null;
     const translation = post.translations.find((t) => t.locale === locale);
 
@@ -73,6 +75,7 @@ export class PostService {
   async create(userId: string, createPostInput: CreatePostInput): Promise<CreatedPost> {
     await this.transaction.run(async (scope) => {
       const eligibility = await this.resolvePostCreationEligibility(userId, scope.posts);
+
       if (!eligibility.canCreate) {
         throw new InvalidInputError({
           message:
@@ -82,6 +85,7 @@ export class PostService {
       }
 
       const existing = await scope.posts.findById(createPostInput.id);
+
       if (existing) {
         throw new ConflictError(
           "A post with this ID already exists. Refresh the page and try again.",
@@ -89,11 +93,13 @@ export class PostService {
       }
 
       const topic = await scope.topics.findById(createPostInput.topicId);
+
       if (!topic) {
         throw new NotFoundError("Topic not found");
       }
 
       const user = await scope.users.findById(userId);
+
       if (!user) {
         throw new NotFoundError("User not found");
       }
@@ -109,6 +115,7 @@ export class PostService {
         updatedAt: null,
         translations: [],
       };
+
       await scope.posts.save(newPost);
 
       if (user.role === "admin" && createPostInput.translations?.length) {
@@ -122,12 +129,15 @@ export class PostService {
             createdAt: this.now(),
             updatedAt: null,
           };
+
           await scope.posts.saveTranslation(t);
         }
       }
     });
     const created = await this.postRepository.findById(createPostInput.id);
+
     if (!created) throw new NotFoundError("Post not found");
+
     return { publicId: created.publicId, slug: forumPostSlug(created.title) };
   }
 
@@ -138,6 +148,7 @@ export class PostService {
   async delete(id: string): Promise<void> {
     return this.transaction.run(async (scope) => {
       const post = await scope.posts.findWithDetails({ kind: "id", value: id });
+
       if (!post) {
         throw new NotFoundError("Post not found");
       }
@@ -155,6 +166,7 @@ export class PostService {
     posts: PostStore = this.postRepository,
   ): Promise<PostCreationEligibility> {
     const latest = await posts.findLatestByUser(userId);
+
     if (!latest) {
       return { canCreate: true, nextAvailableAt: null };
     }

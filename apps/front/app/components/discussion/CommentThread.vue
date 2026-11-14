@@ -66,6 +66,7 @@ async function loadMore() {
   }
 
   loadingMore.value = true;
+
   try {
     const nextPage = loadedExtraPages.value + 1;
     const result = await getCommentsByTarget(targetType, targetId, nextPage);
@@ -95,6 +96,7 @@ async function loadUntilCommentLoaded(commentId: string): Promise<boolean> {
 
   while (comments.value.length < total.value) {
     await loadMore();
+
     if (isCommentLoaded(commentId)) {
       return true;
     }
@@ -105,6 +107,7 @@ async function loadUntilCommentLoaded(commentId: string): Promise<boolean> {
 
 async function resolveHashTarget() {
   const commentId = parseCommentHash(route.hash);
+
   if (!commentId) {
     return;
   }

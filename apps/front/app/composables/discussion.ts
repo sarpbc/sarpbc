@@ -36,9 +36,11 @@ export async function getCommentsByTarget(
       targetId,
       page,
     };
+
     if (limit !== undefined) {
       query.limit = limit;
     }
+
     return await apiFetch<PaginatedReplies>("/replies", {
       method: "GET",
       query,
@@ -75,6 +77,7 @@ export async function createComment(data: {
       break;
     default: {
       const _exhaustive: never = data.targetType;
+
       return { ok: false, reason: "unknown", message: String(_exhaustive) };
     }
   }
@@ -88,6 +91,7 @@ export async function createComment(data: {
       method: "POST",
       body,
     });
+
     return { ok: true, comment: res.reply };
   } catch (error) {
     return apiFailure(error, "creating comment", {
@@ -99,9 +103,11 @@ export async function createComment(data: {
 export async function hideComment(commentId: string): Promise<boolean> {
   try {
     await apiFetch(`/replies/${commentId}/hide`, { method: "PATCH", body: {} });
+
     return true;
   } catch (error) {
     console.error("Error hiding comment:", error);
+
     return false;
   }
 }
@@ -109,9 +115,11 @@ export async function hideComment(commentId: string): Promise<boolean> {
 export async function deleteComment(commentId: string): Promise<boolean> {
   try {
     await apiFetch(`/replies/${commentId}`, { method: "DELETE" });
+
     return true;
   } catch (error) {
     console.error("Error deleting comment:", error);
+
     return false;
   }
 }
@@ -125,6 +133,7 @@ export async function reportComment(
       method: "POST",
       body: { reason },
     });
+
     return { ok: true };
   } catch (error) {
     return apiFailure(error, "reporting comment", {

@@ -1,13 +1,16 @@
 import { z } from "zod";
+
 const text = z
   .string()
   .nullish()
   .transform((v) => v ?? undefined);
+
 const date = z
   .string()
   .refine((v) => Number.isFinite(Date.parse(v)), "Invalid provider date")
   .nullish()
   .transform((v) => v ?? undefined);
+
 export const streamSchema = z.object({
   main: z.boolean().default(false),
   language: z.string().default(""),
@@ -15,6 +18,7 @@ export const streamSchema = z.object({
   official: z.boolean().default(false),
   raw_url: z.string().default(""),
 });
+
 export const matchSchema = z.object({
   id: z.number().int().positive(),
   tournament_id: z.number().int().positive(),
@@ -34,5 +38,7 @@ export const matchSchema = z.object({
     .default([]),
   streams_list: z.array(streamSchema).default([]),
 });
+
 export type MatchStreamDto = z.infer<typeof streamSchema>;
+
 export type MatchDto = z.infer<typeof matchSchema>;

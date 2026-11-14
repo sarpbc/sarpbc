@@ -14,9 +14,11 @@ const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 function formatRange(contract: PlayerContract): string {
   const start = mediumDate.value.format(new Date(contract.startDate));
+
   const end = contract.endDate
     ? mediumDate.value.format(new Date(contract.endDate))
     : t("page.staff.slug.timeline.present");
+
   return `${start} – ${end}`;
 }
 </script>

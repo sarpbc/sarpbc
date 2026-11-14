@@ -12,6 +12,7 @@ interface CreateReplyDtoPlain {
 describe("CreateReplyDto", () => {
   async function validateDto(plain: CreateReplyDtoPlain) {
     const result = CreateReplyDto.safeParse(plain);
+
     return result.success ? [] : result.error.issues;
   }
 
@@ -20,6 +21,7 @@ describe("CreateReplyDto", () => {
       content: "Nice clutch",
       matchId: "22222222-2222-4222-8222-222222222222",
     });
+
     expect(errors).toHaveLength(0);
   });
 
@@ -28,6 +30,7 @@ describe("CreateReplyDto", () => {
       content: "  padded  ",
       matchId: "22222222-2222-4222-8222-222222222222",
     });
+
     expect(dto.content).toBe("padded");
   });
 
@@ -42,6 +45,7 @@ describe("CreateReplyDto", () => {
       postId: "11111111-1111-4111-8111-111111111111",
       matchId: "22222222-2222-4222-8222-222222222222",
     });
+
     expect(errors.length).toBeGreaterThan(0);
   });
 
@@ -50,6 +54,7 @@ describe("CreateReplyDto", () => {
       content: "",
       matchId: "22222222-2222-4222-8222-222222222222",
     });
+
     expect(errors.length).toBeGreaterThan(0);
   });
 

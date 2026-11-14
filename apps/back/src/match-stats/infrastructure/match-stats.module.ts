@@ -48,6 +48,7 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
       provide: BALLCHASING_SOURCE,
       useFactory: (config: ConfigService) => {
         const apiKey = config.get<string>("ballchasing.apiKey");
+
         return apiKey ? new BallchasingClient(apiKey) : null;
       },
       inject: [ConfigService],

@@ -55,7 +55,9 @@ export class PostRepository extends EntityRepository<Post> {
       ORDER BY COALESCE(MAX(r.created_at), p.created_at) DESC
       LIMIT ?
     `;
+
     const results: unknown = await this.em.getConnection().execute(query, [limit]);
+
     const rows = z
       .array(
         z.object({
@@ -67,6 +69,7 @@ export class PostRepository extends EntityRepository<Post> {
         }),
       )
       .parse(results);
+
     return rows.map((row) => ({
       id: row.id,
       publicId: row.public_id,

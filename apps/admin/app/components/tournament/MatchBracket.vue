@@ -21,6 +21,7 @@ const { match, label, participants, stageMatches } = defineProps<{
   participants: TournamentDetailParticipant[];
   stageMatches: TournamentDetailMatch[];
 }>();
+
 const open = defineModel<boolean>("open", { default: false });
 const emit = defineEmits<{ saved: [] }>();
 
@@ -61,6 +62,7 @@ const participantItems = computed(() => [
 function stageMatchLabel(candidate: TournamentDetailMatch): string {
   const [first, second] = candidate.participants;
   const tbd = t("page.tournaments.bracket.tbd");
+
   return `${candidate.name} · ${first ? participantName(first) : tbd} vs ${second ? participantName(second) : tbd}`;
 }
 
@@ -76,6 +78,7 @@ const typeItems = computed(() => [
 ]);
 
 const chosenSides = computed(() => sides.value.filter((side) => side !== TBD));
+
 const canSave = computed(
   () =>
     new Set(chosenSides.value).size === chosenSides.value.length &&
@@ -93,6 +96,7 @@ function removeLink(key: number) {
 
 async function save() {
   saving.value = true;
+
   try {
     await setMatchBracket(match.id, {
       participantIds: chosenSides.value,

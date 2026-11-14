@@ -24,6 +24,7 @@ const { match, label } = defineProps<{
   match: TournamentMatchListItem;
   label: string;
 }>();
+
 const open = defineModel<boolean>("open", { default: false });
 
 const { t, locale } = useI18n();
@@ -53,6 +54,7 @@ function normalizeLanguage(language: string): string {
 
 function languageFeedback(language: string): FieldFeedback {
   const code = normalizeLanguage(language);
+
   return isIso6391Code(code)
     ? { help: languageNames.value.of(code) }
     : { error: t("page.tournaments.vods.errors.invalid-language") };
@@ -66,6 +68,7 @@ function sourceLabel(source: MatchVodSource): string {
       return t("page.tournaments.vods.sources.youtube");
     default: {
       const exhaustive: never = source;
+
       return exhaustive;
     }
   }
@@ -74,6 +77,7 @@ function sourceLabel(source: MatchVodSource): string {
 function urlFeedback(url: string): FieldFeedback {
   if (!url.trim()) return {};
   const parsed = parseMatchVodUrl(url);
+
   return parsed.ok
     ? { help: t("page.tournaments.vods.detectedSource", { source: sourceLabel(parsed.source) }) }
     : { error: t(`page.tournaments.vods.errors.${parsed.error}`) };
@@ -92,6 +96,7 @@ function toRows(vods: MatchVod[]): VodRow[] {
 async function load() {
   loading.value = true;
   loadFailed.value = false;
+
   try {
     rows.value = toRows(await getMatchVods(match.id));
   } catch {
@@ -125,6 +130,7 @@ function removeRow(key: number) {
 
 async function save() {
   saving.value = true;
+
   try {
     const vods = await setMatchVods(
       match.id,
@@ -134,6 +140,7 @@ async function save() {
         language: normalizeLanguage(language),
       })),
     );
+
     rows.value = toRows(vods);
     toast.add({ title: t("page.tournaments.vods.saved"), color: "success" });
     open.value = false;

@@ -28,14 +28,18 @@ export async function verifyCircuits({
 }) {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
+
   const sync = app.get(CompetitionSyncService);
   const run = (work) => RequestContext.create(orm.em.fork(), work);
+
   const teams = [9801, 9802, 9803].map((pandascoreId) => ({
     pandascoreId,
     name: `Circuit Team ${pandascoreId}`,
     slug: `circuit-team-${pandascoreId}`,
   }));
+
   const finished = new Date(Date.now() - DAY);
+
   const counted = await run(() =>
     sync.upsertTournament({
       ...pandascoreStage({
@@ -52,6 +56,7 @@ export async function verifyCircuits({
       ],
     }),
   );
+
   const pending = await run(() =>
     sync.upsertTournament(
       pandascoreStage({
@@ -63,6 +68,7 @@ export async function verifyCircuits({
       }),
     ),
   );
+
   const startgg = (
     await request(
       "POST",
@@ -75,6 +81,7 @@ export async function verifyCircuits({
 
   const identity = { season: 2026, sourceUrl: RULES };
   await request("POST", "/circuits", { name: "Fake Circuit", ...identity }, memberCookie, 403);
+
   for (const missing of [{ season: 2026 }, { sourceUrl: RULES }])
     await request("POST", "/circuits", { name: "Fake Circuit", ...missing }, staffCookie, 400);
   await request(
@@ -84,6 +91,7 @@ export async function verifyCircuits({
     staffCookie,
     400,
   );
+
   const circuit = (
     await request(
       "POST",
@@ -93,14 +101,18 @@ export async function verifyCircuits({
       201,
     )
   ).json();
+
   assert.equal(circuit.slug, "fake-circuit");
   await request("POST", "/circuits", { name: "Fake circuit", ...identity }, staffCookie, 409);
+
   for (const cleared of [{ season: null }, { sourceUrl: null }])
     await request("PATCH", `/circuits/${circuit.id}`, cleared, staffCookie, 400);
 
   const { CircuitPersistence } =
     await import("../../src/circuit/infrastructure/persistence/circuit.store.ts");
+
   const { ConflictError } = await import("../../src/common/domain/errors.ts");
+
   const saveDirectly = (fields) =>
     new CircuitPersistence(orm.em.fork()).save({
       id: randomUUID(),
@@ -111,6 +123,7 @@ export async function verifyCircuits({
       qualificationSpots: null,
       ...fields,
     });
+
   for (const [first, twin, why] of [
     [{ season: null, region: null }, { season: null, region: null }, "no season and no region"],
     [{ season: 2026, region: null }, { season: 2026, region: null }, "no region"],
@@ -138,11 +151,13 @@ export async function verifyCircuits({
       }),
     ),
   );
+
   assert.deepEqual(
     raced.map(({ statusCode }) => statusCode).sort(),
     [201, 409],
     "concurrent twin creates leave one circuit",
   );
+
   for (const response of raced.filter(({ statusCode }) => statusCode === 201))
     await request("DELETE", `/circuits/${response.json().id}`, undefined, staffCookie, 204);
   assert(
@@ -154,6 +169,7 @@ export async function verifyCircuits({
     { from: 2, to: 3, points: 6 },
     { from: 1, to: 1, points: 10 },
   ];
+
   const stagePath = (id) => `/circuits/${circuit.id}/stages/${id}`;
   await request("PUT", stagePath(counted.id), { scale }, staffCookie, 400);
   await request(
@@ -180,6 +196,7 @@ export async function verifyCircuits({
 
   const standings = async () =>
     (await request("GET", `/circuits/${circuit.slug}/standings`)).json();
+
   assert.deepEqual((await standings()).rows, [], "nothing counts before a scale is entered");
 
   assert.deepEqual(
@@ -201,12 +218,14 @@ export async function verifyCircuits({
     { error: true },
     "a BLAST.tv source is refused through the MCP",
   );
+
   const proposal = await callTool("set_circuit_stage_scale", {
     circuitId: circuit.id,
     tournamentId: counted.id,
     scale,
     sourceUrl: RULES,
   });
+
   assert.equal(proposal.status, "pending");
   assert.deepEqual((await standings()).rows, [], "nothing changes before approval");
   assert.equal((await review(proposal)).status, "applied");
@@ -219,6 +238,7 @@ export async function verifyCircuits({
       staffCookie,
     )
   ).json();
+
   assert.deepEqual(
     Object.fromEntries(detail.stages.map((stage) => [stage.tournament.id, stage.scale])),
     { [counted.id]: [...scale].reverse(), [pending.id]: [{ from: 1, to: 1, points: 3 }] },
@@ -258,6 +278,7 @@ export async function verifyCircuits({
   const eventTeams = (
     await request("GET", `${stagePath(counted.id)}/teams`, undefined, staffCookie)
   ).json().teams;
+
   assert.deepEqual(
     eventTeams.map(({ team, placement }) => [team.slug, placement]),
     [
@@ -282,6 +303,7 @@ export async function verifyCircuits({
   assert(!publicEvents.includes(startgg.event.id), "a start.gg stage stays out of the standings");
   const mcpAll = await callTool("get_circuit", { idOrSlug: circuit.slug });
   assert(!JSON.stringify(mcpAll).includes(startgg.id), "get_circuit leaves start.gg out");
+
   for (const attached of [tournament, startgg])
     await request("DELETE", stagePath(attached.id), undefined, staffCookie, 204);
 
@@ -293,6 +315,7 @@ export async function verifyCircuits({
     400,
   );
   await request("PATCH", `/circuits/${circuit.id}`, { region: "EU" }, staffCookie);
+
   const regional = (
     await request(
       "PUT",
@@ -307,6 +330,7 @@ export async function verifyCircuits({
       staffCookie,
     )
   ).json();
+
   assert.deepEqual(
     regional.stages
       .filter(({ tournament: { id } }) => id === counted.id)
@@ -336,8 +360,10 @@ export async function verifyCircuits({
     description: "A fake circuit created through the MCP.",
     sourceUrl: RULES,
   });
+
   assert.equal(created.slug, "fake-season-2026");
   assert.equal(created.sourceUrl, RULES);
+
   for (const [refused, why] of [
     [{ slug: "fake-season-2026", name: "Another Fake", season: 2026 }, "a taken slug"],
     [{ slug: "fake-twin", name: "fake series 2026", region: "worldwide" }, "a name twin"],
@@ -354,19 +380,23 @@ export async function verifyCircuits({
       { error: true },
       `create_circuit refuses ${why}`,
     );
+
   const updated = await callTool("update_circuit", {
     idOrSlug: "fake-season-2026",
     region: "EU",
     qualificationSpots: 1,
   });
+
   assert.equal(updated.region, "EU");
   assert.equal(updated.qualificationSpots, 1);
+
   const mcpProposal = await callTool("set_circuit_stage_scale", {
     circuitId: created.id,
     tournamentId: counted.id,
     scale,
     sourceUrl: RULES,
   });
+
   assert.equal((await review(mcpProposal)).status, "applied");
   const createdDetail = await callTool("get_circuit", { idOrSlug: "fake-season-2026" });
   assert.equal(createdDetail.season, 2026);

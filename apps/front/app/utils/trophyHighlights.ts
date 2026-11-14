@@ -5,6 +5,7 @@ export function formatTrophyHighlightNames(
   const sorted = [...trophies].sort((a, b) => {
     const aTime = a.endAt ? new Date(a.endAt).getTime() : 0;
     const bTime = b.endAt ? new Date(b.endAt).getTime() : 0;
+
     return bTime - aTime;
   });
 
@@ -15,6 +16,7 @@ export function formatTrophyHighlightNames(
     if (!trophy.displayName || seen.has(trophy.displayName)) continue;
     seen.add(trophy.displayName);
     names.push(trophy.displayName);
+
     if (names.length >= limit) break;
   }
 

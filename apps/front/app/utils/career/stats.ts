@@ -29,6 +29,7 @@ export function clampStat(value: number): number {
 function gainCost(current: number): number {
   if (current < SOFT_STAT_CEILING) return 1;
   const over = current - SOFT_STAT_CEILING;
+
   return Math.min(5, 1 + (over * over) / 50);
 }
 
@@ -38,12 +39,15 @@ export function applyStatChange(
   rng: StatRng = denyMythicRoll,
 ): number {
   if (delta === 0) return clampStat(current);
+
   if (delta < 0) return clampStat(current + delta);
 
   let budget = delta;
   let value = current;
+
   while (budget > 0 && value < ELITE_STAT_CAP) {
     const cost = gainCost(value);
+
     if (budget + 1e-9 < cost) break;
     value += 1;
     budget -= cost;
@@ -52,6 +56,7 @@ export function applyStatChange(
   if (current >= ELITE_STAT_CAP && delta >= MYTHIC_STAT_MIN_DELTA && rng() < MYTHIC_STAT_CHANCE) {
     return MAX_STAT;
   }
+
   return clampStat(value);
 }
 
@@ -79,6 +84,7 @@ function getBackgroundBaseStats(background: CareerBackground): CareerStats {
       return { rating: 66, form: 52, morale: 78 };
     default: {
       const _exhaustive: never = background;
+
       return _exhaustive;
     }
   }
@@ -94,6 +100,7 @@ function getRoleDelta(role: CareerRole): Partial<CareerStats> {
       return { morale: 3, rating: -2 };
     default: {
       const _exhaustive: never = role;
+
       return _exhaustive;
     }
   }
@@ -105,7 +112,9 @@ export function getStartingStats(background: CareerBackground, role: CareerRole)
 
 export function getAgeDecline(season: number): Partial<CareerStats> {
   const pastPeak = getSeasonsPastPeak(season);
+
   if (pastPeak <= 0) return {};
+
   return {
     rating: -(1 + pastPeak),
     form: -pastPeak,
@@ -123,6 +132,7 @@ export function computeComposite(stats: CareerStats, role: CareerRole): number {
       return stats.rating * 0.45 + stats.form * 0.3 + stats.morale * 0.25;
     default: {
       const _exhaustive: never = role;
+
       return _exhaustive;
     }
   }
@@ -130,5 +140,6 @@ export function computeComposite(stats: CareerStats, role: CareerRole): number {
 
 export function computePerformance(stats: CareerStats, role?: CareerRole | null): number {
   if (role) return computeComposite(stats, role);
+
   return stats.rating * 0.5 + stats.form * 0.3 + stats.morale * 0.2;
 }

@@ -23,6 +23,7 @@ export class StatsPlayerLinkController {
     @Body({ schema: LinkStatsPlayerDto }) dto: LinkStatsPlayerDto,
   ): Promise<StatsPlayerLinkResult> {
     const linkedRows = await this.service.link(tournamentId, dto);
+
     return { link: dto, linkedRows };
   }
 }

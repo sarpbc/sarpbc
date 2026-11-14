@@ -31,11 +31,13 @@ export class GoogleIdentityGateway implements GoogleIdentity {
     client.setCredentials(tokens);
     const { data } = await oauth2("v2").userinfo.get({ auth: client });
     const parsed = profileSchema.safeParse(data);
+
     if (!parsed.success) {
       throw new AuthenticationError(
         "Google did not return a complete profile. Try again or use email and password.",
       );
     }
+
     return { ...parsed.data, picture: parsed.data.picture ?? null };
   }
 

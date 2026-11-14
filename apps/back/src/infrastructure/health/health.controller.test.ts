@@ -9,15 +9,19 @@ import { ShutdownStateService } from "./shutdown-state.service";
 
 describe("HealthController", () => {
   let controller: HealthController;
+
   const health = {
     check: vi.fn(),
   };
+
   const postgres = {
     pingCheck: vi.fn(),
   };
+
   const redis = {
     pingCheck: vi.fn(),
   };
+
   const shutdownState = {
     isShuttingDown: vi.fn().mockReturnValue(false),
   };
@@ -46,6 +50,7 @@ describe("HealthController", () => {
     health.check.mockImplementation(
       async (indicators: Array<() => Promise<HealthIndicatorResult>>) => {
         await Promise.all(indicators.map((indicator) => indicator()));
+
         return { status: "ok" };
       },
     );

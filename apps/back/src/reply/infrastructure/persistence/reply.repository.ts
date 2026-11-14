@@ -7,6 +7,7 @@ import { Reply } from "./reply.entities";
 import { REPLY_POPULATE } from "./reply.mapper";
 
 type ReplyTargetMatch = { id: string } | { $in: string[] };
+
 type ReplyTargetFilter = Partial<Record<keyof ReplyTargetFields, ReplyTargetMatch>>;
 
 function onTarget(targetType: ReplyTargetType, target: ReplyTargetMatch): ReplyTargetFilter {
@@ -27,7 +28,9 @@ export class ReplyRepository {
     const { includeHidden = false, limit, offset, rootsOnly = false } = options;
 
     const where: FilterQuery<Reply> = onTarget(targetType, { id: targetId });
+
     if (!includeHidden) where.hiddenAt = null;
+
     if (rootsOnly) where.replyTo = null;
 
     return this.rows.find(where, {
@@ -70,9 +73,11 @@ export class ReplyRepository {
     });
 
     const counts = new Map<string, number>();
+
     for (const [targetId, count] of Object.entries(countsDict)) {
       counts.set(targetId, count);
     }
+
     return counts;
   }
 
@@ -99,13 +104,16 @@ export class ReplyRepository {
 
     while (frontier.size > 0) {
       const nextFrontier = new Set<string>();
+
       for (const reply of nonRoots) {
         const parentId = reply.replyTo?.id;
+
         if (parentId && frontier.has(parentId) && !collected.has(reply.id)) {
           collected.set(reply.id, reply);
           nextFrontier.add(reply.id);
         }
       }
+
       frontier = nextFrontier;
     }
 
@@ -136,6 +144,7 @@ export class ReplyRepository {
     )) as ModerationRow[];
 
     const ids = rows.map((row: ModerationRow) => row.id);
+
     if (ids.length === 0) {
       return [];
     }
@@ -151,9 +160,11 @@ export class ReplyRepository {
     return ids
       .map((id: string) => {
         const reply = replyById.get(id);
+
         if (!reply) {
           return null;
         }
+
         return { reply, reportCount: countById.get(id) ?? 0 };
       })
       .filter((item): item is { reply: Reply; reportCount: number } => item !== null);

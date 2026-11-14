@@ -2,9 +2,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { AirRiddleService } from "./application/airriddle.service";
 import { evaluateGuess } from "./domain/airriddle";
 import { AirRiddleResultEnum as Result } from "./domain/airriddle-result.enum";
+
 describe("AirRiddleService", () => {
   const repository = { findTodaysRiddle: vi.fn(), save: vi.fn() };
   const players = { getRandomPlayer: vi.fn(), find: vi.fn() };
+
   const runtime = {
     dayStart: () => new Date("2026-10-14T22:00:00Z"),
     now: () => new Date("2026-10-15T12:00:00Z"),
@@ -12,6 +14,7 @@ describe("AirRiddleService", () => {
     skipped: vi.fn(),
     error: vi.fn(),
   };
+
   let service: AirRiddleService;
   beforeEach(() => {
     vi.clearAllMocks();

@@ -23,6 +23,7 @@ function truncate(value: string, maxLength: number): string {
   if (value.length <= maxLength) {
     return value;
   }
+
   return `${value.slice(0, maxLength - 1)}…`;
 }
 
@@ -44,6 +45,7 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   const status = resolveMatchDiscoveryStatus(match);
 
   let centerLine = "vs";
+
   if (status === "finished" || status === "live") {
     const scoreA = teamA ? getParticipantScore(match, teamA.id) : null;
     const scoreB = teamB ? getParticipantScore(match, teamB.id) : null;
@@ -51,6 +53,7 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
   }
 
   let statusLine = "Upcoming match";
+
   if (status === "live") {
     statusLine = "Live now";
   } else if (status === "finished") {
@@ -89,6 +92,7 @@ export function resolveMatchOgFontFiles(): string[] {
 
   for (const dir of dirs) {
     const files = MATCH_OG_FONT_FILES.map((name) => join(dir, name));
+
     if (files.every((file) => existsSync(file))) {
       return files;
     }

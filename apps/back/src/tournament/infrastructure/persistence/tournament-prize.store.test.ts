@@ -44,6 +44,7 @@ describe("CompetitionPrizeWriter", () => {
         players: { getItems: () => [{ id: "player-a" }, { id: "player-b" }] },
       },
     ]);
+
     const writer = new CompetitionPrizeWriter({
       count: vi.fn(),
       find,

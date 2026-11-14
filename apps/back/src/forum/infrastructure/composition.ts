@@ -3,6 +3,7 @@ import { authorReader } from "../../user/infrastructure/user-persistence";
 import { replyDeletion } from "../../reply/infrastructure/composition";
 import { MikroPostStore, MikroTopicStore } from "./persistence/forum.store";
 import type { ForumTransaction } from "../application/ports";
+
 export function transactionalForum(em: EntityManager): ForumTransaction {
   return {
     run: (work) =>
@@ -13,7 +14,9 @@ export function transactionalForum(em: EntityManager): ForumTransaction {
           replies: replyDeletion(tx),
           users: authorReader(tx),
         });
+
         await tx.flush();
+
         return result;
       }),
   };

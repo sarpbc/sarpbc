@@ -37,11 +37,14 @@ export function useCareerSimulator() {
   function dispatch(action: CareerAction) {
     const { state: next, finishedResult } = reduceCareerState(state.value, action);
     state.value = next;
+
     if (finishedResult) {
       saveCareerResult(finishedResult);
       clearActiveCareer();
+
       return;
     }
+
     if (next.phase !== "career_end") {
       saveActiveCareer(next);
     }
@@ -69,12 +72,15 @@ export function useCareerSimulator() {
   const qualifiedForWorlds = computed(() => {
     if (state.value.currentSplits.length < SPLITS_PER_SEASON) return false;
     const rank = getTeamRank(worldRankings.value, state.value.currentTeamId);
+
     if (rank == null) return false;
+
     return qualifiesForWorlds(rank, worldRankings.value.teams.length);
   });
 
   const currentEvent = computed(() => {
     if (!state.value.currentEventId) return null;
+
     return getEventById(state.value.currentEventId) ?? null;
   });
 
@@ -100,9 +106,11 @@ export function useCareerSimulator() {
 
   const continueName = computed(() => {
     if (!canContinue.value) return "";
+
     if (state.value.playerName && currentTeamName.value) {
       return `${state.value.playerName} · ${currentTeamName.value}`;
     }
+
     return state.value.playerName;
   });
 
@@ -165,11 +173,14 @@ export function useCareerSimulator() {
   };
 
   provide(careerSimulatorKey, api);
+
   return api;
 }
 
 export function useCareerSimulatorContext() {
   const context = inject<ReturnType<typeof useCareerSimulator>>(careerSimulatorKey);
+
   if (!context) throw new Error("useCareerSimulatorContext requires useCareerSimulator parent");
+
   return context;
 }

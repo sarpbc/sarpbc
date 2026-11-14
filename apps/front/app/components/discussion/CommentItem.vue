@@ -56,11 +56,14 @@ async function onHide() {
   isModerating.value = true;
   const ok = await hideComment(comment.id);
   isModerating.value = false;
+
   if (ok) {
     toast.add({ title: t("components.discussion.messages.hidden"), color: "success" });
     emit("changed");
+
     return;
   }
+
   toast.add({
     title: t("components.discussion.messages.errorTitle"),
     description: t("components.discussion.messages.moderateError"),
@@ -73,11 +76,14 @@ async function onDelete() {
   isModerating.value = true;
   const ok = await deleteComment(comment.id);
   isModerating.value = false;
+
   if (ok) {
     toast.add({ title: t("components.discussion.messages.deleted"), color: "success" });
     emit("changed");
+
     return;
   }
+
   toast.add({
     title: t("components.discussion.messages.errorTitle"),
     description: t("components.discussion.messages.moderateError"),

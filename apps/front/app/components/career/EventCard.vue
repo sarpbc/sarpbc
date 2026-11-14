@@ -26,6 +26,7 @@ const stageLabel = computed(() => {
       return t("page.game.career.event.worlds");
     default: {
       const _exhaustive: never = props.stage;
+
       return _exhaustive;
     }
   }
@@ -33,6 +34,7 @@ const stageLabel = computed(() => {
 
 const decisionLabel = computed(() => {
   if (props.decisionCount <= 1) return "";
+
   return t("page.game.career.event.decision", {
     current: props.decisionIndex,
     total: props.decisionCount,

@@ -9,9 +9,11 @@ function packageWith(files, manifest = {}) {
   const directory = mkdtempSync(join(tmpdir(), "package-imports-"));
   mkdirSync(join(directory, "src"));
   writeFileSync(join(directory, "package.json"), JSON.stringify(manifest));
+
   for (const [name, content] of Object.entries(files)) {
     writeFileSync(join(directory, "src", name), content);
   }
+
   return directory;
 }
 
@@ -19,6 +21,7 @@ test("accepts framework-free sources", () => {
   const directory = packageWith({
     "pure.ts": 'import { z } from "zod";\nexport * from "./other";',
   });
+
   try {
     assert.deepEqual(frameworkViolations(directory), []);
   } finally {
@@ -36,6 +39,7 @@ test("rejects Vue and Nuxt imports and dependencies", () => {
     },
     { dependencies: { vue: "^3" } },
   );
+
   try {
     assert.equal(frameworkViolations(directory).length, 5);
   } finally {
@@ -47,6 +51,7 @@ test("rejects relative imports that name a .ts extension", () => {
   const directory = packageWith({
     "index.ts": 'export { ROLES } from "./roles.ts";\nimport type { Role } from "./roles.ts";',
   });
+
   try {
     assert.equal(frameworkViolations(directory).length, 2);
   } finally {

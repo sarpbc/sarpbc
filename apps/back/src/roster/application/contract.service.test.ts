@@ -24,6 +24,7 @@ describe("ContractService sourced career periods", () => {
     findByTeam: async () => [],
     findById: async (id) => {
       const stored = career.find((contract) => contract.id === id);
+
       return stored ? Object.assign(new Contract(), stored) : null;
     },
     save: async (contract) => {
@@ -32,12 +33,15 @@ describe("ContractService sourced career periods", () => {
     },
     delete: async () => {},
   };
+
   const players = {
     findById: async (id: string) => (id === zen.id ? zen : null),
   } as PlayerWriter;
+
   const teams = {
     findById: async (id: string) => [vitality, kc].find((team) => team.id === id) ?? null,
   } as TeamWriter;
+
   const scope = { players, teams, contracts } as RosterWriteScope;
 
   const stint = (team: Team, startDate: string, endDate: string | null) =>
@@ -150,13 +154,16 @@ describe("ContractService sourced career periods", () => {
 describe("ContractService staff contracts", () => {
   it("keeps only staff roles from a player's career", async () => {
     const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
+
     const contract = (id: string, role: Contract["role"]) =>
       Object.assign(new Contract(), { id, team: kc, role, startDate: new Date("2024-01-01") });
+
     const career = [
       contract("player", "active"),
       contract("coach", "coach"),
       contract("analyst", "analyst"),
     ];
+
     const queries: ContractQueries = {
       findByPlayer: async () => career,
       findPastContractsByPlayer: async () => [],
@@ -165,6 +172,7 @@ describe("ContractService staff contracts", () => {
       findMovements: async () => [],
       findMovementsOnDay: async () => [],
     };
+
     const service = new ContractService(queries, {} as TeamQueries, {
       run: (work) => work({} as RosterWriteScope),
     });

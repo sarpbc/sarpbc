@@ -29,12 +29,15 @@ export function assertTeamDeletable(team: Team, references: TeamReferences): voi
       `${team.name} was merged into team "${team.mergedIntoId}" and is kept as its redirect`,
     );
   }
+
   if (team.source === "pandascore" || team.pandascoreId !== null) {
     throw new InvalidInputError(
       `${team.name} is synced from PandaScore and cannot be deleted; merge it instead`,
     );
   }
+
   const blocking = describeReferences(references, TEAM_REFERENCE_NOUNS);
+
   if (blocking) {
     throw new ConflictError(
       `${team.name} still has ${blocking}. Merge it into the team it duplicates instead of deleting it.`,

@@ -40,8 +40,10 @@ const languageValid = computed(() => isIso6391Code(languageCode.value));
 
 const urlError = computed(() => {
   if (!url.value.trim() || parsedUrl.value.ok) return undefined;
+
   return t(`page.match.detail.vodAdd.errors.${parsedUrl.value.error}`);
 });
+
 const languageError = computed(() =>
   languageValid.value ? undefined : t("page.match.detail.vodAdd.errors.invalid-language"),
 );
@@ -58,13 +60,16 @@ async function submit() {
   if (!parsedUrl.value.ok || !languageValid.value || saving.value) return;
 
   saving.value = true;
+
   try {
     // The API replaces the whole list: start from the latest one so another staff member's VODs survive.
     const { match: latest } = await getMatchById(match.id);
+
     const vods = await setMatchVods(match.id, [
       ...(latest.vods ?? []).map(({ game, url, language }) => ({ game, url, language })),
       { game: game.value, url: parsedUrl.value.url, language: languageCode.value },
     ]);
+
     emit("saved", vods);
     toast.add({ title: t("page.match.detail.vodAdd.saved"), color: "success" });
     open.value = false;

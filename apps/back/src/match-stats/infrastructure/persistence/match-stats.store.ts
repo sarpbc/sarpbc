@@ -77,11 +77,13 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
 
   async locations(replayIds: string[]): Promise<Map<string, GameLocation>> {
     if (replayIds.length === 0) return new Map();
+
     const rows = await this.em.find(
       MatchGame,
       { ballchasingId: { $in: replayIds } },
       { fields: ["ballchasingId", "match", "number"] },
     );
+
     return new Map(
       rows.map((row) => [row.ballchasingId, { matchId: row.match.id, number: row.number }]),
     );
@@ -90,6 +92,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   async excluded(replayIds: string[]): Promise<Set<string>> {
     if (replayIds.length === 0) return new Set();
     const rows = await this.em.find(MatchGameExclusion, { ballchasingId: { $in: replayIds } });
+
     return new Set(rows.map((row) => row.ballchasingId));
   }
 
@@ -107,6 +110,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         ],
       },
     );
+
     return game
       ? {
           matchId: game.match.id,
@@ -120,12 +124,14 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   async links(accounts: PlatformAccount[]): Promise<PlayerLink[]> {
     if (accounts.length === 0) return [];
     const rows = await this.em.find(PlayerPlatformLink, { $or: accounts });
+
     return rows.map(toLink);
   }
 
   save(game: GameRecord): Promise<TournamentStatsGame> {
     return this.em.transactional(async (em) => {
       await em.nativeDelete(MatchGameExclusion, { ballchasingId: game.ballchasingId });
+
       for (const { playerId, ...account } of game.learnedLinks) {
         await em.upsert(
           PlayerPlatformLink,
@@ -139,6 +145,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
           { player: kept.player },
         );
       }
+
       const row = em.create(MatchGame, {
         match: game.matchId,
         number: game.number,
@@ -151,6 +158,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         orangeGoals: game.orangeGoals,
         createdAt: new Date(),
       });
+
       for (const player of game.players)
         em.create(MatchGamePlayer, {
           game: row,
@@ -165,6 +173,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
           shots: player.shots,
           demolitions: player.demolitions,
         });
+
       return toTournamentGame(row);
     });
   }
@@ -175,6 +184,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       { match: matchId },
       { populate: ["players.player"], orderBy: { number: "ASC" } },
     );
+
     return games.map((game) => ({
       number: game.number,
       ballchasingId: game.ballchasingId,
@@ -189,6 +199,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       { match: { tournament: tournamentId } },
       { orderBy: { number: "ASC" } },
     );
+
     return games.map(toTournamentGame);
   }
 
@@ -206,9 +217,11 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         ],
       },
     );
+
     return rows.map((row) => {
       const participant =
         row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
+
       return {
         gameId: row.game.id,
         account: JSON.stringify([row.platform, row.platformId ?? row.name]),
@@ -236,6 +249,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         match: { id: location.matchId, tournament: tournamentId },
         number: location.number,
       });
+
       if (!game) return null;
       const removed = toTournamentGame(game);
       await em.nativeDelete(MatchGame, { id: game.id });
@@ -244,6 +258,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         { ballchasingId: game.ballchasingId },
         { onConflictFields: ["ballchasingId"], onConflictAction: "ignore" },
       );
+
       return removed;
     });
   }
@@ -271,16 +286,21 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
         orderBy: { game: { playedAt: QueryOrder.DESC_NULLS_LAST } },
       },
     );
+
     const accounts = new Map<string, StatsPlayerAccount>();
+
     for (const row of rows) {
       const key = JSON.stringify([row.platform, row.platformId]);
       const known = accounts.get(key);
+
       if (known) {
         known.games += 1;
         continue;
       }
+
       const participant =
         row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
+
       accounts.set(key, {
         platform: row.platform,
         platformId: row.platformId!,
@@ -290,6 +310,7 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
         player: row.player ? { id: row.player.id, name: row.player.name } : null,
       });
     }
+
     return [...accounts.values()].sort(
       (a, b) => a.team.name.localeCompare(b.team.name) || a.name.localeCompare(b.name),
     );
@@ -301,6 +322,7 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
       { tournament: tournamentId },
       { populate: ["team", "players"] },
     );
+
     return participants
       .map((participant) => ({
         participantId: participant.id,
@@ -333,6 +355,7 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
           onConflictMergeFields: ["player"],
         },
       );
+
       return em.nativeUpdate(MatchGamePlayer, account, { player: playerId });
     });
   }
@@ -351,11 +374,13 @@ export class MikroOrmStatsCandidates implements StatsCandidates {
       { tournament: tournamentId },
       { populate: ["participants.team", "participants.players", "results.participant"] },
     );
+
     const stored = await this.em.find(
       MatchGame,
       { match: { $in: matches.map((match) => match.id) } },
       { fields: ["ballchasingId", "match"] },
     );
+
     return matches.map((match) => ({
       id: match.id,
       beginAt: match.beginAt,
@@ -406,6 +431,7 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
 
   async load(id: string): Promise<StatsImport | null> {
     const row = await this.em.findOne(MatchStatsImport, id, { refresh: true });
+
     return row ? toImport(row) : null;
   }
 
@@ -429,6 +455,7 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
       { tournament: tournamentId },
       { orderBy: { createdAt: "DESC" }, limit },
     );
+
     return rows.map(toImport);
   }
 

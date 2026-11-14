@@ -15,6 +15,7 @@ export async function findByIdOrSlug<Entity>(
   token: string,
 ): Promise<Entity | null> {
   if (!isUuid(token)) return lookup.findBySlug(token);
+
   return (await lookup.findById(token)) ?? lookup.findBySlug(token);
 }
 
@@ -24,11 +25,13 @@ export async function requireByIdOrSlug<Entity>(
   kind: "Player" | "Team",
 ): Promise<Entity> {
   const entity = await findByIdOrSlug(lookup, token);
+
   if (!entity) {
     const search = kind === "Player" ? "search_players" : "search_teams";
     throw new NotFoundError(
       `${kind} "${token}" was not found. Try ${search} to find the correct slug or id.`,
     );
   }
+
   return entity;
 }

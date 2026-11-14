@@ -8,6 +8,7 @@ describe("TransferService", () => {
   const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
   const now = new Date("2026-10-30");
+
   const contract = (
     id: string,
     team: Team,
@@ -23,6 +24,7 @@ describe("TransferService", () => {
       endDate: endDate ? new Date(endDate) : null,
       role,
     });
+
   const career = [
     contract("v", vitality, "2022-01-10", "2025-06-01"),
     contract("k", kc, "2025-06-01", "2026-03-01"),
@@ -31,6 +33,7 @@ describe("TransferService", () => {
 
   function fixture() {
     const findMovements = async () => career;
+
     const contracts: ContractQueries = {
       findByPlayer: async () => [],
       findPastContractsByPlayer: async () => [],
@@ -39,7 +42,9 @@ describe("TransferService", () => {
       findMovements,
       findMovementsOnDay: findMovements,
     };
+
     const service = new TransferService(contracts);
+
     return { service };
   }
 
@@ -54,6 +59,7 @@ describe("TransferService", () => {
       { type: "departure", limit: 25, offset: 0 },
       now,
     );
+
     expect(departures.map(({ id }) => id)).toEqual(["v:leave"]);
   });
 

@@ -15,6 +15,7 @@ export class CompetitionLineupQueries implements LineupQueries {
       { match: matchId },
       { populate: ["player"], orderBy: { position: "ASC" } },
     );
+
     return rows.map(({ participant, player }) => ({
       participantId: participant.id,
       player: {
@@ -36,6 +37,7 @@ export class CompetitionLineupQueries implements LineupQueries {
         orderBy: { match: { beginAt: QueryOrder.DESC_NULLS_LAST }, id: "ASC" },
       },
     );
+
     return rows.map(({ match, participant }) => ({
       matchId: match.id,
       participantId: participant.id,
@@ -51,7 +53,9 @@ export class CompetitionLineupWriter implements LineupWriter {
 
   async activePlayersExist(ids: string[]) {
     const unique = [...new Set(ids)];
+
     if (unique.length === 0) return true;
+
     return (
       (await this.em.count(Player, { id: { $in: unique }, mergedInto: null })) === unique.length
     );
@@ -59,6 +63,7 @@ export class CompetitionLineupWriter implements LineupWriter {
 
   async replace(matchId: string, lineups: MatchLineupInput[]) {
     await this.em.nativeDelete(MatchLineupPlayer, { match: matchId });
+
     for (const { participantId, playerIds } of lineups) {
       playerIds.forEach((playerId, position) => {
         const row = new MatchLineupPlayer();

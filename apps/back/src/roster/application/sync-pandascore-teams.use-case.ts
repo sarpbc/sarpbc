@@ -1,4 +1,5 @@
 import type { CurrentRosterSource, CurrentRosterWriter } from "./ports";
+
 export class SyncPandascoreTeamsUseCase {
   constructor(
     private readonly writer: CurrentRosterWriter,

@@ -33,10 +33,15 @@ function classifyNickname(input: CareerNicknameInput): NicknameTier {
   const worldsPodiums = input.seasons.filter((season) => isWorldsPodium(season.worlds)).length;
 
   if (worldsWins >= 2) return "goat";
+
   if (worldsWins === 1) return "champion";
+
   if (majorWins >= 2) return "majors";
+
   if (worldsPodiums >= 2) return "nearly";
+
   if (input.seasons.length <= 2 && majorWins === 0) return "bust";
+
   return "journeyman";
 }
 
@@ -50,6 +55,7 @@ function nicknameForChampion(role: CareerRole): CareerNicknameKey {
       return "airSurgeon";
     default: {
       const _exhaustive: never = role;
+
       return _exhaustive;
     }
   }
@@ -65,6 +71,7 @@ function nicknameForNearly(role: CareerRole): CareerNicknameKey {
       return "resetGhost";
     default: {
       const _exhaustive: never = role;
+
       return _exhaustive;
     }
   }
@@ -80,6 +87,7 @@ function nicknameForJourneyman(destiny: CareerDestiny): CareerNicknameKey {
       return "walkedOff";
     default: {
       const _exhaustive: never = destiny;
+
       return _exhaustive;
     }
   }
@@ -87,6 +95,7 @@ function nicknameForJourneyman(destiny: CareerDestiny): CareerNicknameKey {
 
 export function pickCareerNickname(input: CareerNicknameInput): CareerNicknameKey {
   const tier = classifyNickname(input);
+
   switch (tier) {
     case "goat":
       return "goat";
@@ -102,6 +111,7 @@ export function pickCareerNickname(input: CareerNicknameInput): CareerNicknameKe
       return "lanTourist";
     default: {
       const _exhaustive: never = tier;
+
       return _exhaustive;
     }
   }

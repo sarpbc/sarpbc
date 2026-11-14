@@ -8,6 +8,7 @@ import { rosterTools } from "./roster-tools";
 const TEAM_ID = "0f8fad5b-d9cb-469f-a165-70867728950e";
 const PLAYER_ID = "6f1c1f9e-2a4b-4c55-9d1e-0f3a2b1c4d5e";
 const LOGO_URL = `https://cdn.sarpbc.test/teams/${TEAM_ID}/logo-light-0123456789abcdef.webp`;
+
 const input = {
   teamId: TEAM_ID,
   variant: "light",
@@ -17,6 +18,7 @@ const input = {
 
 function setup(role: "admin" | "journalist") {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
+
   const rosterProposalService = {
     propose: vi.fn(async (change: ToolArguments, sourceUrl: string) =>
       Object.assign(new RosterProposal(), { id: "proposal-1", sourceUrl, change }),
@@ -30,14 +32,20 @@ function setup(role: "admin" | "journalist") {
     ),
     list: vi.fn(),
   };
+
   const tools = rosterTools({ rosterProposalService });
+
   const tool = (name: string) => {
     const found = tools.find((candidate) => candidate.name === name);
+
     if (!found) throw new Error(`${name} is not defined`);
+
     return found;
   };
+
   const call = (name: string, args: ToolArguments) =>
     tool(name).run({ id: "u1", email: "staff@test.com", role }, args);
+
   return { rosterProposalService, tool, call };
 }
 
@@ -69,6 +77,7 @@ describe("upload_team_logo", () => {
     const schema = z.object(tool("upload_team_logo").inputSchema);
 
     expect(schema.safeParse(input).success).toBe(true);
+
     for (const invalid of [
       { ...input, variant: "color" },
       { ...input, teamId: "kc" },
@@ -107,6 +116,7 @@ describe("upload_team_logo", () => {
 describe("roster proposals", () => {
   it("defaults a removed player to free_agent and a created player to free_agent", async () => {
     const { rosterProposalService, call } = setup("admin");
+
     const move = {
       playerId: PLAYER_ID,
       teamId: TEAM_ID,
@@ -163,6 +173,7 @@ describe("roster proposals", () => {
       endDate: "2026-01-01",
       sourceUrl: input.sourceUrl,
     });
+
     const empty = await call("update_team", { teamId: TEAM_ID, sourceUrl: input.sourceUrl });
 
     expect(textOf(reversed)).toBe("endDate must not precede startDate.");
@@ -191,6 +202,7 @@ describe("delete proposals", () => {
       matchId: MATCH_ID,
       reason: "Series imported twice",
     });
+
     await call("propose_delete_match", {
       matchId: MATCH_ID,
       reason: "Series imported twice",
@@ -253,6 +265,7 @@ describe("delete proposals", () => {
     const team = z.object(tool("propose_delete_team").inputSchema);
 
     expect(match.safeParse({ matchId: MATCH_ID, reason: "Duplicate" }).success).toBe(true);
+
     for (const invalid of [
       { matchId: "7395", reason: "Duplicate" },
       { matchId: MATCH_ID, reason: "  " },
@@ -265,6 +278,7 @@ describe("delete proposals", () => {
     ]) {
       expect(match.safeParse(invalid).success).toBe(false);
     }
+
     expect(team.safeParse({ teamId: TEAM_ID, reason: "Duplicate" }).success).toBe(true);
     expect(
       team.safeParse({ teamId: TEAM_ID, reason: "Duplicate", mergeIntoTeamId: "kc" }).success,

@@ -25,6 +25,7 @@ export class ContractService {
 
   async getStaffContractsByPlayer(playerId: string): Promise<Contract[]> {
     const contracts = await this.contracts.findByPlayer(playerId);
+
     return contracts.filter((contract) => isStaffContractRole(contract.role));
   }
 
@@ -38,9 +39,11 @@ export class ContractService {
 
   async getContractsByTeam(teamId: string): Promise<Contract[]> {
     const team = await this.teams.findById(teamId);
+
     if (!team) {
       throw new NotFoundError(`Team with id "${teamId}" not found`);
     }
+
     return this.contracts.findByTeam(teamId);
   }
 
@@ -60,13 +63,17 @@ export class ContractService {
   ): Promise<Contract> {
     return this.transaction.run(async (scope) => {
       const contract = await scope.contracts.findById(contractId);
+
       if (!contract || contract.team.id !== teamId) {
         throw new NotFoundError(`Contract with id "${contractId}" not found`);
       }
 
       const updateDto: UpdateContractInput = {};
+
       if (dto.startDate !== undefined) updateDto.startDate = dto.startDate;
+
       if (dto.endDate !== undefined) updateDto.endDate = dto.endDate ?? undefined;
+
       if (dto.role !== undefined) updateDto.role = dto.role;
 
       return this.applyUpdate(scope, contract.player.id, contractId, updateDto);
@@ -76,9 +83,11 @@ export class ContractService {
   async deleteForTeam(teamId: string, contractId: string): Promise<void> {
     return this.transaction.run(async (scope) => {
       const contract = await scope.contracts.findById(contractId);
+
       if (!contract || contract.team.id !== teamId) {
         throw new NotFoundError(`Contract with id "${contractId}" not found`);
       }
+
       await this.remove(scope, contract.player.id, contractId);
     });
   }
@@ -87,6 +96,7 @@ export class ContractService {
     return this.transaction.run(async (scope) => {
       const contract = await this.build(scope, playerId, dto);
       await this.saveInCareer(scope, contract);
+
       return contract;
     });
   }
@@ -98,8 +108,10 @@ export class ContractService {
     return this.transaction.run(async (scope) => {
       const contract = await this.build(scope, playerId, dto);
       contract.joinSourceUrl = sourceUrl;
+
       if (contract.endDate) contract.leaveSourceUrl = sourceUrl;
       await this.saveInCareer(scope, contract);
+
       return contract;
     });
   }
@@ -115,13 +127,17 @@ export class ContractService {
   ): Promise<Contract> {
     return this.transaction.run(async (scope) => {
       const contract = await this.edit(scope, playerId, contractId, dto);
+
       if (dto.teamId !== undefined || dto.startDate !== undefined) {
         contract.joinSourceUrl = sourceUrl;
       }
+
       if (dto.endDate !== undefined) {
         contract.leaveSourceUrl = dto.endDate ? sourceUrl : null;
       }
+
       await this.saveInCareer(scope, contract);
+
       return contract;
     });
   }
@@ -138,6 +154,7 @@ export class ContractService {
   ): Promise<Contract> {
     const contract = await this.edit(scope, playerId, contractId, dto);
     await this.saveInCareer(scope, contract);
+
     return contract;
   }
 
@@ -147,9 +164,11 @@ export class ContractService {
     contractId: string,
   ): Promise<void> {
     const contract = await contracts.findById(contractId);
+
     if (!contract || contract.player.id !== playerId) {
       throw new NotFoundError(`Contract with id "${contractId}" not found`);
     }
+
     await contracts.delete(contract);
   }
 
@@ -159,6 +178,7 @@ export class ContractService {
     dto: CreateContractInput,
   ): Promise<Contract> {
     const player = await players.findById(playerId);
+
     if (!player) {
       throw new NotFoundError(`Player with id "${playerId}" not found`);
     }
@@ -169,6 +189,7 @@ export class ContractService {
     contract.startDate = new Date(dto.startDate);
     contract.endDate = dto.endDate ? new Date(dto.endDate) : null;
     contract.role = dto.role ?? "active";
+
     return contract;
   }
 
@@ -179,6 +200,7 @@ export class ContractService {
     dto: UpdateContractInput,
   ): Promise<Contract> {
     const contract = await contracts.findById(contractId);
+
     if (!contract || contract.player.id !== playerId) {
       throw new NotFoundError(`Contract with id "${contractId}" not found`);
     }
@@ -196,6 +218,7 @@ export class ContractService {
     if (dto.role !== undefined) {
       contract.role = dto.role;
     }
+
     return contract;
   }
 

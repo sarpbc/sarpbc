@@ -20,4 +20,5 @@ export const SetViewershipDto = z.strictObject({
     })
     .nullable(),
 });
+
 export type SetViewershipDto = z.infer<typeof SetViewershipDto>;

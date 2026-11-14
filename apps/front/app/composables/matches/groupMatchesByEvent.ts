@@ -8,6 +8,7 @@ export function groupMatchesByEvent(matches: MatchListItem[]): MatchEventGroup[]
   for (const match of matches) {
     const { tournament } = match;
     let group = byStage.get(tournament.id);
+
     if (!group) {
       group = {
         key: tournament.id,
@@ -17,6 +18,7 @@ export function groupMatchesByEvent(matches: MatchListItem[]): MatchEventGroup[]
       };
       byStage.set(tournament.id, group);
     }
+
     group.matches.push(match);
   }
 

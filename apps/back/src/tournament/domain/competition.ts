@@ -6,6 +6,7 @@ import type { OfficialMatchStream } from "./official-match-stream";
 import { effectiveStreams, pandascoreStreams } from "./stream";
 import type { DataSource, TournamentFormat } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors";
+
 export class League {
   id = v4();
   pandascoreId: number | null = null;
@@ -17,6 +18,7 @@ export class League {
   createdAt = new Date();
   updatedAt = new Date();
 }
+
 export class TournamentParticipant {
   id = v4();
   tournamentId = "";
@@ -26,18 +28,21 @@ export class TournamentParticipant {
   createdAt = new Date();
   updatedAt = new Date();
 }
+
 export interface BracketLink {
   id: string;
   match: { id: string };
   previousMatch: { id: string };
   type: "winner" | "loser";
 }
+
 export interface MatchResult {
   id: string;
   match: { id: string };
   participant: { id: string };
   score: number;
 }
+
 export interface TournamentSummary {
   id: string;
   name: string;
@@ -51,6 +56,7 @@ export interface TournamentSummary {
   streams: Stream[];
   eventStreams: Stream[];
 }
+
 export class Match {
   id = v4();
   publicId!: number;
@@ -94,13 +100,16 @@ export class Match {
     return effectiveStreams(this.streams, this.inheritedStreams());
   }
 }
+
 export interface MatchSlugSource {
   name: string;
   participants: ReadonlyArray<NamedParticipant>;
   tournament: { slug: string; event: { slug: string } };
 }
+
 export function matchPublicSlug({ name, participants, tournament }: MatchSlugSource): string {
   const [first, second] = participants;
+
   return matchSlug({
     teamNames: [first && participantName(first), second && participantName(second)],
     matchName: name,
@@ -108,6 +117,7 @@ export function matchPublicSlug({ name, participants, tournament }: MatchSlugSou
     stageSlug: tournament.slug,
   });
 }
+
 export class Tournament {
   id = v4();
   pandascoreId: number | null = null;
@@ -145,6 +155,7 @@ export class Tournament {
       throw new InvalidInputError("End date must be on or after the start date.");
   }
 }
+
 export interface ParticipantSnapshot {
   id: string;
   tournamentId: string;
@@ -152,25 +163,30 @@ export interface ParticipantSnapshot {
   playerIds: string[];
   rosterSourceUrl: string | null;
 }
+
 export interface ParticipantReferences {
   tournamentWinner: boolean;
   matchParticipant: boolean;
   matchWinner: boolean;
   results: boolean;
 }
+
 export function assertParticipantRemovable(refs: ParticipantReferences): void {
   if (refs.tournamentWinner)
     throw new InvalidInputError(
       "Cannot remove a participant that is the tournament winner. Clear the winner first.",
     );
+
   if (refs.matchParticipant)
     throw new InvalidInputError(
       "Cannot remove a participant that already appears in matches. Remove or reassign those matches first.",
     );
+
   if (refs.matchWinner)
     throw new InvalidInputError(
       "Cannot remove a participant that is recorded as a match winner. Clear those winners first.",
     );
+
   if (refs.results)
     throw new InvalidInputError(
       "Cannot remove a participant that has match results. Remove those results first.",

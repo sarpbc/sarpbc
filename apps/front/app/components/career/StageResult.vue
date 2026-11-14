@@ -19,10 +19,12 @@ const { t } = useI18n();
 
 const isWorlds = computed(() => props.stage === "worlds");
 const showQualificationBanner = computed(() => !isWorlds.value && props.stage === "split2");
+
 const showResultsRail = computed(
   () =>
     (!isWorlds.value && props.split !== null) || (isWorlds.value && props.worldsPlacement !== null),
 );
+
 const railTitle = computed(() =>
   isWorlds.value
     ? t("page.game.career.results.worldsTitle")
@@ -37,16 +39,19 @@ const tooltipContent = {
 
 function regionalPlacementPoints(placement: CareerPlacement): number {
   const weight = props.region ? regionalCircuitWeight(props.region) : 1;
+
   return Math.round(REGIONAL_POINTS[placement] * weight);
 }
 
 function majorPlacementPoints(placement: CareerPlacement | null): number {
   if (!placement) return 0;
+
   return MAJOR_POINTS[placement];
 }
 
 function pointsTooltip(points: number): string {
   const shown = points > 0 ? `+${points}` : `${points}`;
+
   return t("page.game.career.results.points", { points: shown });
 }
 </script>

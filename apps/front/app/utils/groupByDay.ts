@@ -21,6 +21,7 @@ export function groupByDay<T>(
 
   for (const item of items) {
     const date = parseMatchDate(getDate(item));
+
     if (!date) {
       unknown.push(item);
       continue;
@@ -28,6 +29,7 @@ export function groupByDay<T>(
 
     const dateKey = localDayKey(date);
     const existing = byDay.get(dateKey);
+
     if (existing) {
       existing.items.push(item);
     } else {

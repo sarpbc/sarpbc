@@ -6,6 +6,7 @@ import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
 const SOURCE = "https://example.com/fake-cup/broadcast";
+
 const STREAMS = [
   { url: "https://twitch.tv/fakecup", language: "en", kind: "official" },
   { url: "https://twitch.tv/fakecup_fr", language: "fr", kind: "costream", channel: "Fake Cup FR" },
@@ -21,11 +22,14 @@ function setup(toolName: string, role: StaffRole = "admin") {
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
+
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
   );
+
   if (!tool) throw new Error(`${toolName} is not defined`);
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
+
   return { rosterProposalService, tool, call };
 }
 
@@ -76,6 +80,7 @@ describe("stream tools", () => {
 
   it("hides start.gg sourced stream lists from list_roster_proposals", async () => {
     const { tool: _, rosterProposalService } = setup("set_match_streams");
+
     const proposal = (sourceUrl: string) => ({
       id: sourceUrl,
       change: { kind: "set_match_streams", matchId: MATCH_ID, streams: STREAMS },
@@ -84,13 +89,16 @@ describe("stream tools", () => {
       entityId: null,
       createdAt: new Date(0),
     });
+
     rosterProposalService.list.mockResolvedValue({
       proposals: [proposal("https://www.start.gg/tournament/fake"), proposal(SOURCE)],
       names: {},
     });
+
     const list = rosterTools({ rosterProposalService }).find(
       (candidate) => candidate.name === "list_roster_proposals",
     );
+
     if (!list) throw new Error("list_roster_proposals is not defined");
 
     const result = await list.run({ id: "u1", email: "staff@test.com", role: "admin" }, {});

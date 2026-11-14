@@ -13,6 +13,7 @@ const { match, label } = defineProps<{
   match: TournamentMatchListItem;
   label: string;
 }>();
+
 const open = defineModel<boolean>("open", { default: false });
 const emit = defineEmits<{ confirmed: [] }>();
 
@@ -29,6 +30,7 @@ const confirming = ref(false);
 const parsed = computed(() =>
   text.value.trim() === "" ? null : parseStreamScoreProposal(text.value),
 );
+
 const proposal = computed(() => (parsed.value?.ok ? parsed.value.proposal : null));
 
 const sides = computed(() =>
@@ -37,6 +39,7 @@ const sides = computed(() =>
     label: participantName(participant),
   })),
 );
+
 const orangeId = computed(() =>
   sides.value.length === 2
     ? sides.value.find((side) => side.value !== blueId.value)?.value
@@ -51,6 +54,7 @@ function sideId(side: StreamScoreSide): string | undefined {
       return blueId.value === undefined ? undefined : orangeId.value;
     default: {
       const exhaustive: never = side;
+
       return exhaustive;
     }
   }
@@ -58,6 +62,7 @@ function sideId(side: StreamScoreSide): string | undefined {
 
 function sideName(side: StreamScoreSide): string {
   const id = sideId(side);
+
   return (
     sides.value.find((candidate) => candidate.value === id)?.label ??
     t(`page.tournaments.streamScore.side.${side}`)
@@ -81,7 +86,9 @@ const blockers = computed(() =>
 const results = computed(() => {
   const blue = sideId("blue");
   const orange = sideId("orange");
+
   if (!proposal.value || blue === undefined || orange === undefined) return null;
+
   return streamScoreSeriesResults(proposal.value.series, { blue, orange });
 });
 
@@ -91,6 +98,7 @@ function formatOffset(seconds: number): string {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const rest = String(Math.floor(seconds % 60)).padStart(2, "0");
+
   return hours > 0 ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}` : `${minutes}:${rest}`;
 }
 
@@ -113,8 +121,10 @@ watch(open, (isOpen) => {
 
 async function confirm() {
   const series = results.value;
+
   if (!series || !canConfirm.value) return;
   confirming.value = true;
+
   try {
     await setMatchResult(match.id, series);
     toast.add({ title: t("page.tournaments.streamScore.confirmed"), color: "success" });

@@ -3,11 +3,13 @@ import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
+
 setPageSeo({
   title: t("page.login.seoTitle"),
   description: t("page.login.seoDescription"),
   noIndex: true,
 });
+
 const { leaveIfSignedIn, submit, googleLogin } = useAuthFlow();
 
 interface LoginState {
@@ -27,6 +29,7 @@ onMounted(leaveIfSignedIn);
 
 async function onSubmit(event: Event) {
   event.preventDefault();
+
   if (pending.value) {
     return;
   }
@@ -40,6 +43,7 @@ async function onSubmit(event: Event) {
       { email: state.email.trim(), password: state.password },
       "user_logged_in",
     );
+
     if (!signedIn) {
       errorMessage.value = t("page.authentication.errors.loginFailed");
     }

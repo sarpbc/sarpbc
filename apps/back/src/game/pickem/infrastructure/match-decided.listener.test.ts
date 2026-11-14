@@ -8,10 +8,12 @@ import { MatchDecidedListener } from "./match-decided.listener";
 describe("MatchDecidedListener", () => {
   it("scores a match when the decided event is emitted on the application bus", async () => {
     const autoScoreMatch = vi.fn().mockResolvedValue(undefined);
+
     const module = await Test.createTestingModule({
       imports: [EventEmitterModule.forRoot()],
       providers: [MatchDecidedListener, { provide: PickemService, useValue: { autoScoreMatch } }],
     }).compile();
+
     await module.init();
 
     await module.get(EventEmitter2).emitAsync(MATCH_DECIDED, matchDecided("match"));

@@ -36,6 +36,7 @@ describe("stream-score-ocr cli", () => {
         templates: overlay.templates.filter((template) => template.char === "0"),
       }),
     );
+
     const frame = new FixtureRenderer({ width: 1280, height: 720 }, 5).render(
       {
         kind: "scorebug",
@@ -49,6 +50,7 @@ describe("stream-score-ocr cli", () => {
       },
       6,
     );
+
     const ppm = join(directory, "frame.ppm");
     await writeFile(
       ppm,
@@ -68,6 +70,7 @@ describe("stream-score-ocr cli", () => {
       "--clock",
       "+1:32",
     ]);
+
     const learned = parseOverlay(stdout);
     assert.deepEqual(
       [...new Set(learned.templates.map((template) => template.char))].sort(),

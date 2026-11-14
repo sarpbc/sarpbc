@@ -4,6 +4,7 @@ export async function getPatTokens(): Promise<PatToken[]> {
   const res = await apiFetch<{ tokens: PatToken[] }>("/pat/tokens", {
     method: "GET",
   });
+
   return res.tokens ?? [];
 }
 

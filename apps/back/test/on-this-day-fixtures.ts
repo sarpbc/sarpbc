@@ -13,7 +13,9 @@ export const kc = Object.assign(new Team(), {
   slug: "karmine-corp",
   imageUrl: "https://cdn.example/kc.png",
 });
+
 export const bds = Object.assign(new Team(), { id: "bds-id", name: "Team BDS", slug: "team-bds" });
+
 export const vatira = Object.assign(new Player(), {
   id: "vatira-id",
   name: "Vatira",
@@ -55,6 +57,7 @@ export function grandFinal(
 ) {
   const winner = side(`${tournament.id}-kc`, kc);
   const loser = side(`${tournament.id}-bds`, bds);
+
   return Object.assign(new Match(), {
     id: `${tournament.id}-final`,
     publicId: options.publicId ?? 42,
@@ -91,6 +94,7 @@ export function transfer(id: string, type: Transfer["type"], date: string): Tran
     team: kc,
     startDate: new Date(date),
   });
+
   return { id: `${id}:join`, type, date: new Date(date), contract, sourceUrl: null };
 }
 
@@ -120,9 +124,11 @@ export function onThisDaySources(
     wonOnDay: vi.fn(async () => data.titles ?? []),
     finalsOnDay: vi.fn(async () => data.finals ?? []),
   };
+
   const transfers = { onDay: vi.fn(async () => data.transfers ?? []) };
   const facts = { onDay: vi.fn(async () => data.facts ?? []) };
   const sources: OnThisDaySources = { tournaments, transfers, facts };
+
   return { sources, tournaments, transfers, facts };
 }
 
@@ -152,8 +158,10 @@ const LINKABLE = [
 
 export function memoryFactStore(): OnThisDayFactStore {
   const rows = new Map<string, OnThisDayFact>();
+
   const target = ({ kind, id }: OnThisDayFactLinkInput) =>
     LINKABLE.find((link) => link.kind === kind && link.id === id) ?? null;
+
   return {
     list: async () => [...rows.values()],
     onDay: async (month, day) =>

@@ -4,6 +4,7 @@ export async function getLiveStreamers(): Promise<LiveStreamer[]> {
   const res = await apiFetch<{ streamers?: LiveStreamer[] }>("/streamers/live", {
     method: "GET",
   });
+
   return res.streamers ?? [];
 }
 

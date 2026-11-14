@@ -11,6 +11,7 @@ const fakes = vi.hoisted(() => ({
 }));
 
 vi.mock("node:https", () => ({ request: fakes.request }));
+
 vi.mock("node:dns/promises", () => ({
   lookup: async (hostname: string) =>
     (fakes.addresses.get(hostname) ?? []).map((address) => ({
@@ -35,29 +36,40 @@ function resolveDns(addresses: Record<string, string[]>) {
 function serve(routes: Record<string, Reply>) {
   fakes.request.mockImplementation((url, options) => {
     const { lookup, signal } = options;
+
     if (!lookup || !signal) throw new Error("The request must use the guarded lookup and a signal");
+
     const req = Object.assign(new EventEmitter(), {
       end: () =>
         lookup(url.hostname, { all: true }, (error) => {
           if (error) {
             req.emit("error", error);
+
             return;
           }
+
           const reply = routes[url.href];
+
           if (!reply) throw new Error(`Unexpected request to ${url.href}`);
+
           if (reply === "hang") {
             signal.addEventListener("abort", () => req.emit("error", new Error("aborted")));
+
             return;
           }
+
           const response = Object.assign(new PassThrough(), {
             statusCode: reply.status,
             headers: reply.headers ?? {},
           });
+
           req.emit("response", response);
+
           for (const chunk of reply.body ?? []) response.write(chunk);
           response.end();
         }),
     });
+
     return req;
   });
 }

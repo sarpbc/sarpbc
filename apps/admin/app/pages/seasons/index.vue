@@ -32,6 +32,7 @@ const seasonToDelete = ref<SeasonSummary | null>(null);
 
 async function create(input: SeasonInput) {
   isCreating.value = true;
+
   try {
     await createSeason(input);
     isCreateOpen.value = false;

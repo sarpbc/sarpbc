@@ -29,18 +29,21 @@ import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListKind, MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";
 import type { EarningsLine } from "./earnings";
+
 /** A team's stint, open-ended while `to` is null. */
 export interface TeamTenure {
   teamId: string;
   from: Date;
   to: Date | null;
 }
+
 export interface AnniversaryDay {
   month: number;
   day: number;
   timeZone: string;
   beforeYear: number;
 }
+
 export interface TournamentQueries {
   find(options: TournamentListOptions): Promise<[Tournament[], number]>;
   searchByName(options: { name: string; limit?: number; offset?: number }): Promise<Tournament[]>;
@@ -62,6 +65,7 @@ export interface TournamentQueries {
   findByPandascoreId(id: number): Promise<Tournament | null>;
   leagues(options: { limit: number; offset?: number }): Promise<League[]>;
 }
+
 export interface MatchQueries {
   list(
     kind: MatchListKind,
@@ -86,6 +90,7 @@ export interface MatchQueries {
   byTeam(id: string): Promise<Match[]>;
   byTournament(id: string): Promise<Match[]>;
 }
+
 export interface TournamentWriter {
   load(id: string): Promise<Tournament | null>;
   byPandascoreId(id: number): Promise<Tournament | null>;
@@ -106,11 +111,13 @@ export interface TournamentWriter {
   playersExist(ids: string[]): Promise<boolean>;
   teamPlayers(teamId: string): Promise<Player[]>;
 }
+
 export interface EventStage {
   id: string;
   name: string;
   source: DataSource;
 }
+
 export interface EventWriter {
   load(id: string): Promise<TournamentEvent | null>;
   bySerieId(id: number): Promise<TournamentEvent | null>;
@@ -121,10 +128,12 @@ export interface EventWriter {
   save(event: TournamentEvent): Promise<void>;
   remove(id: string): Promise<void>;
 }
+
 export interface EventListing {
   event: TournamentEvent;
   stages: Tournament[];
 }
+
 export interface EventQueries {
   list(options: TournamentListOptions): Promise<[EventListing[], number]>;
   find(idOrSlug: string): Promise<EventListing | null>;
@@ -132,6 +141,7 @@ export interface EventQueries {
   unsynced(): Promise<EventListing[]>;
   stageId(eventSlug: string, stageSlug: string): Promise<string | null>;
 }
+
 export interface MatchWriter {
   load(id: string): Promise<Match | null>;
   byPandascoreId(id: number): Promise<Match | null>;
@@ -143,6 +153,7 @@ export interface MatchWriter {
   participants(tournamentId: string): Promise<TournamentParticipant[]>;
   bracket(tournamentId: string): Promise<StageBracket>;
 }
+
 export interface RosterIdentityWriter {
   upsertTeam(command: UpsertTeamCommand): Promise<{ id: string }>;
   upsertPlayer(
@@ -150,12 +161,15 @@ export interface RosterIdentityWriter {
     currentTeamId?: string | null,
   ): Promise<{ id: string }>;
 }
+
 export type AwardParticipantRef = { participantId: string } | { teamId: string };
+
 export interface AwardContext {
   tournament: { id: string; name: string; source: DataSource } | null;
   participant: { id: string; name: string; playerIds: string[] } | null;
   player: { id: string; name: string; slug: string } | null;
 }
+
 export interface AwardWriter {
   context(
     tournamentId: string,
@@ -171,48 +185,59 @@ export interface AwardWriter {
   }): Promise<TournamentAwardListItem>;
   remove(tournamentId: string, awardId: string): Promise<boolean>;
 }
+
 export interface AwardQueries {
   byPlayer(id: string): Promise<PlayerProfileAward[] | null>;
   byTournament(id: string): Promise<TournamentAwardListItem[] | null>;
 }
+
 export interface EarningsScope {
   redistributableOnly: boolean;
 }
+
 export interface PrizeQueries {
   tournamentSource(id: string): Promise<DataSource | null>;
   byTournament(id: string): Promise<TournamentPrizes | null>;
   byTeam(id: string, scope: EarningsScope): Promise<EarningsLine[]>;
   byPlayer(id: string, scope: EarningsScope): Promise<EarningsLine[]>;
 }
+
 export interface PrizeParticipant {
   teamId: string;
   playerIds: string[];
 }
+
 export interface PrizeWriter {
   tournamentExists(id: string): Promise<boolean>;
   participants(tournamentId: string): Promise<PrizeParticipant[]>;
   entries(tournamentId: string): Promise<PrizeEntry[]>;
   replace(tournamentId: string, entries: PrizeEntry[]): Promise<void>;
 }
+
 export interface PrizeTransaction {
   run<T>(work: (scope: Pick<CompetitionWriteScope, "prizes">) => Promise<T>): Promise<T>;
 }
+
 export interface AwardTransaction {
   run<T>(work: (scope: Pick<CompetitionWriteScope, "awards">) => Promise<T>): Promise<T>;
 }
+
 export interface PlayerLineupRow {
   matchId: string;
   participantId: string;
   rosterIds: string[];
 }
+
 export interface LineupQueries {
   byMatch(matchId: string): Promise<LineupRow[]>;
   byPlayer(playerId: string): Promise<PlayerLineupRow[]>;
 }
+
 export interface LineupWriter {
   activePlayersExist(ids: string[]): Promise<boolean>;
   replace(matchId: string, lineups: MatchLineupInput[]): Promise<void>;
 }
+
 export interface CompetitionWriteScope {
   tournaments: TournamentWriter;
   events: EventWriter;
@@ -222,19 +247,24 @@ export interface CompetitionWriteScope {
   prizes: PrizeWriter;
   lineups: LineupWriter;
 }
+
 export interface CompetitionTransaction {
   run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T>;
 }
+
 export interface SyncCursor {
   getLastSyncAt(): Promise<Date | null>;
   setLastSyncAt(date: Date): Promise<void>;
 }
+
 export interface CompetitionCache {
   invalidateTournament(id: string): Promise<void>;
 }
+
 export interface CompetitionEvents {
   publish(event: MatchDecided): Promise<void>;
 }
+
 export interface CompetitionDiagnostics {
   error(message: string, cause: unknown): void;
   warn(message: string, context: Record<string, string | number | readonly string[]>): void;

@@ -12,6 +12,7 @@ import type {
   TranslationRecord,
 } from "../../application/models";
 import type { PostStore, TopicStore } from "../../application/ports";
+
 export class MikroPostStore implements PostStore {
   private readonly rows: PostRepository;
   constructor(private readonly em: EntityManager) {
@@ -25,14 +26,17 @@ export class MikroPostStore implements PostStore {
   }
   async findById(id: string) {
     const row = await this.rows.findById(id);
+
     return row ? postSnapshot(row) : null;
   }
   async findWithDetails(ref: EntityRef) {
     const row = await this.rows.findWithDetails(ref);
+
     return row ? postSnapshot(row) : null;
   }
   async findLatestByUser(id: string) {
     const row = await this.rows.findLatestByUser(id);
+
     return row ? postSnapshot(row) : null;
   }
   findRecentActivity(limit: number) {
@@ -67,9 +71,11 @@ export class MikroPostStore implements PostStore {
   }
   async delete(post: PostRecord) {
     const row = await this.rows.findById(post.id);
+
     if (row) this.em.remove(row);
   }
 }
+
 export class MikroTopicStore implements TopicStore {
   private readonly rows: TopicRepository;
   constructor(private readonly em: EntityManager) {
@@ -80,10 +86,12 @@ export class MikroTopicStore implements TopicStore {
   }
   async findById(id: string) {
     const row = await this.rows.findById(id);
+
     return row ? topicSnapshot(row) : null;
   }
   async findByTitle(title: string) {
     const row = await this.rows.findByTitle(title);
+
     return row ? topicSnapshot(row) : null;
   }
   async save(model: TopicRecord) {

@@ -36,12 +36,14 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
       recipient: { id: recipientId },
       readAt: null,
     };
+
     if (ids?.length) {
       where.id = { $in: ids };
     }
 
     const notifications = await this.find(where);
     const now = new Date();
+
     for (const notification of notifications) {
       notification.readAt = now;
     }

@@ -99,6 +99,7 @@ describe("client address", () => {
   it("accepts a public forwarded client and ignores a private one", () => {
     const forwarded = (address: string) =>
       forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: address } });
+
     assert.equal(forwarded("203.0.113.10"), "203.0.113.10");
     assert.equal(forwarded("10.1.1.1"), undefined);
     assert.equal(forwarded("100.80.0.4"), undefined);

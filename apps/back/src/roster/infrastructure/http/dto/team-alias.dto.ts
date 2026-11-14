@@ -11,4 +11,5 @@ export const TeamAliasDto = z.strictObject({
   logoUrl: z.string().trim().max(TEAM_ALIAS_URL_MAX_LENGTH).nullable(),
   pandascoreId: z.int().positive().nullable(),
 });
+
 export type TeamAliasDto = z.infer<typeof TeamAliasDto>;

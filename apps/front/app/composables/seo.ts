@@ -4,8 +4,10 @@ import { resolveSiteUrl } from "~/utils/siteUrl";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
+
 const DEFAULT_DESCRIPTION =
   "Follow Rocket League esports on sarpbc.org: live RLCS schedules, match results, team and player pages, pick'ems, Air Riddle, and a bilingual community forum.";
+
 const DEFAULT_SITE_NAME = "sarpbc.org";
 const DEFAULT_IMAGE_PATH = "/og-image.jpg";
 const OG_IMAGE_WIDTH = 1200;
@@ -41,21 +43,27 @@ export const useSarpbcSeo = () => {
 
   const resolveImageType = (imageUrl: string): OgImageMime | undefined => {
     const path = imageUrl.split("?")[0]?.toLowerCase() ?? "";
+
     if (path.endsWith(".png")) {
       return "image/png";
     }
+
     if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
       return "image/jpeg";
     }
+
     if (path.endsWith(".webp")) {
       return "image/webp";
     }
+
     if (path.endsWith(".gif")) {
       return "image/gif";
     }
+
     if (path.endsWith(".avif")) {
       return "image/avif";
     }
+
     return undefined;
   };
 
@@ -75,6 +83,7 @@ export const useSarpbcSeo = () => {
 
     useHead(() => {
       const cleanPath = route.path.replace(/^\/fr(?=\/|$)/, "") || "/";
+
       const alternateLinks = locales.value.map((loc) => ({
         rel: "alternate" as const,
         hreflang: loc.language,
@@ -120,9 +129,11 @@ export const useSarpbcSeo = () => {
       twitterImage: image,
       robots: noIndex ? "noindex, nofollow" : "index, follow",
     };
+
     if (imageType) {
       seoMeta.ogImageType = imageType;
     }
+
     useSeoMeta({ ...seoMeta, ogUrl: getCanonicalUrl });
   };
 

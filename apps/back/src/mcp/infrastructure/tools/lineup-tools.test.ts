@@ -6,6 +6,7 @@ import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
 const SOURCE = "https://example.com/fake-cup/lineups";
+
 const LINEUPS = [
   {
     participantId: "part-fake-a",
@@ -24,11 +25,14 @@ function setup(role: StaffRole = "admin") {
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
+
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === "set_match_lineups",
   );
+
   if (!tool) throw new Error("set_match_lineups is not defined");
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
+
   return { rosterProposalService, tool, call };
 }
 

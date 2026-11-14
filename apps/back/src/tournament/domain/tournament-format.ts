@@ -29,15 +29,19 @@ export function assertLineupFitsFormat(format: TournamentFormat, lineup: Partici
       break;
     default: {
       const exhaustive: never = format;
+
       return exhaustive;
     }
   }
+
   const size = TEAM_SIZE_BY_FORMAT[format];
+
   if (lineup.playerGroups.some((group) => new Set(group).size !== size))
     throw new InvalidInputError(
       `Each participant of a ${format} tournament without a team has exactly ${size} different player${size === 1 ? "" : "s"}.`,
     );
   const players = lineup.playerGroups.flat();
+
   if (new Set(players).size !== players.length)
     throw new InvalidInputError("A player can only be in one participant of a tournament.");
 }

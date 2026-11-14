@@ -71,6 +71,7 @@ export function buildManualTournamentPayload(
   };
 
   const trimmedSlug = state.slug.trim();
+
   if (!editsEventSlug(state, original)) {
     payload.eventId = state.eventId;
   } else if (trimmedSlug && trimmedSlug !== original?.event.slug) {
@@ -78,6 +79,7 @@ export function buildManualTournamentPayload(
   }
 
   const trimmedTier = state.tier.trim();
+
   if (original) {
     payload.tier = trimmedTier || null;
   } else if (trimmedTier) {

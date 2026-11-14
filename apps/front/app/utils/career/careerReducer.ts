@@ -88,6 +88,7 @@ function assertNever(value: never): never {
 
 export function createInitialCareerState(): CareerState {
   const id = crypto.randomUUID();
+
   return {
     id,
     phase: "menu",
@@ -128,6 +129,7 @@ function currentTeamName(state: CareerState): string {
 
 function fieldPlayer(state: CareerState, skip: { skipRegionals: number; skipMajor: boolean }) {
   if (!state.role) throw new Error("Career role required for simulation");
+
   return {
     teamId: state.currentTeamId,
     rating: state.stats.rating,
@@ -140,10 +142,13 @@ function fieldPlayer(state: CareerState, skip: { skipRegionals: number; skipMajo
 
 function pickNextEvent(state: CareerState): CareerState {
   const pool = state.currentStage === "worlds" ? "worlds" : "split";
+
   const seed = hashString(
     `${state.id}:event:${state.currentSeason}:${state.currentStage}:${state.eventsResolvedForStage}`,
   );
+
   const event = pickRandomEvent(pool, state.usedEventIds, seed, state.currentSeason);
+
   return {
     ...state,
     currentEventId: event.id,
@@ -161,6 +166,7 @@ function startStageEvents(state: CareerState): CareerState {
     pendingSkipRegionals: 0,
     pendingSkipMajor: false,
   };
+
   return pickNextEvent(next);
 }
 
@@ -177,11 +183,13 @@ function runStageSimulation(
       const split = getSplitNumber(stage) ?? 1;
       const player = fieldPlayer(next, skip);
       const field = simulateSplitField(next.id, next.currentSeason, split, next.world, player);
+
       const sim = field.get(next.currentTeamId) ?? {
         regionals: [],
         major: null,
         points: 0,
       };
+
       next = {
         ...next,
         stats: applyStatDelta(next.stats, getSplitFeedback(sim)),
@@ -204,12 +212,15 @@ function runStageSimulation(
       };
       break;
     }
+
     case "worlds": {
       const player = fieldPlayer(next, skip);
       const ranking = computeStateRankings(next);
+
       const qualified = ranking.teams
         .filter((entry) => qualifiesForWorlds(entry.rank, ranking.teams.length))
         .map((entry) => entry.team.id);
+
       const placements = simulateWorldsField(
         next.id,
         next.currentSeason,
@@ -217,6 +228,7 @@ function runStageSimulation(
         qualified,
         player,
       );
+
       const placement = placements.get(next.currentTeamId) ?? "group";
       next = {
         ...next,
@@ -225,6 +237,7 @@ function runStageSimulation(
       };
       break;
     }
+
     default:
       assertNever(stage);
   }
@@ -238,6 +251,7 @@ function runStageSimulation(
 
 function endSeason(state: CareerState): CareerState {
   const worlds = state.currentWorlds;
+
   const record: CareerSeasonRecord = {
     season: state.currentSeason,
     teamId: state.currentTeamId,
@@ -247,11 +261,14 @@ function endSeason(state: CareerState): CareerState {
     points: computeCircuitPoints(state.currentSplits),
     ratingEnd: state.stats.rating,
   };
+
   const rankings = computeStateRankings({
     ...state,
     seasonRecords: [...state.seasonRecords, record],
   });
+
   const offerSeed = hashString(`${state.id}:offer:${state.currentSeason}`);
+
   const resolution = resolveOffseasonContracts(
     state.currentSeason,
     record.points,
@@ -284,6 +301,7 @@ function endSeason(state: CareerState): CareerState {
 function goToWorldsOrEndSeason(state: CareerState): CareerState {
   const ranking = computeStateRankings(state);
   const rank = getTeamRank(ranking, state.currentTeamId);
+
   const qualified =
     state.currentSplits.length >= SPLITS_PER_SEASON &&
     rank != null &&
@@ -292,6 +310,7 @@ function goToWorldsOrEndSeason(state: CareerState): CareerState {
   if (qualified) {
     return startStageEvents({ ...state, currentStage: "worlds" });
   }
+
   return endSeason(state);
 }
 
@@ -320,6 +339,7 @@ function finishCareer(state: CareerState, destiny: CareerDestiny): CareerReduceR
   }
 
   const trophies = deriveTrophies(state.seasonRecords);
+
   const result: CareerResult = {
     id: state.id,
     playerName: state.playerName || DEFAULT_PLAYER_NAME,
@@ -358,11 +378,13 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
   switch (action.type) {
     case "START_ONBOARDING": {
       const fresh = createInitialCareerState();
+
       return {
         state: { ...fresh, phase: "onboarding", resumePhase: null },
         finishedResult: null,
       };
     }
+
     case "CONTINUE_FROM_MENU": {
       if (state.resumePhase && state.resumePhase !== "menu") {
         return {
@@ -370,11 +392,14 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
           finishedResult: null,
         };
       }
+
       if (state.phase === "onboarding") {
         return { state: { ...state, resumePhase: null }, finishedResult: null };
       }
+
       return { state, finishedResult: null };
     }
+
     case "RETURN_TO_MENU":
       return {
         state: {
@@ -411,11 +436,14 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
       return { state: { ...state, background: action.background }, finishedResult: null };
     case "COMPLETE_ONBOARDING": {
       const { region, country, role, background } = state;
+
       if (!region || !country || !role || !background) {
         return { state, finishedResult: null };
       }
+
       const stats = getStartingStats(background, role);
       const teamId = pickStartingTeam(region);
+
       const world = moveUserToTeam(
         state.world,
         teamId,
@@ -423,6 +451,7 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
         stats.rating,
         hashString(`${state.id}:start`),
       );
+
       return {
         state: {
           ...state,
@@ -436,6 +465,7 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
         finishedResult: null,
       };
     }
+
     case "START_SEASON":
       return {
         state: startStageEvents({
@@ -448,18 +478,22 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
       };
     case "RESOLVE_EVENT_CHOICE": {
       const eventId = state.currentEventId;
+
       if (!eventId) return { state, finishedResult: null };
 
       const event = getEventById(eventId);
       const choice = event?.choices.find((entry) => entry.id === action.choiceId);
+
       if (!choice) return { state, finishedResult: null };
 
       const before = state.stats;
       const context = buildEventOutcomeContext(state, choice);
       const resolved = resolveEventOutcome(context);
+
       const rng = createRng(
         hashString(`${state.id}:mythic:${eventId}:${action.choiceId}:${state.currentSeason}`),
       );
+
       const nextStats = applyStatDelta(before, resolved.delta, rng);
       const destiny = choice.destiny ?? {};
 
@@ -473,6 +507,7 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
         },
         destiny,
       };
+
       if (resolved.failed) lastEventOutcome.failed = true;
 
       return {
@@ -486,10 +521,12 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
         finishedResult: null,
       };
     }
+
     case "CONTINUE_AFTER_EVENT_OUTCOME": {
       const outcome = state.lastEventOutcome;
       const event = outcome ? getEventById(outcome.eventId) : undefined;
       const choice = event?.choices.find((entry) => entry.id === outcome?.choiceId);
+
       let next: CareerState = {
         ...state,
         pendingSkipRegionals: Math.max(state.pendingSkipRegionals, choice?.skipRegionals ?? 0),
@@ -511,8 +548,10 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
 
       return { state: next, finishedResult: null };
     }
+
     case "CONTINUE_AFTER_STAGE_RESULT": {
       const stage = state.currentStage;
+
       switch (stage) {
         case "split1":
           return {
@@ -527,16 +566,20 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
           assertNever(stage);
       }
     }
+
     case "RESOLVE_OFFSEASON_DESTINY": {
       if (!(action.choiceId in OFFSEASON_DESTINY_CHOICES)) {
         return { state, finishedResult: null };
       }
+
       const id = action.choiceId as OffseasonDestinyChoiceId;
+
       const next = {
         ...state,
         destinyLeanings: applyDestinyLeanings(state.destinyLeanings, OFFSEASON_DESTINY_CHOICES[id]),
         offseasonDestinyPending: false,
       };
+
       switch (id) {
         case "quit":
         case "streamer":
@@ -547,10 +590,12 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
           assertNever(id);
       }
     }
+
     case "ACCEPT_OFFER": {
       if (!state.pendingOfferTeamIds.includes(action.teamId)) {
         return { state, finishedResult: null };
       }
+
       const world = moveUserToTeam(
         state.world,
         action.teamId,
@@ -558,19 +603,24 @@ export function reduceCareerState(state: CareerState, action: CareerAction): Car
         state.stats.rating,
         hashString(`${state.id}:transfer:${state.currentSeason}:${action.teamId}`),
       );
+
       return {
         state: advanceToNextSeason({ ...state, world, currentTeamId: action.teamId }),
         finishedResult: null,
       };
     }
+
     case "STAY_WITH_TEAM": {
       if (!state.renewalOffered) return { state, finishedResult: null };
+
       return { state: advanceToNextSeason(state), finishedResult: null };
     }
+
     case "RETIRE_CAREER":
       return finishCareer(state, getRecommendedDestiny(state.destinyLeanings));
     default: {
       const _exhaustive: never = action;
+
       return _exhaustive;
     }
   }
@@ -580,7 +630,9 @@ export function canContinueCareer(state: CareerState): boolean {
   if (state.resumePhase && state.resumePhase !== "menu" && state.resumePhase !== "career_end") {
     return true;
   }
+
   if (state.phase !== "onboarding" && state.phase !== "menu") return true;
+
   return state.onboardingStep !== "intro" || state.playerName.length > 0 || state.region !== null;
 }
 

@@ -10,7 +10,9 @@ describe("TransferController", () => {
     imageUrl: "https://cdn/kc.png",
     logoDarkUrl: "https://cdn.sarpbc.test/teams/kc/logo-dark-abc.webp",
   });
+
   const zen = Object.assign(new Player(), { id: "zen", name: "zen", slug: "zen", team: kc });
+
   const contract = Object.assign(new Contract(), {
     id: "c1",
     player: zen,
@@ -19,6 +21,7 @@ describe("TransferController", () => {
     role: "active",
     joinSourceUrl: "https://x.com/KarmineCorp/status/1",
   });
+
   const transfers = { findAndCount: vi.fn() };
   const teams = { findBySlug: vi.fn() };
   const players = { findBySlug: vi.fn() };

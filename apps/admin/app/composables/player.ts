@@ -40,22 +40,27 @@ export async function getAllPlayers(query: {
     method: "GET",
     query,
   });
+
   return { players: res.players, total: res.count };
 }
 
 export async function getPlayerById(id: string): Promise<Player> {
   const res = await apiFetch<{ player: Player | null }>(`/player/${id}`, { method: "GET" });
+
   if (!res.player) throw createError({ statusCode: 404, message: "Player not found" });
+
   return res.player;
 }
 
 export async function createPlayer(body: CreatePlayerDto): Promise<Player> {
   const res = await apiFetch<{ player: Player }>("/player", { method: "POST", body });
+
   return res.player;
 }
 
 export async function updatePlayer(id: string, body: UpdatePlayerDto): Promise<Player> {
   const res = await apiFetch<{ player: Player }>(`/player/${id}`, { method: "PATCH", body });
+
   return res.player;
 }
 
@@ -67,6 +72,7 @@ export async function getPlayerContracts(playerId: string): Promise<PlayerContra
   const res = await apiFetch<{ contracts: PlayerContract[] }>(`/player/${playerId}/contract`, {
     method: "GET",
   });
+
   return res.contracts;
 }
 
@@ -78,6 +84,7 @@ export async function createPlayerContract(
     method: "POST",
     body,
   });
+
   return res.contract;
 }
 
@@ -90,6 +97,7 @@ export async function updatePlayerContract(
     `/player/${playerId}/contract/${contractId}`,
     { method: "PATCH", body },
   );
+
   return res.contract;
 }
 

@@ -17,6 +17,7 @@ export class ModerationController {
     @Query({ schema: ListModerationRepliesQueryDto }) query: ListModerationRepliesQueryDto,
   ): Promise<{ replies: ModerationReply[] }> {
     const replies = await this.moderationService.listRecentReplies(query.limit);
+
     return {
       replies: replies.map((reply) => ({
         ...reply,

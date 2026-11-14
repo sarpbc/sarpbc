@@ -12,9 +12,11 @@ const editMatchBlockKey: InjectionKey<EditMatchBlock> = Symbol("editMatchBlock")
 
 export function useEditMatchBlock(): EditMatchBlock {
   const edit = inject(editMatchBlockKey);
+
   if (!edit) {
     throw new Error("useEditMatchBlock needs an ancestor that calls useMatchBlockEditor");
   }
+
   return edit;
 }
 
@@ -58,6 +60,7 @@ export function useMatchBlockEditor() {
       canExecute: () => true,
       execute: (editor: Editor) => {
         insertMatchBlock(editor);
+
         return editor.chain();
       },
       isActive: () => false,

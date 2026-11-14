@@ -21,8 +21,10 @@ export function displayMatchScore(score: number | null, status: MatchStatus): st
   if (!shouldShowMatchScores(status)) {
     return null;
   }
+
   if (score === null) {
     return "–";
   }
+
   return String(score);
 }

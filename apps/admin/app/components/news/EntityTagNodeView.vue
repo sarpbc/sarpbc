@@ -6,6 +6,7 @@ const props = defineProps<NodeViewProps>();
 
 const kind = computed(() => (props.node.type.name === "teamTag" ? "team" : "player"));
 const label = computed(() => String(props.node.attrs.label ?? ""));
+
 const icon = computed(() =>
   kind.value === "team" ? "i-fluent-people-team-24-regular" : "i-fluent-person-24-regular",
 );

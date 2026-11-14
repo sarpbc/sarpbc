@@ -51,6 +51,7 @@ const block = computed((): MatchBlockSelector | null => {
   if (!source.value) {
     return null;
   }
+
   switch (kind.value) {
     case "match":
       return matchIds.value[0] ? { kind: "match", id: matchIds.value[0] } : null;
@@ -62,6 +63,7 @@ const block = computed((): MatchBlockSelector | null => {
       return { kind: "team", id: source.value.id, limit: limit.value };
     default: {
       const exhaustive: never = kind.value;
+
       return exhaustive;
     }
   }
@@ -71,6 +73,7 @@ function matchLabel(match: TournamentMatchListItem): string {
   const [teamA, teamB] = match.participants;
   const tbd = t("newsTag.matchTbd");
   const teams = `${teamA ? participantName(teamA) : tbd} – ${teamB ? participantName(teamB) : tbd}`;
+
   return match.beginAt
     ? `${teams} · ${dateFormatter.value.format(new Date(match.beginAt))}`
     : teams;
@@ -79,14 +82,18 @@ function matchLabel(match: TournamentMatchListItem): string {
 async function resolveSource(initial: MatchBlockSelector): Promise<Selection | null> {
   if (initial.kind === "team") {
     const team = await getTeamById(initial.id);
+
     return { id: team.id, label: team.name };
   }
+
   const key = newsMatchBlockKey(initial);
   const response = await getMatchBlocks(key);
   const tournament = response.blocks[key]?.[0]?.tournament;
+
   if (tournament) {
     return { id: tournament.id, label: tournamentStageLabel(tournament) };
   }
+
   return initial.kind === "tournament" ? { id: initial.id, label: initial.id } : null;
 }
 
@@ -103,6 +110,7 @@ async function reset() {
   query.value = "";
   results.value = [];
   matches.value = [];
+
   if (initial) {
     try {
       source.value = await resolveSource(initial);
@@ -127,6 +135,7 @@ watch(kind, (next, previous) => {
     results.value = [];
     query.value = "";
   }
+
   if (next === "match") {
     matchIds.value = matchIds.value.slice(0, 1);
   }
@@ -134,10 +143,13 @@ watch(kind, (next, previous) => {
 
 watch([source, picksMatches], async ([selected, picking]) => {
   matches.value = [];
+
   if (!selected || !picking) {
     return;
   }
+
   loadingMatches.value = true;
+
   try {
     matches.value = await getTournamentMatches(selected.id);
   } catch (loadError) {
@@ -149,11 +161,15 @@ watch([source, picksMatches], async ([selected, picking]) => {
 
 async function runSearch(value: string) {
   const trimmed = value.trim();
+
   if (!trimmed) {
     results.value = [];
+
     return;
   }
+
   searching.value = true;
+
   try {
     if (searchesTeams.value) {
       const teams = await searchTeams(trimmed);
@@ -185,8 +201,10 @@ function choose(selection: Selection) {
 function toggleMatch(id: string, checked: boolean | "indeterminate") {
   if (kind.value === "match") {
     matchIds.value = checked === true ? [id] : [];
+
     return;
   }
+
   matchIds.value =
     checked === true
       ? [...matchIds.value.filter((existing) => existing !== id), id]

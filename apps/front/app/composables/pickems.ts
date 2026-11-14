@@ -28,6 +28,7 @@ export async function getActivePickemTournaments(limit = 1): Promise<TournamentL
     pickems: true,
     activeOnly: true,
   });
+
   return tournaments.filter(isPickemTournamentActive).slice(0, limit);
 }
 
@@ -74,6 +75,7 @@ export async function getPickemLeaderboard(
       method: "GET",
     },
   );
+
   return res.leaderboard ?? [];
 }
 

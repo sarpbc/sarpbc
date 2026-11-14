@@ -17,8 +17,11 @@ export function isPickemTournamentActive(
   now = Date.now(),
 ): boolean {
   if (!tournament.pickemsEnabled) return false;
+
   if (hasTournamentWinner(tournament)) return false;
+
   if (tournament.endAt && new Date(tournament.endAt).getTime() < now) return false;
+
   return true;
 }
 
@@ -41,10 +44,14 @@ export function getPickOutcome(
   pick: PickemPickState | undefined,
 ): "correct" | "incorrect" | "pending" | "none" {
   if (!pick) return "none";
+
   if (!pick.scored) return "pending";
+
   if (pick.points != null && pick.points > 0) return "correct";
+
   if (match.winnerId) {
     return pick.pickedParticipant === match.winnerId ? "correct" : "incorrect";
   }
+
   return pick.points === 0 ? "incorrect" : "pending";
 }

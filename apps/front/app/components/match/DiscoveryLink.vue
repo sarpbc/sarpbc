@@ -23,6 +23,7 @@ const linkClass = computed(() => ["group block interactive-surface", attrs.class
 
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
+
   return rest;
 });
 
@@ -30,6 +31,7 @@ function onClick() {
   if (!source) {
     return;
   }
+
   trackMatchRowClicked({ matchId: match.id, source, status });
 }
 </script>

@@ -32,6 +32,7 @@ const open = computed({
 const pickable = computed(() =>
   props.matches.filter((match) => (match.participants?.length ?? 0) === 2),
 );
+
 const match = computed(() => pickable.value.find((candidate) => candidate.id === matchId.value));
 
 const matchOptions = computed(() =>
@@ -42,6 +43,7 @@ const gameOptions = computed(() => {
   const taken = new Set(
     props.games.filter((game) => game.matchId === matchId.value).map((game) => game.number),
   );
+
   return Array.from({ length: maxVodGame(match.value?.numberOfGames) }, (_, index) => ({
     value: index + 1,
     label: taken.has(index + 1)
@@ -62,8 +64,10 @@ watch(target, (item) => {
   if (item === null) return;
   shown.value = item;
   const known = pickable.value.some((candidate) => candidate.id === item.matchId);
+
   const blue =
     item.status === "unmatched" || item.status === "failed" ? item.blueParticipantId : null;
+
   matchId.value = known ? (item.matchId ?? undefined) : undefined;
   blueParticipantId.value = known ? (blue ?? undefined) : undefined;
   gameNumber.value = known && item.status === "failed" ? item.gameNumber : undefined;
@@ -72,6 +76,7 @@ watch(target, (item) => {
 watch(matchId, () => {
   if (!match.value?.participants.some((participant) => participant.id === blueParticipantId.value))
     blueParticipantId.value = undefined;
+
   if (gameOptions.value.find((option) => option.value === gameNumber.value)?.disabled !== false)
     gameNumber.value = undefined;
 });
@@ -82,8 +87,10 @@ const canSave = computed(
 
 async function save() {
   const item = target.value;
+
   if (!item || !matchId.value || !gameNumber.value || !blueParticipantId.value) return;
   saving.value = true;
+
   try {
     const game = await attachStatsReplay(props.tournamentId, {
       matchId: matchId.value,
@@ -91,6 +98,7 @@ async function save() {
       gameNumber: gameNumber.value,
       blueParticipantId: blueParticipantId.value,
     });
+
     toast.add({
       title: t("page.tournaments.statsAttach.saved", { number: game.number }),
       color: "success",

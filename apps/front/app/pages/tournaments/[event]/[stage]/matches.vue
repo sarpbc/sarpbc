@@ -27,6 +27,7 @@ const {
 
 const groupedMatches = computed(() => {
   const all = matches.value ?? [];
+
   return {
     upcoming: groupByDay(
       all.filter((match) => !match.endAt),
@@ -45,6 +46,7 @@ const isFinished = computed(() => getTournamentStatus(tournament) === "finished"
 
 const displayGroupedMatches = computed(() => {
   const { upcoming, completed } = groupedMatches.value;
+
   return {
     upcoming: isFinished.value ? [] : upcoming,
     completed,
@@ -67,6 +69,7 @@ function formatDayHeader(group: { date: Date | null; dateKey: string }) {
   if (!group.date) {
     return t("page.tournaments.id.matchSections.unknownDate");
   }
+
   return formatDayHeaderDate(group.date, locale.value);
 }
 </script>

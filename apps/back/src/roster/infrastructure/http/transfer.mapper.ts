@@ -4,6 +4,7 @@ import type { Transfer } from "../../domain/transfer";
 
 export function mapTransfer({ id, type, date, sourceUrl, contract }: Transfer): TransferResponse {
   const { player, team } = contract;
+
   return {
     id,
     type,

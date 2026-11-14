@@ -25,6 +25,7 @@ function lookupStringMap(map: StringLookup, key: string): string | undefined {
   for (const [entryKey, value] of Object.entries(map)) {
     if (entryKey === key) return value;
   }
+
   return undefined;
 }
 
@@ -216,6 +217,7 @@ const getContinent = (countryCode: string): string => {
     TV: "OC",
     VU: "OC",
   } as const;
+
   return lookupStringMap(continentMap, countryCode.toUpperCase()) ?? "UNKNOWN";
 };
 
@@ -241,12 +243,14 @@ const flagToDisplay = computed(() => {
     const upperNationality = nationality.toUpperCase();
     nationalityCounts[upperNationality] = (nationalityCounts[upperNationality] || 0) + 1;
     const continent = getContinent(upperNationality);
+
     if (continent !== "UNKNOWN") {
       continentCounts[continent] = (continentCounts[continent] || 0) + 1;
     }
   });
 
   const totalCount = validNationalities.length;
+
   for (const [nationality, count] of Object.entries(nationalityCounts)) {
     if (count / totalCount > 0.5) {
       return nationality.toLowerCase();
@@ -257,6 +261,7 @@ const flagToDisplay = computed(() => {
     const mostCommonNationality = Object.entries(nationalityCounts).sort(
       ([, a], [, b]) => b - a,
     )[0]?.[0];
+
     return mostCommonNationality?.toLowerCase() || null;
   }
 

@@ -25,9 +25,11 @@ if (!country.value) {
 
 const name = computed(() => (country.value ? countryName(country.value.code) : ""));
 const currentPage = computed(() => Math.floor(offset.value / MATCH_LIST_PAGE_SIZE) + 1);
+
 const totalPages = computed(() =>
   Math.max(1, Math.ceil((country.value?.matchTotal ?? 0) / MATCH_LIST_PAGE_SIZE)),
 );
+
 const hasNext = computed(
   () => offset.value + MATCH_LIST_PAGE_SIZE < (country.value?.matchTotal ?? 0),
 );

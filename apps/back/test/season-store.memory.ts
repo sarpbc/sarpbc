@@ -57,23 +57,28 @@ export function memorySeasonStore() {
   const seasons = new Map<string, SeasonRecord>();
   const awards: StoredAward[] = [];
   const participants: StoredParticipant[] = [];
+
   const players = new Map<string, SeasonAwardPlayer>([
     ["zen", { id: "zen", name: "zen", mergedIntoId: null }],
     ["vatira", { id: "vatira", name: "Vatira", mergedIntoId: null }],
     ["old-zen", { id: "old-zen", name: "zen", mergedIntoId: "zen" }],
   ]);
+
   const teams = new Map<string, SeasonParticipantTeam>([
     ["vitality", { id: "vitality", name: "Team Vitality", mergedIntoId: null }],
     ["falcons", { id: "falcons", name: "Team Falcons", mergedIntoId: null }],
     ["old-vitality", { id: "old-vitality", name: "Vitality", mergedIntoId: "vitality" }],
   ]);
+
   let sequence = 0;
   const nextId = (prefix: string) => `${prefix}-${++sequence}`;
   const stripAward = ({ seasonId: _seasonId, ...award }: StoredAward): SeasonAward => award;
+
   const stripParticipant = ({
     seasonId: _seasonId,
     ...participant
   }: StoredParticipant): SeasonParticipant => ({ ...participant, path: [...participant.path] });
+
   const teamOf = (id: string): SeasonTeam =>
     Object.values(SEASON_TEAMS).find((candidate) => candidate.id === id) ?? team(id, id);
 
@@ -114,6 +119,7 @@ export function memorySeasonStore() {
         .flatMap((award) => {
           const season = seasons.get(award.seasonId);
           const { id, awardType, region, presentedBy, sourceUrl } = award;
+
           return season
             ? [
                 {
@@ -140,15 +146,19 @@ export function memorySeasonStore() {
         seasonId,
         player: { id: playerId, name: playerId, slug: playerId },
       };
+
       awards.push(award);
+
       return stripAward(award);
     },
     removeAward: async (seasonId, awardId) => {
       const index = awards.findIndex(
         (award) => award.seasonId === seasonId && award.id === awardId,
       );
+
       if (index < 0) return false;
       awards.splice(index, 1);
+
       return true;
     },
     team: async (id) => teams.get(id) ?? null,
@@ -162,6 +172,7 @@ export function memorySeasonStore() {
       const found = participants.find(
         (participant) => participant.seasonId === seasonId && participant.id === participantId,
       );
+
       return found ? stripParticipant(found) : null;
     },
     participantTaken: async (seasonId, teamId) =>
@@ -176,19 +187,24 @@ export function memorySeasonStore() {
         pathNote,
         path: [],
       };
+
       participants.push(participant);
+
       return stripParticipant(participant);
     },
     updatePathNote: async (participantId, pathNote) => {
       const found = participants.find((participant) => participant.id === participantId);
+
       if (found) found.pathNote = pathNote;
     },
     removeParticipant: async (seasonId, participantId) => {
       const index = participants.findIndex(
         (participant) => participant.seasonId === seasonId && participant.id === participantId,
       );
+
       if (index < 0) return false;
       participants.splice(index, 1);
+
       return true;
     },
     savePathEntry: async (participantId, { label, result, tournamentId }) => {
@@ -198,16 +214,21 @@ export function memorySeasonStore() {
         result,
         tournament: tournamentId ? tournamentOf(tournamentId) : null,
       };
+
       participants.find((participant) => participant.id === participantId)?.path.push(entry);
+
       return entry;
     },
     removePathEntry: async (participantId, entryId) => {
       const found = participants.find((participant) => participant.id === participantId);
       const index = found?.path.findIndex((entry) => entry.id === entryId) ?? -1;
+
       if (!found || index < 0) return false;
       found.path.splice(index, 1);
+
       return true;
     },
   };
+
   return { store, awards, participants };
 }

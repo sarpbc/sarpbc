@@ -7,6 +7,7 @@ function getMatchBeginAtTime(match: TournamentDetailMatch): number | null {
   }
 
   const time = new Date(match.beginAt).getTime();
+
   return Number.isNaN(time) ? null : time;
 }
 
@@ -16,6 +17,7 @@ function getMatchDayKey(match: TournamentDetailMatch): string | null {
   }
 
   const date = new Date(match.beginAt);
+
   return Number.isNaN(date.getTime()) ? null : date.toDateString();
 }
 
@@ -48,12 +50,15 @@ export function computeChronologicalColumns(matches: TournamentDetailMatch[]): M
     if (timeA === null && timeB === null) {
       return a.id.localeCompare(b.id);
     }
+
     if (timeA === null) {
       return 1;
     }
+
     if (timeB === null) {
       return -1;
     }
+
     if (timeA !== timeB) {
       return timeA - timeB;
     }
@@ -65,6 +70,7 @@ export function computeChronologicalColumns(matches: TournamentDetailMatch[]): M
 
   for (const match of sortedByBeginAt) {
     const dayKey = getMatchDayKey(match);
+
     if (dayKey === null) {
       continue;
     }
@@ -118,6 +124,7 @@ export function computeChronologicalColumns(matches: TournamentDetailMatch[]): M
     }
 
     const parents = getParentIds(match, matchIds);
+
     if (parents.length === 0) {
       columns.set(match.id, 0);
       continue;
@@ -145,6 +152,7 @@ export function computeLowerProgressionDepths(
     const parentsInSection = getParentIds(match, matchIds).filter(
       (parentId) => !crossBracketFinalIds.has(parentId),
     );
+
     if (parentsInSection.length === 0) {
       depths.set(match.id, 0);
     }
@@ -161,6 +169,7 @@ export function computeLowerProgressionDepths(
       const parentsInSection = getParentIds(match, matchIds).filter(
         (parentId) => !crossBracketFinalIds.has(parentId),
       );
+
       if (parentsInSection.length === 0) {
         continue;
       }
@@ -174,6 +183,7 @@ export function computeLowerProgressionDepths(
       }
 
       const nextDepth = Math.max(...parentDepths) + 1;
+
       if (depths.get(match.id) !== nextDepth) {
         depths.set(match.id, nextDepth);
         changed = true;
@@ -199,6 +209,7 @@ export function remapDepthsToColumnRange(
   }
 
   const usedDepths = [...new Set(depths.values())].sort((a, b) => a - b);
+
   const depthRemap = new Map(
     usedDepths.map((depth, index) => {
       if (usedDepths.length === 1) {
@@ -206,11 +217,13 @@ export function remapDepthsToColumnRange(
       }
 
       const ratio = index / (usedDepths.length - 1);
+
       return [depth, Math.round(ratio * targetMaxColumn)] as const;
     }),
   );
 
   const remapped = new Map<string, number>();
+
   for (const [matchId, depth] of depths) {
     remapped.set(matchId, depthRemap.get(depth) ?? 0);
   }

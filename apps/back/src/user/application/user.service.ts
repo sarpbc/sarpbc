@@ -24,12 +24,14 @@ export class UserService {
 
     return this.transaction.run(async ({ users }) => {
       const user = await users.findById(targetId);
+
       if (!user) {
         throw new NotFoundError("User not found");
       }
 
       user.role = role;
       await users.save(user);
+
       return user;
     });
   }
@@ -48,6 +50,7 @@ export class UserService {
 
   async signIn(dto: SignInInput): Promise<User | null> {
     const user = await this.users.findByEmailWithPassword(dto.email);
+
     if (!user || user.password === null) {
       return null;
     }
@@ -70,15 +73,18 @@ export class UserService {
       const hash = await this.passwords.hash(dto.password);
       const user = new User(dto.email, dto.userName, hash);
       await users.save(user);
+
       return user;
     });
   }
 
   async hasAnyPermission(id: string, permissions: StaffPermission[]): Promise<boolean> {
     const user = await this.users.findById(id);
+
     if (!user) {
       return false;
     }
+
     return roleHasAnyPermission(user.role, permissions);
   }
 
@@ -97,6 +103,7 @@ export class UserService {
 
       const user = new User(email, userName, null, googleId, avatarUrl ?? null);
       await users.save(user);
+
       return user;
     });
   }
@@ -104,6 +111,7 @@ export class UserService {
   async updateUserName(userId: string, userName: string): Promise<User> {
     return this.transaction.run(async ({ users }) => {
       const user = await users.findById(userId);
+
       if (!user) {
         throw new NotFoundError("User not found");
       }
@@ -112,6 +120,7 @@ export class UserService {
         if (await users.existsByUserName(userName, userId)) {
           throw new ConflictError("This username is already taken. Choose a different name.");
         }
+
         user.userName = userName;
         await users.save(user);
       }
@@ -122,10 +131,13 @@ export class UserService {
 
   async linkGoogleAccount(user: User, googleId: string, avatarUrl: string | null): Promise<User> {
     user.googleId = googleId;
+
     if (avatarUrl && !user.avatarUrl) {
       user.avatarUrl = avatarUrl;
     }
+
     await this.transaction.run(({ users }) => users.save(user));
+
     return user;
   }
 }

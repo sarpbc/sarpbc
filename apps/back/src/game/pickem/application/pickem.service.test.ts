@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PickemService } from "./pickem.service";
 import type { NamedPick, Pick, PickMatch } from "../domain/pickem";
 import type { PickemWrites } from "./ports";
+
 describe("PickemService", () => {
   let match: PickMatch, picks: Pick[], service: PickemService;
   const warn = vi.fn();
@@ -18,6 +19,7 @@ describe("PickemService", () => {
       results: [],
     };
     picks = [];
+
     const scope: PickemWrites = {
       userExists: async () => true,
       participantExists: async () => true,
@@ -28,6 +30,7 @@ describe("PickemService", () => {
         if (!picks.some((p) => p.id === pick.id)) picks.push(pick);
       },
     };
+
     service = new PickemService(
       { list: async () => picks as NamedPick[] },
       {

@@ -22,6 +22,7 @@ function variantClasses(value: LinkVariant): string {
       return "font-medium text-(--ui-link) hover:text-(--ui-link-hover) transition-none";
     default: {
       const exhaustive: never = value;
+
       return exhaustive;
     }
   }
@@ -31,6 +32,7 @@ const linkClass = computed(() => [variantClasses(variant), attrs.class]);
 
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
+
   return rest;
 });
 </script>

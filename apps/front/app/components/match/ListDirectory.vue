@@ -41,13 +41,17 @@ const { t } = useI18n();
 const titleKey = computed(() =>
   kind === "schedule" ? "page.matches.title" : "page.results.title",
 );
+
 const errorKey = computed(() =>
   kind === "schedule" ? "page.matches.error" : "page.results.error",
 );
+
 const listVariant = computed(() => (kind === "schedule" ? "upcoming" : "result"));
+
 const discoverySource = computed((): MatchDiscoverySource =>
   kind === "schedule" ? "matches_list" : "results_list",
 );
+
 const emptyVariant = computed(() => (kind === "schedule" ? "matches" : "results"));
 const basePath = computed(() => (kind === "schedule" ? "/matches" : "/results"));
 const hasMatches = computed(() => matches.length > 0);

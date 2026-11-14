@@ -27,8 +27,10 @@ const open = computed({
 
 async function confirm() {
   const item = target.value;
+
   if (item === null) return;
   isDeleting.value = true;
+
   try {
     await props.remove(item);
     target.value = null;

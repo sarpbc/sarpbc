@@ -5,5 +5,6 @@ export function slotName(
   index: number,
 ): string | undefined {
   const participant = participants?.[index];
+
   return participant ? participantName(participant) || undefined : undefined;
 }

@@ -32,8 +32,10 @@ export interface BuildNewsArticleJsonLdInput {
 
 export function buildNewsArticleJsonLd(article: BuildNewsArticleJsonLdInput): NewsArticleLd {
   const url = `${SITE_ORIGIN}${localizedPath(newsPath(article.slug), article.locale ?? "en")}`;
+
   const description =
     excerptFromNewsContent(article.content, NEWS_SEO_DESCRIPTION_MAX_LENGTH) || undefined;
+
   const authorName = article.author?.trim();
   const image = article.imageUrl?.trim() || undefined;
 

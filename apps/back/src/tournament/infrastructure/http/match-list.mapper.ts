@@ -53,6 +53,7 @@ function matchBlockState(match: Match, now: Date): MatchBlockState {
   if (isMatchBlockLive(match, now)) {
     return "live";
   }
+
   return isMatchFinished(match) || isMatchLive(match, now) ? "finished" : "upcoming";
 }
 

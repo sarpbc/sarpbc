@@ -12,6 +12,7 @@ const tournamentMatchesPath = computed(() =>
 
 const facts = computed(() => {
   const round = match.name.includes(": ") ? match.name.split(": ")[0] : null;
+
   return [
     round ? { label: t("page.match.detail.info.round"), value: round } : null,
     match.numberOfGames

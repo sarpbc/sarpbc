@@ -28,31 +28,38 @@ export async function getAllTeams(query: {
     method: "GET",
     query,
   });
+
   return { teams: res.teams, total: res.count };
 }
 
 export async function getEveryTeam(): Promise<Team[]> {
   const teams: Team[] = [];
+
   for (;;) {
     const page = await getAllTeams({ limit: MAX_PAGE_SIZE, offset: teams.length });
     teams.push(...page.teams);
+
     if (page.teams.length === 0 || teams.length >= page.total) return teams;
   }
 }
 
 export async function getTeamById(id: string): Promise<Team> {
   const res = await apiFetch<{ team: Team | null }>(`/team/${id}`, { method: "GET" });
+
   if (!res.team) throw createError({ statusCode: 404, message: "Team not found" });
+
   return res.team;
 }
 
 export async function createTeam(body: CreateTeamDto): Promise<Team> {
   const res = await apiFetch<{ team: Team }>("/team", { method: "POST", body });
+
   return res.team;
 }
 
 export async function updateTeam(id: string, body: UpdateTeamDto): Promise<Team> {
   const res = await apiFetch<{ team: Team }>(`/team/${id}`, { method: "PATCH", body });
+
   return res.team;
 }
 
@@ -68,6 +75,7 @@ export async function getTeamContracts(teamId: string): Promise<TeamContract[]> 
   const res = await apiFetch<{ contracts: TeamContract[] }>(`/team/${teamId}/contract`, {
     method: "GET",
   });
+
   return res.contracts;
 }
 
@@ -79,6 +87,7 @@ export async function createTeamContract(
     method: "POST",
     body,
   });
+
   return res.contract;
 }
 
@@ -91,6 +100,7 @@ export async function updateTeamContract(
     method: "PATCH",
     body,
   });
+
   return res.contract;
 }
 
@@ -103,6 +113,7 @@ export async function addTeamAlias(teamId: string, body: TeamAliasInput): Promis
     method: "POST",
     body,
   });
+
   return res.alias;
 }
 
@@ -115,6 +126,7 @@ export async function updateTeamAlias(
     method: "PUT",
     body,
   });
+
   return res.alias;
 }
 

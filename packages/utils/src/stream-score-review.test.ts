@@ -83,11 +83,13 @@ describe("stream score confirmation", () => {
   it("blocks an unread game even when staff checked it", () => {
     const [first, second] = PROPOSAL.games;
     assert.ok(first && second);
+
     const proposal: StreamScoreProposal = {
       ...PROPOSAL,
       games: [{ ...first, blue: 1, orange: 1, winner: null, confidence: 0 }, second],
       series: { blue: 0, orange: 1, winner: null },
     };
+
     assert.deepEqual(
       streamScoreConfirmBlockers(proposal, { ...review, checkedGames: new Set([1, 2]) }),
       ["no-winner", "unread-game"],

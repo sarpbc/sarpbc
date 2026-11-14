@@ -14,6 +14,7 @@ describe("isBlastSourceHost", () => {
   it("matches BLAST.tv and its subdomains but not lookalikes", () => {
     for (const host of ["blast.tv", "www.BLAST.tv", "Rl.BLAST.tv."])
       assert.equal(isBlastSourceHost(host), true);
+
     for (const host of ["notblast.tv", "blast.tv.example"])
       assert.equal(isBlastSourceHost(host), false);
   });
@@ -23,6 +24,7 @@ describe("isForbiddenSourceHost", () => {
   it("refuses Liquipedia and BLAST.tv and accepts official sources", () => {
     for (const host of ["liquipedia.net", "www.blast.tv"])
       assert.equal(isForbiddenSourceHost(host), true);
+
     for (const host of ["rocketleague.com", "start.gg", "notblast.tv"])
       assert.equal(isForbiddenSourceHost(host), false);
   });

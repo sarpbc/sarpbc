@@ -34,6 +34,7 @@ export function regionalCircuitWeight(region: CareerRegion): number {
       return 0.5;
     default: {
       const _exhaustive: never = region;
+
       return _exhaustive;
     }
   }

@@ -35,9 +35,11 @@ const destinyPromptChoices = [
 
 const hasOffers = computed(() => props.offers.length > 0);
 const showCurrentTeamRow = computed(() => props.renewalOffered);
+
 const showChoiceList = computed(
   () => hasOffers.value || showCurrentTeamRow.value || props.canRetire,
 );
+
 const showCurrentTeamIndicator = computed(
   () => !props.destinyPromptPending && Boolean(props.currentTeamName),
 );
@@ -46,25 +48,33 @@ const body = computed(() => {
   if (props.destinyPromptPending) {
     return t("page.game.career.offseason.prompt.body");
   }
+
   if (props.isLastChanceOffer && props.offers[0]) {
     return t("page.game.career.offseason.lastChanceBody", { team: props.offers[0].name });
   }
+
   if (hasOffers.value && props.renewalOffered) {
     return t("page.game.career.offseason.body", { count: props.offers.length });
   }
+
   if (hasOffers.value) {
     return t("page.game.career.offseason.noRenewalBody", { count: props.offers.length });
   }
+
   if (props.renewalOffered) {
     return t("page.game.career.offseason.renewalOnlyBody", { team: props.currentTeamName });
   }
+
   return t("page.game.career.offseason.unsignedBody");
 });
 
 const title = computed(() => {
   if (props.destinyPromptPending) return t("page.game.career.offseason.prompt.title");
+
   if (hasOffers.value) return null;
+
   if (props.renewalOffered) return t("page.game.career.offseason.renewalTitle");
+
   return t("page.game.career.offseason.unsignedTitle");
 });
 
@@ -74,6 +84,7 @@ function setHoveredTeam(teamId: string | null): void {
 
 function offerRowClass(teamId: string, withBottomBorder: boolean): string[] {
   const highlighted = props.hoveredTeamId === teamId;
+
   return [
     "grid grid-cols-[minmax(0,1fr)_max-content] items-center border-l-2",
     "hover:border-l-primary hover:bg-elevated",
@@ -90,9 +101,11 @@ const retireRowClass = [
 function onRowLeave(event: MouseEvent, teamId: string): void {
   const current = event.currentTarget as HTMLElement;
   const next = event.relatedTarget as Node | null;
+
   if (next && current.contains(next)) {
     return;
   }
+
   if (props.hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
@@ -101,9 +114,11 @@ function onRowLeave(event: MouseEvent, teamId: string): void {
 function onRowFocusOut(event: FocusEvent, teamId: string): void {
   const current = event.currentTarget as HTMLElement;
   const next = event.relatedTarget as Node | null;
+
   if (next && current.contains(next)) {
     return;
   }
+
   if (props.hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }

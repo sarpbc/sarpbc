@@ -10,6 +10,7 @@ type EventStage = Pick<
 
 function bound(dates: Array<Date | null>, pick: (...times: number[]) => number): string | null {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
+
   return times.length ? new Date(pick(...times)).toISOString() : null;
 }
 
@@ -21,6 +22,7 @@ export function mapEvent<Stage extends EventStage>(
   const [newest] = ordered;
   // Only the main stage carries the prize pool; its type wins over qualifier stages.
   const main = ordered.find((stage) => stage.prizepool) ?? newest;
+
   return {
     id: event.id,
     slug: event.slug,

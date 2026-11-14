@@ -13,12 +13,15 @@ export function sortMatchesByBeginAt(matches: TournamentDetailMatch[]): Tourname
     if (!hasDateA && !hasDateB) {
       return a.id.localeCompare(b.id);
     }
+
     if (!hasDateA) {
       return 1;
     }
+
     if (!hasDateB) {
       return -1;
     }
+
     if (dateA !== dateB) {
       return dateA - dateB;
     }
@@ -68,17 +71,20 @@ export function assignMatchRows(
 
     for (const match of columnMatches) {
       const parents = getParentIds(match, matchIds);
+
       const parentRows = parents
         .map((id) => rows.get(id))
         .filter((row): row is number => row !== undefined);
 
       let idealRow: number;
+
       if (parentRows.length > 0) {
         idealRow = parentRows.reduce((sum, row) => sum + row, 0) / parentRows.length;
       } else {
         const orphanMatches = columnMatches.filter(
           (candidate) => getParentIds(candidate, matchIds).length === 0,
         );
+
         const orphanIndex = orphanMatches.indexOf(match);
         const maxRow = Math.max(0, ...rows.values());
         idealRow = maxRow + MIN_ROW_GAP + orphanIndex * MIN_ROW_GAP;

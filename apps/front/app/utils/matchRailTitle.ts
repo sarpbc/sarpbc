@@ -19,11 +19,13 @@ export function resolveMatchRailTitleKind(
 
   for (const match of upcoming) {
     const beginAt = parseMatchDate(match.beginAt);
+
     if (!beginAt) {
       continue;
     }
 
     const offset = daysFromToday(beginAt, now);
+
     if (earliestOffset === null || offset < earliestOffset) {
       earliestOffset = offset;
     }

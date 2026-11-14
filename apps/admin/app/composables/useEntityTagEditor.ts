@@ -18,6 +18,7 @@ export function useEntityTagEditor() {
     }
 
     const nodeType = pickerKind.value === "player" ? "playerTag" : "teamTag";
+
     try {
       activeEditor
         .chain()
@@ -38,6 +39,7 @@ export function useEntityTagEditor() {
       canExecute: () => true,
       execute: (editor: Editor) => {
         openEntityTagPicker(kind, editor);
+
         return editor.chain();
       },
       isActive: () => false,

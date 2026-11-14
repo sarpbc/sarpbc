@@ -66,14 +66,17 @@ function json(
 function client(routes: (url: string) => Response) {
   const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(String(input)));
   let clock = 0;
+
   const sleep = vi.fn(async (ms: number) => {
     clock += ms;
   });
+
   const instance = new BallchasingClient("secret-key", {
     fetch,
     sleep,
     now: () => clock,
   });
+
   return { instance, fetch, sleep, advance: (ms: number) => (clock += ms) };
 }
 
@@ -82,7 +85,9 @@ describe("BallchasingClient.groupReplays", () => {
     const { instance, fetch } = client((url) => {
       const parsed = new URL(url);
       const group = parsed.searchParams.get("group");
+
       if (parsed.pathname === "/api/groups/pilot") return json({ id: "pilot", name: "Pilot" });
+
       if (
         parsed.pathname === "/api/replays" &&
         group === "pilot" &&
@@ -93,10 +98,13 @@ describe("BallchasingClient.groupReplays", () => {
           list: [listedReplay("r1")],
           next: `${BALLCHASING_API_URL}/replays?after=r1&count=200&group=pilot`,
         });
+
       if (parsed.pathname === "/api/replays" && group === "pilot")
         return json({ count: 2, list: [listedReplay("r2")] });
+
       if (parsed.pathname === "/api/groups" && group === "pilot")
         return json({ list: [{ id: "pilot-day-2" }] });
+
       if (parsed.pathname === "/api/replays" && group === "pilot-day-2")
         return json({
           count: 1,
@@ -105,8 +113,10 @@ describe("BallchasingClient.groupReplays", () => {
             listedReplay("r1"),
           ],
         });
+
       if (parsed.pathname === "/api/groups" && group === "pilot-day-2")
         return json({ list: [{ id: "pilot" }] });
+
       return json({ error: "not found" }, 404);
     });
 
@@ -126,6 +136,7 @@ describe("BallchasingClient.groupReplays", () => {
       playedAt: new Date("2026-06-02T18:00:00Z"),
       playedAtHasTimezone: false,
     });
+
     for (const [, init] of fetch.mock.calls)
       expect(init?.headers).toEqual({ Authorization: "secret-key" });
     expect(new URL(String(fetch.mock.calls[1][0])).searchParams.get("count")).toBe("200");
@@ -162,6 +173,7 @@ describe("BallchasingClient.groupReplays", () => {
     const fetch = vi.fn<typeof globalThis.fetch>(async () => {
       throw new TypeError("fetch failed");
     });
+
     const instance = new BallchasingClient("k", {
       fetch,
       sleep: async () => undefined,
@@ -270,6 +282,7 @@ describe("BallchasingClient.replayStats", () => {
   it("counts a number omitted inside a stats object as zero", async () => {
     const detail = replayDetail();
     const [firstkiller, racer] = detail.blue.players;
+
     const { instance } = client(() =>
       json({
         ...detail,
@@ -296,10 +309,12 @@ describe("BallchasingClient.replayStats", () => {
   it("refuses a player or team without its stats objects instead of storing zeros", async () => {
     const detail = replayDetail();
     const [firstkiller, racer] = detail.blue.players;
+
     const withBluePlayer = (player: { [key: string]: Json }) => ({
       ...detail,
       blue: { ...detail.blue, players: [firstkiller, player] },
     });
+
     const bodies = [
       withBluePlayer({ name: racer.name, id: racer.id }),
       withBluePlayer({ ...racer, stats: { core: racer.stats.core } }),
@@ -340,6 +355,7 @@ describe("BallchasingClient.replayStats", () => {
 describe("BallchasingClient rate limiting", () => {
   it("honours a positive Retry-After", async () => {
     let calls = 0;
+
     const { instance, sleep } = client(() =>
       ++calls === 1
         ? json({ error: "rate limited" }, 429, { "retry-after": "7" })
@@ -353,10 +369,14 @@ describe("BallchasingClient rate limiting", () => {
 
   it("backs off from one second, doubling, when Retry-After is missing or 0", async () => {
     let calls = 0;
+
     const { instance, sleep } = client(() => {
       calls += 1;
+
       if (calls === 1) return json({ error: "rate limited" }, 429, { "retry-after": "0" });
+
       if (calls <= 3) return json({ error: "rate limited" }, 429);
+
       return json(replayDetail());
     });
 

@@ -64,6 +64,7 @@ describe("GET /player/compare (e2e)", () => {
       .get("/player/compare")
       .query({ a: "zen", b: "vatira" })
       .expect(200);
+
     const { comparison }: { comparison: PlayerComparison } = response.body;
 
     expect(comparison.a.player).toMatchObject({ id: "zen", slug: "zen" });

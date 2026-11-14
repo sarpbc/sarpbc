@@ -6,6 +6,7 @@ import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
 const SOURCE = "https://escharts.com/tournaments/rl/fake-open";
+
 const INPUT = {
   peakViewers: 48_000,
   scope: "official",
@@ -23,11 +24,14 @@ function setup(toolName: string, role: StaffRole = "admin") {
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
+
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
   );
+
   if (!tool) throw new Error(`${toolName} is not defined`);
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
+
   return { rosterProposalService, tool, call };
 }
 
@@ -68,6 +72,7 @@ describe("viewership tools", () => {
     const schema = z.object(setup("set_match_viewership").tool.inputSchema);
     const input = { matchId: MATCH_ID, ...INPUT };
     expect(schema.safeParse(input).success).toBe(true);
+
     for (const invalid of [
       { sourceUrl: undefined },
       { sourceUrl: "http://escharts.com/tournaments/rl/fake-open" },

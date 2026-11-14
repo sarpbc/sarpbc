@@ -37,12 +37,14 @@ export class SearchController {
       ...this.criteria(query),
       type: "player",
     });
+
     return players.map((player) => mapPlayer(player));
   }
 
   @Get("teams")
   async searchTeams(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
     const { teams } = await this.searchService.search({ ...this.criteria(query), type: "team" });
+
     return teams.map((team) => mapTeam(team));
   }
 
@@ -52,6 +54,7 @@ export class SearchController {
       ...this.criteria(query),
       type: "tournament",
     });
+
     return tournaments.map((tournament) => mapTournament(tournament));
   }
 }

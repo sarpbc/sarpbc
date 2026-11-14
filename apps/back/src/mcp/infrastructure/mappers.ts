@@ -143,10 +143,13 @@ export function mapEvent({ event, stages }: EventListing) {
   const phases = stages
     .filter((stage) => isRedistributable(stage.source))
     .sort((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
+
   const days = (dates: Array<Date | null>) =>
     dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
+
   const starts = days(phases.map((phase) => phase.beginAt)),
     ends = days(phases.map((phase) => phase.endAt));
+
   return {
     id: event.id,
     slug: event.slug,
@@ -181,6 +184,7 @@ export function mapTournamentParticipant(participant: TournamentParticipant) {
 /** start.gg tournaments stay out of MCP responses, including write confirmations. */
 export function mapListedParticipants(source: DataSource, participants: TournamentParticipant[]) {
   if (!isRedistributable(source)) return {};
+
   return { participants: participants.map(mapTournamentParticipant) };
 }
 
@@ -204,6 +208,7 @@ export function mapMatchListResponse(match: Match) {
   const winnerId = match.winner?.id ?? null;
   // List queries do not populate the winner relation; participants carry the team names.
   const winner = match.participants.find((participant) => participant.id === winnerId);
+
   return {
     ...item,
     pandascoreId: match.pandascoreId,

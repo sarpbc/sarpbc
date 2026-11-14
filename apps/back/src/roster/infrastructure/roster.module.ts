@@ -82,6 +82,7 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
       useFactory: (em: EntityManager) =>
         new MikroRosterMergeTransaction(em, (tx) => {
           const competition = new TournamentRosterReferences(tx);
+
           return {
             movers: [
               new MatchStatsRosterReferences(tx),

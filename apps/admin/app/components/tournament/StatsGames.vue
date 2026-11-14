@@ -20,6 +20,7 @@ const toRemove = ref<TournamentStatsGame | null>(null);
 
 const rows = computed(() => {
   const games = props.games ?? [];
+
   return props.matches.flatMap((match) =>
     games
       .filter((game) => game.matchId === match.id)
@@ -39,6 +40,7 @@ const rows = computed(() => {
 
 function teamName(match: TournamentMatchListItem, participantId: string): string {
   const participant = match.participants.find((candidate) => candidate.id === participantId);
+
   return participant ? participantName(participant) : t("page.tournaments.statsGames.unknownTeam");
 }
 
@@ -54,6 +56,7 @@ function gameLabel(match: TournamentMatchListItem, game: TournamentStatsGame): s
 
 function confirmMessage(game: TournamentStatsGame): string {
   const match = props.matches.find((candidate) => candidate.id === game.matchId);
+
   return t("page.tournaments.statsGames.confirm", {
     number: game.number,
     match: match ? props.matchLabel(match) : "",

@@ -24,6 +24,7 @@ function listItemSizeClasses(value: ListItemSize): string {
       return "h-row-triple min-h-row-triple";
     default: {
       const _exhaustive: never = value;
+
       return _exhaustive;
     }
   }
@@ -39,6 +40,7 @@ const itemClass = computed(() => [
 
 const delegatedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
+
   return rest;
 });
 </script>

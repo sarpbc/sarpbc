@@ -95,9 +95,11 @@ describe("McpServerFactory", () => {
     const { tools } = await client.listTools();
 
     expect(tools.map((tool) => tool.name).sort()).toEqual([...TOOL_NAMES].sort());
+
     for (const tool of tools.filter((candidate) => candidate.name.startsWith("create_"))) {
       expect(tool.description, tool.name).toMatch(/Requires \w+\.manage\.$/);
     }
+
     await client.close();
   });
 });

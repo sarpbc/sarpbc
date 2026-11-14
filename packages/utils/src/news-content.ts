@@ -30,8 +30,10 @@ export function excerptFromNewsContent(
   maxLength = NEWS_EXCERPT_MAX_LENGTH,
 ): string {
   const plain = newsContentToPlainText(content);
+
   if (plain.length <= maxLength) {
     return plain;
   }
+
   return `${plain.slice(0, maxLength).trimEnd()}…`;
 }

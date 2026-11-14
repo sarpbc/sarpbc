@@ -57,13 +57,17 @@ export function redistributableCompetition(services: RedistributableCompetitionS
 
   async function tournament(id: string): Promise<Tournament> {
     const found = await tournamentQueries.findById(id);
+
     if (!found || !isRedistributable(found.source)) throw tournamentNotFound(id);
+
     return found;
   }
 
   async function event(idOrSlug: string): Promise<EventListing> {
     const listing = await catalogService.findEvent(idOrSlug);
+
     if (isHiddenEvent(listing)) throw new NotFoundError(`Event "${idOrSlug}" was not found.`);
+
     return listing;
   }
 
@@ -74,6 +78,7 @@ export function redistributableCompetition(services: RedistributableCompetitionS
         redistributableOnly: true,
         offset: 0,
       });
+
       return found;
     },
 
@@ -81,6 +86,7 @@ export function redistributableCompetition(services: RedistributableCompetitionS
 
     async tournamentAwards(tournamentId: string) {
       await tournament(tournamentId);
+
       return playerAwardService.findByTournamentId(tournamentId);
     },
 
@@ -90,13 +96,17 @@ export function redistributableCompetition(services: RedistributableCompetitionS
 
     async matchLineups(matchId: string) {
       const { source, lineups } = await matchLineupService.find(matchId);
+
       if (!isRedistributable(source)) throw new NotFoundError(`Match "${matchId}" was not found.`);
+
       return lineups;
     },
 
     async prizeDistribution(tournamentId: string) {
       const distribution = await tournamentPrizeService.findByTournamentId(tournamentId);
+
       if (!isRedistributable(distribution.source)) throw tournamentNotFound(tournamentId);
+
       return distribution;
     },
 

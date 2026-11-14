@@ -38,15 +38,18 @@ const proposals = useLazyAsyncData("admin-home-proposals", () => getPendingRoste
   server: false,
   immediate: canProposals.value,
 });
+
 const replies = useLazyAsyncData("admin-home-replies", () => getModerationReplies(), {
   server: false,
   immediate: canModeration.value,
 });
+
 const articles = useLazyAsyncData(
   "admin-home-articles",
   async () => (await getNewsArticlesAdmin({ limit: ARTICLE_LIMIT, offset: 0 })).data,
   { server: false, immediate: canNews.value },
 );
+
 const matches = useLazyAsyncData("admin-home-matches", () => getUpcomingMatches(MATCH_LIMIT), {
   server: false,
   immediate: canMatches.value,
@@ -54,6 +57,7 @@ const matches = useLazyAsyncData("admin-home-matches", () => getUpcomingMatches(
 
 const proposalCount = computed(() => proposals.data.value?.proposals.length ?? 0);
 const replyCount = computed(() => replies.data.value?.length ?? 0);
+
 const replyCountLabel = computed(() =>
   replyCount.value >= MODERATION_REPLIES_LIMIT
     ? `${MODERATION_REPLIES_LIMIT}+`

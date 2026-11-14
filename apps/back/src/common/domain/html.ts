@@ -41,6 +41,7 @@ const NEWS_ALLOWED_ATTRS = {
 
 function isSafeUrl(value: string): boolean {
   const trimmed = value.trim().toLowerCase();
+
   return (
     trimmed.startsWith("https:") ||
     trimmed.startsWith("http:") ||
@@ -63,17 +64,21 @@ function rawTextElementAt(lower: string, index: number): RawTextElement | null {
       return name;
     }
   }
+
   return null;
 }
 
 function findEndTag(lower: string, name: RawTextElement, from: number): number {
   let index = lower.indexOf(`</${name}`, from);
+
   while (index !== -1) {
     if (/^[\t\n\f\r />]$/.test(lower.charAt(index + name.length + 2))) {
       return index;
     }
+
     index = lower.indexOf(`</${name}`, index + 1);
   }
+
   return -1;
 }
 
@@ -90,11 +95,14 @@ function stripDangerousBlocks(value: string): string {
 
     if (element !== null && !unclosed.has(element)) {
       const startTagEnd = lower.indexOf(">", index);
+
       if (startTagEnd === -1) {
         break;
       }
+
       const endTag = findEndTag(lower, element, startTagEnd + 1);
       const endTagEnd = endTag === -1 ? -1 : lower.indexOf(">", endTag);
+
       if (endTagEnd === -1) {
         unclosed.add(element);
       } else {
@@ -102,6 +110,7 @@ function stripDangerousBlocks(value: string): string {
       }
     } else if (lower.startsWith("<!--", index) && !unclosed.has("comment")) {
       const commentEnd = lower.indexOf("-->", index + 4);
+
       if (commentEnd === -1) {
         unclosed.add("comment");
       } else {
@@ -113,6 +122,7 @@ function stripDangerousBlocks(value: string): string {
       index = lower.indexOf("<", index + 1);
       continue;
     }
+
     result += value.slice(copiedUntil, index);
     copiedUntil = blockEnd;
     index = lower.indexOf("<", blockEnd);
@@ -128,13 +138,16 @@ function stripTags(value: string): string {
 
   while (index !== -1) {
     const tagEnd = value.indexOf(">", index + 1);
+
     if (tagEnd === -1) {
       break;
     }
+
     if (tagEnd > index + 1) {
       result += value.slice(copiedUntil, index);
       copiedUntil = tagEnd + 1;
     }
+
     index = value.indexOf("<", tagEnd + 1);
   }
 
@@ -150,9 +163,11 @@ export function sanitizeNewsHtml(value: string): string {
     /<\/?([a-zA-Z][\w:-]*)\b([^>]*)>/g,
     (full: string, rawName: string, rawAttrs: string) => {
       const name = rawName.toLowerCase();
+
       if (!NEWS_ALLOWED_TAGS.has(name)) {
         return "";
       }
+
       if (full.startsWith("</")) {
         return `</${name}>`;
       }
@@ -161,6 +176,7 @@ export function sanitizeNewsHtml(value: string): string {
         name === "a" || name === "img" || name === "td" || name === "th"
           ? NEWS_ALLOWED_ATTRS[name]
           : undefined;
+
       if (!allowed) {
         return `<${name}>`;
       }
@@ -168,6 +184,7 @@ export function sanitizeNewsHtml(value: string): string {
       const attrs: string[] = [];
       const attrRe = /([a-zA-Z_:][\w:.-]*)\s*=\s*("([^"]*)"|'([^']*)'|(\S+))/g;
       let match = attrRe.exec(rawAttrs);
+
       while (match) {
         const attrName = match[1].toLowerCase();
         const attrValue = match[3] ?? match[4] ?? match[5] ?? "";
@@ -176,13 +193,16 @@ export function sanitizeNewsHtml(value: string): string {
         if (!allowed.has(attrName) || attrName.startsWith("on")) {
           continue;
         }
+
         if ((attrName === "href" || attrName === "src") && !isSafeUrl(attrValue)) {
           continue;
         }
+
         attrs.push(`${attrName}="${attrValue.replaceAll('"', "&quot;")}"`);
       }
 
       const attrString = attrs.length > 0 ? ` ${attrs.join(" ")}` : "";
+
       return `<${name}${attrString}>`;
     },
   );

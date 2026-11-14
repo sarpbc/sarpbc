@@ -27,9 +27,11 @@ export class TwitchAppToken {
     if (this.cached && this.now() < this.cached.refreshAt) {
       return this.cached.value;
     }
+
     this.pending ??= this.request().finally(() => {
       this.pending = null;
     });
+
     return this.pending;
   }
 
@@ -47,15 +49,18 @@ export class TwitchAppToken {
       }),
       signal: AbortSignal.timeout(TOKEN_REQUEST_TIMEOUT_MS),
     });
+
     if (!response.ok) {
       throw new Error(`Twitch token request failed with status ${response.status}`);
     }
+
     const token = tokenResponse.parse(await response.json());
     const lifetimeMs = token.expires_in * 1000;
     this.cached = {
       value: token.access_token,
       refreshAt: this.now() + lifetimeMs - Math.min(REFRESH_MARGIN_MS, lifetimeMs / 2),
     };
+
     return token.access_token;
   }
 }

@@ -46,6 +46,7 @@ export function readTools({
       },
       handler: async ({ query }) => {
         const players = await playerService.find({ name: query, limit: SEARCH_LIMIT, offset: 0 });
+
         return players.map(mapPlayerSummary);
       },
     }),
@@ -58,6 +59,7 @@ export function readTools({
       },
       handler: async ({ query }) => {
         const teams = await teamService.find({ name: query, limit: SEARCH_LIMIT, offset: 0 });
+
         return teams.map(mapTeamSummary);
       },
     }),
@@ -78,6 +80,7 @@ export function readTools({
       input: { idOrSlug: idOrSlugField("Player", "zen-rl") },
       handler: async ({ idOrSlug }) => {
         const player = await requireByIdOrSlug(playerService, idOrSlug, "Player");
+
         return mapCareer(player, await contractService.getContractsByPlayer(player.id));
       },
     }),
@@ -98,6 +101,7 @@ export function readTools({
       input: { idOrSlug: idOrSlugField("Team") },
       handler: async ({ idOrSlug }) => {
         const team = await requireByIdOrSlug(teamService, idOrSlug, "Team");
+
         return { teamId: team.id, name: team.name, aliases: team.aliases.map(mapTeamAlias) };
       },
     }),
@@ -118,6 +122,7 @@ export function readTools({
           activeOnly: activeOnly ?? false,
           limit: limit ?? DEFAULT_PAGE_SIZE,
         });
+
         return tournaments.map(mapTournamentListItem);
       },
     }),
@@ -137,6 +142,7 @@ export function readTools({
       input: { id: z.string().min(1).describe("Tournament UUID.") },
       handler: async ({ id }) => {
         const distribution = await competition.prizeDistribution(id);
+
         return { tournamentId: id, prizepool: distribution.prizepool, prizes: distribution.prizes };
       },
     }),
@@ -151,6 +157,7 @@ export function readTools({
       },
       handler: async ({ tournamentId, event }) => {
         if (tournamentId && !event) return competition.tournamentPlayerStats(tournamentId);
+
         if (event && !tournamentId) return competition.eventPlayerStats(event);
         throw new InvalidInputError("Pass either tournamentId or event.");
       },
@@ -163,6 +170,7 @@ export function readTools({
       input: { id: z.string().min(1).describe("Tournament stage UUID.") },
       handler: async ({ id }) => {
         const awards = await competition.tournamentAwards(id);
+
         return {
           tournamentId: id,
           awards: awards.map(({ id: awardId, awardType, player, participant }) => ({
@@ -182,6 +190,7 @@ export function readTools({
       input: { matchId: z.string().min(1).describe("Match UUID.") },
       handler: async ({ matchId }) => {
         const lineups = await competition.matchLineups(matchId);
+
         return {
           matchId,
           lineups: lineups.map(({ participantId, players }) => ({
@@ -199,6 +208,7 @@ export function readTools({
       input: { idOrSlug: idOrSlugField("Team") },
       handler: async ({ idOrSlug }) => {
         const team = await requireByIdOrSlug(teamService, idOrSlug, "Team");
+
         return competition.teamEarnings(team.id);
       },
     }),
@@ -210,6 +220,7 @@ export function readTools({
       input: { idOrSlug: idOrSlugField("Player", "zen-rl") },
       handler: async ({ idOrSlug }) => {
         const player = await requireByIdOrSlug(playerService, idOrSlug, "Player");
+
         return competition.playerEarnings(player.id);
       },
     }),
@@ -242,6 +253,7 @@ export function readTools({
       input: { limit: listLimit("results") },
       handler: async ({ limit }) => {
         const [results, total] = await competition.matches("results", limit ?? DEFAULT_PAGE_SIZE);
+
         return { results: results.map(mapMatchListResponse), total };
       },
     }),
@@ -257,6 +269,7 @@ export function readTools({
       },
       handler: async ({ page, limit }) => {
         const result = await newsService.findAll(page ?? 0, limit ?? DEFAULT_PAGE_SIZE);
+
         return {
           data: result.data.map(mapNewsListItem),
           total: result.total,

@@ -42,6 +42,7 @@ export class RosterProposalController {
   @Get()
   async list(@Query({ schema: ListRosterProposalsQueryDto }) query: ListRosterProposalsQueryDto) {
     const { proposals, names } = await this.proposals.list(query.status);
+
     return { proposals: proposals.map(mapProposal), names };
   }
 

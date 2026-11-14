@@ -33,11 +33,13 @@ function onLetterPress(letter: string) {
   if (disabled) {
     return;
   }
+
   emit("letter", letter);
 }
 
 function keyLabel(letter: string): string {
   const status = letterStatuses[letter.toUpperCase()];
+
   switch (status) {
     case "correct":
       return `${letter}, ${t("page.game.airriddle.result.correct")}`;
@@ -50,6 +52,7 @@ function keyLabel(letter: string): string {
       return letter;
     default: {
       const exhaustive: never = status;
+
       return exhaustive;
     }
   }
@@ -57,6 +60,7 @@ function keyLabel(letter: string): string {
 
 function keyClass(letter: string): string {
   const status = letterStatuses[letter.toUpperCase()];
+
   switch (status) {
     case "correct":
       return "bg-success text-ink-950";
@@ -69,6 +73,7 @@ function keyClass(letter: string): string {
       return "";
     default: {
       const exhaustive: never = status;
+
       return exhaustive;
     }
   }

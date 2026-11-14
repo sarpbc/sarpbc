@@ -6,6 +6,7 @@ const state = defineModel<EventFormState>({ required: true });
 const props = defineProps<{ leagues: League[]; disabled?: boolean }>();
 
 const { t } = useI18n();
+
 const leagueItems = computed(() =>
   leagueOptions(props.leagues, t("page.tournaments.source.pandascore")),
 );

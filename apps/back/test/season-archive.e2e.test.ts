@@ -26,6 +26,7 @@ describe("season archives (e2e)", () => {
 
   beforeAll(async () => {
     const { store } = memorySeasonStore();
+
     const moduleFixture = await Test.createTestingModule({
       controllers: [SeasonController, SeasonArchiveController],
       providers: [
@@ -61,6 +62,7 @@ describe("season archives (e2e)", () => {
       .set("Cookie", STAFF)
       .send({ name: "Pilot season", slug: "Pilot Season" })
       .expect(201);
+
     pilot = created.body;
     await http().post("/seasons").set("Cookie", STAFF).send({ name: "Draft" }).expect(201);
   });
@@ -91,6 +93,7 @@ describe("season archives (e2e)", () => {
     const archive = await request(app.getHttpServer())
       .get("/season-archives/pilot-season")
       .expect(200);
+
     expect(archive.body).toEqual({
       slug: "pilot-season",
       name: "Pilot season",
@@ -113,6 +116,7 @@ describe("season archives (e2e)", () => {
       .set("Cookie", STAFF)
       .send({ name: "Another pilot", slug: "pilot-season" })
       .expect(409);
+
     expect(JSON.stringify(response.body)).toContain("pilot-season");
   });
 

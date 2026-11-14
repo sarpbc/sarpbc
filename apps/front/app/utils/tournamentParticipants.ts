@@ -25,13 +25,17 @@ export function buildTournamentParticipantEntries(
     const team = participant.team;
     const key = team?.id ?? participant.id;
     const listed = team ? Boolean(team.slug) : participant.players.length > 0;
+
     if (!listed || seen.has(key)) {
       continue;
     }
+
     seen.add(key);
+
     const players = participant.players
       .filter((player) => player.slug)
       .sort((a, b) => a.name.localeCompare(b.name));
+
     result.push({
       id: key,
       name: participantName(participant),

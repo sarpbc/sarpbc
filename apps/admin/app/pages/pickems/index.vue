@@ -26,6 +26,7 @@ const {
   refresh,
 } = useAdminList("admin-pickems-tournaments", async ({ limit, offset }) => {
   const { tournaments, total } = await getAllTournaments({ limit, offset });
+
   return { items: tournaments, total };
 });
 
@@ -49,6 +50,7 @@ async function handleSyncTournament(tournamentId: string) {
 
 async function handleEnablePickems(tournamentId: string) {
   enablingTournamentId.value = tournamentId;
+
   try {
     await enableTournamentPickems(tournamentId);
     toast.add({ title: t("page.pickems.enablePickems"), color: "success" });

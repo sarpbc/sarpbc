@@ -15,6 +15,7 @@ const emit = defineEmits<{ "update:uploading": [boolean] }>();
 const { t } = useI18n();
 const toast = useToast();
 const { uploadFile, progress, isUploading, error } = useR2Upload();
+
 watch(isUploading, (value) => emit("update:uploading", value));
 
 const fileInput = ref<HTMLInputElement | null>(null);
@@ -23,6 +24,7 @@ const displayError = computed(() => {
   if (error.value === null || isUploading.value) {
     return null;
   }
+
   return error.value || t("imageUpload.uploadServerError");
 });
 
@@ -34,6 +36,7 @@ async function onFileChange(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
   input.value = "";
+
   if (!file) {
     return;
   }

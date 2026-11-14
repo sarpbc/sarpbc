@@ -49,6 +49,7 @@ describe("team logo rules", () => {
   it("accepts a self-contained SVG with internal references", () => {
     const svg =
       '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="g"/></defs><rect fill="url(#g)"/><use xlink:href="#g"/><use href=\'#g\'/></svg>';
+
     expect(() => requireSafeSvg(text(svg))).not.toThrow();
   });
 

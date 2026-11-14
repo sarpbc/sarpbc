@@ -12,6 +12,7 @@ import type {
   PickemTransaction,
   PickemWrites,
 } from "../../application/ports";
+
 function toPick(row: PickemChoice): Pick {
   return {
     id: row.id,
@@ -23,26 +24,33 @@ function toPick(row: PickemChoice): Pick {
     createdAt: new Date(row.createdAt),
   };
 }
+
 function toNamedPick(row: PickemChoice): NamedPick {
   return { ...toPick(row), user: { id: row.user.id, userName: row.user.userName } };
 }
+
 /** Serializes picks and scoring of one match, so a pick is never read as unscored while it is being scored. */
 async function lockMatchPicks(tx: EntityManager, matchId: string): Promise<void> {
   await tx.execute("select pg_advisory_xact_lock(hashtextextended(?, 0))", [
     "pickem:match:" + matchId,
   ]);
 }
+
 interface TournamentPickFilter {
   match: { tournament: { id: string } };
   user?: { id: string };
   scored?: boolean;
 }
+
 export class MikroPickemStore implements PickemReads, PickemTransaction {
   constructor(private readonly em: EntityManager) {}
   async list(tournamentId: string, { userId, scoredOnly }: PickFilter = {}): Promise<NamedPick[]> {
     const where: TournamentPickFilter = { match: { tournament: { id: tournamentId } } };
+
     if (userId) where.user = { id: userId };
+
     if (scoredOnly) where.scored = true;
+
     return (
       await this.em.find(PickemChoice, where, { populate: ["user", "match", "pickedParticipant"] })
     ).map(toNamedPick);
@@ -54,15 +62,18 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
         participantExists: async (id) => !!(await tx.findOne(TournamentParticipant, { id })),
         pick: async (userId, matchId) => {
           await lockMatchPicks(tx, matchId);
+
           const row = await tx.findOne(
             PickemChoice,
             { user: { id: userId }, match: { id: matchId } },
             { populate: ["user", "match", "pickedParticipant"], refresh: true },
           );
+
           return row ? toPick(row) : null;
         },
         unscored: async (matchId) => {
           await lockMatchPicks(tx, matchId);
+
           return (
             await tx.find(
               PickemChoice,
@@ -85,8 +96,10 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
           tx.persist(row);
         },
       };
+
       const result = await work(scope);
       await tx.flush();
+
       return result;
     });
   }

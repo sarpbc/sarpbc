@@ -32,6 +32,7 @@ export function tournamentStatusLabelKey(status: TournamentStatus): string {
       return "page.tournaments.id.status.finished";
     default: {
       const _exhaustive: never = status;
+
       return _exhaustive;
     }
   }
@@ -43,15 +44,18 @@ export function formatTournamentShortDateRange(
   locale: string,
 ): string | null {
   const begin = beginAt ? new Date(beginAt) : null;
+
   if (!begin || Number.isNaN(begin.getTime())) {
     return null;
   }
 
   const formatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
   const end = endAt ? new Date(endAt) : null;
+
   if (!end || Number.isNaN(end.getTime()) || end < begin) {
     return formatter.format(begin);
   }
+
   return formatter.formatRange(begin, end);
 }
 
@@ -69,15 +73,19 @@ export function formatTournamentDateRange(
   if (beginAt && endAt) {
     const begin = new Date(beginAt);
     const end = new Date(endAt);
+
     if (Number.isNaN(begin.getTime()) || Number.isNaN(end.getTime())) {
       return null;
     }
+
     return `${formatter.format(begin)} – ${formatter.format(end)}`;
   }
 
   const single = new Date((beginAt ?? endAt)!);
+
   if (Number.isNaN(single.getTime())) {
     return null;
   }
+
   return formatter.format(single);
 }

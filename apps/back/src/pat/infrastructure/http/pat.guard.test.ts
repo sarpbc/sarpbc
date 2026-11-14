@@ -16,6 +16,7 @@ interface PatGuardTestRequest {
 
 describe("PatAuthGuard", () => {
   let guard: PatAuthGuard;
+
   const patService = {
     resolveUser: vi.fn(),
   };
@@ -31,6 +32,7 @@ describe("PatAuthGuard", () => {
 
   const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
     const request: PatGuardTestRequest = { headers };
+
     return {
       switchToHttp: () => ({ getRequest: () => request }),
     } as ExecutionContext;
@@ -42,9 +44,11 @@ describe("PatAuthGuard", () => {
 
   it("attaches the resolved user for a valid bearer token", async () => {
     patService.resolveUser.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+
     const request: PatGuardTestRequest = {
       headers: { authorization: "Bearer sarpbc_pat_valid" },
     };
+
     const context = {
       switchToHttp: () => ({ getRequest: () => request }),
     } as ExecutionContext;

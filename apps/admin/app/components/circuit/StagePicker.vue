@@ -22,12 +22,16 @@ const searched = ref(false);
 
 async function runSearch(value: string) {
   const trimmed = value.trim();
+
   if (!trimmed) {
     results.value = [];
     searched.value = false;
+
     return;
   }
+
   searching.value = true;
+
   try {
     const tournaments = await searchTournaments(trimmed);
     results.value = tournaments.map((tournament) => ({

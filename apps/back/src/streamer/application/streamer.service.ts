@@ -26,10 +26,13 @@ export class StreamerService {
 
   async add(login: string, displayName: string | null): Promise<TrackedStreamer> {
     const created = await this.streamers.add(login, displayName);
+
     if (!created) {
       throw new ConflictError(`The Twitch channel "${login}" is already tracked.`);
     }
+
     await this.invalidate();
+
     return created;
   }
 
@@ -37,6 +40,7 @@ export class StreamerService {
     if (!(await this.streamers.remove(id))) {
       throw new NotFoundError("Streamer not found. It may already have been removed.");
     }
+
     await this.invalidate();
   }
 
@@ -45,21 +49,27 @@ export class StreamerService {
 
     let snapshot: LiveStreamSnapshot | null;
     let claim: string | null;
+
     try {
       snapshot = await this.cache.read();
+
       if (snapshot && this.isFresh(snapshot)) return snapshot.streams;
       claim = await this.cache.claimRefresh();
     } catch (error) {
       this.reportFailure("cache", error);
+
       return [];
     }
+
     if (claim === null) return snapshot?.streams ?? [];
 
     let streams: LiveStreamer[];
+
     try {
       streams = await this.fetchLive(this.source);
     } catch (error) {
       this.reportFailure("fetch", error);
+
       return snapshot?.streams ?? [];
     }
 
@@ -68,15 +78,18 @@ export class StreamerService {
     } catch (error) {
       this.reportFailure("cache", error);
     }
+
     return streams;
   }
 
   private async fetchLive(source: LiveStreamSource): Promise<LiveStreamer[]> {
     const tracked = await this.streamers.list();
+
     if (tracked.length === 0) return [];
 
     const names = new Map(tracked.map((streamer) => [streamer.login, streamer.displayName]));
     const live = await source.findLiveRocketLeague([...names.keys()]);
+
     return byViewerCount(
       live.map((stream) => ({
         login: stream.login,

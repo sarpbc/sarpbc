@@ -25,6 +25,7 @@ function storeFailingWith(error: Error) {
     persist: vi.fn().mockReturnThis(),
     flush: vi.fn().mockRejectedValue(error),
   };
+
   return new CircuitPersistence(Object.assign(Object.create(EntityManager.prototype), em));
 }
 

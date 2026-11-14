@@ -15,6 +15,7 @@ export class AirRiddleController {
   @Get("today")
   async find() {
     const todayRiddle = await this.airRiddleService.getTodaysRiddle();
+
     return { length: todayRiddle?.playerName.length };
   }
 
@@ -24,6 +25,7 @@ export class AirRiddleController {
     await captureRequestEvent(this.posthog, req.headers, "server_airriddle_guess_submitted", {
       is_last: body.last ?? false,
     });
+
     return { results, error, answer };
   }
 }

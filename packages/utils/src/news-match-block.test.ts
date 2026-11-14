@@ -193,6 +193,7 @@ describe("article content", () => {
       ":matches{}",
       "~~~~",
     ].join("\n");
+
     assert.deepEqual(findInvalidNewsMatchTags(documented), []);
     assert.deepEqual(extractNewsMatchBlocks(documented), []);
     assert.deepEqual(findInvalidNewsMatchTags(`\`code\` :matches{match="${MATCH}"}`), [

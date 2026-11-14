@@ -38,6 +38,7 @@ export class TournamentCron {
       const activeTournamentIds = await this.findPandascoreActiveIds(new Date());
 
       const tournamentIds = new Set<string>(activeTournamentIds);
+
       for (const match of [...liveMatches, ...recentlyEndedMatches]) {
         if (match.tournament?.id) {
           tournamentIds.add(match.tournament.id);

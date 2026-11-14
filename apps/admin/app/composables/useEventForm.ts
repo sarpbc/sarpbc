@@ -16,9 +16,13 @@ export function buildEventPayload(state: EventFormState, original: ManualEvent |
   const payload: EventInput = {};
   const name = state.name.trim();
   const slug = state.slug.trim();
+
   if (name !== before.name) payload.name = name;
+
   if (slug && slug !== before.slug) payload.slug = slug;
+
   if (state.leagueId !== before.leagueId)
     payload.leagueId = state.leagueId || (original ? null : undefined);
+
   return payload;
 }

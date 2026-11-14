@@ -14,13 +14,16 @@ import type {
 
 function assertParticipants(entries: PrizeEntry[], participants: PrizeParticipant[]): void {
   const rosters = new Map(participants.map(({ teamId, playerIds }) => [teamId, playerIds]));
+
   for (const { teamId, playerIds } of entries) {
     const roster = rosters.get(teamId);
+
     if (!roster)
       throw new InvalidInputError(
         `Team "${teamId}" is not a participant of this tournament. Add it as a participant first.`,
       );
     const outsiders = playerIds.filter((playerId) => !roster.includes(playerId));
+
     if (outsiders.length > 0)
       throw new InvalidInputError(
         `Players ${outsiders.join(", ")} are not on the tournament roster of team "${teamId}".`,
@@ -37,13 +40,17 @@ export class TournamentPrizeService {
 
   async findByTournamentId(id: string): Promise<TournamentPrizes> {
     const prizes = await this.reads.byTournament(id);
+
     if (!prizes) throw new NotFoundError(`Tournament with id "${id}" not found`);
+
     return prizes;
   }
 
   async requireProposableTournament(id: string): Promise<void> {
     const source = await this.reads.tournamentSource(id);
+
     if (!source) throw new NotFoundError(`Tournament with id "${id}" not found`);
+
     if (source === "startgg")
       throw new InvalidInputError("Prize distributions of start.gg tournaments cannot be proposed");
   }
@@ -74,7 +81,9 @@ export class TournamentPrizeService {
       ...entry,
       sourceUrl: parseDataSourceUrl(entry.sourceUrl),
     }));
+
     assertPrizeDistribution(sourced);
+
     return this.write(tournamentId, async () => sourced);
   }
 
@@ -85,6 +94,7 @@ export class TournamentPrizeService {
     sourceUrl: string,
   ): Promise<TournamentPrizes> {
     const source = parseDataSourceUrl(sourceUrl);
+
     return this.write(tournamentId, async (prizes) =>
       patchPrizeEntry(await prizes.entries(tournamentId), teamId, patch, source),
     );
@@ -103,6 +113,7 @@ export class TournamentPrizeService {
       await prizes.replace(tournamentId, entries);
     });
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
+
     return this.findByTournamentId(tournamentId);
   }
 }

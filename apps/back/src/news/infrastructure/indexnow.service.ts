@@ -10,17 +10,22 @@ export class IndexNowService implements NewsIndexing {
 
   async submitNewsSlugs(slugs: string[]): Promise<void> {
     const key = this.configService.get<string>("indexnow.key");
+
     if (!this.configService.get<boolean>("production") || !key || slugs.length === 0) {
       return;
     }
 
     const log = createLogger({ component: IndexNowService.name });
+
     try {
       const origin = new URL(this.configService.getOrThrow<string>("front_url")).origin;
+
       const urlList = [...new Set(slugs)].flatMap((slug) => {
         const path = newsPath(encodeURIComponent(slug));
+
         return [`${origin}${path}`, `${origin}${localizedPath(path, "fr")}`];
       });
+
       const response = await fetch("https://api.indexnow.org/indexnow", {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
@@ -32,7 +37,9 @@ export class IndexNowService implements NewsIndexing {
         }),
         signal: AbortSignal.timeout(5000),
       });
+
       log.set({ urlCount: urlList.length, status: response.status });
+
       if (!response.ok) {
         log.warn("IndexNow submission rejected");
       }

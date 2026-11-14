@@ -36,8 +36,11 @@ function nameOf(id: string): string {
 
 function formatValue(key: string, value: string | boolean | null): string {
   if (value === null) return t("page.proposals.values.ongoing");
+
   if (value === true) return t("page.proposals.values.yes");
+
   if (value === false) return t("page.proposals.values.no");
+
   switch (key) {
     case "status":
       return t(`page.proposals.playerStatus.${value}`);
@@ -102,6 +105,7 @@ function viewershipRows(
   viewership: Viewership,
 ): { key: string; label: string; value: string }[] {
   const count = new Intl.NumberFormat(parseLocale(locale.value));
+
   return [
     { key: targetKey, label: t(`page.proposals.fields.${targetKey}`), value: nameOf(targetId) },
     {
@@ -136,6 +140,7 @@ function viewershipRows(
 
 function changeRows(proposal: RosterProposal): { key: string; label: string; value: string }[] {
   const { change } = proposal;
+
   if (change.kind === "set_tournament_prizes") {
     return [
       {
@@ -166,8 +171,10 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           }))),
     ];
   }
+
   if (change.kind === "update_tournament_prize") {
     const { patch } = change;
+
     const patched = [
       ...optionalRow(
         "placement",
@@ -192,6 +199,7 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           : patch.playerIds.map(nameOf).join(", ") || t("page.proposals.values.noPlayers"),
       ),
     ];
+
     return [
       {
         key: "tournamentId",
@@ -210,6 +218,7 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
         : patched),
     ];
   }
+
   if (change.kind === "set_circuit_stage_scale") {
     return [
       {
@@ -248,6 +257,7 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
       })),
     ];
   }
+
   if (change.kind === "award_season_player") {
     return [
       {
@@ -279,15 +289,19 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
         : []),
     ];
   }
+
   if (change.kind === "set_event_streams") {
     return streamRows("eventId", change.eventId, change.streams);
   }
+
   if (change.kind === "set_tournament_streams") {
     return streamRows("tournamentId", change.tournamentId, change.streams);
   }
+
   if (change.kind === "set_match_streams") {
     return streamRows("matchId", change.matchId, change.streams);
   }
+
   if (change.kind === "set_match_lineups") {
     const lineups = change.lineups.flatMap((lineup, index) =>
       lineup.playerIds.length > 0
@@ -300,6 +314,7 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           ]
         : [],
     );
+
     return [
       { key: "matchId", label: t("page.proposals.fields.matchId"), value: nameOf(change.matchId) },
       ...(lineups.length === 0
@@ -313,8 +328,10 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
         : lineups),
     ];
   }
+
   if (change.kind === "add_team_alias" || change.kind === "update_team_alias") {
     const { alias } = change;
+
     return [
       { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
       { key: "aliasName", label: t("page.proposals.fields.aliasName"), value: alias.name },
@@ -344,15 +361,20 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           ]),
     ];
   }
+
   if (change.kind === "set_event_viewership") {
     return viewershipRows("eventId", change.eventId, change.viewership);
   }
+
   if (change.kind === "set_match_viewership") {
     return viewershipRows("matchId", change.matchId, change.viewership);
   }
+
   const shown =
     change.kind === "create_contract" ? { ...change, endDate: change.endDate ?? null } : change;
+
   const fields: [string, string | boolean | null | undefined][] = Object.entries(shown);
+
   return fields.flatMap(([key, value]) =>
     ["kind", "logoKey", "logoUrl"].includes(key) || value === undefined
       ? []
@@ -368,6 +390,7 @@ const logoBackgrounds = [
 async function review(proposal: RosterProposal, action: "approve" | "reject") {
   if (reviewingId.value) return;
   reviewingId.value = proposal.id;
+
   try {
     await reviewRosterProposal(proposal.id, action);
     toast.add({

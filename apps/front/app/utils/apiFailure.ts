@@ -22,10 +22,12 @@ export function apiFailure<Reason extends string>(
   const reason =
     (code ? reasons.codes?.[code] : undefined) ??
     (status === undefined ? undefined : reasons.statuses?.[status]);
+
   if (reason) {
     return { ok: false, reason, message };
   }
 
   console.error(`Error ${action}:`, cause);
+
   return { ok: false, reason: "unknown", message };
 }

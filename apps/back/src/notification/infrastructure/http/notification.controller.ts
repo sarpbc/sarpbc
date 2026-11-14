@@ -17,6 +17,7 @@ export class NotificationController {
     @Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryDto,
   ): Promise<{ notifications: AppNotification[] }> {
     const notifications = await this.notificationService.listForUser(userId, query.limit);
+
     return {
       notifications: notifications.map((notification) => ({
         ...notification,
@@ -29,6 +30,7 @@ export class NotificationController {
   @Get("unread-count")
   async unreadCount(@CurrentUserId() userId: string) {
     const count = await this.notificationService.getUnreadCount(userId);
+
     return { count };
   }
 
@@ -38,6 +40,7 @@ export class NotificationController {
     @Body({ schema: MarkNotificationsReadDto }) body: MarkNotificationsReadDto,
   ) {
     const result = await this.notificationService.markRead(userId, body.ids);
+
     return result;
   }
 }

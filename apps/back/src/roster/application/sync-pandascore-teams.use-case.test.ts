@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { SyncPandascoreTeamsUseCase } from "./sync-pandascore-teams.use-case";
+
 describe("SyncPandascoreTeamsUseCase", () => {
   it("initializes from the source when no team exists", async () => {
     const roster = [{ player: { pandascoreId: 2, name: "Comm", slug: "comm" }, currentTeam: null }];

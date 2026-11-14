@@ -11,6 +11,7 @@ export const SITE_ORIGIN = "https://sarpbc.org";
 export function apiPreconnectLinks(apiBase: string): PreconnectLink[] {
   try {
     const { origin } = new URL(apiBase);
+
     return [
       { rel: "preconnect", href: origin, crossorigin: "anonymous" },
       { rel: "dns-prefetch", href: origin },

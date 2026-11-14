@@ -13,6 +13,7 @@ export function useMatchStateLabel(formatBeginAt: (beginAt: Date) => string) {
         return item.beginAt ? formatBeginAt(new Date(item.beginAt)) : t("newsTag.matchTbd");
       default: {
         const exhaustive: never = item.state;
+
         return exhaustive;
       }
     }

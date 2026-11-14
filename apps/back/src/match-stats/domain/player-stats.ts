@@ -25,6 +25,7 @@ const COUNTS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
 function round(value: number, digits: number): number {
   const factor = 10 ** digits;
+
   return Math.round(value * factor) / factor;
 }
 
@@ -38,7 +39,9 @@ function emptyCounts(): PlayerStatCounts {
 
 function toStats({ player, team, games, totals, teamGoals }: Tally): TournamentPlayerStats {
   const perGame = emptyCounts();
+
   for (const count of COUNTS) perGame[count] = round(totals[count] / games.size, 2);
+
   return {
     player,
     team,
@@ -56,13 +59,17 @@ export function aggregatePlayerStats(
   const games = new Set<string>();
   const unlinked = new Set<string>();
   const tallies = new Map<string, Tally>();
+
   for (const line of lines) {
     games.add(line.gameId);
+
     if (!line.player) {
       unlinked.add(line.account);
       continue;
     }
+
     const key = JSON.stringify([line.player.id, line.team.id ?? line.team.name]);
+
     const tally = tallies.get(key) ?? {
       player: line.player,
       team: line.team,
@@ -70,11 +77,15 @@ export function aggregatePlayerStats(
       totals: emptyCounts(),
       teamGoals: 0,
     };
+
     tallies.set(key, tally);
+
     if (!tally.games.has(line.gameId)) tally.teamGoals += line.teamGoals;
     tally.games.add(line.gameId);
+
     for (const count of COUNTS) tally.totals[count] += line[count];
   }
+
   return {
     games: games.size,
     players: [...tallies.values()]

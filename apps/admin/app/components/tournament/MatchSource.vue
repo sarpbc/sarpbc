@@ -4,6 +4,7 @@ const { matchId, label, sourceUrl } = defineProps<{
   label: string;
   sourceUrl: string | null;
 }>();
+
 const open = defineModel<boolean>("open", { default: false });
 const emit = defineEmits<{ saved: [] }>();
 
@@ -21,6 +22,7 @@ watch(open, (isOpen) => {
 
 async function save() {
   saving.value = true;
+
   try {
     await setMatchSource(matchId, normalizeSourceUrl(value.value));
     toast.add({ title: t("page.tournaments.matchSource.saved"), color: "success" });

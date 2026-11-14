@@ -27,15 +27,18 @@ export interface HeadToHead {
 export function formatTournamentLabel(match: Match): string {
   const league = match.tournament?.league?.name;
   const name = match.tournament?.name;
+
   if (league && name) {
     return `${league} ${name}`;
   }
+
   return name ?? "Unknown tournament";
 }
 
 export function getWinnerTeamId(match: Match, teamAId: string, teamBId: string): string | null {
   if (match.winner?.team?.id) {
     const winnerId = match.winner.team.id;
+
     if (winnerId === teamAId || winnerId === teamBId) {
       return winnerId;
     }

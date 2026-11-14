@@ -9,6 +9,7 @@ import { PostService } from "../application/post.service";
 import { TopicService } from "../application/topic.service";
 import { MikroPostStore, MikroTopicStore } from "./persistence/forum.store";
 import { transactionalForum } from "./composition";
+
 @Injectable()
 class TopicInitializer implements OnModuleInit {
   constructor(
@@ -20,6 +21,7 @@ class TopicInitializer implements OnModuleInit {
     await this.topics.initializeTopics();
   }
 }
+
 @Module({
   imports: [ReplyModule],
   controllers: [ForumController, PostController, TopicController],

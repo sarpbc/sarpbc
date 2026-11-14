@@ -4,10 +4,13 @@ import { PostgresHealthIndicator } from "./postgres.health";
 describe("PostgresHealthIndicator", () => {
   const up = vi.fn().mockReturnValue({ postgres: { status: "up" } });
   const down = vi.fn().mockReturnValue({ postgres: { status: "down" } });
+
   const healthIndicatorService = {
     check: vi.fn().mockReturnValue({ up, down }),
   };
+
   const execute = vi.fn();
+
   const em = {
     getConnection: () => ({ execute }),
   };

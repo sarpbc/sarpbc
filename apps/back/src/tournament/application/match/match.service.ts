@@ -22,6 +22,7 @@ import {
   setWinnerInTransaction,
   updateMatchInTransaction,
 } from "./write-match";
+
 const RECENT_FORM_LIMIT = 5;
 
 export interface TeamFormRecord {
@@ -108,6 +109,7 @@ export class MatchService {
 
   private async buildHeadToHead(match: Match): Promise<HeadToHead | null> {
     const [teamA, teamB] = match.participants.map((participant) => participant.team);
+
     if (match.participants.length !== 2 || !teamA || !teamB) {
       return null;
     }
@@ -133,6 +135,7 @@ export class MatchService {
       participants.map(async ({ team }) => {
         if (!team) return;
         const teamId = team.id;
+
         const recent = await this.reads.recentByTeam({
           teamId,
           excludeMatchId: match.id,
@@ -150,6 +153,7 @@ export class MatchService {
             } else if (entry.outcome === "loss") {
               acc.losses += 1;
             }
+
             return acc;
           },
           { wins: 0, losses: 0 },
@@ -174,6 +178,7 @@ export class MatchService {
 
     const results = match.results;
     const teamScore = results.find((r) => r.participant.id === teamParticipant.id)?.score ?? null;
+
     const opponentScore =
       results.find((r) => r.participant.id === opponentParticipant.id)?.score ?? null;
 
@@ -200,6 +205,7 @@ export class MatchService {
     }
 
     const participants = match.participants;
+
     if (participants.length !== 2) {
       return null;
     }
@@ -231,51 +237,62 @@ export class MatchService {
     const written = await this.transaction.run(({ matches }) =>
       createMatchInTransaction(matches, tournamentId, input),
     );
+
     return this.settled(written.id);
   }
   async createEmptyBracket(tournamentId: string, input: EmptyBracketInput): Promise<Match[]> {
     const written = await this.transaction.run(({ matches }) =>
       createEmptyBracketInTransaction(matches, tournamentId, input),
     );
+
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
+
     return this.reads.byIds(written.map((match) => match.id));
   }
   async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setWinnerInTransaction(matches, matchId, winnerId),
     );
+
     return this.settled(written.id);
   }
   async updateMatch(matchId: string, input: UpdateMatchInput): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       updateMatchInTransaction(matches, matchId, input),
     );
+
     return this.settled(written.id);
   }
   async setVods(matchId: string, vods: readonly MatchVodInput[]): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setVodsInTransaction(matches, matchId, vods),
     );
+
     return this.committed(written.id);
   }
   async setSource(matchId: string, sourceUrl: string | null): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setSourceInTransaction(matches, matchId, sourceUrl),
     );
+
     const match = await this.committed(written.id);
     await this.afterCommit.settle({ tournamentIds: [match.tournament.id] });
+
     return match;
   }
   async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setGameVodsInTransaction(matches, matchId, game, links),
     );
+
     return this.committed(written.id);
   }
   async requireProposableDeletion(id: string): Promise<void> {
     await this.transaction.run(async ({ matches }) => {
       const match = await matches.load(id);
+
       if (!match) throw new NotFoundError("Match not found");
+
       if (!isRedistributable(match.source) || !isRedistributable(match.tournament.source))
         throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
       await assertDeletable(matches, match);
@@ -284,11 +301,14 @@ export class MatchService {
   async deleteMatch(id: string): Promise<void> {
     const tournamentId = await this.transaction.run(async ({ matches }) => {
       const match = await matches.load(id);
+
       if (!match) throw new NotFoundError("Match not found");
       await assertDeletable(matches, match);
       await matches.remove(id);
+
       return match.tournament.id;
     });
+
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
   }
   find(id: string): Promise<Match | null> {
@@ -296,7 +316,9 @@ export class MatchService {
   }
   private async committed(id: string): Promise<Match> {
     const match = await this.find(id);
+
     if (!match) throw new NotFoundError("Match not found");
+
     return match;
   }
   private async settled(id: string): Promise<Match> {
@@ -305,6 +327,7 @@ export class MatchService {
       tournamentIds: [match.tournament.id],
       decidedMatchIds: match.isDecided() ? [match.id] : [],
     });
+
     return match;
   }
   async getMatchesByPlayer(id: string) {
@@ -317,6 +340,7 @@ export class MatchService {
     return this.reads.byTournament(id);
   }
 }
+
 async function assertDeletable(matches: MatchWriter, match: Match): Promise<void> {
   assertMatchDeletable(match, await matches.references(match.id));
 }

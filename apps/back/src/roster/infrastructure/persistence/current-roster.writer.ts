@@ -15,18 +15,22 @@ export class MikroCurrentRosterWriter implements CurrentRosterWriter {
     await this.em.fork().transactional(async (tx) => {
       const writer = new RosterSyncWriter(tx);
       const teams = new Map<string, string>();
+
       for (const entry of roster) {
         if (entry.currentTeam && !teams.has(entry.currentTeam.slug)) {
           teams.set(entry.currentTeam.slug, (await writer.upsertTeam(entry.currentTeam)).id);
         }
       }
+
       await tx.flush();
+
       for (const entry of roster) {
         await writer.upsertPlayer(
           entry.player,
           entry.currentTeam ? (teams.get(entry.currentTeam.slug) ?? null) : null,
         );
       }
+
       await tx.flush();
     });
   }

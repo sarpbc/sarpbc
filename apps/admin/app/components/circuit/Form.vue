@@ -45,7 +45,9 @@ const isValid = computed(
 
 function submit() {
   const seasonValue = season.value;
+
   if (!isValid.value || seasonValue === null) return;
+
   const input: CircuitInput = {
     name: name.value.trim(),
     season: seasonValue,
@@ -54,7 +56,9 @@ function submit() {
     sourceUrl: sourceUrl.value.trim(),
     qualificationSpots: qualificationSpots.value,
   };
+
   const trimmedSlug = slug.value.trim();
+
   if (trimmedSlug) input.slug = trimmedSlug;
   emit("submit", input);
 }

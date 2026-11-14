@@ -9,10 +9,13 @@ export class RedisSyncCursor implements SyncCursor {
 
   async getLastSyncAt(): Promise<Date | null> {
     const value = await this.redisService.get(CURSOR_KEY);
+
     if (!value) {
       return null;
     }
+
     const parsed = new Date(value);
+
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
 

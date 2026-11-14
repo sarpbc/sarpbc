@@ -5,9 +5,11 @@ export function findCommentInTree(comments: Reply[], commentId: string): boolean
     if (comment.id === commentId) {
       return true;
     }
+
     if (comment.replies?.length && findCommentInTree(comment.replies, commentId)) {
       return true;
     }
   }
+
   return false;
 }

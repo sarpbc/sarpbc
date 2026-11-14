@@ -4,9 +4,11 @@ import { RedisHealthIndicator } from "./redis.health";
 describe("RedisHealthIndicator", () => {
   const up = vi.fn().mockReturnValue({ redis: { status: "up" } });
   const down = vi.fn().mockReturnValue({ redis: { status: "down" } });
+
   const healthIndicatorService = {
     check: vi.fn().mockReturnValue({ up, down }),
   };
+
   const redis = {
     ping: vi.fn(),
   };

@@ -1,10 +1,12 @@
 import type { ReplyRecord } from "../../reply/application/models";
+
 export interface NotificationRecord {
   id: string;
   createdAt: Date;
   readAt: Date | null;
   reply: ReplyRecord;
 }
+
 export interface NotificationStore {
   findForRecipient(id: string, limit: number): Promise<NotificationRecord[]>;
   countUnread(id: string): Promise<number>;

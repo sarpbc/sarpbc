@@ -55,6 +55,7 @@ describe("TwitchAppToken", () => {
       .fn()
       .mockResolvedValueOnce(tokenResponse("first", 120))
       .mockResolvedValueOnce(tokenResponse("second", 120));
+
     global.fetch = fetchMock;
 
     await token.get();

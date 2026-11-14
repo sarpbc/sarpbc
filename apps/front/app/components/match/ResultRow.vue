@@ -15,6 +15,7 @@ const nameA = computed(() => slotName(match.participants, 0) ?? "");
 const nameB = computed(() => slotName(match.participants, 1) ?? "");
 
 const { isConcealed } = useSpoilerFree();
+
 const concealed = computed(() =>
   isConcealed({ matchId: match.id, tournamentId: match.tournament?.id }),
 );
@@ -25,9 +26,11 @@ const winnerParticipantId = computed(() => {
   }
 
   const [first, second] = match.results;
+
   if (first!.score > second!.score) {
     return first!.participant;
   }
+
   if (second!.score > first!.score) {
     return second!.participant;
   }

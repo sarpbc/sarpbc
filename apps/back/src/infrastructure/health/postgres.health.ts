@@ -19,6 +19,7 @@ export class PostgresHealthIndicator {
         HEALTH_PING_TIMEOUT_MS,
         "Postgres ping timed out",
       );
+
       return indicator.up();
     } catch (error) {
       return indicator.down({

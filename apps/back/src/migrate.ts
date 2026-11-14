@@ -4,6 +4,7 @@ import config from "./mikro-orm.config";
 
 async function migrate(): Promise<void> {
   const orm = new MikroORM({ ...config, extensions: [Migrator] });
+
   try {
     await orm.migrator.up();
   } finally {

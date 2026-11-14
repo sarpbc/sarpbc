@@ -49,11 +49,13 @@ function toTournament(
   tournament: Pick<TournamentSummary, "name" | "slug" | "event">,
 ): OnThisDayTournament {
   const { name, slug, event } = tournament;
+
   return { name, slug, event: { name: event.name, slug: event.slug } };
 }
 
 function toSide(participant: TournamentParticipant, match: Match): OnThisDaySide {
   const result = match.results.find((entry) => entry.participant.id === participant.id);
+
   return {
     team: participant.team ? toTeam(participant.team) : null,
     players: participant.players.map(toPlayer),
@@ -63,12 +65,15 @@ function toSide(participant: TournamentParticipant, match: Match): OnThisDaySide
 
 function dated(at: Date) {
   const day = calendarDayIn(at, SITE_TIME_ZONE);
+
   return { year: day.year, date: formatIsoDay(day) };
 }
 
 function title(tournament: Tournament): OnThisDayEvent[] {
   const { winner, endAt } = tournament;
+
   if (!winner || !endAt || !isRedistributable(tournament.source)) return [];
+
   return [
     {
       kind: "title",
@@ -84,10 +89,14 @@ function title(tournament: Tournament): OnThisDayEvent[] {
 
 function final(match: Match): OnThisDayEvent[] {
   const { winner, endAt, tournament } = match;
+
   if (!winner || !endAt) return [];
+
   if (!isRedistributable(match.source) || !isRedistributable(tournament.source)) return [];
   const loser = match.participants.find((participant) => participant.id !== winner.id);
+
   if (match.participants.length !== 2 || !loser) return [];
+
   return [
     {
       kind: "final",
@@ -128,6 +137,7 @@ function publicLink(link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink {
       return { kind: "match", name: link.name, publicId: link.publicId, slug: link.slug };
     default: {
       const exhaustive: never = link;
+
       return exhaustive;
     }
   }
@@ -135,6 +145,7 @@ function publicLink(link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink {
 
 function fact({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisDayEvent[] {
   if (link?.source && !isRedistributable(link.source)) return [];
+
   return [
     {
       kind: "fact",
@@ -157,6 +168,7 @@ function rank(event: OnThisDayEvent): number {
       return 2;
     default: {
       const exhaustive: never = event;
+
       return exhaustive;
     }
   }
@@ -174,25 +186,30 @@ export class OnThisDayService {
   async forDay(requested: CalendarDay | null, now = new Date()): Promise<OnThisDay> {
     const on = requested ?? calendarDayIn(now, SITE_TIME_ZONE);
     const day = { month: on.month, day: on.day, timeZone: SITE_TIME_ZONE, beforeYear: on.year };
+
     const [titles, finals, transfers, facts] = await Promise.all([
       this.sources.tournaments.wonOnDay(day),
       this.sources.tournaments.finalsOnDay(day),
       this.sources.transfers.onDay(on.month, on.day, now),
       this.sources.facts.onDay(on.month, on.day),
     ]);
+
     const finalEvents = finals.map((match) => ({
       stageId: match.tournament.id,
       events: final(match),
     }));
+
     const decidedInFinal = new Set(
       finalEvents.filter(({ events }) => events.length > 0).map(({ stageId }) => stageId),
     );
+
     const events = [
       ...facts.filter((entry) => isFactShownOn(entry, on)).flatMap(fact),
       ...titles.filter(({ id }) => !decidedInFinal.has(id)).flatMap(title),
       ...finalEvents.flatMap(({ events }) => events),
       ...transfers.filter(({ date }) => date.getUTCFullYear() < on.year).map(transfer),
     ];
+
     return { date: formatIsoDay(on), events: events.sort(byInterest) };
   }
 }

@@ -2,5 +2,6 @@ export function formatDateForInput(date: Date | string | null | undefined): stri
   if (!date) {
     return "";
   }
+
   return new Date(date).toISOString().substring(0, 10);
 }

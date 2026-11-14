@@ -26,7 +26,9 @@ export interface CountryMatchPage {
 
 function currentTeams(players: Player[]): Team[] {
   const teams = new Map<string, Team>();
+
   for (const { team } of players) if (team) teams.set(team.id, team);
+
   return [...teams.values()].sort((a, b) => a.name.localeCompare(b.name, "en"));
 }
 
@@ -40,14 +42,17 @@ export class CountryService {
   async find(rawCode: string, page: CountryMatchPage): Promise<CountryPage> {
     const code = countryCode(rawCode);
     const players = code ? await this.sources.players.findByNationality(code) : [];
+
     if (!code || players.length === 0) {
       throw new NotFoundError(`No player has the nationality "${rawCode}"`);
     }
+
     const [matches, matchTotal] = await this.sources.matches.list("results", {
       ...page,
       playerIds: players.map(({ id }) => id),
       redistributableOnly: true,
     });
+
     return { code, players, teams: currentTeams(players), matches, matchTotal };
   }
 }

@@ -27,6 +27,7 @@ const { path, title } = defineProps<{
   path: string;
   title: string;
 }>();
+
 const open = defineModel<boolean>("open", { default: false });
 
 const { t } = useI18n();
@@ -65,6 +66,7 @@ function toLocalInput(iso: string | null): string {
   if (!iso) return "";
   const date = new Date(iso);
   const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+
   return `${day}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
@@ -101,6 +103,7 @@ function fieldOf(error: ViewershipError): ViewershipField {
       return "measuredAt";
     default: {
       const exhaustive: never = error;
+
       return exhaustive;
     }
   }
@@ -110,7 +113,9 @@ const parsed = computed(() => parseViewership(toViewership(form.value)));
 
 function feedback(field: ViewershipField): FieldFeedback {
   const result = parsed.value;
+
   if (result.ok || fieldOf(result.error) !== field) return {};
+
   return { error: t(`page.tournaments.viewership.errors.${result.error}`) };
 }
 
@@ -131,6 +136,7 @@ function apply(viewership: Viewership | null) {
 async function load() {
   loading.value = true;
   loadFailed.value = false;
+
   try {
     apply((await getViewership(path)).viewership);
   } catch {
@@ -150,6 +156,7 @@ watch(
 
 async function save(viewership: Viewership | null, message: string) {
   saving.value = true;
+
   try {
     apply((await setViewership(path, viewership)).viewership);
     toast.add({ title: message, color: "success" });
@@ -163,6 +170,7 @@ async function save(viewership: Viewership | null, message: string) {
 
 function submit() {
   const result = parsed.value;
+
   if (result.ok) void save(result.viewership, t("page.tournaments.viewership.saved"));
 }
 </script>

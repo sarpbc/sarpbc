@@ -17,5 +17,6 @@ export async function changeUserRole(id: string, role: AssignableRole): Promise<
     method: "PATCH",
     body: { role },
   });
+
   return res.user;
 }

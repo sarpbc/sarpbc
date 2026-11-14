@@ -27,6 +27,7 @@ export class UsersController {
   @Get()
   async list(@Query({ schema: ListUsersQueryDto }) query: ListUsersQueryDto): Promise<UserList> {
     const { users, total } = await this.userService.list(query);
+
     return { users: users.map(UserMapper.toListItemDto), total };
   }
 
@@ -41,6 +42,7 @@ export class UsersController {
       id,
       dto.role === "member" ? null : dto.role,
     );
+
     return { user: UserMapper.toListItemDto(user) };
   }
 }

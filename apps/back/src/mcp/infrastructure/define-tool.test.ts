@@ -6,10 +6,12 @@ import type { PatUser } from "../../pat/application/pat.service";
 import { defineTool } from "./define-tool";
 
 const { logInfo, logError } = vi.hoisted(() => ({ logInfo: vi.fn(), logError: vi.fn() }));
+
 vi.mock("evlog", () => ({ log: { info: logInfo, error: logError } }));
 
 function textContent(result: CallToolResult): string {
   const block = result.content[0];
+
   return block?.type === "text" ? block.text : "";
 }
 
@@ -84,6 +86,7 @@ describe("defineTool", () => {
         input: {},
         handler: async () => ({ ok: true }),
       });
+
       expect((await tool.run(journalist, {})).isError).toBeUndefined();
       expect(tool.description).toBe("List things. Requires tournaments.manage or news.manage.");
     });
@@ -127,6 +130,7 @@ describe("defineTool", () => {
       input: {},
       handler: async () => ({ result: {} }),
     });
+
     expect(tool.description).toBe("Create a league. Requires tournaments.manage.");
   });
 });

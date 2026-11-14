@@ -52,6 +52,7 @@ describe("sanitizeNewsHtml", () => {
     const sanitized = sanitizeNewsHtml(
       '<p>Hello</p><script>alert("x")</script><img src="https://cdn.example/a.png" alt="logo">',
     );
+
     expect(sanitized).toContain("<p>Hello</p>");
     expect(sanitized).toContain('<img src="https://cdn.example/a.png" alt="logo">');
     expect(sanitized).not.toContain("script");

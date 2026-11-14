@@ -20,19 +20,26 @@ const results = ref<Player[]>([]);
 
 const size = computed(() => TEAM_SIZE_BY_FORMAT[props.format]);
 const taken = computed(() => new Set(props.modelValue.flat().map(({ id }) => id)));
+
 const incomplete = computed(() => {
   const last = props.modelValue.at(-1);
+
   return last && last.length < size.value ? last : null;
 });
+
 const available = computed(() => results.value.filter(({ id }) => !taken.value.has(id)));
 
 async function runSearch(searchQuery: string) {
   const trimmed = searchQuery.trim();
+
   if (!trimmed) {
     results.value = [];
+
     return;
   }
+
   pending.value = true;
+
   try {
     results.value = await searchPlayers(trimmed);
   } catch (searchError) {

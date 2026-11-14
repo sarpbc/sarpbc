@@ -51,6 +51,7 @@ export async function getTeamContracts(teamId: string): Promise<TeamContract[]> 
 
   return res.contracts;
 }
+
 export async function getTeamTrophies(teamId: string): Promise<Tournament[]> {
   const res = await apiFetch<{ trophies: Tournament[] }>(`/team/${teamId}/trophies`, {
     method: "GET",

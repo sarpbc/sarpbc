@@ -76,15 +76,18 @@ const isManual = computed(() => tournament.value?.source !== "pandascore");
 async function handleSubmit() {
   if (!tournament.value || isSaving.value || isUploading.value) return;
   const validationError = isManual.value ? validateManualTournamentForm(formState.value) : null;
+
   if (validationError) {
     toast.add({
       title: t(`page.tournaments.form.errors.${validationError}`),
       color: "error",
     });
+
     return;
   }
 
   isSaving.value = true;
+
   try {
     const updated = await updateTournament(
       tournamentId.value,
@@ -92,6 +95,7 @@ async function handleSubmit() {
         ? buildManualTournamentPayload(formState.value, tournament.value)
         : { imageUrl: formState.value.imageUrl.trim() || null },
     );
+
     toast.add({ title: t("page.tournaments.edit.saved"), color: "success" });
     tournament.value = updated;
     formState.value = tournamentToFormState(updated);

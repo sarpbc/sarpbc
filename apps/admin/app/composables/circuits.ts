@@ -8,6 +8,7 @@ import type {
 
 export async function getCircuits(): Promise<CircuitSummary[]> {
   const res = await apiFetch<{ circuits: CircuitSummary[] }>("/circuits", { method: "GET" });
+
   return res.circuits;
 }
 
@@ -53,5 +54,6 @@ export async function getCircuitStageTeams(
     `/circuits/${circuitId}/stages/${tournamentId}/teams`,
     { method: "GET" },
   );
+
   return res.teams;
 }

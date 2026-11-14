@@ -14,6 +14,7 @@ const { formatTournamentPrizepool } = useCurrency();
 
 function eventMeta(event: TournamentEvent<TournamentListItem>): string {
   const typeKey = `components.tournaments.${event.type}`;
+
   return [event.type && te(typeKey) ? t(typeKey) : "", formatTournamentPrizepool(event.prizepool)]
     .filter(Boolean)
     .join(" · ");

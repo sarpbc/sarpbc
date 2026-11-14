@@ -1,6 +1,7 @@
 export const SCHEMA_ORG = "https://schema.org";
 
 export type JsonLdPrimitive = string | number | boolean;
+
 export interface JsonLdReference {
   "@id": string;
 }

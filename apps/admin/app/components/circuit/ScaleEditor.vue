@@ -88,8 +88,10 @@ watch(
 async function loadTeams(tournamentId: string) {
   teamsStatus.value = "pending";
   eventTeams.value = [];
+
   try {
     const teams = await getCircuitStageTeams(props.circuitId, tournamentId);
+
     if (target.value?.tournamentId !== tournamentId) return;
     eventTeams.value = teams;
     teamsStatus.value = "success";
@@ -118,6 +120,7 @@ function toggleRegionTeam(teamId: string, selected: boolean) {
 
 function toFinish(row: FinishRow): CircuitStageFinishInput | null {
   const { teamId, placement } = row;
+
   if (
     teamId === undefined ||
     placement === null ||
@@ -127,24 +130,29 @@ function toFinish(row: FinishRow): CircuitStageFinishInput | null {
   ) {
     return null;
   }
+
   return { teamId, placement };
 }
 
 const finishes = computed<CircuitStageFinishInput[] | null>(() => {
   const valid = finishRows.value.flatMap((row) => toFinish(row) ?? []);
+
   return valid.length === finishRows.value.length ? valid : null;
 });
 
 const hasRepeatedFinish = computed(() => {
   const teamIds = (finishes.value ?? []).map(({ teamId }) => teamId);
+
   return new Set(teamIds).size !== teamIds.length;
 });
 
 function finishError(row: FinishRow): string | undefined {
   if (toFinish(row) !== null) return undefined;
+
   if (row.teamId === undefined || row.placement === null) {
     return t("page.circuits.scale.finishes.errors.incomplete");
   }
+
   return t("page.circuits.scale.finishes.errors.placement", {
     maxPlacement: MAX_CIRCUIT_PLACEMENT,
   });
@@ -160,6 +168,7 @@ function removeFinish(key: number) {
 
 function toTier(row: TierRow): ValidTier | null {
   const { from, to, points } = row;
+
   if (
     from === null ||
     to === null ||
@@ -175,15 +184,19 @@ function toTier(row: TierRow): ValidTier | null {
   ) {
     return null;
   }
+
   return { from, to, points };
 }
 
 function rowError(row: TierRow): string | undefined {
   if (toTier(row) !== null) return undefined;
+
   if (row.from === null || row.to === null || row.points === null) {
     return t("page.circuits.scale.errors.incomplete");
   }
+
   if (row.to < row.from) return t("page.circuits.scale.errors.range");
+
   return t("page.circuits.scale.errors.numbers", {
     maxPlacement: MAX_CIRCUIT_PLACEMENT,
     maxPoints: MAX_CIRCUIT_POINTS,
@@ -192,11 +205,13 @@ function rowError(row: TierRow): string | undefined {
 
 const tiers = computed<ValidTier[] | null>(() => {
   const valid = rows.value.flatMap((row) => toTier(row) ?? []);
+
   return valid.length === rows.value.length ? valid : null;
 });
 
 const hasOverlap = computed(() => {
   const sorted = (tiers.value ?? []).toSorted((a, b) => a.from - b.from);
+
   return sorted.some((tier, index) => index > 0 && tier.from <= (sorted[index - 1]?.to ?? 0));
 });
 
@@ -231,9 +246,11 @@ async function save() {
   const current = target.value;
   const scale = tiers.value;
   const finishList = finishes.value;
+
   if (current === null || scale === null || finishList === null || !canSave.value) return;
   saving.value = true;
   saveError.value = null;
+
   try {
     const circuit = await setCircuitStageScale(props.circuitId, current.tournamentId, {
       scale: scale.toSorted((a, b) => a.from - b.from),
@@ -242,6 +259,7 @@ async function save() {
       regionTeamIds: worldwide.value ? regionTeamIds.value : [],
       finishes: finishList.toSorted((a, b) => a.placement - b.placement),
     });
+
     target.value = null;
     emit("saved", circuit);
   } catch (error) {

@@ -24,6 +24,7 @@ if (!season.value) {
 
 function awardTitle(award: SeasonArchiveAward): string {
   const type = seasonAwardTypeLabel(award.awardType);
+
   return award.region ? `${type} · ${award.region}` : type;
 }
 

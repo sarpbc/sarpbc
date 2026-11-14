@@ -15,6 +15,7 @@ function truncateAtHyphen(slug: string): string {
   if (slug.length <= MAX_SLUG_LENGTH) return slug;
   const window = slug.slice(0, MAX_SLUG_LENGTH + 1);
   const cut = window.lastIndexOf("-");
+
   return cut > 0 ? window.slice(0, cut) : slug.slice(0, MAX_SLUG_LENGTH);
 }
 
@@ -23,14 +24,17 @@ export function toSlug(...parts: Array<string | null | undefined>): string {
     .map((part) => part?.trim())
     .filter(Boolean)
     .join(" ");
+
   const slug = slugify(text, { lower: true, strict: true })
     .replace(/-{2,}/g, "-")
     .replace(/^-|-$/g, "");
+
   return truncateAtHyphen(slug);
 }
 
 export function eventSlug(name: string, year: number | null): string {
   const suffix = year !== null && !YEAR_PATTERN.test(name) ? String(year) : null;
+
   return toSlug(name, suffix) || "event";
 }
 
@@ -45,28 +49,36 @@ export async function allocateSlug(
 ): Promise<string> {
   for (let attempt = 1; ; attempt++) {
     const slug = attempt === 1 ? base : `${base}-${attempt}`;
+
     if (!UUID_PATTERN.test(slug) && !(await isTaken(slug))) return slug;
   }
 }
 
 function roundLabel(matchName: string | null | undefined): string | null {
   const name = matchName?.trim();
+
   if (!name) return null;
   const colon = name.indexOf(":");
+
   if (colon >= 0) return name.slice(0, colon);
+
   return /tbd/i.test(name) ? null : name;
 }
 
 export function isKnownTeamName(name: string | null | undefined): boolean {
   const trimmed = name?.trim();
+
   return Boolean(trimmed) && !/^tbd$/i.test(trimmed!);
 }
 
 export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchSlugInput): string {
   const [teamA, teamB] = teamNames.map((name) => (isKnownTeamName(name) ? name!.trim() : null));
+
   const [first, second] =
     teamA && teamB && toSlug(teamA) > toSlug(teamB) ? [teamB, teamA] : [teamA, teamB];
+
   const lead = first && second ? [first, "vs", second] : [roundLabel(matchName)];
+
   // A manual tournament is the only stage of an event slugged after the same name.
   return toSlug(...lead, eventSlug, stageSlug === eventSlug ? null : stageSlug) || "match";
 }

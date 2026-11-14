@@ -7,6 +7,7 @@ import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tour
 
 const date = z.iso.datetime().transform((value) => new Date(value));
 const nullableText = z.string().nullable();
+
 const team = z.strictObject({
   id: z.string(),
   name: z.string(),
@@ -16,6 +17,7 @@ const team = z.strictObject({
   logoDarkUrl: nullableText,
   location: nullableText,
 });
+
 const participantRef = z.union([
   z.strictObject({ id: z.string(), team }),
   z.strictObject({
@@ -24,6 +26,7 @@ const participantRef = z.union([
     players: z.array(z.strictObject({ id: z.string(), name: z.string(), slug: z.string() })),
   }),
 ]);
+
 const participant = z.strictObject({
   id: z.string(),
   team: team.nullable(),
@@ -37,6 +40,7 @@ const participant = z.strictObject({
   ),
   rosterSourceUrl: nullableText,
 });
+
 const match = z.strictObject({
   id: z.string(),
   publicId: z.number().int().positive(),
@@ -54,6 +58,7 @@ const match = z.strictObject({
   ),
   sourceUrl: nullableText,
 });
+
 const stream = z.strictObject({
   url: z.string(),
   platform: z.enum(STREAM_PLATFORMS),
@@ -62,6 +67,7 @@ const stream = z.strictObject({
   kind: z.enum(STREAM_KINDS),
   source: z.enum(DATA_SOURCES),
 });
+
 const tournament = z.strictObject({
   id: z.string(),
   source: z.enum(DATA_SOURCES),
@@ -98,36 +104,47 @@ export class CachedTournamentRead {
   async findById(id: string): Promise<TournamentDetailResponse | null> {
     const key = tournamentCacheKey(id);
     const cached = await this.readCached(key, id);
+
     if (cached) return cached;
 
     const model = await this.tournaments.findById(id);
+
     if (!model) return null;
     const mapped = mapTournamentDetail(model);
+
     try {
       await this.redis.set(key, JSON.stringify(mapped), 60);
     } catch (error) {
       this.diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
     }
+
     return mapped;
   }
 
   private async readCached(key: string, id: string): Promise<TournamentDetailResponse | null> {
     try {
       const cached = await this.redis.get(key);
+
       if (cached === null) return null;
       const decoded: unknown = JSON.parse(cached);
       const result = tournament.safeParse(decoded);
+
       if (!result.success) {
         this.diagnose(key, "decode", result.error);
+
         return null;
       }
+
       if (result.data.id !== id) {
         this.diagnose(key, "decode", new Error("Cached tournament ID does not match its key"));
+
         return null;
       }
+
       return result.data;
     } catch (error) {
       this.diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
+
       return null;
     }
   }

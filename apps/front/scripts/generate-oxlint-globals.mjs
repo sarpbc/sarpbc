@@ -5,9 +5,11 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FRONT_ROOT = path.resolve(__dirname, "..");
+
 const IMPORTS_TYPES = [".nuxt/types/imports.d.ts", ".nuxt/types/nitro-imports.d.ts"].map((file) =>
   path.join(FRONT_ROOT, file),
 );
+
 const OUTPUT = path.join(FRONT_ROOT, ".oxlintrc.generated.json");
 
 const NODE_AND_NUXT_GLOBALS = ["defineNuxtConfig", "process"];
@@ -25,6 +27,7 @@ const VUE_MACROS = [
 function readAutoImportNames() {
   return IMPORTS_TYPES.flatMap((file) => {
     let source;
+
     try {
       source = readFileSync(file, "utf8");
     } catch {
@@ -33,10 +36,12 @@ function readAutoImportNames() {
     }
 
     const names = [...source.matchAll(/^\s*const (\$?\w+):/gm)].map((match) => match[1]);
+
     if (names.length === 0) {
       console.error(`No auto-import names found in ${file}. Nuxt changed its format?`);
       process.exit(1);
     }
+
     return names;
   });
 }

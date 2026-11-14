@@ -94,6 +94,7 @@ export function circuitTools({ circuitService }: CircuitToolServices): McpTool[]
       handler: async ({ idOrSlug }) => {
         const detail = await circuitService.detail(idOrSlug);
         const standings = await circuitService.standings(detail.id);
+
         return {
           ...withUrl(detail),
           stages: detail.stages
@@ -141,6 +142,7 @@ export function circuitTools({ circuitService }: CircuitToolServices): McpTool[]
       },
       handler: async ({ idOrSlug, ...fields }) => {
         requireUpdateFields(fields);
+
         return written(await circuitService.update(idOrSlug, fields));
       },
     }),

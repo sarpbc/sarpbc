@@ -29,8 +29,10 @@ describe("parseViewership", () => {
   it("requires a source name and an https source URL", () => {
     const error = (input: Partial<Viewership>) => {
       const parsed = parseViewership({ ...VALID, ...input });
+
       return parsed.ok ? null : parsed.error;
     };
+
     assert.equal(error({ sourceName: "  " }), "missing-source-name");
     assert.equal(error({ sourceName: "x".repeat(81) }), "source-name-too-long");
     assert.equal(error({ sourceUrl: "" }), "invalid-source-url");
@@ -42,8 +44,10 @@ describe("parseViewership", () => {
   it("refuses impossible viewer counts", () => {
     const error = (input: Partial<Viewership>) => {
       const parsed = parseViewership({ ...VALID, ...input });
+
       return parsed.ok ? null : parsed.error;
     };
+
     assert.equal(error({ peakViewers: -1 }), "invalid-peak");
     assert.equal(error({ peakViewers: 1.5 }), "invalid-peak");
     assert.equal(error({ averageViewers: -3 }), "invalid-average");

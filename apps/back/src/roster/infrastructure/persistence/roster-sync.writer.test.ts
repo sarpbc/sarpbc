@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Contract, Player, Team, TeamAlias } from "./player.entities";
 import { RosterSyncWriter } from "./roster-sync.writer";
 import type { EntityManager } from "@mikro-orm/postgresql";
+
 describe("RosterSyncWriter", () => {
   const em = { findOne: vi.fn(), persist: vi.fn(), getReference: vi.fn() };
   const manager: Pick<EntityManager, "findOne" | "persist" | "getReference"> = em;
@@ -12,12 +13,14 @@ describe("RosterSyncWriter", () => {
   });
   it("updates a numeric identity and preserves local slug and current team on historical import", async () => {
     const team = Object.assign(new Team(), { id: "old", slug: "old-team" });
+
     const player = Object.assign(new Player(), {
       id: "p1",
       pandascoreId: 1,
       slug: "local-drufinho",
       team,
     });
+
     em.findOne.mockImplementation(async (entity, where) =>
       entity === Player && where.pandascoreId === 1 ? player : null,
     );
@@ -38,6 +41,7 @@ describe("RosterSyncWriter", () => {
       slug: "comm",
       team: new Team(),
     });
+
     em.findOne.mockImplementation(async (entity) => (entity === Player ? player : null));
     const writer = new RosterSyncWriter(manager);
     await writer.upsertPlayer({ pandascoreId: 2, name: "Comm", slug: "comm" }, "new-team");
@@ -51,7 +55,9 @@ describe("RosterSyncWriter", () => {
     const contract = Object.assign(new Contract(), { player, team, endDate: null });
     em.findOne.mockImplementation(async (entity, where) => {
       if (entity === Player && where.pandascoreId === 3) return player;
+
       if (entity === Contract && where.player === "p3" && where.endDate === null) return contract;
+
       return null;
     });
     const writer = new RosterSyncWriter(manager);
@@ -77,6 +83,7 @@ describe("RosterSyncWriter", () => {
       slug: "local",
       imageUrl: "local.png",
     });
+
     em.findOne.mockResolvedValue(team);
     await new RosterSyncWriter(manager).upsertTeam({
       pandascoreId: 10,
@@ -93,6 +100,7 @@ describe("RosterSyncWriter", () => {
       name: "Fixture Now",
       pandascoreId: 20,
     });
+
     const alias = Object.assign(new TeamAlias(), { pandascoreId: 21, team });
     em.findOne.mockImplementation(async (entity, where) =>
       entity === TeamAlias && where.pandascoreId === 21 ? alias : null,

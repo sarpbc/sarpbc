@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
+
 describe("SyncPandascoreTournamentUseCase", () => {
   const feed = {
     getTournamentById: vi.fn(),
@@ -7,6 +8,7 @@ describe("SyncPandascoreTournamentUseCase", () => {
     getTournamentMatches: vi.fn(),
     getTournamentStandings: vi.fn(),
   };
+
   const reads = { findById: vi.fn() };
   const sync = { upsertTournament: vi.fn() };
   const useCase = new SyncPandascoreTournamentUseCase(feed as never, reads, sync as never);

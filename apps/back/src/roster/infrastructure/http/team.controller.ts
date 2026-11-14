@@ -65,12 +65,14 @@ export class TeamController {
   @Post()
   async create(@Body({ schema: CreateTeamDto }) dto: CreateTeamDto) {
     const team = await this.teamService.create(dto);
+
     return { team: mapTeam(team) };
   }
 
   @Get("slug/:slug")
   async findBySlug(@Param("slug") slug: string) {
     const team = await this.teamService.findBySlug(slug);
+
     return { team: team ? mapTeam(team) : null };
   }
 
@@ -79,58 +81,74 @@ export class TeamController {
   @Post("sync")
   async syncPandaScoreTeams() {
     await this.syncPandascoreTeams.sync();
+
     return { success: true };
   }
 
   @Get(":id/trophies")
   async getTrophies(@Param("id", ParseUUIDPipe) id: string) {
     const team = await this.teamService.findById(id);
+
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
+
     const trophies = await this.tournaments.getTournamentsWonByTeam(team.id);
+
     return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/earnings")
   async getEarnings(@Param("id", ParseUUIDPipe) id: string) {
     const team = await this.teamService.findById(id);
+
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
+
     const earnings = await this.tournamentPrizeService.teamEarnings(team.id, {
       redistributableOnly: false,
     });
+
     return { earnings };
   }
 
   @Get(":id/tournaments")
   async getTournaments(@Param("id", ParseUUIDPipe) id: string) {
     const team = await this.teamService.findById(id);
+
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
+
     const tournaments = await this.tournaments.getTournamentsByTeam(team.id);
+
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/former-players")
   async getFormerPlayers(@Param("id") id: string) {
     const team = await this.teamService.findById(id);
+
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
+
     const contracts = await this.contractService.getFormerPlayersByTeam(team.id);
+
     return { contracts };
   }
 
   @Get(":id/contract")
   async getContracts(@Param("id") id: string) {
     const team = await this.teamService.findById(id);
+
     if (!team) {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
+
     const contracts = await this.contractService.getContractsByTeam(team.id);
+
     return { contracts };
   }
 
@@ -142,6 +160,7 @@ export class TeamController {
     @Body({ schema: CreateTeamContractDto }) dto: CreateTeamContractDto,
   ) {
     const contract = await this.contractService.createForTeam(id, dto);
+
     return { contract };
   }
 
@@ -154,6 +173,7 @@ export class TeamController {
     @Body({ schema: UpdateTeamContractDto }) dto: UpdateTeamContractDto,
   ) {
     const contract = await this.contractService.updateForTeam(id, contractId, dto);
+
     return { contract };
   }
 
@@ -200,6 +220,7 @@ export class TeamController {
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const team = await this.teamService.findById(id);
+
     return { team: team ? mapTeam(team) : null };
   }
 
@@ -208,6 +229,7 @@ export class TeamController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body({ schema: UpdateTeamDto }) dto: UpdateTeamDto) {
     const team = await this.teamService.update(id, dto);
+
     return { team: mapTeam(team) };
   }
 

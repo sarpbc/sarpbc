@@ -14,6 +14,7 @@ const variantClass = computed(() => {
       return "";
     default: {
       const _exhaustive: never = variant;
+
       return _exhaustive;
     }
   }

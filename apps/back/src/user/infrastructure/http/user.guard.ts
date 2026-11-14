@@ -34,6 +34,7 @@ export class PermissionGuard implements CanActivate {
     }
 
     const allowed = await this.userService.hasAnyPermission(requestUser.id, required);
+
     if (!allowed) {
       throw new ForbiddenError(
         "You do not have permission for this action. Ask an admin to update your staff role.",

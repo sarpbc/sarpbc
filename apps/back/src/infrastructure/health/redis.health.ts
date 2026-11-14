@@ -19,9 +19,11 @@ export class RedisHealthIndicator {
         HEALTH_PING_TIMEOUT_MS,
         "Redis ping timed out",
       );
+
       if (pong !== "PONG") {
         return indicator.down({ message: "Unexpected ping response" });
       }
+
       return indicator.up();
     } catch (error) {
       return indicator.down({

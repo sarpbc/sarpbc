@@ -18,8 +18,10 @@ export async function verifyLineups({
 }) {
   const lineupPath = `/tournaments/matches/${match.id}/lineups`;
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
+
   const detailLineups = async (matchId) =>
     (await request("GET", `/matches/${matchId}`)).json().lineups;
+
   const standIns = async (playerId) =>
     (await request("GET", `/player/${playerId}/stand-ins`)).json().standIns;
 
@@ -39,6 +41,7 @@ export async function verifyLineups({
       staffCookie,
     )
   ).json();
+
   assert.equal(saved.source, "manual");
   assert.deepEqual(saved.suggested, []);
   assert.deepEqual(sides(saved.lineups), [
@@ -108,6 +111,7 @@ export async function verifyLineups({
       staffCookie,
     )
   ).json();
+
   assert.deepEqual(
     sides(replaced.lineups),
     [[beta, [[standIn.id, true]]]],
@@ -131,6 +135,7 @@ export async function verifyLineups({
       201,
     )
   ).json().tournament;
+
   const startggMatch = (
     await request(
       "POST",
@@ -145,6 +150,7 @@ export async function verifyLineups({
       201,
     )
   ).json().match;
+
   const startggLineups = (
     await request(
       "PUT",
@@ -153,6 +159,7 @@ export async function verifyLineups({
       staffCookie,
     )
   ).json();
+
   assert.equal(startggLineups.source, "startgg");
   const startggDetail = (await request("GET", `/matches/${startggMatch.id}`)).json();
   assert.deepEqual(
@@ -186,10 +193,12 @@ export async function verifyLineupProposals({
 }) {
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
   const sourceUrl = "https://x.com/integration/status/lineups";
+
   const lineups = [
     { participantId: alpha, playerIds: [player.id] },
     { participantId: beta, playerIds: [standIn.id] },
   ];
+
   const detail = async () => (await request("GET", `/matches/${match.id}`)).json().lineups;
 
   assert.deepEqual(
@@ -235,6 +244,7 @@ export async function verifyLineupProposals({
   const duplicate = (
     await request("POST", "/player", { name: "Integration Stand-in Copy" }, staffCookie, 201)
   ).json().player;
+
   await request(
     "PUT",
     `/tournaments/matches/${match.id}/lineups`,
@@ -246,11 +256,13 @@ export async function verifyLineupProposals({
     },
     staffCookie,
   );
+
   const merge = await callTool("merge_players", {
     keptPlayerId: standIn.id,
     duplicatePlayerId: duplicate.id,
     sourceUrl,
   });
+
   assert.equal((await review(merge)).status, "applied");
   assert.deepEqual(
     bySide(await detail()),

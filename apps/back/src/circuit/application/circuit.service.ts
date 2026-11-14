@@ -29,28 +29,34 @@ import type { CircuitStore } from "./ports";
 
 function cleanName(name: string): string {
   const trimmed = name.trim();
+
   if (!trimmed || trimmed.length > CIRCUIT_NAME_MAX_LENGTH)
     throw new InvalidInputError(
       `A circuit name has between 1 and ${CIRCUIT_NAME_MAX_LENGTH} characters.`,
     );
+
   return trimmed;
 }
 
 function cleanDescription(description: string | null | undefined): string | null {
   const trimmed = description?.trim() ?? "";
+
   if (trimmed.length > CIRCUIT_DESCRIPTION_MAX_LENGTH)
     throw new InvalidInputError(
       `A circuit description has at most ${CIRCUIT_DESCRIPTION_MAX_LENGTH} characters.`,
     );
+
   return trimmed || null;
 }
 
 function cleanSpots(spots: number | null | undefined): number | null {
   if (spots === null || spots === undefined) return null;
+
   if (!Number.isInteger(spots) || spots < 1 || spots > MAX_CIRCUIT_QUALIFICATION_SPOTS)
     throw new InvalidInputError(
       `Qualification spots must be a whole number from 1 to ${MAX_CIRCUIT_QUALIFICATION_SPOTS}.`,
     );
+
   return spots;
 }
 
@@ -59,21 +65,25 @@ function cleanSeason(season: number): number {
     throw new InvalidInputError(
       `A circuit season is a year from ${MIN_CIRCUIT_SEASON} to ${MAX_CIRCUIT_SEASON}.`,
     );
+
   return season;
 }
 
 function cleanRegion(region: string | null | undefined): string | null {
   const trimmed = region?.trim() ?? "";
+
   if (trimmed.length > CIRCUIT_REGION_MAX_LENGTH)
     throw new InvalidInputError(
       `A circuit region has at most ${CIRCUIT_REGION_MAX_LENGTH} characters.`,
     );
+
   return trimmed || null;
 }
 
 function cleanSourceUrl(sourceUrl: string): string {
   const trimmed = sourceUrl.trim();
   assertCircuitSourceUrl(trimmed);
+
   return trimmed;
 }
 
@@ -89,14 +99,17 @@ export class CircuitService {
 
   async detail(idOrSlug: string): Promise<CircuitDetail> {
     const circuit = await this.require(idOrSlug);
+
     return { ...circuit, stages: await this.store.stages(circuit.id) };
   }
 
   async standings(idOrSlug: string): Promise<CircuitStandings> {
     const circuit = await this.require(idOrSlug);
+
     const results = (await this.store.stageResults(circuit.id)).filter(({ source }) =>
       isRedistributable(source),
     );
+
     return { ...circuit, ...computeCircuitStandings(results, circuit.region, this.clock()) };
   }
 
@@ -111,14 +124,17 @@ export class CircuitService {
       sourceUrl: cleanSourceUrl(input.sourceUrl),
       qualificationSpots: cleanSpots(input.qualificationSpots),
     };
+
     circuit.slug = await this.freeSlug(input.slug ?? circuit.name, circuit.id);
     await this.assertUnique(circuit);
     await this.store.save(circuit);
+
     return circuit;
   }
 
   async update(idOrSlug: string, input: Partial<CircuitInput>): Promise<CircuitSummary> {
     const current = await this.require(idOrSlug);
+
     const circuit: CircuitSummary = {
       ...current,
       name: input.name === undefined ? current.name : cleanName(input.name),
@@ -133,9 +149,11 @@ export class CircuitService {
           ? current.qualificationSpots
           : cleanSpots(input.qualificationSpots),
     };
+
     if (input.slug !== undefined) circuit.slug = await this.freeSlug(input.slug, circuit.id);
     await this.assertUnique(circuit);
     await this.store.save(circuit);
+
     return circuit;
   }
 
@@ -145,6 +163,7 @@ export class CircuitService {
 
   async stageTeams(circuitId: string, tournamentId: string): Promise<CircuitEventTeam[]> {
     await this.require(circuitId);
+
     return this.requireEventTeams(tournamentId);
   }
 
@@ -155,6 +174,7 @@ export class CircuitService {
   ): Promise<CircuitStageSettings> {
     await this.require(circuitId);
     const teams = await this.requireEventTeams(tournamentId);
+
     return parseCircuitStageSettings(input, new Set(teams.map(({ team }) => team.id)));
   }
 
@@ -174,20 +194,25 @@ export class CircuitService {
 
   private async requireEventTeams(tournamentId: string): Promise<CircuitEventTeam[]> {
     const teams = await this.store.eventTeams(tournamentId);
+
     if (teams === null)
       throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
+
     return teams;
   }
 
   private async require(idOrSlug: string): Promise<CircuitSummary> {
     const circuit = await this.store.find(idOrSlug);
+
     if (!circuit) throw new NotFoundError("Circuit not found");
+
     return circuit;
   }
 
   private async assertUnique({ id, name, season, region }: CircuitSummary): Promise<void> {
     const key = (value: string | null) => value?.toLocaleLowerCase("en-US") ?? null;
     const twins = await this.store.withSeason(season);
+
     if (
       twins.some(
         (other) =>
@@ -201,12 +226,15 @@ export class CircuitService {
 
   private async freeSlug(raw: string, id: string): Promise<string> {
     const slug = toSlug(raw);
+
     if (!slug || isUuid(slug))
       throw new InvalidInputError(
         "Enter a valid slug using letters, numbers, and hyphens (e.g. season-2026).",
       );
+
     if (await this.store.slugTaken(slug, id))
       throw new ConflictError(`A circuit with the slug "${slug}" already exists.`);
+
     return slug;
   }
 }

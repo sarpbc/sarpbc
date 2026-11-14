@@ -36,9 +36,11 @@ const nonPublic = new BlockList();
 function addCidrs(list: BlockList, cidrs: readonly string[], family: "ipv4" | "ipv6"): void {
   for (const cidr of cidrs) {
     const [address, prefix] = cidr.split("/");
+
     if (!address || !prefix) {
       continue;
     }
+
     list.addSubnet(address, Number(prefix), family);
   }
 }
@@ -46,24 +48,39 @@ function addCidrs(list: BlockList, cidrs: readonly string[], family: "ipv4" | "i
 const trustedProxy = new BlockList();
 
 addCidrs(cloudflare, CLOUDFLARE_IPV4, "ipv4");
+
 addCidrs(cloudflare, CLOUDFLARE_IPV6, "ipv6");
 
 trustedProxy.addSubnet("127.0.0.0", 8, "ipv4");
+
 trustedProxy.addSubnet("10.0.0.0", 8, "ipv4");
+
 trustedProxy.addSubnet("172.16.0.0", 12, "ipv4");
+
 trustedProxy.addSubnet("192.168.0.0", 16, "ipv4");
+
 trustedProxy.addAddress("::1", "ipv6");
+
 trustedProxy.addSubnet("fc00::", 7, "ipv6");
 
 nonPublic.addSubnet("0.0.0.0", 8, "ipv4");
+
 nonPublic.addSubnet("10.0.0.0", 8, "ipv4");
+
 nonPublic.addSubnet("127.0.0.0", 8, "ipv4");
+
 nonPublic.addSubnet("169.254.0.0", 16, "ipv4");
+
 nonPublic.addSubnet("172.16.0.0", 12, "ipv4");
+
 nonPublic.addSubnet("192.168.0.0", 16, "ipv4");
+
 nonPublic.addSubnet("100.64.0.0", 10, "ipv4");
+
 nonPublic.addAddress("::1", "ipv6");
+
 nonPublic.addSubnet("fc00::", 7, "ipv6");
+
 nonPublic.addSubnet("fe80::", 10, "ipv6");
 
 export type HeaderValue = string | string[] | undefined;
@@ -79,13 +96,16 @@ export function canonicalIp(value: string | undefined | null): string | undefine
   if (!value) {
     return undefined;
   }
+
   const trimmed = value.trim().split("%")[0] ?? "";
   const mapped = /^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i.exec(trimmed);
   const candidate = mapped?.[1] ?? trimmed;
   const version = isIP(candidate);
+
   if (version === 0) {
     return undefined;
   }
+
   return version === 4 ? candidate : candidate.toLowerCase();
 }
 
@@ -95,59 +115,75 @@ function ipFamily(ip: string): "ipv4" | "ipv6" {
 
 export function isCloudflareIp(value: string | undefined): boolean {
   const ip = canonicalIp(value);
+
   if (!ip) {
     return false;
   }
+
   return cloudflare.check(ip, ipFamily(ip));
 }
 
 export function isTrustedProxy(value: string | undefined): boolean {
   const ip = canonicalIp(value);
+
   if (!ip) {
     return false;
   }
+
   return trustedProxy.check(ip, ipFamily(ip));
 }
 
 export function isPublicIp(value: string | undefined): boolean {
   const ip = canonicalIp(value);
+
   if (!ip) {
     return false;
   }
+
   return !nonPublic.check(ip, ipFamily(ip));
 }
 
 function header(headers: ClientRequest["headers"], name: string): string | undefined {
   const value = headers?.[name] ?? headers?.[name.toLowerCase()];
+
   if (Array.isArray(value)) {
     const trimmed = value.length === 1 ? value[0]?.trim() : undefined;
+
     return trimmed ? trimmed : undefined;
   }
+
   const trimmed = value?.trim();
+
   return trimmed ? trimmed : undefined;
 }
 
 export function resolveClientAddress(request: ClientRequest): string {
   const seen = canonicalIp(request.ip);
+
   if (!seen) {
     return "unknown";
   }
+
   if (isCloudflareIp(seen)) {
     const client = canonicalIp(header(request.headers, "cf-connecting-ip"));
+
     if (client && isPublicIp(client)) {
       return client;
     }
   }
+
   return seen;
 }
 
 export function peerAddress(request: ClientRequest): string | undefined {
   const address = request.socket?.remoteAddress ?? request.raw?.socket?.remoteAddress;
+
   return address ? canonicalIp(address) : undefined;
 }
 
 export function isDirectLoopback(request: ClientRequest): boolean {
   const peer = peerAddress(request);
+
   return peer === "127.0.0.1" || peer === "::1";
 }
 
@@ -156,18 +192,23 @@ export function addressSeenByTrustedProxy(
   forwardedFor: string | undefined | null,
 ): string | undefined {
   const socket = canonicalIp(socketAddress);
+
   if (!socket) {
     return undefined;
   }
+
   const forwarded = (forwardedFor ?? "")
     .split(",")
     .map((part) => canonicalIp(part))
     .filter((part): part is string => part !== undefined);
+
   const chain = [...forwarded, socket];
   let index = chain.length - 1;
+
   while (index > 0 && isTrustedProxy(chain[index])) {
     index -= 1;
   }
+
   return chain[index];
 }
 
@@ -175,6 +216,7 @@ function joinedHeader(value: string | string[] | undefined | null): string | und
   if (Array.isArray(value)) {
     return value.join(",");
   }
+
   return value ?? undefined;
 }
 
@@ -182,6 +224,7 @@ function singleHeader(value: string | string[] | undefined | null): string | und
   if (Array.isArray(value)) {
     return value.length === 1 ? value[0] : undefined;
   }
+
   return value ?? undefined;
 }
 
@@ -191,21 +234,26 @@ export function visitorAddressFromProxy(input: {
   connectingIp?: string | string[] | null;
 }): string | undefined {
   const seen = addressSeenByTrustedProxy(input.socketAddress, joinedHeader(input.forwardedFor));
+
   if (!seen) {
     return undefined;
   }
+
   const resolved = resolveClientAddress({
     ip: seen,
     headers: { "cf-connecting-ip": singleHeader(input.connectingIp) },
   });
+
   return isPublicIp(resolved) ? resolved : undefined;
 }
 
 export function forwardedPublicClient(request: ClientRequest): string | undefined {
   const client = canonicalIp(header(request.headers, INTERNAL_CLIENT_HEADER));
+
   if (!client || !isPublicIp(client)) {
     return undefined;
   }
+
   return client;
 }
 
@@ -214,17 +262,23 @@ export function internalApiTokenMatches(
   expected: string | undefined,
 ): boolean {
   const token = expected?.trim();
+
   if (!token) {
     return false;
   }
+
   const provided = header(request.headers, INTERNAL_API_HEADER);
+
   if (!provided) {
     return false;
   }
+
   const left = Buffer.from(provided);
   const right = Buffer.from(token);
+
   if (left.length !== right.length) {
     return false;
   }
+
   return timingSafeEqual(left, right);
 }

@@ -43,6 +43,7 @@ const rows = computed(() =>
 const hasStandIn = computed(() =>
   lineups.some((lineup) => lineup.players.some((player) => player.standIn)),
 );
+
 const showCredit = computed(() => startgg && lineups.length > 0);
 </script>
 

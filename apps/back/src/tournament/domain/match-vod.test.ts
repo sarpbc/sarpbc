@@ -48,10 +48,12 @@ describe("normalizeMatchVods", () => {
     expect(
       normalizeMatchVods([vod("https://youtu.be/a", { language: " FR " })], 5)[0]?.language,
     ).toBe("fr");
+
     for (const language of ["aa", "ja", "zu"])
       expect(normalizeMatchVods([vod("https://youtu.be/a", { language })], 5)[0]?.language).toBe(
         language,
       );
+
     for (const language of ["fra", "xx", "zz", "e1", "", "en-US"])
       expect(() => normalizeMatchVods([vod("https://youtu.be/a", { language })], 5)).toThrow(
         InvalidInputError,
@@ -91,6 +93,7 @@ describe("normalizeMatchVods", () => {
       ],
       5,
     );
+
     expect(vods.map((v) => [v.game, v.source, v.language])).toEqual([
       [1, "twitch", "fr"],
       [1, "youtube", "de"],
@@ -103,6 +106,7 @@ describe("normalizeMatchVods", () => {
     const links = Array.from({ length: MAX_VODS_PER_GAME + 1 }, (_, i) =>
       vod(`https://youtu.be/v${i}`),
     );
+
     expect(() => normalizeMatchVods(links, 5)).toThrow(
       `Game 1 has more than ${MAX_VODS_PER_GAME} VOD links.`,
     );

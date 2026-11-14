@@ -67,6 +67,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
   spec: ReadToolSpec<Fields, Output> | WriteToolSpec<Fields, Output>,
 ): McpTool {
   const permissions = [spec.permission ?? []].flat();
+
   return {
     name: spec.name,
     description:
@@ -78,6 +79,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
       const allowed =
         permissions.length === 0 ||
         permissions.some((permission) => roleHasPermission(user.role, permission));
+
       if (!allowed) {
         return toolErrorResult(
           `You need the ${permissions.join(" or ")} permission. Ask an admin to update your staff role.`,
@@ -86,6 +88,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
 
       try {
         const fields = input as ToolInput<Fields>;
+
         if (!spec.write) return jsonToolResult(await spec.handler(fields, user));
 
         const { result, entityId, sourceUrl } = await spec.handler(fields, user);
@@ -97,6 +100,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
           sourceUrl,
           message: `${spec.name} completed`,
         });
+
         return jsonToolResult(result);
       } catch (error) {
         log.error({
@@ -106,6 +110,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
           message: `${spec.name} failed`,
           error: asError(error),
         });
+
         return toolErrorResult(extractErrorMessage(error));
       }
     },

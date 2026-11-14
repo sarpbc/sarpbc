@@ -45,6 +45,7 @@ export async function getAllPlayers(query?: {
     method: "GET",
     params,
   });
+
   const players = res.players ?? [];
 
   return { players, total: res.count ?? players.length };

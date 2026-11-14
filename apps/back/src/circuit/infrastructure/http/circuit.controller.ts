@@ -83,6 +83,7 @@ export class CircuitController {
     @Body({ schema: SetCircuitStageDto }) dto: SetCircuitStageDto,
   ): Promise<CircuitDetail> {
     await this.circuits.setStageScale(id, tournamentId, dto);
+
     return this.circuits.detail(id);
   }
 

@@ -22,6 +22,7 @@ const {
   () => `admin-forum-post-${postId.value}`,
   async () => {
     const post = await getPostById(postId.value);
+
     return { post, replies: await getPostReplies(post.id) };
   },
   { server: false, watch: [postId] },
@@ -45,6 +46,7 @@ const flatReplies = computed(() => {
   function walk(replies: Reply[]) {
     for (const reply of replies) {
       items.push(reply);
+
       if (reply.replies.length) {
         walk(reply.replies);
       }
@@ -59,6 +61,7 @@ const flatReplies = computed(() => {
 async function hideReply(reply: Reply) {
   if (hidingReplyId.value) return;
   hidingReplyId.value = reply.id;
+
   try {
     await hideForumReply(reply.id);
     toast.add({

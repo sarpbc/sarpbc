@@ -7,13 +7,18 @@ import {
   serieSchema,
   tournamentSchema,
 } from "./tournament.dto";
+
 export const currentPlayerSchema = playerSchema.extend({ current_team: teamSchema.nullish() });
+
 export type CurrentPlayerDto = z.infer<typeof currentPlayerSchema>;
+
 const change = z.enum(["creation", "update"]);
+
 const base = {
   id: z.number().int(),
   modified_at: z.string().refine((v) => Number.isFinite(Date.parse(v)), "Invalid provider date"),
 };
+
 const upsert = z.discriminatedUnion("type", [
   z.object({
     ...base,
@@ -32,6 +37,7 @@ const upsert = z.discriminatedUnion("type", [
   z.object({ ...base, change_type: change, type: z.literal("league"), object: leagueSchema }),
   z.object({ ...base, change_type: change, type: z.literal("serie"), object: serieSchema }),
 ]);
+
 export const incidentSchema = z.union([
   upsert,
   z.object({
@@ -45,4 +51,5 @@ export const incidentSchema = z.union([
       .transform((deletion) => deletion?.reason ?? null),
   }),
 ]);
+
 export type PandascoreIncidentDto = z.infer<typeof incidentSchema>;

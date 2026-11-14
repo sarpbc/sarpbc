@@ -10,6 +10,7 @@ import type {
 import type { MatchDecided } from "../domain/match-decided";
 import { tournamentCacheKey } from "./cache/cached-tournament.read";
 import { tournamentPrizesCacheKey } from "./cache/cached-tournament-prizes.read";
+
 @Injectable()
 export class CompetitionCacheAdapter implements CompetitionCache {
   constructor(private readonly redis: RedisService) {}
@@ -20,6 +21,7 @@ export class CompetitionCacheAdapter implements CompetitionCache {
     ]);
   }
 }
+
 @Injectable()
 export class CompetitionEventsAdapter implements CompetitionEvents {
   constructor(private readonly emitter: EventEmitter2) {}
@@ -27,6 +29,7 @@ export class CompetitionEventsAdapter implements CompetitionEvents {
     await this.emitter.emitAsync(event.type, event);
   }
 }
+
 export const competitionDiagnostics: CompetitionDiagnostics = {
   error(message, error) {
     log.error({

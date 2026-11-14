@@ -18,6 +18,7 @@ function transferLabel(transfer: Transfer): string {
     transfer.type === "staff"
       ? t(`common.contractRole.${transfer.role}`)
       : t(`components.transfer.type.${transfer.type}`);
+
   return `${transfer.player.name} · ${type} · ${transfer.team.name}`;
 }
 </script>

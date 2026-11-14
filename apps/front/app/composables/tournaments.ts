@@ -18,19 +18,25 @@ interface TournamentListQuery {
 function listPath(path: string, query: TournamentListQuery): string {
   const { limit, offset, pickems, activeOnly } = query;
   const params = new URLSearchParams();
+
   if (limit !== undefined) {
     params.set("limit", String(limit));
   }
+
   if (offset !== undefined) {
     params.set("offset", String(offset));
   }
+
   if (pickems !== undefined) {
     params.set("pickems", pickems ? "true" : "false");
   }
+
   if (activeOnly) {
     params.set("activeOnly", "true");
   }
+
   const search = params.toString();
+
   return search ? `${path}?${search}` : path;
 }
 
@@ -43,6 +49,7 @@ export async function getAllTournaments(
   );
 
   const tournaments = res.tournaments ?? [];
+
   return { tournaments, total: res.count ?? tournaments.length };
 }
 
@@ -71,6 +78,7 @@ export async function resolveTournamentPath(
     if (getApiErrorStatus(cause) === 404) {
       return null;
     }
+
     throw cause;
   }
 }
@@ -86,6 +94,7 @@ export async function getTournamentById(id: string): Promise<TournamentDetail | 
     if (getApiErrorStatus(cause) === 404) {
       return null;
     }
+
     throw cause;
   }
 }

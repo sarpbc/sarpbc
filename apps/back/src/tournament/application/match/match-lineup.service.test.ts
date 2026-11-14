@@ -66,12 +66,14 @@ describe("MatchLineupService", () => {
     references: unused,
     remove: unused,
   };
+
   const lineupWriter: LineupWriter = {
     activePlayersExist: async (ids) => ids.every((id) => existing.has(id)),
     replace: async (matchId, lineups) => {
       replaced.push({ matchId, lineups });
     },
   };
+
   const scope: CompetitionWriteScope = {
     matches: matchWriter,
     lineups: lineupWriter,
@@ -91,13 +93,17 @@ describe("MatchLineupService", () => {
       return unused();
     },
   };
+
   const transaction: CompetitionTransaction = { run: (work) => work(scope) };
+
   const byIds = vi.fn(async (ids: string[]) =>
     ids.flatMap((id) => {
       const found = matches.get(id);
+
       return found ? [found] : [];
     }),
   );
+
   const service = new MatchLineupService(
     { byMatch: async () => stored, byPlayer: async () => playerRows },
     { byIds },
@@ -111,6 +117,7 @@ describe("MatchLineupService", () => {
     playerRows = [];
     existing = new Set(["alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf"]);
     byIds.mockClear();
+
     for (const found of [
       match("manual-match", "manual"),
       match("pandascore-match", "pandascore"),

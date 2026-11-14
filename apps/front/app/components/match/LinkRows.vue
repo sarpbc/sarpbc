@@ -35,19 +35,23 @@ function statusFor(matchId: string): MatchDiscoveryStatus {
   if (variant === "result") {
     return listVariantToDiscoveryStatus(variant);
   }
+
   return isLive(matchId) ? "live" : "upcoming";
 }
 
 function href(match: MatchRowItem): string {
   const path = localePath(matchPath(match.publicId, match.slug));
+
   return source ? `${path}?${MATCH_DISCOVERY_FROM_QUERY}=${source}` : path;
 }
 
 const onClick = useLinkDelegation((link) => {
   const matchId = link.dataset.matchId;
+
   if (!source || !matchId) {
     return;
   }
+
   trackMatchRowClicked({ matchId, source, status: statusFor(matchId) });
 });
 </script>

@@ -45,9 +45,11 @@ const textEn = ref(props.fact?.textEn ?? "");
 const textFr = ref(props.fact?.textFr ?? "");
 const sourceUrl = ref(props.fact?.sourceUrl ?? "");
 const linkKind = ref<OnThisDayLinkKind | typeof NO_LINK>(props.fact?.link?.kind ?? NO_LINK);
+
 const linked = ref<Candidate | null>(
   props.fact?.link ? { id: props.fact.link.id, label: linkLabel(props.fact.link) } : null,
 );
+
 const matchStage = ref<Candidate | null>(null);
 const query = ref("");
 const results = ref<Candidate[]>([]);
@@ -55,16 +57,19 @@ const searching = ref(false);
 
 const monthOptions = computed(() => {
   const format = new Intl.DateTimeFormat(locale.value, { month: "long", timeZone: "UTC" });
+
   return Array.from({ length: 12 }, (_, index) => ({
     value: index + 1,
     label: format.format(new Date(Date.UTC(2024, index, 1))),
   }));
 });
+
 const dayOptions = computed(() =>
   Array.from({ length: 31 }, (_, index) => index + 1)
     .filter((value) => isMonthDay(month.value, value))
     .map((value) => ({ value, label: String(value) })),
 );
+
 const linkKindOptions = computed(() => [
   { value: NO_LINK, label: t("page.onThisDay.form.link.none") },
   ...ON_THIS_DAY_LINK_KINDS.map((kind) => ({
@@ -76,6 +81,7 @@ const linkKindOptions = computed(() => [
 watch(month, () => {
   if (!isMonthDay(month.value, day.value)) day.value = 1;
 });
+
 watch(linkKind, () => {
   linked.value = null;
   matchStage.value = null;
@@ -84,13 +90,16 @@ watch(linkKind, () => {
 });
 
 const parsedYear = computed(() => (year.value.trim() ? Number(year.value.trim()) : null));
+
 const yearError = computed(() =>
   parsedYear.value !== null &&
   (!Number.isInteger(parsedYear.value) || parsedYear.value < ON_THIS_DAY_MIN_YEAR)
     ? t("page.onThisDay.form.yearInvalid", { min: ON_THIS_DAY_MIN_YEAR })
     : undefined,
 );
+
 const sourceError = computed(() => checkSourceUrl(sourceUrl.value));
+
 const isValid = computed(
   () =>
     textEn.value.trim().length > 0 &&
@@ -114,6 +123,7 @@ async function search(kind: OnThisDayLinkKind, value: string): Promise<Candidate
       }));
     default: {
       const exhaustive: never = kind;
+
       return exhaustive;
     }
   }
@@ -122,11 +132,15 @@ async function search(kind: OnThisDayLinkKind, value: string): Promise<Candidate
 async function runSearch(value: string) {
   const trimmed = value.trim();
   const kind = linkKind.value;
+
   if (!trimmed || kind === NO_LINK) {
     results.value = [];
+
     return;
   }
+
   searching.value = true;
+
   try {
     results.value = await search(kind, trimmed);
   } catch (searchError) {
@@ -145,6 +159,7 @@ const loadingMatches = ref(false);
 async function pickStageForMatch(stage: Candidate) {
   matchStage.value = stage;
   loadingMatches.value = true;
+
   try {
     const matches = await getTournamentMatches(stage.id);
     stageMatches.value = matches.map((match) => ({
@@ -162,10 +177,13 @@ async function pickStageForMatch(stage: Candidate) {
 function pick(candidate: Candidate) {
   query.value = "";
   results.value = [];
+
   if (linkKind.value === "match") {
     void pickStageForMatch(candidate);
+
     return;
   }
+
   linked.value = candidate;
 }
 

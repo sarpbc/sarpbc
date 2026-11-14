@@ -110,6 +110,7 @@ export function toIsoDate(value: Date | string | undefined | null): string | und
   }
 
   const date = new Date(value);
+
   if (Number.isNaN(date.getTime())) {
     return undefined;
   }
@@ -129,6 +130,7 @@ export function sportsEventStatusUrl(status: TournamentStatus | null): string | 
       return `${SCHEMA_ORG}/EventScheduled`;
     default: {
       const _exhaustive: never = status;
+
       return _exhaustive;
     }
   }
@@ -146,6 +148,7 @@ export function formatLabel(type: string | null): string | undefined {
       return FORMAT_LABEL[type];
     default: {
       const _exhaustive: never = type;
+
       return _exhaustive;
     }
   }
@@ -159,6 +162,7 @@ const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
 
 function countryPlace(country: string | null | undefined): PlaceLd | undefined {
   const code = country?.trim().toUpperCase();
+
   if (!code || !/^[A-Z]{2}$/.test(code)) {
     return undefined;
   }
@@ -187,6 +191,7 @@ export function eventVenue(
   url: string,
 ): SportsEventVenueLd {
   const place = countryPlace(country);
+
   if (!type || !isTournamentFormat(type) || !place) {
     return onlineVenue(url);
   }
@@ -206,6 +211,7 @@ export function eventVenue(
       };
     default: {
       const _exhaustive: never = type;
+
       return _exhaustive;
     }
   }
@@ -215,10 +221,13 @@ export function getTournamentChampion(
   tournament: Pick<TournamentDetail, "winner">,
 ): ParticipantRef<TeamSummary> | null {
   const winner = tournament.winner;
+
   if (!winner) {
     return null;
   }
+
   const listed = winner.team ? Boolean(winner.team.slug) : winner.players.length > 0;
+
   return listed ? winner : null;
 }
 
@@ -229,6 +238,7 @@ function competitorFromTournament(
 
   for (const participant of tournament.participants) {
     const team = participant.team;
+
     if (!team) {
       for (const player of participant.players) {
         competitors.set(
@@ -240,10 +250,12 @@ function competitorFromTournament(
           }),
         );
       }
+
       continue;
     }
 
     const name = team.name.trim();
+
     if (!name || competitors.has(team.id)) {
       continue;
     }
@@ -310,9 +322,11 @@ function buildDescription(parts: {
   if (parts.format) {
     sentences.push(`Format: ${parts.format}`);
   }
+
   if (parts.prizepool) {
     sentences.push(`Prize pool: ${parts.prizepool}`);
   }
+
   if (parts.championName) {
     sentences.push(`Champion: ${parts.championName}`);
   }

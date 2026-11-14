@@ -24,6 +24,7 @@ function resultToStatus(result: AirRiddleResultEnum): AirRiddleLetterStatus {
       return "incorrect";
     default: {
       const exhaustive: never = result;
+
       return exhaustive;
     }
   }
@@ -36,12 +37,14 @@ export function deriveAirRiddleLetterStatuses(attempts: AirRiddleAttemptLike[]) 
     for (let index = 0; index < attempt.letters.length; index += 1) {
       const letter = attempt.letters[index]?.toUpperCase();
       const result = attempt.results?.[index];
+
       if (!letter || result === undefined) {
         continue;
       }
 
       const nextStatus = resultToStatus(result);
       const current = statuses.get(letter) ?? "unused";
+
       if (STATUS_RANK[nextStatus] > STATUS_RANK[current]) {
         statuses.set(letter, nextStatus);
       }

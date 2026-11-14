@@ -20,7 +20,9 @@ export function assertMatchDeletable(match: Match, references: MatchReferences):
       `${match.name} is synced from PandaScore and would be imported again; it cannot be deleted`,
     );
   }
+
   const blocking = describeReferences(references, MATCH_REFERENCE_NOUNS);
+
   if (blocking) {
     throw new ConflictError(`${match.name} still has ${blocking}; remove them before deleting it`);
   }

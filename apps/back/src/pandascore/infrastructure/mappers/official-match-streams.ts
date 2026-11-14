@@ -6,6 +6,7 @@ const MAX_OFFICIAL_STREAMS = 12;
 function isHttpUrl(value: string): boolean {
   try {
     const parsed = new URL(value);
+
     return parsed.protocol === "http:" || parsed.protocol === "https:";
   } catch {
     return false;
@@ -28,6 +29,7 @@ export function mapOfficialMatchStreams(
     }
 
     const url = stream.raw_url?.trim();
+
     if (!url || !isHttpUrl(url) || seen.has(url)) {
       continue;
     }

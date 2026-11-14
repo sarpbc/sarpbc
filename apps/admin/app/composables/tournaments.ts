@@ -29,6 +29,7 @@ export async function getAllTournaments(query: {
     method: "GET",
     query,
   });
+
   return { tournaments: res.tournaments, total: res.count };
 }
 
@@ -36,6 +37,7 @@ export async function getTournamentById(id: string): Promise<TournamentDetail> {
   const res = await apiFetch<{ tournament: TournamentDetail }>(`/tournaments/${id}`, {
     method: "GET",
   });
+
   return res.tournament;
 }
 
@@ -50,6 +52,7 @@ export async function getTournamentMatches(
     `/tournaments/${tournamentId}/matches`,
     { method: "GET" },
   );
+
   return res.matches;
 }
 
@@ -69,6 +72,7 @@ export async function getTournamentsWithoutMatches(): Promise<{ id: string; name
     "/tournaments/without-matches",
     { method: "GET" },
   );
+
   return res.tournaments;
 }
 
@@ -140,6 +144,7 @@ export async function getTournamentLeagues(): Promise<League[]> {
   const res = await apiFetch<{ leagues: League[] }>("/tournaments/leagues", {
     method: "GET",
   });
+
   return res.leagues;
 }
 
@@ -148,6 +153,7 @@ export async function createLeague(body: LeagueInput): Promise<League> {
     method: "POST",
     body,
   });
+
   return res.league;
 }
 
@@ -156,26 +162,31 @@ export async function updateLeague(id: string, body: LeagueInput): Promise<Leagu
     method: "PATCH",
     body,
   });
+
   return res.league;
 }
 
 export async function getManualEvents(): Promise<ManualEvent[]> {
   const res = await apiFetch<{ events: ManualEvent[] }>("/events/manual", { method: "GET" });
+
   return res.events;
 }
 
 export async function getManualEvent(id: string): Promise<ManualEvent> {
   const res = await apiFetch<{ event: ManualEvent }>(`/events/manual/${id}`, { method: "GET" });
+
   return res.event;
 }
 
 export async function createEvent(body: EventInput): Promise<ManualEvent> {
   const res = await apiFetch<{ event: ManualEvent }>("/events", { method: "POST", body });
+
   return res.event;
 }
 
 export async function updateEvent(id: string, body: EventInput): Promise<ManualEvent> {
   const res = await apiFetch<{ event: ManualEvent }>(`/events/${id}`, { method: "PATCH", body });
+
   return res.event;
 }
 
@@ -188,6 +199,7 @@ export async function createTournament(body: ManualTournamentInput): Promise<Tou
     method: "POST",
     body,
   });
+
   return res.tournament;
 }
 
@@ -199,6 +211,7 @@ export async function updateTournament(
     method: "PATCH",
     body,
   });
+
   return res.tournament;
 }
 
@@ -209,6 +222,7 @@ export async function getTournamentAwards(
     `/tournaments/${tournamentId}/awards`,
     { method: "GET" },
   );
+
   return res.awards;
 }
 
@@ -220,6 +234,7 @@ export async function createTournamentAward(
     `/tournaments/${tournamentId}/awards`,
     { method: "POST", body: payload },
   );
+
   return res.award;
 }
 
@@ -255,6 +270,7 @@ export async function getStatsImports(tournamentId: string): Promise<StatsImport
     `/tournaments/${tournamentId}/stats-imports`,
     { method: "GET" },
   );
+
   return res.imports;
 }
 
@@ -281,6 +297,7 @@ export async function getTournamentStatsGames(
     `/tournaments/${tournamentId}/stats-games`,
     { method: "GET" },
   );
+
   return res.games;
 }
 

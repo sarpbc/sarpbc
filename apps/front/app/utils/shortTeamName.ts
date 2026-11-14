@@ -4,5 +4,6 @@ export function shortTeamName(name: string): string {
     .replace(/\b(?:Esports?|Gaming|Team)\b/gi, "")
     .replace(/\s+/g, " ")
     .trim();
+
   return short || name;
 }

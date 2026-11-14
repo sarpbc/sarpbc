@@ -5,6 +5,7 @@ export class CompetitionPickemMatches implements PickemMatches {
   constructor(private readonly matches: Pick<MatchService, "find" | "setMatchWinner">) {}
   async find(id: string) {
     const match = await this.matches.find(id);
+
     return match
       ? {
           id: match.id,

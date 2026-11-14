@@ -27,11 +27,13 @@ const { teamId, aliases } = defineProps<{
   teamId: string;
   aliases: TeamAlias[];
 }>();
+
 const emit = defineEmits<{ changed: [] }>();
 
 const { t } = useI18n();
 const toast = useToast();
 const reportError = useReportError();
+
 const dateFormatter = useDateFormatter({
   year: "numeric",
   month: "short",
@@ -69,6 +71,7 @@ const columns: TableColumn<TeamAlias>[] = [
 
 function toInput(values: AliasForm): TeamAliasInput {
   const pandascoreId = values.pandascoreId.trim();
+
   return {
     name: values.name,
     from: values.from,
@@ -99,6 +102,7 @@ function fieldOf(error: TeamAliasError): AliasField {
       return "pandascoreId";
     default: {
       const exhaustive: never = error;
+
       return exhaustive;
     }
   }
@@ -108,7 +112,9 @@ const parsed = computed(() => parseTeamAlias(toInput(form.value)));
 
 function feedback(field: AliasField): FieldFeedback {
   const result = parsed.value;
+
   if (result.ok || fieldOf(result.error) !== field) return {};
+
   return { error: t(`page.teams.aliases.errors.${result.error}`) };
 }
 
@@ -133,14 +139,17 @@ function openEdit(alias: TeamAlias) {
 
 async function submit() {
   const result = parsed.value;
+
   if (!result.ok || saving.value) return;
   saving.value = true;
+
   try {
     if (editing.value) {
       await updateTeamAlias(teamId, editing.value.id, result.alias);
     } else {
       await addTeamAlias(teamId, result.alias);
     }
+
     toast.add({ title: t("page.teams.aliases.saved"), color: "success" });
     isOpen.value = false;
     emit("changed");

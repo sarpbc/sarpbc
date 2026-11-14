@@ -8,6 +8,7 @@ describe("CreateCircuitDto", () => {
     expect(
       CreateCircuitDto.safeParse({ name: "RLCS", season: 2026, sourceUrl: RULES }).success,
     ).toBe(true);
+
     for (const body of [
       { name: "RLCS", sourceUrl: RULES },
       { name: "RLCS", season: null, sourceUrl: RULES },

@@ -25,8 +25,10 @@ const unusedLineups = new MatchLineupService(
   { byIds: async () => [] },
   { run: () => Promise.reject(new Error("unused")) },
 );
+
 const unusedGameStats = { byMatch: async () => [] };
 const unusedViewerships = new ViewershipService({ run: () => Promise.reject(new Error("unused")) });
+
 const playerLines = vi.fn(async (ids: string[]) =>
   ids.map((id) => ({
     gameId: `game-${id}`,
@@ -41,6 +43,7 @@ const playerLines = vi.fn(async (ids: string[]) =>
     demolitions: 1,
   })),
 );
+
 const playerStats = new TournamentPlayerStatsService({ playerLines });
 
 describe("TournamentController stage reads", () => {
@@ -123,6 +126,7 @@ describe("TournamentController leagues", () => {
     createLeague: vi.fn(),
     updateLeague: vi.fn(),
   };
+
   const controller = new TournamentController(
     {} as never,
     {} as never,
@@ -140,11 +144,13 @@ describe("TournamentController leagues", () => {
     unusedViewerships,
     playerStats,
   );
+
   const manual = Object.assign(new League(), {
     id: "l1",
     name: "Coupe de France",
     slug: "coupe-de-france",
   });
+
   const synced = Object.assign(new League(), {
     id: "l2",
     name: "RLCS",

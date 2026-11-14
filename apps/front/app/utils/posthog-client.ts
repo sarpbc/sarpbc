@@ -42,6 +42,7 @@ function applyConsent(): void {
       url_trigger: true,
       event_trigger: true,
     });
+
     return;
   }
 
@@ -121,10 +122,12 @@ export async function loadPostHogClient(config: PostHogPublicConfig): Promise<Po
 
     client = posthog;
     applyConsent();
+
     return posthog;
   })()
     .catch(() => {
       console.warn("PostHog could not be initialized");
+
       return null;
     })
     .finally(() => {

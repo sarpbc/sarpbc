@@ -45,6 +45,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       }),
       handler: async (input) => {
         const league = await catalogService.createLeague(input);
+
         return { entityId: league.id, result: mapLeague(league) };
       },
     }),
@@ -67,6 +68,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       handler: async ({ leagueId, ...input }) => {
         requireUpdateFields(input);
         const league = await catalogService.updateLeague(leagueId, input);
+
         return { entityId: league.id, result: mapLeague(league) };
       },
     }),
@@ -89,6 +91,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
           limit: limit ?? DEFAULT_PAGE_SIZE,
           offset: offset ?? 0,
         });
+
         return { events: listings.map(mapEvent), count };
       },
     }),
@@ -116,6 +119,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       }),
       handler: async (input) => {
         const listing = await catalogService.createEvent(input);
+
         return { entityId: listing.event.id, result: mapEvent(listing) };
       },
     }),
@@ -137,6 +141,7 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       handler: async ({ eventId, ...input }) => {
         requireUpdateFields(input);
         const listing = await catalogService.updateEvent(eventId, input);
+
         return { entityId: listing.event.id, result: mapEvent(listing) };
       },
     }),

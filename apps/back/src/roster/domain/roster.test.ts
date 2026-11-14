@@ -14,12 +14,14 @@ describe("roster policies", () => {
 
   it("preserves local slugs, artwork and current team during imported profile updates", () => {
     const team = Object.assign(new Team(), { id: "current" });
+
     const player = Object.assign(new Player(), {
       slug: "local-player",
       imageUrl: "local.png",
       team,
       role: "Coach",
     });
+
     player.synchronizeProfile({ pandascoreId: 42, name: "New name", imageUrl: "remote.png" });
     expect(player.slug).toBe("local-player");
     expect(player.imageUrl).toBe("local.png");
@@ -35,6 +37,7 @@ describe("roster policies", () => {
       imageUrl: "local.png",
       darkModeImageUrl: "dark-local.png",
     });
+
     team.synchronizeProfile({
       pandascoreId: 4,
       name: "Updated name",
@@ -74,6 +77,7 @@ describe("current role", () => {
       role: "Coach",
       contractRole: "benched",
     });
+
     expect(player.currentRole()).toBe("benched");
     player.contractRole = "analyst";
     expect(player.currentRole()).toBe("analyst");
@@ -82,6 +86,7 @@ describe("current role", () => {
   it("falls back to the imported staff role when the current team has no contract", () => {
     const role = (pandascoreRole: string | null) =>
       Object.assign(new Player(), { team, role: pandascoreRole }).currentRole();
+
     expect(role("Coach")).toBe("coach");
     expect(role("Assistant Coach")).toBe("assistant_coach");
     expect(role(" head-coach ")).toBe("coach");

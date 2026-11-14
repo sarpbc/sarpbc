@@ -19,12 +19,15 @@ import type {
   MatchListKind,
   MatchListQueryOptions,
 } from "../../application/match/match-list-filters";
+
 function onDay(column: string): string {
   return `extract(month from ${column} at time zone ?) = ? AND extract(day from ${column} at time zone ?) = ? AND extract(year from ${column} at time zone ?) < ?`;
 }
+
 function terminalBracketMatch(alias: string): string {
   return `EXISTS (SELECT 1 FROM bracket_link fed WHERE fed.match_id = ${alias}.id) AND NOT EXISTS (SELECT 1 FROM bracket_link feeds WHERE feeds.previous_match_id = ${alias}.id)`;
 }
+
 const TOURNAMENT_DETAIL_POPULATE = [
   "league",
   "event",
@@ -38,6 +41,7 @@ const TOURNAMENT_DETAIL_POPULATE = [
   "matches.results",
   "matches.winner",
 ] as const;
+
 export class CompetitionQueries implements TournamentQueries, MatchQueries {
   constructor(private readonly em: EntityManager) {}
   async find({ limit, offset = 0, ...filters }: TournamentListOptions) {
@@ -54,6 +58,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
         "participants.players",
       ],
     });
+
     return [rows.map(toTournament), count] as [ReturnType<typeof toTournament>[], number];
   }
   async searchByName(options: { name: string; limit?: number; offset?: number }) {
@@ -69,6 +74,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       { id },
       { populate: [...TOURNAMENT_DETAIL_POPULATE] },
     );
+
     return row ? toTournament(row) : null;
   }
   async findByPandascoreId(id: number) {
@@ -77,6 +83,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       { pandascoreId: id },
       { populate: [...TOURNAMENT_POPULATE] },
     );
+
     return row ? toTournament(row) : null;
   }
   findPandascoreWithoutMatches() {
@@ -95,6 +102,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       { pandascoreId: { $ne: null } },
       { fields: ["pandascoreId"] },
     );
+
     return new Set(rows.flatMap((r) => (r.pandascoreId === null ? [] : [r.pandascoreId])));
   }
   async leagues({ limit, offset = 0 }: { limit: number; offset?: number }) {
@@ -111,6 +119,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
         "tournament.winner.players",
       ],
     });
+
     return [
       ...new Map(participants.map((p) => [p.tournament.id, toTournament(p.tournament)])).values(),
     ];
@@ -123,6 +132,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
   }
   async getTournamentsByTeamTenures(tenures: TeamTenure[]) {
     if (tenures.length === 0) return [];
+
     return this.tournamentsByParticipants({
       $or: tenures.map(({ teamId, from, to }) => ({
         team: { id: teamId },
@@ -160,7 +170,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
        WHERE t.winner_id IS NOT NULL AND ${onDay("t.end_at")}`,
       day,
     );
+
     if (ids.length === 0) return [];
+
     return (
       await this.em.find(
         Tournament,
@@ -182,7 +194,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
                 AND ${terminalBracketMatch("f")}) = 1`,
       day,
     );
+
     if (ids.length === 0) return [];
+
     return (
       await this.em.find(
         Match,
@@ -204,12 +218,14 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     const rows: { id: string }[] = await this.em
       .getConnection()
       .execute(query, [timeZone, month, timeZone, day, timeZone, beforeYear]);
+
     return rows.map(({ id }) => id);
   }
   async list(kind: MatchListKind, options: MatchListQueryOptions) {
     const [rows, count] = await this.em
       .getRepository<Match, MatchRepository>(Match)
       .listAndCount(kind, options);
+
     return [rows.map(toMatch), count] as [ReturnType<typeof toMatch>[], number];
   }
   async page(kind: MatchListKind, options: MatchListQueryOptions) {
@@ -227,6 +243,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
   }
   async detail(ref: EntityRef) {
     const row = await this.em.getRepository<Match, MatchRepository>(Match).findDetail(ref);
+
     return row ? toMatch(row) : null;
   }
   async recentByTeam(options: { teamId: string; excludeMatchId: string; limit: number }) {

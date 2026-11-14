@@ -28,38 +28,53 @@ export interface DatedTeamName {
 function isIsoDay(value: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const time = Date.parse(`${value}T00:00:00Z`);
+
   return !Number.isNaN(time) && new Date(time).toISOString().startsWith(value);
 }
 
 function parseUrl(value: string, protocols: readonly string[]): URL | null {
   if (value.length > TEAM_ALIAS_URL_MAX_LENGTH || !URL.canParse(value)) return null;
   const url = new URL(value);
+
   if (!protocols.includes(url.protocol) || url.username || url.password) return null;
+
   return url;
 }
 
 export function parseTeamAlias(input: TeamAliasInput): ParsedTeamAlias {
   const name = input.name.trim();
+
   if (!name) return { ok: false, error: "missing-name" };
+
   if (name.length > TEAM_ALIAS_NAME_MAX_LENGTH) return { ok: false, error: "name-too-long" };
+
   if (!isIsoDay(input.from)) return { ok: false, error: "invalid-from" };
+
   if (input.to !== null && !isIsoDay(input.to)) return { ok: false, error: "invalid-to" };
+
   if (input.to !== null && input.to <= input.from) return { ok: false, error: "to-not-after-from" };
   const source = parseUrl(input.sourceUrl.trim(), ["https:", "http:"]);
+
   if (!source) return { ok: false, error: "invalid-source-url" };
+
   if (isForbiddenSourceHost(source.hostname)) return { ok: false, error: "forbidden-source" };
   let logoUrl: string | null = null;
+
   if (input.logoUrl !== null && input.logoUrl.trim()) {
     const logo = parseUrl(input.logoUrl.trim(), ["https:"]);
+
     if (!logo) return { ok: false, error: "invalid-logo-url" };
+
     if (isLiquipediaSourceHost(logo.hostname)) return { ok: false, error: "forbidden-logo-source" };
     logoUrl = logo.href;
   }
+
   if (
     input.pandascoreId !== null &&
     (!Number.isSafeInteger(input.pandascoreId) || input.pandascoreId <= 0)
   )
     return { ok: false, error: "invalid-pandascore-id" };
+
   return {
     ok: true,
     alias: {
@@ -78,10 +93,13 @@ export function teamAliasInForce<T extends DatedTeamName>(
   day: string,
 ): T | null {
   let found: T | null = null;
+
   for (const alias of aliases) {
     if (alias.from > day || (alias.to !== null && day >= alias.to)) continue;
+
     if (!found || alias.from > found.from) found = alias;
   }
+
   return found;
 }
 

@@ -47,6 +47,7 @@ const activeTab = computed<TournamentTab>(() =>
 
 const { tournament: resolvedStage, tab: resolvedTab } = resolved.value;
 const requestedTab = resolvedTab === "overview" ? activeTab.value : resolvedTab;
+
 const canonicalPath = localePath(
   tournamentTabPath(
     requestedTab === "stats" && resolvedStage.source === "startgg" ? "overview" : requestedTab,
@@ -54,6 +55,7 @@ const canonicalPath = localePath(
     resolvedStage.slug,
   ),
 );
+
 if (route.path !== canonicalPath) {
   await redirectToCanonical(route, canonicalPath);
 }
@@ -99,6 +101,7 @@ const tournamentJsonLd = computed(() => {
   }
 
   const concealed = isConcealed({ tournamentId: tournament.value.id });
+
   return buildTournamentSportsEvent(
     concealed ? { ...tournament.value, winner: null } : tournament.value,
     { includeContext: true },

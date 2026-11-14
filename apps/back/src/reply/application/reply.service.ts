@@ -12,6 +12,7 @@ import { replyAlreadyReported } from "../domain/reply-errors";
 import { REPLY_CREATION_COOLDOWN_MS } from "../domain/reply-limits";
 import type { ReplyRecord, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
+
 export class ReplyService {
   constructor(
     private readonly replyRepository: ReplyQueries,
@@ -38,6 +39,7 @@ export class ReplyService {
     ]);
 
     const rootIds = roots.map((reply) => reply.id);
+
     const descendants = await this.replyRepository.findDescendantsForRoots(
       targetType,
       targetId,
@@ -68,6 +70,7 @@ export class ReplyService {
       const target = replyTarget(createReplyDto);
       const cooldownStart = new Date(this.now().getTime() - REPLY_CREATION_COOLDOWN_MS);
       const latestReply = await scope.replies.findLatestByUser(userId);
+
       if (latestReply && latestReply.createdAt >= cooldownStart) {
         throw new InvalidInputError({
           message: "You can only create one reply per minute. Wait and try again.",
@@ -76,27 +79,34 @@ export class ReplyService {
       }
 
       const user = await scope.users.findById(userId);
+
       if (!user) {
         throw new NotFoundError("User not found. Sign in again and try posting.");
       }
 
       const content = sanitizePlainText(createReplyDto.content.trim());
+
       if (!content) {
         throw new InvalidInputError("Comment cannot be empty. Write something before posting.");
       }
 
       const targetFields = await scope.targets.find(target);
+
       if (!targetFields) {
         throw new NotFoundError(
           REPLY_TARGETS[target.kind].label + " not found. Refresh the page and try again.",
         );
       }
+
       let replyTo: ReplyRecord | null = null;
+
       if (createReplyDto.replyToId) {
         replyTo = await scope.replies.findById(createReplyDto.replyToId);
+
         if (!replyTo || replyTo.hiddenAt) {
           throw new NotFoundError("Parent comment not found. Refresh and try again.");
         }
+
         if (!sameReplyTarget(targetFields, replyTo)) {
           throw new InvalidInputError(
             "Parent comment belongs to a different page. Refresh and try again.",
@@ -113,6 +123,7 @@ export class ReplyService {
         ...targetFields,
         replyTo,
       };
+
       await scope.replies.save(newReply);
 
       if (replyTo && replyTo.author.id !== userId) {
@@ -126,12 +137,15 @@ export class ReplyService {
   async hide(id: string): Promise<void> {
     return this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
+
       if (!reply) {
         throw new NotFoundError("Comment not found. It may already be removed.");
       }
+
       if (reply.hiddenAt) {
         return;
       }
+
       reply.hiddenAt = this.now();
       await scope.replies.save(reply);
     });
@@ -140,6 +154,7 @@ export class ReplyService {
   async delete(id: string): Promise<void> {
     return this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
+
       if (!reply) {
         throw new NotFoundError("Comment not found. It may already be removed.");
       }
@@ -155,6 +170,7 @@ export class ReplyService {
   ): Promise<{ id: string; reason: ReplyReportReason; createdAt: Date }> {
     return this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(replyId);
+
       if (!reply || reply.hiddenAt) {
         throw new NotFoundError("Comment not found. It may already be removed.");
       }
@@ -164,11 +180,13 @@ export class ReplyService {
       }
 
       const existing = await scope.reports.findByReplyAndReporter(replyId, userId);
+
       if (existing) {
         throw replyAlreadyReported();
       }
 
       const reporter = await scope.users.findById(userId);
+
       if (!reporter) {
         throw new NotFoundError("User not found. Sign in again and try reporting.");
       }
@@ -196,6 +214,7 @@ export class ReplyService {
       const replies = await scope.replies.findByTarget(targetType, targetId, {
         includeHidden: true,
       });
+
       const rootReplies = replies.filter((reply) => !reply.replyTo);
 
       for (const reply of rootReplies) {
@@ -206,11 +225,13 @@ export class ReplyService {
 
   private async deleteWithChildren(scope: ReplyWriteScope, replyId: string): Promise<void> {
     const children = await scope.replies.findChildren(replyId);
+
     for (const child of children) {
       await this.deleteWithChildren(scope, child.id);
     }
 
     const reply = await scope.replies.findById(replyId);
+
     if (reply) {
       await scope.replies.delete(reply);
     }
@@ -227,6 +248,7 @@ export class ReplyService {
     for (const reply of replies) {
       const dto = byId.get(reply.id)!;
       const parentId = reply.replyTo?.id;
+
       if (parentId && byId.has(parentId)) {
         byId.get(parentId)!.replies.push(dto);
       } else if (!parentId) {

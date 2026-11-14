@@ -19,6 +19,7 @@ export async function verifyViewership({ request, staffCookie, memberCookie, tou
   const matchPath = `/tournaments/matches/${match.id}/viewership`;
   const eventPath = `/events/${tournament.event.id}/viewership`;
   const publicMatch = async () => (await request("GET", `/matches/${match.id}`)).json().match;
+
   const publicEvent = async () =>
     (await request("GET", `/events/resolve/${tournament.event.slug}`)).json().event;
 
@@ -36,6 +37,7 @@ export async function verifyViewership({ request, staffCookie, memberCookie, tou
   ]) {
     await request("PUT", matchPath, { viewership: missing }, staffCookie, 400);
   }
+
   const { sourceName: _, ...uncredited } = ENTRY;
   await request("PUT", matchPath, { viewership: uncredited }, staffCookie, 400);
   assert.equal((await publicMatch()).viewership, null, "a refused entry stores nothing");
@@ -89,6 +91,7 @@ export async function verifyViewershipProposals({
   startggMatchId,
 }) {
   const sourceUrl = "https://escharts.com/tournaments/rl/integration-cup/final";
+
   const proposal = {
     peakViewers: 41_000,
     averageViewers: 25_500,
@@ -116,6 +119,7 @@ export async function verifyViewershipProposals({
     ...proposal,
     sourceUrl,
   });
+
   assert.equal(pending.status, "pending");
   assert.equal(
     (await request("GET", `/matches/${match.id}`)).json().match.viewership,
@@ -129,9 +133,11 @@ export async function verifyViewershipProposals({
     credited,
   );
   const upcoming = await callTool("get_upcoming_matches", {});
+
   const mcpMatch = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? [])].find(
     (candidate) => candidate.id === match.id,
   );
+
   assert.deepEqual(mcpMatch?.viewership, credited, "MCP reads return sarpbc numbers");
 
   const startggEntry = { ...credited, peakViewers: 9_000, averageViewers: 6_000 };
@@ -158,6 +164,7 @@ export async function verifyViewershipProposals({
 
   const startggEvent = (await request("GET", `/tournaments/${startggCupId}`)).json().tournament
     .event;
+
   await request(
     "PUT",
     `/events/${startggEvent.id}/viewership`,

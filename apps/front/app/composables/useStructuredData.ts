@@ -6,6 +6,7 @@ export function useStructuredData() {
     useHead({
       script: computed(() => {
         const payload = toValue(data);
+
         if (!payload) {
           return [];
         }

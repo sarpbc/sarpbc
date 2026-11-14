@@ -19,11 +19,14 @@ function setup(toolName: string, role: StaffRole = "admin") {
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
+
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
   );
+
   if (!tool) throw new Error(`${toolName} is not defined`);
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
+
   return { rosterProposalService, tool, call };
 }
 
@@ -78,6 +81,7 @@ describe("team alias tools", () => {
   it("requires an official sourceUrl outside Liquipedia and its mirrors", () => {
     const schema = z.object(setup("add_team_alias").tool.inputSchema);
     expect(schema.safeParse(INPUT).success).toBe(true);
+
     for (const invalid of [
       { sourceUrl: undefined },
       { sourceUrl: "https://liquipedia.net/rocketleague/Fixture" },

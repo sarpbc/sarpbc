@@ -22,22 +22,29 @@ export function normalizeLineups(
 ): MatchLineupInput[] {
   const byParticipant = new Map<string, string[]>();
   const players = new Set<string>();
+
   for (const { participantId, playerIds } of inputs) {
     if (!participantIds.includes(participantId))
       throw new InvalidInputError(`Participant "${participantId}" does not play this match`);
+
     if (byParticipant.has(participantId))
       throw new InvalidInputError(`Participant "${participantId}" has two lineups`);
+
     if (playerIds.length > MAX_LINEUP_PLAYERS)
       throw new InvalidInputError(`A lineup has at most ${MAX_LINEUP_PLAYERS} players`);
+
     for (const playerId of playerIds) {
       if (players.has(playerId))
         throw new InvalidInputError(`Player "${playerId}" appears twice in the match lineups`);
       players.add(playerId);
     }
+
     byParticipant.set(participantId, [...playerIds]);
   }
+
   return participantIds.flatMap((participantId) => {
     const playerIds = byParticipant.get(participantId) ?? [];
+
     return playerIds.length > 0 ? [{ participantId, playerIds }] : [];
   });
 }
@@ -52,6 +59,7 @@ export function buildLineups(
         ? [{ ...row.player, standIn: isStandIn(rosterIds, row.player.id) }]
         : [],
     );
+
     return players.length > 0 ? [{ participantId, players }] : [];
   });
 }
@@ -66,17 +74,21 @@ export interface GameLineupSource {
 export function lineupsFromGames(games: readonly GameLineupSource[]): MatchLineupInput[] {
   const byParticipant = new Map<string, string[]>();
   const seen = new Set<string>();
+
   for (const { teams } of games) {
     for (const { participantId, players } of teams) {
       const playerIds = byParticipant.get(participantId) ?? [];
+
       for (const { player } of players) {
         if (!player || seen.has(player.id)) continue;
         seen.add(player.id);
         playerIds.push(player.id);
       }
+
       byParticipant.set(participantId, playerIds);
     }
   }
+
   return [...byParticipant].flatMap(([participantId, playerIds]) =>
     playerIds.length > 0
       ? [{ participantId, playerIds: playerIds.slice(0, MAX_LINEUP_PLAYERS) }]

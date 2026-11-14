@@ -15,6 +15,7 @@ const payloadSchema = z.object({
   email: z.string(),
   typ: z.enum(["access", "refresh"]),
 });
+
 type JwtSigner = Pick<JwtService, "signAsync" | "verifyAsync">;
 
 export class JwtTokenGateway implements SessionTokens {
@@ -25,6 +26,7 @@ export class JwtTokenGateway implements SessionTokens {
 
   async sign(user: AuthenticatedUser): Promise<AuthTokenPair> {
     const { secret } = this;
+
     const [accessToken, refreshToken] = await Promise.all([
       this.jwt.signAsync(
         { id: user.id, email: user.email, typ: "access" },
@@ -35,6 +37,7 @@ export class JwtTokenGateway implements SessionTokens {
         { secret, expiresIn: REFRESH_TOKEN_TTL_SECONDS },
       ),
     ]);
+
     return { accessToken, refreshToken };
   }
 
@@ -43,6 +46,7 @@ export class JwtTokenGateway implements SessionTokens {
       const parsed = payloadSchema.safeParse(
         await this.jwt.verifyAsync<object>(token, { secret: this.secret }),
       );
+
       return parsed.success && parsed.data.typ === type
         ? { id: parsed.data.id, email: parsed.data.email }
         : null;

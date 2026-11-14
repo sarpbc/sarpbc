@@ -27,6 +27,7 @@ const rows = computed(() =>
   standIns.map(({ participantId, match }) => {
     const team = match.participants.find((participant) => participant.id === participantId);
     const opponent = match.participants.find((participant) => participant.id !== participantId);
+
     return {
       id: match.id,
       path: matchPath(match.publicId, match.slug),

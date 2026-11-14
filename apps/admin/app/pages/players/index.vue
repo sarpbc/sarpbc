@@ -50,8 +50,10 @@ const {
   refresh,
 } = useAdminList("admin-players", async ({ limit, offset }) => {
   const { players, total } = await getAllPlayers({ limit, offset });
+
   return { items: players, total };
 });
+
 const playerToDelete = ref<Player | null>(null);
 const isCreateModalOpen = ref(false);
 const isCreating = ref(false);
@@ -90,12 +92,18 @@ function openCreateModal() {
 async function confirmCreate() {
   if (!newPlayer.value.name) return;
   isCreating.value = true;
+
   try {
     const body: CreatePlayerDto = { name: newPlayer.value.name };
+
     if (newPlayer.value.firstName) body.firstName = newPlayer.value.firstName;
+
     if (newPlayer.value.lastName) body.lastName = newPlayer.value.lastName;
+
     if (newPlayer.value.nationality) body.nationality = newPlayer.value.nationality;
+
     if (newPlayer.value.birthday) body.birthday = newPlayer.value.birthday;
+
     if (newPlayer.value.imageUrl) body.imageUrl = newPlayer.value.imageUrl;
     const created = await createPlayer(body);
     isCreateModalOpen.value = false;

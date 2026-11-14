@@ -3,24 +3,30 @@ import assert from "node:assert/strict";
 export async function verifyCompetitionImport({ app, orm, request, staffCookie, RequestContext }) {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
+
   const { Player } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
+
   const { TOURNAMENT_QUERIES } =
     await import("../../src/tournament/infrastructure/competition-queries.tokens.ts");
+
   const sync = app.get(CompetitionSyncService);
   const tournaments = app.get(TOURNAMENT_QUERIES);
   const run = (work) => RequestContext.create(orm.em.fork(), work);
+
   const veteran = {
     pandascoreId: 9101,
     name: "Imported Veteran",
     slug: "imported-veteran",
     nationality: "FR",
   };
+
   const rookie = {
     pandascoreId: 9102,
     name: "Imported Rookie",
     slug: "imported-rookie",
     nationality: "BR",
   };
+
   const currentTeam = { pandascoreId: 9201, name: "Current Roster", slug: "current-roster" };
   const oldTeam = { pandascoreId: 9202, name: "Historical Roster", slug: "historical-roster" };
   const rival = { pandascoreId: 9203, name: "Historical Rival", slug: "historical-rival" };
@@ -34,9 +40,11 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       command: { player: veteran, currentTeam },
     }),
   );
+
   const player = await orm.em
     .fork()
     .findOneOrFail(Player, { pandascoreId: veteran.pandascoreId }, { populate: ["team"] });
+
   const currentTeamId = player.team.id;
   await request(
     "PATCH",
@@ -65,6 +73,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       { team: rival, players: [rookie] },
     ],
   };
+
   const semifinal = {
     pandascoreId: 9501,
     tournamentPandascoreId: tournamentCommand.pandascoreId,
@@ -83,6 +92,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     previousMatches: [],
     officialStreams: [],
   };
+
   const final = {
     ...semifinal,
     pandascoreId: 9502,
@@ -95,6 +105,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     previousMatches: [{ type: "winner", matchPandascoreId: semifinal.pandascoreId }],
     officialStreams: [{ url: "https://twitch.tv/example", language: "en", main: true }],
   };
+
   const imported = await run(() => sync.upsertTournament(tournamentCommand, [final, semifinal]));
   let view = (await request("GET", `/tournaments/${imported.id}`)).json().tournament;
   assert.equal(view.source, "pandascore");
@@ -139,14 +150,18 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     { slug: view.event.slug, name: view.event.name },
     { slug: "imported-league-spring-split-2026", name: "Imported League Spring Major" },
   );
+
   const { Match, Tournament } =
     await import("../../src/tournament/infrastructure/persistence/tournament.entities.ts");
+
   const rowVersions = async () => {
     const em = orm.em.fork();
     const stage = await em.findOneOrFail(Tournament, { id: imported.id });
     const matches = await em.find(Match, { tournament: imported.id }, { orderBy: { id: "asc" } });
+
     return [stage, ...matches].map((row) => [row.id, row.updatedAt.toISOString()]);
   };
+
   const versionsBeforeResync = await rowVersions();
   await run(() =>
     sync.upsertTournament(
@@ -260,6 +275,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       serie: { pandascoreId: 9602, fullName: "Spring Qualifier", year: 2026 },
     }),
   );
+
   assert.equal(qualifier.event.slug, "imported-league-spring-qualifier-2026");
   await run(() =>
     sync.applyIncident({
@@ -283,6 +299,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       .sort(),
     [imported.id, qualifier.id].sort(),
   );
+
   return {
     tournamentId: imported.id,
     participantId: participant.id,

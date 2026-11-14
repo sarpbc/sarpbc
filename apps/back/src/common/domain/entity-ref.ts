@@ -11,7 +11,9 @@ export function isUuid(raw: string): boolean {
 export function parseEntityRef(raw: string): EntityRef | null {
   if (PUBLIC_ID.test(raw)) {
     const value = Number(raw);
+
     return value <= MAX_PUBLIC_ID ? { kind: "publicId", value } : null;
   }
+
   return isUuid(raw) ? { kind: "id", value: raw.toLowerCase() } : null;
 }

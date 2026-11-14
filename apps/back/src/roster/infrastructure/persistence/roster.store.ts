@@ -35,6 +35,7 @@ const NATIONALITY_CODE = "upper(trim(nationality))";
 /** A name search wins over a first-letter filter; both leave out merged duplicates. */
 function directoryQuery({ name, start, limit, offset }: Partial<DirectorySearchProps>) {
   const pattern = name ? `%${name}%` : start ? `${start}%` : null;
+
   return {
     where: { ...(pattern && { name: { $ilike: pattern } }), mergedInto: null },
     page: { limit: limit ?? 25, offset: offset ?? 0, orderBy: { name: "asc" as const } },
@@ -49,15 +50,18 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
 
   async search(options: Partial<DirectorySearchProps>) {
     const { where, page } = directoryQuery(options);
+
     return (await this.em.find(Row.Player, where, { ...playerOptions, ...page })).map(toPlayer);
   }
 
   async searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Player[], number]> {
     const { where, page } = directoryQuery(options);
+
     const [rows, count] = await this.em.findAndCount(Row.Player, where, {
       ...playerOptions,
       ...page,
     });
+
     return [rows.map(toPlayer), count];
   }
 
@@ -69,12 +73,15 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
           { refresh: true, lockMode: LockMode.PESSIMISTIC_WRITE },
         )
       : await this.em.findOne(Row.Player, { id }, playerOptions);
+
     if (row && this.locking) await this.em.populate(row, ["team", "photos"], { refresh: true });
+
     return row ? toPlayer(row) : null;
   }
 
   async findBySlug(slug: string) {
     const row = await this.em.findOne(Row.Player, { slug }, playerOptions);
+
     return row ? toPlayer(row) : null;
   }
 
@@ -82,9 +89,11 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     const rows: { id: string }[] = await this.em
       .getConnection()
       .execute("SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1");
+
     const row = rows[0]
       ? await this.em.findOne(Row.Player, { id: rows[0].id }, playerOptions)
       : null;
+
     return row ? toPlayer(row) : null;
   }
 
@@ -94,6 +103,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       .execute(
         `SELECT ${NATIONALITY_CODE} AS code, count(*) AS players FROM player WHERE merged_into_id IS NULL AND ${NATIONALITY_CODE} ~ '^[A-Z]{2}$' GROUP BY 1 ORDER BY 1`,
       );
+
     return rows.map(({ code, players }) => ({ code, players: Number(players) }));
   }
 
@@ -103,7 +113,9 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       .execute(`SELECT id FROM player WHERE merged_into_id IS NULL AND ${NATIONALITY_CODE} = ?`, [
         code,
       ]);
+
     if (rows.length === 0) return [];
+
     return (
       await this.em.find(
         Row.Player,
@@ -117,6 +129,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     const row = model.id
       ? await this.em.findOneOrFail(Row.Player, { id: model.id })
       : new Row.Player();
+
     if (!model.id) model.id = v4();
     Object.assign(row, playerColumns(model), {
       mergedInto: model.mergedIntoId ? this.em.getReference(Row.Player, model.mergedIntoId) : null,
@@ -135,20 +148,25 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
 
   private async teamDirectoryQuery(options: Partial<DirectorySearchProps>) {
     const { where, page } = directoryQuery(options);
+
     if (!options.name) return { where, page };
+
     const aliases = await this.em.find(
       Row.TeamAlias,
       { name: { $ilike: `%${options.name}%` } },
       { fields: ["team"] },
     );
+
     if (aliases.length === 0) return { where, page };
     const { name, ...rest } = where;
     const formerly = { id: { $in: [...new Set(aliases.map(({ team }) => team.id))] } };
+
     return { where: { ...rest, $or: [{ name }, formerly] }, page };
   }
 
   async search(options: Partial<DirectorySearchProps>) {
     const { where, page } = await this.teamDirectoryQuery(options);
+
     return (await this.em.find(Row.Team, where, { ...teamOptions, ...page })).map((row) =>
       toTeam(row),
     );
@@ -157,16 +175,19 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
   async searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]> {
     const { where, page } = await this.teamDirectoryQuery(options);
     const [rows, count] = await this.em.findAndCount(Row.Team, where, { ...teamOptions, ...page });
+
     return [rows.map((row) => toTeam(row)), count];
   }
 
   async findById(id: string) {
     const row = await this.em.findOne(Row.Team, { id }, teamOptions);
+
     return row ? toTeam(row) : null;
   }
 
   async findBySlug(slug: string) {
     const row = await this.em.findOne(Row.Team, { slug }, teamOptions);
+
     return row ? toTeam(row) : null;
   }
 
@@ -176,6 +197,7 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
 
   async save(model: Team) {
     const row = model.id ? await this.em.findOneOrFail(Row.Team, { id: model.id }) : new Row.Team();
+
     if (!model.id) model.id = v4();
     Object.assign(row, teamColumns(model), {
       mergedInto: model.mergedIntoId ? this.em.getReference(Row.Team, model.mergedIntoId) : null,
@@ -193,12 +215,15 @@ export class MikroTeamAliasStore implements TeamAliasWriter {
 
   async pandascoreOwner(pandascoreId: number, exceptAliasId: string) {
     const team = await this.em.findOne(Row.Team, { pandascoreId });
+
     if (team) return team.name;
+
     const alias = await this.em.findOne(
       Row.TeamAlias,
       { pandascoreId, ...(exceptAliasId && { id: { $ne: exceptAliasId } }) },
       { populate: ["team"] },
     );
+
     return alias ? alias.team.name : null;
   }
 
@@ -206,6 +231,7 @@ export class MikroTeamAliasStore implements TeamAliasWriter {
     const row = model.id
       ? await this.em.findOneOrFail(Row.TeamAlias, { id: model.id })
       : new Row.TeamAlias();
+
     if (!model.id) model.id = v4();
     Object.assign(row, {
       id: model.id,
@@ -258,6 +284,7 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
       ...(teamId && { team: teamId }),
       ...(playerId && { player: playerId }),
     };
+
     return (await this.em.find(Row.Contract, where, { populate: ["player", "team"] })).map(
       toContract,
     );
@@ -270,7 +297,9 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
         "SELECT id FROM contract WHERE (extract(month from start_date) = ? AND extract(day from start_date) = ?) OR (extract(month from end_date) = ? AND extract(day from end_date) = ?)",
         [month, day, month, day],
       );
+
     if (rows.length === 0) return [];
+
     return (
       await this.em.find(
         Row.Contract,
@@ -282,6 +311,7 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
 
   async findById(id: string) {
     const row = await this.em.findOne(Row.Contract, { id }, contractOptions);
+
     return row ? toContract(row) : null;
   }
 
@@ -289,6 +319,7 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
     const row = model.id
       ? await this.em.findOneOrFail(Row.Contract, { id: model.id })
       : new Row.Contract();
+
     if (!model.id) model.id = v4();
     Object.assign(row, {
       id: model.id,
@@ -320,11 +351,13 @@ export class MikroPhotoStore implements PhotoQueries, PhotoWriter {
 
   async findById(id: string) {
     const row = await this.em.findOne(Row.PlayerPhoto, { id });
+
     return row ? toPhoto(row) : null;
   }
 
   async save(model: PlayerPhoto) {
     const row = new Row.PlayerPhoto();
+
     if (!model.id) model.id = v4();
     Object.assign(row, {
       id: model.id,
@@ -355,6 +388,7 @@ export class MikroRosterTransaction implements RosterTransaction {
     return this.em.transactional(async (tx) => {
       const result = await work(writeScope(tx));
       await tx.flush();
+
       return result;
     });
   }
@@ -368,7 +402,9 @@ export class MikroTeamAliasTransaction implements TeamAliasTransaction {
         teams: new MikroTeamStore(tx),
         aliases: new MikroTeamAliasStore(tx),
       });
+
       await tx.flush();
+
       return result;
     });
   }
@@ -384,20 +420,24 @@ function rosterReferences(
 ): RosterReferenceMover & SharedTournaments {
   const mergeOpenContracts = async (owner: "player" | "team", from: string, to: string) => {
     const shared = owner === "player" ? "team" : "player";
+
     const open = await em.find(
       Row.Contract,
       { [owner]: { $in: [from, to] }, endDate: null },
       { disableIdentityMap: true },
     );
+
     const duplicates = open.filter(
       (contract) =>
         contract[owner].id === from &&
         open.some((kept) => kept[owner].id === to && kept[shared].id === contract[shared].id),
     );
+
     for (const kept of open.filter((contract) => contract[owner].id === to)) {
       const starts = [kept, ...duplicates.filter((d) => d[shared].id === kept[shared].id)].map(
         ({ startDate }) => new Date(startDate).getTime(),
       );
+
       if (starts.length > 1) {
         await em.nativeUpdate(
           Row.Contract,
@@ -406,8 +446,10 @@ function rosterReferences(
         );
       }
     }
+
     await em.nativeDelete(Row.Contract, { id: { $in: duplicates.map(({ id }) => id) } });
   };
+
   return {
     movePlayer: async (from, to) => {
       // Frees the unique PandaScore id before the kept player takes it in the same flush.
@@ -416,6 +458,7 @@ function rosterReferences(
       await mergeOpenContracts("player", from, to);
       await em.nativeUpdate(Row.Contract, { player: from }, { player: to });
       await em.nativeUpdate(Row.PlayerPhoto, { player: from }, { player: to });
+
       for (const mover of others.movers) await mover.movePlayer(from, to);
     },
     moveTeam: async (from, to) => {
@@ -424,6 +467,7 @@ function rosterReferences(
       await mergeOpenContracts("team", from, to);
       await em.nativeUpdate(Row.Contract, { team: from }, { team: to });
       await em.nativeUpdate(Row.Player, { team: from }, { team: to });
+
       for (const mover of others.movers) await mover.moveTeam(from, to);
     },
     sharedTournamentIds: (teamId, otherTeamId) => others.sharedTournamentIds(teamId, otherTeamId),
@@ -441,7 +485,9 @@ export class MikroRosterMergeTransaction implements RosterMergeTransaction {
         ...writeScope(tx),
         references: rosterReferences(tx, this.participantsFor(tx)),
       });
+
       await tx.flush();
+
       return result;
     });
   }

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { NewsType } from "@sarpbc/types";
 import { toSlug } from "@sarpbc/utils";
+
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -42,6 +43,7 @@ function openSaveModal() {
   if (!slugTouched.value && title.value) {
     articleSlug.value = toSlug(title.value);
   }
+
   isModalOpen.value = true;
 }
 
@@ -51,8 +53,10 @@ async function saveArticle() {
   }
 
   isSaving.value = true;
+
   try {
     const trimmedSlug = articleSlug.value.trim();
+
     const created = await createNewsArticle({
       title: title.value,
       content: content.value,
@@ -62,6 +66,7 @@ async function saveArticle() {
       imageUrl: imageUrl.value ?? undefined,
       type: articleType.value,
     });
+
     isModalOpen.value = false;
     toast.add({
       title: t("page.news.create.saved"),

@@ -34,21 +34,28 @@ export function replaceStreams(
 ): Stream[] {
   if (inputs.length > MAX_STREAMS)
     throw new InvalidInputError(`A stream list holds at most ${MAX_STREAMS} streams.`);
+
   const startgg = new Set(
     current.flatMap((stream) => (stream.source === "startgg" ? [stream.url] : [])),
   );
+
   const seen = new Set<string>();
   const streams: Stream[] = [];
   inputs.forEach((input, index) => {
     const parsed = parseStreamUrl(input.url);
+
     if (!parsed.ok) throw invalid(index, URL_ERRORS[parsed.error]);
     const language = input.language.trim().toLowerCase();
+
     if (!isIso6391Code(language))
       throw invalid(index, "needs a two-letter ISO 639-1 language code (e.g. en, fr)");
     const channel = input.channel?.trim() || parsed.channel;
+
     if (!channel) throw invalid(index, "needs a channel name");
+
     if (channel.length > STREAM_CHANNEL_MAX_LENGTH)
       throw invalid(index, `has a channel name over ${STREAM_CHANNEL_MAX_LENGTH} characters`);
+
     if (seen.has(parsed.url)) return;
     seen.add(parsed.url);
     streams.push({
@@ -60,6 +67,7 @@ export function replaceStreams(
       source: startgg.has(parsed.url) ? "startgg" : source,
     });
   });
+
   return streams;
 }
 
@@ -73,7 +81,9 @@ export function pandascoreStreams(official: readonly OfficialMatchStream[]): Str
     .flatMap((stream) => {
       const parsed = parseStreamUrl(stream.url.trim().replace(/^http:\/\//i, "https://"));
       const [language = ""] = stream.language.trim().toLowerCase().split("-");
+
       if (!parsed.ok || !isIso6391Code(language)) return [];
+
       return [
         {
           url: parsed.url,

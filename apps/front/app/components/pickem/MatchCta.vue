@@ -20,6 +20,7 @@ const { data: userPicks } = useLazyAsyncData(
 
     try {
       const picks = await getUserPickemsForTournament(tournamentId.value);
+
       return new Set(picks.map((pick) => pick.match));
     } catch {
       return null;
@@ -33,8 +34,11 @@ const { data: userPicks } = useLazyAsyncData(
 
 const showCta = computed(() => {
   if (matchStatus !== "upcoming") return false;
+
   if (!isPickemOpenForMatch(match)) return false;
+
   if (userPicks.value?.has(match.id)) return false;
+
   return true;
 });
 </script>
