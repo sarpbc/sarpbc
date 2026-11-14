@@ -390,7 +390,7 @@ const scoreboardLabel = computed(() => {
               <UBadge color="neutral" variant="soft" class="shrink-0">
                 {{ t("components.match.forfeit") }}
               </UBadge>
-              <span class="min-w-0 truncate text-sm text-default">
+              <span class="min-w-0 text-sm text-default">
                 {{ t("page.match.detail.forfeitNote", { team: participantLabel(forfeiter) }) }}
               </span>
             </SListItem>

@@ -74,7 +74,9 @@ const scoreB = computed(() =>
 const displayScoreA = computed(() => displayMatchScore(scoreA.value, matchStatus));
 const displayScoreB = computed(() => displayMatchScore(scoreB.value, matchStatus));
 
-const showScores = computed(() => displayScoreA.value !== null || displayScoreB.value !== null);
+const showScores = computed(
+  () => forfeitedBy !== null || displayScoreA.value !== null || displayScoreB.value !== null,
+);
 
 const isForfeiter = (participantId: string | null): boolean =>
   forfeitedBy !== null && participantId === forfeitedBy;
