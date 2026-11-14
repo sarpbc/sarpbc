@@ -726,7 +726,32 @@ describe("Match forfeits", () => {
     expect(scores(match)).toStrictEqual({ a: 3, b: 0 });
   });
 
-  it("keeps a staff forfeit when PandaScore reports a played match", async () => {
+  it.each([
+    { label: "an unplayed 0-0", status: "finished" },
+    { label: "a canceled match", status: "canceled" },
+  ])("keeps a staff forfeit and its score when PandaScore reports $label", async ({ status }) => {
+    writer.byPandascoreId.mockResolvedValue(await forfeitedByB({ pandascoreId: 9 }));
+
+    const match = await upsertSyncedMatchInTransaction(writer, tournament.id, {
+      forfeitWinnerId: null,
+      name: "Final",
+      numberOfGames: 5,
+      pandascoreId: 9,
+      participantIds: ["a", "b"],
+      results: [
+        { participantId: "a", score: 0 },
+        { participantId: "b", score: 0 },
+      ],
+      status,
+    });
+
+    expect(match.forfeitedBy?.id).toBe("b");
+    expect(match.winner?.id).toBe("a");
+    expect(match.status).toBe("finished");
+    expect(scores(match)).toStrictEqual({ a: 3, b: 0 });
+  });
+
+  it("drops a staff forfeit once PandaScore shows the forfeiting side playing", async () => {
     writer.byPandascoreId.mockResolvedValue(await forfeitedByB({ pandascoreId: 9 }));
 
     const match = await upsertSyncedMatchInTransaction(writer, tournament.id, {
@@ -737,11 +762,12 @@ describe("Match forfeits", () => {
       participantIds: ["a", "b"],
       results: [
         { participantId: "a", score: 3 },
-        { participantId: "b", score: 0 },
+        { participantId: "b", score: 1 },
       ],
       status: "finished",
     });
 
-    expect(match.forfeitedBy?.id).toBe("b");
+    expect(match.forfeitedBy).toBeNull();
+    expect(scores(match)).toStrictEqual({ a: 3, b: 1 });
   });
 });

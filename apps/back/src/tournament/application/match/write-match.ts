@@ -194,6 +194,9 @@ export const createEmptyBracketInTransaction = async (
   return planned.map(({ match }) => match);
 };
 
+const playedBy = (input: SyncedMatchInput, participant: TournamentParticipant): boolean =>
+  (input.results ?? []).some((r) => r.participantId === participant.id && r.score > 0);
+
 export const upsertSyncedMatchInTransaction = async (
   writer: MatchWriter,
   tournamentId: string,
@@ -239,14 +242,19 @@ export const upsertSyncedMatchInTransaction = async (
     );
   }
 
+  const priorForfeiter = match.forfeitedBy;
   applyMatchFields(match, participants, input);
+  match.clearForfeit();
 
   const forfeitWinner = match.participants.find((p) => p.id === input.forfeitWinnerId);
-  const forfeiter = match.participants.find((p) => p.id !== input.forfeitWinnerId);
+  const reportedForfeiter = match.participants.find((p) => p.id !== input.forfeitWinnerId);
+  const keptForfeiter = match.participants.find((p) => p.id === priorForfeiter?.id);
 
-  // A staff forfeit survives a sync that reports none; an unresolvable provider winner leaves it alone.
-  if (forfeitWinner && forfeiter && match.participants.length === 2) {
-    match.declareForfeit(forfeiter);
+  if (forfeitWinner && reportedForfeiter && match.participants.length === 2) {
+    match.declareForfeit(reportedForfeiter);
+  } else if (keptForfeiter && match.participants.length === 2 && !playedBy(input, keptForfeiter)) {
+    // The provider often reports a walkover as 0-0 or canceled; a staff forfeit outlives that until it shows the forfeiter playing.
+    match.declareForfeit(keptForfeiter);
   }
 
   await persist(writer, match);
