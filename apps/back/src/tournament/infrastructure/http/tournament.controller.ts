@@ -23,6 +23,7 @@ import {
   CreateEmptyBracketDto,
   CreateMatchDto,
   SetMatchBracketDto,
+  SetMatchForfeitDto,
   SetMatchResultDto,
   SetMatchSourceDto,
   SetMatchVodsDto,
@@ -32,6 +33,7 @@ import type {
   CreateEmptyBracketInput,
   CreateMatchInput,
   SetMatchBracketInput,
+  SetMatchForfeitInput,
   SetMatchResultInput,
   SetMatchSourceInput,
   SetMatchVodsInput,
@@ -393,6 +395,18 @@ export class TournamentController {
     @Body({ schema: SetMatchSourceDto }) body: SetMatchSourceInput,
   ) {
     const match = await this.matchService.setSource(matchId, body.sourceUrl);
+
+    return { match: withPublicSlug(match) };
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
+  @Put("matches/:matchId/forfeit")
+  async setMatchForfeit(
+    @Param("matchId") matchId: string,
+    @Body({ schema: SetMatchForfeitDto }) body: SetMatchForfeitInput,
+  ) {
+    const match = await this.matchService.setForfeit(matchId, body.participantId);
 
     return { match: withPublicSlug(match) };
   }

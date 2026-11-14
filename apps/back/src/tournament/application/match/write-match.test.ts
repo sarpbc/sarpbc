@@ -11,6 +11,7 @@ import {
   createEmptyBracketInTransaction,
   createMatchInTransaction,
   setGameVodsInTransaction,
+  setForfeitInTransaction,
   setVodsInTransaction,
   setWinnerInTransaction,
   updateMatchInTransaction,
@@ -73,6 +74,7 @@ describe("Match writes", () => {
     );
 
     const match = await upsertSyncedMatchInTransaction(writer, tournament.id, {
+      forfeitWinnerId: null,
       name: "Final",
       pandascoreId: 7,
       participantIds: ["a", "b"],
@@ -102,6 +104,7 @@ describe("Match writes", () => {
     writer.byPandascoreId.mockResolvedValue(match);
 
     const updated = await upsertSyncedMatchInTransaction(writer, tournament.id, {
+      forfeitWinnerId: null,
       name: "Final",
       pandascoreId: 123,
       participantIds: ["a", "b"],
@@ -318,6 +321,7 @@ describe("Match VOD writes", () => {
     writer.byPandascoreId.mockResolvedValue(syncedMatch());
 
     const match = await upsertSyncedMatchInTransaction(writer, "cup", {
+      forfeitWinnerId: null,
       name: "Final",
       numberOfGames: 7,
       pandascoreId: 42,
@@ -574,5 +578,170 @@ describe("Manual bracket writes", () => {
       /PandaScore/u,
     );
     expect(writer.save).not.toHaveBeenCalled();
+  });
+});
+
+const scores = (match: Match) =>
+  Object.fromEntries(match.results.map((r) => [r.participant.id, r.score]));
+
+describe("Match forfeits", () => {
+  const tournament = Object.assign(new Tournament(), { id: "cup", source: "pandascore" });
+
+  const participants = ["a", "b"].map((id) =>
+    Object.assign(new TournamentParticipant(), {
+      id,
+      team: Object.assign(new Team(), { id: `team-${id}` }),
+      tournamentId: tournament.id,
+    }),
+  );
+
+  const writer = matchWriterMock();
+
+  const bestOfFive = (fields: Partial<Match> = {}) =>
+    Object.assign(new Match(), {
+      id: "match",
+      numberOfGames: 5,
+      participants,
+      status: "not_started",
+      tournament,
+      ...fields,
+    });
+
+  const forfeitedByB = async (fields: Partial<Match> = {}) => {
+    writer.load.mockResolvedValue(bestOfFive(fields));
+
+    return await setForfeitInTransaction(writer, "match", "b");
+  };
+
+  beforeEach(() => {
+    vi.resetAllMocks();
+    writer.tournament.mockResolvedValue(tournament);
+    writer.participants.mockResolvedValue(participants);
+  });
+
+  it("gives a PandaScore match to the other side with the series default score", async () => {
+    const match = await forfeitedByB({ pandascoreId: 9 });
+
+    expect(match).toMatchObject({
+      forfeitedBy: { id: "b" },
+      status: "finished",
+      winner: { id: "a" },
+    });
+    expect(match.endAt).toBeInstanceOf(Date);
+    expect(scores(match)).toStrictEqual({ a: 3, b: 0 });
+    expect(writer.save).toHaveBeenCalledWith(match);
+  });
+
+  it("keeps the score of a forfeit when the series length is unknown", async () => {
+    const results = [{ id: "r", match: { id: "match" }, participant: { id: "a" }, score: 1 }];
+
+    const match = await forfeitedByB({ numberOfGames: null, results });
+
+    expect(match.results).toStrictEqual(results);
+    expect(match.winner?.id).toBe("a");
+  });
+
+  it("refuses a forfeit by a side outside the match or in a one-sided match", async () => {
+    writer.load.mockResolvedValue(bestOfFive());
+    await expect(setForfeitInTransaction(writer, "match", "outsider")).rejects.toBeInstanceOf(
+      InvalidInputError,
+    );
+
+    writer.load.mockResolvedValue(bestOfFive({ participants: participants.slice(0, 1) }));
+    await expect(setForfeitInTransaction(writer, "match", "a")).rejects.toBeInstanceOf(
+      InvalidInputError,
+    );
+    expect(writer.save).not.toHaveBeenCalled();
+  });
+
+  it("clears a forfeit without touching the score or the winner", async () => {
+    writer.load.mockResolvedValue(await forfeitedByB());
+
+    const match = await setForfeitInTransaction(writer, "match", null);
+
+    expect(match.forfeitedBy).toBeNull();
+    expect(match.winner?.id).toBe("a");
+    expect(scores(match)).toStrictEqual({ a: 3, b: 0 });
+  });
+
+  it("records the source given with a forfeit", async () => {
+    const sourceUrl = "https://www.start.gg/tournament/cup/event/main/set/1";
+    writer.load.mockResolvedValue(bestOfFive());
+
+    const match = await setForfeitInTransaction(writer, "match", "b", sourceUrl);
+
+    expect(match.sourceUrl).toBe(sourceUrl);
+  });
+
+  it("drops the forfeit when a correction makes the forfeiting side win", async () => {
+    writer.load.mockResolvedValue(await forfeitedByB());
+
+    const match = await updateMatchInTransaction(writer, "match", {
+      results: [
+        { participantId: "a", score: 1 },
+        { participantId: "b", score: 3 },
+      ],
+    });
+
+    expect(match.winner?.id).toBe("b");
+    expect(match.forfeitedBy).toBeNull();
+  });
+
+  it("keeps the forfeit when a correction leaves the same winner", async () => {
+    writer.load.mockResolvedValue(await forfeitedByB());
+
+    const match = await updateMatchInTransaction(writer, "match", {
+      results: [
+        { participantId: "a", score: 3 },
+        { participantId: "b", score: 1 },
+      ],
+    });
+
+    expect(match.forfeitedBy?.id).toBe("b");
+  });
+
+  it("drops the forfeit when the forfeiting side is picked as winner", async () => {
+    writer.load.mockResolvedValue(await forfeitedByB());
+
+    const match = await setWinnerInTransaction(writer, "match", "b");
+
+    expect(match.forfeitedBy).toBeNull();
+  });
+
+  it("declares the forfeit PandaScore reports against the loser", async () => {
+    writer.byPandascoreId.mockResolvedValue(null);
+
+    const match = await upsertSyncedMatchInTransaction(writer, tournament.id, {
+      forfeitWinnerId: "a",
+      name: "Final",
+      numberOfGames: 5,
+      pandascoreId: 9,
+      participantIds: ["a", "b"],
+      results: [],
+      status: "finished",
+    });
+
+    expect(match.forfeitedBy?.id).toBe("b");
+    expect(match.winner?.id).toBe("a");
+    expect(scores(match)).toStrictEqual({ a: 3, b: 0 });
+  });
+
+  it("keeps a staff forfeit when PandaScore reports a played match", async () => {
+    writer.byPandascoreId.mockResolvedValue(await forfeitedByB({ pandascoreId: 9 }));
+
+    const match = await upsertSyncedMatchInTransaction(writer, tournament.id, {
+      forfeitWinnerId: null,
+      name: "Final",
+      numberOfGames: 5,
+      pandascoreId: 9,
+      participantIds: ["a", "b"],
+      results: [
+        { participantId: "a", score: 3 },
+        { participantId: "b", score: 0 },
+      ],
+      status: "finished",
+    });
+
+    expect(match.forfeitedBy?.id).toBe("b");
   });
 });

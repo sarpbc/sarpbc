@@ -146,6 +146,7 @@ describe("PandaScore incidents", () => {
     const incident: CompetitionIncident = {
       ...base,
       command: {
+        forfeit: false,
         name: "Final",
         officialStreams: [],
         opponentSlugs: [],
@@ -153,6 +154,7 @@ describe("PandaScore incidents", () => {
         previousMatches: [],
         results: [],
         tournamentPandascoreId: 42,
+        winnerPandascoreTeamId: null,
       },
       kind: "match",
     };

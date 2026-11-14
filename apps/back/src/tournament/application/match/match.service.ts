@@ -18,6 +18,7 @@ import {
   createEmptyBracketInTransaction,
   createMatchInTransaction,
   setGameVodsInTransaction,
+  setForfeitInTransaction,
   setSourceInTransaction,
   setVodsInTransaction,
   setWinnerInTransaction,
@@ -279,6 +280,19 @@ export class MatchService {
     await this.afterCommit.settle({ tournamentIds: [match.tournament.id] });
 
     return match;
+  }
+  /** A forfeit is staff data, so it applies to PandaScore matches too. */
+  async setForfeit(
+    matchId: string,
+    forfeitedById: string | null,
+    sourceUrl?: string | null,
+  ): Promise<Match> {
+    const written = await this.transaction.run(
+      async ({ matches }) =>
+        await setForfeitInTransaction(matches, matchId, forfeitedById, sourceUrl),
+    );
+
+    return await this.settled(written.id);
   }
   async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]): Promise<Match> {
     const written = await this.transaction.run(

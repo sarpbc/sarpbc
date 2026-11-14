@@ -17,6 +17,7 @@ const services = (): WriteToolServices => ({
   matchService: {
     createEmptyBracket: vi.fn<WriteToolServices["matchService"]["createEmptyBracket"]>(),
     createMatch: vi.fn<WriteToolServices["matchService"]["createMatch"]>(),
+    setForfeit: vi.fn<WriteToolServices["matchService"]["setForfeit"]>(),
     setGameVods: vi.fn<WriteToolServices["matchService"]["setGameVods"]>(),
     setMatchWinner: vi.fn<WriteToolServices["matchService"]["setMatchWinner"]>(),
     setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>(),
@@ -399,6 +400,7 @@ const setupBracket = (source: "manual" | "startgg") => {
     createEmptyBracket: vi
       .fn<WriteToolServices["matchService"]["createEmptyBracket"]>()
       .mockResolvedValue([match]),
+    setForfeit: vi.fn<WriteToolServices["matchService"]["setForfeit"]>().mockResolvedValue(match),
     setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>().mockResolvedValue(match),
     updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>().mockResolvedValue(match),
   };
@@ -447,6 +449,26 @@ describe("bracket tools", () => {
     for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"]) {
       expect(input.safeParse({ matchId: "final", sourceUrl: refused }).success).toBe(false);
     }
+  });
+
+  it("declares a forfeit with its source and clears it without one", async () => {
+    const { matchService, run } = setupBracket("manual");
+    const sourceUrl = "https://www.start.gg/tournament/cup/event/main/set/1";
+
+    await run("set_match_forfeit", { matchId: "final", participantId: "b", sourceUrl });
+    await run("set_match_forfeit", { matchId: "final", participantId: null });
+
+    expect(matchService.setForfeit).toHaveBeenNthCalledWith(1, "final", "b", sourceUrl);
+    expect(matchService.setForfeit).toHaveBeenNthCalledWith(2, "final", null, undefined);
+  });
+
+  it("refuses a forfeit without a source", async () => {
+    const { matchService, run } = setupBracket("manual");
+
+    const result = await run("set_match_forfeit", { matchId: "final", participantId: "b" });
+
+    expect(result.isError).toBe(true);
+    expect(matchService.setForfeit).not.toHaveBeenCalled();
   });
 
   it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {

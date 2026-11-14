@@ -162,6 +162,7 @@ export const mapTournamentDetail = (tournament: Tournament): TournamentDetailRes
   matches: tournament.matches.map((match) => ({
     beginAt: match.beginAt,
     endAt: match.endAt,
+    forfeitedBy: match.forfeitedBy?.id ?? null,
     id: match.id,
     name: match.name,
     numberOfGames: match.numberOfGames,

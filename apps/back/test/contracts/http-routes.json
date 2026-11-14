@@ -1570,6 +1570,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "PUT",
+    "path": "\"matches/:matchId/forfeit\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "PUT",
     "path": "\"matches/:matchId/lineups\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],

@@ -68,6 +68,7 @@ export interface TournamentMatchListItem {
   numberOfGames: number | null;
   participants: ParticipantRef<TeamLogos & { id: string; name: string }>[];
   results: { participant: string; score: number }[];
+  forfeitedBy: string | null;
 }
 
 export interface TournamentDetailParticipant {
@@ -89,6 +90,7 @@ export interface TournamentDetailMatch {
   winnerId: string | null;
   participants: ParticipantRef<TeamSummary>[];
   results: { participant: string; score: number }[];
+  forfeitedBy: string | null;
   previousMatches: { previousMatch: string; type: BracketLinkType }[];
   sourceUrl: string | null;
 }
@@ -123,6 +125,7 @@ export interface MatchListItem {
   beginAt: string | null;
   participants: ParticipantRef<TeamLogos & { name: string }>[];
   results: { participant: string; score: number }[];
+  forfeitedBy: string | null;
   tournament: {
     id: string;
     name: string;

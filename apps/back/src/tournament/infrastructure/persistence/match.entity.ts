@@ -18,6 +18,7 @@ export class Match {
   status: string | null = null;
   participants = new Collection<TournamentParticipant>(this);
   winner: TournamentParticipant | null = null;
+  forfeitedBy: TournamentParticipant | null = null;
   numberOfGames: number | null = null;
   previousMatches = new Collection<BracketLink>(this);
   results = new Collection<MatchResult>(this);

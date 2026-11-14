@@ -45,6 +45,7 @@ const participant = z.strictObject({
 const match = z.strictObject({
   beginAt: date.nullable(),
   endAt: date.nullable(),
+  forfeitedBy: nullableText,
   id: z.string(),
   name: z.string(),
   numberOfGames: z.number().nullable(),

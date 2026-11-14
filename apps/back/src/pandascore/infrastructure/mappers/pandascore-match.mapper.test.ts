@@ -35,6 +35,7 @@ describe("PandascoreMatchMapper", () => {
     expect(command).toStrictEqual({
       beginAt: new Date("2025-06-10T15:00:00Z"),
       endAt: new Date("2025-06-10T17:00:00Z"),
+      forfeit: false,
       name: "Grand Final",
       numberOfGames: 7,
       officialStreams: [],
@@ -45,6 +46,36 @@ describe("PandascoreMatchMapper", () => {
       results: [{ score: 4, teamPandascoreId: 7 }],
       status: "finished",
       tournamentPandascoreId: 42,
+      winnerPandascoreTeamId: null,
+    });
+  });
+
+  it("maps a forfeit and its winner", () => {
+    const dto = matchSchema.parse({
+      forfeit: true,
+      id: 3,
+      name: "Quarterfinal",
+      results: [
+        { score: 0, team_id: 7 },
+        { score: 0, team_id: 8 },
+      ],
+      status: "finished",
+      tournament_id: 2,
+      winner_id: 8,
+    });
+
+    const command = toUpsertMatchCommand(dto);
+
+    expect(command.forfeit).toBe(true);
+    expect(command.winnerPandascoreTeamId).toBe(8);
+  });
+
+  it("reads a missing forfeit flag as a played match", () => {
+    const dto = matchSchema.parse({ forfeit: null, id: 4, tournament_id: 2 });
+
+    expect(toUpsertMatchCommand(dto)).toMatchObject({
+      forfeit: false,
+      winnerPandascoreTeamId: null,
     });
   });
 

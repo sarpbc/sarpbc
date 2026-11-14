@@ -67,6 +67,8 @@ export interface UpsertMatchCommand {
   status?: string;
   numberOfGames?: number;
   opponentSlugs: string[];
+  forfeit: boolean;
+  winnerPandascoreTeamId: number | null;
   opponentPandascoreIds?: number[];
   results: UpsertMatchResultCommand[];
   previousMatches: UpsertMatchPreviousMatchCommand[];
