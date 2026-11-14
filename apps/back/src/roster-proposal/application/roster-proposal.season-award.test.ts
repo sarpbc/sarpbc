@@ -9,8 +9,8 @@ describe("RosterProposalService season award proposals", () => {
     fixture = setup();
   });
 
-  const proposeRegional = (seasonId = "season-1") =>
-    fixture.service.propose(
+  const proposeRegional = async (seasonId = "season-1") =>
+    await fixture.service.propose(
       {
         kind: "award_season_player",
         seasonId,

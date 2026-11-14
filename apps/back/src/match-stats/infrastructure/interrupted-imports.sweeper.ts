@@ -12,8 +12,9 @@ export class InterruptedImportsSweeper implements OnApplicationBootstrap {
   ) {}
 
   async onApplicationBootstrap(): Promise<void> {
-    const interrupted = await RequestContext.create(this.orm.em, () =>
-      this.imports.failInterrupted(),
+    const interrupted = await RequestContext.create(
+      this.orm.em,
+      async () => await this.imports.failInterrupted(),
     );
 
     if (interrupted > 0)

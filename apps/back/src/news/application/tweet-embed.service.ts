@@ -13,6 +13,6 @@ export class TweetEmbedService {
     if (!parsed)
       throw new InvalidInputError("Paste a full X or Twitter post URL (x.com/.../status/...).");
 
-    return this.gateway.load(parsed);
+    return await this.gateway.load(parsed);
   }
 }

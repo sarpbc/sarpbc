@@ -13,7 +13,7 @@ describe("TeamController", () => {
 
   const controller = new TeamController(
     teams as never,
-    new TeamAliasService({ run: async () => Promise.reject(new Error("unused")) }),
+    new TeamAliasService({ run: async () => await Promise.reject(new Error("unused")) }),
     contracts as never,
     tournaments as never,
     prizes,

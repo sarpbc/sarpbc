@@ -17,15 +17,15 @@ export async function getSeasons(): Promise<SeasonSummary[]> {
 }
 
 export async function getSeason(id: string): Promise<SeasonDetail> {
-  return apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "GET" });
+  return await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "GET" });
 }
 
 export async function createSeason(input: SeasonInput): Promise<SeasonDetail> {
-  return apiFetch<SeasonDetail>("/seasons", { method: "POST", body: input });
+  return await apiFetch<SeasonDetail>("/seasons", { method: "POST", body: input });
 }
 
 export async function updateSeason(id: string, input: SeasonInput): Promise<SeasonDetail> {
-  return apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "PATCH", body: input });
+  return await apiFetch<SeasonDetail>(`/seasons/${id}`, { method: "PATCH", body: input });
 }
 
 export async function deleteSeason(id: string): Promise<void> {

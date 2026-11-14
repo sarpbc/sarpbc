@@ -10,7 +10,9 @@ function score(blue: number, orange: number, clock: number, overtime = false): S
 }
 
 function feed(tracker: SeriesTracker, readings: readonly ScoreboardReading[], from = 0): number {
-  readings.forEach((reading, index) => tracker.push(from + index, reading));
+  readings.forEach((reading, index) => {
+    tracker.push(from + index, reading);
+  });
 
   return from + readings.length;
 }
@@ -39,8 +41,8 @@ function regulationGame(blue: number, orange: number): ScoreboardReading[] {
   return readings;
 }
 
-describe("SeriesTracker", () => {
-  it("proposes each game and the series once a side has enough wins", () => {
+void describe("SeriesTracker", () => {
+  void it("proposes each game and the series once a side has enough wins", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     let t = feed(tracker, regulationGame(3, 1));
     t = feed(tracker, regulationGame(0, 2), t);
@@ -61,7 +63,7 @@ describe("SeriesTracker", () => {
     assert.equal(tracker.decided, true);
   });
 
-  it("ends an overtime game on the deciding goal", () => {
+  void it("ends an overtime game on the deciding goal", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [
       score(0, 0, 300),
@@ -83,7 +85,7 @@ describe("SeriesTracker", () => {
     );
   });
 
-  it("keeps an overtime goal seen once before the next kickoff", () => {
+  void it("keeps an overtime goal seen once before the next kickoff", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [
       score(0, 0, 300),
@@ -103,7 +105,7 @@ describe("SeriesTracker", () => {
     );
   });
 
-  it("keeps an overtime game whose deciding goal was never read as undecided", () => {
+  void it("keeps an overtime game whose deciding goal was never read as undecided", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [
       score(0, 0, 300),
@@ -137,7 +139,7 @@ describe("SeriesTracker", () => {
     assert.deepEqual(proposal.series, { blue: 1, orange: 0, winner: null });
   });
 
-  it("drops a game restarted from kickoff during regulation", () => {
+  void it("drops a game restarted from kickoff during regulation", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [
       score(0, 0, 300),
@@ -157,7 +159,7 @@ describe("SeriesTracker", () => {
     );
   });
 
-  it("closes a game at the next kickoff when the final clock was missed", () => {
+  void it("closes a game at the next kickoff when the final clock was missed", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [
       score(0, 0, 300),
@@ -174,7 +176,7 @@ describe("SeriesTracker", () => {
     );
   });
 
-  it("ignores single misreads, decreasing scores and screens without a scoreboard", () => {
+  void it("ignores single misreads, decreasing scores and screens without a scoreboard", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [
       score(0, 0, 300),
@@ -204,7 +206,7 @@ describe("SeriesTracker", () => {
     });
   });
 
-  it("does not propose a game cut before its end", () => {
+  void it("does not propose a game cut before its end", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [score(0, 0, 300), score(0, 0, 299), score(1, 0, 100), score(1, 0, 99)]);
     tracker.finish();
@@ -212,7 +214,7 @@ describe("SeriesTracker", () => {
     assert.equal(tracker.proposal(SOURCE).series.winner, null);
   });
 
-  it("keeps the final overtime goal when the stream ends right after it", () => {
+  void it("keeps the final overtime goal when the stream ends right after it", () => {
     const tracker = new SeriesTracker({ bestOf: 1, stableReadings: 2 });
     feed(tracker, [
       score(0, 0, 300),
@@ -231,7 +233,7 @@ describe("SeriesTracker", () => {
     assert.equal(tracker.proposal(SOURCE).series.winner, "orange");
   });
 
-  it("waits for a kickoff before tracking the next game", () => {
+  void it("waits for a kickoff before tracking the next game", () => {
     const tracker = new SeriesTracker({ bestOf: 5, stableReadings: 2 });
     feed(tracker, [
       ...regulationGame(1, 0),

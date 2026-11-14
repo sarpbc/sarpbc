@@ -17,7 +17,7 @@ export async function getUpcomingMatches(limit: number): Promise<CountedMatchLis
 }
 
 export async function getMatchBlocks(blockKey: string): Promise<MatchBlocksResponse> {
-  return apiFetch<MatchBlocksResponse>("/matches/blocks", { query: { block: blockKey } });
+  return await apiFetch<MatchBlocksResponse>("/matches/blocks", { query: { block: blockKey } });
 }
 
 export async function getMatchVods(matchId: string): Promise<MatchVod[]> {

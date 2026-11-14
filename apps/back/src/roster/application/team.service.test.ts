@@ -53,7 +53,7 @@ describe("Roster workflows", () => {
       run: async (work) => {
         transactions += 1;
 
-        return work(stores);
+        return await work(stores);
       },
     };
 

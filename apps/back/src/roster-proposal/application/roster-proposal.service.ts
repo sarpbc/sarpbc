@@ -294,7 +294,7 @@ export class RosterProposalService {
   }
 
   async approve(id: string, reviewerId: string): Promise<RosterProposal> {
-    return this.transaction.run(async (proposals) => {
+    return await this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);
       // A merge approved since the proposal would leave the change on a redirect record.
       await this.requireReferences(proposal.change);
@@ -313,7 +313,7 @@ export class RosterProposalService {
   }
 
   async reject(id: string, reviewerId: string): Promise<RosterProposal> {
-    return this.transaction.run(async (proposals) => {
+    return await this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);
       proposal.reject(reviewerId, new Date());
 

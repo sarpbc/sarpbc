@@ -19,12 +19,12 @@ export class AuthService {
     private readonly destinations: AuthDestinations,
   ) {}
 
-  signTokenPair(user: AuthenticatedUser): Promise<AuthTokenPair> {
-    return this.tokens.sign({ id: user.id, email: user.email });
+  async signTokenPair(user: AuthenticatedUser): Promise<AuthTokenPair> {
+    return await this.tokens.sign({ id: user.id, email: user.email });
   }
 
   async authenticate(accessToken: string): Promise<AuthenticatedUser | null> {
-    return this.currentUser(await this.tokens.verify(accessToken, "access"));
+    return await this.currentUser(await this.tokens.verify(accessToken, "access"));
   }
 
   async refreshSession(refreshToken: string): Promise<AuthSession | null> {
@@ -48,11 +48,11 @@ export class AuthService {
       );
     }
 
-    return this.signTokenPair(user);
+    return await this.signTokenPair(user);
   }
 
   async signUp(input: CreateAccountInput): Promise<AuthTokenPair> {
-    return this.signTokenPair(await this.userService.create(input));
+    return await this.signTokenPair(await this.userService.create(input));
   }
 
   async handleGoogleCallback(code: string): Promise<AuthTokenPair> {
@@ -71,7 +71,7 @@ export class AuthService {
           );
     }
 
-    return this.signTokenPair(user);
+    return await this.signTokenPair(user);
   }
 
   resolveOAuthReturnUrl(returnTo: string | undefined): string {

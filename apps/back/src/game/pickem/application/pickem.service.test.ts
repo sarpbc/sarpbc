@@ -39,7 +39,7 @@ describe("PickemService", () => {
           match.winnerId = id;
         },
       },
-      { run: async (work) => work(scope) },
+      { run: async (work) => await work(scope) },
       { now: () => new Date("2026-01-01"), id: () => "pick-1", warn },
     );
   });

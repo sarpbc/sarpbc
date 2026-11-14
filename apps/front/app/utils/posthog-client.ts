@@ -68,7 +68,7 @@ export async function loadPostHogClient(config: PostHogPublicConfig): Promise<Po
   }
 
   if (loading) {
-    return loading;
+    return await loading;
   }
 
   loading = (async () => {
@@ -134,7 +134,7 @@ export async function loadPostHogClient(config: PostHogPublicConfig): Promise<Po
       loading = null;
     });
 
-  return loading;
+  return await loading;
 }
 
 export function getLoadedPostHogClient(): PostHog | null {

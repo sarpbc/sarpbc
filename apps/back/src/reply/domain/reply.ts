@@ -90,7 +90,7 @@ export function replyTarget(input: {
   if (targets.length !== 1)
     throw new InvalidInputError("Provide exactly one of postId, newsArticleId, or matchId.");
 
-  return targets[0]!;
+  return targets[0];
 }
 
 export function sameReplyTarget(

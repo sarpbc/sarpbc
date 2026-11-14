@@ -25,7 +25,9 @@ import { TournamentModule } from "../../../tournament/infrastructure/tournament.
         return new PickemService(store, new CompetitionPickemMatches(matches), store, {
           now: () => new Date(),
           id: v4,
-          warn: (message) => logger.warn(message),
+          warn: (message) => {
+            logger.warn(message);
+          },
         });
       },
       inject: [EntityManager, MatchService],

@@ -11,7 +11,6 @@ import { ManualGameService } from "./manual-game.service";
 import type {
   BallchasingSource,
   GameAttachment,
-  GameRecord,
   GameStatsStore,
   ReplayStats,
   StatsCandidates,
@@ -137,7 +136,7 @@ describe("ManualGameService.attach", () => {
       orangeGoals: 3,
     });
     expect(source.replayStats).toHaveBeenCalledWith(REPLAY);
-    const record = games.save.mock.calls[0][0] as GameRecord;
+    const record = games.save.mock.calls[0][0];
     expect(record).toMatchObject({ rocketLeagueId: "RL-1", playedAt: PLAYED_AT, number: 2 });
     expect(record.players.map((player) => [player.name, player.playerId])).toEqual([
       ["Seikoo", "seikoo"],

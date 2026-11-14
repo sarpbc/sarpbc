@@ -94,7 +94,7 @@ describe("MatchLineupService", () => {
     },
   };
 
-  const transaction: CompetitionTransaction = { run: (work) => work(scope) };
+  const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };
 
   const byIds = vi.fn(async (ids: string[]) =>
     ids.flatMap((id) => {

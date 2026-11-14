@@ -67,17 +67,17 @@ export class StatsImportService {
     };
 
     await this.imports.create(statsImport);
-    this.scheduler.schedule(() => this.run(statsImport.id));
+    this.scheduler.schedule(async () => await this.run(statsImport.id));
 
     return statsImport;
   }
 
-  recent(tournamentId: string): Promise<StatsImport[]> {
-    return this.imports.latest(tournamentId, RECENT_IMPORTS);
+  async recent(tournamentId: string): Promise<StatsImport[]> {
+    return await this.imports.latest(tournamentId, RECENT_IMPORTS);
   }
 
-  failInterrupted(): Promise<number> {
-    return this.imports.failUnfinished(INTERRUPTED_IMPORT_ERROR);
+  async failInterrupted(): Promise<number> {
+    return await this.imports.failUnfinished(INTERRUPTED_IMPORT_ERROR);
   }
 
   async run(importId: string): Promise<void> {

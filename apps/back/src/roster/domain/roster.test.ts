@@ -61,9 +61,9 @@ describe("contracts", () => {
 
   it("rejects a departure before the contract start", () => {
     const contract = Object.assign(new Contract(), { startDate: new Date("2026-10-23") });
-    expect(() => contract.close(new Date("2026-01-10"), "https://x.com/a")).toThrow(
-      InvalidInputError,
-    );
+    expect(() => {
+      contract.close(new Date("2026-01-10"), "https://x.com/a");
+    }).toThrow(InvalidInputError);
     expect(contract.endDate).toBeNull();
   });
 });

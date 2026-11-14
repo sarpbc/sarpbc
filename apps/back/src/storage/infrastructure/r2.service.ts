@@ -88,14 +88,14 @@ export class R2Service implements ObjectStorage {
     return { uploadUrl, publicUrl: publicUrl(key), key };
   }
 
-  uploadImage(
+  async uploadImage(
     buffer: Uint8Array,
     contentType: ImageContentType,
     target: ImageUploadTarget,
   ): Promise<StoredObject> {
     const key = imageKey(target, contentType);
 
-    return this.objectOperation(
+    return await this.objectOperation(
       "uploadImage",
       { key, target, imageContentType: contentType, imageSize: buffer.byteLength },
       async ({ client, publicUrl }) => {
@@ -114,8 +114,8 @@ export class R2Service implements ObjectStorage {
     );
   }
 
-  putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject> {
-    return this.objectOperation(
+  async putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject> {
+    return await this.objectOperation(
       "putObject",
       { key, imageContentType: contentType, imageSize: bytes.byteLength },
       async ({ client, publicUrl }) => {
@@ -134,22 +134,26 @@ export class R2Service implements ObjectStorage {
     );
   }
 
-  copyObject(sourceKey: string, key: string): Promise<StoredObject> {
-    return this.objectOperation("copyObject", { sourceKey, key }, async ({ client, publicUrl }) => {
-      await client.send(
-        new CopyObjectCommand({
-          Bucket: this.bucket,
-          CopySource: encodeURI(`${this.bucket}/${sourceKey}`),
-          Key: key,
-        }),
-      );
+  async copyObject(sourceKey: string, key: string): Promise<StoredObject> {
+    return await this.objectOperation(
+      "copyObject",
+      { sourceKey, key },
+      async ({ client, publicUrl }) => {
+        await client.send(
+          new CopyObjectCommand({
+            Bucket: this.bucket,
+            CopySource: encodeURI(`${this.bucket}/${sourceKey}`),
+            Key: key,
+          }),
+        );
 
-      return { publicUrl: publicUrl(key), key };
-    });
+        return { publicUrl: publicUrl(key), key };
+      },
+    );
   }
 
-  deleteObject(key: string): Promise<void> {
-    return this.objectOperation("deleteObject", { key }, async ({ client }) => {
+  async deleteObject(key: string): Promise<void> {
+    return await this.objectOperation("deleteObject", { key }, async ({ client }) => {
       await client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
     });
   }

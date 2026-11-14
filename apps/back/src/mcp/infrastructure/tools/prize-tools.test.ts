@@ -28,7 +28,8 @@ function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes"
   ].find((candidate) => candidate.name === toolName);
 
   if (!tool) throw new Error(`${toolName} is not defined`);
-  const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
+  const call = async (args: ToolArguments) =>
+    await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
 }

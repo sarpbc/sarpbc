@@ -124,7 +124,7 @@ export async function createMatchInTransaction(
 
   if (input.previousMatches?.length) await setBracketLinks(writer, match, input.previousMatches);
 
-  return saveMatch(writer, match, participants, input);
+  return await saveMatch(writer, match, participants, input);
 }
 
 export async function createEmptyBracketInTransaction(
@@ -212,7 +212,7 @@ export async function upsertSyncedMatchInTransaction(
     }
   }
 
-  return saveMatch(writer, match, participants, input);
+  return await saveMatch(writer, match, participants, input);
 }
 
 export async function setWinnerInTransaction(

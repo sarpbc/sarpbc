@@ -22,7 +22,7 @@ describe("IndexNowService", () => {
 
     await service.submitNewsSlugs(["rlcs-final", "rlcs-final"]);
     expect(fetch).toHaveBeenCalledTimes(1);
-    const [endpoint, request] = fetch.mock.calls[0]!;
+    const [endpoint, request] = fetch.mock.calls[0];
     expect(endpoint).toBe("https://api.indexnow.org/indexnow");
     expect(request?.method).toBe("POST");
     expect(JSON.parse(String(request?.body))).toEqual({

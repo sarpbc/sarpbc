@@ -14,14 +14,16 @@ const entry: PrizeEntry = {
 
 describe("assertPrizeDistribution", () => {
   it("accepts tied placements in several currencies", () => {
-    expect(() =>
+    expect(() => {
       assertPrizeDistribution([
         entry,
         { ...entry, placement: 3, currency: "EUR", teamId: "team-b", playerIds: [] },
         { ...entry, placement: 3, teamId: "team-c", playerIds: ["player-c"] },
-      ]),
-    ).not.toThrow();
-    expect(() => assertPrizeDistribution([])).not.toThrow();
+      ]);
+    }).not.toThrow();
+    expect(() => {
+      assertPrizeDistribution([]);
+    }).not.toThrow();
   });
 
   it.each([
@@ -31,15 +33,17 @@ describe("assertPrizeDistribution", () => {
     ["an unknown currency", { currency: "XYZ" }],
     ["a lowercase currency", { currency: "usd" }],
   ])("rejects %s", (_, override) => {
-    expect(() => assertPrizeDistribution([{ ...entry, ...override }])).toThrow(InvalidInputError);
+    expect(() => {
+      assertPrizeDistribution([{ ...entry, ...override }]);
+    }).toThrow(InvalidInputError);
   });
 
   it("rejects a team or player listed twice", () => {
-    expect(() => assertPrizeDistribution([entry, { ...entry, placement: 2 }])).toThrow(
-      "appears twice",
-    );
-    expect(() =>
-      assertPrizeDistribution([entry, { ...entry, placement: 2, teamId: "team-b" }]),
-    ).toThrow('Player "player-a" appears twice');
+    expect(() => {
+      assertPrizeDistribution([entry, { ...entry, placement: 2 }]);
+    }).toThrow("appears twice");
+    expect(() => {
+      assertPrizeDistribution([entry, { ...entry, placement: 2, teamId: "team-b" }]);
+    }).toThrow('Player "player-a" appears twice');
   });
 });

@@ -25,7 +25,7 @@ export function useLatestTransfers(team: MaybeRef<string | undefined>, limit = 5
 
   const { data, pending, error, refresh } = useLazyAsyncData(
     () => `latest-transfers-${teamRef.value ?? "all"}-${limit}`,
-    () => getTransfers({ team: teamRef.value, limit }),
+    async () => await getTransfers({ team: teamRef.value, limit }),
     {
       watch: [teamRef],
       default: () => ({ transfers: [], total: 0 }),

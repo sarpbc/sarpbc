@@ -93,8 +93,8 @@ export class CircuitService {
     private readonly clock: () => Date = () => new Date(),
   ) {}
 
-  list(): Promise<CircuitSummary[]> {
-    return this.store.list();
+  async list(): Promise<CircuitSummary[]> {
+    return await this.store.list();
   }
 
   async detail(idOrSlug: string): Promise<CircuitDetail> {
@@ -164,7 +164,7 @@ export class CircuitService {
   async stageTeams(circuitId: string, tournamentId: string): Promise<CircuitEventTeam[]> {
     await this.require(circuitId);
 
-    return this.requireEventTeams(tournamentId);
+    return await this.requireEventTeams(tournamentId);
   }
 
   async requireStageSettings(

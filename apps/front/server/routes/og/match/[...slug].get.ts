@@ -11,11 +11,11 @@ import {
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname;
   const segment = path.split("/").pop() ?? "";
-  const pngMatch = segment.match(/^(.+)\.png$/i);
-  const svgMatch = segment.match(/^(.+)\.svg$/i);
+  const pngMatch = /^(.+)\.png$/i.exec(segment);
+  const svgMatch = /^(.+)\.svg$/i.exec(segment);
 
   if (svgMatch?.[1]) {
-    return sendRedirect(event, `/og/match/${svgMatch[1]}.png`, 301);
+    return await sendRedirect(event, `/og/match/${svgMatch[1]}.png`, 301);
   }
 
   const id = pngMatch?.[1];

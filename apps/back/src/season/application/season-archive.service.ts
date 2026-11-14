@@ -57,8 +57,8 @@ function toSeasonArchive(
 export class SeasonArchiveService {
   constructor(private readonly store: SeasonStore) {}
 
-  published(): Promise<SeasonArchiveSummary[]> {
-    return this.store.published();
+  async published(): Promise<SeasonArchiveSummary[]> {
+    return await this.store.published();
   }
 
   async archive(slug: string): Promise<SeasonArchive> {
@@ -88,7 +88,7 @@ export class SeasonArchiveService {
     if (await this.store.participantTaken(season.id, team.id))
       throw new ConflictError(`${team.name} already takes part in ${season.name}.`);
 
-    return this.store.saveParticipant(season.id, team.id, parsePathNote(input.pathNote));
+    return await this.store.saveParticipant(season.id, team.id, parsePathNote(input.pathNote));
   }
 
   async updatePathNote(
@@ -124,7 +124,7 @@ export class SeasonArchiveService {
     if (entry.tournamentId && !(await this.store.tournamentExists(entry.tournamentId)))
       throw new NotFoundError(`Tournament with id "${entry.tournamentId}" was not found.`);
 
-    return this.store.savePathEntry(participant.id, entry);
+    return await this.store.savePathEntry(participant.id, entry);
   }
 
   async removePathEntry(seasonId: string, participantId: string, entryId: string): Promise<void> {

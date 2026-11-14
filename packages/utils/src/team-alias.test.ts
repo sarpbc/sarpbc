@@ -12,8 +12,8 @@ const VALID: TeamAliasInput = {
   pandascoreId: null,
 };
 
-describe("parseTeamAlias", () => {
-  it("trims the name and normalizes the source URL", () => {
+void describe("parseTeamAlias", () => {
+  void it("trims the name and normalizes the source URL", () => {
     assert.deepEqual(parseTeamAlias(VALID), {
       ok: true,
       alias: { ...VALID, name: "Fixture Esports", sourceUrl: "https://x.com/fixture/status/1" },
@@ -21,7 +21,7 @@ describe("parseTeamAlias", () => {
     assert.equal(parseTeamAlias({ ...VALID, to: null, pandascoreId: 42 }).ok, true);
   });
 
-  it("refuses Liquipedia and its mirrors as a source or a logo", () => {
+  void it("refuses Liquipedia and its mirrors as a source or a logo", () => {
     const error = (input: Partial<TeamAliasInput>) => {
       const parsed = parseTeamAlias({ ...VALID, ...input });
 
@@ -40,7 +40,7 @@ describe("parseTeamAlias", () => {
     assert.equal(error({ sourceUrl: "ftp://example.com" }), "invalid-source-url");
   });
 
-  it("checks the name, the dates and the PandaScore id", () => {
+  void it("checks the name, the dates and the PandaScore id", () => {
     const error = (input: Partial<TeamAliasInput>) => {
       const parsed = parseTeamAlias({ ...VALID, ...input });
 
@@ -56,13 +56,13 @@ describe("parseTeamAlias", () => {
   });
 });
 
-describe("teamAliasInForce", () => {
+void describe("teamAliasInForce", () => {
   const aliases = [
     { name: "First", from: "2020-01-01", to: "2022-06-01" },
     { name: "Second", from: "2022-06-01", to: null },
   ];
 
-  it("picks the alias whose period holds the day, the end day excluded", () => {
+  void it("picks the alias whose period holds the day, the end day excluded", () => {
     assert.equal(teamAliasInForce(aliases, "2019-12-31"), null);
     assert.equal(teamAliasInForce(aliases, "2020-01-01")?.name, "First");
     assert.equal(teamAliasInForce(aliases, "2022-05-31")?.name, "First");
@@ -70,7 +70,7 @@ describe("teamAliasInForce", () => {
     assert.equal(teamAliasInForce(aliases, "2030-01-01")?.name, "Second");
   });
 
-  it("detects overlapping periods", () => {
+  void it("detects overlapping periods", () => {
     assert.equal(teamAliasesOverlap(aliases[0], aliases[1]), false);
     assert.equal(teamAliasesOverlap(aliases[1], { from: "2023-01-01", to: "2023-02-01" }), true);
     assert.equal(teamAliasesOverlap(aliases[0], { from: "2019-01-01", to: "2020-01-02" }), true);

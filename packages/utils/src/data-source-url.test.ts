@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { isAcceptedDataSourceUrl } from "./data-source-url";
 
-describe("isAcceptedDataSourceUrl", () => {
-  it("accepts an official http(s) page", () => {
+void describe("isAcceptedDataSourceUrl", () => {
+  void it("accepts an official http(s) page", () => {
     assert.equal(isAcceptedDataSourceUrl("https://www.rocketleague.com/en/news/rules"), true);
   });
 
@@ -16,7 +16,7 @@ describe("isAcceptedDataSourceUrl", () => {
     "not a url",
     `https://example.com/${"a".repeat(2048)}`,
   ]) {
-    it(`refuses ${url.slice(0, 60)}`, () => {
+    void it(`refuses ${url.slice(0, 60)}`, () => {
       assert.equal(isAcceptedDataSourceUrl(url), false);
     });
   }

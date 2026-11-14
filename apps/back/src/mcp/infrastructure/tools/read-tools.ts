@@ -156,9 +156,9 @@ export function readTools({
         event: z.string().min(1).optional().describe("Event UUID or slug."),
       },
       handler: async ({ tournamentId, event }) => {
-        if (tournamentId && !event) return competition.tournamentPlayerStats(tournamentId);
+        if (tournamentId && !event) return await competition.tournamentPlayerStats(tournamentId);
 
-        if (event && !tournamentId) return competition.eventPlayerStats(event);
+        if (event && !tournamentId) return await competition.eventPlayerStats(event);
         throw new InvalidInputError("Pass either tournamentId or event.");
       },
     }),
@@ -209,7 +209,7 @@ export function readTools({
       handler: async ({ idOrSlug }) => {
         const team = await requireByIdOrSlug(teamService, idOrSlug, "Team");
 
-        return competition.teamEarnings(team.id);
+        return await competition.teamEarnings(team.id);
       },
     }),
 
@@ -221,7 +221,7 @@ export function readTools({
       handler: async ({ idOrSlug }) => {
         const player = await requireByIdOrSlug(playerService, idOrSlug, "Player");
 
-        return competition.playerEarnings(player.id);
+        return await competition.playerEarnings(player.id);
       },
     }),
 

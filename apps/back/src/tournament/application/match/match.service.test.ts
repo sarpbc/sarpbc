@@ -24,7 +24,7 @@ describe("MatchService decided events", () => {
 
   const service = new MatchService(
     reads as never,
-    { run: (work) => work({ matches } as never) } satisfies CompetitionTransaction,
+    { run: async (work) => await work({ matches } as never) } satisfies CompetitionTransaction,
     new CompetitionAfterCommit(cache, events, diagnostics),
   );
 

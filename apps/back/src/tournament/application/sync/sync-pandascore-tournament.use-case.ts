@@ -28,7 +28,7 @@ export class SyncPandascoreTournamentUseCase {
 
     if (!command) throw new NotFoundError("PandaScore tournament " + id + " not found");
 
-    return this.import(command, linkTournamentId);
+    return await this.import(command, linkTournamentId);
   }
   private async import(
     command: UpsertTournamentCommand,
@@ -40,7 +40,7 @@ export class SyncPandascoreTournamentUseCase {
 
     const standings = await this.feed.getTournamentStandings(command.pandascoreId);
 
-    return this.synchronization.upsertTournament(
+    return await this.synchronization.upsertTournament(
       standings ? { ...command, standings } : command,
       matches,
       linkTournamentId,

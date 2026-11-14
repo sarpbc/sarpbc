@@ -109,14 +109,15 @@ export async function verifyCompetitionImport({
   const oldTeam = { pandascoreId: 9202, name: "Historical Roster", slug: "historical-roster" };
   const rival = { pandascoreId: 9203, name: "Historical Rival", slug: "historical-rival" };
 
-  await run(() =>
-    sync.applyIncident({
-      id: 1,
-      modifiedAt: new Date(),
-      changeType: "creation",
-      kind: "player",
-      command: { player: veteran, currentTeam },
-    }),
+  await run(
+    async () =>
+      await sync.applyIncident({
+        id: 1,
+        modifiedAt: new Date(),
+        changeType: "creation",
+        kind: "player",
+        command: { player: veteran, currentTeam },
+      }),
   );
 
   const player = await orm.em
@@ -185,7 +186,9 @@ export async function verifyCompetitionImport({
     officialStreams: [{ url: "https://twitch.tv/example", language: "en", main: true }],
   };
 
-  const imported = await run(() => sync.upsertTournament(tournamentCommand, [final, semifinal]));
+  const imported = await run(
+    async () => await sync.upsertTournament(tournamentCommand, [final, semifinal]),
+  );
 
   async function read<T>(path: string): Promise<T> {
     return (await request("GET", path)).json<T>();
@@ -224,15 +227,16 @@ export async function verifyCompetitionImport({
     { imageUrl: "https://example.test/local-cup.png" },
     staffCookie,
   );
-  await run(() =>
-    sync.upsertTournament(
-      {
-        ...tournamentCommand,
-        name: "Imported Championship Updated",
-        serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
-      },
-      [semifinal, final],
-    ),
+  await run(
+    async () =>
+      await sync.upsertTournament(
+        {
+          ...tournamentCommand,
+          name: "Imported Championship Updated",
+          serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
+        },
+        [semifinal, final],
+      ),
   );
   view = await tournamentView(imported.id);
   assert.equal(view.name, "Imported Championship Updated");
@@ -254,15 +258,16 @@ export async function verifyCompetitionImport({
   };
 
   const versionsBeforeResync = await rowVersions();
-  await run(() =>
-    sync.upsertTournament(
-      {
-        ...tournamentCommand,
-        name: "Imported Championship Updated",
-        serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
-      },
-      [semifinal, final],
-    ),
+  await run(
+    async () =>
+      await sync.upsertTournament(
+        {
+          ...tournamentCommand,
+          name: "Imported Championship Updated",
+          serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
+        },
+        [semifinal, final],
+      ),
   );
   assert.deepEqual(
     await rowVersions(),
@@ -314,24 +319,30 @@ export async function verifyCompetitionImport({
   );
   assert((await read<{ matches: IdRow[] }>(`/player/${player.id}/matches`)).matches.length >= 2);
   assert.equal(
-    (await run(() => tournaments.findByPandascoreId(tournamentCommand.pandascoreId)))?.id,
+    (await run(async () => await tournaments.findByPandascoreId(tournamentCommand.pandascoreId)))
+      ?.id,
     imported.id,
   );
-  assert((await run(() => tournaments.knownPandascoreIds())).has(tournamentCommand.pandascoreId));
-  await run(() =>
-    sync.applyIncident({
-      id: 3,
-      modifiedAt: new Date(),
-      changeType: "update",
-      kind: "match",
-      command: {
-        ...semifinal,
-        results: [
-          { teamPandascoreId: oldTeam.pandascoreId, score: 3 },
-          { teamPandascoreId: rival.pandascoreId, score: 2 },
-        ],
-      },
-    }),
+  assert(
+    (await run(async () => await tournaments.knownPandascoreIds())).has(
+      tournamentCommand.pandascoreId,
+    ),
+  );
+  await run(
+    async () =>
+      await sync.applyIncident({
+        id: 3,
+        modifiedAt: new Date(),
+        changeType: "update",
+        kind: "match",
+        command: {
+          ...semifinal,
+          results: [
+            { teamPandascoreId: oldTeam.pandascoreId, score: 3 },
+            { teamPandascoreId: rival.pandascoreId, score: 2 },
+          ],
+        },
+      }),
   );
   const updatedSemifinal = (await read<MatchDetail>(`/matches/${semiView.id}`)).match;
   assert.equal(updatedSemifinal.id, semiView.id);
@@ -342,14 +353,15 @@ export async function verifyCompetitionImport({
     2,
   );
 
-  await run(() =>
-    sync.applyIncident({
-      id: 2,
-      modifiedAt: new Date(),
-      changeType: "update",
-      kind: "player",
-      command: { player: veteran, currentTeam: null },
-    }),
+  await run(
+    async () =>
+      await sync.applyIncident({
+        id: 2,
+        modifiedAt: new Date(),
+        changeType: "update",
+        kind: "player",
+        command: { player: veteran, currentTeam: null },
+      }),
   );
   assert.equal((await playerView()).team, null);
   assert.equal(
@@ -358,24 +370,26 @@ export async function verifyCompetitionImport({
     player.id,
   );
 
-  const qualifier = await run(() =>
-    sync.upsertTournament({
-      pandascoreId: 9302,
-      name: "Imported Championship Updated",
-      league: tournamentCommand.league,
-      serie: { pandascoreId: 9602, fullName: "Spring Qualifier", year: 2026 },
-    }),
+  const qualifier = await run(
+    async () =>
+      await sync.upsertTournament({
+        pandascoreId: 9302,
+        name: "Imported Championship Updated",
+        league: tournamentCommand.league,
+        serie: { pandascoreId: 9602, fullName: "Spring Qualifier", year: 2026 },
+      }),
   );
 
   assert.equal(qualifier.event.slug, "imported-league-spring-qualifier-2026");
-  await run(() =>
-    sync.applyIncident({
-      id: 9602,
-      modifiedAt: new Date(),
-      changeType: "deletion",
-      kind: "serie",
-      deletion: { kind: "merged", intoId: tournamentCommand.serie.pandascoreId },
-    }),
+  await run(
+    async () =>
+      await sync.applyIncident({
+        id: 9602,
+        modifiedAt: new Date(),
+        changeType: "deletion",
+        kind: "serie",
+        deletion: { kind: "merged", intoId: tournamentCommand.serie.pandascoreId },
+      }),
   );
   const merged = await tournamentView(qualifier.id);
   assert.deepEqual(

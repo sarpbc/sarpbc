@@ -8,7 +8,9 @@ describe("assertLineupFitsFormat", () => {
     { format: "2v2", teamIds: ["kc"], playerGroups: [["zen", "vatira"]] },
     { format: "3v3", teamIds: ["kc", "vitality"], playerGroups: [] },
   ] as const)("accepts a $format lineup", ({ format, teamIds, playerGroups }) => {
-    expect(() => assertLineupFitsFormat(format, { teamIds, playerGroups })).not.toThrow();
+    expect(() => {
+      assertLineupFitsFormat(format, { teamIds, playerGroups });
+    }).not.toThrow();
   });
 
   it.each([
@@ -32,9 +34,9 @@ describe("assertLineupFitsFormat", () => {
       ],
     },
   ] as const)("rejects $label", ({ format, teamIds, playerGroups }) => {
-    expect(() => assertLineupFitsFormat(format, { teamIds, playerGroups })).toThrow(
-      InvalidInputError,
-    );
+    expect(() => {
+      assertLineupFitsFormat(format, { teamIds, playerGroups });
+    }).toThrow(InvalidInputError);
   });
 });
 

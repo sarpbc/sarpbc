@@ -23,7 +23,7 @@ export function useAuthFlow() {
     }
 
     if (user.value) {
-      navigateTo(redirectTarget());
+      void navigateTo(redirectTarget());
     }
   }
 
@@ -45,7 +45,7 @@ export function useAuthFlow() {
       posthog?.capture(event);
     }
 
-    navigateTo(redirectTarget());
+    void navigateTo(redirectTarget());
 
     return true;
   }

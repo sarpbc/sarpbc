@@ -46,22 +46,22 @@ export class SeasonController {
   }
 
   @Get(":id")
-  detail(@Param("id", ParseUUIDPipe) id: string): Promise<SeasonDetail> {
-    return this.seasons.detail(id);
+  async detail(@Param("id", ParseUUIDPipe) id: string): Promise<SeasonDetail> {
+    return await this.seasons.detail(id);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body({ schema: SeasonDto }) dto: SeasonDto): Promise<SeasonDetail> {
-    return this.seasons.create(dto);
+  async create(@Body({ schema: SeasonDto }) dto: SeasonDto): Promise<SeasonDetail> {
+    return await this.seasons.create(dto);
   }
 
   @Patch(":id")
-  update(
+  async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body({ schema: SeasonDto }) dto: SeasonDto,
   ): Promise<SeasonDetail> {
-    return this.seasons.update(id, dto);
+    return await this.seasons.update(id, dto);
   }
 
   @Delete(":id")

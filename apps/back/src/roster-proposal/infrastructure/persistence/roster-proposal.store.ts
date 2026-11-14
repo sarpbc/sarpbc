@@ -130,9 +130,9 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
 
 export class MikroRosterProposalTransaction implements RosterProposalTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (proposals: RosterProposalStore) => Promise<T>): Promise<T> {
+  async run<T>(work: (proposals: RosterProposalStore) => Promise<T>): Promise<T> {
     // Roster services called inside the work join this transaction through the ORM context.
-    return this.em.transactional(async (tx) => {
+    return await this.em.transactional(async (tx) => {
       const result = await work(rosterProposalStore(tx, true));
       await tx.flush();
 

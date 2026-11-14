@@ -47,17 +47,19 @@ export class NewsController {
     @CurrentUserId() userId: string,
     @Body({ schema: CreateNewsArticleDto }) createNewsArticleDto: CreateNewsArticleDto,
   ) {
-    return this.newsService.create(createNewsArticleDto, userId);
+    return await this.newsService.create(createNewsArticleDto, userId);
   }
 
   @Get()
-  findAll(@Query({ schema: NewsListQueryDto }) { page, limit, locale, type }: NewsListQueryDto) {
-    return this.newsService.findAllPublishedArticle(page, limit, parseLocale(locale), type);
+  async findAll(
+    @Query({ schema: NewsListQueryDto }) { page, limit, locale, type }: NewsListQueryDto,
+  ) {
+    return await this.newsService.findAllPublishedArticle(page, limit, parseLocale(locale), type);
   }
 
   @Get("embed/tweet")
-  embedTweet(@Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryDto) {
-    return this.tweetEmbedService.embed(url);
+  async embedTweet(@Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryDto) {
+    return await this.tweetEmbedService.embed(url);
   }
 
   @Get("embed/tweet/image")
@@ -74,18 +76,18 @@ export class NewsController {
   }
 
   @Get("weeks/:week")
-  findWeek(
+  async findWeek(
     @Param("week") week: string,
     @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
   ) {
-    return this.newsService.findPublishedShortsByWeek(week, parseLocale(locale));
+    return await this.newsService.findPublishedShortsByWeek(week, parseLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("news.manage")
   @Get("admin")
-  findAllAdmin(@Query({ schema: PaginationQueryDto }) { page, limit }: PaginationQueryDto) {
-    return this.newsService.findAll(page, limit);
+  async findAllAdmin(@Query({ schema: PaginationQueryDto }) { page, limit }: PaginationQueryDto) {
+    return await this.newsService.findAll(page, limit);
   }
 
   @Get(":slug")
@@ -93,14 +95,14 @@ export class NewsController {
     @Param("slug") slug: string,
     @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
   ) {
-    return this.newsService.findOneBySlug(slug, parseLocale(locale));
+    return await this.newsService.findOneBySlug(slug, parseLocale(locale));
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("news.manage")
   @Get("admin/:slug")
   async findOneAdmin(@Param("slug") slug: string) {
-    return this.newsService.findOneAdminBySlug(slug);
+    return await this.newsService.findOneAdminBySlug(slug);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -110,7 +112,7 @@ export class NewsController {
     @Param("slug") slug: string,
     @Body({ schema: UpdateNewsArticleDto }) dto: UpdateNewsArticleDto,
   ) {
-    return this.newsService.update(slug, dto);
+    return await this.newsService.update(slug, dto);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

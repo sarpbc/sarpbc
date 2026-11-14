@@ -36,7 +36,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async ping(): Promise<string> {
-    return this.client.ping();
+    return await this.client.ping();
   }
 
   async set(key: string, value: string, ttlInSeconds: number): Promise<void> {
@@ -68,11 +68,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async get(key: string): Promise<string | null> {
-    return this.client.get(key);
+    return await this.client.get(key);
   }
 
   async delete(key: string): Promise<number> {
-    return this.client.del(key);
+    return await this.client.del(key);
   }
 
   async deleteByPrefix(prefix: string): Promise<number> {

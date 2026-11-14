@@ -20,7 +20,7 @@ export class ContractService {
   ) {}
 
   async getContractsByPlayer(playerId: string): Promise<Contract[]> {
-    return this.contracts.findByPlayer(playerId);
+    return await this.contracts.findByPlayer(playerId);
   }
 
   async getStaffContractsByPlayer(playerId: string): Promise<Contract[]> {
@@ -30,11 +30,11 @@ export class ContractService {
   }
 
   async getOldTeamsByPlayer(playerId: string): Promise<Contract[]> {
-    return this.contracts.findPastContractsByPlayer(playerId);
+    return await this.contracts.findPastContractsByPlayer(playerId);
   }
 
   async getFormerPlayersByTeam(teamId: string): Promise<Contract[]> {
-    return this.contracts.findFormerPlayersByTeam(teamId);
+    return await this.contracts.findFormerPlayersByTeam(teamId);
   }
 
   async getContractsByTeam(teamId: string): Promise<Contract[]> {
@@ -44,11 +44,11 @@ export class ContractService {
       throw new NotFoundError(`Team with id "${teamId}" not found`);
     }
 
-    return this.contracts.findByTeam(teamId);
+    return await this.contracts.findByTeam(teamId);
   }
 
   async createForTeam(teamId: string, dto: CreateTeamContractInput): Promise<Contract> {
-    return this.create(dto.playerId, {
+    return await this.create(dto.playerId, {
       teamId,
       startDate: dto.startDate,
       endDate: dto.endDate,
@@ -61,7 +61,7 @@ export class ContractService {
     contractId: string,
     dto: UpdateTeamContractInput,
   ): Promise<Contract> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const contract = await scope.contracts.findById(contractId);
 
       if (!contract || contract.team.id !== teamId) {
@@ -76,12 +76,12 @@ export class ContractService {
 
       if (dto.role !== undefined) updateDto.role = dto.role;
 
-      return this.applyUpdate(scope, contract.player.id, contractId, updateDto);
+      return await this.applyUpdate(scope, contract.player.id, contractId, updateDto);
     });
   }
 
   async deleteForTeam(teamId: string, contractId: string): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const contract = await scope.contracts.findById(contractId);
 
       if (!contract || contract.team.id !== teamId) {
@@ -93,7 +93,7 @@ export class ContractService {
   }
 
   async create(playerId: string, dto: CreateContractInput): Promise<Contract> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const contract = await this.build(scope, playerId, dto);
       await this.saveInCareer(scope, contract);
 
@@ -105,7 +105,7 @@ export class ContractService {
     playerId: string,
     { sourceUrl, ...dto }: SourcedContractInput,
   ): Promise<Contract> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const contract = await this.build(scope, playerId, dto);
       contract.joinSourceUrl = sourceUrl;
 
@@ -117,7 +117,9 @@ export class ContractService {
   }
 
   async update(playerId: string, contractId: string, dto: UpdateContractInput): Promise<Contract> {
-    return this.transaction.run((scope) => this.applyUpdate(scope, playerId, contractId, dto));
+    return await this.transaction.run(
+      async (scope) => await this.applyUpdate(scope, playerId, contractId, dto),
+    );
   }
 
   async revisePeriod(
@@ -125,7 +127,7 @@ export class ContractService {
     contractId: string,
     { sourceUrl, ...dto }: SourcedContractUpdate,
   ): Promise<Contract> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const contract = await this.edit(scope, playerId, contractId, dto);
 
       if (dto.teamId !== undefined || dto.startDate !== undefined) {
@@ -143,7 +145,9 @@ export class ContractService {
   }
 
   async delete(playerId: string, contractId: string): Promise<void> {
-    return this.transaction.run((scope) => this.remove(scope, playerId, contractId));
+    return await this.transaction.run(
+      async (scope) => await this.remove(scope, playerId, contractId),
+    );
   }
 
   private async applyUpdate(

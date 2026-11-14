@@ -122,7 +122,7 @@ export function registerTools(server: McpServer, user: PatUser, tools: readonly 
     server.registerTool(
       tool.name,
       { description: tool.description, inputSchema: tool.inputSchema },
-      (input) => tool.run(user, input),
+      async (input) => await tool.run(user, input),
     );
   }
 }

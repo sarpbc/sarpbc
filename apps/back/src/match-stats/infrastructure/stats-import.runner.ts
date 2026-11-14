@@ -10,12 +10,12 @@ export class StatsImportRunner implements StatsImportScheduler {
 
   schedule(task: () => Promise<void>): void {
     setImmediate(() => {
-      RequestContext.create(this.orm.em, task).catch((error) =>
+      RequestContext.create(this.orm.em, task).catch((error) => {
         log.error({
           component: StatsImportRunner.name,
           error: error instanceof Error ? error : new Error(String(error)),
-        }),
-      );
+        });
+      });
     });
   }
 }

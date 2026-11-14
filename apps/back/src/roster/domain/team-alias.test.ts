@@ -63,9 +63,9 @@ describe("teamAt", () => {
 
 describe("assertTeamAliasFits", () => {
   it("refuses a period that overlaps another alias of the team", () => {
-    expect(() =>
-      assertTeamAliasFits(alias({ name: "Overlap", from: "2022-01-01", to: null }), fixtureTeam()),
-    ).toThrow('overlaps the alias "Fixture Origins"');
+    expect(() => {
+      assertTeamAliasFits(alias({ name: "Overlap", from: "2022-01-01", to: null }), fixtureTeam());
+    }).toThrow('overlaps the alias "Fixture Origins"');
   });
 
   it("lets an alias keep its own period and refuses the team's own PandaScore id", () => {
@@ -78,9 +78,11 @@ describe("assertTeamAliasFits", () => {
       to: "2022-06-01",
     });
 
-    expect(() => assertTeamAliasFits(edited, team)).not.toThrow();
-    expect(() =>
-      assertTeamAliasFits(alias({ from: "2024-01-01", to: null, pandascoreId: 7 }), team),
-    ).toThrow("already has PandaScore id 7");
+    expect(() => {
+      assertTeamAliasFits(edited, team);
+    }).not.toThrow();
+    expect(() => {
+      assertTeamAliasFits(alias({ from: "2024-01-01", to: null, pandascoreId: 7 }), team);
+    }).toThrow("already has PandaScore id 7");
   });
 });

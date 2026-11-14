@@ -33,10 +33,10 @@ export class PlayerAwardService {
     playerId: string,
     awardType: PlayerAwardType,
   ) {
-    return this.transaction.run(async ({ awards }) => {
+    return await this.transaction.run(async ({ awards }) => {
       await this.requireEligible(awards, tournamentId, { participantId }, playerId);
 
-      return awards.create({ tournamentId, participantId, playerId, awardType });
+      return await awards.create({ tournamentId, participantId, playerId, awardType });
     });
   }
   async requireProposable(
@@ -45,8 +45,9 @@ export class PlayerAwardService {
     playerId: string,
     awardType: PlayerAwardType,
   ): Promise<void> {
-    await this.transaction.run(({ awards }) =>
-      this.requireProposableIn(awards, tournamentId, teamId, playerId, awardType),
+    await this.transaction.run(
+      async ({ awards }) =>
+        await this.requireProposableIn(awards, tournamentId, teamId, playerId, awardType),
     );
   }
   async createForTeam(
@@ -55,7 +56,7 @@ export class PlayerAwardService {
     playerId: string,
     awardType: PlayerAwardType,
   ) {
-    return this.transaction.run(async ({ awards }) => {
+    return await this.transaction.run(async ({ awards }) => {
       const participantId = await this.requireProposableIn(
         awards,
         tournamentId,
@@ -64,7 +65,7 @@ export class PlayerAwardService {
         awardType,
       );
 
-      return awards.create({ tournamentId, participantId, playerId, awardType });
+      return await awards.create({ tournamentId, participantId, playerId, awardType });
     });
   }
   async delete(tournamentId: string, awardId: string) {

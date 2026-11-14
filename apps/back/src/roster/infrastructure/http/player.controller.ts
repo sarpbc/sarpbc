@@ -44,14 +44,14 @@ import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competiti
 @Controller("player")
 export class PlayerController {
   constructor(
-    private playerService: PlayerService,
-    private contractService: ContractService,
-    private matchService: MatchService,
-    @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
-    private playerAwardService: PlayerAwardService,
-    private seasonService: SeasonService,
-    private tournamentPrizeService: TournamentPrizeService,
-    private lineupService: MatchLineupService,
+    private readonly playerService: PlayerService,
+    private readonly contractService: ContractService,
+    private readonly matchService: MatchService,
+    @Inject(TOURNAMENT_QUERIES) private readonly tournaments: TournamentQueries,
+    private readonly playerAwardService: PlayerAwardService,
+    private readonly seasonService: SeasonService,
+    private readonly tournamentPrizeService: TournamentPrizeService,
+    private readonly lineupService: MatchLineupService,
   ) {}
 
   @Get()

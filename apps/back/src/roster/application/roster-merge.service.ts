@@ -35,7 +35,7 @@ export class RosterMergeService {
   async mergePlayers(keptId: string, duplicateId: string): Promise<RosterMerge<Player>> {
     if (keptId === duplicateId) throw new InvalidInputError("Choose two different players");
 
-    return this.transaction.run(async ({ players, references }) => {
+    return await this.transaction.run(async ({ players, references }) => {
       const kept = await players.findById(keptId);
 
       if (!kept) throw new NotFoundError(`Player with id "${keptId}" not found`);
@@ -78,7 +78,7 @@ export class RosterMergeService {
   async mergeTeams(keptId: string, duplicateId: string): Promise<RosterMerge<Team>> {
     if (keptId === duplicateId) throw new InvalidInputError("Choose two different teams");
 
-    return this.transaction.run(async ({ teams, references }) => {
+    return await this.transaction.run(async ({ teams, references }) => {
       const kept = await teams.findById(keptId);
 
       if (!kept) throw new NotFoundError(`Team with id "${keptId}" not found`);

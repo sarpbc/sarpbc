@@ -4,7 +4,7 @@ export async function useTeamByRouteSlug() {
 
   const { data, pending, error, refresh } = await useAsyncData(
     () => `team-${slug.value}`,
-    () => getTeamFromSlug(slug.value),
+    async () => await getTeamFromSlug(slug.value),
     { watch: [slug] },
   );
 

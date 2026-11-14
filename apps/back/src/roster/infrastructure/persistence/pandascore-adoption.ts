@@ -27,7 +27,7 @@ export async function findPandascorePlayer(
     return byId;
   }
 
-  return em.findOne(Player, adoptable(slug));
+  return await em.findOne(Player, adoptable(slug));
 }
 
 export async function findPandascoreTeam(
@@ -37,7 +37,7 @@ export async function findPandascoreTeam(
 ): Promise<Team | null> {
   const byId = pandascoreId !== undefined ? await em.findOne(Team, { pandascoreId }) : null;
 
-  return byId ?? em.findOne(Team, adoptable(slug));
+  return await (byId ?? em.findOne(Team, adoptable(slug)));
 }
 
 export async function findAliasedPandascoreTeam(

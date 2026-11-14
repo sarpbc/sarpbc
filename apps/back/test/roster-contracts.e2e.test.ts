@@ -47,7 +47,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
     },
   } as never;
 
-  const transaction: RosterTransaction = { run: async (work) => work(scope) };
+  const transaction: RosterTransaction = { run: async (work) => await work(scope) };
 
   beforeAll(async () => {
     career = [

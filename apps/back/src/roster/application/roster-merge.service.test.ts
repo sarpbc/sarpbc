@@ -61,7 +61,7 @@ describe("RosterMergeService", () => {
         sharedTournamentIds: async () => shared,
       },
     };
-    service = new RosterMergeService({ run: (work) => work(stores) });
+    service = new RosterMergeService({ run: async (work) => await work(stores) });
   });
 
   it("moves references, fills missing profile fields and keeps the duplicate as a redirect", async () => {

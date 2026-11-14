@@ -26,7 +26,9 @@ export default defineConfig({
   },
   highlighter: new SqlHighlighter(),
   debug: !env.production,
-  logger: (message: string) => log.debug({ component: "MikroORMCLI", message }),
+  logger: (message: string) => {
+    log.debug({ component: "MikroORMCLI", message });
+  },
   schemaGenerator: {
     defaultUpdateRule: "cascade",
   },

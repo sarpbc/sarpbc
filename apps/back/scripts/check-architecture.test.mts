@@ -25,11 +25,13 @@ function fixture(): Fixture {
       return file;
     },
     violations: (files: string[]): string[] => architectureViolations(files, root),
-    cleanup: () => fs.rmSync(root, { recursive: true, force: true }),
+    cleanup: () => {
+      fs.rmSync(root, { recursive: true, force: true });
+    },
   };
 }
 
-test("reports a cycle between features' inner layers once and accepts a one-way import", () => {
+void test("reports a cycle between features' inner layers once and accepts a one-way import", () => {
   const { write, violations, cleanup } = fixture();
 
   try {
@@ -66,7 +68,7 @@ test("reports a cycle between features' inner layers once and accepts a one-way 
   }
 });
 
-test("allows another feature's persistence only through its facade or infrastructure composition", () => {
+void test("allows another feature's persistence only through its facade or infrastructure composition", () => {
   const { write, violations, cleanup } = fixture();
 
   try {
@@ -102,7 +104,7 @@ test("allows another feature's persistence only through its facade or infrastruc
   }
 });
 
-test("rejects non-allowlisted packages, aliases, type imports, reexports and foreign repositories", () => {
+void test("rejects non-allowlisted packages, aliases, type imports, reexports and foreign repositories", () => {
   const { write, violations, cleanup } = fixture();
 
   try {
@@ -163,7 +165,7 @@ test("rejects non-allowlisted packages, aliases, type imports, reexports and for
   }
 });
 
-test("rejects common importing a feature and accepts common, root infrastructure and packages", () => {
+void test("rejects common importing a feature and accepts common, root infrastructure and packages", () => {
   const { write, violations, cleanup } = fixture();
 
   try {

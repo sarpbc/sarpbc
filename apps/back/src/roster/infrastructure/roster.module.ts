@@ -91,8 +91,8 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
               new OnThisDayRosterReferences(tx),
               competition,
             ],
-            sharedTournamentIds: (teamId, otherTeamId) =>
-              competition.sharedTournamentIds(teamId, otherTeamId),
+            sharedTournamentIds: async (teamId, otherTeamId) =>
+              await competition.sharedTournamentIds(teamId, otherTeamId),
           };
         }),
       inject: [EntityManager],

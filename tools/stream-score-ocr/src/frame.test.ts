@@ -22,8 +22,8 @@ async function collect(chunks: AsyncIterable<Uint8Array>): Promise<Frame[]> {
   return frames;
 }
 
-describe("readPpmFrames", () => {
-  it("splits a pipe of frames whatever the chunk boundaries", async () => {
+void describe("readPpmFrames", () => {
+  void it("splits a pipe of frames whatever the chunk boundaries", async () => {
     const stream = Buffer.concat([ppm(4, 3, 10), ppm(2, 2, 200)]);
 
     for (const size of [1, 5, 7, 4096]) {
@@ -38,14 +38,14 @@ describe("readPpmFrames", () => {
     }
   });
 
-  it("rejects truncated and foreign streams", async () => {
+  void it("rejects truncated and foreign streams", async () => {
     await assert.rejects(collect(chunked(ppm(4, 3, 0).subarray(0, 30), 8)), /Truncated/);
     await assert.rejects(collect(chunked(new Uint8Array(80), 16)), /Invalid PPM header/);
   });
 });
 
-describe("frame regions", () => {
-  it("scales reference regions to the frame and averages their color", () => {
+void describe("frame regions", () => {
+  void it("scales reference regions to the frame and averages their color", () => {
     const frame: Frame = { width: 960, height: 540, data: new Uint8Array(960 * 540 * 3).fill(100) };
 
     const region = scaleRegion(

@@ -101,7 +101,7 @@ export async function setMatchSource(matchId: string, sourceUrl: string | null):
 }
 
 export async function getMatchLineups(matchId: string): Promise<MatchLineupsResponse> {
-  return apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
+  return await apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
     method: "GET",
   });
 }
@@ -110,7 +110,7 @@ export async function setMatchLineups(
   matchId: string,
   lineups: MatchLineupInput[],
 ): Promise<MatchLineupsResponse> {
-  return apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
+  return await apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
     method: "PUT",
     body: { lineups },
   });
@@ -252,14 +252,14 @@ export interface TournamentPrizeInput {
 }
 
 export async function getTournamentPrizes(tournamentId: string): Promise<TournamentPrizes> {
-  return apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
+  return await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
 }
 
 export async function setTournamentPrizes(
   tournamentId: string,
   prizes: TournamentPrizeInput[],
 ): Promise<TournamentPrizes> {
-  return apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, {
+  return await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, {
     method: "PUT",
     body: { prizes },
   });
@@ -278,14 +278,14 @@ export async function requestStatsImport(
   tournamentId: string,
   group: string,
 ): Promise<StatsImport> {
-  return apiFetch<StatsImport>(`/tournaments/${tournamentId}/stats-imports`, {
+  return await apiFetch<StatsImport>(`/tournaments/${tournamentId}/stats-imports`, {
     method: "POST",
     body: { group },
   });
 }
 
 export async function getStatsPlayerAccounts(tournamentId: string): Promise<StatsPlayerAccounts> {
-  return apiFetch<StatsPlayerAccounts>(`/tournaments/${tournamentId}/stats-players`, {
+  return await apiFetch<StatsPlayerAccounts>(`/tournaments/${tournamentId}/stats-players`, {
     method: "GET",
   });
 }
@@ -305,7 +305,7 @@ export async function attachStatsReplay(
   tournamentId: string,
   body: AttachReplayInput,
 ): Promise<TournamentStatsGame> {
-  return apiFetch<TournamentStatsGame>(`/tournaments/${tournamentId}/stats-games`, {
+  return await apiFetch<TournamentStatsGame>(`/tournaments/${tournamentId}/stats-games`, {
     method: "POST",
     body,
   });
@@ -316,7 +316,7 @@ export async function removeStatsGame(
   matchId: string,
   number: number,
 ): Promise<TournamentStatsGame> {
-  return apiFetch<TournamentStatsGame>(
+  return await apiFetch<TournamentStatsGame>(
     `/tournaments/${tournamentId}/stats-games/${matchId}/${number}`,
     { method: "DELETE" },
   );
@@ -326,7 +326,7 @@ export async function linkStatsPlayer(
   tournamentId: string,
   body: StatsPlayerLinkInput,
 ): Promise<StatsPlayerLinkResult> {
-  return apiFetch<StatsPlayerLinkResult>(`/tournaments/${tournamentId}/stats-players/link`, {
+  return await apiFetch<StatsPlayerLinkResult>(`/tournaments/${tournamentId}/stats-players/link`, {
     method: "PUT",
     body,
   });

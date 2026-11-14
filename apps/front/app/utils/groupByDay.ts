@@ -43,7 +43,7 @@ export function groupByDay<T>(
       date: group.date,
       items: group.items.sort((a, b) => sign * (timeOf(a) - timeOf(b))),
     }))
-    .sort((a, b) => sign * (a.date!.getTime() - b.date!.getTime()));
+    .sort((a, b) => sign * (a.date.getTime() - b.date.getTime()));
 
   if (unknown.length > 0) {
     groups.push({ dateKey: UNKNOWN_DAY_KEY, date: null, items: unknown });

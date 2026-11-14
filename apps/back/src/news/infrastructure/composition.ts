@@ -6,8 +6,8 @@ import type { NewsTransaction } from "../application/ports";
 
 export function transactionalNews(em: EntityManager): NewsTransaction {
   return {
-    run: (work) =>
-      em.transactional(async (tx) => {
+    run: async (work) =>
+      await em.transactional(async (tx) => {
         const result = await work({
           articles: new MikroNewsStore(tx),
           replies: replyDeletion(tx),

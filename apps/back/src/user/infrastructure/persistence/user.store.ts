@@ -50,20 +50,20 @@ export class MikroUserStore implements UserQueries, UserWriter {
     return { users: records.map(toAccount), total };
   }
 
-  findByEmail(email: string): Promise<Account | null> {
-    return this.find({ email });
+  async findByEmail(email: string): Promise<Account | null> {
+    return await this.find({ email });
   }
 
-  findById(id: string): Promise<Account | null> {
-    return this.find({ id });
+  async findById(id: string): Promise<Account | null> {
+    return await this.find({ id });
   }
 
-  findByGoogleId(googleId: string): Promise<Account | null> {
-    return this.find({ googleId });
+  async findByGoogleId(googleId: string): Promise<Account | null> {
+    return await this.find({ googleId });
   }
 
-  findByEmailWithPassword(email: string): Promise<Account | null> {
-    return this.find({ email, password: { $ne: null } });
+  async findByEmailWithPassword(email: string): Promise<Account | null> {
+    return await this.find({ email, password: { $ne: null } });
   }
 
   async existsByEmail(email: string): Promise<boolean> {
@@ -104,8 +104,8 @@ export class MikroUserStore implements UserQueries, UserWriter {
 
 export class MikroUserTransaction implements UserTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (scope: UserWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: UserWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const result = await work({ users: new MikroUserStore(tx) });
       await tx.flush();
 

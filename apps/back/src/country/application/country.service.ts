@@ -35,8 +35,8 @@ function currentTeams(players: Player[]): Team[] {
 export class CountryService {
   constructor(private readonly sources: CountrySources) {}
 
-  list(): Promise<NationalityCount[]> {
-    return this.sources.players.nationalities();
+  async list(): Promise<NationalityCount[]> {
+    return await this.sources.players.nationalities();
   }
 
   async find(rawCode: string, page: CountryMatchPage): Promise<CountryPage> {

@@ -1,10 +1,13 @@
 const cache = new Map<string, Promise<unknown>>();
 
-export function fetchWithEntityTagCache<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
+export async function fetchWithEntityTagCache<T>(
+  key: string,
+  fetcher: () => Promise<T>,
+): Promise<T> {
   const existing = cache.get(key);
 
   if (existing) {
-    return existing as Promise<T>;
+    return await (existing as Promise<T>);
   }
 
   const pending = fetcher().catch((cause) => {
@@ -14,5 +17,5 @@ export function fetchWithEntityTagCache<T>(key: string, fetcher: () => Promise<T
 
   cache.set(key, pending);
 
-  return pending;
+  return await pending;
 }

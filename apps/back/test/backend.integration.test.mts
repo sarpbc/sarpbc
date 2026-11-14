@@ -202,7 +202,7 @@ const rpcMessage = z.object({
 const portBindings = z.record(z.string(), z.array(z.object({ HostPort: z.string() })).nullable());
 
 function composeImage(name: string): string {
-  const image = compose.match(new RegExp(`image: (${name}:\\S+)`))?.[1];
+  const image = new RegExp(`image: (${name}:\\S+)`).exec(compose)?.[1];
 
   if (image === undefined) throw new Error(`docker-compose.local.yml has no ${name} image`);
 
@@ -404,7 +404,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
     await app.init();
     await app.getHttpAdapter().getInstance().ready();
 
-    for (const job of app.get(SchedulerRegistry).getCronJobs().values()) job.stop();
+    for (const job of app.get(SchedulerRegistry).getCronJobs().values()) void job.stop();
 
     let staffCookie: string;
     let memberCookie: string;
@@ -834,8 +834,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         await request("POST", "/pat/tokens", { name: "VOD MCP" }, staffCookie, 201)
       ).json<TokenBody>();
 
-      const setGameVods = (game: number) =>
-        request(
+      const setGameVods = async (game: number) =>
+        await request(
           "POST",
           "/mcp",
           {
@@ -1000,14 +1000,16 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       async () => {
         const participantId = tournament.participants[0].id;
         await Promise.all(
-          Array.from({ length: 4 }, () =>
-            request(
-              "POST",
-              `/pickem/match/${match.id}/pick`,
-              { pickedParticipantId: participantId },
-              memberCookie,
-              201,
-            ),
+          Array.from(
+            { length: 4 },
+            async () =>
+              await request(
+                "POST",
+                `/pickem/match/${match.id}/pick`,
+                { pickedParticipantId: participantId },
+                memberCookie,
+                201,
+              ),
           ),
         );
         assert.equal(
@@ -1229,32 +1231,34 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         const id = randomUUID();
         const failure = new Error("injected after second SQL write");
         await assert.rejects(
-          () =>
-            RequestContext.create(em, () =>
-              transactionalReplies(em).run(async (scope) => {
-                await scope.replies.save({
-                  id,
-                  content: "Must roll back",
-                  createdAt: new Date(),
-                  hiddenAt: null,
-                  author: { id: member.id, userName: member.userName },
-                  post: null,
-                  newsArticle: {
-                    id: article.id,
-                    title: article.title,
-                    slug: article.slug,
-                  },
-                  match: null,
-                  replyTo: null,
-                });
-                await scope.notifications.createForDirectReply(staff.id, id);
-                const tx = TransactionContext.getEntityManager();
-                assert(tx, "the adapter provides a real transaction context");
-                await tx.flush();
-                assert.equal(await tx.count(Reply, { id }), 1);
-                assert.equal(await tx.count(ReplyNotification, { reply: { id } }), 1);
-                throw failure;
-              }),
+          async () =>
+            await RequestContext.create(
+              em,
+              async () =>
+                await transactionalReplies(em).run(async (scope) => {
+                  await scope.replies.save({
+                    id,
+                    content: "Must roll back",
+                    createdAt: new Date(),
+                    hiddenAt: null,
+                    author: { id: member.id, userName: member.userName },
+                    post: null,
+                    newsArticle: {
+                      id: article.id,
+                      title: article.title,
+                      slug: article.slug,
+                    },
+                    match: null,
+                    replyTo: null,
+                  });
+                  await scope.notifications.createForDirectReply(staff.id, id);
+                  const tx = TransactionContext.getEntityManager();
+                  assert(tx, "the adapter provides a real transaction context");
+                  await tx.flush();
+                  assert.equal(await tx.count(Reply, { id }), 1);
+                  assert.equal(await tx.count(ReplyNotification, { reply: { id } }), 1);
+                  throw failure;
+                }),
             ),
           (error) => error === failure,
         );
@@ -1271,38 +1275,40 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         const em = orm.em.fork();
         const id = randomUUID();
         await assert.rejects(
-          () =>
-            RequestContext.create(em, () =>
-              transactionalReplies(em).run(async (scope) => {
-                const tx = TransactionContext.getEntityManager();
-                assert(tx, "the adapter provides a real transaction context");
-                await scope.replies.save({
-                  id,
-                  content: "Rolled back after SQL constraint",
-                  createdAt: new Date(),
-                  hiddenAt: null,
-                  author: { id: member.id, userName: member.userName },
-                  post: null,
-                  newsArticle: {
-                    id: article.id,
-                    title: article.title,
-                    slug: article.slug,
-                  },
-                  match: null,
-                  replyTo: null,
-                });
-                await tx.flush();
-                assert.equal(
-                  await tx.count(Reply, { id }),
-                  1,
-                  "first SQL insert happened before the failure",
-                );
-                await scope.notifications.createForDirectReply(randomUUID(), id);
-                await tx.flush();
-                assert.fail(
-                  "the notification recipient foreign key must reject the second SQL write",
-                );
-              }),
+          async () =>
+            await RequestContext.create(
+              em,
+              async () =>
+                await transactionalReplies(em).run(async (scope) => {
+                  const tx = TransactionContext.getEntityManager();
+                  assert(tx, "the adapter provides a real transaction context");
+                  await scope.replies.save({
+                    id,
+                    content: "Rolled back after SQL constraint",
+                    createdAt: new Date(),
+                    hiddenAt: null,
+                    author: { id: member.id, userName: member.userName },
+                    post: null,
+                    newsArticle: {
+                      id: article.id,
+                      title: article.title,
+                      slug: article.slug,
+                    },
+                    match: null,
+                    replyTo: null,
+                  });
+                  await tx.flush();
+                  assert.equal(
+                    await tx.count(Reply, { id }),
+                    1,
+                    "first SQL insert happened before the failure",
+                  );
+                  await scope.notifications.createForDirectReply(randomUUID(), id);
+                  await tx.flush();
+                  assert.fail(
+                    "the notification recipient foreign key must reject the second SQL write",
+                  );
+                }),
             ),
           (error) =>
             error instanceof ForeignKeyConstraintViolationException &&
@@ -1330,26 +1336,28 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const photo = new PlayerPhoto();
       const failure = new Error("injected after player and photo SQL writes");
       await assert.rejects(
-        () =>
-          RequestContext.create(em, () =>
-            new MikroRosterTransaction(em).run(async (scope) => {
-              const model = await scope.players.findById(player.id);
-              assert(model, "the player exists");
-              model.imageUrl = "https://example.test/rolled-back.jpg";
-              await scope.players.save(model);
-              photo.player = model;
-              photo.url = "https://example.test/rollback-archive.jpg";
-              await scope.photos.save(photo);
-              const tx = TransactionContext.getEntityManager();
-              assert(tx, "the adapter provides a real transaction context");
-              await tx.flush();
-              assert.equal(await tx.count(rosterRows.PlayerPhoto, { id: photo.id }), 1);
-              assert.equal(
-                (await tx.findOneOrFail(rosterRows.Player, { id: player.id })).imageUrl,
-                model.imageUrl,
-              );
-              throw failure;
-            }),
+        async () =>
+          await RequestContext.create(
+            em,
+            async () =>
+              await new MikroRosterTransaction(em).run(async (scope) => {
+                const model = await scope.players.findById(player.id);
+                assert(model, "the player exists");
+                model.imageUrl = "https://example.test/rolled-back.jpg";
+                await scope.players.save(model);
+                photo.player = model;
+                photo.url = "https://example.test/rollback-archive.jpg";
+                await scope.photos.save(photo);
+                const tx = TransactionContext.getEntityManager();
+                assert(tx, "the adapter provides a real transaction context");
+                await tx.flush();
+                assert.equal(await tx.count(rosterRows.PlayerPhoto, { id: photo.id }), 1);
+                assert.equal(
+                  (await tx.findOneOrFail(rosterRows.Player, { id: player.id })).imageUrl,
+                  model.imageUrl,
+                );
+                throw failure;
+              }),
           ),
         (error) => error === failure,
       );
@@ -1380,8 +1388,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         await request("GET", "/mcp", undefined, undefined, 405, patHeaders);
         await orm.em.fork().nativeUpdate(User, { id: staff.id }, { role: "journalist" });
         assert.equal(
-          await RequestContext.create(orm.em.fork(), () =>
-            app.get(PatService).resolveUser(token.token),
+          await RequestContext.create(
+            orm.em.fork(),
+            async () => await app.get(PatService).resolveUser(token.token),
           ).then((user) => user?.role),
           "journalist",
         );
@@ -1438,8 +1447,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         return jsonValue.parse(JSON.parse(text));
       }
 
-      const review: Review = (proposal, action = "approve", status = 200) =>
-        request(
+      const review: Review = async (proposal, action = "approve", status = 200) =>
+        await request(
           "POST",
           `/roster-proposals/${proposal.proposalId}/${action}`,
           undefined,
@@ -1782,8 +1791,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           ({ id }) => id,
         );
 
-      const createCup = <T,>(tournamentSource: string): Promise<T> =>
-        callTool<T>("create_tournament", {
+      const createCup = async <T,>(tournamentSource: string): Promise<T> =>
+        await callTool<T>("create_tournament", {
           name: `MCP ${tournamentSource} Cup`,
           beginAt: "2026-10-20",
           endAt: "2026-10-30",
@@ -1975,8 +1984,9 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       const merges = app.get(RosterMergeService);
 
-      const merge = <T,>(work: (service: InstanceType<typeof RosterMergeService>) => Promise<T>) =>
-        RequestContext.create(orm.em.fork(), () => work(merges));
+      const merge = async <T,>(
+        work: (service: InstanceType<typeof RosterMergeService>) => Promise<T>,
+      ) => await RequestContext.create(orm.em.fork(), async () => await work(merges));
 
       const day = (value: Date | string | null | undefined) =>
         value && new Date(value).toISOString().slice(0, 10);
@@ -1992,26 +2002,26 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         return id;
       };
 
-      const newTeam = (name: string, props: { mergedInto?: string } = {}) =>
-        insert((em, id) =>
+      const newTeam = async (name: string, props: { mergedInto?: string } = {}) =>
+        await insert((em, id) =>
           em.create(rosterRows.Team, { id, name, slug: slug(name), ...props }, { partial: true }),
         );
 
-      const newPlayer = (
+      const newPlayer = async (
         name: string,
         props: { team?: string; pandascoreId?: number; mergedInto?: string } = {},
       ) =>
-        insert((em, id) =>
+        await insert((em, id) =>
           em.create(rosterRows.Player, { id, name, slug: slug(name), ...props }, { partial: true }),
         );
 
-      const newContract = (
+      const newContract = async (
         player: string,
         team: string,
         startDate: string,
         endDate: string | null = null,
       ) =>
-        insert((em, id) =>
+        await insert((em, id) =>
           em.create(
             rosterRows.Contract,
             {
@@ -2025,8 +2035,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           ),
         );
 
-      const newPhoto = (player: string, url: string) =>
-        insert((em, id) =>
+      const newPhoto = async (player: string, url: string) =>
+        await insert((em, id) =>
           em.create(rosterRows.PlayerPhoto, { id, player, url }, { partial: true }),
         );
 
@@ -2069,8 +2079,13 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           .map(({ id }) => id)
           .sort();
 
-      const award = (cup: Identified, participantId: string, playerId: string, awardType: string) =>
-        request(
+      const award = async (
+        cup: Identified,
+        participantId: string,
+        playerId: string,
+        awardType: string,
+      ) =>
+        await request(
           "POST",
           `/tournaments/${cup.id}/awards`,
           { participantId, playerId, awardType },
@@ -2089,8 +2104,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
           await orm.em.fork().find(rosterRows.Contract, where, { orderBy: { startDate: "asc" } })
         ).map((row) => [row.team.id, day(row.startDate), day(row.endDate)]);
 
-      const playerRow = (id: string) => orm.em.fork().findOneOrFail(rosterRows.Player, { id });
-      const teamRow = (id: string) => orm.em.fork().findOneOrFail(rosterRows.Team, { id });
+      const playerRow = async (id: string) =>
+        await orm.em.fork().findOneOrFail(rosterRows.Player, { id });
+      const teamRow = async (id: string) =>
+        await orm.em.fork().findOneOrFail(rosterRows.Team, { id });
 
       const redirectOf = async (entity: EntityClass<Mergeable>, id: string) =>
         (await orm.em.fork().findOneOrFail(entity, { id }, { populate: ["mergedInto"] })).mergedInto
@@ -2162,8 +2179,8 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
 
       const { UniqueConstraintViolationException } = await import("@mikro-orm/core");
 
-      const regularSeasonMvp = (player: string) =>
-        insert((em, id) =>
+      const regularSeasonMvp = async (player: string) =>
+        await insert((em, id) =>
           em.create(
             SeasonAward,
             {
@@ -2185,7 +2202,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
         "a season holds one award of a type without a region",
       );
 
-      await merge((service) => service.mergePlayers(kept, duplicate));
+      await merge(async (service) => await service.mergePlayers(kept, duplicate));
 
       const keptRow = await playerRow(kept);
       assert.equal(keptRow.pandascoreId, 77001, "the kept player takes the freed PandaScore id");
@@ -2241,7 +2258,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const keeperCup = await newCup("Reference Keeper Cup", [keeper, opponent]);
       const droppedEntry = droppedCup.participantOf(dropped);
 
-      await merge((service) => service.mergeTeams(keeper, dropped));
+      await merge(async (service) => await service.mergeTeams(keeper, dropped));
 
       assert.equal((await teamRow(dropped)).active, false);
       assert.equal(await redirectOf(rosterRows.Team, dropped), keeper);
@@ -2265,7 +2282,7 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const twinTwo = await newTeam("Reference Twin Two");
       const twinCup = await newCup("Reference Twin Cup", [twinOne, twinTwo]);
       await assert.rejects(
-        merge((service) => service.mergeTeams(twinOne, twinTwo)),
+        merge(async (service) => await service.mergeTeams(twinOne, twinTwo)),
         (error) => error instanceof ConflictError && error.message.includes(twinCup.id),
       );
       assert.equal(await participantTeam(twinCup.participantOf(twinTwo)), twinTwo);
@@ -2485,7 +2502,10 @@ test("complete backend workflows with PostgreSQL, Redis and MikroORM migrations"
       const mergedIds = new Set(merged.map(({ id }) => id));
 
       for (let draw = 0; draw < 40; draw++) {
-        const drawn = await RequestContext.create(orm.em.fork(), () => players.getRandomPlayer());
+        const drawn = await RequestContext.create(
+          orm.em.fork(),
+          async () => await players.getRandomPlayer(),
+        );
         assert(drawn && !mergedIds.has(drawn.id), "a redirect row was drawn as a random player");
       }
     });

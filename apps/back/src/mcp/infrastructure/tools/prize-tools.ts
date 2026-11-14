@@ -57,8 +57,8 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
           .describe("Every paid placement of the stage."),
         sourceUrl: proposalSourceUrlSchema,
       },
-      handler: ({ tournamentId, prizes, sourceUrl }, user) =>
-        propose(
+      handler: async ({ tournamentId, prizes, sourceUrl }, user) =>
+        await propose(
           {
             kind: "set_tournament_prizes",
             tournamentId,
@@ -103,11 +103,11 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
           "Required public source of the corrected row, usually the official Rocket League rules (prize attachments) or the organiser's announcement. Never Liquipedia, a mirror of it or BLAST.tv.",
         ),
       },
-      handler: (
+      handler: async (
         { tournamentId, teamId, placement, amount, currency, playerIds, sourceUrl },
         user,
       ) =>
-        propose(
+        await propose(
           {
             kind: "update_tournament_prize",
             tournamentId,

@@ -482,7 +482,7 @@ describe("Competition synchronization", () => {
         kind: "tournament",
         changeType: "update",
         command: stageCommand({}),
-      } as CompetitionIncident);
+      });
       expect(store.tournaments.get("stage")?.endAt).toEqual(new Date("2025-03-02T18:00Z"));
     });
 

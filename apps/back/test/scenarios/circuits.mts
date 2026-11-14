@@ -102,33 +102,35 @@ export async function verifyCircuits({
 
   const finished = new Date(Date.now() - DAY);
 
-  const counted = await run(() =>
-    sync.upsertTournament({
-      ...pandascoreStage({
-        pandascoreId: 9701,
-        serieId: 9711,
-        name: "Finals",
-        teams,
-        endAt: finished,
+  const counted = await run(
+    async () =>
+      await sync.upsertTournament({
+        ...pandascoreStage({
+          pandascoreId: 9701,
+          serieId: 9711,
+          name: "Finals",
+          teams,
+          endAt: finished,
+        }),
+        standings: [
+          { teamPandascoreId: 9801, rank: 1 },
+          { teamPandascoreId: 9802, rank: 2 },
+          { teamPandascoreId: 9803, rank: 2 },
+        ],
       }),
-      standings: [
-        { teamPandascoreId: 9801, rank: 1 },
-        { teamPandascoreId: 9802, rank: 2 },
-        { teamPandascoreId: 9803, rank: 2 },
-      ],
-    }),
   );
 
-  const pending = await run(() =>
-    sync.upsertTournament(
-      pandascoreStage({
-        pandascoreId: 9702,
-        serieId: 9712,
-        name: "Qualifier",
-        teams,
-        endAt: finished,
-      }),
-    ),
+  const pending = await run(
+    async () =>
+      await sync.upsertTournament(
+        pandascoreStage({
+          pandascoreId: 9702,
+          serieId: 9712,
+          name: "Qualifier",
+          teams,
+          endAt: finished,
+        }),
+      ),
   );
 
   const startgg = (
@@ -178,8 +180,8 @@ export async function verifyCircuits({
 
   const { ConflictError } = await import("../../src/common/domain/errors.ts");
 
-  const saveDirectly = (fields: CircuitFields): Promise<void> =>
-    new CircuitPersistence(orm.em.fork()).save({
+  const saveDirectly = async (fields: CircuitFields): Promise<void> =>
+    await new CircuitPersistence(orm.em.fork()).save({
       id: randomUUID(),
       season: null,
       region: null,
@@ -208,14 +210,15 @@ export async function verifyCircuits({
   }
 
   const raced = await Promise.all(
-    ["Fake Raced", "fake raced"].map((name, index) =>
-      app.inject({
-        method: "POST",
-        url: "/circuits",
-        payload: { name, slug: `fake-raced-${index}`, season: 2026, sourceUrl: RULES },
-        remoteAddress: "127.0.0.1",
-        headers: { cookie: staffCookie },
-      }),
+    ["Fake Raced", "fake raced"].map(
+      async (name, index) =>
+        await app.inject({
+          method: "POST",
+          url: "/circuits",
+          payload: { name, slug: `fake-raced-${index}`, season: 2026, sourceUrl: RULES },
+          remoteAddress: "127.0.0.1",
+          headers: { cookie: staffCookie },
+        }),
     ),
   );
 

@@ -22,14 +22,14 @@ export class HealthController {
 
   @Get("ready")
   @HealthCheck()
-  ready() {
+  async ready() {
     if (this.shutdownState.isShuttingDown()) {
       throw new ServiceUnavailableException("Shutting down");
     }
 
-    return this.health.check([
-      () => this.postgres.pingCheck("postgres"),
-      () => this.redis.pingCheck("redis"),
+    return await this.health.check([
+      async () => await this.postgres.pingCheck("postgres"),
+      async () => await this.redis.pingCheck("redis"),
     ]);
   }
 }

@@ -12,7 +12,7 @@ export async function addTrackedStreamer(
   login: string,
   displayName: string | null,
 ): Promise<TrackedStreamer> {
-  return apiFetch<TrackedStreamer>("/streamers", {
+  return await apiFetch<TrackedStreamer>("/streamers", {
     method: "POST",
     body: { login, displayName },
   });

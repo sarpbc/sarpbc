@@ -17,12 +17,12 @@ export class ImagesController {
   async getUploadUrl(@Req() request: FastifyRequest) {
     useLogger().set({ userId: request.user?.id, userEmail: request.user?.email });
 
-    return this.imagesService.createUploadUrl();
+    return await this.imagesService.createUploadUrl();
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async saveImage(@Body({ schema: SaveImageDto }) dto: SaveImageDto) {
-    return this.imagesService.saveImage(dto.imageId);
+    return await this.imagesService.saveImage(dto.imageId);
   }
 }

@@ -43,8 +43,8 @@ export async function verifyOnThisDay({
     return (await request("POST", path, body, staffCookie, 201)).json<T>();
   }
 
-  const sql = (query: string, params: (string | number)[]) =>
-    orm.em.fork().getConnection().execute(query, params);
+  const sql = async (query: string, params: (string | number)[]) =>
+    await orm.em.fork().getConnection().execute(query, params);
 
   const home = (await created<{ team: TeamRef }>("/team", { name: "Anniversary Home" })).team;
   const away = (await created<{ team: TeamRef }>("/team", { name: "Anniversary Away" })).team;
@@ -58,8 +58,8 @@ export async function verifyOnThisDay({
       })
     ).tournament;
 
-  const crown = (tournament: StageRef, endAt: string) =>
-    sql("update tournament set winner_id = ?, end_at = ? where id = ?", [
+  const crown = async (tournament: StageRef, endAt: string) =>
+    await sql("update tournament set winner_id = ?, end_at = ? where id = ?", [
       participantOf(tournament, home.id),
       endAt,
       tournament.id,
