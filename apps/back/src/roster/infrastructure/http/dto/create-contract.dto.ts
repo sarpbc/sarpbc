@@ -9,4 +9,4 @@ export const CreateContractDto = z.strictObject({
   role: z.enum(CONTRACT_ROLES).optional(),
 });
 
-export type CreateContractDto = z.infer<typeof CreateContractDto>;
+export type CreateContractInput = z.infer<typeof CreateContractDto>;

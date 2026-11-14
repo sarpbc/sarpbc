@@ -36,6 +36,10 @@ export type ObjectOperationLoggerFactory = (
   context: Record<string, string | number | undefined>,
 ) => ObjectOperationLogger;
 
+function imageKey(target: ImageUploadTarget, contentType: ImageContentType): string {
+  return `${IMAGE_PREFIXES[target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
+}
+
 export class R2Service implements ObjectStorage {
   private connection: R2Connection | null = null;
 
@@ -208,8 +212,4 @@ export class R2Service implements ObjectStorage {
       log.emit();
     }
   }
-}
-
-function imageKey(target: ImageUploadTarget, contentType: ImageContentType): string {
-  return `${IMAGE_PREFIXES[target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
 }

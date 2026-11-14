@@ -13,7 +13,7 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { ManualGameService } from "../../application/manual-game.service";
-import { AttachReplayDto } from "./dto/attach-replay.dto";
+import { AttachReplayDto, type AttachReplayInput } from "./dto/attach-replay.dto";
 
 @Controller("tournaments/:id/stats-games")
 @UseGuards(AuthGuard, PermissionGuard)
@@ -29,7 +29,7 @@ export class StatsGameController {
   @Post()
   async attach(
     @Param("id") tournamentId: string,
-    @Body({ schema: AttachReplayDto }) dto: AttachReplayDto,
+    @Body({ schema: AttachReplayDto }) dto: AttachReplayInput,
   ): Promise<TournamentStatsGame> {
     return await this.service.attach(tournamentId, dto);
   }

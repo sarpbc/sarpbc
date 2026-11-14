@@ -41,7 +41,7 @@ export interface FieldPlayer {
 }
 
 function blendWithTeam(personal: number, teamStrength: number | undefined): number {
-  if (teamStrength == null) return personal;
+  if (teamStrength === undefined || teamStrength === null) return personal;
 
   return personal * 0.55 + teamStrength * 0.45;
 }
@@ -138,9 +138,9 @@ export function simulateSplitField(
   const skipRegionals = player.skipRegionals ?? 0;
 
   for (const region of CAREER_REGIONS) {
-    for (let regional = 0; regional < REGIONALS_PER_SPLIT; regional++) {
+    for (let regional = 0; regional < REGIONALS_PER_SPLIT; regional += 1) {
       const sitOut =
-        player.teamId != null &&
+        isNonEmptyString(player.teamId) &&
         skipRegionals > regional &&
         getWorldTeamsByRegion(region).some((team) => team.id === player.teamId);
 

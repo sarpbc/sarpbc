@@ -8,12 +8,18 @@ import {
 } from "@sarpbc/utils";
 import { getMatchParticipantScore } from "~/utils/matchScore";
 
-const props = defineProps<{
-  match?: string;
-  ids?: string;
-  tournament?: string;
-  team?: string;
-  limit?: string | number;
+const {
+  match = null,
+  ids = null,
+  tournament = null,
+  team = null,
+  limit = null,
+} = defineProps<{
+  match?: string | null;
+  ids?: string | null;
+  tournament?: string | null;
+  team?: string | null;
+  limit?: string | number | null;
 }>();
 
 const { t, locale } = useI18n();
@@ -21,7 +27,7 @@ const localePath = useLocalePath();
 const blocks = useNewsMatchBlocks();
 const { isConcealed } = useSpoilerFree();
 
-const block = computed(() => newsMatchBlockFromAttrs(props));
+const block = computed(() => newsMatchBlockFromAttrs({ match, ids, tournament, team, limit }));
 
 const items = computed((): MatchBlockItem[] | undefined =>
   block.value ? blocks?.items.value[newsMatchBlockKey(block.value)] : undefined,

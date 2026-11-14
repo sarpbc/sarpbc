@@ -1,21 +1,21 @@
 import { wrap } from "@mikro-orm/core";
 import { log } from "evlog";
 import type { TournamentEventRef } from "@sarpbc/types";
-import * as Row from "./tournament.entities";
-import {
-  League,
-  Match,
-  Tournament,
-  TournamentParticipant,
-  matchPublicSlug,
-  type TournamentSummary,
-} from "../../domain/competition";
+import type { League as LeagueRow } from "./league.entity";
+import type { TournamentEvent as TournamentEventRow } from "./tournament-event.entity";
+import type { TournamentParticipant as TournamentParticipantRow } from "./tournament-participant.entity";
+import type { Tournament as TournamentRow } from "./tournament.entity";
+import type { Match as MatchRow } from "./match.entity";
+import { League } from "../../domain/league";
+import { Match, matchPublicSlug, type TournamentSummary } from "../../domain/match";
+import { Tournament } from "../../domain/tournament";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import { teamNameAt, toPlayer, toTeam } from "../../../roster/infrastructure/roster-persistence";
 import { teamAt } from "../../../roster/domain/team-alias";
 
-export function toLeague(row: Row.League): League {
+export function toLeague(row: LeagueRow): League {
   return Object.assign(new League(), {
     id: row.id,
     pandascoreId: row.pandascoreId,
@@ -29,7 +29,7 @@ export function toLeague(row: Row.League): League {
   });
 }
 
-export function toTournamentEvent(row: Row.TournamentEvent): TournamentEvent {
+export function toTournamentEvent(row: TournamentEventRow): TournamentEvent {
   return Object.assign(new TournamentEvent(), {
     id: row.id,
     pandascoreSerieId: row.pandascoreSerieId,
@@ -53,20 +53,23 @@ export const MATCH_WRITE_POPULATE = [
   "previousMatches.previousMatch",
 ] as const;
 
-export function eventRefOf(row: Row.TournamentEvent): TournamentEventRef {
+export function eventRefOf(row: TournamentEventRow): TournamentEventRef {
   // An unpopulated reference would silently map to an empty slug and break every public URL.
-  if (!wrap(row).isInitialized())
-    throw new Error("Tournament event " + row.id + " is not populated");
+  if (!wrap(row).isInitialized()) throw new Error(`Tournament event ${row.id} is not populated`);
 
   return toEventRef(row);
 }
 
+function stageDate(tournament: TournamentRow): Date | null {
+  return wrap(tournament).isInitialized() ? tournament.beginAt : null;
+}
+
 export function toParticipant(
-  row: Row.TournamentParticipant,
+  row: TournamentParticipantRow,
   at?: Date | null,
 ): TournamentParticipant | null {
   const { team } = row;
-  const tournament: Row.Tournament | undefined = row.tournament;
+  const tournament: TournamentRow | undefined = row.tournament;
 
   const loaded =
     wrap(row).isInitialized() &&
@@ -95,15 +98,11 @@ export function toParticipant(
   });
 }
 
-function stageDate(tournament: Row.Tournament): Date | null {
-  return wrap(tournament).isInitialized() ? tournament.beginAt : null;
-}
-
-function matchDate(row: Row.Match): Date | null {
+function matchDate(row: MatchRow): Date | null {
   return row.beginAt ?? stageDate(row.tournament);
 }
 
-export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
+export function toTournamentSummary(row: TournamentRow): TournamentSummary {
   return {
     id: row.id,
     name: row.name,
@@ -119,7 +118,7 @@ export function toTournamentSummary(row: Row.Tournament): TournamentSummary {
   };
 }
 
-export function toMatch(row: Row.Match): Match {
+export function toMatch(row: MatchRow): Match {
   return Object.assign(new Match(), {
     id: row.id,
     publicId: row.publicId,
@@ -163,7 +162,7 @@ export function toMatch(row: Row.Match): Match {
   });
 }
 
-export function toTournament(row: Row.Tournament): Tournament {
+export function toTournament(row: TournamentRow): Tournament {
   return Object.assign(new Tournament(), {
     id: row.id,
     pandascoreId: row.pandascoreId,
@@ -197,10 +196,10 @@ export function toTournament(row: Row.Tournament): Tournament {
   });
 }
 
-export function toMatchSlug(row: Row.Match): string {
+export function toMatchSlug(row: MatchRow): string {
   const loaded = wrap(row).isInitialized();
 
-  const rowTournament: Row.Tournament | undefined = row.tournament;
+  const rowTournament: TournamentRow | undefined = row.tournament;
 
   const tournament =
     loaded && rowTournament !== undefined && wrap(rowTournament).isInitialized()

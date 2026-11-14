@@ -1,5 +1,5 @@
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import { ApplicationError } from "../../common/domain/errors";
+import { ApplicationError } from "../../common/domain/errors/application-error";
 
 const INTERNAL_ERROR_MESSAGE =
   "Something went wrong on the server and was logged. Try again later, or ask an admin to check the logs.";

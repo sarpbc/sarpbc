@@ -1,6 +1,7 @@
 import { defineEntity, p } from "@mikro-orm/core";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
-import { Match, TournamentParticipant } from "./tournament.entities";
+import { Match } from "./match.entity";
+import { TournamentParticipant } from "./tournament-participant.entity";
 
 export class MatchLineupPlayer {
   id!: string;

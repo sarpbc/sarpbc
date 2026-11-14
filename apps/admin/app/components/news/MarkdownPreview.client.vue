@@ -3,7 +3,7 @@ import type { MDCParserResult } from "@nuxtjs/mdc";
 import { parseMarkdown } from "@nuxtjs/mdc/runtime";
 import { newsMdcComponents } from "~/utils/newsMdcComponents";
 
-const props = defineProps<{
+const { value } = defineProps<{
   value: string;
 }>();
 
@@ -25,7 +25,7 @@ async function refreshPreview(markdown: string) {
 }
 
 watch(
-  () => props.value,
+  () => value,
   (markdown) => {
     void refreshPreview(markdown);
   },

@@ -43,9 +43,9 @@ const {
   error,
   refresh,
 } = useAdminList("admin-forum-posts", async () => {
-  const posts = await getPosts();
+  const loaded = await getPosts();
 
-  return { items: posts, total: posts.length };
+  return { items: loaded, total: loaded.length };
 });
 
 const postToDelete = ref<ForumPostListItem | null>(null);

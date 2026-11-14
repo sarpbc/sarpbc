@@ -17,23 +17,26 @@ interface ToolSpec<Fields extends Record<string, z.ZodType>> {
   input: Fields;
 }
 
+/** A JSON-serialisable tool payload. */
+export type ToolData = object;
+
 export interface ToolWrite<Result = object> {
   result: Result;
   entityId?: string;
   sourceUrl?: string;
 }
 
-interface ReadToolSpec<Fields extends Record<string, z.ZodType>, Output> extends ToolSpec<Fields> {
+interface ReadToolSpec<Fields extends Record<string, z.ZodType>> extends ToolSpec<Fields> {
   write?: false;
   /** Without a permission, any valid token may read. With several, any one of them is enough. */
   permission?: StaffPermission | readonly StaffPermission[];
-  handler: (input: ToolInput<Fields>, user: PatUser) => Promise<Output>;
+  handler: (input: ToolInput<Fields>, user: PatUser) => Promise<ToolData>;
 }
 
-interface WriteToolSpec<Fields extends Record<string, z.ZodType>, Output> extends ToolSpec<Fields> {
+interface WriteToolSpec<Fields extends Record<string, z.ZodType>> extends ToolSpec<Fields> {
   write: true;
   permission: StaffPermission;
-  handler: (input: ToolInput<Fields>, user: PatUser) => Promise<ToolWrite<Output>>;
+  handler: (input: ToolInput<Fields>, user: PatUser) => Promise<ToolWrite>;
 }
 
 export interface McpTool {
@@ -44,9 +47,7 @@ export interface McpTool {
 }
 
 function listOr(items: readonly string[]): string {
-  return items.length > 1
-    ? `${items.slice(0, -1).join(", ")} or ${items[items.length - 1]}`
-    : items.join("");
+  return items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join("");
 }
 
 function asError(cause: unknown): Error {
@@ -57,17 +58,10 @@ function asError(cause: unknown): Error {
  * The one way to declare an MCP tool: it owns the permission gate, the logging and the
  * "Requires …" description suffix, so a tool states its name and permission once.
  */
-export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
-  spec: ReadToolSpec<Fields, Output>,
-): McpTool;
-export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
-  spec: WriteToolSpec<Fields, Output>,
-): McpTool;
-export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
-  spec: ReadToolSpec<Fields, Output> | WriteToolSpec<Fields, Output>,
+export function defineTool<Fields extends Record<string, z.ZodType>>(
+  spec: ReadToolSpec<Fields> | WriteToolSpec<Fields>,
 ): McpTool {
   const permissions = [spec.permission ?? []].flat();
-  const jsonResult = (data: Output) => textToolResult(JSON.stringify(data, null, 2));
 
   return {
     name: spec.name,
@@ -94,7 +88,8 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
 
         const fields = parsed.data;
 
-        if (spec.write !== true) return jsonResult(await spec.handler(fields, user));
+        if (spec.write !== true)
+          return textToolResult(JSON.stringify(await spec.handler(fields, user), null, 2));
 
         const { result, entityId, sourceUrl } = await spec.handler(fields, user);
         log.info({
@@ -106,7 +101,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
           message: `${spec.name} completed`,
         });
 
-        return jsonResult(result);
+        return textToolResult(JSON.stringify(result, null, 2));
       } catch (error) {
         log.error({
           component: "McpTool",

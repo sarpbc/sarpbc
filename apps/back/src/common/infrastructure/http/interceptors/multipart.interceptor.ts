@@ -18,13 +18,9 @@ import { getFileFromPart, MultipartOptions, validateFile } from "../multipart-fi
 
 const fieldValue = z.string().catch("");
 
-interface StoredFilesByField {
-  [fieldname: string]: Storage.MultipartFile[];
-}
+type StoredFilesByField = Record<string, Storage.MultipartFile[]>;
 
-interface MultipartFormFields {
-  [fieldname: string]: string;
-}
+type MultipartFormFields = Record<string, string>;
 
 function isMultipartFileTooLarge(cause: unknown): boolean {
   if (!(cause instanceof Error)) {
@@ -47,7 +43,7 @@ export function MultipartInterceptor(
   messages: MultipartMessages,
 ): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
-    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
       const req = context.switchToHttp().getRequest<FastifyRequest>();
 
       if (!req.isMultipart())

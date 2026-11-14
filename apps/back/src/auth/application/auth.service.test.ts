@@ -1,6 +1,7 @@
+import { setImmediate as nextTick } from "node:timers/promises";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { AuthenticationError } from "../../common/domain/errors";
-import { AuthService } from "./auth.service";
+import { AuthenticationError } from "../../common/domain/errors/authentication-error";
+import { AuthService, parseOAuthReturnTo } from "./auth.service";
 import {
   GoogleIdentityGateway,
   type GoogleOAuthSession,
@@ -11,26 +12,23 @@ import type { GoogleIdentity } from "./ports/authentication";
 import { UserService } from "../../user/application/user.service";
 import { unconstructed } from "../../../test/doubles";
 
-async function waitUntil(predicate: () => boolean): Promise<void> {
-  const startedAt = Date.now();
+async function waitUntil(predicate: () => boolean, startedAt = Date.now()): Promise<void> {
+  if (predicate()) return;
 
-  while (!predicate()) {
-    if (Date.now() - startedAt > 1000) {
-      throw new Error("Timed out waiting for overlapping OAuth callbacks");
-    }
-
-    await new Promise<void>((resolve) => {
-      setImmediate(resolve);
-    });
+  if (Date.now() - startedAt > 1000) {
+    throw new Error("Timed out waiting for overlapping OAuth callbacks");
   }
+
+  await nextTick();
+  await waitUntil(predicate, startedAt);
 }
+
+let newGoogleSession: () => GoogleOAuthSession = () => {
+  throw new Error("unused");
+};
 
 describe("AuthService", () => {
   let service: AuthService;
-
-  let newGoogleSession: () => GoogleOAuthSession = () => {
-    throw new Error("unused");
-  };
 
   const userServiceMocks = {
     signIn: vi.fn(),
@@ -137,10 +135,10 @@ describe("AuthService", () => {
 
   describe("OAuth return destination", () => {
     it("parses returnTo allowlist and defaults to front", () => {
-      expect(service.parseOAuthReturnTo("admin")).toBe("admin");
-      expect(service.parseOAuthReturnTo("front")).toBe("front");
-      expect(service.parseOAuthReturnTo("https://evil.example")).toBe("front");
-      expect(service.parseOAuthReturnTo(undefined)).toBe("front");
+      expect(parseOAuthReturnTo("admin")).toBe("admin");
+      expect(parseOAuthReturnTo("front")).toBe("front");
+      expect(parseOAuthReturnTo("https://evil.example")).toBe("front");
+      expect(parseOAuthReturnTo(undefined)).toBe("front");
     });
 
     it("resolves only FRONT_URL or ADMIN_URL", () => {
@@ -152,11 +150,8 @@ describe("AuthService", () => {
 
   describe("handleGoogleCallback", () => {
     it("does not swap Google profiles when two callbacks overlap", async () => {
-      let releaseGetToken!: () => void;
-
-      const holdGetToken = new Promise<void>((resolve) => {
-        releaseGetToken = resolve;
-      });
+      const { promise: holdGetToken, resolve: releaseGetToken } =
+        Promise.withResolvers<undefined>();
 
       let getTokenStarted = 0;
 
@@ -210,7 +205,7 @@ describe("AuthService", () => {
       const second = service.handleGoogleCallback("code-b");
 
       await waitUntil(() => getTokenStarted === 2);
-      releaseGetToken();
+      releaseGetToken(undefined);
 
       await expect(Promise.all([first, second])).resolves.toEqual([
         { accessToken: "jwt-user-google-a", refreshToken: "jwt-user-google-a" },

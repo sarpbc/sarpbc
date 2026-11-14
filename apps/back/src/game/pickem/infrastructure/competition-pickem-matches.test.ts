@@ -1,10 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
-import {
-  Match,
-  TournamentParticipant,
-  type TournamentSummary,
-} from "../../../tournament/domain/competition";
+import { Match, type TournamentSummary } from "../../../tournament/domain/match";
+import { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
 import { matchDecided } from "../../../tournament/domain/match-decided";
 import { CompetitionAfterCommit } from "../../../tournament/application/after-commit";
 import { MatchService } from "../../../tournament/application/match/match.service";

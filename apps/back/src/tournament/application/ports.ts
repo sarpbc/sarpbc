@@ -7,15 +7,14 @@ import type {
   TournamentAwardListItem,
   TournamentPrizes,
 } from "@sarpbc/types";
+import type { League } from "../domain/league";
+import type { Match, TournamentSummary } from "../domain/match";
+import type { Tournament } from "../domain/tournament";
 import type {
-  League,
-  Match,
-  Tournament,
   TournamentParticipant,
-  TournamentSummary,
   ParticipantSnapshot,
   ParticipantReferences,
-} from "../domain/competition";
+} from "../domain/tournament-participant";
 import type { TournamentEvent } from "../domain/tournament-event";
 import type { ManualCandidate } from "../domain/manual-counterpart";
 import type { MatchTiming } from "../domain/tournament-end";
@@ -24,7 +23,7 @@ import type { MatchReferences } from "../domain/match-deletion";
 import type { LineupRow } from "../domain/match-lineup";
 import type { StageBracket } from "../domain/bracket";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
-import type { Player } from "../../roster/domain/roster";
+import type { Player } from "../../roster/domain/player";
 import type { EntityRef } from "../../common/domain/entity-ref";
 import type { MatchListKind, MatchListQueryOptions } from "./match/match-list-filters";
 import type { TournamentListOptions } from "./inputs";

@@ -91,13 +91,28 @@ function chronology(
   const at = a.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
   const bt = b.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
 
-  return at === bt ? a.id.localeCompare(b.id) : at < bt ? -1 : 1;
+  if (at === bt) return a.id.localeCompare(b.id);
+
+  return at < bt ? -1 : 1;
+}
+
+async function inOrder<Item>(
+  items: readonly Item[],
+  task: (item: Item) => Promise<void>,
+): Promise<void> {
+  const step = async (index: number): Promise<void> => {
+    if (index === items.length) return;
+    await task(items[index]);
+    await step(index + 1);
+  };
+
+  await step(0);
 }
 
 function groupKey(stage: StageRow): string {
   const serie = nonBlank(stage.serie);
 
-  return serie !== undefined ? `${stage.leagueId ?? ""}::${serie}` : `stage::${stage.id}`;
+  return serie === undefined ? `stage::${stage.id}` : `${stage.leagueId ?? ""}::${serie}`;
 }
 
 export class Migration20261022120000_addTournamentEvents extends Migration {
@@ -121,12 +136,12 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
 
     const ordered = [...groups.values()]
       .map((group) => {
-        const sorted = [...group].sort(chronology);
-        const minId = group.map((stage) => stage.id).sort()[0];
+        const sorted = group.toSorted(chronology);
+        const [minId] = group.map((stage) => stage.id).toSorted();
 
         return { stages: sorted, order: { beginAt: sorted[0].beginAt, id: minId } };
       })
-      .sort((a, b) => chronology(a.order, b.order))
+      .toSorted((a, b) => chronology(a.order, b.order))
       .map((group) => group.stages);
 
     await this.execute(
@@ -136,13 +151,13 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
 
     const eventSlugs = new Set<string>();
 
-    for (const group of ordered) {
+    await inOrder(ordered, async (group) => {
       const [first] = group;
 
       const manual =
         group.length === 1 && first.source === "manual" && nonBlank(first.serie) === undefined;
 
-      const newest = [...group].sort(compareStages)[0];
+      const [newest] = group.toSorted(compareStages);
 
       const name = manual
         ? first.name
@@ -165,7 +180,7 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
       );
       const stageSlugs = new Set<string>();
 
-      for (const stage of group) {
+      await inOrder(group, async (stage) => {
         const allocated = await allocateSlug(stageSlug(stage.name), (candidate) =>
           stageSlugs.has(candidate),
         );
@@ -176,8 +191,8 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
           allocated,
           stage.id,
         ]);
-      }
-    }
+      });
+    });
 
     await this.execute(
       `alter table "tournament_event" add constraint "tournament_event_pandascore_serie_id_unique" unique ("pandascore_serie_id");`,

@@ -7,8 +7,12 @@ import type {
 import { vi } from "vitest";
 import type { PlayerComparisonSources } from "../src/career/application/player-comparison.service";
 import type { EarningsScope } from "../src/tournament/application/ports";
-import { Contract, Player, Team } from "../src/roster/domain/roster";
-import { Match, Tournament, TournamentParticipant } from "../src/tournament/domain/competition";
+import { Contract } from "../src/roster/domain/contract";
+import { Player } from "../src/roster/domain/player";
+import { Team } from "../src/roster/domain/team";
+import { Match } from "../src/tournament/domain/match";
+import { Tournament } from "../src/tournament/domain/tournament";
+import { TournamentParticipant } from "../src/tournament/domain/tournament-participant";
 
 const cup = { id: "cup", slug: "cup", name: "Cup" };
 

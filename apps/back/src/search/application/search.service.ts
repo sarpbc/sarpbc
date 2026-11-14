@@ -3,8 +3,9 @@ import type { PlayerService } from "../../roster/application/player.service";
 import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentQueries } from "../../tournament/application/ports";
 import { SearchResult, SearchParams } from "./models/search-result";
-import type { Player, Team } from "../../roster/domain/roster";
-import type { Tournament } from "../../tournament/domain/competition";
+import type { Player } from "../../roster/domain/player";
+import type { Team } from "../../roster/domain/team";
+import type { Tournament } from "../../tournament/domain/tournament";
 
 function pageForEachKind({ type, limit, offset }: SearchParams) {
   const mixed = type === "all";

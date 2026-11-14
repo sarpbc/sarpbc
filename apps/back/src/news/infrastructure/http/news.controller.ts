@@ -13,13 +13,21 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import type { FastifyReply } from "fastify";
-import { UpdateNewsArticleDto } from "./dto/update-news-article.dto";
-import { PaginationQueryDto } from "../../../common/infrastructure/http/dto/pagination-query.dto";
-import { NewsListQueryDto, NewsLocaleQueryDto } from "./dto/news-locale-query.dto";
+import { UpdateNewsArticleDto, type UpdateNewsArticleInput } from "./dto/update-news-article.dto";
+import {
+  PaginationQueryDto,
+  type PaginationQueryInput,
+} from "../../../common/infrastructure/http/dto/pagination-query.dto";
+import {
+  NewsListQueryDto,
+  type NewsListQueryInput,
+  NewsLocaleQueryDto,
+  type NewsLocaleQueryInput,
+} from "./dto/news-locale-query.dto";
 import { parseLocale } from "@sarpbc/utils";
 import { NewsService } from "../../application/news.service";
-import { CreateNewsArticleDto } from "./dto/create-news-article.dto";
-import { TweetEmbedQueryDto } from "./dto/tweet-embed-query.dto";
+import { CreateNewsArticleDto, type CreateNewsArticleInput } from "./dto/create-news-article.dto";
+import { TweetEmbedQueryDto, type TweetEmbedQueryInput } from "./dto/tweet-embed-query.dto";
 import { TweetEmbedService } from "../../application/tweet-embed.service";
 import { TweetImageService } from "../../application/tweet-image.service";
 
@@ -27,7 +35,10 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { ReplyService } from "../../../reply/application/reply.service";
-import { ReplyContentDto } from "../../../reply/infrastructure/http/dto/create-reply.dto";
+import {
+  ReplyContentDto,
+  type ReplyContentInput,
+} from "../../../reply/infrastructure/http/dto/create-reply.dto";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 
 @Controller("news")
@@ -45,26 +56,26 @@ export class NewsController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @CurrentUserId() userId: string,
-    @Body({ schema: CreateNewsArticleDto }) createNewsArticleDto: CreateNewsArticleDto,
+    @Body({ schema: CreateNewsArticleDto }) createNewsArticleDto: CreateNewsArticleInput,
   ) {
     return await this.newsService.create(createNewsArticleDto, userId);
   }
 
   @Get()
   async findAll(
-    @Query({ schema: NewsListQueryDto }) { page, limit, locale, type }: NewsListQueryDto,
+    @Query({ schema: NewsListQueryDto }) { page, limit, locale, type }: NewsListQueryInput,
   ) {
     return await this.newsService.findAllPublishedArticle(page, limit, parseLocale(locale), type);
   }
 
   @Get("embed/tweet")
-  async embedTweet(@Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryDto) {
+  async embedTweet(@Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryInput) {
     return await this.tweetEmbedService.embed(url);
   }
 
   @Get("embed/tweet/image")
   async tweetImage(
-    @Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryDto,
+    @Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryInput,
     @Res() reply: FastifyReply,
   ): Promise<void> {
     const image = await this.tweetImageService.load(url);
@@ -78,7 +89,7 @@ export class NewsController {
   @Get("weeks/:week")
   async findWeek(
     @Param("week") week: string,
-    @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
+    @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryInput,
   ) {
     return await this.newsService.findPublishedShortsByWeek(week, parseLocale(locale));
   }
@@ -86,14 +97,14 @@ export class NewsController {
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("news.manage")
   @Get("admin")
-  async findAllAdmin(@Query({ schema: PaginationQueryDto }) { page, limit }: PaginationQueryDto) {
+  async findAllAdmin(@Query({ schema: PaginationQueryDto }) { page, limit }: PaginationQueryInput) {
     return await this.newsService.findAll(page, limit);
   }
 
   @Get(":slug")
   async findOne(
     @Param("slug") slug: string,
-    @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryDto,
+    @Query({ schema: NewsLocaleQueryDto }) { locale }: NewsLocaleQueryInput,
   ) {
     return await this.newsService.findOneBySlug(slug, parseLocale(locale));
   }
@@ -110,7 +121,7 @@ export class NewsController {
   @Patch(":slug")
   async update(
     @Param("slug") slug: string,
-    @Body({ schema: UpdateNewsArticleDto }) dto: UpdateNewsArticleDto,
+    @Body({ schema: UpdateNewsArticleDto }) dto: UpdateNewsArticleInput,
   ) {
     return await this.newsService.update(slug, dto);
   }
@@ -144,7 +155,7 @@ export class NewsController {
   async createReply(
     @Param("slug") slug: string,
     @CurrentUserId() userId: string,
-    @Body({ schema: ReplyContentDto }) dto: ReplyContentDto,
+    @Body({ schema: ReplyContentDto }) dto: ReplyContentInput,
   ) {
     const articleId = await this.newsService.findArticleIdBySlug(slug);
 

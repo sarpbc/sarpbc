@@ -17,7 +17,7 @@ const {
 const namedCountries = computed(() =>
   countries.value
     .map((country) => ({ ...country, name: countryName(country.code) }))
-    .sort((a, b) => a.name.localeCompare(b.name, locale.value)),
+    .toSorted((a, b) => a.name.localeCompare(b.name, locale.value)),
 );
 
 setPageSeo({

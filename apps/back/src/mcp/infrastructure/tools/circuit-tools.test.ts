@@ -272,8 +272,10 @@ describe("create_circuit and update_circuit", () => {
   it("requires tournaments.manage", async () => {
     const { create, update, circuitService } = tools();
 
-    expect((await create.run(user("journalist"), input)).isError).toBe(true);
-    expect((await update.run(user("journalist"), { idOrSlug: "x", name: "y" })).isError).toBe(true);
+    const runResult = await create.run(user("journalist"), input);
+    expect(runResult.isError).toBe(true);
+    const runResult2 = await update.run(user("journalist"), { idOrSlug: "x", name: "y" });
+    expect(runResult2.isError).toBe(true);
     expect(circuitService.create).not.toHaveBeenCalled();
     expect(circuitService.update).not.toHaveBeenCalled();
   });

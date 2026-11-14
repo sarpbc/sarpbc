@@ -16,14 +16,14 @@ export function buildConnectors(
   for (const match of matches) {
     const links = (match.previousMatches ?? []).filter((link) => matchIds.has(link.previousMatch));
 
-    links.forEach((link, index) => {
+    for (const [index, link] of links.entries()) {
       connectors.push({
         fromMatchId: link.previousMatch,
         toMatchId: match.id,
         linkType: link.type,
         targetSlot: index === 0 ? "a" : "b",
       });
-    });
+    }
   }
 
   return connectors;

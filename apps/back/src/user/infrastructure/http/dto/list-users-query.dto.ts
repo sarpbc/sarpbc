@@ -5,4 +5,4 @@ export const ListUsersQueryDto = OffsetPaginationQueryDto.extend({
   search: z.string().trim().max(100).optional(),
 });
 
-export type ListUsersQueryDto = z.infer<typeof ListUsersQueryDto>;
+export type ListUsersQueryInput = z.infer<typeof ListUsersQueryDto>;

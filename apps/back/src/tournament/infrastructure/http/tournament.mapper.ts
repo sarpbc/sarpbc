@@ -9,12 +9,10 @@ import type {
   TournamentListItem,
 } from "@sarpbc/types";
 import { mapPlayer, mapTeamSummary } from "../../../roster/infrastructure/http/player.mapper";
-import {
-  League,
-  Tournament,
-  TournamentParticipant,
-  matchPublicSlug,
-} from "../../domain/competition";
+import { League } from "../../domain/league";
+import { Tournament } from "../../domain/tournament";
+import { TournamentParticipant } from "../../domain/tournament-participant";
+import { matchPublicSlug } from "../../domain/match";
 import { toEventRef } from "../../domain/tournament-event";
 import { mapParticipantRef } from "./participant-ref.mapper";
 

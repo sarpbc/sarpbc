@@ -4,7 +4,8 @@ import type { ReplyWriteScope, ReplyTransaction } from "./ports";
 import type { Author } from "../../common/domain/author";
 import type { ReplyRecord } from "./models";
 import { FORUM_ERROR_CODES } from "@sarpbc/types";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 
 const now = new Date("2026-10-15T12:00:00Z");
 const author: Author = { id: "author", userName: "Fan" };
@@ -19,7 +20,7 @@ function reply(overrides: Partial<ReplyRecord> = {}): ReplyRecord {
     match: null,
     replyTo: null,
     hiddenAt: null,
-    createdAt: new Date(now.getTime() - 120000),
+    createdAt: new Date(now.getTime() - 120_000),
     ...overrides,
   };
 }
@@ -66,7 +67,7 @@ function setup() {
   const transaction: ReplyTransaction = {
     async run(work) {
       const result = await work(scope);
-      commits++;
+      commits += 1;
 
       return result;
     },
@@ -141,7 +142,7 @@ describe("reply invariants without Nest or ORM", () => {
   it("enforces the full one-minute cooldown including its boundary", async () => {
     const f = setup();
     f.replies.findLatestByUser.mockResolvedValue(
-      reply({ createdAt: new Date(now.getTime() - 60000) }),
+      reply({ createdAt: new Date(now.getTime() - 60_000) }),
     );
     await expect(f.service.create("author", { content: "Hi", postId: "p" })).rejects.toMatchObject({
       detail: { code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED },
@@ -170,8 +171,8 @@ describe("reply invariants without Nest or ORM", () => {
     });
   });
   it("deletes child replies before their parent in one transaction", async () => {
-    const f = setup(),
-      order: string[] = [];
+    const f = setup();
+    const order: string[] = [];
 
     f.replies.findChildren.mockImplementation(async (id: string) =>
       id === "parent" ? [reply({ id: "child", replyTo: { id: "parent" } })] : [],

@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { IntegrationError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { IntegrationError } from "../../common/domain/errors/integration-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { TweetSyndicationGateway } from "../infrastructure/tweet-syndication.gateway";
 import { TweetEmbedService } from "./tweet-embed.service";
 import hereticsReply from "./__fixtures__/tweet-2116198150683734246.json";

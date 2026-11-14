@@ -3,6 +3,16 @@ import type { EditorToolbarItem } from "@nuxt/ui";
 
 const DEFAULT_TABLE = { rows: 3, cols: 3, withHeaderRow: true } as const;
 
+function shouldShowTableToolbar({
+  editor,
+  view,
+}: {
+  editor: Editor;
+  view: { hasFocus: () => boolean };
+}) {
+  return editor.isActive("table") && view.hasFocus();
+}
+
 export function useTableEditor() {
   const { t } = useI18n();
 
@@ -74,16 +84,6 @@ export function useTableEditor() {
         },
       ],
     ];
-  }
-
-  function shouldShowTableToolbar({
-    editor,
-    view,
-  }: {
-    editor: Editor;
-    view: { hasFocus: () => boolean };
-  }) {
-    return editor.isActive("table") && view.hasFocus();
   }
 
   return {

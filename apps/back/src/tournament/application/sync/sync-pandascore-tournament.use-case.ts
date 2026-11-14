@@ -1,8 +1,8 @@
-import { NotFoundError } from "../../../common/domain/errors";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import type { CompetitionFeed, UpsertTournamentCommand } from "../feed";
 import type { TournamentQueries } from "../ports";
 import { assertPandascoreSyncAllowed } from "../../domain/tournament-source";
-import type { Tournament } from "../../domain/competition";
+import type { Tournament } from "../../domain/tournament";
 import { CompetitionSyncService } from "./competition-sync.service";
 
 export class SyncPandascoreTournamentUseCase {
@@ -26,7 +26,7 @@ export class SyncPandascoreTournamentUseCase {
   async executeByPandascoreId(id: number, linkTournamentId?: string): Promise<Tournament> {
     const command = await this.feed.getTournamentById(id);
 
-    if (!command) throw new NotFoundError("PandaScore tournament " + id + " not found");
+    if (!command) throw new NotFoundError(`PandaScore tournament ${id} not found`);
 
     return await this.import(command, linkTournamentId);
   }

@@ -10,11 +10,12 @@ export type EntityListTab = "upcoming" | "past";
 
 type EntityListTabKey = "matches" | "events";
 
-type ProfileTabQuery = {
+interface ProfileTabQuery {
   tab: EntityProfileTab;
   matches?: string;
   events?: string;
-};
+  [key: string]: string | undefined;
+}
 
 function parseProfileTab(value: LocationQuery[string] | number | undefined): EntityProfileTab {
   return PROFILE_TABS.find((tab) => tab === value) ?? "info";
@@ -69,14 +70,13 @@ export function useEntityListTab(key: EntityListTabKey) {
   );
 
   function setTab(value: string | number) {
-    const query = { ...route.query };
-
     if (value === "past") {
-      query[key] = "past";
-    } else {
-      delete query[key];
+      void router.replace({ query: { ...route.query, [key]: "past" } });
+
+      return;
     }
 
+    const { [key]: _removed, ...query } = route.query;
     void router.replace({ query });
   }
 

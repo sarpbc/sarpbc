@@ -1,6 +1,6 @@
 import type { TournamentFormat } from "@sarpbc/types";
 import { TEAM_SIZE_BY_FORMAT } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface ParticipantLineup {
   teamIds: readonly string[];
@@ -8,7 +8,7 @@ export interface ParticipantLineup {
 }
 
 export function playerGroupKey(playerIds: readonly string[]): string {
-  return [...playerIds].sort().join(",");
+  return playerIds.toSorted().join(",");
 }
 
 export function assertLineupFitsFormat(format: TournamentFormat, lineup: ParticipantLineup): void {

@@ -11,7 +11,8 @@ import { User } from "../../../user/infrastructure/user-persistence";
 import type { ReplyRecord } from "../../application/models";
 import type { ReplyFindOptions, ReplyReportRecord, ReplyWrites } from "../../application/ports";
 import { replyAlreadyReported, replyStillReferenced } from "../../domain/reply-errors";
-import { Reply, ReplyReport } from "./reply.entities";
+import { Reply } from "./reply.entity";
+import { ReplyReport } from "./reply-report.entity";
 import { replySnapshot } from "./reply.mapper";
 import { ReplyRepository } from "./reply.repository";
 
@@ -21,7 +22,9 @@ export class MikroReplyStore implements ReplyWrites {
     this.rows = new ReplyRepository(em);
   }
   async findByTarget(type: ReplyTargetType, id: string, options?: ReplyFindOptions) {
-    return (await this.rows.findByTarget(type, id, options)).map(replySnapshot);
+    const rows = await this.rows.findByTarget(type, id, options);
+
+    return rows.map(replySnapshot);
   }
   async findById(id: string) {
     const row = await this.rows.findById(id);
@@ -40,13 +43,19 @@ export class MikroReplyStore implements ReplyWrites {
     return await this.rows.countByTargetIds(type, ids);
   }
   async findDescendantsForRoots(type: ReplyTargetType, id: string, roots: string[]) {
-    return (await this.rows.findDescendantsForRoots(type, id, roots)).map(replySnapshot);
+    const rows = await this.rows.findDescendantsForRoots(type, id, roots);
+
+    return rows.map(replySnapshot);
   }
   async findChildren(id: string) {
-    return (await this.rows.findChildren(id)).map(replySnapshot);
+    const rows = await this.rows.findChildren(id);
+
+    return rows.map(replySnapshot);
   }
   async findRecentForModeration(limit: number) {
-    return (await this.rows.findRecentForModeration(limit)).map(({ reply, reportCount }) => ({
+    const rows = await this.rows.findRecentForModeration(limit);
+
+    return rows.map(({ reply, reportCount }) => ({
       reply: replySnapshot(reply),
       reportCount,
     }));

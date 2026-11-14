@@ -15,11 +15,19 @@ const staffTournamentsBody = z.object({ tournaments: z.array(z.object({ id: z.st
 const sitemapEntries = z.array(z.object({ path: z.string() }));
 
 export async function verifySitemap({ orm, request, tournament }: SitemapContext): Promise<void> {
-  const { Match, Tournament, TournamentParticipant } =
-    await import("../../src/tournament/infrastructure/persistence/tournament.entities.ts");
+  const { Match } = await import("../../src/tournament/infrastructure/persistence/match.entity.ts");
 
-  const { Contract, Player, Team } =
-    await import("../../src/roster/infrastructure/persistence/player.entities.ts");
+  const { Tournament } =
+    await import("../../src/tournament/infrastructure/persistence/tournament.entity.ts");
+
+  const { TournamentParticipant } =
+    await import("../../src/tournament/infrastructure/persistence/tournament-participant.entity.ts");
+
+  const { Contract } =
+    await import("../../src/roster/infrastructure/persistence/contract.entity.ts");
+
+  const { Player } = await import("../../src/roster/infrastructure/persistence/player.entity.ts");
+  const { Team } = await import("../../src/roster/infrastructure/persistence/team.entity.ts");
 
   type TournamentParticipantRow = InstanceType<typeof TournamentParticipant>;
 
@@ -41,7 +49,7 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
     { populate: ["team"] },
   );
 
-  assert(participants.length >= 2, "the stage has two teams to play a listed match");
+  assert.ok(participants.length >= 2, "the stage has two teams to play a listed match");
   const tbdTeam = new Team();
   Object.assign(tbdTeam, { name: " tbd ", slug: "sitemap-tbd-team" });
   em.persist(tbdTeam);
@@ -71,53 +79,56 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
   stage.beginAt = new Date("2026-01-10T12:00:00Z");
   await em.flush();
 
-  const paths = async (kind: string): Promise<string[]> =>
-    (await request("GET", `/sitemap/${kind}`)).json(sitemapEntries).map(({ path }) => path);
+  const paths = async (kind: string): Promise<string[]> => {
+    const response = await request("GET", `/sitemap/${kind}`);
+
+    return response.json(sitemapEntries).map(({ path }) => path);
+  };
 
   const stages = await paths("tournaments");
-  assert(stages.includes(`/tournaments/${tournament.event.slug}`));
-  assert(stages.includes(`/tournaments/${tournament.event.slug}/${tournament.slug}`));
+  assert.ok(stages.includes(`/tournaments/${tournament.event.slug}`));
+  assert.ok(stages.includes(`/tournaments/${tournament.event.slug}/${tournament.slug}`));
 
   const matches = await paths("matches");
-  const publicIds = matches.map((path) => Number(path.split("/")[2]));
-  assert(publicIds.includes(listed.publicId));
+  const publicIds = new Set(matches.map((path) => Number(path.split("/")[2])));
+  assert.ok(publicIds.has(listed.publicId));
 
   for (const excluded of [noTeams, oneTeam, tbd, canceled]) {
-    assert(!publicIds.includes(excluded.publicId), `${excluded.name} stays out of the sitemap`);
+    assert.ok(!publicIds.has(excluded.publicId), `${excluded.name} stays out of the sitemap`);
   }
 
-  const { match } = (await request("GET", `/matches/${listed.publicId}`)).json(matchBody);
-  assert(matches.includes(`/matches/${listed.publicId}/${match.slug}`), "the slug is canonical");
+  const response2 = await request("GET", `/matches/${listed.publicId}`);
+  const { match } = response2.json(matchBody);
+  assert.ok(matches.includes(`/matches/${listed.publicId}/${match.slug}`), "the slug is canonical");
 
   const players = await paths("players");
-  assert(!players.includes("/player/sitemap-empty-player"));
-  const mergedPlayers = await em.find(Player, { mergedInto: { $ne: null } });
-  assert(mergedPlayers.length > 0, "the scenario runs after a player merge");
+  assert.ok(!players.includes("/player/sitemap-empty-player"));
+  const mergedPlayers = await em.getRepository(Player).find({ mergedInto: { $ne: null } });
+  assert.ok(mergedPlayers.length > 0, "the scenario runs after a player merge");
 
-  for (const { slug } of mergedPlayers) assert(!players.includes(`/player/${slug}`));
+  for (const { slug } of mergedPlayers) assert.ok(!players.includes(`/player/${slug}`));
 
   const staff = await paths("staff");
-  assert(staff.includes("/staff/sitemap-coach"));
-  assert(!staff.includes("/staff/sitemap-empty-player"));
+  assert.ok(staff.includes("/staff/sitemap-coach"));
+  assert.ok(!staff.includes("/staff/sitemap-empty-player"));
 
-  const { tournaments: coached } = (
-    await request("GET", `/player/${coach.id}/staff-tournaments`)
-  ).json(staffTournamentsBody);
+  const response3 = await request("GET", `/player/${coach.id}/staff-tournaments`);
+  const { tournaments: coached } = response3.json(staffTournamentsBody);
 
-  assert(
+  assert.ok(
     coached.some(({ id }) => id === stage.id),
     "a staff tenure covers its team's stage",
   );
 
   const teams = await paths("teams");
   const firstTeam = participants[0].team;
-  assert(firstTeam, "the participant has a team");
+  assert.ok(firstTeam, "the participant has a team");
   const teamSlug = firstTeam.slug;
-  assert(teams.includes(`/team/${teamSlug}`));
-  const mergedTeams = await em.find(Team, { mergedInto: { $ne: null } });
-  assert(mergedTeams.length > 0, "the scenario runs after a team merge");
+  assert.ok(teams.includes(`/team/${teamSlug}`));
+  const mergedTeams = await em.getRepository(Team).find({ mergedInto: { $ne: null } });
+  assert.ok(mergedTeams.length > 0, "the scenario runs after a team merge");
 
-  for (const { slug } of mergedTeams) assert(!teams.includes(`/team/${slug}`));
+  for (const { slug } of mergedTeams) assert.ok(!teams.includes(`/team/${slug}`));
 
   await request("GET", "/sitemap/bogus", undefined, undefined, 404);
 

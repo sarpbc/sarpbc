@@ -40,8 +40,8 @@ export function parseNewsEntityTag(raw: string): NewsEntityTag | null {
     return null;
   }
 
-  const kind = match[1];
-  const attrs = parseAttrs(match[2] ?? "");
+  const [, kind, rawAttrs] = match;
+  const attrs = parseAttrs(rawAttrs ?? "");
   const slug = attrs.slug?.trim();
   const label = attrs.label?.trim();
 
@@ -77,7 +77,7 @@ export function newsEntityTagStart(content: string, kind: NewsEntityTagKind): nu
 }
 
 export function replaceNewsEntityTagsWithLabels(content: string): string {
-  return content.replace(
+  return content.replaceAll(
     NEWS_ENTITY_TAG_GLOBAL_PATTERN,
     (raw) => parseNewsEntityTag(raw)?.label ?? "",
   );

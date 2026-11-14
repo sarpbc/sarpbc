@@ -13,7 +13,7 @@ export interface Size {
   height: number;
 }
 
-const PPM_HEADER = /^P6\s+(\d+)\s+(\d+)\s+255\s/;
+const PPM_HEADER = /^P6\s+(?<width>\d+)\s+(?<height>\d+)\s+255\s/;
 const MAX_PPM_HEADER = 64;
 
 export function scaleRegion(region: Region, reference: Size, frame: Frame): Region {
@@ -35,8 +35,8 @@ export function meanColor(frame: Frame, region: Region): Rgb {
   let green = 0;
   let blue = 0;
 
-  for (let y = region.y; y < region.y + region.height; y++) {
-    for (let x = region.x; x < region.x + region.width; x++) {
+  for (let { y } = region; y < region.y + region.height; y += 1) {
+    for (let { x } = region; x < region.x + region.width; x += 1) {
       const offset = (y * frame.width + x) * 3;
       red += frame.data[offset] ?? 0;
       green += frame.data[offset + 1] ?? 0;
@@ -63,8 +63,8 @@ function parsePpmHeader(bytes: Uint8Array): { width: number; height: number; siz
     return null;
   }
 
-  const width = Number(match[1]);
-  const height = Number(match[2]);
+  const width = Number(match.groups?.width);
+  const height = Number(match.groups?.height);
 
   if (width < 1 || height < 1) throw new Error("Invalid PPM size.");
 

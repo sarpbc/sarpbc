@@ -1,8 +1,9 @@
 import { MikroORM } from "@mikro-orm/postgresql";
 import { describe, expect, it, vi } from "vitest";
 import { mikroOrmEntities } from "../../../mikro-orm.entities";
-import { Team, TeamAlias } from "./player.entities";
-import { MikroTeamStore } from "./roster.store";
+import { Team } from "./team.entity";
+import { TeamAlias } from "./team-alias.entity";
+import { MikroTeamStore } from "./team.store";
 
 const orm = new MikroORM({
   entities: mikroOrmEntities,

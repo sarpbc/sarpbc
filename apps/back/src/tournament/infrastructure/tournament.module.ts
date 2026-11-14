@@ -3,13 +3,11 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { EntityManager, MikroORM } from "@mikro-orm/postgresql";
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
-import {
-  League,
-  Match,
-  Tournament,
-  TournamentEvent,
-  TournamentParticipant,
-} from "./persistence/tournament.entities";
+import { League } from "./persistence/league.entity";
+import { Match } from "./persistence/match.entity";
+import { Tournament } from "./persistence/tournament.entity";
+import { TournamentEvent } from "./persistence/tournament-event.entity";
+import { TournamentParticipant } from "./persistence/tournament-participant.entity";
 import { PlayerAward } from "./persistence/player-award.entities";
 import { TournamentPrize } from "./persistence/tournament-prize.entities";
 import { MatchLineupPlayer } from "./persistence/match-lineup.entities";
@@ -37,14 +35,12 @@ import { SyncPandascoreIncidentsUseCase } from "../application/sync/sync-pandasc
 import { SyncNewTournamentsUseCase } from "../application/sync/sync-new-tournaments.use-case";
 import { CompetitionQueries } from "./persistence/competition.queries";
 import { MikroOrmCompetitionTransaction } from "./persistence/competition.transaction";
-import { CompetitionAwardQueries } from "./persistence/player-award.store";
-import { CompetitionPrizeQueries } from "./persistence/tournament-prize.store";
-import { CompetitionLineupQueries } from "./persistence/match-lineup.store";
-import {
-  CompetitionCacheAdapter,
-  CompetitionEventsAdapter,
-  competitionDiagnostics,
-} from "./competition.adapters";
+import { CompetitionAwardQueries } from "./persistence/player-award.queries";
+import { CompetitionPrizeQueries } from "./persistence/tournament-prize.queries";
+import { CompetitionLineupQueries } from "./persistence/match-lineup.queries";
+import { CompetitionCacheAdapter } from "./competition-cache.adapter";
+import { CompetitionEventsAdapter } from "./competition-events.adapter";
+import { competitionDiagnostics } from "./competition-diagnostics";
 import { RedisModule } from "../../infrastructure/redis/redis.module";
 import { PandascoreModule } from "../../pandascore/infrastructure/pandascore.module";
 import { PandascoreCompetitionFeed } from "../../pandascore/infrastructure/pandascore-competition-feed";

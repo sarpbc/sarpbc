@@ -2,7 +2,10 @@ import { Controller, Get, Query } from "@nestjs/common";
 import { PlayerService } from "../../application/player.service";
 import { TeamService } from "../../application/team.service";
 import { TransferService } from "../../application/transfer.service";
-import { ListTransfersQueryDto } from "./dto/list-transfers-query.dto";
+import {
+  ListTransfersQueryDto,
+  type ListTransfersQueryInput,
+} from "./dto/list-transfers-query.dto";
 import { mapTransfer } from "./transfer.mapper";
 
 @Controller("transfers")
@@ -14,7 +17,7 @@ export class TransferController {
   ) {}
 
   @Get()
-  async find(@Query({ schema: ListTransfersQueryDto }) query: ListTransfersQueryDto) {
+  async find(@Query({ schema: ListTransfersQueryDto }) query: ListTransfersQueryInput) {
     const [team, player] = await Promise.all([
       query.team !== undefined && query.team !== ""
         ? this.teamService.findBySlug(query.team)

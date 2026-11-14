@@ -1,7 +1,7 @@
 import { EntityRepository } from "@mikro-orm/core";
 
 import { REPLY_HAS_TARGET, REPLY_POPULATE } from "../../../reply/infrastructure/reply-persistence";
-import { ReplyNotification } from "./reply-notification.entity";
+import type { ReplyNotification } from "./reply-notification.entity";
 
 interface ReplyNotificationReadFilter {
   recipient: { id: string };
@@ -13,14 +13,12 @@ const hasTarget = () => REPLY_HAS_TARGET.map((target) => ({ reply: target }));
 
 export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
   async findForRecipient(recipientId: string, limit: number): Promise<ReplyNotification[]> {
-    return await this.find(
-      { recipient: { id: recipientId }, $or: hasTarget() },
-      {
-        populate: ["reply", ...REPLY_POPULATE.map((relation) => `reply.${relation}` as const)],
-        orderBy: { createdAt: "DESC" },
-        limit,
-      },
-    );
+    return await this.findAll({
+      where: { recipient: { id: recipientId }, $or: hasTarget() },
+      populate: ["reply", ...REPLY_POPULATE.map((relation) => `reply.${relation}` as const)],
+      orderBy: { createdAt: "DESC" },
+      limit,
+    });
   }
 
   async countUnread(recipientId: string): Promise<number> {

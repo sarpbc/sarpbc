@@ -1,6 +1,7 @@
 import type { Stream, StreamInput } from "@sarpbc/types";
 import { describe, expect, it } from "vitest";
-import { Match, Tournament } from "./competition";
+import { Match } from "./match";
+import { Tournament } from "./tournament";
 import { pandascoreStreams, replaceStreams } from "./stream";
 
 const official: StreamInput = {

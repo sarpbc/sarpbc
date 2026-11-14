@@ -2,7 +2,8 @@ import type { LookupAddress, LookupOptions } from "node:dns";
 import type { RequestOptions } from "node:https";
 import type { IncomingMessage } from "node:http";
 import { BlockList, isIP, type LookupFunction } from "node:net";
-import { InvalidInputError } from "../../common/domain/errors";
+import { finished } from "node:stream/promises";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface PublicDownloadOptions {
   maxBytes: number;
@@ -66,32 +67,22 @@ export function isPublicAddress(address: string): boolean {
   return !blocked.check(address, family === 4 ? "ipv4" : "ipv6");
 }
 
-function createPublicOnlyLookup(lookup: PublicHttpsTransport["lookup"]): LookupFunction {
-  return (hostname, options, callback) => {
-    void resolvePublicAddresses(lookup, hostname, options.family).then((resolved) => {
-      if (resolved instanceof Error) {
-        callback(resolved, "", 0);
+function privateAddressError(): InvalidInputError {
+  return new InvalidInputError(
+    "The image URL resolves to a private, loopback or link-local address.",
+  );
+}
 
-        return;
-      }
+function tooLargeError(maxBytes: number): InvalidInputError {
+  return new InvalidInputError(`The image is larger than ${maxBytes / (1024 * 1024)} MB.`);
+}
 
-      const first: (typeof resolved)[number] | undefined = resolved[0];
+function downloadError(error: Error, signal: AbortSignal): Error {
+  if (error instanceof InvalidInputError) return error;
 
-      if (first === undefined) {
-        callback(privateAddressError(), "", 0);
+  if (signal.aborted) return new InvalidInputError("The image download timed out.");
 
-        return;
-      }
-
-      if (options.all === true) {
-        callback(null, resolved);
-
-        return;
-      }
-
-      callback(null, first.address, first.family);
-    });
-  };
+  return new InvalidInputError(`The image could not be downloaded: ${error.message}`);
 }
 
 async function resolvePublicAddresses(
@@ -110,46 +101,36 @@ async function resolvePublicAddresses(
   }
 }
 
-export async function downloadPublicHttps(
-  url: URL,
-  options: PublicDownloadOptions,
-  transport: PublicHttpsTransport,
-): Promise<Uint8Array> {
-  const signal = AbortSignal.timeout(options.timeoutMs);
-  let current = url;
+function createPublicOnlyLookup(lookup: PublicHttpsTransport["lookup"]): LookupFunction {
+  return (hostname, options, respond) => {
+    const answer = async (): Promise<void> => {
+      const resolved = await resolvePublicAddresses(lookup, hostname, options.family);
 
-  for (let redirects = 0; ; redirects += 1) {
-    requirePublicHttpsUrl(current, options.isAllowedHost);
-    const response = await get(current, signal, transport);
-    const status = response.statusCode ?? 0;
+      if (resolved instanceof Error) {
+        respond(resolved, "", 0);
 
-    if (
-      status >= 300 &&
-      status < 400 &&
-      response.headers.location !== undefined &&
-      response.headers.location !== ""
-    ) {
-      response.resume();
-
-      if (redirects >= options.maxRedirects) {
-        throw new InvalidInputError("The image URL redirected too many times.");
+        return;
       }
 
-      if (!URL.canParse(response.headers.location, current)) {
-        throw new InvalidInputError("The image URL redirected to an invalid location.");
+      const first: (typeof resolved)[number] | undefined = resolved[0];
+
+      if (first === undefined) {
+        respond(privateAddressError(), "", 0);
+
+        return;
       }
 
-      current = new URL(response.headers.location, current);
-      continue;
-    }
+      if (options.all === true) {
+        respond(null, resolved);
 
-    if (status !== 200) {
-      response.resume();
-      throw new InvalidInputError(`The image URL answered HTTP ${status}.`);
-    }
+        return;
+      }
 
-    return await readBody(response, options.maxBytes, signal);
-  }
+      respond(null, first.address, first.family);
+    };
+
+    void answer();
+  };
 }
 
 function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => boolean): void {
@@ -165,11 +146,11 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
     throw new InvalidInputError("The image URL must use the default https port.");
   }
 
-  const host = url.hostname.replace(/^\[|\]$/g, "");
+  const host = url.hostname.replaceAll(/^\[|\]$/g, "");
 
   if (isIP(host) && !isPublicAddress(host)) throw privateAddressError();
 
-  if (/(^|\.)localhost\.?$/i.test(host)) throw privateAddressError();
+  if (/(?:^|\.)localhost\.?$/i.test(host)) throw privateAddressError();
 
   if (!isAllowedHost(host)) {
     throw new InvalidInputError(`The image URL host "${host}" is not an accepted source.`);
@@ -181,21 +162,22 @@ async function get(
   signal: AbortSignal,
   transport: PublicHttpsTransport,
 ): Promise<IncomingMessage> {
-  return await new Promise((resolve, reject) => {
-    const req = transport.request(url, {
-      method: "GET",
-      lookup: createPublicOnlyLookup(transport.lookup),
-      signal,
-      agent: false,
-      headers: { accept: "image/png,image/webp,image/svg+xml", "user-agent": "sarpbc.org" },
-    });
-
-    req.once("response", resolve);
-    req.once("error", (error) => {
-      reject(downloadError(error, signal));
-    });
-    req.end();
+  const req = transport.request(url, {
+    method: "GET",
+    lookup: createPublicOnlyLookup(transport.lookup),
+    signal,
+    agent: false,
+    headers: { accept: "image/png,image/webp,image/svg+xml", "user-agent": "sarpbc.org" },
   });
+
+  const { promise, resolve, reject } = Promise.withResolvers<IncomingMessage>();
+  req.once("response", resolve);
+  req.once("error", (error) => {
+    reject(downloadError(error, signal));
+  });
+  req.end();
+
+  return await promise;
 }
 
 async function readBody(
@@ -208,50 +190,80 @@ async function readBody(
   if (Number.isFinite(declared) && declared > maxBytes) {
     response.destroy();
 
-    return await Promise.reject(tooLargeError(maxBytes));
+    throw tooLargeError(maxBytes);
   }
 
-  return await new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    let size = 0;
-    response.on("data", (chunk: Buffer) => {
-      size += chunk.byteLength;
+  const chunks: Buffer[] = [];
+  let size = 0;
+  response.on("data", (chunk: Buffer) => {
+    size += chunk.byteLength;
 
-      if (size > maxBytes) {
-        response.destroy();
-        reject(tooLargeError(maxBytes));
+    if (size > maxBytes) {
+      response.destroy(tooLargeError(maxBytes));
 
-        return;
-      }
+      return;
+    }
 
-      chunks.push(chunk);
-    });
-    response.once("end", () => {
-      resolve(new Uint8Array(Buffer.concat(chunks)));
-    });
-    response.once("error", (error) => {
-      reject(downloadError(error, signal));
-    });
-    response.once("close", () => {
-      reject(downloadError(new Error("the connection closed early"), signal));
-    });
+    chunks.push(chunk);
   });
+
+  try {
+    await finished(response);
+  } catch (error) {
+    throw downloadError(error instanceof Error ? error : new Error(String(error)), signal);
+  }
+
+  return new Uint8Array(Buffer.concat(chunks));
 }
 
-function downloadError(error: Error, signal: AbortSignal): Error {
-  if (error instanceof InvalidInputError) return error;
+async function followRedirects(
+  current: URL,
+  redirects: number,
+  options: PublicDownloadOptions,
+  transport: PublicHttpsTransport,
+  signal: AbortSignal,
+): Promise<Uint8Array> {
+  requirePublicHttpsUrl(current, options.isAllowedHost);
+  const response = await get(current, signal, transport);
+  const status = response.statusCode ?? 0;
 
-  if (signal.aborted) return new InvalidInputError("The image download timed out.");
+  if (
+    status >= 300 &&
+    status < 400 &&
+    response.headers.location !== undefined &&
+    response.headers.location !== ""
+  ) {
+    response.resume();
 
-  return new InvalidInputError(`The image could not be downloaded: ${error.message}`);
+    if (redirects >= options.maxRedirects) {
+      throw new InvalidInputError("The image URL redirected too many times.");
+    }
+
+    if (!URL.canParse(response.headers.location, current)) {
+      throw new InvalidInputError("The image URL redirected to an invalid location.");
+    }
+
+    return await followRedirects(
+      new URL(response.headers.location, current),
+      redirects + 1,
+      options,
+      transport,
+      signal,
+    );
+  }
+
+  if (status !== 200) {
+    response.resume();
+    throw new InvalidInputError(`The image URL answered HTTP ${status}.`);
+  }
+
+  return await readBody(response, options.maxBytes, signal);
 }
 
-function privateAddressError(): InvalidInputError {
-  return new InvalidInputError(
-    "The image URL resolves to a private, loopback or link-local address.",
-  );
-}
-
-function tooLargeError(maxBytes: number): InvalidInputError {
-  return new InvalidInputError(`The image is larger than ${maxBytes / (1024 * 1024)} MB.`);
+export async function downloadPublicHttps(
+  url: URL,
+  options: PublicDownloadOptions,
+  transport: PublicHttpsTransport,
+): Promise<Uint8Array> {
+  return await followRedirects(url, 0, options, transport, AbortSignal.timeout(options.timeoutMs));
 }

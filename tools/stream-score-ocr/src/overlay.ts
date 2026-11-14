@@ -64,5 +64,5 @@ export function parseOverlay(text: string): Overlay {
 }
 
 export async function loadOverlay(path: string): Promise<Overlay> {
-  return parseOverlay(await readFile(path, "utf8"));
+  return parseOverlay(await readFile(path, "utf-8"));
 }

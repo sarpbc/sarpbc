@@ -7,10 +7,10 @@ import {
 } from "@sarpbc/utils";
 import type { AsyncDataRequestStatus } from "#app";
 
-type NewsMatchBlocks = {
+interface NewsMatchBlocks {
   items: Readonly<Ref<Record<string, MatchBlockItem[]>>>;
   status: Readonly<Ref<AsyncDataRequestStatus>>;
-};
+}
 
 const NEWS_MATCH_BLOCKS: InjectionKey<NewsMatchBlocks> = Symbol("news-match-blocks");
 

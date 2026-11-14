@@ -14,7 +14,7 @@ export class NewsArticle {
   author!: User;
   createdAt: Date = new Date();
   updatedAt: Date | null = null;
-  isDraft: boolean = true;
+  isDraft = true;
   imageUrl: string | null = null;
   type: NewsType = DEFAULT_NEWS_TYPE;
 }

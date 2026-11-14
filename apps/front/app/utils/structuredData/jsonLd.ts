@@ -20,7 +20,7 @@ export function compactJsonLd<T extends JsonLdNode>(node: T): T {
 
   for (const [key, value] of Object.entries(node)) {
     if (value === undefined) {
-      delete result[key];
+      Reflect.deleteProperty(result, key);
     }
   }
 

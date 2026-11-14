@@ -38,11 +38,11 @@ function findClosingQuote(raw: string, from: number): number {
 }
 
 export function escapeNewsTagAttrValue(value: string): string {
-  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 }
 
 function unescapeAttrValue(value: string): string {
-  return value.replace(/\\"/g, '"').replace(/\\\\/g, "\\");
+  return value.replaceAll('\\"', '"').replaceAll("\\\\", "\\");
 }
 
 export function parseNewsTagAttrs(raw: string): NewsTagAttr[] {

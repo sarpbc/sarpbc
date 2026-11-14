@@ -6,4 +6,4 @@ export const CreateUserDto = z.strictObject({
   userName: z.string().min(1).max(100),
 });
 
-export type CreateUserDto = z.infer<typeof CreateUserDto>;
+export type CreateUserInput = z.infer<typeof CreateUserDto>;

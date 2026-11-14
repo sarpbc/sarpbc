@@ -57,7 +57,7 @@ function setup(role: string | null = "admin") {
   const transaction: ForumTransaction = {
     async run(work) {
       const result = await work(scope);
-      commits++;
+      commits += 1;
 
       return result;
     },
@@ -120,7 +120,7 @@ describe("post transaction and policies", () => {
       author: { id: "user", userName: "Fan" },
       topic: { id: "topic", title: "Topic" },
       postType: PostType.DISCUSSION,
-      createdAt: new Date(now.getTime() - 3599999),
+      createdAt: new Date(now.getTime() - 3_599_999),
       updatedAt: null,
       translations: [],
     });
@@ -141,7 +141,7 @@ describe("post transaction and policies", () => {
       author: { id: "user", userName: "Fan" },
       topic: { id: "topic", title: "Topic" },
       postType: PostType.DISCUSSION,
-      createdAt: new Date(now.getTime() - 3600000),
+      createdAt: new Date(now.getTime() - 3_600_000),
       updatedAt: null,
       translations: [],
     });
@@ -151,7 +151,7 @@ describe("post transaction and policies", () => {
   it("does not delete the post or commit when dependent deletion fails", async () => {
     const f = setup();
     await f.service.create("user", input);
-    const post = f.saved[0];
+    const [post] = f.saved;
     f.scope.posts.findWithDetails = async () => post;
     f.scope.replies.deleteAllForPost = async () => {
       throw new Error("reply deletion failed");

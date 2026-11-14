@@ -6,21 +6,21 @@ const localePath = useLocalePath();
 
 const year = new Date().getFullYear();
 
-type FooterLink = {
+interface FooterLink {
   label: string;
   to: RouteLocationRaw;
-};
+}
 
-type FooterColumn = {
+interface FooterColumn {
   title: string;
   links: FooterLink[];
-};
+}
 
-type SocialLink = {
+interface SocialLink {
   label: string;
   icon: string;
   to: string;
-};
+}
 
 const columns = computed<FooterColumn[]>(() => [
   {

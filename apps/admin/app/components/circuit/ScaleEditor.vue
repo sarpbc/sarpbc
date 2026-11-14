@@ -43,7 +43,7 @@ interface ValidTier {
   points: number;
 }
 
-const props = defineProps<{ circuitId: string; region: string | null }>();
+const { circuitId, region } = defineProps<{ circuitId: string; region: string | null }>();
 const target = defineModel<ScaleEditorTarget | null>("target", { required: true });
 const emit = defineEmits<{ saved: [circuit: CircuitDetail] }>();
 
@@ -69,28 +69,12 @@ const open = computed({
   },
 });
 
-watch(
-  target,
-  (value) => {
-    if (value === null) return;
-    shown.value = value;
-    rows.value = value.scale.map((tier) => ({ key: nextKey++, ...tier }));
-    sourceUrl.value = value.sourceUrl;
-    worldwide.value = value.worldwide;
-    regionTeamIds.value = [...value.regionTeamIds];
-    finishRows.value = value.finishes.map((finish) => ({ key: nextKey++, ...finish }));
-    saveError.value = null;
-    void loadTeams(value.tournamentId);
-  },
-  { immediate: true },
-);
-
 async function loadTeams(tournamentId: string) {
   teamsStatus.value = "pending";
   eventTeams.value = [];
 
   try {
-    const teams = await getCircuitStageTeams(props.circuitId, tournamentId);
+    const teams = await getCircuitStageTeams(circuitId, tournamentId);
 
     if (target.value?.tournamentId !== tournamentId) return;
     eventTeams.value = teams;
@@ -100,7 +84,23 @@ async function loadTeams(tournamentId: string) {
   }
 }
 
-const regional = computed(() => !isWorldwideCircuitRegion(props.region));
+watch(
+  target,
+  (value) => {
+    if (value === null) return;
+    shown.value = value;
+    rows.value = value.scale.map((tier) => ({ key: (nextKey += 1), ...tier }));
+    sourceUrl.value = value.sourceUrl;
+    worldwide.value = value.worldwide;
+    regionTeamIds.value = [...value.regionTeamIds];
+    finishRows.value = value.finishes.map((finish) => ({ key: (nextKey += 1), ...finish }));
+    saveError.value = null;
+    void loadTeams(value.tournamentId);
+  },
+  { immediate: true },
+);
+
+const regional = computed(() => !isWorldwideCircuitRegion(region));
 
 const teamOptions = computed(() =>
   eventTeams.value.map(({ team, placement }) => ({
@@ -159,7 +159,7 @@ function finishError(row: FinishRow): string | undefined {
 }
 
 function addFinish() {
-  finishRows.value.push({ key: nextKey++, teamId: undefined, placement: null });
+  finishRows.value.push({ key: (nextKey += 1), teamId: undefined, placement: null });
 }
 
 function removeFinish(key: number) {
@@ -231,7 +231,7 @@ const canSave = computed(
 function addRow() {
   const last = tiers.value?.toSorted((a, b) => a.to - b.to).at(-1);
   rows.value.push({
-    key: nextKey++,
+    key: (nextKey += 1),
     from: last ? last.to + 1 : null,
     to: null,
     points: null,
@@ -252,7 +252,7 @@ async function save() {
   saveError.value = null;
 
   try {
-    const circuit = await setCircuitStageScale(props.circuitId, current.tournamentId, {
+    const circuit = await setCircuitStageScale(circuitId, current.tournamentId, {
       scale: scale.toSorted((a, b) => a.from - b.from),
       sourceUrl: sourceUrl.value.trim(),
       worldwide: worldwide.value,

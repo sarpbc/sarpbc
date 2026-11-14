@@ -11,17 +11,17 @@ export function newsContentToPlainText(content: string): string {
   );
 
   return withLabels
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`([^`]+)`/g, "$1")
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    .replace(/\[([^\]]+)\]\([^)]*\)/g, "$1")
-    .replace(/^#{1,6}\s+/gm, "")
-    .replace(/^\s*>\s?/gm, "")
-    .replace(/^\s*[-*+]\s+/gm, "")
-    .replace(/^\s*\d+\.\s+/gm, "")
-    .replace(/\|/g, " ")
-    .replace(/[*_~]+/g, "")
-    .replace(/\s+/g, " ")
+    .replaceAll(/```[\s\S]*?```/g, " ")
+    .replaceAll(/`(?<code>[^`]+)`/g, "$<code>")
+    .replaceAll(/!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replaceAll(/\[(?<text>[^\]]+)\]\([^)]*\)/g, "$<text>")
+    .replaceAll(/^#{1,6}\s+/gm, "")
+    .replaceAll(/^\s*>\s?/gm, "")
+    .replaceAll(/^\s*[-*+]\s+/gm, "")
+    .replaceAll(/^\s*\d+\.\s+/gm, "")
+    .replaceAll("|", " ")
+    .replaceAll(/[*_~]+/g, "")
+    .replaceAll(/\s+/g, " ")
     .trim();
 }
 

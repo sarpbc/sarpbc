@@ -5,11 +5,11 @@ import { PaginationQueryDto } from "../../../../common/infrastructure/http/dto/p
 const newsLocale = z.string().max(16).optional();
 export const NewsLocaleQueryDto = z.strictObject({ locale: newsLocale });
 
-export type NewsLocaleQueryDto = z.infer<typeof NewsLocaleQueryDto>;
+export type NewsLocaleQueryInput = z.infer<typeof NewsLocaleQueryDto>;
 
 export const NewsListQueryDto = PaginationQueryDto.extend({
   locale: newsLocale,
   type: z.enum(NEWS_TYPES).optional(),
 });
 
-export type NewsListQueryDto = z.infer<typeof NewsListQueryDto>;
+export type NewsListQueryInput = z.infer<typeof NewsListQueryDto>;

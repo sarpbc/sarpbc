@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PrizeEntry } from "@sarpbc/types";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { assertPrizeDistribution } from "./prize-distribution";
 
 const entry: PrizeEntry = {

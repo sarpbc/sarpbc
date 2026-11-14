@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { NotFoundError } from "../../common/domain/errors";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { kc } from "../../../test/career-fixtures";
 import {
   alpha54,
@@ -25,7 +25,7 @@ describe("CountryService", () => {
 
   it("gathers the players, their current teams and the finished matches of a country", async () => {
     const { sources, findByNationality, list } = countrySources();
-    const page = await new CountryService(sources).find(" fr ", firstPage);
+    const page = await new CountryService(sources).detail(" fr ", firstPage);
 
     expect(findByNationality).toHaveBeenCalledWith("FR");
     expect(page.code).toBe("FR");
@@ -40,7 +40,7 @@ describe("CountryService", () => {
 
   it("leaves start.gg matches and stages out of the public page", async () => {
     const { sources } = countrySources();
-    const page = await new CountryService(sources).find("FR", firstPage);
+    const page = await new CountryService(sources).detail("FR", firstPage);
 
     expect(page.matches.map(({ id }) => id)).toEqual(["final"]);
     expect(page.matchTotal).toBe(1);
@@ -49,7 +49,9 @@ describe("CountryService", () => {
   it("reports a code no player holds", async () => {
     const { sources, list } = countrySources();
 
-    await expect(new CountryService(sources).find("DE", firstPage)).rejects.toThrow(NotFoundError);
+    await expect(new CountryService(sources).detail("DE", firstPage)).rejects.toThrow(
+      NotFoundError,
+    );
     expect(list).not.toHaveBeenCalled();
   });
 
@@ -57,8 +59,8 @@ describe("CountryService", () => {
     const { sources, findByNationality } = countrySources();
     const service = new CountryService(sources);
 
-    await expect(service.find("", firstPage)).rejects.toThrow(NotFoundError);
-    await expect(service.find("FRA", firstPage)).rejects.toThrow(NotFoundError);
+    await expect(service.detail("", firstPage)).rejects.toThrow(NotFoundError);
+    await expect(service.detail("FRA", firstPage)).rejects.toThrow(NotFoundError);
     expect(findByNationality).not.toHaveBeenCalled();
   });
 });

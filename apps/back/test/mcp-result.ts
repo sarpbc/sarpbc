@@ -5,7 +5,7 @@ import { z } from "zod";
 import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
 
 export function textOf(result: CallToolResult): string {
-  const block = result.content[0];
+  const [block] = result.content;
 
   return block?.type === "text" ? block.text : "";
 }

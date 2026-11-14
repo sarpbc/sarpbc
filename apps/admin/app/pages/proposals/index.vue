@@ -138,156 +138,254 @@ function viewershipRows(
   ];
 }
 
-function changeRows(proposal: RosterProposal): { key: string; label: string; value: string }[] {
+interface ProposalRow {
+  key: string;
+  label: string;
+  value: string;
+}
+
+function prizesRows(
+  change: Extract<RosterProposal["change"], { kind: "set_tournament_prizes" }>,
+): ProposalRow[] {
+  return [
+    {
+      key: "tournamentId",
+      label: t("page.proposals.fields.tournamentId"),
+      value: nameOf(change.tournamentId),
+    },
+    ...(change.prizes.length === 0
+      ? [
+          {
+            key: "prizes",
+            label: t("page.proposals.fields.prizes"),
+            value: t("page.proposals.values.noPrizes"),
+          },
+        ]
+      : change.prizes.map((prize) => ({
+          key: `prize-${prize.teamId}`,
+          label: t(
+            "page.proposals.fields.placement",
+            { placement: prize.placement },
+            prize.placement,
+          ),
+          value: [
+            nameOf(prize.teamId),
+            formatAmount(prize.amount, prize.currency),
+            ...(prize.playerIds.length > 0 ? [prize.playerIds.map(nameOf).join(", ")] : []),
+          ].join(" · "),
+        }))),
+  ];
+}
+
+function amountText(amount: number | undefined, currency: string | undefined): string | undefined {
+  if (amount === undefined) {
+    return undefined;
+  }
+
+  return currency === undefined ? String(amount) : formatAmount(amount, currency);
+}
+
+function prizeUpdateRows(
+  change: Extract<RosterProposal["change"], { kind: "update_tournament_prize" }>,
+): ProposalRow[] {
+  const { patch } = change;
+
+  const patched = [
+    ...optionalRow(
+      "placement",
+      t("page.tournaments.prizes.placement"),
+      patch.placement === undefined ? undefined : String(patch.placement),
+    ),
+    ...optionalRow(
+      "amount",
+      t("page.tournaments.prizes.amount"),
+      amountText(patch.amount, patch.currency),
+    ),
+    ...optionalRow("currency", t("page.tournaments.prizes.currency"), patch.currency),
+    ...optionalRow(
+      "playerIds",
+      t("page.tournaments.prizes.players"),
+      patch.playerIds === undefined
+        ? undefined
+        : patch.playerIds.map(nameOf).join(", ") || t("page.proposals.values.noPlayers"),
+    ),
+  ];
+
+  return [
+    {
+      key: "tournamentId",
+      label: t("page.proposals.fields.tournamentId"),
+      value: nameOf(change.tournamentId),
+    },
+    { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
+    ...(patched.length === 0
+      ? [
+          {
+            key: "patch",
+            label: t("page.proposals.fields.prizes"),
+            value: t("page.proposals.values.sourceOnly"),
+          },
+        ]
+      : patched),
+  ];
+}
+
+function circuitScaleRows(
+  change: Extract<RosterProposal["change"], { kind: "set_circuit_stage_scale" }>,
+): ProposalRow[] {
+  return [
+    {
+      key: "circuitId",
+      label: t("page.proposals.fields.circuitId"),
+      value: nameOf(change.circuitId),
+    },
+    {
+      key: "tournamentId",
+      label: t("page.proposals.fields.tournamentId"),
+      value: nameOf(change.tournamentId),
+    },
+    ...change.scale.map((tier) => ({
+      key: `tier-${tier.from}`,
+      label: t("page.proposals.fields.tier", { number: tier.from }),
+      value: `${tier.from === tier.to ? tier.from : `${tier.from}–${tier.to}`}: ${tier.points}`,
+    })),
+    {
+      key: "worldwide",
+      label: t("page.proposals.fields.worldwide"),
+      value: change.worldwide ? t("page.proposals.values.yes") : t("page.proposals.values.no"),
+    },
+    ...(change.regionTeamIds?.length
+      ? [
+          {
+            key: "regionTeamIds",
+            label: t("page.proposals.fields.regionTeams"),
+            value: change.regionTeamIds.map(nameOf).join(", "),
+          },
+        ]
+      : []),
+    ...(change.finishes ?? []).map((finish) => ({
+      key: `finish-${finish.teamId}`,
+      label: t("page.proposals.fields.finish", { placement: finish.placement }),
+      value: nameOf(finish.teamId),
+    })),
+  ];
+}
+
+function seasonAwardRows(
+  change: Extract<RosterProposal["change"], { kind: "award_season_player" }>,
+): ProposalRow[] {
+  return [
+    {
+      key: "seasonId",
+      label: t("page.proposals.fields.seasonId"),
+      value: nameOf(change.seasonId),
+    },
+    {
+      key: "playerId",
+      label: t("page.proposals.fields.playerId"),
+      value: nameOf(change.playerId),
+    },
+    {
+      key: "awardType",
+      label: t("page.proposals.fields.awardType"),
+      value: t(`page.seasons.awards.types.${change.awardType}`),
+    },
+    ...(change.region
+      ? [{ key: "region", label: t("page.proposals.fields.region"), value: change.region }]
+      : []),
+    ...(change.presentedBy
+      ? [
+          {
+            key: "presentedBy",
+            label: t("page.proposals.fields.presentedBy"),
+            value: change.presentedBy,
+          },
+        ]
+      : []),
+  ];
+}
+
+function lineupRows(
+  change: Extract<RosterProposal["change"], { kind: "set_match_lineups" }>,
+): ProposalRow[] {
+  const lineups = change.lineups.flatMap((lineup, index) =>
+    lineup.playerIds.length > 0
+      ? [
+          {
+            key: `lineup-${lineup.participantId}`,
+            label: t("page.proposals.fields.side", { number: index + 1 }),
+            value: lineup.playerIds.map(nameOf).join(", "),
+          },
+        ]
+      : [],
+  );
+
+  return [
+    { key: "matchId", label: t("page.proposals.fields.matchId"), value: nameOf(change.matchId) },
+    ...(lineups.length === 0
+      ? [
+          {
+            key: "lineups",
+            label: t("page.proposals.fields.lineups"),
+            value: t("page.proposals.values.noLineups"),
+          },
+        ]
+      : lineups),
+  ];
+}
+
+function aliasRows(
+  change: Extract<RosterProposal["change"], { kind: "add_team_alias" | "update_team_alias" }>,
+): ProposalRow[] {
+  const { alias } = change;
+
+  return [
+    { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
+    { key: "aliasName", label: t("page.proposals.fields.aliasName"), value: alias.name },
+    { key: "aliasFrom", label: t("page.proposals.fields.aliasFrom"), value: alias.from },
+    {
+      key: "aliasTo",
+      label: t("page.proposals.fields.aliasTo"),
+      value: alias.to ?? t("page.proposals.values.ongoing"),
+    },
+    ...(alias.logoUrl
+      ? [
+          {
+            key: "aliasLogoUrl",
+            label: t("page.proposals.fields.imageUrl"),
+            value: alias.logoUrl,
+          },
+        ]
+      : []),
+    ...(alias.pandascoreId === null
+      ? []
+      : [
+          {
+            key: "aliasPandascoreId",
+            label: t("page.proposals.fields.aliasPandascoreId"),
+            value: String(alias.pandascoreId),
+          },
+        ]),
+  ];
+}
+
+function changeRows(proposal: RosterProposal): ProposalRow[] {
   const { change } = proposal;
 
   if (change.kind === "set_tournament_prizes") {
-    return [
-      {
-        key: "tournamentId",
-        label: t("page.proposals.fields.tournamentId"),
-        value: nameOf(change.tournamentId),
-      },
-      ...(change.prizes.length === 0
-        ? [
-            {
-              key: "prizes",
-              label: t("page.proposals.fields.prizes"),
-              value: t("page.proposals.values.noPrizes"),
-            },
-          ]
-        : change.prizes.map((prize) => ({
-            key: `prize-${prize.teamId}`,
-            label: t(
-              "page.proposals.fields.placement",
-              { placement: prize.placement },
-              prize.placement,
-            ),
-            value: [
-              nameOf(prize.teamId),
-              formatAmount(prize.amount, prize.currency),
-              ...(prize.playerIds.length > 0 ? [prize.playerIds.map(nameOf).join(", ")] : []),
-            ].join(" · "),
-          }))),
-    ];
+    return prizesRows(change);
   }
 
   if (change.kind === "update_tournament_prize") {
-    const { patch } = change;
-
-    const patched = [
-      ...optionalRow(
-        "placement",
-        t("page.tournaments.prizes.placement"),
-        patch.placement === undefined ? undefined : String(patch.placement),
-      ),
-      ...optionalRow(
-        "amount",
-        t("page.tournaments.prizes.amount"),
-        patch.amount === undefined
-          ? undefined
-          : patch.currency === undefined
-            ? String(patch.amount)
-            : formatAmount(patch.amount, patch.currency),
-      ),
-      ...optionalRow("currency", t("page.tournaments.prizes.currency"), patch.currency),
-      ...optionalRow(
-        "playerIds",
-        t("page.tournaments.prizes.players"),
-        patch.playerIds === undefined
-          ? undefined
-          : patch.playerIds.map(nameOf).join(", ") || t("page.proposals.values.noPlayers"),
-      ),
-    ];
-
-    return [
-      {
-        key: "tournamentId",
-        label: t("page.proposals.fields.tournamentId"),
-        value: nameOf(change.tournamentId),
-      },
-      { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
-      ...(patched.length === 0
-        ? [
-            {
-              key: "patch",
-              label: t("page.proposals.fields.prizes"),
-              value: t("page.proposals.values.sourceOnly"),
-            },
-          ]
-        : patched),
-    ];
+    return prizeUpdateRows(change);
   }
 
   if (change.kind === "set_circuit_stage_scale") {
-    return [
-      {
-        key: "circuitId",
-        label: t("page.proposals.fields.circuitId"),
-        value: nameOf(change.circuitId),
-      },
-      {
-        key: "tournamentId",
-        label: t("page.proposals.fields.tournamentId"),
-        value: nameOf(change.tournamentId),
-      },
-      ...change.scale.map((tier) => ({
-        key: `tier-${tier.from}`,
-        label: t("page.proposals.fields.tier", { number: tier.from }),
-        value: `${tier.from === tier.to ? tier.from : `${tier.from}–${tier.to}`}: ${tier.points}`,
-      })),
-      {
-        key: "worldwide",
-        label: t("page.proposals.fields.worldwide"),
-        value: change.worldwide ? t("page.proposals.values.yes") : t("page.proposals.values.no"),
-      },
-      ...(change.regionTeamIds?.length
-        ? [
-            {
-              key: "regionTeamIds",
-              label: t("page.proposals.fields.regionTeams"),
-              value: change.regionTeamIds.map(nameOf).join(", "),
-            },
-          ]
-        : []),
-      ...(change.finishes ?? []).map((finish) => ({
-        key: `finish-${finish.teamId}`,
-        label: t("page.proposals.fields.finish", { placement: finish.placement }),
-        value: nameOf(finish.teamId),
-      })),
-    ];
+    return circuitScaleRows(change);
   }
 
   if (change.kind === "award_season_player") {
-    return [
-      {
-        key: "seasonId",
-        label: t("page.proposals.fields.seasonId"),
-        value: nameOf(change.seasonId),
-      },
-      {
-        key: "playerId",
-        label: t("page.proposals.fields.playerId"),
-        value: nameOf(change.playerId),
-      },
-      {
-        key: "awardType",
-        label: t("page.proposals.fields.awardType"),
-        value: t(`page.seasons.awards.types.${change.awardType}`),
-      },
-      ...(change.region
-        ? [{ key: "region", label: t("page.proposals.fields.region"), value: change.region }]
-        : []),
-      ...(change.presentedBy
-        ? [
-            {
-              key: "presentedBy",
-              label: t("page.proposals.fields.presentedBy"),
-              value: change.presentedBy,
-            },
-          ]
-        : []),
-    ];
+    return seasonAwardRows(change);
   }
 
   if (change.kind === "set_event_streams") {
@@ -303,63 +401,11 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
   }
 
   if (change.kind === "set_match_lineups") {
-    const lineups = change.lineups.flatMap((lineup, index) =>
-      lineup.playerIds.length > 0
-        ? [
-            {
-              key: `lineup-${lineup.participantId}`,
-              label: t("page.proposals.fields.side", { number: index + 1 }),
-              value: lineup.playerIds.map(nameOf).join(", "),
-            },
-          ]
-        : [],
-    );
-
-    return [
-      { key: "matchId", label: t("page.proposals.fields.matchId"), value: nameOf(change.matchId) },
-      ...(lineups.length === 0
-        ? [
-            {
-              key: "lineups",
-              label: t("page.proposals.fields.lineups"),
-              value: t("page.proposals.values.noLineups"),
-            },
-          ]
-        : lineups),
-    ];
+    return lineupRows(change);
   }
 
   if (change.kind === "add_team_alias" || change.kind === "update_team_alias") {
-    const { alias } = change;
-
-    return [
-      { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
-      { key: "aliasName", label: t("page.proposals.fields.aliasName"), value: alias.name },
-      { key: "aliasFrom", label: t("page.proposals.fields.aliasFrom"), value: alias.from },
-      {
-        key: "aliasTo",
-        label: t("page.proposals.fields.aliasTo"),
-        value: alias.to ?? t("page.proposals.values.ongoing"),
-      },
-      ...(alias.logoUrl
-        ? [
-            {
-              key: "aliasLogoUrl",
-              label: t("page.proposals.fields.imageUrl"),
-              value: alias.logoUrl,
-            },
-          ]
-        : []),
-      ...(alias.pandascoreId === null
-        ? []
-        : [
-            {
-              key: "aliasPandascoreId",
-              label: t("page.proposals.fields.aliasPandascoreId"),
-              value: String(alias.pandascoreId),
-            },
-          ]),
-    ];
+    return aliasRows(change);
   }
 
   if (change.kind === "set_event_viewership") {

@@ -56,7 +56,11 @@ export function computeEventFailureChance(context: EventOutcomeContext): number 
   chance += gapChance(WORLD_STRENGTH_BASELINE - context.teamStrength, 120, 0.12);
   chance += gapChance(WORLD_STRENGTH_BASELINE - mean(context.teammateRatings), 180, 0.06);
 
-  if (context.lastSplitPoints != null && context.lastSplitPoints < 12) {
+  if (
+    context.lastSplitPoints !== null &&
+    context.lastSplitPoints !== undefined &&
+    context.lastSplitPoints < 12
+  ) {
     chance += 0.06;
   }
 
@@ -109,10 +113,9 @@ export function buildEventOutcomeContext(
   if (!isNonEmptyString(eventId)) throw new Error("No active event");
 
   const roster = state.world.rosters[state.currentTeamId];
-  const lastSeason = state.seasonRecords[state.seasonRecords.length - 1];
+  const lastSeason = state.seasonRecords.at(-1);
 
-  const lastSplit =
-    state.currentSplits[state.currentSplits.length - 1] ?? lastSeason?.splits.at(-1);
+  const lastSplit = state.currentSplits.at(-1) ?? lastSeason?.splits.at(-1);
 
   return {
     careerId: state.id,

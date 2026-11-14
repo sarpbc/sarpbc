@@ -46,7 +46,11 @@ const replies = useLazyAsyncData("admin-home-replies", () => getModerationReplie
 
 const articles = useLazyAsyncData(
   "admin-home-articles",
-  async () => (await getNewsArticlesAdmin({ limit: ARTICLE_LIMIT, offset: 0 })).data,
+  async () => {
+    const response = await getNewsArticlesAdmin({ limit: ARTICLE_LIMIT, offset: 0 });
+
+    return response.data;
+  },
   { server: false, immediate: canNews.value },
 );
 

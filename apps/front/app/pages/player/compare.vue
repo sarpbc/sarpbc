@@ -124,7 +124,7 @@ function teamCount(career: PlayerCareer): number {
 function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
   const currencies = [
     ...new Set([...a.earnings.totals, ...b.earnings.totals].map(({ currency }) => currency)),
-  ].sort();
+  ].toSorted();
 
   if (currencies.length === 0)
     return [

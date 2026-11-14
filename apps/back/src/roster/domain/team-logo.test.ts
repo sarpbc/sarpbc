@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import {
   detectTeamLogoFormat,
   pendingTeamLogoKey,
@@ -25,7 +25,7 @@ describe("team logo rules", () => {
   });
 
   it("detects SVG behind ambiguous comments", () => {
-    const comments = "<!--" + "--><!--".repeat(40);
+    const comments = `<!--${"--><!--".repeat(40)}`;
 
     expect(() => detectTeamLogoFormat(text(comments))).toThrow(InvalidInputError);
     expect(detectTeamLogoFormat(text(`${comments}--><svg>`))).toBe("svg");

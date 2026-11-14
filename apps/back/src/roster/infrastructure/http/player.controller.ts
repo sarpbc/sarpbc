@@ -20,12 +20,15 @@ import { ContractService } from "../../application/contract.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { CreatePlayerDto } from "./dto/create-player.dto";
-import { UpdatePlayerDto } from "./dto/update-player.dto";
-import { CreateContractDto } from "./dto/create-contract.dto";
-import { UpdateContractDto } from "./dto/update-contract.dto";
-import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
-import { ListDirectoryQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { CreatePlayerDto, type CreatePlayerInput } from "./dto/create-player.dto";
+import { UpdatePlayerDto, type UpdatePlayerInput } from "./dto/update-player.dto";
+import { CreateContractDto, type CreateContractInput } from "./dto/create-contract.dto";
+import { UpdateContractDto, type UpdateContractInput } from "./dto/update-contract.dto";
+import { AddPlayerPhotoDto, type AddPlayerPhotoInput } from "./dto/add-player-photo.dto";
+import {
+  ListDirectoryQueryDto,
+  type ListDirectoryQueryInput,
+} from "../../../common/infrastructure/http/dto/list-directory-query.dto";
 import { mapPlayer } from "./player.mapper";
 import { mapProfileMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
@@ -55,7 +58,7 @@ export class PlayerController {
   ) {}
 
   @Get()
-  async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryDto) {
+  async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryInput) {
     const [players, count] = await this.playerService.findAndCount({
       name: query.name,
       start: query.start,
@@ -72,7 +75,7 @@ export class PlayerController {
   @RequirePermissions("players.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
-  async create(@Body({ schema: CreatePlayerDto }) dto: CreatePlayerDto) {
+  async create(@Body({ schema: CreatePlayerDto }) dto: CreatePlayerInput) {
     const player = await this.playerService.create(dto);
 
     return { player: mapPlayer(player) };
@@ -95,7 +98,7 @@ export class PlayerController {
   @RequirePermissions("players.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
-  async update(@Param("id") id: string, @Body({ schema: UpdatePlayerDto }) dto: UpdatePlayerDto) {
+  async update(@Param("id") id: string, @Body({ schema: UpdatePlayerDto }) dto: UpdatePlayerInput) {
     const player = await this.playerService.update(id, dto);
 
     return { player: mapPlayer(player) };
@@ -127,7 +130,7 @@ export class PlayerController {
   @Post(":id/contract")
   async createContract(
     @Param("id") id: string,
-    @Body({ schema: CreateContractDto }) dto: CreateContractDto,
+    @Body({ schema: CreateContractDto }) dto: CreateContractInput,
   ) {
     const contract = await this.contractService.create(id, dto);
 
@@ -140,7 +143,7 @@ export class PlayerController {
   async updateContract(
     @Param("id") id: string,
     @Param("contractId") contractId: string,
-    @Body({ schema: UpdateContractDto }) dto: UpdateContractDto,
+    @Body({ schema: UpdateContractDto }) dto: UpdateContractInput,
   ) {
     const contract = await this.contractService.update(id, contractId, dto);
 
@@ -292,7 +295,7 @@ export class PlayerController {
   @Post(":id/photo")
   async addPhoto(
     @Param("id") id: string,
-    @Body({ schema: AddPlayerPhotoDto }) dto: AddPlayerPhotoDto,
+    @Body({ schema: AddPlayerPhotoDto }) dto: AddPlayerPhotoInput,
   ) {
     const photo = await this.playerService.addPhoto(id, dto.url);
 

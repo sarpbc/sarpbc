@@ -7,13 +7,11 @@ import type {
 } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { setupRosterProposalService as setup } from "../../../test/roster-proposal-service.setup";
-import {
-  ConflictError,
-  ForbiddenError,
-  InvalidInputError,
-  NotFoundError,
-} from "../../common/domain/errors";
-import { Player } from "../../roster/domain/roster";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { Player } from "../../roster/domain/player";
 import type { RosterProposalService } from "./roster-proposal.service";
 
 describe("RosterProposalService", () => {
@@ -57,6 +55,27 @@ describe("RosterProposalService", () => {
       service,
     } = setup());
   });
+
+  const proposeDarkLogo = async () =>
+    await service.proposeTeamLogo(
+      { teamId: "kc", variant: "dark", imageUrl: "https://kcorp.gg/logo-dark.svg" },
+      source,
+      "journalist",
+    );
+
+  const deleteMatch = async (matchId: string) =>
+    await service.propose(
+      { kind: "delete_match", matchId, reason: "Series imported twice" },
+      "",
+      "journalist",
+    );
+
+  const deleteTeam = async (teamId: string, mergeIntoTeamId?: string) =>
+    await service.propose(
+      { kind: "delete_team", teamId, reason: "Empty duplicate", mergeIntoTeamId },
+      "",
+      "journalist",
+    );
 
   const addZen = async () =>
     await service.propose(
@@ -159,7 +178,8 @@ describe("RosterProposalService", () => {
       "journalist",
     );
 
-    expect((await service.approve(id, "admin")).entityId).toBe("new-player");
+    const approveResult = await service.approve(id, "admin");
+    expect(approveResult.entityId).toBe("new-player");
     expect(players.create).toHaveBeenCalledWith({
       name: "Atow",
       status: "free_agent",
@@ -180,7 +200,8 @@ describe("RosterProposalService", () => {
       "journalist",
     );
 
-    expect((await service.approve(id, "admin")).entityId).toBe("new-contract");
+    const approveResult2 = await service.approve(id, "admin");
+    expect(approveResult2.entityId).toBe("new-contract");
     expect(contracts.recordPeriod).toHaveBeenCalledWith("zen", {
       teamId: "kc",
       startDate: "2022-01-10",
@@ -232,7 +253,8 @@ describe("RosterProposalService", () => {
     await expect(service.approve(id, "admin")).rejects.toThrow("Team is inactive");
 
     expect(saved.get(id)).toMatchObject({ status: "pending", reviewedById: null });
-    expect((await service.list("pending")).proposals).toHaveLength(1);
+    const listResult = await service.list("pending");
+    expect(listResult.proposals).toHaveLength(1);
   });
 
   const prizeEntry = {
@@ -286,28 +308,33 @@ describe("RosterProposalService", () => {
   });
 
   it("refuses a BLAST.tv or Liquipedia mirror source for any proposal", async () => {
-    for (const sourceUrl of ["https://blast.tv/rl/open", "https://liquipedia-mirror.example/x"])
-      await expect(
-        service.propose(
-          { kind: "update_tournament_prize", tournamentId: "cup", teamId: "kc", patch: {} },
-          sourceUrl,
-          "journalist",
-        ),
-      ).rejects.toThrow(InvalidInputError);
+    await Promise.all(
+      ["https://blast.tv/rl/open", "https://liquipedia-mirror.example/x"].map(async (sourceUrl) => {
+        await expect(
+          service.propose(
+            { kind: "update_tournament_prize", tournamentId: "cup", teamId: "kc", patch: {} },
+            sourceUrl,
+            "journalist",
+          ),
+        ).rejects.toThrow(InvalidInputError);
+      }),
+    );
   });
 
   it("rejects prize proposals with an unknown or start.gg tournament, team or invalid currency", async () => {
-    const propose = async (tournamentId: string, entry: typeof prizeEntry) =>
+    const proposePrizes = async (tournamentId: string, entry: typeof prizeEntry) =>
       await service.propose(
         { kind: "set_tournament_prizes", tournamentId, prizes: [entry] },
         source,
         "journalist",
       );
 
-    await expect(propose("missing", prizeEntry)).rejects.toThrow(NotFoundError);
-    await expect(propose("startgg-cup", prizeEntry)).rejects.toThrow(InvalidInputError);
-    await expect(propose("cup", { ...prizeEntry, teamId: "nope" })).rejects.toThrow(NotFoundError);
-    await expect(propose("cup", { ...prizeEntry, currency: "XYZ" })).rejects.toThrow(
+    await expect(proposePrizes("missing", prizeEntry)).rejects.toThrow(NotFoundError);
+    await expect(proposePrizes("startgg-cup", prizeEntry)).rejects.toThrow(InvalidInputError);
+    await expect(proposePrizes("cup", { ...prizeEntry, teamId: "nope" })).rejects.toThrow(
+      NotFoundError,
+    );
+    await expect(proposePrizes("cup", { ...prizeEntry, currency: "XYZ" })).rejects.toThrow(
       InvalidInputError,
     );
     expect(saved.size).toBe(0);
@@ -320,6 +347,9 @@ describe("RosterProposalService", () => {
     playerId: "zen",
     awardType: "mvp",
   };
+
+  const propose = async (change: Partial<typeof award>) =>
+    await service.propose({ ...award, ...change }, source, "journalist");
 
   it("applies a sourced award once a tournament manager approves it", async () => {
     const { id } = await service.propose(award, source, "journalist");
@@ -346,9 +376,6 @@ describe("RosterProposalService", () => {
   });
 
   it("rejects award proposals the tournament cannot take", async () => {
-    const propose = async (change: Partial<typeof award>) =>
-      await service.propose({ ...award, ...change }, source, "journalist");
-
     await expect(propose({ tournamentId: "missing" })).rejects.toThrow(NotFoundError);
     await expect(propose({ tournamentId: "startgg-cup" })).rejects.toThrow(InvalidInputError);
     await expect(propose({ playerId: "bench" })).rejects.toThrow(NotFoundError);
@@ -393,13 +420,6 @@ describe("RosterProposalService", () => {
     const pendingUrl = `https://cdn.sarpbc.test/${pendingKey}`;
     const publishedKey = "teams/kc/logo-dark-0123456789abcdef.webp";
     const publishedUrl = `https://cdn.sarpbc.test/${publishedKey}`;
-
-    const proposeDarkLogo = async () =>
-      await service.proposeTeamLogo(
-        { teamId: "kc", variant: "dark", imageUrl: "https://kcorp.gg/logo-dark.svg" },
-        source,
-        "journalist",
-      );
 
     it("stages the normalized asset and queues it for review without touching the team", async () => {
       const proposal = await proposeDarkLogo();
@@ -497,20 +517,6 @@ describe("RosterProposalService", () => {
   });
 
   describe("deletions", () => {
-    const deleteMatch = async (matchId: string) =>
-      await service.propose(
-        { kind: "delete_match", matchId, reason: "Series imported twice" },
-        "",
-        "journalist",
-      );
-
-    const deleteTeam = async (teamId: string, mergeIntoTeamId?: string) =>
-      await service.propose(
-        { kind: "delete_team", teamId, reason: "Empty duplicate", mergeIntoTeamId },
-        "",
-        "journalist",
-      );
-
     it("records a pending match deletion without deleting anything", async () => {
       const proposal = await deleteMatch("dup-match");
 
@@ -662,7 +668,7 @@ describe("RosterProposalService", () => {
         list,
         "startgg",
       );
-      const result = streams.set.mock.results[1];
+      const [, result] = streams.set.mock.results;
       const applied = result?.type === "return" ? await result.value : undefined;
       expect(applied?.streams.map((stream) => stream.source)).toEqual(["startgg", "startgg"]);
     });

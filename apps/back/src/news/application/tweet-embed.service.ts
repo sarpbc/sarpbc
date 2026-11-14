@@ -1,5 +1,5 @@
 import { parseTweetUrl, type ParsedTweetUrl, type TweetEmbed } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface TweetEmbedGateway {
   load(parsed: ParsedTweetUrl): Promise<TweetEmbed>;

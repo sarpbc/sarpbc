@@ -5,7 +5,7 @@ import { NewsArticle } from "../../../news/infrastructure/news-persistence";
 import { Match, toMatchSlug } from "../../../tournament/infrastructure/competition-persistence";
 import type { ReplyRecord } from "../../application/models";
 import { REPLY_TARGETS, type ReplyTargetFields } from "../../domain/reply";
-import type { Reply } from "./reply.entities";
+import type { Reply } from "./reply.entity";
 
 export const REPLY_POPULATE = [
   "author",

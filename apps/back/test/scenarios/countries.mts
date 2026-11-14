@@ -25,13 +25,17 @@ export interface CountriesContext {
 
 export async function verifyCountries({ request, staffCookie }: CountriesContext): Promise<void> {
   async function created<T>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> {
-    return (await request("POST", path, body, staffCookie, 201)).json(schema);
+    const response = await request("POST", path, body, staffCookie, 201);
+
+    return response.json(schema);
   }
 
   const teamBody = z.object({ team });
   const playerBody = z.looseObject({});
-  const home = (await created("/team", { name: "Country Home Five" }, teamBody)).team;
-  const away = (await created("/team", { name: "Country Away Five" }, teamBody)).team;
+  const response2 = await created("/team", { name: "Country Home Five" }, teamBody);
+  const home = response2.team;
+  const response3 = await created("/team", { name: "Country Away Five" }, teamBody);
+  const away = response3.team;
 
   await created(
     "/player",
@@ -62,37 +66,39 @@ export async function verifyCountries({ request, staffCookie }: CountriesContext
       }),
     );
 
-    return (
-      await created(
-        `/tournaments/${tournament.id}/matches`,
-        {
-          name: `Country ${source} Final`,
-          beginAt: "2026-06-01T10:00:00Z",
-          endAt: "2026-06-01T12:00:00Z",
-          status: "finished",
-          participantIds: tournament.participants.map(({ id }) => id),
-        },
-        z.object({ match: z.looseObject({ id: z.string() }) }),
-      )
-    ).match.id;
+    const response4 = await created(
+      `/tournaments/${tournament.id}/matches`,
+      {
+        name: `Country ${source} Final`,
+        beginAt: "2026-06-01T10:00:00Z",
+        endAt: "2026-06-01T12:00:00Z",
+        status: "finished",
+        participantIds: tournament.participants.map(({ id }) => id),
+      },
+      z.object({ match: z.looseObject({ id: z.string() }) }),
+    );
+
+    return response4.match.id;
   };
 
   const manualFinal = await finishedMatchOf("manual");
   await finishedMatchOf("startgg");
 
-  const { countries } = (await request("GET", "/countries")).json(countriesBody);
+  const response5 = await request("GET", "/countries");
+  const { countries } = response5.json(countriesBody);
 
   assert.deepEqual(
     countries.find(({ code }) => code === "TV"),
     { code: "TV", playerCount: 2 },
     "stored nationalities are trimmed and upper-cased into one code",
   );
-  assert(
+  assert.ok(
     countries.every(({ code }) => /^[A-Z]{2}$/.test(code)),
     "values that are not a two-letter code stay off the index",
   );
 
-  const { country } = (await request("GET", "/countries/tv")).json(countryBody);
+  const response6 = await request("GET", "/countries/tv");
+  const { country } = response6.json(countryBody);
   assert.equal(country.code, "TV");
   assert.deepEqual(
     country.players.map(({ name }) => name),

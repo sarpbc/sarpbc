@@ -1,26 +1,15 @@
-import { Injectable, Module, OnModuleInit } from "@nestjs/common";
-import { EntityManager, MikroORM } from "@mikro-orm/postgresql";
-import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import { Module } from "@nestjs/common";
+import { EntityManager } from "@mikro-orm/postgresql";
 import { ReplyModule } from "../../reply/infrastructure/reply.module";
 import { ForumController } from "./http/forum.controller";
 import { PostController } from "./http/post.controller";
 import { TopicController } from "./http/topic.contoller";
 import { PostService } from "../application/post.service";
 import { TopicService } from "../application/topic.service";
-import { MikroPostStore, MikroTopicStore } from "./persistence/forum.store";
+import { MikroPostStore } from "./persistence/post.store";
+import { MikroTopicStore } from "./persistence/topic.store";
 import { transactionalForum } from "./composition";
-
-@Injectable()
-class TopicInitializer implements OnModuleInit {
-  constructor(
-    private readonly topics: TopicService,
-    private readonly orm: MikroORM,
-  ) {}
-  @CreateRequestContext()
-  async onModuleInit() {
-    await this.topics.initializeTopics();
-  }
-}
+import { TopicInitializer } from "./topic-initializer";
 
 @Module({
   imports: [ReplyModule],

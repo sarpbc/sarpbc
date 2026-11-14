@@ -80,10 +80,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   }
 
   async deleteByPrefix(prefix: string): Promise<number> {
-    let cursor = "0";
-    let deleted = 0;
-
-    do {
+    const deleteFrom = async (cursor: string): Promise<number> => {
       const [nextCursor, keys] = await this.client.scan(
         cursor,
         "MATCH",
@@ -92,13 +89,11 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
         100,
       );
 
-      if (keys.length > 0) {
-        deleted += await this.client.del(keys);
-      }
+      const deleted = keys.length > 0 ? await this.client.del(keys) : 0;
 
-      cursor = nextCursor;
-    } while (cursor !== "0");
+      return nextCursor === "0" ? deleted : deleted + (await deleteFrom(nextCursor));
+    };
 
-    return deleted;
+    return await deleteFrom("0");
   }
 }

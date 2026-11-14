@@ -63,7 +63,7 @@ describe("on this day (e2e)", () => {
               id === "staff" && required.includes("tournaments.manage"),
           },
         },
-        { provide: ConfigService, useValue: { get: () => undefined } },
+        { provide: ConfigService, useValue: { get: () => {} } },
         { provide: APP_FILTER, useClass: AllExceptionsFilter },
       ],
     }).compile();

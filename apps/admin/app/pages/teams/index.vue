@@ -38,10 +38,10 @@ const {
   status,
   error,
   refresh,
-} = useAdminList("admin-teams", async ({ limit, offset }) => {
-  const { teams, total } = await getAllTeams({ limit, offset });
+} = useAdminList("admin-teams", async (range) => {
+  const response = await getAllTeams(range);
 
-  return { items: teams, total };
+  return { items: response.teams, total: response.total };
 });
 
 const teamToDelete = ref<Team | null>(null);

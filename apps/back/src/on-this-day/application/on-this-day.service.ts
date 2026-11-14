@@ -10,16 +10,14 @@ import type {
 } from "@sarpbc/types";
 import { SITE_TIME_ZONE, calendarDayIn, formatIsoDay, type CalendarDay } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
-import type { Player, Team } from "../../roster/domain/roster";
+import type { Player } from "../../roster/domain/player";
+import type { Team } from "../../roster/domain/team";
 import type { Transfer } from "../../roster/domain/transfer";
 import type { TransferService } from "../../roster/application/transfer.service";
-import { matchPublicSlug } from "../../tournament/domain/competition";
-import type {
-  Match,
-  Tournament,
-  TournamentParticipant,
-  TournamentSummary,
-} from "../../tournament/domain/competition";
+import { matchPublicSlug } from "../../tournament/domain/match";
+import type { Match, TournamentSummary } from "../../tournament/domain/match";
+import type { Tournament } from "../../tournament/domain/tournament";
+import type { TournamentParticipant } from "../../tournament/domain/tournament-participant";
 import type { TournamentQueries } from "../../tournament/application/ports";
 import { isFactShownOn } from "../domain/on-this-day-fact";
 import type { OnThisDayFactStore } from "./ports";
@@ -206,10 +204,10 @@ export class OnThisDayService {
     const events = [
       ...facts.filter((entry) => isFactShownOn(entry, on)).flatMap(fact),
       ...titles.filter(({ id }) => !decidedInFinal.has(id)).flatMap(title),
-      ...finalEvents.flatMap(({ events }) => events),
+      ...finalEvents.flatMap(({ events: stageEvents }) => stageEvents),
       ...transfers.filter(({ date }) => date.getUTCFullYear() < on.year).map(transfer),
     ];
 
-    return { date: formatIsoDay(on), events: events.sort(byInterest) };
+    return { date: formatIsoDay(on), events: events.toSorted(byInterest) };
   }
 }

@@ -10,7 +10,7 @@ import {
   MAX_CIRCUIT_STAGE_TEAMS,
   isForbiddenSourceHost,
 } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 function isWhole(value: number, min: number, max: number): boolean {
   return Number.isInteger(value) && value >= min && value <= max;
@@ -32,18 +32,18 @@ export function parseCircuitScale(tiers: readonly CircuitScaleTier[]): CircuitSc
       );
   }
 
-  const sorted = [...tiers]
-    .sort((a, b) => a.from - b.from)
+  const sorted = tiers
+    .toSorted((a, b) => a.from - b.from)
     .map(({ from, to, points }) => ({ from, to, points }));
 
-  sorted.forEach((tier, index) => {
+  for (const [index, tier] of sorted.entries()) {
     const previous: typeof tier | undefined = sorted[index - 1];
 
     if (previous !== undefined && tier.from <= previous.to)
       throw new InvalidInputError(
         `Placement ${tier.from} appears in two tiers. Each placement belongs to one tier.`,
       );
-  });
+  }
 
   return sorted;
 }
@@ -110,6 +110,6 @@ export function parseCircuitStageSettings(
     sourceUrl: input.sourceUrl,
     worldwide: input.worldwide ?? false,
     regionTeamIds,
-    finishes: finishes.sort((a, b) => a.placement - b.placement),
+    finishes: finishes.toSorted((a, b) => a.placement - b.placement),
   };
 }

@@ -4,22 +4,27 @@ import type { MatchEventGroup } from "~/types/matches";
 import type { MatchDiscoverySource } from "~/utils/matchDiscoveryAnalytics";
 import { formatDayHeaderDate } from "~/utils/dateFormatter";
 
-const { matches, variant, discoverySource, liveMatchIds } = defineProps<{
+const {
+  matches,
+  variant,
+  discoverySource = null,
+  liveMatchIds = null,
+} = defineProps<{
   matches: MatchListItem[];
   variant: "live" | "upcoming" | "result";
   /** When set, links carry `?from=` and emit `match_row_clicked`. */
-  discoverySource?: MatchDiscoverySource;
+  discoverySource?: MatchDiscoverySource | null;
   /** Match ids treated as live when mixed into an upcoming schedule list. */
-  liveMatchIds?: ReadonlySet<string>;
+  liveMatchIds?: ReadonlySet<string> | null;
 }>();
 
 const { t, locale } = useI18n();
 
-type ListBlock = {
+interface ListBlock {
   key: string;
   dateLabel: string | null;
   events: MatchEventGroup[];
-};
+}
 
 const useDateGrouping = computed(() => variant === "upcoming");
 

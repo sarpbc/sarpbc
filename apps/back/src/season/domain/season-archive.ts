@@ -10,7 +10,7 @@ import {
   toSlug,
 } from "@sarpbc/utils";
 import { isUuid } from "../../common/domain/entity-ref";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface SeasonPathEntryFields {
   label: string;

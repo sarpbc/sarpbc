@@ -1,6 +1,9 @@
 import { v4 } from "uuid";
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import { Match, type TournamentParticipant } from "../../domain/competition";
+import { mapSequentially } from "../../../common/application/sequentially";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import { Match } from "../../domain/match";
+import type { TournamentParticipant } from "../../domain/tournament-participant";
 import type { MatchWriter } from "../ports";
 import type {
   EmptyBracketInput,
@@ -29,9 +32,9 @@ async function requireParticipants(
   tournamentId: string,
   participantIds: string[],
 ) {
-  const available = await writer.participants(tournamentId),
-    ids = new Set(participantIds),
-    participants = available.filter((p) => ids.has(p.id));
+  const available = await writer.participants(tournamentId);
+  const ids = new Set(participantIds);
+  const participants = available.filter((p) => ids.has(p.id));
 
   if (participants.length !== participantIds.length)
     throw new InvalidInputError("Some participants not found in this tournament");
@@ -157,13 +160,13 @@ export async function createEmptyBracketInTransaction(
     return { slot, match };
   });
 
-  for (const { slot, match } of planned) {
+  await mapSequentially(planned, async ({ slot, match }) => {
     match.previousMatches = toBracketLinks(
       match.id,
       slot.previousMatches.flatMap(({ index, type }) => {
         const previous: (typeof planned)[number] | undefined = planned[index];
 
-        return previous !== undefined ? [{ previousMatchId: previous.match.id, type }] : [];
+        return previous === undefined ? [] : [{ previousMatchId: previous.match.id, type }];
       }),
     );
     await saveMatch(writer, match, [], {
@@ -172,7 +175,7 @@ export async function createEmptyBracketInTransaction(
       numberOfGames: input.numberOfGames,
       participantIds: [],
     });
-  }
+  });
 
   return planned.map(({ match }) => match);
 }
@@ -198,19 +201,23 @@ export async function upsertSyncedMatchInTransaction(
   if (input.officialStreams !== undefined) match.officialStreams = input.officialStreams;
 
   if (input.previousMatches?.length !== undefined && input.previousMatches.length !== 0) {
-    match.previousMatches = [];
+    const previousMatches = await mapSequentially(input.previousMatches, async (link) => ({
+      link,
+      previous: await writer.byPandascoreId(link.matchPandascoreId),
+    }));
 
-    for (const link of input.previousMatches) {
-      const previous = await writer.byPandascoreId(link.matchPandascoreId);
-
-      if (previous)
-        match.previousMatches.push({
-          id: v4(),
-          match: { id: match.id },
-          previousMatch: { id: previous.id },
-          type: link.type,
-        });
-    }
+    match.previousMatches = previousMatches.flatMap(({ link, previous }) =>
+      previous
+        ? [
+            {
+              id: v4(),
+              match: { id: match.id },
+              previousMatch: { id: previous.id },
+              type: link.type,
+            },
+          ]
+        : [],
+    );
   }
 
   return await saveMatch(writer, match, participants, input);
@@ -233,6 +240,31 @@ export async function setWinnerInTransaction(
   await writer.save(match);
 
   return match;
+}
+
+async function replaceParticipants(
+  writer: MatchWriter,
+  match: Match,
+  participantIds: readonly string[],
+  rescored: boolean,
+): Promise<void> {
+  assertManualBracketMatch(match);
+
+  if (new Set(participantIds).size !== participantIds.length)
+    throw new InvalidInputError("Each participant can only play a match once.");
+  const participants = await requireParticipants(writer, match.tournament.id, [...participantIds]);
+  const current = new Set(match.participants.map((p) => p.id));
+
+  const changed =
+    current.size !== participantIds.length || participantIds.some((id) => !current.has(id));
+
+  if (changed && !rescored && (match.results.length > 0 || match.winner))
+    throw new InvalidInputError(
+      "This match already has scores or a winner. Send its new scores with the participants.",
+    );
+  match.participants = participantIds.flatMap((id) => participants.find((p) => p.id === id) ?? []);
+
+  if (match.winner && !participantIds.includes(match.winner.id)) match.winner = null;
 }
 
 export async function updateMatchInTransaction(
@@ -280,9 +312,7 @@ export async function updateMatchInTransaction(
       ? input.status === "finished"
       : match.hasEnded();
 
-  if (!finished) {
-    match.winner = null;
-  } else {
+  if (finished) {
     const winnerId = winnerFromResults(
       match.results.map((r) => ({ participantId: r.participant.id, score: r.score })),
     );
@@ -293,37 +323,14 @@ export async function updateMatchInTransaction(
     if (winner || input.results) match.winner = winner;
 
     if (match.winner) match.status = "finished";
+  } else {
+    match.winner = null;
   }
 
   match.stampEnd(new Date());
   await writer.save(match);
 
   return match;
-}
-
-async function replaceParticipants(
-  writer: MatchWriter,
-  match: Match,
-  participantIds: readonly string[],
-  rescored: boolean,
-): Promise<void> {
-  assertManualBracketMatch(match);
-
-  if (new Set(participantIds).size !== participantIds.length)
-    throw new InvalidInputError("Each participant can only play a match once.");
-  const participants = await requireParticipants(writer, match.tournament.id, [...participantIds]);
-  const current = new Set(match.participants.map((p) => p.id));
-
-  const changed =
-    current.size !== participantIds.length || participantIds.some((id) => !current.has(id));
-
-  if (changed && !rescored && (match.results.length > 0 || match.winner))
-    throw new InvalidInputError(
-      "This match already has scores or a winner. Send its new scores with the participants.",
-    );
-  match.participants = participantIds.flatMap((id) => participants.find((p) => p.id === id) ?? []);
-
-  if (match.winner && !participantIds.includes(match.winner.id)) match.winner = null;
 }
 
 export async function setVodsInTransaction(

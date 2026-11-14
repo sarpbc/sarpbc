@@ -83,7 +83,11 @@ export function circuitTools({ circuitService }: CircuitToolServices): McpTool[]
       description:
         "List the points circuits on sarpbc.org (a season circuit, worldwide or limited to one region, whose official points scales staff entered). Use get_circuit for the stages, scales and standings.",
       input: {},
-      handler: async () => (await circuitService.list()).map(withUrl),
+      handler: async () => {
+        const circuits = await circuitService.list();
+
+        return circuits.map(withUrl);
+      },
     }),
 
     defineTool({

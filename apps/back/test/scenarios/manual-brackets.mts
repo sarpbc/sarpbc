@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import type { BracketLinkInput } from "@sarpbc/types";
 import { z } from "zod";
+import { mapSequentially } from "../../src/common/application/sequentially.ts";
 import { byJoined } from "./support.mts";
 import type { JsonResponse, Payload, Request } from "./support.mts";
 
@@ -43,25 +44,26 @@ export async function verifyManualBrackets({
   memberCookie,
   competition,
 }: ManualBracketsContext): Promise<void> {
-  const players: Identified[] = [];
+  const players: Identified[] = await mapSequentially(
+    ["Fake Seed One", "Fake Seed Two", "Fake Seed Three", "Fake Seed Four"],
+    async (name) => {
+      const response = await request("POST", "/player", { name }, staffCookie, 201);
 
-  for (const name of ["Fake Seed One", "Fake Seed Two", "Fake Seed Three", "Fake Seed Four"])
-    players.push(
-      (await request("POST", "/player", { name }, staffCookie, 201)).json(
-        z.object({ player: identified }),
-      ).player,
+      return response.json(z.object({ player: identified })).player;
+    },
+  );
+
+  const createStage = async (name: string): Promise<TournamentDetail> => {
+    const response = await request(
+      "POST",
+      "/tournaments",
+      { name, format: "1v1", playerParticipants: players.map(({ id }) => [id]) },
+      staffCookie,
+      201,
     );
 
-  const createStage = async (name: string): Promise<TournamentDetail> =>
-    (
-      await request(
-        "POST",
-        "/tournaments",
-        { name, format: "1v1", playerParticipants: players.map(({ id }) => [id]) },
-        staffCookie,
-        201,
-      )
-    ).json(tournamentBody).tournament;
+    return response.json(tournamentBody).tournament;
+  };
 
   const stage = await createStage("Fake Bracket Finals");
   assert.equal(stage.hasBracket, false);
@@ -72,17 +74,24 @@ export async function verifyManualBrackets({
         (participant) => participant.players[0].id === player.id,
       );
 
-      assert(entry, "the seeded player entered the stage");
+      assert.ok(entry, "the seeded player entered the stage");
 
       return entry.id;
     });
 
   const [p1, p2, p3, p4] = participantsOf(stage);
 
-  const createMatch = async (body: Payload): Promise<Identified> =>
-    (await request("POST", `/tournaments/${stage.id}/matches`, body, staffCookie, 201)).json(
-      z.object({ match: identified }),
-    ).match;
+  const createMatch = async (body: Payload): Promise<Identified> => {
+    const response2 = await request(
+      "POST",
+      `/tournaments/${stage.id}/matches`,
+      body,
+      staffCookie,
+      201,
+    );
+
+    return response2.json(z.object({ match: identified })).match;
+  };
 
   const semi1 = await createMatch({ name: "Semifinal 1", participantIds: [p1, p2] });
   const semi2 = await createMatch({ name: "Semifinal 2", participantIds: [p3, p4] });
@@ -101,9 +110,14 @@ export async function verifyManualBrackets({
   );
   await request("PATCH", `/tournaments/${stage.id}`, { hasBracket: true }, memberCookie, 403);
 
-  const enabled = (
-    await request("PATCH", `/tournaments/${stage.id}`, { hasBracket: true }, staffCookie)
-  ).json(tournamentBody).tournament;
+  const response3 = await request(
+    "PATCH",
+    `/tournaments/${stage.id}`,
+    { hasBracket: true },
+    staffCookie,
+  );
+
+  const enabled = response3.json(tournamentBody).tournament;
 
   assert.equal(enabled.hasBracket, true);
 
@@ -113,16 +127,17 @@ export async function verifyManualBrackets({
     previousMatches: feeders,
   });
 
-  const detail = (await request("GET", `/tournaments/${stage.id}`)).json(tournamentBody).tournament;
+  const response4 = await request("GET", `/tournaments/${stage.id}`);
+  const detail = response4.json(tournamentBody).tournament;
 
   const detailFinal = detail.matches.find((match) => match.id === final.id);
   assert.equal(detail.hasBracket, true);
-  assert(detailFinal, "the final is part of the stage");
+  assert.ok(detailFinal, "the final is part of the stage");
   assert.deepEqual(
     detailFinal.previousMatches
       .map(({ previousMatch, type }) => [previousMatch, type])
-      .sort(byJoined),
-    feeders.map(({ previousMatchId, type }) => [previousMatchId, type]).sort(byJoined),
+      .toSorted(byJoined),
+    feeders.map(({ previousMatchId, type }) => [previousMatchId, type]).toSorted(byJoined),
     "the public stage carries the links the bracket tree is drawn from",
   );
 
@@ -157,12 +172,15 @@ export async function verifyManualBrackets({
   await request("DELETE", `/tournaments/matches/${semi1.id}`, undefined, staffCookie, 204);
   await request("POST", `/tournaments/${stage.id}/bracket`, { teams: 4 }, staffCookie, 400);
   await request("DELETE", `/tournaments/matches/${semi2.id}`, undefined, staffCookie, 204);
-  assert.equal(
-    (await request("PATCH", `/tournaments/${stage.id}`, { hasBracket: false }, staffCookie)).json(
-      tournamentBody,
-    ).tournament.hasBracket,
-    false,
+
+  const response5 = await request(
+    "PATCH",
+    `/tournaments/${stage.id}`,
+    { hasBracket: false },
+    staffCookie,
   );
+
+  assert.equal(response5.json(tournamentBody).tournament.hasBracket, false);
 
   const empty = await createStage("Fake Empty Bracket");
   await request("POST", `/tournaments/${empty.id}/bracket`, { teams: 4 }, staffCookie, 400);
@@ -170,38 +188,43 @@ export async function verifyManualBrackets({
   await request("POST", `/tournaments/${empty.id}/bracket`, { teams: 6 }, staffCookie, 400);
   await request("POST", `/tournaments/${empty.id}/bracket`, { teams: 4 }, memberCookie, 403);
 
-  const generated = (
-    await request(
-      "POST",
-      `/tournaments/${empty.id}/bracket`,
-      { teams: 4, numberOfGames: 7 },
-      staffCookie,
-      201,
-    )
-  ).json(generatedMatches).matches;
+  const response6 = await request(
+    "POST",
+    `/tournaments/${empty.id}/bracket`,
+    { teams: 4, numberOfGames: 7 },
+    staffCookie,
+    201,
+  );
+
+  const generated = response6.json(generatedMatches).matches;
 
   assert.equal(generated.length, 3);
-  assert(generated.every((match) => match.participants.length === 0 && match.numberOfGames === 7));
+  assert.ok(
+    generated.every((match) => match.participants.length === 0 && match.numberOfGames === 7),
+  );
 
-  const tree = (await request("GET", `/tournaments/${empty.id}`)).json(tournamentBody).tournament
-    .matches;
+  const response7 = await request("GET", `/tournaments/${empty.id}`);
+  const tree = response7.json(tournamentBody).tournament.matches;
 
   const grandFinal = tree.find((match) => match.name === "Grand Final");
-  assert(grandFinal, "the generated bracket has a grand final");
+  assert.ok(grandFinal, "the generated bracket has a grand final");
   assert.deepEqual(
-    grandFinal.previousMatches.map(({ previousMatch }) => previousMatch).sort(),
+    grandFinal.previousMatches.map(({ previousMatch }) => previousMatch).toSorted(),
     tree
       .filter((match) => match.name.startsWith("Semifinal"))
       .map(({ id }) => id)
-      .sort(),
+      .toSorted(),
   );
   const firstSemi = tree.find((match) => match.name === "Semifinal 1");
-  assert(firstSemi, "the generated bracket has a first semifinal");
+  assert.ok(firstSemi, "the generated bracket has a first semifinal");
   const [e1, e2] = participantsOf(empty);
 
-  const filled = (
-    await setBracket(firstSemi.id, { participantIds: [e2, e1], previousMatches: [] })
-  ).json(z.object({ match: tournamentDetailMatch })).match;
+  const setBracketResult = await setBracket(firstSemi.id, {
+    participantIds: [e2, e1],
+    previousMatches: [],
+  });
+
+  const filled = setBracketResult.json(z.object({ match: tournamentDetailMatch })).match;
 
   assert.deepEqual(
     filled.participants.map(({ id }) => id),

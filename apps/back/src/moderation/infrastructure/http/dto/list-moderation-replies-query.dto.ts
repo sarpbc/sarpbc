@@ -6,4 +6,4 @@ export const ListModerationRepliesQueryDto = PaginationQueryDto.extend({
   limit: z.coerce.number().int().min(1).max(MAX_PAGE_SIZE).default(50),
 });
 
-export type ListModerationRepliesQueryDto = z.infer<typeof ListModerationRepliesQueryDto>;
+export type ListModerationRepliesQueryInput = z.infer<typeof ListModerationRepliesQueryDto>;

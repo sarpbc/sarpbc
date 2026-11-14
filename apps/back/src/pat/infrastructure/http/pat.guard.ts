@@ -1,6 +1,6 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { FastifyRequest } from "fastify";
-import { AuthenticationError } from "../../../common/domain/errors";
+import { AuthenticationError } from "../../../common/domain/errors/authentication-error";
 import { PatService } from "../../application/pat.service";
 
 const BEARER_PREFIX = /^bearer\s+/i;

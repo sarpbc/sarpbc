@@ -12,11 +12,11 @@ export async function getCircuitStandings(slug: string): Promise<CircuitStanding
     return await apiFetch<CircuitStandings>(`/circuits/${encodeURIComponent(slug)}/standings`, {
       method: "GET",
     });
-  } catch (cause) {
-    if (getApiErrorStatus(cause) === 404) {
+  } catch (error) {
+    if (getApiErrorStatus(error) === 404) {
       return null;
     }
 
-    throw cause;
+    throw error;
   }
 }

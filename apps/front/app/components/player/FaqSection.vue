@@ -14,21 +14,31 @@ const { t, te } = useI18n();
 const { setJsonLd } = useStructuredData();
 
 const faqItems = computed(() => {
-  const name = player.name;
+  const { name } = player;
   const teamName = player.team?.name;
   const demonym = resolvePlayerNationalityDemonym(player.nationality, te, t);
 
-  const whoAnswer = teamName
-    ? demonym
-      ? t("page.player.slug.faq.who.answerWithTeam", {
-          name,
-          team: teamName,
-          nationality: demonym,
-        })
-      : t("page.player.slug.faq.who.answerWithTeamGeneric", { name, team: teamName })
-    : demonym
-      ? t("page.player.slug.faq.who.answerFreeAgent", { name, nationality: demonym })
-      : t("page.player.slug.faq.who.answerFreeAgentGeneric", { name });
+  function whoAnswerText(): string {
+    if (teamName && demonym) {
+      return t("page.player.slug.faq.who.answerWithTeam", {
+        name,
+        team: teamName,
+        nationality: demonym,
+      });
+    }
+
+    if (teamName) {
+      return t("page.player.slug.faq.who.answerWithTeamGeneric", { name, team: teamName });
+    }
+
+    if (demonym) {
+      return t("page.player.slug.faq.who.answerFreeAgent", { name, nationality: demonym });
+    }
+
+    return t("page.player.slug.faq.who.answerFreeAgentGeneric", { name });
+  }
+
+  const whoAnswer = whoAnswerText();
 
   const trophyAnswer =
     trophies.length > 0

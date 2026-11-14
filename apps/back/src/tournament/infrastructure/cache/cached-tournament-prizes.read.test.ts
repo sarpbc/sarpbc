@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TournamentPrizes } from "@sarpbc/types";
-import { NotFoundError } from "../../../common/domain/errors";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { CachedTournamentPrizesRead } from "./cached-tournament-prizes.read";
 
 const distribution: TournamentPrizes = {

@@ -36,17 +36,11 @@ export const TweetTagNode = Node.create({
     tokenize: (src: string) => {
       const parsed = parseNewsTweetTag(src.trimStart());
 
-      if (!parsed) {
-        return undefined;
-      }
-
       const leading = src.length - src.trimStart().length;
 
-      return {
-        type: "tweetTag",
-        raw: `${src.slice(0, leading)}${parsed.raw}`,
-        url: parsed.url,
-      };
+      return parsed
+        ? { type: "tweetTag", raw: `${src.slice(0, leading)}${parsed.raw}`, url: parsed.url }
+        : undefined;
     },
   },
 

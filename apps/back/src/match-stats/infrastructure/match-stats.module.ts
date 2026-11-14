@@ -14,19 +14,15 @@ import { InterruptedImportsSweeper } from "./interrupted-imports.sweeper";
 import { StatsGameController } from "./http/stats-game.controller";
 import { StatsImportController } from "./http/stats-import.controller";
 import { StatsPlayerLinkController } from "./http/stats-player-link.controller";
-import {
-  MatchGame,
-  MatchGameExclusion,
-  MatchGamePlayer,
-  MatchStatsImport,
-  PlayerPlatformLink,
-} from "./persistence/match-stats.entities";
-import {
-  MikroOrmGameStatsStore,
-  MikroOrmPlayerLinkStore,
-  MikroOrmStatsCandidates,
-  MikroOrmStatsImportStore,
-} from "./persistence/match-stats.store";
+import { MatchGame } from "./persistence/match-game.entity";
+import { MatchGameExclusion } from "./persistence/match-game-exclusion.entity";
+import { MatchGamePlayer } from "./persistence/match-game-player.entity";
+import { MatchStatsImport } from "./persistence/match-stats-import.entity";
+import { PlayerPlatformLink } from "./persistence/player-platform-link.entity";
+import { MikroOrmGameStatsStore } from "./persistence/match-stats.store";
+import { MikroOrmPlayerLinkStore } from "./persistence/player-link.store";
+import { MikroOrmStatsCandidates } from "./persistence/stats-candidates.store";
+import { MikroOrmStatsImportStore } from "./persistence/stats-import.store";
 import { StatsImportRunner } from "./stats-import.runner";
 
 const BALLCHASING_SOURCE = Symbol("BallchasingSource");

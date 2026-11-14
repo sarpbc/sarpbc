@@ -9,8 +9,8 @@ import {
   MIN_CIRCUIT_SEASON,
 } from "@sarpbc/utils";
 
-const props = defineProps<{
-  circuit?: CircuitSummary;
+const { circuit = null } = defineProps<{
+  circuit?: CircuitSummary | null;
   submitLabel: string;
   loading: boolean;
 }>();
@@ -19,13 +19,13 @@ const emit = defineEmits<{ submit: [input: CircuitInput] }>();
 
 const { sourceUrlError: checkSourceUrl } = useSourceUrl();
 
-const name = ref(props.circuit?.name ?? "");
-const slug = ref(props.circuit?.slug ?? "");
-const season = ref<number | null>(props.circuit?.season ?? null);
-const region = ref(props.circuit?.region ?? "");
-const description = ref(props.circuit?.description ?? "");
-const sourceUrl = ref(props.circuit?.sourceUrl ?? "");
-const qualificationSpots = ref<number | null>(props.circuit?.qualificationSpots ?? null);
+const name = ref(circuit?.name ?? "");
+const slug = ref(circuit?.slug ?? "");
+const season = ref<number | null>(circuit?.season ?? null);
+const region = ref(circuit?.region ?? "");
+const description = ref(circuit?.description ?? "");
+const sourceUrl = ref(circuit?.sourceUrl ?? "");
+const qualificationSpots = ref<number | null>(circuit?.qualificationSpots ?? null);
 
 function inRange(value: number | null, min: number, max: number): boolean {
   return value === null || (Number.isInteger(value) && value >= min && value <= max);

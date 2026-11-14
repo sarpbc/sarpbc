@@ -3,15 +3,15 @@ import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
 const {
   letter = "",
-  result,
+  result = null,
   variant = "filled",
-  revealDelay,
+  revealDelay = null,
 } = defineProps<{
   letter?: string;
-  result?: AirRiddleResultEnum;
+  result?: AirRiddleResultEnum | null;
   variant?: "empty" | "current" | "filled";
   /** Flip-in delay (ms) for a row that was just submitted; omit for restored rows. */
-  revealDelay?: number;
+  revealDelay?: number | null;
 }>();
 
 const { t } = useI18n();

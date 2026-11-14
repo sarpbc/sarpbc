@@ -1,8 +1,9 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 
-export type OffsetPageQuery = {
+export interface OffsetPageQuery {
   offset?: string;
-};
+  [key: string]: string | undefined;
+}
 
 export const MATCH_LIST_PAGE_SIZE = 20;
 
@@ -13,7 +14,7 @@ export function parseRouteOffset(value: string | null | (string | null)[] | unde
     return 0;
   }
 
-  const parsed = Number.parseInt(raw, 10);
+  const parsed = Math.trunc(Number(raw));
 
   if (!Number.isFinite(parsed) || parsed < 0) {
     return 0;
@@ -28,6 +29,10 @@ export function offsetPageQuery(offset: number): OffsetPageQuery {
   }
 
   return { offset: String(offset) };
+}
+
+function getPageQuery(nextOffset: number): OffsetPageQuery {
+  return offsetPageQuery(Math.max(0, nextOffset));
 }
 
 export function useOffsetMatchListPage<TData extends { total: number }>(config: {
@@ -66,10 +71,6 @@ export function useOffsetMatchListPage<TData extends { total: number }>(config: 
 
   const hasPrevious = computed(() => offset.value > 0);
   const hasNext = computed(() => offset.value + MATCH_LIST_PAGE_SIZE < totalMatches.value);
-
-  function getPageQuery(nextOffset: number): OffsetPageQuery {
-    return offsetPageQuery(Math.max(0, nextOffset));
-  }
 
   return {
     offset,

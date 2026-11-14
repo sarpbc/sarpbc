@@ -51,7 +51,7 @@ const SIZES = {
   },
 };
 
-const { playerName, img = undefined, size, priority = false } = defineProps<Props>();
+const { playerName, img = null, size, priority = false } = defineProps<Props>();
 
 const spec = computed(() => SIZES[size]);
 const failed = ref(false);

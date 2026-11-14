@@ -1,43 +1,18 @@
-import { v4 } from "uuid";
-import { allocateSlug, eventSlug } from "@sarpbc/utils";
-import { Team } from "../../../roster/domain/roster";
-import { Tournament, League } from "../../domain/competition";
-import { TournamentEvent, eventDisplayName, toEventRef } from "../../domain/tournament-event";
-import { ConflictError, NotFoundError } from "../../../common/domain/errors";
-import { counterpartSearchWindow, findManualCounterpart } from "../../domain/manual-counterpart";
-import { inferEndAt } from "../../domain/tournament-end";
-import { assertPandascoreUpsertAllowed, claimForPandascore } from "../../domain/tournament-source";
 import type { CompetitionAfterCommit } from "../after-commit";
 import type {
   CompetitionTransaction,
   CompetitionWriteScope,
   CompetitionDiagnostics,
-  EventWriter,
 } from "../ports";
-import type {
-  CompetitionIncident,
-  ProviderDeletion,
-  UpsertLeagueCommand,
-  UpsertMatchCommand,
-  UpsertSerieCommand,
-  UpsertTournamentCommand,
-} from "../feed";
-import { upsertSyncedMatchInTransaction } from "../match/write-match";
-import { placeStage } from "../event-placement";
+import type { CompetitionIncident, UpsertMatchCommand, UpsertTournamentCommand } from "../feed";
+import type { Tournament } from "../../domain/tournament";
+import { assertPandascoreUpsertAllowed } from "../../domain/tournament-source";
+import type { Applied, AppliedTournament } from "./sync-applied";
+import { applyDeletion, applyLeague, applySerie } from "./sync-catalog";
+import { applyMatches } from "./sync-matches";
+import { applyTournament, settleEndAt } from "./sync-tournament";
 
 type IncidentChange = Exclude<CompetitionIncident, { changeType: "deletion" }>;
-
-type IncidentDeletion = Extract<CompetitionIncident, { changeType: "deletion" }>;
-
-interface Applied {
-  stageIds: string[];
-  matches: string[];
-}
-
-interface AppliedTournament {
-  tournament: Tournament;
-  stageIds: string[];
-}
 
 export class CompetitionSyncService {
   constructor(
@@ -51,9 +26,15 @@ export class CompetitionSyncService {
     linkTournamentId?: string,
   ): Promise<Tournament> {
     const result = await this.transaction.run(async (scope) => {
-      const { tournament, stageIds } = await this.applyTournament(scope, command, linkTournamentId);
-      const applied = await this.applyMatches(scope, tournament, matches);
-      await this.settleEndAt(scope, tournament);
+      const { tournament, stageIds } = await applyTournament(
+        scope,
+        this.diagnostics,
+        command,
+        linkTournamentId,
+      );
+
+      const applied = await applyMatches(scope, tournament, matches);
+      await settleEndAt(scope, tournament);
 
       return { tournament, stageIds, matches: applied };
     });
@@ -71,7 +52,7 @@ export class CompetitionSyncService {
   ): Promise<void> {
     const applied = await this.transaction.run(async (scope) =>
       incident.changeType === "deletion"
-        ? await this.applyDeletion(scope, incident)
+        ? await applyDeletion(scope, incident)
         : await this.applyChange(scope, incident, backfill),
     );
 
@@ -88,8 +69,13 @@ export class CompetitionSyncService {
   ): Promise<Applied | null> {
     switch (incident.kind) {
       case "tournament": {
-        const { tournament, stageIds } = await this.applyTournament(scope, incident.command);
-        await this.settleEndAt(scope, tournament);
+        const { tournament, stageIds } = await applyTournament(
+          scope,
+          this.diagnostics,
+          incident.command,
+        );
+
+        await settleEndAt(scope, tournament);
 
         return { stageIds, matches: [] };
       }
@@ -98,16 +84,15 @@ export class CompetitionSyncService {
         const pandascoreId = incident.command.tournamentPandascoreId;
         const existing = await scope.tournaments.byPandascoreId(pandascoreId);
 
-        const applied: AppliedTournament | null = existing
-          ? { tournament: existing, stageIds: [existing.id] }
-          : backfill
-            ? await this.applyTournament(scope, backfill)
-            : null;
+        let applied: AppliedTournament | null = null;
+
+        if (existing) applied = { tournament: existing, stageIds: [existing.id] };
+        else if (backfill) applied = await applyTournament(scope, this.diagnostics, backfill);
 
         if (!applied) return null;
         assertPandascoreUpsertAllowed(applied.tournament, pandascoreId);
-        const matches = await this.applyMatches(scope, applied.tournament, [incident.command]);
-        await this.settleEndAt(scope, applied.tournament);
+        const matches = await applyMatches(scope, applied.tournament, [incident.command]);
+        await settleEndAt(scope, applied.tournament);
 
         return { stageIds: applied.stageIds, matches };
       }
@@ -127,410 +112,16 @@ export class CompetitionSyncService {
       }
 
       case "league":
-        await this.applyLeague(scope, incident.command);
+        await applyLeague(scope, incident.command);
 
         return null;
       case "serie":
-        return await this.applySerie(scope.events, incident.command);
+        return await applySerie(scope.events, incident.command);
       default: {
         const neverIncident: never = incident;
 
         return neverIncident;
       }
     }
-  }
-  private async applyDeletion(
-    scope: CompetitionWriteScope,
-    incident: IncidentDeletion,
-  ): Promise<Applied | null> {
-    switch (incident.kind) {
-      case "serie":
-        return await this.applySerieDeletion(scope, incident.id, incident.deletion);
-      case "league":
-      case "match":
-      case "player":
-      case "team":
-      case "tournament":
-        return null;
-      default: {
-        const neverKind: never = incident.kind;
-
-        return neverKind;
-      }
-    }
-  }
-  private async applySerieDeletion(
-    scope: CompetitionWriteScope,
-    serieId: number,
-    deletion: ProviderDeletion,
-  ): Promise<Applied | null> {
-    switch (deletion.kind) {
-      case "merged":
-        return await this.mergeSerie(scope, serieId, deletion.intoId);
-      case "replaced":
-      case "deleted":
-        return null;
-      default: {
-        const neverDeletion: never = deletion;
-
-        return neverDeletion;
-      }
-    }
-  }
-  private async applySerie(
-    events: EventWriter,
-    command: UpsertSerieCommand,
-  ): Promise<Applied | null> {
-    const event = await events.bySerieId(command.pandascoreId);
-    const serieName = command.fullName?.trim();
-
-    if (!event || serieName === undefined || serieName === "") return null;
-    const stages = await events.stages(event.id);
-    event.name = eventDisplayName({
-      leagueName: event.league?.name ?? null,
-      serieName,
-      stageName: stages[0]?.name ?? "",
-    });
-    await events.save(event);
-
-    return { stageIds: stages.map((stage) => stage.id), matches: [] };
-  }
-  private async mergeSerie(
-    scope: CompetitionWriteScope,
-    serieId: number,
-    intoId: number,
-  ): Promise<Applied | null> {
-    const from = await scope.events.bySerieId(serieId);
-
-    if (!from) return null;
-    const stages = await scope.events.stages(from.id);
-    const stageIds = stages.map((stage) => stage.id);
-    const into = await scope.events.bySerieId(intoId);
-
-    if (!into) {
-      from.pandascoreSerieId = intoId;
-      await scope.events.save(from);
-
-      return { stageIds, matches: [] };
-    }
-
-    for (const stage of stages) {
-      const tournament = await scope.tournaments.load(stage.id);
-
-      if (!tournament) continue;
-      await placeStage(scope.events, tournament, into);
-      await scope.tournaments.save(tournament);
-    }
-
-    if (into.streams.length === 0 && from.streams.length > 0) {
-      into.streams = from.streams;
-      await scope.events.save(into);
-    }
-
-    await scope.events.remove(from.id);
-
-    return { stageIds, matches: [] };
-  }
-  private async applyTournament(
-    scope: CompetitionWriteScope,
-    command: UpsertTournamentCommand,
-    linkTournamentId?: string,
-  ): Promise<AppliedTournament> {
-    const league = command.league ? await this.applyLeague(scope, command.league) : null;
-    const existing = await this.syncTarget(scope, command, league, linkTournamentId);
-
-    if (existing) assertPandascoreUpsertAllowed(existing, command.pandascoreId);
-
-    const tournament =
-      existing ?? Object.assign(new Tournament(), { pandascoreId: command.pandascoreId });
-
-    tournament.source = "pandascore";
-    tournament.name = command.name;
-    tournament.tier = command.tier ?? null;
-    tournament.beginAt = command.beginAt ?? null;
-
-    if (!tournament.endAtCorrected) tournament.endAt = command.endAt ?? null;
-    tournament.prizepool = command.prizepool ?? null;
-    tournament.type = command.type ?? null;
-    tournament.country = command.country ?? null;
-    tournament.hasBracket = command.hasBracket ?? false;
-    tournament.winnerType = command.winnerType ?? null;
-    tournament.league = league;
-    const previousEventId = existing?.event.id ?? null;
-
-    const { event, renamed } = await this.resolveEvent(
-      scope.events,
-      previousEventId,
-      command,
-      tournament.league,
-    );
-
-    if (event.id === previousEventId) tournament.event = toEventRef(event);
-    else await placeStage(scope.events, tournament, event);
-    await scope.tournaments.save(tournament);
-
-    if (previousEventId !== null && previousEventId !== "" && previousEventId !== event.id) {
-      const remaining = await scope.events.stages(previousEventId);
-
-      if (!remaining.length) {
-        const previous = await scope.events.load(previousEventId);
-
-        if (previous && event.streams.length === 0 && previous.streams.length > 0) {
-          event.streams = previous.streams;
-          await scope.events.save(event);
-        }
-
-        await scope.events.remove(previousEventId);
-      }
-    }
-
-    const participants = await scope.tournaments.participants(tournament.id);
-
-    const pandascoreTeams = new Map(
-      participants.flatMap((participant) =>
-        participant.team?.pandascoreId !== null &&
-        participant.team?.pandascoreId !== undefined &&
-        participant.team.pandascoreId !== 0
-          ? [[participant.id, participant.team.pandascoreId]]
-          : [],
-      ),
-    );
-
-    for (const roster of command.expectedRoster ?? []) {
-      const team = await scope.rosters.upsertTeam(roster.team),
-        existingParticipant = participants.find((p) => p.team?.id === team.id),
-        playerIds: string[] = [];
-
-      for (const player of roster.players)
-        playerIds.push((await scope.rosters.upsertPlayer(player)).id);
-      const participantId = existingParticipant?.id ?? v4();
-
-      if (roster.team.pandascoreId !== undefined && roster.team.pandascoreId !== 0)
-        pandascoreTeams.set(participantId, roster.team.pandascoreId);
-      await scope.tournaments.saveParticipant({
-        id: participantId,
-        tournamentId: tournament.id,
-        teamId: team.id,
-        playerIds,
-        rosterSourceUrl: existingParticipant?.rosterSourceUrl ?? null,
-      });
-
-      if (roster.team.pandascoreId === command.winnerPandascoreTeamId) {
-        // Winner identity is sufficient for persistence; full roster views are reloaded after commit.
-        tournament.winner = {
-          id: participantId,
-          tournamentId: tournament.id,
-          team:
-            existingParticipant?.team ?? Object.assign(new Team(), { ...roster.team, id: team.id }),
-          players: [],
-          rosterSourceUrl: existingParticipant?.rosterSourceUrl ?? null,
-          createdAt: existingParticipant?.createdAt ?? new Date(),
-          updatedAt: new Date(),
-        };
-      }
-    }
-
-    if (command.standings) {
-      const ranks = new Map(command.standings.map((s) => [s.teamPandascoreId, s.rank]));
-      await scope.tournaments.setPlacements(
-        new Map([...pandascoreTeams].map(([id, teamId]) => [id, ranks.get(teamId) ?? null])),
-      );
-    }
-
-    await scope.tournaments.save(tournament);
-    const siblings = renamed ? (await scope.events.stages(event.id)).map((stage) => stage.id) : [];
-
-    return { tournament, stageIds: [...new Set([tournament.id, ...siblings])] };
-  }
-  private async syncTarget(
-    scope: CompetitionWriteScope,
-    command: UpsertTournamentCommand,
-    league: League | null,
-    linkTournamentId: string | undefined,
-  ): Promise<Tournament | null> {
-    const synced = await scope.tournaments.byPandascoreId(command.pandascoreId);
-
-    if (synced) {
-      if (
-        linkTournamentId !== undefined &&
-        linkTournamentId !== "" &&
-        synced.id !== linkTournamentId
-      )
-        throw new ConflictError(
-          `PandaScore tournament ${command.pandascoreId} is already imported as tournament ${synced.id}.`,
-        );
-
-      return synced;
-    }
-
-    const manualId = linkTournamentId ?? (await this.manualCounterpart(scope, command, league));
-
-    if (manualId === null || manualId === "") return null;
-    const manual = await scope.tournaments.load(manualId);
-
-    if (!manual) throw new NotFoundError(`Tournament with id "${manualId}" was not found.`);
-    claimForPandascore(manual, command.pandascoreId, command.endAt ?? null);
-
-    return manual;
-  }
-  private async manualCounterpart(
-    scope: CompetitionWriteScope,
-    command: UpsertTournamentCommand,
-    league: League | null,
-  ): Promise<string | null> {
-    const eventName = eventDisplayName({
-      leagueName: league?.name ?? null,
-      serieName: command.serie?.fullName ?? null,
-      stageName: command.name,
-    });
-
-    const stage = {
-      eventName,
-      stageName: command.name,
-      leagueId: league?.id ?? null,
-      beginAt: command.beginAt ?? null,
-      endAt: command.endAt ?? null,
-    };
-
-    const window = counterpartSearchWindow(stage);
-
-    if (!window) return null;
-    const match = findManualCounterpart(stage, await scope.tournaments.manualCandidates(window));
-
-    switch (match.kind) {
-      case "none":
-        return null;
-      case "unique":
-        return match.id;
-      case "ambiguous":
-        this.diagnostics.warn("Several manual tournaments match a PandaScore stage; none linked", {
-          pandascoreId: command.pandascoreId,
-          tournamentIds: match.ids,
-        });
-
-        return null;
-      default: {
-        const neverMatch: never = match;
-
-        return neverMatch;
-      }
-    }
-  }
-  private async settleEndAt(scope: CompetitionWriteScope, tournament: Tournament) {
-    if (tournament.endAt || tournament.endAtCorrected) return;
-    const endAt = inferEndAt(await scope.matches.timings(tournament.id));
-
-    if (!endAt) return;
-    tournament.endAt = endAt;
-    await scope.tournaments.save(tournament);
-  }
-  /** Backfilled events claim their serie on first sync instead of duplicating under a `-2` slug. */
-  private async resolveEvent(
-    events: EventWriter,
-    currentEventId: string | null,
-    command: UpsertTournamentCommand,
-    league: League | null,
-  ): Promise<{ event: TournamentEvent; renamed: boolean }> {
-    const serie = command.serie;
-
-    const name = eventDisplayName({
-      leagueName: league?.name ?? null,
-      serieName: serie?.fullName ?? null,
-      stageName: command.name,
-    });
-
-    const current =
-      currentEventId !== null && currentEventId !== "" ? await events.load(currentEventId) : null;
-
-    const unclaimedCurrent = current?.pandascoreSerieId === null ? current : null;
-
-    const lookups: Array<() => Promise<TournamentEvent | null>> = serie
-      ? [
-          async () => await events.bySerieId(serie.pandascoreId),
-          async () => unclaimedCurrent,
-          async () => await events.unclaimedByName(league?.id ?? null, name),
-        ]
-      : [async () => unclaimedCurrent];
-
-    let found: TournamentEvent | null = null;
-
-    for (const lookup of lookups) {
-      found = await lookup();
-
-      if (found) break;
-    }
-
-    const event = found ?? new TournamentEvent();
-
-    if (!found) {
-      const year = serie?.year ?? command.beginAt?.getUTCFullYear() ?? null;
-      event.slug = await allocateSlug(
-        eventSlug(name, year),
-        async (slug) => await events.slugTaken(slug, null),
-      );
-    }
-
-    const renamed = found !== null && found.name !== name;
-    event.pandascoreSerieId = serie?.pandascoreId ?? event.pandascoreSerieId;
-    event.name = name;
-    event.league = league;
-    await events.save(event);
-
-    return { event, renamed };
-  }
-  private async applyLeague(scope: CompetitionWriteScope, command: UpsertLeagueCommand) {
-    let league = await scope.tournaments.leagueByPandascoreId(command.pandascoreId);
-
-    if (!league) {
-      league = new League();
-      league.pandascoreId = command.pandascoreId;
-    }
-
-    league.name = command.name;
-    league.slug = league.slug ?? command.slug ?? null;
-    league.url = command.url ?? null;
-    league.imageUrl = league.imageUrl ?? command.imageUrl ?? null;
-    league.modifiedAt = command.modifiedAt ?? null;
-    await scope.tournaments.saveLeague(league);
-
-    return league;
-  }
-  private async applyMatches(
-    scope: CompetitionWriteScope,
-    tournament: Tournament,
-    commands: UpsertMatchCommand[],
-  ): Promise<string[]> {
-    const participants = await scope.tournaments.participants(tournament.id),
-      ids: string[] = [];
-
-    // Bracket links only resolve to matches already written, so earlier matches go first.
-    for (const command of [...commands].sort(
-      (a, b) => (a.beginAt?.getTime() ?? 0) - (b.beginAt?.getTime() ?? 0),
-    )) {
-      if (!command.beginAt) continue;
-
-      const participantIds = (
-        command.opponentPandascoreIds?.length !== undefined &&
-        command.opponentPandascoreIds.length !== 0
-          ? command.opponentPandascoreIds.map(
-              (id) => participants.find((p) => p.team?.pandascoreId === id)?.id,
-            )
-          : command.opponentSlugs.map((slug) => participants.find((p) => p.team?.slug === slug)?.id)
-      ).filter((id): id is string => Boolean(id));
-
-      const match = await upsertSyncedMatchInTransaction(scope.matches, tournament.id, {
-        ...command,
-        participantIds,
-        results: command.results.map((r) => ({
-          participantId:
-            participants.find((p) => p.team?.pandascoreId === r.teamPandascoreId)?.id ?? null,
-          score: r.score,
-        })),
-      });
-
-      if (match.isDecided()) ids.push(match.id);
-    }
-
-    return ids;
   }
 }

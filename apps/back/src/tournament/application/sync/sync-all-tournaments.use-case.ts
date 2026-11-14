@@ -1,3 +1,4 @@
+import { mapSequentially } from "../../../common/application/sequentially";
 import type { CompetitionFeed } from "../feed";
 import type { TournamentQueries } from "../ports";
 import { CompetitionSyncService } from "./competition-sync.service";
@@ -9,16 +10,18 @@ export class SyncAllTournamentsUseCase {
     private readonly synchronization: CompetitionSyncService,
   ) {}
   async execute(): Promise<string[]> {
-    const commands = await this.feed.getTournaments(),
-      known = await this.reads.knownPandascoreIds(),
-      ids: string[] = [];
+    const commands = await this.feed.getTournaments();
+    const known = await this.reads.knownPandascoreIds();
 
-    for (const command of commands) {
-      if (known.has(command.pandascoreId)) continue;
-      ids.push((await this.synchronization.upsertTournament(command)).id);
+    // Each upsert may create the league, serie or event the next one reuses, so run them in order.
+    const upserted = await mapSequentially(commands, async (command) => {
+      if (known.has(command.pandascoreId)) return null;
+      const tournament = await this.synchronization.upsertTournament(command);
       known.add(command.pandascoreId);
-    }
 
-    return ids;
+      return tournament.id;
+    });
+
+    return upserted.filter((id): id is string => id !== null);
   }
 }

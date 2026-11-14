@@ -1,7 +1,7 @@
-import { Controller, Get, Module } from "@nestjs/common";
+import { Controller, Get } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
-import { NestFactory } from "@nestjs/core";
 import type { NestFastifyApplication } from "@nestjs/platform-fastify";
+import { Test } from "@nestjs/testing";
 import { ThrottlerGuard, ThrottlerModule } from "@nestjs/throttler";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "@sarpbc/utils";
@@ -14,30 +14,27 @@ const SSR_LIMIT = 400;
 
 @Controller("probe")
 class ProbeController {
+  readonly body = { ok: true };
+
   @Get()
   ok() {
-    return { ok: true };
+    return this.body;
   }
 }
-
-@Module({
-  imports: [ThrottlerModule.forRoot(createClientThrottleOptions(TOKEN))],
-  controllers: [ProbeController],
-  providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
-})
-class ProbeModule {}
 
 describe("client throttle behind a trusted proxy", () => {
   let app: NestFastifyApplication;
 
   beforeAll(async () => {
-    const nest = await NestFactory.create<NestFastifyApplication>(
-      ProbeModule,
-      createHttpAdapter(),
-      {
-        logger: false,
-      },
-    );
+    const moduleRef = await Test.createTestingModule({
+      imports: [ThrottlerModule.forRoot(createClientThrottleOptions(TOKEN))],
+      controllers: [ProbeController],
+      providers: [{ provide: APP_GUARD, useClass: ThrottlerGuard }],
+    }).compile();
+
+    const nest = moduleRef.createNestApplication<NestFastifyApplication>(createHttpAdapter(), {
+      logger: false,
+    });
 
     await nest.init();
     await nest.getHttpAdapter().getInstance().ready();
@@ -88,11 +85,14 @@ describe("client throttle behind a trusted proxy", () => {
       connectingIp: "203.0.113.10",
     };
 
-    for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
-      expect((await hit(visitor)).statusCode).toBe(200);
-    }
+    const responses = await Promise.all(
+      Array.from({ length: PUBLIC_LIMIT }, async () => await hit(visitor)),
+    );
 
-    expect((await hit(visitor)).statusCode).toBe(429);
+    for (const response of responses) expect(response.statusCode).toBe(200);
+
+    const response2 = await hit(visitor);
+    expect(response2.statusCode).toBe(429);
 
     const otherVisitor = {
       remoteAddress: "10.0.0.8",
@@ -100,7 +100,8 @@ describe("client throttle behind a trusted proxy", () => {
       connectingIp: "203.0.113.11",
     };
 
-    expect((await hit(otherVisitor)).statusCode).toBe(200);
+    const response3 = await hit(otherVisitor);
+    expect(response3.statusCode).toBe(200);
   });
 
   it("ignores a spoofed CF-Connecting-IP when the proxy did not see Cloudflare", async () => {
@@ -109,13 +110,17 @@ describe("client throttle behind a trusted proxy", () => {
       forwardedFor: "203.0.113.40",
     };
 
-    for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
-      expect((await hit({ ...options, connectingIp: `198.51.100.${attempt}` })).statusCode).toBe(
-        200,
-      );
-    }
+    const responses = await Promise.all(
+      Array.from(
+        { length: PUBLIC_LIMIT },
+        async (_, attempt) => await hit({ ...options, connectingIp: `198.51.100.${attempt}` }),
+      ),
+    );
 
-    expect((await hit({ ...options, connectingIp: "198.51.100.200" })).statusCode).toBe(429);
+    for (const response of responses) expect(response.statusCode).toBe(200);
+
+    const response5 = await hit({ ...options, connectingIp: "198.51.100.200" });
+    expect(response5.statusCode).toBe(429);
   });
 
   it("does not let a public client prepend a forged forwarding hop", async () => {
@@ -133,9 +138,11 @@ describe("client throttle behind a trusted proxy", () => {
           },
         });
 
-    for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
-      expect((await forged(attempt)).statusCode).toBe(200);
-    }
+    const responses = await Promise.all(
+      Array.from({ length: PUBLIC_LIMIT }, async (_, attempt) => await forged(attempt)),
+    );
+
+    for (const response of responses) expect(response.statusCode).toBe(200);
 
     const blocked = await app.getHttpAdapter().getInstance().inject({
       method: "GET",
@@ -147,21 +154,35 @@ describe("client throttle behind a trusted proxy", () => {
   });
 
   it("skips the limit for a direct loopback call", async () => {
-    for (let attempt = 0; attempt < 4; attempt += 1) {
-      expect((await hit({ remoteAddress: "127.0.0.1" })).statusCode).toBe(200);
-    }
+    const responses = await Promise.all(
+      Array.from({ length: 4 }, async () => await hit({ remoteAddress: "127.0.0.1" })),
+    );
+
+    for (const response of responses) expect(response.statusCode).toBe(200);
   });
 
+  const callInternal = async (client: string) =>
+    await hit({ remoteAddress: "10.0.0.12", token: TOKEN, client });
+
+  const callPrivateHop = async (client: string) =>
+    await hit({
+      remoteAddress: "10.0.0.22",
+      forwardedFor: "198.51.100.88",
+      token: TOKEN,
+      client,
+    });
+
   it("limits internal SSR calls per forwarded visitor above the public limit", async () => {
-    const call = async (client: string) =>
-      await hit({ remoteAddress: "10.0.0.12", token: TOKEN, client });
+    const responses = await Promise.all(
+      Array.from({ length: SSR_LIMIT }, async () => await callInternal("203.0.113.50")),
+    );
 
-    for (let attempt = 0; attempt < SSR_LIMIT; attempt += 1) {
-      expect((await call("203.0.113.50")).statusCode).toBe(200);
-    }
+    for (const response of responses) expect(response.statusCode).toBe(200);
 
-    expect((await call("203.0.113.50")).statusCode).toBe(429);
-    expect((await call("203.0.113.51")).statusCode).toBe(200);
+    const callResult2 = await callInternal("203.0.113.50");
+    expect(callResult2.statusCode).toBe(429);
+    const callResult3 = await callInternal("203.0.113.51");
+    expect(callResult3.statusCode).toBe(200);
   });
 
   it("ignores a forwarded visitor without the internal token", async () => {
@@ -170,26 +191,30 @@ describe("client throttle behind a trusted proxy", () => {
       forwardedFor: "198.51.100.77",
     };
 
-    for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
-      expect((await hit({ ...base, client: `203.0.113.${attempt}` })).statusCode).toBe(200);
-    }
+    const responses = await Promise.all(
+      Array.from(
+        { length: PUBLIC_LIMIT },
+        async (_, attempt) => await hit({ ...base, client: `203.0.113.${attempt}` }),
+      ),
+    );
 
-    expect((await hit({ ...base, client: "203.0.113.200" })).statusCode).toBe(429);
+    for (const response of responses) expect(response.statusCode).toBe(200);
+
+    const response8 = await hit({ ...base, client: "203.0.113.200" });
+    expect(response8.statusCode).toBe(429);
   });
 
   it("does not split the SSR bucket on a private forwarded visitor", async () => {
-    const call = async (client: string) =>
-      await hit({
-        remoteAddress: "10.0.0.22",
-        forwardedFor: "198.51.100.88",
-        token: TOKEN,
-        client,
-      });
+    const responses = await Promise.all(
+      Array.from(
+        { length: SSR_LIMIT },
+        async (_, attempt) => await callPrivateHop(attempt % 2 === 0 ? "10.9.9.1" : "100.64.1.1"),
+      ),
+    );
 
-    for (let attempt = 0; attempt < SSR_LIMIT; attempt += 1) {
-      expect((await call(attempt % 2 === 0 ? "10.9.9.1" : "100.64.1.1")).statusCode).toBe(200);
-    }
+    for (const response of responses) expect(response.statusCode).toBe(200);
 
-    expect((await call("10.9.9.2")).statusCode).toBe(429);
+    const callResult5 = await callPrivateHop("10.9.9.2");
+    expect(callResult5.statusCode).toBe(429);
   });
 });

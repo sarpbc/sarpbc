@@ -18,18 +18,39 @@ const DEBOUNCE_MS = 150;
 
 let latestRequest = 0;
 
+async function refreshSearch() {
+  latestRequest += 1;
+  const request = latestRequest;
+  const query = search.value;
+  const { teams, players } = await searchTeamsAndPlayers({ query });
+
+  // A newer keystroke or a cleared field owns the results now.
+  if (request !== latestRequest) {
+    return;
+  }
+
+  teamList.value = teams;
+  teamQuery.value = query;
+  playerList.value = players;
+  searching.value = false;
+}
+
 const pendingSearch = useTimeoutFn(refreshSearch, DEBOUNCE_MS, { immediate: false });
 
 function resetResults() {
   pendingSearch.stop();
-  latestRequest++;
+  latestRequest += 1;
   searching.value = false;
   teamList.value = [];
   playerList.value = [];
 }
 
-function updateSearch(value: string) {
-  search.value = value;
+function handleFocus() {
+  open.value = teamList.value.length > 0 || playerList.value.length > 0 || search.value.length > 0;
+}
+
+function updateSearch(value: string | null) {
+  search.value = value ?? "";
 
   if (search.value.length === 0) {
     resetResults();
@@ -39,10 +60,6 @@ function updateSearch(value: string) {
   }
 
   handleFocus();
-}
-
-function handleFocus() {
-  open.value = teamList.value.length > 0 || playerList.value.length > 0 || search.value.length > 0;
 }
 
 function handleBlur(): void {
@@ -60,22 +77,6 @@ function handleLinkClick(event: MouseEvent): void {
     open.value = false;
     inputRef.value?.blur();
   }
-}
-
-async function refreshSearch() {
-  const request = ++latestRequest;
-  const query = search.value;
-  const { teams, players } = await searchTeamsAndPlayers({ query });
-
-  // A newer keystroke or a cleared field owns the results now.
-  if (request !== latestRequest) {
-    return;
-  }
-
-  teamList.value = teams;
-  teamQuery.value = query;
-  playerList.value = players;
-  searching.value = false;
 }
 </script>
 

@@ -1,5 +1,5 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
-import { ConflictError } from "../../../common/domain/errors";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { Player } from "../../../roster/infrastructure/roster-persistence";
 import type {
   RosterReferenceMover,
@@ -8,7 +8,8 @@ import type {
 } from "../../../roster/application/ports";
 import { MatchLineupPlayer } from "./match-lineup.entities";
 import { PlayerAward } from "./player-award.entities";
-import { Match, TournamentParticipant } from "./tournament.entities";
+import { Match } from "./match.entity";
+import { TournamentParticipant } from "./tournament-participant.entity";
 import { TournamentPrize } from "./tournament-prize.entities";
 
 export class TournamentRosterReferences

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Match, TournamentParticipant } from "../../domain/competition";
+import { Match } from "../../domain/match";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
 import { CompetitionAfterCommit } from "../after-commit";
 import { MatchService } from "./match.service";

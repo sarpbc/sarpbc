@@ -3,9 +3,9 @@ type ListItemSize = "compact" | "default" | "header" | "double" | "triple";
 
 defineOptions({ inheritAttrs: false });
 
-const { size = "default", to } = defineProps<{
+const { size = "default", to = null } = defineProps<{
   size?: ListItemSize;
-  to?: string;
+  to?: string | null;
 }>();
 
 const attrs = useAttrs();

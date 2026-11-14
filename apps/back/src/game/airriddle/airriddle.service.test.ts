@@ -64,9 +64,12 @@ describe("AirRiddleService", () => {
   it("reveals the answer only after success or the final guess", async () => {
     repository.findTodaysRiddle.mockResolvedValue({ playerName: "Kaydop" });
     players.find.mockResolvedValue([{ name: "Zen" }]);
-    expect((await service.guess("Zen")).answer).toBeUndefined();
-    expect((await service.guess("Zen", true)).answer).toBe("Kaydop");
+    const guessResult = await service.guess("Zen");
+    expect(guessResult.answer).toBeUndefined();
+    const guessResult2 = await service.guess("Zen", true);
+    expect(guessResult2.answer).toBe("Kaydop");
     players.find.mockResolvedValue([{ name: "Kaydop" }]);
-    expect((await service.guess("kaydop")).answer).toBe("Kaydop");
+    const guessResult3 = await service.guess("kaydop");
+    expect(guessResult3.answer).toBe("Kaydop");
   });
 });

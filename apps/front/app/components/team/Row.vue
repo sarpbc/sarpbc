@@ -4,10 +4,10 @@ import { teamPath } from "@sarpbc/utils";
 
 interface Props {
   team: Team;
-  formerName?: string;
+  formerName?: string | null;
 }
 
-const { team, formerName } = defineProps<Props>();
+const { team, formerName = null } = defineProps<Props>();
 </script>
 
 <template>

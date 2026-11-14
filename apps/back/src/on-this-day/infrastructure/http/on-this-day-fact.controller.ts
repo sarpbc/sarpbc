@@ -16,7 +16,7 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { OnThisDayFactService } from "../../application/on-this-day-fact.service";
-import { OnThisDayFactDto } from "./dto/on-this-day.dto";
+import { OnThisDayFactDto, type OnThisDayFactInput } from "./dto/on-this-day.dto";
 
 @Controller("on-this-day-facts")
 @UseGuards(AuthGuard, PermissionGuard)
@@ -32,7 +32,7 @@ export class OnThisDayFactController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @Body({ schema: OnThisDayFactDto }) dto: OnThisDayFactDto,
+    @Body({ schema: OnThisDayFactDto }) dto: OnThisDayFactInput,
   ): Promise<{ fact: OnThisDayFact }> {
     return { fact: await this.facts.create(dto) };
   }
@@ -40,7 +40,7 @@ export class OnThisDayFactController {
   @Patch(":id")
   async update(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: OnThisDayFactDto }) dto: OnThisDayFactDto,
+    @Body({ schema: OnThisDayFactDto }) dto: OnThisDayFactInput,
   ): Promise<{ fact: OnThisDayFact }> {
     return { fact: await this.facts.update(id, dto) };
   }

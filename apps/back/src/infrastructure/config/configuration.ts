@@ -3,18 +3,18 @@ import { loadEnv, type Env } from "./env.validation";
 const DEV_ORIGINS = ["http://localhost:4000", "http://localhost:4001", "http://localhost:4002"];
 
 function sharedParentDomain(urls: string[]): string | undefined {
-  const reversed = urls.map((url) => new URL(url).hostname.split(".").reverse());
+  const reversed = urls.map((url) => new URL(url).hostname.split(".").toReversed());
   const shared: string[] = [];
 
   for (
     let i = 0;
     reversed.every((labels) => labels[i] !== undefined && labels[i] === reversed[0][i]);
-    i++
+    i += 1
   ) {
     shared.push(reversed[0][i]);
   }
 
-  return shared.length >= 2 ? `.${shared.reverse().join(".")}` : undefined;
+  return shared.length >= 2 ? `.${shared.toReversed().join(".")}` : undefined;
 }
 
 function originWithWww(url: string): string[] {
@@ -82,4 +82,6 @@ export function toConfiguration(env: Env) {
   };
 }
 
-export default () => toConfiguration(loadEnv());
+export default function loadConfiguration() {
+  return toConfiguration(loadEnv());
+}

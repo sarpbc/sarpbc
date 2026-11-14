@@ -1,7 +1,7 @@
 import type { ToolArguments } from "../define-tool";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
 import { jsonOf } from "../../../../test/mcp-result";
 import { rosterTools } from "./roster-tools";
@@ -50,7 +50,7 @@ function setup(role: "admin" | "journalist") {
   return { rosterProposalService, tool, call };
 }
 
-function textOf(result: { content: Array<{ type: string; text?: string }> }): string {
+function textOf(result: { content: { type: string; text?: string }[] }): string {
   return result.content[0]?.text ?? "";
 }
 
@@ -108,7 +108,8 @@ describe("upload_team_logo", () => {
   it("requires teams.manage and says so in its description", async () => {
     const { rosterProposalService, call, tool } = setup("journalist");
 
-    expect((await call("upload_team_logo", input)).isError).toBe(true);
+    const callResult = await call("upload_team_logo", input);
+    expect(callResult.isError).toBe(true);
     expect(rosterProposalService.proposeTeamLogo).not.toHaveBeenCalled();
     expect(tool("upload_team_logo").description).toContain("Requires teams.manage.");
   });
@@ -305,12 +306,14 @@ describe("delete proposals", () => {
   it("requires the permission that reviews the deletion", async () => {
     const { rosterProposalService, call, tool } = setup("journalist");
 
-    expect(
-      (await call("propose_delete_match", { matchId: MATCH_ID, reason: "Duplicate" })).isError,
-    ).toBe(true);
-    expect(
-      (await call("propose_delete_team", { teamId: TEAM_ID, reason: "Duplicate" })).isError,
-    ).toBe(true);
+    const callResult2 = await call("propose_delete_match", {
+      matchId: MATCH_ID,
+      reason: "Duplicate",
+    });
+
+    expect(callResult2.isError).toBe(true);
+    const callResult3 = await call("propose_delete_team", { teamId: TEAM_ID, reason: "Duplicate" });
+    expect(callResult3.isError).toBe(true);
     expect(rosterProposalService.propose).not.toHaveBeenCalled();
     expect(tool("propose_delete_match").description).toContain("Requires tournaments.manage.");
     expect(tool("propose_delete_team").description).toContain("Requires teams.manage.");

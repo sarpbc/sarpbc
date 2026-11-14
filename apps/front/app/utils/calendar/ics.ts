@@ -39,16 +39,16 @@ export function matchEventUid(id: string): string {
 function formatIcsUtc(date: Date): string {
   return date
     .toISOString()
-    .replace(/[-:]/g, "")
+    .replaceAll(/[-:]/g, "")
     .replace(/\.\d{3}/, "");
 }
 
 function escapeIcsText(value: string): string {
   return value
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/;/g, "\\;")
-    .replace(/,/g, "\\,");
+    .replaceAll("\\", "\\\\")
+    .replaceAll("\n", "\\n")
+    .replaceAll(";", "\\;")
+    .replaceAll(",", "\\,");
 }
 
 function foldIcsLine(line: string): string {
@@ -58,11 +58,10 @@ function foldIcsLine(line: string): string {
     return line;
   }
 
-  const chars = Array.from(line);
   const folded: string[] = [];
   let current = "";
 
-  for (const char of chars) {
+  for (const char of line) {
     const next = current + char;
 
     if (encoder.encode(next).length > FOLD_OCTETS) {
@@ -90,7 +89,7 @@ export function matchEndAt(
   }
 
   const minutes =
-    numberOfGames != null && numberOfGames > 0
+    numberOfGames !== undefined && numberOfGames !== null && numberOfGames > 0
       ? numberOfGames * GAME_MINUTES
       : DEFAULT_DURATION_MINUTES;
 

@@ -77,6 +77,8 @@ async function read(args: readonly string[]): Promise<void> {
     intervalSeconds: positiveInteger(values.interval, 1, "interval"),
   });
 
+  let writes: Promise<void> = Promise.resolve();
+
   for await (const { t, frame } of frames) {
     const known = tracker.games.length;
     tracker.push(t, readScoreboard(frame, overlay));
@@ -86,12 +88,22 @@ async function read(args: readonly string[]): Promise<void> {
         `Game ${game.number}: blue ${game.blue} - ${game.orange} orange (${game.endedBy}, ${game.endedAt}s, confidence ${game.confidence})\n`,
       );
 
-      if (values.out !== undefined) await writeProposal(tracker.proposal(source), values.out);
+      if (values.out !== undefined) {
+        const { out } = values;
+        const snapshot = tracker.proposal(source);
+        const previous = writes;
+
+        writes = (async () => {
+          await previous;
+          await writeProposal(snapshot, out);
+        })();
+      }
     }
 
     if (tracker.decided) break;
   }
 
+  await writes;
   tracker.finish();
   const proposal = tracker.proposal(source);
   process.stderr.write(
@@ -103,8 +115,13 @@ async function read(args: readonly string[]): Promise<void> {
 }
 
 async function readSingleFrame(path: string): Promise<Frame> {
-  for await (const frame of readPpmFrames(createReadStream(path))) return frame;
-  throw new Error(`${path} holds no PPM frame.`);
+  const frames = readPpmFrames(createReadStream(path));
+  const first = await frames.next();
+  await frames.return(undefined);
+
+  if (first.done === true) throw new Error(`${path} holds no PPM frame.`);
+
+  return first.value;
 }
 
 function labelledTemplates(

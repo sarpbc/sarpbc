@@ -6,4 +6,4 @@ export const OffsetPaginationQueryDto = z.strictObject({
   offset: z.coerce.number().int().min(0).default(0),
 });
 
-export type OffsetPaginationQueryDto = z.infer<typeof OffsetPaginationQueryDto>;
+export type OffsetPaginationQueryInput = z.infer<typeof OffsetPaginationQueryDto>;

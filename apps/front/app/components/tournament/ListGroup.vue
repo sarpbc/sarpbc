@@ -2,10 +2,10 @@
 import type { TournamentEvent, TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
 
-const { events, to } = defineProps<{
+const { events, to = null } = defineProps<{
   events: TournamentEvent<TournamentListItem>[];
   /** Overrides the stage link (pick'ems); the event name then stays plain text. */
-  to?: (stage: TournamentListItem) => string;
+  to?: ((stage: TournamentListItem) => string) | null;
 }>();
 
 const { t, te } = useI18n();

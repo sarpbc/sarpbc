@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { StatsImportItem, StatsPlayerAccounts, TournamentStatsGame } from "@sarpbc/types";
 import { jsonOf, textOf } from "../../../../test/mcp-result";
-import { ConflictError } from "../../../common/domain/errors";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import type { StatsImport } from "../../../match-stats/domain/stats-import";
 import { gameStatsTools, summarizeStatsImport } from "./game-stats-tools";
 
@@ -154,9 +154,8 @@ describe("game stats tools", () => {
   it("starts an import and reports the latest one", async () => {
     const { call, statsImportService } = setup("admin");
 
-    expect(
-      (await call("import_game_stats", { tournamentId: "t1", group: "rlcs-x1" })).body,
-    ).toEqual({ id: "import-1", groupId: "rlcs-x1", status: "pending" });
+    const callResult = await call("import_game_stats", { tournamentId: "t1", group: "rlcs-x1" });
+    expect(callResult.body).toEqual({ id: "import-1", groupId: "rlcs-x1", status: "pending" });
     expect(statsImportService.request).toHaveBeenCalledWith("t1", "rlcs-x1");
     const { body } = await call("get_game_stats_import", { tournamentId: "t1" });
     expect(body).toMatchObject({
@@ -168,7 +167,8 @@ describe("game stats tools", () => {
     const { call, statsImportService } = setup("admin");
     statsImportService.recent.mockResolvedValueOnce([]);
 
-    expect((await call("get_game_stats_import", { tournamentId: "t1" })).body).toEqual({
+    const callResult2 = await call("get_game_stats_import", { tournamentId: "t1" });
+    expect(callResult2.body).toEqual({
       import: null,
     });
   });
@@ -176,15 +176,19 @@ describe("game stats tools", () => {
   it("lists unlinked accounts by default and linked ones on request, then links", async () => {
     const { call, statsPlayerLinkService } = setup("admin");
 
-    const unlinked = (await call("list_unlinked_game_players", { tournamentId: "t1" })).body;
+    const callResult3 = await call("list_unlinked_game_players", { tournamentId: "t1" });
+    const unlinked = callResult3.body;
     expect(unlinked).toMatchObject({
       players: [expect.objectContaining({ name: "Racer" })],
       rosters: accounts.rosters,
     });
 
-    const all = (
-      await call("list_unlinked_game_players", { tournamentId: "t1", includeLinked: true })
-    ).body;
+    const callResult4 = await call("list_unlinked_game_players", {
+      tournamentId: "t1",
+      includeLinked: true,
+    });
+
+    const all = callResult4.body;
 
     expect(all).toMatchObject({ players: [{}, {}] });
 
@@ -194,7 +198,8 @@ describe("game stats tools", () => {
       playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
     };
 
-    expect((await call("link_game_player", { tournamentId: "t1", ...link })).body).toEqual({
+    const callResult5 = await call("link_game_player", { tournamentId: "t1", ...link });
+    expect(callResult5.body).toEqual({
       link,
       linkedRows: 7,
     });
@@ -211,13 +216,17 @@ describe("game stats tools", () => {
       blueParticipantId: "p1",
     };
 
-    expect((await call("attach_replay_to_game", { tournamentId: "t1", ...input })).body).toEqual(
-      game,
-    );
+    const callResult6 = await call("attach_replay_to_game", { tournamentId: "t1", ...input });
+    expect(callResult6.body).toEqual(game);
     expect(manualGameService.attach).toHaveBeenCalledWith("t1", input);
-    expect(
-      (await call("remove_match_game", { tournamentId: "t1", matchId: "m1", gameNumber: 2 })).body,
-    ).toEqual(game);
+
+    const callResult7 = await call("remove_match_game", {
+      tournamentId: "t1",
+      matchId: "m1",
+      gameNumber: 2,
+    });
+
+    expect(callResult7.body).toEqual(game);
     expect(manualGameService.remove).toHaveBeenCalledWith("t1", "m1", 2);
   });
 
@@ -245,19 +254,24 @@ describe("game stats tools", () => {
     const { call, statsImportService, statsPlayerLinkService, manualGameService } =
       setup("journalist");
 
-    for (const name of TOOLS) {
-      const { result, text } = await call(name, {
-        tournamentId: "t1",
-        group: "rlcs-x1",
-        platform: "steam",
-        platformId: "1",
-        playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
-        matchId: "m1",
-        replay: game.ballchasingId,
-        gameNumber: 1,
-        blueParticipantId: "p1",
-      });
+    const outcomes = await Promise.all(
+      TOOLS.map(async (name) => ({
+        name,
+        ...(await call(name, {
+          tournamentId: "t1",
+          group: "rlcs-x1",
+          platform: "steam",
+          platformId: "1",
+          playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
+          matchId: "m1",
+          replay: game.ballchasingId,
+          gameNumber: 1,
+          blueParticipantId: "p1",
+        })),
+      })),
+    );
 
+    for (const { name, result, text } of outcomes) {
       expect(result.isError, name).toBe(true);
       expect(text).toContain("tournaments.manage");
     }

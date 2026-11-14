@@ -1,5 +1,5 @@
 import type { Sharp, SharpOptions } from "sharp";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import type { TeamLogoImages } from "../../application/ports";
 import type { TeamLogoFormat } from "../../domain/team-logo";
 

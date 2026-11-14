@@ -3,11 +3,11 @@ import type { Team } from "@sarpbc/types";
 
 interface Props {
   teams: Team[];
-  title?: string;
+  title?: string | null;
   query?: string;
 }
 
-const { query = "" } = defineProps<Props>();
+const { title = null, query = "" } = defineProps<Props>();
 
 function formerNameFor(team: Team): string | undefined {
   const needle = query.trim().toLocaleLowerCase();

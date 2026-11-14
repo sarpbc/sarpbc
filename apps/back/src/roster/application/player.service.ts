@@ -1,7 +1,12 @@
 import { toSlug } from "@sarpbc/utils";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { mapSequentially } from "../../common/application/sequentially";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } from "./inputs";
-import { Contract, Player, PlayerPhoto } from "../domain/roster";
+import { Contract } from "../domain/contract";
+import { Player } from "../domain/player";
+import { PlayerPhoto } from "../domain/player-photo";
 import type {
   ContractWriter,
   NationalityCount,
@@ -11,6 +16,24 @@ import type {
 } from "./ports";
 import { requireTeam } from "./require-team";
 import type { DirectorySearchProps } from "./search-props";
+
+async function openContracts(contracts: ContractWriter, playerId: string): Promise<Contract[]> {
+  const all = await contracts.findByPlayer(playerId);
+
+  return all.filter((contract) => contract.endDate === null);
+}
+
+function requireUnmerged(player: Player | null, id: string): Player {
+  if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
+
+  if (player.mergedIntoId !== null && player.mergedIntoId !== "") {
+    throw new InvalidInputError(
+      `${player.name} was merged into player "${player.mergedIntoId}"; edit that player instead`,
+    );
+  }
+
+  return player;
+}
 
 export class PlayerService {
   constructor(
@@ -133,10 +156,10 @@ export class PlayerService {
         );
       }
 
-      for (const contract of open) {
+      await mapSequentially(open, async (contract) => {
         contract.close(effectiveDate, input.sourceUrl);
         await contracts.save(contract);
-      }
+      });
 
       const contract = new Contract();
       contract.player = player;
@@ -158,19 +181,18 @@ export class PlayerService {
     return await this.transaction.run(async ({ players, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
 
-      const closed = (await openContracts(contracts, playerId)).filter(
-        (contract) => contract.team.id === input.teamId,
-      );
+      const open = await openContracts(contracts, playerId);
+      const closed = open.filter((contract) => contract.team.id === input.teamId);
 
       // Players imported from PandaScore have a current team but no contract row.
       if (closed.length === 0 && player.team?.id !== input.teamId) {
         throw new InvalidInputError(`${player.name} is not on team "${input.teamId}"`);
       }
 
-      for (const contract of closed) {
+      await mapSequentially(closed, async (contract) => {
         contract.close(new Date(input.effectiveDate), input.sourceUrl);
         await contracts.save(contract);
-      }
+      });
 
       if (player.team?.id === input.teamId) {
         player.team = null;
@@ -193,15 +215,15 @@ export class PlayerService {
 
       const existingContracts = await contracts.findByPlayer(id);
 
-      for (const contract of existingContracts) {
+      await mapSequentially(existingContracts, async (contract) => {
         await contracts.delete(contract);
-      }
+      });
 
       const existingPhotos = await photos.findByPlayer(id);
 
-      for (const photo of existingPhotos) {
+      await mapSequentially(existingPhotos, async (photo) => {
         await photos.delete(photo);
-      }
+      });
 
       await players.delete(player);
     });
@@ -288,20 +310,4 @@ export class PlayerService {
       return player;
     });
   }
-}
-
-async function openContracts(contracts: ContractWriter, playerId: string): Promise<Contract[]> {
-  return (await contracts.findByPlayer(playerId)).filter((contract) => contract.endDate === null);
-}
-
-function requireUnmerged(player: Player | null, id: string): Player {
-  if (!player) throw new NotFoundError(`Player with id "${id}" not found`);
-
-  if (player.mergedIntoId !== null && player.mergedIntoId !== "") {
-    throw new InvalidInputError(
-      `${player.name} was merged into player "${player.mergedIntoId}"; edit that player instead`,
-    );
-  }
-
-  return player;
 }

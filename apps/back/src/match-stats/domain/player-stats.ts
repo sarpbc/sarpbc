@@ -90,7 +90,7 @@ export function aggregatePlayerStats(
     games: games.size,
     players: [...tallies.values()]
       .map(toStats)
-      .sort(
+      .toSorted(
         (a, b) =>
           a.team.name.localeCompare(b.team.name) || a.player.name.localeCompare(b.player.name),
       ),

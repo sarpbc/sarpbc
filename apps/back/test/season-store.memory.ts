@@ -53,6 +53,9 @@ function tournamentOf(id: string): SeasonPathTournament | null {
   return Object.values(SEASON_TOURNAMENTS).find((tournament) => tournament.id === id) ?? null;
 }
 
+const teamOf = (id: string): SeasonTeam =>
+  Object.values(SEASON_TEAMS).find((candidate) => candidate.id === id) ?? team(id, id);
+
 export function memorySeasonStore() {
   const seasons = new Map<string, SeasonRecord>();
   const awards: StoredAward[] = [];
@@ -71,7 +74,13 @@ export function memorySeasonStore() {
   ]);
 
   let sequence = 0;
-  const nextId = (prefix: string) => `${prefix}-${++sequence}`;
+
+  const nextId = (prefix: string) => {
+    sequence += 1;
+
+    return `${prefix}-${sequence}`;
+  };
+
   const stripAward = ({ seasonId: _seasonId, ...award }: StoredAward): SeasonAward => award;
 
   const stripParticipant = ({
@@ -79,15 +88,13 @@ export function memorySeasonStore() {
     ...participant
   }: StoredParticipant): SeasonParticipant => ({ ...participant, path: [...participant.path] });
 
-  const teamOf = (id: string): SeasonTeam =>
-    Object.values(SEASON_TEAMS).find((candidate) => candidate.id === id) ?? team(id, id);
-
   const store: SeasonStore = {
     list: async () => [...seasons.values()].map(({ id, name, slug }) => ({ id, name, slug })),
     published: async () =>
       [...seasons.values()].flatMap(({ id, name, slug, winnerTeamId }) =>
-        slug !== null
-          ? [
+        slug === null
+          ? []
+          : [
               {
                 slug,
                 name,
@@ -97,8 +104,7 @@ export function memorySeasonStore() {
                       participant.seasonId === id && participant.team.id === winnerTeamId,
                   )?.team ?? null,
               },
-            ]
-          : [],
+            ],
       ),
     find: async (id) => seasons.get(id) ?? null,
     findBySlug: async (slug) =>
@@ -156,7 +162,7 @@ export function memorySeasonStore() {
         (award) => award.seasonId === seasonId && award.id === awardId,
       );
 
-      if (index < 0) return false;
+      if (index === -1) return false;
       awards.splice(index, 1);
 
       return true;
@@ -166,7 +172,7 @@ export function memorySeasonStore() {
     participants: async (seasonId) =>
       participants
         .filter((participant) => participant.seasonId === seasonId)
-        .sort((a, b) => a.team.name.localeCompare(b.team.name))
+        .toSorted((a, b) => a.team.name.localeCompare(b.team.name))
         .map(stripParticipant),
     participant: async (seasonId, participantId) => {
       const found = participants.find(
@@ -202,7 +208,7 @@ export function memorySeasonStore() {
         (participant) => participant.seasonId === seasonId && participant.id === participantId,
       );
 
-      if (index < 0) return false;
+      if (index === -1) return false;
       participants.splice(index, 1);
 
       return true;

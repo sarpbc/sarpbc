@@ -10,4 +10,4 @@ export const ListTransfersQueryDto = OffsetPaginationQueryDto.extend({
   to: z.iso.date().optional(),
 });
 
-export type ListTransfersQueryDto = z.infer<typeof ListTransfersQueryDto>;
+export type ListTransfersQueryInput = z.infer<typeof ListTransfersQueryDto>;

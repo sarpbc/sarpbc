@@ -28,7 +28,7 @@ function toMember(contract: TeamContract): TeamRosterEraMember {
 }
 
 function sortMembers(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
-  return [...members].sort((a, b) => {
+  return members.toSorted((a, b) => {
     const roleDiff = CONTRACT_ROLES.indexOf(a.role) - CONTRACT_ROLES.indexOf(b.role);
 
     if (roleDiff !== 0) return roleDiff;
@@ -87,14 +87,15 @@ function getMembersAt(normalized: NormalizedContract[], timeMs: number): TeamRos
   return members;
 }
 
+function sortByPlayerId(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
+  return members.toSorted((left, right) => left.playerId.localeCompare(right.playerId));
+}
+
 function sameRoster(a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean {
   if (a.length !== b.length) return false;
 
-  const byPlayerId = (members: TeamRosterEraMember[]) =>
-    [...members].sort((left, right) => left.playerId.localeCompare(right.playerId));
-
-  const sortedA = byPlayerId(a);
-  const sortedB = byPlayerId(b);
+  const sortedA = sortByPlayerId(a);
+  const sortedB = sortByPlayerId(b);
 
   return sortedA.every(
     (member, index) =>
@@ -125,12 +126,12 @@ function diffMembers(
 }
 
 function mergeAdjacentEras(
-  eras: Array<{
+  eras: {
     startMs: number;
     endMs: number | null;
     isCurrent: boolean;
     members: TeamRosterEraMember[];
-  }>,
+  }[],
 ): typeof eras {
   if (eras.length <= 1) return eras;
 
@@ -172,17 +173,16 @@ function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRoster
     boundarySet.add(now);
   }
 
-  const boundaries = [...boundarySet].sort((left, right) => left - right);
+  const boundaries = [...boundarySet].toSorted((left, right) => left - right);
 
-  const rawEras: Array<{
+  const rawEras: {
     startMs: number;
     endMs: number | null;
     isCurrent: boolean;
     members: TeamRosterEraMember[];
-  }> = [];
+  }[] = [];
 
-  for (let index = 0; index < boundaries.length; index++) {
-    const startMs = boundaries[index]!;
+  for (const [index, startMs] of boundaries.entries()) {
     const members = getMembersAt(normalized, startMs);
 
     if (members.length === 0) continue;
@@ -234,7 +234,7 @@ function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRoster
     });
   }
 
-  return eras.reverse();
+  return eras.toReversed();
 }
 
 export function useTeamRosterHistory(teamId: MaybeRef<string | undefined>) {

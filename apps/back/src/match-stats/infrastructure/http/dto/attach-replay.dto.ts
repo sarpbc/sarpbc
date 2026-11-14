@@ -9,4 +9,4 @@ export const attachReplayFields = {
 
 export const AttachReplayDto = z.strictObject(attachReplayFields);
 
-export type AttachReplayDto = z.infer<typeof AttachReplayDto>;
+export type AttachReplayInput = z.infer<typeof AttachReplayDto>;

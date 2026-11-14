@@ -5,7 +5,17 @@ export interface OffseasonOfferItem {
   rank: number | null;
 }
 
-const props = defineProps<{
+const {
+  offers,
+  currentTeamId,
+  currentTeamName,
+  currentTeamRank,
+  renewalOffered,
+  isLastChanceOffer,
+  canRetire,
+  destinyPromptPending,
+  hoveredTeamId,
+} = defineProps<{
   offers: OffseasonOfferItem[];
   currentTeamId: string;
   currentTeamName: string;
@@ -33,47 +43,43 @@ const destinyPromptChoices = [
   { id: "coach", endsCareer: false },
 ] as const;
 
-const hasOffers = computed(() => props.offers.length > 0);
-const showCurrentTeamRow = computed(() => props.renewalOffered);
+const hasOffers = computed(() => offers.length > 0);
+const showCurrentTeamRow = computed(() => renewalOffered);
 
-const showChoiceList = computed(
-  () => hasOffers.value || showCurrentTeamRow.value || props.canRetire,
-);
+const showChoiceList = computed(() => hasOffers.value || showCurrentTeamRow.value || canRetire);
 
-const showCurrentTeamIndicator = computed(
-  () => !props.destinyPromptPending && Boolean(props.currentTeamName),
-);
+const showCurrentTeamIndicator = computed(() => !destinyPromptPending && Boolean(currentTeamName));
 
 const body = computed(() => {
-  if (props.destinyPromptPending) {
+  if (destinyPromptPending) {
     return t("page.game.career.offseason.prompt.body");
   }
 
-  if (props.isLastChanceOffer && props.offers[0]) {
-    return t("page.game.career.offseason.lastChanceBody", { team: props.offers[0].name });
+  if (isLastChanceOffer && offers[0]) {
+    return t("page.game.career.offseason.lastChanceBody", { team: offers[0].name });
   }
 
-  if (hasOffers.value && props.renewalOffered) {
-    return t("page.game.career.offseason.body", { count: props.offers.length });
+  if (hasOffers.value && renewalOffered) {
+    return t("page.game.career.offseason.body", { count: offers.length });
   }
 
   if (hasOffers.value) {
-    return t("page.game.career.offseason.noRenewalBody", { count: props.offers.length });
+    return t("page.game.career.offseason.noRenewalBody", { count: offers.length });
   }
 
-  if (props.renewalOffered) {
-    return t("page.game.career.offseason.renewalOnlyBody", { team: props.currentTeamName });
+  if (renewalOffered) {
+    return t("page.game.career.offseason.renewalOnlyBody", { team: currentTeamName });
   }
 
   return t("page.game.career.offseason.unsignedBody");
 });
 
 const title = computed(() => {
-  if (props.destinyPromptPending) return t("page.game.career.offseason.prompt.title");
+  if (destinyPromptPending) return t("page.game.career.offseason.prompt.title");
 
   if (hasOffers.value) return null;
 
-  if (props.renewalOffered) return t("page.game.career.offseason.renewalTitle");
+  if (renewalOffered) return t("page.game.career.offseason.renewalTitle");
 
   return t("page.game.career.offseason.unsignedTitle");
 });
@@ -83,7 +89,7 @@ function setHoveredTeam(teamId: string | null): void {
 }
 
 function offerRowClass(teamId: string, withBottomBorder: boolean): string[] {
-  const highlighted = props.hoveredTeamId === teamId;
+  const highlighted = hoveredTeamId === teamId;
 
   return [
     "grid grid-cols-[minmax(0,1fr)_max-content] items-center border-l-2",
@@ -105,7 +111,7 @@ function onRowLeave(event: MouseEvent, teamId: string): void {
     return;
   }
 
-  if (props.hoveredTeamId === teamId) {
+  if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
 }
@@ -117,7 +123,7 @@ function onRowFocusOut(event: FocusEvent, teamId: string): void {
     return;
   }
 
-  if (props.hoveredTeamId === teamId) {
+  if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
 }

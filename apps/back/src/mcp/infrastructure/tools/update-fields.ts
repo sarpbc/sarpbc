@@ -1,4 +1,4 @@
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 
 type UpdateFieldValue = string | number | boolean | null | undefined | readonly (object | string)[];
 

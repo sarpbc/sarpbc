@@ -1,4 +1,4 @@
-import type { MatchSlugSource } from "../../tournament/domain/competition";
+import type { MatchSlugSource } from "../../tournament/domain/match";
 
 export interface NewsSitemapRow {
   slug: string;

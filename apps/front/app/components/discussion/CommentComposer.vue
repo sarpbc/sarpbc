@@ -6,12 +6,12 @@ import type { ReplyTargetType } from "@sarpbc/types";
 const {
   targetType,
   targetId,
-  replyToId = undefined,
+  replyToId = null,
   autofocus = false,
 } = defineProps<{
   targetType: ReplyTargetType;
   targetId: string;
-  replyToId?: string;
+  replyToId?: string | null;
   autofocus?: boolean;
 }>();
 
@@ -54,6 +54,20 @@ onMounted(() => {
   if (autofocus) focusContentInput();
 });
 
+type CreateCommentResult = Awaited<ReturnType<typeof createComment>>;
+
+function createFailureDescription(failure: Exclude<CreateCommentResult, { ok: true }>): string {
+  if (failure.reason === "unauthorized") {
+    return t("components.discussion.messages.signInRequired");
+  }
+
+  if (failure.reason === "rate_limited") {
+    return failure.message ?? t("components.discussion.messages.rateLimitDescription");
+  }
+
+  return failure.message ?? t("components.discussion.messages.errorDescription");
+}
+
 async function submitComment() {
   if (!user.value || isSubmitting.value) {
     return;
@@ -73,7 +87,7 @@ async function submitComment() {
     content: result.data.content,
     targetType,
     targetId,
-    replyToId,
+    replyToId: replyToId ?? undefined,
   });
 
   isSubmitting.value = false;
@@ -90,12 +104,7 @@ async function submitComment() {
     return;
   }
 
-  const description =
-    createResult.reason === "unauthorized"
-      ? t("components.discussion.messages.signInRequired")
-      : createResult.reason === "rate_limited"
-        ? (createResult.message ?? t("components.discussion.messages.rateLimitDescription"))
-        : (createResult.message ?? t("components.discussion.messages.errorDescription"));
+  const description = createFailureDescription(createResult);
 
   toast.add({
     title: t("components.discussion.messages.errorTitle"),

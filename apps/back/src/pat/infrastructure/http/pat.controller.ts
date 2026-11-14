@@ -12,7 +12,7 @@ import {
 import type { CreatedPatToken, PatToken } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
-import { CreateTokenDto } from "./dto/create-token.dto";
+import { CreateTokenDto, type CreateTokenInput } from "./dto/create-token.dto";
 import { PatService } from "../../application/pat.service";
 
 @Controller("pat")
@@ -39,7 +39,7 @@ export class PatController {
   @HttpCode(HttpStatus.CREATED)
   async createToken(
     @CurrentUserId() userId: string,
-    @Body({ schema: CreateTokenDto }) dto: CreateTokenDto,
+    @Body({ schema: CreateTokenDto }) dto: CreateTokenInput,
   ): Promise<CreatedPatToken> {
     const created = await this.patService.createToken(userId, dto.name);
 

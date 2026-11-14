@@ -1,5 +1,5 @@
 import type { StatsPlayerAccounts } from "@sarpbc/types";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { requireTournament } from "./game-record";
 import type { PlayerLink, PlayerLinkStore, StatsCandidates } from "./ports";
 

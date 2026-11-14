@@ -130,14 +130,12 @@ interface PickemDayGroup {
 const matchesByDay = computed(() => {
   if (!tournament.value?.matches) return [];
 
-  const validMatches = tournament.value.matches.filter(
-    (m) => m.participants?.length === 2 && m.beginAt,
-  );
-
   const grouped = new Map<string, PickemDayGroup>();
 
-  for (const match of validMatches) {
-    const matchDate = new Date(match.beginAt!);
+  for (const match of tournament.value.matches) {
+    if (match.participants?.length !== 2 || !match.beginAt) continue;
+
+    const matchDate = new Date(match.beginAt);
     const dayKey = matchDate.toDateString();
     const existing = grouped.get(dayKey);
 
@@ -149,11 +147,11 @@ const matchesByDay = computed(() => {
   }
 
   return [...grouped.values()]
-    .sort((a, b) => b.date.getTime() - a.date.getTime())
+    .toSorted((a, b) => b.date.getTime() - a.date.getTime())
     .map((group) => ({
       ...group,
-      matches: group.matches.sort(
-        (a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime(),
+      matches: group.matches.toSorted(
+        (a, b) => new Date(a.beginAt ?? 0).getTime() - new Date(b.beginAt ?? 0).getTime(),
       ),
     }));
 });
@@ -208,7 +206,7 @@ function matchScoreLabel(match: TournamentDetailMatch): string | null {
     status,
   );
 
-  if (scoreA == null && scoreB == null) return null;
+  if (scoreA === null && scoreB === null) return null;
 
   return `${scoreA ?? "–"}–${scoreB ?? "–"}`;
 }

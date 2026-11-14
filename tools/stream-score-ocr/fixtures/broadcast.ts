@@ -65,11 +65,11 @@ function scriptedGame(random: () => number, winner: StreamScoreSide): GameScript
   const clocks = new Set<number>();
 
   while (clocks.size < sides.length) clocks.add(10 + Math.floor(random() * (GAME_SECONDS - 20)));
-  const ordered = [...clocks].sort((a, b) => b - a);
+  const ordered = [...clocks].toSorted((a, b) => b - a);
 
   const shuffled = sides
     .map((side) => ({ side, key: random() }))
-    .sort((a, b) => a.key - b.key)
+    .toSorted((a, b) => a.key - b.key)
     .map(({ side }) => side);
 
   return {
@@ -90,7 +90,7 @@ export function generateSeries(count: number, seed: number): SeriesScript[] {
 
     while (wins.blue < needed && wins.orange < needed) {
       const winner: StreamScoreSide = random() < 0.5 ? "blue" : "orange";
-      wins[winner]++;
+      wins[winner] += 1;
       games.push(scriptedGame(random, winner));
     }
 
@@ -105,27 +105,25 @@ export function generateSeries(count: number, seed: number): SeriesScript[] {
   });
 }
 
+function scorebug(score: FinalScore, clock: number, overtime: boolean): ScorebugScene {
+  return { kind: "scorebug", ...score, clock, overtime, replay: false, fade: 1, glitch: false };
+}
+
 export function* broadcast(script: SeriesScript): Generator<TimedScene> {
   const random = seededRandom(script.seed);
   let t = 0;
 
   function* hold(scene: Scene, seconds: number): Generator<TimedScene> {
-    for (let second = 0; second < seconds; second++) {
+    for (let second = 0; second < seconds; second += 1) {
       const glitch = scene.kind === "scorebug" && random() < 0.02;
       const cut = scene.kind === "scorebug" && random() < 0.01;
-      yield {
-        t: t++,
-        scene: cut
-          ? { kind: "hidden", variant: 4 }
-          : scene.kind === "scorebug"
-            ? { ...scene, glitch }
-            : scene,
-      };
-    }
-  }
+      let shown: Scene = scene;
 
-  function scorebug(score: FinalScore, clock: number, overtime: boolean): ScorebugScene {
-    return { kind: "scorebug", ...score, clock, overtime, replay: false, fade: 1, glitch: false };
+      if (cut) shown = { kind: "hidden", variant: 4 };
+      else if (scene.kind === "scorebug") shown = { ...scene, glitch };
+      yield { t, scene: shown };
+      t += 1;
+    }
   }
 
   yield* hold({ kind: "hidden", variant: 0 }, 20);
@@ -142,14 +140,15 @@ export function* broadcast(script: SeriesScript): Generator<TimedScene> {
     let clock = GAME_SECONDS;
 
     while (clock > 0) {
-      clock--;
+      clock -= 1;
       yield* hold(scorebug(score, clock, false), 1);
 
       if (clock === game.pauseAt) yield* hold(scorebug(score, clock, false), 15);
-      const goal = game.goals.find((candidate) => candidate.clock === clock);
+      const tick = clock;
+      const goal = game.goals.find((candidate) => candidate.clock === tick);
 
       if (goal === undefined) continue;
-      score[goal.side]++;
+      score[goal.side] += 1;
       yield* hold(scorebug(score, clock, false), 3);
 
       if (clock === 0) break;
@@ -164,11 +163,11 @@ export function* broadcast(script: SeriesScript): Generator<TimedScene> {
 
     yield* hold(scorebug(score, 0, false), 4);
 
-    for (let seconds = 0; seconds <= game.overtime.seconds; seconds++) {
+    for (let seconds = 0; seconds <= game.overtime.seconds; seconds += 1) {
       yield* hold(scorebug(score, seconds, true), 1);
     }
 
-    score[game.overtime.side]++;
+    score[game.overtime.side] += 1;
     yield* hold(scorebug(score, game.overtime.seconds, true), 2);
   }
 

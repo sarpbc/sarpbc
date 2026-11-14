@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { S3Client } from "@aws-sdk/client-s3";
 import { R2Service, type ObjectOperationLogger } from "./r2.service";
 import { StorageService } from "../application/storage.service";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 describe("R2Service", () => {
   const configuredValues = {
@@ -19,9 +19,9 @@ describe("R2Service", () => {
   const logError = vi.fn<ObjectOperationLogger["error"]>();
 
   const operationLogger: ObjectOperationLogger = {
-    set: () => undefined,
+    set: () => {},
     error: logError,
-    emit: () => undefined,
+    emit: () => {},
   };
 
   let sendSpy: MockInstance;

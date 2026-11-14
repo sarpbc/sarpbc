@@ -1,9 +1,8 @@
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import { z } from "zod";
 
-const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repository = path.resolve(import.meta.dirname, "..");
 const frameworkFree = ["packages/types", "packages/utils"];
 const frameworkPackage = /^(?:vue(?:$|[/-])|@vue\/|nuxt(?:$|[/-])|@nuxt\/|@nuxtjs\/|#)/;
 
@@ -17,7 +16,7 @@ const packageManifest = z.object({
 });
 
 const specifierPattern =
-  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["']([^"']+)["']/g;
+  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["'](?<specifier>[^"']+)["']/g;
 
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -33,9 +32,11 @@ export function frameworkViolations(directory: string, root = directory): string
   const violations: string[] = [];
 
   for (const file of sourceFiles(directory)) {
-    const text = readFileSync(file, "utf8");
+    const text = readFileSync(file, "utf-8");
 
-    for (const [, specifier] of text.matchAll(specifierPattern)) {
+    for (const match of text.matchAll(specifierPattern)) {
+      const specifier = match.groups?.specifier ?? "";
+
       if (frameworkPackage.test(specifier)) {
         violations.push(`${path.relative(root, file)}: imports ${specifier}`);
       }
@@ -47,7 +48,7 @@ export function frameworkViolations(directory: string, root = directory): string
   }
 
   const manifestPath = path.join(directory, "package.json");
-  const manifest = packageManifest.parse(JSON.parse(readFileSync(manifestPath, "utf8")));
+  const manifest = packageManifest.parse(JSON.parse(readFileSync(manifestPath, "utf-8")));
 
   for (const field of dependencyFields) {
     for (const name of Object.keys(manifest[field] ?? {})) {
@@ -60,7 +61,7 @@ export function frameworkViolations(directory: string, root = directory): string
   return violations;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const violations = frameworkFree.flatMap((directory) =>
     frameworkViolations(path.join(repository, directory), repository),
   );

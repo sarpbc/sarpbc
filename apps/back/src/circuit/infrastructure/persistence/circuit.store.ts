@@ -7,7 +7,7 @@ import type {
   TournamentEventRef,
 } from "@sarpbc/types";
 import { isUuid } from "../../../common/domain/entity-ref";
-import { ConflictError } from "../../../common/domain/errors";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { Team } from "../../../roster/infrastructure/roster-persistence";
 import {
@@ -17,7 +17,9 @@ import {
 import type { CircuitStore, StoredStageResult } from "../../application/ports";
 import type { CircuitStageSettings } from "../../domain/circuit-scale";
 import type { StagePlacement } from "../../domain/circuit-standings";
-import { Circuit, CircuitStage, CircuitStageTeam } from "./circuit.entities";
+import { Circuit } from "./circuit.entity";
+import { CircuitStage } from "./circuit-stage.entity";
+import { CircuitStageTeam } from "./circuit-stage-team.entity";
 
 function toSummary(row: Circuit): CircuitSummary {
   return {
@@ -51,7 +53,7 @@ function regionTeams(stage: CircuitStage): Team[] {
     .getItems()
     .filter(({ regionMember }) => regionMember)
     .map(({ team }) => team)
-    .sort((a, b) => a.name.localeCompare(b.name));
+    .toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
 function finishes(stage: CircuitStage): StagePlacement[] {
@@ -60,7 +62,7 @@ function finishes(stage: CircuitStage): StagePlacement[] {
     .flatMap(({ team, placement }) =>
       placement === null ? [] : [{ team: toTeam(team), placement }],
     )
-    .sort((a, b) => a.placement - b.placement || a.team.name.localeCompare(b.team.name));
+    .toSorted((a, b) => a.placement - b.placement || a.team.name.localeCompare(b.team.name));
 }
 
 function toStageItem(stage: CircuitStage): CircuitDetail["stages"][number] {
@@ -114,7 +116,9 @@ export class CircuitPersistence implements CircuitStore {
   }
 
   async withSeason(season: number | null) {
-    return (await this.em.find(Circuit, { season })).map(toSummary);
+    const rows = await this.em.findAll(Circuit, { where: { season } });
+
+    return rows.map(toSummary);
   }
 
   async save(circuit: CircuitSummary) {
@@ -171,7 +175,7 @@ export class CircuitPersistence implements CircuitStore {
     const placements = new Map<string, StagePlacement[]>();
 
     for (const participant of participants) {
-      const id = participant.tournament.id;
+      const { id } = participant.tournament;
       placements.set(id, [...(placements.get(id) ?? []), ...toPlacement(participant)]);
     }
 
@@ -213,7 +217,7 @@ export class CircuitPersistence implements CircuitStore {
       teams.set(team.id, { team: toTeam(team), placement: own ?? current?.placement ?? null });
     }
 
-    return [...teams.values()].sort(
+    return [...teams.values()].toSorted(
       (a, b) =>
         (a.placement ?? Number.MAX_SAFE_INTEGER) - (b.placement ?? Number.MAX_SAFE_INTEGER) ||
         a.team.name.localeCompare(b.team.name),

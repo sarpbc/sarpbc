@@ -1,19 +1,14 @@
-import type {
-  CircuitStageScaleInput,
-  PrizeEntry,
-  ProposedPrizeEntry,
-  RosterChange,
-  RosterProposalStatus,
-  StreamInput,
-  TeamLogoVariant,
-} from "@sarpbc/types";
+import type { RosterChange, RosterProposalStatus, TeamLogoVariant } from "@sarpbc/types";
 import { isAcceptedDataSourceUrl, requiredPermission } from "@sarpbc/utils";
+import { mapSequentially } from "../../common/application/sequentially";
 import {
   REFUSED_DATA_SOURCE_MESSAGE,
   isRedistributable,
   sourceFromUrl,
 } from "../../common/domain/data-source";
-import { ForbiddenError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { RosterMergeService } from "../../roster/application/roster-merge.service";
@@ -31,9 +26,44 @@ import type { ViewershipService } from "../../tournament/application/viewership.
 import type { CircuitService } from "../../circuit/application/circuit.service";
 import type { SeasonService } from "../../season/application/season.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
-import type { StreamOwner } from "../../tournament/domain/stream";
 import { assertPrizeDistribution } from "../../tournament/domain/prize-distribution";
 import type { RosterProposalTransaction, RosterProposalStore } from "./ports";
+import {
+  circuitStageInput,
+  sourcedPrizes,
+  streamChangeFor,
+  streamChangeOf,
+} from "./roster-change-inputs";
+import { referencedPlayerIds, referencedTeamIds } from "./roster-change-references";
+
+type Kind = RosterChange["kind"];
+
+type ChangeMap = { [K in Kind]: Extract<RosterChange, { kind: K }> };
+
+type ApplyHandlers = {
+  [K in Kind]: (change: ChangeMap[K], sourceUrl: string) => Promise<string>;
+};
+
+async function applyChange<K extends Kind>(
+  handlers: ApplyHandlers,
+  kind: K,
+  change: ChangeMap[K],
+  sourceUrl: string,
+): Promise<string> {
+  return await handlers[kind](change, sourceUrl);
+}
+
+async function idOf(created: Promise<{ id: string }>): Promise<string> {
+  const { id } = await created;
+
+  return id;
+}
+
+async function keptIdOf(merged: Promise<{ kept: { id: string } }>): Promise<string> {
+  const { kept } = await merged;
+
+  return kept.id;
+}
 
 export interface RosterProposalList {
   proposals: RosterProposal[];
@@ -72,20 +102,6 @@ type Circuits = Pick<CircuitService, "requireStageSettings" | "setStageScale">;
 type TeamAliases = Pick<TeamAliasService, "requireProposable" | "add" | "update">;
 
 type Seasons = Pick<SeasonService, "requireAward" | "addAward">;
-
-type CircuitStageChange = Extract<RosterChange, { kind: "set_circuit_stage_scale" }>;
-
-function circuitStageInput(
-  { scale, worldwide, regionTeamIds, finishes }: CircuitStageChange,
-  sourceUrl: string,
-): CircuitStageScaleInput {
-  return { scale, sourceUrl, worldwide, regionTeamIds, finishes };
-}
-
-interface StreamChange {
-  owner: StreamOwner;
-  streams: StreamInput[];
-}
 
 export interface TeamLogoProposal {
   teamId: string;
@@ -345,9 +361,12 @@ export class RosterProposalService {
   }
 
   private async apply(change: RosterChange, sourceUrl: string): Promise<string> {
-    switch (change.kind) {
-      case "add_player_to_team": {
-        const { playerId, teamId, effectiveDate, contractRole } = change;
+    return await applyChange(this.applyHandlers(), change.kind, change, sourceUrl);
+  }
+
+  private applyHandlers(): ApplyHandlers {
+    return {
+      add_player_to_team: async ({ playerId, teamId, effectiveDate, contractRole }, sourceUrl) => {
         await this.players.joinTeam(playerId, {
           teamId,
           effectiveDate,
@@ -356,122 +375,110 @@ export class RosterProposalService {
         });
 
         return playerId;
-      }
-
-      case "remove_player_from_team": {
-        const { playerId, teamId, effectiveDate, status } = change;
+      },
+      remove_player_from_team: async ({ playerId, teamId, effectiveDate, status }, sourceUrl) => {
         await this.players.leaveTeam(playerId, { teamId, effectiveDate, sourceUrl, status });
 
         return playerId;
-      }
-
-      case "create_player": {
+      },
+      create_player: async (change, sourceUrl) => {
         const { kind: _, ...input } = change;
 
-        return (await this.players.create({ ...input, source: sourceFromUrl(sourceUrl) })).id;
-      }
-
-      case "update_player": {
+        return await idOf(this.players.create({ ...input, source: sourceFromUrl(sourceUrl) }));
+      },
+      update_player: async (change) => {
         const { kind: _, playerId, ...input } = change;
 
-        return (await this.players.update(playerId, input)).id;
-      }
-
-      case "create_team": {
+        return await idOf(this.players.update(playerId, input));
+      },
+      create_team: async (change, sourceUrl) => {
         const { kind: _, ...input } = change;
 
-        return (await this.teams.create({ ...input, source: sourceFromUrl(sourceUrl) })).id;
-      }
-
-      case "update_team": {
+        return await idOf(this.teams.create({ ...input, source: sourceFromUrl(sourceUrl) }));
+      },
+      update_team: async (change) => {
         const { kind: _, teamId, ...input } = change;
 
-        return (await this.teams.update(teamId, input)).id;
-      }
-
-      case "upload_team_logo": {
-        const { teamId, variant, logoUrl } = change;
-
-        return (await this.teams.update(teamId, { [teamLogoField(variant)]: logoUrl })).id;
-      }
-
-      case "add_team_alias":
+        return await idOf(this.teams.update(teamId, input));
+      },
+      upload_team_logo: async ({ teamId, variant, logoUrl }) =>
+        await idOf(this.teams.update(teamId, { [teamLogoField(variant)]: logoUrl })),
+      add_team_alias: async (change, sourceUrl) => {
         await this.teamAliases.add(change.teamId, { ...change.alias, sourceUrl });
 
         return change.teamId;
-      case "update_team_alias": {
-        const { teamId, aliasId, alias } = change;
+      },
+      update_team_alias: async ({ teamId, aliasId, alias }, sourceUrl) => {
         await this.teamAliases.update(teamId, aliasId, { ...alias, sourceUrl });
 
         return teamId;
-      }
-
-      case "merge_players":
-        return (await this.merges.mergePlayers(change.keptId, change.duplicateId)).kept.id;
-      case "merge_teams":
-        return (await this.merges.mergeTeams(change.keptId, change.duplicateId)).kept.id;
-      case "create_contract": {
-        const { playerId, teamId, startDate, endDate, contractRole } = change;
-        const input = { teamId, startDate, endDate, role: contractRole, sourceUrl };
-
-        return (await this.contracts.recordPeriod(playerId, input)).id;
-      }
-
-      case "update_contract": {
-        const { contractId, playerId, teamId, startDate, endDate, contractRole } = change;
-        const input = { teamId, startDate, endDate, role: contractRole, sourceUrl };
-
-        return (await this.contracts.revisePeriod(playerId, contractId, input)).id;
-      }
-
-      case "set_tournament_prizes":
+      },
+      merge_players: async (change) =>
+        await keptIdOf(this.merges.mergePlayers(change.keptId, change.duplicateId)),
+      merge_teams: async (change) =>
+        await keptIdOf(this.merges.mergeTeams(change.keptId, change.duplicateId)),
+      create_contract: async ({ playerId, teamId, startDate, endDate, contractRole }, sourceUrl) =>
+        await idOf(
+          this.contracts.recordPeriod(playerId, {
+            teamId,
+            startDate,
+            endDate,
+            role: contractRole,
+            sourceUrl,
+          }),
+        ),
+      update_contract: async (
+        { contractId, playerId, teamId, startDate, endDate, contractRole },
+        sourceUrl,
+      ) =>
+        await idOf(
+          this.contracts.revisePeriod(playerId, contractId, {
+            teamId,
+            startDate,
+            endDate,
+            role: contractRole,
+            sourceUrl,
+          }),
+        ),
+      set_tournament_prizes: async (change, sourceUrl) => {
         await this.prizes.setDistribution(
           change.tournamentId,
           sourcedPrizes(change.prizes, sourceUrl),
         );
 
         return change.tournamentId;
-      case "update_tournament_prize": {
-        const { tournamentId, teamId, patch } = change;
+      },
+      update_tournament_prize: async ({ tournamentId, teamId, patch }, sourceUrl) => {
         await this.prizes.updateEntry(tournamentId, teamId, patch, sourceUrl);
 
         return tournamentId;
-      }
-
-      case "award_player": {
-        const { tournamentId, teamId, playerId, awardType } = change;
-
-        return (await this.awards.createForTeam(tournamentId, teamId, playerId, awardType)).id;
-      }
-
-      case "award_season_player": {
+      },
+      award_player: async ({ tournamentId, teamId, playerId, awardType }) =>
+        await idOf(this.awards.createForTeam(tournamentId, teamId, playerId, awardType)),
+      award_season_player: async (change, sourceUrl) => {
         const { kind: _, seasonId, ...award } = change;
 
-        return (await this.seasons.addAward(seasonId, { ...award, sourceUrl })).id;
-      }
-
-      case "set_event_streams":
-      case "set_tournament_streams":
-      case "set_match_streams": {
-        const { owner, streams } = streamChangeFor(change);
-        await this.streams.set(owner, streams, sourceFromUrl(sourceUrl));
-
-        return owner.id;
-      }
-
-      case "set_match_lineups":
+        return await idOf(this.seasons.addAward(seasonId, { ...award, sourceUrl }));
+      },
+      set_event_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_tournament_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_match_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_match_lineups: async (change) => {
         await this.lineups.set(change.matchId, change.lineups);
 
         return change.matchId;
-      case "set_event_viewership":
+      },
+      set_event_viewership: async (change) => {
         await this.viewerships.set({ kind: "event", id: change.eventId }, change.viewership);
 
         return change.eventId;
-      case "set_match_viewership":
+      },
+      set_match_viewership: async (change) => {
         await this.viewerships.set({ kind: "match", id: change.matchId }, change.viewership);
 
         return change.matchId;
-      case "set_circuit_stage_scale": {
+      },
+      set_circuit_stage_scale: async (change, sourceUrl) => {
         const { circuitId, tournamentId } = change;
         await this.circuits.setStageScale(
           circuitId,
@@ -480,26 +487,31 @@ export class RosterProposalService {
         );
 
         return circuitId;
-      }
-
-      case "delete_match":
+      },
+      delete_match: async (change) => {
         await this.matches.deleteMatch(change.matchId);
 
         return change.matchId;
-      case "delete_team":
-        if (change.mergeIntoTeamId !== undefined && change.mergeIntoTeamId !== "") {
-          return (await this.merges.mergeTeams(change.mergeIntoTeamId, change.teamId)).kept.id;
-        }
+      },
+      delete_team: async (change) => {
+        if (change.mergeIntoTeamId !== undefined && change.mergeIntoTeamId !== "")
+          return await keptIdOf(this.merges.mergeTeams(change.mergeIntoTeamId, change.teamId));
 
         await this.teams.delete(change.teamId);
 
         return change.teamId;
-      default: {
-        const exhaustive: never = change;
+      },
+    };
+  }
 
-        return exhaustive;
-      }
-    }
+  private async setStreams(
+    change: Parameters<typeof streamChangeFor>[0],
+    sourceUrl: string,
+  ): Promise<string> {
+    const { owner, streams } = streamChangeFor(change);
+    await this.streams.set(owner, streams, sourceFromUrl(sourceUrl));
+
+    return owner.id;
   }
 
   private async requireTeamRemoval(teamId: string, mergeIntoTeamId: string | undefined) {
@@ -525,9 +537,12 @@ export class RosterProposalService {
   }
 
   private async requireReferences(change: RosterChange): Promise<void> {
-    for (const id of referencedPlayerIds(change)) await this.requirePlayer(id);
-
-    for (const id of referencedTeamIds(change)) await this.requireTeam(id);
+    await mapSequentially(referencedPlayerIds(change), async (id) => {
+      await this.requirePlayer(id);
+    });
+    await mapSequentially(referencedTeamIds(change), async (id) => {
+      await this.requireTeam(id);
+    });
   }
 
   private async requireContract(playerId: string, contractId: string): Promise<void> {
@@ -547,135 +562,4 @@ export class RosterProposalService {
       throw new InvalidInputError(`Team "${id}" was merged into "${team.id}"; use that id`);
     }
   }
-}
-
-function referencedPlayerIds(change: RosterChange): string[] {
-  switch (change.kind) {
-    case "add_player_to_team":
-    case "remove_player_from_team":
-    case "update_player":
-    case "create_contract":
-    case "update_contract":
-    case "award_player":
-    case "award_season_player":
-      return [change.playerId];
-    case "merge_players":
-      return [change.keptId, change.duplicateId];
-    case "set_tournament_prizes":
-      return change.prizes.flatMap(({ playerIds }) => playerIds);
-    case "update_tournament_prize":
-      return change.patch.playerIds ?? [];
-    case "set_match_lineups":
-      return change.lineups.flatMap(({ playerIds }) => playerIds);
-    case "create_player":
-    case "create_team":
-    case "update_team":
-    case "upload_team_logo":
-    case "add_team_alias":
-    case "update_team_alias":
-    case "merge_teams":
-    case "set_event_streams":
-    case "set_tournament_streams":
-    case "set_match_streams":
-    case "set_event_viewership":
-    case "set_match_viewership":
-    case "set_circuit_stage_scale":
-    case "delete_match":
-    case "delete_team":
-      return [];
-    default: {
-      const exhaustive: never = change;
-
-      return exhaustive;
-    }
-  }
-}
-
-function referencedTeamIds(change: RosterChange): string[] {
-  switch (change.kind) {
-    case "add_player_to_team":
-    case "remove_player_from_team":
-      return [change.teamId];
-    case "update_team":
-    case "upload_team_logo":
-    case "add_team_alias":
-    case "update_team_alias":
-    case "create_contract":
-    case "award_player":
-      return [change.teamId];
-    case "update_contract":
-      return change.teamId !== undefined && change.teamId !== "" ? [change.teamId] : [];
-    case "merge_teams":
-      return [change.keptId, change.duplicateId];
-    case "set_tournament_prizes":
-      return change.prizes.map(({ teamId }) => teamId);
-    case "update_tournament_prize":
-      return [change.teamId];
-    case "set_circuit_stage_scale":
-      return [
-        ...new Set([
-          ...(change.regionTeamIds ?? []),
-          ...(change.finishes ?? []).map(({ teamId }) => teamId),
-        ]),
-      ];
-    case "delete_team":
-      return change.mergeIntoTeamId !== undefined && change.mergeIntoTeamId !== ""
-        ? [change.teamId, change.mergeIntoTeamId]
-        : [change.teamId];
-    case "create_player":
-    case "update_player":
-    case "create_team":
-    case "merge_players":
-    case "award_season_player":
-    case "set_event_streams":
-    case "set_tournament_streams":
-    case "set_match_streams":
-    case "set_match_lineups":
-    case "set_event_viewership":
-    case "set_match_viewership":
-    case "delete_match":
-      return [];
-    default: {
-      const exhaustive: never = change;
-
-      return exhaustive;
-    }
-  }
-}
-
-function sourcedPrizes(prizes: ProposedPrizeEntry[], sourceUrl: string): PrizeEntry[] {
-  return prizes.map((prize) => ({ ...prize, sourceUrl }));
-}
-
-type StreamRosterChange = Extract<
-  RosterChange,
-  { kind: "set_event_streams" | "set_tournament_streams" | "set_match_streams" }
->;
-
-function streamChangeFor(change: StreamRosterChange): StreamChange {
-  switch (change.kind) {
-    case "set_event_streams":
-      return { owner: { kind: "event", id: change.eventId }, streams: change.streams };
-    case "set_tournament_streams":
-      return { owner: { kind: "tournament", id: change.tournamentId }, streams: change.streams };
-    case "set_match_streams":
-      return { owner: { kind: "match", id: change.matchId }, streams: change.streams };
-    default: {
-      const exhaustive: never = change;
-
-      return exhaustive;
-    }
-  }
-}
-
-function streamChangeOf(change: RosterChange): StreamChange | null {
-  if (
-    change.kind === "set_event_streams" ||
-    change.kind === "set_tournament_streams" ||
-    change.kind === "set_match_streams"
-  ) {
-    return streamChangeFor(change);
-  }
-
-  return null;
 }

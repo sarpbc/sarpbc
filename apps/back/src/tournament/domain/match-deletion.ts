@@ -1,6 +1,7 @@
-import { ConflictError, InvalidInputError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { describeReferences, type ReferenceNouns } from "../../common/domain/references";
-import type { Match } from "./competition";
+import type { Match } from "./match";
 
 export interface MatchReferences {
   picks: number;

@@ -11,7 +11,7 @@ import { useIntervalFn } from "@vueuse/core";
 
 const POLL_MS = 3000;
 
-const props = defineProps<{
+const { tournamentId, matches } = defineProps<{
   tournamentId: string;
   matches: TournamentMatchListItem[];
 }>();
@@ -36,9 +36,9 @@ const {
   error,
   refresh,
 } = await useLazyAsyncData(
-  () => `admin-tournament-${props.tournamentId}-stats-imports`,
-  () => getStatsImports(props.tournamentId),
-  { server: false, watch: [() => props.tournamentId] },
+  () => `admin-tournament-${tournamentId}-stats-imports`,
+  () => getStatsImports(tournamentId),
+  { server: false, watch: [() => tournamentId] },
 );
 
 const latest = computed<StatsImport | null>(() => imports.value?.[0] ?? null);
@@ -53,9 +53,9 @@ const {
   error: gamesError,
   refresh: refreshGames,
 } = await useLazyAsyncData(
-  () => `admin-tournament-${props.tournamentId}-stats-games`,
-  () => getTournamentStatsGames(props.tournamentId),
-  { server: false, watch: [() => props.tournamentId, () => latest.value?.finishedAt] },
+  () => `admin-tournament-${tournamentId}-stats-games`,
+  () => getTournamentStatsGames(tournamentId),
+  { server: false, watch: [() => tournamentId, () => latest.value?.finishedAt] },
 );
 
 const attachTarget = ref<StatsImportItem | null>(null);
@@ -116,7 +116,7 @@ function labelOf(match: TournamentMatchListItem): string {
 }
 
 function matchLabel(matchId: string | null): string | null {
-  const match = props.matches.find((candidate) => candidate.id === matchId);
+  const match = matches.find((candidate) => candidate.id === matchId);
 
   return match ? labelOf(match) : null;
 }
@@ -128,14 +128,16 @@ function replayUrl(item: StatsImportItem): string {
   return `https://ballchasing.com/replay/${item.replayId}`;
 }
 
+function itemTarget(item: StatsImportItem, label: string): string {
+  return item.status === "unmatched"
+    ? label
+    : t("page.tournaments.statsImport.game", { match: label, number: item.gameNumber });
+}
+
 function itemMeta(item: StatsImportItem): string {
   const label = matchLabel(item.matchId);
 
-  const target = !label
-    ? "—"
-    : item.status === "unmatched"
-      ? label
-      : t("page.tournaments.statsImport.game", { match: label, number: item.gameNumber });
+  const target = label ? itemTarget(item, label) : "—";
 
   return `${formatDate(item.playedAt)} · ${target}`;
 }
@@ -162,7 +164,7 @@ async function submit() {
   submitting.value = true;
 
   try {
-    const created = await requestStatsImport(props.tournamentId, group.value.trim());
+    const created = await requestStatsImport(tournamentId, group.value.trim());
     imports.value = [created, ...(imports.value ?? [])];
     group.value = "";
     toast.add({ title: t("page.tournaments.statsImport.started"), color: "success" });

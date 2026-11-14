@@ -1,5 +1,5 @@
 import { isStaffContractRole } from "@sarpbc/utils";
-import { NotFoundError } from "../../common/domain/errors";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import {
   CreateContractInput,
   CreateTeamContractInput,
@@ -8,9 +8,96 @@ import {
   UpdateContractInput,
   UpdateTeamContractInput,
 } from "./inputs";
-import { Contract } from "../domain/roster";
+import { Contract } from "../domain/contract";
 import type { ContractQueries, RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
 import { requireTeam } from "./require-team";
+
+async function removeContract(
+  { contracts }: RosterWriteScope,
+  playerId: string,
+  contractId: string,
+): Promise<void> {
+  const contract = await contracts.findById(contractId);
+
+  if (!contract || contract.player.id !== playerId) {
+    throw new NotFoundError(`Contract with id "${contractId}" not found`);
+  }
+
+  await contracts.delete(contract);
+}
+
+async function buildContract(
+  { players, teams }: RosterWriteScope,
+  playerId: string,
+  dto: CreateContractInput,
+): Promise<Contract> {
+  const player = await players.findById(playerId);
+
+  if (!player) {
+    throw new NotFoundError(`Player with id "${playerId}" not found`);
+  }
+
+  const contract = new Contract();
+  contract.player = player;
+  contract.team = await requireTeam(teams, dto.teamId);
+  contract.startDate = new Date(dto.startDate);
+  contract.endDate = dto.endDate !== undefined && dto.endDate !== "" ? new Date(dto.endDate) : null;
+  contract.role = dto.role ?? "active";
+
+  return contract;
+}
+
+async function editContract(
+  { contracts, teams }: RosterWriteScope,
+  playerId: string,
+  contractId: string,
+  dto: UpdateContractInput,
+): Promise<Contract> {
+  const contract = await contracts.findById(contractId);
+
+  if (!contract || contract.player.id !== playerId) {
+    throw new NotFoundError(`Contract with id "${contractId}" not found`);
+  }
+
+  if (dto.teamId !== undefined && dto.teamId !== "")
+    contract.team = await requireTeam(teams, dto.teamId);
+
+  if (dto.startDate !== undefined) {
+    contract.startDate = new Date(dto.startDate);
+  }
+
+  if (dto.endDate !== undefined) {
+    contract.endDate = dto.endDate !== null && dto.endDate !== "" ? new Date(dto.endDate) : null;
+  }
+
+  if (dto.role !== undefined) {
+    contract.role = dto.role;
+  }
+
+  return contract;
+}
+
+async function saveContractInCareer(
+  { players, contracts }: RosterWriteScope,
+  contract: Contract,
+): Promise<void> {
+  const player = await players.findById(contract.player.id);
+  const career = await contracts.findByPlayer(contract.player.id);
+  contract.assertFitsCareer(career, player?.team?.id ?? null);
+  await contracts.save(contract);
+}
+
+async function applyContractUpdate(
+  scope: RosterWriteScope,
+  playerId: string,
+  contractId: string,
+  dto: UpdateContractInput,
+): Promise<Contract> {
+  const contract = await editContract(scope, playerId, contractId, dto);
+  await saveContractInCareer(scope, contract);
+
+  return contract;
+}
 
 export class ContractService {
   constructor(
@@ -76,7 +163,7 @@ export class ContractService {
 
       if (dto.role !== undefined) updateDto.role = dto.role;
 
-      return await this.applyUpdate(scope, contract.player.id, contractId, updateDto);
+      return await applyContractUpdate(scope, contract.player.id, contractId, updateDto);
     });
   }
 
@@ -88,14 +175,14 @@ export class ContractService {
         throw new NotFoundError(`Contract with id "${contractId}" not found`);
       }
 
-      await this.remove(scope, contract.player.id, contractId);
+      await removeContract(scope, contract.player.id, contractId);
     });
   }
 
   async create(playerId: string, dto: CreateContractInput): Promise<Contract> {
     return await this.transaction.run(async (scope) => {
-      const contract = await this.build(scope, playerId, dto);
-      await this.saveInCareer(scope, contract);
+      const contract = await buildContract(scope, playerId, dto);
+      await saveContractInCareer(scope, contract);
 
       return contract;
     });
@@ -106,11 +193,11 @@ export class ContractService {
     { sourceUrl, ...dto }: SourcedContractInput,
   ): Promise<Contract> {
     return await this.transaction.run(async (scope) => {
-      const contract = await this.build(scope, playerId, dto);
+      const contract = await buildContract(scope, playerId, dto);
       contract.joinSourceUrl = sourceUrl;
 
       if (contract.endDate) contract.leaveSourceUrl = sourceUrl;
-      await this.saveInCareer(scope, contract);
+      await saveContractInCareer(scope, contract);
 
       return contract;
     });
@@ -118,7 +205,7 @@ export class ContractService {
 
   async update(playerId: string, contractId: string, dto: UpdateContractInput): Promise<Contract> {
     return await this.transaction.run(
-      async (scope) => await this.applyUpdate(scope, playerId, contractId, dto),
+      async (scope) => await applyContractUpdate(scope, playerId, contractId, dto),
     );
   }
 
@@ -128,7 +215,7 @@ export class ContractService {
     { sourceUrl, ...dto }: SourcedContractUpdate,
   ): Promise<Contract> {
     return await this.transaction.run(async (scope) => {
-      const contract = await this.edit(scope, playerId, contractId, dto);
+      const contract = await editContract(scope, playerId, contractId, dto);
 
       if (dto.teamId !== undefined || dto.startDate !== undefined) {
         contract.joinSourceUrl = sourceUrl;
@@ -138,7 +225,7 @@ export class ContractService {
         contract.leaveSourceUrl = dto.endDate !== null && dto.endDate !== "" ? sourceUrl : null;
       }
 
-      await this.saveInCareer(scope, contract);
+      await saveContractInCareer(scope, contract);
 
       return contract;
     });
@@ -146,95 +233,7 @@ export class ContractService {
 
   async delete(playerId: string, contractId: string): Promise<void> {
     await this.transaction.run(async (scope) => {
-      await this.remove(scope, playerId, contractId);
+      await removeContract(scope, playerId, contractId);
     });
-  }
-
-  private async applyUpdate(
-    scope: RosterWriteScope,
-    playerId: string,
-    contractId: string,
-    dto: UpdateContractInput,
-  ): Promise<Contract> {
-    const contract = await this.edit(scope, playerId, contractId, dto);
-    await this.saveInCareer(scope, contract);
-
-    return contract;
-  }
-
-  private async remove(
-    { contracts }: RosterWriteScope,
-    playerId: string,
-    contractId: string,
-  ): Promise<void> {
-    const contract = await contracts.findById(contractId);
-
-    if (!contract || contract.player.id !== playerId) {
-      throw new NotFoundError(`Contract with id "${contractId}" not found`);
-    }
-
-    await contracts.delete(contract);
-  }
-
-  private async build(
-    { players, teams }: RosterWriteScope,
-    playerId: string,
-    dto: CreateContractInput,
-  ): Promise<Contract> {
-    const player = await players.findById(playerId);
-
-    if (!player) {
-      throw new NotFoundError(`Player with id "${playerId}" not found`);
-    }
-
-    const contract = new Contract();
-    contract.player = player;
-    contract.team = await requireTeam(teams, dto.teamId);
-    contract.startDate = new Date(dto.startDate);
-    contract.endDate =
-      dto.endDate !== undefined && dto.endDate !== "" ? new Date(dto.endDate) : null;
-    contract.role = dto.role ?? "active";
-
-    return contract;
-  }
-
-  private async edit(
-    { contracts, teams }: RosterWriteScope,
-    playerId: string,
-    contractId: string,
-    dto: UpdateContractInput,
-  ): Promise<Contract> {
-    const contract = await contracts.findById(contractId);
-
-    if (!contract || contract.player.id !== playerId) {
-      throw new NotFoundError(`Contract with id "${contractId}" not found`);
-    }
-
-    if (dto.teamId !== undefined && dto.teamId !== "")
-      contract.team = await requireTeam(teams, dto.teamId);
-
-    if (dto.startDate !== undefined) {
-      contract.startDate = new Date(dto.startDate);
-    }
-
-    if (dto.endDate !== undefined) {
-      contract.endDate = dto.endDate !== null && dto.endDate !== "" ? new Date(dto.endDate) : null;
-    }
-
-    if (dto.role !== undefined) {
-      contract.role = dto.role;
-    }
-
-    return contract;
-  }
-
-  private async saveInCareer(
-    { players, contracts }: RosterWriteScope,
-    contract: Contract,
-  ): Promise<void> {
-    const player = await players.findById(contract.player.id);
-    const career = await contracts.findByPlayer(contract.player.id);
-    contract.assertFitsCareer(career, player?.team?.id ?? null);
-    await contracts.save(contract);
   }
 }

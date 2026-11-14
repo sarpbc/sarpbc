@@ -18,16 +18,16 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
-import { CreateReplyDto } from "./dto/create-reply.dto";
-import { ListRepliesQueryDto } from "./dto/list-replies-query.dto";
-import { ReportReplyDto } from "./dto/report-reply.dto";
+import { CreateReplyDto, type CreateReplyInput } from "./dto/create-reply.dto";
+import { ListRepliesQueryDto, type ListRepliesQueryInput } from "./dto/list-replies-query.dto";
+import { ReportReplyDto, type ReportReplyInput } from "./dto/report-reply.dto";
 
 @Controller("replies")
 export class ReplyController {
   constructor(private readonly replyService: ReplyService) {}
 
   @Get()
-  async findByTarget(@Query({ schema: ListRepliesQueryDto }) query: ListRepliesQueryDto) {
+  async findByTarget(@Query({ schema: ListRepliesQueryDto }) query: ListRepliesQueryInput) {
     return await this.replyService.findByTargetPaginated(
       query.targetType,
       query.targetId,
@@ -41,7 +41,7 @@ export class ReplyController {
   @HttpCode(HttpStatus.CREATED)
   async create(
     @CurrentUserId() userId: string,
-    @Body({ schema: CreateReplyDto }) createReplyDto: CreateReplyDto,
+    @Body({ schema: CreateReplyDto }) createReplyDto: CreateReplyInput,
   ) {
     const reply = await this.replyService.create(userId, createReplyDto);
 
@@ -55,7 +55,7 @@ export class ReplyController {
   async report(
     @CurrentUserId() userId: string,
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: ReportReplyDto }) reportReplyDto: ReportReplyDto,
+    @Body({ schema: ReportReplyDto }) reportReplyDto: ReportReplyInput,
   ) {
     const report = await this.replyService.report(userId, id, reportReplyDto.reason);
 

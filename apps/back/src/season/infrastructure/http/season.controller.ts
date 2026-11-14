@@ -25,10 +25,15 @@ import { SeasonArchiveService } from "../../application/season-archive.service";
 import { SeasonService } from "../../application/season.service";
 import {
   CreateSeasonAwardDto,
+  type CreateSeasonAwardInput,
   CreateSeasonParticipantDto,
+  type CreateSeasonParticipantInput,
   CreateSeasonPathEntryDto,
+  type CreateSeasonPathEntryInput,
   SeasonDto,
+  type SeasonInput,
   UpdateSeasonParticipantDto,
+  type UpdateSeasonParticipantInput,
 } from "./dto/season.dto";
 
 @Controller("seasons")
@@ -52,14 +57,14 @@ export class SeasonController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body({ schema: SeasonDto }) dto: SeasonDto): Promise<SeasonDetail> {
+  async create(@Body({ schema: SeasonDto }) dto: SeasonInput): Promise<SeasonDetail> {
     return await this.seasons.create(dto);
   }
 
   @Patch(":id")
   async update(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: SeasonDto }) dto: SeasonDto,
+    @Body({ schema: SeasonDto }) dto: SeasonInput,
   ): Promise<SeasonDetail> {
     return await this.seasons.update(id, dto);
   }
@@ -74,7 +79,7 @@ export class SeasonController {
   @HttpCode(HttpStatus.CREATED)
   async addAward(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: CreateSeasonAwardDto }) dto: CreateSeasonAwardDto,
+    @Body({ schema: CreateSeasonAwardDto }) dto: CreateSeasonAwardInput,
   ): Promise<{ award: SeasonAward }> {
     return { award: await this.seasons.addAward(id, dto) };
   }
@@ -92,7 +97,7 @@ export class SeasonController {
   @HttpCode(HttpStatus.CREATED)
   async addParticipant(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: CreateSeasonParticipantDto }) dto: CreateSeasonParticipantDto,
+    @Body({ schema: CreateSeasonParticipantDto }) dto: CreateSeasonParticipantInput,
   ): Promise<{ participant: SeasonParticipant }> {
     return { participant: await this.archives.addParticipant(id, dto) };
   }
@@ -101,7 +106,7 @@ export class SeasonController {
   async updateParticipant(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("participantId", ParseUUIDPipe) participantId: string,
-    @Body({ schema: UpdateSeasonParticipantDto }) dto: UpdateSeasonParticipantDto,
+    @Body({ schema: UpdateSeasonParticipantDto }) dto: UpdateSeasonParticipantInput,
   ): Promise<{ participant: SeasonParticipant }> {
     return {
       participant: await this.archives.updatePathNote(id, participantId, dto.pathNote),
@@ -122,7 +127,7 @@ export class SeasonController {
   async addPathEntry(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("participantId", ParseUUIDPipe) participantId: string,
-    @Body({ schema: CreateSeasonPathEntryDto }) dto: CreateSeasonPathEntryDto,
+    @Body({ schema: CreateSeasonPathEntryDto }) dto: CreateSeasonPathEntryInput,
   ): Promise<{ entry: SeasonPathEntry }> {
     return { entry: await this.archives.addPathEntry(id, participantId, dto) };
   }

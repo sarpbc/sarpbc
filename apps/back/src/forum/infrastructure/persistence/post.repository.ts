@@ -2,7 +2,7 @@ import { z } from "zod";
 import { EntityRepository } from "@mikro-orm/core";
 
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import { Post } from "./forum.entities";
+import { Post } from "./post.entity";
 
 export class PostRepository extends EntityRepository<Post> {
   async findPaginated({
@@ -12,14 +12,19 @@ export class PostRepository extends EntityRepository<Post> {
     limit?: number;
     offset?: number;
   }): Promise<Post[]> {
-    return await super.find(
-      {},
-      { limit, offset, populate: ["author", "topic"], orderBy: { createdAt: "DESC" } },
-    );
+    return await super.findAll({
+      limit,
+      offset,
+      populate: ["author", "topic"],
+      orderBy: { createdAt: "DESC" },
+    });
   }
 
   async findByTopicId(topicId: string): Promise<Post[]> {
-    return await super.find({ topic: { id: topicId } }, { populate: ["author", "topic"] });
+    return await super.findAll({
+      where: { topic: { id: topicId } },
+      populate: ["author", "topic"],
+    });
   }
 
   async findById(id: string): Promise<Post | null> {
@@ -36,13 +41,13 @@ export class PostRepository extends EntityRepository<Post> {
   }
 
   async findRecentActivity(limit: number): Promise<
-    Array<{
+    {
       id: string;
       publicId: number;
       title: string;
       messageCount: number;
       lastActivity: Date;
-    }>
+    }[]
   > {
     const query = `
       SELECT

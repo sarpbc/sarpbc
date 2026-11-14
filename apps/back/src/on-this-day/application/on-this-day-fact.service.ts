@@ -1,6 +1,7 @@
 import type { OnThisDayFact, OnThisDayFactInput } from "@sarpbc/types";
 import { v4 } from "uuid";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { parseOnThisDayFact } from "../domain/on-this-day-fact";
 import type { OnThisDayFactStore } from "./ports";
 

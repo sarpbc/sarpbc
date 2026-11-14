@@ -1,9 +1,9 @@
 export type BracketSection = "upper" | "lower" | "finals";
 
-export type BracketRoundParse = {
+export interface BracketRoundParse {
   section: BracketSection;
   column: number | null;
-};
+}
 
 /**
  * PandaScore match names encode section and column when feeder links are omitted.

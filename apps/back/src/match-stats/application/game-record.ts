@@ -1,4 +1,5 @@
-import { IntegrationError, NotFoundError } from "../../common/domain/errors";
+import { IntegrationError } from "../../common/domain/errors/integration-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { resolvePlayerId, type RosterPlayer, type SideAssignment } from "../domain/replay-matching";
 import type {
   BallchasingSource,

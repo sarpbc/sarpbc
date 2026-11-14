@@ -4,11 +4,9 @@ import { FileValidator } from "@nestjs/common/pipes/file/file-validator.interfac
 import { FileTypeValidator, MaxFileSizeValidator } from "@nestjs/common";
 import type { Storage } from "./fastify";
 
-export class MultipartOptions {
-  constructor(
-    public maxFileSize?: number,
-    public fileType?: string | RegExp,
-  ) {}
+export interface MultipartOptions {
+  maxFileSize?: number;
+  fileType?: string | RegExp;
 }
 
 export const getFileFromPart = async (part: MultipartFile): Promise<Storage.MultipartFile> => {
@@ -35,11 +33,9 @@ export const validateFile = async (
   if (options.fileType !== undefined && options.fileType !== "")
     validators.push(new FileTypeValidator({ fileType: options.fileType }));
 
-  for (const validator of validators) {
-    if (await validator.isValid(file)) continue;
+  const checked = await Promise.all(
+    validators.map(async (validator) => ({ validator, valid: await validator.isValid(file) })),
+  );
 
-    return validator.buildErrorMessage(file);
-  }
-
-  return undefined;
+  return checked.find(({ valid }) => !valid)?.validator.buildErrorMessage(file);
 };

@@ -21,18 +21,22 @@ const concealed = computed(() =>
 );
 
 const winnerParticipantId = computed(() => {
-  if (concealed.value || !match.results || match.results.length < 2) {
+  if (concealed.value || !match.results) {
     return null;
   }
 
   const [first, second] = match.results;
 
-  if (first!.score > second!.score) {
-    return first!.participant;
+  if (!first || !second) {
+    return null;
   }
 
-  if (second!.score > first!.score) {
-    return second!.participant;
+  if (first.score > second.score) {
+    return first.participant;
+  }
+
+  if (second.score > first.score) {
+    return second.participant;
   }
 
   return null;

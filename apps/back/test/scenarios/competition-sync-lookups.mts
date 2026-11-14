@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { z } from "zod";
 import type { UpsertTournamentCommand } from "../../src/tournament/application/feed.ts";
 import { verifyCountries } from "./countries.mts";
+import { mapSequentially } from "../../src/common/application/sequentially.ts";
 import { byText } from "./support.mts";
 import type { Application, Orm, Payload, Request, RequestContextType } from "./support.mts";
 
@@ -49,11 +50,17 @@ export async function verifyCompetitionSyncLookups({
   const upsert = async (command: Omit<UpsertTournamentCommand, "league">) =>
     await run(async () => await sync.upsertTournament({ league, ...command }));
 
-  const view = async (id: string): Promise<StageView> =>
-    (await request("GET", `/tournaments/${id}`)).json(stageBody).tournament;
+  const view = async (id: string): Promise<StageView> => {
+    const response2 = await request("GET", `/tournaments/${id}`);
 
-  const eventSlugOf = async (tournament: IdRef): Promise<string> =>
-    (await view(tournament.id)).event.slug;
+    return response2.json(stageBody).tournament;
+  };
+
+  const eventSlugOf = async (tournament: IdRef): Promise<string> => {
+    const viewResult = await view(tournament.id);
+
+    return viewResult.event.slug;
+  };
 
   const backfilled = await upsert({
     pandascoreId: 9711,
@@ -76,7 +83,8 @@ export async function verifyCompetitionSyncLookups({
     backfilledEventSlug,
     "a backfilled stage claims its own event for the serie instead of opening a duplicate",
   );
-  assert.equal((await view(claimed.id)).event.name, "Lookup League Spring");
+  const viewResult2 = await view(claimed.id);
+  assert.equal(viewResult2.event.name, "Lookup League Spring");
 
   const unclaimed = await upsert({
     pandascoreId: 9712,
@@ -99,17 +107,18 @@ export async function verifyCompetitionSyncLookups({
     "a new stage is filed under the unclaimed event of its league with the same name",
   );
 
-  const leagueId = (await view(claimed.id)).league.id;
+  const viewResult3 = await view(claimed.id);
+  const leagueId = viewResult3.league.id;
 
-  const manualEvent = (
-    await request(
-      "POST",
-      "/tournaments",
-      { name: "Lookup League Group C", leagueId, beginAt: "2026-04-01T12:00:00Z" },
-      staffCookie,
-      201,
-    )
-  ).json(stageBody).tournament;
+  const response3 = await request(
+    "POST",
+    "/tournaments",
+    { name: "Lookup League Group C", leagueId, beginAt: "2026-04-01T12:00:00Z" },
+    staffCookie,
+    201,
+  );
+
+  const manualEvent = response3.json(stageBody).tournament;
 
   assert.equal(manualEvent.event.name, "Lookup League Group C");
 
@@ -127,22 +136,23 @@ export async function verifyCompetitionSyncLookups({
     "a provider stage is never filed under a manual event",
   );
   assert.equal(besideView.event.name, "Lookup League Group C");
-  assert.equal((await view(manualEvent.id)).source, "manual");
+  const viewResult4 = await view(manualEvent.id);
+  assert.equal(viewResult4.source, "manual");
 
-  const manualFinals = (
-    await request(
-      "POST",
-      "/tournaments",
-      {
-        name: "Lookup League Counter Finals",
-        leagueId,
-        beginAt: "2026-03-01T00:00:00Z",
-        endAt: "2026-03-02T00:00:00Z",
-      },
-      staffCookie,
-      201,
-    )
-  ).json(stageBody).tournament;
+  const response4 = await request(
+    "POST",
+    "/tournaments",
+    {
+      name: "Lookup League Counter Finals",
+      leagueId,
+      beginAt: "2026-03-01T00:00:00Z",
+      endAt: "2026-03-02T00:00:00Z",
+    },
+    staffCookie,
+    201,
+  );
+
+  const manualFinals = response4.json(stageBody).tournament;
 
   const counterpart = await upsert({
     pandascoreId: 9715,
@@ -156,7 +166,8 @@ export async function verifyCompetitionSyncLookups({
     manualFinals.id,
     "the single matching manual tournament becomes the synced stage",
   );
-  assert.equal((await view(manualFinals.id)).source, "pandascore");
+  const viewResult5 = await view(manualFinals.id);
+  assert.equal(viewResult5.source, "pandascore");
 
   const ambiguous = [1, 2].map(() => ({
     name: "Lookup League Twin Finals",
@@ -165,12 +176,11 @@ export async function verifyCompetitionSyncLookups({
     endAt: "2026-05-02T00:00:00Z",
   }));
 
-  const twins: StageView[] = [];
+  const twins: StageView[] = await mapSequentially(ambiguous, async (body) => {
+    const response = await request("POST", "/tournaments", body, staffCookie, 201);
 
-  for (const body of ambiguous)
-    twins.push(
-      (await request("POST", "/tournaments", body, staffCookie, 201)).json(stageBody).tournament,
-    );
+    return response.json(stageBody).tournament;
+  });
 
   const separate = await upsert({
     pandascoreId: 9716,
@@ -179,12 +189,14 @@ export async function verifyCompetitionSyncLookups({
     serie: { pandascoreId: 9805, fullName: "Twin", year: 2026 },
   });
 
-  assert(
+  assert.ok(
     !twins.some((twin) => twin.id === separate.id),
     "several matching manual tournaments are never linked automatically",
   );
 
-  for (const twin of twins) assert.equal((await view(twin.id)).source, "manual");
+  const views = await Promise.all(twins.map(async (twin) => await view(twin.id)));
+
+  for (const { source } of views) assert.equal(source, "manual");
 }
 
 export async function verifyPandascoreAdoption({
@@ -197,7 +209,7 @@ export async function verifyPandascoreAdoption({
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
-  const { Player } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
+  const { Player } = await import("../../src/roster/infrastructure/persistence/player.entity.ts");
   const { randomUUID } = await import("node:crypto");
   const sync = app.get(CompetitionSyncService);
 
@@ -220,13 +232,16 @@ export async function verifyPandascoreAdoption({
   const imported = async (pandascoreId: number) =>
     await orm.em.fork().findOneOrFail(Player, { pandascoreId });
 
-  const legacy = (
-    await request("POST", "/player", { name: "Adoption Legacy" }, staffCookie, 201)
-  ).json(z.object({ player: z.looseObject({ id: z.string(), slug: z.string() }) })).player;
+  const response5 = await request("POST", "/player", { name: "Adoption Legacy" }, staffCookie, 201);
+
+  const legacy = response5.json(
+    z.object({ player: z.looseObject({ id: z.string(), slug: z.string() }) }),
+  ).player;
 
   await importPlayer(9951, legacy.slug);
+  const importedResult = await imported(9951);
   assert.equal(
-    (await imported(9951)).id,
+    importedResult.id,
     legacy.id,
     "a legacy row without a provider id is adopted through its slug",
   );
@@ -247,8 +262,9 @@ export async function verifyPandascoreAdoption({
   const created = await imported(9952);
   assert.notEqual(created.id, startgg, "a start.gg row is never adopted through its slug");
   assert.equal(created.slug, "adoption-startgg-9952");
+  const findOneOrFailResult = await orm.em.fork().findOneOrFail(Player, { id: startgg });
   assert.equal(
-    (await orm.em.fork().findOneOrFail(Player, { id: startgg })).pandascoreId,
+    findOneOrFailResult.pandascoreId,
     null,
     "the start.gg row keeps its source and has no provider id",
   );
@@ -274,12 +290,16 @@ export async function verifyRedistributableScope({
   }
 
   async function created<T>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> {
-    return (await request("POST", path, body, staffCookie, 201)).json(schema);
+    const response6 = await request("POST", path, body, staffCookie, 201);
+
+    return response6.json(schema);
   }
 
   const teamBody = z.object({ team: idRef });
-  const alpha = (await created("/team", { name: "Scope Alpha" }, teamBody)).team.id;
-  const beta = (await created("/team", { name: "Scope Beta" }, teamBody)).team.id;
+  const response7 = await created("/team", { name: "Scope Alpha" }, teamBody);
+  const alpha = response7.team.id;
+  const response8 = await created("/team", { name: "Scope Beta" }, teamBody);
+  const beta = response8.team.id;
 
   const finishedMatchOf = async (source: string): Promise<string> => {
     const { tournament } = await created(
@@ -335,12 +355,12 @@ export async function verifyRedistributableScope({
 
     assert.equal(total, rows.length, "the total counts the rows that are returned");
 
-    return rows.map((match) => match.tournament.id).sort(byText);
+    return rows.map((match) => match.tournament.id).toSorted(byText);
   };
 
   assert.deepEqual(
     await finishedCups({ redistributableOnly: false }),
-    [manualCup, startggCup].sort(),
+    [manualCup, startggCup].toSorted(),
   );
   assert.deepEqual(
     await finishedCups({ redistributableOnly: true }),
@@ -348,8 +368,13 @@ export async function verifyRedistributableScope({
     "redistributable lists never carry start.gg matches",
   );
 
-  const earned = async (redistributableOnly: boolean) =>
-    (await run(async () => await prizes.teamEarnings(alpha, { redistributableOnly }))).totals;
+  const earned = async (redistributableOnly: boolean) => {
+    const runResult = await run(
+      async () => await prizes.teamEarnings(alpha, { redistributableOnly }),
+    );
+
+    return runResult.totals;
+  };
 
   assert.deepEqual(await earned(false), [{ currency: "USD", amount: 2000 }]);
   assert.deepEqual(

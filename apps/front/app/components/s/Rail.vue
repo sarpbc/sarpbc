@@ -4,12 +4,12 @@ type RailCaption = "lead" | "section" | "none";
 type CaptionAlign = "start" | "center";
 
 const {
-  title,
+  title = null,
   caption = "section",
   captionAlign = "start",
-  class: className,
+  class: className = null,
 } = defineProps<{
-  title?: string;
+  title?: string | null;
   /**
    * `lead` — first rail in a hub column (72px from `md`); aligns with `SHubPageHeader` + gap.
    * `section` — stacked rails / mid-page blocks (44px / `h-row`).
@@ -17,7 +17,7 @@ const {
    */
   caption?: RailCaption;
   captionAlign?: CaptionAlign;
-  class?: string;
+  class?: string | null;
 }>();
 
 const slots = useSlots();

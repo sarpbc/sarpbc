@@ -1,19 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
-import type { TournamentStatsGame } from "@sarpbc/types";
-import {
-  ConflictError,
-  IntegrationError,
-  InvalidInputError,
-  NotFoundError,
-} from "../../common/domain/errors";
+import { MemoryGames } from "../../../test/memory-games";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { IntegrationError } from "../../common/domain/errors/integration-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { CandidateMatch, ReplaySummary } from "../domain/replay-matching";
 import type { StatsImport } from "../domain/stats-import";
 import type {
   BallchasingSource,
-  GameRecord,
-  GameStatsStore,
-  PlatformAccount,
-  PlayerLink,
   ReplayStats,
   StatsCandidates,
   StatsImportScheduler,
@@ -61,20 +55,20 @@ const stranger: ReplaySummary = {
   blue: { name: null, goals: 1, playerNames: ["x", "y", "z"] },
 };
 
-function statsFor(replay: ReplaySummary): ReplayStats {
-  const side = (names: string[], team: "blue" | "orange") =>
-    names.map((name, index) => ({
-      name: index === 2 ? "Stand-in" : name,
-      platform: "epic",
-      platformId: `${name}-id`,
-      side: team,
-      goals: 0,
-      assists: 0,
-      saves: 1,
-      shots: 1,
-      demolitions: index,
-    }));
+const side = (names: string[], team: "blue" | "orange") =>
+  names.map((name, index) => ({
+    name: index === 2 ? "Stand-in" : name,
+    platform: "epic",
+    platformId: `${name}-id`,
+    side: team,
+    goals: 0,
+    assists: 0,
+    saves: 1,
+    shots: 1,
+    demolitions: index,
+  }));
 
+function statsFor(replay: ReplaySummary): ReplayStats {
   return {
     rocketLeagueId: replay.rocketLeagueId,
     playedAt: replay.playedAt,
@@ -105,7 +99,7 @@ class MemoryImports implements StatsImportStore {
   async latest(tournamentId: string, limit: number) {
     return [...this.rows.values()]
       .filter((row) => row.tournamentId === tournamentId)
-      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
+      .toSorted((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .slice(0, limit);
   }
   async failUnfinished(error: string) {
@@ -121,84 +115,21 @@ class MemoryImports implements StatsImportStore {
   }
 }
 
-function toTournamentGame(game: GameRecord): TournamentStatsGame {
-  return {
-    matchId: game.matchId,
-    number: game.number,
-    ballchasingId: game.ballchasingId,
-    playedAt: null,
-    blueParticipantId: game.blueParticipantId,
-    orangeParticipantId: game.orangeParticipantId,
-    blueGoals: game.blueGoals,
-    orangeGoals: game.orangeGoals,
-  };
-}
-
-class MemoryGames implements GameStatsStore {
-  saved: GameRecord[] = [];
-  linked: PlayerLink[] = [];
-  exclusions = new Set<string>();
-  async locations(ids: string[]) {
-    return new Map(
-      this.saved
-        .filter((game) => ids.includes(game.ballchasingId))
-        .map((game) => [game.ballchasingId, { matchId: game.matchId, number: game.number }]),
-    );
-  }
-  async excluded(ids: string[]) {
-    return new Set(ids.filter((id) => this.exclusions.has(id)));
-  }
-  async attachment() {
-    return null;
-  }
-  async links(accounts: PlatformAccount[]) {
-    return this.linked.filter((link) =>
-      accounts.some((a) => a.platform === link.platform && a.platformId === link.platformId),
-    );
-  }
-  async save(game: GameRecord) {
-    this.saved.push(game);
-    this.exclusions.delete(game.ballchasingId);
-
-    for (const link of game.learnedLinks)
-      if (!this.linked.some((known) => known.platformId === link.platformId))
-        this.linked.push(link);
-
-    return toTournamentGame(game);
-  }
-  async byMatch() {
-    return [];
-  }
-  async inTournament() {
-    return [];
-  }
-  async playerLines() {
-    return [];
-  }
-  async remove(_tournamentId: string, { matchId, number }: { matchId: string; number: number }) {
-    const game = this.saved.find((saved) => saved.matchId === matchId && saved.number === number);
-
-    if (!game) return null;
-    this.saved = this.saved.filter((saved) => saved !== game);
-    this.exclusions.add(game.ballchasingId);
-
-    return toTournamentGame(game);
-  }
-}
-
 function setup(options: { replays?: ReplaySummary[] } = {}) {
   const source = {
     groupReplays: vi.fn<BallchasingSource["groupReplays"]>(
       async () => options.replays ?? [game2, stranger, game1],
     ),
     replayStats: vi.fn<BallchasingSource["replayStats"]>(async (id) => {
-      const replay = [game1, game2].find((candidate) => candidate.id === id);
+      const replay = [game1, game2].find((known) => known.id === id);
 
       if (replay === undefined) throw new Error(`Unknown replay ${id}`);
 
       return statsFor(replay);
     }),
   } satisfies BallchasingSource;
+
+  const games = new MemoryGames();
 
   const candidates: StatsCandidates = {
     tournamentExists: vi.fn(async (id: string) => id === "t1"),
@@ -210,7 +141,6 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
     ]),
   };
 
-  const games = new MemoryGames();
   const imports = new MemoryImports();
   const reportFailure = vi.fn<(cause: unknown) => void>();
   const scheduler = { schedule: vi.fn<StatsImportScheduler["schedule"]>() };
@@ -317,7 +247,8 @@ describe("StatsImportService.run", () => {
   it("learns platform links from unique roster-name matches once", async () => {
     const { service, games } = setup({ replays: [game1, game2] });
 
-    await service.run((await service.request("t1", "pilot-abc123")).id);
+    const response = await service.request("t1", "pilot-abc123");
+    await service.run(response.id);
 
     expect(games.saved[0].learnedLinks).toEqual([
       { platform: "epic", platformId: "Vatira-id", playerId: "Vatira" },
@@ -344,7 +275,8 @@ describe("StatsImportService.run", () => {
       { platform: "steam", platformId: "Seikoo-id", playerId: "other-platform" },
     ];
 
-    await service.run((await service.request("t1", "pilot-abc123")).id);
+    const response2 = await service.request("t1", "pilot-abc123");
+    await service.run(response2.id);
 
     const [saved] = games.saved;
     expect(saved.players.map((player) => [player.name, player.playerId])).toEqual([
@@ -364,7 +296,8 @@ describe("StatsImportService.run", () => {
 
   it("skips already imported replays on a rerun without fetching their stats", async () => {
     const { service, games, imports, source } = setup();
-    await service.run((await service.request("t1", "pilot-abc123")).id);
+    const response3 = await service.request("t1", "pilot-abc123");
+    await service.run(response3.id);
     source.replayStats.mockClear();
 
     const { id } = await service.request("t1", "pilot-abc123");
@@ -381,7 +314,8 @@ describe("StatsImportService.run", () => {
 
   it("leaves a replay staff removed out of a later run, without fetching it", async () => {
     const { service, games, imports, source } = setup();
-    await service.run((await service.request("t1", "pilot-abc123")).id);
+    const response4 = await service.request("t1", "pilot-abc123");
+    await service.run(response4.id);
     await games.remove("t1", { matchId: "m1", number: 2 });
     source.replayStats.mockClear();
 

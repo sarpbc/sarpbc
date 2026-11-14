@@ -70,7 +70,9 @@ describe("set_match_lineups", () => {
     expect(
       schema.safeParse({
         ...input,
-        lineups: [{ participantId: "part-fake-a", playerIds: Array(7).fill(MATCH_ID) }],
+        lineups: [
+          { participantId: "part-fake-a", playerIds: Array.from({ length: 7 }, () => MATCH_ID) },
+        ],
       }).success,
     ).toBe(false);
   });

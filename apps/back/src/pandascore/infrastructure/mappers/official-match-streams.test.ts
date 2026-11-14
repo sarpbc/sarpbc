@@ -1,3 +1,4 @@
+import { SCRIPT_URL } from "../../../../test/doubles";
 import { describe, expect, it } from "vitest";
 import { mapOfficialMatchStreams } from "./official-match-streams";
 import type { MatchStreamDto } from "../dto/match.dto";
@@ -24,7 +25,7 @@ describe("mapOfficialMatchStreams", () => {
       mapOfficialMatchStreams([
         stream({ official: false, raw_url: "https://www.twitch.tv/fan" }),
         stream({ language: "fr", raw_url: "https://www.twitch.tv/rocketbaguette", main: true }),
-        stream({ raw_url: "javascript:alert(1)" }),
+        stream({ raw_url: SCRIPT_URL }),
         stream({ raw_url: "not-a-url" }),
         stream({ raw_url: "  https://www.twitch.tv/rocketleague  ", language: "en" }),
       ]),

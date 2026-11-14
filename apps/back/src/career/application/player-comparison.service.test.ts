@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import {
   careerEarnings,
   careerSources,

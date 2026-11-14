@@ -99,11 +99,7 @@ async function togglePublish() {
   isPublishing.value = true;
 
   try {
-    if (isDraft.value) {
-      await publishNewsArticle(slug);
-    } else {
-      await unpublishNewsArticle(slug);
-    }
+    await (isDraft.value ? publishNewsArticle(slug) : unpublishNewsArticle(slug));
 
     isDraft.value = !isDraft.value;
     toast.add({

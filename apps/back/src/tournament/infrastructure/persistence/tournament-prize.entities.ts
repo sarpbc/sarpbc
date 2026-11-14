@@ -1,6 +1,6 @@
 import { Collection, defineEntity, p } from "@mikro-orm/core";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
-import { Tournament } from "./tournament.entities";
+import { Tournament } from "./tournament.entity";
 
 export class TournamentPrize {
   id!: string;

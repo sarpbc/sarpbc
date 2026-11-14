@@ -8,4 +8,4 @@ export const linkStatsPlayerFields = {
 
 export const LinkStatsPlayerDto = z.strictObject(linkStatsPlayerFields);
 
-export type LinkStatsPlayerDto = z.infer<typeof LinkStatsPlayerDto>;
+export type LinkStatsPlayerInput = z.infer<typeof LinkStatsPlayerDto>;

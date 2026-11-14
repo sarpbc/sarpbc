@@ -1,5 +1,6 @@
+import { setTimeout as delay } from "node:timers/promises";
 import { z } from "zod";
-import { IntegrationError } from "../../../common/domain/errors";
+import { IntegrationError } from "../../../common/domain/errors/integration-error";
 import type { BallchasingSource, ReplayPlayerStats, ReplayStats } from "../../application/ports";
 import { BALLCHASING_HOST } from "../../domain/ballchasing-ref";
 import { nonBlank } from "../../../common/domain/text";
@@ -89,7 +90,7 @@ function toTeam(side: z.infer<typeof team> | undefined): ReplayTeam {
 function playedAt(raw: string | undefined, hasTimezone: boolean | undefined): Date | null {
   if (raw === undefined || raw === "") return null;
   // Without a timezone Ballchasing gives the uploader's wall clock; reading it as UTC keeps the order.
-  const value = hasTimezone === true ? raw : `${raw.replace(/(Z|[+-]\d\d:\d\d)$/, "")}Z`;
+  const value = hasTimezone === true ? raw : `${raw.replace(/(?:Z|[+-]\d\d:\d\d)$/, "")}Z`;
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;
@@ -143,9 +144,7 @@ export class BallchasingClient implements BallchasingSource {
     this.sleep =
       options.sleep ??
       (async (ms) => {
-        await new Promise<void>((resolve) => {
-          setTimeout(resolve, ms);
-        });
+        await delay(ms);
       });
     this.now = options.now ?? Date.now;
     this.intervalsMs = options.intervalsMs ?? DEFAULT_INTERVALS_MS;
@@ -155,17 +154,29 @@ export class BallchasingClient implements BallchasingSource {
     await this.request("group", `${BALLCHASING_API_URL}/groups/${encodeURIComponent(groupId)}`);
     const replays = new Map<string, ReplaySummary>();
     const visited = new Set<string>();
-    const queue = [groupId];
 
-    for (let group = queue.shift(); group !== undefined; group = queue.shift()) {
-      if (visited.has(group)) continue;
+    // Breadth-first and one group at a time: every call spends the endpoint's rate-limit slot.
+    const crawl = async (queue: readonly string[]): Promise<void> => {
+      const [group, ...rest] = queue;
+
+      if (group === undefined) return;
+
+      if (visited.has(group)) {
+        await crawl(rest);
+
+        return;
+      }
+
       visited.add(group);
 
       for (const replay of await this.pages(replayList, "replays", group))
         replays.set(replay.id, toSummary(replay));
 
-      for (const child of await this.pages(groupList, "groups", group)) queue.push(child.id);
-    }
+      const children = await this.pages(groupList, "groups", group);
+      await crawl([...rest, ...children.map((child) => child.id)]);
+    };
+
+    await crawl([groupId]);
 
     return [...replays.values()];
   }
@@ -199,57 +210,57 @@ export class BallchasingClient implements BallchasingSource {
     resource: "replays" | "groups",
     group: string,
   ): Promise<z.infer<T>["list"]> {
-    const items: z.infer<T>["list"] = [];
     const first = new URL(`${BALLCHASING_API_URL}/${resource}`);
     first.searchParams.set("group", group);
     first.searchParams.set("count", String(PAGE_SIZE));
-    let url: string | undefined = first.toString();
 
-    while (url !== undefined && url !== "") {
+    const readFrom = async (url: string): Promise<z.infer<T>["list"]> => {
       const response = await this.request("list", url);
       const page = schema.safeParse(await response.json());
 
       if (!page.success)
         throw new IntegrationError("Ballchasing returned an unexpected response. Try again later.");
-      items.push(...page.data.list);
-      url = page.data.next;
+      const { next } = page.data;
+
+      if (next === undefined || next === "") return page.data.list;
 
       // The key travels with every request, so never follow a link off the API host.
-      if (url !== undefined && url !== "" && !url.startsWith(`${BALLCHASING_API_URL}/`))
+      if (!next.startsWith(`${BALLCHASING_API_URL}/`))
         throw new IntegrationError("Ballchasing returned an unexpected response. Try again later.");
-    }
 
-    return items;
+      return [...page.data.list, ...(await readFrom(next))];
+    };
+
+    return await readFrom(first.toString());
   }
 
-  private async request(endpoint: Endpoint, url: string): Promise<Response> {
-    for (let attempt = 0; ; attempt++) {
-      await this.waitForSlot(endpoint);
-      let response: Response;
+  private async request(endpoint: Endpoint, url: string, attempt = 0): Promise<Response> {
+    await this.waitForSlot(endpoint);
+    let response: Response;
 
-      try {
-        response = await this.fetch(url, {
-          headers: { Authorization: this.apiKey },
-          signal: AbortSignal.timeout(TIMEOUT_MS),
-        });
-      } catch {
-        throw new IntegrationError("Ballchasing could not be reached. Try again later.");
-      }
-
-      if (response.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES) {
-        // Ballchasing has answered 429 with `retry-after: 0`, so 0 cannot mean "retry now".
-        const retryAfter = Number(response.headers.get("retry-after"));
-        await this.sleep(
-          Number.isFinite(retryAfter) && retryAfter > 0
-            ? retryAfter * 1000
-            : Math.min(FIRST_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS),
-        );
-        continue;
-      }
-
-      if (response.ok) return response;
-      throw this.failure(response.status, url);
+    try {
+      response = await this.fetch(url, {
+        headers: { Authorization: this.apiKey },
+        signal: AbortSignal.timeout(TIMEOUT_MS),
+      });
+    } catch {
+      throw new IntegrationError("Ballchasing could not be reached. Try again later.");
     }
+
+    if (response.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES) {
+      // Ballchasing has answered 429 with `retry-after: 0`, so 0 cannot mean "retry now".
+      const retryAfter = Number(response.headers.get("retry-after"));
+      await this.sleep(
+        Number.isFinite(retryAfter) && retryAfter > 0
+          ? retryAfter * 1000
+          : Math.min(FIRST_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS),
+      );
+
+      return await this.request(endpoint, url, attempt + 1);
+    }
+
+    if (response.ok) return response;
+    throw this.failure(response.status, url);
   }
 
   private async waitForSlot(endpoint: Endpoint): Promise<void> {

@@ -12,6 +12,12 @@ const VALID: Viewership = {
   sourceUrl: " https://escharts.com/tournaments/rl/fake-open ",
 };
 
+function error(input: Partial<Viewership>) {
+  const parsed = parseViewership({ ...VALID, ...input });
+
+  return parsed.ok ? null : parsed.error;
+}
+
 void describe("parseViewership", () => {
   void it("normalizes the credit, the source URL and the measured date", () => {
     assert.deepEqual(parseViewership(VALID), {
@@ -27,12 +33,6 @@ void describe("parseViewership", () => {
   });
 
   void it("requires a source name and an https source URL", () => {
-    const error = (input: Partial<Viewership>) => {
-      const parsed = parseViewership({ ...VALID, ...input });
-
-      return parsed.ok ? null : parsed.error;
-    };
-
     assert.equal(error({ sourceName: "  " }), "missing-source-name");
     assert.equal(error({ sourceName: "x".repeat(81) }), "source-name-too-long");
     assert.equal(error({ sourceUrl: "" }), "invalid-source-url");
@@ -42,12 +42,6 @@ void describe("parseViewership", () => {
   });
 
   void it("refuses impossible viewer counts", () => {
-    const error = (input: Partial<Viewership>) => {
-      const parsed = parseViewership({ ...VALID, ...input });
-
-      return parsed.ok ? null : parsed.error;
-    };
-
     assert.equal(error({ peakViewers: -1 }), "invalid-peak");
     assert.equal(error({ peakViewers: 1.5 }), "invalid-peak");
     assert.equal(error({ averageViewers: -3 }), "invalid-average");

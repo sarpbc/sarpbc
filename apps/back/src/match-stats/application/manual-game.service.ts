@@ -1,10 +1,8 @@
 import type { AttachReplayInput, TournamentStatsGame } from "@sarpbc/types";
-import {
-  ConflictError,
-  InvalidInputError,
-  NotFoundError,
-  UnprocessableError,
-} from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
 import { parseBallchasingRef } from "../domain/ballchasing-ref";
 import {
   buildGameRecord,
@@ -34,9 +32,8 @@ export class ManualGameService {
     const replayId = parseBallchasingRef("replay", input.replay);
     await requireTournament(this.candidates, tournamentId);
 
-    const match = (await this.candidates.matches(tournamentId)).find(
-      (candidate) => candidate.id === input.matchId,
-    );
+    const candidates = await this.candidates.matches(tournamentId);
+    const match = candidates.find((candidate) => candidate.id === input.matchId);
 
     if (!match)
       throw new InvalidInputError({

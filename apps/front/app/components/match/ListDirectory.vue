@@ -9,7 +9,7 @@ const {
   pending,
   hasError,
   matches,
-  liveMatchIds,
+  liveMatchIds = null,
   totalMatches,
   currentPage,
   totalPages,
@@ -22,7 +22,7 @@ const {
   pending: boolean;
   hasError: boolean;
   matches: MatchListItem[];
-  liveMatchIds?: ReadonlySet<string>;
+  liveMatchIds?: ReadonlySet<string> | null;
   totalMatches: number;
   currentPage: number;
   totalPages: number;

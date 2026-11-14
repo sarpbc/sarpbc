@@ -21,7 +21,7 @@ const { data: staff, error: staffError } = await useAsyncData(
 const staffContracts = computed(() =>
   (staff.value?.contracts ?? [])
     .filter((contract) => isStaffContractRole(contract.role))
-    .sort((a, b) => b.startDate.localeCompare(a.startDate)),
+    .toSorted((a, b) => b.startDate.localeCompare(a.startDate)),
 );
 
 if (!staff.value || staffContracts.value.length === 0) {
@@ -36,7 +36,8 @@ if (staff.value && staff.value.player.slug !== slug.value) {
   await redirectToCanonical(route, localePath(staffPath(staff.value.player.slug)));
 }
 
-const person = computed(() => staff.value!.player);
+const loadedPerson = staff.value.player;
+const person = computed(() => staff.value?.player ?? loadedPerson);
 const staffId = computed(() => person.value.id);
 
 const currentContract = computed(() => staffContracts.value.find((contract) => !contract.endDate));

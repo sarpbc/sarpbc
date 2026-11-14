@@ -1,5 +1,8 @@
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Player, Team } from "../domain/roster";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { Player } from "../domain/player";
+import { Team } from "../domain/team";
 import type { RosterMergeTransaction } from "./ports";
 
 export interface RosterMerge<T> {

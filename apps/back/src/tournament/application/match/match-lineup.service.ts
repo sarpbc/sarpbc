@@ -1,7 +1,8 @@
 import type { DataSource, MatchLineup, MatchLineupInput } from "@sarpbc/types";
 import { isRedistributable } from "../../../common/domain/data-source";
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import type { Match } from "../../domain/competition";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import type { Match } from "../../domain/match";
 import { buildLineups, isStandIn, normalizeLineups } from "../../domain/match-lineup";
 import type {
   CompetitionTransaction,
@@ -43,9 +44,9 @@ async function validLineups(
     inputs,
   );
 
-  const playerIds = normalized.flatMap(({ playerIds }) => playerIds);
+  const lineupPlayerIds = normalized.flatMap(({ playerIds }) => playerIds);
 
-  if (!(await lineups.activePlayersExist(playerIds)))
+  if (!(await lineups.activePlayersExist(lineupPlayerIds)))
     throw new InvalidInputError("Every lineup player must exist and not be a merged duplicate");
 
   return normalized;
@@ -95,18 +96,13 @@ export class MatchLineupService {
   }
 
   async standIns(playerId: string): Promise<StandInMatch[]> {
-    const rows = (await this.reads.byPlayer(playerId)).filter(({ rosterIds }) =>
-      isStandIn(rosterIds, playerId),
-    );
+    const playerRows = await this.reads.byPlayer(playerId);
+    const rows = playerRows.filter(({ rosterIds }) => isStandIn(rosterIds, playerId));
 
     if (rows.length === 0) return [];
 
-    const matches = new Map(
-      (await this.matches.byIds(rows.map(({ matchId }) => matchId))).map((match) => [
-        match.id,
-        match,
-      ]),
-    );
+    const found = await this.matches.byIds(rows.map(({ matchId }) => matchId));
+    const matches = new Map(found.map((match) => [match.id, match]));
 
     return rows.flatMap(({ matchId, participantId }) => {
       const match = matches.get(matchId);

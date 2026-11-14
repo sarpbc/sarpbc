@@ -2,9 +2,7 @@ import { Injectable, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PostHog } from "posthog-node";
 
-export interface PostHogProperties {
-  [key: string]: string | number | boolean | null;
-}
+export type PostHogProperties = Record<string, string | number | boolean | null>;
 
 @Injectable()
 export class PostHogService implements OnModuleDestroy {
@@ -12,15 +10,16 @@ export class PostHogService implements OnModuleDestroy {
 
   constructor(configService: ConfigService) {
     const token = configService.get<string>("posthog.token");
-    const enabled = configService.get<boolean>("production") === true && Boolean(token);
+    const enabled = configService.get<boolean>("production") === true;
 
-    this.client = enabled
-      ? new PostHog(token!, {
-          host: configService.get<string>("posthog.host"),
-          flushAt: 1,
-          flushInterval: 0,
-        })
-      : null;
+    this.client =
+      enabled && token !== undefined && token !== ""
+        ? new PostHog(token, {
+            host: configService.get<string>("posthog.host"),
+            flushAt: 1,
+            flushInterval: 0,
+          })
+        : null;
   }
 
   capture(params: {
@@ -31,14 +30,15 @@ export class PostHogService implements OnModuleDestroy {
   }): void {
     if (!this.client || params.distinctId === undefined || params.distinctId === "") return;
 
-    const properties: PostHogProperties = {
+    const base = {
       ...params.properties,
       $process_person_profile: false,
-    };
+    } satisfies PostHogProperties;
 
-    if (params.sessionId !== undefined && params.sessionId !== "") {
-      properties.$session_id = params.sessionId;
-    }
+    const properties =
+      params.sessionId !== undefined && params.sessionId !== ""
+        ? { ...base, $session_id: params.sessionId }
+        : base;
 
     this.client.capture({
       distinctId: params.distinctId,

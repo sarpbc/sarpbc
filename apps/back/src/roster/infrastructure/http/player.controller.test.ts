@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Player } from "../../domain/roster";
-import { Match, TournamentParticipant } from "../../../tournament/domain/competition";
+import { Player } from "../../domain/player";
+import { Match } from "../../../tournament/domain/match";
+import { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
 import { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
 import type { PlayerLineupRow, TournamentQueries } from "../../../tournament/application/ports";
 import type { SeasonStore } from "../../../season/application/ports";
@@ -13,6 +14,31 @@ import { PlayerAwardService } from "../../../tournament/application/player-award
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import { unconstructed } from "../../../../test/doubles";
 import { unusedTournamentQueries } from "../../../../test/unused-tournament-queries";
+
+const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
+  Object.assign(new Match(), {
+    id,
+    publicId,
+    name: "Grand Final",
+    source,
+    participants: [
+      Object.assign(new TournamentParticipant(), { id: `${id}-a`, players: [] }),
+      Object.assign(new TournamentParticipant(), { id: `${id}-b`, players: [] }),
+    ],
+    tournament: {
+      id: `${id}-stage`,
+      name: "Main Stage",
+      slug: "main-stage",
+      event: { id: "fake-event", slug: "fake-cup", name: "Fake Cup" },
+      beginAt: null,
+      league: null,
+      pickemsEnabled: false,
+      source,
+      pandascoreId: null,
+      streams: [],
+      eventStreams: [],
+    },
+  });
 
 describe("PlayerController", () => {
   const kept = Object.assign(new Player(), { id: "kept", name: "Kept" });
@@ -63,31 +89,6 @@ describe("PlayerController", () => {
 
   const playerEarnings = vi.fn();
   const prizes = Object.assign(unconstructed(TournamentPrizeService), { playerEarnings });
-
-  const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
-    Object.assign(new Match(), {
-      id,
-      publicId,
-      name: "Grand Final",
-      source,
-      participants: [
-        Object.assign(new TournamentParticipant(), { id: `${id}-a`, players: [] }),
-        Object.assign(new TournamentParticipant(), { id: `${id}-b`, players: [] }),
-      ],
-      tournament: {
-        id: `${id}-stage`,
-        name: "Main Stage",
-        slug: "main-stage",
-        event: { id: "fake-event", slug: "fake-cup", name: "Fake Cup" },
-        beginAt: null,
-        league: null,
-        pickemsEnabled: false,
-        source,
-        pandascoreId: null,
-        streams: [],
-        eventStreams: [],
-      },
-    });
 
   const standInMatches = [
     standInMatch("startgg-final", "startgg", 7),

@@ -49,18 +49,17 @@ const BLUE_COLOR: Rgb = [25, 95, 225];
 const ORANGE_COLOR: Rgb = [240, 125, 25];
 const REPLAY_COLOR: Rgb = [230, 200, 40];
 const TEXT_COLOR: Rgb = [245, 245, 245];
-const NOISE_TABLE_SIZE = 1 << 20;
+const NOISE_TABLE_SIZE = 2 ** 20;
+const PRNG_MODULUS = 2_147_483_647;
+const PRNG_MULTIPLIER = 48_271;
 
 export function seededRandom(seed: number): () => number {
-  let state = seed >>> 0;
+  let state = (Math.abs(Math.trunc(seed)) % (PRNG_MODULUS - 1)) + 1;
 
   return () => {
-    state = (state + 0x6d2b79f5) >>> 0;
-    let value = state;
-    value = Math.imul(value ^ (value >>> 15), value | 1);
-    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    state = (state * PRNG_MULTIPLIER) % PRNG_MODULUS;
 
-    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+    return state / PRNG_MODULUS;
   };
 }
 
@@ -83,7 +82,7 @@ function rectCoverage(region: Region, x0: number, x1: number, y0: number, y1: nu
 }
 
 function textInk(text: string) {
-  const glyphs = Array.from(text).map((char) => {
+  const glyphs = Array.from(text, (char) => {
     const rows = FONT.get(char);
 
     if (rows === undefined) throw new Error(`No fixture glyph for ${char}`);
@@ -99,7 +98,7 @@ function textInk(text: string) {
     }
 
     for (const [y, row] of rows.entries()) {
-      ink[y]?.push(...Array.from(row).map((cell) => cell === "#"));
+      ink[y]?.push(...Array.from(row, (cell) => cell === "#"));
     }
   }
 
@@ -142,8 +141,8 @@ export class FixtureRenderer {
     };
     const data = new Uint8Array(size.width * size.height * 3);
 
-    for (let y = 0; y < size.height; y++) {
-      for (let x = 0; x < size.width; x++) {
+    for (let y = 0; y < size.height; y += 1) {
+      for (let x = 0; x < size.width; x += 1) {
         const offset = (y * size.width + x) * 3;
         data.set(backgroundAt(x, y), offset);
       }
@@ -155,7 +154,7 @@ export class FixtureRenderer {
     this.#layer = new Float32Array(this.#background.length);
     this.#noise = new Float32Array(NOISE_TABLE_SIZE);
 
-    for (let index = 0; index < NOISE_TABLE_SIZE; index++) {
+    for (let index = 0; index < NOISE_TABLE_SIZE; index += 1) {
       const radius = Math.sqrt(-2 * Math.log(1 - this.#random()));
       this.#noise[index] = radius * Math.cos(2 * Math.PI * this.#random());
     }
@@ -172,10 +171,10 @@ export class FixtureRenderer {
     const rowLength = band.width * 3;
     const values = new Float32Array(rowLength);
 
-    for (let y = 0; y < band.height; y++) {
+    for (let y = 0; y < band.height; y += 1) {
       const source = y * rowLength;
 
-      for (let index = 0; index < rowLength; index++) {
+      for (let index = 0; index < rowLength; index += 1) {
         values[index] = (layer[source + index] ?? 0) + (table[source + index] ?? 0) * sigma;
       }
 
@@ -191,8 +190,8 @@ export class FixtureRenderer {
     const band = this.#band;
     const layer = new Float32Array(band.width * band.height * 3);
 
-    for (let y = 0; y < band.height; y++) {
-      for (let x = 0; x < band.width; x++) {
+    for (let y = 0; y < band.height; y += 1) {
+      for (let x = 0; x < band.width; x += 1) {
         const x0 = (band.x + x) / this.#scale - this.#jitterX;
         const y0 = (band.y + y) / this.#scale - this.#jitterY;
         const base = backgroundAt(band.x + x, band.y + y);
@@ -211,7 +210,7 @@ export class FixtureRenderer {
 
     if (cached !== undefined) return cached;
 
-    const layers: Array<{ region: Region; color: Rgb }> = [
+    const layers: { region: Region; color: Rgb }[] = [
       { region: PANEL, color: PANEL_COLOR },
       { region: BLUE_STRIP, color: BLUE_COLOR },
       { region: ORANGE_STRIP, color: ORANGE_COLOR },
@@ -219,17 +218,20 @@ export class FixtureRenderer {
 
     if (replay) layers.push({ region: REPLAY_BANNER, color: REPLAY_COLOR });
 
-    const layer = this.#bandLayer((x0, x1, y0, y1, base) =>
-      layers.reduce<Rgb>((color, { region, color: fill }) => {
-        const amount = rectCoverage(region, x0, x1, y0, y1);
+    const layer = this.#bandLayer((x0, x1, y0, y1, base) => {
+      let color = base;
 
-        return [
+      for (const { region, color: fill } of layers) {
+        const amount = rectCoverage(region, x0, x1, y0, y1);
+        color = [
           mix(color[0], fill[0], amount),
           mix(color[1], fill[1], amount),
           mix(color[2], fill[2], amount),
         ];
-      }, base),
-    );
+      }
+
+      return color;
+    });
 
     this.#panels.set(replay, layer);
 
@@ -247,8 +249,8 @@ export class FixtureRenderer {
     const band = this.#band;
     const coverage = new Float32Array(band.width * band.height);
 
-    for (let y = 0; y < band.height; y++) {
-      for (let x = 0; x < band.width; x++) {
+    for (let y = 0; y < band.height; y += 1) {
+      for (let x = 0; x < band.width; x += 1) {
         const x0 = (band.x + x) / this.#scale - this.#jitterX;
         const y0 = (band.y + y) / this.#scale - this.#jitterY;
         const x1 = x0 + 1 / this.#scale;
@@ -259,8 +261,8 @@ export class FixtureRenderer {
         const firstRow = Math.max(0, Math.floor((y0 - originY) / FONT_PIXEL));
         const lastRow = Math.min(FONT_ROWS - 1, Math.floor((y1 - originY) / FONT_PIXEL));
 
-        for (let row = firstRow; row <= lastRow; row++) {
-          for (let column = firstColumn; column <= lastColumn; column++) {
+        for (let row = firstRow; row <= lastRow; row += 1) {
+          for (let column = firstColumn; column <= lastColumn; column += 1) {
             if (!ink[row]?.[column]) continue;
             const cellX = originX + column * FONT_PIXEL;
             const cellY = originY + row * FONT_PIXEL;
@@ -286,10 +288,10 @@ export class FixtureRenderer {
     const orange = this.#text(TEXT_REGIONS.orange, String(scene.orange));
     const layer = this.#layer;
 
-    for (let pixel = 0; pixel < blue.length; pixel++) {
+    for (let pixel = 0; pixel < blue.length; pixel += 1) {
       const ink = Math.min(1, (blue[pixel] ?? 0) + (clock[pixel] ?? 0) + (orange[pixel] ?? 0));
 
-      for (let channel = 0; channel < 3; channel++) {
+      for (let channel = 0; channel < 3; channel += 1) {
         const index = pixel * 3 + channel;
         const drawn = mix(panel[index] ?? 0, TEXT_COLOR[channel] ?? 0, ink);
         layer[index] = mix(this.#background[index] ?? 0, drawn, scene.fade);

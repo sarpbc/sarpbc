@@ -23,7 +23,7 @@ export const createEventFields = {
 
 export const CreateEventDto = z.strictObject(createEventFields);
 
-export type CreateEventDto = z.infer<typeof CreateEventDto>;
+export type CreateEventInput = z.infer<typeof CreateEventDto>;
 
 export const updateEventFields = {
   name: name.optional(),
@@ -35,7 +35,7 @@ export const UpdateEventDto = z
   .strictObject(updateEventFields)
   .refine(someField, NOTHING_TO_UPDATE);
 
-export type UpdateEventDto = z.infer<typeof UpdateEventDto>;
+export type UpdateEventInput = z.infer<typeof UpdateEventDto>;
 
 export const createLeagueFields = {
   name,
@@ -46,7 +46,7 @@ export const createLeagueFields = {
 
 export const CreateLeagueDto = z.strictObject(createLeagueFields);
 
-export type CreateLeagueDto = z.infer<typeof CreateLeagueDto>;
+export type CreateLeagueInput = z.infer<typeof CreateLeagueDto>;
 
 export const updateLeagueFields = {
   name: name.optional(),
@@ -59,4 +59,4 @@ export const UpdateLeagueDto = z
   .strictObject(updateLeagueFields)
   .refine(someField, NOTHING_TO_UPDATE);
 
-export type UpdateLeagueDto = z.infer<typeof UpdateLeagueDto>;
+export type UpdateLeagueInput = z.infer<typeof UpdateLeagueDto>;
