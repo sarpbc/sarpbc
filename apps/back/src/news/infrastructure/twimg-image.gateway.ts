@@ -9,7 +9,6 @@ import type { TweetImage, TweetImageGateway } from "../application/tweet-image.s
 
 const FETCH_TIMEOUT_MS = 5_000;
 const MAX_REDIRECTS = 2;
-const TWIMG_ORIGIN = "https://pbs.twimg.com";
 
 // X also serves AVIF, which the cover upload does not accept.
 const TWIMG_CONTENT_TYPES = new Set<string>([...IMAGE_CONTENT_TYPES, "image/avif"]);
@@ -29,7 +28,8 @@ function twimgUrl(input: string, base?: string): string | null {
 
   if (!isTweetImageUrl(url.href)) return null;
 
-  return `${TWIMG_ORIGIN}${url.pathname}${url.search}`;
+  // A literal host prefix keeps every request on pbs.twimg.com, whatever path the input carries.
+  return `https://pbs.twimg.com/${url.pathname.slice(1)}${url.search}`;
 }
 
 export class TwimgImageGateway implements TweetImageGateway {
