@@ -397,7 +397,7 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Mark one side of a two-sided match as having forfeited or been disqualified, or clear the forfeit. Works on any match, PandaScore included. When start.gg shows a set as DQ with a -1 score, record it here instead of entering the score. A forfeit keeps the series counted normally for circuit points, standings and pick'em: the winner becomes the other side and the score becomes the series default (3-0 in a best of 5; the score is kept when the series length is unknown). Passing participantId null clears the forfeit without touching the score or the winner. sourceUrl is required to declare a forfeit and optional to clear one; when given it is recorded as the match source like set_match_source.",
+      "Mark one side of a two-sided match as having forfeited or been disqualified, or clear the forfeit. Works on any match, PandaScore included. When the cited source (for example a start.gg set shown as DQ with a -1 score) reports a forfeit or disqualification, record it here instead of entering the score. A forfeit keeps the series counted normally for circuit points, standings and pick'em: the winner becomes the other side and the score becomes the series default (3-0 in a best of 5; the score is kept when the series length is unknown). Passing participantId null clears the forfeit without touching the score or the winner. sourceUrl is required to declare a forfeit and optional to clear one; when given it is recorded as the match source like set_match_source.",
     handler: async ({ matchId, participantId, sourceUrl }) => {
       if (participantId !== null && sourceUrl === undefined) {
         throw new InvalidInputError(
