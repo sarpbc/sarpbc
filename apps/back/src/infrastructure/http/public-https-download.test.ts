@@ -1,24 +1,27 @@
+import type { LookupAddress } from "node:dns";
 import { EventEmitter } from "node:events";
-import type { RequestOptions } from "node:https";
 import { PassThrough } from "node:stream";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors";
-import { downloadPublicHttps, isPublicAddress } from "./public-https-download";
+import {
+  downloadPublicHttps,
+  isPublicAddress,
+  type PublicHttpsTransport,
+} from "./public-https-download";
 
-const fakes = vi.hoisted(() => ({
+const fakes = {
   addresses: new Map<string, string[]>(),
-  request: vi.fn<(url: URL, options: RequestOptions) => EventEmitter>(),
-}));
+  request: vi.fn<PublicHttpsTransport["request"]>(),
+};
 
-vi.mock("node:https", () => ({ request: fakes.request }));
-
-vi.mock("node:dns/promises", () => ({
-  lookup: async (hostname: string) =>
+const transport: PublicHttpsTransport = {
+  request: fakes.request,
+  lookup: async (hostname): Promise<LookupAddress[]> =>
     (fakes.addresses.get(hostname) ?? []).map((address) => ({
       address,
       family: address.includes(":") ? 6 : 4,
     })),
-}));
+};
 
 type Reply = { status: number; headers?: Record<string, string>; body?: string[] } | "hang";
 
@@ -78,7 +81,7 @@ function serve(routes: Record<string, Reply>) {
 }
 
 const download = async (url: string, overrides: Partial<typeof limits> = {}) =>
-  await downloadPublicHttps(new URL(url), { ...limits, ...overrides });
+  await downloadPublicHttps(new URL(url), { ...limits, ...overrides }, transport);
 
 describe("isPublicAddress", () => {
   it.each([

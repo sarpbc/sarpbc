@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import {
   CopyObjectCommand,
@@ -8,7 +8,6 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
-import { createLogger } from "evlog";
 import { nodeEnvironment } from "../../infrastructure/config/env.validation";
 import {
   IMAGE_FILE_EXTENSIONS,
@@ -27,11 +26,23 @@ interface R2Connection {
   publicUrl: (key: string) => string;
 }
 
-@Injectable()
+export interface ObjectOperationLogger {
+  set(fields: { stored: boolean }): void;
+  error(error: Error): void;
+  emit(): void;
+}
+
+export type ObjectOperationLoggerFactory = (
+  context: Record<string, string | number | undefined>,
+) => ObjectOperationLogger;
+
 export class R2Service implements ObjectStorage {
   private connection: R2Connection | null = null;
 
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly createLogger: ObjectOperationLoggerFactory,
+  ) {}
 
   private connect(): R2Connection {
     if (this.connection) {
@@ -177,7 +188,7 @@ export class R2Service implements ObjectStorage {
   ): Promise<T> {
     const connection = this.connect();
 
-    const log = createLogger({
+    const log = this.createLogger({
       component: R2Service.name,
       action,
       environment: nodeEnvironment(),

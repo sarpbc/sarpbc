@@ -2,6 +2,8 @@ import { Module, OnModuleInit } from "@nestjs/common";
 import { ConfigModule, ConfigService } from "@nestjs/config";
 import { MikroOrmModule } from "@mikro-orm/nestjs";
 import { EntityManager } from "@mikro-orm/postgresql";
+import { lookup } from "node:dns/promises";
+import { request } from "node:https";
 import { log } from "evlog";
 import { PlayerController } from "./http/player.controller";
 import { TeamController } from "./http/team.controller";
@@ -151,7 +153,7 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
       provide: TeamLogoService,
       useFactory: (storage: R2Service) =>
         new TeamLogoService(
-          new HttpsTeamLogoSource(),
+          new HttpsTeamLogoSource({ request, lookup }),
           new SharpTeamLogoImages(),
           new R2TeamLogoStorage(storage),
         ),
