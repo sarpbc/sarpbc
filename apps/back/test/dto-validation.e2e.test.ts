@@ -25,37 +25,31 @@ import {
   type CreateNewsArticleInput,
 } from "../src/news/infrastructure/http/dto/create-news-article.dto";
 
-function echo<T>(value: T): T {
-  return value;
-}
-
 @Controller()
 class ValidationController {
-  private readonly echo = echo;
-
   @Get("tournaments")
   tournaments(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryInput) {
-    return this.echo(query);
+    return query;
   }
 
   @Get("notifications")
   notifications(@Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryInput) {
-    return this.echo(query);
+    return query;
   }
 
   @Post("posts")
   post(@Body({ schema: CreatePostDto }) body: CreatePostInput) {
-    return this.echo(body);
+    return body;
   }
 
   @Post("tournament")
   tournament(@Body({ schema: UpdateTournamentDto }) body: UpdateTournamentInput) {
-    return this.echo(body);
+    return body;
   }
 
   @Post("news")
   news(@Body({ schema: CreateNewsArticleDto }) body: CreateNewsArticleInput) {
-    return this.echo(body);
+    return body;
   }
 }
 

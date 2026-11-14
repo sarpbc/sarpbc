@@ -671,7 +671,7 @@
       }
     },
     {
-      "files": ["apps/back/src/**/*.controller.ts"],
+      "files": ["apps/back/src/**/*.controller.ts", "apps/back/test/**/*.e2e.test.ts"],
       "rules": {
         "class-methods-use-this": "off"
       }
