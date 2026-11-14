@@ -1,5 +1,5 @@
 import type { TeamAliasInput } from "@sarpbc/types";
-import { isLiquipediaSourceHost } from "./source-host";
+import { isForbiddenSourceHost, isLiquipediaSourceHost } from "./source-host";
 
 export const TEAM_ALIAS_NAME_MAX_LENGTH = 255;
 export const TEAM_ALIAS_URL_MAX_LENGTH = 2048;
@@ -47,7 +47,7 @@ export function parseTeamAlias(input: TeamAliasInput): ParsedTeamAlias {
   if (input.to !== null && input.to <= input.from) return { ok: false, error: "to-not-after-from" };
   const source = parseUrl(input.sourceUrl.trim(), ["https:", "http:"]);
   if (!source) return { ok: false, error: "invalid-source-url" };
-  if (isLiquipediaSourceHost(source.hostname)) return { ok: false, error: "forbidden-source" };
+  if (isForbiddenSourceHost(source.hostname)) return { ok: false, error: "forbidden-source" };
   let logoUrl: string | null = null;
   if (input.logoUrl !== null && input.logoUrl.trim()) {
     const logo = parseUrl(input.logoUrl.trim(), ["https:"]);

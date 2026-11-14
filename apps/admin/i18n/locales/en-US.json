@@ -1130,7 +1130,7 @@
           "invalid-to": "Enter a valid date or leave it empty.",
           "to-not-after-from": "The end date must come after the start date.",
           "invalid-source-url": "Enter the http(s) URL of an official source.",
-          "forbidden-source": "Liquipedia is not an accepted source.",
+          "forbidden-source": "Liquipedia and BLAST.tv are not accepted sources.",
           "invalid-logo-url": "Enter an https URL.",
           "forbidden-logo-source": "Liquipedia is not an accepted logo source.",
           "invalid-pandascore-id": "Enter a positive whole number."

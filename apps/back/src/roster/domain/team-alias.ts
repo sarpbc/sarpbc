@@ -28,7 +28,7 @@ const ERRORS = {
   "to-not-after-from": "The alias end date must come after its start date.",
   "invalid-source-url": "The alias source must be an http(s) URL.",
   "forbidden-source":
-    "Liquipedia is not an accepted source; cite the team, its players, the organiser, BLAST, RLEsports or PandaScore.",
+    "Liquipedia and BLAST.tv are not accepted sources; cite the team, its players, the organiser, RLEsports or PandaScore.",
   "invalid-logo-url": "The alias logo must be an https URL.",
   "forbidden-logo-source": "Liquipedia is not an accepted logo source; use the official asset.",
   "invalid-pandascore-id": "The PandaScore team id must be a positive whole number.",

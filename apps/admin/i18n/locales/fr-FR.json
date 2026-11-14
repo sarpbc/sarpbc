@@ -1130,7 +1130,7 @@
           "invalid-to": "Saisissez une date valide ou laissez vide.",
           "to-not-after-from": "La date de fin doit suivre la date de début.",
           "invalid-source-url": "Saisissez l'URL http(s) d'une source officielle.",
-          "forbidden-source": "Liquipedia n'est pas une source acceptée.",
+          "forbidden-source": "Liquipedia et BLAST.tv ne sont pas des sources acceptées.",
           "invalid-logo-url": "Saisissez une URL https.",
           "forbidden-logo-source": "Liquipedia n'est pas une source de logo acceptée.",
           "invalid-pandascore-id": "Saisissez un nombre entier positif."
