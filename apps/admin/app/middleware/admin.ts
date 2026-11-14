@@ -3,6 +3,7 @@ import { canAccessRoute } from "~/utils/adminSections";
 
 export default defineNuxtRouteMiddleware((to) => {
   const baseName = useRouteBaseName()(to);
+
   if (baseName === "login") {
     return;
   }

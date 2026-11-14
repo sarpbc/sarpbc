@@ -91,17 +91,22 @@ export class SeriesTracker {
 
   push(t: number, reading: ScoreboardReading): void {
     this.#frames.read++;
+
     if (this.decided) return;
+
     switch (reading.kind) {
       case "hidden":
         this.#frames.hidden++;
+
         return;
       case "unreadable":
         this.#frames.unreadable++;
+
         return;
       case "score":
         this.#frames.accepted++;
         this.#score(t, reading);
+
         return;
       default: {
         const exhaustive: never = reading;
@@ -112,7 +117,9 @@ export class SeriesTracker {
 
   finish(): void {
     const current = this.#current;
+
     if (current === null || this.decided) return;
+
     if (!current.overtime && current.lastClock !== 0) return;
     this.#adoptUnconfirmed(current);
     this.#close("stream_end", current.lastSeen);
@@ -134,39 +141,53 @@ export class SeriesTracker {
 
   #winner(): StreamScoreSide | null {
     const needed = winsNeeded(this.#settings.bestOf);
+
     if (this.#wins("blue") >= needed) return "blue";
+
     if (this.#wins("orange") >= needed) return "orange";
+
     return null;
   }
 
   #score(t: number, reading: ScoreReading): void {
     const previous = this.#candidate;
+
     const candidate: Candidate =
       previous !== null && previous.blue === reading.blue && previous.orange === reading.orange
         ? { ...previous, count: previous.count + 1 }
         : { blue: reading.blue, orange: reading.orange, since: t, count: 1 };
+
     this.#candidate = candidate;
     const stable = this.#settings.stableReadings;
     const current = this.#current;
+
     if (current !== null && isKickoff(current, reading)) {
       const kickoff: Candidate =
         current.kickoff === null
           ? { blue: 0, orange: 0, since: t, count: 1 }
           : { ...current.kickoff, count: current.kickoff.count + 1 };
+
       current.kickoff = kickoff;
+
       if (kickoff.count >= stable) this.#restart(current, kickoff);
+
       return;
     }
+
     if (current !== null) {
       current.kickoff = null;
       current.readings++;
     }
+
     if (candidate.count === stable) this.#commit(candidate);
+
     if (current === null || this.#current !== current) return;
+
     if (current.blue !== reading.blue || current.orange !== reading.orange) {
       if (candidate.count < stable && isNextGoal(current, candidate)) {
         current.unconfirmed = candidate;
       }
+
       return;
     }
 
@@ -176,27 +197,36 @@ export class SeriesTracker {
     current.overtimeReadings = reading.overtime ? current.overtimeReadings + 1 : 0;
     current.zeroClockReadings =
       !reading.overtime && reading.clock === 0 ? current.zeroClockReadings + 1 : 0;
+
     if (current.blue === current.orange) {
       if (current.overtimeReadings >= stable) current.overtime = true;
+
       return;
     }
+
     if (current.overtime) this.#close("overtime", t);
     else if (current.zeroClockReadings >= stable) this.#close("regulation", t);
   }
 
   #commit(candidate: Candidate): void {
     const current = this.#current;
+
     if (current === null) {
       if (!this.#awaitingKickoff || (candidate.blue === 0 && candidate.orange === 0)) {
         this.#start(candidate);
       }
+
       return;
     }
+
     if (candidate.blue === current.blue && candidate.orange === current.orange) return;
+
     if (candidate.blue < current.blue || candidate.orange < current.orange) {
       this.#frames.rejected++;
+
       return;
     }
+
     current.blue = candidate.blue;
     current.orange = candidate.orange;
     current.agreeing += candidate.count - 1;
@@ -206,11 +236,13 @@ export class SeriesTracker {
   #restart(current: CurrentGame, kickoff: Candidate): void {
     this.#adoptUnconfirmed(current);
     this.#close("reset", current.lastSeen);
+
     if (!this.decided) this.#start(kickoff);
   }
 
   #adoptUnconfirmed(current: CurrentGame): void {
     const unconfirmed = current.unconfirmed;
+
     if (current.blue !== current.orange || unconfirmed === null) return;
     current.blue = unconfirmed.blue;
     current.orange = unconfirmed.orange;
@@ -238,10 +270,12 @@ export class SeriesTracker {
 
   #close(endedBy: StreamScoreGameEnding, endedAt: number): void {
     const current = this.#current;
+
     if (current === null) return;
     this.#current = null;
     const winner = gameWinner(current);
     const played = current.overtime || current.lastClock === 0;
+
     if (winner === null && !played) return;
     this.#awaitingKickoff = true;
     this.#games.push({

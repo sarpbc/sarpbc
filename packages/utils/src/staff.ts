@@ -51,6 +51,7 @@ export function requiredPermission(change: RosterChange): StaffPermission {
       return "tournaments.manage";
     default: {
       const exhaustive: never = change;
+
       return exhaustive;
     }
   }

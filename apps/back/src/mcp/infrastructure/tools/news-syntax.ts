@@ -11,19 +11,23 @@ export const PLAYER_TAG = serializeNewsEntityTag({
   slug: "<slug>",
   label: "<name>",
 });
+
 export const TEAM_TAG = serializeNewsEntityTag({ kind: "team", slug: "<slug>", label: "<name>" });
 export const TWEET_TAG = serializeNewsTweetTag("https://x.com/<handle>/status/<id>");
 
 const ONE_MATCH_TAG = serializeNewsMatchTag({ kind: "match", id: "<match id>" });
+
 const SELECTION_TAG = serializeNewsMatchTag({
   kind: "matches",
   ids: ["<match id>", "<match id>"],
 });
+
 const TOURNAMENT_TAG = serializeNewsMatchTag({
   kind: "tournament",
   id: "<tournament id>",
   limit: NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
 });
+
 const TEAM_MATCHES_TAG = serializeNewsMatchTag({
   kind: "team",
   id: "<team id>",

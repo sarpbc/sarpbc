@@ -17,6 +17,7 @@ const title = computed(() => {
       return t("page.game.pickems.banner.title", { event: eventName.value });
     default: {
       const _exhaustive: never = variant;
+
       return _exhaustive;
     }
   }
@@ -30,6 +31,7 @@ const ctaLabel = computed(() => {
       return t("page.game.pickems.banner.cta");
     default: {
       const _exhaustive: never = variant;
+
       return _exhaustive;
     }
   }

@@ -1,4 +1,5 @@
 import type { ContractRole, DataSource, PlayerStatus } from "@sarpbc/types";
+
 export interface CreatePlayerInput {
   name: string;
   source?: Exclude<DataSource, "pandascore">;

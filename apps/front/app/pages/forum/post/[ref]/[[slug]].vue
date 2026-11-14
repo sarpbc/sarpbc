@@ -41,6 +41,7 @@ if (!post.value) {
 
 const { publicId, slug } = post.value;
 const canonicalPath = localePath(forumPostPath(publicId, slug));
+
 if (route.path !== canonicalPath) {
   await redirectToCanonical(route, canonicalPath);
 }

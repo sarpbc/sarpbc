@@ -23,9 +23,11 @@ describe("PatService", () => {
     savedHash = null;
     lastUsedAt = null;
     touch.mockReset();
+
     const store: TokenStore = {
       create: async (_ownerId, name, hash) => {
         savedHash = hash;
+
         return { id: "token-1", name, createdAt: now, lastUsedAt: null };
       },
       listActive: async () => [],
@@ -34,6 +36,7 @@ describe("PatService", () => {
       revokeOwned: async (ownerId, id) => {
         if (ownerId !== owner.id || id !== "token-1" || revoked) return false;
         revoked = true;
+
         return true;
       },
       touch: async (_id, at) => {
@@ -41,6 +44,7 @@ describe("PatService", () => {
         lastUsedAt = at;
       },
     };
+
     service = new PatService(
       store,
       { findById: async (id) => (id === owner.id ? owner : null) },

@@ -18,6 +18,7 @@ const {
 );
 
 const events = computed(() => eventsResponse.value?.events ?? []);
+
 const stageCount = computed(() =>
   events.value.reduce((count, event) => count + event.stages.length, 0),
 );

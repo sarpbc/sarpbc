@@ -204,6 +204,7 @@ describe("RosterProposalService", () => {
       source,
       "journalist",
     );
+
     await service.approve(id, "admin");
 
     expect(contracts.revisePeriod).toHaveBeenCalledWith("zen", "zen-kc", {
@@ -248,6 +249,7 @@ describe("RosterProposalService", () => {
       source,
       "journalist",
     );
+
     expect(prizes.setDistribution).not.toHaveBeenCalled();
 
     const approved = await service.approve(id, "admin");
@@ -265,6 +267,7 @@ describe("RosterProposalService", () => {
       source,
       "journalist",
     );
+
     const approved = await service.approve(id, "admin");
 
     expect(staff.permissions).toEqual(["tournaments.manage"]);
@@ -390,6 +393,7 @@ describe("RosterProposalService", () => {
     const pendingUrl = `https://cdn.sarpbc.test/${pendingKey}`;
     const publishedKey = "teams/kc/logo-dark-0123456789abcdef.webp";
     const publishedUrl = `https://cdn.sarpbc.test/${publishedKey}`;
+
     const proposeDarkLogo = () =>
       service.proposeTeamLogo(
         { teamId: "kc", variant: "dark", imageUrl: "https://kcorp.gg/logo-dark.svg" },
@@ -499,6 +503,7 @@ describe("RosterProposalService", () => {
         "",
         "journalist",
       );
+
     const deleteTeam = (teamId: string, mergeIntoTeamId?: string) =>
       service.propose(
         { kind: "delete_team", teamId, reason: "Empty duplicate", mergeIntoTeamId },
@@ -598,6 +603,7 @@ describe("RosterProposalService", () => {
       { url: "https://twitch.tv/rlesports", language: "en", kind: "official" },
       { url: "https://twitch.tv/kameto", language: "fr", kind: "costream" },
     ];
+
     const setMatchStreams = (sourceUrl: string, matchId = "match-1") =>
       service.propose(
         { kind: "set_match_streams", matchId, streams: list },
@@ -634,6 +640,7 @@ describe("RosterProposalService", () => {
 
     it("replaces the whole list on approval and marks start.gg sourced streams", async () => {
       const manual = await setMatchStreams(source);
+
       const startgg = await service.propose(
         { kind: "set_event_streams", eventId: "event-1", streams: list },
         "https://www.start.gg/tournament/rl-open",
@@ -677,6 +684,7 @@ describe("RosterProposalService", () => {
       { participantId: "part-kc", playerIds: ["zen"] },
       { participantId: "part-bds", playerIds: [] },
     ];
+
     const setLineups = (sourceUrl: string, matchId = "match-1") =>
       service.propose(
         { kind: "set_match_lineups", matchId, lineups: sides },
@@ -798,6 +806,7 @@ describe("RosterProposalService", () => {
   describe("circuit scale proposals", () => {
     const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
     const rules = "https://example.org/official-rules";
+
     const setScale = (tournamentId = "ps-stage") =>
       service.propose(
         { kind: "set_circuit_stage_scale", circuitId: "circuit-1", tournamentId, scale },
@@ -838,6 +847,7 @@ describe("RosterProposalService", () => {
         regionTeamIds: ["kc"],
         finishes: [{ teamId: "kc", placement: 13 }],
       };
+
       const { id } = await service.propose(change, rules, "journalist");
 
       await service.approve(id, "admin");
@@ -898,6 +908,7 @@ describe("RosterProposalService", () => {
         source,
         "journalist",
       );
+
       const updated = await service.propose(
         { kind: "update_team_alias", teamId: "kc", aliasId: "alias-1", alias },
         source,

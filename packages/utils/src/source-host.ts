@@ -9,6 +9,7 @@ export function isLiquipediaSourceHost(hostname: string): boolean {
 
 export function isBlastSourceHost(hostname: string): boolean {
   const host = normalizedHost(hostname);
+
   return host === "blast.tv" || host.endsWith(".blast.tv");
 }
 

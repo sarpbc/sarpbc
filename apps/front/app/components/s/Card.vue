@@ -16,6 +16,7 @@ function cardSizeClasses(value: CardSize): string {
       return "min-h-card-l h-row-snap";
     default: {
       const _exhaustive: never = value;
+
       return _exhaustive;
     }
   }

@@ -12,6 +12,7 @@ const { data: staff, error: staffError } = await useAsyncData(
   () => `staff-slug-${slug.value}`,
   async () => {
     const player = await getPlayerFromSlug(slug.value);
+
     return player ? { player, contracts: await getPlayerContracts(player.id) } : null;
   },
   { watch: [slug] },

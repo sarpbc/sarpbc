@@ -24,6 +24,7 @@ const STATIC_EXTENSIONS = new Set([
 function lastSegment(pathname: string): string {
   const trimmed = pathname.replace(/\/+$/, "");
   const slash = trimmed.lastIndexOf("/");
+
   return slash === -1 ? trimmed : trimmed.slice(slash + 1);
 }
 
@@ -34,11 +35,13 @@ function isInternalOrAssetPath(pathname: string): boolean {
 
   const segment = lastSegment(pathname);
   const dot = segment.lastIndexOf(".");
+
   if (dot <= 0) {
     return false;
   }
 
   const ext = segment.slice(dot + 1).toLowerCase();
+
   return STATIC_EXTENSIONS.has(ext);
 }
 
@@ -60,6 +63,7 @@ export function isMarkdownEligibleHtmlPath(pathname: string): boolean {
   }
 
   const normalized = pathname.replace(/\/+$/, "") || "/";
+
   return !PRIVATE_HTML_PATHS.has(normalized);
 }
 
@@ -69,19 +73,24 @@ export function htmlPathFromMarkdownPath(pathname: string): string {
   if (withoutMd === "/index" || withoutMd === "") {
     return "/";
   }
+
   if (withoutMd === "/fr/index") {
     return "/fr";
   }
+
   return withoutMd || "/";
 }
 
 export function markdownPathFromHtmlPath(pathname: string): string {
   const normalized = pathname.replace(/\/+$/, "") || "/";
+
   if (normalized === "/") {
     return "/index.md";
   }
+
   if (normalized === "/fr") {
     return "/fr/index.md";
   }
+
   return `${normalized}.md`;
 }

@@ -42,6 +42,7 @@ const TWEET_INLINE_OPENER = ":tweet{";
 export function parseTweetUrl(input: string): ParsedTweetUrl | null {
   const trimmed = input.trim();
   const match = trimmed.match(TWEET_STATUS_PATTERN);
+
   if (!match || match[2] == null) {
     return null;
   }
@@ -59,6 +60,7 @@ export function parseTweetUrl(input: string): ParsedTweetUrl | null {
 
 export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
   const match = raw.match(TWEET_TAG_PATTERN);
+
   if (!match) {
     return null;
   }
@@ -72,6 +74,7 @@ export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
   }
 
   const parsed = parseTweetUrl(url);
+
   if (!parsed) {
     return null;
   }
@@ -86,19 +89,23 @@ export function parseNewsTweetTag(raw: string): NewsTweetTag | null {
 export function serializeNewsTweetTag(url: string): string {
   const parsed = parseTweetUrl(url);
   const canonical = parsed?.url ?? url.trim();
+
   return `:tweet{url="${escapeNewsTagAttrValue(canonical)}"}`;
 }
 
 export function newsTweetTagStart(content: string): number {
   const block = content.indexOf(TWEET_BLOCK_OPENER);
+
   return block !== -1 ? block : content.indexOf(TWEET_INLINE_OPENER);
 }
 
 function blockTagEnd(content: string, afterBrace: number): number {
   let index = afterBrace;
+
   while (index < content.length && WHITESPACE.test(content.charAt(index))) {
     index += 1;
   }
+
   return content.startsWith("::", index) ? index + 2 : -1;
 }
 
@@ -110,24 +117,32 @@ function replaceTweetTags(
   let result = "";
   let copiedUntil = 0;
   let searchFrom = 0;
+
   while (true) {
     const start = content.indexOf(opener, searchFrom);
+
     if (start === -1) {
       break;
     }
+
     const closingBrace = content.indexOf("}", start + opener.length);
+
     if (closingBrace === -1) {
       break;
     }
+
     const end = tagEnd(closingBrace + 1);
+
     if (end === -1) {
       searchFrom = closingBrace + 1;
       continue;
     }
+
     result += `${content.slice(copiedUntil, start)} `;
     copiedUntil = end;
     searchFrom = end;
   }
+
   return result + content.slice(copiedUntil);
 }
 
@@ -141,11 +156,13 @@ export function stripNewsTweetTags(content: string): string {
 
 export function isTweetImageUrl(input: string): boolean {
   let url: URL;
+
   try {
     url = new URL(input);
   } catch {
     return false;
   }
+
   return (
     url.protocol === "https:" &&
     url.hostname === "pbs.twimg.com" &&

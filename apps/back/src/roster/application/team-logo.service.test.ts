@@ -9,16 +9,20 @@ const WEBP_OUTPUT = new Uint8Array([9, 9, 9]);
 
 function setup(bytes: Uint8Array, size = { width: 512, height: 256 }) {
   const source = { download: vi.fn(async () => bytes) };
+
   const images = {
     dimensions: vi.fn(async () => size),
     normalize: vi.fn(async () => WEBP_OUTPUT),
   };
+
   const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
+
   const storage = {
     put: vi.fn(async (key: string) => stored(key)),
     copy: vi.fn(async (_sourceKey: string, key: string) => stored(key)),
     delete: vi.fn(async () => {}),
   };
+
   return { source, images, storage, service: new TeamLogoService(source, images, storage) };
 }
 

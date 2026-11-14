@@ -37,6 +37,7 @@ export function splitDoubleEliminationMatches(
 
   for (const match of matches) {
     const section = getBracketSectionFromName(match.name);
+
     if (section === "upper") {
       upperIds.add(match.id);
     } else if (section === "lower" || section === "finals") {
@@ -46,6 +47,7 @@ export function splitDoubleEliminationMatches(
 
   for (const match of matches) {
     const hasLoserFeed = match.previousMatches?.some((link) => link.type === "loser");
+
     if (hasLoserFeed) {
       lowerIds.add(match.id);
       upperIds.delete(match.id);
@@ -53,6 +55,7 @@ export function splitDoubleEliminationMatches(
   }
 
   let changed = true;
+
   while (changed) {
     changed = false;
 
@@ -62,6 +65,7 @@ export function splitDoubleEliminationMatches(
       }
 
       const winnerParents = getWinnerParentIds(match, matchIds);
+
       if (winnerParents.some((parentId) => lowerIds.has(parentId))) {
         if (!lowerIds.has(match.id)) {
           lowerIds.add(match.id);
@@ -82,6 +86,7 @@ export function splitDoubleEliminationMatches(
         }
 
         const parent = matchById.get(parentId);
+
         if (getBracketSectionFromName(parent?.name) === "upper") {
           continue;
         }
@@ -119,6 +124,7 @@ export function buildDoubleEliminationCombinedLayout(
 
   for (const match of lowerMatches) {
     const namedColumn = getCombinedColumnFromName(match.name);
+
     if (namedColumn === null) {
       unnamedMatches.push(match);
     } else {
@@ -138,14 +144,18 @@ export function buildDoubleEliminationCombinedLayout(
 
   if (unnamedMatches.length > 0) {
     const progressionDepths = computeLowerProgressionDepths(unnamedMatches, crossBracketFinalIds);
+
     const unnamedFinals = sortMatchesByBeginAt(
       unnamedMatches.filter((match) => crossBracketFinalIds.has(match.id)),
     );
+
     const maxNamedColumn = namedColumns.size > 0 ? Math.max(...namedColumns.values()) : -1;
     const finalColumnCount = unnamedFinals.length > 0 ? Math.min(unnamedFinals.length, 2) : 0;
+
     const maxProgressionDepth = progressionDepths.size
       ? Math.max(...progressionDepths.values())
       : 0;
+
     const progressionRoundCount = maxProgressionDepth + 1;
     const firstUnnamedColumn = maxNamedColumn + 1;
     const totalNeededColumns = firstUnnamedColumn + progressionRoundCount + finalColumnCount;
@@ -163,6 +173,7 @@ export function buildDoubleEliminationCombinedLayout(
         0,
         MAX_DOUBLE_ELIM_COMBINED_COLUMNS - finalColumnCount - firstUnnamedColumn - 1,
       );
+
       const remappedProgression = remapDepthsToColumnRange(progressionDepths, progressionTargetMax);
 
       for (const [matchId, depth] of remappedProgression) {
@@ -206,6 +217,7 @@ export function buildUnifiedDoubleEliminationLayout(
 
   const upperIds = new Set(upperMatches.map((match) => match.id));
   const lowerSectionLayout = buildDoubleEliminationCombinedLayout(lowerMatches, upperIds);
+
   const lowerPositionById = new Map(
     (lowerSectionLayout?.matches ?? []).map((match) => [match.matchId, match]),
   );
@@ -219,6 +231,7 @@ export function buildUnifiedDoubleEliminationLayout(
 
     for (const child of allMatches) {
       const childPosition = lowerPositionById.get(child.id);
+
       if (!childPosition) {
         continue;
       }
@@ -252,6 +265,7 @@ export function buildUnifiedDoubleEliminationLayout(
   }
 
   const takenUpperRows = new Map<number, number[]>();
+
   const sortedUpperPlacements = sortMatchesByBeginAt(
     upperPlacements.map((placement) => placement.match),
   ).map((match) => upperPlacements.find((placement) => placement.match.id === match.id)!);

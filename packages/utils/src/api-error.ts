@@ -24,6 +24,7 @@ const apiErrorSchema = z.object({
 
 export function getApiErrorStatus(cause: unknown): number | undefined {
   const parsed = apiErrorSchema.safeParse(cause);
+
   if (!parsed.success) return undefined;
 
   return parsed.data.statusCode ?? parsed.data.status;
@@ -31,6 +32,7 @@ export function getApiErrorStatus(cause: unknown): number | undefined {
 
 export function getApiErrorBody(cause: unknown): ApiErrorBody | undefined {
   const parsed = apiErrorSchema.safeParse(cause);
+
   if (!parsed.success) return undefined;
 
   if (parsed.data.data) {
@@ -46,6 +48,7 @@ export function getApiErrorBody(cause: unknown): ApiErrorBody | undefined {
 
 export function getApiErrorMessage(cause: unknown): string | undefined {
   const body = getApiErrorBody(cause);
+
   if (!body?.message) return undefined;
 
   if (Array.isArray(body.message)) {

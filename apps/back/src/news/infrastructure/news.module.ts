@@ -11,6 +11,7 @@ import { TwimgImageGateway } from "./twimg-image.gateway";
 import { MikroNewsStore } from "./persistence/news.store";
 import { transactionalNews } from "./composition";
 import { IndexNowService } from "./indexnow.service";
+
 @Module({
   imports: [ReplyModule],
   controllers: [NewsController],

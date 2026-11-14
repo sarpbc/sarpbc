@@ -31,6 +31,7 @@ function toPrizeItem(row: TournamentPrize): TournamentPrizeItem {
 
 function toEarningsLine(row: TournamentPrize, shares: number): EarningsLine {
   const { tournament } = row;
+
   return {
     id: row.id,
     placement: row.placement,
@@ -55,17 +56,21 @@ export class CompetitionPrizeQueries implements PrizeQueries {
 
   async tournamentSource(id: string) {
     const tournament = await this.em.findOne(Tournament, { id }, { fields: ["source"] });
+
     return tournament?.source ?? null;
   }
 
   async byTournament(id: string) {
     const tournament = await this.em.findOne(Tournament, { id });
+
     if (!tournament) return null;
+
     const rows = await this.em.find(
       TournamentPrize,
       { tournament: { id } },
       { populate: ["team", "players"], orderBy: { placement: "ASC", amount: "DESC" } },
     );
+
     return {
       source: tournament.source,
       prizepool: tournament.prizepool,
@@ -75,11 +80,13 @@ export class CompetitionPrizeQueries implements PrizeQueries {
 
   async byTeam(id: string, scope: EarningsScope) {
     const rows = await this.earnings({ team: { id } }, scope);
+
     return rows.map((row) => toEarningsLine(row, 1));
   }
 
   async byPlayer(id: string, scope: EarningsScope) {
     const rows = await this.earnings({ players: { id } }, scope, ["players"]);
+
     return rows.map((row) => toEarningsLine(row, row.players.length));
   }
 
@@ -125,6 +132,7 @@ export class CompetitionPrizeWriter implements PrizeWriter {
       { tournament: tournamentId },
       { populate: ["players"] },
     );
+
     return rows.flatMap((row) =>
       row.team
         ? [{ teamId: row.team.id, playerIds: row.players.getItems().map(({ id }) => id) }]
@@ -138,6 +146,7 @@ export class CompetitionPrizeWriter implements PrizeWriter {
       { tournament: tournamentId },
       { populate: ["players"], orderBy: { placement: "ASC", amount: "DESC" } },
     );
+
     return rows.map((row) => ({
       placement: row.placement,
       amount: row.amount,
@@ -150,6 +159,7 @@ export class CompetitionPrizeWriter implements PrizeWriter {
 
   async replace(tournamentId: string, entries: PrizeEntry[]) {
     await this.em.nativeDelete(TournamentPrize, { tournament: tournamentId });
+
     for (const entry of entries) {
       const row = new TournamentPrize();
       row.id = crypto.randomUUID();

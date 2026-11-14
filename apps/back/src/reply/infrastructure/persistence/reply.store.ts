@@ -25,10 +25,12 @@ export class MikroReplyStore implements ReplyWrites {
   }
   async findById(id: string) {
     const row = await this.rows.findById(id);
+
     return row ? replySnapshot(row) : null;
   }
   async findLatestByUser(id: string) {
     const row = await this.rows.findLatestByUser(id);
+
     return row ? replySnapshot(row) : null;
   }
   countRootsByTarget(type: ReplyTargetType, id: string) {
@@ -66,8 +68,10 @@ export class MikroReplyStore implements ReplyWrites {
   }
   async delete(model: ReplyRecord) {
     const row = await this.em.findOne(Reply, { id: model.id });
+
     if (!row) return;
     this.em.remove(row);
+
     try {
       await this.em.flush();
     } catch (error) {
@@ -76,6 +80,7 @@ export class MikroReplyStore implements ReplyWrites {
     }
   }
 }
+
 export function replyReports(em: EntityManager) {
   return {
     async findByReplyAndReporter(
@@ -86,6 +91,7 @@ export function replyReports(em: EntityManager) {
         reply: { id: replyId },
         reporter: { id: userId },
       });
+
       return row
         ? {
             id: row.id,
@@ -104,6 +110,7 @@ export function replyReports(em: EntityManager) {
       row.reason = model.reason;
       row.createdAt = model.createdAt;
       em.persist(row);
+
       try {
         await em.flush();
       } catch (error) {

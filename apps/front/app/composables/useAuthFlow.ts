@@ -9,9 +9,11 @@ export function useAuthFlow() {
 
   function redirectTarget(): string {
     const raw = route.query.redirect;
+
     if (Array.isArray(raw) || raw == null || !raw.startsWith("/") || raw.startsWith("//")) {
       return localePath("/");
     }
+
     return raw;
   }
 
@@ -19,6 +21,7 @@ export function useAuthFlow() {
     if (user.value === undefined) {
       user.value = await getProfile();
     }
+
     if (user.value) {
       navigateTo(redirectTarget());
     }
@@ -30,16 +33,20 @@ export function useAuthFlow() {
     event: AuthEvent,
   ): Promise<boolean> {
     const res = await apiFetch<{ success?: boolean }>(path, { method: "POST", body });
+
     if (res.success !== true) {
       return false;
     }
 
     const profile = await getProfile();
     user.value = profile;
+
     if (profile) {
       posthog?.capture(event);
     }
+
     navigateTo(redirectTarget());
+
     return true;
   }
 

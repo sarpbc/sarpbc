@@ -28,6 +28,7 @@ export class SitemapStore implements SitemapQueries {
       { isDraft: false },
       { fields: ["slug", "createdAt", "updatedAt"] },
     );
+
     return rows.map((row) => ({
       slug: row.slug,
       lastmod: new Date(row.updatedAt ?? row.createdAt),
@@ -40,6 +41,7 @@ export class SitemapStore implements SitemapQueries {
       {},
       { populate: ["event"], fields: ["slug", "updatedAt", "event.slug"] },
     );
+
     return rows.map((row) => ({
       slug: row.slug,
       eventSlug: row.event.slug,
@@ -68,6 +70,7 @@ export class SitemapStore implements SitemapQueries {
         ],
       },
     );
+
     return rows.map((row) => ({
       publicId: row.publicId,
       name: row.name,
@@ -86,6 +89,7 @@ export class SitemapStore implements SitemapQueries {
       .createQueryBuilder(TournamentParticipant, "tp")
       .join("tp.players", "p")
       .select("p.id");
+
     const rows = await this.em.find(
       Player,
       {
@@ -94,6 +98,7 @@ export class SitemapStore implements SitemapQueries {
       },
       { fields: ["slug"] },
     );
+
     return rows.map((row) => row.slug);
   }
 
@@ -103,12 +108,14 @@ export class SitemapStore implements SitemapQueries {
       { mergedInto: null, contracts: { $some: { role: { $in: [...STAFF_CONTRACT_ROLES] } } } },
       { fields: ["slug"] },
     );
+
     return rows.map((row) => row.slug);
   }
 
   async teamSlugs(): Promise<string[]> {
     const appeared = this.em.createQueryBuilder(TournamentParticipant, "tp").select("tp.team");
     const contracted = this.em.createQueryBuilder(Contract, "c").select("c.team");
+
     const rows = await this.em.find(
       Team,
       {
@@ -121,6 +128,7 @@ export class SitemapStore implements SitemapQueries {
       },
       { fields: ["slug"] },
     );
+
     return rows.map((row) => row.slug);
   }
 }

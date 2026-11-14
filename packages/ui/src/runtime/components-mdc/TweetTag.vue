@@ -22,11 +22,13 @@ const { data, status, error } = useAsyncData(
 
 function imageSrc(url: string): string {
   const path = tweetImageProxyPath(url);
+
   return path ? `${config.public.apiBase}${path}` : url;
 }
 
 const href = computed(() => data.value?.url ?? parsed.value?.url ?? props.url);
 const showError = computed(() => !parsed.value || status.value === "error" || error.value);
+
 const postedAtLabel = computed(() =>
   data.value
     ? new Intl.DateTimeFormat(locale.value, {

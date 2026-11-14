@@ -45,6 +45,7 @@ const {
   refresh,
 } = useAdminList("admin-users", async (range) => {
   const { users, total } = await getUsers(range);
+
   return { items: users, total };
 });
 
@@ -64,16 +65,20 @@ function requestRoleChange(user: UserListItem, role: AssignableRole) {
   if (role === roleOf(user)) {
     return;
   }
+
   if (role === "admin" || user.role === "admin") {
     pendingChange.value = { user, role };
     isConfirmOpen.value = true;
+
     return;
   }
+
   void applyRoleChange(user, role);
 }
 
 async function applyRoleChange(user: UserListItem, role: AssignableRole) {
   savingId.value = user.id;
+
   try {
     await changeUserRole(user.id, role);
     toast.add({
@@ -93,9 +98,11 @@ async function applyRoleChange(user: UserListItem, role: AssignableRole) {
 
 async function confirmChange() {
   const change = pendingChange.value;
+
   if (!change) {
     return;
   }
+
   isConfirmOpen.value = false;
   pendingChange.value = null;
   await applyRoleChange(change.user, change.role);

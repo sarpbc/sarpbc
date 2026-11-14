@@ -10,6 +10,7 @@ describe("TeamController", () => {
   const tournaments = { getTournamentsWonByTeam: vi.fn(), getTournamentsByTeam: vi.fn() };
   const teamEarnings = vi.fn();
   const prizes = { teamEarnings } as never;
+
   const controller = new TeamController(
     teams as never,
     new TeamAliasService({ run: async () => Promise.reject(new Error("unused")) }),

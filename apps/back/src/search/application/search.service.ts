@@ -8,6 +8,7 @@ import type { Tournament } from "../../tournament/domain/competition";
 
 function pageForEachKind({ type, limit, offset }: SearchParams) {
   const mixed = type === "all";
+
   return {
     limit: mixed ? Math.ceil(limit / 2) : limit,
     offset: mixed ? Math.floor(offset / 2) : offset,
@@ -34,7 +35,9 @@ export class SearchService {
     let tournaments: Tournament[] = [];
 
     if (includes(type, "player")) players = await this.playerService.find(page);
+
     if (includes(type, "team")) teams = await this.teamService.find(page);
+
     if (includes(type, "tournament")) tournaments = await this.tournamentService.searchByName(page);
 
     return {

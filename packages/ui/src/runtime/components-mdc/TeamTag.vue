@@ -40,6 +40,7 @@ async function loadTeam() {
     const response = await fetchWithEntityTagCache(`team:${props.slug}`, () =>
       apiFetch<{ team: Team | null }>(`/team/slug/${encodeURIComponent(props.slug)}`),
     );
+
     team.value = response.team;
     error.value = response.team === null;
   } catch {

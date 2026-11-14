@@ -1,6 +1,8 @@
 <script lang="ts" setup>
 const imageUrl = defineModel<string>({ default: "" });
+
 defineProps<{ disabled?: boolean }>();
+
 const emit = defineEmits<{ "update:uploading": [boolean] }>();
 const uploading = ref(false);
 const { t } = useI18n();

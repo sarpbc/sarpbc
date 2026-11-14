@@ -14,8 +14,10 @@ export class ImageRepository implements ImageStore {
     const record = new Image();
     record.imageId = imageId;
     record.url = url;
+
     try {
       await this.em.persist(record).flush();
+
       return {
         id: record.id,
         imageId: record.imageId,

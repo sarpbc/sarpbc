@@ -4,6 +4,7 @@ export async function getTrackedStreamers(): Promise<TrackedStreamer[]> {
   const res = await apiFetch<{ streamers: TrackedStreamer[] }>("/streamers", {
     method: "GET",
   });
+
   return res.streamers ?? [];
 }
 

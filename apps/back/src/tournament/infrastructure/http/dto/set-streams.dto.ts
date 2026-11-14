@@ -14,4 +14,5 @@ export const SetStreamsDto = z.strictObject({
     )
     .max(MAX_STREAMS),
 });
+
 export type SetStreamsDto = z.infer<typeof SetStreamsDto>;

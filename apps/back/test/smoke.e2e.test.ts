@@ -37,6 +37,7 @@ import { User } from "../src/user/domain/user";
 describe("API smoke (e2e)", () => {
   let app: NestFastifyApplication;
   const user = Object.assign(new User("fan@sarpbc.org", "fan", "hash"), { id: "user-1" });
+
   const userService = {
     signIn: vi.fn().mockResolvedValue(user),
     findById: vi.fn().mockResolvedValue(user),
@@ -46,6 +47,7 @@ describe("API smoke (e2e)", () => {
     createGoogleUser: vi.fn(),
     linkGoogleAccount: vi.fn(),
   };
+
   const newsService = {
     findAllPublishedArticle: vi.fn().mockResolvedValue({
       data: [{ id: "n1", title: "Hello", slug: "hello" }],
@@ -57,6 +59,7 @@ describe("API smoke (e2e)", () => {
       if (week === "2026-W99") {
         throw new BadRequestException("Week must be an ISO week id (e.g. 2026-W36).");
       }
+
       return {
         week,
         start: new Date("2026-08-31T00:00:00.000Z"),
@@ -65,18 +68,23 @@ describe("API smoke (e2e)", () => {
       };
     }),
   };
+
   const tweetImages = {
     load: vi.fn(async (url: string) => {
       if (url.endsWith("/removed.jpg")) {
         throw new NotFoundError("This image is no longer available on X.");
       }
+
       if (url.endsWith("/broken.jpg")) {
         throw new IntegrationError("Could not load this image from X. Try again in a moment.");
       }
+
       return { contentType: "image/png", body: Buffer.from("png") };
     }),
   };
+
   const MISSING_MATCH_ID = "11111111-1111-4111-8111-111111111111";
+
   const grandFinal = Object.assign(new Match(), {
     publicId: 7250,
     name: "Grand Final: Karmine Corp vs Team Falcons",
@@ -93,11 +101,13 @@ describe("API smoke (e2e)", () => {
       eventStreams: [],
     },
   });
+
   const matchService = {
     findDetail: vi.fn(async (ref: EntityRef) => {
       if (ref.kind === "id" && ref.value === MISSING_MATCH_ID) {
         throw new NotFoundError("This match could not be found.");
       }
+
       return { match: grandFinal, teamForms: {}, headToHead: null };
     }),
     findUpcomingAndCount: vi.fn(),
@@ -130,6 +140,7 @@ describe("API smoke (e2e)", () => {
       ],
     },
   ];
+
   const matchGames = { byMatch: vi.fn(async () => games) };
 
   const transferService = { findAndCount: vi.fn().mockResolvedValue([[], 0]) };
@@ -232,6 +243,7 @@ describe("API smoke (e2e)", () => {
 
   it("proxies allowlisted tweet images with a short public cache", async () => {
     const url = "https://pbs.twimg.com/media/photo.png";
+
     const response = await request(app.getHttpServer())
       .get(`/news/embed/tweet/image?url=${encodeURIComponent(url)}`)
       .expect(200);
@@ -286,9 +298,11 @@ describe("API smoke (e2e)", () => {
 
   it("resolves article match blocks in one batched call", async () => {
     const team = "c9e1a3b5-7d9f-4b1d-a3c5-e7f9b1d3f544";
+
     const response = await request(app.getHttpServer())
       .get(`/matches/blocks?block=match:${grandFinal.id}&block=team:${team}:5`)
       .expect(200);
+
     expect(matchService.findBlocks).toHaveBeenLastCalledWith(
       [
         { kind: "match", id: grandFinal.id },
@@ -308,11 +322,13 @@ describe("API smoke (e2e)", () => {
   it("rejects missing or malformed match blocks", async () => {
     await request(app.getHttpServer()).get("/matches/blocks").expect(400);
     await request(app.getHttpServer()).get("/matches/blocks?block=team:falcons:5").expect(400);
+
     const tooMany = Array.from(
       { length: 21 },
       (_, index) =>
         `block=match:0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f${String(index).padStart(2, "0")}`,
     ).join("&");
+
     await request(app.getHttpServer()).get(`/matches/blocks?${tooMany}`).expect(400);
   });
 
@@ -320,6 +336,7 @@ describe("API smoke (e2e)", () => {
     const response = await request(app.getHttpServer())
       .get("/transfers?type=loan&from=2026-01-01&to=2026-06-30&limit=5")
       .expect(200);
+
     expect(response.body).toEqual({ transfers: [], count: 0 });
     expect(transferService.findAndCount).toHaveBeenLastCalledWith(
       expect.objectContaining({

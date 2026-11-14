@@ -19,6 +19,7 @@ export class TransferController {
       query.team ? this.teamService.findBySlug(query.team) : null,
       query.player ? this.playerService.findBySlug(query.player) : null,
     ]);
+
     if ((query.team && !team) || (query.player && !player)) {
       return { transfers: [], count: 0 };
     }
@@ -32,6 +33,7 @@ export class TransferController {
       limit: query.limit,
       offset: query.offset,
     });
+
     return { transfers: transfers.map(mapTransfer), count };
   }
 }

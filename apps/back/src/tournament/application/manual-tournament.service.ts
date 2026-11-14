@@ -23,6 +23,7 @@ import type {
 } from "./ports";
 import { explicitEventSlug, placeStage, requireEvent, requireLeague } from "./event-placement";
 import { parseDataSourceUrl } from "../../common/domain/data-source";
+
 export class ManualTournamentService {
   constructor(
     private readonly reads: TournamentQueries,
@@ -47,6 +48,7 @@ export class ManualTournamentService {
       tournament.endAt = input.endAt ? new Date(input.endAt) : null;
       tournament.assertDateOrder();
       tournament.league = await requireLeague(tournaments, input.leagueId);
+
       if (input.eventId) {
         if (input.slug !== undefined) throw sharedEventSlugError();
         await placeStage(events, tournament, await requireEvent(events, input.eventId));
@@ -54,29 +56,41 @@ export class ManualTournamentService {
         tournament.slug = stageSlug(input.name);
         tournament.event = toEventRef(await this.createOwnEvent(events, tournament, input.slug));
       }
+
       await tournaments.save(tournament);
+
       if (input.teamIds?.length)
         await this.syncParticipants(tournaments, tournament, input.teamIds);
+
       if (input.playerParticipants?.length)
         await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
+
       return tournament.id;
     });
+
     return this.detail(id);
   }
   async update(id: string, input: UpdateTournamentInput): Promise<Tournament> {
     await this.transaction.run(async ({ tournaments, events, matches }) => {
       const tournament = await tournaments.load(id);
+
       if (!tournament) throw new NotFoundError('Tournament with id "' + id + '" was not found.');
       assertTournamentUpdateAllowed(tournament.source, input);
       const previousName = tournament.name;
+
       if (input.name !== undefined) tournament.name = input.name;
+
       if (input.tier !== undefined) tournament.tier = input.tier?.trim() || null;
+
       if (input.beginAt !== undefined)
         tournament.beginAt = input.beginAt === null ? null : new Date(input.beginAt);
+
       if (input.endAt !== undefined)
         tournament.endAt = input.endAt === null ? null : new Date(input.endAt);
+
       if (input.imageUrl !== undefined) tournament.imageUrl = input.imageUrl?.trim() || null;
       tournament.assertDateOrder();
+
       if (tournament.source === "pandascore") {
         if (input.endAt !== undefined) tournament.endAtCorrected = input.endAt !== null;
       } else {
@@ -84,23 +98,30 @@ export class ManualTournamentService {
           tournament.league = await requireLeague(tournaments, input.leagueId);
         await this.updateEvent(events, tournament, previousName, input);
         await this.assertUpdatedLineup(tournaments, tournament, input);
+
         if (input.teamIds !== undefined)
           await this.syncParticipants(tournaments, tournament, input.teamIds);
+
         if (input.playerParticipants !== undefined)
           await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
+
         if (input.rosters !== undefined)
           await this.setRosters(tournaments, tournament, input.rosters);
+
         if (input.hasBracket !== undefined)
           tournament.hasBracket = await bracketToggle(matches, tournament.id, input.hasBracket);
       }
+
       await tournaments.save(tournament);
     });
     await this.afterCommit.settle({ tournamentIds: [id] });
+
     return this.detail(id);
   }
   async setPickemsEnabled(id: string, enabled: boolean): Promise<void> {
     await this.transaction.run(async ({ tournaments }) => {
       const tournament = await tournaments.load(id);
+
       if (!tournament) throw new NotFoundError("Tournament not found");
       tournament.pickemsEnabled = enabled;
       await tournaments.save(tournament);
@@ -109,8 +130,10 @@ export class ManualTournamentService {
   }
   private async detail(id: string) {
     const tournament = await this.reads.findById(id);
+
     if (!tournament)
       throw new NotFoundError('Tournament with id "' + id + '" was not found after save.');
+
     return tournament;
   }
   private async createOwnEvent(
@@ -122,12 +145,14 @@ export class ManualTournamentService {
       name: tournament.name,
       league: tournament.league,
     });
+
     event.slug = slug
       ? await explicitEventSlug(events, slug, event.id)
       : await allocateSlug(eventSlug(tournament.name, null), (taken) =>
           events.slugTaken(taken, null),
         );
     await events.save(event);
+
     return event;
   }
   private async updateEvent(
@@ -139,17 +164,23 @@ export class ManualTournamentService {
     if (input.eventId !== undefined && input.eventId !== tournament.event.id) {
       if (input.slug !== undefined) throw sharedEventSlugError();
       await placeStage(events, tournament, await requireEvent(events, input.eventId));
+
       return;
     }
+
     const event = await requireEvent(events, tournament.event.id);
     const stageIds = (await events.stages(event.id)).map((stage) => stage.id);
+
     if (!ownsEvent(event, stageIds, { id: tournament.id, name: previousName })) {
       if (input.slug !== undefined && toSlug(input.slug) !== event.slug)
         throw sharedEventSlugError();
+
       return;
     }
+
     event.name = tournament.name;
     event.league = tournament.league;
+
     if (input.slug !== undefined)
       event.slug = await explicitEventSlug(events, input.slug, event.id);
     await events.save(event);
@@ -164,14 +195,18 @@ export class ManualTournamentService {
       throw new InvalidInputError(
         "One or more teams were not found. Refresh the team list and try again.",
       );
+
     const existing = await writer.participants(tournament.id),
       desired = new Set(teamIds);
+
     for (const p of existing) {
       if (!p.team || desired.has(p.team.id)) continue;
       assertParticipantRemovable(await writer.participantReferences(tournament.id, p.id));
       await writer.removeParticipant(p.id);
     }
+
     const present = new Set(existing.flatMap((p) => (p.team ? [p.team.id] : [])));
+
     for (const teamId of teamIds) {
       if (!present.has(teamId))
         await writer.saveParticipant({
@@ -189,19 +224,24 @@ export class ManualTournamentService {
     groups: string[][],
   ) {
     const playerIds = [...new Set(groups.flat())];
+
     if (playerIds.length && !(await writer.playersExist(playerIds)))
       throw new InvalidInputError(
         "One or more players were not found. Refresh the player list and try again.",
       );
+
     const existing = (await writer.participants(tournament.id)).filter((p) => !p.team),
       keyOf = (p: TournamentParticipant) => playerGroupKey(p.players.map((player) => player.id)),
       desired = new Set(groups.map(playerGroupKey));
+
     for (const p of existing) {
       if (desired.has(keyOf(p))) continue;
       assertParticipantRemovable(await writer.participantReferences(tournament.id, p.id));
       await writer.removeParticipant(p.id);
     }
+
     const present = new Set(existing.map(keyOf));
+
     for (const group of groups) {
       if (!present.has(playerGroupKey(group)))
         await writer.saveParticipant({
@@ -219,6 +259,7 @@ export class ManualTournamentService {
     input: UpdateTournamentInput,
   ) {
     if (input.format !== undefined) tournament.format = input.format;
+
     if (
       input.format === undefined &&
       input.teamIds === undefined &&
@@ -245,13 +286,16 @@ export class ManualTournamentService {
     rosters: ParticipantRosterInput[],
   ) {
     const playerIds = [...new Set(rosters.flatMap((roster) => roster.playerIds))];
+
     if (playerIds.length && !(await writer.playersExist(playerIds)))
       throw new InvalidInputError(
         "One or more players were not found. Refresh the player list and try again.",
       );
     const participants = await writer.participants(tournament.id);
+
     for (const roster of rosters) {
       const participant = participants.find((p) => p.team?.id === roster.teamId);
+
       if (!participant)
         throw new InvalidInputError(
           `Team "${roster.teamId}" is not a participant of this tournament. Add it to teamIds first.`,
@@ -277,10 +321,12 @@ async function bracketToggle(
 ): Promise<boolean> {
   if (hasBracket) return true;
   const stage = await matches.bracket(tournamentId);
+
   if (stage.matches.some((match) => match.previousMatches.length > 0))
     throw new InvalidInputError(
       "This stage still has bracket links. Remove them from its matches before disabling the bracket.",
     );
+
   return false;
 }
 

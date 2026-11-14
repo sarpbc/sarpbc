@@ -25,6 +25,7 @@ function cookieOptions(
   if (config?.domain) {
     options.domain = config.domain;
   }
+
   if (maxAge !== undefined) {
     options.maxAge = maxAge;
   }

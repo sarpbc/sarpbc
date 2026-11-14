@@ -15,6 +15,7 @@ const { t } = useI18n();
 function scrollToTopOnNavigate(event: MouseEvent, enabled: boolean) {
   if (!enabled) {
     event.preventDefault();
+
     return;
   }
 

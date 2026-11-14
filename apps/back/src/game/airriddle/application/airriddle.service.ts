@@ -2,6 +2,7 @@ import { evaluateGuess } from "../domain/airriddle";
 import type { DailyRiddle } from "../domain/airriddle";
 import { AirRiddleResultEnum } from "../domain/airriddle-result.enum";
 import type { DailyRiddles, RiddlePlayers, RiddleRuntime } from "./ports";
+
 export class AirRiddleService {
   constructor(
     private readonly riddles: DailyRiddles,
@@ -19,11 +20,14 @@ export class AirRiddleService {
     last?: boolean,
   ): Promise<{ results: AirRiddleResultEnum[]; error?: string; answer?: string }> {
     const players = await this.players.find({ name: guess });
+
     if (!players.some((p) => p.name.toUpperCase() === guess.toUpperCase()))
       return { results: [], error: "playerNotFound" };
     const riddle = await this.getTodaysRiddle();
+
     if (!riddle) throw new Error("Failed to create AirRiddle");
     const results = evaluateGuess(guess.toUpperCase(), riddle.playerName.toUpperCase());
+
     return {
       results,
       answer:
@@ -36,20 +40,26 @@ export class AirRiddleService {
     try {
       if (await this.riddles.findTodaysRiddle(this.runtime.dayStart())) return null;
       const player = await this.players.getRandomPlayer();
+
       if (!player) {
         this.runtime.skipped();
+
         return null;
       }
+
       const riddle = {
         id: this.runtime.id(),
         playerId: player.id,
         playerName: player.name,
         createdAt: this.runtime.now(),
       };
+
       await this.riddles.save(riddle);
+
       return riddle;
     } catch (error) {
       this.runtime.error(error instanceof Error ? error : new Error(String(error)));
+
       return null;
     }
   }

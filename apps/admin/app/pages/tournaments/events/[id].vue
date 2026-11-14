@@ -52,16 +52,23 @@ function formatDate(date: Date | string | null): string {
 
 async function handleSubmit() {
   if (!event.value || isSaving.value) return;
+
   if (!formState.value.name.trim()) {
     toast.add({ title: t("page.tournaments.events.form.nameRequired"), color: "error" });
+
     return;
   }
+
   const payload = buildEventPayload(formState.value, event.value);
+
   if (Object.keys(payload).length === 0) {
     toast.add({ title: t("page.tournaments.events.edit.unchanged") });
+
     return;
   }
+
   isSaving.value = true;
+
   try {
     event.value = await updateEvent(event.value.id, payload);
     toast.add({ title: t("page.tournaments.events.edit.saved"), color: "success" });

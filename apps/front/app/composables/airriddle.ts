@@ -9,6 +9,7 @@ export async function getTodayAirRiddleLength(): Promise<number> {
     return res.length || 0;
   } catch (error) {
     console.error("Error fetching air riddle length:", error);
+
     return 0;
   }
 }
@@ -34,6 +35,7 @@ export async function guessAirRiddle(
     };
   } catch (error) {
     console.error("Error fetching air riddle guess:", error);
+
     return { result: [], error: "submitFailed" };
   }
 }

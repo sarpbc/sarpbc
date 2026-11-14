@@ -36,7 +36,9 @@ const ERRORS = {
 
 export function requireTeamAliasInput(input: TeamAliasInput): TeamAliasInput {
   const parsed = parseTeamAlias(input);
+
   if (!parsed.ok) throw new InvalidInputError(ERRORS[parsed.error]);
+
   return parsed.alias;
 }
 
@@ -44,11 +46,13 @@ export function assertTeamAliasFits(alias: TeamAlias, team: Team): void {
   const overlap = team.aliases.find(
     (other) => other.id !== alias.id && teamAliasesOverlap(alias, other),
   );
+
   if (overlap) {
     throw new UnprocessableError(
       `This period overlaps the alias "${overlap.name}" of ${team.name} (${overlap.from} to ${overlap.to ?? "now"}); update that alias instead.`,
     );
   }
+
   if (alias.pandascoreId !== null && alias.pandascoreId === team.pandascoreId) {
     throw new InvalidInputError(
       `${team.name} already has PandaScore id ${alias.pandascoreId}; leave it off the alias.`,
@@ -59,7 +63,9 @@ export function assertTeamAliasFits(alias: TeamAlias, team: Team): void {
 export function teamAt(team: Team, at: Date | null): Team {
   if (!at || team.aliases.length === 0) return team;
   const alias = teamAliasInForce(team.aliases, isoDay(at));
+
   if (!alias) return team;
+
   const logo = alias.logoUrl
     ? {
         imageUrl: alias.logoUrl,
@@ -68,5 +74,6 @@ export function teamAt(team: Team, at: Date | null): Team {
         logoDarkUrl: null,
       }
     : {};
+
   return Object.assign(new Team(), team, { name: alias.name }, logo);
 }

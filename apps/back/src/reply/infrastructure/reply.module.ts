@@ -4,6 +4,7 @@ import { ReplyController } from "./http/reply.controller";
 import { ReplyService } from "../application/reply.service";
 import { MikroReplyStore } from "./persistence/reply.store";
 import { transactionalReplies } from "./composition";
+
 @Module({
   controllers: [ReplyController],
   providers: [

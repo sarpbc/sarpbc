@@ -74,6 +74,7 @@ const SECRET_FILES = {
 
 export function readSecret(env: RawEnv, name: string, file: string): string | undefined {
   const value = env[name];
+
   if (value !== undefined) {
     return value;
   }
@@ -84,6 +85,7 @@ export function readSecret(env: RawEnv, name: string, file: string): string | un
     if ((error as NodeJS.ErrnoException).code === "ENOENT") {
       return undefined;
     }
+
     throw error;
   }
 }
@@ -94,17 +96,21 @@ function withSecrets(env: RawEnv, names: SecretName[]) {
   const secrets = Object.fromEntries(
     names.map((name) => [name, readSecret(env, name, SECRET_FILES[name])]),
   );
+
   return { ...env, ...secrets };
 }
 
 function parse<T extends z.ZodType>(schema: T, env: RawEnv): z.infer<T> {
   const parsed = schema.safeParse(env);
+
   if (!parsed.success) {
     const message = parsed.error.issues
       .map((issue) => `${issue.path.join(".")}: ${issue.message}`)
       .join("; ");
+
     throw new Error(`Invalid environment: ${message}`);
   }
+
   return parsed.data;
 }
 

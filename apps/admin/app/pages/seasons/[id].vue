@@ -40,11 +40,13 @@ const awardForm = useTemplateRef("awardForm");
 
 function awardLabel(award: SeasonAward): string {
   const type = t(`page.seasons.awards.types.${award.awardType}`);
+
   return award.region ? `${type} · ${award.region}` : type;
 }
 
 async function save(input: SeasonInput) {
   isSaving.value = true;
+
   try {
     season.value = await updateSeason(seasonId.value, input);
     toast.add({ title: t("page.seasons.edit.saved"), color: "success" });
@@ -57,6 +59,7 @@ async function save(input: SeasonInput) {
 
 async function addAward(input: SeasonAwardInput) {
   isAdding.value = true;
+
   try {
     const award = await createSeasonAward(seasonId.value, input);
     toast.add({

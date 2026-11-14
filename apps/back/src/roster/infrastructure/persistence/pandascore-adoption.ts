@@ -22,9 +22,11 @@ export async function findPandascorePlayer(
   slug: string,
 ): Promise<Player | null> {
   const byId = await em.findOne(Player, { pandascoreId });
+
   if (byId) {
     return byId;
   }
+
   return em.findOne(Player, adoptable(slug));
 }
 
@@ -34,6 +36,7 @@ export async function findPandascoreTeam(
   slug: string,
 ): Promise<Team | null> {
   const byId = pandascoreId !== undefined ? await em.findOne(Team, { pandascoreId }) : null;
+
   return byId ?? em.findOne(Team, adoptable(slug));
 }
 
@@ -43,6 +46,7 @@ export async function findAliasedPandascoreTeam(
 ): Promise<string | null> {
   if (pandascoreId === undefined || (await em.findOne(Team, { pandascoreId }))) return null;
   const alias = await em.findOne(TeamAlias, { pandascoreId });
+
   return alias ? alias.team.id : null;
 }
 
@@ -52,5 +56,6 @@ export async function availablePlayerSlug(
   slug: string,
 ): Promise<string> {
   const taken = await em.findOne(Player, { slug });
+
   return taken ? `${slug}-${pandascoreId}` : slug;
 }

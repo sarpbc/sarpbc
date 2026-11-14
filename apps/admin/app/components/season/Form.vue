@@ -23,9 +23,11 @@ const { t } = useI18n();
 const name = ref(props.season?.name ?? "");
 const slug = ref(props.season?.slug ?? "");
 const summary = ref(props.season?.format.summary ?? "");
+
 const phases = ref<SeasonFormatPhase[]>(
   props.season?.format.phases.map((phase) => ({ ...phase })) ?? [],
 );
+
 const winner = ref(props.season?.winnerTeamId ?? NO_WINNER);
 
 const winnerOptions = computed(() => [
@@ -47,6 +49,7 @@ function removePhase(index: number) {
 
 function submit() {
   if (!isValid.value) return;
+
   const input: SeasonInput = {
     name: name.value.trim(),
     slug: slug.value.trim() || null,
@@ -58,6 +61,7 @@ function submit() {
       })),
     },
   };
+
   if (props.season) input.winnerTeamId = winner.value === NO_WINNER ? null : winner.value;
   emit("submit", input);
 }

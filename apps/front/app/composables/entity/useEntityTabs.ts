@@ -5,7 +5,9 @@ import type { EntityKind } from "~/types/entity";
 const PROFILE_TABS = ["info", "matches", "events", "trophies", "earnings"] as const;
 
 export type EntityProfileTab = (typeof PROFILE_TABS)[number];
+
 export type EntityListTab = "upcoming" | "past";
+
 type EntityListTabKey = "matches" | "events";
 
 type ProfileTabQuery = {
@@ -31,18 +33,23 @@ export function useEntityTabs(kind: EntityKind) {
 
   function setTab(value: string | number) {
     const next = parseProfileTab(value);
+
     if (next === "info") {
       router.replace({ query: {} });
+
       return;
     }
 
     const query: ProfileTabQuery = { tab: next };
+
     if (next === "matches" || next === "events") {
       const current = route.query[next];
+
       if (current) {
         query[next] = String(current);
       }
     }
+
     router.replace({ query });
   }
 
@@ -63,11 +70,13 @@ export function useEntityListTab(key: EntityListTabKey) {
 
   function setTab(value: string | number) {
     const query = { ...route.query };
+
     if (value === "past") {
       query[key] = "past";
     } else {
       delete query[key];
     }
+
     router.replace({ query });
   }
 

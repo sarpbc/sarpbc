@@ -1,4 +1,5 @@
 export const CAREER_REGIONS = ["na", "eu", "oce", "sam", "mena", "apac", "ssa"] as const;
+
 export type CareerRegion = (typeof CAREER_REGIONS)[number];
 
 export const CAREER_COUNTRIES = {
@@ -10,12 +11,15 @@ export const CAREER_COUNTRIES = {
   apac: ["jp", "kr", "sg", "in"],
   ssa: ["za", "ng", "ke"],
 } as const satisfies Record<CareerRegion, readonly string[]>;
+
 export type CareerCountry = (typeof CAREER_COUNTRIES)[CareerRegion][number];
 
 export const CAREER_ROLES = ["offense", "technical", "defense"] as const;
+
 export type CareerRole = (typeof CAREER_ROLES)[number];
 
 export const CAREER_BACKGROUNDS = ["prodigy", "grinder", "oneVOne", "freestyler"] as const;
+
 export type CareerBackground = (typeof CAREER_BACKGROUNDS)[number];
 
 export interface CareerStats {
@@ -34,12 +38,15 @@ export const CAREER_PHASES = [
   "offseason",
   "career_end",
 ] as const;
+
 export type CareerPhase = (typeof CAREER_PHASES)[number];
 
 export const ONBOARDING_STEPS = ["intro", "region", "country", "role", "background"] as const;
+
 export type OnboardingStep = (typeof ONBOARDING_STEPS)[number];
 
 export const CAREER_STAGES = ["split1", "split2", "worlds"] as const;
+
 export type CareerStage = (typeof CAREER_STAGES)[number];
 
 export const DEFAULT_PLAYER_NAME = "Rookie";
@@ -54,6 +61,7 @@ export function getSplitNumber(stage: CareerStage): number | null {
       return null;
     default: {
       const _exhaustive: never = stage;
+
       return _exhaustive;
     }
   }
@@ -74,6 +82,7 @@ export function getSplitStage(split: number): CareerStage {
 export type CareerEventPool = "split" | "worlds";
 
 export const CAREER_DESTINIES = ["quit", "streamer", "coach"] as const;
+
 export type CareerDestiny = (typeof CAREER_DESTINIES)[number];
 
 export const CAREER_NICKNAME_KEYS = [
@@ -90,6 +99,7 @@ export const CAREER_NICKNAME_KEYS = [
   "walkedOff",
   "lanTourist",
 ] as const;
+
 export type CareerNicknameKey = (typeof CAREER_NICKNAME_KEYS)[number];
 
 export interface CareerDestinyLeanings {
@@ -130,6 +140,7 @@ export const CAREER_PLACEMENTS = [
   "group",
   "unavailable",
 ] as const;
+
 export type CareerPlacement = (typeof CAREER_PLACEMENTS)[number];
 
 export interface CareerSplitRecord {
@@ -244,6 +255,7 @@ export interface CareerState {
 }
 
 export const STARTING_AGE = 16;
+
 /** Seasons 1–7 are ages 16–22. The stay-or-retire prompt starts after that. */
 export const PEAK_SEASONS = 7;
 export const SPLITS_PER_SEASON = 2;
@@ -252,6 +264,7 @@ export const REGIONALS_PER_SPLIT = 3;
 export const MAJOR_QUALIFICATION_POINTS = 10;
 export const WORLDS_QUALIFICATION_RANK = 16;
 export const MIN_STAT = 0;
+
 /** Hard ceiling. 100 is reachable but gated to roughly 1 career in 1000. */
 export const MAX_STAT = 100;
 
@@ -286,11 +299,13 @@ export function getRecommendedDestiny(leanings: CareerDestinyLeanings): CareerDe
   const order: CareerDestiny[] = ["quit", "streamer", "coach"];
   let best: CareerDestiny = "quit";
   let bestScore = Number.NEGATIVE_INFINITY;
+
   for (const destiny of order) {
     if (leanings[destiny] > bestScore) {
       best = destiny;
       bestScore = leanings[destiny];
     }
   }
+
   return best;
 }

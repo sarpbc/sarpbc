@@ -21,6 +21,7 @@ export class CompetitionAfterCommit {
         this.diagnostics.error("Tournament cache invalidation failed", error);
       }
     }
+
     for (const matchId of new Set(decidedMatchIds)) {
       try {
         await this.events.publish(matchDecided(matchId));

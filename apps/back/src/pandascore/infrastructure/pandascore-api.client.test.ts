@@ -54,6 +54,7 @@ describe("PandascoreApiClient", () => {
       });
 
     const since = new Date("2025-01-01T00:00:00Z");
+
     const incidents = await client.listIncidents({
       since,
       perPage: 1,

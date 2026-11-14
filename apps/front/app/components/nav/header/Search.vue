@@ -55,6 +55,7 @@ function handleMouseDown(event: MouseEvent): void {
 
 function handleLinkClick(event: MouseEvent): void {
   const target = event.target as HTMLElement;
+
   if (target.closest("a")) {
     search.value = "";
     resetResults();
@@ -67,10 +68,12 @@ async function refreshSearch() {
   const request = ++latestRequest;
   const query = search.value;
   const { teams, players } = await searchTeamsAndPlayers({ query });
+
   // A newer keystroke or a cleared field owns the results now.
   if (request !== latestRequest) {
     return;
   }
+
   teamList.value = teams;
   teamQuery.value = query;
   playerList.value = players;

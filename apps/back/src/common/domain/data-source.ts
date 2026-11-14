@@ -7,8 +7,11 @@ export const REFUSED_DATA_SOURCE_MESSAGE =
 
 export function parseDataSourceUrl(value: string | null): string | null {
   const url = value?.trim() ?? "";
+
   if (!url) return null;
+
   if (!isAcceptedDataSourceUrl(url)) throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
+
   return url;
 }
 
@@ -25,6 +28,7 @@ export function isRedistributable(source: DataSource): boolean {
       return false;
     default: {
       const exhaustive: never = source;
+
       return exhaustive;
     }
   }
@@ -32,5 +36,6 @@ export function isRedistributable(source: DataSource): boolean {
 
 export function sourceFromUrl(url: string): Exclude<DataSource, "pandascore"> {
   const host = new URL(url).hostname.toLowerCase();
+
   return host === "start.gg" || host.endsWith(".start.gg") ? "startgg" : "manual";
 }

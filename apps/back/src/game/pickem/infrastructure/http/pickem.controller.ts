@@ -22,6 +22,7 @@ export class PickemController {
     @Request() req: AuthenticatedUserRequest,
   ) {
     const picks = await this.pickemService.getUserPicksForTournament(tournamentId, req.user.id);
+
     return { picks };
   }
 
@@ -36,6 +37,7 @@ export class PickemController {
     await captureRequestEvent(this.posthog, req.headers, "server_pickem_pick_submitted", {
       match_id: matchId,
     });
+
     return { success: true };
   }
 
@@ -49,6 +51,7 @@ export class PickemController {
   @Get("tournament/:tournamentId/leaderboard")
   async leaderboard(@Param("tournamentId") tournamentId: string) {
     const leaderboard = await this.pickemService.leaderboard(tournamentId);
+
     return { leaderboard };
   }
 

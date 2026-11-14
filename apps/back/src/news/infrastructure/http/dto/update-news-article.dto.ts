@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { NEWS_TEXT_MAX_LENGTH } from "../../../domain/news-limits";
 import { createNewsArticleFields, NewsCoverImageUrl } from "./create-news-article.dto";
+
 export const updateNewsArticleFields = {
   ...createNewsArticleFields,
   title: createNewsArticleFields.title.optional(),
@@ -13,5 +14,7 @@ export const updateNewsArticleFields = {
     .max(NEWS_TEXT_MAX_LENGTH)
     .optional(),
 };
+
 export const UpdateNewsArticleDto = z.strictObject(updateNewsArticleFields);
+
 export type UpdateNewsArticleDto = z.infer<typeof UpdateNewsArticleDto>;

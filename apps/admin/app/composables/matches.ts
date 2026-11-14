@@ -12,6 +12,7 @@ export async function getUpcomingMatches(limit: number): Promise<CountedMatchLis
     method: "GET",
     query: { limit },
   });
+
   return res.upcoming;
 }
 
@@ -23,6 +24,7 @@ export async function getMatchVods(matchId: string): Promise<MatchVod[]> {
   const res = await apiFetch<{ match: { vods?: MatchVod[] } }>(`/matches/${matchId}`, {
     method: "GET",
   });
+
   return res.match.vods ?? [];
 }
 
@@ -38,6 +40,7 @@ export async function setMatchVods(
     `/tournaments/matches/${matchId}/vods`,
     { method: "PUT", body: { vods } },
   );
+
   return res.match.vods;
 }
 

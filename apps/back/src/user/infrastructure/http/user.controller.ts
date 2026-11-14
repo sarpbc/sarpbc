@@ -16,10 +16,13 @@ export class UserController {
   @Get("profile")
   async getProfile(@Request() req: AuthenticatedUserRequest) {
     const user = await this.userService.findOneByEmail(req.user.email);
+
     if (!user) {
       throw new NotFoundError("User not found");
     }
+
     const userDto = UserMapper.toDto(user);
+
     return { user: userDto };
   }
 
@@ -31,6 +34,7 @@ export class UserController {
     @Body({ schema: UpdateProfileDto }) dto: UpdateProfileDto,
   ) {
     const user = await this.userService.updateUserName(userId, dto.userName);
+
     return { user: UserMapper.toDto(user) };
   }
 }

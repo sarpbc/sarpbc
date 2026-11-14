@@ -74,18 +74,21 @@ export class PlayerController {
   @Post()
   async create(@Body({ schema: CreatePlayerDto }) dto: CreatePlayerDto) {
     const player = await this.playerService.create(dto);
+
     return { player: mapPlayer(player) };
   }
 
   @Get("slug/:slug")
   async findBySlug(@Param("slug") slug: string) {
     const player = await this.playerService.findBySlug(slug);
+
     return { player: player ? mapPlayer(player, { includePhotos: true }) : null };
   }
 
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
+
     return { player: player ? mapPlayer(player) : null };
   }
 
@@ -94,6 +97,7 @@ export class PlayerController {
   @Patch(":id")
   async update(@Param("id") id: string, @Body({ schema: UpdatePlayerDto }) dto: UpdatePlayerDto) {
     const player = await this.playerService.update(id, dto);
+
     return { player: mapPlayer(player) };
   }
 
@@ -108,10 +112,13 @@ export class PlayerController {
   @Get(":id/contract")
   async getContracts(@Param("id") id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const contracts = await this.contractService.getContractsByPlayer(player.id);
+
     return { contracts };
   }
 
@@ -123,6 +130,7 @@ export class PlayerController {
     @Body({ schema: CreateContractDto }) dto: CreateContractDto,
   ) {
     const contract = await this.contractService.create(id, dto);
+
     return { contract };
   }
 
@@ -135,6 +143,7 @@ export class PlayerController {
     @Body({ schema: UpdateContractDto }) dto: UpdateContractDto,
   ) {
     const contract = await this.contractService.update(id, contractId, dto);
+
     return { contract };
   }
 
@@ -149,45 +158,57 @@ export class PlayerController {
   @Get(":id/old-teams")
   async getOldTeams(@Param("id") id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const contracts = await this.contractService.getOldTeamsByPlayer(player.id);
+
     return { contracts };
   }
 
   @Get(":id/trophies")
   async getTrophies(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const trophies = await this.tournaments.getTournamentsWonByPlayer(player.id);
+
     return { trophies: trophies.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/awards")
   async getAwards(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const [awards, seasonAwards] = await Promise.all([
       this.playerAwardService.findByPlayerId(player.id),
       this.seasonService.awardsOfPlayer(player.id),
     ]);
+
     return { awards, seasonAwards };
   }
 
   @Get(":id/earnings")
   async getEarnings(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const earnings = await this.tournamentPrizeService.playerEarnings(player.id, {
       redistributableOnly: false,
     });
+
     return { earnings };
   }
 
@@ -196,10 +217,13 @@ export class PlayerController {
     @Param("id", ParseUUIDPipe) id: string,
   ): Promise<{ standIns: PlayerStandIn[] }> {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const standIns = await this.lineupService.standIns(player.id);
+
     return {
       standIns: standIns.map(({ participantId, match }) => ({
         participantId,
@@ -212,20 +236,26 @@ export class PlayerController {
   @Get(":id/tournaments")
   async getTournaments(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const tournaments = await this.tournaments.getTournamentsByPlayer(player.id);
+
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/staff-tournaments")
   async getStaffTournaments(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const contracts = await this.contractService.getStaffContractsByPlayer(player.id);
+
     const tournaments = await this.tournaments.getTournamentsByTeamTenures(
       contracts.map((contract) => ({
         teamId: contract.team.id,
@@ -233,22 +263,27 @@ export class PlayerController {
         to: contract.endDate,
       })),
     );
+
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get(":id/matches")
   async getMatches(@Param("id") id: string) {
     const player = await this.playerService.findById(id);
+
     if (!player) {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
+
     const matches = await this.matchService.getMatchesByPlayer(player.id);
+
     return { matches: matches.map(mapProfileMatchListItem) };
   }
 
   @Get(":id/photo")
   async getPhotos(@Param("id") id: string) {
     const photos = await this.playerService.getPhotos(id);
+
     return { photos };
   }
 
@@ -260,6 +295,7 @@ export class PlayerController {
     @Body({ schema: AddPlayerPhotoDto }) dto: AddPlayerPhotoDto,
   ) {
     const photo = await this.playerService.addPhoto(id, dto.url);
+
     return { photo };
   }
 
@@ -276,6 +312,7 @@ export class PlayerController {
   @Patch(":id/photo/:photoId/set-profile")
   async setProfilePhoto(@Param("id") id: string, @Param("photoId") photoId: string) {
     const player = await this.playerService.setProfilePhoto(id, photoId);
+
     return { player: mapPlayer(player) };
   }
 }

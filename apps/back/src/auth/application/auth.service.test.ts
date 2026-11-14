@@ -15,16 +15,19 @@ vi.mock("@googleapis/oauth2", () => ({
 
 async function waitUntil(predicate: () => boolean): Promise<void> {
   const startedAt = Date.now();
+
   while (!predicate()) {
     if (Date.now() - startedAt > 1000) {
       throw new Error("Timed out waiting for overlapping OAuth callbacks");
     }
+
     await new Promise<void>((resolve) => setImmediate(resolve));
   }
 }
 
 describe("AuthService", () => {
   let service: AuthService;
+
   const userService = {
     signIn: vi.fn(),
     findOneByGoogleId: vi.fn(),
@@ -33,6 +36,7 @@ describe("AuthService", () => {
     linkGoogleAccount: vi.fn(),
     create: vi.fn(),
   };
+
   const jwtService = {
     signAsync: vi.fn().mockResolvedValue("jwt-token"),
   };
@@ -78,7 +82,9 @@ describe("AuthService", () => {
       sign: vi.fn().mockResolvedValue({ accessToken: "access", refreshToken: "refresh" }),
       verify: vi.fn(),
     };
+
     const sessionUsers = { findById: vi.fn() };
+
     const sessions = new AuthService(tokens, {} as never, sessionUsers as never, {
       frontUrl: "",
       adminUrl: "",
@@ -133,9 +139,11 @@ describe("AuthService", () => {
   describe("handleGoogleCallback", () => {
     it("does not swap Google profiles when two callbacks overlap", async () => {
       let releaseGetToken!: () => void;
+
       const holdGetToken = new Promise<void>((resolve) => {
         releaseGetToken = resolve;
       });
+
       let getTokenStarted = 0;
 
       interface OAuthClientCredentials {
@@ -154,6 +162,7 @@ describe("AuthService", () => {
           getToken: vi.fn(async (code: string) => {
             getTokenStarted += 1;
             await holdGetToken;
+
             return { tokens: { access_token: code } };
           }),
           setCredentials: vi.fn((tokens: { access_token: string }) => {
@@ -161,6 +170,7 @@ describe("AuthService", () => {
           }),
           generateAuthUrl: vi.fn(),
         };
+
         return client;
       });
 
@@ -170,9 +180,11 @@ describe("AuthService", () => {
           get: vi.fn(async ({ auth }: { auth: { credentials: OAuthClientCredentials } }) => {
             const code = auth.credentials.access_token;
             const profile = code === "code-a" || code === "code-b" ? profiles[code] : undefined;
+
             if (!profile) {
               throw new Error(`Unknown Google token ${code}`);
             }
+
             return { data: profile };
           }),
         },

@@ -29,7 +29,9 @@ function toMember(contract: TeamContract): TeamRosterEraMember {
 function sortMembers(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
   return [...members].sort((a, b) => {
     const roleDiff = CONTRACT_ROLES.indexOf(a.role) - CONTRACT_ROLES.indexOf(b.role);
+
     if (roleDiff !== 0) return roleDiff;
+
     return a.name.localeCompare(b.name, "en");
   });
 }
@@ -39,14 +41,17 @@ function normalizeContracts(contracts: TeamContract[], now: number): NormalizedC
 
   for (const contract of contracts) {
     const startMs = new Date(contract.startDate).getTime();
+
     if (Number.isNaN(startMs) || startMs > now) {
       continue;
     }
 
     let endMs: number | null = contract.endDate ? new Date(contract.endDate).getTime() : null;
+
     if (endMs !== null && Number.isNaN(endMs)) {
       endMs = null;
     }
+
     if (endMs !== null && endMs < startMs) {
       endMs = startMs;
     }
@@ -63,10 +68,13 @@ function getMembersAt(normalized: NormalizedContract[], timeMs: number): TeamRos
 
   for (const { contract, startMs, endMs } of normalized) {
     if (startMs > timeMs) continue;
+
     if (endMs !== null) {
       if (endMs < timeMs) continue;
+
       if (endMs === timeMs && endMs !== startMs) continue;
     }
+
     if (seen.has(contract.player.id)) continue;
 
     seen.add(contract.player.id);
@@ -127,11 +135,13 @@ function mergeAdjacentEras(
 
   for (const era of eras) {
     const last = merged.at(-1);
+
     if (last && sameRoster(last.members, era.members)) {
       last.endMs = era.endMs;
       last.isCurrent = era.isCurrent;
       continue;
     }
+
     merged.push({ ...era, members: [...era.members] });
   }
 
@@ -140,22 +150,27 @@ function mergeAdjacentEras(
 
 function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRosterEra[] {
   const normalized = normalizeContracts(contracts, now);
+
   if (normalized.length === 0) return [];
 
   const boundarySet = new Set<number>();
+
   for (const { startMs, endMs } of normalized) {
     boundarySet.add(startMs);
+
     if (endMs !== null) {
       boundarySet.add(endMs);
     }
   }
 
   const hasOpenContract = normalized.some(({ endMs }) => endMs === null);
+
   if (hasOpenContract) {
     boundarySet.add(now);
   }
 
   const boundaries = [...boundarySet].sort((left, right) => left - right);
+
   const rawEras: Array<{
     startMs: number;
     endMs: number | null;
@@ -166,6 +181,7 @@ function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRoster
   for (let index = 0; index < boundaries.length; index++) {
     const startMs = boundaries[index]!;
     const members = getMembersAt(normalized, startMs);
+
     if (members.length === 0) continue;
 
     const isLast = index === boundaries.length - 1;
@@ -174,6 +190,7 @@ function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRoster
 
     if (isLast) {
       const memberPlayerIds = new Set(members.map((member) => member.playerId));
+
       const anyOpenMember = normalized.some(
         ({ contract, endMs: contractEndMs }) =>
           memberPlayerIds.has(contract.player.id) && contractEndMs === null,

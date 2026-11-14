@@ -15,6 +15,7 @@ setPageSeo({
 });
 
 setJsonLd("ld-json-organization", () => buildOrganization());
+
 setJsonLd("ld-json-website", () =>
   buildWebSite({
     description: t("page.home.seo.description"),
@@ -43,6 +44,7 @@ function loadMoreNews() {
   if (!hasMoreNews.value || newsPending.value) {
     return;
   }
+
   newsLimit.value += HOMEPAGE_NEWS_LIMIT;
 }
 
@@ -50,6 +52,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
   "active-pickem-tournament",
   async () => {
     const tournaments = await getActivePickemTournaments(1);
+
     return tournaments[0] ?? null;
   },
 );

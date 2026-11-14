@@ -10,6 +10,7 @@ import {
 
 describe("Match outcome", () => {
   const winner = new TournamentParticipant();
+
   const build = (finished: boolean, endAt: Date | null, hasWinner: boolean) =>
     Object.assign(new Match(), {
       status: finished ? "finished" : "running",

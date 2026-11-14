@@ -24,11 +24,13 @@ export const REPLY_HAS_TARGET: Partial<Record<keyof ReplyTargetFields, { $ne: nu
   Object.values(REPLY_TARGETS).map(({ field }) => ({ [field]: { $ne: null } }));
 
 const postFields = (row: Post) => ({ id: row.id, publicId: row.publicId, title: row.title });
+
 const newsArticleFields = (row: NewsArticle) => ({
   id: row.id,
   title: row.title,
   slug: row.slug,
 });
+
 const matchFields = (row: Match) => ({
   id: row.id,
   publicId: row.publicId,
@@ -39,10 +41,12 @@ const matchFields = (row: Match) => ({
 export const REPLY_TARGET_LOADERS = {
   forumPost: async (em, id) => {
     const row = await em.findOne(Post, { id });
+
     return row && { post: postFields(row) };
   },
   newsArticle: async (em, id) => {
     const row = await em.findOne(NewsArticle, { id });
+
     return row && { newsArticle: newsArticleFields(row) };
   },
   match: async (em, id) => {
@@ -51,6 +55,7 @@ export const REPLY_TARGET_LOADERS = {
       { id },
       { populate: ["participants.team", "participants.players", "tournament.event"] },
     );
+
     return row && { match: matchFields(row) };
   },
 } satisfies Record<

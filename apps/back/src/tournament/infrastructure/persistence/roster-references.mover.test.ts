@@ -16,15 +16,18 @@ describe("TournamentRosterReferences.moveTeam prizes", () => {
     const find = vi.fn().mockResolvedValue(prizes);
     const nativeDelete = vi.fn();
     const nativeUpdate = vi.fn();
+
     const references = new TournamentRosterReferences({
       find,
       nativeDelete,
       nativeUpdate,
     } as never);
+
     const prizeUpdateOrder = () =>
       nativeUpdate.mock.invocationCallOrder[
         nativeUpdate.mock.calls.findIndex(([entity]) => entity === TournamentPrize)
       ] ?? 0;
+
     return { references, nativeDelete, nativeUpdate, prizeUpdateOrder };
   }
 
@@ -32,6 +35,7 @@ describe("TournamentRosterReferences.moveTeam prizes", () => {
     const kept = prize("kept-cup", "kc", "cup", ["zen"]);
     const duplicate = prize("dup-cup", "kc-dup", "cup", ["vatira"]);
     const moved = prize("dup-open", "kc-dup", "open", ["atow"]);
+
     const { references, nativeDelete, nativeUpdate, prizeUpdateOrder } = mover([
       kept,
       duplicate,

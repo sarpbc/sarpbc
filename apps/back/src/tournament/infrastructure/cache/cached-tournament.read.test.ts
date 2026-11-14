@@ -7,12 +7,15 @@ import { CachedTournamentRead } from "./cached-tournament.read";
 
 function fixture(): Tournament {
   const team = Object.assign(new Team(), { id: "team", name: "Team", slug: "team" });
+
   const player = Object.assign(new Player(), {
     id: "player",
     team,
     birthday: new Date("2000-01-02"),
   });
+
   const participant = Object.assign(new TournamentParticipant(), { team, players: [player] });
+
   const match = Object.assign(new Match(), {
     id: "match",
     publicId: 7250,
@@ -21,6 +24,7 @@ function fixture(): Tournament {
     beginAt: new Date("2026-01-01"),
     officialStreams: [{ url: "https://twitch.tv/rl", language: "en", main: true }],
   });
+
   return Object.assign(new Tournament(), {
     id: "t1",
     name: "RLCS",

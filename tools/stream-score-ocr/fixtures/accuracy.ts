@@ -32,26 +32,35 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
   const overlay = await loadOverlay(OVERLAY_PATH);
   const renderer = new FixtureRenderer(script.size, script.seed);
   const tracker = new SeriesTracker({ bestOf: script.bestOf, stableReadings: 2 });
+
   for (const { t, scene } of broadcast(script)) {
     if (t % intervalSeconds !== 0) continue;
     tracker.push(t, readScoreboard(renderer.render(scene, script.noise), overlay));
+
     if (tracker.decided) break;
   }
+
   tracker.finish();
+
   const parsed = parseStreamScoreProposal(
     JSON.stringify(
       tracker.proposal({ overlay: overlay.id, source: script.id, sourceStartedAt: null }),
     ),
   );
+
   if (!parsed.ok) throw new Error(`${script.id} produced an invalid proposal: ${parsed.error}`);
   const expected = finalScores(script);
+
   const correctGames = expected.filter((score, index) => {
     const game = parsed.proposal.games[index];
+
     return game !== undefined && game.blue === score.blue && game.orange === score.orange;
   }).length;
+
   const blueWins = expected.filter((score) => score.blue > score.orange).length;
   const winner = parsed.proposal.series.winner;
   const expectedWinner = blueWins > expected.length - blueWins ? "blue" : "orange";
+
   return {
     id: script.id,
     games: Math.max(expected.length, parsed.proposal.games.length),
@@ -63,16 +72,19 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
 
 export async function measureFixtures(intervalSeconds: number): Promise<Measure> {
   const results: SeriesResult[] = [];
+
   for (const script of generateSeries(12, 20261102))
     results.push(await replay(script, intervalSeconds));
   const games = results.reduce((total, result) => total + result.games, 0);
   const correctGames = results.reduce((total, result) => total + result.correctGames, 0);
   const undecidedGames = results.reduce((total, result) => total + result.undecidedGames, 0);
+
   return { games, correctGames, undecidedGames, rate: correctGames / games, results };
 }
 
 export function describeMeasure(measure: Measure): string[] {
   const wrongGames = measure.games - measure.correctGames - measure.undecidedGames;
+
   return [
     ...measure.results.map(
       (result) =>

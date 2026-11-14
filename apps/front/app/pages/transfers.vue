@@ -9,8 +9,10 @@ const { setPageSeo } = useSarpbcSeo();
 
 const currentPage = computed(() => {
   const page = Number(route.query.page ?? 1);
+
   return Number.isInteger(page) && page >= 1 ? page : 1;
 });
+
 const offset = computed(() => (currentPage.value - 1) * TRANSFERS_PER_PAGE);
 
 const { data, pending, error, refresh } = await useAsyncData(

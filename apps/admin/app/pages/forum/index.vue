@@ -44,8 +44,10 @@ const {
   refresh,
 } = useAdminList("admin-forum-posts", async () => {
   const posts = await getPosts();
+
   return { items: posts, total: posts.length };
 });
+
 const postToDelete = ref<ForumPostListItem | null>(null);
 
 function selectRow(e: Event, row: TableRow<ForumPostListItem>) {

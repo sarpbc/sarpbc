@@ -3,7 +3,9 @@ import { PostService } from "./post.service";
 import type { ForumWriteScope, ForumTransaction } from "./ports";
 import type { PostRecord, TopicRecord, TranslationRecord } from "./models";
 import { PostType } from "../domain/post-type.enum";
+
 const now = new Date("2026-10-15T12:00:00Z");
+
 function setup(role: string | null = "admin") {
   const topic: TopicRecord = {
     id: "topic",
@@ -13,13 +15,16 @@ function setup(role: string | null = "admin") {
     updatedAt: null,
     posts: [],
   };
+
   const saved: PostRecord[] = [];
   const translations: TranslationRecord[] = [];
+
   const posts = {
     findPaginated: vi.fn().mockResolvedValue([]),
     findByTopicId: vi.fn().mockResolvedValue([]),
     findById: vi.fn(async (id: string) => {
       const post = saved.find((candidate) => candidate.id === id);
+
       return post ? { ...post, publicId: 41 } : null;
     }),
     findWithDetails: vi.fn().mockResolvedValue(null),
@@ -34,6 +39,7 @@ function setup(role: string | null = "admin") {
     deleteTranslations: vi.fn(),
     delete: vi.fn(),
   };
+
   const scope: ForumWriteScope = {
     posts,
     topics: {
@@ -45,14 +51,18 @@ function setup(role: string | null = "admin") {
     users: { findById: vi.fn().mockResolvedValue({ id: "user", userName: "Fan", role }) },
     replies: { deleteAllForPost: vi.fn() },
   };
+
   let commits = 0;
+
   const transaction: ForumTransaction = {
     async run(work) {
       const result = await work(scope);
       commits++;
+
       return result;
     },
   };
+
   return {
     service: new PostService(
       posts,
@@ -66,6 +76,7 @@ function setup(role: string | null = "admin") {
     commits: () => commits,
   };
 }
+
 const input = {
   id: "post",
   topicId: "topic",
@@ -73,6 +84,7 @@ const input = {
   content: "<script>bad()</script>Body",
   translations: [{ locale: "fr-FR" as const, title: "<b>Titre</b>", content: "Corps" }],
 };
+
 describe("post transaction and policies", () => {
   it("creates the post and sanitized admin translations before a single commit", async () => {
     const f = setup();
@@ -93,6 +105,7 @@ describe("post transaction and policies", () => {
     f.scope.posts.saveTranslation = async () => {
       throw new Error("translation failed");
     };
+
     await expect(f.service.create("user", input)).rejects.toThrow("translation failed");
     expect(f.commits()).toBe(0);
   });
@@ -142,12 +155,14 @@ describe("post transaction and policies", () => {
     f.scope.replies.deleteAllForPost = async () => {
       throw new Error("reply deletion failed");
     };
+
     await expect(f.service.delete(post.id)).rejects.toThrow("reply deletion failed");
     expect(f.scope.posts.deleteTranslations).not.toHaveBeenCalled();
     expect(f.scope.posts.delete).not.toHaveBeenCalled();
     expect(f.commits()).toBe(1);
   });
 });
+
 describe("post lookup", () => {
   const stored: PostRecord = {
     id: "0a1b2c3d-0000-4000-8000-123456789abc",
@@ -171,6 +186,7 @@ describe("post lookup", () => {
       },
     ],
   };
+
   it("exposes the public id and a slug derived from the base title", async () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);

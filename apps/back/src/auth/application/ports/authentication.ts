@@ -11,6 +11,7 @@ export interface AuthSession {
 }
 
 export type AuthTokenType = "access" | "refresh";
+
 export type OAuthReturnTo = "front" | "admin";
 
 export interface SessionTokens {

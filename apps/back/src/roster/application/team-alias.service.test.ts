@@ -29,7 +29,9 @@ function setup(owner: string | null = null) {
       }),
     ],
   });
+
   const merged = Object.assign(new Team(), { id: "merged", name: "Old", mergedIntoId: "team" });
+
   const aliases = {
     pandascoreOwner: vi.fn(async () => owner),
     save: vi.fn(async (_teamId: string, alias: TeamAlias) => {
@@ -37,9 +39,11 @@ function setup(owner: string | null = null) {
     }),
     delete: vi.fn(async () => undefined),
   };
+
   const known = new Map([team, merged].map((entry) => [entry.id, entry]));
   const teams = { findById: vi.fn(async (id: string) => known.get(id) ?? null) };
   const transaction: TeamAliasTransaction = { run: (work) => work({ teams, aliases }) };
+
   return { aliases, service: new TeamAliasService(transaction) };
 }
 
@@ -83,6 +87,7 @@ describe("TeamAliasService", () => {
       from: "2022-07-01",
       to: null,
     });
+
     await service.delete("team", "a1");
 
     expect(updated).toMatchObject({ id: "a1", from: "2022-07-01" });

@@ -17,6 +17,7 @@ const kc: CandidateParticipant = {
     { id: "rise", name: "Rise." },
   ],
 };
+
 const bds: CandidateParticipant = {
   id: "p-bds",
   teamNames: ["Team BDS"],
@@ -26,6 +27,7 @@ const bds: CandidateParticipant = {
     { id: "exotiik", name: "ExoTiiK" },
   ],
 };
+
 const vit: CandidateParticipant = {
   id: "p-vit",
   teamNames: ["Team Vitality"],
@@ -71,6 +73,7 @@ function match(
 }
 
 let sequence = 0;
+
 function replay(
   playedAt: string | null,
   blue: { names: string[]; goals: number; name?: string },
@@ -78,6 +81,7 @@ function replay(
   overrides: Partial<ReplaySummary> = {},
 ): ReplaySummary {
   sequence += 1;
+
   return {
     id: `r-${String(sequence).padStart(3, "0")}`,
     rocketLeagueId: `guid-${sequence}`,
@@ -109,6 +113,7 @@ describe("assignReplays with player participants", () => {
     teamNames: ["zen"],
     players: [{ id: "zen", name: "zen" }],
   };
+
   const vatira: CandidateParticipant = {
     id: "p-vatira",
     teamNames: ["Vatira"],
@@ -120,6 +125,7 @@ describe("assignReplays with player participants", () => {
       scores: won(vatira, zen),
       numberOfGames: 1,
     });
+
     const game = replay(
       "2026-06-01T18:05:00Z",
       { names: ["Vatira"], goals: 2 },
@@ -136,6 +142,7 @@ describe("assignReplays with player participants", () => {
       scores: won(vatira, zen),
       numberOfGames: 1,
     });
+
     const game = replay(
       "2026-06-01T18:05:00Z",
       { names: ["Atow"], goals: 2 },
@@ -156,21 +163,25 @@ describe("assignReplays", () => {
         ["p-bds", 1],
       ]),
     });
+
     const g2 = replay(
       "2026-06-01T18:25:00Z",
       { names: BDS_NAMES, goals: 2 },
       { names: KC_NAMES, goals: 1 },
     );
+
     const g1 = replay(
       "2026-06-01T18:05:00Z",
       { names: KC_NAMES, goals: 3 },
       { names: BDS_NAMES, goals: 0 },
     );
+
     const g4 = replay(
       "2026-06-01T19:05:00Z",
       { names: KC_NAMES, goals: 2 },
       { names: BDS_NAMES, goals: 1 },
     );
+
     const g3 = replay(
       "2026-06-01T18:45:00Z",
       { names: BDS_NAMES, goals: 0 },
@@ -187,6 +198,7 @@ describe("assignReplays", () => {
 
   it("recognises tagged and punctuated in-game names without team names", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: ["KC Vatira", "Atow.", "kc rise"], goals: 1, name: "BLUE" },
@@ -198,6 +210,7 @@ describe("assignReplays", () => {
 
   it("accepts one substitute on the roster majority", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: ["Vatira", "Atow", "Stand-in"], goals: 1 },
@@ -209,11 +222,13 @@ describe("assignReplays", () => {
 
   it("needs the team name when two substitutes leave a single known player", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+
     const named = replay(
       "2026-06-01T18:10:00Z",
       { names: ["Vatira", "Sub One", "Sub Two"], goals: 1, name: "KARMINE CORP" },
       { names: BDS_NAMES, goals: 0, name: "BDS" },
     );
+
     const anonymous = replay(
       "2026-06-01T18:30:00Z",
       { names: ["Vatira", "Sub One", "Sub Two"], goals: 1 },
@@ -228,9 +243,11 @@ describe("assignReplays", () => {
 
   it("uses team names alone only when the participant has no known roster", () => {
     const unknownRoster = { ...vit, players: [] };
+
     const m = match("m1", [unknownRoster, bds], "2026-06-01T18:00:00Z", {
       scores: won(unknownRoster, bds),
     });
+
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: ["a", "b", "c"], goals: 2, name: "VITALITY" },
@@ -242,9 +259,11 @@ describe("assignReplays", () => {
 
   it("recognises a former name of the team", () => {
     const renamed = { ...vit, teamNames: ["Fixture Now", "Team Vitality"], players: [] };
+
     const m = match("m1", [renamed, bds], "2026-06-01T18:00:00Z", {
       scores: won(renamed, bds),
     });
+
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: ["a", "b", "c"], goals: 2, name: "VITALITY" },
@@ -256,6 +275,7 @@ describe("assignReplays", () => {
 
   it("rejects a team name that contradicts the roster", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z");
+
     const game = replay(
       "2026-06-01T18:10:00Z",
       { names: BDS_NAMES, goals: 1, name: "Karmine Corp" },
@@ -272,14 +292,17 @@ describe("assignReplays", () => {
       endAt: at("2026-05-28T16:10:00Z"),
       scores: won(kc, bds),
     });
+
     const playoffs = match("playoffs", [bds, kc], "2026-06-01T18:00:00Z", {
       scores: won(kc, bds),
     });
+
     const early = replay(
       "2026-05-28T15:20:00Z",
       { names: KC_NAMES, goals: 1 },
       { names: BDS_NAMES, goals: 0 },
     );
+
     const late = replay(
       "2026-06-01T18:20:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -295,11 +318,13 @@ describe("assignReplays", () => {
   it("splits a same-day upper final and grand final by the latest started match", () => {
     const upper = match("upper", [kc, bds], "2026-06-01T14:00:00Z", { scores: won(kc, bds) });
     const grand = match("grand", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(bds, kc) });
+
     const upperGame = replay(
       "2026-06-01T14:30:00Z",
       { names: KC_NAMES, goals: 1 },
       { names: BDS_NAMES, goals: 0 },
     );
+
     const grandGame = replay(
       "2026-06-01T18:20:00Z",
       { names: KC_NAMES, goals: 0 },
@@ -317,7 +342,9 @@ describe("assignReplays", () => {
       endAt: at("2026-06-01T17:30:00Z"),
       scores: won(kc, bds),
     });
+
     const grand = match("grand", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(bds, kc) });
+
     const lateUpperGame = replay(
       "2026-06-01T17:10:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -334,7 +361,9 @@ describe("assignReplays", () => {
       endAt: at("2026-05-28T16:10:00Z"),
       scores: won(bds, kc),
     });
+
     const final = match("final", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+
     const earlyGame = replay(
       "2026-06-01T17:20:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -349,6 +378,7 @@ describe("assignReplays", () => {
   it("refuses to choose between two matches that have not begun", () => {
     const first = match("a", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
     const second = match("b", [kc, bds], "2026-06-01T18:30:00Z", { scores: won(kc, bds) });
+
     const game = replay(
       "2026-06-01T17:40:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -363,6 +393,7 @@ describe("assignReplays", () => {
   it("refuses to choose between two matches scheduled at the same time", () => {
     const first = match("a", [kc, bds], "2026-06-01T18:00:00Z");
     const second = match("b", [bds, kc], "2026-06-01T18:00:00Z");
+
     const game = replay(
       "2026-06-01T18:20:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -377,6 +408,7 @@ describe("assignReplays", () => {
   it("refuses overlapping windows when the replay date has no timezone", () => {
     const upper = match("upper", [kc, bds], "2026-06-01T14:00:00Z");
     const grand = match("grand", [kc, bds], "2026-06-01T18:00:00Z");
+
     const game = replay(
       "2026-06-01T18:20:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -391,6 +423,7 @@ describe("assignReplays", () => {
 
   it("tolerates an unknown timezone when a single match fits", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+
     const game = replay(
       "2026-06-01T11:10:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -405,18 +438,23 @@ describe("assignReplays", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", {
       endAt: at("2026-06-01T19:00:00Z"),
     });
+
     const unscheduled = match("m2", [kc, vit], null);
+
     const tooLate = replay(
       "2026-06-01T21:30:00Z",
       { names: KC_NAMES, goals: 1 },
       { names: BDS_NAMES, goals: 0 },
     );
+
     const undated = replay(null, { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 });
+
     const strangers = replay(
       "2026-06-01T18:20:00Z",
       { names: ["x", "y", "z"], goals: 1 },
       { names: ["u", "v", "w"], goals: 0 },
     );
+
     const unscheduledGame = replay(
       "2026-06-01T18:20:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -435,12 +473,14 @@ describe("assignReplays", () => {
 
   it("keeps the first upload of a game and reports the duplicate", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { scores: won(kc, bds) });
+
     const original = replay(
       "2026-06-01T18:10:00Z",
       { names: KC_NAMES, goals: 1 },
       { names: BDS_NAMES, goals: 0 },
       { rocketLeagueId: "same" },
     );
+
     const copy = replay(
       "2026-06-01T18:10:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -461,6 +501,7 @@ describe("assignReplays", () => {
         ["p-bds", 1],
       ]),
     });
+
     const games = [
       replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
       replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
@@ -479,6 +520,7 @@ describe("assignReplays", () => {
         ["p-bds", 0],
       ]),
     });
+
     const game = replay(
       "2026-06-01T18:05:00Z",
       { names: KC_NAMES, goals: 0 },
@@ -493,10 +535,12 @@ describe("assignReplays", () => {
   it("rejects more games than the format allows and drawn replays", () => {
     const bo1 = match("bo1", [kc, bds], "2026-06-01T18:00:00Z", { numberOfGames: 1 });
     const other = match("other", [kc, vit], "2026-06-02T18:00:00Z");
+
     const twice = [
       replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
       replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
     ];
+
     const drawn = replay(
       "2026-06-02T18:05:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -512,6 +556,7 @@ describe("assignReplays", () => {
 
   it("never mixes in games when the match already holds stats from other replays", () => {
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", { storedReplayIds: ["elsewhere"] });
+
     const game = replay(
       "2026-06-01T18:05:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -528,12 +573,15 @@ describe("assignReplays", () => {
       finished: false,
       scores: won(kc, bds),
     });
+
     const unscored = match("unscored", [kc, vit], "2026-06-02T18:00:00Z");
+
     const liveGame = replay(
       "2026-06-01T18:05:00Z",
       { names: KC_NAMES, goals: 1 },
       { names: BDS_NAMES, goals: 0 },
     );
+
     const unscoredGame = replay(
       "2026-06-02T18:05:00Z",
       { names: KC_NAMES, goals: 1 },
@@ -552,11 +600,13 @@ describe("assignReplays", () => {
       { names: KC_NAMES, goals: 1 },
       { names: BDS_NAMES, goals: 0 },
     );
+
     const second = replay(
       "2026-06-01T18:25:00Z",
       { names: BDS_NAMES, goals: 1 },
       { names: KC_NAMES, goals: 0 },
     );
+
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", {
       scores: new Map([
         ["p-kc", 1],
@@ -564,6 +614,7 @@ describe("assignReplays", () => {
       ]),
       storedReplayIds: [first.id],
     });
+
     const stored = new Map([[first.id, { matchId: "m1", number: 1 }]]);
 
     expect(byReplay(assignReplays([second, first], [m], stored))).toEqual({
@@ -578,6 +629,7 @@ describe("assignReplays", () => {
         scores: won(kc, bds, 3),
         ...overrides,
       });
+
     const sweep = () => [
       replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
       replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
@@ -587,6 +639,7 @@ describe("assignReplays", () => {
     it("reports a removed replay as excluded and holds back its series as incomplete", () => {
       const [g1, g2, g3] = sweep();
       const m = bo5({ storedReplayIds: [g1.id, g3.id] });
+
       const stored = new Map([
         [g1.id, { matchId: "m1", number: 1 }],
         [g3.id, { matchId: "m1", number: 3 }],
@@ -651,6 +704,7 @@ describe("assignReplays", () => {
 
     it("leaves a game staff attached to another match out of the series it fits", () => {
       const [g1, g2, g3] = sweep();
+
       const other = match("other", [kc, vit], "2026-06-02T18:00:00Z", {
         storedReplayIds: [g1.id],
       });
@@ -699,6 +753,7 @@ describe("assignReplays", () => {
 
   it("ignores matches without two participants", () => {
     const tbd = match("tbd", [kc], "2026-06-01T18:00:00Z");
+
     const game = replay(
       "2026-06-01T18:05:00Z",
       { names: KC_NAMES, goals: 1 },

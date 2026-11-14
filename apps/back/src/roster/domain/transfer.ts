@@ -25,6 +25,7 @@ function joinType(role: ContractRole): TransferType {
       return "staff";
     default: {
       const unreachable: never = role;
+
       return unreachable;
     }
   }
@@ -33,9 +34,11 @@ function joinType(role: ContractRole): TransferType {
 export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] {
   const stint = (contract: Contract, day: Date) =>
     `${contract.player.id}:${contract.team.id}:${day.getTime()}`;
+
   const starts = new Set(contracts.map((contract) => stint(contract, contract.startDate)));
 
   const transfers: Transfer[] = [];
+
   for (const contract of contracts) {
     transfers.push({
       id: `${contract.id}:join`,
@@ -44,6 +47,7 @@ export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] 
       contract,
       sourceUrl: contract.joinSourceUrl,
     });
+
     if (contract.endDate && !starts.has(stint(contract, contract.endDate))) {
       transfers.push({
         id: `${contract.id}:leave`,
@@ -54,6 +58,7 @@ export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] 
       });
     }
   }
+
   return transfers
     .filter((transfer) => transfer.date <= until)
     .sort((a, b) => b.date.getTime() - a.date.getTime() || a.id.localeCompare(b.id));

@@ -65,6 +65,7 @@ function finishes(stage: CircuitStage): StagePlacement[] {
 
 function toStageItem(stage: CircuitStage): CircuitDetail["stages"][number] {
   const { tournament, scale, sourceUrl, worldwide } = stage;
+
   return {
     tournament: {
       id: tournament.id,
@@ -92,6 +93,7 @@ export class CircuitPersistence implements CircuitStore {
 
   async list() {
     const rows = await this.em.find(Circuit, {}, { orderBy: { createdAt: "DESC", name: "ASC" } });
+
     return rows.map(toSummary);
   }
 
@@ -100,11 +102,13 @@ export class CircuitPersistence implements CircuitStore {
       Circuit,
       isUuid(idOrSlug) ? { id: idOrSlug } : { slug: idOrSlug },
     );
+
     return row ? toSummary(row) : null;
   }
 
   async slugTaken(slug: string, exceptId: string | null) {
     const filter = exceptId ? { slug, id: { $ne: exceptId } } : { slug };
+
     return (await this.em.count(Circuit, filter)) > 0;
   }
 
@@ -115,6 +119,7 @@ export class CircuitPersistence implements CircuitStore {
   async save(circuit: CircuitSummary) {
     const row = (await this.em.findOne(Circuit, { id: circuit.id })) ?? new Circuit();
     Object.assign(row, circuit);
+
     try {
       await this.em.persist(row).flush();
     } catch (error) {
@@ -139,6 +144,7 @@ export class CircuitPersistence implements CircuitStore {
         orderBy: { tournament: { beginAt: "ASC" } },
       },
     );
+
     return rows.map(toStageItem);
   }
 
@@ -148,6 +154,7 @@ export class CircuitPersistence implements CircuitStore {
       { circuit: { id: circuitId } },
       { populate: ["tournament.event", "teams.team"] },
     );
+
     const participants = rows.length
       ? await this.em.find(
           TournamentParticipant,
@@ -159,11 +166,14 @@ export class CircuitPersistence implements CircuitStore {
           { populate: ["team"] },
         )
       : [];
+
     const placements = new Map<string, StagePlacement[]>();
+
     for (const participant of participants) {
       const id = participant.tournament.id;
       placements.set(id, [...(placements.get(id) ?? []), ...toPlacement(participant)]);
     }
+
     return rows.map((stage) => ({
       source: stage.tournament.source,
       event: eventRef(stage.tournament),
@@ -184,19 +194,24 @@ export class CircuitPersistence implements CircuitStore {
       { id: tournamentId },
       { fields: ["event"] },
     );
+
     if (!tournament) return null;
+
     const participants = await this.em.find(
       TournamentParticipant,
       { tournament: { event: tournament.event.id }, team: { $ne: null } },
       { populate: ["team"] },
     );
+
     const teams = new Map<string, CircuitEventTeam>();
+
     for (const { tournament: stage, team, placement } of participants) {
       if (!team) continue;
       const current = teams.get(team.id);
       const own = stage.id === tournamentId ? placement : null;
       teams.set(team.id, { team: toTeam(team), placement: own ?? current?.placement ?? null });
     }
+
     return [...teams.values()].sort(
       (a, b) =>
         (a.placement ?? Number.MAX_SAFE_INTEGER) - (b.placement ?? Number.MAX_SAFE_INTEGER) ||
@@ -215,6 +230,7 @@ export class CircuitPersistence implements CircuitStore {
           circuit: em.getReference(Circuit, circuitId),
           tournament: em.getReference(Tournament, tournamentId),
         });
+
       row.scale = settings.scale;
       row.sourceUrl = settings.sourceUrl;
       row.worldwide = settings.worldwide;
@@ -222,6 +238,7 @@ export class CircuitPersistence implements CircuitStore {
       await em.nativeDelete(CircuitStageTeam, { stage: row.id });
       const placements = new Map(settings.finishes.map((f) => [f.teamId, f.placement]));
       const region = new Set(settings.regionTeamIds);
+
       for (const teamId of new Set([...region, ...placements.keys()]))
         em.persist(
           Object.assign(new CircuitStageTeam(), {
@@ -239,6 +256,7 @@ export class CircuitPersistence implements CircuitStore {
       circuit: { id: circuitId },
       tournament: { id: tournamentId },
     });
+
     return removed > 0;
   }
 }

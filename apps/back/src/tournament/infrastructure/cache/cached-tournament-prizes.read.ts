@@ -6,6 +6,7 @@ import type { TournamentPrizeService } from "../../application/tournament-prize.
 import { DATA_SOURCES } from "@sarpbc/types";
 
 const nullableText = z.string().nullable();
+
 const distribution = z.object({
   source: z.enum(DATA_SOURCES),
   prizepool: nullableText,
@@ -41,30 +42,38 @@ export class CachedTournamentPrizesRead {
   async findByTournamentId(id: string): Promise<TournamentPrizes> {
     const key = tournamentPrizesCacheKey(id);
     const cached = await this.readCached(key);
+
     if (cached) return cached;
 
     const prizes = await this.prizes.findByTournamentId(id);
+
     try {
       await this.redis.set(key, JSON.stringify(prizes), 60);
     } catch (error) {
       this.diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
     }
+
     return prizes;
   }
 
   private async readCached(key: string): Promise<TournamentPrizes | null> {
     try {
       const cached = await this.redis.get(key);
+
       if (cached === null) return null;
       const decoded: unknown = JSON.parse(cached);
       const result = distribution.safeParse(decoded);
+
       if (!result.success) {
         this.diagnose(key, "decode", result.error);
+
         return null;
       }
+
       return result.data;
     } catch (error) {
       this.diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
+
       return null;
     }
   }

@@ -55,6 +55,7 @@ function summary(id: string, playedAt: string, kcBlue: boolean, blueGoals: numbe
 
 const game1 = summary("r1", "2026-06-01T18:05:00Z", true, 2);
 const game2 = summary("r2", "2026-06-01T18:25:00Z", true, 0);
+
 const stranger: ReplaySummary = {
   ...summary("r3", "2026-06-01T18:40:00Z", true, 1),
   blue: { name: null, goals: 1, playerNames: ["x", "y", "z"] },
@@ -73,6 +74,7 @@ function statsFor(replay: ReplaySummary): ReplayStats {
       shots: 1,
       demolitions: index,
     }));
+
   return {
     rocketLeagueId: replay.rocketLeagueId,
     playedAt: replay.playedAt,
@@ -93,6 +95,7 @@ class MemoryImports implements StatsImportStore {
   }
   async load(id: string) {
     const row = this.rows.get(id);
+
     return row ? structuredClone(row) : null;
   }
   async save(statsImport: StatsImport) {
@@ -107,11 +110,13 @@ class MemoryImports implements StatsImportStore {
   }
   async failUnfinished(error: string) {
     let changed = 0;
+
     for (const row of this.rows.values())
       if (row.status === "pending" || row.status === "running") {
         Object.assign(row, { status: "failed", error, finishedAt: new Date() });
         changed += 1;
       }
+
     return changed;
   }
 }
@@ -154,9 +159,11 @@ class MemoryGames implements GameStatsStore {
   async save(game: GameRecord) {
     this.saved.push(game);
     this.exclusions.delete(game.ballchasingId);
+
     for (const link of game.learnedLinks)
       if (!this.linked.some((known) => known.platformId === link.platformId))
         this.linked.push(link);
+
     return toTournamentGame(game);
   }
   async byMatch() {
@@ -170,9 +177,11 @@ class MemoryGames implements GameStatsStore {
   }
   async remove(_tournamentId: string, { matchId, number }: { matchId: string; number: number }) {
     const game = this.saved.find((saved) => saved.matchId === matchId && saved.number === number);
+
     if (!game) return null;
     this.saved = this.saved.filter((saved) => saved !== game);
     this.exclusions.add(game.ballchasingId);
+
     return toTournamentGame(game);
   }
 }
@@ -186,6 +195,7 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
       statsFor([game1, game2].find((replay) => replay.id === id) as ReplaySummary),
     ),
   } satisfies BallchasingSource;
+
   const candidates: StatsCandidates = {
     tournamentExists: vi.fn(async (id: string) => id === "t1"),
     matches: vi.fn(async () => [
@@ -195,10 +205,12 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
       },
     ]),
   };
+
   const games = new MemoryGames();
   const imports = new MemoryImports();
   const reportFailure = vi.fn();
   const scheduler = { schedule: vi.fn<StatsImportScheduler["schedule"]>() };
+
   const service = new StatsImportService(
     source,
     candidates,
@@ -207,6 +219,7 @@ function setup(options: { replays?: ReplaySummary[] } = {}) {
     scheduler,
     reportFailure,
   );
+
   return { service, source, games, imports, scheduler, reportFailure };
 }
 
@@ -241,6 +254,7 @@ describe("StatsImportService.request", () => {
 
   it("explains a missing API key", async () => {
     const { imports } = setup();
+
     const service = new StatsImportService(
       null,
       { tournamentExists: vi.fn(), matches: vi.fn() },

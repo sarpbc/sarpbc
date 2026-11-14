@@ -29,6 +29,7 @@ defineShortcuts({
       if (!canSearch.value) {
         return;
       }
+
       open.value = !open.value;
     },
   },
@@ -36,12 +37,15 @@ defineShortcuts({
 
 async function runSearch(query: string) {
   const trimmed = query.trim();
+
   if (!trimmed) {
     results.value = { players: [], teams: [], tournaments: [] };
+
     return;
   }
 
   pending.value = true;
+
   try {
     results.value = await searchAdminEntities(trimmed);
   } catch (searchError) {
@@ -58,11 +62,14 @@ watch(open, (isOpen) => {
   if (!isOpen) {
     searchTerm.value = "";
     results.value = { players: [], teams: [], tournaments: [] };
+
     if (refreshState.value !== "loading") {
       refreshState.value = "idle";
     }
+
     return;
   }
+
   if (refreshState.value !== "loading") {
     refreshState.value = "idle";
   }
@@ -77,6 +84,7 @@ function playerItems(): CommandPaletteItem[] {
   if (!canPlayers.value) {
     return [];
   }
+
   return results.value.players.map((player: Player) => ({
     id: `player-${player.id}`,
     label: player.name,
@@ -93,8 +101,10 @@ function teamItems(): CommandPaletteItem[] {
   if (!canTeams.value) {
     return [];
   }
+
   return results.value.teams.map((team: Team) => {
     const src = resolveThemedLogoUrl(team, colorMode.value);
+
     return {
       id: `team-${team.id}`,
       label: team.name,
@@ -112,6 +122,7 @@ function tournamentItems(): CommandPaletteItem[] {
   if (!canTournaments.value) {
     return [];
   }
+
   return results.value.tournaments.map((tournament) => ({
     id: `tournament-${tournament.id}`,
     label: tournamentStageLabel(tournament),
@@ -125,16 +136,20 @@ function tournamentItems(): CommandPaletteItem[] {
 
 async function refreshEmptyTournaments(event?: Event) {
   event?.preventDefault();
+
   if (refreshState.value === "loading" || !canTournaments.value) {
     return;
   }
 
   refreshState.value = "loading";
+
   try {
     const emptyTournaments = await getTournamentsWithoutMatches();
+
     for (const tournament of emptyTournaments) {
       await syncTournament(tournament.id);
     }
+
     refreshState.value = "success";
   } catch (refreshError) {
     refreshState.value = "error";

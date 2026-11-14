@@ -39,15 +39,19 @@ const range = computed(() => isoWeekUtcRange(weekId.value));
 
 const rangeLabel = computed(() => {
   const bounds = range.value;
+
   if (!bounds) {
     return "";
   }
+
   const endInclusive = new Date(bounds.end.getTime() - 1);
+
   const format = new Intl.DateTimeFormat(locale.value, {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
+
   return t("page.news.week.range", {
     start: format.format(bounds.start),
     end: format.format(endInclusive),

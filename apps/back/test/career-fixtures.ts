@@ -17,14 +17,17 @@ export const kc = Object.assign(new Team(), {
   name: "Karmine Corp",
   slug: "karmine-corp",
 });
+
 export const bds = Object.assign(new Team(), { id: "bds", name: "Team BDS", slug: "team-bds" });
 export const zen = Object.assign(new Player(), { id: "zen", name: "zen", slug: "zen", team: kc });
+
 export const vatira = Object.assign(new Player(), {
   id: "vatira",
   name: "Vatira",
   slug: "vatira",
   team: kc,
 });
+
 export const mawkzy = Object.assign(new Player(), { id: "mawkzy", name: "M0nkey", slug: "m0nkey" });
 
 function side(id: string, team: Team, players: Player[]): TournamentParticipant {
@@ -45,6 +48,7 @@ export function careerMatch(spec: MatchSpec): Match {
     side(`${spec.id}-kc`, kc, spec.sides[0]),
     side(`${spec.id}-bds`, bds, spec.sides[1]),
   ];
+
   return Object.assign(new Match(), {
     id: spec.id,
     source: spec.source ?? "manual",
@@ -123,6 +127,7 @@ export const careerMatches: Match[] = [
 
 export function careerSources() {
   const players = [zen, vatira, mawkzy];
+
   const contract = Object.assign(new Contract(), {
     id: "zen-kc",
     player: zen,
@@ -130,10 +135,12 @@ export function careerSources() {
     startDate: new Date("2023-01-01T00:00:00.000Z"),
     endDate: null,
   });
+
   const playerEarnings = vi.fn(
     async (playerId: string, scope: EarningsScope): Promise<ProfileEarnings> =>
       careerEarnings(scope.redistributableOnly && playerId === zen.id ? 1500 : 0),
   );
+
   const sources = {
     players: {
       findBySlug: async (slug: string) => players.find((player) => player.slug === slug) ?? null,
@@ -164,5 +171,6 @@ export function careerSources() {
       awardsOfPlayer: async (playerId: string) => (playerId === zen.id ? [zenSeasonAward] : []),
     },
   } satisfies PlayerComparisonSources;
+
   return { sources, playerEarnings };
 }

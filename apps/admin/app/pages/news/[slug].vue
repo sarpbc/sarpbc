@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { NewsType } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
+
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -62,6 +63,7 @@ async function saveArticle() {
   }
 
   isSaving.value = true;
+
   try {
     const updated = await editNewsArticle(slug, {
       title: title.value,
@@ -72,11 +74,13 @@ async function saveArticle() {
       imageUrl: imageUrl.value,
       type: articleType.value,
     });
+
     isModalOpen.value = false;
     toast.add({
       title: t("page.news.edit.saved"),
       color: "success",
     });
+
     if (updated.slug !== slug) {
       await navigateTo(localePath(`/news/${updated.slug}`));
     }
@@ -91,13 +95,16 @@ async function togglePublish() {
   if (isPublishing.value) {
     return;
   }
+
   isPublishing.value = true;
+
   try {
     if (isDraft.value) {
       await publishNewsArticle(slug);
     } else {
       await unpublishNewsArticle(slug);
     }
+
     isDraft.value = !isDraft.value;
     toast.add({
       title: isDraft.value ? t("page.news.edit.unpublished") : t("page.news.edit.published"),

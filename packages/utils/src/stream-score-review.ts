@@ -41,11 +41,13 @@ export function streamScoreBestOfMismatch(
 
 export function isForbiddenStreamScoreSource(source: string): boolean {
   let url: URL;
+
   try {
     url = new URL(source);
   } catch {
     return false;
   }
+
   return (
     (url.protocol === "http:" || url.protocol === "https:") && isLiquipediaSourceHost(url.hostname)
   );
@@ -56,8 +58,11 @@ export function streamScoreConfirmBlockers(
   review: StreamScoreReview,
 ): StreamScoreConfirmBlocker[] {
   const blockers: StreamScoreConfirmBlocker[] = [];
+
   if (proposal.series.winner === null) blockers.push("no-winner");
+
   if (proposal.games.some((game) => game.winner === null)) blockers.push("unread-game");
+
   if (
     proposal.games.some(
       (game) =>
@@ -67,9 +72,12 @@ export function streamScoreConfirmBlockers(
     )
   )
     blockers.push("unchecked-game");
+
   if (streamScoreBestOfMismatch(proposal, review.numberOfGames) && !review.bestOfAcknowledged)
     blockers.push("best-of-mismatch");
+
   if (isForbiddenStreamScoreSource(proposal.source)) blockers.push("forbidden-source");
+
   return blockers;
 }
 

@@ -7,6 +7,7 @@ import { splitTournaments } from "~/composables/entity/useEntityTournaments";
 function coversTournament(contract: PlayerContract, tournament: Tournament): boolean {
   if (!tournament.beginAt) return false;
   const beginAt = new Date(tournament.beginAt).getTime();
+
   return (
     new Date(contract.startDate).getTime() <= beginAt &&
     (contract.endDate === null || beginAt <= new Date(contract.endDate).getTime())
@@ -16,6 +17,7 @@ function coversTournament(contract: PlayerContract, tournament: Tournament): boo
 function wonDuringTenure(tournament: Tournament, contracts: PlayerContract[]): boolean {
   const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
   const winnerTeamId = winner?.team instanceof Object ? winner.team.id : undefined;
+
   return contracts.some(
     (contract) => contract.team.id === winnerTeamId && coversTournament(contract, tournament),
   );

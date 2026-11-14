@@ -3,6 +3,7 @@ import { ReplyNotificationRepository } from "./reply-notification.repository";
 import { ReplyNotification } from "./reply-notification.entity";
 import { replySnapshot } from "../../../reply/infrastructure/reply-persistence";
 import type { NotificationStore } from "../../application/ports";
+
 export class MikroNotificationStore implements NotificationStore {
   private readonly rows: ReplyNotificationRepository;
   constructor(private readonly em: EntityManager) {
@@ -24,8 +25,10 @@ export class MikroNotificationStore implements NotificationStore {
       const rows = em.getRepository<ReplyNotification, ReplyNotificationRepository>(
         ReplyNotification,
       );
+
       const result = await rows.markRead(id, ids);
       await em.flush();
+
       return result;
     });
   }

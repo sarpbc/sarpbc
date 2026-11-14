@@ -8,6 +8,7 @@ import type { CompetitionTransaction } from "../ports";
 describe("MatchService decided events", () => {
   const participants = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
   let persisted: Match;
+
   const matches = {
     load: vi.fn(),
     byPandascoreId: vi.fn(),
@@ -15,10 +16,12 @@ describe("MatchService decided events", () => {
     tournament: vi.fn(),
     participants: vi.fn(),
   };
+
   const reads = { detail: vi.fn() };
   const events = { publish: vi.fn() };
   const diagnostics = { error: vi.fn(), warn: vi.fn() };
   const cache = { invalidateTournament: vi.fn() };
+
   const service = new MatchService(
     reads as never,
     { run: (work) => work({ matches } as never) } satisfies CompetitionTransaction,

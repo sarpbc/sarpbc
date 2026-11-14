@@ -11,7 +11,9 @@ const { query = "" } = defineProps<Props>();
 
 function formerNameFor(team: Team): string | undefined {
   const needle = query.trim().toLocaleLowerCase();
+
   if (!needle || team.name.toLocaleLowerCase().includes(needle)) return undefined;
+
   return team.aliases.find((alias) => alias.name.toLocaleLowerCase().includes(needle))?.name;
 }
 </script>

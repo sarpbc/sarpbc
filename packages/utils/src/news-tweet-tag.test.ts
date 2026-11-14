@@ -21,6 +21,7 @@ describe("parseNewsTweetTag", () => {
     const parsed = parseNewsTweetTag(
       ':tweet{alt="x" url=" https://twitter.com/i/web/status/42 " url="https://x.com/a/status/1"}',
     );
+
     assert.equal(parsed?.url, "https://x.com/i/web/status/42");
     assert.equal(
       parseNewsTweetTag(serializeNewsTweetTag("https://mobile.twitter.com/Foo/status/7?s=20"))?.url,

@@ -5,8 +5,10 @@ import type { Author } from "../../common/domain/author";
 import type { ReplyRecord } from "./models";
 import { FORUM_ERROR_CODES } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+
 const now = new Date("2026-10-15T12:00:00Z");
 const author: Author = { id: "author", userName: "Fan" };
+
 function reply(overrides: Partial<ReplyRecord> = {}): ReplyRecord {
   return {
     id: "parent",
@@ -21,9 +23,11 @@ function reply(overrides: Partial<ReplyRecord> = {}): ReplyRecord {
     ...overrides,
   };
 }
+
 function setup() {
   const saved: ReplyRecord[] = [];
   const notified: { recipientId: string; replyId: string }[] = [];
+
   const replies = {
     findByTarget: vi.fn().mockResolvedValue([]),
     findById: vi.fn().mockResolvedValue(reply()),
@@ -38,6 +42,7 @@ function setup() {
     }),
     delete: vi.fn(),
   };
+
   const scope: ReplyWriteScope = {
     replies,
     reports: { findByReplyAndReporter: vi.fn().mockResolvedValue(null), save: vi.fn() },
@@ -55,31 +60,39 @@ function setup() {
       }),
     },
   };
+
   let commits = 0;
+
   const transaction: ReplyTransaction = {
     async run(work) {
       const result = await work(scope);
       commits++;
+
       return result;
     },
   };
+
   const service = new ReplyService(
     replies,
     transaction,
     () => now,
     () => "new-reply",
   );
+
   return { scope, replies, service, saved, notified, commits: () => commits };
 }
+
 describe("reply invariants without Nest or ORM", () => {
   it("writes the direct notification in the same application transaction", async () => {
     const f = setup();
     f.replies.findById.mockResolvedValue(reply({ author: { id: "other", userName: "Other" } }));
+
     const result = await f.service.create("author", {
       content: " <b>Hello</b> ",
       postId: "p",
       replyToId: "parent",
     });
+
     expect(result.content).toBe("Hello");
     expect(f.saved).toHaveLength(1);
     expect(f.notified).toEqual([{ recipientId: "other", replyId: "new-reply" }]);
@@ -91,6 +104,7 @@ describe("reply invariants without Nest or ORM", () => {
     f.scope.notifications.createForDirectReply = async () => {
       throw new Error("notification failed");
     };
+
     await expect(
       f.service.create("author", { content: "Hi", postId: "p", replyToId: "parent" }),
     ).rejects.toThrow("notification failed");
@@ -158,6 +172,7 @@ describe("reply invariants without Nest or ORM", () => {
   it("deletes child replies before their parent in one transaction", async () => {
     const f = setup(),
       order: string[] = [];
+
     f.replies.findChildren.mockImplementation(async (id: string) =>
       id === "parent" ? [reply({ id: "child", replyTo: { id: "parent" } })] : [],
     );

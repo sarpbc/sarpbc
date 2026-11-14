@@ -37,6 +37,7 @@ export class PandascoreApiClient {
 
   constructor(private readonly configService: ConfigService) {
     const apiToken = this.configService.get<string>("pandascore_api_token");
+
     if (!apiToken) {
       log.error({
         component: PandascoreApiClient.name,
@@ -44,6 +45,7 @@ export class PandascoreApiClient {
       });
       throw new Error("PandaScore API token not configured");
     }
+
     this.apiToken = apiToken;
   }
 
@@ -63,12 +65,15 @@ export class PandascoreApiClient {
     const runningTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/running`);
     const allTournaments = [...pastTournaments, ...upcomingTournaments, ...runningTournaments];
     const byId = new Map<number, PandascoreJson>();
+
     for (const tournament of allTournaments) {
       const { id } = z.object({ id: z.number().int() }).parse(tournament);
+
       if (!byId.has(id)) {
         byId.set(id, tournament);
       }
     }
+
     return Array.from(byId.values());
   }
 
@@ -94,13 +99,16 @@ export class PandascoreApiClient {
       return await this.paginateAll(`/tournaments/${tournamentId}/standings`);
     } catch (error) {
       if (!(error instanceof PandascoreApiError)) throw error;
+
       if (error.status === 404) return [];
+
       if (error.status !== 403) throw error;
       log.warn({
         component: PandascoreApiClient.name,
         message: "PandaScore standings are not available with this API plan",
         tournamentId,
       });
+
       return null;
     }
   }
@@ -139,6 +147,7 @@ export class PandascoreApiClient {
       } else {
         allItems.push(...items);
         page += 1;
+
         if (items.length < perPage) {
           hasMore = false;
         }
@@ -163,6 +172,7 @@ export class PandascoreApiClient {
         if (value === undefined) {
           continue;
         }
+
         if (Array.isArray(value)) {
           // PandaScore rejects `key[]=` (HTTP 500). Use repeated keys instead.
           for (const item of value) {

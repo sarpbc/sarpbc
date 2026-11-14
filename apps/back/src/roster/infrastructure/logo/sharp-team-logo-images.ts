@@ -15,8 +15,10 @@ function loadSharp(): Promise<SharpFactory> {
   sharpFactory ??= import("sharp").then(({ default: sharp }) => {
     sharp.cache(false);
     sharp.concurrency(1);
+
     return sharp;
   });
+
   return sharpFactory;
 }
 
@@ -24,12 +26,14 @@ export class SharpTeamLogoImages implements TeamLogoImages {
   async dimensions(bytes: Uint8Array): Promise<{ width: number; height: number }> {
     const image = await this.open(bytes);
     const { width, height } = await this.decode(() => image.metadata());
+
     return { width, height };
   }
 
   async normalize(bytes: Uint8Array, format: TeamLogoFormat, pixels: number): Promise<Uint8Array> {
     const density = format === "svg" ? await this.svgDensity(bytes, pixels) : undefined;
     const image = await this.open(bytes, { density });
+
     const output = await this.decode(() =>
       image
         .timeout({ seconds: PIPELINE_TIMEOUT_SECONDS })
@@ -38,6 +42,7 @@ export class SharpTeamLogoImages implements TeamLogoImages {
         .webp({ quality: 90, alphaQuality: 100, effort: 4 })
         .toBuffer(),
     );
+
     return new Uint8Array(output);
   }
 
@@ -45,11 +50,13 @@ export class SharpTeamLogoImages implements TeamLogoImages {
     const image = await this.open(bytes, { limitInputPixels: false });
     const { width, height } = await this.decode(() => image.metadata());
     const longest = Math.max(width, height, 1);
+
     return Math.min(MAX_SVG_DENSITY, Math.max(1, Math.ceil((72 * pixels) / longest)));
   }
 
   private async open(bytes: Uint8Array, options: SharpOptions = {}): Promise<Sharp> {
     const sharp = await loadSharp();
+
     return sharp(bytes, { limitInputPixels: MAX_INPUT_PIXELS, animated: false, ...options });
   }
 

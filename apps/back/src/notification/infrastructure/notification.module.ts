@@ -3,6 +3,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { NotificationController } from "./http/notification.controller";
 import { NotificationService } from "../application/notification.service";
 import { MikroNotificationStore } from "./persistence/notification.store";
+
 @Module({
   controllers: [NotificationController],
   providers: [

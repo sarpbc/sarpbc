@@ -8,6 +8,7 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
   }
 
   const visibility = useDocumentVisibility();
+
   const poll = useIntervalFn(
     () => void refreshNuxtData(toValue(key)),
     LIVE_MATCH_REFRESH_INTERVAL_MS,
@@ -15,6 +16,7 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
       immediate: false,
     },
   );
+
   let stopWatch: (() => void) | null = null;
   let disposed = false;
 
@@ -27,6 +29,7 @@ export function useLiveMatchRefresh(key: MaybeRefOrGetter<string>, hasLive: () =
       () => hasLive() && visibility.value === "visible",
       (polling) => {
         poll.pause();
+
         if (!polling) {
           return;
         }

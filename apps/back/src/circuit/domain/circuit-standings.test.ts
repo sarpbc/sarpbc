@@ -13,6 +13,7 @@ const scale: CircuitScaleTier[] = [
 ];
 
 const event = (id: string): TournamentEventRef => ({ id, slug: id, name: `Event ${id}` });
+
 const team = (id: string) => ({
   id,
   name: id.toUpperCase(),
@@ -137,6 +138,7 @@ describe("computeCircuitStandings", () => {
 
   it("counts only stages that have ended", () => {
     const placements = [{ team: team("kc"), placement: 1 }];
+
     const { rows, events } = computeCircuitStandings(
       [
         stage({ event: event("live"), endAt: future, placements }),
@@ -179,6 +181,7 @@ describe("computeCircuitStandings in a regional circuit", () => {
     { from: 3, to: 4, points: 14 },
     { from: 13, to: 16, points: 3 },
   ];
+
   const major = (overrides: Partial<CircuitStageResult> = {}) =>
     stage({
       event: event("major"),
@@ -193,6 +196,7 @@ describe("computeCircuitStandings in a regional circuit", () => {
       ],
       ...overrides,
     });
+
   const totals = (stages: CircuitStageResult[], region: string | null) =>
     computeCircuitStandings(stages, region, now).rows.map(({ team: { id }, points }) => [
       id,
@@ -268,11 +272,14 @@ describe("computeCircuitStandings with places decided in groups", () => {
     { from: 9, to: 12, points: 2 },
     { from: 13, to: 16, points: 1 },
   ];
+
   const playoffTeams = ["p1", "p2", "p3", "p4", "p5", "p6", "p7", "p8"];
+
   const groupFinishes = [
     ...["g9", "g10", "g11", "g12"].map((id) => ({ team: team(id), placement: 9 })),
     ...["g13", "g14", "g15", "g16"].map((id) => ({ team: team(id), placement: 13 })),
   ];
+
   const playoffs = stage({
     event: event("open"),
     scale: openScale,

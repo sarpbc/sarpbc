@@ -8,6 +8,7 @@ export const useCookieConsent = () => {
     maxAge: 60 * 60 * 24 * 180,
     sameSite: "lax",
   });
+
   const choice = useState<CookieChoice | null>(COOKIE_NAME, () => choiceCookie.value ?? null);
   watch(
     choiceCookie,

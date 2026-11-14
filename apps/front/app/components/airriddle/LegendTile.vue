@@ -13,6 +13,7 @@ const toneClass = computed(() => {
       return "bg-elevated text-highlighted";
     default: {
       const _exhaustive: never = tone;
+
       return _exhaustive;
     }
   }

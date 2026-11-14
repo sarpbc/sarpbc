@@ -31,6 +31,7 @@ const {
 );
 
 const prizes = computed(() => distribution.value?.prizes ?? []);
+
 const showSection = computed(
   () => pending.value || Boolean(error.value) || prizes.value.length > 0,
 );

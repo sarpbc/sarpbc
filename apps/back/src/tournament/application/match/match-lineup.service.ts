@@ -27,7 +27,9 @@ export function lineupSource(match: Pick<Match, "source" | "tournament">): DataS
 
 async function requireMatch(matches: MatchWriter, id: string): Promise<Match> {
   const match = await matches.load(id);
+
   if (!match) throw new NotFoundError(`Match with id "${id}" not found`);
+
   return match;
 }
 
@@ -40,9 +42,12 @@ async function validLineups(
     match.participants.map(({ id }) => id),
     inputs,
   );
+
   const playerIds = normalized.flatMap(({ playerIds }) => playerIds);
+
   if (!(await lineups.activePlayersExist(playerIds)))
     throw new InvalidInputError("Every lineup player must exist and not be a merged duplicate");
+
   return normalized;
 }
 
@@ -58,11 +63,13 @@ export class MatchLineupService {
       participantId: id,
       rosterIds: players.map((player) => player.id),
     }));
+
     return buildLineups(sides, await this.reads.byMatch(match.id));
   }
 
   async find(matchId: string): Promise<MatchLineups> {
     const match = await this.transaction.run(({ matches }) => requireMatch(matches, matchId));
+
     return { source: lineupSource(match), lineups: await this.forMatch(match) };
   }
 
@@ -71,12 +78,14 @@ export class MatchLineupService {
       const match = await requireMatch(matches, matchId);
       await lineups.replace(matchId, await validLineups(match, lineups, inputs));
     });
+
     return this.find(matchId);
   }
 
   async requireProposable(matchId: string, inputs: readonly MatchLineupInput[]): Promise<void> {
     await this.transaction.run(async ({ matches, lineups }) => {
       const match = await requireMatch(matches, matchId);
+
       if (!isRedistributable(lineupSource(match)))
         throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
       await validLineups(match, lineups, inputs);
@@ -87,16 +96,21 @@ export class MatchLineupService {
     const rows = (await this.reads.byPlayer(playerId)).filter(({ rosterIds }) =>
       isStandIn(rosterIds, playerId),
     );
+
     if (rows.length === 0) return [];
+
     const matches = new Map(
       (await this.matches.byIds(rows.map(({ matchId }) => matchId))).map((match) => [
         match.id,
         match,
       ]),
     );
+
     return rows.flatMap(({ matchId, participantId }) => {
       const match = matches.get(matchId);
+
       if (!match?.participants.some(({ id }) => id === participantId)) return [];
+
       return [{ participantId, match }];
     });
   }

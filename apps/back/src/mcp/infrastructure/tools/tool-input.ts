@@ -34,6 +34,7 @@ export function describeFields<Fields extends Record<string, z.ZodType>>(
   return Object.fromEntries(
     Object.entries<z.ZodType>(fields).map(([field, schema]) => {
       const description = descriptions[field];
+
       return [field, description ? schema.describe(description) : schema];
     }),
   ) as Fields;

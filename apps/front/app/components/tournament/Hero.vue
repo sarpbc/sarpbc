@@ -55,17 +55,23 @@ const statusLabel = computed(() =>
 const typeLabel = computed(() => {
   if (!type) return null;
   const key = `components.tournaments.${type}`;
+
   return te(key) ? t(key) : null;
 });
 
 const metaItems = computed(() => {
   const items: { label: string; tabular: boolean }[] = [];
   const prizepoolLabel = formatTournamentPrizepool(prizepool);
+
   if (prizepoolLabel) items.push({ label: prizepoolLabel, tabular: true });
+
   if (countLabel) items.push({ label: countLabel, tabular: true });
   const formatLabel = nonDefaultFormatLabel(format);
+
   if (formatLabel) items.push({ label: formatLabel, tabular: true });
+
   if (typeLabel.value) items.push({ label: typeLabel.value, tabular: false });
+
   return items;
 });
 
@@ -75,7 +81,9 @@ const championPath = computed(() => {
   if (champion?.team) {
     return teamPath(champion.team.slug);
   }
+
   const [player, ...others] = champion?.players ?? [];
+
   return player && others.length === 0 ? playerPath(player.slug) : null;
 });
 

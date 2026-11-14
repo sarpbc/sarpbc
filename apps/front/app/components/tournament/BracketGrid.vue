@@ -35,6 +35,7 @@ const connectorPaths = computed(() => {
     .map((connector) => {
       const from = matchMap.get(connector.fromMatchId);
       const to = matchMap.get(connector.toMatchId);
+
       if (!from || !to) {
         return null;
       }

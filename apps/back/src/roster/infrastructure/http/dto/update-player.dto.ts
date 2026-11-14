@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
+
 export const UpdatePlayerDto = z.strictObject({
   name: z.string().optional(),
   teamId: z.uuid().nullable().optional(),

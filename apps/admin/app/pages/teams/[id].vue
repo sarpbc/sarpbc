@@ -58,9 +58,12 @@ watch(
 async function saveTeam() {
   if (!teamForm.value.name) return;
   isSavingTeam.value = true;
+
   try {
     const body: UpdateTeamDto = { name: teamForm.value.name };
+
     if (teamForm.value.location) body.location = teamForm.value.location;
+
     if (teamForm.value.imageUrl) body.imageUrl = teamForm.value.imageUrl;
     team.value = await updateTeam(teamId, body);
   } catch (saveError) {
@@ -149,6 +152,7 @@ function openEditContractModal(contract: TeamContract) {
 async function saveContract() {
   if (!contractForm.value.playerId || !contractForm.value.startDate) return;
   isSavingContract.value = true;
+
   try {
     const body = {
       playerId: contractForm.value.playerId,
@@ -156,11 +160,13 @@ async function saveContract() {
       startDate: contractForm.value.startDate,
       endDate: contractForm.value.endDate || null,
     };
+
     if (editingContract.value) {
       await updateTeamContract(teamId, editingContract.value.id, body);
     } else {
       await createTeamContract(teamId, body);
     }
+
     isContractModalOpen.value = false;
     await refreshContracts();
   } catch (saveError) {

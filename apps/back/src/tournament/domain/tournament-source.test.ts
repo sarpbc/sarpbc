@@ -35,6 +35,7 @@ describe("tournament source", () => {
       endAt: new Date("2025-03-02T00:00Z"),
       endAtCorrected: false,
     };
+
     claimForPandascore(tournament, 42, null);
     expect(tournament).toMatchObject({
       source: "pandascore",

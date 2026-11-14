@@ -37,6 +37,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
       findByPlayer: async () => career,
       findById: async (id: string) => {
         const stored = career.find((contract) => contract.id === id);
+
         return stored ? Object.assign(new Contract(), stored) : null;
       },
       save: async (contract: Contract) => {
@@ -45,6 +46,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
       },
     },
   } as never;
+
   const transaction: RosterTransaction = { run: async (work) => work(scope) };
 
   beforeAll(async () => {
@@ -57,6 +59,7 @@ describe("Staff contract writes keep the career consistent (e2e)", () => {
         endDate: null,
       }),
     ];
+
     const moduleFixture = await Test.createTestingModule({
       controllers: [PlayerController],
       providers: [

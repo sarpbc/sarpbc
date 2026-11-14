@@ -12,11 +12,14 @@ const orm = new MikroORM({
 
 function fixture(aliasTeamIds: string[]) {
   const em = orm.em.fork();
+
   const aliases = aliasTeamIds.map((id) =>
     Object.assign(new TeamAlias(), { team: Object.assign(new Team(), { id }) }),
   );
+
   const find = vi.spyOn(em, "find");
   find.mockResolvedValueOnce(aliases).mockResolvedValueOnce([]);
+
   return { find, teams: new MikroTeamStore(em) };
 }
 

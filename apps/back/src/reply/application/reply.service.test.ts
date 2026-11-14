@@ -4,11 +4,14 @@ import type { Author } from "../../common/domain/author";
 import type { ReplyTarget } from "../domain/reply";
 import type { ReplyRecord } from "./models";
 import type { ReplyWriteScope } from "./ports";
+
 type Match = NonNullable<ReplyRecord["match"]>;
+
 import { ReplyService } from "./reply.service";
 
 describe("ReplyService", () => {
   let service: ReplyService;
+
   const replyRepository = {
     findByTarget: vi.fn(),
     findById: vi.fn(),
@@ -20,16 +23,20 @@ describe("ReplyService", () => {
     delete: vi.fn(),
     findChildren: vi.fn(),
   };
+
   const replyReportRepository = {
     findByReplyAndReporter: vi.fn(),
     save: vi.fn(),
   };
+
   const userService = {
     findById: vi.fn(),
   };
+
   const notificationService = {
     createForDirectReply: vi.fn(),
   };
+
   const em = {
     findOne: vi.fn(),
   };
@@ -43,7 +50,9 @@ describe("ReplyService", () => {
       targets: {
         async find(target: ReplyTarget) {
           const row = await em.findOne(target);
+
           if (!row) return null;
+
           return {
             post: target.kind === "forumPost" ? row : null,
             newsArticle: target.kind === "newsArticle" ? row : null,
@@ -52,6 +61,7 @@ describe("ReplyService", () => {
         },
       },
     };
+
     service = new ReplyService(scope.replies, { run: (work) => work(scope) });
     vi.clearAllMocks();
   });
@@ -126,11 +136,13 @@ describe("ReplyService", () => {
         id: "root",
         match: { id: "m1" } as Match,
       });
+
       const child = makeReply({
         id: "child",
         match: { id: "m1" } as Match,
         replyTo: root,
       });
+
       replyRepository.countRootsByTarget.mockResolvedValue(1);
       replyRepository.findByTarget.mockResolvedValue([root]);
       replyRepository.findDescendantsForRoots.mockResolvedValue([child]);

@@ -109,6 +109,7 @@ export class TournamentController {
   @Get("leagues")
   async findLeagues() {
     const leagues = await this.catalogService.leagues();
+
     return { leagues: leagues.map(mapLeague) };
   }
 
@@ -134,6 +135,7 @@ export class TournamentController {
   @Get("without-matches")
   async findWithoutMatches() {
     const tournaments = await this.tournaments.findPandascoreWithoutMatches();
+
     return { tournaments };
   }
 
@@ -142,15 +144,18 @@ export class TournamentController {
   @Post()
   async create(@Body({ schema: CreateTournamentDto }) dto: CreateTournamentDto) {
     const tournament = await this.manualTournamentService.create(dto);
+
     return { tournament: mapTournamentDetail(tournament) };
   }
 
   @Get(":id")
   async findOne(@Param("id") id: string) {
     const tournament = await this.tournamentRead.findById(id);
+
     if (!tournament) {
       throw new NotFoundException(`Tournament with id "${id}" not found`);
     }
+
     return { tournament };
   }
 
@@ -162,6 +167,7 @@ export class TournamentController {
     @Body({ schema: UpdateTournamentDto }) dto: UpdateTournamentDto,
   ) {
     const tournament = await this.manualTournamentService.update(id, dto);
+
     return { tournament: mapTournamentDetail(tournament) };
   }
 
@@ -170,6 +176,7 @@ export class TournamentController {
   @Post("sync/additions")
   async syncPandascoreAdditions() {
     const sync = await this.syncNewTournaments.execute();
+
     return { success: true, sync };
   }
 
@@ -182,6 +189,7 @@ export class TournamentController {
     }
 
     const tournament = await this.syncTournaments.executeByPandascoreId(pandascoreId);
+
     return {
       success: true,
       tournamentId: tournament.id,
@@ -194,6 +202,7 @@ export class TournamentController {
   @Post(":id/sync")
   async syncTournamentFromPandascore(@Param("id") id: string) {
     await this.syncTournaments.execute(id);
+
     return {
       success: true,
     };
@@ -207,27 +216,32 @@ export class TournamentController {
     @Body("enabled") enabled: boolean,
   ) {
     await this.manualTournamentService.setPickemsEnabled(tournamentId, enabled);
+
     return { success: true };
   }
 
   @Get(":id/matches")
   async getMatchesByTournament(@Param("id") id: string) {
     const matches = await this.matchService.getMatchesByTournament(id);
+
     return { matches: matches.map(mapTournamentMatchListItem) };
   }
 
   @Get(":id/player-stats")
   async getPlayerStats(@Param("id") id: string): Promise<TournamentPlayerStatsResponse> {
     const tournament = await this.tournamentRead.findById(id);
+
     if (!tournament || !isRedistributable(tournament.source)) {
       throw new NotFoundException(`Tournament with id "${id}" not found`);
     }
+
     return this.playerStatsService.forStages([tournament]);
   }
 
   @Get(":id/awards")
   async getAwardsByTournament(@Param("id") id: string) {
     const awards = await this.playerAwardService.findByTournamentId(id);
+
     return { awards };
   }
 
@@ -244,6 +258,7 @@ export class TournamentController {
       dto.playerId,
       dto.awardType,
     );
+
     return { award };
   }
 
@@ -282,6 +297,7 @@ export class TournamentController {
       beginAt: matchData.beginAt ? new Date(matchData.beginAt) : undefined,
       endAt: matchData.endAt ? new Date(matchData.endAt) : undefined,
     });
+
     return { match: withPublicSlug(match) };
   }
 
@@ -293,6 +309,7 @@ export class TournamentController {
     @Body({ schema: CreateEmptyBracketDto }) body: CreateEmptyBracketDto,
   ) {
     const matches = await this.matchService.createEmptyBracket(tournamentId, body);
+
     return { matches: matches.map(mapTournamentMatchListItem) };
   }
 
@@ -304,6 +321,7 @@ export class TournamentController {
     @Body({ schema: SetMatchBracketDto }) body: SetMatchBracketDto,
   ) {
     const match = await this.matchService.updateMatch(matchId, body);
+
     return { match: withPublicSlug(match) };
   }
 
@@ -315,6 +333,7 @@ export class TournamentController {
     @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerDto,
   ) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);
+
     return { match: withPublicSlug(match) };
   }
 
@@ -329,6 +348,7 @@ export class TournamentController {
       status: "finished",
       results: body.results,
     });
+
     return { match: withPublicSlug(match) };
   }
 
@@ -340,6 +360,7 @@ export class TournamentController {
     @Body({ schema: SetMatchVodsDto }) body: SetMatchVodsDto,
   ) {
     const match = await this.matchService.setVods(matchId, body.vods);
+
     return { match: withPublicSlug(match) };
   }
 
@@ -351,6 +372,7 @@ export class TournamentController {
     @Body({ schema: SetMatchSourceDto }) body: SetMatchSourceDto,
   ) {
     const match = await this.matchService.setSource(matchId, body.sourceUrl);
+
     return { match: withPublicSlug(match) };
   }
 
@@ -433,12 +455,14 @@ export class TournamentController {
   @Get("player/:playerId")
   async getTournamentsByPlayer(@Param("playerId") playerId: string) {
     const tournaments = await this.tournaments.getTournamentsByPlayer(playerId);
+
     return { tournaments: tournaments.map((tournament) => mapTournament(tournament)) };
   }
 
   @Get("matches/team/:teamId")
   async getMatchesByTeam(@Param("teamId") teamId: string) {
     const matches = await this.matchService.getMatchesByTeam(teamId);
+
     return { matches: matches.map(mapProfileMatchListItem) };
   }
 
@@ -447,6 +471,7 @@ export class TournamentController {
     pending: Promise<MatchLineups>,
   ): Promise<MatchLineupsResponse> {
     const lineups = await pending;
+
     return { ...lineups, suggested: lineupsFromGames(await this.gameStats.byMatch(matchId)) };
   }
 }

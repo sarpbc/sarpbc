@@ -15,19 +15,25 @@ export type BallchasingRefKind = keyof typeof REFS;
 export function parseBallchasingRef(kind: BallchasingRefKind, input: string): string {
   const value = input.trim();
   let candidate = value;
+
   if (/^https?:\/\//i.test(value)) {
     let url: URL;
+
     try {
       url = new URL(value);
     } catch {
       throw invalidRef(kind);
     }
+
     const [pathKind, id] = url.pathname.split("/").filter(Boolean);
+
     if (url.hostname.replace(/^www\./, "") !== BALLCHASING_HOST || pathKind !== kind || !id)
       throw invalidRef(kind);
     candidate = id;
   }
+
   if (!REFS[kind].id.test(candidate)) throw invalidRef(kind);
+
   return REFS[kind].normalize(candidate);
 }
 

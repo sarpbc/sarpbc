@@ -8,11 +8,14 @@ const official: StreamInput = {
   language: "en",
   kind: "official",
 };
+
 const costream: StreamInput = { url: "https://kick.com/kameto", language: "fr", kind: "costream" };
 
 function stream(url: string, source: Stream["source"] = "manual"): Stream {
   const [streamUrl] = replaceStreams([], [{ url, language: "en", kind: "official" }], "manual");
+
   if (!streamUrl) throw new Error("fixture");
+
   return { ...streamUrl, source };
 }
 
@@ -61,6 +64,7 @@ describe("replaceStreams", () => {
       [{ ...official, channel: "RLEsports B" }, official],
       "manual",
     );
+
     expect(streams).toHaveLength(1);
     expect(streams[0]?.channel).toBe("RLEsports B");
   });
@@ -82,6 +86,7 @@ describe("replaceStreams", () => {
       ...official,
       url: `https://twitch.tv/channel${index}`,
     }));
+
     expect(() => replaceStreams([], many, "manual")).toThrow("at most 12 streams");
   });
 
@@ -91,11 +96,13 @@ describe("replaceStreams", () => {
 
   it("keeps the start.gg mark of a stream a staff edit carries over", () => {
     const current = replaceStreams([], [official], "startgg");
+
     const edited = replaceStreams(
       current,
       [{ ...official, channel: "Renamed" }, costream],
       "manual",
     );
+
     expect(edited.map((s) => [s.url, s.source])).toEqual([
       ["https://twitch.tv/rlesports", "startgg"],
       ["https://kick.com/kameto", "manual"],
@@ -181,6 +188,7 @@ describe("watch streams", () => {
       streams: [stageStream],
       eventStreams: [eventStream],
     });
+
     expect(tournament.watchStreams()).toEqual([stageStream]);
   });
 });

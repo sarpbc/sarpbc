@@ -61,6 +61,7 @@ describe("aggregatePlayerStats", () => {
         goalParticipation: 100,
       },
     ]);
+
     for (const key of ["goals", "assists", "saves", "shots", "demolitions"] as const) {
       const linked = games.filter((row) => row.player);
       expect(stats.players.reduce((sum, row) => sum + row.totals[key], 0)).toBe(
@@ -101,6 +102,7 @@ describe("aggregatePlayerStats", () => {
 
   it("groups a player without a team by participant name across stages", () => {
     const duo = { id: null, name: "zen & Kaydop", slug: null };
+
     const stats = aggregatePlayerStats([
       line("g1", zen, duo, 1, [1, 0, 0, 1, 0]),
       line("g2", zen, { ...duo }, 2, [1, 1, 0, 2, 0]),

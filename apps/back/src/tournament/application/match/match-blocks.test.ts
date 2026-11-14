@@ -10,6 +10,7 @@ describe("findMatchBlocks", () => {
     byIds: vi.fn<MatchQueries["byIds"]>(),
     page: vi.fn<MatchQueries["page"]>(),
   };
+
   const stored = (id: string) => Object.assign(new Match(), { id });
 
   beforeEach(() => {

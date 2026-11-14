@@ -24,6 +24,7 @@ export class TokenRepository implements TokenStore {
     token.name = name;
     token.tokenHash = hash;
     await this.em.persist(token).flush();
+
     return summary(token);
   }
 
@@ -33,6 +34,7 @@ export class TokenRepository implements TokenStore {
       { owner: ownerId, revokedAt: null },
       { orderBy: { createdAt: "DESC" } },
     );
+
     return tokens.map(summary);
   }
 
@@ -42,6 +44,7 @@ export class TokenRepository implements TokenStore {
       { tokenHash: hash, revokedAt: null },
       { populate: ["owner"] },
     );
+
     return token
       ? {
           id: token.id,

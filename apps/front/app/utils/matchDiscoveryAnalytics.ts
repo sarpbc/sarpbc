@@ -29,6 +29,7 @@ function isMatchDiscoverySource(value: MatchDiscoveryQueryValue): value is Match
   if (value == null || Array.isArray(value)) {
     return false;
   }
+
   return SOURCE_SET.has(value);
 }
 
@@ -54,6 +55,7 @@ export function listVariantToDiscoveryStatus(
       return "finished";
     default: {
       const _exhaustive: never = variant;
+
       return _exhaustive;
     }
   }

@@ -14,16 +14,20 @@ const loaded = ref(false);
 
 onMounted(() => {
   const fromStorage = loadCareerResult(careerId.value);
+
   if (fromStorage) {
     result.value = fromStorage;
     loaded.value = true;
+
     return;
   }
 
   const encoded = Array.isArray(route.query.d) ? null : route.query.d;
+
   if (encoded) {
     result.value = decodeCareerResultFromShare(encoded);
   }
+
   loaded.value = true;
 });
 

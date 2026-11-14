@@ -17,6 +17,7 @@ function setup() {
       demolitions: 0,
     })),
   );
+
   return { playerLines, service: new TournamentPlayerStatsService({ playerLines }) };
 }
 

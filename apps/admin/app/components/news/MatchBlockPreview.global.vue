@@ -14,6 +14,7 @@ const { t, locale } = useI18n();
 
 const blockKey = computed(() => {
   const block = newsMatchBlockFromAttrs(props);
+
   return block ? newsMatchBlockKey(block) : null;
 });
 
@@ -23,10 +24,12 @@ const { data, status } = useLazyAsyncData(
     if (!blockKey.value) {
       return null;
     }
+
     const response = await apiFetch<MatchBlocksResponse>("/matches/blocks", {
       method: "GET",
       query: { block: blockKey.value },
     });
+
     return response.blocks[blockKey.value] ?? [];
   },
   { server: false },
@@ -38,12 +41,14 @@ const dateFormatter = computed(
 
 function teamName(item: MatchBlockItem, index: number): string {
   const participant = item.participants[index];
+
   return (participant && participantName(participant)) || t("newsTag.matchTbd");
 }
 
 function score(item: MatchBlockItem, index: number): string {
   const participant = item.participants[index];
   const result = item.results.find((entry) => entry.participant === participant?.id);
+
   return result ? String(result.score) : "–";
 }
 
@@ -57,6 +62,7 @@ function stateColor(state: MatchBlockState): "error" | "info" | "neutral" {
       return "neutral";
     default: {
       const exhaustive: never = state;
+
       return exhaustive;
     }
   }

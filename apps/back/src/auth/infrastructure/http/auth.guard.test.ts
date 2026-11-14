@@ -19,10 +19,12 @@ interface AuthGuardTestRequest {
 
 describe("AuthGuard", () => {
   let guard: AuthGuard;
+
   const authService = {
     authenticate: vi.fn(),
     refreshSession: vi.fn(),
   };
+
   const setCookie = vi.fn();
 
   beforeEach(async () => {

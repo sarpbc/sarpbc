@@ -68,6 +68,7 @@ describe("SeasonService", () => {
         ],
       },
     });
+
     expect(updated.format).toEqual({
       summary: "Open qualifiers feed two Majors and a World Championship.",
       phases: [
@@ -104,10 +105,12 @@ describe("SeasonService", () => {
     ).rejects.toThrow("The winner must be one of the season's participants.");
 
     await archives.addParticipant(season.id, { teamId: "vitality" });
+
     const crowned = await service.update(season.id, {
       name: "RLCS 2024",
       winnerTeamId: "vitality",
     });
+
     expect(crowned.winnerTeamId).toBe("vitality");
     expect(await service.update(season.id, { name: "RLCS 2024" })).toMatchObject({
       winnerTeamId: "vitality",
@@ -147,6 +150,7 @@ describe("SeasonService", () => {
         region,
         sourceUrl: ANNOUNCEMENT,
       });
+
     await regional("zen", "Europe");
     await regional("vatira", "North America");
     await expect(regional("vatira", "Europe")).rejects.toThrow(
@@ -159,6 +163,7 @@ describe("SeasonService", () => {
         awardType: "season_mvp",
         sourceUrl: ANNOUNCEMENT,
       });
+
     await seasonMvp();
     await expect(seasonMvp()).rejects.toBeInstanceOf(ConflictError);
     expect((await service.detail(season.id)).awards).toHaveLength(3);
@@ -218,6 +223,7 @@ describe("SeasonService", () => {
       awardType: "season_mvp",
       sourceUrl: ANNOUNCEMENT,
     });
+
     await service.removeAward(season.id, award.id);
     await expect(service.removeAward(season.id, award.id)).rejects.toBeInstanceOf(NotFoundError);
     await service.remove(season.id);

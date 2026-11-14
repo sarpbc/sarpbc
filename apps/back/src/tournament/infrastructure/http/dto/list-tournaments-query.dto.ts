@@ -14,4 +14,5 @@ export const ListTournamentsQueryDto = OffsetPaginationQueryDto.extend({
   pickems: optionalBoolean,
   activeOnly: optionalBoolean,
 });
+
 export type ListTournamentsQueryDto = z.infer<typeof ListTournamentsQueryDto>;

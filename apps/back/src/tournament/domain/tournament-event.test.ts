@@ -65,6 +65,7 @@ describe("compareStages", () => {
       stage("Group A", "2026-05-10T15:00:00Z"),
       stage("Undated", null),
     ];
+
     expect([...stages].sort(compareStages).map((s) => s.name)).toEqual([
       "Group A",
       "Group B",

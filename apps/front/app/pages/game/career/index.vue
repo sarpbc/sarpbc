@@ -10,6 +10,7 @@ const { setPageSeo } = useSarpbcSeo();
 const localePath = useLocalePath();
 
 const sim = useCareerSimulator();
+
 const {
   state,
   hydrated,
@@ -45,6 +46,7 @@ function handlePlayAgain() {
 type PendingConfirm = "abandon" | "newCareer";
 
 const pendingConfirm = ref<PendingConfirm | undefined>(undefined);
+
 const confirmOpen = computed({
   get: () => pendingConfirm.value !== undefined,
   set: (open) => {
@@ -68,6 +70,7 @@ const confirmCopy = computed(() => {
       return { title: "", action: "" };
     default: {
       const exhaustive: never = pendingConfirm.value;
+
       return exhaustive;
     }
   }
@@ -80,14 +83,17 @@ function handleAbandon() {
 function handleNewCareer() {
   if (canContinue.value) {
     pendingConfirm.value = "newCareer";
+
     return;
   }
+
   startOnboarding();
 }
 
 function confirmPending() {
   const confirmed = pendingConfirm.value;
   pendingConfirm.value = undefined;
+
   if (confirmed === "abandon") returnToMenu();
   else if (confirmed === "newCareer") startOnboarding();
 }

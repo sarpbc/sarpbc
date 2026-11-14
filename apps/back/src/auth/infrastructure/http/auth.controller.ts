@@ -46,12 +46,14 @@ export class AuthController {
     const tokens = await this.authService.signIn(userData);
     setAuthCookies(res, tokens, this.authCookie());
     await this.captureAuthEvent(req, "server_user_logged_in");
+
     return res.code(200).send({ success: true });
   }
 
   @Get("logout")
   logout(@Res() res: FastifyReply) {
     clearAuthCookies(res, this.authCookie());
+
     return res.send({ success: true });
   }
 
@@ -59,8 +61,10 @@ export class AuthController {
   @Post("refresh")
   async refresh(@Request() req: FastifyRequest, @Res() res: FastifyReply) {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE];
+
     if (!refreshToken) {
       clearAuthCookies(res, this.authCookie());
+
       return res.code(401).send({
         statusCode: 401,
         message: "Missing auth token in cookie",
@@ -68,8 +72,10 @@ export class AuthController {
     }
 
     const session = await this.authService.refreshSession(refreshToken);
+
     if (!session) {
       clearAuthCookies(res, this.authCookie());
+
       return res.code(401).send({
         statusCode: 401,
         message: "Invalid or expired token",
@@ -77,6 +83,7 @@ export class AuthController {
     }
 
     setAuthCookies(res, session.tokens, this.authCookie());
+
     return res.code(200).send({ success: true });
   }
 
@@ -90,6 +97,7 @@ export class AuthController {
     const tokens = await this.authService.signUp(userData);
     setAuthCookies(res, tokens, this.authCookie());
     await this.captureAuthEvent(req, "server_user_signed_up");
+
     return res.code(200).send({ success: true });
   }
 
@@ -104,6 +112,7 @@ export class AuthController {
   redirectToGoogle(@Query("returnTo") returnTo: string | undefined, @Res() res: FastifyReply) {
     const destination = this.authService.parseOAuthReturnTo(returnTo);
     const url = this.authService.getGoogleAuthUrl(destination);
+
     return res.code(302).redirect(url);
   }
 
@@ -115,6 +124,7 @@ export class AuthController {
     @Res() res: FastifyReply,
   ) {
     const log = useLogger();
+
     const returnUrl = this.authService.resolveOAuthReturnUrl(
       this.authService.parseOAuthReturnTo(state),
     );
@@ -122,10 +132,12 @@ export class AuthController {
     try {
       const tokens = await this.authService.handleGoogleCallback(code);
       setAuthCookies(res, tokens, this.authCookie());
+
       return res.code(302).redirect(returnUrl);
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
       const separator = returnUrl.includes("?") ? "&" : "?";
+
       return res.code(302).redirect(`${returnUrl}${separator}authError=google`);
     }
   }

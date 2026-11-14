@@ -55,6 +55,7 @@ export class EventController {
       pickems: query.pickems,
       activeOnly: query.activeOnly === true,
     });
+
     return {
       events: listings.map(({ event, stages }) =>
         mapEvent(event, stages.map(mapTournamentListItem)),
@@ -68,6 +69,7 @@ export class EventController {
   @Get("manual")
   async listManual() {
     const listings = await this.catalogService.manualEvents();
+
     return { events: listings.map(mapStaffEvent) };
   }
 
@@ -134,9 +136,11 @@ export class EventController {
   @Get(":event/player-stats")
   async playerStats(@Param("event") event: string): Promise<TournamentPlayerStatsResponse> {
     const found = await this.events.find(event);
+
     if (!found?.stages.some((stage) => isRedistributable(stage.source))) {
       throw new NotFoundError(MISSING);
     }
+
     return this.playerStatsService.forStages(found.stages);
   }
 
@@ -155,27 +159,36 @@ export class EventController {
 
   private async resolve(segments: string[]): Promise<TournamentPathResponse> {
     const path = parseTournamentPath(segments);
+
     if (!path) throw new NotFoundError(MISSING);
+
     switch (path.kind) {
       case "legacyStage":
         return { kind: "stage", tournament: await this.stage(path.id), tab: path.tab };
       case "stage": {
         const id = await this.events.stageId(path.eventSlug, path.stageSlug);
+
         if (!id) throw new NotFoundError(MISSING);
+
         return { kind: "stage", tournament: await this.stage(id), tab: "overview" };
       }
+
       case "event": {
         const found = await this.events.find(path.eventSlug);
+
         // An event left empty by moving its stages elsewhere stays stored but is not public.
         if (!found?.stages.length) throw new NotFoundError(MISSING);
         const stages = await Promise.all(found.stages.map(({ id }) => this.stage(id)));
+
         return {
           kind: "event",
           event: { ...mapEvent(found.event, stages), viewership: found.event.viewership },
         };
       }
+
       default: {
         const unreachable: never = path;
+
         return unreachable;
       }
     }
@@ -183,7 +196,9 @@ export class EventController {
 
   private async stage(id: string): Promise<TournamentDetailResponse> {
     const tournament = await this.tournamentRead.findById(id);
+
     if (!tournament) throw new NotFoundError(MISSING);
+
     return tournament;
   }
 }

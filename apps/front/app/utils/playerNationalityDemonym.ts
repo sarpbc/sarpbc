@@ -10,11 +10,13 @@ export function resolvePlayerNationalityDemonym(
   t: (key: string) => string,
 ): string | null {
   const code = nationality?.trim().toUpperCase();
+
   if (!code) {
     return null;
   }
 
   const key = playerNationalityDemonymKey(code);
+
   if (!te(key)) {
     return null;
   }

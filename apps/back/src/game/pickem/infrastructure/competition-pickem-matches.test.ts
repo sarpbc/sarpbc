@@ -15,6 +15,7 @@ import { CompetitionPickemMatches } from "./competition-pickem-matches";
 describe("deciding a match from pick'ems", () => {
   it("stamps the end and publishes MatchDecided so the match leaves the live list", async () => {
     const [a, b] = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
+
     const stored = Object.assign(new Match(), {
       id: "m",
       beginAt: new Date("2026-01-01T10:00:00Z"),
@@ -26,8 +27,10 @@ describe("deciding a match from pick'ems", () => {
       ],
       tournament: { id: "cup", pickemsEnabled: true } as TournamentSummary,
     });
+
     const writer = { load: vi.fn(async () => stored), save: vi.fn(async () => {}) };
     const events = { publish: vi.fn(async () => {}) };
+
     const competition = new MatchService(
       { detail: async () => stored } as never,
       { run: (work) => work({ matches: writer } as never) } satisfies CompetitionTransaction,
@@ -35,12 +38,14 @@ describe("deciding a match from pick'ems", () => {
         error: vi.fn(),
       }),
     );
+
     const pickems = new PickemService(
       { list: async () => [] },
       new CompetitionPickemMatches(competition),
       { run: async (work) => work({ unscored: async () => [] } as never) },
       { now: () => new Date("2026-01-01T12:00:00Z"), id: () => "id", warn: vi.fn() },
     );
+
     const now = new Date("2026-01-01T12:00:00Z");
     expect(isMatchLive(stored, now)).toBe(true);
 

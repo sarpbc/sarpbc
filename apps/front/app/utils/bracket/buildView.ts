@@ -16,6 +16,7 @@ function getOrphanMatches(matches: TournamentDetailMatch[]): TournamentDetailMat
   for (const match of matches) {
     for (const link of match.previousMatches ?? []) {
       const parentId = link.previousMatch;
+
       if (ids.has(parentId)) {
         connected.add(match.id);
         connected.add(parentId);
@@ -61,6 +62,7 @@ export function buildTournamentBracketView(tournament: TournamentDetail): Tourna
     case "linked-double-elimination": {
       const { upper, lower } = splitDoubleEliminationMatches(matches);
       const doubleEliminationLayout = buildUnifiedDoubleEliminationLayout(upper, lower, matches);
+
       return {
         format,
         upperLayout: null,
@@ -70,8 +72,10 @@ export function buildTournamentBracketView(tournament: TournamentDetail): Tourna
         groupedMatches: [],
       };
     }
+
     default: {
       const exhaustiveCheck: never = format;
+
       return exhaustiveCheck;
     }
   }

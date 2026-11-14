@@ -47,6 +47,7 @@ function toTeam(row: Team): SeasonTeam {
 
 function toPathEntry(row: SeasonPathEntry): SeasonPathEntryItem {
   const { tournament } = row;
+
   return {
     id: row.id,
     label: row.label,
@@ -105,6 +106,7 @@ export class SeasonPersistence implements SeasonStore {
 
   async list() {
     const rows = await this.em.find(Season, {}, { orderBy: { createdAt: "DESC", name: "ASC" } });
+
     return rows.map(toSummary);
   }
 
@@ -114,6 +116,7 @@ export class SeasonPersistence implements SeasonStore {
       { slug: { $ne: null } },
       { populate: ["winnerTeam"], orderBy: { createdAt: "DESC", name: "ASC" } },
     );
+
     return rows.flatMap(({ slug, name, winnerTeam }) =>
       slug ? [{ slug, name, winner: winnerTeam ? toTeam(winnerTeam) : null }] : [],
     );
@@ -121,21 +124,25 @@ export class SeasonPersistence implements SeasonStore {
 
   async find(id: string) {
     const row = await this.em.findOne(Season, { id });
+
     return row ? toRecord(row) : null;
   }
 
   async findBySlug(slug: string) {
     const row = await this.em.findOne(Season, { slug });
+
     return row ? toRecord(row) : null;
   }
 
   async nameTaken(name: string, exceptId: string | null) {
     const filter = exceptId ? { name, id: { $ne: exceptId } } : { name };
+
     return (await this.em.count(Season, filter)) > 0;
   }
 
   async slugTaken(slug: string, exceptId: string | null) {
     const filter = exceptId ? { slug, id: { $ne: exceptId } } : { slug };
+
     return (await this.em.count(Season, filter)) > 0;
   }
 
@@ -149,6 +156,7 @@ export class SeasonPersistence implements SeasonStore {
       formatPhases: season.format.phases,
       winnerTeam: season.winnerTeamId ? this.em.getReference(Team, season.winnerTeamId) : null,
     });
+
     try {
       await this.em.persist(row).flush();
     } catch (error) {
@@ -171,6 +179,7 @@ export class SeasonPersistence implements SeasonStore {
       { season: { id: seasonId } },
       { populate: ["player"] },
     );
+
     return rows.sort(byAwardOrder).map(toAward);
   }
 
@@ -180,7 +189,9 @@ export class SeasonPersistence implements SeasonStore {
       { player: { id: playerId } },
       { populate: ["season"] },
     );
+
     rows.sort((a, b) => b.season.name.localeCompare(a.season.name) || byAwardOrder(a, b));
+
     return rows.map((row) => ({
       id: row.id,
       awardType: row.awardType,
@@ -193,6 +204,7 @@ export class SeasonPersistence implements SeasonStore {
 
   async player(id: string): Promise<SeasonAwardPlayer | null> {
     const row = await this.em.findOne(Player, { id }, { populate: ["mergedInto"] });
+
     return row ? { id: row.id, name: row.name, mergedIntoId: row.mergedInto?.id ?? null } : null;
   }
 
@@ -212,6 +224,7 @@ export class SeasonPersistence implements SeasonStore {
       season: await this.em.findOneOrFail(Season, { id: seasonId }),
       player: await this.em.findOneOrFail(Player, { id: playerId }),
     });
+
     try {
       await this.em.persist(row).flush();
     } catch (error) {
@@ -221,6 +234,7 @@ export class SeasonPersistence implements SeasonStore {
         );
       throw error;
     }
+
     return toAward(row);
   }
 
@@ -229,11 +243,13 @@ export class SeasonPersistence implements SeasonStore {
       id: awardId,
       season: { id: seasonId },
     });
+
     return removed > 0;
   }
 
   async team(id: string): Promise<SeasonParticipantTeam | null> {
     const row = await this.em.findOne(Team, { id }, { populate: ["mergedInto"] });
+
     return row ? { id: row.id, name: row.name, mergedIntoId: row.mergedInto?.id ?? null } : null;
   }
 
@@ -247,6 +263,7 @@ export class SeasonPersistence implements SeasonStore {
       { season: { id: seasonId } },
       { populate: PARTICIPANT_POPULATE, orderBy: { team: { name: "ASC" } } },
     );
+
     return rows.map(toParticipant);
   }
 
@@ -256,6 +273,7 @@ export class SeasonPersistence implements SeasonStore {
       { id: participantId, season: { id: seasonId } },
       { populate: PARTICIPANT_POPULATE },
     );
+
     return row ? toParticipant(row) : null;
   }
 
@@ -272,6 +290,7 @@ export class SeasonPersistence implements SeasonStore {
       team: await this.em.findOneOrFail(Team, { id: teamId }),
       pathNote,
     });
+
     try {
       await this.em.persist(row).flush();
     } catch (error) {
@@ -279,6 +298,7 @@ export class SeasonPersistence implements SeasonStore {
         throw new ConflictError(`${row.team.name} already takes part in this season.`);
       throw error;
     }
+
     return toParticipant(row);
   }
 
@@ -291,6 +311,7 @@ export class SeasonPersistence implements SeasonStore {
       id: participantId,
       season: { id: seasonId },
     });
+
     return removed > 0;
   }
 
@@ -307,7 +328,9 @@ export class SeasonPersistence implements SeasonStore {
           )
         : null,
     });
+
     await this.em.persist(row).flush();
+
     return toPathEntry(row);
   }
 
@@ -316,6 +339,7 @@ export class SeasonPersistence implements SeasonStore {
       id: entryId,
       participant: { id: participantId },
     });
+
     return removed > 0;
   }
 }

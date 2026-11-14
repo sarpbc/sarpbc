@@ -44,10 +44,12 @@ describe("mapMatchBlockItem", () => {
   it("derives the state the public lists use", () => {
     const upcoming = match({ beginAt: new Date("2026-10-31T20:00:00Z") });
     const live = match({ beginAt: new Date("2026-10-31T17:00:00Z") });
+
     const ended = match({
       beginAt: new Date("2026-10-31T15:00:00Z"),
       endAt: new Date("2026-10-31T16:30:00Z"),
     });
+
     const finishedStatus = match({ beginAt: live.beginAt, status: "finished" });
 
     expect(mapMatchBlockItem(upcoming, NOW, 0).state).toBe("upcoming");

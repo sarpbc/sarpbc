@@ -23,6 +23,7 @@ const dateFormatter = computed(() => mediumDateFormatter(locale.value));
 
 function meetingDate(meeting: HeadToHead["recentMeetings"][number]) {
   const date = meeting.endAt ?? meeting.beginAt;
+
   return date ? dateFormatter.value.format(new Date(date)) : "";
 }
 
@@ -30,9 +31,11 @@ function winnerLabel(winnerTeamId: string | null) {
   if (winnerTeamId === headToHead.teamAId) {
     return teamAName;
   }
+
   if (winnerTeamId === headToHead.teamBId) {
     return teamBName;
   }
+
   return t("page.match.detail.h2h.draw");
 }
 </script>

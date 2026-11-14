@@ -25,11 +25,15 @@ const candidates = computed(() => results.value.filter((team) => !takenTeamIds.v
 
 async function runSearch(value: string) {
   const trimmed = value.trim();
+
   if (!trimmed) {
     results.value = [];
+
     return;
   }
+
   searching.value = true;
+
   try {
     results.value = await searchTeams(trimmed);
   } catch (searchError) {
@@ -44,6 +48,7 @@ watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 async function add(team: Team) {
   adding.value = true;
+
   try {
     await createSeasonParticipant(props.seasonId, { teamId: team.id });
     toast.add({

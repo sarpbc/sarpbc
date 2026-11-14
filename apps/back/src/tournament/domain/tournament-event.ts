@@ -75,16 +75,21 @@ export function eventDisplayName(input: {
   const league = input.leagueName?.trim();
   const serie = input.serieName?.trim();
   const stage = input.stageName.trim();
+
   if (serie) {
     if (/^\d{4}$/.test(serie)) {
       if (league) return `${league} ${serie}`;
+
       return stage && !isGenericStageName(stage) ? stage : serie;
     }
+
     return league && !serie.toLowerCase().startsWith(league.toLowerCase())
       ? `${league} ${serie}`
       : serie;
   }
+
   if (league && stage) return `${league} ${stage}`;
+
   return stage || league || "";
 }
 

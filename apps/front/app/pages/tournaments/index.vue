@@ -18,6 +18,7 @@ interface TournamentsIndexPayload {
 
 const offset = computed(() => {
   const param = route.query.offset as string;
+
   return param ? parseInt(param, 10) : 0;
 });
 
@@ -42,10 +43,13 @@ const { data: nextEvent } = useLazyAsyncData(
   "tournaments-next-event",
   async () => {
     const { events: active } = await getEvents({ limit: 50, activeOnly: true });
+
     const next = active
       .filter((event) => getTournamentStatus(event) === "upcoming")
       .toSorted((a, b) => new Date(a.beginAt!).getTime() - new Date(b.beginAt!).getTime())[0];
+
     if (!next) return null;
+
     return { slug: next.slug, name: next.name };
   },
   { default: () => null },

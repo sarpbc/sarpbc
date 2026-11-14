@@ -12,6 +12,7 @@ export const ReplyContentDto = z.strictObject({
     ),
   replyToId: z.uuidv4().optional(),
 });
+
 export type ReplyContentDto = z.infer<typeof ReplyContentDto>;
 
 export const CreateReplyDto = ReplyContentDto.extend({
@@ -26,4 +27,5 @@ export const CreateReplyDto = ReplyContentDto.extend({
     path: ["content"],
   },
 );
+
 export type CreateReplyDto = z.infer<typeof CreateReplyDto>;

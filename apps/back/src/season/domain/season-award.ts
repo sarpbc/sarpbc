@@ -32,6 +32,7 @@ function regionRule(awardType: SeasonAwardType): RegionRule {
       return "required";
     default: {
       const exhaustive: never = awardType;
+
       return exhaustive;
     }
   }
@@ -39,8 +40,10 @@ function regionRule(awardType: SeasonAwardType): RegionRule {
 
 function optionalText(value: string | null | undefined, max: number, field: string) {
   const trimmed = value?.trim() ?? "";
+
   if (trimmed.length > max)
     throw new InvalidInputError(`The ${field} has at most ${max} characters.`);
+
   return trimmed || null;
 }
 
@@ -48,10 +51,13 @@ function parseRegion(awardType: SeasonAwardType, value: string | null | undefine
   const region = optionalText(value, SEASON_AWARD_REGION_MAX_LENGTH, "region");
   const rule = regionRule(awardType);
   const label = SEASON_AWARD_LABELS[awardType];
+
   if (rule === "required" && region === null)
     throw new InvalidInputError(`A ${label} names its region.`);
+
   if (rule === "forbidden" && region !== null)
     throw new InvalidInputError(`A ${label} covers the whole season and has no region.`);
+
   return region;
 }
 
@@ -60,8 +66,10 @@ export function assertAwardSourceUrl(value: string): void {
     throw new InvalidInputError(
       `The award source has at most ${SEASON_AWARD_SOURCE_URL_MAX_LENGTH} characters.`,
     );
+
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
     throw new InvalidInputError("The award source must be an http(s) URL.");
+
   if (isForbiddenSourceHost(new URL(value).hostname))
     throw new InvalidInputError(
       "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
@@ -76,6 +84,7 @@ export function parseSeasonAward(input: {
 }): SeasonAwardFields {
   const sourceUrl = input.sourceUrl.trim();
   assertAwardSourceUrl(sourceUrl);
+
   return {
     awardType: input.awardType,
     region: parseRegion(input.awardType, input.region),

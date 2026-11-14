@@ -76,6 +76,7 @@ function setup(
     groupReplays: vi.fn<BallchasingSource["groupReplays"]>(),
     replayStats: vi.fn<BallchasingSource["replayStats"]>(async () => stats),
   } satisfies BallchasingSource;
+
   const candidates: StatsCandidates = {
     tournamentExists: vi.fn(async (id: string) => id === "t1"),
     matches: vi.fn(async () => [
@@ -86,6 +87,7 @@ function setup(
       },
     ]),
   };
+
   const games = {
     locations: vi.fn<GameStatsStore["locations"]>(
       async () => new Map([["stored-1", { matchId: "m1", number: 1 }]]),
@@ -110,11 +112,13 @@ function setup(
     playerLines: vi.fn<GameStatsStore["playerLines"]>(async () => []),
     remove: vi.fn<GameStatsStore["remove"]>(async () => null),
   } satisfies GameStatsStore;
+
   const service = new ManualGameService(
     options.source === false ? null : source,
     candidates,
     games,
   );
+
   return { service, source, games };
 }
 
@@ -155,6 +159,7 @@ describe("ManualGameService.attach", () => {
         { id: "p-seikoo", teamNames: ["Seikoo"], players: [{ id: "seikoo", name: "Seikoo" }] },
       ],
     });
+
     games.links.mockResolvedValue([]);
 
     await service.attach("t1", { ...input, blueParticipantId: "p-seikoo" });
@@ -216,6 +221,7 @@ describe("ManualGameService.attach", () => {
     const error = await service.attach(tournamentId, { ...input, ...change }).catch((e) => e);
 
     expect(error).toBeInstanceOf(kind);
+
     if (code) expect(error.detail.code).toBe(code);
     expect(source.replayStats).not.toHaveBeenCalled();
     expect(games.save).not.toHaveBeenCalled();
@@ -223,12 +229,14 @@ describe("ManualGameService.attach", () => {
 
   it("says where a replay is already attached", async () => {
     const { service, games, source } = setup();
+
     const attached: GameAttachment = {
       matchId: "m9",
       number: 3,
       tournamentName: "RLCS Paris Major",
       teams: ["Vitality", "Falcons"],
     };
+
     games.attachment.mockResolvedValueOnce(attached);
 
     const error = await service.attach("t1", input).catch((e) => e);
@@ -265,6 +273,7 @@ describe("ManualGameService.attach", () => {
 describe("ManualGameService.remove", () => {
   it("removes the game and returns it", async () => {
     const { service, games } = setup();
+
     const removed = {
       matchId: "m1",
       number: 1,
@@ -275,6 +284,7 @@ describe("ManualGameService.remove", () => {
       blueGoals: 1,
       orangeGoals: 0,
     };
+
     games.remove.mockResolvedValueOnce(removed);
 
     expect(await service.remove("t1", "m1", 1)).toEqual(removed);

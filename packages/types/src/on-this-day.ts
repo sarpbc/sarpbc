@@ -3,6 +3,7 @@ import type { TeamLogos } from "./team";
 import type { TransferType } from "./transfer";
 
 export const ON_THIS_DAY_LINK_KINDS = ["player", "team", "tournament", "match"] as const;
+
 export type OnThisDayLinkKind = (typeof ON_THIS_DAY_LINK_KINDS)[number];
 
 export interface OnThisDayPlayer {

@@ -115,6 +115,7 @@ export function canAccessSection(user: User | null | undefined, path: AdminSecti
 /** Pages are named after their path, so `news-slug` belongs to `/news`. Unknown routes are open to staff. */
 function adminSectionForRoute(baseName: string | undefined): AdminSection | undefined {
   const root = baseName?.split("-")[0];
+
   return ADMIN_SECTIONS.find((section) => section.path === `/${root}`);
 }
 
@@ -123,5 +124,6 @@ export function canAccessRoute(
   baseName: string | undefined,
 ): boolean {
   const section = adminSectionForRoute(baseName);
+
   return !section || meetsSection(user, section);
 }

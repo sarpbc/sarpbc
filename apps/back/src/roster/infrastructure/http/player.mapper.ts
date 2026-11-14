@@ -33,9 +33,11 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
     source: player.source,
     team: player.team ? mapTeamSummary(player.team) : null,
   };
+
   if (options?.includePhotos) {
     response.photos = player.photos.map((photo) => photo.url);
   }
+
   return response;
 }
 

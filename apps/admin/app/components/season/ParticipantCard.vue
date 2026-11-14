@@ -40,6 +40,7 @@ function entryTournamentLabel(entry: SeasonPathEntry): string | null {
 
 async function saveNote() {
   savingNote.value = true;
+
   try {
     await updateSeasonPathNote(props.seasonId, props.participant.id, pathNote.value.trim() || null);
     toast.add({ title: t("page.seasons.path.noteSaved"), color: "success" });
@@ -53,12 +54,14 @@ async function saveNote() {
 
 function pickStage(picked: PickedStage) {
   stage.value = picked;
+
   if (!label.value.trim()) label.value = picked.label.slice(0, SEASON_PATH_LABEL_MAX_LENGTH);
 }
 
 async function addEntry() {
   if (!canAddEntry.value) return;
   addingEntry.value = true;
+
   try {
     await createSeasonPathEntry(props.seasonId, props.participant.id, {
       label: label.value.trim(),

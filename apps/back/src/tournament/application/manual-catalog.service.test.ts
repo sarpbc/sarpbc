@@ -10,9 +10,11 @@ describe("ManualCatalogService", () => {
   const events = new Map<string, TournamentEvent>();
   const leagues = new Map<string, League>();
   let stages: EventStage[] = [];
+
   const eventWriter = {
     load: vi.fn(async (id: string) => {
       const event = events.get(id);
+
       return event ? Object.assign(new TournamentEvent(), event) : null;
     }),
     slugTaken: vi.fn(async (slug: string, except: string | null) =>
@@ -23,30 +25,37 @@ describe("ManualCatalogService", () => {
       events.set(event.id, Object.assign(new TournamentEvent(), event));
     }),
   };
+
   const tournamentWriter = {
     league: vi.fn(async (id: string) => {
       const league = leagues.get(id);
+
       return league ? Object.assign(new League(), league) : null;
     }),
     saveLeague: vi.fn(async (league: League) => {
       leagues.set(league.id, Object.assign(new League(), league));
     }),
   };
+
   const tx = {
     run: <T>(work: (scope: never) => Promise<T>) =>
       work({ tournaments: tournamentWriter, events: eventWriter } as never),
   };
+
   const queries = {
     list: vi.fn(),
     find: vi.fn(async (idOrSlug: string) => {
       const event = events.get(idOrSlug);
+
       return event ? { event, stages: [] } : null;
     }),
     stageId: vi.fn(),
     unsynced: vi.fn(),
   };
+
   const cache = { invalidateTournament: vi.fn() },
     diagnostics = { error: vi.fn(), warn: vi.fn() };
+
   const service = new ManualCatalogService(
     { leagues: vi.fn() } as never,
     queries,
@@ -98,11 +107,13 @@ describe("ManualCatalogService", () => {
       { id: "pool", name: "Poule", source: "manual" },
       { id: "finals", name: "Finals", source: "manual" },
     ];
+
     const updated = await service.updateEvent("cdf", {
       name: "Coupe de France Slash 2026",
       slug: "coupe-de-france-slash-2026",
       leagueId: null,
     });
+
     expect(updated.event).toMatchObject({
       name: "Coupe de France Slash 2026",
       slug: "coupe-de-france-slash-2026",
@@ -126,6 +137,7 @@ describe("ManualCatalogService", () => {
   it("lists only events the staff can edit, empty ones included", async () => {
     const event = (id: string, pandascoreSerieId: number | null = null) =>
       Object.assign(new TournamentEvent(), { id, slug: id, name: id, pandascoreSerieId });
+
     queries.unsynced.mockResolvedValue([
       { event: event("empty"), stages: [] },
       { event: event("manual"), stages: [{ id: "pool", source: "manual" }] },

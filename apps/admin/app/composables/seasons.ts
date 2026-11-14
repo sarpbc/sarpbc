@@ -12,6 +12,7 @@ import type {
 
 export async function getSeasons(): Promise<SeasonSummary[]> {
   const res = await apiFetch<{ seasons: SeasonSummary[] }>("/seasons", { method: "GET" });
+
   return res.seasons;
 }
 
@@ -39,6 +40,7 @@ export async function createSeasonAward(
     method: "POST",
     body: input,
   });
+
   return res.award;
 }
 
@@ -54,6 +56,7 @@ export async function createSeasonParticipant(
     `/seasons/${seasonId}/participants`,
     { method: "POST", body: input },
   );
+
   return res.participant;
 }
 
@@ -66,6 +69,7 @@ export async function updateSeasonPathNote(
     `/seasons/${seasonId}/participants/${participantId}`,
     { method: "PATCH", body: { pathNote } },
   );
+
   return res.participant;
 }
 
@@ -85,6 +89,7 @@ export async function createSeasonPathEntry(
     `/seasons/${seasonId}/participants/${participantId}/path`,
     { method: "POST", body: input },
   );
+
   return res.entry;
 }
 

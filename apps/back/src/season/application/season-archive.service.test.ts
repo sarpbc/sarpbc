@@ -44,6 +44,7 @@ describe("SeasonArchiveService", () => {
       teamId: "vitality",
       pathNote: "  Won both Majors. ",
     });
+
     expect(participant).toMatchObject({
       team: SEASON_TEAMS.vitality,
       pathNote: "Won both Majors.",
@@ -79,6 +80,7 @@ describe("SeasonArchiveService", () => {
       result: " 1st ",
       tournamentId: "major",
     });
+
     expect(linked).toMatchObject({ label: "RLCS Major", result: "1st" });
     expect(linked.tournament).toMatchObject({ id: "major", source: "pandascore" });
     expect(

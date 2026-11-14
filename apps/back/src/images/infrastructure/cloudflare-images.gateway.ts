@@ -19,14 +19,17 @@ export class CloudflareImagesGateway implements ImageHost {
     const accountId = this.configService.get<string>("cloudflare_account_id");
     const apiToken = this.configService.get<string>("cloudflare_api_token");
     const accountHash = this.configService.get<string>("cloudflare_account_hash");
+
     if (!accountId || !apiToken || !accountHash) {
       throw new InternalServerErrorException("Cloudflare credentials are not configured");
     }
+
     return { accountId, apiToken, accountHash };
   }
 
   async createUploadUrl(): Promise<ImageUploadUrl> {
     const { accountId, apiToken } = this.credentials();
+
     const log = createLogger({
       component: CloudflareImagesGateway.name,
       action: "createUploadUrl",
@@ -50,6 +53,7 @@ export class CloudflareImagesGateway implements ImageHost {
       );
 
       log.set({ imageId: response.data.result.id });
+
       return {
         uploadURL: response.data.result.uploadURL,
         imageId: response.data.result.id,

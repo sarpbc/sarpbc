@@ -19,10 +19,13 @@ function dated(path: string, lastmod: Date): SitemapEntry {
 
 function tournamentEntries(stages: StageSitemapRow[]): SitemapEntry[] {
   const eventLastmods = new Map<string, Date>();
+
   for (const { eventSlug, lastmod } of stages) {
     const latest = eventLastmods.get(eventSlug);
+
     if (!latest || latest < lastmod) eventLastmods.set(eventSlug, lastmod);
   }
+
   return [
     ...[...eventLastmods].map(([slug, lastmod]) => dated(tournamentEventPath(slug), lastmod)),
     ...stages.map(({ eventSlug, slug, lastmod }) =>
@@ -70,6 +73,7 @@ export class SitemapService {
         }));
       default: {
         const unhandled: never = kind;
+
         return unhandled;
       }
     }

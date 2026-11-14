@@ -11,6 +11,7 @@ function score(blue: number, orange: number, clock: number, overtime = false): S
 
 function feed(tracker: SeriesTracker, readings: readonly ScoreboardReading[], from = 0): number {
   readings.forEach((reading, index) => tracker.push(from + index, reading));
+
   return from + readings.length;
 }
 
@@ -18,6 +19,7 @@ function regulationGame(blue: number, orange: number): ScoreboardReading[] {
   const readings: ScoreboardReading[] = [score(0, 0, 300), score(0, 0, 299)];
   let current = { blue: 0, orange: 0 };
   let clock = 250;
+
   while (current.blue < blue || current.orange < orange) {
     current =
       current.blue < blue
@@ -29,9 +31,11 @@ function regulationGame(blue: number, orange: number): ScoreboardReading[] {
     );
     clock -= 30;
   }
+
   readings.push(score(current.blue, current.orange, 0), score(current.blue, current.orange, 0), {
     kind: "hidden",
   });
+
   return readings;
 }
 

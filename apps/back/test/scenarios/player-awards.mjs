@@ -17,9 +17,11 @@ export async function verifyPlayerAwards({
   assert.equal(award.participant.id, participantId);
   await request("POST", url, input, staffCookie, 409);
   await request("POST", url, { ...input, awardType: "season_mvp" }, staffCookie, 400);
+
   const grandFinals = (
     await request("POST", url, { ...input, awardType: "grand_finals_mvp" }, staffCookie, 201)
   ).json().award;
+
   await request("POST", url, { ...input, awardType: "grand_finals_mvp" }, staffCookie, 409);
   const tournamentAwards = (await request("GET", url)).json().awards;
   assert.deepEqual(

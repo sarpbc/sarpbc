@@ -41,6 +41,7 @@ const columns: TableColumn<NewsArticleAdmin>[] = [
     header: t("page.news.columns.format"),
     cell: ({ getValue }) => {
       const value = getValue() as NewsType | undefined;
+
       return value === "article" ? t("page.news.type.article") : t("page.news.type.short");
     },
   },
@@ -71,6 +72,7 @@ const {
   refresh,
 } = useAdminList("admin-news-articles", async (range) => {
   const { data, total } = await getNewsArticlesAdmin(range);
+
   return { items: data, total };
 });
 
@@ -128,6 +130,7 @@ async function saveTitle() {
   }
 
   isRenaming.value = true;
+
   try {
     await editNewsArticle(articleToRename.value.slug, {
       title: renameTitle.value.trim(),
@@ -151,13 +154,16 @@ async function togglePublish(article: NewsArticleAdmin) {
   if (isPublishing.value) {
     return;
   }
+
   isPublishing.value = true;
+
   try {
     if (article.isDraft) {
       await publishNewsArticle(article.slug);
     } else {
       await unpublishNewsArticle(article.slug);
     }
+
     article.isDraft = !article.isDraft;
     toast.add({
       title: article.isDraft ? t("page.news.edit.unpublished") : t("page.news.edit.published"),

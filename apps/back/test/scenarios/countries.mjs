@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 export async function verifyCountries({ request, staffCookie }) {
   const created = async (path, body) =>
     (await request("POST", path, body, staffCookie, 201)).json();
+
   const home = (await created("/team", { name: "Country Home Five" })).team;
   const away = (await created("/team", { name: "Country Away Five" })).team;
   await created("/player", { name: "Country Local", nationality: " tv ", teamId: home.id });
@@ -15,6 +16,7 @@ export async function verifyCountries({ request, staffCookie }) {
       source,
       teamIds: [home.id, away.id],
     });
+
     return (
       await created(`/tournaments/${tournament.id}/matches`, {
         name: `Country ${source} Final`,
@@ -25,6 +27,7 @@ export async function verifyCountries({ request, staffCookie }) {
       })
     ).match.id;
   };
+
   const manualFinal = await finishedMatchOf("manual");
   await finishedMatchOf("startgg");
 

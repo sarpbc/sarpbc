@@ -13,6 +13,7 @@ export class MultipartOptions {
 
 export const getFileFromPart = async (part: MultipartFile): Promise<Storage.MultipartFile> => {
   const buffer = await part.toBuffer();
+
   return {
     buffer,
     size: buffer.byteLength,
@@ -30,6 +31,7 @@ export const validateFile = async (
 
   if (options.maxFileSize)
     validators.push(new MaxFileSizeValidator({ maxSize: options.maxFileSize }));
+
   if (options.fileType) validators.push(new FileTypeValidator({ fileType: options.fileType }));
 
   for (const validator of validators) {

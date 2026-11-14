@@ -36,6 +36,7 @@ function setup({
     entries: vi.fn<PrizeWriter["entries"]>().mockResolvedValue([entry]),
     replace: vi.fn<PrizeWriter["replace"]>(),
   };
+
   const reads = {
     tournamentSource: vi.fn<PrizeQueries["tournamentSource"]>().mockResolvedValue(source),
     byTournament: vi
@@ -44,14 +45,17 @@ function setup({
     byTeam: vi.fn<PrizeQueries["byTeam"]>().mockResolvedValue([]),
     byPlayer: vi.fn<PrizeQueries["byPlayer"]>().mockResolvedValue([]),
   };
+
   const transaction: PrizeTransaction = { run: (work) => work({ prizes: writer }) };
   const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
   const diagnostics = { error: vi.fn<CompetitionDiagnostics["error"]>() };
+
   const service = new TournamentPrizeService(
     reads,
     transaction,
     new CompetitionAfterCommit(cache, { publish: vi.fn() }, diagnostics),
   );
+
   return { service, reads, writer, cache, diagnostics };
 }
 
@@ -95,6 +99,7 @@ describe("TournamentPrizeService", () => {
     const { service, writer } = setup({
       participants: [rosterA, { teamId: "team-b", playerIds: ["player-c"] }],
     });
+
     await expect(
       service.setDistribution("cup", [{ ...entry, playerIds: ["player-a", "player-c"] }]),
     ).rejects.toThrow(/player-c/);
@@ -135,6 +140,7 @@ describe("TournamentPrizeService", () => {
     const { service, writer } = setup({
       participants: [rosterA, { teamId: "team-b", playerIds: [] }],
     });
+
     const other: PrizeEntry = {
       ...entry,
       placement: 2,
@@ -142,6 +148,7 @@ describe("TournamentPrizeService", () => {
       teamId: "team-b",
       playerIds: [],
     };
+
     writer.entries.mockResolvedValue([entry, other]);
 
     await service.updateEntry("cup", "team-a", { amount: 1800 }, RULES);
@@ -170,6 +177,7 @@ describe("TournamentPrizeService", () => {
     const { service, writer } = setup({
       participants: [rosterA, { teamId: "team-b", playerIds: [] }],
     });
+
     const legacy: PrizeEntry = {
       ...entry,
       placement: 2,
@@ -177,6 +185,7 @@ describe("TournamentPrizeService", () => {
       playerIds: [],
       sourceUrl: "https://blast.tv/rl/open",
     };
+
     writer.entries.mockResolvedValue([entry, legacy]);
 
     await service.updateEntry("cup", "team-a", {}, RULES);

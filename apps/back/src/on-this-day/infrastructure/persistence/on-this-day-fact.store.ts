@@ -31,13 +31,16 @@ function matchName(match: Match): string {
     .map((participant) =>
       participantName({ team: participant.team, players: participant.players.getItems() }),
     );
+
   return sides.length === 2 ? sides.join(" vs ") : match.name;
 }
 
 function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["link"] {
   if (player)
     return { kind: "player", id: player.id, name: player.name, slug: player.slug, source: null };
+
   if (team) return { kind: "team", id: team.id, name: team.name, slug: team.slug, source: null };
+
   if (tournament)
     return {
       kind: "tournament",
@@ -47,6 +50,7 @@ function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["
       event: { name: tournament.event.name, slug: tournament.event.slug },
       source: tournament.source,
     };
+
   if (match)
     return {
       kind: "match",
@@ -56,6 +60,7 @@ function toLink({ player, team, tournament, match }: OnThisDayFact): StaffFact["
       slug: toMatchSlug(match),
       source: matchSource(match),
     };
+
   return null;
 }
 
@@ -84,6 +89,7 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
         orderBy: { month: "ASC", day: "ASC", year: "ASC", createdAt: "ASC" },
       },
     );
+
     return rows.map(toFact);
   }
 
@@ -93,11 +99,13 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
       { month, day },
       { populate: FACT_POPULATE, orderBy: { year: "DESC", createdAt: "ASC" } },
     );
+
     return rows.map(toFact);
   }
 
   async find(id: string) {
     const row = await this.em.findOne(OnThisDayFact, { id }, { populate: FACT_POPULATE });
+
     return row ? toFact(row) : null;
   }
 
@@ -113,6 +121,7 @@ export class OnThisDayFactPersistence implements OnThisDayFactStore {
         return (await this.em.count(Match, { id })) > 0;
       default: {
         const exhaustive: never = kind;
+
         return exhaustive;
       }
     }

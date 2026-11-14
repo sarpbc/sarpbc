@@ -6,6 +6,7 @@ export function isNewsType(value: string): value is NewsType {
       return true;
     }
   }
+
   return false;
 }
 

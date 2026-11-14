@@ -31,6 +31,7 @@ function storeFailingWith(error: Error) {
     persist: vi.fn(),
     flush: vi.fn().mockRejectedValue(error),
   };
+
   return new MikroNewsStore(Object.assign(Object.create(EntityManager.prototype), em));
 }
 

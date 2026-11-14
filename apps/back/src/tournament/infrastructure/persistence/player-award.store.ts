@@ -8,6 +8,7 @@ import { Player } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament, TournamentParticipant } from "./tournament.entities";
 import { PlayerAward } from "./player-award.entities";
 import { toEventRef } from "../../domain/tournament-event";
+
 const AWARD_LABELS = {
   mvp: "MVP",
   grand_finals_mvp: "Grand Finals MVP",
@@ -15,6 +16,7 @@ const AWARD_LABELS = {
   defensive_mvp: "Defensive MVP",
   breakthrough_player: "Breakthrough Player",
 } as const satisfies Record<PlayerAwardType, string>;
+
 function toTournamentItem(row: PlayerAward): TournamentAwardListItem {
   return {
     id: row.id,
@@ -28,15 +30,18 @@ function toTournamentItem(row: PlayerAward): TournamentAwardListItem {
     },
   };
 }
+
 export class CompetitionAwardQueries implements AwardQueries {
   constructor(private readonly em: EntityManager) {}
   async byPlayer(id: string): Promise<PlayerProfileAward[] | null> {
     if (!(await this.em.findOne(Player, { id }))) return null;
+
     const rows = await this.em.find(
       PlayerAward,
       { player: { id } },
       { populate: ["tournament.event"], orderBy: { tournament: { endAt: "DESC" } } },
     );
+
     return rows.map((row) => ({
       id: row.id,
       awardType: row.awardType,
@@ -52,6 +57,7 @@ export class CompetitionAwardQueries implements AwardQueries {
   }
   async byTournament(id: string): Promise<TournamentAwardListItem[] | null> {
     if (!(await this.em.findOne(Tournament, { id }))) return null;
+
     return (
       await this.em.find(
         PlayerAward,
@@ -61,6 +67,7 @@ export class CompetitionAwardQueries implements AwardQueries {
     ).map(toTournamentItem);
   }
 }
+
 export class CompetitionAwardWriter implements AwardWriter {
   constructor(private readonly em: EntityManager) {}
   async context(tournamentId: string, participant: AwardParticipantRef, playerId: string) {
@@ -78,6 +85,7 @@ export class CompetitionAwardWriter implements AwardWriter {
       ),
       this.em.findOne(Player, { id: playerId }),
     ]);
+
     return {
       tournament: t ? { id: t.id, name: t.name, source: t.source } : null,
       participant: p
@@ -111,6 +119,7 @@ export class CompetitionAwardWriter implements AwardWriter {
     row.player = await this.em.findOneOrFail(Player, { id: input.playerId });
     row.awardType = input.awardType;
     this.em.persist(row);
+
     try {
       await this.em.flush();
     } catch (error) {
@@ -123,12 +132,15 @@ export class CompetitionAwardWriter implements AwardWriter {
         );
       throw error;
     }
+
     return toTournamentItem(row);
   }
   async remove(tournamentId: string, id: string) {
     const row = await this.em.findOne(PlayerAward, { id, tournament: { id: tournamentId } });
+
     if (!row) return false;
     this.em.remove(row);
+
     return true;
   }
 }

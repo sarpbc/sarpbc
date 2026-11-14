@@ -5,6 +5,7 @@ const props = defineProps<{
   tournamentId: string;
   participants: TournamentDetailParticipant[];
 }>();
+
 const emit = defineEmits<{ saved: [] }>();
 
 const { t } = useI18n();
@@ -33,6 +34,7 @@ watch(
 
 async function save(participant: (typeof teamParticipants.value)[number]) {
   savingId.value = participant.id;
+
   try {
     await updateTournament(props.tournamentId, {
       rosters: [

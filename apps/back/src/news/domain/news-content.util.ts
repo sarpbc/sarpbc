@@ -3,6 +3,7 @@ import { InvalidInputError } from "../../common/domain/errors";
 
 export function assertValidMatchBlocks(content: string): void {
   const [invalid] = findInvalidNewsMatchTags(content);
+
   if (invalid !== undefined) {
     throw new InvalidInputError(
       `Invalid match block ${invalid}. Put it on its own line and use :matches{match="<match id>"}, :matches{ids="<match id>,<match id>"}, :matches{tournament="<tournament id>" limit="5"} or :matches{team="<team id>" limit="5"} with UUIDs and at most ${NEWS_MATCH_BLOCK_MAX_MATCHES} matches.`,

@@ -94,6 +94,7 @@ describe("deriveTransfers", () => {
       [contract("v", vitality, "2022-01-10", "2025-06-01")],
       today,
     );
+
     expect(departure).toMatchObject({ id: "v:leave", sourceUrl: "https://x.com/v/leave" });
     expect(arrival).toMatchObject({ id: "v:join", sourceUrl: "https://x.com/v/join" });
   });

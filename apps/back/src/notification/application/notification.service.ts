@@ -19,11 +19,13 @@ export class NotificationService {
 
   async markRead(userId: string, ids?: string[]): Promise<{ marked: number }> {
     const marked = await this.notificationRepository.markRead(userId, ids);
+
     return { marked };
   }
 
   private toDto(notification: NotificationRecord): NotificationDto | null {
     const target = resolveReplyTargetLink(notification.reply);
+
     if (!target) {
       return null;
     }

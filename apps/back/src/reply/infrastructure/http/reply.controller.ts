@@ -44,6 +44,7 @@ export class ReplyController {
     @Body({ schema: CreateReplyDto }) createReplyDto: CreateReplyDto,
   ) {
     const reply = await this.replyService.create(userId, createReplyDto);
+
     return { reply };
   }
 
@@ -57,6 +58,7 @@ export class ReplyController {
     @Body({ schema: ReportReplyDto }) reportReplyDto: ReportReplyDto,
   ) {
     const report = await this.replyService.report(userId, id, reportReplyDto.reason);
+
     return { report };
   }
 

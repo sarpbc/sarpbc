@@ -17,6 +17,7 @@ describe("bracket links", () => {
       { id: "third", previousMatches: [] },
     ],
   });
+
   const semis = [
     { previousMatchId: "semi-1", type: "winner" },
     { previousMatchId: "semi-2", type: "winner" },

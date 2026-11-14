@@ -46,6 +46,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
       return "result";
     default: {
       const exhaustive: never = tab.value;
+
       return exhaustive;
     }
   }

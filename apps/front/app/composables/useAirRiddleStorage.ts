@@ -60,11 +60,13 @@ export function parseAirRiddleStoredState(
 
   try {
     const parsed = airRiddleStoredStateSchema.safeParse(JSON.parse(raw));
+
     if (!parsed.success) {
       return null;
     }
 
     const state = parsed.data;
+
     if (
       state.date !== today ||
       state.targetLength <= 0 ||
@@ -77,8 +79,10 @@ export function parseAirRiddleStoredState(
       if (attempt.letters.length !== state.targetLength) {
         return false;
       }
+
       return attempt.results === undefined || attempt.results.length === state.targetLength;
     });
+
     if (!attemptsMatchLength) {
       return null;
     }
@@ -97,9 +101,11 @@ export function loadAirRiddleStoredState(
   }
 
   const stored = parseAirRiddleStoredState(localStorage.getItem(AIR_RIDDLE_STORAGE_KEY), today);
+
   if (!stored) {
     localStorage.removeItem(AIR_RIDDLE_STORAGE_KEY);
   }
+
   return stored;
 }
 

@@ -14,6 +14,7 @@ export function transferTypeIcon(type: TransferType): string {
       return "i-fluent-briefcase-24-regular";
     default: {
       const exhaustive: never = type;
+
       return exhaustive;
     }
   }

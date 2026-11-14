@@ -34,6 +34,7 @@ describe("MatchService deletion", () => {
       removed.push(id);
     },
   };
+
   const scope: CompetitionWriteScope = {
     matches,
     get tournaments() {
@@ -55,7 +56,9 @@ describe("MatchService deletion", () => {
       return unused();
     },
   };
+
   const transaction: CompetitionTransaction = { run: (work) => work(scope) };
+
   const reads: MatchQueries = {
     list: vi.fn(),
     page: vi.fn(),
@@ -68,6 +71,7 @@ describe("MatchService deletion", () => {
     byTeam: vi.fn(),
     byTournament: vi.fn(),
   };
+
   const service = new MatchService(
     reads,
     transaction,

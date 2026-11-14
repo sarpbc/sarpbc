@@ -38,6 +38,7 @@ describe("client throttle behind a trusted proxy", () => {
         logger: false,
       },
     );
+
     await nest.init();
     await nest.getHttpAdapter().getInstance().ready();
     app = nest;
@@ -55,18 +56,23 @@ describe("client throttle behind a trusted proxy", () => {
     client?: string;
   }) {
     const headers: Record<string, string> = {};
+
     if (options.forwardedFor) {
       headers["x-forwarded-for"] = options.forwardedFor;
     }
+
     if (options.connectingIp) {
       headers["cf-connecting-ip"] = options.connectingIp;
     }
+
     if (options.token) {
       headers[INTERNAL_API_HEADER] = options.token;
     }
+
     if (options.client) {
       headers[INTERNAL_CLIENT_HEADER] = options.client;
     }
+
     return app.getHttpAdapter().getInstance().inject({
       method: "GET",
       url: "/probe",
@@ -81,15 +87,19 @@ describe("client throttle behind a trusted proxy", () => {
       forwardedFor: "104.16.0.1",
       connectingIp: "203.0.113.10",
     };
+
     for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
       expect((await hit(visitor)).statusCode).toBe(200);
     }
+
     expect((await hit(visitor)).statusCode).toBe(429);
+
     const otherVisitor = {
       remoteAddress: "10.0.0.8",
       forwardedFor: "104.16.0.2",
       connectingIp: "203.0.113.11",
     };
+
     expect((await hit(otherVisitor)).statusCode).toBe(200);
   });
 
@@ -98,11 +108,13 @@ describe("client throttle behind a trusted proxy", () => {
       remoteAddress: "10.0.0.9",
       forwardedFor: "203.0.113.40",
     };
+
     for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
       expect((await hit({ ...options, connectingIp: `198.51.100.${attempt}` })).statusCode).toBe(
         200,
       );
     }
+
     expect((await hit({ ...options, connectingIp: "198.51.100.200" })).statusCode).toBe(429);
   });
 
@@ -120,9 +132,11 @@ describe("client throttle behind a trusted proxy", () => {
             "cf-connecting-ip": `203.0.113.${attempt}`,
           },
         });
+
     for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
       expect((await forged(attempt)).statusCode).toBe(200);
     }
+
     const blocked = await app.getHttpAdapter().getInstance().inject({
       method: "GET",
       url: "/probe",
@@ -140,6 +154,7 @@ describe("client throttle behind a trusted proxy", () => {
 
   it("limits internal SSR calls per forwarded visitor above the public limit", async () => {
     const call = (client: string) => hit({ remoteAddress: "10.0.0.12", token: TOKEN, client });
+
     for (let attempt = 0; attempt < SSR_LIMIT; attempt += 1) {
       expect((await call("203.0.113.50")).statusCode).toBe(200);
     }
@@ -153,9 +168,11 @@ describe("client throttle behind a trusted proxy", () => {
       remoteAddress: "10.0.0.21",
       forwardedFor: "198.51.100.77",
     };
+
     for (let attempt = 0; attempt < PUBLIC_LIMIT; attempt += 1) {
       expect((await hit({ ...base, client: `203.0.113.${attempt}` })).statusCode).toBe(200);
     }
+
     expect((await hit({ ...base, client: "203.0.113.200" })).statusCode).toBe(429);
   });
 
@@ -167,6 +184,7 @@ describe("client throttle behind a trusted proxy", () => {
         token: TOKEN,
         client,
       });
+
     for (let attempt = 0; attempt < SSR_LIMIT; attempt += 1) {
       expect((await call(attempt % 2 === 0 ? "10.9.9.1" : "100.64.1.1")).statusCode).toBe(200);
     }

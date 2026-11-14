@@ -18,10 +18,12 @@ describe("TournamentCron", () => {
   let cron: TournamentCron;
   const syncNewTournamentsUseCase = { execute: vi.fn() };
   const syncPandascoreTournamentUseCase = { execute: vi.fn() };
+
   const matchService = {
     list: vi.fn(),
     findRecentlyEnded: vi.fn(),
   };
+
   const tournaments = { findPandascoreActive: vi.fn() };
 
   beforeEach(async () => {

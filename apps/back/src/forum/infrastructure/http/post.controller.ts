@@ -36,10 +36,12 @@ export class PostController {
   @Get()
   async findAll(): Promise<{ posts: ForumPostListItem[] }> {
     const posts = await this.postService.find({});
+
     const commentCounts = await this.replyService.countByTargetIds(
       "forumPost",
       posts.map((post) => post.id),
     );
+
     return {
       posts: posts.map((post) => ({
         id: post.id,
@@ -60,6 +62,7 @@ export class PostController {
   @Get("topic/:topicId")
   async findByTopic(@Param("topicId") topicId: string) {
     const posts = await this.postService.findByTopicId(topicId);
+
     return { posts: posts.map(postWithSlugResponse) };
   }
 
@@ -75,6 +78,7 @@ export class PostController {
     @Request() req: AuthenticatedUserRequest,
   ): Promise<PostResponse> {
     const locale = parseLocale(req.headers["accept-language"]);
+
     return { post: await this.postService.findByIdDto(ref, locale) };
   }
 

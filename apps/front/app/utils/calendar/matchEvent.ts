@@ -23,6 +23,7 @@ export function isMatchOnCalendar(match: {
   if (!match.beginAt) {
     return false;
   }
+
   return match.status !== "finished";
 }
 

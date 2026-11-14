@@ -37,6 +37,7 @@ const circuitToDelete = ref<CircuitSummary | null>(null);
 
 async function create(input: CircuitInput) {
   isCreating.value = true;
+
   try {
     await createCircuit(input);
     isCreateOpen.value = false;

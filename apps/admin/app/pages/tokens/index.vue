@@ -32,6 +32,7 @@ const columns: TableColumn<PatToken>[] = [
     header: t("page.tokens.columns.lastUsedAt"),
     cell: ({ getValue }) => {
       const value = getValue() as string | null;
+
       return value ? dateFormatter.value.format(new Date(value)) : t("page.tokens.lastUsedNever");
     },
   },
@@ -65,6 +66,7 @@ const mcpConfigSnippet = computed(() => {
   if (!revealedToken.value) {
     return "";
   }
+
   return `URL: ${MCP_URL}\nHeader: Authorization: Bearer ${revealedToken.value}`;
 });
 
@@ -95,11 +97,13 @@ async function copyText(text: string, target: "token" | "config") {
 
 async function confirmCreate() {
   const name = newTokenName.value.trim();
+
   if (!name) {
     return;
   }
 
   isCreating.value = true;
+
   try {
     const created = await createPatToken(name);
     isCreateModalOpen.value = false;
@@ -129,6 +133,7 @@ async function confirmRevoke() {
   }
 
   isRevoking.value = true;
+
   try {
     await revokePatToken(tokenToRevoke.value.id);
     isRevokeModalOpen.value = false;

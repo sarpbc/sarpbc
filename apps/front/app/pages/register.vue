@@ -3,11 +3,13 @@ import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
+
 setPageSeo({
   title: t("page.register.seoTitle"),
   description: t("page.register.seoDescription"),
   noIndex: true,
 });
+
 const { leaveIfSignedIn, submit, googleLogin } = useAuthFlow();
 
 interface RegisterState {
@@ -36,6 +38,7 @@ async function onSubmit(event: Event) {
       { userName: state.userName, email: state.email, password: state.password },
       "user_signed_up",
     );
+
     if (!signedUp) {
       errorMessage.value = t("page.authentication.errors.signUpFailed");
     }

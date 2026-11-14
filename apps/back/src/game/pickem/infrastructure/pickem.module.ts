@@ -21,6 +21,7 @@ import { TournamentModule } from "../../../tournament/infrastructure/tournament.
       useFactory: (em: EntityManager, matches: MatchService) => {
         const store = new MikroPickemStore(em);
         const logger = new Logger(PickemService.name);
+
         return new PickemService(store, new CompetitionPickemMatches(matches), store, {
           now: () => new Date(),
           id: v4,

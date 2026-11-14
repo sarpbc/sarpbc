@@ -40,8 +40,10 @@ const {
   refresh,
 } = useAdminList("admin-teams", async ({ limit, offset }) => {
   const { teams, total } = await getAllTeams({ limit, offset });
+
   return { items: teams, total };
 });
+
 const teamToDelete = ref<Team | null>(null);
 const isCreateModalOpen = ref(false);
 const isCreating = ref(false);
@@ -75,9 +77,12 @@ function openCreateModal() {
 async function confirmCreate() {
   if (!newTeam.value.name) return;
   isCreating.value = true;
+
   try {
     const body: CreateTeamDto = { name: newTeam.value.name };
+
     if (newTeam.value.location) body.location = newTeam.value.location;
+
     if (newTeam.value.imageUrl) body.imageUrl = newTeam.value.imageUrl;
     const created = await createTeam(body);
     isCreateModalOpen.value = false;
@@ -93,7 +98,9 @@ async function onSyncTeams() {
   if (isSyncing.value) {
     return;
   }
+
   isSyncing.value = true;
+
   try {
     await syncTeamFromPandascore();
     await refresh();

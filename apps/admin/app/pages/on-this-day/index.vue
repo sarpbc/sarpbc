@@ -32,11 +32,13 @@ const dayFormat = computed(
 
 function dateLabel(fact: OnThisDayFact): string {
   const day = dayFormat.value.format(new Date(Date.UTC(2024, fact.month - 1, fact.day)));
+
   return fact.year ? `${day} ${fact.year}` : day;
 }
 
 function linkLabel(link: NonNullable<OnThisDayFact["link"]>): string {
   const name = link.kind === "tournament" ? tournamentStageLabel(link) : link.name;
+
   return `${t(`page.onThisDay.form.link.kinds.${link.kind}`)} · ${name}`;
 }
 
@@ -58,6 +60,7 @@ function openEdit(fact: OnThisDayFact) {
 async function save(input: OnThisDayFactInput) {
   isSaving.value = true;
   const current = editing.value;
+
   try {
     if (current) await updateOnThisDayFact(current.id, input);
     else await createOnThisDayFact(input);

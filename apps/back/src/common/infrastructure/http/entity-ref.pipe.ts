@@ -6,9 +6,11 @@ import { parseEntityRef, type EntityRef } from "../../domain/entity-ref";
 export class EntityRefPipe implements PipeTransform<string, EntityRef> {
   transform(value: string): EntityRef {
     const ref = parseEntityRef(value);
+
     if (!ref) {
       throw new NotFoundError("This link does not point to an existing page. Check the address.");
     }
+
     return ref;
   }
 }

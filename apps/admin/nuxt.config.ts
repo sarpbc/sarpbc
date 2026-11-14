@@ -9,6 +9,7 @@ const tiptapPmPath = dirname(dirname(require.resolve("@tiptap/pm/view")));
 
 function prosemirrorAlias(packageName: string) {
   const resolved = require.resolve(packageName, { paths: [tiptapPmPath] });
+
   return resolved.replace(/index\.cjs$/, "index.js");
 }
 

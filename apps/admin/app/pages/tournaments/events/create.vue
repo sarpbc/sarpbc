@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { getApiErrorMessage } from "@sarpbc/utils";
+
 const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
@@ -22,16 +23,21 @@ const breadcrumbItems = computed(() => [
 
 async function handleSubmit() {
   if (isSaving.value) return;
+
   if (!formState.value.name.trim()) {
     toast.add({ title: t("page.tournaments.events.form.nameRequired"), color: "error" });
+
     return;
   }
+
   isSaving.value = true;
+
   try {
     const created = await createEvent({
       ...buildEventPayload(formState.value, null),
       name: formState.value.name.trim(),
     });
+
     toast.add({ title: t("page.tournaments.events.create.saved"), color: "success" });
     await navigateTo(localePath(`/tournaments/events/${created.id}`));
   } catch (error) {

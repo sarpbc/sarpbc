@@ -22,23 +22,28 @@ function live(login: string, viewerCount: number): SourceStream {
 
 describe("StreamerService", () => {
   let snapshot: LiveStreamSnapshot | null = null;
+
   const createStreamers = () => ({
     list: vi.fn().mockResolvedValue([tracked("zenrll", "Zen"), tracked("kaydop")]),
     add: vi.fn(),
     remove: vi.fn(),
   });
+
   const createSource = () => ({
     findLiveRocketLeague: vi.fn().mockResolvedValue([live("kaydop", 100), live("zenrll", 900)]),
   });
+
   const createCache = () => ({
     read: vi.fn(async () => snapshot),
     write: vi.fn(async (value: LiveStreamSnapshot, _claim: string) => {
       snapshot = value;
+
       return true;
     }),
     claimRefresh: vi.fn<() => Promise<string | null>>().mockResolvedValue("claim-1"),
     clear: vi.fn().mockResolvedValue(undefined),
   });
+
   let streamers = createStreamers();
   let source = createSource();
   let cache = createCache();

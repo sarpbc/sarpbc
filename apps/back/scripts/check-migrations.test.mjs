@@ -12,6 +12,7 @@ function repository(baseMigrations) {
   mkdirSync(directory);
   const git = (...args) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
   git("init", "--quiet", "--initial-branch", "base");
+
   for (const name of baseMigrations) writeFileSync(join(directory, name), "");
   writeFileSync(join(directory, ".snapshot-sarpbc.json"), "{}");
   git("add", ".");
@@ -28,6 +29,7 @@ function repository(baseMigrations) {
     "-m",
     "base",
   );
+
   return {
     directory,
     add: (name) => writeFileSync(join(directory, name), ""),
@@ -38,6 +40,7 @@ function repository(baseMigrations) {
 
 test("accepts unique migrations newer than every migration on base", () => {
   const repo = repository(["Migration20250815162622.ts", "Migration20250817144821_addPlayer.ts"]);
+
   try {
     repo.add("Migration20260101000000_addThing.ts");
     assert.deepEqual(migrationViolations(repo.directory), []);
@@ -49,6 +52,7 @@ test("accepts unique migrations newer than every migration on base", () => {
 
 test("reports migrations sharing a timestamp, including ones without a name suffix", () => {
   const repo = repository([]);
+
   try {
     repo.add("Migration20260101000000.ts");
     repo.add("Migration20260101000000_addThing.ts");
@@ -65,6 +69,7 @@ test("reports migrations sharing a timestamp, including ones without a name suff
 
 test("reports added migrations that are not newer than the newest migration on base", () => {
   const repo = repository(["Migration20250815162622.ts", "Migration20260201000000_onBase.ts"]);
+
   try {
     repo.add("Migration20260115000000_older.ts");
     repo.add("Migration20260201000000_same.ts");
@@ -84,6 +89,7 @@ test("reports added migrations that are not newer than the newest migration on b
 
 test("reports files that are neither migrations nor snapshots", () => {
   const repo = repository(["Migration20250815162622.ts"]);
+
   try {
     repo.add("Migration2026010100000_short.ts");
     repo.add("Migration20260101000000-dash.ts");
@@ -91,6 +97,7 @@ test("reports files that are neither migrations nor snapshots", () => {
     repo.add("Migration20260101000000.js");
     const violations = migrationViolations(repo.directory);
     assert.equal(violations.length, 4);
+
     for (const violation of violations) assert.match(violation, /^Unexpected file /);
   } finally {
     repo.remove();
@@ -99,6 +106,7 @@ test("reports files that are neither migrations nor snapshots", () => {
 
 test("reports a base ref that does not resolve without throwing", () => {
   const repo = repository(["Migration20250815162622.ts"]);
+
   try {
     assert.deepEqual(migrationViolations(repo.directory, "origin/missing"), [
       "BASE_REF origin/missing does not resolve to a commit. Fetch it first or unset BASE_REF to skip the ordering check.",
@@ -110,6 +118,7 @@ test("reports a base ref that does not resolve without throwing", () => {
 
 test("reports a renamed base migration as renamed instead of not newer", () => {
   const repo = repository(["Migration20250815162622.ts", "Migration20260201000000_onBase.ts"]);
+
   try {
     repo.delete("Migration20260201000000_onBase.ts");
     repo.add("Migration20260201000000_renamed.ts");

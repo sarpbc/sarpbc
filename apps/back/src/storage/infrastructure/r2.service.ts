@@ -39,12 +39,15 @@ export class R2Service implements ObjectStorage {
     }
 
     const accountId = this.configService.get<string>("r2_account_id");
+
     const endpoint =
       this.configService.get<string>("r2_endpoint")?.replace(/\/$/, "") ??
       (accountId ? `https://${accountId}.r2.cloudflarestorage.com` : undefined);
+
     const accessKeyId = this.configService.get<string>("r2_access_key_id");
     const secretAccessKey = this.configService.get<string>("r2_secret_access_key");
     const publicBaseUrl = this.configService.get<string>("r2_public_base_url");
+
     if (!endpoint || !accessKeyId || !secretAccessKey || !publicBaseUrl) {
       throw new InternalServerErrorException(
         "R2 storage is not configured. Set R2 credentials, R2_ENDPOINT (or R2_ACCOUNT_ID), and R2_PUBLIC_BASE_URL.",
@@ -59,6 +62,7 @@ export class R2Service implements ObjectStorage {
       }),
       publicUrl: (key) => `${publicBaseUrl.replace(/\/$/, "")}/${key}`,
     };
+
     return this.connection;
   }
 
@@ -72,6 +76,7 @@ export class R2Service implements ObjectStorage {
   ): Promise<ObjectUploadUrl> {
     const { client, publicUrl } = this.connect();
     const key = imageKey(target, contentType);
+
     const command = new PutObjectCommand({
       Bucket: this.bucket,
       Key: key,
@@ -79,6 +84,7 @@ export class R2Service implements ObjectStorage {
     });
 
     const uploadUrl = await getSignedUrl(client, command, { expiresIn: 600 });
+
     return { uploadUrl, publicUrl: publicUrl(key), key };
   }
 
@@ -88,6 +94,7 @@ export class R2Service implements ObjectStorage {
     target: ImageUploadTarget,
   ): Promise<StoredObject> {
     const key = imageKey(target, contentType);
+
     return this.objectOperation(
       "uploadImage",
       { key, target, imageContentType: contentType, imageSize: buffer.byteLength },
@@ -100,6 +107,7 @@ export class R2Service implements ObjectStorage {
             ContentType: contentType,
           }),
         );
+
         return { publicUrl: publicUrl(key), key };
       },
       "Image could not be stored. Try again, or pick a different JPEG, PNG, WebP, or GIF.",
@@ -120,6 +128,7 @@ export class R2Service implements ObjectStorage {
             CacheControl: "public, max-age=31536000, immutable",
           }),
         );
+
         return { publicUrl: publicUrl(key), key };
       },
     );
@@ -134,6 +143,7 @@ export class R2Service implements ObjectStorage {
           Key: key,
         }),
       );
+
       return { publicUrl: publicUrl(key), key };
     });
   }
@@ -151,6 +161,7 @@ export class R2Service implements ObjectStorage {
     failureMessage = "The image could not be stored. Try again.",
   ): Promise<T> {
     const connection = this.connect();
+
     const log = createLogger({
       component: R2Service.name,
       action,
@@ -158,9 +169,11 @@ export class R2Service implements ObjectStorage {
       bucket: this.bucket,
       ...fields,
     });
+
     try {
       const result = await work(connection);
       log.set({ stored: true });
+
       return result;
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
