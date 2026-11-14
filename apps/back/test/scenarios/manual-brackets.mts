@@ -27,6 +27,20 @@ type TournamentDetail = z.infer<typeof tournamentDetail>;
 
 const tournamentBody = z.object({ tournament: tournamentDetail });
 
+const decidedMatches = z.object({
+  tournament: z.object({
+    matches: z.array(
+      z.looseObject({
+        forfeitedBy: z.string().nullable(),
+        id: z.string(),
+        results: z.array(z.object({ participant: z.string(), score: z.number() })),
+        status: z.string().nullable(),
+        winnerId: z.string().nullable(),
+      }),
+    ),
+  }),
+});
+
 const generatedMatches = z.object({
   matches: z.array(z.looseObject({ numberOfGames: z.number(), participants: z.array(identified) })),
 });
@@ -231,4 +245,34 @@ export const verifyManualBrackets = async ({
     [e2, e1],
   );
   await request("POST", `/tournaments/${empty.id}/bracket`, { teams: 4 }, staffCookie, 400);
+
+  const forfeitPath = `/tournaments/matches/${firstSemi.id}/forfeit`;
+  await request("PUT", forfeitPath, { participantId: e2 }, memberCookie, 403);
+  await request("PUT", forfeitPath, { participantId: e2 }, staffCookie, 200);
+
+  const forfeitedSemi = async () => {
+    const response = await request("GET", `/tournaments/${empty.id}`);
+
+    const semi = response
+      .json(decidedMatches)
+      .tournament.matches.find((match) => match.id === firstSemi.id);
+
+    assert.ok(semi, "the forfeited semifinal is listed");
+
+    return semi;
+  };
+
+  const forfeited = await forfeitedSemi();
+  assert.equal(forfeited.forfeitedBy, e2);
+  assert.equal(forfeited.winnerId, e1);
+  assert.equal(forfeited.status, "finished");
+  assert.deepEqual(
+    Object.fromEntries(forfeited.results.map(({ participant, score }) => [participant, score])),
+    { [e1]: 4, [e2]: 0 },
+  );
+
+  await request("PUT", forfeitPath, { participantId: null }, staffCookie, 200);
+  const cleared = await forfeitedSemi();
+  assert.equal(cleared.forfeitedBy, null);
+  assert.equal(cleared.winnerId, e1);
 };
