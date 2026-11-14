@@ -1,4 +1,5 @@
 import type { TeamAliasInput } from "@sarpbc/types";
+import { isLiquipediaSourceHost } from "./source-host";
 
 export const TEAM_ALIAS_NAME_MAX_LENGTH = 255;
 export const TEAM_ALIAS_URL_MAX_LENGTH = 2048;
@@ -22,10 +23,6 @@ export type ParsedTeamAlias =
 export interface DatedTeamName {
   from: string;
   to: string | null;
-}
-
-export function isLiquipediaSourceHost(hostname: string): boolean {
-  return hostname.toLowerCase().includes("liquipedia");
 }
 
 function isIsoDay(value: string): boolean {

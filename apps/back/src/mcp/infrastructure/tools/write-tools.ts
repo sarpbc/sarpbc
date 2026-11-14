@@ -2,7 +2,7 @@ import { z } from "zod";
 import {
   DATA_SOURCE_URL_MAX_LENGTH,
   MAX_VODS_PER_GAME,
-  isForbiddenDataSourceHost,
+  isForbiddenSourceHost,
 } from "@sarpbc/utils";
 import type { NewsService } from "../../../news/application/news.service";
 import { createNewsArticleFields } from "../../../news/infrastructure/http/dto/create-news-article.dto";
@@ -39,7 +39,7 @@ const matchSourceUrlInput = z
   .max(DATA_SOURCE_URL_MAX_LENGTH)
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .refine(
-    (url) => !URL.canParse(url) || !isForbiddenDataSourceHost(new URL(url).hostname),
+    (url) => !URL.canParse(url) || !isForbiddenSourceHost(new URL(url).hostname),
     "Liquipedia and BLAST.tv are not accepted sources",
   )
   .describe(

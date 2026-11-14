@@ -11,7 +11,7 @@ import {
   MAX_CIRCUIT_SCALE_TIERS,
   MAX_CIRCUIT_STAGE_TEAMS,
   getApiErrorMessage,
-  isForbiddenCircuitSourceHost,
+  isForbiddenSourceHost,
   isWorldwideCircuitRegion,
 } from "@sarpbc/utils";
 
@@ -207,7 +207,7 @@ const sourceUrlError = computed<string | undefined>(() => {
   if (url === null || (url.protocol !== "https:" && url.protocol !== "http:")) {
     return t("page.circuits.scale.errors.sourceUrl");
   }
-  return isForbiddenCircuitSourceHost(url.hostname)
+  return isForbiddenSourceHost(url.hostname)
     ? t("page.circuits.scale.errors.sourceBlocked")
     : undefined;
 });

@@ -7,7 +7,7 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SEASON,
   MIN_CIRCUIT_SEASON,
-  isForbiddenCircuitSourceHost,
+  isForbiddenSourceHost,
 } from "@sarpbc/utils";
 
 const props = defineProps<{
@@ -38,7 +38,7 @@ const sourceUrlError = computed<string | undefined>(() => {
   const url = URL.parse(value);
   if (url === null || (url.protocol !== "https:" && url.protocol !== "http:"))
     return t("page.circuits.scale.errors.sourceUrl");
-  return isForbiddenCircuitSourceHost(url.hostname)
+  return isForbiddenSourceHost(url.hostname)
     ? t("page.circuits.scale.errors.sourceBlocked")
     : undefined;
 });

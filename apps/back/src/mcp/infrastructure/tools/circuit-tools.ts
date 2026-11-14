@@ -6,7 +6,7 @@ import {
   MAX_CIRCUIT_QUALIFICATION_SPOTS,
   MAX_CIRCUIT_SEASON,
   MIN_CIRCUIT_SEASON,
-  isForbiddenCircuitSourceHost,
+  isForbiddenSourceHost,
 } from "@sarpbc/utils";
 import { z } from "zod";
 import { isRedistributable } from "../../../common/domain/data-source";
@@ -71,7 +71,7 @@ const sourceUrlSchema = z
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .refine(
-    (url) => !URL.canParse(url) || !isForbiddenCircuitSourceHost(new URL(url).hostname),
+    (url) => !URL.canParse(url) || !isForbiddenSourceHost(new URL(url).hostname),
     "Liquipedia, its mirrors and BLAST.tv are not accepted sources",
   )
   .describe(

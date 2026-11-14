@@ -1,12 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  calendarDayIn,
-  formatIsoDay,
-  isForbiddenFactSource,
-  isMonthDay,
-  parseIsoDay,
-} from "./on-this-day";
+import { calendarDayIn, formatIsoDay, isMonthDay, parseIsoDay } from "./on-this-day";
 
 describe("on this day calendar", () => {
   it("accepts every day of the year, February 29 included", () => {
@@ -36,13 +30,5 @@ describe("on this day calendar", () => {
     assert.equal(parseIsoDay("2023-02-29"), null);
     assert.equal(parseIsoDay("2024-2-9"), null);
     assert.equal(formatIsoDay({ year: 2024, month: 3, day: 5 }), "2024-03-05");
-  });
-
-  it("refuses Liquipedia and BLAST.tv hosts", () => {
-    assert.equal(isForbiddenFactSource("liquipedia.net"), true);
-    assert.equal(isForbiddenFactSource("LIQUIPEDIA.NET."), true);
-    assert.equal(isForbiddenFactSource("www.blast.tv"), true);
-    assert.equal(isForbiddenFactSource("rocketleague.com"), false);
-    assert.equal(isForbiddenFactSource("notblast.tv"), false);
   });
 });

@@ -31,8 +31,8 @@ import {
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
-  isForbiddenCircuitSourceHost,
-  isForbiddenDataSourceHost,
+  isBlastSourceHost,
+  isForbiddenSourceHost,
   isForbiddenViewershipSource,
   isLiquipediaSourceHost,
   isIso4217Code,
@@ -60,7 +60,7 @@ const withoutLiquipedia = (use: string) =>
   ] as const;
 
 const withoutBlast = [
-  (url: string) => !URL.canParse(url) || !isForbiddenDataSourceHost(new URL(url).hostname),
+  (url: string) => !URL.canParse(url) || !isBlastSourceHost(new URL(url).hostname),
   "BLAST.tv is not an accepted source; its terms forbid reusing its data. Cite the official Rocket League rules or the organiser's announcement",
 ] as const;
 
@@ -128,7 +128,7 @@ const circuitScaleSchema = z
 
 const circuitSourceUrlSchema = sourceUrlSchema
   .refine(
-    (url) => !URL.canParse(url) || !isForbiddenCircuitSourceHost(new URL(url).hostname),
+    (url) => !URL.canParse(url) || !isForbiddenSourceHost(new URL(url).hostname),
     "Liquipedia and BLAST.tv are not accepted circuit sources",
   )
   .describe(

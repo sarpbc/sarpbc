@@ -10,7 +10,7 @@ import {
   ON_THIS_DAY_MIN_YEAR,
   ON_THIS_DAY_SOURCE_URL_MAX_LENGTH,
   ON_THIS_DAY_TEXT_MAX_LENGTH,
-  isForbiddenFactSource,
+  isForbiddenSourceHost,
   isMonthDay,
   participantName,
   tournamentStageLabel,
@@ -95,7 +95,7 @@ const sourceError = computed(() => {
   if (!value) return undefined;
   if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol))
     return t("page.onThisDay.form.sourceInvalid");
-  return isForbiddenFactSource(new URL(value).hostname)
+  return isForbiddenSourceHost(new URL(value).hostname)
     ? t("page.onThisDay.form.sourceForbidden")
     : undefined;
 });

@@ -1,10 +1,9 @@
 import type { Viewership } from "@sarpbc/types";
+import { isForbiddenSourceHost } from "./source-host";
 
 export const MAX_VIEWERS = 100_000_000;
 export const VIEWERSHIP_SOURCE_NAME_MAX_LENGTH = 80;
 export const VIEWERSHIP_SOURCE_URL_MAX_LENGTH = 2048;
-
-const FORBIDDEN_SOURCE_HOSTS = ["liquipedia.net", "blast.tv", "start.gg"] as const;
 
 export type ViewershipError =
   | "invalid-peak"
@@ -22,10 +21,8 @@ export type ParsedViewership =
   | { ok: false; error: ViewershipError };
 
 export function isForbiddenViewershipSource(hostname: string): boolean {
-  const host = hostname.toLowerCase();
-  return FORBIDDEN_SOURCE_HOSTS.some(
-    (forbidden) => host === forbidden || host.endsWith(`.${forbidden}`),
-  );
+  const host = hostname.toLowerCase().replace(/\.$/, "");
+  return isForbiddenSourceHost(host) || host === "start.gg" || host.endsWith(".start.gg");
 }
 
 function isViewerCount(value: number): boolean {

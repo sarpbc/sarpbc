@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { isAcceptedDataSourceUrl, isForbiddenDataSourceHost } from "./data-source-url";
+import { isAcceptedDataSourceUrl } from "./data-source-url";
 
 describe("isAcceptedDataSourceUrl", () => {
   it("accepts an official http(s) page", () => {
@@ -20,11 +20,4 @@ describe("isAcceptedDataSourceUrl", () => {
       assert.equal(isAcceptedDataSourceUrl(url), false);
     });
   }
-});
-
-describe("isForbiddenDataSourceHost", () => {
-  it("matches BLAST.tv subdomains with a trailing dot but not lookalikes", () => {
-    assert.equal(isForbiddenDataSourceHost("Rl.BLAST.tv."), true);
-    assert.equal(isForbiddenDataSourceHost("notblast.tv"), false);
-  });
 });
