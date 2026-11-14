@@ -140,7 +140,7 @@ describe("TournamentController stage reads", () => {
           }),
     );
 
-    expect(await controller.getPlayerStats("group-stage")).toMatchObject({
+    await expect(controller.getPlayerStats("group-stage")).resolves.toMatchObject({
       games: 1,
       players: [{ player: { id: "zen" }, totals: { goals: 1, saves: 2 }, goalParticipation: 50 }],
     });
@@ -148,7 +148,7 @@ describe("TournamentController stage reads", () => {
       NotFoundException,
     );
     await expect(controller.getPlayerStats("missing")).rejects.toBeInstanceOf(NotFoundException);
-    expect(playerLines).toHaveBeenCalledTimes(1);
+    expect(playerLines).toHaveBeenCalledOnce();
     expect(playerLines).toHaveBeenCalledWith(["group-stage"]);
   });
 });
@@ -181,7 +181,7 @@ describe("TournamentController leagues", () => {
 
   it("lists leagues with the fields staff edit and their PandaScore id", async () => {
     leagues.mockResolvedValue([manual, synced]);
-    expect(await controller.findLeagues()).toEqual({
+    await expect(controller.findLeagues()).resolves.toEqual({
       leagues: [
         {
           id: "l1",

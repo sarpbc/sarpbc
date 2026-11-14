@@ -14,7 +14,7 @@ function stream(overrides: Partial<MatchStreamDto> = {}): MatchStreamDto {
   };
 }
 
-describe("mapOfficialMatchStreams", () => {
+describe(mapOfficialMatchStreams, () => {
   it("returns an empty list when streams are missing", () => {
     expect(mapOfficialMatchStreams(undefined)).toEqual([]);
     expect(mapOfficialMatchStreams([])).toEqual([]);

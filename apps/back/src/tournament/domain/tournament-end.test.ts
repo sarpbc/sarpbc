@@ -3,7 +3,7 @@ import { inferEndAt } from "./tournament-end";
 
 const at = (iso: string) => new Date(iso);
 
-describe("inferEndAt", () => {
+describe(inferEndAt, () => {
   it("returns the latest played match end once every match is settled", () => {
     expect(
       inferEndAt([

@@ -6,7 +6,7 @@ import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pan
 import { MatchService } from "../../application/match/match.service";
 import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
 
-describe("TournamentSyncRunner", () => {
+describe(TournamentSyncRunner, () => {
   let cron: TournamentSyncRunner;
   const syncNewTournamentsUseCase = { execute: vi.fn() };
   const syncPandascoreTournamentUseCase = { execute: vi.fn() };

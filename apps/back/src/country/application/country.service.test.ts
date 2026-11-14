@@ -13,7 +13,7 @@ import { CountryService } from "./country.service";
 
 const firstPage = { limit: 25, offset: 0 };
 
-describe("CountryService", () => {
+describe(CountryService, () => {
   it("lists the nationalities stored on player profiles", async () => {
     const { sources } = countrySources();
 

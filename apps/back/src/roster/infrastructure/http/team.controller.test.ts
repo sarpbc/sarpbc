@@ -10,7 +10,7 @@ import type { TournamentQueries } from "../../../tournament/application/ports";
 import { unconstructed } from "../../../../test/doubles";
 import { unusedTournamentQueries } from "../../../../test/unused-tournament-queries";
 
-describe("TeamController", () => {
+describe(TeamController, () => {
   const kept = Object.assign(new Team(), { id: "kept", name: "Kept" });
   const findById = vi.fn();
   const getFormerPlayersByTeam = vi.fn();

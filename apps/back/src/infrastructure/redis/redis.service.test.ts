@@ -3,7 +3,7 @@ import { Redis } from "ioredis";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { RedisService } from "./redis.service";
 
-describe("RedisService", () => {
+describe(RedisService, () => {
   const client = new Redis({ lazyConnect: true });
   const quit = vi.spyOn(client, "quit").mockResolvedValue("OK");
   const on = vi.spyOn(client, "on");
@@ -26,11 +26,11 @@ describe("RedisService", () => {
 
   it("awaits quit on module destroy", async () => {
     await service.onModuleDestroy();
-    expect(quit).toHaveBeenCalled();
+    expect(quit).toHaveBeenCalledWith();
   });
 
   it("pings the redis client", async () => {
     await expect(service.ping()).resolves.toBe("PONG");
-    expect(ping).toHaveBeenCalled();
+    expect(ping).toHaveBeenCalledWith();
   });
 });

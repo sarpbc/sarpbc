@@ -15,7 +15,7 @@ function configure(env: Record<string, string>) {
   return toConfiguration(validateEnv({ ...requiredEnv, ...env }));
 }
 
-describe("toConfiguration", () => {
+describe(toConfiguration, () => {
   it("derives production origins and the cookie domain from the front and admin URLs", () => {
     const config = configure({
       NODE_ENV: "production",

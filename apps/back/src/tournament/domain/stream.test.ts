@@ -37,7 +37,7 @@ function matchIn(tournament: { streams: Stream[]; eventStreams: Stream[] }): Mat
   });
 }
 
-describe("replaceStreams", () => {
+describe(replaceStreams, () => {
   it("normalizes each stream and derives its platform and channel", () => {
     expect(replaceStreams([], [official, { ...costream, language: " FR " }], "manual")).toEqual([
       {
@@ -111,7 +111,7 @@ describe("replaceStreams", () => {
   });
 });
 
-describe("pandascoreStreams", () => {
+describe(pandascoreStreams, () => {
   it("puts the main stream first and skips unusable entries", () => {
     expect(
       pandascoreStreams([

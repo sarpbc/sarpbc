@@ -43,7 +43,7 @@ describe("RosterProposalService season award proposals", () => {
   it("records the award with the announcement as its source on approval", async () => {
     const { id } = await proposeRegional();
 
-    expect(await fixture.service.approve(id, "admin")).toMatchObject({
+    await expect(fixture.service.approve(id, "admin")).resolves.toMatchObject({
       entityId: "season-award-1",
     });
     expect(fixture.seasons.addAward).toHaveBeenCalledWith("season-1", {

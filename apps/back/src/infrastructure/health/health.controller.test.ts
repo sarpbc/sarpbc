@@ -7,7 +7,7 @@ import { PostgresHealthIndicator } from "./postgres.health";
 import { RedisHealthIndicator } from "./redis.health";
 import { ShutdownStateService } from "./shutdown-state.service";
 
-describe("HealthController", () => {
+describe(HealthController, () => {
   let controller: HealthController;
 
   const health = {

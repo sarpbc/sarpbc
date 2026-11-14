@@ -7,7 +7,7 @@ const NOW = new Date("2026-10-31T18:00:00Z");
 
 const stored = (id: string) => Object.assign(new Match(), { id });
 
-describe("findMatchBlocks", () => {
+describe(findMatchBlocks, () => {
   const reads = {
     byIds: vi.fn<MatchQueries["byIds"]>(),
     page: vi.fn<MatchQueries["page"]>(),
@@ -29,7 +29,7 @@ describe("findMatchBlocks", () => {
       NOW,
     );
 
-    expect(reads.byIds).toHaveBeenCalledTimes(1);
+    expect(reads.byIds).toHaveBeenCalledOnce();
     expect(reads.byIds).toHaveBeenCalledWith(["a", "b", "missing"]);
     expect(reads.page).not.toHaveBeenCalled();
     expect(single?.map((match) => match.id)).toEqual(["a"]);
@@ -93,7 +93,7 @@ const started = (hoursAgo: number, endAt: Date | null = null) =>
     endAt,
   });
 
-describe("isMatchBlockLive", () => {
+describe(isMatchBlockLive, () => {
   it("stops treating a match without an end as live after the window", () => {
     expect(isMatchBlockLive(started(1), NOW)).toBe(true);
     expect(isMatchBlockLive(started(5), NOW)).toBe(true);

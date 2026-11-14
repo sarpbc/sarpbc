@@ -10,7 +10,7 @@ import {
 } from "../../../test/career-fixtures";
 import { PlayerComparisonService } from "./player-comparison.service";
 
-describe("PlayerComparisonService", () => {
+describe(PlayerComparisonService, () => {
   it("compares the two careers without start.gg competition data", async () => {
     const { sources, playerEarnings } = careerSources();
     const comparison = await new PlayerComparisonService(sources).compare("zen", "vatira");

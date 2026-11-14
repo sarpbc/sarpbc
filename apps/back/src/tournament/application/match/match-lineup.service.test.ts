@@ -58,7 +58,7 @@ function match(id: string, source: DataSource, tournamentSource: DataSource = "m
   });
 }
 
-describe("MatchLineupService", () => {
+describe(MatchLineupService, () => {
   const matches = new Map<string, Match>();
   const replaced: { matchId: string; lineups: MatchLineupInput[] }[] = [];
   let stored: LineupRow[] = [];
@@ -231,12 +231,12 @@ describe("MatchLineupService", () => {
 
     it("skips a side that no longer plays the match after a sync", async () => {
       playerRows = [{ matchId: "manual-match", participantId: "side-gone", rosterIds: [] }];
-      expect(await service.standIns("delta")).toEqual([]);
+      await expect(service.standIns("delta")).resolves.toEqual([]);
     });
 
     it("does not read matches for a player who never stood in", async () => {
       playerRows = [{ matchId: "manual-match", participantId: "side-a", rosterIds: ["delta"] }];
-      expect(await service.standIns("delta")).toEqual([]);
+      await expect(service.standIns("delta")).resolves.toEqual([]);
       expect(byIds).not.toHaveBeenCalled();
     });
   });

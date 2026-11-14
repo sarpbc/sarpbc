@@ -126,7 +126,7 @@ function setup(role: "admin" | "journalist") {
   return { tools, call, statsImportService, statsPlayerLinkService, manualGameService };
 }
 
-describe("summarizeStatsImport", () => {
+describe(summarizeStatsImport, () => {
   it("counts other-stage replays and lists only the ones staff should review", () => {
     const summary = summarizeStatsImport(statsImport, false);
 

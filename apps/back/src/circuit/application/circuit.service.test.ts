@@ -83,7 +83,7 @@ const result = (overrides: Partial<StoredStageResult>): StoredStageResult => ({
   ...overrides,
 });
 
-describe("CircuitService", () => {
+describe(CircuitService, () => {
   let service: CircuitService;
   let saved: ReturnType<typeof setup>["saved"];
   let results: ReturnType<typeof setup>["results"];
@@ -102,7 +102,7 @@ describe("CircuitService", () => {
   });
 
   it("creates a circuit with a slug from its name and refuses a taken slug", async () => {
-    expect(await service.detail("season-circuit")).toMatchObject({
+    await expect(service.detail("season-circuit")).resolves.toMatchObject({
       name: "Season Circuit",
       slug: "season-circuit",
       qualificationSpots: null,
@@ -126,7 +126,7 @@ describe("CircuitService", () => {
       sourceUrl: ` ${SOURCE} `,
     });
 
-    expect(await service.detail("season-2026")).toMatchObject({
+    await expect(service.detail("season-2026")).resolves.toMatchObject({
       id: rlcs.id,
       season: 2026,
       region: "Worldwide",
@@ -168,12 +168,18 @@ describe("CircuitService", () => {
     ).rejects.toThrow(ConflictError);
 
     await expect(service.update(europe.id, { region: "Worldwide" })).rejects.toThrow(ConflictError);
-    expect(await service.update("season-2026-eu", { region: "NA", season: 2026 })).toMatchObject({
+    await expect(
+      service.update("season-2026-eu", { region: "NA", season: 2026 }),
+    ).resolves.toMatchObject({
       id: europe.id,
       region: "NA",
     });
-    expect(await service.update(rlcs.id, { name: "RLCS 2026" })).toMatchObject({ id: rlcs.id });
-    expect(await service.update(rlcs.id, { region: null, description: null })).toMatchObject({
+    await expect(service.update(rlcs.id, { name: "RLCS 2026" })).resolves.toMatchObject({
+      id: rlcs.id,
+    });
+    await expect(
+      service.update(rlcs.id, { region: null, description: null }),
+    ).resolves.toMatchObject({
       season: 2026,
       region: null,
       sourceUrl: SOURCE,
@@ -289,7 +295,7 @@ describe("CircuitService", () => {
   });
 
   it("lists the teams of the stage's event for staff", async () => {
-    expect(await service.stageTeams(circuitId, "ps-stage")).toHaveLength(2);
+    await expect(service.stageTeams(circuitId, "ps-stage")).resolves.toHaveLength(2);
     await expect(service.stageTeams(circuitId, "missing")).rejects.toThrow(NotFoundError);
   });
 

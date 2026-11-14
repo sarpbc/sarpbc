@@ -653,8 +653,12 @@ describe("RosterProposalService", () => {
         "journalist",
       );
 
-      expect(await service.approve(manual.id, "admin")).toMatchObject({ entityId: "match-1" });
-      expect(await service.approve(startgg.id, "admin")).toMatchObject({ entityId: "event-1" });
+      await expect(service.approve(manual.id, "admin")).resolves.toMatchObject({
+        entityId: "match-1",
+      });
+      await expect(service.approve(startgg.id, "admin")).resolves.toMatchObject({
+        entityId: "event-1",
+      });
 
       expect(streams.set).toHaveBeenNthCalledWith(
         1,
@@ -767,7 +771,9 @@ describe("RosterProposalService", () => {
       );
       expect(viewerships.set).not.toHaveBeenCalled();
 
-      expect(await service.approve(proposal.id, "admin")).toMatchObject({ entityId: "match-1" });
+      await expect(service.approve(proposal.id, "admin")).resolves.toMatchObject({
+        entityId: "match-1",
+      });
       expect(viewerships.set).toHaveBeenCalledExactlyOnceWith(
         { kind: "match", id: "match-1" },
         viewership,
@@ -836,7 +842,7 @@ describe("RosterProposalService", () => {
     it("applies the scale with the proposal source on approval", async () => {
       const { id } = await setScale();
 
-      expect(await service.approve(id, "admin")).toMatchObject({ entityId: "circuit-1" });
+      await expect(service.approve(id, "admin")).resolves.toMatchObject({ entityId: "circuit-1" });
       expect(circuits.setStageScale).toHaveBeenCalledWith("circuit-1", "ps-stage", input);
       expect(staff.permissions).toContain("tournaments.manage");
     });
@@ -919,8 +925,8 @@ describe("RosterProposalService", () => {
         "journalist",
       );
 
-      expect(await service.approve(added.id, "admin")).toMatchObject({ entityId: "kc" });
-      expect(await service.approve(updated.id, "admin")).toMatchObject({ entityId: "kc" });
+      await expect(service.approve(added.id, "admin")).resolves.toMatchObject({ entityId: "kc" });
+      await expect(service.approve(updated.id, "admin")).resolves.toMatchObject({ entityId: "kc" });
       expect(teamAliases.add).toHaveBeenCalledWith("kc", { ...alias, sourceUrl: source });
       expect(teamAliases.update).toHaveBeenCalledWith("kc", "alias-1", {
         ...alias,

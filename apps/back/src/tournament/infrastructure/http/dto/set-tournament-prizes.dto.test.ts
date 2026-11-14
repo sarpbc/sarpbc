@@ -19,7 +19,7 @@ const parse = (
     ],
   }).success;
 
-describe("SetTournamentPrizesDto", () => {
+describe(SetTournamentPrizesDto, () => {
   it("defaults the players of an entry to none", () => {
     const body = SetTournamentPrizesDto.parse({
       prizes: [{ placement: 1, amount: 100, currency: "USD", teamId: TEAM_ID, sourceUrl: null }],

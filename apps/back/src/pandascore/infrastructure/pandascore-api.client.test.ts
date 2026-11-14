@@ -5,7 +5,7 @@ import { requestUrl } from "../../../test/fetch-mock";
 import { PandascoreApiClient } from "./pandascore-api.client";
 import { PandascoreApiError } from "./pandascore-api.errors";
 
-describe("PandascoreApiClient", () => {
+describe(PandascoreApiClient, () => {
   const fetchMock = vi.fn<typeof fetch>();
   let client: PandascoreApiClient;
 

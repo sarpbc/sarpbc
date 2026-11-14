@@ -35,7 +35,7 @@ const createSource = () => ({
   findLiveRocketLeague: vi.fn().mockResolvedValue([live("kaydop", 100), live("zenrll", 900)]),
 });
 
-describe("StreamerService", () => {
+describe(StreamerService, () => {
   let snapshot: LiveStreamSnapshot | null = null;
 
   const createCache = () => ({
@@ -108,7 +108,7 @@ describe("StreamerService", () => {
     await service.listLive();
     await service.listLive();
 
-    expect(source.findLiveRocketLeague).toHaveBeenCalledTimes(1);
+    expect(source.findLiveRocketLeague).toHaveBeenCalledOnce();
   });
 
   it("serves the stale result while another instance refreshes", async () => {
@@ -163,7 +163,7 @@ describe("StreamerService", () => {
 
     await expect(service.add("zenrll", "Zen")).resolves.toMatchObject({ login: "zenrll" });
     expect(streamers.add).toHaveBeenCalledWith("zenrll", "Zen");
-    expect(cache.clear).toHaveBeenCalled();
+    expect(cache.clear).toHaveBeenCalledWith();
   });
 
   it("rejects a channel that is already tracked", async () => {
@@ -177,7 +177,7 @@ describe("StreamerService", () => {
     streamers.remove.mockResolvedValue(true);
 
     await service.remove("zenrll-id");
-    expect(cache.clear).toHaveBeenCalled();
+    expect(cache.clear).toHaveBeenCalledWith();
   });
 
   it("reports a missing channel on removal", async () => {

@@ -233,7 +233,7 @@ describe("BallchasingClient.replayStats", () => {
   it("maps the date, team goals and each player's five stats", async () => {
     const { instance, fetch } = client(() => json(replayDetail()));
 
-    expect(await instance.replayStats("r1")).toEqual({
+    await expect(instance.replayStats("r1")).resolves.toEqual({
       rocketLeagueId: "RL-r1",
       playedAt: new Date("2026-06-01T18:05:00Z"),
       blueGoals: 2,
@@ -332,7 +332,7 @@ describe("BallchasingClient.replayStats", () => {
   it("returns null while Ballchasing is still processing the replay", async () => {
     const { instance } = client(() => json({ id: "r1", status: "pending" }));
 
-    expect(await instance.replayStats("r1")).toBeNull();
+    await expect(instance.replayStats("r1")).resolves.toBeNull();
   });
 
   it("reports a replay that disappeared", async () => {

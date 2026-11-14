@@ -6,7 +6,7 @@ import { R2Service, type ObjectOperationLogger } from "./r2.service";
 import { StorageService } from "../application/storage.service";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
-describe("R2Service", () => {
+describe(R2Service, () => {
   const configuredValues = {
     r2_account_id: "acct",
     r2_endpoint: "https://acct.r2.cloudflarestorage.com",
@@ -63,7 +63,7 @@ describe("R2Service", () => {
       service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "news"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
 
-    expect(logError).toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledWith();
   });
 
   it("stores tournament artwork separately from news covers", async () => {
@@ -109,7 +109,7 @@ describe("R2Service", () => {
     await expect(
       r2.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
-    expect(logError).toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledWith();
   });
 
   it("publishes a pending object by copying it under its final key", async () => {

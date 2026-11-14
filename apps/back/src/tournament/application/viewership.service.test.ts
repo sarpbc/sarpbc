@@ -32,7 +32,7 @@ function stage(source: DataSource): TournamentSummary {
   };
 }
 
-describe("ViewershipService", () => {
+describe(ViewershipService, () => {
   const events = new Map<string, TournamentEvent>();
   const matches = new Map<string, Match>();
   let stages: EventStage[] = [];
@@ -82,7 +82,7 @@ describe("ViewershipService", () => {
       measuredAt: "2026-05-24T18:00:00.000Z",
       sourceName: "Esports Charts",
     });
-    expect(await service.find({ kind: "match", id: "manual" })).toEqual(saved);
+    await expect(service.find({ kind: "match", id: "manual" })).resolves.toEqual(saved);
 
     await service.set({ kind: "match", id: "manual" }, null);
     expect(matches.get("manual")?.viewership).toBeNull();

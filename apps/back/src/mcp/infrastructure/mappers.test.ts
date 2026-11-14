@@ -23,7 +23,7 @@ function match(source: DataSource, tournamentSource: DataSource, teamSource: Dat
   });
 }
 
-describe("isRedistributableMatch", () => {
+describe(isRedistributableMatch, () => {
   it("keeps a redistributable match with a start.gg participant team", () => {
     expect(isRedistributableMatch(match("manual", "pandascore", "startgg"))).toBe(true);
   });

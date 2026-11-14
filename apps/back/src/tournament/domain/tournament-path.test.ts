@@ -4,7 +4,7 @@ import { parseTournamentPath } from "./tournament-path";
 const ID = "0B6F2D3E-6C1A-4B8E-9A51-2F7C3D4E5A6B";
 const id = ID.toLowerCase();
 
-describe("parseTournamentPath", () => {
+describe(parseTournamentPath, () => {
   it("reads a UUID as a legacy stage, with an optional matches tab", () => {
     expect(parseTournamentPath([ID])).toEqual({ kind: "legacyStage", id, tab: "overview" });
     expect(parseTournamentPath([id, "matches"])).toEqual({

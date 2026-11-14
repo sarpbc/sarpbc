@@ -89,18 +89,20 @@ const input = {
 describe("post transaction and policies", () => {
   it("creates the post and sanitized admin translations before a single commit", async () => {
     const f = setup();
-    expect(await f.service.create("user", input)).toEqual({ publicId: 41, slug: "title" });
+    await expect(f.service.create("user", input)).resolves.toEqual({ publicId: 41, slug: "title" });
     expect(f.saved[0]?.title).toBe("Title");
     expect(f.translations[0]?.title).toBe("Titre");
     expect(f.translations[0]?.post.id).toBe("post");
     expect(f.commits()).toBe(1);
   });
+
   it("ignores translations from non-admin authors", async () => {
     const f = setup(null);
     await f.service.create("user", input);
     expect(f.saved).toHaveLength(1);
     expect(f.translations).toEqual([]);
   });
+
   it("does not commit a post if a translation fails", async () => {
     const f = setup();
     f.scope.posts.saveTranslation = async () => {
@@ -110,6 +112,7 @@ describe("post transaction and policies", () => {
     await expect(f.service.create("user", input)).rejects.toThrow("translation failed");
     expect(f.commits()).toBe(0);
   });
+
   it("reports the next available time until the one-hour boundary", async () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
@@ -124,13 +127,14 @@ describe("post transaction and policies", () => {
       updatedAt: null,
       translations: [],
     });
-    expect(await f.service.getCreationStatus("user")).toEqual({
+    await expect(f.service.getCreationStatus("user")).resolves.toEqual({
       canCreate: false,
       nextAvailableAt: new Date(now.getTime() + 1).toISOString(),
       cooldownHours: 1,
     });
     await expect(f.service.create("user", input)).rejects.toMatchObject({ kind: "invalid-input" });
   });
+
   it("allows creation exactly at the one-hour boundary", async () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
@@ -148,6 +152,7 @@ describe("post transaction and policies", () => {
     await f.service.create("user", input);
     expect(f.saved).toHaveLength(1);
   });
+
   it("does not delete the post or commit when dependent deletion fails", async () => {
     const f = setup();
     await f.service.create("user", input);
@@ -192,30 +197,37 @@ describe("post lookup", () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
     const ref = { kind: "publicId", value: 88 } as const;
-    expect(await f.service.findByIdDto(ref, "fr-FR")).toMatchObject({
+    await expect(f.service.findByIdDto(ref, "fr-FR")).resolves.toMatchObject({
       id: stored.id,
       publicId: 88,
       slug: "mon-post-quel-roster",
       title: stored.title,
     });
   });
+
   it("applies the requested translation from the single lookup and keeps the base slug", async () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
-    expect(await f.service.findByIdDto({ kind: "publicId", value: 88 }, "en-US")).toMatchObject({
+    await expect(
+      f.service.findByIdDto({ kind: "publicId", value: 88 }, "en-US"),
+    ).resolves.toMatchObject({
       slug: "mon-post-quel-roster",
       title: "Translated title",
       content: "Translated",
     });
   });
+
   it("reports a missing post as null", async () => {
     const f = setup();
-    expect(await f.service.findByIdDto({ kind: "id", value: stored.id }, "fr-FR")).toBeNull();
+    await expect(
+      f.service.findByIdDto({ kind: "id", value: stored.id }, "fr-FR"),
+    ).resolves.toBeNull();
   });
+
   it("deletes by legacy id", async () => {
     const f = setup();
     f.scope.posts.findWithDetails = vi.fn().mockResolvedValue(stored);
     await f.service.delete(stored.id);
-    expect(f.posts.delete).toHaveBeenCalled();
+    expect(f.posts.delete).toHaveBeenCalledWith();
   });
 });

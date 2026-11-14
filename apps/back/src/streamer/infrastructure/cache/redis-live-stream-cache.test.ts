@@ -18,7 +18,7 @@ const stream = {
   url: "https://twitch.tv/zenrll",
 };
 
-describe("RedisLiveStreamCache", () => {
+describe(RedisLiveStreamCache, () => {
   let store = new Map<string, string>();
 
   const createRedis = () => ({
@@ -109,7 +109,7 @@ describe("RedisLiveStreamCache", () => {
     );
 
     await expect(service.listLive()).resolves.toEqual([stream]);
-    expect(findLiveRocketLeague).toHaveBeenCalledTimes(1);
+    expect(findLiveRocketLeague).toHaveBeenCalledOnce();
     await expect(cache.read()).resolves.toEqual({ streams: [stream], fetchedAt: now });
   });
 

@@ -466,7 +466,7 @@ describe("StatsImportService maintenance", () => {
     const { service } = setup();
     await service.request("t1", "pilot-abc123");
 
-    expect(await service.failInterrupted()).toBe(1);
+    await expect(service.failInterrupted()).resolves.toBe(1);
     const [latest] = await service.recent("t1");
     expect(latest).toMatchObject({ status: "failed", error: INTERRUPTED_IMPORT_ERROR });
   });

@@ -4,7 +4,7 @@ import { unconstructed } from "../../../test/doubles";
 import { RedisService } from "../redis/redis.service";
 import { RedisHealthIndicator } from "./redis.health";
 
-describe("RedisHealthIndicator", () => {
+describe(RedisHealthIndicator, () => {
   const ping = vi.fn<RedisService["ping"]>();
   const redis = Object.assign(unconstructed(RedisService), { ping });
 

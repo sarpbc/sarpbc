@@ -14,7 +14,7 @@ const input = {
   sourceUrl: null,
 };
 
-describe("OnThisDayFactService", () => {
+describe(OnThisDayFactService, () => {
   it("creates, edits and deletes a staff fact with its resolved link", async () => {
     const service = new OnThisDayFactService(memoryFactStore());
 
@@ -27,10 +27,10 @@ describe("OnThisDayFactService", () => {
 
     const updated = await service.update(created.id, { ...input, link: null, year: null });
     expect(updated).toMatchObject({ id: created.id, year: null, link: null });
-    expect(await service.list()).toHaveLength(1);
+    await expect(service.list()).resolves.toHaveLength(1);
 
     await service.remove(created.id);
-    expect(await service.list()).toEqual([]);
+    await expect(service.list()).resolves.toEqual([]);
     await expect(service.remove(created.id)).rejects.toThrow(NotFoundError);
   });
 
@@ -40,7 +40,7 @@ describe("OnThisDayFactService", () => {
     await expect(
       service.create({ ...input, link: { kind: "player", id: MANUAL_STAGE_ID } }),
     ).rejects.toThrow(InvalidInputError);
-    expect(await service.list()).toEqual([]);
+    await expect(service.list()).resolves.toEqual([]);
   });
 
   it("refuses to edit an unknown fact", async () => {

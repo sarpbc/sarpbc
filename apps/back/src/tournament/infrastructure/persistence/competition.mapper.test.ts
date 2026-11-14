@@ -33,7 +33,7 @@ function entry(tournament: Tournament, teamId: string) {
   return participant;
 }
 
-describe("toTournament", () => {
+describe(toTournament, () => {
   it("maps a won stage with its winner and participants", () => {
     const tournament = stage();
     const winner = entry(tournament, "gentle-mates");
@@ -71,7 +71,7 @@ describe("toTournament", () => {
   });
 });
 
-describe("toParticipant", () => {
+describe(toParticipant, () => {
   it("returns null when the tournament relation is missing", () => {
     const participant = entry(stage(), "gentle-mates");
     Object.assign(participant, { tournament: undefined });

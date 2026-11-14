@@ -7,7 +7,7 @@ import type { PasswordHasher } from "./ports/password-hasher";
 import { User } from "../domain/user";
 import type { UserTransaction } from "./ports/user-store";
 
-describe("UserService", () => {
+describe(UserService, () => {
   let service: UserService;
 
   const userQueries = {

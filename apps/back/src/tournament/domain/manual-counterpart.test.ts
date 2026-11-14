@@ -20,7 +20,7 @@ function candidate(overrides: Partial<ManualCandidate>): ManualCandidate {
   };
 }
 
-describe("findManualCounterpart", () => {
+describe(findManualCounterpart, () => {
   it("matches the same words in any order with overlapping dates", () => {
     expect(findManualCounterpart(stage, [candidate({})])).toEqual({
       kind: "unique",

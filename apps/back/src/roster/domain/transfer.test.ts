@@ -4,7 +4,7 @@ import { Player } from "./player";
 import { Team } from "./team";
 import { deriveTransfers } from "./transfer";
 
-describe("deriveTransfers", () => {
+describe(deriveTransfers, () => {
   const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });

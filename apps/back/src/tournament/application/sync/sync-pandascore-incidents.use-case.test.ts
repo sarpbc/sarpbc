@@ -34,6 +34,7 @@ describe("PandaScore incidents", () => {
     cursor.getLastSyncAt.mockResolvedValue(new Date("2026-10-14"));
     sync.applyIncident.mockResolvedValue(undefined);
   });
+
   it("uses a one-day lookback and advances empty feeds to now", async () => {
     cursor.getLastSyncAt.mockResolvedValue(null);
     feed.listIncidents.mockResolvedValue([]);
@@ -41,6 +42,7 @@ describe("PandaScore incidents", () => {
     expect(feed.listIncidents).toHaveBeenCalledWith({ since: new Date("2026-10-14T12:00:00Z") });
     expect(cursor.setLastSyncAt).toHaveBeenCalledWith(now);
   });
+
   it.each(["tournament", "team", "league"] as const)(
     "applies normalized %s updates",
     async (kind) => {
@@ -51,6 +53,7 @@ describe("PandaScore incidents", () => {
       expect(cursor.setLastSyncAt).toHaveBeenCalledWith(base.modifiedAt);
     },
   );
+
   it.each([null, { pandascoreId: 7, name: "Current", slug: "current" }])(
     "preserves explicit current membership update %p",
     async (currentTeam) => {
@@ -87,6 +90,7 @@ describe("PandaScore incidents", () => {
       sync.applyIncident.mock.invocationCallOrder[1],
     );
   });
+
   it("stops the cursor before the earliest of several failures", async () => {
     const incidents = [
       team(1, "2026-10-15T09:00:00Z"),
@@ -102,12 +106,14 @@ describe("PandaScore incidents", () => {
     await service.execute();
     expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-15T09:59:59.999Z"));
   });
+
   it("never moves the cursor back before where this run started", async () => {
     feed.listIncidents.mockResolvedValue([team(1, "2026-10-14T00:00:00Z")]);
     sync.applyIncident.mockRejectedValueOnce(new Error("rollback"));
     await service.execute();
     expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-14T00:00:00Z"));
   });
+
   it("hands deletions to the sync without a backfill and advances the cursor", async () => {
     const incident = {
       ...base,
@@ -122,6 +128,7 @@ describe("PandaScore incidents", () => {
     expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
     expect(cursor.setLastSyncAt).toHaveBeenCalledWith(base.modifiedAt);
   });
+
   it("fetches missing tournament before the incident write", async () => {
     const incident = {
       ...base,

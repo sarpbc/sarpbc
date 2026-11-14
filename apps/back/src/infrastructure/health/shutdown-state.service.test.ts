@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { ShutdownStateService } from "./shutdown-state.service";
 
-describe("ShutdownStateService", () => {
+describe(ShutdownStateService, () => {
   const service = new ShutdownStateService();
 
   afterEach(() => {

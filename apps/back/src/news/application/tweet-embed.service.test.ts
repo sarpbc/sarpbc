@@ -6,7 +6,7 @@ import { TweetSyndicationGateway } from "../infrastructure/tweet-syndication.gat
 import { TweetEmbedService } from "./tweet-embed.service";
 import hereticsReply from "./__fixtures__/tweet-2116198150683734246.json";
 
-describe("TweetEmbedService", () => {
+describe(TweetEmbedService, () => {
   const fetchMock = vi.fn<typeof fetch>();
   let service: TweetEmbedService;
 
@@ -69,7 +69,7 @@ describe("TweetEmbedService", () => {
       },
     ]);
     expect(second).toEqual(first);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 
   it("returns text-only posts without inventing media", async () => {

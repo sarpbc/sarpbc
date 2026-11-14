@@ -29,7 +29,7 @@ function requestedLogins(call: Parameters<typeof fetch>): string[] {
   return requestedUrl(call).searchParams.getAll("user_login");
 }
 
-describe("TwitchHelixSource", () => {
+describe(TwitchHelixSource, () => {
   const fetchMock = vi.fn<typeof fetch>();
   let token = new TwitchAppToken({ clientId: "client", clientSecret: "secret" });
   let source = new TwitchHelixSource("client", token);

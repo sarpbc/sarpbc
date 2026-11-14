@@ -17,7 +17,7 @@ function makeReply(partial: Partial<ReplyTargetFields>): ReplyTargetFields {
   };
 }
 
-describe("resolveReplyTargetLink", () => {
+describe(resolveReplyTargetLink, () => {
   it("resolves forum post targets", () => {
     const reply = makeReply({
       post: { id: "post-1", publicId: 88, title: "Thread title: Who wins?" },
@@ -67,7 +67,7 @@ describe("resolveReplyTargetLink", () => {
   });
 });
 
-describe("replyTarget", () => {
+describe(replyTarget, () => {
   it.each([
     [{ postId: "p" }, { kind: "forumPost", id: "p" }],
     [{ newsArticleId: "n" }, { kind: "newsArticle", id: "n" }],
@@ -83,7 +83,7 @@ describe("replyTarget", () => {
 
 const post = (id: string) => makeReply({ post: { id, publicId: 1, title: "T" } });
 
-describe("sameReplyTarget", () => {
+describe(sameReplyTarget, () => {
   it("matches replies on the same target", () => {
     expect(sameReplyTarget(post("p1"), post("p1"))).toBe(true);
   });
@@ -96,7 +96,7 @@ describe("sameReplyTarget", () => {
   });
 });
 
-describe("replySortOrder", () => {
+describe(replySortOrder, () => {
   it("lists forum discussions oldest first and the other targets newest first", () => {
     expect(replySortOrder("forumPost")).toBe("asc");
     expect(replySortOrder("newsArticle")).toBe("desc");

@@ -39,7 +39,7 @@ function fixture(): Tournament {
   });
 }
 
-describe("CachedTournamentRead", () => {
+describe(CachedTournamentRead, () => {
   const warn = vi.spyOn(log, "warn");
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
@@ -67,15 +67,15 @@ describe("CachedTournamentRead", () => {
     const hit = await read.findById("t1");
     expect(JSON.stringify(hit)).toEqual(JSON.stringify(miss));
     expect(hit).toEqual(miss);
-    expect(tournaments.findById).toHaveBeenCalledTimes(1);
-    expect(redis.set).toHaveBeenCalledTimes(1);
+    expect(tournaments.findById).toHaveBeenCalledOnce();
+    expect(redis.set).toHaveBeenCalledOnce();
   });
 
   it.each(["{broken", "null", "{}", '{"id":"t1"}', ""])(
     "treats malformed or incompatible cache data %p as a diagnosed miss",
     async (cached) => {
       redis.get.mockResolvedValue(cached);
-      expect(await read.findById("t1")).toEqual(mapTournamentDetail(model));
+      await expect(read.findById("t1")).resolves.toEqual(mapTournamentDetail(model));
       expect(warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
     },
   );
@@ -93,8 +93,8 @@ describe("CachedTournamentRead", () => {
   it("never serves a cached value with fields outside the public response", async () => {
     const dto = mapTournamentDetail(model);
     redis.get.mockResolvedValue(JSON.stringify({ ...dto, internalSecret: "hidden" }));
-    expect(await read.findById("t1")).toEqual(dto);
-    expect(tournaments.findById).toHaveBeenCalledTimes(1);
+    await expect(read.findById("t1")).resolves.toEqual(dto);
+    expect(tournaments.findById).toHaveBeenCalledOnce();
     expect(warn).toHaveBeenCalledWith(expect.objectContaining({ key: "tournament:t1" }));
   });
 
@@ -102,14 +102,14 @@ describe("CachedTournamentRead", () => {
     "preserves database success when cache %s fails",
     async (operation) => {
       redis[operation].mockRejectedValue(new Error("Redis unavailable"));
-      expect(await read.findById("t1")).toEqual(mapTournamentDetail(model));
-      expect(warn).toHaveBeenCalled();
+      await expect(read.findById("t1")).resolves.toEqual(mapTournamentDetail(model));
+      expect(warn).toHaveBeenCalledWith();
     },
   );
 
   it("does not cache missing records", async () => {
     tournaments.findById.mockResolvedValue(null);
-    expect(await read.findById("missing")).toBeNull();
+    await expect(read.findById("missing")).resolves.toBeNull();
     expect(redis.set).not.toHaveBeenCalled();
   });
 

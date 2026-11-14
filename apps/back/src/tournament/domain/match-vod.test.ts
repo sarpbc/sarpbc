@@ -11,7 +11,7 @@ const vod = (url: string, overrides: Partial<{ game: number; language: string }>
   ...overrides,
 });
 
-describe("normalizeMatchVods", () => {
+describe(normalizeMatchVods, () => {
   it.each([
     ["https://www.twitch.tv/videos/2245891234?t=1h2m3s", "twitch"],
     ["https://twitch.tv/videos/2245891234", "twitch"],
@@ -115,7 +115,7 @@ describe("normalizeMatchVods", () => {
   });
 });
 
-describe("replaceGameVods", () => {
+describe(replaceGameVods, () => {
   const current = normalizeMatchVods(
     [vod("https://youtu.be/g1"), vod("https://youtu.be/g2", { game: 2 })],
     5,

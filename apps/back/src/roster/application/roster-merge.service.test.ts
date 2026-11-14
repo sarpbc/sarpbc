@@ -8,7 +8,7 @@ import { present } from "../../../test/doubles";
 import { unusedContractWriter, unusedPhotoWriter } from "../../../test/roster-doubles";
 import { RosterMergeService } from "./roster-merge.service";
 
-describe("RosterMergeService", () => {
+describe(RosterMergeService, () => {
   let players: Map<string, Player>;
   let teams: Map<string, Team>;
   let stores: RosterMergeWriteScope;

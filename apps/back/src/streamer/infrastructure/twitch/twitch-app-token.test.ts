@@ -5,7 +5,7 @@ function tokenResponse(accessToken: string, expiresIn = 3600) {
   return Response.json({ access_token: accessToken, expires_in: expiresIn });
 }
 
-describe("TwitchAppToken", () => {
+describe(TwitchAppToken, () => {
   const fetchMock = vi.fn<typeof fetch>();
   let now: number;
   let token: TwitchAppToken;
@@ -69,7 +69,7 @@ describe("TwitchAppToken", () => {
     fetchMock.mockResolvedValueOnce(tokenResponse("first"));
 
     await expect(Promise.all([token.get(), token.get()])).resolves.toEqual(["first", "first"]);
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 
   it("requests a new token after the current one is rejected", async () => {
@@ -88,7 +88,7 @@ describe("TwitchAppToken", () => {
     await token.get();
     token.invalidate("older");
     await expect(token.get()).resolves.toBe("first");
-    expect(fetchMock).toHaveBeenCalledTimes(1);
+    expect(fetchMock).toHaveBeenCalledOnce();
   });
 
   it("fails without caching when Twitch refuses the credentials", async () => {

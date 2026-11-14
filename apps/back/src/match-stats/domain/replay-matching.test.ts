@@ -170,7 +170,7 @@ const sweep = () => [
   replay("2026-06-01T18:45:00Z", { names: KC_NAMES, goals: 3 }, { names: BDS_NAMES, goals: 0 }),
 ];
 
-describe("assignReplays", () => {
+describe(assignReplays, () => {
   it("numbers a complete series by replay date and keeps the sides of each game", () => {
     const final = match("m1", [kc, bds], "2026-06-01T18:00:00Z", {
       scores: new Map([
@@ -769,7 +769,7 @@ describe("assignReplays", () => {
   });
 });
 
-describe("resolvePlayerId", () => {
+describe(resolvePlayerId, () => {
   it("resolves a single roster match and keeps substitutes or clashes unresolved", () => {
     expect(resolvePlayerId("KC Vatira", kc.players)).toBe("vatira");
     expect(resolvePlayerId("Stand-in", kc.players)).toBeNull();

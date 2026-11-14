@@ -205,20 +205,22 @@ describe("MCP read tools", () => {
       source: "startgg",
     });
 
-    expect(await json("search_players", { query: "Scout" })).toEqual([startgg]);
-    expect(await json("search_teams", { query: "Scouted" })).toEqual([startgg]);
-    expect(await json("get_player", { idOrSlug: "scout" })).toMatchObject({
+    await expect(json("search_players", { query: "Scout" })).resolves.toEqual([startgg]);
+    await expect(json("search_teams", { query: "Scouted" })).resolves.toEqual([startgg]);
+    await expect(json("get_player", { idOrSlug: "scout" })).resolves.toMatchObject({
       source: "startgg",
       role: "active",
       team: { id: "t1", source: "startgg" },
     });
-    expect(await json("get_team", { idOrSlug: "scouted" })).toMatchObject({ source: "startgg" });
+    await expect(json("get_team", { idOrSlug: "scouted" })).resolves.toMatchObject({
+      source: "startgg",
+    });
   });
 
   it("returns registered participants and hides start.gg tournaments", async () => {
     const { call, json } = setup();
 
-    expect(await json("get_tournament", { id: "manual-cup" })).toMatchObject({
+    await expect(json("get_tournament", { id: "manual-cup" })).resolves.toMatchObject({
       id: "manual-cup",
       participants: [
         {
@@ -233,14 +235,14 @@ describe("MCP read tools", () => {
 
   it("aggregates player stats per stage or event and leaves start.gg stages out", async () => {
     const { call, json, playerLines } = setup();
-    expect(await json("get_tournament_player_stats", { tournamentId: "manual-cup" })).toMatchObject(
-      {
-        games: 1,
-        unlinkedAccounts: 0,
-        players: [{ player: { id: "p1" }, games: 1, totals: { goals: 2 }, goalParticipation: 75 }],
-      },
-    );
-    expect(await json("get_tournament_player_stats", { event: "coupe" })).toMatchObject({
+    await expect(
+      json("get_tournament_player_stats", { tournamentId: "manual-cup" }),
+    ).resolves.toMatchObject({
+      games: 1,
+      unlinkedAccounts: 0,
+      players: [{ player: { id: "p1" }, games: 1, totals: { goals: 2 }, goalParticipation: 75 }],
+    });
+    await expect(json("get_tournament_player_stats", { event: "coupe" })).resolves.toMatchObject({
       games: 1,
     });
     expect(playerLines).toHaveBeenLastCalledWith(["manual-cup"]);
@@ -253,7 +255,7 @@ describe("MCP read tools", () => {
 
   it("returns match lineups with stand-in flags and hides start.gg matches", async () => {
     const { call, json } = setup();
-    expect(await json("get_match_lineups", { matchId: "manual-match" })).toEqual({
+    await expect(json("get_match_lineups", { matchId: "manual-match" })).resolves.toEqual({
       matchId: "manual-match",
       lineups: [
         {
@@ -281,7 +283,7 @@ describe("MCP read tools", () => {
 
   it("returns redistributable distributions with the PandaScore prize pool", async () => {
     const { json } = setup();
-    expect(await json("get_tournament_prizes", { id: "c1" })).toEqual({
+    await expect(json("get_tournament_prizes", { id: "c1" })).resolves.toEqual({
       tournamentId: "c1",
       prizepool: null,
       prizes: [],
@@ -297,7 +299,7 @@ describe("MCP read tools", () => {
 
   it("returns the awards of a redistributable tournament with their player and team", async () => {
     const { json } = setup();
-    expect(await json("get_tournament_awards", { id: "manual-cup" })).toEqual({
+    await expect(json("get_tournament_awards", { id: "manual-cup" })).resolves.toEqual({
       tournamentId: "manual-cup",
       awards: [
         {

@@ -10,7 +10,7 @@ const player = (id: string) => ({
   nationality: null,
 });
 
-describe("isStandIn", () => {
+describe(isStandIn, () => {
   it("is false for a player on the participant roster and true otherwise", () => {
     expect(isStandIn(["alpha", "bravo", "charlie"], "bravo")).toBe(false);
     expect(isStandIn(["alpha", "bravo", "charlie"], "delta")).toBe(true);
@@ -18,7 +18,7 @@ describe("isStandIn", () => {
   });
 });
 
-describe("buildLineups", () => {
+describe(buildLineups, () => {
   it("flags only the players outside the participant roster, in lineup order", () => {
     const lineups = buildLineups(
       [
@@ -56,7 +56,7 @@ describe("buildLineups", () => {
   });
 });
 
-describe("normalizeLineups", () => {
+describe(normalizeLineups, () => {
   const sides = ["side-a", "side-b"];
 
   it("orders lineups like the match participants and drops empty ones", () => {
@@ -105,7 +105,7 @@ const game = (aPlayers: (string | null)[], bPlayers: (string | null)[]) => ({
   ],
 });
 
-describe("lineupsFromGames", () => {
+describe(lineupsFromGames, () => {
   it("collects linked players per participant once, in first appearance order", () => {
     expect(
       lineupsFromGames([

@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { assertValidMatchBlocks } from "./news-content.util";
 
-describe("assertValidMatchBlocks", () => {
+describe(assertValidMatchBlocks, () => {
   it("accepts well-formed match blocks", () => {
     expect(() => {
       assertValidMatchBlocks(

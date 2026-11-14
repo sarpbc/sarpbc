@@ -60,7 +60,7 @@ function setup({
   return { service, reads, writer, cache, diagnostics };
 }
 
-describe("TournamentPrizeService", () => {
+describe(TournamentPrizeService, () => {
   it("replaces the distribution inside the competition transaction", async () => {
     const { service, writer, reads } = setup();
 

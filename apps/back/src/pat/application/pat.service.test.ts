@@ -7,7 +7,7 @@ import { tokenSecrets } from "../infrastructure/token-secrets";
 import type { TokenStore } from "./ports/token-store";
 import { PatService } from "./pat.service";
 
-describe("PatService", () => {
+describe(PatService, () => {
   const now = new Date("2026-10-15T12:00:00Z");
   let owner: User;
   let revoked: boolean;

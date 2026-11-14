@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { parseEntityRef } from "./entity-ref";
 
-describe("parseEntityRef", () => {
+describe(parseEntityRef, () => {
   it("reads a positive integer as a public id", () => {
     expect(parseEntityRef("7250")).toEqual({ kind: "publicId", value: 7250 });
   });

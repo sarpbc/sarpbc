@@ -36,7 +36,7 @@ function stage(overrides: Partial<CircuitStageResult> & { event: TournamentEvent
   };
 }
 
-describe("computeCircuitStandings", () => {
+describe(computeCircuitStandings, () => {
   it("adds the points of each placement and breaks the total down by event", () => {
     const { rows, events } = computeCircuitStandings(
       [

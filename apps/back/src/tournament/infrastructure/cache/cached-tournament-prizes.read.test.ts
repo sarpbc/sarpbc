@@ -25,7 +25,7 @@ const distribution: TournamentPrizes = {
   ],
 };
 
-describe("CachedTournamentPrizesRead", () => {
+describe(CachedTournamentPrizesRead, () => {
   const redis = { get: vi.fn(), set: vi.fn() };
   const prizes = { findByTournamentId: vi.fn() };
   const read = new CachedTournamentPrizesRead(prizes, redis);
@@ -37,7 +37,7 @@ describe("CachedTournamentPrizesRead", () => {
   });
 
   it("stores the distribution for 60 seconds on a miss", async () => {
-    expect(await read.findByTournamentId("cup")).toEqual(distribution);
+    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
     expect(redis.set).toHaveBeenCalledWith(
       "tournament-prizes:cup",
       JSON.stringify(distribution),
@@ -47,17 +47,17 @@ describe("CachedTournamentPrizesRead", () => {
 
   it("serves a cached distribution without reading the database", async () => {
     redis.get.mockResolvedValue(JSON.stringify(distribution));
-    expect(await read.findByTournamentId("cup")).toEqual(distribution);
+    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
     expect(prizes.findByTournamentId).not.toHaveBeenCalled();
   });
 
   it("ignores an undecodable cache entry and an unavailable cache", async () => {
     redis.get.mockResolvedValueOnce(JSON.stringify({ prizes: "broken" }));
-    expect(await read.findByTournamentId("cup")).toEqual(distribution);
+    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
 
     redis.get.mockRejectedValueOnce(new Error("down"));
     redis.set.mockRejectedValueOnce(new Error("down"));
-    expect(await read.findByTournamentId("cup")).toEqual(distribution);
+    await expect(read.findByTournamentId("cup")).resolves.toEqual(distribution);
   });
 
   it("does not cache unknown tournaments", async () => {

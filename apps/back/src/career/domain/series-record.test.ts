@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { careerMatch, mawkzy, vatira, zen } from "../../../test/career-fixtures";
 import { headToHead, seriesRecord } from "./series-record";
 
-describe("seriesRecord", () => {
+describe(seriesRecord, () => {
   it("counts decided series on the player's side only", () => {
     const matches = [
       careerMatch({ id: "won", sides: [[zen], [vatira]], winner: 0 }),
@@ -21,7 +21,7 @@ describe("seriesRecord", () => {
   });
 });
 
-describe("headToHead", () => {
+describe(headToHead, () => {
   it("counts the series each player won against the other", () => {
     const matches = [
       careerMatch({ id: "first", sides: [[zen], [vatira]], winner: 0 }),
