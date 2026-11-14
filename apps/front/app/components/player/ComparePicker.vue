@@ -37,8 +37,15 @@ const selected = computed(() => (player ? toOption(player) : undefined));
 
 const { data: results, status } = useLazyAsyncData(
   () => `player-compare-search-${query.value}`,
-  async () =>
-    query.value ? (await getAllPlayers({ search: query.value, limit: SEARCH_LIMIT })).players : [],
+  async () => {
+    if (!query.value) {
+      return [];
+    }
+
+    const { players } = await getAllPlayers({ search: query.value, limit: SEARCH_LIMIT });
+
+    return players;
+  },
   { server: false, default: () => [] },
 );
 

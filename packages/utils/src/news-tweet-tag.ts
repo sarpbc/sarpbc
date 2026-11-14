@@ -32,9 +32,9 @@ export interface TweetEmbed {
 }
 
 const TWEET_STATUS_PATTERN =
-  /^https?:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(?:i\/(?:web\/)?status|([A-Za-z0-9_]{1,15})\/status)\/(\d+)/i;
+  /^https?:\/\/(?:www\.|mobile\.)?(?:twitter|x)\.com\/(?:i\/(?:web\/)?status|(?<handle>[A-Za-z0-9_]{1,15})\/status)\/(?<id>\d+)/i;
 
-const TWEET_TAG_PATTERN = /^(?::{1,2})tweet\{([^}]*)\}(?:\s*\n?::)?/;
+const TWEET_TAG_PATTERN = /^(?::{1,2})tweet\{(?<attrs>[^}]*)\}(?:\s*\n?::)?/;
 const WHITESPACE = /\s/;
 
 const TWEET_BLOCK_OPENER = "::tweet{";
@@ -44,12 +44,13 @@ export function parseTweetUrl(input: string): ParsedTweetUrl | null {
   const trimmed = input.trim();
   const match = TWEET_STATUS_PATTERN.exec(trimmed);
 
-  if (!match || match[2] == null) {
+  const { handle: matchedHandle, id } = match?.groups ?? {};
+
+  if (id === undefined) {
     return null;
   }
 
-  const handle = match[1] ? match[1] : null;
-  const id = match[2];
+  const handle = matchedHandle || null;
   const pathHandle = handle ?? "i/web";
 
   return {
@@ -97,7 +98,7 @@ export function serializeNewsTweetTag(url: string): string {
 export function newsTweetTagStart(content: string): number {
   const block = content.indexOf(TWEET_BLOCK_OPENER);
 
-  return block !== -1 ? block : content.indexOf(TWEET_INLINE_OPENER);
+  return block === -1 ? content.indexOf(TWEET_INLINE_OPENER) : block;
 }
 
 function blockTagEnd(content: string, afterBrace: number): number {

@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const TOKEN_URL = "https://id.twitch.tv/oauth2/token";
 const REFRESH_MARGIN_MS = 5 * 60_000;
-export const TOKEN_REQUEST_TIMEOUT_MS = 5_000;
+export const TOKEN_REQUEST_TIMEOUT_MS = 5000;
 
 const tokenResponse = z.object({
   access_token: z.string().min(1),

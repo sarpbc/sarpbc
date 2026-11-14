@@ -60,7 +60,7 @@ describe("TwitchAppToken", () => {
     await token.get();
     now += 59_000;
     await expect(token.get()).resolves.toBe("first");
-    now += 1_000;
+    now += 1000;
     await expect(token.get()).resolves.toBe("second");
     expect(fetchMock).toHaveBeenCalledTimes(2);
   });

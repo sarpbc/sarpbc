@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NewsService } from "./news.service";
 import type { NewsArticleRecord } from "./models";
 import type { NewsQueries, NewsTransaction, NewsWriteScope } from "./ports";

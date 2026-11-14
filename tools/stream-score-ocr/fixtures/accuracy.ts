@@ -28,6 +28,12 @@ export interface Measure {
   results: SeriesResult[];
 }
 
+function seriesOutcome(winner: string | null, expectedWinner: string): SeriesOutcome {
+  if (winner === null) return "undetermined";
+
+  return winner === expectedWinner ? "correct" : "wrong";
+}
+
 async function replay(script: SeriesScript, intervalSeconds: number): Promise<SeriesResult> {
   const overlay = await loadOverlay(OVERLAY_PATH);
   const renderer = new FixtureRenderer(script.size, script.seed);
@@ -58,7 +64,7 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
   }).length;
 
   const blueWins = expected.filter((score) => score.blue > score.orange).length;
-  const winner = parsed.proposal.series.winner;
+  const { winner } = parsed.proposal.series;
   const expectedWinner = blueWins > expected.length - blueWins ? "blue" : "orange";
 
   return {
@@ -66,15 +72,15 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
     games: Math.max(expected.length, parsed.proposal.games.length),
     correctGames,
     undecidedGames: parsed.proposal.games.filter((game) => game.winner === null).length,
-    series: winner === null ? "undetermined" : winner === expectedWinner ? "correct" : "wrong",
+    series: seriesOutcome(winner, expectedWinner),
   };
 }
 
 export async function measureFixtures(intervalSeconds: number): Promise<Measure> {
-  const results: SeriesResult[] = [];
+  const results = await Promise.all(
+    generateSeries(12, 20_261_102).map(async (script) => await replay(script, intervalSeconds)),
+  );
 
-  for (const script of generateSeries(12, 20261102))
-    results.push(await replay(script, intervalSeconds));
   const games = results.reduce((total, result) => total + result.games, 0);
   const correctGames = results.reduce((total, result) => total + result.correctGames, 0);
   const undecidedGames = results.reduce((total, result) => total + result.undecidedGames, 0);

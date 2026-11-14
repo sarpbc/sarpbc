@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
-import { Contract, Player, Team } from "./roster";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { Contract } from "./contract";
+import { Player } from "./player";
+import { Team } from "./team";
 
 describe("roster policies", () => {
   it("archives only a different nonempty profile photo", () => {
@@ -71,6 +73,9 @@ describe("contracts", () => {
 describe("current role", () => {
   const team = Object.assign(new Team(), { id: "kc" });
 
+  const role = (pandascoreRole: string | null) =>
+    Object.assign(new Player(), { team, role: pandascoreRole }).currentRole();
+
   it("comes from the current contract over the imported profile role", () => {
     const player = Object.assign(new Player(), {
       team,
@@ -84,9 +89,6 @@ describe("current role", () => {
   });
 
   it("falls back to the imported staff role when the current team has no contract", () => {
-    const role = (pandascoreRole: string | null) =>
-      Object.assign(new Player(), { team, role: pandascoreRole }).currentRole();
-
     expect(role("Coach")).toBe("coach");
     expect(role("Assistant Coach")).toBe("assistant_coach");
     expect(role(" head-coach ")).toBe("coach");

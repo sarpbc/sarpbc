@@ -1,6 +1,13 @@
-type AdminListRange = { limit: number; offset: number; search: string };
+interface AdminListRange {
+  limit: number;
+  offset: number;
+  search: string;
+}
 
-type AdminListPage<T> = { items: T[]; total: number };
+interface AdminListPage<T> {
+  items: T[];
+  total: number;
+}
 
 export function useAdminList<T>(
   key: string,

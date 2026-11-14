@@ -174,6 +174,9 @@ describe("computeCircuitStandings", () => {
   });
 });
 
+const totals = (stages: CircuitStageResult[], region: string | null) =>
+  computeCircuitStandings(stages, region, now).rows.map(({ team: { id }, points }) => [id, points]);
+
 describe("computeCircuitStandings in a regional circuit", () => {
   const majorScale: CircuitScaleTier[] = [
     { from: 1, to: 1, points: 30 },
@@ -196,12 +199,6 @@ describe("computeCircuitStandings in a regional circuit", () => {
       ],
       ...overrides,
     });
-
-  const totals = (stages: CircuitStageResult[], region: string | null) =>
-    computeCircuitStandings(stages, region, now).rows.map(({ team: { id }, points }) => [
-      id,
-      points,
-    ]);
 
   it("credits only the region teams listed on a worldwide stage", () => {
     expect(totals([major()], "EU")).toEqual([

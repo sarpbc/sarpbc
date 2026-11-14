@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { isFactShownOn, parseOnThisDayFact, type OnThisDayFactFields } from "./on-this-day-fact";
 
 const input: OnThisDayFactFields = {

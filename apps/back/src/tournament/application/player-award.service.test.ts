@@ -1,8 +1,10 @@
 import { PLAYER_AWARD_TYPES, type PlayerAwardType } from "@sarpbc/types";
 import { describe, expect, it, vi } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { PlayerAwardService } from "./player-award.service";
 import type { AwardTransaction, AwardWriter } from "./ports";
+import { mapSequentially } from "../../common/application/sequentially";
 
 function setup(source: "manual" | "startgg" = "manual") {
   const given = new Set<PlayerAwardType>();
@@ -100,8 +102,10 @@ describe("PlayerAwardService by team", () => {
   it("holds every award type on one stage, including a separate Grand Finals MVP", async () => {
     const { service, writer } = setup();
 
-    for (const awardType of PLAYER_AWARD_TYPES)
-      await service.createForTeam("cup", "kc", "zen", awardType);
+    await mapSequentially(
+      PLAYER_AWARD_TYPES,
+      async (awardType) => await service.createForTeam("cup", "kc", "zen", awardType),
+    );
 
     expect(writer.create.mock.calls.map(([input]) => input.awardType)).toEqual([
       "mvp",

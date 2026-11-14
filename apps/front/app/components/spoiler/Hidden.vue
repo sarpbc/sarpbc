@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const { label } = defineProps<{ label?: string }>();
+const { label = null } = defineProps<{ label?: string | null }>();
 
 const { t } = useI18n();
 </script>

@@ -21,4 +21,4 @@ export const SetViewershipDto = z.strictObject({
     .nullable(),
 });
 
-export type SetViewershipDto = z.infer<typeof SetViewershipDto>;
+export type SetViewershipInput = z.infer<typeof SetViewershipDto>;

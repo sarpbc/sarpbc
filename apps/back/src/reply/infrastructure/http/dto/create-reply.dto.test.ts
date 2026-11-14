@@ -9,13 +9,13 @@ interface CreateReplyDtoPlain {
   replyToId?: string;
 }
 
+async function validateDto(plain: CreateReplyDtoPlain) {
+  const result = CreateReplyDto.safeParse(plain);
+
+  return result.success ? [] : result.error.issues;
+}
+
 describe("CreateReplyDto", () => {
-  async function validateDto(plain: CreateReplyDtoPlain) {
-    const result = CreateReplyDto.safeParse(plain);
-
-    return result.success ? [] : result.error.issues;
-  }
-
   it("accepts a single match target", async () => {
     const errors = await validateDto({
       content: "Nice clutch",

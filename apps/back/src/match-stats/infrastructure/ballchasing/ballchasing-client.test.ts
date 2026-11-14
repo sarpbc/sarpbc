@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { requestUrl } from "../../../../test/fetch-mock";
-import { IntegrationError } from "../../../common/domain/errors";
+import { IntegrationError } from "../../../common/domain/errors/integration-error";
 import { BALLCHASING_API_URL, BallchasingClient } from "./ballchasing-client";
 
 // Shapes follow the examples of https://ballchasing.com/doc/api (GET /groups/{id}, GET /replays, GET /groups).
@@ -54,14 +54,11 @@ function listedReplay(id: string, overrides: { date?: string; date_has_tz?: bool
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
 function json(
-  body: { [key: string]: Json },
+  body: Record<string, Json>,
   status = 200,
   headers: Record<string, string> = {},
 ): Response {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json", ...headers },
-  });
+  return Response.json(body, { status, headers });
 }
 
 function client(routes: (url: string) => Response) {
@@ -177,7 +174,7 @@ describe("BallchasingClient.groupReplays", () => {
 
     const instance = new BallchasingClient("k", {
       fetch,
-      sleep: async () => undefined,
+      sleep: async () => {},
     });
 
     await expect(instance.groupReplays("pilot")).rejects.toThrow(/could not be reached/);
@@ -311,7 +308,7 @@ describe("BallchasingClient.replayStats", () => {
     const detail = replayDetail();
     const [firstkiller, racer] = detail.blue.players;
 
-    const withBluePlayer = (player: { [key: string]: Json }) => ({
+    const withBluePlayer = (player: Record<string, Json>) => ({
       ...detail,
       blue: { ...detail.blue, players: [firstkiller, player] },
     });
@@ -323,10 +320,13 @@ describe("BallchasingClient.replayStats", () => {
       { ...detail, orange: { name: detail.orange.name, players: detail.orange.players } },
     ];
 
-    for (const body of bodies)
-      await expect(client(() => json(body)).instance.replayStats("r1")).rejects.toThrow(
-        IntegrationError,
-      );
+    await Promise.all(
+      bodies.map(async (body) => {
+        await expect(client(() => json(body)).instance.replayStats("r1")).rejects.toThrow(
+          IntegrationError,
+        );
+      }),
+    );
   });
 
   it("returns null while Ballchasing is still processing the replay", async () => {
@@ -357,11 +357,13 @@ describe("BallchasingClient rate limiting", () => {
   it("honours a positive Retry-After", async () => {
     let calls = 0;
 
-    const { instance, sleep } = client(() =>
-      ++calls === 1
+    const { instance, sleep } = client(() => {
+      calls += 1;
+
+      return calls === 1
         ? json({ error: "rate limited" }, 429, { "retry-after": "7" })
-        : json(replayDetail()),
-    );
+        : json(replayDetail());
+    });
 
     await instance.replayStats("r1");
 

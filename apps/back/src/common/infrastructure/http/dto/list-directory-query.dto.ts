@@ -6,4 +6,4 @@ export const ListDirectoryQueryDto = OffsetPaginationQueryDto.extend({
   start: z.string().max(16).optional(),
 });
 
-export type ListDirectoryQueryDto = z.infer<typeof ListDirectoryQueryDto>;
+export type ListDirectoryQueryInput = z.infer<typeof ListDirectoryQueryDto>;

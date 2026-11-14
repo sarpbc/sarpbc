@@ -1,6 +1,11 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { ConflictError, InvalidInputError, UnprocessableError } from "../../common/domain/errors";
-import { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
+import { Contract } from "../domain/contract";
+import { Player } from "../domain/player";
+import { PlayerPhoto } from "../domain/player-photo";
+import { Team } from "../domain/team";
 import { PlayerService } from "./player.service";
 import type { RosterWriteScope } from "./ports";
 import { unusedPhotoQueries, unusedPlayerQueries } from "../../../test/roster-doubles";
@@ -58,7 +63,8 @@ describe("PlayerService profile photos", () => {
   });
 
   it("archives the previous profile and consumes the selected gallery photo in one transaction", async () => {
-    expect((await service.setProfilePhoto(player.id, "selected")).imageUrl).toBe("selected.png");
+    const setProfilePhotoResult = await service.setProfilePhoto(player.id, "selected");
+    expect(setProfilePhotoResult.imageUrl).toBe("selected.png");
     expect(gallery.map((photo) => photo.url)).toEqual(["old.png"]);
     expect(transactions).toBe(1);
   });

@@ -94,16 +94,19 @@ function replay(
   };
 }
 
+function describeAssignment(assignment: ReplayAssignment): string {
+  if (assignment.kind === "matched") {
+    return `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`;
+  }
+
+  if (assignment.kind === "stored") return `stored:${assignment.matchId}#${assignment.gameNumber}`;
+
+  return `unmatched:${assignment.reason}${assignment.matchId === null ? "" : `@${assignment.matchId}`}`;
+}
+
 function byReplay(assignments: ReplayAssignment[]) {
   return Object.fromEntries(
-    assignments.map((assignment) => [
-      assignment.replay.id,
-      assignment.kind === "matched"
-        ? `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`
-        : assignment.kind === "stored"
-          ? `stored:${assignment.matchId}#${assignment.gameNumber}`
-          : `unmatched:${assignment.reason}${assignment.matchId !== null ? `@${assignment.matchId}` : ""}`,
-    ]),
+    assignments.map((assignment) => [assignment.replay.id, describeAssignment(assignment)]),
   );
 }
 
@@ -154,6 +157,18 @@ describe("assignReplays with player participants", () => {
     });
   });
 });
+
+const bo5 = (overrides: Partial<CandidateMatch> = {}) =>
+  match("m1", [kc, bds], "2026-06-01T18:00:00Z", {
+    scores: won(kc, bds, 3),
+    ...overrides,
+  });
+
+const sweep = () => [
+  replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
+  replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
+  replay("2026-06-01T18:45:00Z", { names: KC_NAMES, goals: 3 }, { names: BDS_NAMES, goals: 0 }),
+];
 
 describe("assignReplays", () => {
   it("numbers a complete series by replay date and keeps the sides of each game", () => {
@@ -624,18 +639,6 @@ describe("assignReplays", () => {
   });
 
   describe("after staff changes", () => {
-    const bo5 = (overrides: Partial<CandidateMatch> = {}) =>
-      match("m1", [kc, bds], "2026-06-01T18:00:00Z", {
-        scores: won(kc, bds, 3),
-        ...overrides,
-      });
-
-    const sweep = () => [
-      replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
-      replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
-      replay("2026-06-01T18:45:00Z", { names: KC_NAMES, goals: 3 }, { names: BDS_NAMES, goals: 0 }),
-    ];
-
     it("reports a removed replay as excluded and holds back its series as incomplete", () => {
       const [g1, g2, g3] = sweep();
       const m = bo5({ storedReplayIds: [g1.id, g3.id] });

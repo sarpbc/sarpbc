@@ -4,7 +4,7 @@ import {
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
   type ViewershipError,
 } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export type ViewershipOwnerKind = "event" | "match";
 

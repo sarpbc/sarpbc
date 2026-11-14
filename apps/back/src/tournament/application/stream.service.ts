@@ -1,6 +1,7 @@
 import type { Stream, StreamInput } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { replaceStreams, type StreamEditSource, type StreamOwner } from "../domain/stream";
 import type { CompetitionAfterCommit } from "./after-commit";
 import { requireEvent } from "./event-placement";

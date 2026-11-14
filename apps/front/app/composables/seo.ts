@@ -34,38 +34,40 @@ interface PageSeoMeta {
   robots: "noindex, nofollow" | "index, follow";
 }
 
+const resolveImageUrl = (image?: string | null): string =>
+  resolveSiteUrl(image) ?? `${SITE_ORIGIN}${DEFAULT_IMAGE_PATH}`;
+
+const resolveImageType = (imageUrl: string): OgImageMime | undefined => {
+  const path = imageUrl.split("?")[0]?.toLowerCase() ?? "";
+
+  if (path.endsWith(".png")) {
+    return "image/png";
+  }
+
+  if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
+    return "image/jpeg";
+  }
+
+  if (path.endsWith(".webp")) {
+    return "image/webp";
+  }
+
+  if (path.endsWith(".gif")) {
+    return "image/gif";
+  }
+
+  if (path.endsWith(".avif")) {
+    return "image/avif";
+  }
+
+  return undefined;
+};
+
 export const useSarpbcSeo = () => {
   const { locales } = useI18n();
   const route = useRoute();
 
-  const resolveImageUrl = (image?: string | null): string =>
-    resolveSiteUrl(image) ?? `${SITE_ORIGIN}${DEFAULT_IMAGE_PATH}`;
-
-  const resolveImageType = (imageUrl: string): OgImageMime | undefined => {
-    const path = imageUrl.split("?")[0]?.toLowerCase() ?? "";
-
-    if (path.endsWith(".png")) {
-      return "image/png";
-    }
-
-    if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
-      return "image/jpeg";
-    }
-
-    if (path.endsWith(".webp")) {
-      return "image/webp";
-    }
-
-    if (path.endsWith(".gif")) {
-      return "image/gif";
-    }
-
-    if (path.endsWith(".avif")) {
-      return "image/avif";
-    }
-
-    return undefined;
-  };
+  const getCanonicalUrl = () => `${SITE_ORIGIN}${route.path === "/fr" ? "/fr/" : route.path}`;
 
   const setPageSeo = (opts?: {
     title?: string;
@@ -135,10 +137,6 @@ export const useSarpbcSeo = () => {
     }
 
     useSeoMeta({ ...seoMeta, ogUrl: getCanonicalUrl });
-  };
-
-  const getCanonicalUrl = () => {
-    return `${SITE_ORIGIN}${route.path === "/fr" ? "/fr/" : route.path}`;
   };
 
   return {

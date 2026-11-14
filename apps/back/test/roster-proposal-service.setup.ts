@@ -5,8 +5,12 @@ import type {
   Viewership,
 } from "@sarpbc/types";
 import { vi } from "vitest";
-import { ConflictError, InvalidInputError, NotFoundError } from "../src/common/domain/errors";
-import { Contract, Player, Team } from "../src/roster/domain/roster";
+import { ConflictError } from "../src/common/domain/errors/conflict-error";
+import { InvalidInputError } from "../src/common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../src/common/domain/errors/not-found-error";
+import { Contract } from "../src/roster/domain/contract";
+import { Player } from "../src/roster/domain/player";
+import { Team } from "../src/roster/domain/team";
 import { TeamAlias } from "../src/roster/domain/team-alias";
 import {
   replaceStreams,
@@ -18,6 +22,31 @@ import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
 import type { RosterProposalStore } from "../src/roster-proposal/application/ports";
 import { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 
+const teamGuard = async (id: string) => {
+  if (id === "kc") throw new ConflictError("Karmine Corp still has 3 contracts");
+};
+
+const matchGuard = async (id: string) => {
+  if (id === "missing-match") throw new NotFoundError("Match not found");
+
+  if (id === "pandascore-match")
+    throw new InvalidInputError("Final is synced from PandaScore and cannot be deleted");
+};
+
+const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
+
+const awardError = (tournamentId: string, playerId: string) => {
+  if (tournamentId === "startgg-cup")
+    return new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
+
+  if (tournamentId !== "cup")
+    return new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+
+  if (playerId !== "zen") return new InvalidInputError(`${playerId} is not on the roster`);
+
+  return null;
+};
+
 export function setupRosterProposalService() {
   const saved = new Map<string, RosterProposal>();
   let sequence = 0;
@@ -26,7 +55,11 @@ export function setupRosterProposalService() {
     findById: async (id) => saved.get(id) ?? null,
     list: async (status) => [...saved.values()].filter((p) => p.status === status),
     save: async (proposal) => {
-      proposal.id ||= `proposal-${++sequence}`;
+      if (proposal.id === "") {
+        sequence += 1;
+        proposal.id = `proposal-${sequence}`;
+      }
+
       saved.set(proposal.id, proposal);
     },
     names: vi.fn(async () => ({ zen: "zen", kc: "Karmine Corp" })),
@@ -36,10 +69,6 @@ export function setupRosterProposalService() {
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
   const kcCopy = Object.assign(new Team(), { id: "kc-copy", name: "Karmine Corp Esports" });
   const knownTeams = new Map([kc, kcCopy].map((team) => [team.id, team]));
-
-  const teamGuard = async (id: string) => {
-    if (id === "kc") throw new ConflictError("Karmine Corp still has 3 contracts");
-  };
 
   const players = {
     findById: vi.fn(async (id: string) => (id === "zen" || id === "zen-dup" ? zen : null)),
@@ -55,13 +84,6 @@ export function setupRosterProposalService() {
     update: vi.fn(async () => kc),
     requireDeletable: vi.fn(teamGuard),
     delete: vi.fn(teamGuard),
-  };
-
-  const matchGuard = async (id: string) => {
-    if (id === "missing-match") throw new NotFoundError("Match not found");
-
-    if (id === "pandascore-match")
-      throw new InvalidInputError("Final is synced from PandaScore and cannot be deleted");
   };
 
   const matches = {
@@ -119,7 +141,7 @@ export function setupRosterProposalService() {
         return { worldwide: false, regionTeamIds: [], finishes: [], ...input };
       },
     ),
-    setStageScale: vi.fn(async () => undefined),
+    setStageScale: vi.fn().mockResolvedValue(undefined),
   };
 
   const teamAliases = {
@@ -152,14 +174,12 @@ export function setupRosterProposalService() {
     })),
   };
 
-  const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
-
   const logos = {
     upload: vi.fn(async (teamId: string, variant: string) =>
       stored(`pending/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`),
     ),
     publish: vi.fn(async (pendingKey: string) => stored(pendingKey.slice("pending/".length))),
-    discard: vi.fn(async () => {}),
+    discard: vi.fn().mockResolvedValue(undefined),
   };
 
   const contracts = {
@@ -192,18 +212,6 @@ export function setupRosterProposalService() {
     }),
     setDistribution: vi.fn(),
     updateEntry: vi.fn(),
-  };
-
-  const awardError = (tournamentId: string, playerId: string) => {
-    if (tournamentId === "startgg-cup")
-      return new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
-
-    if (tournamentId !== "cup")
-      return new NotFoundError(`Tournament with id "${tournamentId}" not found`);
-
-    if (playerId !== "zen") return new InvalidInputError(`${playerId} is not on the roster`);
-
-    return null;
   };
 
   const awards = {
@@ -248,8 +256,8 @@ export function setupRosterProposalService() {
     contracts,
     merges,
     {
-      hasAnyPermission: async (_: string, permissions: string[]) => {
-        staff.permissions.push(...permissions);
+      hasAnyPermission: async (_: string, required: string[]) => {
+        staff.permissions.push(...required);
 
         return staff.allowed;
       },

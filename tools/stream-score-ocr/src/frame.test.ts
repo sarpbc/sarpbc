@@ -26,8 +26,11 @@ void describe("readPpmFrames", () => {
   void it("splits a pipe of frames whatever the chunk boundaries", async () => {
     const stream = Buffer.concat([ppm(4, 3, 10), ppm(2, 2, 200)]);
 
-    for (const size of [1, 5, 7, 4096]) {
-      const frames = await collect(chunked(stream, size));
+    const results = await Promise.all(
+      [1, 5, 7, 4096].map(async (size) => await collect(chunked(stream, size))),
+    );
+
+    for (const frames of results) {
       assert.deepEqual(
         frames.map((frame) => [frame.width, frame.height, frame.data[0], frame.data.length]),
         [

@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { unconstructed } from "../../../../test/doubles";
-import { Player as PlayerRow } from "./player.entities";
-import { Player } from "../../domain/roster";
-import { MikroPlayerStore } from "./roster.store";
+import { Player as PlayerRow } from "./player.entity";
+import { Player } from "../../domain/player";
+import { MikroPlayerStore } from "./player.store";
 
 function fixture() {
   const execute = vi.fn();

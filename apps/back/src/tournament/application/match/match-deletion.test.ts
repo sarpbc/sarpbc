@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import { Match } from "../../domain/competition";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import { Match } from "../../domain/match";
 import type { MatchReferences } from "../../domain/match-deletion";
 import { CompetitionAfterCommit } from "../after-commit";
 import type {
@@ -14,6 +16,25 @@ import { MatchService } from "./match.service";
 function unused(): never {
   throw new Error("Not part of a match deletion");
 }
+
+const match = (fields: Partial<Match> = {}) =>
+  Object.assign(new Match(), {
+    id: "dup",
+    name: "Group A round 1",
+    source: "manual",
+    tournament: {
+      id: "oce-open",
+      name: "OCE Open 1",
+      slug: "group-a",
+      event: { id: "event", slug: "oce-open-1", name: "OCE Open 1" },
+      beginAt: null,
+      league: null,
+      pickemsEnabled: false,
+      source: "manual",
+      pandascoreId: null,
+    },
+    ...fields,
+  });
 
 describe("MatchService deletion", () => {
   let stored: Match | null;
@@ -85,25 +106,6 @@ describe("MatchService deletion", () => {
       { error: () => {} },
     ),
   );
-
-  const match = (fields: Partial<Match> = {}) =>
-    Object.assign(new Match(), {
-      id: "dup",
-      name: "Group A round 1",
-      source: "manual",
-      tournament: {
-        id: "oce-open",
-        name: "OCE Open 1",
-        slug: "group-a",
-        event: { id: "event", slug: "oce-open-1", name: "OCE Open 1" },
-        beginAt: null,
-        league: null,
-        pickemsEnabled: false,
-        source: "manual",
-        pandascoreId: null,
-      },
-      ...fields,
-    });
 
   beforeEach(() => {
     stored = match();

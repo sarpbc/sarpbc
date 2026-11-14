@@ -1,17 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Match } from "../../domain/competition";
+import { Match } from "../../domain/match";
 import type { MatchQueries } from "../ports";
 import { findMatchBlocks, isMatchBlockLive, MATCH_BLOCK_LIVE_WINDOW_MS } from "./match-blocks";
 
 const NOW = new Date("2026-10-31T18:00:00Z");
+
+const stored = (id: string) => Object.assign(new Match(), { id });
 
 describe("findMatchBlocks", () => {
   const reads = {
     byIds: vi.fn<MatchQueries["byIds"]>(),
     page: vi.fn<MatchQueries["page"]>(),
   };
-
-  const stored = (id: string) => Object.assign(new Match(), { id });
 
   beforeEach(() => {
     vi.resetAllMocks();
@@ -37,13 +37,13 @@ describe("findMatchBlocks", () => {
   });
 
   it("puts live, then upcoming, then recent results of a scope up to its limit", async () => {
-    reads.page.mockImplementation(async (kind) =>
-      kind === "live"
-        ? [stored("live")]
-        : kind === "upcoming"
-          ? [stored("next"), stored("later")]
-          : [stored("result")],
-    );
+    reads.page.mockImplementation(async (kind) => {
+      if (kind === "live") return [stored("live")];
+
+      if (kind === "upcoming") return [stored("next"), stored("later")];
+
+      return [stored("result")];
+    });
 
     const [tournament, team] = await findMatchBlocks(
       reads,
@@ -87,13 +87,13 @@ describe("findMatchBlocks", () => {
   });
 });
 
-describe("isMatchBlockLive", () => {
-  const started = (hoursAgo: number, endAt: Date | null = null) =>
-    Object.assign(new Match(), {
-      beginAt: new Date(NOW.getTime() - hoursAgo * 60 * 60 * 1000),
-      endAt,
-    });
+const started = (hoursAgo: number, endAt: Date | null = null) =>
+  Object.assign(new Match(), {
+    beginAt: new Date(NOW.getTime() - hoursAgo * 60 * 60 * 1000),
+    endAt,
+  });
 
+describe("isMatchBlockLive", () => {
   it("stops treating a match without an end as live after the window", () => {
     expect(isMatchBlockLive(started(1), NOW)).toBe(true);
     expect(isMatchBlockLive(started(5), NOW)).toBe(true);

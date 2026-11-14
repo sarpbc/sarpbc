@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { PlayerLinkStore, StatsCandidates } from "./ports";
 import { StatsPlayerLinkService } from "./stats-player-link.service";
 

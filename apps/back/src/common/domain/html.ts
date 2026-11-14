@@ -51,7 +51,7 @@ function isSafeUrl(value: string): boolean {
 }
 
 function asciiLowerCase(value: string): string {
-  return value.replace(/[A-Z]/g, (char) => char.toLowerCase());
+  return value.replaceAll(/[A-Z]/g, (char) => char.toLowerCase());
 }
 
 function isWordChar(char: string): boolean {
@@ -159,8 +159,8 @@ export function sanitizePlainText(value: string): string {
 }
 
 export function sanitizeNewsHtml(value: string): string {
-  return stripDangerousBlocks(value).replace(
-    /<\/?([a-zA-Z][\w:-]*)\b([^>]*)>/g,
+  return stripDangerousBlocks(value).replaceAll(
+    /<\/?(?<tag>[a-zA-Z][\w:-]*)\b(?<attrs>[^>]*)>/g,
     (full: string, rawName: string, rawAttrs: string) => {
       const name = rawName.toLowerCase();
 
@@ -182,12 +182,16 @@ export function sanitizeNewsHtml(value: string): string {
       }
 
       const attrs: string[] = [];
-      const attrRe = /([a-zA-Z_:][\w:.-]*)\s*=\s*("([^"]*)"|'([^']*)'|(\S+))/g;
+
+      const attrRe =
+        /(?<name>[a-zA-Z_:][\w:.-]*)\s*=\s*(?:"(?<double>[^"]*)"|'(?<single>[^']*)'|(?<bare>\S+))/g;
+
       let match = attrRe.exec(rawAttrs);
 
       while (match) {
-        const attrName = match[1].toLowerCase();
-        const attrValue = match[3] ?? match[4] ?? match[5] ?? "";
+        const groups: Record<string, string | undefined> = match.groups ?? {};
+        const attrName = (groups.name ?? "").toLowerCase();
+        const attrValue = groups.double ?? groups.single ?? groups.bare ?? "";
         match = attrRe.exec(rawAttrs);
 
         if (!allowed.has(attrName) || attrName.startsWith("on")) {

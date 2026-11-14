@@ -10,7 +10,9 @@ const games = computed(() => {
 
   for (const vod of vods) byGame.set(vod.game, [...(byGame.get(vod.game) ?? []), vod]);
 
-  return [...byGame.entries()].sort(([a], [b]) => a - b).map(([game, links]) => ({ game, links }));
+  return [...byGame.entries()]
+    .toSorted(([a], [b]) => a - b)
+    .map(([game, links]) => ({ game, links }));
 });
 
 const languageNames = computed(() => new Intl.DisplayNames([locale.value], { type: "language" }));

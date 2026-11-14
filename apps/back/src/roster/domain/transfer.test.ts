@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { Contract, Player, Team } from "./roster";
+import { Contract } from "./contract";
+import { Player } from "./player";
+import { Team } from "./team";
 import { deriveTransfers } from "./transfer";
 
 describe("deriveTransfers", () => {
@@ -27,10 +29,10 @@ describe("deriveTransfers", () => {
     });
 
   const summary = (contracts: Contract[], until = today) =>
-    deriveTransfers(contracts, until).map(({ type, date, contract }) => [
+    deriveTransfers(contracts, until).map(({ type, date, contract: moved }) => [
       type,
       date.toISOString().slice(0, 10),
-      contract.team.id,
+      moved.team.id,
     ]);
 
   it("turns a move between teams into a departure and an arrival, newest first", () => {

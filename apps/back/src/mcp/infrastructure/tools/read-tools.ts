@@ -1,6 +1,6 @@
 import { DEFAULT_PAGE_SIZE } from "@sarpbc/utils";
 import { z } from "zod";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import type { NewsService } from "../../../news/application/news.service";
 import type { ContractService } from "../../../roster/application/contract.service";
 import type { PlayerService } from "../../../roster/application/player.service";

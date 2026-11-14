@@ -209,14 +209,14 @@ void describe("article content", () => {
   });
 });
 
-void describe("hostile content", () => {
-  function assertFast(content: string) {
-    assert.deepEqual(extractNewsMatchBlocks(content), []);
-    assert.equal(parseNewsMatchTag(content), null);
-    findInvalidNewsMatchTags(content);
-    stripNewsMatchTags(content);
-  }
+function assertFast(content: string) {
+  assert.deepEqual(extractNewsMatchBlocks(content), []);
+  assert.equal(parseNewsMatchTag(content), null);
+  findInvalidNewsMatchTags(content);
+  stripNewsMatchTags(content);
+}
 
+void describe("hostile content", () => {
   void it("scans a block tag followed by whitespace in linear time", () => {
     assertFast(`::matches{}${" ".repeat(200_000)}`);
     assertFast(`::matches{}${" \t".repeat(100_000)}x`);

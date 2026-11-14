@@ -1,4 +1,7 @@
-import type { Contract, Player, PlayerPhoto, Team } from "../domain/roster";
+import type { Contract } from "../domain/contract";
+import type { Player } from "../domain/player";
+import type { PlayerPhoto } from "../domain/player-photo";
+import type { Team } from "../domain/team";
 import type { TeamAlias } from "../domain/team-alias";
 import type { TeamCompetitionReferences } from "../domain/team-deletion";
 import type { TeamLogoFormat } from "../domain/team-logo";

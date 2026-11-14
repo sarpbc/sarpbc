@@ -33,7 +33,8 @@ if (player.value && player.value.slug !== slug.value) {
   await redirectToCanonical(route, localePath(playerPath(player.value.slug)));
 }
 
-const currentPlayer = computed(() => player.value!);
+const loadedPlayer = player.value;
+const currentPlayer = computed(() => player.value ?? loadedPlayer);
 const playerId = computed(() => player.value?.id ?? "");
 
 const { data: oldTeams } = await useAsyncData(

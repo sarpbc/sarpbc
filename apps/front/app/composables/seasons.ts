@@ -14,11 +14,11 @@ export async function getSeasonArchive(slug: string): Promise<SeasonArchive | nu
     return await apiFetch<SeasonArchive>(`/season-archives/${encodeURIComponent(slug)}`, {
       method: "GET",
     });
-  } catch (cause) {
-    if (getApiErrorStatus(cause) === 404) {
+  } catch (error) {
+    if (getApiErrorStatus(error) === 404) {
       return null;
     }
 
-    throw cause;
+    throw error;
   }
 }

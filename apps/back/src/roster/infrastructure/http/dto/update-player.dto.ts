@@ -12,4 +12,4 @@ export const UpdatePlayerDto = z.strictObject({
   slug: z.string().optional(),
 });
 
-export type UpdatePlayerDto = z.infer<typeof UpdatePlayerDto>;
+export type UpdatePlayerInput = z.infer<typeof UpdatePlayerDto>;

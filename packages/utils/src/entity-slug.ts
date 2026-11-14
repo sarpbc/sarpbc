@@ -20,15 +20,15 @@ function truncateAtHyphen(slug: string): string {
   return cut > 0 ? window.slice(0, cut) : slug.slice(0, MAX_SLUG_LENGTH);
 }
 
-export function toSlug(...parts: Array<string | null | undefined>): string {
+export function toSlug(...parts: (string | null | undefined)[]): string {
   const text = parts
     .map((part) => part?.trim())
     .filter(Boolean)
     .join(" ");
 
   const slug = slugify(text, { lower: true, strict: true })
-    .replace(/-{2,}/g, "-")
-    .replace(/^-|-$/g, "");
+    .replaceAll(/-{2,}/g, "-")
+    .replaceAll(/^-|-$/g, "");
 
   return truncateAtHyphen(slug);
 }
@@ -48,11 +48,15 @@ export async function allocateSlug(
   base: string,
   isTaken: (slug: string) => boolean | Promise<boolean>,
 ): Promise<string> {
-  for (let attempt = 1; ; attempt++) {
+  const allocate = async (attempt: number): Promise<string> => {
     const slug = attempt === 1 ? base : `${base}-${attempt}`;
 
     if (!UUID_PATTERN.test(slug) && !(await isTaken(slug))) return slug;
-  }
+
+    return await allocate(attempt + 1);
+  };
+
+  return await allocate(1);
 }
 
 function roundLabel(matchName: string | null | undefined): string | null {
@@ -61,19 +65,28 @@ function roundLabel(matchName: string | null | undefined): string | null {
   if (!isNonEmptyString(name)) return null;
   const colon = name.indexOf(":");
 
-  if (colon >= 0) return name.slice(0, colon);
+  if (colon !== -1) return name.slice(0, colon);
 
   return /tbd/i.test(name) ? null : name;
 }
 
-export function isKnownTeamName(name: string | null | undefined): boolean {
+function knownTeamName(name: string | null | undefined): string | null {
   const trimmed = name?.trim();
 
-  return Boolean(trimmed) && !/^tbd$/i.test(trimmed!);
+  return isNonEmptyString(trimmed) && !/^tbd$/i.test(trimmed) ? trimmed : null;
 }
 
-export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchSlugInput): string {
-  const [teamA, teamB] = teamNames.map((name) => (isKnownTeamName(name) ? name!.trim() : null));
+export function isKnownTeamName(name: string | null | undefined): boolean {
+  return knownTeamName(name) !== null;
+}
+
+export function matchSlug({
+  teamNames,
+  matchName,
+  eventSlug: event,
+  stageSlug: stage,
+}: MatchSlugInput): string {
+  const [teamA = null, teamB = null] = teamNames.map(knownTeamName);
 
   const [first, second] =
     teamA !== null && teamB !== null && toSlug(teamA) > toSlug(teamB)
@@ -83,7 +96,7 @@ export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchS
   const lead = first !== null && second !== null ? [first, "vs", second] : [roundLabel(matchName)];
 
   // A manual tournament is the only stage of an event slugged after the same name.
-  return toSlug(...lead, eventSlug, stageSlug === eventSlug ? null : stageSlug) || "match";
+  return toSlug(...lead, event, stage === event ? null : stage) || "match";
 }
 
 export function forumPostSlug(title: string): string {

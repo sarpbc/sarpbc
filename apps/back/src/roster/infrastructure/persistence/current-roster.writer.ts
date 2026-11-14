@@ -1,5 +1,6 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import { Team } from "./player.entities";
+import { mapSequentially } from "../../../common/application/sequentially";
+import { Team } from "./team.entity";
 import { RosterSyncWriter } from "./roster-sync.writer";
 import type { ImportedPlayer } from "../../application/imports";
 import type { CurrentRosterWriter } from "../../application/ports";
@@ -14,22 +15,33 @@ export class MikroCurrentRosterWriter implements CurrentRosterWriter {
   async syncCurrentTeams(roster: ImportedPlayer[]): Promise<void> {
     await this.em.fork().transactional(async (tx) => {
       const writer = new RosterSyncWriter(tx);
-      const teams = new Map<string, string>();
 
-      for (const entry of roster) {
-        if (entry.currentTeam && !teams.has(entry.currentTeam.slug)) {
-          teams.set(entry.currentTeam.slug, (await writer.upsertTeam(entry.currentTeam)).id);
-        }
-      }
+      const currentTeams = roster.flatMap((entry) =>
+        entry.currentTeam ? [entry.currentTeam] : [],
+      );
+
+      const firstBySlug = currentTeams.filter(
+        (team, index) => currentTeams.findIndex((other) => other.slug === team.slug) === index,
+      );
+
+      const teamIds = new Map(
+        await mapSequentially(firstBySlug, async (team): Promise<[string, string]> => {
+          const { id } = await writer.upsertTeam(team);
+
+          return [team.slug, id];
+        }),
+      );
 
       await tx.flush();
 
-      for (const entry of roster) {
-        await writer.upsertPlayer(
-          entry.player,
-          entry.currentTeam ? (teams.get(entry.currentTeam.slug) ?? null) : null,
-        );
-      }
+      await mapSequentially(
+        roster,
+        async (entry) =>
+          await writer.upsertPlayer(
+            entry.player,
+            entry.currentTeam ? (teamIds.get(entry.currentTeam.slug) ?? null) : null,
+          ),
+      );
 
       await tx.flush();
     });

@@ -95,6 +95,16 @@ const tournament = z.strictObject({
 
 export const tournamentCacheKey = (id: string): string => `tournament:${id}`;
 
+function diagnose(key: string, operation: string, error: Error): void {
+  log.warn({
+    component: "CachedTournamentRead",
+    message: "Optional tournament cache failed",
+    key,
+    operation,
+    error,
+  });
+}
+
 export class CachedTournamentRead {
   constructor(
     private readonly tournaments: Pick<TournamentQueries, "findById">,
@@ -115,7 +125,7 @@ export class CachedTournamentRead {
     try {
       await this.redis.set(key, JSON.stringify(mapped), 60);
     } catch (error) {
-      this.diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
+      diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
     }
 
     return mapped;
@@ -130,32 +140,22 @@ export class CachedTournamentRead {
       const result = tournament.safeParse(decoded);
 
       if (!result.success) {
-        this.diagnose(key, "decode", result.error);
+        diagnose(key, "decode", result.error);
 
         return null;
       }
 
       if (result.data.id !== id) {
-        this.diagnose(key, "decode", new Error("Cached tournament ID does not match its key"));
+        diagnose(key, "decode", new Error("Cached tournament ID does not match its key"));
 
         return null;
       }
 
       return result.data;
     } catch (error) {
-      this.diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
+      diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
 
       return null;
     }
-  }
-
-  private diagnose(key: string, operation: string, error: Error): void {
-    log.warn({
-      component: CachedTournamentRead.name,
-      message: "Optional tournament cache failed",
-      key,
-      operation,
-      error,
-    });
   }
 }

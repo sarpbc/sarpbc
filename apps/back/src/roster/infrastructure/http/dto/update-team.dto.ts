@@ -8,4 +8,4 @@ export const UpdateTeamDto = z.strictObject({
   slug: z.string().optional(),
 });
 
-export type UpdateTeamDto = z.infer<typeof UpdateTeamDto>;
+export type UpdateTeamInput = z.infer<typeof UpdateTeamDto>;

@@ -7,8 +7,9 @@ import {
   teamAliasesOverlap,
   type TeamAliasError,
 } from "@sarpbc/utils";
-import { InvalidInputError, UnprocessableError } from "../../common/domain/errors";
-import { Team } from "./roster";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
+import { Team } from "./team";
 
 export class TeamAlias {
   id = "";

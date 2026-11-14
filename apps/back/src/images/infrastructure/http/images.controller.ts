@@ -5,7 +5,7 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { ImagesService } from "../../application/images.service";
-import { SaveImageDto } from "./dto/save-image.dto";
+import { SaveImageDto, type SaveImageInput } from "./dto/save-image.dto";
 
 @UseGuards(AuthGuard, PermissionGuard)
 @RequirePermissions("images.manage")
@@ -22,7 +22,7 @@ export class ImagesController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async saveImage(@Body({ schema: SaveImageDto }) dto: SaveImageDto) {
+  async saveImage(@Body({ schema: SaveImageDto }) dto: SaveImageInput) {
     return await this.imagesService.saveImage(dto.imageId);
   }
 }

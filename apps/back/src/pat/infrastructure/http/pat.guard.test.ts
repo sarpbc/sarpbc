@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ExecutionContext } from "@nestjs/common";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import { Test, TestingModule } from "@nestjs/testing";
-import { AuthenticationError } from "../../../common/domain/errors";
+import { AuthenticationError } from "../../../common/domain/errors/authentication-error";
 import { PatAuthGuard } from "./pat.guard";
 import { PatService, PatUser } from "../../application/pat.service";
 
@@ -14,6 +14,12 @@ interface PatGuardTestRequest {
   headers: PatGuardTestHeaders;
   user?: PatUser;
 }
+
+const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
+  const request: PatGuardTestRequest = { headers };
+
+  return new ExecutionContextHost([request]);
+};
 
 describe("PatAuthGuard", () => {
   let guard: PatAuthGuard;
@@ -30,12 +36,6 @@ describe("PatAuthGuard", () => {
     guard = module.get(PatAuthGuard);
     vi.clearAllMocks();
   });
-
-  const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
-    const request: PatGuardTestRequest = { headers };
-
-    return new ExecutionContextHost([request]);
-  };
 
   it("throws when the authorization header is missing", async () => {
     await expect(guard.canActivate(createContext())).rejects.toBeInstanceOf(AuthenticationError);

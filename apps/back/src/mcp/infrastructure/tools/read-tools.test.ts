@@ -1,6 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import { Player, Team } from "../../../roster/domain/roster";
-import { Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
+import { Player } from "../../../roster/domain/player";
+import { Team } from "../../../roster/domain/team";
+import { Tournament } from "../../../tournament/domain/tournament";
+import { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { redistributableCompetition } from "../redistributable-competition";
@@ -164,9 +166,7 @@ function setup() {
     return await tool.run(user, args);
   };
 
-  const json = async (name: string, args = {}) => {
-    return jsonOf(await call(name, args));
-  };
+  const json = async (name: string, args = {}) => jsonOf(await call(name, args));
 
   return {
     matchService,
@@ -227,7 +227,8 @@ describe("MCP read tools", () => {
         },
       ],
     });
-    expect((await call("get_tournament", { id: "c1" })).isError).toBe(true);
+    const callResult = await call("get_tournament", { id: "c1" });
+    expect(callResult.isError).toBe(true);
   });
 
   it("aggregates player stats per stage or event and leaves start.gg stages out", async () => {
@@ -243,8 +244,10 @@ describe("MCP read tools", () => {
       games: 1,
     });
     expect(playerLines).toHaveBeenLastCalledWith(["manual-cup"]);
-    expect((await call("get_tournament_player_stats", { tournamentId: "c1" })).isError).toBe(true);
-    expect((await call("get_tournament_player_stats", {})).isError).toBe(true);
+    const callResult2 = await call("get_tournament_player_stats", { tournamentId: "c1" });
+    expect(callResult2.isError).toBe(true);
+    const callResult3 = await call("get_tournament_player_stats", {});
+    expect(callResult3.isError).toBe(true);
     expect(playerLines).toHaveBeenCalledTimes(2);
   });
 
@@ -261,7 +264,7 @@ describe("MCP read tools", () => {
     });
     const hidden = await call("get_match_lineups", { matchId: "startgg-match" });
     expect(hidden.isError).toBe(true);
-    const block = hidden.content[0];
+    const [block] = hidden.content;
     expect(block?.type === "text" ? block.text : "").not.toContain("Scout");
   });
 
@@ -272,7 +275,8 @@ describe("MCP read tools", () => {
       prizepool: null,
       prizes: [],
     });
-    expect((await call("get_tournament_prizes", { id: "c1" })).isError).toBe(true);
+    const callResult4 = await call("get_tournament_prizes", { id: "c1" });
+    expect(callResult4.isError).toBe(true);
   });
 
   it("returns redistributable distributions with the PandaScore prize pool", async () => {
@@ -286,7 +290,8 @@ describe("MCP read tools", () => {
 
   it("hides the awards of start.gg tournaments without reading them", async () => {
     const { call, playerAwardService } = setup();
-    expect((await call("get_tournament_awards", { id: "startgg-cup" })).isError).toBe(true);
+    const callResult5 = await call("get_tournament_awards", { id: "startgg-cup" });
+    expect(callResult5.isError).toBe(true);
     expect(playerAwardService.findByTournamentId).not.toHaveBeenCalled();
   });
 

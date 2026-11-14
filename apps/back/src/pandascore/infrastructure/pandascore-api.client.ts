@@ -1,3 +1,4 @@
+import { setTimeout as sleep } from "node:timers/promises";
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { z } from "zod";
@@ -5,13 +6,14 @@ import { z } from "zod";
 import { PandascoreApiError } from "./pandascore-api.errors";
 import { log } from "evlog";
 
-export type PandascoreQueryParams = {
+export interface PandascoreQueryParams {
+  [key: string]: string | string[] | undefined;
   page?: string;
   per_page?: string;
   sort?: string;
   since?: string;
   videogame?: string[];
-};
+}
 
 export interface PandascoreRequestOptions {
   params?: PandascoreQueryParams;
@@ -74,7 +76,7 @@ export class PandascoreApiClient {
       }
     }
 
-    return Array.from(byId.values());
+    return [...byId.values()];
   }
 
   async getTournamentById(tournamentId: number): Promise<PandascoreJson | null> {
@@ -126,11 +128,8 @@ export class PandascoreApiClient {
   ): Promise<PandascoreJson[]> {
     const perPage = options.perPage ?? 100;
     const rateLimitMs = options.rateLimitMs ?? 100;
-    const allItems: PandascoreJson[] = [];
-    let page = 1;
-    let hasMore = true;
 
-    while (hasMore) {
+    const fetchFrom = async (page: number): Promise<PandascoreJson[]> => {
       const items = z.array(jsonSchema).parse(
         await this.request(path, {
           ...options,
@@ -142,23 +141,13 @@ export class PandascoreApiClient {
         }),
       );
 
-      if (items.length === 0) {
-        hasMore = false;
-      } else {
-        allItems.push(...items);
-        page += 1;
+      if (items.length < perPage) return items;
+      await sleep(rateLimitMs);
 
-        if (items.length < perPage) {
-          hasMore = false;
-        }
-      }
+      return [...items, ...(await fetchFrom(page + 1))];
+    };
 
-      if (hasMore) {
-        await this.sleep(rateLimitMs);
-      }
-    }
-
-    return allItems;
+    return await fetchFrom(1);
   }
 
   private async request(
@@ -201,11 +190,5 @@ export class PandascoreApiClient {
     }
 
     return jsonSchema.parse(await response.json());
-  }
-
-  private async sleep(ms: number): Promise<void> {
-    await new Promise<void>((resolve) => {
-      setTimeout(resolve, ms);
-    });
   }
 }

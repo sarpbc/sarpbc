@@ -1,5 +1,8 @@
 <script lang="ts" setup>
-const { limit, standalone = false } = defineProps<{ limit?: number; standalone?: boolean }>();
+const { limit = null, standalone = false } = defineProps<{
+  limit?: number | null;
+  standalone?: boolean;
+}>();
 
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
@@ -7,7 +10,7 @@ const localePath = useLocalePath();
 const { events, date, pending, error, refresh } = useOnThisDay();
 
 const shown = computed(() => (limit ? events.value.slice(0, limit) : events.value));
-const hasMore = computed(() => limit !== undefined && events.value.length > limit);
+const hasMore = computed(() => limit !== null && events.value.length > limit);
 
 const dayLabel = computed(() =>
   date.value

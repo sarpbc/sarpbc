@@ -1,6 +1,6 @@
 import type { ReplyTargetType } from "@sarpbc/types";
 
-export type ModerationReplyDto = {
+export interface ModerationReplyDto {
   id: string;
   content: string;
   createdAt: Date;
@@ -14,4 +14,4 @@ export type ModerationReplyDto = {
   targetLabel: string;
   targetPath: string;
   reportCount: number;
-};
+}

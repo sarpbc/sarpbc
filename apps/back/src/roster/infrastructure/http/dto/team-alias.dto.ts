@@ -12,4 +12,4 @@ export const TeamAliasDto = z.strictObject({
   pandascoreId: z.int().positive().nullable(),
 });
 
-export type TeamAliasDto = z.infer<typeof TeamAliasDto>;
+export type TeamAliasInput = z.infer<typeof TeamAliasDto>;

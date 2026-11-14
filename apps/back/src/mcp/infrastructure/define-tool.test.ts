@@ -2,7 +2,7 @@ import { log } from "evlog";
 import { describe, expect, it, vi } from "vitest";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { z } from "zod";
-import { NotFoundError } from "../../common/domain/errors";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { PatUser } from "../../pat/application/pat.service";
 import { defineTool } from "./define-tool";
 
@@ -10,7 +10,7 @@ const logInfo = vi.spyOn(log, "info");
 const logError = vi.spyOn(log, "error");
 
 function textContent(result: CallToolResult): string {
-  const block = result.content[0];
+  const [block] = result.content;
 
   return block?.type === "text" ? block.text : "";
 }
@@ -18,18 +18,37 @@ function textContent(result: CallToolResult): string {
 const admin: PatUser = { id: "user-1", email: "admin@test.com", role: "admin" };
 const journalist: PatUser = { id: "user-2", email: "journalist@test.com", role: "journalist" };
 
+const write = (handler: () => Promise<{ result: object; entityId?: string }>) =>
+  defineTool({
+    name: "set_match_winner",
+    description: "Set a winner.",
+    write: true,
+    permission: "tournaments.manage",
+    input: { matchId: z.string() },
+    handler,
+  });
+
+const read = (permission?: "news.manage" | readonly ["players.manage", "teams.manage"]) =>
+  defineTool({
+    name: "get_thing",
+    description: "Get a thing.",
+    permission,
+    input: {},
+    handler: async () => ({ slug: "zen-joins-karmine-corp" }),
+  });
+
+const failing = (cause: Error) =>
+  defineTool({
+    name: "get_thing",
+    description: "Get a thing.",
+    input: {},
+    handler: async () => {
+      throw cause;
+    },
+  });
+
 describe("defineTool", () => {
   describe("write tools", () => {
-    const write = (handler: () => Promise<{ result: unknown; entityId?: string }>) =>
-      defineTool({
-        name: "set_match_winner",
-        description: "Set a winner.",
-        write: true,
-        permission: "tournaments.manage",
-        input: { matchId: z.string() },
-        handler,
-      });
-
     it("denies a role without the permission and never runs the handler", async () => {
       const handler = vi.fn(async () => ({ result: { ok: true } }));
       const result = await write(handler).run(journalist, { matchId: "m1" });
@@ -58,24 +77,17 @@ describe("defineTool", () => {
   });
 
   describe("read tools", () => {
-    const read = (permission?: "news.manage" | readonly ["players.manage", "teams.manage"]) =>
-      defineTool({
-        name: "get_thing",
-        description: "Get a thing.",
-        permission,
-        input: {},
-        handler: async () => ({ slug: "zen-joins-karmine-corp" }),
-      });
-
     it("lets any valid token read when no permission is declared", async () => {
       expect(textContent(await read().run(journalist, {}))).toContain("zen-joins-karmine-corp");
     });
 
     it("gates a staff read on its permission", async () => {
       const gated = read("news.manage");
-      expect((await gated.run(journalist, {})).isError).toBeUndefined();
+      const runResult = await gated.run(journalist, {});
+      expect(runResult.isError).toBeUndefined();
       const denied = read(["players.manage", "teams.manage"]);
-      expect((await denied.run(journalist, {})).isError).toBe(true);
+      const runResult2 = await denied.run(journalist, {});
+      expect(runResult2.isError).toBe(true);
     });
 
     it("accepts any one of several permissions", async () => {
@@ -87,22 +99,13 @@ describe("defineTool", () => {
         handler: async () => ({ ok: true }),
       });
 
-      expect((await tool.run(journalist, {})).isError).toBeUndefined();
+      const runResult3 = await tool.run(journalist, {});
+      expect(runResult3.isError).toBeUndefined();
       expect(tool.description).toBe("List things. Requires tournaments.manage or news.manage.");
     });
   });
 
   describe("failures", () => {
-    const failing = (cause: Error) =>
-      defineTool({
-        name: "get_thing",
-        description: "Get a thing.",
-        input: {},
-        handler: async () => {
-          throw cause;
-        },
-      });
-
     it("forwards the message of an application error and logs it", async () => {
       const result = await failing(new NotFoundError("Tournament not found")).run(admin, {});
 

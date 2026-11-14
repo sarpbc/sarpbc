@@ -1,6 +1,5 @@
-import type { TransferType } from "@sarpbc/types";
-import type { ContractRole } from "@sarpbc/types";
-import { Contract } from "./roster";
+import type { TransferType, ContractRole } from "@sarpbc/types";
+import { Contract } from "./contract";
 
 export interface Transfer {
   id: string;
@@ -31,10 +30,11 @@ function joinType(role: ContractRole): TransferType {
   }
 }
 
-export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] {
-  const stint = (contract: Contract, day: Date) =>
-    `${contract.player.id}:${contract.team.id}:${day.getTime()}`;
+function stint(contract: Contract, day: Date): string {
+  return `${contract.player.id}:${contract.team.id}:${day.getTime()}`;
+}
 
+export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] {
   const starts = new Set(contracts.map((contract) => stint(contract, contract.startDate)));
 
   const transfers: Transfer[] = [];
@@ -61,5 +61,5 @@ export function deriveTransfers(contracts: Contract[], until: Date): Transfer[] 
 
   return transfers
     .filter((transfer) => transfer.date <= until)
-    .sort((a, b) => b.date.getTime() - a.date.getTime() || a.id.localeCompare(b.id));
+    .toSorted((a, b) => b.date.getTime() - a.date.getTime() || a.id.localeCompare(b.id));
 }

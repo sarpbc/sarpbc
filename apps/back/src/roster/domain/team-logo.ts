@@ -1,6 +1,6 @@
 import type { TeamLogoVariant } from "@sarpbc/types";
 import { isLiquipediaSourceHost } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export type TeamLogoFormat = "png" | "webp" | "svg";
 
@@ -74,6 +74,30 @@ export function requireTeamLogoUrl(value: string): URL {
   return url;
 }
 
+function skipSvgPrologue(head: string): string {
+  let rest = head.trimStart();
+
+  if (rest.startsWith("<?xml")) {
+    const end = rest.indexOf(">");
+
+    if (end === -1) return rest;
+    rest = rest.slice(end + 1).trimStart();
+  }
+
+  while (rest.startsWith("<!--")) {
+    const end = rest.indexOf("-->", 4);
+
+    if (end === -1) return rest;
+    rest = rest.slice(end + 3).trimStart();
+  }
+
+  return rest;
+}
+
+function ascii(bytes: Uint8Array, start: number, end: number): string {
+  return String.fromCodePoint(...bytes.subarray(start, end));
+}
+
 export function detectTeamLogoFormat(bytes: Uint8Array): TeamLogoFormat {
   if (PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) return "png";
 
@@ -100,28 +124,4 @@ export function requireTeamLogoDimensions(width: number, height: number): void {
       `The logo is ${width}x${height} pixels; it must be at least ${MIN_TEAM_LOGO_PIXELS}x${MIN_TEAM_LOGO_PIXELS}.`,
     );
   }
-}
-
-function skipSvgPrologue(head: string): string {
-  let rest = head.trimStart();
-
-  if (rest.startsWith("<?xml")) {
-    const end = rest.indexOf(">");
-
-    if (end === -1) return rest;
-    rest = rest.slice(end + 1).trimStart();
-  }
-
-  while (rest.startsWith("<!--")) {
-    const end = rest.indexOf("-->", 4);
-
-    if (end === -1) return rest;
-    rest = rest.slice(end + 3).trimStart();
-  }
-
-  return rest;
-}
-
-function ascii(bytes: Uint8Array, start: number, end: number): string {
-  return String.fromCharCode(...bytes.subarray(start, end));
 }

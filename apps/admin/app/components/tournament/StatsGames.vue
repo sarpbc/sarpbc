@@ -2,7 +2,7 @@
 import type { TournamentMatchListItem, TournamentStatsGame } from "@sarpbc/types";
 import { getApiErrorMessage, participantName } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { games, matches, matchLabel, tournamentId } = defineProps<{
   tournamentId: string;
   matches: TournamentMatchListItem[];
   games: TournamentStatsGame[] | undefined;
@@ -17,26 +17,6 @@ const { t } = useI18n();
 const toast = useToast();
 
 const toRemove = ref<TournamentStatsGame | null>(null);
-
-const rows = computed(() => {
-  const games = props.games ?? [];
-
-  return props.matches.flatMap((match) =>
-    games
-      .filter((game) => game.matchId === match.id)
-      .map((game, index) => ({
-        key: `${match.id}:${game.number}`,
-        heading: index === 0 ? props.matchLabel(match) : null,
-        label: gameLabel(match, game),
-        url: `https://ballchasing.com/replay/${game.ballchasingId}`,
-        removeLabel: t("page.tournaments.statsGames.remove", {
-          number: game.number,
-          match: props.matchLabel(match),
-        }),
-        game,
-      })),
-  );
-});
 
 function teamName(match: TournamentMatchListItem, participantId: string): string {
   const participant = match.participants.find((candidate) => candidate.id === participantId);
@@ -54,17 +34,37 @@ function gameLabel(match: TournamentMatchListItem, game: TournamentStatsGame): s
   });
 }
 
+const rows = computed(() => {
+  const loaded = games ?? [];
+
+  return matches.flatMap((match) =>
+    loaded
+      .filter((game) => game.matchId === match.id)
+      .map((game, index) => ({
+        key: `${match.id}:${game.number}`,
+        heading: index === 0 ? matchLabel(match) : null,
+        label: gameLabel(match, game),
+        url: `https://ballchasing.com/replay/${game.ballchasingId}`,
+        removeLabel: t("page.tournaments.statsGames.remove", {
+          number: game.number,
+          match: matchLabel(match),
+        }),
+        game,
+      })),
+  );
+});
+
 function confirmMessage(game: TournamentStatsGame): string {
-  const match = props.matches.find((candidate) => candidate.id === game.matchId);
+  const match = matches.find((candidate) => candidate.id === game.matchId);
 
   return t("page.tournaments.statsGames.confirm", {
     number: game.number,
-    match: match ? props.matchLabel(match) : "",
+    match: match ? matchLabel(match) : "",
   });
 }
 
 async function remove(game: TournamentStatsGame): Promise<void> {
-  await removeStatsGame(props.tournamentId, game.matchId, game.number);
+  await removeStatsGame(tournamentId, game.matchId, game.number);
   toast.add({
     title: t("page.tournaments.statsGames.removed", { number: game.number }),
     color: "success",

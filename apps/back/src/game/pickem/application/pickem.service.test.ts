@@ -4,7 +4,9 @@ import type { NamedPick, Pick, PickMatch } from "../domain/pickem";
 import type { PickemWrites } from "./ports";
 
 describe("PickemService", () => {
-  let match: PickMatch, picks: Pick[], service: PickemService;
+  let match: PickMatch;
+  let picks: Pick[];
+  let service: PickemService;
   const warn = vi.fn<(message: string) => void>();
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,8 +25,8 @@ describe("PickemService", () => {
     const scope: PickemWrites = {
       userExists: async () => true,
       participantExists: async () => true,
-      pick: async (user, match) =>
-        picks.find((p) => p.user.id === user && p.match.id === match) ?? null,
+      pick: async (user, matchId) =>
+        picks.find((p) => p.user.id === user && p.match.id === matchId) ?? null,
       unscored: async () => picks.filter((p) => !p.scored),
       savePick: async (pick) => {
         if (!picks.some((p) => p.id === pick.id)) picks.push(pick);

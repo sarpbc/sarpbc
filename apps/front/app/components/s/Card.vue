@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 type CardSize = "s" | "m" | "l";
 
-const { size } = defineProps<{
+const { size = null } = defineProps<{
   /** Min height on the hub row grid (`n × row-double`). Grows by `row-double` so both side rails stay aligned. */
-  size?: CardSize;
+  size?: CardSize | null;
 }>();
 
 function cardSizeClasses(value: CardSize): string {

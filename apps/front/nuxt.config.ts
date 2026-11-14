@@ -53,6 +53,10 @@ function hostnameFromUrl(base: string | undefined): string | undefined {
 const r2ImageHost = hostnameFromUrl(process.env.NUXT_PUBLIC_R2_PUBLIC_BASE_URL);
 
 export default defineNuxtConfig({
+  imports: {
+    dirs: ["composables/**"],
+  },
+
   app: {
     head: {
       link: [
@@ -192,7 +196,7 @@ export default defineNuxtConfig({
     apiBaseServer: "",
     apiInternalToken: "",
     public: {
-      apiBase: apiBase,
+      apiBase,
       adminUrl,
       posthog: {
         publicKey: posthogPublicKey,

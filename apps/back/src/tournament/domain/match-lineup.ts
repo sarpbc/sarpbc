@@ -1,6 +1,6 @@
 import type { MatchLineup, MatchLineupInput, MatchLineupPlayer } from "@sarpbc/types";
 import { MAX_LINEUP_PLAYERS } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface LineupSide {
   participantId: string;

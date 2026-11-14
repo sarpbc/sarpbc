@@ -1,6 +1,7 @@
 import type { Viewership, ViewershipResponse } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { requireViewership, type ViewershipOwner } from "../domain/viewership";
 import type { EventWriter, MatchWriter } from "./ports";
 
@@ -66,16 +67,19 @@ export class ViewershipService {
   constructor(private readonly transaction: ViewershipTransaction) {}
 
   async find(owner: ViewershipOwner): Promise<ViewershipResponse> {
-    return await this.transaction.run(async (scope) => ({
-      viewership: (await loadOwner(scope, owner)).viewership,
-    }));
+    return await this.transaction.run(async (scope) => {
+      const loaded = await loadOwner(scope, owner);
+
+      return { viewership: loaded.viewership };
+    });
   }
 
   async set(owner: ViewershipOwner, input: Viewership | null): Promise<ViewershipResponse> {
     const viewership = input && requireViewership(input);
 
     return await this.transaction.run(async (scope) => {
-      await (await loadOwner(scope, owner)).save(viewership);
+      const loaded = await loadOwner(scope, owner);
+      await loaded.save(viewership);
 
       return { viewership };
     });
@@ -84,7 +88,9 @@ export class ViewershipService {
   async requireProposable(owner: ViewershipOwner, input: Viewership): Promise<void> {
     requireViewership(input);
     await this.transaction.run(async (scope) => {
-      if (!(await loadOwner(scope, owner)).redistributable)
+      const loaded = await loadOwner(scope, owner);
+
+      if (!loaded.redistributable)
         throw new InvalidInputError(
           `The viewership of a start.gg ${owner.kind} cannot be proposed`,
         );

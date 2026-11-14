@@ -10,7 +10,7 @@ import {
   tournamentEventPath,
   tournamentStagePath,
 } from "@sarpbc/utils";
-import { matchPublicSlug } from "../../tournament/domain/competition";
+import { matchPublicSlug } from "../../tournament/domain/match";
 import type { MatchSitemapRow, SitemapQueries, StageSitemapRow } from "./ports";
 
 function dated(path: string, lastmod: Date): SitemapEntry {
@@ -46,31 +46,40 @@ export class SitemapService {
 
   async entries(kind: SitemapKind): Promise<SitemapEntry[]> {
     switch (kind) {
-      case "news":
-        return (await this.queries.news()).map(({ slug, lastmod }) =>
-          dated(newsPath(slug), lastmod),
-        );
+      case "news": {
+        const news = await this.queries.news();
+
+        return news.map(({ slug, lastmod }) => dated(newsPath(slug), lastmod));
+      }
+
       case "tournaments":
         return tournamentEntries(await this.queries.stages());
-      case "matches":
-        return (await this.queries.matches())
+      case "matches": {
+        const matches = await this.queries.matches();
+
+        return matches
           .filter(isListedMatch)
           .map((match) => dated(matchPath(match.publicId, matchPublicSlug(match)), match.lastmod));
-      case "players":
-        return (await this.queries.playerSlugs()).map((slug) => ({
-          path: playerPath(slug),
-          lastmod: null,
-        }));
-      case "staff":
-        return (await this.queries.staffSlugs()).map((slug) => ({
-          path: staffPath(slug),
-          lastmod: null,
-        }));
-      case "teams":
-        return (await this.queries.teamSlugs()).map((slug) => ({
-          path: teamPath(slug),
-          lastmod: null,
-        }));
+      }
+
+      case "players": {
+        const slugs = await this.queries.playerSlugs();
+
+        return slugs.map((slug) => ({ path: playerPath(slug), lastmod: null }));
+      }
+
+      case "staff": {
+        const slugs = await this.queries.staffSlugs();
+
+        return slugs.map((slug) => ({ path: staffPath(slug), lastmod: null }));
+      }
+
+      case "teams": {
+        const slugs = await this.queries.teamSlugs();
+
+        return slugs.map((slug) => ({ path: teamPath(slug), lastmod: null }));
+      }
+
       default: {
         const unhandled: never = kind;
 

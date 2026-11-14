@@ -15,7 +15,7 @@ export const ROLE_PERMISSIONS = {
   admin: STAFF_PERMISSIONS,
   journalist: ["news.manage", "images.manage"],
   moderator: ["forum.moderate"],
-} as const satisfies { readonly [Role in StaffRole]: readonly StaffPermission[] };
+} as const satisfies Readonly<Record<StaffRole, readonly StaffPermission[]>>;
 
 export function isStaffRole(value: string | null | undefined): value is StaffRole {
   return STAFF_ROLES.some((role) => role === value);

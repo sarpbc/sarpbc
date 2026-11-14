@@ -104,8 +104,7 @@ function npcSplitPointsByTeam(
 function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldState): WorldRankings {
   const completedSplits = player.splits.length;
 
-  const freezeToSnapshot =
-    completedSplits === 0 && world.rankSnapshot != null && world.rankSnapshot.length > 0;
+  const freezeToSnapshot = completedSplits === 0 && (world.rankSnapshot?.length ?? 0) > 0;
 
   const snapshot = freezeToSnapshot ? world.rankSnapshot : null;
 
@@ -119,7 +118,7 @@ function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldStat
 
   const npcSplitCaches: Map<string, number>[] = [];
 
-  for (let split = 1; split <= completedSplits; split++) {
+  for (let split = 1; split <= completedSplits; split += 1) {
     npcSplitCaches.push(npcSplitPointsByTeam(player, world, split));
   }
 
@@ -141,13 +140,21 @@ function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldStat
       ? yearPlayerPoints
       : splitPoints.reduce((sum, value) => sum + value, 0);
 
-    const previous = snapshotPoints
-      ? (snapshotPoints.get(team.id) ?? 0)
-      : isPlayerTeam
-        ? (player.previousPoints ?? 0)
-        : 0;
+    let previous = 0;
 
-    const rankingScore = freezeToSnapshot ? previous : completedSplits === 0 ? strength : points;
+    if (snapshotPoints) {
+      previous = snapshotPoints.get(team.id) ?? 0;
+    } else if (isPlayerTeam) {
+      previous = player.previousPoints ?? 0;
+    }
+
+    let rankingScore = points;
+
+    if (freezeToSnapshot) {
+      rankingScore = previous;
+    } else if (completedSplits === 0) {
+      rankingScore = strength;
+    }
 
     return { team, roster, strength, rating: rankingScore, points, rank: 0, isPlayerTeam };
   });
@@ -163,9 +170,9 @@ function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldStat
     );
   }
 
-  teams.forEach((entry, index) => {
+  for (const [index, entry] of teams.entries()) {
     entry.rank = index + 1;
-  });
+  }
 
   const players: RankedPlayer[] = [];
 
@@ -184,9 +191,10 @@ function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldStat
   }
 
   players.sort((a, b) => b.rating - a.rating);
-  players.forEach((entry, index) => {
+
+  for (const [index, entry] of players.entries()) {
     entry.rank = index + 1;
-  });
+  }
 
   return { teams, players };
 }
@@ -197,9 +205,13 @@ export function getTeamRank(rankings: WorldRankings, teamId: string): number | n
 
 export function pickStartingTeam(region: CareerRegion): string {
   const teams = getWorldTeamsByRegion(region);
-  const weakest = [...teams].sort((a, b) => a.baseStrength - b.baseStrength)[0];
+  const [weakest] = teams.toSorted((a, b) => a.baseStrength - b.baseStrength);
 
-  return weakest!.id;
+  if (!weakest) {
+    throw new Error(`No team in region ${region}`);
+  }
+
+  return weakest.id;
 }
 
 export function computeStateRankings(state: CareerState): WorldRankings {
@@ -212,7 +224,7 @@ export function computeStateRankings(state: CareerState): WorldRankings {
       season: state.currentSeason,
       splits: state.currentSplits,
       worlds: state.currentWorlds,
-      previousPoints: state.seasonRecords[state.seasonRecords.length - 1]?.points ?? null,
+      previousPoints: state.seasonRecords.at(-1)?.points ?? null,
     },
     state.world,
   );

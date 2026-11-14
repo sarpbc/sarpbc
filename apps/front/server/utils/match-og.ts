@@ -1,5 +1,5 @@
 import { existsSync } from "node:fs";
-import { join } from "node:path";
+import path from "node:path";
 import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/utils/matchScore";
 import { TBD_LABEL } from "~/utils/tbdLabel";
@@ -13,11 +13,11 @@ const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
 
 function escapeXml(value: string): string {
   return value
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
 }
 
 function truncate(value: string, maxLength: number): string {
@@ -36,10 +36,9 @@ function getParticipantScore(
 }
 
 export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
-  const match = matchDetail.match;
+  const { match } = matchDetail;
   const participants = match.participants ?? [];
-  const teamA = participants[0];
-  const teamB = participants[1];
+  const [teamA, teamB] = participants;
   const teamAName = truncate(teamA ? participantName(teamA) : TBD_LABEL, 28);
   const teamBName = truncate(teamB ? participantName(teamB) : TBD_LABEL, 28);
   const tournament = truncate(tournamentStageLabel(match.tournament), 48);
@@ -87,12 +86,12 @@ export function buildMatchOgSvg(matchDetail: MatchDetailResponse): string {
 
 export function resolveMatchOgFontFiles(): string[] {
   const dirs = [
-    join(process.cwd(), "public", "fonts", "og"),
-    join(process.cwd(), "apps", "front", "public", "fonts", "og"),
+    path.join(process.cwd(), "public", "fonts", "og"),
+    path.join(process.cwd(), "apps", "front", "public", "fonts", "og"),
   ];
 
   for (const dir of dirs) {
-    const files = MATCH_OG_FONT_FILES.map((name) => join(dir, name));
+    const files = MATCH_OG_FONT_FILES.map((name) => path.join(dir, name));
 
     if (files.every((file) => existsSync(file))) {
       return files;
@@ -114,8 +113,8 @@ export function getMatchOgResvgFontOptions() {
 export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResponse> {
   try {
     return await getMatchById(id);
-  } catch (cause) {
-    return rethrowApiError(cause, {
+  } catch (error) {
+    return rethrowApiError(error, {
       notFound: "Match not found",
       badGateway: "Could not load match for OG image",
     });

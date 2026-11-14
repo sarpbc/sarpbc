@@ -15,9 +15,9 @@ function createEntityTagCache<T>() {
 
     try {
       return await pending;
-    } catch (cause) {
+    } catch (error) {
       cache.delete(slug);
-      throw cause;
+      throw error;
     }
   };
 }

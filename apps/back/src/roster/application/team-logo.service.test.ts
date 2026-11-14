@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { MAX_TEAM_LOGO_BYTES } from "../domain/team-logo";
 import { TeamLogoService } from "./team-logo.service";
 
@@ -7,15 +7,17 @@ const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 1, 2
 const SVG = new TextEncoder().encode('<svg xmlns="http://www.w3.org/2000/svg"><rect/></svg>');
 const WEBP_OUTPUT = new Uint8Array([9, 9, 9]);
 
-function setup(bytes: Uint8Array, size = { width: 512, height: 256 }) {
+const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
+
+const DEFAULT_SIZE = { width: 512, height: 256 };
+
+function setup(bytes: Uint8Array, size = DEFAULT_SIZE) {
   const source = { download: vi.fn(async () => bytes) };
 
   const images = {
     dimensions: vi.fn(async () => size),
     normalize: vi.fn(async () => WEBP_OUTPUT),
   };
-
-  const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
 
   const storage = {
     put: vi.fn(async (key: string) => stored(key)),

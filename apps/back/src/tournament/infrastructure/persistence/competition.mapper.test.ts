@@ -3,7 +3,10 @@ import { describe, expect, it } from "vitest";
 import { mikroOrmEntities } from "../../../mikro-orm.entities";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { toMatch, toMatchSlug, toParticipant, toTournament } from "./competition.mapper";
-import { Match, Tournament, TournamentEvent, TournamentParticipant } from "./tournament.entities";
+import { Match } from "./match.entity";
+import { Tournament } from "./tournament.entity";
+import { TournamentEvent } from "./tournament-event.entity";
+import { TournamentParticipant } from "./tournament-participant.entity";
 
 const orm = new MikroORM({
   entities: mikroOrmEntities,
@@ -87,28 +90,28 @@ describe("toParticipant", () => {
   });
 });
 
+function renamedStage(beginAt: string) {
+  const tournament = Object.assign(stage(), { beginAt: new Date(beginAt) });
+  const participant = entry(tournament, "fixture");
+  Object.assign(participant.team ?? {}, {
+    name: "Fixture Now",
+    aliases: [
+      {
+        id: "a1",
+        name: "Fixture Origins",
+        from: "2020-01-01",
+        to: "2022-06-01",
+        sourceUrl: "https://x.com/fixture/status/1",
+        logoUrl: null,
+        pandascoreId: null,
+      },
+    ],
+  });
+
+  return { tournament, participant };
+}
+
 describe("names in force on the date", () => {
-  function renamedStage(beginAt: string) {
-    const tournament = Object.assign(stage(), { beginAt: new Date(beginAt) });
-    const participant = entry(tournament, "fixture");
-    Object.assign(participant.team ?? {}, {
-      name: "Fixture Now",
-      aliases: [
-        {
-          id: "a1",
-          name: "Fixture Origins",
-          from: "2020-01-01",
-          to: "2022-06-01",
-          sourceUrl: "https://x.com/fixture/status/1",
-          logoUrl: null,
-          pandascoreId: null,
-        },
-      ],
-    });
-
-    return { tournament, participant };
-  }
-
   it("shows the stage participants under the name they used when the stage began", () => {
     const { tournament } = renamedStage("2021-05-01T18:00:00Z");
 

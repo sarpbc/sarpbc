@@ -52,12 +52,12 @@ describe("eventDisplayName", () => {
   });
 });
 
-describe("compareStages", () => {
-  const stage = (name: string, beginAt: string | null) => ({
-    name,
-    beginAt: beginAt === null ? null : new Date(beginAt),
-  });
+const stage = (name: string, beginAt: string | null) => ({
+  name,
+  beginAt: beginAt === null ? null : new Date(beginAt),
+});
 
+describe("compareStages", () => {
   it("orders newest day first, then name within a day", () => {
     const stages = [
       stage("Swiss", "2026-05-01T10:00:00Z"),
@@ -66,7 +66,7 @@ describe("compareStages", () => {
       stage("Undated", null),
     ];
 
-    expect([...stages].sort(compareStages).map((s) => s.name)).toEqual([
+    expect(stages.toSorted(compareStages).map((s) => s.name)).toEqual([
       "Group A",
       "Group B",
       "Swiss",

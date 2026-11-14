@@ -1,5 +1,6 @@
 import type { HeadToHead, SeriesRecord } from "@sarpbc/types";
-import type { Match, TournamentParticipant } from "../../tournament/domain/competition";
+import type { Match } from "../../tournament/domain/match";
+import type { TournamentParticipant } from "../../tournament/domain/tournament-participant";
 
 function sideOf(match: Match, playerId: string): TournamentParticipant | undefined {
   return match.participants.find(({ players }) => players.some(({ id }) => id === playerId));

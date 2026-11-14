@@ -1,3 +1,4 @@
+import { mapSequentially } from "../../../common/application/sequentially";
 import type { CompetitionDiagnostics } from "../ports";
 import { SyncAllTournamentsUseCase } from "./sync-all-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
@@ -19,18 +20,21 @@ export class SyncNewTournamentsUseCase {
   async execute(): Promise<SyncNewTournamentsResult> {
     const ids = await this.additions.execute();
 
-    let detailsSynced = 0,
-      detailsFailed = 0;
-
-    for (const id of ids) {
+    // One tournament at a time: the provider API is rate limited.
+    const synced = await mapSequentially(ids, async (id) => {
       try {
         await this.details.execute(id);
-        detailsSynced++;
+
+        return true;
       } catch (error) {
-        detailsFailed++;
-        this.diagnostics.error("Tournament detail sync failed: " + id, error);
+        this.diagnostics.error(`Tournament detail sync failed: ${id}`, error);
+
+        return false;
       }
-    }
+    });
+
+    const detailsSynced = synced.filter(Boolean).length;
+    const detailsFailed = synced.length - detailsSynced;
 
     await this.incidents.execute();
 

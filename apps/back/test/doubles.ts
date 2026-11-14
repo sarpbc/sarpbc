@@ -12,3 +12,13 @@ export function unconstructed<T extends object>(type: abstract new (...args: nev
 
   return instance;
 }
+
+export function present<T>(value: T | null | undefined, what = "value"): T {
+  if (value === null || value === undefined) {
+    throw new TypeError(`Expected ${what} to be present`);
+  }
+
+  return value;
+}
+
+export const SCRIPT_URL = ["javascript", "alert(1)"].join(":");

@@ -9,7 +9,7 @@ import {
   type SeasonSummary,
   type SeasonTeam,
 } from "@sarpbc/types";
-import { ConflictError } from "../../../common/domain/errors";
+import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament } from "../../../tournament/infrastructure/competition-persistence";
@@ -21,7 +21,10 @@ import type {
 } from "../../application/ports";
 import type { SeasonPathEntryFields } from "../../domain/season-archive";
 import type { SeasonAwardFields } from "../../domain/season-award";
-import { Season, SeasonAward, SeasonParticipant, SeasonPathEntry } from "./season.entities";
+import { Season } from "./season.entity";
+import { SeasonAward } from "./season-award.entity";
+import { SeasonParticipant } from "./season-participant.entity";
+import { SeasonPathEntry } from "./season-path-entry.entity";
 
 function toSummary(row: Season): SeasonSummary {
   return { id: row.id, name: row.name, slug: row.slug };
@@ -77,7 +80,7 @@ function toParticipant(row: SeasonParticipant): SeasonParticipantItem {
     id: row.id,
     team: toTeam(row.team),
     pathNote: row.pathNote,
-    path: row.path.getItems().sort(byCreation).map(toPathEntry),
+    path: row.path.getItems().toSorted(byCreation).map(toPathEntry),
   };
 }
 
@@ -169,8 +172,9 @@ export class SeasonPersistence implements SeasonStore {
     } catch (error) {
       if (isUniqueViolation(error))
         throw new ConflictError(
-          `Another season already uses the name "${season.name}"` +
-            (season.slug !== null && season.slug !== "" ? ` or the slug "${season.slug}".` : "."),
+          `Another season already uses the name "${season.name}"${
+            season.slug !== null && season.slug !== "" ? ` or the slug "${season.slug}".` : "."
+          }`,
         );
       throw error;
     }
@@ -187,7 +191,7 @@ export class SeasonPersistence implements SeasonStore {
       { populate: ["player"] },
     );
 
-    return rows.sort(byAwardOrder).map(toAward);
+    return rows.toSorted(byAwardOrder).map(toAward);
   }
 
   async awardsOfPlayer(playerId: string): Promise<PlayerSeasonAward[]> {
@@ -197,9 +201,11 @@ export class SeasonPersistence implements SeasonStore {
       { populate: ["season"] },
     );
 
-    rows.sort((a, b) => b.season.name.localeCompare(a.season.name) || byAwardOrder(a, b));
+    const sorted = rows.toSorted(
+      (a, b) => b.season.name.localeCompare(a.season.name) || byAwardOrder(a, b),
+    );
 
-    return rows.map((row) => ({
+    return sorted.map((row) => ({
       id: row.id,
       awardType: row.awardType,
       region: row.region,

@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, ForbiddenError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { UserService } from "./user.service";
 import type { PasswordHasher } from "./ports/password-hasher";
 import { User } from "../domain/user";

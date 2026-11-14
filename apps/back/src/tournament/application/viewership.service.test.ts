@@ -1,7 +1,8 @@
 import type { DataSource, Viewership } from "@sarpbc/types";
 import { beforeEach, describe, expect, it } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Match, type TournamentSummary } from "../domain/competition";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { Match, type TournamentSummary } from "../domain/match";
 import { TournamentEvent } from "../domain/tournament-event";
 import type { EventStage } from "./ports";
 import { ViewershipService, type ViewershipScope } from "./viewership.service";

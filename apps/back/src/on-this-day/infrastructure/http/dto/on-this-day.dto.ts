@@ -8,7 +8,7 @@ import {
 
 export const OnThisDayQueryDto = z.strictObject({ date: z.iso.date().optional() });
 
-export type OnThisDayQueryDto = z.infer<typeof OnThisDayQueryDto>;
+export type OnThisDayQueryInput = z.infer<typeof OnThisDayQueryDto>;
 
 export const OnThisDayFactDto = z.strictObject({
   month: z.int().min(1).max(12),
@@ -20,4 +20,4 @@ export const OnThisDayFactDto = z.strictObject({
   sourceUrl: z.string().trim().max(ON_THIS_DAY_SOURCE_URL_MAX_LENGTH).nullable(),
 });
 
-export type OnThisDayFactDto = z.infer<typeof OnThisDayFactDto>;
+export type OnThisDayFactInput = z.infer<typeof OnThisDayFactDto>;

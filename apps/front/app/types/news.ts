@@ -1,6 +1,6 @@
 import type { NewsType } from "@sarpbc/types";
 
-export type NewsArticleListItem = {
+export interface NewsArticleListItem {
   id: string;
   slug: string;
   title: string;
@@ -10,7 +10,7 @@ export type NewsArticleListItem = {
   /** Plain-text teaser from list endpoints; omitted on full article payloads. */
   excerpt?: string;
   commentCount?: number;
-};
+}
 
 export type NewsArticle = NewsArticleListItem & {
   author: string;
@@ -18,16 +18,16 @@ export type NewsArticle = NewsArticleListItem & {
   isDraft: boolean;
 };
 
-export type PaginatedNewsArticles = {
+export interface PaginatedNewsArticles {
   data: NewsArticleListItem[];
   total: number;
   page: number;
   limit: number;
-};
+}
 
-export type NewsWeek = {
+export interface NewsWeek {
   week: string;
   start: string;
   end: string;
   items: NewsArticle[];
-};
+}

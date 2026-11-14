@@ -1,6 +1,10 @@
 import type { EntityManager } from "@mikro-orm/postgresql";
+import { mapSequentially } from "../../../common/application/sequentially";
 import type { RosterReferenceMover } from "../../../roster/application/ports";
-import { Season, SeasonAward, SeasonParticipant, SeasonPathEntry } from "./season.entities";
+import { Season } from "./season.entity";
+import { SeasonAward } from "./season-award.entity";
+import { SeasonParticipant } from "./season-participant.entity";
+import { SeasonPathEntry } from "./season-path-entry.entity";
 
 const awardKey = ({ season, awardType, region }: SeasonAward) =>
   JSON.stringify([season.id, awardType, region]);
@@ -40,24 +44,27 @@ export class SeasonRosterReferences implements RosterReferenceMover {
         .map((participant) => [participant.season.id, participant]),
     );
 
-    for (const duplicate of participants.filter(({ team }) => team.id === from)) {
-      const keeper = kept.get(duplicate.season.id);
+    await mapSequentially(
+      participants.filter(({ team }) => team.id === from),
+      async (duplicate) => {
+        const keeper = kept.get(duplicate.season.id);
 
-      if (!keeper) continue;
-      await this.em.nativeUpdate(
-        SeasonPathEntry,
-        { participant: duplicate.id },
-        { participant: keeper.id },
-      );
-
-      if (keeper.pathNote === null && duplicate.pathNote !== null)
+        if (!keeper) return;
         await this.em.nativeUpdate(
-          SeasonParticipant,
-          { id: keeper.id },
-          { pathNote: duplicate.pathNote },
+          SeasonPathEntry,
+          { participant: duplicate.id },
+          { participant: keeper.id },
         );
-      await this.em.nativeDelete(SeasonParticipant, { id: duplicate.id });
-    }
+
+        if (keeper.pathNote === null && duplicate.pathNote !== null)
+          await this.em.nativeUpdate(
+            SeasonParticipant,
+            { id: keeper.id },
+            { pathNote: duplicate.pathNote },
+          );
+        await this.em.nativeDelete(SeasonParticipant, { id: duplicate.id });
+      },
+    );
 
     await this.em.nativeUpdate(SeasonParticipant, { team: from }, { team: to });
   }

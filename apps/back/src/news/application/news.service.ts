@@ -5,7 +5,9 @@ import {
   localizedNewsFields,
   toSlug,
 } from "@sarpbc/utils";
-import { InvalidInputError, NotFoundError, ConflictError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { sanitizeNewsHtml, sanitizePlainText } from "../../common/domain/html";
 import { assertValidMatchBlocks } from "../domain/news-content.util";
 import { DEFAULT_NEWS_TYPE } from "../domain/news-type";
@@ -56,6 +58,83 @@ function newsContent(value: string): string {
   return sanitizeNewsHtml(value);
 }
 
+async function firstFreeSlug(base: string, articles: NewsQueries, suffix = 0): Promise<string> {
+  const slug = suffix === 0 ? base : `${base}-${suffix}`;
+
+  return (await articles.findBySlug(slug)) ? await firstFreeSlug(base, articles, suffix + 1) : slug;
+}
+
+function mapListArticle(
+  article: NewsArticleRecord,
+  locale: SupportedLocale,
+  commentCount = 0,
+): NewsArticleListItemResponse {
+  const { title, content } = localizedNewsFields(article, locale);
+
+  return {
+    id: article.id,
+    title,
+    slug: article.slug,
+    createdAt: article.createdAt,
+    imageUrl: article.imageUrl,
+    excerpt: excerptFromNewsContent(content),
+    commentCount,
+    type: article.type,
+  };
+}
+
+function mapArticle(article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse {
+  const { title, content } = localizedNewsFields(article, locale);
+
+  return {
+    id: article.id,
+    author: article.author.userName,
+    title,
+    slug: article.slug,
+    content,
+    createdAt: article.createdAt,
+    isDraft: article.isDraft,
+    imageUrl: article.imageUrl,
+    type: article.type,
+  };
+}
+
+function mapAdminArticle(article: NewsArticleRecord): NewsArticleAdmin {
+  return {
+    ...mapArticle(article, "en-US"),
+    createdAt: article.createdAt.toISOString(),
+    titleFr: article.titleFr,
+    contentFr: article.contentFr,
+    hasFrench: hasFrenchTranslation(article),
+  };
+}
+
+async function generateUniqueSlug(source: string, articles: NewsQueries): Promise<string> {
+  const base = toSlug(source);
+
+  if (!base) {
+    throw new ConflictError(
+      "Could not generate a URL slug from that title. Add a slug manually (letters, numbers, hyphens).",
+    );
+  }
+
+  return await firstFreeSlug(base, articles);
+}
+
+async function assertSlugAvailable(
+  articles: NewsQueries,
+  slug: string,
+  excludeArticleId?: string,
+): Promise<void> {
+  const existing = await articles.findBySlug(slug);
+
+  if (existing && existing.id !== excludeArticleId) {
+    throw new ConflictError(
+      `An article with the slug "${slug}" already exists. Choose a different slug.`,
+    );
+  }
+}
+
 export class NewsService {
   constructor(
     private readonly newsRepository: NewsQueries,
@@ -63,84 +142,6 @@ export class NewsService {
     private readonly replyService: NewsComments,
     private readonly indexing: NewsIndexing,
   ) {}
-
-  private mapListArticle(
-    article: NewsArticleRecord,
-    locale: SupportedLocale,
-    commentCount = 0,
-  ): NewsArticleListItemResponse {
-    const { title, content } = localizedNewsFields(article, locale);
-
-    return {
-      id: article.id,
-      title,
-      slug: article.slug,
-      createdAt: article.createdAt,
-      imageUrl: article.imageUrl,
-      excerpt: excerptFromNewsContent(content),
-      commentCount,
-      type: article.type,
-    };
-  }
-
-  private mapArticle(article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse {
-    const { title, content } = localizedNewsFields(article, locale);
-
-    return {
-      id: article.id,
-      author: article.author.userName,
-      title,
-      slug: article.slug,
-      content,
-      createdAt: article.createdAt,
-      isDraft: article.isDraft,
-      imageUrl: article.imageUrl,
-      type: article.type,
-    };
-  }
-
-  private mapAdminArticle(article: NewsArticleRecord): NewsArticleAdmin {
-    return {
-      ...this.mapArticle(article, "en-US"),
-      createdAt: article.createdAt.toISOString(),
-      titleFr: article.titleFr,
-      contentFr: article.contentFr,
-      hasFrench: hasFrenchTranslation(article),
-    };
-  }
-
-  private async generateUniqueSlug(source: string, articles: NewsQueries): Promise<string> {
-    const base = toSlug(source);
-
-    if (!base) {
-      throw new ConflictError(
-        "Could not generate a URL slug from that title. Add a slug manually (letters, numbers, hyphens).",
-      );
-    }
-
-    let slug = base;
-    let suffix = 1;
-
-    while (await articles.findBySlug(slug)) {
-      slug = `${base}-${suffix++}`;
-    }
-
-    return slug;
-  }
-
-  private async assertSlugAvailable(
-    articles: NewsQueries,
-    slug: string,
-    excludeArticleId?: string,
-  ): Promise<void> {
-    const existing = await articles.findBySlug(slug);
-
-    if (existing && existing.id !== excludeArticleId) {
-      throw new ConflictError(
-        `An article with the slug "${slug}" already exists. Choose a different slug.`,
-      );
-    }
-  }
 
   async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdmin> {
     return await this.transaction.run(async (scope) => {
@@ -161,9 +162,9 @@ export class NewsService {
           );
         }
 
-        await this.assertSlugAvailable(scope.articles, slug);
+        await assertSlugAvailable(scope.articles, slug);
       } else {
-        slug = await this.generateUniqueSlug(dto.title, scope.articles);
+        slug = await generateUniqueSlug(dto.title, scope.articles);
       }
 
       const article: NewsArticleRecord = {
@@ -171,8 +172,10 @@ export class NewsService {
         updatedAt: null,
         title: sanitizePlainText(dto.title),
         content: newsContent(dto.content),
-        titleFr: dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null,
-        contentFr: dto.contentFr != null ? newsContent(dto.contentFr) : null,
+        titleFr:
+          dto.titleFr === null || dto.titleFr === undefined ? null : sanitizePlainText(dto.titleFr),
+        contentFr:
+          dto.contentFr === null || dto.contentFr === undefined ? null : newsContent(dto.contentFr),
         author,
         slug,
         isDraft: true,
@@ -183,7 +186,7 @@ export class NewsService {
 
       await scope.articles.save(article);
 
-      return this.mapAdminArticle(article);
+      return mapAdminArticle(article);
     });
   }
 
@@ -207,7 +210,7 @@ export class NewsService {
 
     return {
       data: articles.map((article) =>
-        this.mapListArticle(article, locale, commentCounts.get(article.id) ?? 0),
+        mapListArticle(article, locale, commentCounts.get(article.id) ?? 0),
       ),
       total,
       page,
@@ -235,7 +238,7 @@ export class NewsService {
       week,
       start: range.start,
       end: range.end,
-      items: articles.map((article) => this.mapArticle(article, locale)),
+      items: articles.map((article) => mapArticle(article, locale)),
     };
   }
 
@@ -243,7 +246,7 @@ export class NewsService {
     const [articles, total] = await this.newsRepository.listAdmin(page, limit);
 
     return {
-      data: articles.map((a) => this.mapAdminArticle(a)),
+      data: articles.map((a) => mapAdminArticle(a)),
       total,
       page,
       limit,
@@ -262,7 +265,7 @@ export class NewsService {
 
     if (article.isDraft) throw new NotFoundError(`News article with slug "${slug}" not found`);
 
-    return this.mapArticle(article, locale);
+    return mapArticle(article, locale);
   }
 
   async findOneAdminBySlug(slug: string): Promise<NewsArticleAdmin> {
@@ -272,20 +275,20 @@ export class NewsService {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
     }
 
-    return this.mapAdminArticle(article);
+    return mapAdminArticle(article);
   }
 
   async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdmin> {
     const bySlug = await this.newsRepository.findBySlug(idOrSlug);
 
     if (bySlug) {
-      return this.mapAdminArticle(bySlug);
+      return mapAdminArticle(bySlug);
     }
 
     const byId = await this.newsRepository.findById(idOrSlug);
 
     if (byId) {
-      return this.mapAdminArticle(byId);
+      return mapAdminArticle(byId);
     }
 
     throw new NotFoundError(
@@ -320,11 +323,11 @@ export class NewsService {
       }
 
       if (dto.titleFr !== undefined) {
-        article.titleFr = dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null;
+        article.titleFr = dto.titleFr === null ? null : sanitizePlainText(dto.titleFr);
       }
 
       if (dto.contentFr !== undefined) {
-        article.contentFr = dto.contentFr != null ? newsContent(dto.contentFr) : null;
+        article.contentFr = dto.contentFr === null ? null : newsContent(dto.contentFr);
       }
 
       if (dto.imageUrl !== undefined) {
@@ -341,7 +344,7 @@ export class NewsService {
         }
 
         if (nextSlug !== article.slug) {
-          await this.assertSlugAvailable(scope.articles, nextSlug, article.id);
+          await assertSlugAvailable(scope.articles, nextSlug, article.id);
           article.slug = nextSlug;
         }
       }
@@ -352,7 +355,7 @@ export class NewsService {
 
       await scope.articles.save(article);
 
-      return this.mapAdminArticle(article);
+      return mapAdminArticle(article);
     });
 
     if (!result.isDraft) {

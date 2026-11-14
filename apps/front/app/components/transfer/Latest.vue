@@ -1,15 +1,15 @@
 <script lang="ts" setup>
 const LATEST_TRANSFERS = 5;
 
-const { team } = defineProps<{
-  team?: string;
+const { team = null } = defineProps<{
+  team?: string | null;
 }>();
 
 const { t } = useI18n();
 const localePath = useLocalePath();
 
 const { transfers, pending, error, refresh } = useLatestTransfers(
-  toRef(() => team),
+  toRef(() => team ?? undefined),
   LATEST_TRANSFERS,
 );
 

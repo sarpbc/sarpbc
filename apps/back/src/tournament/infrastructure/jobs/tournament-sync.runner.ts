@@ -1,4 +1,5 @@
 import { MAX_PAGE_SIZE } from "@sarpbc/utils";
+import { mapSequentially } from "../../../common/application/sequentially";
 import { Inject, Injectable } from "@nestjs/common";
 import { createLogger } from "evlog";
 import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
@@ -54,19 +55,21 @@ export class TournamentSyncRunner {
         return;
       }
 
-      let synced = 0;
-      let failed = 0;
-
-      for (const tournamentId of tournamentIds) {
+      const outcomes = await mapSequentially([...tournamentIds], async (tournamentId) => {
         try {
           await this.syncPandascoreTournamentUseCase.execute(tournamentId);
-          synced += 1;
+
+          return true;
         } catch (error) {
-          failed += 1;
           log.set({ tournamentId });
           log.error(error instanceof Error ? error : new Error(String(error)));
+
+          return false;
         }
-      }
+      });
+
+      const synced = outcomes.filter(Boolean).length;
+      const failed = outcomes.length - synced;
 
       log.set({ sync: { synced, failed } });
     } catch (error) {
@@ -77,13 +80,13 @@ export class TournamentSyncRunner {
   }
 
   private async findPandascoreActiveIds(now: Date): Promise<string[]> {
-    return (
-      await this.tournaments.findPandascoreActive({
-        beginsBefore: new Date(now.getTime() + 24 * HOUR_MS),
-        beganAfter: new Date(now.getTime() - 7 * 24 * HOUR_MS),
-        endsAfter: new Date(now.getTime() - 6 * HOUR_MS),
-      })
-    ).map((t) => t.id);
+    const active = await this.tournaments.findPandascoreActive({
+      beginsBefore: new Date(now.getTime() + 24 * HOUR_MS),
+      beganAfter: new Date(now.getTime() - 7 * 24 * HOUR_MS),
+      endsAfter: new Date(now.getTime() - 6 * HOUR_MS),
+    });
+
+    return active.map((t) => t.id);
   }
 
   async syncPandascoreAdditionsDaily() {

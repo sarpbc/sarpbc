@@ -67,7 +67,7 @@ describe("TwitchHelixSource", () => {
 
     await source.findLiveRocketLeague(logins);
 
-    const calls = fetchMock.mock.calls;
+    const { calls } = fetchMock.mock;
     expect(calls.map((call) => requestedLogins(call).length)).toEqual([100, 100, 50]);
     expect(calls.flatMap(requestedLogins)).toEqual(logins);
   });

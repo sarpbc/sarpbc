@@ -1,7 +1,9 @@
 import { playerColumns, teamColumns, toPlayer, toTeam } from "./roster.mapper";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
-import { Contract, Player, Team } from "./player.entities";
+import { Contract } from "./contract.entity";
+import { Player } from "./player.entity";
+import { Team } from "./team.entity";
 import {
   availablePlayerSlug,
   findAliasedPandascoreTeam,
@@ -16,7 +18,7 @@ export class RosterSyncWriter {
   private readonly players = new Map<number, Player>();
   constructor(private readonly em: Pick<EntityManager, "findOne" | "persist" | "getReference">) {}
   async upsertTeam(input: UpsertTeamCommand): Promise<{ id: string }> {
-    const key = input.pandascoreId !== undefined ? String(input.pandascoreId) : input.slug;
+    const key = input.pandascoreId === undefined ? input.slug : String(input.pandascoreId);
 
     if (!this.teams.has(key) && !this.aliasedTeams.has(key)) {
       this.aliasedTeams.set(key, await findAliasedPandascoreTeam(this.em, input.pandascoreId));

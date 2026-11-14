@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path from "node:path";
 import { test } from "node:test";
 import { frameworkViolations } from "./check-package-imports.ts";
 
@@ -9,12 +9,12 @@ function packageWith(
   files: Record<string, string>,
   manifest: { dependencies?: Record<string, string> } = {},
 ): string {
-  const directory = mkdtempSync(join(tmpdir(), "package-imports-"));
-  mkdirSync(join(directory, "src"));
-  writeFileSync(join(directory, "package.json"), JSON.stringify(manifest));
+  const directory = mkdtempSync(path.join(tmpdir(), "package-imports-"));
+  mkdirSync(path.join(directory, "src"));
+  writeFileSync(path.join(directory, "package.json"), JSON.stringify(manifest));
 
   for (const [name, content] of Object.entries(files)) {
-    writeFileSync(join(directory, "src", name), content);
+    writeFileSync(path.join(directory, "src", name), content);
   }
 
   return directory;

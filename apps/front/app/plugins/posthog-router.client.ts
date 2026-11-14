@@ -22,7 +22,7 @@ export default defineNuxtPlugin(() => {
     }
 
     lastPageview = fullPath;
-    const path = fullPath.split(/[?#]/)[0];
+    const [path] = fullPath.split(/[?#]/);
     client.capture("$pageview", {
       $current_url: `${window.location.origin}${path}`,
       page_path: path,
@@ -43,6 +43,8 @@ export default defineNuxtPlugin(() => {
       void loadPostHogClient(config.public.posthog).then(async () => {
         await router.isReady();
         capturePageview();
+
+        return true;
       });
     },
     { immediate: true, flush: "sync" },

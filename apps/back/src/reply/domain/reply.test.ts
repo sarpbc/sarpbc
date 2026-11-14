@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import {
   replySortOrder,
   replyTarget,
@@ -81,9 +81,9 @@ describe("replyTarget", () => {
   });
 });
 
-describe("sameReplyTarget", () => {
-  const post = (id: string) => makeReply({ post: { id, publicId: 1, title: "T" } });
+const post = (id: string) => makeReply({ post: { id, publicId: 1, title: "T" } });
 
+describe("sameReplyTarget", () => {
   it("matches replies on the same target", () => {
     expect(sameReplyTarget(post("p1"), post("p1"))).toBe(true);
   });

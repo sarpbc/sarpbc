@@ -12,4 +12,4 @@ export const SetMatchLineupsDto = z.strictObject({
     .max(16),
 });
 
-export type SetMatchLineupsDto = z.infer<typeof SetMatchLineupsDto>;
+export type SetMatchLineupsInput = z.infer<typeof SetMatchLineupsDto>;

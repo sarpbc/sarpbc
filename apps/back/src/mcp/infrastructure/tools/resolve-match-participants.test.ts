@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import { Player, Team } from "../../../roster/domain/roster";
-import { Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import { Player } from "../../../roster/domain/player";
+import { Team } from "../../../roster/domain/team";
+import { Tournament } from "../../../tournament/domain/tournament";
+import { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
 import type { IdOrSlugLookup } from "./find-by-id-or-slug";
 import { resolveMatchParticipantIds } from "./resolve-match-participants";
 

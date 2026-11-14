@@ -9,7 +9,7 @@ type EventStage = Pick<
   "name" | "beginAt" | "endAt" | "imageUrl" | "prizepool" | "type"
 >;
 
-function bound(dates: Array<Date | null>, pick: (...times: number[]) => number): string | null {
+function bound(dates: (Date | null)[], pick: (...times: number[]) => number): string | null {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
 
   return times.length ? new Date(pick(...times)).toISOString() : null;
@@ -19,7 +19,7 @@ export function mapEvent<Stage extends EventStage>(
   event: TournamentEvent,
   stages: Stage[],
 ): TournamentEventResponse<Stage> {
-  const ordered = [...stages].sort(compareStages);
+  const ordered = stages.toSorted(compareStages);
   const [newest] = ordered;
 
   // Only the main stage carries the prize pool; its type wins over qualifier stages.

@@ -28,11 +28,14 @@ import { TransferService } from "../src/roster/application/transfer.service";
 import { TeamService } from "../src/roster/application/team.service";
 import { PlayerService } from "../src/roster/application/player.service";
 import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/all-exceptions.filter";
-import { IntegrationError, NotFoundError } from "../src/common/domain/errors";
+import { IntegrationError } from "../src/common/domain/errors/integration-error";
+import { NotFoundError } from "../src/common/domain/errors/not-found-error";
 import { configureApp } from "../src/configure-app";
 import type { EntityRef } from "../src/common/domain/entity-ref";
-import { League, Match, TournamentParticipant } from "../src/tournament/domain/competition";
-import { Team } from "../src/roster/domain/roster";
+import { League } from "../src/tournament/domain/league";
+import { Match } from "../src/tournament/domain/match";
+import { TournamentParticipant } from "../src/tournament/domain/tournament-participant";
+import { Team } from "../src/roster/domain/team";
 import { User } from "../src/user/domain/user";
 
 describe("API smoke (e2e)", () => {

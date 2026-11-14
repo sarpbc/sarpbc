@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { assertValidMatchBlocks } from "./news-content.util";
 
 describe("assertValidMatchBlocks", () => {

@@ -4,7 +4,7 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { StatsPlayerLinkService } from "../../application/stats-player-link.service";
-import { LinkStatsPlayerDto } from "./dto/link-stats-player.dto";
+import { LinkStatsPlayerDto, type LinkStatsPlayerInput } from "./dto/link-stats-player.dto";
 
 @Controller("tournaments/:id/stats-players")
 @UseGuards(AuthGuard, PermissionGuard)
@@ -20,7 +20,7 @@ export class StatsPlayerLinkController {
   @Put("link")
   async link(
     @Param("id") tournamentId: string,
-    @Body({ schema: LinkStatsPlayerDto }) dto: LinkStatsPlayerDto,
+    @Body({ schema: LinkStatsPlayerDto }) dto: LinkStatsPlayerInput,
   ): Promise<StatsPlayerLinkResult> {
     const linkedRows = await this.service.link(tournamentId, dto);
 

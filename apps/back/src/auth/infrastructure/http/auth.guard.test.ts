@@ -4,7 +4,7 @@ import { ConfigService } from "@nestjs/config";
 import { ExecutionContext } from "@nestjs/common";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import { AuthenticatedUser } from "../../../common/application/models/authenticated-user";
-import { AuthenticationError } from "../../../common/domain/errors";
+import { AuthenticationError } from "../../../common/domain/errors/authentication-error";
 import { AuthService } from "../../application/auth.service";
 import { AuthGuard } from "./auth.guard";
 

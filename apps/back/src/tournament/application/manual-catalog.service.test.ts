@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { League } from "../domain/competition";
+import { present } from "../../../test/doubles";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { League } from "../domain/league";
 import { TournamentEvent } from "../domain/tournament-event";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualCatalogService } from "./manual-catalog.service";
@@ -13,6 +16,9 @@ import {
   tournamentWriter as tournamentWriterDouble,
 } from "../../../test/competition-doubles";
 
+const event = (id: string, pandascoreSerieId: number | null = null) =>
+  Object.assign(new TournamentEvent(), { id, slug: id, name: id, pandascoreSerieId });
+
 describe("ManualCatalogService", () => {
   const events = new Map<string, TournamentEvent>();
   const leagues = new Map<string, League>();
@@ -20,16 +26,16 @@ describe("ManualCatalogService", () => {
 
   const eventWriter = {
     load: vi.fn(async (id: string) => {
-      const event = events.get(id);
+      const known = events.get(id);
 
-      return event ? Object.assign(new TournamentEvent(), event) : null;
+      return known ? Object.assign(new TournamentEvent(), known) : null;
     }),
     slugTaken: vi.fn(async (slug: string, except: string | null) =>
-      [...events.values()].some((event) => event.slug === slug && event.id !== except),
+      [...events.values()].some((candidate) => candidate.slug === slug && candidate.id !== except),
     ),
     stages: vi.fn(async () => stages),
-    save: vi.fn(async (event: TournamentEvent) => {
-      events.set(event.id, Object.assign(new TournamentEvent(), event));
+    save: vi.fn(async (saved: TournamentEvent) => {
+      events.set(saved.id, Object.assign(new TournamentEvent(), saved));
     }),
   };
 
@@ -57,16 +63,16 @@ describe("ManualCatalogService", () => {
   const queries = {
     list: vi.fn(),
     find: vi.fn(async (idOrSlug: string) => {
-      const event = events.get(idOrSlug);
+      const found = events.get(idOrSlug);
 
-      return event ? { event, stages: [] } : null;
+      return found ? { event: found, stages: [] } : null;
     }),
     stageId: vi.fn(),
     unsynced: vi.fn(),
   };
 
-  const cache = { invalidateTournament: vi.fn() },
-    diagnostics = { error: vi.fn(), warn: vi.fn() };
+  const cache = { invalidateTournament: vi.fn() };
+  const diagnostics = { error: vi.fn(), warn: vi.fn() };
 
   const service = new ManualCatalogService(
     tournamentQueries(),
@@ -138,7 +144,7 @@ describe("ManualCatalogService", () => {
     ["follows a serie", { pandascoreSerieId: 9 }, []],
     ["holds a PandaScore stage", {}, [{ id: "s", name: "Swiss", source: "pandascore" as const }]],
   ])("rejects editing an event that %s", async (_label, patch, synced) => {
-    Object.assign(events.get("cdf")!, patch);
+    Object.assign(present(events.get("cdf")), patch);
     stages = synced;
     await expect(service.updateEvent("cdf", { name: "Renamed" })).rejects.toBeInstanceOf(
       InvalidInputError,
@@ -147,19 +153,14 @@ describe("ManualCatalogService", () => {
   });
 
   it("lists only events the staff can edit, empty ones included", async () => {
-    const event = (id: string, pandascoreSerieId: number | null = null) =>
-      Object.assign(new TournamentEvent(), { id, slug: id, name: id, pandascoreSerieId });
-
     queries.unsynced.mockResolvedValue([
       { event: event("empty"), stages: [] },
       { event: event("manual"), stages: [{ id: "pool", source: "manual" }] },
       { event: event("mixed"), stages: [{ id: "swiss", source: "pandascore" }] },
       { event: event("serie", 3), stages: [] },
     ]);
-    expect((await service.manualEvents()).map(({ event }) => event.id)).toEqual([
-      "empty",
-      "manual",
-    ]);
+    const manualEventsResult = await service.manualEvents();
+    expect(manualEventsResult.map((listed) => listed.event.id)).toEqual(["empty", "manual"]);
   });
 
   it("creates a manual league with a slug from its name", async () => {

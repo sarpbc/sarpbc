@@ -44,10 +44,15 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
 
       return row ? toProposal(row) : null;
     },
-    list: async (status, limit) =>
-      (await em.find(Row.RosterProposal, { status }, { orderBy: { createdAt: "asc" }, limit })).map(
-        toProposal,
-      ),
+    list: async (status, limit) => {
+      const rows = await em.find(
+        Row.RosterProposal,
+        { status },
+        { orderBy: { createdAt: "asc" }, limit },
+      );
+
+      return rows.map(toProposal);
+    },
     save: async (model) => {
       const row = model.id
         ? await em.findOneOrFail(Row.RosterProposal, { id: model.id })
@@ -123,7 +128,9 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
             match.id,
             [
               match.participants
-                .map(({ team, players }) => participantName({ team, players: players.getItems() }))
+                .map(({ team, players: lineup }) =>
+                  participantName({ team, players: lineup.getItems() }),
+                )
                 .join(" vs "),
               match.tournament.event.name,
               match.tournament.name,

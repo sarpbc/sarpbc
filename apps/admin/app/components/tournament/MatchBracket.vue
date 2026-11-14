@@ -37,7 +37,7 @@ let nextKey = 0;
 function reset() {
   sides.value = [0, 1].map((index) => match.participants[index]?.id ?? TBD);
   links.value = match.previousMatches.map(({ previousMatch, type }) => ({
-    key: nextKey++,
+    key: (nextKey += 1),
     previousMatchId: previousMatch,
     type,
   }));
@@ -87,7 +87,7 @@ const canSave = computed(
 );
 
 function addLink() {
-  links.value.push({ key: nextKey++, previousMatchId: "", type: "winner" });
+  links.value.push({ key: (nextKey += 1), previousMatchId: "", type: "winner" });
 }
 
 function removeLink(key: number) {

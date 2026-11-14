@@ -62,8 +62,7 @@ async function save(input: OnThisDayFactInput) {
   const current = editing.value;
 
   try {
-    if (current) await updateOnThisDayFact(current.id, input);
-    else await createOnThisDayFact(input);
+    await (current ? updateOnThisDayFact(current.id, input) : createOnThisDayFact(input));
     isFormOpen.value = false;
     toast.add({
       title: t(current ? "page.onThisDay.edit.saved" : "page.onThisDay.create.success"),

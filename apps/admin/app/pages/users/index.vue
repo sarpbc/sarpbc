@@ -44,9 +44,9 @@ const {
   error,
   refresh,
 } = useAdminList("admin-users", async (range) => {
-  const { users, total } = await getUsers(range);
+  const response = await getUsers(range);
 
-  return { items: users, total };
+  return { items: response.users, total: response.total };
 });
 
 watchDebounced(
@@ -59,21 +59,6 @@ watchDebounced(
 
 function roleOf(user: UserListItem): AssignableRole {
   return user.role ?? "member";
-}
-
-function requestRoleChange(user: UserListItem, role: AssignableRole) {
-  if (role === roleOf(user)) {
-    return;
-  }
-
-  if (role === "admin" || user.role === "admin") {
-    pendingChange.value = { user, role };
-    isConfirmOpen.value = true;
-
-    return;
-  }
-
-  void applyRoleChange(user, role);
 }
 
 async function applyRoleChange(user: UserListItem, role: AssignableRole) {
@@ -94,6 +79,21 @@ async function applyRoleChange(user: UserListItem, role: AssignableRole) {
     savingId.value = null;
     await refresh();
   }
+}
+
+function requestRoleChange(user: UserListItem, role: AssignableRole) {
+  if (role === roleOf(user)) {
+    return;
+  }
+
+  if (role === "admin" || user.role === "admin") {
+    pendingChange.value = { user, role };
+    isConfirmOpen.value = true;
+
+    return;
+  }
+
+  void applyRoleChange(user, role);
 }
 
 async function confirmChange() {

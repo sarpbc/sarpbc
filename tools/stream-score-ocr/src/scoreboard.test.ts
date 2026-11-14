@@ -69,7 +69,7 @@ void describe("readScoreboard", () => {
     for (const [index, size] of SIZES.entries()) {
       const renderer = new FixtureRenderer(size, index + 20);
 
-      for (let frame = 0; frame < 20; frame++) {
+      for (let frame = 0; frame < 20; frame += 1) {
         const reading = readScoreboard(
           renderer.render({ ...scorebug(3, 1, 187, false), glitch: true }, 8),
           overlay,

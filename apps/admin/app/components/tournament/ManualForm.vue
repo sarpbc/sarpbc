@@ -11,7 +11,7 @@ import type { ManualTournamentFormState } from "~/composables/useManualTournamen
 
 const NEW_EVENT = "new";
 
-const props = defineProps<{
+const { modelValue, events, original, leagues, teams, slugAuto } = defineProps<{
   modelValue: ManualTournamentFormState;
   original: TournamentDetail | null;
   events: ManualEvent[];
@@ -32,49 +32,50 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const state = computed({
-  get: () => props.modelValue,
+  get: () => modelValue,
   set: (value) => emit("update:modelValue", value),
 });
 
+function updateField<K extends keyof ManualTournamentFormState>(
+  key: K,
+  value: ManualTournamentFormState[K],
+) {
+  emit("update:modelValue", { ...modelValue, [key]: value });
+}
+
 const imageUrl = computed({
-  get: () => props.modelValue.imageUrl,
+  get: () => modelValue.imageUrl,
   set: (value: string) => updateField("imageUrl", value),
 });
 
 const eventOptions = computed(() => {
-  const options = props.events.map((event) => ({ value: event.id, label: event.name }));
-  const current = props.original?.event;
+  const options = events.map((event) => ({ value: event.id, label: event.name }));
+  const current = original?.event;
 
   if (current && !options.some((option) => option.value === current.id))
     options.unshift({ value: current.id, label: current.name });
 
-  return props.original
+  return original
     ? options
     : [{ value: NEW_EVENT, label: t("page.tournaments.form.newEvent") }, ...options];
 });
 
 const eventId = computed({
-  get: () => props.modelValue.eventId || NEW_EVENT,
+  get: () => modelValue.eventId || NEW_EVENT,
   set: (value: string) => updateField("eventId", value === NEW_EVENT ? "" : value),
 });
 
 /** Mirrors the API: only an event of its own (one stage, same name) follows the tournament's slug. */
 const sharesEvent = computed(() => {
-  const original = props.original;
-
   if (!original) return false;
-  const event = props.events.find((candidate) => candidate.id === original.event.id);
+  const event = events.find((candidate) => candidate.id === original.event.id);
 
   return !event || event.stages.length !== 1 || event.name !== original.name;
 });
 
-const showsSlug = computed(
-  () => editsEventSlug(props.modelValue, props.original) && !sharesEvent.value,
-);
+const showsSlug = computed(() => editsEventSlug(modelValue, original) && !sharesEvent.value);
 
-const movesEvent = computed(
-  () => !!props.original && props.modelValue.eventId !== props.original.event.id,
-);
+const movesEvent = computed(() => !!original && modelValue.eventId !== original.event.id);
 
 const eventHelp = computed(() => {
   if (movesEvent.value) return t("page.tournaments.form.eventMoveHelp");
@@ -84,9 +85,7 @@ const eventHelp = computed(() => {
   return t("page.tournaments.form.eventHelp");
 });
 
-const leagueItems = computed(() =>
-  leagueOptions(props.leagues, t("page.tournaments.source.pandascore")),
-);
+const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.source.pandascore")));
 
 const formatItems = TOURNAMENT_FORMATS.map((format) => ({ value: format, label: format }));
 
@@ -96,25 +95,18 @@ const filteredTeams = computed(() => {
   const query = teamSearch.value.trim().toLowerCase();
 
   if (!query) {
-    return props.teams;
+    return teams;
   }
 
-  return props.teams.filter((team) => team.name.toLowerCase().includes(query));
+  return teams.filter((team) => team.name.toLowerCase().includes(query));
 });
 
-function updateField<K extends keyof ManualTournamentFormState>(
-  key: K,
-  value: ManualTournamentFormState[K],
-) {
-  emit("update:modelValue", { ...props.modelValue, [key]: value });
-}
-
-// One emit: props.modelValue stays stale until the parent re-renders, so a second emit would drop the name.
+// One emit: modelValue stays stale until the parent re-renders, so a second emit would drop the name.
 function onNameInput(value: string) {
   emit("update:modelValue", {
-    ...props.modelValue,
+    ...modelValue,
     name: value,
-    slug: props.slugAuto ? toSlug(value) : props.modelValue.slug,
+    slug: slugAuto ? toSlug(value) : modelValue.slug,
   });
 }
 
@@ -132,7 +124,7 @@ function toggleTeam(teamId: string, checked: boolean) {
     next.delete(teamId);
   }
 
-  updateField("teamIds", Array.from(next));
+  updateField("teamIds", [...next]);
 }
 
 function isTeamSelected(teamId: string): boolean {

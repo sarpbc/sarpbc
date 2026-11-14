@@ -35,7 +35,7 @@ const COLUMNS: readonly Column[] = [
   "goalParticipation",
 ];
 
-const PERCENTAGES: readonly Column[] = ["shootingPercentage", "goalParticipation"];
+const PERCENTAGES: ReadonlySet<Column> = new Set(["shootingPercentage", "goalParticipation"]);
 const ALL_TEAMS = "all";
 
 const view = ref<View>("totals");
@@ -59,8 +59,8 @@ const teamOptions = computed(() => {
   return [
     { value: ALL_TEAMS, label: t("page.tournaments.stats.allTeams") },
     ...[...teams]
-      .map(([value, label]) => ({ value, label }))
-      .sort((a, b) => a.label.localeCompare(b.label)),
+      .map(([teamId, label]) => ({ value: teamId, label }))
+      .toSorted((a, b) => a.label.localeCompare(b.label)),
   ];
 });
 
@@ -105,7 +105,7 @@ const rows = computed(() => {
 
   return (stats?.players ?? [])
     .filter((row) => team.value === ALL_TEAMS || teamKey(row) === team.value)
-    .sort(
+    .toSorted(
       (a, b) =>
         (descending ? -1 : 1) * compare(a, b, key) || a.player.name.localeCompare(b.player.name),
     );
@@ -137,7 +137,7 @@ function display(row: TournamentPlayerStats, column: Column): string {
 
   if (current === null) return "–";
 
-  return PERCENTAGES.includes(column)
+  return PERCENTAGES.has(column)
     ? percentFormat.value.format(current / 100)
     : numberFormat.value.format(current);
 }

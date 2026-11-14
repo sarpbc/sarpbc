@@ -31,9 +31,9 @@ function isTodayOrTomorrow(date: Date, now: Date = new Date()): boolean {
   return offset >= 0 && offset <= 1;
 }
 
-type MatchWithBeginAt = {
+interface MatchWithBeginAt {
   beginAt?: Date | string | null;
-};
+}
 
 export function filterMatchesTodayOrTomorrow<T extends MatchWithBeginAt>(
   matches: T[],
@@ -42,6 +42,6 @@ export function filterMatchesTodayOrTomorrow<T extends MatchWithBeginAt>(
   return matches.filter((match) => {
     const beginAt = parseMatchDate(match.beginAt);
 
-    return beginAt != null && isTodayOrTomorrow(beginAt, now);
+    return beginAt !== null && beginAt !== undefined && isTodayOrTomorrow(beginAt, now);
   });
 }

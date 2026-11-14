@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { NotFoundError } from "../../../common/domain/errors";
-import { League, Tournament } from "../../domain/competition";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import { League } from "../../domain/league";
+import { Tournament } from "../../domain/tournament";
 import { TournamentEvent } from "../../domain/tournament-event";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EventController } from "./event.controller";
@@ -242,7 +243,8 @@ describe("EventController", () => {
     const synced = Object.assign(new TournamentEvent(), event, { pandascoreSerieId: 7 });
 
     findManualEvent.mockResolvedValue({ event: synced, stages: [] });
-    expect((await controller.findManual("event")).event).toMatchObject({
+    const findManualResult = await controller.findManual("event");
+    expect(findManualResult.event).toMatchObject({
       id: "event",
       editable: false,
     });

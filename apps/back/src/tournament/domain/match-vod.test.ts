@@ -1,5 +1,6 @@
+import { SCRIPT_URL } from "../../../test/doubles";
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { MAX_VODS_PER_GAME } from "@sarpbc/utils";
 import { normalizeMatchVods, replaceGameVods } from "./match-vod";
 
@@ -35,7 +36,7 @@ describe("normalizeMatchVods", () => {
     ["https://music.youtube.com/watch?v=x", "must be a twitch.tv"],
     ["https://www.youtube.com:8443/watch?v=x", "must be a twitch.tv"],
     ["https://user:pass@www.youtube.com/watch?v=x", "must be a twitch.tv"],
-    ["javascript:alert(1)", "must use https"],
+    [SCRIPT_URL, "must use https"],
     ["https://www.twitch.tv/videos/1?t=1h2x", "invalid t= timestamp"],
     ["https://youtu.be/x?t=", "invalid t= timestamp"],
     ["https://youtu.be/x?t=-5", "invalid t= timestamp"],

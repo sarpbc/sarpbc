@@ -6,7 +6,7 @@ import {
   parseStreamUrl,
   type StreamUrlError,
 } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { nonBlank } from "../../common/domain/text";
 import type { OfficialMatchStream } from "./official-match-stream";
 
@@ -42,7 +42,8 @@ export function replaceStreams(
 
   const seen = new Set<string>();
   const streams: Stream[] = [];
-  inputs.forEach((input, index) => {
+
+  for (const [index, input] of inputs.entries()) {
     const parsed = parseStreamUrl(input.url);
 
     if (!parsed.ok) throw invalid(index, URL_ERRORS[parsed.error]);
@@ -57,7 +58,7 @@ export function replaceStreams(
     if (channel.length > STREAM_CHANNEL_MAX_LENGTH)
       throw invalid(index, `has a channel name over ${STREAM_CHANNEL_MAX_LENGTH} characters`);
 
-    if (seen.has(parsed.url)) return;
+    if (seen.has(parsed.url)) continue;
     seen.add(parsed.url);
     streams.push({
       url: parsed.url,
@@ -67,18 +68,18 @@ export function replaceStreams(
       kind: input.kind,
       source: startgg.has(parsed.url) ? "startgg" : source,
     });
-  });
+  }
 
   return streams;
 }
 
-export function effectiveStreams(...lists: ReadonlyArray<readonly Stream[]>): Stream[] {
+export function effectiveStreams(...lists: readonly (readonly Stream[])[]): Stream[] {
   return [...(lists.find((list) => list.length > 0) ?? [])];
 }
 
 export function pandascoreStreams(official: readonly OfficialMatchStream[]): Stream[] {
-  return [...official]
-    .sort((a, b) => Number(b.main) - Number(a.main))
+  return official
+    .toSorted((a, b) => Number(b.main) - Number(a.main))
     .flatMap((stream) => {
       const parsed = parseStreamUrl(stream.url.trim().replace(/^http:\/\//i, "https://"));
       const [language = ""] = stream.language.trim().toLowerCase().split("-");

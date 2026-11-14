@@ -74,7 +74,7 @@ export function useCareerSimulator() {
     if (state.value.currentSplits.length < SPLITS_PER_SEASON) return false;
     const rank = getTeamRank(worldRankings.value, state.value.currentTeamId);
 
-    if (rank == null) return false;
+    if (rank === null || rank === undefined) return false;
 
     return qualifiesForWorlds(rank, worldRankings.value.teams.length);
   });
@@ -86,7 +86,7 @@ export function useCareerSimulator() {
   });
 
   const lastSplit = computed<CareerSplitRecord | null>(
-    () => state.value.currentSplits[state.value.currentSplits.length - 1] ?? null,
+    () => state.value.currentSplits.at(-1) ?? null,
   );
 
   const playerAge = computed(() => getPlayerAge(state.value.currentSeason));

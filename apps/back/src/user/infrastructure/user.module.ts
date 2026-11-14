@@ -3,7 +3,8 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { UserController } from "./http/user.controller";
 import { UsersController } from "./http/users.controller";
 import { UserService } from "../application/user.service";
-import { MikroUserStore, MikroUserTransaction } from "./persistence/user.store";
+import { MikroUserStore } from "./persistence/user.store";
+import { MikroUserTransaction } from "./persistence/user.transaction";
 import { passwordHasher } from "./password-hasher";
 
 @Module({

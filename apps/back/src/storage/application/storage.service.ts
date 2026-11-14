@@ -1,4 +1,4 @@
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { MAX_IMAGE_BYTES, MAX_IMAGE_MEGABYTES, type ImageUploadTarget } from "@sarpbc/utils";
 import { imageContentType } from "../domain/image-upload";
 import type { ObjectStorage, ObjectUploadUrl, StoredObject } from "./ports/object-storage";

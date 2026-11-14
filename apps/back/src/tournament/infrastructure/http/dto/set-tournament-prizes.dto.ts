@@ -22,4 +22,4 @@ export const SetTournamentPrizesDto = z.strictObject({
   prizes: z.array(TournamentPrizeEntryDto).max(MAX_PRIZE_ENTRIES),
 });
 
-export type SetTournamentPrizesDto = z.infer<typeof SetTournamentPrizesDto>;
+export type SetTournamentPrizesInput = z.infer<typeof SetTournamentPrizesDto>;

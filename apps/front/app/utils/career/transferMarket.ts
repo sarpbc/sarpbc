@@ -60,11 +60,15 @@ function teamWantsPlayer(team: RankedTeam, playerRating: number): boolean {
 function shuffleTeams(teams: RankedTeam[], rng: () => number): RankedTeam[] {
   const shuffled = [...teams];
 
-  for (let i = shuffled.length - 1; i > 0; i--) {
+  for (let i = shuffled.length - 1; i > 0; i -= 1) {
     const j = Math.floor(rng() * (i + 1));
-    const current = shuffled[i]!;
-    shuffled[i] = shuffled[j]!;
-    shuffled[j] = current;
+    const current = shuffled[i];
+    const other = shuffled[j];
+
+    if (current !== undefined && other !== undefined) {
+      shuffled[i] = other;
+      shuffled[j] = current;
+    }
   }
 
   return shuffled;
@@ -110,6 +114,12 @@ export function getTransferBand(
   return { minRank: 1, maxRank: Math.max(6, currentRank), maxOffers: 3 };
 }
 
+function rollOfferCount(rng: () => number, threeChance: number, twoChance: number): number {
+  if (rng() < threeChance) return 3;
+
+  return rng() < twoChance ? 2 : 1;
+}
+
 export function pickOffseasonOffers(
   currentTeamId: string,
   seasonPoints: number,
@@ -140,11 +150,11 @@ export function pickOffseasonOffers(
   let count: number;
 
   if (playerWorldRank <= ELITE_PLAYER_RANK) {
-    count = rng() < 0.45 ? 3 : rng() < 0.85 ? 2 : 1;
+    count = rollOfferCount(rng, 0.45, 0.85);
   } else if (playerWorldRank <= STRONG_PLAYER_RANK) {
     count = rng() < 0.55 ? 2 : 1;
   } else if (seasonPoints >= 60) {
-    count = rng() < 0.35 ? 3 : rng() < 0.7 ? 2 : 1;
+    count = rollOfferCount(rng, 0.35, 0.7);
   } else if (seasonPoints >= 42) {
     count = rng() < 0.4 ? 2 : 1;
   } else if (seasonPoints >= 28) {
@@ -157,18 +167,30 @@ export function pickOffseasonOffers(
 
   if (count <= 0) return [];
 
-  const shortlist = [...pool].sort((a, b) => a.rank - b.rank).slice(0, OFFER_SHORTLIST);
+  const shortlist = pool.toSorted((a, b) => a.rank - b.rank).slice(0, OFFER_SHORTLIST);
 
   return shuffleTeams(shortlist, rng)
     .slice(0, count)
     .map((entry) => entry.team.id);
 }
 
+function renewalPerformanceModifier(seasonPoints: number): number {
+  if (seasonPoints >= 42) return 0.15;
+
+  if (seasonPoints >= 20) return 0.05;
+
+  return seasonPoints < 10 ? -0.15 : 0;
+}
+
 function pickWeakestOtherTeam(currentTeamId: string, rankings: WorldRankings): string {
   const others = rankings.teams.filter((entry) => entry.team.id !== currentTeamId);
-  const weakest = [...others].sort((a, b) => b.rank - a.rank)[0];
+  const [weakest] = others.toSorted((a, b) => b.rank - a.rank);
 
-  return weakest!.team.id;
+  if (!weakest) {
+    throw new Error("Rankings contain no team other than the current one");
+  }
+
+  return weakest.team.id;
 }
 
 export interface OffseasonResolution {
@@ -196,8 +218,7 @@ export function resolveOffseasonContracts(
     };
   }
 
-  const performance =
-    seasonPoints >= 42 ? 0.15 : seasonPoints >= 20 ? 0.05 : seasonPoints < 10 ? -0.15 : 0;
+  const performance = renewalPerformanceModifier(seasonPoints);
 
   const renewalChance = Math.max(0.04, 0.72 - pastPeak * 0.14 + performance);
   const renewalOffered = rng() < renewalChance;

@@ -26,12 +26,12 @@ export type CounterpartMatch =
 function nameKey(name: string): string {
   const tokens = name
     .normalize("NFKD")
-    .replace(/[̀-ͯ]/g, "")
+    .replaceAll(/[̀-ͯ]/g, "")
     .toLowerCase()
     .split(/[^a-z0-9]+/)
     .filter(Boolean);
 
-  return [...new Set(tokens)].sort().join(" ");
+  return [...new Set(tokens)].toSorted().join(" ");
 }
 
 function overlaps(candidate: ManualCandidate, stage: ProviderStage): boolean {
@@ -59,7 +59,7 @@ export function findManualCounterpart(
   stage: ProviderStage,
   candidates: readonly ManualCandidate[],
 ): CounterpartMatch {
-  const name = nameKey(stage.eventName + " " + stage.stageName);
+  const name = nameKey(`${stage.eventName} ${stage.stageName}`);
 
   if (!name) return { kind: "none" };
 

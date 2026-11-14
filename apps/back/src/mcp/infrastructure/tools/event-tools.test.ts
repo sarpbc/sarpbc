@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { jsonOf as json } from "../../../../test/mcp-result";
-import { League, Tournament } from "../../../tournament/domain/competition";
+import { League } from "../../../tournament/domain/league";
+import { Tournament } from "../../../tournament/domain/tournament";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import type { DataSource } from "@sarpbc/types";
 import { redistributableCompetition } from "../redistributable-competition";
@@ -21,12 +22,12 @@ function stage(id: string, source: DataSource, beginAt: string | null) {
   });
 }
 
-type ToolInput = {
+interface ToolInput extends Record<string, unknown> {
   idOrSlug?: string;
   eventId?: string;
   leagueId?: string;
   name?: string;
-};
+}
 
 function setup(role: "admin" | "journalist" = "admin") {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
@@ -109,7 +110,8 @@ describe("event tools", () => {
       event: listing.event,
       stages: [stage("qualifier", "startgg", null)],
     });
-    expect((await tool("get_event")({ idOrSlug: "cdf" })).isError).toBe(true);
+    const awaited = await tool("get_event")({ idOrSlug: "cdf" });
+    expect(awaited.isError).toBe(true);
     catalogService.findEvent.mockResolvedValueOnce({ event: listing.event, stages: [] });
     expect(json(await tool("get_event")({ idOrSlug: "cdf" }))).toMatchObject({ stages: [] });
   });
@@ -142,7 +144,8 @@ describe("event tools", () => {
     expect(catalogService.updateEvent).toHaveBeenCalledWith(EVENT_ID, {
       name: "Coupe de France Slash 2026",
     });
-    expect((await tool("update_event")({ eventId: EVENT_ID })).isError).toBe(true);
+    const awaited2 = await tool("update_event")({ eventId: EVENT_ID });
+    expect(awaited2.isError).toBe(true);
   });
 
   it("maps leagues with their source", async () => {

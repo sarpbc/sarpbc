@@ -3,7 +3,7 @@ import {
   IMAGE_CONTENT_TYPES,
   type ImageContentType,
 } from "@sarpbc/utils";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export function imageContentType(value: string): ImageContentType {
   const canonical = canonicalImageContentType(value);

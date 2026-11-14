@@ -146,9 +146,7 @@ async function refreshEmptyTournaments(event?: Event) {
   try {
     const emptyTournaments = await getTournamentsWithoutMatches();
 
-    for (const tournament of emptyTournaments) {
-      await syncTournament(tournament.id);
-    }
+    await Promise.all(emptyTournaments.map(({ id }) => syncTournament(id)));
 
     refreshState.value = "success";
   } catch (refreshError) {

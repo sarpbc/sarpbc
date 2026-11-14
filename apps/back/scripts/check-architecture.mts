@@ -1,9 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 import ts from "typescript";
 
-const project = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const project = path.resolve(import.meta.dirname, "..");
 const sourceRoot = path.join(project, "src");
 const configPath = path.join(project, "tsconfig.json");
 const config = ts.readConfigFile(configPath, (file) => ts.sys.readFile(file));
@@ -94,7 +93,7 @@ function stronglyConnected(graph: FeatureGraph): string[][] {
     stack.push(node);
     onStack.add(node);
 
-    for (const next of [...(graph.get(node)?.keys() ?? [])].sort()) {
+    for (const next of [...(graph.get(node)?.keys() ?? [])].toSorted()) {
       if (!index.has(next)) {
         visit(next);
         low.set(node, Math.min(defined(low.get(node)), defined(low.get(next))));
@@ -113,34 +112,34 @@ function stronglyConnected(graph: FeatureGraph): string[][] {
         component.push(member);
       } while (member !== node);
 
-      components.push(component.sort());
+      components.push(component.toSorted());
     }
   }
 
-  for (const node of [...graph.keys()].sort()) if (!index.has(node)) visit(node);
+  for (const node of [...graph.keys()].toSorted()) if (!index.has(node)) visit(node);
 
   return components;
 }
 
 function cyclePath(component: string[], graph: FeatureGraph): string[] | undefined {
   const members = new Set(component);
-  const start = component[0];
-  const path = [start];
+  const [start] = component;
+  const trail = [start];
   const seen = new Set([start]);
 
   function walk(node: string): string[] | undefined {
-    for (const next of [...defined(graph.get(node)).keys()].sort()) {
+    for (const next of [...defined(graph.get(node)).keys()].toSorted()) {
       if (!members.has(next)) continue;
 
-      if (next === start) return path.concat(start);
+      if (next === start) return [...trail, start];
 
       if (seen.has(next)) continue;
       seen.add(next);
-      path.push(next);
+      trail.push(next);
       const found = walk(next);
 
       if (found) return found;
-      path.pop();
+      trail.pop();
     }
 
     return undefined;
@@ -157,25 +156,111 @@ function featureCycles(edges: FeatureEdge[]): string[] {
 
     if (!graph.has(target)) graph.set(target, new Map());
     const importers = defined(graph.get(from)).get(target) ?? [];
-    defined(graph.get(from)).set(target, [...importers, via].sort());
+    defined(graph.get(from)).set(target, [...importers, via].toSorted());
   }
 
   return stronglyConnected(graph)
     .filter((component) => component.length > 1)
     .map((component) => {
-      const path = defined(cyclePath(component, graph));
+      const cycle = defined(cyclePath(component, graph));
 
-      const imports = path
+      const imports = cycle
         .slice(0, -1)
         .map(
           (from, i) =>
-            `${from} -> ${path[i + 1]}: ${defined(defined(graph.get(from)).get(path[i + 1]))[0]}`,
+            `${from} -> ${cycle[i + 1]}: ${defined(defined(graph.get(from)).get(cycle[i + 1]))[0]}`,
         );
 
-      return [`feature cycle: ${path.join(" -> ")}`, ...imports.map((line) => `  ${line}`)].join(
+      return [`feature cycle: ${cycle.join(" -> ")}`, ...imports.map((line) => `  ${line}`)].join(
         "\n",
       );
     });
+}
+
+interface ImportSite {
+  file: string;
+  origin: string;
+  originLayer: string;
+  specifier: string;
+  resolved: string | undefined;
+}
+
+function innerLayerViolations(
+  site: ImportSite,
+  root: string,
+  featureEdges: FeatureEdge[],
+): string[] {
+  const { file, origin, originLayer, specifier, resolved } = site;
+  const external = !specifier.startsWith(".") && !specifier.startsWith("src/");
+
+  if (external && !innerLayerPackage.test(specifier)) {
+    return [`${origin}: ${originLayer} imports non-allowlisted package ${specifier}`];
+  }
+
+  if (resolved === undefined || !resolved.startsWith(root)) return [];
+
+  const violations: string[] = [];
+  const allowed = originLayer === "domain" ? ["domain"] : ["domain", "application"];
+
+  if (!allowed.includes(layer(resolved, root))) {
+    violations.push(`${origin}: ${originLayer} imports ${normalized(resolved, root)}`);
+  }
+
+  if (
+    isInner(file, root) &&
+    isInner(resolved, root) &&
+    featureOf(file, root) !== featureOf(resolved, root)
+  ) {
+    featureEdges.push([featureOf(file, root), featureOf(resolved, root), origin]);
+  }
+
+  return violations;
+}
+
+function crossFeatureViolations(site: ImportSite, root: string): string[] {
+  const { origin, resolved } = site;
+
+  if (resolved === undefined || !resolved.startsWith(root)) return [];
+
+  const violations: string[] = [];
+  const target = normalized(resolved, root);
+  const [feature] = origin.split("/");
+  const [targetFeature] = target.split("/");
+  const composes = /(?:\.module|composition)\.ts$/.test(origin) || !origin.includes("/");
+  const sharedTarget = targetFeature === "common";
+
+  if (feature === "common" && !sharedTarget && targetFeature !== "infrastructure") {
+    violations.push(`${origin}: common imports feature code ${target}`);
+  }
+
+  if (
+    feature !== targetFeature &&
+    !composes &&
+    !sharedTarget &&
+    !persistenceFacade.test(target) &&
+    (target.includes("/infrastructure/persistence/") ||
+      (target.includes("/infrastructure/") && /(?:repository|\.persistence)\.ts$/.test(target)))
+  ) {
+    violations.push(`${origin}: imports private persistence of ${targetFeature}: ${target}`);
+  }
+
+  return violations;
+}
+
+function importViolations(site: ImportSite, root: string, featureEdges: FeatureEdge[]): string[] {
+  const violations: string[] = [];
+
+  if (site.specifier.startsWith("src/")) {
+    violations.push(
+      `${site.origin}: use a relative import so compiled Node.js resolves ${site.specifier}`,
+    );
+  }
+
+  if (site.originLayer === "domain" || site.originLayer === "application") {
+    violations.push(...innerLayerViolations(site, root, featureEdges));
+  }
+
+  return [...violations, ...crossFeatureViolations(site, root)];
 }
 
 export function architectureViolations(sourceFiles = files, root = sourceRoot): string[] {
@@ -183,91 +268,36 @@ export function architectureViolations(sourceFiles = files, root = sourceRoot): 
   const featureEdges: FeatureEdge[] = [];
 
   for (const file of sourceFiles) {
-    const origin = normalized(file, root);
-    const originLayer = layer(file, root);
-
     const source = ts.createSourceFile(
       file,
-      fs.readFileSync(file, "utf8"),
+      fs.readFileSync(file, "utf-8"),
       ts.ScriptTarget.Latest,
       true,
     );
 
     for (const specifier of importsOf(source)) {
-      if (specifier.startsWith("src/")) {
-        violations.push(
-          `${origin}: use a relative import so compiled Node.js resolves ${specifier}`,
-        );
-      }
-
       const module = ts.resolveModuleName(specifier, file, parsed.options, ts.sys).resolvedModule;
 
-      const resolved = module
-        ? { ...module, resolvedFileName: path.resolve(module.resolvedFileName) }
-        : undefined;
-
-      if (originLayer === "domain" || originLayer === "application") {
-        const external = !specifier.startsWith(".") && !specifier.startsWith("src/");
-
-        if (external && !innerLayerPackage.test(specifier)) {
-          violations.push(`${origin}: ${originLayer} imports non-allowlisted package ${specifier}`);
-          continue;
-        }
-
-        if (resolved && resolved.resolvedFileName.startsWith(root)) {
-          const targetLayer = layer(resolved.resolvedFileName, root);
-          const allowed = originLayer === "domain" ? ["domain"] : ["domain", "application"];
-
-          if (!allowed.includes(targetLayer)) {
-            violations.push(
-              `${origin}: ${originLayer} imports ${normalized(resolved.resolvedFileName, root)}`,
-            );
-          }
-
-          if (
-            isInner(file, root) &&
-            isInner(resolved.resolvedFileName, root) &&
-            featureOf(file, root) !== featureOf(resolved.resolvedFileName, root)
-          ) {
-            featureEdges.push([
-              featureOf(file, root),
-              featureOf(resolved.resolvedFileName, root),
-              origin,
-            ]);
-          }
-        }
-      }
-
-      if (resolved && resolved.resolvedFileName.startsWith(root)) {
-        const target = normalized(resolved.resolvedFileName, root);
-        const feature = origin.split("/")[0];
-        const targetFeature = target.split("/")[0];
-        const composes = /(?:\.module|composition)\.ts$/.test(origin) || !origin.includes("/");
-        const sharedTarget = targetFeature === "common";
-
-        if (feature === "common" && !sharedTarget && targetFeature !== "infrastructure") {
-          violations.push(`${origin}: common imports feature code ${target}`);
-        }
-
-        if (
-          feature !== targetFeature &&
-          !composes &&
-          !sharedTarget &&
-          !persistenceFacade.test(target) &&
-          (target.includes("/infrastructure/persistence/") ||
-            (target.includes("/infrastructure/") &&
-              /(?:repository|\.persistence)\.ts$/.test(target)))
-        ) {
-          violations.push(`${origin}: imports private persistence of ${targetFeature}: ${target}`);
-        }
-      }
+      violations.push(
+        ...importViolations(
+          {
+            file,
+            origin: normalized(file, root),
+            originLayer: layer(file, root),
+            specifier,
+            resolved: module ? path.resolve(module.resolvedFileName) : undefined,
+          },
+          root,
+          featureEdges,
+        ),
+      );
     }
   }
 
   return [...violations, ...featureCycles(featureEdges)];
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && path.resolve(process.argv[1]) === import.meta.filename) {
   const violations = architectureViolations();
 
   if (violations.length) {

@@ -5,9 +5,8 @@
  */
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = import.meta.dirname;
 const FRONT_ROOT = path.resolve(__dirname, "..");
 
 const SCAN_ROOTS = [path.join(FRONT_ROOT, "app")];
@@ -17,7 +16,7 @@ const RULES = [
   { id: "h-11.25", pattern: /\bh-11\.25\b/ },
   { id: "h-11.5", pattern: /\bh-11\.5\b/ },
   { id: "h-8.25", pattern: /\bh-8\.25\b/ },
-  { id: "h-67", pattern: /\bh-67(\.\d+)?\b/ },
+  { id: "h-67", pattern: /\bh-67(?:\.\d+)?\b/ },
   { id: "mt-11", pattern: /\bmt-11\b/ },
   { id: "leading-5.5", pattern: /\bleading-5\.5\b/ },
   { id: "py-[", pattern: /\bpy-\[/ },
@@ -30,29 +29,24 @@ interface Violation {
   text: string;
 }
 
-async function collectFiles(dir: string, files: string[] = []): Promise<string[]> {
+const SKIPPED_DIRECTORIES = new Set(["node_modules", ".nuxt", "dist"]);
+
+async function collectFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
 
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
+  const nested = await Promise.all(
+    entries.map(async (entry): Promise<string[]> => {
+      const fullPath = path.join(dir, entry.name);
 
-    if (entry.isDirectory()) {
-      if (entry.name === "node_modules" || entry.name === ".nuxt" || entry.name === "dist") {
-        continue;
+      if (entry.isDirectory()) {
+        return SKIPPED_DIRECTORIES.has(entry.name) ? [] : await collectFiles(fullPath);
       }
 
-      await collectFiles(fullPath, files);
-      continue;
-    }
+      return FILE_EXTENSIONS.has(path.extname(entry.name)) ? [fullPath] : [];
+    }),
+  );
 
-    const ext = path.extname(entry.name);
-
-    if (FILE_EXTENSIONS.has(ext)) {
-      files.push(fullPath);
-    }
-  }
-
-  return files;
+  return nested.flat();
 }
 
 function scanFile(filePath: string, content: string): Violation[] {
@@ -78,18 +72,13 @@ function scanFile(filePath: string, content: string): Violation[] {
 }
 
 async function main(): Promise<void> {
-  const files: string[] = [];
+  const rootFiles = await Promise.all(SCAN_ROOTS.map(async (root) => await collectFiles(root)));
 
-  for (const root of SCAN_ROOTS) {
-    await collectFiles(root, files);
-  }
+  const fileViolations = await Promise.all(
+    rootFiles.flat().map(async (file) => scanFile(file, await readFile(file, "utf-8"))),
+  );
 
-  const violations: Violation[] = [];
-
-  for (const file of files) {
-    const content = await readFile(file, "utf8");
-    violations.push(...scanFile(file, content));
-  }
+  const violations = fileViolations.flat();
 
   if (violations.length === 0) {
     console.log("lint-hub-row-heights: ok");

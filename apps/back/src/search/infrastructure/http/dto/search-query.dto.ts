@@ -7,4 +7,4 @@ export const SearchQueryDto = OffsetPaginationQueryDto.extend({
   type: z.enum(SEARCH_TYPES).optional(),
 });
 
-export type SearchQueryDto = z.infer<typeof SearchQueryDto>;
+export type SearchQueryInput = z.infer<typeof SearchQueryDto>;

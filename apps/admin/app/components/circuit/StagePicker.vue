@@ -9,7 +9,11 @@ export interface PickedStage {
   label: string;
 }
 
-const props = defineProps<{ title?: string; description?: string }>();
+const { title = null, description = null } = defineProps<{
+  title?: string | null;
+  description?: string | null;
+}>();
+
 const open = defineModel<boolean>("open", { required: true });
 const emit = defineEmits<{ select: [stage: PickedStage] }>();
 
@@ -65,8 +69,8 @@ function choose(stage: PickedStage) {
 <template>
   <UModal
     v-model:open="open"
-    :title="props.title ?? $t('page.circuits.picker.title')"
-    :description="props.description ?? $t('page.circuits.picker.hint')"
+    :title="title ?? $t('page.circuits.picker.title')"
+    :description="description ?? $t('page.circuits.picker.hint')"
   >
     <template #body>
       <div class="flex flex-col gap-3">

@@ -5,4 +5,4 @@ export const CreateTokenDto = z.strictObject({
   name: z.string().trim().min(1).max(TOKEN_NAME_MAX_LENGTH),
 });
 
-export type CreateTokenDto = z.infer<typeof CreateTokenDto>;
+export type CreateTokenInput = z.infer<typeof CreateTokenDto>;

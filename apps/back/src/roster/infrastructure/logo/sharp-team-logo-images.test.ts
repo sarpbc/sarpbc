@@ -1,6 +1,6 @@
 import sharp from "sharp";
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { SharpTeamLogoImages } from "./sharp-team-logo-images";
 
 const images = new SharpTeamLogoImages();

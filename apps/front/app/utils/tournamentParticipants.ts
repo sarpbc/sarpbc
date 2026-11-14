@@ -22,7 +22,7 @@ export function buildTournamentParticipantEntries(
   const result: TournamentParticipantEntry[] = [];
 
   for (const participant of tournament.participants) {
-    const team = participant.team;
+    const { team } = participant;
     const key = team?.id ?? participant.id;
     const listed = team ? Boolean(team.slug) : participant.players.length > 0;
 
@@ -34,7 +34,7 @@ export function buildTournamentParticipantEntries(
 
     const players = participant.players
       .filter((player) => player.slug)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
 
     result.push({
       id: key,
@@ -45,5 +45,5 @@ export function buildTournamentParticipantEntries(
     });
   }
 
-  return result.sort((a, b) => a.name.localeCompare(b.name));
+  return result.toSorted((a, b) => a.name.localeCompare(b.name));
 }

@@ -152,6 +152,29 @@ export const careerStateSchema = z.object({
   result: careerResultSchema.nullable(),
 });
 
+/** Legacy saves may omit menu/resumePhase/splitFields — normalize without casting. */
+function normalizeLoadedCareerState(state: CareerState): CareerState {
+  const withDefaults: CareerState = {
+    ...state,
+    resumePhase: state.resumePhase ?? null,
+    world: {
+      ...state.world,
+      splitFields: state.world.splitFields ?? [],
+      rankSnapshot: state.world.rankSnapshot ?? null,
+    },
+  };
+
+  if (withDefaults.phase !== "menu" && withDefaults.phase !== "career_end") {
+    return {
+      ...withDefaults,
+      phase: "menu",
+      resumePhase: withDefaults.resumePhase ?? withDefaults.phase,
+    };
+  }
+
+  return withDefaults;
+}
+
 export function parseCareerStateJson(raw: string | null): CareerState | null {
   if (!isNonEmptyString(raw)) return null;
 
@@ -199,39 +222,16 @@ export function parseCareerResultsJson(raw: string | null): Map<string, CareerRe
   return results;
 }
 
-/** Legacy saves may omit menu/resumePhase/splitFields — normalize without casting. */
-function normalizeLoadedCareerState(state: CareerState): CareerState {
-  const withDefaults: CareerState = {
-    ...state,
-    resumePhase: state.resumePhase ?? null,
-    world: {
-      ...state.world,
-      splitFields: state.world.splitFields ?? [],
-      rankSnapshot: state.world.rankSnapshot ?? null,
-    },
-  };
-
-  if (withDefaults.phase !== "menu" && withDefaults.phase !== "career_end") {
-    return {
-      ...withDefaults,
-      phase: "menu",
-      resumePhase: withDefaults.resumePhase ?? withDefaults.phase,
-    };
-  }
-
-  return withDefaults;
-}
-
 export function encodeCareerResultForShare(result: CareerResult): string {
   return btoa(encodeURIComponent(JSON.stringify(result)))
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+    .replaceAll("+", "-")
+    .replaceAll("/", "_")
+    .replace(/[=]+$/, "");
 }
 
 export function decodeCareerResultFromShare(encoded: string): CareerResult | null {
   try {
-    const padded = encoded.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = encoded.replaceAll("-", "+").replaceAll("_", "/");
     const json = decodeURIComponent(atob(padded));
 
     return parseCareerResultJson(json);

@@ -48,10 +48,10 @@ const {
   status,
   error,
   refresh,
-} = useAdminList("admin-players", async ({ limit, offset }) => {
-  const { players, total } = await getAllPlayers({ limit, offset });
+} = useAdminList("admin-players", async (range) => {
+  const response = await getAllPlayers(range);
 
-  return { items: players, total };
+  return { items: response.players, total: response.total };
 });
 
 const playerToDelete = ref<Player | null>(null);

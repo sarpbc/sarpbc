@@ -1,6 +1,6 @@
 import type { ParticipantRef } from "@sarpbc/types";
-import type { Team } from "../../../roster/domain/roster";
-import type { TournamentParticipant } from "../../domain/competition";
+import type { Team } from "../../../roster/domain/team";
+import type { TournamentParticipant } from "../../domain/tournament-participant";
 
 export function mapParticipantRef<TTeam>(
   participant: TournamentParticipant,

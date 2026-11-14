@@ -43,7 +43,9 @@ type SideRow = [participantId: string, players: [id: string, standIn: boolean][]
 
 type Identified = z.infer<typeof identified>;
 
-type Tournament = { participants: z.infer<typeof participant>[] };
+interface Tournament {
+  participants: z.infer<typeof participant>[];
+}
 
 interface LineupsContext {
   request: Request;
@@ -89,28 +91,40 @@ export async function verifyLineups({
   const lineupPath = `/tournaments/matches/${match.id}/lineups`;
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
 
-  const detailLineups = async (matchId: string): Promise<MatchLineup[]> =>
-    (await request("GET", `/matches/${matchId}`)).json(matchDetail).lineups;
+  const detailLineups = async (matchId: string): Promise<MatchLineup[]> => {
+    const response = await request("GET", `/matches/${matchId}`);
 
-  const standInsOf = async (playerId: string) =>
-    (await request("GET", `/player/${playerId}/stand-ins`)).json(standIns).standIns;
+    return response.json(matchDetail).lineups;
+  };
+
+  const standInsOf = async (playerId: string) => {
+    const response2 = await request("GET", `/player/${playerId}/stand-ins`);
+
+    return response2.json(standIns).standIns;
+  };
 
   await request("GET", lineupPath, undefined, memberCookie, 403);
   await request("PUT", lineupPath, { lineups: [] }, memberCookie, 403);
   assert.deepEqual(await detailLineups(match.id), [], "a match starts without lineups");
 
-  const standIn = (
-    await request("POST", "/player", { name: "Integration Stand-in" }, staffCookie, 201)
-  ).json(createdPlayer).player;
+  const response3 = await request(
+    "POST",
+    "/player",
+    { name: "Integration Stand-in" },
+    staffCookie,
+    201,
+  );
 
-  const saved = (
-    await request(
-      "PUT",
-      lineupPath,
-      { lineups: [{ participantId: alpha, playerIds: [player.id, standIn.id] }] },
-      staffCookie,
-    )
-  ).json(matchLineupsResponse);
+  const standIn = response3.json(createdPlayer).player;
+
+  const response4 = await request(
+    "PUT",
+    lineupPath,
+    { lineups: [{ participantId: alpha, playerIds: [player.id, standIn.id] }] },
+    staffCookie,
+  );
+
+  const saved = response4.json(matchLineupsResponse);
 
   assert.equal(saved.source, "manual");
   assert.deepEqual(saved.suggested, []);
@@ -128,8 +142,9 @@ export async function verifyLineups({
     sides(saved.lineups),
     "the public match page shows the lineup with the stand-in badge",
   );
+  const standInsOfResult = await standInsOf(standIn.id);
   assert.deepEqual(
-    (await standInsOf(standIn.id)).map(({ participantId, startgg, match: { id } }) => [
+    standInsOfResult.map(({ participantId, startgg, match: { id } }) => [
       participantId,
       startgg,
       id,
@@ -171,75 +186,79 @@ export async function verifyLineups({
     staffCookie,
     404,
   );
-  assert.equal((await detailLineups(match.id)).length, 1, "a refused lineup changes nothing");
+  const detailLineupsResult = await detailLineups(match.id);
+  assert.equal(detailLineupsResult.length, 1, "a refused lineup changes nothing");
 
-  const replaced = (
-    await request(
-      "PUT",
-      lineupPath,
-      { lineups: [{ participantId: beta, playerIds: [standIn.id] }] },
-      staffCookie,
-    )
-  ).json(matchLineupsResponse);
+  const response5 = await request(
+    "PUT",
+    lineupPath,
+    { lineups: [{ participantId: beta, playerIds: [standIn.id] }] },
+    staffCookie,
+  );
+
+  const replaced = response5.json(matchLineupsResponse);
 
   assert.deepEqual(
     sides(replaced.lineups),
     [[beta, [[standIn.id, true]]]],
     "a new lineup replaces every previous side",
   );
+  const standInsOfResult2 = await standInsOf(standIn.id);
   assert.deepEqual(
-    (await standInsOf(standIn.id)).map(({ participantId }) => participantId),
+    standInsOfResult2.map(({ participantId }) => participantId),
     [beta],
   );
 
-  const startggCup = (
-    await request(
-      "POST",
-      "/tournaments",
-      {
-        name: "Integration start.gg Lineups",
-        source: "startgg",
-        teamIds: tournament.participants.map(({ team }) => team.id),
-      },
-      staffCookie,
-      201,
-    )
-  ).json(startggCupBody).tournament;
+  const response6 = await request(
+    "POST",
+    "/tournaments",
+    {
+      name: "Integration start.gg Lineups",
+      source: "startgg",
+      teamIds: tournament.participants.map(({ team }) => team.id),
+    },
+    staffCookie,
+    201,
+  );
 
-  const startggMatch = (
-    await request(
-      "POST",
-      `/tournaments/${startggCup.id}/matches`,
-      {
-        name: "Integration start.gg Final",
-        participantIds: startggCup.participants.map(({ id }) => id),
-        beginAt: new Date(Date.now() - 86_400_000).toISOString(),
-        status: "finished",
-      },
-      staffCookie,
-      201,
-    )
-  ).json(z.object({ match: identified })).match;
+  const startggCup = response6.json(startggCupBody).tournament;
 
-  const startggLineups = (
-    await request(
-      "PUT",
-      `/tournaments/matches/${startggMatch.id}/lineups`,
-      { lineups: [{ participantId: startggCup.participants[0].id, playerIds: [standIn.id] }] },
-      staffCookie,
-    )
-  ).json(matchLineupsResponse);
+  const response7 = await request(
+    "POST",
+    `/tournaments/${startggCup.id}/matches`,
+    {
+      name: "Integration start.gg Final",
+      participantIds: startggCup.participants.map(({ id }) => id),
+      beginAt: new Date(Date.now() - 86_400_000).toISOString(),
+      status: "finished",
+    },
+    staffCookie,
+    201,
+  );
+
+  const startggMatch = response7.json(z.object({ match: identified })).match;
+
+  const response8 = await request(
+    "PUT",
+    `/tournaments/matches/${startggMatch.id}/lineups`,
+    { lineups: [{ participantId: startggCup.participants[0].id, playerIds: [standIn.id] }] },
+    staffCookie,
+  );
+
+  const startggLineups = response8.json(matchLineupsResponse);
 
   assert.equal(startggLineups.source, "startgg");
-  const startggDetail = (await request("GET", `/matches/${startggMatch.id}`)).json(matchDetail);
+  const response9 = await request("GET", `/matches/${startggMatch.id}`);
+  const startggDetail = response9.json(matchDetail);
   assert.deepEqual(
     sides(startggDetail.lineups),
     [[startggCup.participants[0].id, [[standIn.id, true]]]],
     "the site shows start.gg lineups",
   );
   assert.equal(startggDetail.match.tournament.source, "startgg", "with the source for the credit");
+  const standInsOfResult3 = await standInsOf(standIn.id);
   assert.deepEqual(
-    (await standInsOf(standIn.id)).map(({ startgg, match: { id } }) => [id, startgg]),
+    standInsOfResult3.map(({ startgg, match: { id } }) => [id, startgg]),
     [
       [match.id, false],
       [startggMatch.id, true],
@@ -269,8 +288,11 @@ export async function verifyLineupProposals({
     { participantId: beta, playerIds: [standIn.id] },
   ];
 
-  const detail = async (): Promise<MatchLineup[]> =>
-    (await request("GET", `/matches/${match.id}`)).json(matchDetail).lineups;
+  const detail = async (): Promise<MatchLineup[]> => {
+    const response10 = await request("GET", `/matches/${match.id}`);
+
+    return response10.json(matchDetail).lineups;
+  };
 
   assert.deepEqual(
     await callTool("set_match_lineups", { matchId: match.id, lineups }, toolFailure),
@@ -315,17 +337,21 @@ export async function verifyLineupProposals({
   assert.deepEqual(await detail(), before, "nothing changes before approval");
   const applied = await review(proposal);
   assert.deepEqual([applied.status, applied.entityId], ["applied", match.id]);
-  assert.deepEqual(
-    bySide((await callTool("get_match_lineups", { matchId: match.id }, lineupsTool)).lineups),
-    {
-      [alpha]: [[player.id, false]],
-      [beta]: [[standIn.id, true]],
-    },
+  const callToolResult = await callTool("get_match_lineups", { matchId: match.id }, lineupsTool);
+  assert.deepEqual(bySide(callToolResult.lineups), {
+    [alpha]: [[player.id, false]],
+    [beta]: [[standIn.id, true]],
+  });
+
+  const response11 = await request(
+    "POST",
+    "/player",
+    { name: "Integration Stand-in Copy" },
+    staffCookie,
+    201,
   );
 
-  const duplicate = (
-    await request("POST", "/player", { name: "Integration Stand-in Copy" }, staffCookie, 201)
-  ).json(createdPlayer).player;
+  const duplicate = response11.json(createdPlayer).player;
 
   await request(
     "PUT",
@@ -345,7 +371,8 @@ export async function verifyLineupProposals({
     sourceUrl,
   });
 
-  assert.equal((await review(merge)).status, "applied");
+  const reviewResult = await review(merge);
+  assert.equal(reviewResult.status, "applied");
   assert.deepEqual(
     bySide(await detail()),
     { [alpha]: [[player.id, false]], [beta]: [[standIn.id, true]] },

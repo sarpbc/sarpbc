@@ -5,11 +5,7 @@ interface Props {
   fallbackToContinent?: boolean;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-  nationalities: null,
-  size: "md",
-  fallbackToContinent: true,
-});
+const { nationalities = null, size = "md", fallbackToContinent = true } = defineProps<Props>();
 
 const sizeClasses = {
   sm: "w-3 h-2",
@@ -17,9 +13,7 @@ const sizeClasses = {
   lg: "w-6 h-4",
 };
 
-interface StringLookup {
-  readonly [key: string]: string;
-}
+type StringLookup = Readonly<Record<string, string>>;
 
 function lookupStringMap(map: StringLookup, key: string): string | undefined {
   for (const [entryKey, value] of Object.entries(map)) {
@@ -222,11 +216,9 @@ const getContinent = (countryCode: string): string => {
 };
 
 const flagToDisplay = computed(() => {
-  if (!props.nationalities) return null;
+  if (!nationalities) return null;
 
-  const nationalitiesArray = Array.isArray(props.nationalities)
-    ? props.nationalities
-    : [props.nationalities];
+  const nationalitiesArray = Array.isArray(nationalities) ? nationalities : [nationalities];
 
   const validNationalities = nationalitiesArray.filter((n) => n && n.trim());
 
@@ -239,7 +231,7 @@ const flagToDisplay = computed(() => {
   const nationalityCounts: Record<string, number> = {};
   const continentCounts: Record<string, number> = {};
 
-  validNationalities.forEach((nationality) => {
+  for (const nationality of validNationalities) {
     const upperNationality = nationality.toUpperCase();
     nationalityCounts[upperNationality] = (nationalityCounts[upperNationality] || 0) + 1;
     const continent = getContinent(upperNationality);
@@ -247,7 +239,7 @@ const flagToDisplay = computed(() => {
     if (continent !== "UNKNOWN") {
       continentCounts[continent] = (continentCounts[continent] || 0) + 1;
     }
-  });
+  }
 
   const totalCount = validNationalities.length;
 
@@ -257,15 +249,17 @@ const flagToDisplay = computed(() => {
     }
   }
 
-  if (!props.fallbackToContinent) {
-    const mostCommonNationality = Object.entries(nationalityCounts).sort(
+  if (!fallbackToContinent) {
+    const mostCommonNationality = Object.entries(nationalityCounts).toSorted(
       ([, a], [, b]) => b - a,
     )[0]?.[0];
 
     return mostCommonNationality?.toLowerCase() || null;
   }
 
-  const mostCommonContinent = Object.entries(continentCounts).sort(([, a], [, b]) => b - a)[0]?.[0];
+  const mostCommonContinent = Object.entries(continentCounts).toSorted(
+    ([, a], [, b]) => b - a,
+  )[0]?.[0];
 
   const continentFlags = {
     EU: "eu",
@@ -280,11 +274,9 @@ const flagToDisplay = computed(() => {
 });
 
 const tooltipText = computed(() => {
-  if (!props.nationalities) return "";
+  if (!nationalities) return "";
 
-  const nationalitiesArray = Array.isArray(props.nationalities)
-    ? props.nationalities
-    : [props.nationalities];
+  const nationalitiesArray = Array.isArray(nationalities) ? nationalities : [nationalities];
 
   const validNationalities = nationalitiesArray.filter((n) => n && n.trim());
 

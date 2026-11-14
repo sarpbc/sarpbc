@@ -1,7 +1,9 @@
 import type { SeasonDetail } from "@sarpbc/types";
 import { beforeEach, describe, expect, it } from "vitest";
 import { SEASON_TEAMS, memorySeasonStore } from "../../../test/season-store.memory";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { SeasonArchiveService } from "./season-archive.service";
 import { SeasonService } from "./season.service";
 
@@ -101,7 +103,8 @@ describe("SeasonArchiveService", () => {
     await expect(archives.removePathEntry(season.id, id, linked.id)).rejects.toBeInstanceOf(
       NotFoundError,
     );
-    expect((await seasons.detail(season.id)).participants[0]?.path).toHaveLength(1);
+    const detailResult = await seasons.detail(season.id);
+    expect(detailResult.participants[0]?.path).toHaveLength(1);
   });
 
   it("publishes the winner, the paths and the awards without staff-only fields", async () => {
@@ -183,6 +186,7 @@ describe("SeasonArchiveService", () => {
     await expect(archives.removeParticipant(season.id, vitality.id)).rejects.toBeInstanceOf(
       NotFoundError,
     );
-    expect((await seasons.detail(season.id)).participants).toEqual([]);
+    const detailResult2 = await seasons.detail(season.id);
+    expect(detailResult2.participants).toEqual([]);
   });
 });

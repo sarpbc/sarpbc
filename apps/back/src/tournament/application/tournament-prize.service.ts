@@ -1,6 +1,7 @@
 import type { PrizeEntry, PrizeEntryPatch, ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
 import { parseDataSourceUrl } from "../../common/domain/data-source";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { assertPrizeDistribution, patchPrizeEntry } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
 import type { CompetitionAfterCommit } from "./after-commit";
@@ -102,12 +103,12 @@ export class TournamentPrizeService {
 
   private async write(
     tournamentId: string,
-    next: (prizes: PrizeWriter) => Promise<PrizeEntry[]>,
+    buildEntries: (prizes: PrizeWriter) => Promise<PrizeEntry[]>,
   ): Promise<TournamentPrizes> {
     await this.transaction.run(async ({ prizes }) => {
       if (!(await prizes.tournamentExists(tournamentId)))
         throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
-      const entries = await next(prizes);
+      const entries = await buildEntries(prizes);
       assertPrizeDistribution(entries);
       assertParticipants(entries, await prizes.participants(tournamentId));
       await prizes.replace(tournamentId, entries);

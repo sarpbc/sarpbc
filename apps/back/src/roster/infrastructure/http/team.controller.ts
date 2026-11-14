@@ -25,12 +25,21 @@ import { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-te
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
 import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
-import { CreateTeamDto } from "./dto/create-team.dto";
-import { UpdateTeamDto } from "./dto/update-team.dto";
-import { TeamAliasDto } from "./dto/team-alias.dto";
-import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
-import { UpdateTeamContractDto } from "./dto/update-team-contract.dto";
-import { ListDirectoryQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { CreateTeamDto, type CreateTeamInput } from "./dto/create-team.dto";
+import { UpdateTeamDto, type UpdateTeamInput } from "./dto/update-team.dto";
+import { TeamAliasDto, type TeamAliasInput } from "./dto/team-alias.dto";
+import {
+  CreateTeamContractDto,
+  type CreateTeamContractInput,
+} from "./dto/create-team-contract.dto";
+import {
+  UpdateTeamContractDto,
+  type UpdateTeamContractInput,
+} from "./dto/update-team-contract.dto";
+import {
+  ListDirectoryQueryDto,
+  type ListDirectoryQueryInput,
+} from "../../../common/infrastructure/http/dto/list-directory-query.dto";
 import { mapTeam, mapTeamAlias } from "./player.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 
@@ -46,7 +55,7 @@ export class TeamController {
   ) {}
 
   @Get()
-  async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryDto) {
+  async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryInput) {
     const [teams, count] = await this.teamService.findAndCount({
       name: query.name,
       start: query.start,
@@ -63,7 +72,7 @@ export class TeamController {
   @RequirePermissions("teams.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
-  async create(@Body({ schema: CreateTeamDto }) dto: CreateTeamDto) {
+  async create(@Body({ schema: CreateTeamDto }) dto: CreateTeamInput) {
     const team = await this.teamService.create(dto);
 
     return { team: mapTeam(team) };
@@ -157,7 +166,7 @@ export class TeamController {
   @Post(":id/contract")
   async createContract(
     @Param("id") id: string,
-    @Body({ schema: CreateTeamContractDto }) dto: CreateTeamContractDto,
+    @Body({ schema: CreateTeamContractDto }) dto: CreateTeamContractInput,
   ) {
     const contract = await this.contractService.createForTeam(id, dto);
 
@@ -170,7 +179,7 @@ export class TeamController {
   async updateContract(
     @Param("id") id: string,
     @Param("contractId") contractId: string,
-    @Body({ schema: UpdateTeamContractDto }) dto: UpdateTeamContractDto,
+    @Body({ schema: UpdateTeamContractDto }) dto: UpdateTeamContractInput,
   ) {
     const contract = await this.contractService.updateForTeam(id, contractId, dto);
 
@@ -190,7 +199,7 @@ export class TeamController {
   @Post(":id/aliases")
   async addAlias(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: TeamAliasDto }) dto: TeamAliasDto,
+    @Body({ schema: TeamAliasDto }) dto: TeamAliasInput,
   ) {
     return { alias: mapTeamAlias(await this.teamAliasService.add(id, dto)) };
   }
@@ -201,7 +210,7 @@ export class TeamController {
   async updateAlias(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("aliasId", ParseUUIDPipe) aliasId: string,
-    @Body({ schema: TeamAliasDto }) dto: TeamAliasDto,
+    @Body({ schema: TeamAliasDto }) dto: TeamAliasInput,
   ) {
     return { alias: mapTeamAlias(await this.teamAliasService.update(id, aliasId, dto)) };
   }
@@ -227,7 +236,7 @@ export class TeamController {
   @RequirePermissions("teams.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch(":id")
-  async update(@Param("id") id: string, @Body({ schema: UpdateTeamDto }) dto: UpdateTeamDto) {
+  async update(@Param("id") id: string, @Body({ schema: UpdateTeamDto }) dto: UpdateTeamInput) {
     const team = await this.teamService.update(id, dto);
 
     return { team: mapTeam(team) };

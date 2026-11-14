@@ -1,12 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import { Player, Team } from "../../../roster/domain/roster";
-import {
-  Match,
-  Tournament,
-  TournamentParticipant,
-  matchPublicSlug,
-} from "../../domain/competition";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import { Player } from "../../../roster/domain/player";
+import { Team } from "../../../roster/domain/team";
+import { Match, matchPublicSlug } from "../../domain/match";
+import { Tournament } from "../../domain/tournament";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import type { MatchWriter } from "../ports";
 import {
   createEmptyBracketInTransaction,
@@ -249,20 +248,20 @@ describe("Manual match corrections", () => {
   });
 });
 
+const syncedMatch = () =>
+  Object.assign(new Match(), {
+    id: "match",
+    pandascoreId: 42,
+    source: "pandascore",
+    numberOfGames: 7,
+    vods: [
+      { game: 1, url: "https://youtu.be/g1", language: "en", source: "youtube" },
+      { game: 5, url: "https://youtu.be/g5", language: "en", source: "youtube" },
+    ],
+  });
+
 describe("Match VOD writes", () => {
   const writer = matchWriterMock();
-
-  const syncedMatch = () =>
-    Object.assign(new Match(), {
-      id: "match",
-      pandascoreId: 42,
-      source: "pandascore",
-      numberOfGames: 7,
-      vods: [
-        { game: 1, url: "https://youtu.be/g1", language: "en", source: "youtube" },
-        { game: 5, url: "https://youtu.be/g5", language: "en", source: "youtube" },
-      ],
-    });
 
   beforeEach(() => vi.resetAllMocks());
 

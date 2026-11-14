@@ -3,7 +3,7 @@ import { watchDebounced } from "@vueuse/core";
 import type { ParticipantPlayer, Player, TournamentFormat } from "@sarpbc/types";
 import { TEAM_SIZE_BY_FORMAT, participantName } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { format, modelValue } = defineProps<{
   modelValue: ParticipantPlayer[][];
   format: TournamentFormat;
 }>();
@@ -18,11 +18,11 @@ const query = ref("");
 const pending = ref(false);
 const results = ref<Player[]>([]);
 
-const size = computed(() => TEAM_SIZE_BY_FORMAT[props.format]);
-const taken = computed(() => new Set(props.modelValue.flat().map(({ id }) => id)));
+const size = computed(() => TEAM_SIZE_BY_FORMAT[format]);
+const taken = computed(() => new Set(modelValue.flat().map(({ id }) => id)));
 
 const incomplete = computed(() => {
-  const last = props.modelValue.at(-1);
+  const last = modelValue.at(-1);
 
   return last && last.length < size.value ? last : null;
 });
@@ -59,15 +59,15 @@ function pick(player: Player) {
   emit(
     "update:modelValue",
     incomplete.value
-      ? [...props.modelValue.slice(0, -1), [...incomplete.value, picked]]
-      : [...props.modelValue, [picked]],
+      ? [...modelValue.slice(0, -1), [...incomplete.value, picked]]
+      : [...modelValue, [picked]],
   );
 }
 
 function remove(index: number) {
   emit(
     "update:modelValue",
-    props.modelValue.filter((_, position) => position !== index),
+    modelValue.filter((_, position) => position !== index),
   );
 }
 </script>

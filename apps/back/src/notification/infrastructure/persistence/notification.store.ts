@@ -10,7 +10,9 @@ export class MikroNotificationStore implements NotificationStore {
     this.rows = em.getRepository<ReplyNotification, ReplyNotificationRepository>(ReplyNotification);
   }
   async findForRecipient(id: string, limit: number) {
-    return (await this.rows.findForRecipient(id, limit)).map((row) => ({
+    const rows = await this.rows.findForRecipient(id, limit);
+
+    return rows.map((row) => ({
       id: row.id,
       createdAt: new Date(row.createdAt),
       readAt: row.readAt ? new Date(row.readAt) : null,

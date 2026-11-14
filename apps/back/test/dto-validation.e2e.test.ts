@@ -1,39 +1,61 @@
+import { SCRIPT_URL } from "./doubles";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
 import { configureApp } from "../src/configure-app";
-import { ListTournamentsQueryDto } from "../src/tournament/infrastructure/http/dto/list-tournaments-query.dto";
-import { ListNotificationsQueryDto } from "../src/notification/infrastructure/http/dto/list-notifications-query.dto";
-import { CreatePostDto } from "../src/forum/infrastructure/http/post/dto/create-post.dto";
-import { UpdateTournamentDto } from "../src/tournament/infrastructure/http/dto/create-tournament.dto";
-import { CreateNewsArticleDto } from "../src/news/infrastructure/http/dto/create-news-article.dto";
+import {
+  ListTournamentsQueryDto,
+  type ListTournamentsQueryInput,
+} from "../src/tournament/infrastructure/http/dto/list-tournaments-query.dto";
+import {
+  ListNotificationsQueryDto,
+  type ListNotificationsQueryInput,
+} from "../src/notification/infrastructure/http/dto/list-notifications-query.dto";
+import {
+  CreatePostDto,
+  type CreatePostInput,
+} from "../src/forum/infrastructure/http/post/dto/create-post.dto";
+import {
+  UpdateTournamentDto,
+  type UpdateTournamentInput,
+} from "../src/tournament/infrastructure/http/dto/create-tournament.dto";
+import {
+  CreateNewsArticleDto,
+  type CreateNewsArticleInput,
+} from "../src/news/infrastructure/http/dto/create-news-article.dto";
+
+function echo<T>(value: T): T {
+  return value;
+}
 
 @Controller()
 class ValidationController {
+  private readonly echo = echo;
+
   @Get("tournaments")
-  tournaments(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryDto) {
-    return query;
+  tournaments(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryInput) {
+    return this.echo(query);
   }
 
   @Get("notifications")
-  notifications(@Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryDto) {
-    return query;
+  notifications(@Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryInput) {
+    return this.echo(query);
   }
 
   @Post("posts")
-  post(@Body({ schema: CreatePostDto }) body: CreatePostDto) {
-    return body;
+  post(@Body({ schema: CreatePostDto }) body: CreatePostInput) {
+    return this.echo(body);
   }
 
   @Post("tournament")
-  tournament(@Body({ schema: UpdateTournamentDto }) body: UpdateTournamentDto) {
-    return body;
+  tournament(@Body({ schema: UpdateTournamentDto }) body: UpdateTournamentInput) {
+    return this.echo(body);
   }
 
   @Post("news")
-  news(@Body({ schema: CreateNewsArticleDto }) body: CreateNewsArticleDto) {
-    return body;
+  news(@Body({ schema: CreateNewsArticleDto }) body: CreateNewsArticleInput) {
+    return this.echo(body);
   }
 }
 
@@ -102,19 +124,22 @@ describe("native Nest Zod validation over Fastify", () => {
     expect(accepted.statusCode).toBe(201);
     expect(accepted.json()).toHaveProperty("translations", [translation]);
 
-    for (const translations of [
-      [{ ...translation, author: "staff" }],
-      [{ ...translation, locale: "de-DE" }],
-      translation,
-    ]) {
-      const rejected = await app.inject({
-        method: "POST",
-        url: "/posts",
-        payload: { ...post, translations },
-      });
+    const rejections = await Promise.all(
+      [
+        [{ ...translation, author: "staff" }],
+        [{ ...translation, locale: "de-DE" }],
+        translation,
+      ].map(
+        async (translations) =>
+          await app.inject({
+            method: "POST",
+            url: "/posts",
+            payload: { ...post, translations },
+          }),
+      ),
+    );
 
-      expect(rejected.statusCode).toBe(400);
-    }
+    for (const rejected of rejections) expect(rejected.statusCode).toBe(400);
   });
 
   it("keeps explicit null clears and rejects duplicate tournament teams", async () => {
@@ -172,7 +197,7 @@ describe("native Nest Zod validation over Fastify", () => {
     expect(rejected.statusCode).toBe(400);
   });
 
-  it.each(["javascript:alert(1)", "data:image/png;base64,AAAA", "not a URL"])(
+  it.each([SCRIPT_URL, "data:image/png;base64,AAAA", "not a URL"])(
     "rejects invalid cover URL %s",
     async (imageUrl) => {
       const response = await app.inject({

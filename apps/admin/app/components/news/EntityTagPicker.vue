@@ -3,7 +3,7 @@ import { watchDebounced } from "@vueuse/core";
 import type { Player, Team } from "@sarpbc/types";
 import { resolveThemedLogoUrl, type NewsEntityTagKind } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { kind, open } = defineProps<{
   kind: NewsEntityTagKind;
   open: boolean;
 }>();
@@ -19,16 +19,16 @@ const reportError = useReportError();
 
 const query = ref("");
 const pending = ref(false);
-const results = ref<Array<Player | Team>>([]);
+const results = ref<(Player | Team)[]>([]);
 
 const title = computed(() =>
-  props.kind === "player"
+  kind === "player"
     ? t("page.news.editor.picker.titlePlayer")
     : t("page.news.editor.picker.titleTeam"),
 );
 
 const placeholder = computed(() =>
-  props.kind === "player"
+  kind === "player"
     ? t("page.news.editor.picker.placeholderPlayer")
     : t("page.news.editor.picker.placeholderTeam"),
 );
@@ -45,8 +45,7 @@ async function runSearch(searchQuery: string) {
   pending.value = true;
 
   try {
-    results.value =
-      props.kind === "player" ? await searchPlayers(trimmed) : await searchTeams(trimmed);
+    results.value = kind === "player" ? await searchPlayers(trimmed) : await searchTeams(trimmed);
   } catch (searchError) {
     results.value = [];
     reportError(searchError);
@@ -56,7 +55,7 @@ async function runSearch(searchQuery: string) {
 }
 
 watch(
-  () => props.open,
+  () => open,
   (isOpen) => {
     if (isOpen) {
       query.value = "";
@@ -77,7 +76,7 @@ function close() {
 }
 
 function itemLogoSrc(item: Player | Team) {
-  if (props.kind === "team") {
+  if (kind === "team") {
     return resolveThemedLogoUrl(item, colorMode.value);
   }
 

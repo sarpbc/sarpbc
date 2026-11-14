@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
-import { CompetitionPrizeQueries, CompetitionPrizeWriter } from "./tournament-prize.store";
+import { CompetitionPrizeQueries } from "./tournament-prize.queries";
+import { CompetitionPrizeWriter } from "./tournament-prize.writer";
 
 function prizeRow(playerCount: number) {
   return {

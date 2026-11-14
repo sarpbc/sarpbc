@@ -63,40 +63,47 @@ export async function verifyViewership({
   const matchPath = `/tournaments/matches/${match.id}/viewership`;
   const eventPath = `/events/${tournament.event.id}/viewership`;
 
-  const publicMatch = async () =>
-    (await request("GET", `/matches/${match.id}`)).json(creditedMatch).match;
+  const publicMatch = async () => {
+    const response = await request("GET", `/matches/${match.id}`);
 
-  const publicEvent = async () =>
-    (await request("GET", `/events/resolve/${tournament.event.slug}`)).json(creditedEvent).event;
+    return response.json(creditedMatch).match;
+  };
+
+  const publicEvent = async () => {
+    const response2 = await request("GET", `/events/resolve/${tournament.event.slug}`);
+
+    return response2.json(creditedEvent).event;
+  };
 
   await request("GET", matchPath, undefined, memberCookie, 403);
   await request("PUT", matchPath, { viewership: ENTRY }, memberCookie, 403);
-  assert.equal((await publicMatch()).viewership, null);
+  const publicMatchResult = await publicMatch();
+  assert.equal(publicMatchResult.viewership, null);
 
-  for (const missing of [
-    { ...ENTRY, sourceName: "" },
-    { ...ENTRY, sourceUrl: "" },
-    { ...ENTRY, sourceUrl: "http://escharts.com/tournaments/rl/integration-cup" },
-    { ...ENTRY, sourceUrl: "https://liquipedia.net/rocketleague/Integration_Cup" },
-    { ...ENTRY, sourceUrl: "https://www.start.gg/tournament/integration-cup" },
-    { ...ENTRY, averageViewers: ENTRY.peakViewers + 1 },
-  ]) {
-    await request("PUT", matchPath, { viewership: missing }, staffCookie, 400);
-  }
+  await Promise.all(
+    [
+      { ...ENTRY, sourceName: "" },
+      { ...ENTRY, sourceUrl: "" },
+      { ...ENTRY, sourceUrl: "http://escharts.com/tournaments/rl/integration-cup" },
+      { ...ENTRY, sourceUrl: "https://liquipedia.net/rocketleague/Integration_Cup" },
+      { ...ENTRY, sourceUrl: "https://www.start.gg/tournament/integration-cup" },
+      { ...ENTRY, averageViewers: ENTRY.peakViewers + 1 },
+    ].map(
+      async (missing) => await request("PUT", matchPath, { viewership: missing }, staffCookie, 400),
+    ),
+  );
 
   const { sourceName: _, ...uncredited } = ENTRY;
   await request("PUT", matchPath, { viewership: uncredited }, staffCookie, 400);
-  assert.equal((await publicMatch()).viewership, null, "a refused entry stores nothing");
+  const publicMatchResult2 = await publicMatch();
+  assert.equal(publicMatchResult2.viewership, null, "a refused entry stores nothing");
 
-  assert.deepEqual(
-    (await request("PUT", matchPath, { viewership: ENTRY }, staffCookie)).json(viewershipResponse),
-    { viewership: SAVED },
-  );
-  assert.deepEqual(
-    (await request("GET", matchPath, undefined, staffCookie)).json(viewershipResponse),
-    { viewership: SAVED },
-  );
-  assert.deepEqual((await publicMatch()).viewership, SAVED, "the site shows the credited numbers");
+  const response3 = await request("PUT", matchPath, { viewership: ENTRY }, staffCookie);
+  assert.deepEqual(response3.json(viewershipResponse), { viewership: SAVED });
+  const response4 = await request("GET", matchPath, undefined, staffCookie);
+  assert.deepEqual(response4.json(viewershipResponse), { viewership: SAVED });
+  const publicMatchResult3 = await publicMatch();
+  assert.deepEqual(publicMatchResult3.viewership, SAVED, "the site shows the credited numbers");
 
   await request(
     "PUT",
@@ -104,16 +111,16 @@ export async function verifyViewership({
     { viewership: { ...ENTRY, averageViewers: null, scope: "official", measuredAt: null } },
     staffCookie,
   );
-  assert.deepEqual((await publicEvent()).viewership, {
+  const publicEventResult = await publicEvent();
+  assert.deepEqual(publicEventResult.viewership, {
     ...SAVED,
     averageViewers: null,
     scope: "official",
     measuredAt: null,
   });
 
-  const listed = (await request("GET", "/events?limit=100")).json(
-    z.object({ events: z.array(z.looseObject({})) }),
-  ).events;
+  const response5 = await request("GET", "/events?limit=100");
+  const listed = response5.json(z.object({ events: z.array(z.looseObject({})) })).events;
 
   assert.ok(
     listed.every((event) => !("viewership" in event)),
@@ -129,8 +136,10 @@ export async function verifyViewership({
   );
   await request("PUT", matchPath, { viewership: null }, staffCookie);
   await request("PUT", eventPath, { viewership: null }, staffCookie);
-  assert.equal((await publicMatch()).viewership, null);
-  assert.equal((await publicEvent()).viewership, null);
+  const publicMatchResult4 = await publicMatch();
+  assert.equal(publicMatchResult4.viewership, null);
+  const publicEventResult2 = await publicEvent();
+  assert.equal(publicEventResult2.viewership, null);
 }
 
 export async function verifyViewershipProposals({
@@ -177,17 +186,17 @@ export async function verifyViewershipProposals({
   });
 
   assert.equal(pending.status, "pending");
+  const response6 = await request("GET", `/matches/${match.id}`);
   assert.equal(
-    (await request("GET", `/matches/${match.id}`)).json(creditedMatch).match.viewership,
+    response6.json(creditedMatch).match.viewership,
     null,
     "nothing changes before approval",
   );
-  assert.equal((await review(pending)).status, "applied");
+  const reviewResult = await review(pending);
+  assert.equal(reviewResult.status, "applied");
   const expected = { ...proposal, measuredAt: null, sourceUrl };
-  assert.deepEqual(
-    (await request("GET", `/matches/${match.id}`)).json(creditedMatch).match.viewership,
-    expected,
-  );
+  const response7 = await request("GET", `/matches/${match.id}`);
+  assert.deepEqual(response7.json(creditedMatch).match.viewership, expected);
   const upcoming = await callTool("get_upcoming_matches", {}, mcpMatches);
 
   const mcpMatch = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? [])].find(
@@ -196,7 +205,7 @@ export async function verifyViewershipProposals({
 
   assert.deepEqual(mcpMatch?.viewership, expected, "MCP reads return sarpbc numbers");
 
-  const startggEntry = { ...expected, peakViewers: 9_000, averageViewers: 6_000 };
+  const startggEntry = { ...expected, peakViewers: 9000, averageViewers: 6000 };
   await request(
     "PUT",
     `/tournaments/matches/${startggMatchId}/viewership`,
@@ -204,7 +213,9 @@ export async function verifyViewershipProposals({
     staffCookie,
   );
 
-  const site = (await request("GET", `/matches/${startggMatchId}`)).json(
+  const response8 = await request("GET", `/matches/${startggMatchId}`);
+
+  const site = response8.json(
     z.object({ match: credited.extend({ tournament: z.object({ source: z.string() }) }) }),
   ).match;
 
@@ -232,9 +243,10 @@ export async function verifyViewershipProposals({
     "MCP reads leave start.gg matches and their numbers out",
   );
 
-  const startggEvent = (await request("GET", `/tournaments/${startggCupId}`)).json(
-    z.object({ tournament: z.object({ event: eventRef }) }),
-  ).tournament.event;
+  const response9 = await request("GET", `/tournaments/${startggCupId}`);
+
+  const startggEvent = response9.json(z.object({ tournament: z.object({ event: eventRef }) }))
+    .tournament.event;
 
   await request(
     "PUT",
@@ -242,11 +254,8 @@ export async function verifyViewershipProposals({
     { viewership: startggEntry },
     staffCookie,
   );
-  assert.deepEqual(
-    (await request("GET", `/events/resolve/${startggEvent.slug}`)).json(creditedEvent).event
-      .viewership,
-    startggEntry,
-  );
+  const response10 = await request("GET", `/events/resolve/${startggEvent.slug}`);
+  assert.deepEqual(response10.json(creditedEvent).event.viewership, startggEntry);
   assert.deepEqual(await callTool("get_event", { idOrSlug: startggEvent.id }, toolFailure), {
     error: true,
   });

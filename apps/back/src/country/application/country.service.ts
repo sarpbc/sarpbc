@@ -1,10 +1,11 @@
 import { countryCode } from "@sarpbc/utils";
 import type { NationalityCount } from "../../roster/application/ports";
 import type { PlayerService } from "../../roster/application/player.service";
-import type { Player, Team } from "../../roster/domain/roster";
-import { NotFoundError } from "../../common/domain/errors";
+import type { Player } from "../../roster/domain/player";
+import type { Team } from "../../roster/domain/team";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { MatchService } from "../../tournament/application/match/match.service";
-import type { Match } from "../../tournament/domain/competition";
+import type { Match } from "../../tournament/domain/match";
 
 export interface CountrySources {
   players: Pick<PlayerService, "nationalities" | "findByNationality">;
@@ -29,7 +30,7 @@ function currentTeams(players: Player[]): Team[] {
 
   for (const { team } of players) if (team) teams.set(team.id, team);
 
-  return [...teams.values()].sort((a, b) => a.name.localeCompare(b.name, "en"));
+  return [...teams.values()].toSorted((a, b) => a.name.localeCompare(b.name, "en"));
 }
 
 export class CountryService {
@@ -39,7 +40,7 @@ export class CountryService {
     return await this.sources.players.nationalities();
   }
 
-  async find(rawCode: string, page: CountryMatchPage): Promise<CountryPage> {
+  async detail(rawCode: string, page: CountryMatchPage): Promise<CountryPage> {
     const code = countryCode(rawCode);
 
     const players =

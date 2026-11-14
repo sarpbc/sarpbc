@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { participantName } from "@sarpbc/utils";
-import type { BracketSectionLayout } from "~/utils/bracket";
+import type { BracketSectionLayout } from "~/utils/bracket/types";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import {
   BRACKET_COLUMN_GAP,
@@ -11,7 +11,7 @@ import {
   bracketMatchLeft,
   bracketMatchTop,
   bracketTeamRowCenterY,
-} from "~/utils/bracket";
+} from "~/utils/bracket/geometry";
 
 const { layout, tournamentId } = defineProps<{
   layout: BracketSectionLayout;

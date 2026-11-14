@@ -18,4 +18,4 @@ export const CreatePostDto = z.strictObject({
     .optional(),
 });
 
-export type CreatePostDto = z.infer<typeof CreatePostDto>;
+export type CreatePostInput = z.infer<typeof CreatePostDto>;

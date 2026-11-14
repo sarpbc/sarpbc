@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { z } from "zod";
+import { mapSequentially } from "../../src/common/application/sequentially.ts";
 import { toolFailure } from "./support.mts";
 import type { CallTool, Request, Review } from "./support.mts";
 
@@ -76,23 +77,32 @@ export async function verifySeasonAwards({
   review,
   player,
 }: SeasonAwardsContext): Promise<void> {
-  const otherPlayer = (
-    await request("POST", "/player", { name: "Season Award Rival" }, staffCookie, 201)
-  ).json(playerBody).player;
+  const response = await request(
+    "POST",
+    "/player",
+    { name: "Season Award Rival" },
+    staffCookie,
+    201,
+  );
+
+  const otherPlayer = response.json(playerBody).player;
 
   await request("POST", "/seasons", { name: "Fake League 2026" }, memberCookie, 403);
 
-  const season = (
-    await request("POST", "/seasons", { name: "Fake League 2026" }, staffCookie, 201)
-  ).json(createdSeason);
+  const response2 = await request(
+    "POST",
+    "/seasons",
+    { name: "Fake League 2026" },
+    staffCookie,
+    201,
+  );
+
+  const season = response2.json(createdSeason);
 
   await request("POST", "/seasons", { name: "Fake League 2026" }, staffCookie, 409);
   await request("GET", "/seasons", undefined, undefined, 401);
-  assert(
-    (await request("GET", "/seasons", undefined, staffCookie))
-      .json(seasonList)
-      .seasons.some(({ id }) => id === season.id),
-  );
+  const response3 = await request("GET", "/seasons", undefined, staffCookie);
+  assert.ok(response3.json(seasonList).seasons.some(({ id }) => id === season.id));
 
   const awardsUrl = `/seasons/${season.id}/awards`;
 
@@ -120,9 +130,8 @@ export async function verifySeasonAwards({
     400,
   );
 
-  const mvp = (await request("POST", awardsUrl, seasonMvp, staffCookie, 201)).json(
-    seasonAwardBody,
-  ).award;
+  const response4 = await request("POST", awardsUrl, seasonMvp, staffCookie, 201);
+  const mvp = response4.json(seasonAwardBody).award;
 
   assert.equal(mvp.presentedBy, "Fake Partner");
   await request("POST", awardsUrl, { ...seasonMvp, playerId: otherPlayer.id }, staffCookie, 409);
@@ -158,14 +167,16 @@ export async function verifySeasonAwards({
   );
   const europe = await callTool("propose_season_award", regional("Europe", player.id));
   assert.equal(europe.status, "pending");
-  assert.equal((await review(europe)).status, "applied");
+  const reviewResult = await review(europe);
+  assert.equal(reviewResult.status, "applied");
 
   const northAmerica = await callTool(
     "propose_season_award",
     regional("North America", otherPlayer.id),
   );
 
-  assert.equal((await review(northAmerica)).status, "applied");
+  const reviewResult2 = await review(northAmerica);
+  assert.equal(reviewResult2.status, "applied");
   assert.deepEqual(
     await callTool("propose_season_award", regional("Europe", otherPlayer.id), toolFailure),
     { error: true },
@@ -186,9 +197,11 @@ export async function verifySeasonAwards({
       ["regional_mvp", "North America", otherPlayer.id],
     ],
   );
-  assert((await callTool("list_seasons", {}, z.array(idRef))).some(({ id }) => id === season.id));
+  const callToolResult = await callTool("list_seasons", {}, z.array(idRef));
+  assert.ok(callToolResult.some(({ id }) => id === season.id));
 
-  const profile = (await request("GET", `/player/${player.id}/awards`)).json(playerSeasonAwards);
+  const response5 = await request("GET", `/player/${player.id}/awards`);
+  const profile = response5.json(playerSeasonAwards);
 
   assert.deepEqual(
     profile.seasonAwards.map(({ awardType, region, season: { name } }) => [
@@ -205,10 +218,8 @@ export async function verifySeasonAwards({
   await request("DELETE", `${awardsUrl}/${mvp.id}`, undefined, staffCookie, 204);
   await request("DELETE", `${awardsUrl}/${mvp.id}`, undefined, staffCookie, 404);
   await request("DELETE", `/seasons/${season.id}`, undefined, staffCookie, 204);
-  assert.deepEqual(
-    (await request("GET", `/player/${player.id}/awards`)).json(playerSeasonAwards).seasonAwards,
-    [],
-  );
+  const response6 = await request("GET", `/player/${player.id}/awards`);
+  assert.deepEqual(response6.json(playerSeasonAwards).seasonAwards, []);
 }
 
 export async function verifySeasonArchives({
@@ -223,14 +234,21 @@ export async function verifySeasonArchives({
   const slug = "fake-archive-2026";
   await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, memberCookie, 403);
 
-  const season = (
-    await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, staffCookie, 201)
-  ).json(createdSeason);
+  const response7 = await request(
+    "POST",
+    "/seasons",
+    { name: "Fake Archive 2026", slug },
+    staffCookie,
+    201,
+  );
+
+  const season = response7.json(createdSeason);
 
   assert.equal(season.slug, slug);
   await request("POST", "/seasons", { name: "Fake Archive copy", slug }, staffCookie, 409);
   await request("GET", "/season-archives/fake-archive-unknown", undefined, undefined, 404);
-  assert.deepEqual((await request("GET", `/season-archives/${slug}`)).json(z.unknown()), {
+  const response8 = await request("GET", `/season-archives/${slug}`);
+  assert.deepEqual(response8.json(z.unknown()), {
     slug,
     name: "Fake Archive 2026",
     format: { summary: null, phases: [] },
@@ -242,27 +260,29 @@ export async function verifySeasonArchives({
   const participantsUrl = `/seasons/${season.id}/participants`;
   await request("POST", participantsUrl, { teamId: team.id }, memberCookie, 403);
 
-  const winner = (
-    await request(
-      "POST",
-      participantsUrl,
-      { teamId: team.id, pathNote: "Fake path." },
-      staffCookie,
-      201,
-    )
-  ).json(z.object({ participant: idRef })).participant;
+  const response9 = await request(
+    "POST",
+    participantsUrl,
+    { teamId: team.id, pathNote: "Fake path." },
+    staffCookie,
+    201,
+  );
+
+  const winner = response9.json(z.object({ participant: idRef })).participant;
 
   await request("POST", participantsUrl, { teamId: team.id }, staffCookie, 409);
   await request("POST", participantsUrl, { teamId: otherTeam.id }, staffCookie, 201);
 
   const pathUrl = `${participantsUrl}/${winner.id}/path`;
 
-  for (const entry of [
-    { label: "Fake Open", result: "Qualified", tournamentId: startggCupId },
-    { label: "Fake Major", result: "1st", tournamentId: tournament.id },
-    { label: "Fake Regional", result: "Top 4" },
-  ])
-    await request("POST", pathUrl, entry, staffCookie, 201);
+  await mapSequentially(
+    [
+      { label: "Fake Open", result: "Qualified", tournamentId: startggCupId },
+      { label: "Fake Major", result: "1st", tournamentId: tournament.id },
+      { label: "Fake Regional", result: "Top 4" },
+    ],
+    async (entry) => await request("POST", pathUrl, entry, staffCookie, 201),
+  );
 
   await request(
     "PATCH",
@@ -277,33 +297,34 @@ export async function verifySeasonArchives({
   );
   await request("DELETE", `${participantsUrl}/${winner.id}`, undefined, staffCookie, 409);
 
-  const detail = (await request("GET", `/seasons/${season.id}`, undefined, staffCookie)).json(
-    seasonDetail,
-  );
+  const response10 = await request("GET", `/seasons/${season.id}`, undefined, staffCookie);
+  const detail = response10.json(seasonDetail);
 
   const staffEntry = detail.participants.find(({ id }) => id === winner.id);
-  assert(staffEntry, "the season lists the winner");
+  assert.ok(staffEntry, "the season lists the winner");
   const staffPath = staffEntry.path;
   assert.deepEqual(
     staffPath.map(({ tournament: linked }) => linked?.source ?? null),
     ["startgg", tournament.source, null],
   );
 
-  const archiveBody = (await request("GET", `/season-archives/${slug}`)).json(z.json());
+  const response11 = await request("GET", `/season-archives/${slug}`);
+  const archiveBody = response11.json(z.json());
   const archive = seasonArchive.parse(archiveBody);
-  assert(archive.winner, "the archive names the winner");
+  assert.ok(archive.winner, "the archive names the winner");
   assert.equal(archive.winner.id, team.id);
   assert.deepEqual(archive.format.phases, [{ name: "Fake splits", description: null }]);
   const publicEntry = archive.participants.find(({ team: { id } }) => id === team.id);
-  assert(publicEntry, "the archive lists the winner");
+  assert.ok(publicEntry, "the archive lists the winner");
   const publicPath = publicEntry.path;
   assert.deepEqual(
     publicPath.map(({ label }) => label),
     ["Fake Major", "Fake Regional"],
   );
-  assert(!JSON.stringify(archiveBody).includes(startggCupId));
-  assert(
-    (await request("GET", "/season-archives"))
+  assert.ok(!JSON.stringify(archiveBody).includes(startggCupId));
+  const response12 = await request("GET", "/season-archives");
+  assert.ok(
+    response12
       .json(seasonArchiveList)
       .seasons.some((summary) => summary.slug === slug && summary.winner?.id === team.id),
   );

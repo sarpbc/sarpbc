@@ -3,6 +3,12 @@ import { isNonEmptyString } from "./text";
 
 export type ThemedLogo = Partial<TeamLogos>;
 
+function present(url: string | null | undefined): string | undefined {
+  const trimmed = url?.trim();
+
+  return isNonEmptyString(trimmed) ? trimmed : undefined;
+}
+
 export function resolveThemedLogoUrl(
   logo: ThemedLogo | null | undefined,
   colorMode: string,
@@ -16,10 +22,4 @@ export function resolveThemedLogoUrl(
   }
 
   return light ?? image ?? dark;
-}
-
-function present(url: string | null | undefined): string | undefined {
-  const trimmed = url?.trim();
-
-  return isNonEmptyString(trimmed) ? trimmed : undefined;
 }

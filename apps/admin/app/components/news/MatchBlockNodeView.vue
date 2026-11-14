@@ -4,15 +4,15 @@ import type { NodeViewProps } from "@tiptap/vue-3";
 import { newsMatchBlockFromAttrs } from "@sarpbc/utils";
 import { matchBlockNodeAttrs } from "~/utils/editor/matchBlockAttrs";
 
-const props = defineProps<NodeViewProps>();
+const { node, updateAttributes, selected, deleteNode } = defineProps<NodeViewProps>();
 
 const { t } = useI18n();
 const editMatchBlock = useEditMatchBlock();
 
-const block = computed(() => newsMatchBlockFromAttrs(props.node.attrs));
+const block = computed(() => newsMatchBlockFromAttrs(node.attrs));
 
 function edit() {
-  editMatchBlock(block.value, (next) => props.updateAttributes(matchBlockNodeAttrs(next)));
+  editMatchBlock(block.value, (next) => updateAttributes(matchBlockNodeAttrs(next)));
 }
 </script>
 
@@ -20,7 +20,7 @@ function edit() {
   <NodeViewWrapper
     as="div"
     class="my-3 flex flex-col gap-2"
-    :class="{ 'ring-2 ring-primary ring-offset-2 ring-offset-default': props.selected }"
+    :class="{ 'ring-2 ring-primary ring-offset-2 ring-offset-default': selected }"
     contenteditable="false"
     data-drag-handle
   >
@@ -39,9 +39,9 @@ function edit() {
         variant="subtle"
         icon="i-lucide-trash-2"
         :label="t('page.news.editor.matches.remove')"
-        @click="props.deleteNode()"
+        @click="deleteNode()"
       />
     </div>
-    <NewsMatchBlockPreview v-bind="props.node.attrs" />
+    <NewsMatchBlockPreview v-bind="node.attrs" />
   </NodeViewWrapper>
 </template>

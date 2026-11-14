@@ -1,12 +1,13 @@
 import { vi } from "vitest";
 import { isRedistributable } from "../src/common/domain/data-source";
 import type { CountrySources } from "../src/country/application/country.service";
-import { Player, Team } from "../src/roster/domain/roster";
+import { Player } from "../src/roster/domain/player";
+import { Team } from "../src/roster/domain/team";
 import type {
   MatchListKind,
   MatchListQueryOptions,
 } from "../src/tournament/application/match/match-list-filters";
-import type { Match } from "../src/tournament/domain/competition";
+import type { Match } from "../src/tournament/domain/match";
 import { careerMatch, kc } from "./career-fixtures";
 
 export const vitality = Object.assign(new Team(), {

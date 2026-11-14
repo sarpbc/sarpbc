@@ -8,6 +8,4 @@ export class Migration20261102220000_endFinishedMatches extends Migration {
       `update "match" set "end_at" = "updated_at" where "status" = 'finished' and "end_at" is null;`,
     );
   }
-
-  override down(): void | Promise<void> {}
 }

@@ -5,4 +5,4 @@ export const ListNotificationsQueryDto = PaginationQueryDto.extend({
   limit: z.coerce.number().int().min(1).max(50).default(30),
 });
 
-export type ListNotificationsQueryDto = z.infer<typeof ListNotificationsQueryDto>;
+export type ListNotificationsQueryInput = z.infer<typeof ListNotificationsQueryDto>;

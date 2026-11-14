@@ -22,6 +22,66 @@ export interface DoubleEliminationSplit {
   lower: TournamentDetailMatch[];
 }
 
+function propagateLowerFromWinnerParents(
+  matches: TournamentDetailMatch[],
+  matchIds: Set<string>,
+  lowerIds: Set<string>,
+  upperIds: Set<string>,
+): boolean {
+  let changed = false;
+
+  for (const match of matches) {
+    if (upperIds.has(match.id) || getBracketSectionFromName(match.name) === "upper") {
+      continue;
+    }
+
+    const winnerParents = getWinnerParentIds(match, matchIds);
+
+    if (winnerParents.some((parentId) => lowerIds.has(parentId)) && !lowerIds.has(match.id)) {
+      lowerIds.add(match.id);
+      upperIds.delete(match.id);
+      changed = true;
+    }
+  }
+
+  return changed;
+}
+
+function propagateLowerFromLinks(
+  matches: TournamentDetailMatch[],
+  matchIds: Set<string>,
+  matchById: Map<string, TournamentDetailMatch>,
+  lowerIds: Set<string>,
+  upperIds: Set<string>,
+): boolean {
+  let changed = false;
+
+  for (const match of matches) {
+    if (lowerIds.has(match.id) || upperIds.has(match.id)) {
+      continue;
+    }
+
+    for (const parentId of getWinnerParentIdsFromLinks(match)) {
+      if (!lowerIds.has(parentId) || !matchIds.has(parentId)) {
+        continue;
+      }
+
+      const parent = matchById.get(parentId);
+
+      if (getBracketSectionFromName(parent?.name) === "upper") {
+        continue;
+      }
+
+      if (!lowerIds.has(match.id)) {
+        lowerIds.add(match.id);
+        changed = true;
+      }
+    }
+  }
+
+  return changed;
+}
+
 /**
  * PandaScore double-elim split: upper bracket stays isolated; lower progression and
  * cross-bracket finals share the combined grid. Match names are used when PandaScore
@@ -57,46 +117,9 @@ export function splitDoubleEliminationMatches(
   let changed = true;
 
   while (changed) {
-    changed = false;
-
-    for (const match of matches) {
-      if (upperIds.has(match.id) || getBracketSectionFromName(match.name) === "upper") {
-        continue;
-      }
-
-      const winnerParents = getWinnerParentIds(match, matchIds);
-
-      if (winnerParents.some((parentId) => lowerIds.has(parentId))) {
-        if (!lowerIds.has(match.id)) {
-          lowerIds.add(match.id);
-          upperIds.delete(match.id);
-          changed = true;
-        }
-      }
-    }
-
-    for (const match of matches) {
-      if (lowerIds.has(match.id) || upperIds.has(match.id)) {
-        continue;
-      }
-
-      for (const parentId of getWinnerParentIdsFromLinks(match)) {
-        if (!lowerIds.has(parentId) || !matchIds.has(parentId)) {
-          continue;
-        }
-
-        const parent = matchById.get(parentId);
-
-        if (getBracketSectionFromName(parent?.name) === "upper") {
-          continue;
-        }
-
-        if (!lowerIds.has(match.id)) {
-          lowerIds.add(match.id);
-          changed = true;
-        }
-      }
-    }
+    const fedByWinners = propagateLowerFromWinnerParents(matches, matchIds, lowerIds, upperIds);
+    const fedByLinks = propagateLowerFromLinks(matches, matchIds, matchById, lowerIds, upperIds);
+    changed = fedByWinners || fedByLinks;
   }
 
   for (const match of matches) {
@@ -165,9 +188,9 @@ export function buildDoubleEliminationCombinedLayout(
         columns.set(matchId, firstUnnamedColumn + depth);
       }
 
-      unnamedFinals.forEach((match, index) => {
+      for (const [index, match] of unnamedFinals.entries()) {
         columns.set(match.id, firstUnnamedColumn + progressionRoundCount + index);
-      });
+      }
     } else {
       const progressionTargetMax = Math.max(
         0,
@@ -181,9 +204,10 @@ export function buildDoubleEliminationCombinedLayout(
       }
 
       const firstFinalColumn = MAX_DOUBLE_ELIM_COMBINED_COLUMNS - finalColumnCount;
-      unnamedFinals.forEach((match, index) => {
+
+      for (const [index, match] of unnamedFinals.entries()) {
         columns.set(match.id, firstFinalColumn + index);
-      });
+      }
     }
   }
 
@@ -206,6 +230,44 @@ export function buildDoubleEliminationCombinedLayout(
   return finalizeSectionLayout(lowerMatches, layoutMatches, maxColumn);
 }
 
+interface UpperAnchor {
+  column: number | null;
+  row: number | null;
+}
+
+function findUpperAnchor(
+  upperMatch: TournamentDetailMatch,
+  allMatches: TournamentDetailMatch[],
+  lowerPositionById: Map<string, BracketLayoutMatch>,
+): UpperAnchor {
+  let column: number | null = getUpperColumnFromName(upperMatch.name);
+  let row: number | null = null;
+
+  for (const child of allMatches) {
+    const childPosition = lowerPositionById.get(child.id);
+
+    if (!childPosition) {
+      continue;
+    }
+
+    for (const link of child.previousMatches ?? []) {
+      if (link.previousMatch !== upperMatch.id) {
+        continue;
+      }
+
+      if (link.type === "loser") {
+        return { column: childPosition.column, row: childPosition.row };
+      }
+
+      if (row === null) {
+        ({ column, row } = childPosition);
+      }
+    }
+  }
+
+  return { column, row };
+}
+
 export function buildUnifiedDoubleEliminationLayout(
   upperMatches: TournamentDetailMatch[],
   lowerMatches: TournamentDetailMatch[],
@@ -222,42 +284,14 @@ export function buildUnifiedDoubleEliminationLayout(
     (lowerSectionLayout?.matches ?? []).map((match) => [match.matchId, match]),
   );
 
-  const upperPlacements: Array<{ match: TournamentDetailMatch; column: number; row: number }> = [];
+  const upperPlacements: { match: TournamentDetailMatch; column: number; row: number }[] = [];
 
   for (const upperMatch of sortMatchesByBeginAt(upperMatches)) {
-    let anchorColumn: number | null = getUpperColumnFromName(upperMatch.name);
-    let anchorRow: number | null = null;
-    let foundLoserAnchor = false;
-
-    for (const child of allMatches) {
-      const childPosition = lowerPositionById.get(child.id);
-
-      if (!childPosition) {
-        continue;
-      }
-
-      for (const link of child.previousMatches ?? []) {
-        if (link.previousMatch !== upperMatch.id) {
-          continue;
-        }
-
-        if (link.type === "loser") {
-          anchorColumn = childPosition.column;
-          anchorRow = childPosition.row;
-          foundLoserAnchor = true;
-          break;
-        }
-
-        if (anchorRow === null) {
-          anchorColumn = childPosition.column;
-          anchorRow = childPosition.row;
-        }
-      }
-
-      if (foundLoserAnchor) {
-        break;
-      }
-    }
+    const { column: anchorColumn, row: anchorRow } = findUpperAnchor(
+      upperMatch,
+      allMatches,
+      lowerPositionById,
+    );
 
     const column = anchorColumn ?? 0;
     const row = Math.max(0, (anchorRow ?? 0) - UPPER_TO_LOWER_ROW_GAP);
@@ -266,13 +300,9 @@ export function buildUnifiedDoubleEliminationLayout(
 
   const takenUpperRows = new Map<number, number[]>();
 
-  const sortedUpperPlacements = sortMatchesByBeginAt(
-    upperPlacements.map((placement) => placement.match),
-  ).map((match) => upperPlacements.find((placement) => placement.match.id === match.id)!);
-
   const upperLayoutMatches: BracketLayoutMatch[] = [];
 
-  for (const placement of sortedUpperPlacements) {
+  for (const placement of upperPlacements) {
     const takenRows = takenUpperRows.get(placement.column) ?? [];
     const row = nextAvailableRow(placement.row, takenRows);
     takenRows.push(row);

@@ -1,36 +1,36 @@
 import type { ContractRole, Player, PlayerContract } from "@sarpbc/types";
 
-export type CreatePlayerDto = {
+export interface CreatePlayerDto {
   name: string;
   firstName?: string;
   lastName?: string;
   nationality?: string;
   birthday?: string;
   imageUrl?: string;
-};
+}
 
-export type UpdatePlayerDto = {
+export interface UpdatePlayerDto {
   name?: string;
   firstName?: string;
   lastName?: string;
   nationality?: string;
   birthday?: string;
   imageUrl?: string;
-};
+}
 
-type CreatePlayerContractDto = {
+interface CreatePlayerContractDto {
   teamId: string;
   role: ContractRole;
   startDate: string;
   endDate?: string | null;
-};
+}
 
-type UpdatePlayerContractDto = {
+interface UpdatePlayerContractDto {
   teamId?: string;
   role?: ContractRole;
   startDate?: string;
   endDate?: string | null;
-};
+}
 
 export async function getAllPlayers(query: {
   limit: number;

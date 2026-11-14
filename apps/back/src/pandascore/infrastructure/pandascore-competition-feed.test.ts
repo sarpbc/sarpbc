@@ -11,10 +11,7 @@ interface StandingRow {
 }
 
 function respond(status: number, body: StandingRow[] | { error: string }) {
-  return new Response(JSON.stringify(body), {
-    status,
-    headers: { "content-type": "application/json" },
-  });
+  return Response.json(body, { status });
 }
 
 describe("PandascoreCompetitionFeed standings", () => {
