@@ -11,11 +11,11 @@ const defaultDirectory = path.resolve(
 const migrationPattern = /^Migration(\d{14})(?:_[A-Za-z0-9]+)?\.ts$/;
 const snapshotPattern = /^\.snapshot-[^/]+\.json$/;
 
-function timestampOf(name) {
+function timestampOf(name: string): string | undefined {
   return migrationPattern.exec(name)?.[1];
 }
 
-function baseMigrationNames(directory, baseRef) {
+function baseMigrationNames(directory: string, baseRef: string): string[] | undefined {
   try {
     execFileSync("git", ["rev-parse", "--verify", "--quiet", `${baseRef}^{commit}`], {
       cwd: directory,
@@ -36,7 +36,7 @@ function baseMigrationNames(directory, baseRef) {
     .filter((name) => timestampOf(name));
 }
 
-export function migrationViolations(directory = defaultDirectory, baseRef = "") {
+export function migrationViolations(directory = defaultDirectory, baseRef = ""): string[] {
   const files = readdirSync(directory).sort();
   const names = files.filter((name) => timestampOf(name));
 
@@ -86,7 +86,7 @@ export function migrationViolations(directory = defaultDirectory, baseRef = "") 
     for (const name of names.filter((name) => !baseNames.has(name))) {
       const timestamp = timestampOf(name);
 
-      if (timestamp <= newestBase && !missingTimestamps.has(timestamp)) {
+      if (timestamp !== undefined && timestamp <= newestBase && !missingTimestamps.has(timestamp)) {
         violations.push(
           `Migration ${name} is not newer than ${newestBase}, the newest migration on ${baseRef}. Regenerate it after updating the branch so it runs after the migrations already on ${baseRef}.`,
         );

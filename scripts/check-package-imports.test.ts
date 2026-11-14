@@ -3,9 +3,12 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { frameworkViolations } from "./check-package-imports.mjs";
+import { frameworkViolations } from "./check-package-imports.ts";
 
-function packageWith(files, manifest = {}) {
+function packageWith(
+  files: Record<string, string>,
+  manifest: { dependencies?: Record<string, string> } = {},
+): string {
   const directory = mkdtempSync(join(tmpdir(), "package-imports-"));
   mkdirSync(join(directory, "src"));
   writeFileSync(join(directory, "package.json"), JSON.stringify(manifest));

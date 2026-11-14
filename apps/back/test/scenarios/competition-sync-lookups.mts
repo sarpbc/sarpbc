@@ -1,5 +1,26 @@
 import assert from "node:assert/strict";
-import { verifyCountries } from "./countries.mjs";
+import type { UpsertTournamentCommand } from "../../src/tournament/application/feed.ts";
+import { verifyCountries } from "./countries.mts";
+import type { Application, Orm, Payload, Request, RequestContextType } from "./support.mts";
+
+interface StageView {
+  id: string;
+  source: string;
+  event: { slug: string; name: string };
+  league: { id: string };
+}
+
+interface IdRef {
+  id: string;
+}
+
+export interface CompetitionSyncContext {
+  app: Application;
+  orm: Orm;
+  request: Request;
+  staffCookie: string;
+  RequestContext: RequestContextType;
+}
 
 export async function verifyCompetitionSyncLookups({
   app,
@@ -7,16 +28,26 @@ export async function verifyCompetitionSyncLookups({
   request,
   staffCookie,
   RequestContext,
-}) {
+}: CompetitionSyncContext): Promise<void> {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
   const sync = app.get(CompetitionSyncService);
-  const run = (work) => RequestContext.create(orm.em.fork(), work);
+
+  function run<T>(work: () => T): T {
+    return RequestContext.create(orm.em.fork(), work);
+  }
+
   const league = { pandascoreId: 9701, name: "Lookup League", slug: "lookup-league" };
-  const upsert = (command) => run(() => sync.upsertTournament({ league, ...command }));
-  const view = async (id) => (await request("GET", `/tournaments/${id}`)).json().tournament;
-  const eventSlugOf = async (tournament) => (await view(tournament.id)).event.slug;
+
+  const upsert = (command: Omit<UpsertTournamentCommand, "league">) =>
+    run(() => sync.upsertTournament({ league, ...command }));
+
+  const view = async (id: string): Promise<StageView> =>
+    (await request("GET", `/tournaments/${id}`)).json<{ tournament: StageView }>().tournament;
+
+  const eventSlugOf = async (tournament: IdRef): Promise<string> =>
+    (await view(tournament.id)).event.slug;
 
   const backfilled = await upsert({
     pandascoreId: 9711,
@@ -72,7 +103,7 @@ export async function verifyCompetitionSyncLookups({
       staffCookie,
       201,
     )
-  ).json().tournament;
+  ).json<{ tournament: StageView }>().tournament;
 
   assert.equal(manualEvent.event.name, "Lookup League Group C");
 
@@ -105,7 +136,7 @@ export async function verifyCompetitionSyncLookups({
       staffCookie,
       201,
     )
-  ).json().tournament;
+  ).json<{ tournament: StageView }>().tournament;
 
   const counterpart = await upsert({
     pandascoreId: 9715,
@@ -128,10 +159,14 @@ export async function verifyCompetitionSyncLookups({
     endAt: "2026-05-02T00:00:00Z",
   }));
 
-  const twins = [];
+  const twins: StageView[] = [];
 
   for (const body of ambiguous)
-    twins.push((await request("POST", "/tournaments", body, staffCookie, 201)).json().tournament);
+    twins.push(
+      (await request("POST", "/tournaments", body, staffCookie, 201)).json<{
+        tournament: StageView;
+      }>().tournament,
+    );
 
   const separate = await upsert({
     pandascoreId: 9716,
@@ -148,16 +183,25 @@ export async function verifyCompetitionSyncLookups({
   for (const twin of twins) assert.equal((await view(twin.id)).source, "manual");
 }
 
-export async function verifyPandascoreAdoption({ app, orm, request, staffCookie, RequestContext }) {
+export async function verifyPandascoreAdoption({
+  app,
+  orm,
+  request,
+  staffCookie,
+  RequestContext,
+}: CompetitionSyncContext): Promise<void> {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
   const { Player } = await import("../../src/roster/infrastructure/persistence/player.entities.ts");
   const { randomUUID } = await import("node:crypto");
   const sync = app.get(CompetitionSyncService);
-  const run = (work) => RequestContext.create(orm.em.fork(), work);
 
-  const importPlayer = (pandascoreId, slug) =>
+  function run<T>(work: () => T): T {
+    return RequestContext.create(orm.em.fork(), work);
+  }
+
+  const importPlayer = (pandascoreId: number, slug: string) =>
     run(() =>
       sync.applyIncident({
         id: pandascoreId,
@@ -168,11 +212,11 @@ export async function verifyPandascoreAdoption({ app, orm, request, staffCookie,
       }),
     );
 
-  const imported = (pandascoreId) => orm.em.fork().findOneOrFail(Player, { pandascoreId });
+  const imported = (pandascoreId: number) => orm.em.fork().findOneOrFail(Player, { pandascoreId });
 
   const legacy = (
     await request("POST", "/player", { name: "Adoption Legacy" }, staffCookie, 201)
-  ).json().player;
+  ).json<{ player: { id: string; slug: string } }>().player;
 
   await importPlayer(9951, legacy.slug);
   assert.equal(
@@ -189,6 +233,7 @@ export async function verifyPandascoreAdoption({ app, orm, request, staffCookie,
       name: "Adoption Startgg",
       slug: "adoption-startgg",
       source: "startgg",
+      status: "active",
     }),
   );
   await em.flush();
@@ -209,7 +254,7 @@ export async function verifyRedistributableScope({
   request,
   staffCookie,
   RequestContext,
-}) {
+}: CompetitionSyncContext): Promise<void> {
   const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
 
   const { TournamentPrizeService } =
@@ -217,20 +262,27 @@ export async function verifyRedistributableScope({
 
   const matches = app.get(MatchService);
   const prizes = app.get(TournamentPrizeService);
-  const run = (work) => RequestContext.create(orm.em.fork(), work);
 
-  const created = async (path, body) =>
-    (await request("POST", path, body, staffCookie, 201)).json();
+  function run<T>(work: () => T): T {
+    return RequestContext.create(orm.em.fork(), work);
+  }
 
-  const alpha = (await created("/team", { name: "Scope Alpha" })).team.id;
-  const beta = (await created("/team", { name: "Scope Beta" })).team.id;
+  async function created<T>(path: string, body: Payload): Promise<T> {
+    return (await request("POST", path, body, staffCookie, 201)).json<T>();
+  }
 
-  const finishedMatchOf = async (source) => {
-    const { tournament } = await created("/tournaments", {
-      name: `Scope ${source} Cup`,
-      source,
-      teamIds: [alpha, beta],
-    });
+  const alpha = (await created<{ team: IdRef }>("/team", { name: "Scope Alpha" })).team.id;
+  const beta = (await created<{ team: IdRef }>("/team", { name: "Scope Beta" })).team.id;
+
+  const finishedMatchOf = async (source: string): Promise<string> => {
+    const { tournament } = await created<{ tournament: { id: string; participants: IdRef[] } }>(
+      "/tournaments",
+      {
+        name: `Scope ${source} Cup`,
+        source,
+        teamIds: [alpha, beta],
+      },
+    );
 
     await created(`/tournaments/${tournament.id}/matches`, {
       name: `Scope ${source} Final`,
@@ -249,7 +301,7 @@ export async function verifyRedistributableScope({
     );
 
     assert.equal(
-      response.json().prizes[0].sourceUrl,
+      response.json<{ prizes: { sourceUrl: string }[] }>().prizes[0].sourceUrl,
       sourceUrl,
       "a prize keeps the source staff entered",
     );
@@ -260,7 +312,7 @@ export async function verifyRedistributableScope({
   const manualCup = await finishedMatchOf("manual");
   const startggCup = await finishedMatchOf("startgg");
 
-  const finishedCups = async (options) => {
+  const finishedCups = async (options: { redistributableOnly: boolean }): Promise<string[]> => {
     const [rows, total] = await run(() => matches.list("results", { teamId: alpha, ...options }));
     assert.equal(total, rows.length, "the total counts the rows that are returned");
 
@@ -277,7 +329,7 @@ export async function verifyRedistributableScope({
     "redistributable lists never carry start.gg matches",
   );
 
-  const earned = async (redistributableOnly) =>
+  const earned = async (redistributableOnly: boolean) =>
     (await run(() => prizes.teamEarnings(alpha, { redistributableOnly }))).totals;
 
   assert.deepEqual(await earned(false), [{ currency: "USD", amount: 2000 }]);
