@@ -136,6 +136,6 @@ describe("names in force on the date", () => {
 
     expect(toMatch(match).participants[0]?.team?.name).toBe("Fixture Now");
     expect(toTournament(tournament).participants[0]?.team?.name).toBe("Fixture Origins");
-    expect(toMatchSlug(match)).toMatch(/^fixture-now-vs-opponent-/);
+    expect(toMatchSlug(match)).toMatch(/^fixture-now-vs-opponent-/u);
   });
 });

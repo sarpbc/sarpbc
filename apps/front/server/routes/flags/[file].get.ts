@@ -7,7 +7,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
  */
 export default defineEventHandler((event) => {
   const code = getRouterParam(event, "file")
-    ?.match(/^(?<code>[a-z-]+)\.svg$/i)
+    ?.match(/^(?<code>[a-z-]+)\.svg$/iu)
     ?.groups?.code?.toLowerCase();
 
   const name = `${code}-4x3`;

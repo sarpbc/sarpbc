@@ -11,18 +11,18 @@ export const TEAM_LOGO_PIXELS = 512;
 const PNG_SIGNATURE = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
 
 const UNSAFE_SVG_PATTERNS: [RegExp, string][] = [
-  [/<!DOCTYPE|<!ENTITY/i, "a DOCTYPE or entity declaration"],
-  [/<script[\s>/]/i, "a script element"],
-  [/<foreignObject[\s>/]/i, "a foreignObject element"],
-  [/<(?:iframe|embed|object|audio|video)[\s>/]/i, "an embedded element"],
-  [/\son[a-z]+\s*=/i, "an event handler attribute"],
-  [/javascript:/i, "a javascript: URL"],
+  [/<!DOCTYPE|<!ENTITY/iu, "a DOCTYPE or entity declaration"],
+  [/<script[\s>/]/iu, "a script element"],
+  [/<foreignObject[\s>/]/iu, "a foreignObject element"],
+  [/<(?:iframe|embed|object|audio|video)[\s>/]/iu, "an embedded element"],
+  [/\son[a-z]+\s*=/iu, "an event handler attribute"],
+  [/javascript:/iu, "a javascript: URL"],
   [
-    /(?:href|src)\s*=\s*(?!["']?\s*(?:#|data:image\/(?:png|jpeg|webp|gif)[;,]))/i,
+    /(?:href|src)\s*=\s*(?!["']?\s*(?:#|data:image\/(?:png|jpeg|webp|gif)[;,]))/iu,
     "an external reference",
   ],
-  [/url\(\s*(?!["']?\s*#)/i, "an external url() reference"],
-  [/@import/i, "a stylesheet import"],
+  [/url\(\s*(?!["']?\s*#)/iu, "an external url() reference"],
+  [/@import/iu, "a stylesheet import"],
 ];
 
 export function teamLogoField(variant: TeamLogoVariant): "logoLightUrl" | "logoDarkUrl" {
@@ -122,7 +122,7 @@ export function detectTeamLogoFormat(bytes: Uint8Array): TeamLogoFormat {
 
   const head = new TextDecoder().decode(bytes.subarray(0, 1024));
 
-  if (/^<svg[\s>]/i.test(skipSvgPrologue(head))) {
+  if (/^<svg[\s>]/iu.test(skipSvgPrologue(head))) {
     return "svg";
   }
 

@@ -12,13 +12,13 @@ export interface ViewershipScope {
 }
 
 export interface ViewershipTransaction {
-  run<T>(work: (scope: ViewershipScope) => Promise<T>): Promise<T>;
+  run: <T>(work: (scope: ViewershipScope) => Promise<T>) => Promise<T>;
 }
 
 interface LoadedOwner {
   viewership: Viewership | null;
   redistributable: boolean;
-  save(viewership: Viewership | null): Promise<void>;
+  save: (viewership: Viewership | null) => Promise<void>;
 }
 
 async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promise<LoadedOwner> {

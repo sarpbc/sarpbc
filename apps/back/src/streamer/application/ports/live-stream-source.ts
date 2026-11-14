@@ -6,5 +6,5 @@ export interface SourceStream {
 }
 
 export interface LiveStreamSource {
-  findLiveRocketLeague(logins: readonly string[]): Promise<SourceStream[]>;
+  findLiveRocketLeague: (logins: readonly string[]) => Promise<SourceStream[]>;
 }

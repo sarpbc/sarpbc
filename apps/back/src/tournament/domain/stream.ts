@@ -93,7 +93,7 @@ export function pandascoreStreams(official: readonly OfficialMatchStream[]): Str
   return official
     .toSorted((a, b) => Number(b.main) - Number(a.main))
     .flatMap((stream) => {
-      const parsed = parseStreamUrl(stream.url.trim().replace(/^http:\/\//i, "https://"));
+      const parsed = parseStreamUrl(stream.url.trim().replace(/^http:\/\//iu, "https://"));
       const [language = ""] = stream.language.trim().toLowerCase().split("-");
 
       if (!parsed.ok || !isIso6391Code(language)) {
@@ -104,7 +104,7 @@ export function pandascoreStreams(official: readonly OfficialMatchStream[]): Str
         {
           url: parsed.url,
           platform: parsed.platform,
-          channel: parsed.channel ?? new URL(parsed.url).hostname.replace(/^www\./, ""),
+          channel: parsed.channel ?? new URL(parsed.url).hostname.replace(/^www\./u, ""),
           language,
           kind: "official" as const,
           source: "pandascore" as const,

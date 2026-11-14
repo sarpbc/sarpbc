@@ -93,7 +93,7 @@ function playedAt(raw: string | undefined, hasTimezone: boolean | undefined): Da
   }
 
   // Without a timezone Ballchasing gives the uploader's wall clock; reading it as UTC keeps the order.
-  const value = hasTimezone === true ? raw : `${raw.replace(/(?:Z|[+-]\d\d:\d\d)$/, "")}Z`;
+  const value = hasTimezone === true ? raw : `${raw.replace(/(?:Z|[+-]\d\d:\d\d)$/u, "")}Z`;
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;

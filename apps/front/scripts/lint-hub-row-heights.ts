@@ -13,13 +13,13 @@ const SCAN_ROOTS = [path.join(FRONT_ROOT, "app")];
 const FILE_EXTENSIONS = new Set([".vue", ".ts", ".tsx", ".js", ".jsx"]);
 
 const RULES = [
-  { id: "h-11.25", pattern: /\bh-11\.25\b/ },
-  { id: "h-11.5", pattern: /\bh-11\.5\b/ },
-  { id: "h-8.25", pattern: /\bh-8\.25\b/ },
-  { id: "h-67", pattern: /\bh-67(?:\.\d+)?\b/ },
-  { id: "mt-11", pattern: /\bmt-11\b/ },
-  { id: "leading-5.5", pattern: /\bleading-5\.5\b/ },
-  { id: "py-[", pattern: /\bpy-\[/ },
+  { id: "h-11.25", pattern: /\bh-11\.25\b/u },
+  { id: "h-11.5", pattern: /\bh-11\.5\b/u },
+  { id: "h-8.25", pattern: /\bh-8\.25\b/u },
+  { id: "h-67", pattern: /\bh-67(?:\.\d+)?\b/u },
+  { id: "mt-11", pattern: /\bmt-11\b/u },
+  { id: "leading-5.5", pattern: /\bleading-5\.5\b/u },
+  { id: "py-[", pattern: /\bpy-\[/u },
 ];
 
 interface Violation {

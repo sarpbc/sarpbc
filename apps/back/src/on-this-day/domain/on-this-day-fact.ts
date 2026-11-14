@@ -67,7 +67,7 @@ export function parseFactSourceUrl(value: string | null): string | null {
 
   const url = new URL(raw);
 
-  if (!/^https?:$/.test(url.protocol) || url.username || url.password) {
+  if (!/^https?:$/u.test(url.protocol) || url.username || url.password) {
     throw new InvalidInputError("The source must be an http(s) URL.");
   }
 

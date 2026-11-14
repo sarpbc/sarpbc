@@ -151,7 +151,7 @@ describe(TweetEmbedService, () => {
       authorImageUrl: null,
       media: [],
     });
-    expect(embed.text).toMatch(/^Give a warm welcome to the boys!/);
+    expect(embed.text).toMatch(/^Give a warm welcome to the boys!/u);
   });
 
   it.each([{}, { __typename: "TweetTombstone" }])(

@@ -2,8 +2,8 @@ import slugify from "slugify";
 import { isNonEmptyString } from "./text";
 
 const MAX_SLUG_LENGTH = 120;
-const YEAR_PATTERN = /\b(?:19|20)\d{2}\b/;
-export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const YEAR_PATTERN = /\b(?:19|20)\d{2}\b/u;
+export const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 
 export interface MatchSlugInput {
   teamNames: readonly [string | null | undefined, string | null | undefined];
@@ -30,8 +30,8 @@ export function toSlug(...parts: (string | null | undefined)[]): string {
     .join(" ");
 
   const slug = slugify(text, { lower: true, strict: true })
-    .replaceAll(/-{2,}/g, "-")
-    .replaceAll(/^-|-$/g, "");
+    .replaceAll(/-{2,}/gu, "-")
+    .replaceAll(/^-|-$/gu, "");
 
   return truncateAtHyphen(slug);
 }
@@ -77,13 +77,13 @@ function roundLabel(matchName: string | null | undefined): string | null {
     return name.slice(0, colon);
   }
 
-  return /tbd/i.test(name) ? null : name;
+  return /tbd/iu.test(name) ? null : name;
 }
 
 function knownTeamName(name: string | null | undefined): string | null {
   const trimmed = name?.trim();
 
-  return isNonEmptyString(trimmed) && !/^tbd$/i.test(trimmed) ? trimmed : null;
+  return isNonEmptyString(trimmed) && !/^tbd$/iu.test(trimmed) ? trimmed : null;
 }
 
 export function isKnownTeamName(name: string | null | undefined): boolean {

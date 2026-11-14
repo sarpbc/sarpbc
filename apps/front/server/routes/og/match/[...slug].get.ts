@@ -12,8 +12,8 @@ import {
 export default defineEventHandler(async (event) => {
   const path = getRequestURL(event).pathname;
   const segment = path.split("/").pop() ?? "";
-  const pngMatch = /^(?<id>.+)\.png$/i.exec(segment);
-  const svgMatch = /^(?<id>.+)\.svg$/i.exec(segment);
+  const pngMatch = /^(?<id>.+)\.png$/iu.exec(segment);
+  const svgMatch = /^(?<id>.+)\.svg$/iu.exec(segment);
 
   if (isNonEmptyString(svgMatch?.groups?.id)) {
     await sendRedirect(event, `/og/match/${svgMatch.groups.id}.png`, 301);

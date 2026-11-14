@@ -21,14 +21,14 @@ export interface NewsMatchTag {
 }
 
 const MATCH_TAG_SOURCE = String.raw`::matches\{([^{}]*)\}[ \t]*\r?\n::|::?matches\{([^{}]*)\}`;
-const MATCH_TAG_PATTERN = new RegExp(`^(?:${MATCH_TAG_SOURCE})`);
-const MATCH_TAG_GLOBAL_PATTERN = new RegExp(MATCH_TAG_SOURCE, "g");
+const MATCH_TAG_PATTERN = new RegExp(`^(?:${MATCH_TAG_SOURCE})`, "u");
+const MATCH_TAG_GLOBAL_PATTERN = new RegExp(MATCH_TAG_SOURCE, "gu");
 const MATCH_BLOCK_OPENER = "::matches{";
 const MATCH_INLINE_OPENER = ":matches{";
-const ATTRS_PATTERN = /^(?:\w+="[^"]*"(?:[ \t]+\w+="[^"]*")*)?$/;
-const LIMIT_PATTERN = /^[1-9]\d*$/;
-const BACKTICK_RUN_PATTERN = /`+/g;
-const FENCE_PATTERN = /^ {0,3}(?<fence>`{3,}|~{3,})/;
+const ATTRS_PATTERN = /^(?:\w+="[^"]*"(?:[ \t]+\w+="[^"]*")*)?$/u;
+const LIMIT_PATTERN = /^[1-9]\d*$/u;
+const BACKTICK_RUN_PATTERN = /`+/gu;
+const FENCE_PATTERN = /^ {0,3}(?<fence>`{3,}|~{3,})/u;
 const MAX_TAG_INDENT = 3;
 const SELECTORS = ["match", "ids", "tournament", "team"] as const;
 const ATTR_NAMES = new Set<string>([...SELECTORS, "limit"]);

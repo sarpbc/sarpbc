@@ -16,7 +16,7 @@ export interface OwnedStreams {
 interface LoadedOwner extends OwnedStreams {
   redistributable: boolean;
   tournamentIds: string[];
-  save(streams: Stream[]): Promise<void>;
+  save: (streams: Stream[]) => Promise<void>;
 }
 
 async function loadOwner(scope: CompetitionWriteScope, owner: StreamOwner): Promise<LoadedOwner> {

@@ -9,7 +9,7 @@ export type Payload = InjectOptions["payload"];
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface JsonResponse extends Omit<LightMyRequestResponse, "json"> {
-  json<T>(schema: z.ZodType<T>): T;
+  json: <T>(schema: z.ZodType<T>) => T;
 }
 
 export type Request = (

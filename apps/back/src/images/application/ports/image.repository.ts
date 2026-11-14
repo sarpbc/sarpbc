@@ -1,7 +1,7 @@
 import type { ImageMetadata } from "../../domain/image";
 
 export interface ImageRepository {
-  register(imageId: string, url: string): Promise<ImageMetadata>;
+  register: (imageId: string, url: string) => Promise<ImageMetadata>;
 }
 
 export interface ImageUploadUrl {
@@ -10,6 +10,6 @@ export interface ImageUploadUrl {
 }
 
 export interface ImageHost {
-  createUploadUrl(): Promise<ImageUploadUrl>;
-  imageUrl(imageId: string): string;
+  createUploadUrl: () => Promise<ImageUploadUrl>;
+  imageUrl: (imageId: string) => string;
 }

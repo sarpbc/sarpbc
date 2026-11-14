@@ -38,13 +38,13 @@ describe("bracket links", () => {
   it("refuses links on a stage without a bracket", () => {
     expect(() => {
       assertBracketLinks("final", [...semis], { ...stage(), hasBracket: false });
-    }).toThrow(/hasBracket/);
+    }).toThrow(/hasBracket/u);
   });
 
   it("refuses a previous match from another stage", () => {
     expect(() => {
       assertBracketLinks("final", [{ previousMatchId: "elsewhere", type: "winner" }], stage());
-    }).toThrow(/same stage/);
+    }).toThrow(/same stage/u);
   });
 
   it("refuses more than two incoming links", () => {
@@ -54,7 +54,7 @@ describe("bracket links", () => {
         [...semis, { previousMatchId: "third", type: "winner" }],
         stage(),
       );
-    }).toThrow(/at most 2/);
+    }).toThrow(/at most 2/u);
   });
 
   it("refuses the same previous match twice and a match feeding itself", () => {
@@ -70,7 +70,7 @@ describe("bracket links", () => {
     }).toThrow(InvalidInputError);
     expect(() => {
       assertBracketLinks("final", [{ previousMatchId: "final", type: "winner" }], stage());
-    }).toThrow(/itself/);
+    }).toThrow(/itself/u);
   });
 
   it("refuses a cycle", () => {
@@ -80,7 +80,7 @@ describe("bracket links", () => {
     );
     expect(() => {
       assertBracketLinks("semi-1", [{ previousMatchId: "final", type: "loser" }], linked);
-    }).toThrow(/cycle/);
+    }).toThrow(/cycle/u);
   });
 
   it("refuses a winner already sent to another match", () => {
@@ -90,7 +90,7 @@ describe("bracket links", () => {
     );
     expect(() => {
       assertBracketLinks("third", [{ previousMatchId: "semi-1", type: "winner" }], linked);
-    }).toThrow(/already goes/);
+    }).toThrow(/already goes/u);
     expect(() => {
       assertBracketLinks(
         "third",
@@ -130,13 +130,13 @@ describe("PandaScore bracket data", () => {
   it("refuses a PandaScore match or a match of a PandaScore stage", () => {
     expect(() => {
       assertManualBracketMatch({ ...manual, pandascoreId: 12 });
-    }).toThrow(/PandaScore/);
+    }).toThrow(/PandaScore/u);
     expect(() => {
       assertManualBracketMatch({ ...manual, source: "pandascore" });
-    }).toThrow(/PandaScore/);
+    }).toThrow(/PandaScore/u);
     expect(() => {
       assertManualBracketMatch({ ...manual, tournament: { source: "pandascore" } });
-    }).toThrow(/PandaScore/);
+    }).toThrow(/PandaScore/u);
   });
 });
 

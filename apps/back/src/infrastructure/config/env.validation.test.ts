@@ -42,7 +42,7 @@ describe("validateEnv", () => {
   });
 
   it("fails when a required secret is missing", () => {
-    expect(() => validate({ ...requiredEnv, JWT_KEY: undefined })).toThrow(/JWT_KEY/);
+    expect(() => validate({ ...requiredEnv, JWT_KEY: undefined })).toThrow(/JWT_KEY/u);
   });
 
   it("reads an absent secret file as missing", () => {
@@ -51,7 +51,7 @@ describe("validateEnv", () => {
   });
 
   it("rejects an invalid PORT", () => {
-    expect(() => validateEnv({ PORT: "nope" })).toThrow(/Invalid environment/);
+    expect(() => validateEnv({ PORT: "nope" })).toThrow(/Invalid environment/u);
   });
 
   it("accepts an absent or empty IndexNow key without enabling submissions", () => {
@@ -84,7 +84,7 @@ describe("validateEnv", () => {
     const invalid = "short-token";
     const failure = failureOf({ INTERNAL_API_TOKEN: invalid });
 
-    expect(failure).toMatch(/INTERNAL_API_TOKEN/);
+    expect(failure).toMatch(/INTERNAL_API_TOKEN/u);
     expect(failure).not.toContain(invalid);
   });
 
@@ -92,7 +92,7 @@ describe("validateEnv", () => {
     const invalid = "invalid/indexnow/credential";
     const failure = failureOf({ INDEXNOW_KEY: invalid });
 
-    expect(failure).toMatch(/INDEXNOW_KEY/);
+    expect(failure).toMatch(/INDEXNOW_KEY/u);
     expect(failure).not.toContain(invalid);
   });
 });

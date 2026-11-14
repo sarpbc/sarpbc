@@ -43,7 +43,7 @@ export interface McpTool {
   readonly name: string;
   readonly description: string;
   readonly inputSchema: Record<string, z.ZodType>;
-  run(user: PatUser, input: ToolArguments): Promise<CallToolResult>;
+  run: (user: PatUser, input: ToolArguments) => Promise<CallToolResult>;
 }
 
 function listOr(items: readonly string[]): string {

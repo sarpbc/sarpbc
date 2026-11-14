@@ -5,8 +5,8 @@ export function toUpsertSerieCommand(dto: SerieDto): UpsertSerieCommand {
   return { pandascoreId: dto.id, fullName: dto.full_name, year: dto.year };
 }
 
-const MERGED = /^Merged with (?<id>[0-9]+)$/;
-const REPLACED = /^Replaced by (?<entity>serie|tournament) (?<id>[0-9]+)$/;
+const MERGED = /^Merged with (?<id>[0-9]+)$/u;
+const REPLACED = /^Replaced by (?<entity>serie|tournament) (?<id>[0-9]+)$/u;
 
 /** PandaScore deletion reasons: "Merged with <id>", "Replaced by serie|tournament <id>", "Model deleted". */
 export function parseProviderDeletion(reason: string | null): ProviderDeletion {

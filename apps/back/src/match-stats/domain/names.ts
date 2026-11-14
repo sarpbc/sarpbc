@@ -6,7 +6,7 @@ function tokens(value: string): string[] {
     .normalize("NFKD")
     .replaceAll(/\p{M}/gu, "")
     .toLowerCase()
-    .split(/[^a-z0-9]+/)
+    .split(/[^a-z0-9]+/u)
     .filter(Boolean);
 }
 

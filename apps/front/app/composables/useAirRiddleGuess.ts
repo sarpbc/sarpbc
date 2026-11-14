@@ -1,4 +1,4 @@
-const GUESS_PATTERN = /[^A-Z0-9 ]/g;
+const GUESS_PATTERN = /[^A-Z0-9 ]/gu;
 
 export function sanitizeAirRiddleGuess(value: string, maxLength: number): string {
   return value.toUpperCase().replaceAll(GUESS_PATTERN, "").slice(0, maxLength);

@@ -30,7 +30,7 @@ void describe("toSlug", () => {
     const slug = toSlug(Array.from({ length: 40 }, (_, i) => `word${i}`).join(" "));
     assert.ok(slug.length <= 120);
     assert.equal(slug.endsWith("-"), false);
-    assert.ok(slug.split("-").every((word) => /^word\d+$/.test(word)));
+    assert.ok(slug.split("-").every((word) => /^word\d+$/u.test(word)));
   });
 });
 
@@ -93,7 +93,7 @@ void describe("matchSlug", () => {
     const input = { matchName: "Final", ...worlds };
     const swapped = matchSlug({ ...input, teamNames: ["Team Falcons", "Karmine Corp"] });
     assert.equal(swapped, matchSlug({ ...input, teamNames: ["Karmine Corp", "Team Falcons"] }));
-    assert.match(swapped, /^karmine-corp-vs-team-falcons-/);
+    assert.match(swapped, /^karmine-corp-vs-team-falcons-/u);
   });
 
   void it("falls back to the round label when a team is missing", () => {

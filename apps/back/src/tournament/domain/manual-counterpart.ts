@@ -26,9 +26,9 @@ export type CounterpartMatch =
 function nameKey(name: string): string {
   const tokens = name
     .normalize("NFKD")
-    .replaceAll(/[̀-ͯ]/g, "")
+    .replaceAll(/[̀-ͯ]/gu, "")
     .toLowerCase()
-    .split(/[^a-z0-9]+/)
+    .split(/[^a-z0-9]+/u)
     .filter(Boolean);
 
   return [...new Set(tokens)].toSorted().join(" ");

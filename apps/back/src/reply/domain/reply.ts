@@ -26,7 +26,7 @@ interface ReplyTargetSpec {
   inputKey: "postId" | "newsArticleId" | "matchId";
   label: string;
   sortOrder: "asc" | "desc";
-  describe(fields: ReplyTargetFields): { id: string; label: string; path: string } | null;
+  describe: (fields: ReplyTargetFields) => { id: string; label: string; path: string } | null;
 }
 
 function replyTargetSpec<F extends keyof ReplyTargetFields>(spec: {

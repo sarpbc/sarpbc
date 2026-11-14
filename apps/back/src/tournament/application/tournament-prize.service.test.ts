@@ -108,7 +108,7 @@ describe(TournamentPrizeService, () => {
 
     await expect(
       service.setDistribution("cup", [{ ...entry, playerIds: ["player-a", "player-c"] }]),
-    ).rejects.toThrow(/player-c/);
+    ).rejects.toThrow(/player-c/u);
     expect(writer.replace).not.toHaveBeenCalled();
   });
 

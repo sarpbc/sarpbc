@@ -3,9 +3,9 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 export const BALLCHASING_HOST = "ballchasing.com";
 
 const REFS = {
-  group: { id: /^[a-z0-9][a-z0-9-]{2,99}$/i, normalize: (id: string) => id },
+  group: { id: /^[a-z0-9][a-z0-9-]{2,99}$/iu, normalize: (id: string) => id },
   replay: {
-    id: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    id: /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu,
     normalize: (id: string) => id.toLowerCase(),
   },
 } as const;
@@ -23,7 +23,7 @@ export function parseBallchasingRef(kind: BallchasingRefKind, input: string): st
   const value = input.trim();
   let candidate = value;
 
-  if (/^https?:\/\//i.test(value)) {
+  if (/^https?:\/\//iu.test(value)) {
     let url: URL;
 
     try {
@@ -34,7 +34,7 @@ export function parseBallchasingRef(kind: BallchasingRefKind, input: string): st
 
     const [pathKind, id] = url.pathname.split("/").filter(Boolean);
 
-    if (url.hostname.replace(/^www\./, "") !== BALLCHASING_HOST || pathKind !== kind || !id) {
+    if (url.hostname.replace(/^www\./u, "") !== BALLCHASING_HOST || pathKind !== kind || !id) {
       throw invalidRef(kind);
     }
 

@@ -66,7 +66,7 @@ describe(AuthService, () => {
       );
 
       await expect(service.signIn({ email: "a@b.com", password: "wrong" })).rejects.toThrow(
-        /Email or password is incorrect/,
+        /Email or password is incorrect/u,
       );
     });
 

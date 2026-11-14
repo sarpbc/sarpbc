@@ -14,9 +14,9 @@ export interface PublicDownloadOptions {
 }
 
 interface HttpsRequest {
-  once(event: "response", listener: (response: IncomingMessage) => void): this;
-  once(event: "error", listener: (error: Error) => void): this;
-  end(): void;
+  once: ((event: "response", listener: (response: IncomingMessage) => void) => HttpsRequest) &
+    ((event: "error", listener: (error: Error) => void) => HttpsRequest);
+  end: () => void;
 }
 
 /** The Node primitives a download needs, so a caller supplies them (`https.request`, `dns.promises.lookup`). */
@@ -157,13 +157,13 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
     throw new InvalidInputError("The image URL must use the default https port.");
   }
 
-  const host = url.hostname.replaceAll(/^\[|\]$/g, "");
+  const host = url.hostname.replaceAll(/^\[|\]$/gu, "");
 
   if (isIP(host) && !isPublicAddress(host)) {
     throw privateAddressError();
   }
 
-  if (/(?:^|\.)localhost\.?$/i.test(host)) {
+  if (/(?:^|\.)localhost\.?$/iu.test(host)) {
     throw privateAddressError();
   }
 

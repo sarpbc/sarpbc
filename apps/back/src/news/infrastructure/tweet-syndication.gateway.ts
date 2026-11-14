@@ -21,7 +21,7 @@ const tweetSchema = z.object({
   display_text_range: z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative()]),
   user: z.object({
     name: z.string(),
-    screen_name: z.string().regex(/^[A-Za-z0-9_]{1,15}$/),
+    screen_name: z.string().regex(/^[A-Za-z0-9_]{1,15}$/u),
     profile_image_url_https: imageUrl.optional().catch(undefined),
   }),
   mediaDetails: z
@@ -65,7 +65,7 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
     // X's syndication endpoint requires this token, also used by vercel/react-tweet.
     url.searchParams.set(
       "token",
-      ((Number(parsed.id) / 1e15) * Math.PI).toString(36).replaceAll(/(?:0+|\.)/g, ""),
+      ((Number(parsed.id) / 1e15) * Math.PI).toString(36).replaceAll(/(?:0+|\.)/gu, ""),
     );
 
     let response: Response;

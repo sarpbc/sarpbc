@@ -256,7 +256,7 @@ describe("Competition synchronization", () => {
       pandascoreId: 99,
     });
     await expect(service.upsertTournament({ pandascoreId: 99, name: "Provider" })).rejects.toThrow(
-      /source=manual/,
+      /source=manual/u,
     );
     expect(store.tournamentWriter.save).not.toHaveBeenCalled();
   });

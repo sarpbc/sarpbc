@@ -10,7 +10,7 @@ function roleFromPandascore(role: string | null): ContractRole {
     role
       ?.trim()
       .toLowerCase()
-      .replaceAll(/[\s-]+/g, "_") ??
+      .replaceAll(/[\s-]+/gu, "_") ??
     ""
   ) {
     case "coach":

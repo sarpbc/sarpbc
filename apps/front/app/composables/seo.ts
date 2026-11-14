@@ -84,7 +84,7 @@ export const useSarpbcSeo = () => {
     const twitterCard = opts?.twitterCard ?? "summary_large_image";
 
     useHead(() => {
-      const cleanPath = route.path.replace(/^\/fr(?=\/|$)/, "") || "/";
+      const cleanPath = route.path.replace(/^\/fr(?=\/|$)/u, "") || "/";
 
       const alternateLinks = locales.value.map((loc) => ({
         rel: "alternate" as const,

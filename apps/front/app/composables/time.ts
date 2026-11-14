@@ -35,8 +35,8 @@ export function formatLocaleTimeAgo(date: Date) {
 
   const messages: UseTimeAgoMessages = {
     justNow: t("timeAgo.just-now"),
-    past: (n) => (/\d/.test(n) ? t("timeAgo.ago", [n]) : n),
-    future: (n) => (/\d/.test(n) ? t("timeAgo.in", [n]) : n),
+    past: (n) => (/\d/u.test(n) ? t("timeAgo.ago", [n]) : n),
+    future: (n) => (/\d/u.test(n) ? t("timeAgo.in", [n]) : n),
     month: (n, past) => {
       if (n !== 1) {
         return `${n} ${t(`timeAgo.month${pf(past)}`, n)}`;

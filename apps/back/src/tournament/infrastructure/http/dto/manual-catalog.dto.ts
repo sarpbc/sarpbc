@@ -8,7 +8,7 @@ const url = z
   .string()
   .trim()
   .max(255)
-  .pipe(z.url({ protocol: /^https?$/, message: "Enter a valid http(s) URL." }));
+  .pipe(z.url({ protocol: /^https?$/u, message: "Enter a valid http(s) URL." }));
 
 const someField = (fields: Record<string, string | null | undefined>) =>
   Object.values(fields).some((value) => value !== undefined);

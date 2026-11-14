@@ -13,7 +13,7 @@ export interface Size {
   height: number;
 }
 
-const PPM_HEADER = /^P6\s+(?<width>\d+)\s+(?<height>\d+)\s+255\s/;
+const PPM_HEADER = /^P6\s+(?<width>\d+)\s+(?<height>\d+)\s+255\s/u;
 const MAX_PPM_HEADER = 64;
 
 export function scaleRegion(region: Region, reference: Size, frame: Frame): Region {

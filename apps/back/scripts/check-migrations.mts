@@ -7,8 +7,8 @@ const defaultDirectory = path.resolve(
   "../src/infrastructure/database/migrations",
 );
 
-const migrationPattern = /^Migration(?<timestamp>\d{14})(?:_[A-Za-z0-9]+)?\.ts$/;
-const snapshotPattern = /^\.snapshot-[^/]+\.json$/;
+const migrationPattern = /^Migration(?<timestamp>\d{14})(?:_[A-Za-z0-9]+)?\.ts$/u;
+const snapshotPattern = /^\.snapshot-[^/]+\.json$/u;
 
 function timestampOf(name: string): string | undefined {
   return migrationPattern.exec(name)?.groups?.timestamp;
@@ -30,7 +30,7 @@ function baseMigrationNames(directory: string, baseRef: string): string[] | unde
   });
 
   return output
-    .split(/\r?\n/)
+    .split(/\r?\n/u)
     .map((file) => path.posix.basename(file))
     .filter((name) => timestampOf(name) !== undefined);
 }

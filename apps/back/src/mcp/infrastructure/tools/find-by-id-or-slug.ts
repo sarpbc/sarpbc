@@ -2,8 +2,8 @@ import { isUuid } from "../../../common/domain/entity-ref";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 
 export interface IdOrSlugLookup<Entity> {
-  findById(id: string): Promise<Entity | null>;
-  findBySlug(slug: string): Promise<Entity | null>;
+  findById: (id: string) => Promise<Entity | null>;
+  findBySlug: (slug: string) => Promise<Entity | null>;
 }
 
 /**

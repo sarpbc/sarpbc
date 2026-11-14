@@ -34,7 +34,7 @@ function readAutoImportNames(): string[] {
       process.exit(1);
     }
 
-    const names = [...source.matchAll(/^\s*const (?<name>\$?\w+):/gm)].map((match) => match[1]);
+    const names = [...source.matchAll(/^\s*const (?<name>\$?\w+):/gmu)].map((match) => match[1]);
 
     if (names.length === 0) {
       console.error(`No auto-import names found in ${file}. Nuxt changed its format?`);

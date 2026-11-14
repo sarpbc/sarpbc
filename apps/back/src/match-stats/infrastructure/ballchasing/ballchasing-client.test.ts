@@ -152,10 +152,10 @@ describe("BallchasingClient.groupReplays", () => {
   it("explains a missing group, a rejected key and an unexpected body", async () => {
     await expect(
       client(() => json({ error: "not found" }, 404)).instance.groupReplays("nope"),
-    ).rejects.toThrow(/group does not exist/);
+    ).rejects.toThrow(/group does not exist/u);
     await expect(
       client(() => json({ error: "invalid api key" }, 401)).instance.groupReplays("pilot"),
-    ).rejects.toThrow(/BALLCHASING_API_KEY/);
+    ).rejects.toThrow(/BALLCHASING_API_KEY/u);
     await expect(
       client((url) =>
         url.includes("/groups/") ? json({}) : json({ unexpected: true }),
@@ -186,7 +186,7 @@ describe("BallchasingClient.groupReplays", () => {
       sleep: async () => {},
     });
 
-    await expect(instance.groupReplays("pilot")).rejects.toThrow(/could not be reached/);
+    await expect(instance.groupReplays("pilot")).rejects.toThrow(/could not be reached/u);
   });
 });
 
@@ -347,7 +347,7 @@ describe("BallchasingClient.replayStats", () => {
   it("reports a replay that disappeared", async () => {
     const { instance } = client(() => json({ error: "not found" }, 404));
 
-    await expect(instance.replayStats("gone")).rejects.toThrow(/no longer available/);
+    await expect(instance.replayStats("gone")).rejects.toThrow(/no longer available/u);
   });
 
   it("spaces replay calls 500 ms apart", async () => {
@@ -404,7 +404,7 @@ describe("BallchasingClient rate limiting", () => {
   it("fails clearly once the retries are exhausted", async () => {
     const { instance, fetch, sleep } = client(() => json({ error: "rate limited" }, 429));
 
-    await expect(instance.replayStats("r1")).rejects.toThrow(/rate limit reached/);
+    await expect(instance.replayStats("r1")).rejects.toThrow(/rate limit reached/u);
     expect(fetch).toHaveBeenCalledTimes(6);
     expect(sleep.mock.calls).toStrictEqual([[1000], [2000], [4000], [8000], [16_000]]);
   });

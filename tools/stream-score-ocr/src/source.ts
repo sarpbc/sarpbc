@@ -4,7 +4,7 @@ import { isLiquipediaSourceHost } from "@sarpbc/utils/source-host";
 import { readPpmFrames } from "./frame.ts";
 import type { Frame } from "./frame.ts";
 
-const URL_INPUT = /^[a-z][a-z0-9+.-]*:\/\//i;
+const URL_INPUT = /^[a-z][a-z0-9+.-]*:\/\//iu;
 
 export interface SourceSettings {
   input: string;

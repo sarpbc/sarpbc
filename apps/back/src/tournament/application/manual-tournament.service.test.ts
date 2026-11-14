@@ -226,7 +226,7 @@ describe(ManualTournamentService, () => {
       service.update("ewc", {
         rosters: [{ teamId: "ikkaku", playerIds: ["yujin"], sourceUrl: "https://blast.tv/rl" }],
       }),
-    ).rejects.toThrow(/BLAST/);
+    ).rejects.toThrow(/BLAST/u);
   });
 
   it("rejects a roster for a team that is not participating", async () => {
@@ -292,9 +292,9 @@ describe(ManualTournamentService, () => {
   });
 
   it("refuses to change the bracket of a PandaScore stage", async () => {
-    await expect(service.update("ewc", { hasBracket: true })).rejects.toThrow(/PandaScore/);
+    await expect(service.update("ewc", { hasBracket: true })).rejects.toThrow(/PandaScore/u);
     await expect(service.update("ewc", { hasBracket: false, imageUrl: null })).rejects.toThrow(
-      /PandaScore/,
+      /PandaScore/u,
     );
     expect(writer.save).not.toHaveBeenCalled();
   });
@@ -313,7 +313,7 @@ describe(ManualTournamentService, () => {
       hasBracket: true,
       matches: [{ id: "final", previousMatches: [{ previousMatchId: "semi", type: "winner" }] }],
     });
-    await expect(service.update("ewc", { hasBracket: false })).rejects.toThrow(/bracket links/);
+    await expect(service.update("ewc", { hasBracket: false })).rejects.toThrow(/bracket links/u);
     matchWriter.bracket.mockResolvedValue({
       hasBracket: true,
       matches: [{ id: "final", previousMatches: [] }],

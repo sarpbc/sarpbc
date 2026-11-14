@@ -18,13 +18,13 @@ const anchorSchema = z.object({
 });
 
 const templateSchema = z.object({
-  char: z.string().regex(/^[0-9:+]$/),
-  rows: z.array(z.string().regex(/^[.#]+$/)).min(1),
+  char: z.string().regex(/^[0-9:+]$/u),
+  rows: z.array(z.string().regex(/^[.#]+$/u)).min(1),
 });
 
 const overlaySchema = z
   .object({
-    id: z.string().regex(/^[a-z0-9-]+$/),
+    id: z.string().regex(/^[a-z0-9-]+$/u),
     name: z.string().min(1),
     reference: z.object({ width: pixel.min(1), height: pixel.min(1) }),
     text: z.object({

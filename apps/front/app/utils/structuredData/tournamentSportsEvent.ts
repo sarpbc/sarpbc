@@ -168,7 +168,7 @@ const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
 function countryPlace(country: string | null | undefined): PlaceLd | undefined {
   const code = country?.trim().toUpperCase();
 
-  if (!isNonEmptyString(code) || !/^[A-Z]{2}$/.test(code)) {
+  if (!isNonEmptyString(code) || !/^[A-Z]{2}$/u.test(code)) {
     return undefined;
   }
 

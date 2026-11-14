@@ -23,7 +23,7 @@ import { R2UploadDto, R2UploadUrlDto } from "./dto/r2-upload-url.dto";
 import type { R2UploadInput, R2UploadUrlInput } from "./dto/r2-upload-url.dto";
 import type { StorageService } from "../../application/storage.service";
 
-const IMAGE_FILE_TYPE = new RegExp(`^(${IMAGE_CONTENT_TYPES.join("|")})$`);
+const IMAGE_FILE_TYPE = new RegExp(`^(${IMAGE_CONTENT_TYPES.join("|")})$`, "u");
 
 @UseGuards(AuthGuard, PermissionGuard)
 @RequirePermissions("images.manage")
