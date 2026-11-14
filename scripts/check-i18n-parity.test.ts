@@ -3,9 +3,10 @@ import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
-import { parityViolations } from "./check-i18n-parity.mjs";
+import { parityViolations } from "./check-i18n-parity.ts";
+import type { LocaleValue } from "./check-i18n-parity.ts";
 
-function locales(english, french) {
+function locales(english: LocaleValue, french: LocaleValue): string {
   const directory = mkdtempSync(join(tmpdir(), "i18n-parity-"));
   writeFileSync(join(directory, "en-US.json"), JSON.stringify(english));
   writeFileSync(join(directory, "fr-FR.json"), JSON.stringify(french));

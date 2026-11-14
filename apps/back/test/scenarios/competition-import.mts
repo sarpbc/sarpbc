@@ -1,6 +1,81 @@
 import assert from "node:assert/strict";
+import type { TournamentQueries } from "../../src/tournament/application/ports.ts";
+import type { Application, Orm, Request, RequestContextType } from "./support.mts";
 
-export async function verifyCompetitionImport({ app, orm, request, staffCookie, RequestContext }) {
+interface ParticipantView {
+  id: string;
+  team: { id: string; slug: string };
+  players: { id: string }[];
+}
+
+interface MatchView {
+  id: string;
+  name: string;
+  winnerId: string | null;
+  results: { participant: string; score: number }[];
+  previousMatches: { previousMatch: string }[];
+}
+
+interface TournamentView {
+  source: string;
+  slug: string;
+  name: string;
+  country: string;
+  imageUrl: string | null;
+  event: { slug: string; name: string };
+  league: { id: string };
+  winner: { id: string };
+  participants: ParticipantView[];
+  matches: MatchView[];
+}
+
+interface IdRow {
+  id: string;
+}
+
+interface PlayerView {
+  slug: string;
+  team: { id: string } | null;
+}
+
+interface EventView {
+  event: { stages: IdRow[] };
+}
+
+interface MatchDetail {
+  match: {
+    id: string;
+    winner: { id: string };
+    officialStreams: { language: string }[];
+    results: { participant: { id: string }; score: number }[];
+  };
+  headToHead: { totalMeetings: number };
+  teamForms: Record<string, { record: { wins: number } }>;
+}
+
+export interface CompetitionImportContext {
+  app: Application;
+  orm: Orm;
+  request: Request;
+  staffCookie: string;
+  RequestContext: RequestContextType;
+}
+
+export interface CompetitionImportResult {
+  tournamentId: string;
+  participantId: string;
+  playerId: string;
+  matchId: string;
+  rivalParticipantId: string;
+}
+
+export async function verifyCompetitionImport({
+  app,
+  orm,
+  request,
+  staffCookie,
+  RequestContext,
+}: CompetitionImportContext): Promise<CompetitionImportResult> {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
@@ -10,8 +85,11 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     await import("../../src/tournament/infrastructure/competition-queries.tokens.ts");
 
   const sync = app.get(CompetitionSyncService);
-  const tournaments = app.get(TOURNAMENT_QUERIES);
-  const run = (work) => RequestContext.create(orm.em.fork(), work);
+  const tournaments = app.get<symbol, TournamentQueries>(TOURNAMENT_QUERIES);
+
+  function run<T>(work: () => T): T {
+    return RequestContext.create(orm.em.fork(), work);
+  }
 
   const veteran = {
     pandascoreId: 9101,
@@ -45,6 +123,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     .fork()
     .findOneOrFail(Player, { pandascoreId: veteran.pandascoreId }, { populate: ["team"] });
 
+  assert(player.team, "the imported player has a current team");
   const currentTeamId = player.team.id;
   await request(
     "PATCH",
@@ -102,12 +181,23 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     endAt: undefined,
     status: "not_started",
     results: [],
-    previousMatches: [{ type: "winner", matchPandascoreId: semifinal.pandascoreId }],
+    previousMatches: [{ type: "winner" as const, matchPandascoreId: semifinal.pandascoreId }],
     officialStreams: [{ url: "https://twitch.tv/example", language: "en", main: true }],
   };
 
   const imported = await run(() => sync.upsertTournament(tournamentCommand, [final, semifinal]));
-  let view = (await request("GET", `/tournaments/${imported.id}`)).json().tournament;
+
+  async function read<T>(path: string): Promise<T> {
+    return (await request("GET", path)).json<T>();
+  }
+
+  const playerView = async (): Promise<PlayerView> =>
+    (await read<{ player: PlayerView }>(`/player/${player.id}`)).player;
+
+  const tournamentView = async (id: string): Promise<TournamentView> =>
+    (await request("GET", `/tournaments/${id}`)).json<{ tournament: TournamentView }>().tournament;
+
+  let view = await tournamentView(imported.id);
   assert.equal(view.source, "pandascore");
   assert.equal(view.slug, "imported-championship");
   assert.deepEqual(
@@ -123,9 +213,10 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
   assert.equal(view.winner.id, participant.id);
   const semiView = view.matches.find((m) => m.name === semifinal.name);
   const finalView = view.matches.find((m) => m.name === final.name);
+  assert(semiView && finalView, "both imported matches are listed");
   assert.equal(semiView.winnerId, participant.id);
   assert.equal(finalView.previousMatches[0].previousMatch, semiView.id);
-  assert.equal((await request("GET", `/player/${player.id}`)).json().player.team.id, currentTeamId);
+  assert.equal((await playerView()).team?.id, currentTeamId);
 
   await request(
     "PATCH",
@@ -143,7 +234,7 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       [semifinal, final],
     ),
   );
-  view = (await request("GET", `/tournaments/${imported.id}`)).json().tournament;
+  view = await tournamentView(imported.id);
   assert.equal(view.name, "Imported Championship Updated");
   assert.equal(view.slug, "imported-championship");
   assert.deepEqual(
@@ -179,50 +270,51 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
     "an unchanged re-sync keeps each stage and match sitemap lastmod",
   );
   const eventPath = `/events/resolve/${view.event.slug}`;
-  assert.equal((await request("GET", eventPath)).json().event.stages[0].id, imported.id);
+  assert.equal((await read<EventView>(eventPath)).event.stages[0].id, imported.id);
   assert.equal(
-    (await request("GET", `${eventPath}/imported-championship`)).json().tournament.id,
+    (await read<{ tournament: { id: string } }>(`${eventPath}/imported-championship`)).tournament
+      .id,
     imported.id,
   );
   assert.equal(view.imageUrl, "https://example.test/local-cup.png");
   assert.equal(view.participants.length, 2);
   assert.equal(view.matches.length, 2);
-  assert.equal(view.matches.find((m) => m.id === semiView.id).results.length, 2);
-  assert.equal(view.matches.find((m) => m.id === finalView.id).previousMatches.length, 1);
-  const refreshedPlayer = (await request("GET", `/player/${player.id}`)).json().player;
+  assert.equal(view.matches.find((m) => m.id === semiView.id)?.results.length, 2);
+  assert.equal(view.matches.find((m) => m.id === finalView.id)?.previousMatches.length, 1);
+  const refreshedPlayer = await playerView();
   assert.equal(refreshedPlayer.slug, "local-veteran");
-  assert.equal(refreshedPlayer.team.id, currentTeamId);
+  assert.equal(refreshedPlayer.team?.id, currentTeamId);
 
-  const finalDetail = (await request("GET", `/matches/${finalView.id}`)).json();
+  const finalDetail = await read<MatchDetail>(`/matches/${finalView.id}`);
   assert.equal(finalDetail.match.officialStreams[0].language, "en");
   assert.equal(finalDetail.headToHead.totalMeetings, 1);
   assert.equal(finalDetail.teamForms[participant.team.id].record.wins, 1);
   assert.equal(
-    (await request("GET", `/matches/results?tournamentId=${imported.id}`)).json().total,
+    (await read<{ total: number }>(`/matches/results?tournamentId=${imported.id}`)).total,
     1,
   );
   assert.equal(
-    (await request("GET", `/matches/upcoming?leagueId=${view.league.id}`)).json().total,
+    (await read<{ total: number }>(`/matches/upcoming?leagueId=${view.league.id}`)).total,
     1,
   );
   assert(
-    (await request("GET", `/player/${player.id}/trophies`))
-      .json()
-      .trophies.some((t) => t.id === imported.id),
+    (await read<{ trophies: IdRow[] }>(`/player/${player.id}/trophies`)).trophies.some(
+      (t) => t.id === imported.id,
+    ),
   );
   assert(
-    (await request("GET", `/team/${participant.team.id}/tournaments`))
-      .json()
-      .tournaments.some((t) => t.id === imported.id),
+    (
+      await read<{ tournaments: IdRow[] }>(`/team/${participant.team.id}/tournaments`)
+    ).tournaments.some((t) => t.id === imported.id),
   );
   assert(
-    (await request("GET", `/team/${participant.team.id}/trophies`))
-      .json()
-      .trophies.some((t) => t.id === imported.id),
+    (await read<{ trophies: IdRow[] }>(`/team/${participant.team.id}/trophies`)).trophies.some(
+      (t) => t.id === imported.id,
+    ),
   );
-  assert((await request("GET", `/player/${player.id}/matches`)).json().matches.length >= 2);
+  assert((await read<{ matches: IdRow[] }>(`/player/${player.id}/matches`)).matches.length >= 2);
   assert.equal(
-    (await run(() => tournaments.findByPandascoreId(tournamentCommand.pandascoreId))).id,
+    (await run(() => tournaments.findByPandascoreId(tournamentCommand.pandascoreId)))?.id,
     imported.id,
   );
   assert((await run(() => tournaments.knownPandascoreIds())).has(tournamentCommand.pandascoreId));
@@ -241,12 +333,12 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       },
     }),
   );
-  const updatedSemifinal = (await request("GET", `/matches/${semiView.id}`)).json().match;
+  const updatedSemifinal = (await read<MatchDetail>(`/matches/${semiView.id}`)).match;
   assert.equal(updatedSemifinal.id, semiView.id);
   assert.equal(updatedSemifinal.winner.id, participant.id);
   assert.equal(updatedSemifinal.results.length, 2);
   assert.equal(
-    updatedSemifinal.results.find((result) => result.participant.id !== participant.id).score,
+    updatedSemifinal.results.find((result) => result.participant.id !== participant.id)?.score,
     2,
   );
 
@@ -259,11 +351,10 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       command: { player: veteran, currentTeam: null },
     }),
   );
-  assert.equal((await request("GET", `/player/${player.id}`)).json().player.team, null);
+  assert.equal((await playerView()).team, null);
   assert.equal(
-    (await request("GET", `/tournaments/${imported.id}`))
-      .json()
-      .tournament.participants.find((p) => p.id === participant.id).players[0].id,
+    (await tournamentView(imported.id)).participants.find((p) => p.id === participant.id)
+      ?.players[0].id,
     player.id,
   );
 
@@ -286,25 +377,27 @@ export async function verifyCompetitionImport({ app, orm, request, staffCookie, 
       deletion: { kind: "merged", intoId: tournamentCommand.serie.pandascoreId },
     }),
   );
-  const merged = (await request("GET", `/tournaments/${qualifier.id}`)).json().tournament;
+  const merged = await tournamentView(qualifier.id);
   assert.deepEqual(
     [merged.event.slug, merged.slug],
     ["imported-league-spring-split-2026", "imported-championship-updated"],
   );
   await request("GET", `/events/resolve/${qualifier.event.slug}`, undefined, undefined, 404);
   assert.deepEqual(
-    (await request("GET", `/events/resolve/${merged.event.slug}`))
-      .json()
-      .event.stages.map((stage) => stage.id)
+    (await read<EventView>(`/events/resolve/${merged.event.slug}`)).event.stages
+      .map((stage) => stage.id)
       .sort(),
     [imported.id, qualifier.id].sort(),
   );
+
+  const rivalParticipant = view.participants.find((p) => p.id !== participant.id);
+  assert(rivalParticipant, "the rival remains a tournament participant");
 
   return {
     tournamentId: imported.id,
     participantId: participant.id,
     playerId: player.id,
     matchId: semiView.id,
-    rivalParticipantId: view.participants.find((p) => p.id !== participant.id).id,
+    rivalParticipantId: rivalParticipant.id,
   };
 }

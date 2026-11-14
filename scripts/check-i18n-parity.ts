@@ -1,20 +1,32 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { z } from "zod";
 
 const repository = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
-function leafKeys(value, prefix = "") {
-  if (Object.prototype.toString.call(value) !== "[object Object]") return [prefix];
+const localeValue = z.json();
+const localeObject = z.record(z.string(), localeValue);
 
-  return Object.entries(value).flatMap(([key, child]) =>
+export type LocaleValue = z.infer<typeof localeValue>;
+
+function leafKeys(value: LocaleValue, prefix = ""): string[] {
+  const object = localeObject.safeParse(value);
+
+  if (!object.success) return [prefix];
+
+  return Object.entries(object.data).flatMap(([key, child]) =>
     leafKeys(child, prefix ? `${prefix}.${key}` : key),
   );
 }
 
-export function parityViolations(directory) {
-  const keys = (locale) =>
-    new Set(leafKeys(JSON.parse(readFileSync(path.join(directory, `${locale}.json`), "utf8"))));
+export function parityViolations(directory: string): string[] {
+  const keys = (locale: string): Set<string> =>
+    new Set(
+      leafKeys(
+        localeValue.parse(JSON.parse(readFileSync(path.join(directory, `${locale}.json`), "utf8"))),
+      ),
+    );
 
   const english = keys("en-US");
   const french = keys("fr-FR");

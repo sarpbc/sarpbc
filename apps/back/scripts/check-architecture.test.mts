@@ -3,21 +3,28 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { architectureViolations } from "./check-architecture.mjs";
+import { architectureViolations } from "./check-architecture.mts";
 
-function fixture() {
+interface Fixture {
+  root: string;
+  write: (relative: string, content: string) => string;
+  violations: (files: string[]) => string[];
+  cleanup: () => void;
+}
+
+function fixture(): Fixture {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "architecture-"));
 
   return {
     root,
-    write(relative, content) {
+    write(relative: string, content: string): string {
       const file = path.join(root, relative);
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, content);
 
       return file;
     },
-    violations: (files) => architectureViolations(files, root),
+    violations: (files: string[]): string[] => architectureViolations(files, root),
     cleanup: () => fs.rmSync(root, { recursive: true, force: true }),
   };
 }

@@ -6,7 +6,7 @@ source_dir: scripts
 pre-commit:
   jobs:
     - name: branch-name
-      script: ../check-git-names.mjs
+      script: ../check-git-names.ts
       runner: node
       args: branch
     - name: oxfmt
@@ -16,14 +16,14 @@ pre-commit:
 commit-msg:
   jobs:
     - name: commit-message
-      script: ../check-git-names.mjs
+      script: ../check-git-names.ts
       runner: node
       args: commit-msg '{1}'
 
 pre-push:
   jobs:
     - name: branch-names
-      script: ../check-git-names.mjs
+      script: ../check-git-names.ts
       runner: node
       args: pre-push
       use_stdin: true

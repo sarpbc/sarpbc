@@ -18,19 +18,20 @@ const files = parsed.fileNames
     (file) => file.startsWith(sourceRoot) && !file.endsWith(".test.ts") && !file.endsWith(".d.ts"),
   );
 
-const normalized = (file, root) => path.relative(root, file).split(path.sep).join("/");
+const normalized = (file: string, root: string): string =>
+  path.relative(root, file).split(path.sep).join("/");
 
-const layer = (file, root) =>
+const layer = (file: string, root: string): string =>
   normalized(file, root)
     .split("/")
-    .find((part) => ["domain", "application", "infrastructure"].includes(part));
+    .find((part) => ["domain", "application", "infrastructure"].includes(part)) ?? "";
 
 const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|node:crypto)(?:$|\/)/;
 
-function importsOf(source) {
-  const imports = [];
+function importsOf(source: ts.SourceFile): string[] {
+  const imports: string[] = [];
 
-  function visit(node) {
+  function visit(node: ts.Node): void {
     if (
       (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
       node.moduleSpecifier &&
@@ -62,18 +63,31 @@ function importsOf(source) {
 }
 
 const persistenceFacade = /^[^/]+\/infrastructure\/[^/]+-persistence\.ts$/;
-const isInner = (file, root) => ["domain", "application"].includes(layer(file, root));
-const featureOf = (file, root) => normalized(file, root).split("/")[0];
 
-function stronglyConnected(graph) {
-  const index = new Map();
-  const low = new Map();
-  const stack = [];
-  const onStack = new Set();
-  const components = [];
+const isInner = (file: string, root: string): boolean =>
+  ["domain", "application"].includes(layer(file, root));
+
+const featureOf = (file: string, root: string): string => normalized(file, root).split("/")[0];
+
+function defined<T>(value: T | undefined): T {
+  if (value === undefined) throw new Error("Expected a value in the feature graph.");
+
+  return value;
+}
+
+type FeatureEdge = [from: string, target: string, via: string];
+
+type FeatureGraph = Map<string, Map<string, string[]>>;
+
+function stronglyConnected(graph: FeatureGraph): string[][] {
+  const index = new Map<string, number>();
+  const low = new Map<string, number>();
+  const stack: string[] = [];
+  const onStack = new Set<string>();
+  const components: string[][] = [];
   let counter = 0;
 
-  function visit(node) {
+  function visit(node: string): void {
     index.set(node, counter);
     low.set(node, counter);
     counter += 1;
@@ -83,18 +97,18 @@ function stronglyConnected(graph) {
     for (const next of [...(graph.get(node)?.keys() ?? [])].sort()) {
       if (!index.has(next)) {
         visit(next);
-        low.set(node, Math.min(low.get(node), low.get(next)));
+        low.set(node, Math.min(defined(low.get(node)), defined(low.get(next))));
       } else if (onStack.has(next)) {
-        low.set(node, Math.min(low.get(node), index.get(next)));
+        low.set(node, Math.min(defined(low.get(node)), defined(index.get(next))));
       }
     }
 
     if (low.get(node) === index.get(node)) {
-      const component = [];
-      let member;
+      const component: string[] = [];
+      let member: string;
 
       do {
-        member = stack.pop();
+        member = defined(stack.pop());
         onStack.delete(member);
         component.push(member);
       } while (member !== node);
@@ -108,14 +122,14 @@ function stronglyConnected(graph) {
   return components;
 }
 
-function cyclePath(component, graph) {
+function cyclePath(component: string[], graph: FeatureGraph): string[] | undefined {
   const members = new Set(component);
   const start = component[0];
   const path = [start];
   const seen = new Set([start]);
 
-  function walk(node) {
-    for (const next of [...graph.get(node).keys()].sort()) {
+  function walk(node: string): string[] | undefined {
+    for (const next of [...defined(graph.get(node)).keys()].sort()) {
       if (!members.has(next)) continue;
 
       if (next === start) return path.concat(start);
@@ -135,25 +149,28 @@ function cyclePath(component, graph) {
   return walk(start);
 }
 
-function featureCycles(edges) {
-  const graph = new Map();
+function featureCycles(edges: FeatureEdge[]): string[] {
+  const graph: FeatureGraph = new Map();
 
   for (const [from, target, via] of edges) {
     if (!graph.has(from)) graph.set(from, new Map());
 
     if (!graph.has(target)) graph.set(target, new Map());
-    const importers = graph.get(from).get(target) ?? [];
-    graph.get(from).set(target, [...importers, via].sort());
+    const importers = defined(graph.get(from)).get(target) ?? [];
+    defined(graph.get(from)).set(target, [...importers, via].sort());
   }
 
   return stronglyConnected(graph)
     .filter((component) => component.length > 1)
     .map((component) => {
-      const path = cyclePath(component, graph);
+      const path = defined(cyclePath(component, graph));
 
       const imports = path
         .slice(0, -1)
-        .map((from, i) => `${from} -> ${path[i + 1]}: ${graph.get(from).get(path[i + 1])[0]}`);
+        .map(
+          (from, i) =>
+            `${from} -> ${path[i + 1]}: ${defined(defined(graph.get(from)).get(path[i + 1]))[0]}`,
+        );
 
       return [`feature cycle: ${path.join(" -> ")}`, ...imports.map((line) => `  ${line}`)].join(
         "\n",
@@ -161,9 +178,9 @@ function featureCycles(edges) {
     });
 }
 
-export function architectureViolations(sourceFiles = files, root = sourceRoot) {
-  const violations = [];
-  const featureEdges = [];
+export function architectureViolations(sourceFiles = files, root = sourceRoot): string[] {
+  const violations: string[] = [];
+  const featureEdges: FeatureEdge[] = [];
 
   for (const file of sourceFiles) {
     const origin = normalized(file, root);

@@ -1,0 +1,10 @@
+{
+  "extends": "../../../packages/tsconfig.base.json",
+  "compilerOptions": {
+    "target": "ES2025",
+    "types": ["node"],
+    "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true
+  },
+  "include": ["*.ts"]
+}

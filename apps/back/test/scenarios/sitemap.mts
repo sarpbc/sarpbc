@@ -1,16 +1,34 @@
 import assert from "node:assert/strict";
+import type { SitemapEntry } from "@sarpbc/types";
+import type { Orm, Request } from "./support.mts";
 
-export async function verifySitemap({ orm, request, tournament }) {
+export interface SitemapContext {
+  orm: Orm;
+  request: Request;
+  tournament: { id: string; slug: string; event: { slug: string } };
+}
+
+interface MatchBody {
+  match: { slug: string };
+}
+
+interface StaffTournamentsBody {
+  tournaments: { id: string }[];
+}
+
+export async function verifySitemap({ orm, request, tournament }: SitemapContext): Promise<void> {
   const { Match, Tournament, TournamentParticipant } =
     await import("../../src/tournament/infrastructure/persistence/tournament.entities.ts");
 
   const { Contract, Player, Team } =
     await import("../../src/roster/infrastructure/persistence/player.entities.ts");
 
+  type TournamentParticipantRow = InstanceType<typeof TournamentParticipant>;
+
   const em = orm.em.fork();
   const stage = await em.findOneOrFail(Tournament, { id: tournament.id });
 
-  const addMatch = (name, status, participants) => {
+  const addMatch = (name: string, status: string, participants: TournamentParticipantRow[]) => {
     const match = new Match();
     Object.assign(match, { name, status, tournament: stage });
     match.participants.set(participants);
@@ -55,8 +73,8 @@ export async function verifySitemap({ orm, request, tournament }) {
   stage.beginAt = new Date("2026-01-10T12:00:00Z");
   await em.flush();
 
-  const paths = async (kind) =>
-    (await request("GET", `/sitemap/${kind}`)).json().map(({ path }) => path);
+  const paths = async (kind: string): Promise<string[]> =>
+    (await request("GET", `/sitemap/${kind}`)).json<SitemapEntry[]>().map(({ path }) => path);
 
   const stages = await paths("tournaments");
   assert(stages.includes(`/tournaments/${tournament.event.slug}`));
@@ -70,7 +88,7 @@ export async function verifySitemap({ orm, request, tournament }) {
     assert(!publicIds.includes(excluded.publicId), `${excluded.name} stays out of the sitemap`);
   }
 
-  const { match } = (await request("GET", `/matches/${listed.publicId}`)).json();
+  const { match } = (await request("GET", `/matches/${listed.publicId}`)).json<MatchBody>();
   assert(matches.includes(`/matches/${listed.publicId}/${match.slug}`), "the slug is canonical");
 
   const players = await paths("players");
@@ -86,7 +104,7 @@ export async function verifySitemap({ orm, request, tournament }) {
 
   const { tournaments: coached } = (
     await request("GET", `/player/${coach.id}/staff-tournaments`)
-  ).json();
+  ).json<StaffTournamentsBody>();
 
   assert(
     coached.some(({ id }) => id === stage.id),
@@ -94,7 +112,9 @@ export async function verifySitemap({ orm, request, tournament }) {
   );
 
   const teams = await paths("teams");
-  const teamSlug = participants[0].team.slug;
+  const firstTeam = participants[0].team;
+  assert(firstTeam, "the participant has a team");
+  const teamSlug = firstTeam.slug;
   assert(teams.includes(`/team/${teamSlug}`));
   const mergedTeams = await em.find(Team, { mergedInto: { $ne: null } });
   assert(mergedTeams.length > 0, "the scenario runs after a team merge");
