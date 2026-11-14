@@ -6,7 +6,7 @@ export default defineNuxtPlugin((nuxtApp) => {
   const route = useRoute();
   const router = useRouter();
   const toast = useToast();
-  const i18n = nuxtApp.$i18n as { t: (key: string) => string };
+  const { $i18n: i18n } = nuxtApp;
 
   const showAuthError = (code: string | (string | null)[] | null | undefined) => {
     if (Array.isArray(code) || code == null || code === "") {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { CollectionQueryBuilder, Collections } from "@nuxt/content";
+import type { Collections } from "@nuxt/content";
 import { uiLocale } from "@sarpbc/utils";
 
 type LegalPage = Collections["legal"];
@@ -12,13 +12,9 @@ const { locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const localeCode = computed(() => uiLocale(locale.value));
 
-const queryLegalCollection = queryCollection as (
-  collection: "legal",
-) => CollectionQueryBuilder<LegalPage>;
-
 const { data: doc } = await useAsyncData<LegalPage | null>(
   () => `legal-${props.slug}-${localeCode.value}`,
-  () => queryLegalCollection("legal").path(`/legal/${localeCode.value}/${props.slug}`).first(),
+  () => queryCollection("legal").path(`/legal/${localeCode.value}/${props.slug}`).first(),
   { watch: [localeCode] },
 );
 

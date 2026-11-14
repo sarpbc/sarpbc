@@ -29,7 +29,7 @@ const columns: TableColumn<ForumPostListItem>[] = [
   {
     accessorKey: "createdAt",
     header: t("page.forum.columns.createdAt"),
-    cell: ({ getValue }) => new Date(getValue() as string).toLocaleString(),
+    cell: ({ row }) => new Date(row.original.createdAt).toLocaleString(),
   },
   {
     id: "actions",

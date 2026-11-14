@@ -7,7 +7,7 @@ const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
 
-const tournamentId = computed(() => route.params.id as string);
+const tournamentId = computed(() => String(route.params.id));
 const formState = ref(createEmptyTournamentFormState());
 const slugAuto = ref(false);
 const isSaving = ref(false);

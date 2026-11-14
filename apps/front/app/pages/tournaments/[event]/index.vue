@@ -13,7 +13,7 @@ const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const { setPageSeo } = useSarpbcSeo();
 
-const eventParam = computed(() => route.params.event as string);
+const eventParam = computed(() => String(route.params.event));
 
 const {
   data: resolved,

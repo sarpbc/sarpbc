@@ -6,7 +6,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
-const slug = useRoute().params.slug as string;
+const slug = String(useRoute().params.slug);
 
 const {
   data: article,

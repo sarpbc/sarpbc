@@ -27,7 +27,7 @@ export type ImageUploadTarget = (typeof IMAGE_UPLOAD_TARGETS)[number];
 export function canonicalImageContentType(contentType: string): string {
   const normalized = contentType.toLowerCase().split(";")[0]?.trim() ?? "";
 
-  return (IMAGE_CONTENT_TYPE_ALIASES as readonly string[]).includes(normalized)
+  return IMAGE_CONTENT_TYPE_ALIASES.some((alias) => alias === normalized)
     ? "image/jpeg"
     : normalized;
 }

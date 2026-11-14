@@ -18,7 +18,7 @@ const { setPageSeo } = useSarpbcSeo();
 const { setJsonLd } = useStructuredData();
 
 // A string, not the segments array: switching Overview / Matches must not refetch the stage.
-const stagePath = computed(() => `${route.params.event as string}/${route.params.stage as string}`);
+const stagePath = computed(() => `${String(route.params.event)}/${String(route.params.stage)}`);
 
 const {
   data: resolved,

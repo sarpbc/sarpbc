@@ -164,6 +164,8 @@ describe("AuthService", () => {
         access_token?: string;
       }
 
+      const initialCredentials: OAuthClientCredentials = {};
+
       const profiles = {
         "code-a": { id: "google-a", email: "a@example.com", name: "Alice" },
         "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
@@ -172,7 +174,7 @@ describe("AuthService", () => {
       const oauth2Mock = googleOAuth2.OAuth2;
       oauth2Mock.mockImplementation(function () {
         const client = {
-          credentials: {} as OAuthClientCredentials,
+          credentials: initialCredentials,
           getToken: vi.fn(async (code: string) => {
             getTokenStarted += 1;
             await holdGetToken;
