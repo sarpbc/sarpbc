@@ -52,7 +52,7 @@ const handleEnablePickems = async (tournamentId: string) => {
 
   try {
     await enableTournamentPickems(tournamentId);
-    toast.add({ title: t("page.pickems.enablePickems"), color: "success" });
+    toast.add({ color: "success", title: t("page.pickems.enablePickems") });
     await refresh();
   } catch (enableError) {
     reportError(enableError);

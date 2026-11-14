@@ -10,16 +10,16 @@ const colorMode = useColorMode();
 setPageSeo();
 
 useHead({
-  meta: [
-    {
-      name: "theme-color",
-      content: computed(() => (colorMode.value === "dark" ? "#020305" : "#ffffff")),
-    },
-  ],
-  link: [{ rel: "icon", href: "/favicon.ico" }],
   htmlAttrs: {
     lang: computed(() => uiLocale(locale.value)),
   },
+  link: [{ href: "/favicon.ico", rel: "icon" }],
+  meta: [
+    {
+      content: computed(() => (colorMode.value === "dark" ? "#020305" : "#ffffff")),
+      name: "theme-color",
+    },
+  ],
 });
 </script>
 

@@ -5,70 +5,70 @@ import { toUpsertMatchCommand } from "./pandascore-match.mapper";
 describe("PandascoreMatchMapper", () => {
   it("maps match dto to upsert command", () => {
     const dto = matchSchema.parse({
-      id: 99,
-      name: "Grand Final",
-      status: "finished",
       begin_at: "2025-06-10T15:00:00Z",
       end_at: "2025-06-10T17:00:00Z",
-      tournament_id: 42,
+      id: 99,
+      name: "Grand Final",
       number_of_games: 7,
       opponents: [
         {
-          type: "Team",
           opponent: {
+            acronym: "VIT",
             id: 7,
-            name: "Team Vitality",
-            slug: "team-vitality",
+            image_url: "https://example.com/vitality.png",
             location: "FR",
             modified_at: "2025-01-01T00:00:00Z",
-            acronym: "VIT",
-            image_url: "https://example.com/vitality.png",
+            name: "Team Vitality",
+            slug: "team-vitality",
           },
+          type: "Team",
         },
       ],
-      results: [{ team_id: 7, score: 4 }],
-      previous_matches: [{ type: "winner", match_id: 88 }],
+      previous_matches: [{ match_id: 88, type: "winner" }],
+      results: [{ score: 4, team_id: 7 }],
+      status: "finished",
+      tournament_id: 42,
     });
 
     const command = toUpsertMatchCommand(dto);
 
     expect(command).toStrictEqual({
-      pandascoreId: 99,
-      tournamentPandascoreId: 42,
-      name: "Grand Final",
       beginAt: new Date("2025-06-10T15:00:00Z"),
       endAt: new Date("2025-06-10T17:00:00Z"),
-      status: "finished",
+      name: "Grand Final",
       numberOfGames: 7,
-      opponentSlugs: ["team-vitality"],
-      opponentPandascoreIds: [7],
-      results: [{ teamPandascoreId: 7, score: 4 }],
-      previousMatches: [{ type: "winner", matchPandascoreId: 88 }],
       officialStreams: [],
+      opponentPandascoreIds: [7],
+      opponentSlugs: ["team-vitality"],
+      pandascoreId: 99,
+      previousMatches: [{ matchPandascoreId: 88, type: "winner" }],
+      results: [{ score: 4, teamPandascoreId: 7 }],
+      status: "finished",
+      tournamentPandascoreId: 42,
     });
   });
 
   it("maps official streams from streams_list", () => {
     const dto = matchSchema.parse({
       id: 1,
-      tournament_id: 2,
       name: "Semi",
       opponents: [],
-      results: [],
       previous_matches: [],
+      results: [],
       streams_list: [
         {
-          official: true,
-          main: true,
-          language: "en",
           embed_url: "https://player.twitch.tv/?channel=rlcs",
+          language: "en",
+          main: true,
+          official: true,
           raw_url: "https://www.twitch.tv/rocketleague",
         },
       ],
+      tournament_id: 2,
     });
 
     expect(toUpsertMatchCommand(dto).officialStreams).toStrictEqual([
-      { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },
+      { language: "en", main: true, url: "https://www.twitch.tv/rocketleague" },
     ]);
   });
 });

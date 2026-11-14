@@ -35,8 +35,8 @@ const rowCount = computed(() =>
 
 const rows = computed(() =>
   columns.value.map((column) => ({
-    participant: column.participant,
     cells: Array.from({ length: rowCount.value }, (_, index) => column.players[index] ?? null),
+    participant: column.participant,
   })),
 );
 

@@ -7,14 +7,14 @@ import { TournamentModule } from "../../tournament/infrastructure/tournament.mod
 import { CountryController } from "./http/country.controller";
 
 @Module({
-  imports: [RosterModule, TournamentModule],
   controllers: [CountryController],
+  imports: [RosterModule, TournamentModule],
   providers: [
     {
+      inject: [PlayerService, MatchService],
       provide: CountryService,
       useFactory: (players: PlayerService, matches: MatchService) =>
-        new CountryService({ players, matches }),
-      inject: [PlayerService, MatchService],
+        new CountryService({ matches, players }),
     },
   ],
 })

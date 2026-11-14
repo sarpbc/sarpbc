@@ -11,10 +11,10 @@ const agentTrailerPattern =
 
 const pullRequestEvent = z.object({
   pull_request: z.object({
-    title: z.string(),
-    body: z.string().nullish(),
     base: z.object({ sha: z.string() }),
+    body: z.string().nullish(),
     head: z.object({ ref: z.string(), sha: z.string() }),
+    title: z.string(),
   }),
 });
 

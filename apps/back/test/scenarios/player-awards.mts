@@ -3,10 +3,10 @@ import { z } from "zod";
 import type { Request } from "./support.mts";
 
 const tournamentAward = z.object({
-  id: z.string(),
   awardType: z.string(),
-  player: z.object({ id: z.string() }),
+  id: z.string(),
   participant: z.object({ id: z.string() }),
+  player: z.object({ id: z.string() }),
 });
 
 const awardBody = z.object({ award: tournamentAward });
@@ -33,7 +33,7 @@ export const verifyPlayerAwards = async ({
 }: PlayerAwardsContext): Promise<void> => {
   const { tournamentId, participantId, playerId } = competition;
   const url = `/tournaments/${tournamentId}/awards`;
-  const input = { participantId, playerId, awardType: "mvp" };
+  const input = { awardType: "mvp", participantId, playerId };
   await request("POST", url, input, memberCookie, 403);
   await request("POST", url, { ...input, playerId: outsiderPlayerId }, staffCookie, 400);
 

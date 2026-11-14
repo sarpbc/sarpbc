@@ -27,7 +27,7 @@ export class SharpTeamLogoImages implements TeamLogoImages {
     const image = await this.open(bytes);
     const { width, height } = await this.decode(async () => await image.metadata());
 
-    return { width, height };
+    return { height, width };
   }
 
   async normalize(bytes: Uint8Array, format: TeamLogoFormat, pixels: number): Promise<Uint8Array> {
@@ -39,8 +39,8 @@ export class SharpTeamLogoImages implements TeamLogoImages {
         await image
           .timeout({ seconds: PIPELINE_TIMEOUT_SECONDS })
           .ensureAlpha()
-          .resize(pixels, pixels, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-          .webp({ quality: 90, alphaQuality: 100, effort: 4 })
+          .resize(pixels, pixels, { background: { alpha: 0, b: 0, g: 0, r: 0 }, fit: "contain" })
+          .webp({ alphaQuality: 100, effort: 4, quality: 90 })
           .toBuffer(),
     );
 
@@ -58,7 +58,7 @@ export class SharpTeamLogoImages implements TeamLogoImages {
   private async open(bytes: Uint8Array, options: SharpOptions = {}): Promise<Sharp> {
     const sharp = await loadSharp();
 
-    return sharp(bytes, { limitInputPixels: MAX_INPUT_PIXELS, animated: false, ...options });
+    return sharp(bytes, { animated: false, limitInputPixels: MAX_INPUT_PIXELS, ...options });
   }
 
   private async decode<T>(work: () => Promise<T>): Promise<T> {

@@ -23,8 +23,8 @@ describe(findMatchBlocks, () => {
     const [single, manual] = await findMatchBlocks(
       reads,
       [
-        { kind: "match", id: "a" },
-        { kind: "matches", ids: ["b", "missing", "a"] },
+        { id: "a", kind: "match" },
+        { ids: ["b", "missing", "a"], kind: "matches" },
       ],
       NOW,
     );
@@ -51,8 +51,8 @@ describe(findMatchBlocks, () => {
     const [tournament, team] = await findMatchBlocks(
       reads,
       [
-        { kind: "tournament", id: "cup", limit: 3 },
-        { kind: "team", id: "falcons", limit: 10 },
+        { id: "cup", kind: "tournament", limit: 3 },
+        { id: "falcons", kind: "team", limit: 10 },
       ],
       NOW,
     );
@@ -60,8 +60,8 @@ describe(findMatchBlocks, () => {
     expect(reads.byIds).not.toHaveBeenCalled();
     expect(reads.page).toHaveBeenCalledWith("live", {
       limit: 3,
-      tournamentId: "cup",
       liveSince: new Date(NOW.getTime() - MATCH_BLOCK_LIVE_WINDOW_MS),
+      tournamentId: "cup",
     });
     expect(reads.page).toHaveBeenCalledWith("results", { limit: 10, teamId: "falcons" });
     expect(tournament?.map((match) => match.id)).toStrictEqual(["live", "next", "later"]);
@@ -76,8 +76,8 @@ describe(findMatchBlocks, () => {
     const [short, long] = await findMatchBlocks(
       reads,
       [
-        { kind: "team", id: "falcons", limit: 2 },
-        { kind: "team", id: "falcons", limit: 4 },
+        { id: "falcons", kind: "team", limit: 2 },
+        { id: "falcons", kind: "team", limit: 4 },
       ],
       NOW,
     );

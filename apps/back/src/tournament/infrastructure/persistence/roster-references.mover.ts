@@ -21,9 +21,9 @@ export class TournamentRosterReferences
     const { em } = this;
 
     const clashes = await em.count(TournamentParticipant, {
-      team: null,
       players: from,
-      tournament: { participants: { team: null, players: to } },
+      team: null,
+      tournament: { participants: { players: to, team: null } },
     });
 
     if (clashes > 0) {
@@ -35,8 +35,8 @@ export class TournamentRosterReferences
     await em.nativeUpdate(PlayerAward, { player: from }, { player: to });
     const keptLineups = await em.find(MatchLineupPlayer, { player: to }, { fields: ["match"] });
     await em.nativeDelete(MatchLineupPlayer, {
-      player: from,
       match: { $in: keptLineups.map(({ match }) => match.id) },
+      player: from,
     });
     await em.nativeUpdate(MatchLineupPlayer, { player: from }, { player: to });
 
@@ -68,7 +68,7 @@ export class TournamentRosterReferences
     const participants = await this.em.find(
       TournamentParticipant,
       { team: teamId, tournament: { participants: { team: otherTeamId } } },
-      { fields: ["tournament"], disableIdentityMap: true },
+      { disableIdentityMap: true, fields: ["tournament"] },
     );
 
     return [...new Set(participants.map(({ tournament }) => tournament.id))];
@@ -81,7 +81,7 @@ export class TournamentRosterReferences
       this.em.count(TournamentPrize, { team: teamId }),
     ]);
 
-    return { participations, matches, prizes };
+    return { matches, participations, prizes };
   }
 
   private async foldPrizes(from: string, to: string): Promise<void> {

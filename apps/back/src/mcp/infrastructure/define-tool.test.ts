@@ -15,38 +15,38 @@ const textContent = (result: CallToolResult): string => {
   return block?.type === "text" ? block.text : "";
 };
 
-const admin: PatUser = { id: "user-1", email: "admin@test.com", role: "admin" };
-const journalist: PatUser = { id: "user-2", email: "journalist@test.com", role: "journalist" };
+const admin: PatUser = { email: "admin@test.com", id: "user-1", role: "admin" };
+const journalist: PatUser = { email: "journalist@test.com", id: "user-2", role: "journalist" };
 
 const write = (handler: () => Promise<{ result: object; entityId?: string }>) =>
   defineTool({
-    name: "set_match_winner",
     description: "Set a winner.",
-    write: true,
-    permission: "tournaments.manage",
-    input: { matchId: z.string() },
     handler,
+    input: { matchId: z.string() },
+    name: "set_match_winner",
+    permission: "tournaments.manage",
+    write: true,
   });
 
 type WriteHandler = Parameters<typeof write>[0];
 
 const read = (permission?: "news.manage" | readonly ["players.manage", "teams.manage"]) =>
   defineTool({
-    name: "get_thing",
     description: "Get a thing.",
-    permission,
-    input: {},
     handler: async () => ({ slug: "zen-joins-karmine-corp" }),
+    input: {},
+    name: "get_thing",
+    permission,
   });
 
 const failing = (cause: Error) =>
   defineTool({
-    name: "get_thing",
     description: "Get a thing.",
-    input: {},
     handler: async () => {
       throw cause;
     },
+    input: {},
+    name: "get_thing",
   });
 
 describe(defineTool, () => {
@@ -62,16 +62,16 @@ describe(defineTool, () => {
 
     it("returns the result as JSON and logs the entity", async () => {
       const result = await write(async () => ({
-        result: { matchId: "match-1" },
         entityId: "match-1",
+        result: { matchId: "match-1" },
       })).run(admin, { matchId: "m1" });
 
       expect(result.isError).toBeUndefined();
       expect(textContent(result)).toContain("match-1");
       expect(logInfo).toHaveBeenCalledWith(
         expect.objectContaining({
-          tool: "set_match_winner",
           entityId: "match-1",
+          tool: "set_match_winner",
           userId: "user-1",
         }),
       );
@@ -94,11 +94,11 @@ describe(defineTool, () => {
 
     it("accepts any one of several permissions", async () => {
       const tool = defineTool({
-        name: "list_things",
         description: "List things.",
-        permission: ["tournaments.manage", "news.manage"],
-        input: {},
         handler: async () => ({ ok: true }),
+        input: {},
+        name: "list_things",
+        permission: ["tournaments.manage", "news.manage"],
       });
 
       const runResult3 = await tool.run(journalist, {});
@@ -134,12 +134,12 @@ describe(defineTool, () => {
 
   it("appends the required permission to the description once", () => {
     const tool = defineTool({
-      name: "create_league",
       description: "Create a league.",
-      write: true,
-      permission: "tournaments.manage",
-      input: {},
       handler: async () => ({ result: {} }),
+      input: {},
+      name: "create_league",
+      permission: "tournaments.manage",
+      write: true,
     });
 
     expect(tool.description).toBe("Create a league. Requires tournaments.manage.");

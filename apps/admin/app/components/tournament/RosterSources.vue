@@ -15,7 +15,7 @@ const { normalizeSourceUrl, sourceUrlError } = useSourceUrl();
 
 const teamParticipants = computed(() =>
   participants.flatMap(({ id, team, players, rosterSourceUrl }) =>
-    team ? [{ id, team, players, rosterSourceUrl }] : [],
+    team ? [{ id, players, rosterSourceUrl, team }] : [],
   ),
 );
 
@@ -39,13 +39,13 @@ const save = async (participant: (typeof teamParticipants.value)[number]) => {
     await updateTournament(tournamentId, {
       rosters: [
         {
-          teamId: participant.team.id,
           playerIds: participant.players.map(({ id }) => id),
           sourceUrl: normalizeSourceUrl(values.value[participant.id] ?? ""),
+          teamId: participant.team.id,
         },
       ],
     });
-    toast.add({ title: t("page.tournaments.rosterSources.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.rosterSources.saved") });
     emit("saved");
   } catch (error) {
     reportError(error, t("page.tournaments.rosterSources.saveError"));

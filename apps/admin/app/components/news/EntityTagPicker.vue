@@ -69,7 +69,7 @@ watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 const onSelect = (item: Player | Team) => {
   emit("update:open", false);
-  emit("select", { slug: item.slug, label: item.name });
+  emit("select", { label: item.name, slug: item.slug });
 };
 
 const close = () => {

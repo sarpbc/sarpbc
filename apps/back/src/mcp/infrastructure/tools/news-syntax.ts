@@ -8,29 +8,29 @@ import {
 
 export const PLAYER_TAG = serializeNewsEntityTag({
   kind: "player",
-  slug: "<slug>",
   label: "<name>",
+  slug: "<slug>",
 });
 
-export const TEAM_TAG = serializeNewsEntityTag({ kind: "team", slug: "<slug>", label: "<name>" });
+export const TEAM_TAG = serializeNewsEntityTag({ kind: "team", label: "<name>", slug: "<slug>" });
 export const TWEET_TAG = serializeNewsTweetTag("https://x.com/<handle>/status/<id>");
 
-const ONE_MATCH_TAG = serializeNewsMatchTag({ kind: "match", id: "<match id>" });
+const ONE_MATCH_TAG = serializeNewsMatchTag({ id: "<match id>", kind: "match" });
 
 const SELECTION_TAG = serializeNewsMatchTag({
-  kind: "matches",
   ids: ["<match id>", "<match id>"],
+  kind: "matches",
 });
 
 const TOURNAMENT_TAG = serializeNewsMatchTag({
-  kind: "tournament",
   id: "<tournament id>",
+  kind: "tournament",
   limit: NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
 });
 
 const TEAM_MATCHES_TAG = serializeNewsMatchTag({
-  kind: "team",
   id: "<team id>",
+  kind: "team",
   limit: NEWS_MATCH_BLOCK_DEFAULT_LIMIT,
 });
 

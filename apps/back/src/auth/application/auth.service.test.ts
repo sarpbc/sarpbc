@@ -31,12 +31,12 @@ describe(AuthService, () => {
   let service: AuthService;
 
   const userServiceMocks = {
-    signIn: vi.fn<UserService["signIn"]>(),
-    findOneByGoogleId: vi.fn<UserService["findOneByGoogleId"]>(),
-    findOneByEmail: vi.fn<UserService["findOneByEmail"]>(),
-    createGoogleUser: vi.fn<UserService["createGoogleUser"]>(),
-    linkGoogleAccount: vi.fn<UserService["linkGoogleAccount"]>(),
     create: vi.fn<UserService["create"]>(),
+    createGoogleUser: vi.fn<UserService["createGoogleUser"]>(),
+    findOneByEmail: vi.fn<UserService["findOneByEmail"]>(),
+    findOneByGoogleId: vi.fn<UserService["findOneByGoogleId"]>(),
+    linkGoogleAccount: vi.fn<UserService["linkGoogleAccount"]>(),
+    signIn: vi.fn<UserService["signIn"]>(),
   };
 
   const userService = Object.assign(unconstructed(UserService), userServiceMocks);
@@ -52,7 +52,7 @@ describe(AuthService, () => {
       new JwtTokenGateway({ ...jwtService, verifyAsync: vi.fn<() => Promise<never>>() }, "secret"),
       new GoogleIdentityGateway(() => newGoogleSession()),
       userService,
-      { frontUrl: "http://localhost:4000", adminUrl: "http://localhost:4002" },
+      { adminUrl: "http://localhost:4002", frontUrl: "http://localhost:4000" },
     );
     vi.clearAllMocks();
   });
@@ -95,30 +95,30 @@ describe(AuthService, () => {
     const sessionUsers = Object.assign(unconstructed(UserService), { findById });
 
     const unusedGoogle: GoogleIdentity = {
-      profile: async () => await Promise.reject(new Error("unused")),
       authorizationUrl: () => {
         throw new Error("unused");
       },
+      profile: async () => await Promise.reject(new Error("unused")),
     };
 
     const sessions = new AuthService(tokens, unusedGoogle, sessionUsers, {
-      frontUrl: "",
       adminUrl: "",
+      frontUrl: "",
     });
 
     it("authenticates with the current database email, not the token's", async () => {
-      tokens.verify.mockResolvedValue({ id: "user-1", email: "old@b.com" });
+      tokens.verify.mockResolvedValue({ email: "old@b.com", id: "user-1" });
       findById.mockResolvedValue(Object.assign(new User("new@b.com", "x"), { id: "user-1" }));
 
       await expect(sessions.authenticate("jwt")).resolves.toStrictEqual({
-        id: "user-1",
         email: "new@b.com",
+        id: "user-1",
       });
       expect(tokens.verify).toHaveBeenCalledWith("jwt", "access");
     });
 
     it("rejects a valid token whose user no longer exists", async () => {
-      tokens.verify.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+      tokens.verify.mockResolvedValue({ email: "a@b.com", id: "user-1" });
       findById.mockResolvedValue(null);
 
       await expect(sessions.authenticate("jwt")).resolves.toBeNull();
@@ -126,12 +126,12 @@ describe(AuthService, () => {
     });
 
     it("refreshes into the user and a new token pair", async () => {
-      tokens.verify.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+      tokens.verify.mockResolvedValue({ email: "a@b.com", id: "user-1" });
       findById.mockResolvedValue(Object.assign(new User("a@b.com", "x"), { id: "user-1" }));
 
       await expect(sessions.refreshSession("jwt")).resolves.toStrictEqual({
-        user: { id: "user-1", email: "a@b.com" },
         tokens: { accessToken: "access", refreshToken: "refresh" },
+        user: { email: "a@b.com", id: "user-1" },
       });
       expect(tokens.verify).toHaveBeenCalledWith("jwt", "refresh");
     });
@@ -160,14 +160,17 @@ describe(AuthService, () => {
       let getTokenStarted = 0;
 
       const profiles = {
-        "code-a": { id: "google-a", email: "a@example.com", name: "Alice" },
-        "code-b": { id: "google-b", email: "b@example.com", name: "Bob" },
+        "code-a": { email: "a@example.com", id: "google-a", name: "Alice" },
+        "code-b": { email: "b@example.com", id: "google-b", name: "Bob" },
       } as const;
 
       newGoogleSession = () => {
         let accessToken: string | null | undefined;
 
         return {
+          generateAuthUrl: () => {
+            throw new Error("unused");
+          },
           getToken: async (code) => {
             getTokenStarted += 1;
             await holdGetToken;
@@ -176,9 +179,6 @@ describe(AuthService, () => {
           },
           setCredentials: (tokens) => {
             accessToken = tokens.access_token;
-          },
-          generateAuthUrl: () => {
-            throw new Error("unused");
           },
           userinfo: async () => {
             const profile =

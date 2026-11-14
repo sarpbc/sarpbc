@@ -45,6 +45,16 @@ import { R2TeamLogoStorage } from "./logo/r2-team-logo-storage";
 import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
 
 @Module({
+  controllers: [PlayerController, TeamController, TransferController],
+  exports: [
+    PlayerService,
+    TransferService,
+    TeamService,
+    TeamAliasService,
+    ContractService,
+    RosterMergeService,
+    TeamLogoService,
+  ],
   imports: [
     MikroOrmModule.forFeature([Player, Team, Contract, PlayerPhoto]),
     TournamentModule,
@@ -53,34 +63,34 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
     StorageModule,
     ConfigModule,
   ],
-  controllers: [PlayerController, TeamController, TransferController],
   providers: [
     {
+      inject: [EntityManager],
       provide: MikroPlayerStore,
       useFactory: (em: EntityManager) => new MikroPlayerStore(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: MikroTeamStore,
       useFactory: (em: EntityManager) => new MikroTeamStore(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: MikroContractStore,
       useFactory: (em: EntityManager) => new MikroContractStore(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: MikroPhotoStore,
       useFactory: (em: EntityManager) => new MikroPhotoStore(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: MikroRosterTransaction,
       useFactory: (em: EntityManager) => new MikroRosterTransaction(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: MikroRosterMergeTransaction,
       useFactory: (em: EntityManager) =>
         new MikroRosterMergeTransaction(em, (tx) => {
@@ -98,77 +108,67 @@ import { SharpTeamLogoImages } from "./logo/sharp-team-logo-images";
               await competition.sharedTournamentIds(teamId, otherTeamId),
           };
         }),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: MikroCurrentRosterWriter,
       useFactory: (em: EntityManager) => new MikroCurrentRosterWriter(em),
-      inject: [EntityManager],
     },
     {
+      inject: [MikroCurrentRosterWriter, PandascoreCurrentRosterSource],
       provide: SyncPandascoreTeamsUseCase,
       useFactory: (writer: MikroCurrentRosterWriter, source: CurrentRosterSource) =>
         new SyncPandascoreTeamsUseCase(writer, source),
-      inject: [MikroCurrentRosterWriter, PandascoreCurrentRosterSource],
     },
     {
+      inject: [MikroPlayerStore, MikroPhotoStore, MikroRosterTransaction],
       provide: PlayerService,
       useFactory: (
         players: MikroPlayerStore,
         photos: MikroPhotoStore,
         transaction: MikroRosterTransaction,
       ) => new PlayerService(players, photos, transaction),
-      inject: [MikroPlayerStore, MikroPhotoStore, MikroRosterTransaction],
     },
     {
+      inject: [MikroTeamStore, MikroRosterTransaction, EntityManager],
       provide: TeamService,
       useFactory: (teams: MikroTeamStore, transaction: MikroRosterTransaction, em: EntityManager) =>
         new TeamService(teams, transaction, new TournamentRosterReferences(em)),
-      inject: [MikroTeamStore, MikroRosterTransaction, EntityManager],
     },
     {
+      inject: [MikroContractStore, MikroTeamStore, MikroRosterTransaction],
       provide: ContractService,
       useFactory: (
         contracts: MikroContractStore,
         teams: MikroTeamStore,
         transaction: MikroRosterTransaction,
       ) => new ContractService(contracts, teams, transaction),
-      inject: [MikroContractStore, MikroTeamStore, MikroRosterTransaction],
     },
     {
+      inject: [MikroContractStore],
       provide: TransferService,
       useFactory: (contracts: MikroContractStore) => new TransferService(contracts),
-      inject: [MikroContractStore],
     },
     {
+      inject: [MikroRosterMergeTransaction],
       provide: RosterMergeService,
       useFactory: (transaction: MikroRosterMergeTransaction) => new RosterMergeService(transaction),
-      inject: [MikroRosterMergeTransaction],
     },
     {
+      inject: [EntityManager],
       provide: TeamAliasService,
       useFactory: (em: EntityManager) => new TeamAliasService(new MikroTeamAliasTransaction(em)),
-      inject: [EntityManager],
     },
     {
+      inject: [R2Service],
       provide: TeamLogoService,
       useFactory: (storage: R2Service) =>
         new TeamLogoService(
-          new HttpsTeamLogoSource({ request, lookup }),
+          new HttpsTeamLogoSource({ lookup, request }),
           new SharpTeamLogoImages(),
           new R2TeamLogoStorage(storage),
         ),
-      inject: [R2Service],
     },
-  ],
-  exports: [
-    PlayerService,
-    TransferService,
-    TeamService,
-    TeamAliasService,
-    ContractService,
-    RosterMergeService,
-    TeamLogoService,
   ],
 })
 export class RosterModule implements OnModuleInit {
@@ -189,9 +189,9 @@ export class RosterModule implements OnModuleInit {
     } catch (error) {
       log.error({
         component: RosterModule.name,
+        error: error instanceof Error ? error : new Error(String(error)),
         job: "module_init",
         message: "Failed to initialize teams on module init",
-        error: error instanceof Error ? error : new Error(String(error)),
       });
     }
   }

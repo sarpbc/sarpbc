@@ -17,59 +17,59 @@ import type {
 const idRef = z.looseObject({ id: z.string() });
 
 const circuitSummary = z.looseObject({
-  id: z.string(),
-  slug: z.string(),
-  name: z.string(),
-  season: z.number().nullable(),
-  region: z.string().nullable(),
   description: z.string().nullable(),
-  sourceUrl: z.string().nullable(),
+  id: z.string(),
+  name: z.string(),
   qualificationSpots: z.number().nullable(),
+  region: z.string().nullable(),
+  season: z.number().nullable(),
+  slug: z.string(),
+  sourceUrl: z.string().nullable(),
 });
 
 type CircuitSummary = z.infer<typeof circuitSummary>;
 
 const standingTeam = z.looseObject({ id: z.string(), slug: z.string() });
 
-const scaleTier = z.looseObject({ from: z.number(), to: z.number(), points: z.number() });
+const scaleTier = z.looseObject({ from: z.number(), points: z.number(), to: z.number() });
 
 const circuitDetail = circuitSummary.extend({
   stages: z.array(
     z.looseObject({
-      tournament: z.looseObject({ id: z.string(), source: z.string() }),
-      scale: z.array(scaleTier),
-      worldwide: z.boolean(),
+      finishes: z.array(z.looseObject({ placement: z.number(), team: standingTeam })),
       regionTeams: z.array(standingTeam),
-      finishes: z.array(z.looseObject({ team: standingTeam, placement: z.number() })),
+      scale: z.array(scaleTier),
+      tournament: z.looseObject({ id: z.string(), source: z.string() }),
+      worldwide: z.boolean(),
     }),
   ),
 });
 
 const circuitStandings = circuitSummary.extend({
-  sourceUrls: z.array(z.string()),
   events: z.array(z.looseObject({ event: idRef, status: z.string() })),
   rows: z.array(
     z.looseObject({
-      rank: z.number(),
-      points: z.number(),
-      team: standingTeam,
       events: z.array(z.looseObject({ eventId: z.string(), placement: z.number() })),
+      points: z.number(),
+      rank: z.number(),
+      team: standingTeam,
     }),
   ),
+  sourceUrls: z.array(z.string()),
 });
 
 const mcpCircuit = circuitSummary.extend({
-  standings: z.array(z.looseObject({ points: z.number() })),
   stages: z.array(
     z.looseObject({ tournament: z.looseObject({ id: z.string(), source: z.string() }) }),
   ),
+  standings: z.array(z.looseObject({ points: z.number() })),
 });
 
 const eventTeams = z.object({
-  teams: z.array(z.looseObject({ team: standingTeam, placement: z.number().nullable() })),
+  teams: z.array(z.looseObject({ placement: z.number().nullable(), team: standingTeam })),
 });
 
-const stageRef = z.looseObject({ id: z.string(), event: idRef });
+const stageRef = z.looseObject({ event: idRef, id: z.string() });
 
 interface StageInput {
   pandascoreId: number;
@@ -110,12 +110,12 @@ const pandascoreStage = ({
   teams,
   endAt,
 }: StageInput): UpsertTournamentCommand => ({
-  pandascoreId,
-  name,
-  serie: { pandascoreId: serieId, fullName: `Fake Circuit ${name}`, year: 2026 },
   beginAt: new Date(endAt.getTime() - 3 * DAY),
   endAt,
-  expectedRoster: teams.map((team) => ({ team, players: [] })),
+  expectedRoster: teams.map((team) => ({ players: [], team })),
+  name,
+  pandascoreId,
+  serie: { fullName: `Fake Circuit ${name}`, pandascoreId: serieId, year: 2026 },
 });
 
 export const verifyCircuits = async ({
@@ -137,8 +137,8 @@ export const verifyCircuits = async ({
   const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
 
   const teams = [9801, 9802, 9803].map((pandascoreId) => ({
-    pandascoreId,
     name: `Circuit Team ${pandascoreId}`,
+    pandascoreId,
     slug: `circuit-team-${pandascoreId}`,
   }));
 
@@ -148,16 +148,16 @@ export const verifyCircuits = async ({
     async () =>
       await sync.upsertTournament({
         ...pandascoreStage({
+          endAt: finished,
+          name: "Finals",
           pandascoreId: 9701,
           serieId: 9711,
-          name: "Finals",
           teams,
-          endAt: finished,
         }),
         standings: [
-          { teamPandascoreId: 9801, rank: 1 },
-          { teamPandascoreId: 9802, rank: 2 },
-          { teamPandascoreId: 9803, rank: 2 },
+          { rank: 1, teamPandascoreId: 9801 },
+          { rank: 2, teamPandascoreId: 9802 },
+          { rank: 2, teamPandascoreId: 9803 },
         ],
       }),
   );
@@ -166,11 +166,11 @@ export const verifyCircuits = async ({
     async () =>
       await sync.upsertTournament(
         pandascoreStage({
+          endAt: finished,
+          name: "Qualifier",
           pandascoreId: 9702,
           serieId: 9712,
-          name: "Qualifier",
           teams,
-          endAt: finished,
         }),
       ),
   );
@@ -233,21 +233,21 @@ export const verifyCircuits = async ({
 
   const saveDirectly = async (fields: CircuitFields): Promise<void> => {
     await new CircuitPersistence(orm.em.fork()).save({
-      id: randomUUID(),
-      season: null,
-      region: null,
       description: null,
-      sourceUrl: null,
+      id: randomUUID(),
       qualificationSpots: null,
+      region: null,
+      season: null,
+      sourceUrl: null,
       ...fields,
     });
   };
 
   const twins: [Placement, Placement, string][] = [
-    [{ season: null, region: null }, { season: null, region: null }, "no season and no region"],
-    [{ season: 2026, region: null }, { season: 2026, region: null }, "no region"],
-    [{ season: null, region: "EU" }, { season: null, region: "eu" }, "no season"],
-    [{ season: 2026, region: "EU" }, { season: 2026, region: "eu" }, "a season and a region"],
+    [{ region: null, season: null }, { region: null, season: null }, "no season and no region"],
+    [{ region: null, season: 2026 }, { region: null, season: 2026 }, "no region"],
+    [{ region: "EU", season: null }, { region: "eu", season: null }, "no season"],
+    [{ region: "EU", season: 2026 }, { region: "eu", season: 2026 }, "a season and a region"],
   ];
 
   await mapSequentially(twins, async ([first, twin, why]) => {
@@ -265,11 +265,11 @@ export const verifyCircuits = async ({
     ["Fake Raced", "fake raced"].map(
       async (name, index) =>
         await app.inject({
-          method: "POST",
-          url: "/circuits",
-          payload: { name, slug: `fake-raced-${index}`, season: 2026, sourceUrl: RULES },
-          remoteAddress: "127.0.0.1",
           headers: { cookie: staffCookie },
+          method: "POST",
+          payload: { name, season: 2026, slug: `fake-raced-${index}`, sourceUrl: RULES },
+          remoteAddress: "127.0.0.1",
+          url: "/circuits",
         }),
     ),
   );
@@ -303,8 +303,8 @@ export const verifyCircuits = async ({
   );
 
   const scale: CircuitScaleTier[] = [
-    { from: 2, to: 3, points: 6 },
-    { from: 1, to: 1, points: 10 },
+    { from: 2, points: 6, to: 3 },
+    { from: 1, points: 10, to: 1 },
   ];
 
   const stagePath = (id: string): string => `/circuits/${circuit.id}/stages/${id}`;
@@ -314,8 +314,8 @@ export const verifyCircuits = async ({
     stagePath(counted.id),
     {
       scale: [
-        { from: 1, to: 2, points: 5 },
-        { from: 2, to: 2, points: 1 },
+        { from: 1, points: 5, to: 2 },
+        { from: 2, points: 1, to: 2 },
       ],
       sourceUrl: RULES,
     },
@@ -345,8 +345,8 @@ export const verifyCircuits = async ({
       "set_circuit_stage_scale",
       {
         circuitId: circuit.id,
-        tournamentId: counted.id,
         scale,
+        tournamentId: counted.id,
       },
       toolFailure,
     ),
@@ -358,9 +358,9 @@ export const verifyCircuits = async ({
       "set_circuit_stage_scale",
       {
         circuitId: circuit.id,
-        tournamentId: counted.id,
         scale,
         sourceUrl: "https://www.blast.tv/rl/leaderboard/2026",
+        tournamentId: counted.id,
       },
       toolFailure,
     ),
@@ -370,9 +370,9 @@ export const verifyCircuits = async ({
 
   const proposal = await callTool("set_circuit_stage_scale", {
     circuitId: circuit.id,
-    tournamentId: counted.id,
     scale,
     sourceUrl: RULES,
+    tournamentId: counted.id,
   });
 
   assert.equal(proposal.status, "pending");
@@ -384,7 +384,7 @@ export const verifyCircuits = async ({
   const response6 = await request(
     "PUT",
     stagePath(pending.id),
-    { scale: [{ from: 1, to: 1, points: 3 }], sourceUrl: RULES },
+    { scale: [{ from: 1, points: 3, to: 1 }], sourceUrl: RULES },
     staffCookie,
   );
 
@@ -392,7 +392,7 @@ export const verifyCircuits = async ({
 
   assert.deepEqual(
     Object.fromEntries(detail.stages.map((stage) => [stage.tournament.id, stage.scale])),
-    { [counted.id]: scale.toReversed(), [pending.id]: [{ from: 1, to: 1, points: 3 }] },
+    { [counted.id]: scale.toReversed(), [pending.id]: [{ from: 1, points: 3, to: 1 }] },
     "the admin detail lists both stages with their scales sorted by placement",
   );
 
@@ -479,7 +479,7 @@ export const verifyCircuits = async ({
   await request(
     "PUT",
     stagePath(counted.id),
-    { scale, sourceUrl: RULES, regionTeamIds: [randomUUID()] },
+    { regionTeamIds: [randomUUID()], scale, sourceUrl: RULES },
     staffCookie,
     400,
   );
@@ -489,11 +489,11 @@ export const verifyCircuits = async ({
     "PUT",
     stagePath(counted.id),
     {
-      scale: [...scale, { from: 9, to: 12, points: 2 }],
+      finishes: [{ placement: 9, teamId: teamId("circuit-team-9803") }],
+      regionTeamIds: [teamId("circuit-team-9801"), teamId("circuit-team-9803")],
+      scale: [...scale, { from: 9, points: 2, to: 12 }],
       sourceUrl: RULES,
       worldwide: true,
-      regionTeamIds: [teamId("circuit-team-9801"), teamId("circuit-team-9803")],
-      finishes: [{ teamId: teamId("circuit-team-9803"), placement: 9 }],
     },
     staffCookie,
   );
@@ -525,11 +525,11 @@ export const verifyCircuits = async ({
   const created = await callTool(
     "create_circuit",
     {
-      name: "Fake Series 2026",
-      slug: "fake-season-2026",
-      season: 2026,
-      region: "Worldwide",
       description: "A fake circuit created through the MCP.",
+      name: "Fake Series 2026",
+      region: "Worldwide",
+      season: 2026,
+      slug: "fake-season-2026",
       sourceUrl: RULES,
     },
     circuitSummary,
@@ -539,8 +539,8 @@ export const verifyCircuits = async ({
   assert.equal(created.sourceUrl, RULES);
 
   const refusals: [Partial<CircuitSummary>, string][] = [
-    [{ slug: "fake-season-2026", name: "Another Fake", season: 2026 }, "a taken slug"],
-    [{ slug: "fake-twin", name: "fake series 2026", region: "worldwide" }, "a name twin"],
+    [{ name: "Another Fake", season: 2026, slug: "fake-season-2026" }, "a taken slug"],
+    [{ name: "fake series 2026", region: "worldwide", slug: "fake-twin" }, "a name twin"],
     [{ slug: "fake-lp", sourceUrl: "https://liquipedia.net/rocketleague/Fake" }, "Liquipedia"],
   ];
 
@@ -551,8 +551,8 @@ export const verifyCircuits = async ({
           "create_circuit",
           {
             name: "Fake Series 2026",
-            season: 2026,
             region: "Worldwide",
+            season: 2026,
             sourceUrl: RULES,
             ...refused,
           },
@@ -569,8 +569,8 @@ export const verifyCircuits = async ({
     "update_circuit",
     {
       idOrSlug: "fake-season-2026",
-      region: "EU",
       qualificationSpots: 1,
+      region: "EU",
     },
     circuitSummary,
   );
@@ -580,9 +580,9 @@ export const verifyCircuits = async ({
 
   const mcpProposal = await callTool("set_circuit_stage_scale", {
     circuitId: created.id,
-    tournamentId: counted.id,
     scale,
     sourceUrl: RULES,
+    tournamentId: counted.id,
   });
 
   const reviewResult2 = await review(mcpProposal);

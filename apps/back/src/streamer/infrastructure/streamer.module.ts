@@ -12,11 +12,12 @@ import { TwitchStreamerRepository } from "./persistence/twitch-streamer.reposito
 import { createTwitchSource } from "./twitch/create-twitch-source";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([TwitchStreamer]), RedisModule],
   controllers: [StreamerController],
+  imports: [MikroOrmModule.forFeature([TwitchStreamer]), RedisModule],
   providers: [
     TwitchStreamerRepository,
     {
+      inject: [TwitchStreamerRepository, RedisService, ConfigService],
       provide: StreamerService,
       useFactory: (
         streamers: TwitchStreamerRepository,
@@ -33,13 +34,12 @@ import { createTwitchSource } from "./twitch/create-twitch-source";
           (operation, error) => {
             log.warn({
               component: StreamerService.name,
+              error: error instanceof Error ? error : new Error(String(error)),
               message: "Live streamers degraded",
               operation,
-              error: error instanceof Error ? error : new Error(String(error)),
             });
           },
         ),
-      inject: [TwitchStreamerRepository, RedisService, ConfigService],
     },
   ],
 })

@@ -27,16 +27,16 @@ const [
   { data: teams, status: teamsStatus, error: teamsError, refresh: refreshTeams },
 ] = await Promise.all([
   useLazyAsyncData("admin-tournament-leagues", () => getTournamentLeagues(), {
-    server: false,
     default: () => [],
+    server: false,
   }),
   useLazyAsyncData("admin-manual-events", () => getManualEvents(), {
-    server: false,
     default: () => [],
+    server: false,
   }),
   useLazyAsyncData("admin-tournament-teams", () => getEveryTeam(), {
-    server: false,
     default: () => [],
+    server: false,
   }),
 ]);
 
@@ -55,8 +55,8 @@ const handleSubmit = async () => {
 
   if (validationError) {
     toast.add({
-      title: t(`page.tournaments.form.errors.${validationError}`),
       color: "error",
+      title: t(`page.tournaments.form.errors.${validationError}`),
     });
 
     return;
@@ -66,7 +66,7 @@ const handleSubmit = async () => {
 
   try {
     const created = await createTournament(buildManualTournamentPayload(formState.value, null));
-    toast.add({ title: t("page.tournaments.create.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.create.saved") });
     await navigateTo(localePath(`/tournaments/${created.id}/edit`));
   } catch (error) {
     reportError(error, t("page.tournaments.form.saveFailed"));

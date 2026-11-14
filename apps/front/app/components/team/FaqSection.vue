@@ -34,7 +34,7 @@ const formatMatchLine = (match: MatchListItem, live: boolean): string => {
 
   if (live) {
     return event
-      ? t("page.team.slug.faq.upcoming.matchLiveWithEvent", { opponent, event })
+      ? t("page.team.slug.faq.upcoming.matchLiveWithEvent", { event, opponent })
       : t("page.team.slug.faq.upcoming.matchLive", { opponent });
   }
 
@@ -43,8 +43,8 @@ const formatMatchLine = (match: MatchListItem, live: boolean): string => {
     : t("page.team.slug.faq.upcoming.dateTbd");
 
   return event
-    ? t("page.team.slug.faq.upcoming.matchVsWithEvent", { opponent, event, date })
-    : t("page.team.slug.faq.upcoming.matchVs", { opponent, date });
+    ? t("page.team.slug.faq.upcoming.matchVsWithEvent", { date, event, opponent })
+    : t("page.team.slug.faq.upcoming.matchVs", { date, opponent });
 };
 
 const faqItems = computed(() => {
@@ -66,23 +66,23 @@ const faqItems = computed(() => {
   const upcomingAnswer =
     matchLines.length > 0
       ? t("page.team.slug.faq.upcoming.answerWithMatches", {
-          name,
           matches: matchLines.join(", "),
+          name,
         })
       : t("page.team.slug.faq.upcoming.answerNone", { name });
 
   return [
     {
-      question: t("page.team.slug.faq.roster.question", { name }),
       answer: rosterAnswer,
+      question: t("page.team.slug.faq.roster.question", { name }),
     },
     {
-      question: t("page.team.slug.faq.rank.question", { name }),
       answer: t("page.team.slug.faq.rank.answerUnknown", { name }),
+      question: t("page.team.slug.faq.rank.question", { name }),
     },
     {
-      question: t("page.team.slug.faq.upcoming.question", { name }),
       answer: upcomingAnswer,
+      question: t("page.team.slug.faq.upcoming.question", { name }),
     },
   ];
 });

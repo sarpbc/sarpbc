@@ -13,7 +13,7 @@ import { Match } from "../src/tournament/domain/match";
 import { Tournament } from "../src/tournament/domain/tournament";
 import { TournamentParticipant } from "../src/tournament/domain/tournament-participant";
 
-const cup = { id: "cup", slug: "cup", name: "Cup" };
+const cup = { id: "cup", name: "Cup", slug: "cup" };
 
 export const kc = Object.assign(new Team(), {
   id: "kc",
@@ -34,7 +34,7 @@ export const vatira = Object.assign(new Player(), {
 export const mawkzy = Object.assign(new Player(), { id: "mawkzy", name: "M0nkey", slug: "m0nkey" });
 
 const side = (id: string, team: Team, players: Player[]): TournamentParticipant =>
-  Object.assign(new TournamentParticipant(), { id, team, players });
+  Object.assign(new TournamentParticipant(), { id, players, team });
 
 interface MatchSpec {
   id: string;
@@ -53,74 +53,74 @@ export const careerMatch = (spec: MatchSpec): Match => {
 
   return Object.assign(new Match(), {
     id: spec.id,
+    participants,
     source: spec.source ?? "manual",
     status: spec.finished === false ? "not_started" : "finished",
-    participants,
-    winner: spec.winner === null ? null : participants[spec.winner],
     tournament: {
-      id: `${spec.id}-stage`,
-      name: "Main Stage",
-      slug: "main-stage",
-      event: cup,
       beginAt: null,
-      league: null,
-      pickemsEnabled: false,
-      source: spec.tournamentSource ?? "manual",
-      pandascoreId: null,
-      streams: [],
+      event: cup,
       eventStreams: [],
+      id: `${spec.id}-stage`,
+      league: null,
+      name: "Main Stage",
+      pandascoreId: null,
+      pickemsEnabled: false,
+      slug: "main-stage",
+      source: spec.tournamentSource ?? "manual",
+      streams: [],
     },
+    winner: spec.winner === null ? null : participants[spec.winner],
   });
 };
 
 export const careerTitle = (id: string, source: DataSource): Tournament =>
   Object.assign(new Tournament(), {
+    endAt: new Date("2026-05-01T00:00:00.000Z"),
+    event: cup,
     id,
     name: `Title ${id}`,
     slug: id,
     source,
-    event: cup,
-    endAt: new Date("2026-05-01T00:00:00.000Z"),
   });
 
 export const careerAward = (id: string, source: DataSource): PlayerProfileAward => ({
-  id,
   awardType: "mvp",
+  id,
   tournament: {
+    endAt: null,
+    event: cup,
     id: `${id}-stage`,
     name: "Main Stage",
     slug: "main-stage",
     source,
-    endAt: null,
-    event: cup,
   },
 });
 
 export const zenSeasonAward: PlayerSeasonAward = {
-  id: "season-mvp",
   awardType: "season_mvp",
-  region: null,
+  id: "season-mvp",
   presentedBy: null,
-  sourceUrl: "https://rocketleague.com/news/season-mvp",
+  region: null,
   season: { id: "season-1", name: "2026 Season", slug: null },
+  sourceUrl: "https://rocketleague.com/news/season-mvp",
 };
 
 export const careerEarnings = (amount: number): ProfileEarnings => ({
-  totals: [{ currency: "USD", amount }],
+  totals: [{ amount, currency: "USD" }],
   years: [],
 });
 
 export const careerMatches: Match[] = [
   careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 }),
-  careerMatch({ id: "rematch", sides: [[zen], [vatira]], winner: 1, source: "pandascore" }),
-  careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], winner: 0, source: "startgg" }),
+  careerMatch({ id: "rematch", sides: [[zen], [vatira]], source: "pandascore", winner: 1 }),
+  careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], source: "startgg", winner: 0 }),
   careerMatch({
     id: "startgg-stage",
     sides: [[vatira], [zen]],
-    winner: 0,
     tournamentSource: "startgg",
+    winner: 0,
   }),
-  careerMatch({ id: "upcoming", sides: [[zen], [mawkzy]], winner: null, finished: false }),
+  careerMatch({ finished: false, id: "upcoming", sides: [[zen], [mawkzy]], winner: null }),
   careerMatch({ id: "groups", sides: [[zen], [mawkzy]], winner: 0 }),
   careerMatch({ id: "scrim-cup", sides: [[zen, vatira], [mawkzy]], winner: 1 }),
 ];
@@ -129,11 +129,11 @@ export const careerSources = () => {
   const players = [zen, vatira, mawkzy];
 
   const contract = Object.assign(new Contract(), {
+    endDate: null,
     id: "zen-kc",
     player: zen,
-    team: kc,
     startDate: new Date("2023-01-01T00:00:00.000Z"),
-    endDate: null,
+    team: kc,
   });
 
   const playerEarnings = vi.fn<PlayerComparisonSources["prizes"]["playerEarnings"]>(
@@ -142,17 +142,14 @@ export const careerSources = () => {
   );
 
   const sources = {
-    players: {
-      findBySlug: async (slug: string) => players.find((player) => player.slug === slug) ?? null,
+    awards: {
+      findByPlayerId: async (playerId: string) =>
+        playerId === zen.id
+          ? [careerAward("major-mvp", "pandascore"), careerAward("open-mvp", "startgg")]
+          : [],
     },
     contracts: {
       getContractsByPlayer: async (playerId: string) => (playerId === zen.id ? [contract] : []),
-    },
-    tournaments: {
-      getTournamentsWonByPlayer: async (playerId: string) =>
-        playerId === zen.id
-          ? [careerTitle("rlcs", "pandascore"), careerTitle("open", "startgg")]
-          : [],
     },
     matches: {
       getMatchesByPlayer: async (playerId: string) =>
@@ -160,17 +157,20 @@ export const careerSources = () => {
           participants.some((participant) => participant.players.some(({ id }) => id === playerId)),
         ),
     },
-    prizes: { playerEarnings },
-    awards: {
-      findByPlayerId: async (playerId: string) =>
-        playerId === zen.id
-          ? [careerAward("major-mvp", "pandascore"), careerAward("open-mvp", "startgg")]
-          : [],
+    players: {
+      findBySlug: async (slug: string) => players.find((player) => player.slug === slug) ?? null,
     },
+    prizes: { playerEarnings },
     seasons: {
       awardsOfPlayer: async (playerId: string) => (playerId === zen.id ? [zenSeasonAward] : []),
     },
+    tournaments: {
+      getTournamentsWonByPlayer: async (playerId: string) =>
+        playerId === zen.id
+          ? [careerTitle("rlcs", "pandascore"), careerTitle("open", "startgg")]
+          : [],
+    },
   } satisfies PlayerComparisonSources;
 
-  return { sources, playerEarnings };
+  return { playerEarnings, sources };
 };

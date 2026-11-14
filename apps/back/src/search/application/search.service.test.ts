@@ -29,17 +29,17 @@ describe(SearchService, () => {
     tournamentService.searchByName.mockResolvedValue([rlcs]);
 
     const result = await service.search({
-      query: "rl",
-      type: "all",
       limit: 10,
       offset: 0,
+      query: "rl",
+      type: "all",
     });
 
     expect(result.tournaments).toStrictEqual([rlcs]);
     expect(result.total.tournaments).toBe(1);
     expect(tournamentService.searchByName).toHaveBeenCalledWith({
-      name: "rl",
       limit: 5,
+      name: "rl",
       offset: 0,
     });
   });
@@ -49,9 +49,9 @@ describe(SearchService, () => {
       source.mockResolvedValue([]);
     }
 
-    await service.search({ query: "rl", type: "all", limit: 5, offset: 3 });
+    await service.search({ limit: 5, offset: 3, query: "rl", type: "all" });
 
-    const page = { name: "rl", limit: 3, offset: 1 };
+    const page = { limit: 3, name: "rl", offset: 1 };
     expect(playerService.find).toHaveBeenCalledWith(page);
     expect(teamService.find).toHaveBeenCalledWith(page);
     expect(tournamentService.searchByName).toHaveBeenCalledWith(page);
@@ -63,9 +63,9 @@ describe(SearchService, () => {
   ] as const)("searches only %ss when type is %s", async (type, seed, source) => {
     seed();
 
-    const result = await service.search({ query: "rl", type, limit: 4, offset: 1 });
+    const result = await service.search({ limit: 4, offset: 1, query: "rl", type });
 
-    expect(source).toHaveBeenCalledWith({ name: "rl", limit: 4, offset: 1 });
+    expect(source).toHaveBeenCalledWith({ limit: 4, name: "rl", offset: 1 });
     expect(result.total).toStrictEqual({
       players: type === "player" ? 1 : 0,
       teams: type === "team" ? 1 : 0,
@@ -78,10 +78,10 @@ describe(SearchService, () => {
     tournamentService.searchByName.mockResolvedValue([tournament("t1")]);
 
     const result = await service.search({
-      query: "major",
-      type: "tournament",
       limit: 8,
       offset: 2,
+      query: "major",
+      type: "tournament",
     });
 
     expect(playerService.find).not.toHaveBeenCalled();
@@ -89,8 +89,8 @@ describe(SearchService, () => {
     expect(result.players).toStrictEqual([]);
     expect(result.teams).toStrictEqual([]);
     expect(tournamentService.searchByName).toHaveBeenCalledWith({
-      name: "major",
       limit: 8,
+      name: "major",
       offset: 2,
     });
   });

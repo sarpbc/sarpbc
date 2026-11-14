@@ -33,13 +33,13 @@ const loadOwner = async (scope: ViewershipScope, owner: ViewershipOwner): Promis
       const stages = await scope.events.stages(event.id);
 
       return {
-        viewership: event.viewership,
         redistributable:
           stages.length === 0 || stages.some((stage) => isRedistributable(stage.source)),
         save: async (viewership) => {
           event.viewership = viewership;
           await scope.events.save(event);
         },
+        viewership: event.viewership,
       };
     }
 
@@ -51,13 +51,13 @@ const loadOwner = async (scope: ViewershipScope, owner: ViewershipOwner): Promis
       }
 
       return {
-        viewership: match.viewership,
         redistributable:
           isRedistributable(match.source) && isRedistributable(match.tournament.source),
         save: async (viewership) => {
           match.viewership = viewership;
           await scope.matches.save(match);
         },
+        viewership: match.viewership,
       };
     }
 

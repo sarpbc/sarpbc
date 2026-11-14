@@ -4,15 +4,15 @@ import { toolFailure } from "./support.mts";
 import type { CallTool, Request, Review } from "./support.mts";
 
 const stream = z.strictObject({
-  url: z.string(),
-  platform: z.string(),
   channel: z.string().nullable(),
-  language: z.string(),
   kind: z.string(),
+  language: z.string(),
+  platform: z.string(),
   source: z.string(),
+  url: z.string(),
 });
 
-const streamsResponse = z.object({ streams: z.array(stream), inherited: z.array(stream) });
+const streamsResponse = z.object({ inherited: z.array(stream), streams: z.array(stream) });
 
 const watchedMatch = z.object({ match: z.object({ watchStreams: z.array(stream) }) });
 
@@ -77,7 +77,7 @@ export const verifyStreams = async ({
     "PUT",
     eventPath,
     {
-      streams: [{ url: "https://twitch.tv/integration_event", language: "en", kind: "official" }],
+      streams: [{ kind: "official", language: "en", url: "https://twitch.tv/integration_event" }],
     },
     staffCookie,
   );
@@ -85,25 +85,25 @@ export const verifyStreams = async ({
   const event = response3.json(z.unknown());
 
   assert.deepEqual(event, {
+    inherited: [],
     streams: [
       {
-        url: "https://twitch.tv/integration_event",
-        platform: "twitch",
         channel: "integration_event",
-        language: "en",
         kind: "official",
+        language: "en",
+        platform: "twitch",
         source: "manual",
+        url: "https://twitch.tv/integration_event",
       },
     ],
-    inherited: [],
   });
   const stageResult2 = await stage();
   assert.deepEqual(urls(stageResult2.watchStreams), ["https://twitch.tv/integration_event"]);
   assert.deepEqual(urls(await watched()), ["https://twitch.tv/integration_event"]);
 
   const tournamentList = [
-    { url: "https://twitch.tv/integration_cup", language: "en", kind: "official" },
-    { url: "https://kick.com/integration_fr", language: "FR", kind: "costream" },
+    { kind: "official", language: "en", url: "https://twitch.tv/integration_cup" },
+    { kind: "costream", language: "FR", url: "https://kick.com/integration_fr" },
   ];
 
   const response4 = await request("PUT", tournamentPath, { streams: tournamentList }, staffCookie);
@@ -127,12 +127,12 @@ export const verifyStreams = async ({
   );
   const response5 = await request("GET", matchPath, undefined, staffCookie);
   assert.deepEqual(response5.json(z.unknown()), {
-    streams: [],
     inherited: saved.streams,
+    streams: [],
   });
 
   const override = [
-    { url: "https://www.youtube.com/@IntegrationB/live", language: "en", kind: "official" },
+    { kind: "official", language: "en", url: "https://www.youtube.com/@IntegrationB/live" },
   ];
 
   const response6 = await request("PUT", matchPath, { streams: override }, staffCookie);
@@ -150,14 +150,14 @@ export const verifyStreams = async ({
   await request(
     "PUT",
     matchPath,
-    { streams: [{ url: "http://twitch.tv/insecure", language: "en", kind: "official" }] },
+    { streams: [{ kind: "official", language: "en", url: "http://twitch.tv/insecure" }] },
     staffCookie,
     400,
   );
   await request(
     "PUT",
     matchPath,
-    { streams: [{ url: "https://www.youtube.com/watch?v=x", language: "en", kind: "official" }] },
+    { streams: [{ kind: "official", language: "en", url: "https://www.youtube.com/watch?v=x" }] },
     staffCookie,
     400,
   );
@@ -198,7 +198,7 @@ export const verifyStreams = async ({
     `/tournaments/${startggCup.id}/streams`,
     {
       streams: [
-        { url: "https://twitch.tv/integration_startgg_cup", language: "en", kind: "official" },
+        { kind: "official", language: "en", url: "https://twitch.tv/integration_startgg_cup" },
       ],
     },
     staffCookie,
@@ -225,9 +225,9 @@ export const verifyStreamProposals = async ({
   match,
 }: StreamProposalsContext): Promise<void> => {
   const proposed = {
-    url: "https://twitch.tv/integration_startgg",
-    language: "en",
     kind: "official",
+    language: "en",
+    url: "https://twitch.tv/integration_startgg",
   };
 
   const refused = await callTool(
@@ -239,9 +239,9 @@ export const verifyStreamProposals = async ({
   assert.deepEqual(refused, { error: true }, "set_match_streams requires a sourceUrl");
 
   const startgg = await callTool("set_tournament_streams", {
-    tournamentId: tournament.id,
-    streams: [proposed],
     sourceUrl: "https://www.start.gg/tournament/integration/event/main",
+    streams: [proposed],
+    tournamentId: tournament.id,
   });
 
   assert.equal(startgg.status, "pending");
@@ -284,15 +284,15 @@ export const verifyStreamProposals = async ({
 
   const manual = await callTool("set_match_streams", {
     matchId: match.id,
+    sourceUrl: "https://x.com/integration/status/2",
     streams: [
       {
-        url: "https://twitch.tv/integration_b",
-        language: "fr",
-        kind: "costream",
         channel: "Integration B",
+        kind: "costream",
+        language: "fr",
+        url: "https://twitch.tv/integration_b",
       },
     ],
-    sourceUrl: "https://x.com/integration/status/2",
   });
 
   const reviewResult2 = await review(manual);

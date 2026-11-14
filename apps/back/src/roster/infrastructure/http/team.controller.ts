@@ -54,15 +54,15 @@ export class TeamController {
   @Get()
   async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryInput) {
     const [teams, count] = await this.teamService.findAndCount({
-      name: query.name,
-      start: query.start,
       limit: query.limit,
+      name: query.name,
       offset: query.offset,
+      start: query.start,
     });
 
     return {
-      teams: teams.map((team) => mapTeam(team)),
       count,
+      teams: teams.map((team) => mapTeam(team)),
     };
   }
 

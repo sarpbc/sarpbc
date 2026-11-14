@@ -28,8 +28,8 @@ onMounted(() => {
 });
 
 setPageSeo({
-  title: t("page.game.career.seo.title"),
   description: t("page.game.career.seo.description"),
+  title: t("page.game.career.seo.title"),
 });
 
 const handleShare = () => {
@@ -63,20 +63,20 @@ const confirmCopy = computed(() => {
   switch (pendingConfirm.value) {
     case "abandon": {
       return {
-        title: t("page.game.career.actions.abandonConfirm"),
         action: t("page.game.career.actions.abandon"),
+        title: t("page.game.career.actions.abandonConfirm"),
       };
     }
 
     case "newCareer": {
       return {
-        title: t("page.game.career.menu.newCareerConfirm"),
         action: t("page.game.career.menu.newCareer"),
+        title: t("page.game.career.menu.newCareerConfirm"),
       };
     }
 
     case undefined: {
-      return { title: "", action: "" };
+      return { action: "", title: "" };
     }
 
     default: {

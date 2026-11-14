@@ -71,7 +71,7 @@ export class TournamentSyncRunner {
       const synced = outcomes.filter(Boolean).length;
       const failed = outcomes.length - synced;
 
-      log.set({ sync: { synced, failed } });
+      log.set({ sync: { failed, synced } });
     } catch (error) {
       log.error(error instanceof Error ? error : new Error(String(error)));
     } finally {
@@ -81,8 +81,8 @@ export class TournamentSyncRunner {
 
   private async findPandascoreActiveIds(now: Date): Promise<string[]> {
     const active = await this.tournaments.findPandascoreActive({
-      beginsBefore: new Date(now.getTime() + 24 * HOUR_MS),
       beganAfter: new Date(now.getTime() - 7 * 24 * HOUR_MS),
+      beginsBefore: new Date(now.getTime() + 24 * HOUR_MS),
       endsAfter: new Date(now.getTime() - 6 * HOUR_MS),
     });
 

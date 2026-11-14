@@ -73,9 +73,9 @@ describe("native Nest Zod validation over Fastify", () => {
     });
 
     expect(query.statusCode).toBe(200);
-    expect(query.json()).toStrictEqual({ limit: 3, offset: 2, pickems: false, activeOnly: true });
+    expect(query.json()).toStrictEqual({ activeOnly: true, limit: 3, offset: 2, pickems: false });
     const notifications = await app.inject({ method: "GET", url: "/notifications" });
-    expect(notifications.json()).toStrictEqual({ page: 0, limit: 30 });
+    expect(notifications.json()).toStrictEqual({ limit: 30, page: 0 });
   });
 
   it.each([
@@ -91,19 +91,19 @@ describe("native Nest Zod validation over Fastify", () => {
   });
 
   const post = {
+    content: "Great game",
     id: "11111111-1111-4111-8111-111111111111",
     title: "Final",
-    content: "Great game",
     topicId: "22222222-2222-4222-8222-222222222222",
   };
 
   it("validates nested translations and rejects nested unknown fields", async () => {
-    const translation = { locale: "fr-FR", title: "Finale", content: "Beau match" };
+    const translation = { content: "Beau match", locale: "fr-FR", title: "Finale" };
 
     const accepted = await app.inject({
       method: "POST",
-      url: "/posts",
       payload: { ...post, translations: [translation] },
+      url: "/posts",
     });
 
     expect(accepted.statusCode).toBe(201);
@@ -118,8 +118,8 @@ describe("native Nest Zod validation over Fastify", () => {
         async (translations) =>
           await app.inject({
             method: "POST",
-            url: "/posts",
             payload: { ...post, translations },
+            url: "/posts",
           }),
       ),
     );
@@ -132,29 +132,29 @@ describe("native Nest Zod validation over Fastify", () => {
   it("keeps explicit null clears and rejects duplicate tournament teams", async () => {
     const cleared = await app.inject({
       method: "POST",
-      url: "/tournament",
       payload: {
-        name: "  RLCS  ",
-        leagueId: null,
         beginAt: "2026-10-17",
         endAt: null,
         imageUrl: null,
+        leagueId: null,
+        name: "  RLCS  ",
       },
+      url: "/tournament",
     });
 
     expect(cleared.statusCode).toBe(201);
     expect(cleared.json()).toStrictEqual({
-      name: "RLCS",
-      leagueId: null,
       beginAt: "2026-10-17",
       endAt: null,
       imageUrl: null,
+      leagueId: null,
+      name: "RLCS",
     });
 
     const duplicate = await app.inject({
       method: "POST",
-      url: "/tournament",
       payload: { teamIds: [post.id, post.id] },
+      url: "/tournament",
     });
 
     expect(duplicate.statusCode).toBe(400);
@@ -163,22 +163,22 @@ describe("native Nest Zod validation over Fastify", () => {
   it("normalizes empty French translations and rejects non-string translations safely", async () => {
     const accepted = await app.inject({
       method: "POST",
+      payload: { content: "Content", contentFr: " Texte ", title: "News", titleFr: "  " },
       url: "/news",
-      payload: { title: "News", content: "Content", titleFr: "  ", contentFr: " Texte " },
     });
 
     expect(accepted.statusCode).toBe(201);
     expect(accepted.json()).toStrictEqual({
-      title: "News",
       content: "Content",
-      titleFr: null,
       contentFr: "Texte",
+      title: "News",
+      titleFr: null,
     });
 
     const rejected = await app.inject({
       method: "POST",
+      payload: { content: "Content", title: "News", titleFr: 42 },
       url: "/news",
-      payload: { title: "News", content: "Content", titleFr: 42 },
     });
 
     expect(rejected.statusCode).toBe(400);
@@ -189,8 +189,8 @@ describe("native Nest Zod validation over Fastify", () => {
     async (imageUrl) => {
       const response = await app.inject({
         method: "POST",
+        payload: { content: "Content", imageUrl, title: "News" },
         url: "/news",
-        payload: { title: "News", content: "Content", imageUrl },
       });
 
       expect(response.statusCode).toBe(400);

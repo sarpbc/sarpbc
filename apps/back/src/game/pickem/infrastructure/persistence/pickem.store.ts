@@ -14,13 +14,13 @@ import type {
 } from "../../application/ports";
 
 const toPick = (row: PickemChoice): Pick => ({
+  createdAt: new Date(row.createdAt),
   id: row.id,
-  user: { id: row.user.id },
   match: { id: row.match.id },
   pickedParticipant: { id: row.pickedParticipant.id },
   points: row.points,
   scored: row.scored,
-  createdAt: new Date(row.createdAt),
+  user: { id: row.user.id },
 });
 
 const toNamedPick = (row: PickemChoice): NamedPick => ({
@@ -63,18 +63,30 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
   async run<T>(work: (scope: PickemWrites) => Promise<T>): Promise<T> {
     return await this.em.transactional(async (tx) => {
       const scope: PickemWrites = {
-        userExists: async (id) => !!(await tx.findOne(User, { id })),
         participantExists: async (id) => !!(await tx.findOne(TournamentParticipant, { id })),
         pick: async (userId, matchId) => {
           await lockMatchPicks(tx, matchId);
 
           const row = await tx.findOne(
             PickemChoice,
-            { user: { id: userId }, match: { id: matchId } },
+            { match: { id: matchId }, user: { id: userId } },
             { populate: ["user", "match", "pickedParticipant"], refresh: true },
           );
 
           return row ? toPick(row) : null;
+        },
+        savePick: async (pick) => {
+          const row = (await tx.findOne(PickemChoice, { id: pick.id })) ?? new PickemChoice();
+          Object.assign(row, {
+            createdAt: pick.createdAt,
+            id: pick.id,
+            match: tx.getReference(Match, pick.match.id),
+            pickedParticipant: tx.getReference(TournamentParticipant, pick.pickedParticipant.id),
+            points: pick.points,
+            scored: pick.scored,
+            user: tx.getReference(User, pick.user.id),
+          });
+          tx.persist(row);
         },
         unscored: async (matchId) => {
           await lockMatchPicks(tx, matchId);
@@ -87,19 +99,7 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
 
           return rows.map(toPick);
         },
-        savePick: async (pick) => {
-          const row = (await tx.findOne(PickemChoice, { id: pick.id })) ?? new PickemChoice();
-          Object.assign(row, {
-            id: pick.id,
-            user: tx.getReference(User, pick.user.id),
-            match: tx.getReference(Match, pick.match.id),
-            pickedParticipant: tx.getReference(TournamentParticipant, pick.pickedParticipant.id),
-            points: pick.points,
-            scored: pick.scored,
-            createdAt: pick.createdAt,
-          });
-          tx.persist(row);
-        },
+        userExists: async (id) => !!(await tx.findOne(User, { id })),
       };
 
       const result = await work(scope);

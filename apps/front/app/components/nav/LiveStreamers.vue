@@ -21,7 +21,7 @@ const { stop } = useIntersectionObserver(
 );
 
 const viewerFormatter = computed(
-  () => new Intl.NumberFormat(locale.value, { notation: "compact", maximumFractionDigits: 1 }),
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1, notation: "compact" }),
 );
 
 const viewerPlurals = computed(() => new Intl.PluralRules(locale.value));

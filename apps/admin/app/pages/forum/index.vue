@@ -22,18 +22,18 @@ const columns: TableColumn<ForumPostListItem>[] = [
     header: t("page.forum.columns.author"),
   },
   {
-    id: "topic",
-    header: t("page.forum.columns.topic"),
     cell: ({ row }) => row.original.topic.title,
+    header: t("page.forum.columns.topic"),
+    id: "topic",
   },
   {
     accessorKey: "createdAt",
-    header: t("page.forum.columns.createdAt"),
     cell: ({ row }) => new Date(row.original.createdAt).toLocaleString(),
+    header: t("page.forum.columns.createdAt"),
   },
   {
-    id: "actions",
     header: "",
+    id: "actions",
   },
 ];
 

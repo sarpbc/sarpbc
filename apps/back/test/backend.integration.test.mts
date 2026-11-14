@@ -55,7 +55,7 @@ const userBody = identified.extend({ userName: z.string() });
 
 const articleBody = identified.extend({ slug: z.string(), title: z.string() });
 
-const teamBody = identified.extend({ slug: z.string(), name: z.string() });
+const teamBody = identified.extend({ name: z.string(), slug: z.string() });
 
 const playerBody = identified.extend({ slug: z.string() });
 
@@ -69,26 +69,26 @@ const contractBody = identified.extend({ team: identified });
 
 const participantBody = identified.extend({ team: teamBody });
 
-const eventBody = identified.extend({ slug: z.string(), name: z.string() });
+const eventBody = identified.extend({ name: z.string(), slug: z.string() });
 
 const tournamentBody = identified.extend({
-  slug: z.string(),
-  source: z.string(),
   event: eventBody,
   participants: z.array(participantBody),
+  slug: z.string(),
+  source: z.string(),
 });
 
 const transferBody = z.object({
-  type: z.string(),
   date: z.string(),
   team: z.object({ slug: z.string() }),
+  type: z.string(),
 });
 
 const vodBody = z.object({
   game: z.number(),
-  url: z.string(),
   language: z.string(),
   source: z.string().optional(),
+  url: z.string(),
 });
 
 const tokenBody = identified.extend({ token: z.string() });
@@ -115,11 +115,11 @@ const notificationBody = identified.extend({ targetPath: z.string() });
 type ContractWhere = FilterQuery<ContractEntity>;
 
 const mcpContract = identified.extend({
-  team: identified,
-  startDate: z.string(),
   endDate: z.string().nullable(),
-  role: z.string(),
   leaveSourceUrl: z.string().nullable(),
+  role: z.string(),
+  startDate: z.string(),
+  team: identified,
 });
 
 interface ContractChanges {
@@ -137,12 +137,12 @@ const mcpLimitedMatch = identified.extend({ participants: z.undefined().optional
 const mcpCreatedTournament = identified.extend({ participants: z.array(participantBody) });
 
 const mcpTournament = identified.extend({
-  participants: z.array(participantBody),
   matches: z.array(
     identified.extend({
       participants: z.array(z.object({ team: z.object({ name: z.string() }) })),
     }),
   ),
+  participants: z.array(participantBody),
 });
 
 const mcpLimitedTournament = identified.extend({ participants: z.undefined().optional() });
@@ -153,9 +153,9 @@ interface Mergeable {
 }
 
 const postBody = identified.extend({
-  title: z.string(),
   publicId: z.number(),
   slug: z.string(),
+  title: z.string(),
 });
 
 const matchBody = identified.extend({ publicId: z.number(), slug: z.string() });
@@ -186,8 +186,8 @@ const rpcMessage = z.object({
   error: z.unknown().optional(),
   result: z
     .object({
-      isError: z.boolean().optional(),
       content: z.array(z.object({ text: z.string() })).optional(),
+      isError: z.boolean().optional(),
     })
     .optional(),
 });
@@ -299,9 +299,9 @@ describe("backend integration", () => {
         composeImage("postgres"),
         5432,
         {
-          POSTGRES_USER: "integration",
-          POSTGRES_PASSWORD: "integration-only",
           POSTGRES_DB: "integration",
+          POSTGRES_PASSWORD: "integration-only",
+          POSTGRES_USER: "integration",
         },
         ["pg_isready", "-U", "integration", "-d", "integration"],
       );
@@ -312,26 +312,26 @@ describe("backend integration", () => {
       ]);
 
       Object.assign(process.env, {
-        NODE_ENV: "test",
+        ADMIN_URL: "http://127.0.0.1:4002",
         DB_HOST: "127.0.0.1",
-        DB_PORT: String(pgPort),
         DB_NAME: "integration",
-        DB_USER: "integration",
         DB_PASSWORD: "integration-only",
-        REDIS_HOST: "127.0.0.1",
-        REDIS_PORT: String(redisPort),
-        JWT_KEY: "integration-only-key-never-for-production",
-        PANDASCORE_API_TOKEN: "integration-not-a-real-token",
+        DB_PORT: String(pgPort),
+        DB_USER: "integration",
+        FRONT_URL: "http://127.0.0.1:4000",
         GOOGLE_CLIENT_ID: "integration",
         GOOGLE_CLIENT_SECRET: "",
         GOOGLE_REDIRECT_URI: "http://127.0.0.1/auth/google/callback",
-        FRONT_URL: "http://127.0.0.1:4000",
-        ADMIN_URL: "http://127.0.0.1:4002",
+        JWT_KEY: "integration-only-key-never-for-production",
+        NODE_ENV: "test",
+        PANDASCORE_API_TOKEN: "integration-not-a-real-token",
+        REDIS_HOST: "127.0.0.1",
+        REDIS_PORT: String(redisPort),
       });
       await import("reflect-metadata");
       const { initLogger } = await import("evlog");
       initLogger({
-        env: { service: "backend-integration", environment: "test" },
+        env: { environment: "test", service: "backend-integration" },
       });
       const { NestFactory } = await import("@nestjs/core");
       const { FastifyAdapter } = await import("@nestjs/platform-fastify");
@@ -345,8 +345,8 @@ describe("backend integration", () => {
         AppModule,
         new FastifyAdapter(),
         {
-          logger: false,
           abortOnError: false,
+          logger: false,
         },
       );
 
@@ -383,11 +383,11 @@ describe("backend integration", () => {
         }
 
         const response = await app.inject({
+          headers: requestHeaders,
           method,
-          url,
           payload,
           remoteAddress: "127.0.0.1",
-          headers: requestHeaders,
+          url,
         });
 
         assert.equal(response.statusCode, status, `${method} ${url}: ${response.body}`);
@@ -416,9 +416,9 @@ describe("backend integration", () => {
       ]);
 
       const rosterRows = {
+        Contract: ContractRow,
         Player: PlayerRow,
         PlayerPhoto: PlayerPhotoRow,
-        Contract: ContractRow,
         Team: TeamRow,
       };
 
@@ -446,9 +446,9 @@ describe("backend integration", () => {
         async () => {
           orm.config.set("migrations", {
             ...orm.config.get("migrations"),
+            emit: "js",
             path: nodePath.resolve(root, "dist/infrastructure/database/migrations"),
             pathTs: undefined,
-            emit: "js",
             snapshot: false,
           });
           const { migrator } = orm;
@@ -481,8 +481,8 @@ describe("backend integration", () => {
             cookies(
               await request("POST", "/auth/signup", {
                 email,
-                userName,
                 password: "integration-password",
+                userName,
               }),
             );
 
@@ -531,10 +531,10 @@ describe("backend integration", () => {
           "POST",
           "/news",
           {
-            title: "Integration News",
             content: "<p>Published report</p>",
-            titleFr: "Actualité intégration",
             contentFr: "<p>Rapport français</p>",
+            title: "Integration News",
+            titleFr: "Actualité intégration",
           },
           staffCookie,
           201,
@@ -558,7 +558,7 @@ describe("backend integration", () => {
         const response8 = await request(
           "POST",
           "/news",
-          { title: "Integration Secret Draft", content: "<p>Not public</p>" },
+          { content: "<p>Not public</p>", title: "Integration Secret Draft" },
           staffCookie,
           201,
         );
@@ -632,10 +632,10 @@ describe("backend integration", () => {
           "POST",
           "/player",
           {
-            name: "Integration Player",
-            teamId: team.id,
-            nationality: "FR",
             imageUrl: "https://example.test/original.jpg",
+            name: "Integration Player",
+            nationality: "FR",
+            teamId: team.id,
           },
           staffCookie,
           201,
@@ -680,7 +680,7 @@ describe("backend integration", () => {
         const response23 = await request(
           "POST",
           `/player/${player.id}/contract`,
-          { teamId: team.id, startDate: "2026-01-01" },
+          { startDate: "2026-01-01", teamId: team.id },
           staffCookie,
           201,
         );
@@ -703,7 +703,7 @@ describe("backend integration", () => {
         await request(
           "POST",
           `/player/${player.id}/contract`,
-          { teamId: otherTeam.id, startDate: "2025-03-01", endDate: "2025-12-31", role: "benched" },
+          { endDate: "2025-12-31", role: "benched", startDate: "2025-03-01", teamId: otherTeam.id },
           staffCookie,
           201,
         );
@@ -755,9 +755,9 @@ describe("backend integration", () => {
             "POST",
             `/tournaments/${tournament.id}/matches`,
             {
+              beginAt: new Date(Date.now() + 86_400_000).toISOString(),
               name: "Integration Final",
               participantIds: tournament.participants.map((p) => p.id),
-              beginAt: new Date(Date.now() + 86_400_000).toISOString(),
               status: "not_started",
             },
             staffCookie,
@@ -896,9 +896,9 @@ describe("backend integration", () => {
 
       await check("per-game VOD links persist as validated jsonb on the match", async () => {
         const vods = [
-          { game: 2, url: "https://youtu.be/second?t=1h2m3s", language: "FR" },
-          { game: 1, url: "https://www.twitch.tv/videos/1?t=95", language: "en" },
-          { game: 1, url: "https://www.twitch.tv/videos/1?t=95", language: "en" },
+          { game: 2, language: "FR", url: "https://youtu.be/second?t=1h2m3s" },
+          { game: 1, language: "en", url: "https://www.twitch.tv/videos/1?t=95" },
+          { game: 1, language: "en", url: "https://www.twitch.tv/videos/1?t=95" },
         ];
 
         await request("PUT", `/tournaments/matches/${match.id}/vods`, { vods }, memberCookie, 403);
@@ -914,8 +914,8 @@ describe("backend integration", () => {
           .match.vods;
 
         const expected = [
-          { game: 1, url: "https://www.twitch.tv/videos/1?t=95", language: "en", source: "twitch" },
-          { game: 2, url: "https://youtu.be/second?t=1h2m3s", language: "fr", source: "youtube" },
+          { game: 1, language: "en", source: "twitch", url: "https://www.twitch.tv/videos/1?t=95" },
+          { game: 2, language: "fr", source: "youtube", url: "https://youtu.be/second?t=1h2m3s" },
         ];
 
         assert.deepEqual(saved, expected);
@@ -933,7 +933,7 @@ describe("backend integration", () => {
         await request(
           "PUT",
           `/tournaments/matches/${match.id}/vods`,
-          { vods: [{ game: 1, url: "http://youtu.be/x", language: "en" }] },
+          { vods: [{ game: 1, language: "en", url: "http://youtu.be/x" }] },
           staffCookie,
           400,
         );
@@ -965,23 +965,23 @@ describe("backend integration", () => {
             "POST",
             "/mcp",
             {
-              jsonrpc: "2.0",
               id: game,
+              jsonrpc: "2.0",
               method: "tools/call",
               params: {
-                name: "set_match_game_vods",
                 arguments: {
-                  matchId: match.id,
                   game,
-                  links: [{ url: `https://youtu.be/game${game}`, language: "en" }],
+                  links: [{ language: "en", url: `https://youtu.be/game${game}` }],
+                  matchId: match.id,
                 },
+                name: "set_match_game_vods",
               },
             },
             undefined,
             200,
             {
-              authorization: `Bearer ${token.token}`,
               accept: "application/json, text/event-stream",
+              authorization: `Bearer ${token.token}`,
               "content-type": "application/json",
             },
           );
@@ -1000,7 +1000,7 @@ describe("backend integration", () => {
       await check(
         "watch streams inherit from event to tournament to match and a match override replaces them",
         async () => {
-          await verifyStreams({ request, staffCookie, memberCookie, tournament, match });
+          await verifyStreams({ match, memberCookie, request, staffCookie, tournament });
         },
       );
 
@@ -1009,24 +1009,24 @@ describe("backend integration", () => {
         "series lineups replace per match, flag stand-ins and keep start.gg lineups on the site",
         async () => {
           lineupFixtures = await verifyLineups({
+            match,
+            memberCookie,
+            player,
             request,
             staffCookie,
-            memberCookie,
             tournament,
-            match,
-            player,
           });
         },
       );
       await check("staff enter credited viewership on matches and events", async () => {
-        await verifyViewership({ request, staffCookie, memberCookie, tournament, match });
+        await verifyViewership({ match, memberCookie, request, staffCookie, tournament });
       });
 
       let aliasFixtures: Awaited<ReturnType<typeof verifyTeamAliases>>;
       await check(
         "dated team aliases name past stages and matches, feed search and refuse Liquipedia",
         async () => {
-          aliasFixtures = await verifyTeamAliases({ request, staffCookie, memberCookie });
+          aliasFixtures = await verifyTeamAliases({ memberCookie, request, staffCookie });
         },
       );
 
@@ -1035,8 +1035,8 @@ describe("backend integration", () => {
         async () => {
           assert.equal(tournament.slug, "integration-cup");
           assert.deepEqual(
-            { slug: tournament.event.slug, name: tournament.event.name },
-            { slug: "integration-cup", name: "Integration Cup" },
+            { name: tournament.event.name, slug: tournament.event.slug },
+            { name: "Integration Cup", slug: "integration-cup" },
           );
           const response42 = await request("GET", "/events?limit=100");
           const listed = response42.json(eventList);
@@ -1059,11 +1059,11 @@ describe("backend integration", () => {
 
           const event = response45.json(
             z.object({
-              kind: z.string(),
               event: z.object({
                 slug: z.string(),
                 stages: z.array(z.object({ id: z.string(), matches: z.array(identified) })),
               }),
+              kind: z.string(),
             }),
           );
 
@@ -1091,8 +1091,8 @@ describe("backend integration", () => {
               resolvedStage,
               z.object({
                 tournament: z.object({
-                  slug: z.string(),
                   event: z.object({ slug: z.string() }),
+                  slug: z.string(),
                 }),
               }),
             ),
@@ -1173,8 +1173,8 @@ describe("backend integration", () => {
           );
           assert.equal(
             await orm.em.fork().count(PickemChoice, {
-              user: { id: member.id },
               match: { id: match.id },
+              user: { id: member.id },
             }),
             1,
           );
@@ -1346,9 +1346,9 @@ describe("backend integration", () => {
             "POST",
             "/posts",
             {
+              content: "Body",
               id: postId,
               title: "Linked Discussion",
-              content: "Body",
               topicId: topics[0].id,
             },
             memberCookie,
@@ -1441,18 +1441,18 @@ describe("backend integration", () => {
                 async () =>
                   await transactionalReplies(em).run(async (scope) => {
                     await scope.replies.save({
-                      id,
+                      author: { id: member.id, userName: member.userName },
                       content: "Must roll back",
                       createdAt: new Date(),
                       hiddenAt: null,
-                      author: { id: member.id, userName: member.userName },
-                      post: null,
+                      id,
+                      match: null,
                       newsArticle: {
                         id: article.id,
-                        title: article.title,
                         slug: article.slug,
+                        title: article.title,
                       },
-                      match: null,
+                      post: null,
                       replyTo: null,
                     });
                     await scope.notifications.createForDirectReply(staff.id, id);
@@ -1489,18 +1489,18 @@ describe("backend integration", () => {
                     const tx = TransactionContext.getEntityManager();
                     assert.ok(tx, "the adapter provides a real transaction context");
                     await scope.replies.save({
-                      id,
+                      author: { id: member.id, userName: member.userName },
                       content: "Rolled back after SQL constraint",
                       createdAt: new Date(),
                       hiddenAt: null,
-                      author: { id: member.id, userName: member.userName },
-                      post: null,
+                      id,
+                      match: null,
                       newsArticle: {
                         id: article.id,
-                        title: article.title,
                         slug: article.slug,
+                        title: article.title,
                       },
-                      match: null,
+                      post: null,
                       replyTo: null,
                     });
                     await tx.flush();
@@ -1644,16 +1644,16 @@ describe("backend integration", () => {
             "POST",
             "/mcp",
             {
-              jsonrpc: "2.0",
               id: rpcId,
+              jsonrpc: "2.0",
               method: "tools/call",
-              params: { name, arguments: args },
+              params: { arguments: args, name },
             },
             undefined,
             200,
             {
-              authorization: `Bearer ${token.token}`,
               accept: "application/json, text/event-stream",
+              authorization: `Bearer ${token.token}`,
               "content-type": "application/json",
             },
           );
@@ -1754,8 +1754,8 @@ describe("backend integration", () => {
 
         const pending = response69.json(
           z.object({
-            proposals: z.array(z.object({ id: z.string(), status: z.string() })),
             names: z.record(z.string(), z.string()),
+            proposals: z.array(z.object({ id: z.string(), status: z.string() })),
           }),
         );
 
@@ -1770,16 +1770,16 @@ describe("backend integration", () => {
         await review(duplicate, "approve", 400);
 
         const created = await applied("create_player", {
-          name: "MCP Roster Player",
           country: "FR",
+          name: "MCP Roster Player",
           sourceUrl: source,
         });
 
         const move = (playerId: string, teamId: string, effectiveDate: string) => ({
-          playerId,
-          teamId,
           effectiveDate,
+          playerId,
           sourceUrl: source,
+          teamId,
         });
 
         const queued = await callTool("add_player_to_team", move(created, alpha, "2026-01-10"));
@@ -1815,15 +1815,15 @@ describe("backend integration", () => {
 
         assert.equal(findOneOrFailResult3.status, "retired");
         await applied("update_team", {
-          teamId: beta,
           active: false,
           sourceUrl: source,
+          teamId: beta,
         });
         const inactive = await callTool("add_player_to_team", move(created, beta, "2026-10-25"));
         await review(inactive, "approve", 400);
         await review(inactive, "reject");
         assert.deepEqual(
-          await callTool("update_team", { teamId: beta, active: true }, toolFailure),
+          await callTool("update_team", { active: true, teamId: beta }, toolFailure),
           {
             error: true,
           },
@@ -1838,8 +1838,8 @@ describe("backend integration", () => {
         await applied("add_player_to_team", move(created, alpha, "2026-10-25"));
 
         const mergePlayers = {
-          keptPlayerId: created,
           duplicatePlayerId: twin,
+          keptPlayerId: created,
           sourceUrl: source,
         };
 
@@ -1854,8 +1854,8 @@ describe("backend integration", () => {
         ]);
 
         const open = await orm.em.fork().findOneOrFail(rosterRows.Contract, {
-          player: created,
           endDate: null,
+          player: created,
         });
 
         assert.equal(new Date(open.startDate).toISOString().slice(0, 10), "2026-09-01");
@@ -1884,8 +1884,8 @@ describe("backend integration", () => {
         });
 
         await applied("merge_teams", {
-          keptTeamId: alpha,
           duplicateTeamId: beta,
+          keptTeamId: alpha,
           sourceUrl: source,
         });
         const contractsResult = await contracts({ player: created });
@@ -1923,12 +1923,12 @@ describe("backend integration", () => {
         };
 
         const stint = {
-          playerId: veteran,
-          teamId: gamma,
-          startDate: "2024-01-01",
           endDate: "2025-12-31",
+          playerId: veteran,
           role: "loaned",
           sourceUrl: "https://x.com/integration/status/2",
+          startDate: "2024-01-01",
+          teamId: gamma,
         };
 
         const stintId = await applied("create_contract", stint);
@@ -1950,8 +1950,8 @@ describe("backend integration", () => {
         }
 
         const conflicts: [Payload, number][] = [
-          [{ ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" }, 422],
-          [{ ...stint, startDate: "2026-03-01", endDate: undefined }, 400],
+          [{ ...stint, endDate: "2026-03-01", startDate: "2025-06-01", teamId: alpha }, 422],
+          [{ ...stint, endDate: undefined, startDate: "2026-03-01" }, 400],
         ];
 
         await mapSequentially(conflicts, async ([conflicting, status]) => {
@@ -1963,8 +1963,8 @@ describe("backend integration", () => {
         const correction = "https://x.com/integration/status/3";
 
         const revise = (changes: ContractChanges) => ({
-          playerId: veteran,
           contractId: stintId,
+          playerId: veteran,
           sourceUrl: correction,
           ...changes,
         });
@@ -2118,11 +2118,11 @@ describe("backend integration", () => {
           await callTool(
             "create_tournament",
             {
-              name: `MCP ${tournamentSource} Cup`,
               beginAt: "2026-10-20",
               endAt: "2026-10-30",
-              teamIds: [alpha, scoutedTeam],
+              name: `MCP ${tournamentSource} Cup`,
               source: tournamentSource,
+              teamIds: [alpha, scoutedTeam],
             },
             schema,
           );
@@ -2151,9 +2151,9 @@ describe("backend integration", () => {
         const bySlug = await callTool(
           "create_match",
           {
-            tournamentId: manualCup,
             name: "MCP manual by slug",
             teams: slugs,
+            tournamentId: manualCup,
           },
           mcpMatch,
         );
@@ -2166,9 +2166,9 @@ describe("backend integration", () => {
         const byTeamId = await callTool(
           "create_match",
           {
-            tournamentId: manualCup,
             name: "MCP manual by team id",
             teams: detail.participants.map((entrant) => entrant.team.id),
+            tournamentId: manualCup,
           },
           mcpMatch,
         );
@@ -2178,9 +2178,9 @@ describe("backend integration", () => {
         const byParticipant = await callTool(
           "create_match",
           {
-            tournamentId: manualCup,
             name: "MCP manual by participant",
             participantIds: detail.participants.map(({ id }) => id),
+            tournamentId: manualCup,
           },
           mcpMatch,
         );
@@ -2191,9 +2191,9 @@ describe("backend integration", () => {
           await callTool(
             "create_match",
             {
-              tournamentId: manualCup,
               name: "MCP outsider",
               teams: [betaTeam.slug, slugs[0]],
+              tournamentId: manualCup,
             },
             toolFailure,
           ),
@@ -2203,9 +2203,9 @@ describe("backend integration", () => {
           await callTool(
             "create_match",
             {
-              tournamentId: manualCup,
               name: "MCP missing team",
               teams: ["not-a-team", slugs[0]],
+              tournamentId: manualCup,
             },
             toolFailure,
           ),
@@ -2215,8 +2215,8 @@ describe("backend integration", () => {
         const updated = await callTool(
           "update_tournament",
           {
-            tournamentId: manualCup,
             teamIds: [alpha, scoutedTeam],
+            tournamentId: manualCup,
           },
           mcpCreatedTournament,
         );
@@ -2242,9 +2242,9 @@ describe("backend integration", () => {
         const startggMatch = await callTool(
           "create_match",
           {
-            tournamentId: startggCup,
             name: "MCP startgg Final",
             participantIds: await participantIds(startggCup),
+            tournamentId: startggCup,
           },
           mcpLimitedMatch,
         );
@@ -2255,9 +2255,9 @@ describe("backend integration", () => {
         const startggByTeam = await callTool(
           "create_match",
           {
-            tournamentId: startggCup,
             name: "MCP startgg by team",
             teams: slugs,
+            tournamentId: startggCup,
           },
           mcpLimitedMatch,
         );
@@ -2296,53 +2296,53 @@ describe("backend integration", () => {
           {},
           z.intersection(
             counted,
-            z.object({ upcoming: z.array(identified), live: z.array(identified) }),
+            z.object({ live: z.array(identified), upcoming: z.array(identified) }),
           ),
         );
 
         assert.equal(upcoming.total, upcoming.upcoming.length + upcoming.live.length);
         assert.ok(Array.isArray(await callTool("get_tournaments", {}, z.array(z.unknown()))));
-        await verifyStreamProposals({ request, staffCookie, callTool, review, tournament, match });
+        await verifyStreamProposals({ callTool, match, request, review, staffCookie, tournament });
         await verifyLineupProposals({
-          request,
-          staffCookie,
           callTool,
-          review,
-          tournament,
           match,
           player,
+          request,
+          review,
+          staffCookie,
+          tournament,
           ...lineupFixtures,
         });
         await verifyViewershipProposals({
-          request,
-          staffCookie,
           callTool,
-          review,
           match,
+          request,
+          review,
+          staffCookie,
           startggCupId: startggCup,
           startggMatchId: startggMatch.id,
         });
-        await verifyTeamAliasProposals({ request, callTool, review, ...aliasFixtures });
+        await verifyTeamAliasProposals({ callTool, request, review, ...aliasFixtures });
         await verifyCircuits({
-          app,
-          orm,
           RequestContext,
-          request,
-          staffCookie,
-          memberCookie,
+          app,
           callTool,
+          memberCookie,
+          orm,
+          request,
           review,
+          staffCookie,
           tournament,
         });
-        await verifySeasonAwards({ request, staffCookie, memberCookie, callTool, review, player });
+        await verifySeasonAwards({ callTool, memberCookie, player, request, review, staffCookie });
         await verifySeasonArchives({
+          memberCookie,
+          otherTeam,
           request,
           staffCookie,
-          memberCookie,
-          team,
-          otherTeam,
-          tournament,
           startggCupId: startggCup,
+          team,
+          tournament,
         });
         await request("DELETE", `/pat/tokens/${token.id}`, undefined, staffCookie, 204);
       });
@@ -2389,11 +2389,11 @@ describe("backend integration", () => {
             em.create(
               rosterRows.Contract,
               {
+                endDate: endDate === null ? null : new Date(endDate),
                 id,
                 player: playerId,
-                team: teamId,
                 startDate: new Date(startDate),
-                endDate: endDate === null ? null : new Date(endDate),
+                team: teamId,
               },
               { partial: true },
             ),
@@ -2464,7 +2464,7 @@ describe("backend integration", () => {
           await request(
             "POST",
             `/tournaments/${cup.id}/awards`,
-            { participantId, playerId, awardType },
+            { awardType, participantId, playerId },
             staffCookie,
             201,
           );
@@ -2526,8 +2526,8 @@ describe("backend integration", () => {
         const kept = await newPlayer("Reference Kept", { team: alpha });
 
         const duplicate = await newPlayer("Reference Duplicate", {
-          team: alpha,
           pandascoreId: 77_001,
+          team: alpha,
         });
 
         const redirected = await newPlayer("Reference Redirected", { mergedInto: duplicate });
@@ -2560,8 +2560,8 @@ describe("backend integration", () => {
           "POST",
           `/seasons/${referenceSeason.id}/awards`,
           {
-            playerId: duplicate,
             awardType: "season_mvp",
+            playerId: duplicate,
             sourceUrl: "https://example.test/reference-season/mvp",
           },
           staffCookie,
@@ -2578,11 +2578,11 @@ describe("backend integration", () => {
             em.create(
               SeasonAward,
               {
-                id,
-                season: referenceSeason.id,
-                player: playerId,
                 awardType: "regular_season_mvp",
+                id,
+                player: playerId,
                 region: null,
+                season: referenceSeason.id,
                 sourceUrl: "https://example.test/reference-season/regular",
               },
               { partial: true },
@@ -2702,7 +2702,7 @@ describe("backend integration", () => {
           const response78 = await request("GET", "/forum");
 
           const overview = response78.json(
-            z.object({ totalTopics: z.number(), topics: z.array(identified) }),
+            z.object({ topics: z.array(identified), totalTopics: z.number() }),
           );
 
           assert.equal(overview.totalTopics, 4);
@@ -2712,15 +2712,15 @@ describe("backend integration", () => {
             "POST",
             "/posts",
             {
+              content: "Forum content",
               id,
               title: "Integration Discussion",
-              content: "Forum content",
               topicId: overview.topics[0].id,
               translations: [
                 {
+                  content: "Contenu français",
                   locale: "fr-FR",
                   title: "Discussion intégration",
-                  content: "Contenu français",
                 },
               ],
             },
@@ -2827,11 +2827,11 @@ describe("backend integration", () => {
         "competition import preserves player identity, current membership, local artwork and bracket history",
         async () => {
           competition = await verifyCompetitionImport({
+            RequestContext,
             app,
             orm,
             request,
             staffCookie,
-            RequestContext,
           });
         },
       );
@@ -2839,11 +2839,11 @@ describe("backend integration", () => {
         "player awards enforce roster membership, staff authorization, uniqueness and revocation",
         async () => {
           await verifyPlayerAwards({
+            competition,
+            memberCookie,
+            outsiderPlayerId: player.id,
             request,
             staffCookie,
-            memberCookie,
-            competition,
-            outsiderPlayerId: player.id,
           });
         },
       );
@@ -2851,7 +2851,7 @@ describe("backend integration", () => {
       await check(
         "match stats keep one game per Ballchasing replay and number, save players atomically, follow player merges and track imports",
         async () => {
-          await verifyMatchStats({ app, orm, request, staffCookie, memberCookie, competition });
+          await verifyMatchStats({ app, competition, memberCookie, orm, request, staffCookie });
         },
       );
 
@@ -2859,12 +2859,12 @@ describe("backend integration", () => {
         "1v1 tournaments take existing players as participants, with matches, scores and stats and no team",
         async () => {
           await verifyPlayerTournaments({
+            RequestContext,
             app,
+            memberCookie,
             orm,
             request,
             staffCookie,
-            memberCookie,
-            RequestContext,
           });
         },
       );
@@ -2872,35 +2872,35 @@ describe("backend integration", () => {
       await check(
         "manual stages link their matches into a bracket and keep PandaScore brackets out of reach",
         async () => {
-          await verifyManualBrackets({ request, staffCookie, memberCookie, competition });
+          await verifyManualBrackets({ competition, memberCookie, request, staffCookie });
         },
       );
 
       await check(
         "on this day reads titles, bracket finals and transfers on the Paris day without start.gg",
         async () => {
-          await verifyOnThisDay({ orm, request, staffCookie, memberCookie });
+          await verifyOnThisDay({ memberCookie, orm, request, staffCookie });
         },
       );
 
       await check(
         "competition sync files stages under the right event and links manual counterparts in SQL",
         async () => {
-          await verifyCompetitionSyncLookups({ app, orm, request, staffCookie, RequestContext });
+          await verifyCompetitionSyncLookups({ RequestContext, app, orm, request, staffCookie });
         },
       );
 
       await check(
         "redistributable scope drops start.gg matches and earnings from lists in SQL",
         async () => {
-          await verifyRedistributableScope({ app, orm, request, staffCookie, RequestContext });
+          await verifyRedistributableScope({ RequestContext, app, orm, request, staffCookie });
         },
       );
 
       await check(
         "PandaScore player import adopts legacy slugs and never relabels start.gg rows",
         async () => {
-          await verifyPandascoreAdoption({ app, orm, request, staffCookie, RequestContext });
+          await verifyPandascoreAdoption({ RequestContext, app, orm, request, staffCookie });
         },
       );
 
@@ -2987,11 +2987,11 @@ describe("backend integration", () => {
 
         const ready = response93.json(
           z.object({
-            status: z.string(),
             info: z.object({
               postgres: z.object({ status: z.string() }),
               redis: z.object({ status: z.string() }),
             }),
+            status: z.string(),
           }),
         );
 

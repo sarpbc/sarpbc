@@ -10,21 +10,21 @@ import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { CircuitPersistence } from "./circuit.store";
 
 const circuit: CircuitSummary = {
-  id: "11111111-1111-4111-8111-111111111111",
-  slug: "season-2026",
-  name: "RLCS 2026",
-  season: 2026,
-  region: null,
   description: null,
-  sourceUrl: "https://example.org/rules",
+  id: "11111111-1111-4111-8111-111111111111",
+  name: "RLCS 2026",
   qualificationSpots: null,
+  region: null,
+  season: 2026,
+  slug: "season-2026",
+  sourceUrl: "https://example.org/rules",
 };
 
 const storeFailingWith = (error: Error) => {
   const em = {
     findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
-    persist: vi.fn<EntityManager["persist"]>().mockReturnThis(),
     flush: vi.fn<EntityManager["flush"]>().mockRejectedValue(error),
+    persist: vi.fn<EntityManager["persist"]>().mockReturnThis(),
   };
 
   return new CircuitPersistence(Object.assign(unconstructed(EntityManager), em));

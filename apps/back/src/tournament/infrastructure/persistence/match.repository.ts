@@ -71,7 +71,7 @@ const buildLiveQuery = (todayOnly: boolean, liveSince?: Date): MatchListFilter =
     floors.length > 0 ? new Date(Math.max(...floors.map((date) => date.getTime()))) : null;
 
   return since
-    ? { beginAt: { $lte: now, $gte: since }, endAt: null }
+    ? { beginAt: { $gte: since, $lte: now }, endAt: null }
     : { beginAt: { $lte: now }, endAt: null };
 };
 
@@ -137,28 +137,28 @@ const listQuery = (
   switch (kind) {
     case "upcoming": {
       return {
-        where: mergeScopeFilters(buildUpcomingQuery(todayOnly), scope),
-        orderBy: { beginAt: "ASC" } as const,
         limit,
         offset,
+        orderBy: { beginAt: "ASC" } as const,
+        where: mergeScopeFilters(buildUpcomingQuery(todayOnly), scope),
       };
     }
 
     case "live": {
       return {
-        where: mergeScopeFilters(buildLiveQuery(todayOnly, liveSince), scope),
-        orderBy: { beginAt: "ASC" } as const,
         limit,
         offset,
+        orderBy: { beginAt: "ASC" } as const,
+        where: mergeScopeFilters(buildLiveQuery(todayOnly, liveSince), scope),
       };
     }
 
     case "results": {
       return {
-        where: mergeScopeFilters({ endAt: { $ne: null } }, scope),
-        orderBy: { endAt: "DESC" } as const,
         limit,
         offset,
+        orderBy: { endAt: "DESC" } as const,
+        where: mergeScopeFilters({ endAt: { $ne: null } }, scope),
       };
     }
 
@@ -174,7 +174,7 @@ export class MatchRepository extends EntityRepository<Match> {
   async list(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]> {
     const { where, orderBy, limit, offset } = listQuery(kind, options);
 
-    return await this.findAll({ where, limit, offset, orderBy, populate: [...LIST_POPULATE] });
+    return await this.findAll({ limit, offset, orderBy, populate: [...LIST_POPULATE], where });
   }
 
   async listAndCount(
@@ -187,7 +187,7 @@ export class MatchRepository extends EntityRepository<Match> {
   }
 
   async findByIds(ids: string[]): Promise<Match[]> {
-    return await this.findAll({ where: { id: { $in: ids } }, populate: [...LIST_POPULATE] });
+    return await this.findAll({ populate: [...LIST_POPULATE], where: { id: { $in: ids } } });
   }
 
   async findDetail(ref: EntityRef): Promise<Match | null> {
@@ -206,16 +206,16 @@ export class MatchRepository extends EntityRepository<Match> {
     limit?: number;
   }): Promise<Match[]> {
     return await this.findAll({
+      limit,
+      orderBy: { endAt: "DESC" },
+      populate: [...FINISHED_POPULATE],
       where: {
-        id: { $ne: excludeMatchId },
         endAt: { $ne: null },
+        id: { $ne: excludeMatchId },
         participants: {
           team: { id: teamId },
         },
       },
-      limit,
-      orderBy: { endAt: "DESC" },
-      populate: [...FINISHED_POPULATE],
     });
   }
 
@@ -231,17 +231,17 @@ export class MatchRepository extends EntityRepository<Match> {
     limit?: number;
   }): Promise<Match[]> {
     return await this.findAll({
+      limit,
+      orderBy: { endAt: "DESC" },
+      populate: [...FINISHED_POPULATE],
       where: {
-        id: { $ne: excludeMatchId },
-        endAt: { $ne: null },
         $and: [
           { participants: { team: { id: teamAId } } },
           { participants: { team: { id: teamBId } } },
         ],
+        endAt: { $ne: null },
+        id: { $ne: excludeMatchId },
       },
-      limit,
-      orderBy: { endAt: "DESC" },
-      populate: [...FINISHED_POPULATE],
     });
   }
 
@@ -256,10 +256,10 @@ export class MatchRepository extends EntityRepository<Match> {
     const cutoffTime = new Date(now.getTime() - minutesAgo * 60 * 1000);
 
     return await this.findAll({
-      where: { endAt: { $ne: null, $gte: cutoffTime } },
       limit,
       orderBy: { endAt: "DESC" },
       populate: [...LIST_POPULATE],
+      where: { endAt: { $gte: cutoffTime, $ne: null } },
     });
   }
 }

@@ -21,26 +21,26 @@ const arrange = () => {
   const [a, b] = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
 
   const stored = Object.assign(new Match(), {
-    id: "m",
     beginAt: new Date("2026-01-01T10:00:00Z"),
-    status: "running",
+    id: "m",
     participants: [a, b],
     results: [
       { id: "r1", match: { id: "m" }, participant: { id: "a" }, score: 3 },
       { id: "r2", match: { id: "m" }, participant: { id: "b" }, score: 1 },
     ],
+    status: "running",
     tournament: {
-      id: "cup",
-      name: "Cup",
-      slug: "cup",
-      event: { id: "event", slug: "event", name: "Event" },
       beginAt: null,
-      league: null,
-      pickemsEnabled: true,
-      source: "manual",
-      pandascoreId: null,
-      streams: [],
+      event: { id: "event", name: "Event", slug: "event" },
       eventStreams: [],
+      id: "cup",
+      league: null,
+      name: "Cup",
+      pandascoreId: null,
+      pickemsEnabled: true,
+      slug: "cup",
+      source: "manual",
+      streams: [],
     } satisfies TournamentSummary,
   });
 
@@ -66,17 +66,17 @@ const arrange = () => {
     {
       run: async (work) =>
         await work({
-          userExists: async () => true,
           participantExists: async () => true,
           pick: async () => null,
-          unscored: async () => [],
           savePick: async () => {},
+          unscored: async () => [],
+          userExists: async () => true,
         }),
     },
-    { now: () => new Date("2026-01-01T12:00:00Z"), id: () => "id", warn: () => {} },
+    { id: () => "id", now: () => new Date("2026-01-01T12:00:00Z"), warn: () => {} },
   );
 
-  return { stored, save, publish, pickems };
+  return { pickems, publish, save, stored };
 };
 
 describe("deciding a match from pick'ems", () => {

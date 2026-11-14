@@ -4,22 +4,22 @@ import { toolFailure } from "./support.mts";
 import type { CallTool, Request, Review } from "./support.mts";
 
 const teamAlias = z.strictObject({
-  id: z.string(),
-  name: z.string(),
   from: z.string(),
-  to: z.string().nullable(),
-  sourceUrl: z.string(),
+  id: z.string(),
   logoUrl: z.string().nullable(),
+  name: z.string(),
   pandascoreId: z.number().nullable(),
+  sourceUrl: z.string(),
+  to: z.string().nullable(),
 });
 
 type TeamAlias = z.infer<typeof teamAlias>;
 
 const aliasedTeam = z.object({
-  id: z.string(),
-  slug: z.string(),
-  name: z.string(),
   aliases: z.array(teamAlias),
+  id: z.string(),
+  name: z.string(),
+  slug: z.string(),
 });
 
 type AliasedTeam = z.infer<typeof aliasedTeam>;
@@ -42,9 +42,9 @@ const stageDetail = z.object({
         team: z
           .object({
             id: z.string(),
+            logoLightUrl: z.string().nullable(),
             name: z.string(),
             slug: z.string(),
-            logoLightUrl: z.string().nullable(),
           })
           .nullable(),
       }),
@@ -54,10 +54,10 @@ const stageDetail = z.object({
 
 const publicMatchBody = z.object({
   match: z.object({
-    slug: z.string(),
     participants: z.array(
       z.object({ team: z.object({ id: z.string(), name: z.string() }).nullable() }),
     ),
+    slug: z.string(),
   }),
 });
 
@@ -87,12 +87,12 @@ const teamOf = async (request: Request, id: string): Promise<AliasedTeam> => {
 const SOURCE = "https://www.rlesports.com/news/integration-rebrand";
 
 const ORIGINS = {
-  name: "Integration Origins",
   from: "2020-01-01",
-  to: "2022-06-01",
-  sourceUrl: SOURCE,
   logoUrl: "https://cdn.example.test/origins.png",
+  name: "Integration Origins",
   pandascoreId: null,
+  sourceUrl: SOURCE,
+  to: "2022-06-01",
 };
 
 export const verifyTeamAliases = async ({
@@ -134,7 +134,7 @@ export const verifyTeamAliases = async ({
   await request(
     "POST",
     aliasesPath,
-    { ...ORIGINS, name: "Overlapping", from: "2021-01-01", to: null, logoUrl: null },
+    { ...ORIGINS, from: "2021-01-01", logoUrl: null, name: "Overlapping", to: null },
     staffCookie,
     422,
   );
@@ -142,7 +142,7 @@ export const verifyTeamAliases = async ({
   const response4 = await request(
     "POST",
     aliasesPath,
-    { ...ORIGINS, name: "Integration Sponsored", from: "2022-06-01", to: null, logoUrl: null },
+    { ...ORIGINS, from: "2022-06-01", logoUrl: null, name: "Integration Sponsored", to: null },
     staffCookie,
     201,
   );
@@ -169,7 +169,7 @@ export const verifyTeamAliases = async ({
   const response7 = await request(
     "POST",
     "/tournaments",
-    { name: "Integration Archive Cup", beginAt: "2021-05-01", teamIds: [team.id, opponent.id] },
+    { beginAt: "2021-05-01", name: "Integration Archive Cup", teamIds: [team.id, opponent.id] },
     staffCookie,
     201,
   );
@@ -180,9 +180,9 @@ export const verifyTeamAliases = async ({
     "POST",
     `/tournaments/${stage.id}/matches`,
     {
+      beginAt: "2023-01-10T18:00:00.000Z",
       name: "Integration Archive Final",
       participantIds: stage.participants.map(({ id }) => id),
-      beginAt: "2023-01-10T18:00:00.000Z",
       status: "not_started",
     },
     staffCookie,
@@ -197,8 +197,8 @@ export const verifyTeamAliases = async ({
   const renamed = detail.participants.find(({ team: entry }) => entry?.id === team.id)?.team;
   assert.ok(renamed, "the stage lists the renamed team");
   assert.deepEqual(
-    { name: renamed.name, slug: renamed.slug, logo: renamed.logoLightUrl },
-    { name: "Integration Origins", slug: team.slug, logo: ORIGINS.logoUrl },
+    { logo: renamed.logoLightUrl, name: renamed.name, slug: renamed.slug },
+    { logo: ORIGINS.logoUrl, name: "Integration Origins", slug: team.slug },
     "a stage shows the name and logo in force when it began",
   );
 
@@ -217,7 +217,7 @@ export const verifyTeamAliases = async ({
   const response11 = await request(
     "PUT",
     `${aliasesPath}/${sponsored.id}`,
-    { ...ORIGINS, name: "Integration Sponsored", from: "2022-06-01", to: "2024-01-01" },
+    { ...ORIGINS, from: "2022-06-01", name: "Integration Sponsored", to: "2024-01-01" },
     staffCookie,
   );
 
@@ -239,7 +239,7 @@ export const verifyTeamAliases = async ({
     [origins.id],
   );
 
-  return { team, origins };
+  return { origins, team };
 };
 
 export const verifyTeamAliasProposals = async ({
@@ -250,11 +250,11 @@ export const verifyTeamAliasProposals = async ({
   origins,
 }: TeamAliasProposalsContext): Promise<void> => {
   const proposal = {
-    teamId: team.id,
-    name: "Integration Founders",
     from: "2018-03-01",
-    to: "2020-01-01",
+    name: "Integration Founders",
     sourceUrl: "https://x.com/integration/status/2018",
+    teamId: team.id,
+    to: "2020-01-01",
   };
 
   assert.deepEqual(
@@ -284,10 +284,10 @@ export const verifyTeamAliasProposals = async ({
   const updated = await callTool("update_team_alias", {
     ...proposal,
     aliasId: origins.id,
-    name: "Integration Origins",
     from: "2020-01-01",
-    to: "2022-06-01",
+    name: "Integration Origins",
     sourceUrl: "https://www.pandascore.co/rl/teams/integration",
+    to: "2022-06-01",
   });
 
   await review(updated);

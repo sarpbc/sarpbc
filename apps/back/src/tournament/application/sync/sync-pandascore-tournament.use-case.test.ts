@@ -9,8 +9,8 @@ import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.us
 
 describe(SyncPandascoreTournamentUseCase, () => {
   const feed = {
-    getTournamentById: vi.fn<CompetitionFeed["getTournamentById"]>(),
     getTournamentBrackets: vi.fn<CompetitionFeed["getTournamentBrackets"]>(),
+    getTournamentById: vi.fn<CompetitionFeed["getTournamentById"]>(),
     getTournamentMatches: vi.fn<CompetitionFeed["getTournamentMatches"]>(),
     getTournamentStandings: vi.fn<CompetitionFeed["getTournamentStandings"]>(),
   };
@@ -28,20 +28,20 @@ describe(SyncPandascoreTournamentUseCase, () => {
     vi.clearAllMocks();
     reads.findById.mockResolvedValue(
       Object.assign(new Tournament(), {
-        id: "t1",
-        source: "pandascore",
-        pandascoreId: 42,
         hasBracket: false,
+        id: "t1",
+        pandascoreId: 42,
+        source: "pandascore",
       }),
     );
     sync.upsertTournament.mockResolvedValue(Object.assign(new Tournament(), { id: "t1" }));
     feed.getTournamentMatches.mockResolvedValue([]);
     feed.getTournamentBrackets.mockResolvedValue([]);
-    feed.getTournamentStandings.mockResolvedValue([{ teamPandascoreId: 8, rank: 1 }]);
+    feed.getTournamentStandings.mockResolvedValue([{ rank: 1, teamPandascoreId: 8 }]);
   });
 
   it.each([true, false])("uses fresh provider hasBracket=%s", async (hasBracket) => {
-    const command: UpsertTournamentCommand = { pandascoreId: 42, name: "Playoffs", hasBracket };
+    const command: UpsertTournamentCommand = { hasBracket, name: "Playoffs", pandascoreId: 42 };
     feed.getTournamentById.mockResolvedValue(command);
     await useCase.execute("t1");
     expect(
@@ -52,14 +52,14 @@ describe(SyncPandascoreTournamentUseCase, () => {
     ).not.toHaveBeenCalled();
     expect(feed.getTournamentStandings).toHaveBeenCalledExactlyOnceWith(42);
     expect(sync.upsertTournament).toHaveBeenCalledExactlyOnceWith(
-      { ...command, standings: [{ teamPandascoreId: 8, rank: 1 }] },
+      { ...command, standings: [{ rank: 1, teamPandascoreId: 8 }] },
       [],
       undefined,
     );
   });
 
   it("leaves placements untouched when standings are unavailable", async () => {
-    const command: UpsertTournamentCommand = { pandascoreId: 42, name: "Playoffs" };
+    const command: UpsertTournamentCommand = { name: "Playoffs", pandascoreId: 42 };
     feed.getTournamentById.mockResolvedValue(command);
     feed.getTournamentStandings.mockResolvedValue(null);
     await useCase.execute("t1");
@@ -84,7 +84,7 @@ describe(SyncPandascoreTournamentUseCase, () => {
   });
 
   it("fetches all provider data before opening the write operation", async () => {
-    feed.getTournamentById.mockResolvedValue({ pandascoreId: 42, name: "Cup" });
+    feed.getTournamentById.mockResolvedValue({ name: "Cup", pandascoreId: 42 });
     feed.getTournamentMatches.mockRejectedValue(new Error("provider failed"));
     await expect(useCase.executeByPandascoreId(42)).rejects.toThrow("provider failed");
     expect(sync.upsertTournament).not.toHaveBeenCalled();

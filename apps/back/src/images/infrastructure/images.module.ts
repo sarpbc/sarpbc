@@ -8,18 +8,18 @@ import { CloudflareImagesGateway } from "./cloudflare-images.gateway";
 import { ImageRepository } from "./persistence/images.repository";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([Image]), ConfigModule],
   controllers: [ImagesController],
+  exports: [ImagesService],
+  imports: [MikroOrmModule.forFeature([Image]), ConfigModule],
   providers: [
     CloudflareImagesGateway,
     ImageRepository,
     {
+      inject: [ImageRepository, CloudflareImagesGateway],
       provide: ImagesService,
       useFactory: (images: ImageRepository, host: CloudflareImagesGateway) =>
         new ImagesService(images, host),
-      inject: [ImageRepository, CloudflareImagesGateway],
     },
   ],
-  exports: [ImagesService],
 })
 export class ImagesModule {}

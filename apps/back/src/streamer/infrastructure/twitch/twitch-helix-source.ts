@@ -11,11 +11,11 @@ export const STREAMS_REQUEST_TIMEOUT_MS = 5000;
 const streamsResponse = z.object({
   data: z.array(
     z.object({
+      game_id: z.string(),
+      title: z.string(),
+      type: z.string(),
       user_login: z.string(),
       user_name: z.string(),
-      game_id: z.string(),
-      type: z.string(),
-      title: z.string(),
       viewer_count: z.number().int().nonnegative(),
     }),
   ),
@@ -42,8 +42,8 @@ export class TwitchHelixSource implements LiveStreamSource {
       .flat()
       .filter((stream) => stream.type === "live" && stream.game_id === ROCKET_LEAGUE_GAME_ID)
       .map((stream) => ({
-        login: stream.user_login,
         displayName: stream.user_name,
+        login: stream.user_login,
         title: stream.title,
         viewerCount: stream.viewer_count,
       }));
@@ -76,7 +76,7 @@ export class TwitchHelixSource implements LiveStreamSource {
 
   private async request(url: URL, token: string): Promise<Response> {
     return await fetch(url, {
-      headers: { "Client-Id": this.clientId, Authorization: `Bearer ${token}` },
+      headers: { Authorization: `Bearer ${token}`, "Client-Id": this.clientId },
       signal: AbortSignal.timeout(STREAMS_REQUEST_TIMEOUT_MS),
     });
   }

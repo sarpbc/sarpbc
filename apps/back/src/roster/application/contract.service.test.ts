@@ -24,21 +24,23 @@ describe("ContractService sourced career periods", () => {
   let service: ContractService;
 
   const contracts: ContractWriter = {
-    findByPlayer: async () => career,
-    findByTeam: async () => [],
+    delete: async () => {},
     findById: async (id) => {
       const stored = career.find((contract) => contract.id === id);
 
       return stored ? Object.assign(new Contract(), stored) : null;
     },
+    findByPlayer: async () => career,
+    findByTeam: async () => [],
     save: async (contract) => {
       contract.id ||= `contract-${career.length + 1}`;
       career = [...career.filter((stored) => stored.id !== contract.id), contract];
     },
-    delete: async () => {},
   };
 
   const scope: RosterWriteScope = {
+    contracts,
+    photos: unusedPhotoWriter,
     players: {
       ...unusedPlayerWriter,
       findById: async (id) => (id === zen.id ? zen : null),
@@ -47,17 +49,15 @@ describe("ContractService sourced career periods", () => {
       ...unusedTeamWriter,
       findById: async (id) => [vitality, kc].find((team) => team.id === id) ?? null,
     },
-    contracts,
-    photos: unusedPhotoWriter,
   };
 
   const stint = (team: Team, startDate: string, endDate: string | null) =>
     Object.assign(new Contract(), {
+      endDate: endDate === null ? null : new Date(endDate),
       id: `${team.id}-${startDate}`,
       player: zen,
-      team,
       startDate: new Date(startDate),
-      endDate: endDate === null ? null : new Date(endDate),
+      team,
     });
 
   beforeEach(() => {
@@ -69,28 +69,28 @@ describe("ContractService sourced career periods", () => {
 
   it("records a closed past period with its source on both ends", async () => {
     const contract = await service.recordPeriod("zen", {
-      teamId: "vitality",
-      startDate: "2022-01-10",
       endDate: "2025-05-31",
       role: "benched",
       sourceUrl: source,
+      startDate: "2022-01-10",
+      teamId: "vitality",
     });
 
     expect(career).toContain(contract);
     expect(career).toHaveLength(2);
     expect(contract).toMatchObject({
-      role: "benched",
       joinSourceUrl: source,
       leaveSourceUrl: source,
+      role: "benched",
     });
   });
 
   it("only leaves the current team's contract open", async () => {
     await expect(
       service.recordPeriod("zen", {
-        teamId: "vitality",
-        startDate: "2022-01-10",
         sourceUrl: source,
+        startDate: "2022-01-10",
+        teamId: "vitality",
       }),
     ).rejects.toThrow("record the move as a roster move");
     expect(career).toHaveLength(1);
@@ -99,35 +99,35 @@ describe("ContractService sourced career periods", () => {
   it("rejects a period that overlaps a contract with the same team", async () => {
     await expect(
       service.recordPeriod("zen", {
-        teamId: "kc",
-        startDate: "2024-01-01",
         endDate: "2025-07-01",
         sourceUrl: source,
+        startDate: "2024-01-01",
+        teamId: "kc",
       }),
     ).rejects.toThrow('overlaps contract "kc-2025-06-01"');
   });
 
   it("accepts back-to-back stints and rejects inverted dates", async () => {
     await service.recordPeriod("zen", {
-      teamId: "kc",
-      startDate: "2024-01-01",
       endDate: "2025-06-01",
       sourceUrl: source,
+      startDate: "2024-01-01",
+      teamId: "kc",
     });
 
     await expect(
       service.recordPeriod("zen", {
-        teamId: "vitality",
-        startDate: "2023-01-01",
         endDate: "2022-01-01",
         sourceUrl: source,
+        startDate: "2023-01-01",
+        teamId: "vitality",
       }),
     ).rejects.toThrow(InvalidInputError);
   });
 
   it("uses the unprocessable error for a missing team on creation and update", async () => {
     await expect(
-      service.create("zen", { teamId: "missing", startDate: "2026-10-15" }),
+      service.create("zen", { startDate: "2026-10-15", teamId: "missing" }),
     ).rejects.toBeInstanceOf(UnprocessableError);
     await expect(
       service.update("zen", "kc-2025-06-01", { teamId: "missing" }),
@@ -163,7 +163,7 @@ describe("ContractService staff contracts", () => {
     const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
 
     const contract = (id: string, role: Contract["role"]) =>
-      Object.assign(new Contract(), { id, team: kc, role, startDate: new Date("2024-01-01") });
+      Object.assign(new Contract(), { id, role, startDate: new Date("2024-01-01"), team: kc });
 
     const career = [
       contract("player", "active"),
@@ -173,20 +173,20 @@ describe("ContractService staff contracts", () => {
 
     const queries: ContractQueries = {
       findByPlayer: async () => career,
-      findPastContractsByPlayer: async () => [],
       findByTeam: async () => [],
       findFormerPlayersByTeam: async () => [],
       findMovements: async () => [],
       findMovementsOnDay: async () => [],
+      findPastContractsByPlayer: async () => [],
     };
 
     const service = new ContractService(queries, unusedTeamQueries, {
       run: async (work) =>
         await work({
-          players: unusedPlayerWriter,
-          teams: unusedTeamWriter,
           contracts: unusedContractWriter,
           photos: unusedPhotoWriter,
+          players: unusedPlayerWriter,
+          teams: unusedTeamWriter,
         }),
     });
 

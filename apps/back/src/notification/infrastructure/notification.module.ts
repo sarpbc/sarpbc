@@ -8,9 +8,9 @@ import { MikroNotificationStore } from "./persistence/notification.store";
   controllers: [NotificationController],
   providers: [
     {
+      inject: [EntityManager],
       provide: NotificationService,
       useFactory: (em: EntityManager) => new NotificationService(new MikroNotificationStore(em)),
-      inject: [EntityManager],
     },
   ],
 })

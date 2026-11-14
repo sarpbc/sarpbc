@@ -53,14 +53,14 @@ export class PostService {
     const translation = post.translations.find((t) => t.locale === locale);
 
     return {
+      author: post.author.userName,
+      content: translation?.content ?? post.content,
+      createdAt: post.createdAt,
       id: post.id,
       publicId: post.publicId,
       slug: forumPostSlug(post.title),
       title: translation?.title ?? post.title,
-      content: translation?.content ?? post.content,
       topic: { id: post.topic.id, title: post.topic.title },
-      author: post.author.userName,
-      createdAt: post.createdAt,
     };
   }
 
@@ -69,8 +69,8 @@ export class PostService {
 
     return {
       canCreate: eligibility.canCreate,
-      nextAvailableAt: eligibility.nextAvailableAt?.toISOString() ?? null,
       cooldownHours: POST_CREATION_COOLDOWN_HOURS,
+      nextAvailableAt: eligibility.nextAvailableAt?.toISOString() ?? null,
     };
   }
 
@@ -80,9 +80,9 @@ export class PostService {
 
       if (!eligibility.canCreate) {
         throw new InvalidInputError({
+          code: FORUM_ERROR_CODES.POST_RATE_LIMITED,
           message:
             "You can only create one post per hour. Wait until the cooldown ends and try again.",
-          code: FORUM_ERROR_CODES.POST_RATE_LIMITED,
         });
       }
 
@@ -107,15 +107,15 @@ export class PostService {
       }
 
       const newPost: NewPostRecord = {
-        id: createPostInput.id,
-        title: sanitizePlainText(createPostInput.title),
-        content: sanitizePlainText(createPostInput.content),
-        topic,
         author: user,
-        postType: PostType.DISCUSSION,
+        content: sanitizePlainText(createPostInput.content),
         createdAt: this.now(),
-        updatedAt: null,
+        id: createPostInput.id,
+        postType: PostType.DISCUSSION,
+        title: sanitizePlainText(createPostInput.title),
+        topic,
         translations: [],
+        updatedAt: null,
       };
 
       await scope.posts.save(newPost);
@@ -126,12 +126,12 @@ export class PostService {
         createPostInput.translations.length !== 0
       ) {
         const translations = createPostInput.translations.map((tr): TranslationRecord => ({
-          id: this.id(),
-          post: { id: newPost.id },
-          locale: tr.locale,
-          title: sanitizePlainText(tr.title),
           content: sanitizePlainText(tr.content),
           createdAt: this.now(),
+          id: this.id(),
+          locale: tr.locale,
+          post: { id: newPost.id },
+          title: sanitizePlainText(tr.title),
           updatedAt: null,
         }));
 

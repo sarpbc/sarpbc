@@ -12,31 +12,31 @@ const date = z
   .transform((v) => v ?? undefined);
 
 export const streamSchema = z.object({
-  main: z.boolean().default(false),
-  language: z.string().default(""),
   embed_url: z.string().default(""),
+  language: z.string().default(""),
+  main: z.boolean().default(false),
   official: z.boolean().default(false),
   raw_url: z.string().default(""),
 });
 
 export const matchSchema = z.object({
-  id: z.number().int().positive(),
-  tournament_id: z.number().int().positive(),
-  name: text,
-  status: text,
   begin_at: date,
   end_at: date,
+  id: z.number().int().positive(),
+  name: text,
   number_of_games: z.number().int().nullish(),
   opponents: z
     .array(
       z.object({ opponent: z.object({ id: z.number().int().optional(), slug: text }).nullish() }),
     )
     .default([]),
-  results: z.array(z.object({ team_id: z.number().int(), score: z.number().int() })).default([]),
   previous_matches: z
-    .array(z.object({ type: z.enum(["loser", "winner"]), match_id: z.number().int() }))
+    .array(z.object({ match_id: z.number().int(), type: z.enum(["loser", "winner"]) }))
     .default([]),
+  results: z.array(z.object({ score: z.number().int(), team_id: z.number().int() })).default([]),
+  status: text,
   streams_list: z.array(streamSchema).default([]),
+  tournament_id: z.number().int().positive(),
 });
 
 export type MatchStreamDto = z.infer<typeof streamSchema>;

@@ -56,13 +56,13 @@ const {
 
 const toRows = (value: TournamentPrizes | null | undefined): PrizeRow[] =>
   (value?.prizes ?? []).map((prize) => ({
-    key: (nextKey += 1),
-    placement: prize.placement,
     amount: prize.amount,
     currency: prize.currency,
-    teamId: prize.team.id,
+    key: (nextKey += 1),
+    placement: prize.placement,
     playerIds: prize.players.map(({ id }) => id),
     sourceUrl: prize.sourceUrl ?? "",
+    teamId: prize.team.id,
   }));
 
 watch(distribution, (value) => (rows.value = toRows(value)), { immediate: true });
@@ -79,14 +79,14 @@ const isOnRoster = (teamId: string | undefined, playerId: string): boolean =>
 
 const teamOptions = computed<Option[]>(() => {
   const participantOptions = participants.flatMap(({ team }) =>
-    team ? [{ value: team.id, label: team.name }] : [],
+    team ? [{ label: team.name, value: team.id }] : [],
   );
 
   const outsiders = (distribution.value?.prizes ?? [])
     .filter(({ team }) => !isParticipant(team.id))
     .map(({ team }) => ({
-      value: team.id,
       label: t("page.tournaments.prizes.notParticipantOption", { name: team.name }),
+      value: team.id,
     }));
 
   return [...participantOptions, ...outsiders].toSorted((a, b) => a.label.localeCompare(b.label));
@@ -94,8 +94,8 @@ const teamOptions = computed<Option[]>(() => {
 
 const playerOptions = (teamId: string | undefined): Option[] => {
   const roster = (rosters.value.get(teamId ?? "") ?? []).map(({ id, name }) => ({
-    value: id,
     label: name,
+    value: id,
   }));
 
   const outsiders = (distribution.value?.prizes ?? [])
@@ -103,8 +103,8 @@ const playerOptions = (teamId: string | undefined): Option[] => {
     .flatMap(({ players }) => players)
     .filter(({ id }) => !isOnRoster(teamId, id))
     .map(({ id, name }) => ({
-      value: id,
       label: t("page.tournaments.prizes.notOnRosterOption", { name }),
+      value: id,
     }));
 
   return [...roster, ...outsiders];
@@ -162,12 +162,12 @@ const toInput = (row: PrizeRow): TournamentPrizeInput | null => {
   }
 
   return {
-    placement: row.placement,
     amount,
     currency: normalizeCurrency(row.currency),
-    teamId,
+    placement: row.placement,
     playerIds: row.playerIds,
     sourceUrl: normalizeSourceUrl(row.sourceUrl),
+    teamId,
   };
 };
 
@@ -194,13 +194,13 @@ const prizeInputs = computed<TournamentPrizeInput[] | null>(() => {
 const addRow = () => {
   const last = rows.value.at(-1);
   rows.value.push({
-    key: (nextKey += 1),
-    placement: last ? last.placement + 1 : 1,
     amount: null,
     currency: last?.currency ?? "USD",
-    teamId: undefined,
+    key: (nextKey += 1),
+    placement: last ? last.placement + 1 : 1,
     playerIds: [],
     sourceUrl: bulkSourceUrl.value.trim(),
+    teamId: undefined,
   });
 };
 
@@ -230,12 +230,12 @@ const save = async () => {
 
   try {
     distribution.value = await setTournamentPrizes(tournamentId, inputs);
-    toast.add({ title: t("page.tournaments.prizes.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.prizes.saved") });
   } catch (saveError) {
     toast.add({
-      title: t("page.tournaments.prizes.saveError"),
-      description: getApiErrorMessage(saveError) ?? undefined,
       color: "error",
+      description: getApiErrorMessage(saveError) ?? undefined,
+      title: t("page.tournaments.prizes.saveError"),
     });
   } finally {
     saving.value = false;

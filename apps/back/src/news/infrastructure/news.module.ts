@@ -13,15 +13,16 @@ import { transactionalNews } from "./composition";
 import { IndexNowService } from "./indexnow.service";
 
 @Module({
-  imports: [ReplyModule],
   controllers: [NewsController],
+  exports: [NewsService],
+  imports: [ReplyModule],
   providers: [
     IndexNowService,
     {
+      inject: [EntityManager, ReplyService, IndexNowService],
       provide: NewsService,
       useFactory: (em: EntityManager, replies: ReplyService, indexing: IndexNowService) =>
         new NewsService(new MikroNewsStore(em), transactionalNews(em), replies, indexing),
-      inject: [EntityManager, ReplyService, IndexNowService],
     },
     {
       provide: TweetEmbedService,
@@ -32,6 +33,5 @@ import { IndexNowService } from "./indexnow.service";
       useFactory: () => new TweetImageService(new TwimgImageGateway()),
     },
   ],
-  exports: [NewsService],
 })
 export class NewsModule {}

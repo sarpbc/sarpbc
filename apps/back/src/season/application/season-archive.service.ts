@@ -27,15 +27,15 @@ const publicPath = (path: SeasonPathEntry[]): SeasonArchivePathEntry[] =>
 
     const { id, name, slug, event } = tournament;
 
-    return [{ label, result, tournament: { id, name, slug, event } }];
+    return [{ label, result, tournament: { event, id, name, slug } }];
   });
 
 const publicAward = ({ awardType, region, presentedBy, sourceUrl, player }: SeasonAward) => ({
   awardType,
-  region,
-  presentedBy,
-  sourceUrl,
   player: { name: player.name, slug: player.slug },
+  presentedBy,
+  region,
+  sourceUrl,
 });
 
 const toSeasonArchive = (
@@ -44,16 +44,16 @@ const toSeasonArchive = (
   participants: SeasonParticipant[],
   awards: SeasonAward[],
 ): SeasonArchive => ({
-  slug,
-  name: season.name,
-  format: season.format,
-  winner: participants.find(({ team }) => team.id === season.winnerTeamId)?.team ?? null,
-  participants: participants.map(({ team, pathNote, path }) => ({
-    team,
-    pathNote,
-    path: publicPath(path),
-  })),
   awards: awards.map(publicAward),
+  format: season.format,
+  name: season.name,
+  participants: participants.map(({ team, pathNote, path }) => ({
+    path: publicPath(path),
+    pathNote,
+    team,
+  })),
+  slug,
+  winner: participants.find(({ team }) => team.id === season.winnerTeamId)?.team ?? null,
 });
 
 export class SeasonArchiveService {
@@ -174,6 +174,6 @@ export class SeasonArchiveService {
       );
     }
 
-    return { season, participant };
+    return { participant, season };
   }
 }

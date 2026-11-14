@@ -30,7 +30,7 @@ export const getAllTournaments = async (query: {
     query,
   });
 
-  return { tournaments: res.tournaments, total: res.count };
+  return { total: res.count, tournaments: res.tournaments };
 };
 
 export const getTournamentById = async (id: string): Promise<TournamentDetail> => {
@@ -58,8 +58,8 @@ export const getTournamentMatches = async (
 
 export const enableTournamentPickems = async (tournamentId: string): Promise<void> => {
   await apiFetch(`/tournaments/${tournamentId}/enable-pickems`, {
-    method: "POST",
     body: { enabled: true },
+    method: "POST",
   });
 };
 
@@ -78,8 +78,8 @@ export const getTournamentsWithoutMatches = async (): Promise<{ id: string; name
 
 export const setMatchWinner = async (matchId: string, winnerId: string): Promise<void> => {
   await apiFetch(`/tournaments/matches/${matchId}/winner`, {
-    method: "PUT",
     body: { winnerId },
+    method: "PUT",
   });
 };
 
@@ -88,15 +88,15 @@ export const setMatchResult = async (
   results: StreamScoreSeriesResult[],
 ): Promise<void> => {
   await apiFetch(`/tournaments/matches/${matchId}/result`, {
-    method: "PUT",
     body: { results },
+    method: "PUT",
   });
 };
 
 export const setMatchSource = async (matchId: string, sourceUrl: string | null): Promise<void> => {
   await apiFetch(`/tournaments/matches/${matchId}/source`, {
-    method: "PUT",
     body: { sourceUrl },
+    method: "PUT",
   });
 };
 
@@ -110,15 +110,15 @@ export const setMatchLineups = async (
   lineups: MatchLineupInput[],
 ): Promise<MatchLineupsResponse> =>
   await apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
-    method: "PUT",
     body: { lineups },
+    method: "PUT",
   });
 
 /** A manual league can share its name with a synced one, so synced options say where they come from. */
 export const leagueOptions = (leagues: League[], pandascoreLabel: string) =>
   leagues.map((league) => ({
-    value: league.id,
     label: league.pandascoreId === null ? league.name : `${league.name} · ${pandascoreLabel}`,
+    value: league.id,
   }));
 
 export interface ManualTournamentInput {
@@ -147,8 +147,8 @@ export const getTournamentLeagues = async (): Promise<League[]> => {
 
 export const createLeague = async (body: LeagueInput): Promise<League> => {
   const res = await apiFetch<{ league: League }>("/tournaments/leagues", {
-    method: "POST",
     body,
+    method: "POST",
   });
 
   return res.league;
@@ -156,8 +156,8 @@ export const createLeague = async (body: LeagueInput): Promise<League> => {
 
 export const updateLeague = async (id: string, body: LeagueInput): Promise<League> => {
   const res = await apiFetch<{ league: League }>(`/tournaments/leagues/${id}`, {
-    method: "PATCH",
     body,
+    method: "PATCH",
   });
 
   return res.league;
@@ -176,13 +176,13 @@ export const getManualEvent = async (id: string): Promise<ManualEvent> => {
 };
 
 export const createEvent = async (body: EventInput): Promise<ManualEvent> => {
-  const res = await apiFetch<{ event: ManualEvent }>("/events", { method: "POST", body });
+  const res = await apiFetch<{ event: ManualEvent }>("/events", { body, method: "POST" });
 
   return res.event;
 };
 
 export const updateEvent = async (id: string, body: EventInput): Promise<ManualEvent> => {
-  const res = await apiFetch<{ event: ManualEvent }>(`/events/${id}`, { method: "PATCH", body });
+  const res = await apiFetch<{ event: ManualEvent }>(`/events/${id}`, { body, method: "PATCH" });
 
   return res.event;
 };
@@ -193,8 +193,8 @@ export const deleteEvent = async (id: string): Promise<void> => {
 
 export const createTournament = async (body: ManualTournamentInput): Promise<TournamentDetail> => {
   const res = await apiFetch<{ tournament: TournamentDetail }>("/tournaments", {
-    method: "POST",
     body,
+    method: "POST",
   });
 
   return res.tournament;
@@ -205,8 +205,8 @@ export const updateTournament = async (
   body: Partial<ManualTournamentInput>,
 ): Promise<TournamentDetail> => {
   const res = await apiFetch<{ tournament: TournamentDetail }>(`/tournaments/${id}`, {
-    method: "PATCH",
     body,
+    method: "PATCH",
   });
 
   return res.tournament;
@@ -229,7 +229,7 @@ export const createTournamentAward = async (
 ): Promise<TournamentAwardListItem> => {
   const res = await apiFetch<{ award: TournamentAwardListItem }>(
     `/tournaments/${tournamentId}/awards`,
-    { method: "POST", body: payload },
+    { body: payload, method: "POST" },
   );
 
   return res.award;
@@ -259,8 +259,8 @@ export const setTournamentPrizes = async (
   prizes: TournamentPrizeInput[],
 ): Promise<TournamentPrizes> =>
   await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, {
-    method: "PUT",
     body: { prizes },
+    method: "PUT",
   });
 
 export const getStatsImports = async (tournamentId: string): Promise<StatsImport[]> => {
@@ -277,8 +277,8 @@ export const requestStatsImport = async (
   group: string,
 ): Promise<StatsImport> =>
   await apiFetch<StatsImport>(`/tournaments/${tournamentId}/stats-imports`, {
-    method: "POST",
     body: { group },
+    method: "POST",
   });
 
 export const getStatsPlayerAccounts = async (tournamentId: string): Promise<StatsPlayerAccounts> =>
@@ -302,8 +302,8 @@ export const attachStatsReplay = async (
   body: AttachReplayInput,
 ): Promise<TournamentStatsGame> =>
   await apiFetch<TournamentStatsGame>(`/tournaments/${tournamentId}/stats-games`, {
-    method: "POST",
     body,
+    method: "POST",
   });
 
 export const removeStatsGame = async (
@@ -321,6 +321,6 @@ export const linkStatsPlayer = async (
   body: StatsPlayerLinkInput,
 ): Promise<StatsPlayerLinkResult> =>
   await apiFetch<StatsPlayerLinkResult>(`/tournaments/${tournamentId}/stats-players/link`, {
-    method: "PUT",
     body,
+    method: "PUT",
   });

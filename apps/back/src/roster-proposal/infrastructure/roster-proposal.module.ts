@@ -30,6 +30,8 @@ import {
 } from "./persistence/roster-proposal.store";
 
 @Module({
+  controllers: [RosterProposalController],
+  exports: [RosterProposalService],
   imports: [
     MikroOrmModule.forFeature([RosterProposal]),
     RosterModule,
@@ -38,9 +40,26 @@ import {
     CircuitModule,
     SeasonModule,
   ],
-  controllers: [RosterProposalController],
   providers: [
     {
+      inject: [
+        EntityManager,
+        PlayerService,
+        TeamService,
+        ContractService,
+        RosterMergeService,
+        UserService,
+        TournamentPrizeService,
+        PlayerAwardService,
+        TeamLogoService,
+        MatchService,
+        StreamService,
+        MatchLineupService,
+        ViewershipService,
+        CircuitService,
+        TeamAliasService,
+        SeasonService,
+      ],
       provide: RosterProposalService,
       useFactory: (
         em: EntityManager,
@@ -79,26 +98,7 @@ import {
           teamAliases,
           seasons,
         ),
-      inject: [
-        EntityManager,
-        PlayerService,
-        TeamService,
-        ContractService,
-        RosterMergeService,
-        UserService,
-        TournamentPrizeService,
-        PlayerAwardService,
-        TeamLogoService,
-        MatchService,
-        StreamService,
-        MatchLineupService,
-        ViewershipService,
-        CircuitService,
-        TeamAliasService,
-        SeasonService,
-      ],
     },
   ],
-  exports: [RosterProposalService],
 })
 export class RosterProposalModule {}

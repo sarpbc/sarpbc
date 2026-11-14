@@ -14,9 +14,9 @@ import { unchangedJson } from "./unchanged-json";
 import { CompetitionTournamentWriter } from "./tournament.writer";
 
 const matchReferenceCounts = z.object({
-  picks: z.coerce.number().int().nonnegative(),
   comments: z.coerce.number().int().nonnegative(),
   nextMatches: z.coerce.number().int().nonnegative(),
+  picks: z.coerce.number().int().nonnegative(),
 });
 
 const stageBracketRows = z.array(z.object({ has_bracket: z.boolean() }));
@@ -42,7 +42,7 @@ export class CompetitionMatchWriter implements MatchWriter {
       row = await this.em.findOne(
         MatchRow,
         { id },
-        { refresh: true, lockMode: LockMode.PESSIMISTIC_WRITE },
+        { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true },
       );
 
       if (row) {
@@ -85,7 +85,7 @@ export class CompetitionMatchWriter implements MatchWriter {
       }
     }
 
-    return [...byId.values()].map(({ status, beginAt, endAt }) => ({ status, beginAt, endAt }));
+    return [...byId.values()].map(({ status, beginAt, endAt }) => ({ beginAt, endAt, status }));
   }
   async tournament(id: string) {
     return await this.tournaments.load(id);
@@ -157,19 +157,19 @@ export class CompetitionMatchWriter implements MatchWriter {
     }
 
     Object.assign(row, {
-      pandascoreId: model.pandascoreId,
-      source: model.source,
-      name: model.name,
       beginAt: model.beginAt,
       endAt: model.endAt,
-      status: model.status,
+      name: model.name,
       numberOfGames: model.numberOfGames,
       // jsonb reorders keys, so the ORM would see an equal value as a change and bump updatedAt.
       officialStreams: unchangedJson(row.officialStreams, model.officialStreams),
+      pandascoreId: model.pandascoreId,
+      source: model.source,
+      sourceUrl: model.sourceUrl,
+      status: model.status,
       streams: unchangedJson(row.streams, model.streams),
       viewership: unchangedJson(row.viewership, model.viewership),
       vods: model.vods,
-      sourceUrl: model.sourceUrl,
     });
     row.tournament = this.em.getReference(TournamentRow, model.tournament.id);
     row.winner = model.winner

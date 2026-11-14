@@ -112,19 +112,19 @@ const toTeamFormEntry = (match: Match, teamId: string): TeamFormMatchEntry | nul
     results.find((r) => r.participant.id === opponentParticipant.id)?.score ?? null;
 
   return {
-    id: match.id,
-    publicId: match.publicId,
-    slug: matchPublicSlug(match),
     beginAt: match.beginAt,
     endAt: match.endAt,
+    id: match.id,
     opponent: {
       id: opponent.id,
+      imageUrl: opponent.imageUrl,
       name: opponent.name,
       slug: opponent.slug,
-      imageUrl: opponent.imageUrl,
     },
-    score: { team: teamScore, opponent: opponentScore },
     outcome: teamMatchOutcome(match, teamId),
+    publicId: match.publicId,
+    score: { opponent: opponentScore, team: teamScore },
+    slug: matchPublicSlug(match),
   };
 };
 
@@ -176,7 +176,7 @@ export class MatchService {
       this.buildHeadToHead(match),
     ]);
 
-    return { match, teamForms, headToHead };
+    return { headToHead, match, teamForms };
   }
 
   private async buildHeadToHead(match: Match): Promise<HeadToHead | null> {
@@ -190,10 +190,10 @@ export class MatchService {
     const teamBId = teamB.id;
 
     const historicalMatches = await this.reads.betweenTeams({
-      teamAId,
-      teamBId,
       excludeMatchId: match.id,
       limit: 20,
+      teamAId,
+      teamBId,
     });
 
     return buildHeadToHead(historicalMatches, teamAId, teamBId);
@@ -212,9 +212,9 @@ export class MatchService {
         const teamId = team.id;
 
         const recent = await this.reads.recentByTeam({
-          teamId,
           excludeMatchId: match.id,
           limit: RECENT_FORM_LIMIT,
+          teamId,
         });
 
         const entries = recent
@@ -222,8 +222,8 @@ export class MatchService {
           .filter((entry): entry is TeamFormMatchEntry => entry !== null);
 
         const record: TeamFormRecord = {
-          wins: entries.filter((entry) => entry.outcome === "win").length,
           losses: entries.filter((entry) => entry.outcome === "loss").length,
+          wins: entries.filter((entry) => entry.outcome === "win").length,
         };
 
         teamForms[teamId] = { recent: entries, record };
@@ -333,8 +333,8 @@ export class MatchService {
   private async settled(id: string): Promise<Match> {
     const match = await this.committed(id);
     await this.afterCommit.settle({
-      tournamentIds: [match.tournament.id],
       decidedMatchIds: match.isDecided() ? [match.id] : [],
+      tournamentIds: [match.tournament.id],
     });
 
     return match;

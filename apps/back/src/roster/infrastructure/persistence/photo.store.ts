@@ -33,10 +33,10 @@ export class MikroPhotoStore implements PhotoQueries, PhotoWriter {
     }
 
     Object.assign(row, {
+      createdAt: model.createdAt,
       id: model.id,
       player: this.em.getReference(PlayerRow, model.player.id),
       url: model.url,
-      createdAt: model.createdAt,
     });
     this.em.persist(row);
   }

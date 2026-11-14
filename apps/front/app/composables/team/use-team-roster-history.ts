@@ -19,11 +19,11 @@ interface NormalizedContract {
 
 const toMember = (contract: TeamContract): TeamRosterEraMember => ({
   contractId: contract.id,
-  playerId: contract.player.id,
-  name: contract.player.name,
-  slug: contract.player.slug,
   imageUrl: contract.player.imageUrl,
+  name: contract.player.name,
+  playerId: contract.player.id,
   role: contract.role,
+  slug: contract.player.slug,
 });
 
 const sortMembers = (members: TeamRosterEraMember[]): TeamRosterEraMember[] =>
@@ -59,7 +59,7 @@ const normalizeContracts = (contracts: TeamContract[], now: number): NormalizedC
       endMs = startMs;
     }
 
-    result.push({ contract, startMs, endMs });
+    result.push({ contract, endMs, startMs });
   }
 
   return result;
@@ -226,7 +226,7 @@ const buildTeamRosterEras = (contracts: TeamContract[], now: number): TeamRoster
       endMs = boundaries[index + 1] ?? null;
     }
 
-    rawEras.push({ startMs, endMs, isCurrent, members });
+    rawEras.push({ endMs, isCurrent, members, startMs });
   }
 
   const mergedEras = mergeAdjacentEras(rawEras);
@@ -239,13 +239,13 @@ const buildTeamRosterEras = (contracts: TeamContract[], now: number): TeamRoster
     previousMembers = sortedMembers;
 
     eras.push({
-      id: `${era.startMs}-${era.endMs ?? "now"}`,
-      start: new Date(era.startMs).toISOString(),
       end: era.endMs === null ? null : new Date(era.endMs).toISOString(),
+      id: `${era.startMs}-${era.endMs ?? "now"}`,
       isCurrent: era.isCurrent,
-      members: sortedMembers,
       joined: sortMembers(joined),
       left: sortMembers(left),
+      members: sortedMembers,
+      start: new Date(era.startMs).toISOString(),
     });
   }
 
@@ -262,8 +262,8 @@ export const useTeamRosterHistory = (teamId: MaybeRef<string | undefined>) => {
       fetchedAt: Date.now(),
     }),
     {
-      watch: [teamIdRef],
       default: () => ({ contracts: [], fetchedAt: 0 }),
+      watch: [teamIdRef],
     },
   );
 
@@ -273,8 +273,8 @@ export const useTeamRosterHistory = (teamId: MaybeRef<string | undefined>) => {
 
   return {
     eras,
-    pending,
     error,
+    pending,
     refresh,
   };
 };

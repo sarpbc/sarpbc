@@ -50,8 +50,8 @@ export const groupMatchesByRound = (
 
   return [...groups.entries()]
     .map(([round, roundMatches]) => ({
-      round,
       matches: sortMatchesByBeginAt(roundMatches),
+      round,
     }))
     .toSorted((a, b) => {
       const dateA = isNonEmptyDateInput(a.matches[0]?.beginAt)

@@ -9,40 +9,41 @@ const now = new Date("2026-10-15T12:00:00Z");
 
 const setup = (role: Author["role"] = "admin") => {
   const topic: TopicRecord = {
-    id: "topic",
-    title: "Topic",
-    description: null,
     createdAt: now,
-    updatedAt: null,
+    description: null,
+    id: "topic",
     posts: [],
+    title: "Topic",
+    updatedAt: null,
   };
 
   const saved: NewPostRecord[] = [];
   const translations: TranslationRecord[] = [];
 
   const posts = {
-    findPaginated: vi.fn<PostStore["findPaginated"]>().mockResolvedValue([]),
-    findByTopicId: vi.fn<PostStore["findByTopicId"]>().mockResolvedValue([]),
+    delete: vi.fn<PostStore["delete"]>(),
+    deleteTranslations: vi.fn<PostStore["deleteTranslations"]>(),
     findById: vi.fn<PostStore["findById"]>(async (id) => {
       const post = saved.find((candidate) => candidate.id === id);
 
       return post ? { ...post, publicId: 41 } : null;
     }),
-    findWithDetails: vi.fn<PostStore["findWithDetails"]>().mockResolvedValue(null),
+    findByTopicId: vi.fn<PostStore["findByTopicId"]>().mockResolvedValue([]),
     findLatestByUser: vi.fn<PostStore["findLatestByUser"]>().mockResolvedValue(null),
+    findPaginated: vi.fn<PostStore["findPaginated"]>().mockResolvedValue([]),
     findRecentActivity: vi.fn<PostStore["findRecentActivity"]>().mockResolvedValue([]),
+    findWithDetails: vi.fn<PostStore["findWithDetails"]>().mockResolvedValue(null),
     save: vi.fn<PostStore["save"]>(async (model) => {
       saved.push(model);
     }),
     saveTranslation: vi.fn<PostStore["saveTranslation"]>(async (model) => {
       translations.push(model);
     }),
-    deleteTranslations: vi.fn<PostStore["deleteTranslations"]>(),
-    delete: vi.fn<PostStore["delete"]>(),
   };
 
   const scope: ForumWriteScope = {
     posts,
+    replies: { deleteAllForPost: vi.fn<ForumWriteScope["replies"]["deleteAllForPost"]>() },
     topics: {
       findAllTopics: vi.fn<TopicStore["findAllTopics"]>().mockResolvedValue([]),
       findById: vi.fn<TopicStore["findById"]>().mockResolvedValue(topic),
@@ -52,9 +53,8 @@ const setup = (role: Author["role"] = "admin") => {
     users: {
       findById: vi
         .fn<ForumWriteScope["users"]["findById"]>()
-        .mockResolvedValue({ id: "user", userName: "Fan", role }),
+        .mockResolvedValue({ id: "user", role, userName: "Fan" }),
     },
-    replies: { deleteAllForPost: vi.fn<ForumWriteScope["replies"]["deleteAllForPost"]>() },
   };
 
   let commits = 0;
@@ -69,26 +69,26 @@ const setup = (role: Author["role"] = "admin") => {
   };
 
   return {
+    commits: () => commits,
+    posts,
+    saved,
+    scope,
     service: new PostService(
       posts,
       transaction,
       () => now,
       () => "translation",
     ),
-    scope,
-    posts,
-    saved,
     translations,
-    commits: () => commits,
   };
 };
 
 const input = {
-  id: "post",
-  topicId: "topic",
-  title: "<b>Title</b>",
   content: "<script>bad()</script>Body",
-  translations: [{ locale: "fr-FR" as const, title: "<b>Titre</b>", content: "Corps" }],
+  id: "post",
+  title: "<b>Title</b>",
+  topicId: "topic",
+  translations: [{ content: "Corps", locale: "fr-FR" as const, title: "<b>Titre</b>" }],
 };
 
 describe("post transaction and policies", () => {
@@ -124,21 +124,21 @@ describe("post transaction and policies", () => {
   it("reports the next available time until the one-hour boundary", async () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
+      author: { id: "user", userName: "Fan" },
+      content: "Body",
+      createdAt: new Date(now.getTime() - 3_599_999),
       id: "latest",
+      postType: PostType.DISCUSSION,
       publicId: 1,
       title: "Post",
-      content: "Body",
-      author: { id: "user", userName: "Fan" },
       topic: { id: "topic", title: "Topic" },
-      postType: PostType.DISCUSSION,
-      createdAt: new Date(now.getTime() - 3_599_999),
-      updatedAt: null,
       translations: [],
+      updatedAt: null,
     });
     await expect(f.service.getCreationStatus("user")).resolves.toStrictEqual({
       canCreate: false,
-      nextAvailableAt: new Date(now.getTime() + 1).toISOString(),
       cooldownHours: 1,
+      nextAvailableAt: new Date(now.getTime() + 1).toISOString(),
     });
     await expect(f.service.create("user", input)).rejects.toMatchObject({ kind: "invalid-input" });
   });
@@ -146,16 +146,16 @@ describe("post transaction and policies", () => {
   it("allows creation exactly at the one-hour boundary", async () => {
     const f = setup();
     f.scope.posts.findLatestByUser = async () => ({
+      author: { id: "user", userName: "Fan" },
+      content: "Body",
+      createdAt: new Date(now.getTime() - 3_600_000),
       id: "latest",
+      postType: PostType.DISCUSSION,
       publicId: 1,
       title: "Post",
-      content: "Body",
-      author: { id: "user", userName: "Fan" },
       topic: { id: "topic", title: "Topic" },
-      postType: PostType.DISCUSSION,
-      createdAt: new Date(now.getTime() - 3_600_000),
-      updatedAt: null,
       translations: [],
+      updatedAt: null,
     });
     await f.service.create("user", input);
     expect(f.saved).toHaveLength(1);
@@ -179,26 +179,26 @@ describe("post transaction and policies", () => {
 
 describe("post lookup", () => {
   const stored: PostRecord = {
+    author: { id: "user", userName: "Fan" },
+    content: "Body",
+    createdAt: now,
     id: "0a1b2c3d-0000-4000-8000-123456789abc",
+    postType: PostType.DISCUSSION,
     publicId: 88,
     title: "Mon Post: Quel roster ?",
-    content: "Body",
-    author: { id: "user", userName: "Fan" },
     topic: { id: "topic", title: "Topic" },
-    postType: PostType.DISCUSSION,
-    createdAt: now,
-    updatedAt: null,
     translations: [
       {
-        id: "t",
-        post: { id: "0a1b2c3d-0000-4000-8000-123456789abc" },
-        locale: "en-US",
-        title: "Translated title",
         content: "Translated",
         createdAt: now,
+        id: "t",
+        locale: "en-US",
+        post: { id: "0a1b2c3d-0000-4000-8000-123456789abc" },
+        title: "Translated title",
         updatedAt: null,
       },
     ],
+    updatedAt: null,
   };
 
   it("exposes the public id and a slug derived from the base title", async () => {
@@ -219,9 +219,9 @@ describe("post lookup", () => {
     await expect(
       f.service.findByIdDto({ kind: "publicId", value: 88 }, "en-US"),
     ).resolves.toMatchObject({
+      content: "Translated",
       slug: "mon-post-quel-roster",
       title: "Translated title",
-      content: "Translated",
     });
   });
 

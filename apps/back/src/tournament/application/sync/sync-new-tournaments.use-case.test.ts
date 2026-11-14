@@ -43,14 +43,14 @@ const run = async () => {
 
   const result = await service.execute();
 
-  return { result, steps, diagnostics };
+  return { diagnostics, result, steps };
 };
 
 describe(SyncNewTournamentsUseCase, () => {
   it("counts discovered, synced and failed tournament details", async () => {
     const { result } = await run();
 
-    expect(result).toStrictEqual({ discovered: 3, detailsSynced: 2, detailsFailed: 1 });
+    expect(result).toStrictEqual({ detailsFailed: 1, detailsSynced: 2, discovered: 3 });
   });
 
   it("syncs every discovered tournament despite a failure, then reconciles incidents", async () => {

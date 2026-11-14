@@ -24,7 +24,6 @@ interface SocialLink {
 
 const columns = computed<FooterColumn[]>(() => [
   {
-    title: t("components.footer.columns.explore"),
     links: [
       { label: t("general.news"), to: localePath("/") },
       { label: t("general.matches"), to: localePath("/matches") },
@@ -37,18 +36,18 @@ const columns = computed<FooterColumn[]>(() => [
       { label: t("general.countries"), to: localePath("/countries") },
       { label: t("general.transfers"), to: localePath("/transfers") },
     ],
+    title: t("components.footer.columns.explore"),
   },
   {
-    title: t("components.footer.columns.community"),
     links: [
       { label: t("page.game.airriddle.title"), to: localePath("/game/airriddle") },
       { label: t("page.game.pickems.title"), to: localePath("/game/pickems") },
       { label: t("page.game.career.title"), to: localePath("/game/career") },
       { label: t("general.forum"), to: localePath("/forum") },
     ],
+    title: t("components.footer.columns.community"),
   },
   {
-    title: t("components.footer.columns.company"),
     links: [
       { label: t("components.footer.about"), to: localePath("/about") },
       { label: t("components.footer.brand"), to: localePath("/brand") },
@@ -58,6 +57,7 @@ const columns = computed<FooterColumn[]>(() => [
         to: "https://github.com/sarpbc/sarpbc/blob/main/CONTRIBUTING.md",
       },
     ],
+    title: t("components.footer.columns.company"),
   },
 ]);
 
@@ -70,13 +70,13 @@ const legalLinks = computed<FooterLink[]>(() => [
 
 const socialLinks = computed<SocialLink[]>(() => [
   {
-    label: t("components.footer.socialX"),
     icon: "i-ri-twitter-x-fill",
+    label: t("components.footer.socialX"),
     to: "https://x.com/SARPBCorg",
   },
   {
-    label: t("components.footer.socialGitHub"),
     icon: "i-ri-github-fill",
+    label: t("components.footer.socialGitHub"),
     to: "https://github.com/sarpbc/sarpbc",
   },
 ]);

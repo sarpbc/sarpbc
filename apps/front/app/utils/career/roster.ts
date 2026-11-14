@@ -82,25 +82,25 @@ const cloneWorld = (world: CareerWorldState): CareerWorldState => {
   }
 
   return {
-    rosters,
-    players,
     freeAgentIds: [...world.freeAgentIds],
     nextGeneratedId: world.nextGeneratedId,
+    players,
     rankSnapshot: world.rankSnapshot?.map((entry) => ({ ...entry })) ?? null,
+    rosters,
     splitFields: (world.splitFields ?? []).map((field) => ({
+      points: { ...field.points },
       season: field.season,
       split: field.split,
-      points: { ...field.points },
     })),
   };
 };
 
 const emptyCareerWorld = (): CareerWorldState => ({
-  rosters: {},
-  players: {},
   freeAgentIds: [],
   nextGeneratedId: 1,
+  players: {},
   rankSnapshot: null,
+  rosters: {},
   splitFields: [],
 });
 
@@ -140,9 +140,9 @@ export interface MatchStrengthUser {
 }
 
 const npcStats = (player: CareerNpcPlayer): CareerStats => ({
-  rating: player.rating,
   form: player.form,
   morale: player.morale,
+  rating: player.rating,
 });
 
 export const getPlayerMatchStrength = (

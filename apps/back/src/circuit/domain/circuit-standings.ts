@@ -126,7 +126,6 @@ export const computeCircuitStandings = (
 
   const events = [...groups.values()]
     .map(({ event, stages: eventStages }) => ({
-      event,
       beginAt: bound(
         eventStages.map((stage) => stage.beginAt),
         "earliest",
@@ -135,6 +134,7 @@ export const computeCircuitStandings = (
         eventStages.map((stage) => stage.endAt),
         "latest",
       ),
+      event,
       status: eventStatus(eventStages, now),
     }))
     .toSorted(compareEvents);
@@ -154,16 +154,16 @@ export const computeCircuitStandings = (
       }
 
       const tally = tallies.get(team.id) ?? {
-        team,
-        points: 0,
         cells: new Map<string, CircuitStandingCell>(),
+        points: 0,
+        team,
       };
 
       const cell = tally.cells.get(stage.event.id);
       tally.cells.set(stage.event.id, {
         eventId: stage.event.id,
-        points: (cell?.points ?? 0) + points,
         placement: Math.min(cell?.placement ?? placement, placement),
+        points: (cell?.points ?? 0) + points,
       });
       tally.points += points;
       tallies.set(team.id, tally);
@@ -177,17 +177,17 @@ export const computeCircuitStandings = (
   );
 
   const rows = sorted.map((tally): CircuitStandingRow => ({
-    rank: sorted.findIndex((other) => other.points === tally.points) + 1,
-    points: tally.points,
-    team: tally.team,
     events: [...tally.cells.values()].toSorted(
       (a, b) => (order.get(a.eventId) ?? 0) - (order.get(b.eventId) ?? 0),
     ),
+    points: tally.points,
+    rank: sorted.findIndex((other) => other.points === tally.points) + 1,
+    team: tally.team,
   }));
 
   const sourceUrls = [
     ...new Set(stages.flatMap((stage) => (stage.scale.length > 0 ? [stage.sourceUrl] : []))),
   ];
 
-  return { sourceUrls, events, rows };
+  return { events, rows, sourceUrls };
 };

@@ -58,16 +58,16 @@ const onHide = async () => {
   isModerating.value = false;
 
   if (ok) {
-    toast.add({ title: t("components.discussion.messages.hidden"), color: "success" });
+    toast.add({ color: "success", title: t("components.discussion.messages.hidden") });
     emit("changed");
 
     return;
   }
 
   toast.add({
-    title: t("components.discussion.messages.errorTitle"),
-    description: t("components.discussion.messages.moderateError"),
     color: "error",
+    description: t("components.discussion.messages.moderateError"),
+    title: t("components.discussion.messages.errorTitle"),
   });
 };
 
@@ -78,16 +78,16 @@ const onDelete = async () => {
   isModerating.value = false;
 
   if (ok) {
-    toast.add({ title: t("components.discussion.messages.deleted"), color: "success" });
+    toast.add({ color: "success", title: t("components.discussion.messages.deleted") });
     emit("changed");
 
     return;
   }
 
   toast.add({
-    title: t("components.discussion.messages.errorTitle"),
-    description: t("components.discussion.messages.moderateError"),
     color: "error",
+    description: t("components.discussion.messages.moderateError"),
+    title: t("components.discussion.messages.errorTitle"),
   });
 };
 </script>

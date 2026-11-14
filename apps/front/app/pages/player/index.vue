@@ -23,8 +23,8 @@ const {
       start: start.value || undefined,
     }),
   {
-    watch: [offset, start],
     default: () => ({ players: [], total: 0 }),
+    watch: [offset, start],
   },
 );
 
@@ -102,10 +102,10 @@ const description = computed(() => {
 });
 
 setPageSeo({
+  description: description.value,
   title: start.value
     ? t("page.players.letter.title", { letter: start.value })
     : t("page.players.index.title"),
-  description: description.value,
 });
 </script>
 

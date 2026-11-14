@@ -14,21 +14,21 @@ void describe("on this day calendar", () => {
 
   void it("reads the calendar day in the site time zone", () => {
     assert.deepEqual(calendarDayIn(new Date("2024-06-30T22:30:00Z"), "Europe/Paris"), {
-      year: 2024,
-      month: 7,
       day: 1,
+      month: 7,
+      year: 2024,
     });
     assert.deepEqual(calendarDayIn(new Date("2024-06-30T22:30:00Z"), "UTC"), {
-      year: 2024,
-      month: 6,
       day: 30,
+      month: 6,
+      year: 2024,
     });
   });
 
   void it("parses and formats ISO days, refusing impossible dates", () => {
-    assert.deepEqual(parseIsoDay("2024-02-29"), { year: 2024, month: 2, day: 29 });
+    assert.deepEqual(parseIsoDay("2024-02-29"), { day: 29, month: 2, year: 2024 });
     assert.equal(parseIsoDay("2023-02-29"), null);
     assert.equal(parseIsoDay("2024-2-9"), null);
-    assert.equal(formatIsoDay({ year: 2024, month: 3, day: 5 }), "2024-03-05");
+    assert.equal(formatIsoDay({ day: 5, month: 3, year: 2024 }), "2024-03-05");
   });
 });

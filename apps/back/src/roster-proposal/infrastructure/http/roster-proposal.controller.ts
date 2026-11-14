@@ -21,15 +21,15 @@ import { ListRosterProposalsQueryDto } from "./dto/list-roster-proposals-query.d
 import type { ListRosterProposalsQueryInput } from "./dto/list-roster-proposals-query.dto";
 
 const mapProposal = (proposal: RosterProposal): RosterProposalResponse => ({
-  id: proposal.id,
   change: proposal.change,
+  createdAt: proposal.createdAt.toISOString(),
+  entityId: proposal.entityId,
+  id: proposal.id,
+  proposedById: proposal.proposedById,
+  reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
+  reviewedById: proposal.reviewedById,
   sourceUrl: proposal.sourceUrl,
   status: proposal.status,
-  proposedById: proposal.proposedById,
-  reviewedById: proposal.reviewedById,
-  reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
-  entityId: proposal.entityId,
-  createdAt: proposal.createdAt.toISOString(),
 });
 
 @Controller("roster-proposals")
@@ -42,7 +42,7 @@ export class RosterProposalController {
   async list(@Query({ schema: ListRosterProposalsQueryDto }) query: ListRosterProposalsQueryInput) {
     const { proposals, names } = await this.proposals.list(query.status);
 
-    return { proposals: proposals.map(mapProposal), names };
+    return { names, proposals: proposals.map(mapProposal) };
   }
 
   @RequirePermissions(...ROSTER_PROPOSAL_PERMISSIONS)

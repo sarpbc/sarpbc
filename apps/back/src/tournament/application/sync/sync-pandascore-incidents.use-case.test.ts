@@ -8,8 +8,8 @@ import type { CompetitionDiagnostics, SyncCursor, TournamentQueries } from "../p
 
 describe("PandaScore incidents", () => {
   const feed = {
-    listIncidents: vi.fn<CompetitionFeed["listIncidents"]>(),
     getTournamentById: vi.fn<CompetitionFeed["getTournamentById"]>(),
+    listIncidents: vi.fn<CompetitionFeed["listIncidents"]>(),
   };
 
   const cursor = {
@@ -37,8 +37,8 @@ describe("PandaScore incidents", () => {
   );
 
   const base = {
-    id: 1,
     changeType: "update" as const,
+    id: 1,
     modifiedAt: new Date("2026-10-15T10:00:00Z"),
   };
 
@@ -59,7 +59,7 @@ describe("PandaScore incidents", () => {
   it.each(["tournament", "team", "league"] as const)(
     "applies normalized %s updates",
     async (kind) => {
-      const incident = { ...base, kind, command: { pandascoreId: 42, name: "RLCS", slug: "rlcs" } };
+      const incident = { ...base, command: { name: "RLCS", pandascoreId: 42, slug: "rlcs" }, kind };
       feed.listIncidents.mockResolvedValue([incident]);
       await service.execute();
       expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
@@ -67,13 +67,13 @@ describe("PandaScore incidents", () => {
     },
   );
 
-  it.each([null, { pandascoreId: 7, name: "Current", slug: "current" }])(
+  it.each([null, { name: "Current", pandascoreId: 7, slug: "current" }])(
     "preserves explicit current membership update %p",
     async (currentTeam) => {
       const incident: CompetitionIncident = {
         ...base,
+        command: { currentTeam, player: { name: "Player", pandascoreId: 1, slug: "player" } },
         kind: "player",
-        command: { player: { pandascoreId: 1, name: "Player", slug: "player" }, currentTeam },
       };
 
       feed.listIncidents.mockResolvedValue([incident]);
@@ -84,10 +84,10 @@ describe("PandaScore incidents", () => {
 
   const team = (id: number, modifiedAt: string): CompetitionIncident => ({
     ...base,
-    id,
-    modifiedAt: new Date(modifiedAt),
-    kind: "team",
     command: { name: `T${id}`, slug: `t${id}` },
+    id,
+    kind: "team",
+    modifiedAt: new Date(modifiedAt),
   });
 
   it("keeps processing after a failure but does not move the cursor past it", async () => {
@@ -130,9 +130,9 @@ describe("PandaScore incidents", () => {
   it("hands deletions to the sync without a backfill and advances the cursor", async () => {
     const incident: CompetitionIncident = {
       ...base,
-      kind: "serie",
       changeType: "deletion",
-      deletion: { kind: "merged", intoId: 9 },
+      deletion: { intoId: 9, kind: "merged" },
+      kind: "serie",
     };
 
     feed.listIncidents.mockResolvedValue([incident]);
@@ -145,21 +145,21 @@ describe("PandaScore incidents", () => {
   it("fetches missing tournament before the incident write", async () => {
     const incident: CompetitionIncident = {
       ...base,
-      kind: "match",
       command: {
-        pandascoreId: 8,
-        tournamentPandascoreId: 42,
         name: "Final",
-        opponentSlugs: [],
-        results: [],
-        previousMatches: [],
         officialStreams: [],
+        opponentSlugs: [],
+        pandascoreId: 8,
+        previousMatches: [],
+        results: [],
+        tournamentPandascoreId: 42,
       },
+      kind: "match",
     };
 
     feed.listIncidents.mockResolvedValue([incident]);
     reads.findByPandascoreId.mockResolvedValue(null);
-    const tournament = { pandascoreId: 42, name: "Cup" };
+    const tournament = { name: "Cup", pandascoreId: 42 };
     feed.getTournamentById.mockResolvedValue(tournament);
     await service.execute();
     expect(feed.getTournamentById).toHaveBeenCalledWith(42);

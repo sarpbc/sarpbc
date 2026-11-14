@@ -7,14 +7,14 @@ import { transactionalReplies } from "./composition";
 
 @Module({
   controllers: [ReplyController],
+  exports: [ReplyService],
   providers: [
     {
+      inject: [EntityManager],
       provide: ReplyService,
       useFactory: (em: EntityManager) =>
         new ReplyService(new MikroReplyStore(em), transactionalReplies(em)),
-      inject: [EntityManager],
     },
   ],
-  exports: [ReplyService],
 })
 export class ReplyModule {}

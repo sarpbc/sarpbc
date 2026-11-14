@@ -39,10 +39,10 @@ const matches = ref<TournamentMatchListItem[]>([]);
 const loadingMatches = ref(false);
 
 const kindItems = computed(() => [
-  { value: "match", label: t("page.news.editor.matches.kind.match") },
-  { value: "matches", label: t("page.news.editor.matches.kind.matches") },
-  { value: "tournament", label: t("page.news.editor.matches.kind.tournament") },
-  { value: "team", label: t("page.news.editor.matches.kind.team") },
+  { label: t("page.news.editor.matches.kind.match"), value: "match" },
+  { label: t("page.news.editor.matches.kind.matches"), value: "matches" },
+  { label: t("page.news.editor.matches.kind.tournament"), value: "tournament" },
+  { label: t("page.news.editor.matches.kind.team"), value: "team" },
 ]);
 
 const searchesTeams = computed(() => kind.value === "team");
@@ -57,19 +57,19 @@ const block = computed((): MatchBlockSelector | null => {
 
   switch (kind.value) {
     case "match": {
-      return matchIds.value[0] ? { kind: "match", id: matchIds.value[0] } : null;
+      return matchIds.value[0] ? { id: matchIds.value[0], kind: "match" } : null;
     }
 
     case "matches": {
-      return matchIds.value.length > 0 ? { kind: "matches", ids: matchIds.value } : null;
+      return matchIds.value.length > 0 ? { ids: matchIds.value, kind: "matches" } : null;
     }
 
     case "tournament": {
-      return { kind: "tournament", id: source.value.id, limit: limit.value };
+      return { id: source.value.id, kind: "tournament", limit: limit.value };
     }
 
     case "team": {
-      return { kind: "team", id: source.value.id, limit: limit.value };
+      return { id: source.value.id, kind: "team", limit: limit.value };
     }
 
     default: {

@@ -6,8 +6,8 @@ const matchBeginTime = (match: MatchListItem): number =>
 
 export const useMatchesListPage = () => {
   const page = useOffsetMatchListPage<UpcomingMatchesResponse>({
-    keyPrefix: "matches-schedule",
     fetch: getUpcomingMatches,
+    keyPrefix: "matches-schedule",
   });
 
   const liveMatchIds = computed(
@@ -28,5 +28,5 @@ export const useMatchesListPage = () => {
 
   const hasMatches = computed(() => scheduleMatches.value.length > 0);
 
-  return { ...page, scheduleMatches, liveMatchIds, hasMatches };
+  return { ...page, hasMatches, liveMatchIds, scheduleMatches };
 };

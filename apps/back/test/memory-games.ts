@@ -7,14 +7,14 @@ import type {
 } from "../src/match-stats/application/ports";
 
 const toTournamentGame = (game: GameRecord): TournamentStatsGame => ({
+  ballchasingId: game.ballchasingId,
+  blueGoals: game.blueGoals,
+  blueParticipantId: game.blueParticipantId,
   matchId: game.matchId,
   number: game.number,
-  ballchasingId: game.ballchasingId,
-  playedAt: null,
-  blueParticipantId: game.blueParticipantId,
-  orangeParticipantId: game.orangeParticipantId,
-  blueGoals: game.blueGoals,
   orangeGoals: game.orangeGoals,
+  orangeParticipantId: game.orangeParticipantId,
+  playedAt: null,
 });
 
 export class MemoryGames implements GameStatsStore {

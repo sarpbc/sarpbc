@@ -19,39 +19,39 @@ const REPLAY = "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 const PLAYED_AT = new Date("2026-06-01T18:05:00Z");
 
 const match: CandidateMatch = {
-  id: "m1",
   beginAt: new Date("2026-06-01T18:00:00Z"),
   endAt: null,
   finished: true,
+  id: "m1",
   numberOfGames: 5,
   participants: [
-    { id: "p-kc", teamNames: ["Karmine Corp"], players: [{ id: "vatira", name: "Vatira" }] },
-    { id: "p-bds", teamNames: ["BDS"], players: [{ id: "seikoo", name: "Seikoo" }] },
+    { id: "p-kc", players: [{ id: "vatira", name: "Vatira" }], teamNames: ["Karmine Corp"] },
+    { id: "p-bds", players: [{ id: "seikoo", name: "Seikoo" }], teamNames: ["BDS"] },
   ],
   scores: new Map(),
   storedReplayIds: ["stored-1"],
 };
 
 const line = (name: string, platformId: string) => ({
+  assists: 0,
+  demolitions: 0,
+  goals: 1,
   name,
   platform: "steam",
   platformId,
-  goals: 1,
-  assists: 0,
   saves: 2,
   shots: 3,
-  demolitions: 0,
 });
 
 const stats: ReplayStats = {
-  rocketLeagueId: "RL-1",
-  playedAt: PLAYED_AT,
   blueGoals: 1,
   orangeGoals: 3,
+  playedAt: PLAYED_AT,
   players: [
     { ...line("Seikoo", "seikoo-id"), side: "blue" },
     { ...line("Stand-in", "stand-in-id"), side: "orange" },
   ],
+  rocketLeagueId: "RL-1",
 };
 
 const rejection = async (work: Promise<unknown>): Promise<ApplicationError> => {
@@ -65,10 +65,10 @@ const rejection = async (work: Promise<unknown>): Promise<ApplicationError> => {
 };
 
 const input = {
+  blueParticipantId: "p-bds",
+  gameNumber: 2,
   matchId: "m1",
   replay: `https://ballchasing.com/replay/${REPLAY}`,
-  gameNumber: 2,
-  blueParticipantId: "p-bds",
 };
 
 const setup = (
@@ -84,7 +84,6 @@ const setup = (
   } satisfies BallchasingSource;
 
   const candidates: StatsCandidates = {
-    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
     matches: vi.fn<StatsCandidates["matches"]>(async () => [
       {
         ...match,
@@ -92,31 +91,32 @@ const setup = (
         participants: options.participants ?? match.participants,
       },
     ]),
+    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
   };
 
   const games = {
-    locations: vi.fn<GameStatsStore["locations"]>(
-      async () => new Map([["stored-1", { matchId: "m1", number: 1 }]]),
-    ),
-    excluded: vi.fn<GameStatsStore["excluded"]>(async () => new Set()),
     attachment: vi.fn<GameStatsStore["attachment"]>(async () => null),
+    byMatch: vi.fn<GameStatsStore["byMatch"]>(async () => []),
+    excluded: vi.fn<GameStatsStore["excluded"]>(async () => new Set()),
+    inTournament: vi.fn<GameStatsStore["inTournament"]>(async () => []),
     links: vi.fn<GameStatsStore["links"]>(async () => [
       { platform: "steam", platformId: "stand-in-id", playerId: "vatira" },
     ]),
-    save: vi.fn<GameStatsStore["save"]>(async (record) => ({
-      matchId: record.matchId,
-      number: record.number,
-      ballchasingId: record.ballchasingId,
-      playedAt: record.playedAt?.toISOString() ?? null,
-      blueParticipantId: record.blueParticipantId,
-      orangeParticipantId: record.orangeParticipantId,
-      blueGoals: record.blueGoals,
-      orangeGoals: record.orangeGoals,
-    })),
-    byMatch: vi.fn<GameStatsStore["byMatch"]>(async () => []),
-    inTournament: vi.fn<GameStatsStore["inTournament"]>(async () => []),
+    locations: vi.fn<GameStatsStore["locations"]>(
+      async () => new Map([["stored-1", { matchId: "m1", number: 1 }]]),
+    ),
     playerLines: vi.fn<GameStatsStore["playerLines"]>(async () => []),
     remove: vi.fn<GameStatsStore["remove"]>(async () => null),
+    save: vi.fn<GameStatsStore["save"]>(async (record) => ({
+      ballchasingId: record.ballchasingId,
+      blueGoals: record.blueGoals,
+      blueParticipantId: record.blueParticipantId,
+      matchId: record.matchId,
+      number: record.number,
+      orangeGoals: record.orangeGoals,
+      orangeParticipantId: record.orangeParticipantId,
+      playedAt: record.playedAt?.toISOString() ?? null,
+    })),
   } satisfies GameStatsStore;
 
   const service = new ManualGameService(
@@ -125,7 +125,7 @@ const setup = (
     games,
   );
 
-  return { service, source, games };
+  return { games, service, source };
 };
 
 describe("ManualGameService.attach", () => {
@@ -133,18 +133,18 @@ describe("ManualGameService.attach", () => {
     const { service, games, source } = setup();
 
     await expect(service.attach("t1", input)).resolves.toStrictEqual({
+      ballchasingId: REPLAY,
+      blueGoals: 1,
+      blueParticipantId: "p-bds",
       matchId: "m1",
       number: 2,
-      ballchasingId: REPLAY,
-      playedAt: PLAYED_AT.toISOString(),
-      blueParticipantId: "p-bds",
-      orangeParticipantId: "p-kc",
-      blueGoals: 1,
       orangeGoals: 3,
+      orangeParticipantId: "p-kc",
+      playedAt: PLAYED_AT.toISOString(),
     });
     expect(source.replayStats).toHaveBeenCalledWith(REPLAY);
     const [[record]] = games.save.mock.calls;
-    expect(record).toMatchObject({ rocketLeagueId: "RL-1", playedAt: PLAYED_AT, number: 2 });
+    expect(record).toMatchObject({ number: 2, playedAt: PLAYED_AT, rocketLeagueId: "RL-1" });
     expect(record.players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Seikoo", "seikoo"],
       ["Stand-in", "vatira"],
@@ -159,10 +159,10 @@ describe("ManualGameService.attach", () => {
       participants: [
         {
           id: "p-stand-in",
-          teamNames: ["Stand-in"],
           players: [{ id: "stand-in", name: "Stand-in" }],
+          teamNames: ["Stand-in"],
         },
-        { id: "p-seikoo", teamNames: ["Seikoo"], players: [{ id: "seikoo", name: "Seikoo" }] },
+        { id: "p-seikoo", players: [{ id: "seikoo", name: "Seikoo" }], teamNames: ["Seikoo"] },
       ],
     });
 
@@ -248,8 +248,8 @@ describe("ManualGameService.attach", () => {
     const attached: GameAttachment = {
       matchId: "m9",
       number: 3,
-      tournamentName: "RLCS Paris Major",
       teams: ["Vitality", "Falcons"],
+      tournamentName: "RLCS Paris Major",
     };
 
     games.attachment.mockResolvedValueOnce(attached);
@@ -290,14 +290,14 @@ describe("ManualGameService.remove", () => {
     const { service, games } = setup();
 
     const removed = {
+      ballchasingId: "stored-1",
+      blueGoals: 1,
+      blueParticipantId: "p-kc",
       matchId: "m1",
       number: 1,
-      ballchasingId: "stored-1",
-      playedAt: null,
-      blueParticipantId: "p-kc",
-      orangeParticipantId: "p-bds",
-      blueGoals: 1,
       orangeGoals: 0,
+      orangeParticipantId: "p-bds",
+      playedAt: null,
     };
 
     games.remove.mockResolvedValueOnce(removed);

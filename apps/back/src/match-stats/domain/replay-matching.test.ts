@@ -9,32 +9,32 @@ import type {
 
 const kc: CandidateParticipant = {
   id: "p-kc",
-  teamNames: ["Karmine Corp"],
   players: [
     { id: "vatira", name: "Vatira" },
     { id: "atow", name: "Atow" },
     { id: "rise", name: "Rise." },
   ],
+  teamNames: ["Karmine Corp"],
 };
 
 const bds: CandidateParticipant = {
   id: "p-bds",
-  teamNames: ["Team BDS"],
   players: [
     { id: "monkey", name: "M0nkey M00n" },
     { id: "seikoo", name: "Seikoo" },
     { id: "exotiik", name: "ExoTiiK" },
   ],
+  teamNames: ["Team BDS"],
 };
 
 const vit: CandidateParticipant = {
   id: "p-vit",
-  teamNames: ["Team Vitality"],
   players: [
     { id: "zen", name: "zen" },
     { id: "alpha", name: "Alpha54" },
     { id: "radosin", name: "Radosin" },
   ],
+  teamNames: ["Team Vitality"],
 };
 
 const KC_NAMES = ["Vatira", "Atow", "Rise"];
@@ -55,10 +55,10 @@ const match = (
   beginAt: string | null,
   overrides: Partial<CandidateMatch> = {},
 ): CandidateMatch => ({
-  id,
   beginAt: beginAt === null ? null : at(beginAt),
   endAt: null,
   finished: true,
+  id,
   numberOfGames: 5,
   participants,
   scores: new Map(),
@@ -77,13 +77,13 @@ const replay = (
   sequence += 1;
 
   return {
+    blue: { goals: blue.goals, name: blue.name ?? null, playerNames: blue.names },
     id: `r-${String(sequence).padStart(3, "0")}`,
-    rocketLeagueId: `guid-${sequence}`,
-    title: `Replay ${sequence}`,
+    orange: { goals: orange.goals, name: orange.name ?? null, playerNames: orange.names },
     playedAt: playedAt === null ? null : at(playedAt),
     playedAtHasTimezone: true,
-    blue: { name: blue.name ?? null, goals: blue.goals, playerNames: blue.names },
-    orange: { name: orange.name ?? null, goals: orange.goals, playerNames: orange.names },
+    rocketLeagueId: `guid-${sequence}`,
+    title: `Replay ${sequence}`,
     ...overrides,
   };
 };
@@ -108,26 +108,26 @@ const byReplay = (assignments: ReplayAssignment[]) =>
 describe("assignReplays with player participants", () => {
   const zen: CandidateParticipant = {
     id: "p-zen",
-    teamNames: ["zen"],
     players: [{ id: "zen", name: "zen" }],
+    teamNames: ["zen"],
   };
 
   const vatira: CandidateParticipant = {
     id: "p-vatira",
-    teamNames: ["Vatira"],
     players: [{ id: "vatira", name: "Vatira" }],
+    teamNames: ["Vatira"],
   };
 
   it("orients a 1v1 replay by the player on each side", () => {
     const final = match("m1v1", [zen, vatira], "2026-06-01T18:00:00Z", {
-      scores: won(vatira, zen),
       numberOfGames: 1,
+      scores: won(vatira, zen),
     });
 
     const game = replay(
       "2026-06-01T18:05:00Z",
-      { names: ["Vatira"], goals: 2 },
-      { names: ["zen"], goals: 1 },
+      { goals: 2, names: ["Vatira"] },
+      { goals: 1, names: ["zen"] },
     );
 
     expect(byReplay(assignReplays([game], [final]))).toStrictEqual({
@@ -137,14 +137,14 @@ describe("assignReplays with player participants", () => {
 
   it("leaves a 1v1 replay of other players unmatched", () => {
     const final = match("m1v1", [zen, vatira], "2026-06-01T18:00:00Z", {
-      scores: won(vatira, zen),
       numberOfGames: 1,
+      scores: won(vatira, zen),
     });
 
     const game = replay(
       "2026-06-01T18:05:00Z",
-      { names: ["Atow"], goals: 2 },
-      { names: ["Rise"], goals: 1 },
+      { goals: 2, names: ["Atow"] },
+      { goals: 1, names: ["Rise"] },
     );
 
     expect(byReplay(assignReplays([game], [final]))).toStrictEqual({
@@ -160,9 +160,9 @@ const bo5 = (overrides: Partial<CandidateMatch> = {}) =>
   });
 
 const sweep = () => [
-  replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
-  replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
-  replay("2026-06-01T18:45:00Z", { names: KC_NAMES, goals: 3 }, { names: BDS_NAMES, goals: 0 }),
+  replay("2026-06-01T18:05:00Z", { goals: 1, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
+  replay("2026-06-01T18:25:00Z", { goals: 2, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
+  replay("2026-06-01T18:45:00Z", { goals: 3, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
 ];
 
 describe(assignReplays, () => {
@@ -176,26 +176,26 @@ describe(assignReplays, () => {
 
     const g2 = replay(
       "2026-06-01T18:25:00Z",
-      { names: BDS_NAMES, goals: 2 },
-      { names: KC_NAMES, goals: 1 },
+      { goals: 2, names: BDS_NAMES },
+      { goals: 1, names: KC_NAMES },
     );
 
     const g1 = replay(
       "2026-06-01T18:05:00Z",
-      { names: KC_NAMES, goals: 3 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 3, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     const g4 = replay(
       "2026-06-01T19:05:00Z",
-      { names: KC_NAMES, goals: 2 },
-      { names: BDS_NAMES, goals: 1 },
+      { goals: 2, names: KC_NAMES },
+      { goals: 1, names: BDS_NAMES },
     );
 
     const g3 = replay(
       "2026-06-01T18:45:00Z",
-      { names: BDS_NAMES, goals: 0 },
-      { names: KC_NAMES, goals: 4 },
+      { goals: 0, names: BDS_NAMES },
+      { goals: 4, names: KC_NAMES },
     );
 
     expect(byReplay(assignReplays([g2, g4, g1, g3], [final]))).toStrictEqual({
@@ -211,8 +211,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:10:00Z",
-      { names: ["KC Vatira", "Atow.", "kc rise"], goals: 1, name: "BLUE" },
-      { names: ["BDS.M0nkey M00n", "seikoo", "Exotiik"], goals: 0, name: "ORANGE" },
+      { goals: 1, name: "BLUE", names: ["KC Vatira", "Atow.", "kc rise"] },
+      { goals: 0, name: "ORANGE", names: ["BDS.M0nkey M00n", "seikoo", "Exotiik"] },
     );
 
     expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-kc" });
@@ -223,8 +223,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:10:00Z",
-      { names: ["Vatira", "Atow", "Stand-in"], goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: ["Vatira", "Atow", "Stand-in"] },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-kc" });
@@ -235,14 +235,14 @@ describe(assignReplays, () => {
 
     const named = replay(
       "2026-06-01T18:10:00Z",
-      { names: ["Vatira", "Sub One", "Sub Two"], goals: 1, name: "KARMINE CORP" },
-      { names: BDS_NAMES, goals: 0, name: "BDS" },
+      { goals: 1, name: "KARMINE CORP", names: ["Vatira", "Sub One", "Sub Two"] },
+      { goals: 0, name: "BDS", names: BDS_NAMES },
     );
 
     const anonymous = replay(
       "2026-06-01T18:30:00Z",
-      { names: ["Vatira", "Sub One", "Sub Two"], goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: ["Vatira", "Sub One", "Sub Two"] },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([named, anonymous], [m]))).toStrictEqual({
@@ -260,15 +260,15 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:10:00Z",
-      { names: ["a", "b", "c"], goals: 2, name: "VITALITY" },
-      { names: BDS_NAMES, goals: 1, name: "BDS" },
+      { goals: 2, name: "VITALITY", names: ["a", "b", "c"] },
+      { goals: 1, name: "BDS", names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-vit" });
   });
 
   it("recognises a former name of the team", () => {
-    const renamed = { ...vit, teamNames: ["Fixture Now", "Team Vitality"], players: [] };
+    const renamed = { ...vit, players: [], teamNames: ["Fixture Now", "Team Vitality"] };
 
     const m = match("m1", [renamed, bds], "2026-06-01T18:00:00Z", {
       scores: won(renamed, bds),
@@ -276,8 +276,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:10:00Z",
-      { names: ["a", "b", "c"], goals: 2, name: "VITALITY" },
-      { names: BDS_NAMES, goals: 1, name: "BDS" },
+      { goals: 2, name: "VITALITY", names: ["a", "b", "c"] },
+      { goals: 1, name: "BDS", names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [m]))).toStrictEqual({ [game.id]: "m1#1 blue=p-vit" });
@@ -288,8 +288,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:10:00Z",
-      { names: BDS_NAMES, goals: 1, name: "Karmine Corp" },
-      { names: BDS_NAMES, goals: 0, name: "BDS" },
+      { goals: 1, name: "Karmine Corp", names: BDS_NAMES },
+      { goals: 0, name: "BDS", names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [m]))).toStrictEqual({
@@ -309,14 +309,14 @@ describe(assignReplays, () => {
 
     const early = replay(
       "2026-05-28T15:20:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     const late = replay(
       "2026-06-01T18:20:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([early, late], [groups, playoffs]))).toStrictEqual({
@@ -331,14 +331,14 @@ describe(assignReplays, () => {
 
     const upperGame = replay(
       "2026-06-01T14:30:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     const grandGame = replay(
       "2026-06-01T18:20:00Z",
-      { names: KC_NAMES, goals: 0 },
-      { names: BDS_NAMES, goals: 2 },
+      { goals: 0, names: KC_NAMES },
+      { goals: 2, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([upperGame, grandGame], [upper, grand]))).toStrictEqual({
@@ -357,8 +357,8 @@ describe(assignReplays, () => {
 
     const lateUpperGame = replay(
       "2026-06-01T17:10:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([lateUpperGame], [upper, grand]))).toStrictEqual({
@@ -376,8 +376,8 @@ describe(assignReplays, () => {
 
     const earlyGame = replay(
       "2026-06-01T17:20:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([earlyGame], [groups, final]))).toStrictEqual({
@@ -391,8 +391,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T17:40:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [first, second]))).toStrictEqual({
@@ -406,8 +406,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:20:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [first, second]))).toStrictEqual({
@@ -421,8 +421,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:20:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
       { playedAtHasTimezone: false },
     );
 
@@ -436,8 +436,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T11:10:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
       { playedAtHasTimezone: false },
     );
 
@@ -453,22 +453,22 @@ describe(assignReplays, () => {
 
     const tooLate = replay(
       "2026-06-01T21:30:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
-    const undated = replay(null, { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 });
+    const undated = replay(null, { goals: 1, names: KC_NAMES }, { goals: 0, names: BDS_NAMES });
 
     const strangers = replay(
       "2026-06-01T18:20:00Z",
-      { names: ["x", "y", "z"], goals: 1 },
-      { names: ["u", "v", "w"], goals: 0 },
+      { goals: 1, names: ["x", "y", "z"] },
+      { goals: 0, names: ["u", "v", "w"] },
     );
 
     const unscheduledGame = replay(
       "2026-06-01T18:20:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: VIT_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: VIT_NAMES },
     );
 
     expect(
@@ -486,15 +486,15 @@ describe(assignReplays, () => {
 
     const original = replay(
       "2026-06-01T18:10:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
       { rocketLeagueId: "same" },
     );
 
     const copy = replay(
       "2026-06-01T18:10:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
       { rocketLeagueId: "same" },
     );
 
@@ -513,9 +513,9 @@ describe(assignReplays, () => {
     });
 
     const games = [
-      replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
-      replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
-      replay("2026-06-01T18:45:00Z", { names: KC_NAMES, goals: 3 }, { names: BDS_NAMES, goals: 0 }),
+      replay("2026-06-01T18:05:00Z", { goals: 1, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
+      replay("2026-06-01T18:25:00Z", { goals: 2, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
+      replay("2026-06-01T18:45:00Z", { goals: 3, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
     ];
 
     expect(new Set(Object.values(byReplay(assignReplays(games, [m]))))).toStrictEqual(
@@ -533,8 +533,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:05:00Z",
-      { names: KC_NAMES, goals: 0 },
-      { names: BDS_NAMES, goals: 2 },
+      { goals: 0, names: KC_NAMES },
+      { goals: 2, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [m]))).toStrictEqual({
@@ -547,14 +547,14 @@ describe(assignReplays, () => {
     const other = match("other", [kc, vit], "2026-06-02T18:00:00Z");
 
     const twice = [
-      replay("2026-06-01T18:05:00Z", { names: KC_NAMES, goals: 1 }, { names: BDS_NAMES, goals: 0 }),
-      replay("2026-06-01T18:25:00Z", { names: KC_NAMES, goals: 2 }, { names: BDS_NAMES, goals: 0 }),
+      replay("2026-06-01T18:05:00Z", { goals: 1, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
+      replay("2026-06-01T18:25:00Z", { goals: 2, names: KC_NAMES }, { goals: 0, names: BDS_NAMES }),
     ];
 
     const drawn = replay(
       "2026-06-02T18:05:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: VIT_NAMES, goals: 1 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 1, names: VIT_NAMES },
     );
 
     expect(byReplay(assignReplays([...twice, drawn], [bo1, other]))).toStrictEqual({
@@ -569,8 +569,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:05:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [m]))).toStrictEqual({
@@ -588,14 +588,14 @@ describe(assignReplays, () => {
 
     const liveGame = replay(
       "2026-06-01T18:05:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     const unscoredGame = replay(
       "2026-06-02T18:05:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: VIT_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: VIT_NAMES },
     );
 
     expect(byReplay(assignReplays([liveGame, unscoredGame], [live, unscored]))).toStrictEqual({
@@ -607,14 +607,14 @@ describe(assignReplays, () => {
   it("reports stored games where they are when the group is imported again", () => {
     const first = replay(
       "2026-06-01T18:05:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     const second = replay(
       "2026-06-01T18:25:00Z",
-      { names: BDS_NAMES, goals: 1 },
-      { names: KC_NAMES, goals: 0 },
+      { goals: 1, names: BDS_NAMES },
+      { goals: 0, names: KC_NAMES },
     );
 
     const m = match("m1", [kc, bds], "2026-06-01T18:00:00Z", {
@@ -756,8 +756,8 @@ describe(assignReplays, () => {
 
     const game = replay(
       "2026-06-01T18:05:00Z",
-      { names: KC_NAMES, goals: 1 },
-      { names: BDS_NAMES, goals: 0 },
+      { goals: 1, names: KC_NAMES },
+      { goals: 0, names: BDS_NAMES },
     );
 
     expect(byReplay(assignReplays([game], [tbd]))).toStrictEqual({

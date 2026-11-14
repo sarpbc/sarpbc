@@ -15,8 +15,8 @@ const hasMore = computed(() => limit !== null && events.value.length > limit);
 const dayLabel = computed(() =>
   date.value
     ? new Intl.DateTimeFormat(locale.value, {
-        month: "long",
         day: "numeric",
+        month: "long",
         timeZone: "UTC",
       }).format(new Date(date.value))
     : null,

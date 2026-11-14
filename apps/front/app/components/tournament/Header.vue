@@ -13,9 +13,9 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 
 const TABS = [
-  { tab: "overview", label: "common.overview" },
-  { tab: "matches", label: "general.matches" },
-  { tab: "stats", label: "page.tournaments.stats.tab" },
+  { label: "common.overview", tab: "overview" },
+  { label: "general.matches", tab: "matches" },
+  { label: "page.tournaments.stats.tab", tab: "stats" },
 ] as const;
 
 const tabItems = computed(() =>
@@ -23,9 +23,9 @@ const tabItems = computed(() =>
     stats || tab !== "stats"
       ? [
           {
-            to: localePath(tournamentTabPath(tab, eventSlug, stageSlug)),
-            label: t(label),
             active: activeTab === tab,
+            label: t(label),
+            to: localePath(tournamentTabPath(tab, eventSlug, stageSlug)),
           },
         ]
       : [],

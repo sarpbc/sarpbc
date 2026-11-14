@@ -11,41 +11,41 @@ import { unconstructed } from "../../../../test/doubles";
 import { MikroReplyStore, replyReports } from "./reply.store";
 
 const reply: ReplyRecord = {
-  id: "reply",
-  content: "Comment",
   author: { id: "author", userName: "Fan" },
-  post: { id: "post", publicId: 1, title: "Thread" },
-  newsArticle: null,
-  match: null,
-  replyTo: null,
-  hiddenAt: null,
+  content: "Comment",
   createdAt: new Date("2026-01-01"),
+  hiddenAt: null,
+  id: "reply",
+  match: null,
+  newsArticle: null,
+  post: { id: "post", publicId: 1, title: "Thread" },
+  replyTo: null,
 };
 
 const entityManager = (flushFailure: Error | null) => ({
-  getRepository: vi.fn<() => object>().mockReturnValue({}),
   findOne: vi.fn<() => Promise<{ id: string }>>().mockResolvedValue({ id: reply.id }),
-  getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
-    (_entity, id) => ({ id }),
-  ),
-  persist: vi.fn<EntityManager["persist"]>(),
-  remove: vi.fn<EntityManager["remove"]>(),
   flush: vi.fn<() => Promise<void>>(async () => {
     if (flushFailure) {
       throw flushFailure;
     }
   }),
+  getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
+    (_entity, id) => ({ id }),
+  ),
+  getRepository: vi.fn<() => object>().mockReturnValue({}),
+  persist: vi.fn<EntityManager["persist"]>(),
+  remove: vi.fn<EntityManager["remove"]>(),
 });
 
 const asEntityManager = (em: ReturnType<typeof entityManager>): EntityManager =>
   Object.assign(unconstructed(EntityManager), em);
 
 const report = {
+  createdAt: new Date(),
   id: "report",
+  reason: "spam" as const,
   reply: { id: reply.id },
   reporter: { id: "reporter" },
-  reason: "spam" as const,
-  createdAt: new Date(),
 };
 
 describe("MikroReplyStore.delete", () => {
@@ -53,11 +53,11 @@ describe("MikroReplyStore.delete", () => {
     const em = entityManager(new ForeignKeyConstraintViolationException(new Error("referenced")));
 
     await expect(new MikroReplyStore(asEntityManager(em)).delete(reply)).rejects.toMatchObject({
-      kind: "conflict",
       detail: {
         message:
           "This comment could not be deleted because it is still referenced. Hide it instead.",
       },
+      kind: "conflict",
     });
     expect(em.remove).toHaveBeenCalledExactlyOnceWith({ id: reply.id });
   });
@@ -86,11 +86,11 @@ describe("replyReports.save", () => {
     const em = entityManager(new UniqueConstraintViolationException(new Error("duplicate")));
 
     await expect(replyReports(asEntityManager(em)).save(report)).rejects.toMatchObject({
-      kind: "conflict",
       detail: {
-        message: "You already reported this comment.",
         code: FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED,
+        message: "You already reported this comment.",
       },
+      kind: "conflict",
     });
   });
 

@@ -30,12 +30,12 @@ export interface OnThisDaySources {
 }
 
 const toTeam = (team: Team): OnThisDayTeam => ({
+  darkModeImageUrl: team.darkModeImageUrl,
+  imageUrl: team.imageUrl,
+  logoDarkUrl: team.logoDarkUrl,
+  logoLightUrl: team.logoLightUrl,
   name: team.name,
   slug: team.slug,
-  imageUrl: team.imageUrl,
-  darkModeImageUrl: team.darkModeImageUrl,
-  logoLightUrl: team.logoLightUrl,
-  logoDarkUrl: team.logoDarkUrl,
 });
 
 const toPlayer = (player: Pick<Player, "name" | "slug">): OnThisDayPlayer => ({
@@ -48,23 +48,23 @@ const toTournament = (
 ): OnThisDayTournament => {
   const { name, slug, event } = tournament;
 
-  return { name, slug, event: { name: event.name, slug: event.slug } };
+  return { event: { name: event.name, slug: event.slug }, name, slug };
 };
 
 const toSide = (participant: TournamentParticipant, match: Match): OnThisDaySide => {
   const result = match.results.find((entry) => entry.participant.id === participant.id);
 
   return {
-    team: participant.team ? toTeam(participant.team) : null,
     players: participant.players.map(toPlayer),
     score: result?.score ?? null,
+    team: participant.team ? toTeam(participant.team) : null,
   };
 };
 
 const dated = (at: Date) => {
   const day = calendarDayIn(at, SITE_TIME_ZONE);
 
-  return { year: day.year, date: formatIsoDay(day) };
+  return { date: formatIsoDay(day), year: day.year };
 };
 
 const title = (tournament: Tournament): OnThisDayEvent[] => {
@@ -80,8 +80,8 @@ const title = (tournament: Tournament): OnThisDayEvent[] => {
       ...dated(endAt),
       tournament: toTournament(tournament),
       winner: {
-        team: winner.team ? toTeam(winner.team) : null,
         players: winner.players.map(toPlayer),
+        team: winner.team ? toTeam(winner.team) : null,
       },
     },
   ];
@@ -108,21 +108,21 @@ const final = (match: Match): OnThisDayEvent[] => {
     {
       kind: "final",
       ...dated(endAt),
-      tournament: toTournament(tournament),
-      match: { publicId: match.publicId, slug: matchPublicSlug(match) },
-      winner: toSide(winner, match),
       loser: toSide(loser, match),
+      match: { publicId: match.publicId, slug: matchPublicSlug(match) },
+      tournament: toTournament(tournament),
+      winner: toSide(winner, match),
     },
   ];
 };
 
 const transfer = ({ type, date, contract }: Transfer): OnThisDayEvent => ({
-  kind: "transfer",
-  year: date.getUTCFullYear(),
   date: date.toISOString().slice(0, 10),
-  type,
+  kind: "transfer",
   player: toPlayer(contract.player),
   team: toTeam(contract.team),
+  type,
+  year: date.getUTCFullYear(),
 });
 
 const publicLink = (link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink => {
@@ -137,10 +137,10 @@ const publicLink = (link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink => 
 
     case "tournament": {
       return {
+        event: { name: link.event.name, slug: link.event.slug },
         kind: "tournament",
         name: link.name,
         slug: link.slug,
-        event: { name: link.event.name, slug: link.event.slug },
       };
     }
 
@@ -164,10 +164,10 @@ const fact = ({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisD
   return [
     {
       kind: "fact",
-      year,
-      text: { en: textEn, fr: textFr },
       link: link ? publicLink(link) : null,
       sourceUrl,
+      text: { en: textEn, fr: textFr },
+      year,
     },
   ];
 };
@@ -205,7 +205,7 @@ export class OnThisDayService {
 
   async forDay(requested: CalendarDay | null, now = new Date()): Promise<OnThisDay> {
     const on = requested ?? calendarDayIn(now, SITE_TIME_ZONE);
-    const day = { month: on.month, day: on.day, timeZone: SITE_TIME_ZONE, beforeYear: on.year };
+    const day = { beforeYear: on.year, day: on.day, month: on.month, timeZone: SITE_TIME_ZONE };
 
     const [titles, finals, transfers, facts] = await Promise.all([
       this.sources.tournaments.wonOnDay(day),
@@ -215,8 +215,8 @@ export class OnThisDayService {
     ]);
 
     const finalEvents = finals.map((match) => ({
-      stageId: match.tournament.id,
       events: final(match),
+      stageId: match.tournament.id,
     }));
 
     const decidedInFinal = new Set(

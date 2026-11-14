@@ -4,12 +4,12 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { assertPrizeDistribution } from "./prize-distribution";
 
 const entry: PrizeEntry = {
-  placement: 1,
   amount: 1000,
   currency: "USD",
-  teamId: "team-a",
+  placement: 1,
   playerIds: ["player-a"],
   sourceUrl: null,
+  teamId: "team-a",
 };
 
 describe(assertPrizeDistribution, () => {
@@ -17,8 +17,8 @@ describe(assertPrizeDistribution, () => {
     expect(() => {
       assertPrizeDistribution([
         entry,
-        { ...entry, placement: 3, currency: "EUR", teamId: "team-b", playerIds: [] },
-        { ...entry, placement: 3, teamId: "team-c", playerIds: ["player-c"] },
+        { ...entry, currency: "EUR", placement: 3, playerIds: [], teamId: "team-b" },
+        { ...entry, placement: 3, playerIds: ["player-c"], teamId: "team-c" },
       ]);
     }).not.toThrow();
     expect(() => {

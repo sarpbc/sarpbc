@@ -9,11 +9,11 @@ export class TwitchStreamer {
 
 export const TwitchStreamerSchema = defineEntity({
   class: TwitchStreamer,
-  uniques: [{ properties: ["login"] }],
   properties: {
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    displayName: p.string().nullable(),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     login: p.string(),
-    displayName: p.string().nullable(),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
+  uniques: [{ properties: ["login"] }],
 });

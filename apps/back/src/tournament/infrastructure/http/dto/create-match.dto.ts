@@ -14,14 +14,14 @@ export const bracketLinksSchema = z
   .max(MAX_INCOMING_BRACKET_LINKS);
 
 export const CreateMatchDto = z.strictObject({
-  name: z.string(),
   beginAt: isoDateSchema.optional(),
   endAt: isoDateSchema.optional(),
-  status: z.string().optional(),
+  name: z.string(),
   numberOfGames: z.number().optional(),
   participantIds: z.array(z.string()).min(2),
   previousMatches: bracketLinksSchema.optional(),
   sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable().optional(),
+  status: z.string().optional(),
 });
 
 export type CreateMatchInput = z.infer<typeof CreateMatchDto>;
@@ -50,9 +50,9 @@ export const SetMatchResultDto = z.strictObject({
 export type SetMatchResultInput = z.infer<typeof SetMatchResultDto>;
 
 export const MatchVodLinkDto = z.strictObject({
-  url: z.string().min(1).max(2048),
   language: z.string().min(1).max(8),
   source: z.enum(["twitch", "youtube"]).optional(),
+  url: z.string().min(1).max(2048),
 });
 
 export const SetMatchVodsDto = z.strictObject({
@@ -71,8 +71,8 @@ export type SetMatchBracketInput = z.infer<typeof SetMatchBracketDto>;
 export const emptyBracketTeamsSchema = z.literal(EMPTY_BRACKET_SIZES);
 
 export const CreateEmptyBracketDto = z.strictObject({
-  teams: emptyBracketTeamsSchema,
   numberOfGames: z.number().int().min(1).max(9).optional(),
+  teams: emptyBracketTeamsSchema,
 });
 
 export type CreateEmptyBracketInput = z.infer<typeof CreateEmptyBracketDto>;

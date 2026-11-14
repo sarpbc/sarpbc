@@ -12,8 +12,8 @@ const {
 } = await useAsyncData("circuits-index", () => getCircuits(), { default: () => [] });
 
 setPageSeo({
-  title: t("page.circuits.index.seoTitle"),
   description: t("page.circuits.index.description"),
+  title: t("page.circuits.index.seoTitle"),
 });
 </script>
 

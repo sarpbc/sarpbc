@@ -11,87 +11,87 @@ const nullableText = z.string().nullable();
 
 const team = z.strictObject({
   id: z.string(),
+  imageUrl: nullableText,
+  location: nullableText,
+  logoDarkUrl: nullableText,
+  logoLightUrl: nullableText,
   name: z.string(),
   slug: z.string(),
-  imageUrl: nullableText,
-  logoLightUrl: nullableText,
-  logoDarkUrl: nullableText,
-  location: nullableText,
 });
 
 const participantRef = z.union([
   z.strictObject({ id: z.string(), team }),
   z.strictObject({
     id: z.string(),
-    team: z.null(),
     players: z.array(z.strictObject({ id: z.string(), name: z.string(), slug: z.string() })),
+    team: z.null(),
   }),
 ]);
 
 const participant = z.strictObject({
   id: z.string(),
-  team: team.nullable(),
   players: z.array(
     z.strictObject({
       id: z.string(),
       name: z.string(),
-      slug: z.string(),
       nationality: nullableText,
+      slug: z.string(),
     }),
   ),
   rosterSourceUrl: nullableText,
+  team: team.nullable(),
 });
 
 const match = z.strictObject({
-  id: z.string(),
-  publicId: z.number().int().positive(),
-  slug: z.string(),
-  name: z.string(),
-  status: nullableText,
   beginAt: date.nullable(),
   endAt: date.nullable(),
+  id: z.string(),
+  name: z.string(),
   numberOfGames: z.number().nullable(),
-  winnerId: nullableText,
   participants: z.array(participantRef),
-  results: z.array(z.strictObject({ participant: z.string(), score: z.number() })),
   previousMatches: z.array(
     z.strictObject({ previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
   ),
+  publicId: z.number().int().positive(),
+  results: z.array(z.strictObject({ participant: z.string(), score: z.number() })),
+  slug: z.string(),
   sourceUrl: nullableText,
+  status: nullableText,
+  winnerId: nullableText,
 });
 
 const stream = z.strictObject({
-  url: z.string(),
-  platform: z.enum(STREAM_PLATFORMS),
   channel: z.string(),
-  language: z.string(),
   kind: z.enum(STREAM_KINDS),
+  language: z.string(),
+  platform: z.enum(STREAM_PLATFORMS),
   source: z.enum(DATA_SOURCES),
+  url: z.string(),
 });
 
 const tournament = z.strictObject({
-  id: z.string(),
-  source: z.enum(DATA_SOURCES),
+  beginAt: date.nullable(),
+  country: nullableText,
+  endAt: date.nullable(),
+  event: z.strictObject({ id: z.string(), name: z.string(), slug: z.string() }),
   format: z.enum(TOURNAMENT_FORMATS),
+  hasBracket: z.boolean(),
+  id: z.string(),
+  imageUrl: nullableText,
+  league: z
+    .object({ id: z.string(), imageUrl: nullableText, name: z.string(), url: nullableText })
+    .nullable(),
+  matches: z.array(match),
   name: z.string(),
+  participants: z.array(participant),
+  pickemsEnabled: z.boolean(),
+  prizepool: nullableText,
   slug: z.string(),
-  event: z.strictObject({ id: z.string(), slug: z.string(), name: z.string() }),
+  source: z.enum(DATA_SOURCES),
   tier: nullableText,
   type: nullableText,
-  country: nullableText,
-  prizepool: nullableText,
-  imageUrl: nullableText,
-  beginAt: date.nullable(),
-  endAt: date.nullable(),
-  pickemsEnabled: z.boolean(),
-  hasBracket: z.boolean(),
-  league: z
-    .object({ id: z.string(), name: z.string(), imageUrl: nullableText, url: nullableText })
-    .nullable(),
-  winner: participantRef.nullable(),
-  participants: z.array(participant),
-  matches: z.array(match),
   watchStreams: z.array(stream),
+  winner: participantRef.nullable(),
 }) satisfies z.ZodType<TournamentDetailResponse>;
 
 export const tournamentCacheKey = (id: string): string => `tournament:${id}`;
@@ -99,10 +99,10 @@ export const tournamentCacheKey = (id: string): string => `tournament:${id}`;
 const diagnose = (key: string, operation: string, error: Error): void => {
   log.warn({
     component: "CachedTournamentRead",
-    message: "Optional tournament cache failed",
-    key,
-    operation,
     error,
+    key,
+    message: "Optional tournament cache failed",
+    operation,
   });
 };
 

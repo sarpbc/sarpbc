@@ -54,22 +54,22 @@ const monthOptions = computed(() => {
   const format = new Intl.DateTimeFormat(locale.value, { month: "long", timeZone: "UTC" });
 
   return Array.from({ length: 12 }, (_, index) => ({
-    value: index + 1,
     label: format.format(new Date(Date.UTC(2024, index, 1))),
+    value: index + 1,
   }));
 });
 
 const dayOptions = computed(() =>
   Array.from({ length: 31 }, (_, index) => index + 1)
     .filter((value) => isMonthDay(month.value, value))
-    .map((value) => ({ value, label: String(value) })),
+    .map((value) => ({ label: String(value), value })),
 );
 
 const linkKindOptions = computed(() => [
-  { value: NO_LINK, label: t("page.onThisDay.form.link.none") },
+  { label: t("page.onThisDay.form.link.none"), value: NO_LINK },
   ...ON_THIS_DAY_LINK_KINDS.map((kind) => ({
-    value: kind,
     label: t(`page.onThisDay.form.link.kinds.${kind}`),
+    value: kind,
   })),
 ]);
 
@@ -205,16 +205,16 @@ const submit = () => {
   }
 
   emit("submit", {
-    month: month.value,
     day: day.value,
-    year: parsedYear.value,
-    textEn: textEn.value.trim(),
-    textFr: textFr.value.trim(),
     link:
       linkKind.value !== NO_LINK && linked.value
-        ? { kind: linkKind.value, id: linked.value.id }
+        ? { id: linked.value.id, kind: linkKind.value }
         : null,
+    month: month.value,
     sourceUrl: sourceUrl.value.trim() || null,
+    textEn: textEn.value.trim(),
+    textFr: textFr.value.trim(),
+    year: parsedYear.value,
   });
 };
 </script>

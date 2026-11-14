@@ -9,7 +9,7 @@ import { seasonTools } from "./season-tools";
 const SEASON_ID = "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b";
 const PLAYER_ID = "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d";
 const ANNOUNCEMENT = "https://x.com/RLEsports/status/1";
-const user = (role: StaffRole) => ({ id: "u1", email: "staff@test.com", role });
+const user = (role: StaffRole) => ({ email: "staff@test.com", id: "u1", role });
 
 const awardTool = () => {
   const rosterProposalService = pendingProposalService();
@@ -27,10 +27,10 @@ const awardTool = () => {
 
 describe("propose_season_award", () => {
   const input = {
-    seasonId: SEASON_ID,
-    playerId: PLAYER_ID,
     awardType: "regional_mvp",
+    playerId: PLAYER_ID,
     region: "Europe",
+    seasonId: SEASON_ID,
     sourceUrl: ANNOUNCEMENT,
   };
 
@@ -42,12 +42,12 @@ describe("propose_season_award", () => {
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
       {
-        kind: "award_season_player",
-        seasonId: SEASON_ID,
-        playerId: PLAYER_ID,
         awardType: "regional_mvp",
-        region: "Europe",
+        kind: "award_season_player",
+        playerId: PLAYER_ID,
         presentedBy: undefined,
+        region: "Europe",
+        seasonId: SEASON_ID,
       },
       ANNOUNCEMENT,
       "u1",
@@ -82,48 +82,48 @@ describe("get_season", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const detail: SeasonDetail = {
+      awards: [
+        {
+          awardType: "season_mvp",
+          id: "award-1",
+          player: { id: PLAYER_ID, name: "ExoTiiK", slug: "exotiik" },
+          presentedBy: "Ally",
+          region: null,
+          sourceUrl: ANNOUNCEMENT,
+        },
+      ],
+      format: { phases: [], summary: "Splits and a World Championship." },
       id: SEASON_ID,
       name: "RLCS 2024",
-      slug: "rlcs-2024",
-      format: { summary: "Splits and a World Championship.", phases: [] },
-      winnerTeamId: null,
       participants: [
         {
           id: "participant-1",
-          team: { id: "t1", name: "Team", slug: "team", imageUrl: null, darkModeImageUrl: null },
-          pathNote: null,
           path: [
             {
               id: "entry-1",
               label: "Open qualifier",
               result: "1st",
               tournament: {
+                event: { id: "e1", name: "Open", slug: "open" },
                 id: "s1",
                 name: "Open",
                 slug: "open",
                 source: "startgg",
-                event: { id: "e1", slug: "open", name: "Open" },
               },
             },
           ],
+          pathNote: null,
+          team: { darkModeImageUrl: null, id: "t1", imageUrl: null, name: "Team", slug: "team" },
         },
       ],
-      awards: [
-        {
-          id: "award-1",
-          awardType: "season_mvp",
-          region: null,
-          presentedBy: "Ally",
-          sourceUrl: ANNOUNCEMENT,
-          player: { id: PLAYER_ID, name: "ExoTiiK", slug: "exotiik" },
-        },
-      ],
+      slug: "rlcs-2024",
+      winnerTeamId: null,
     };
 
     const tool = seasonTools({
       seasonService: {
-        list: vi.fn<SeasonService["list"]>(),
         detail: vi.fn<SeasonService["detail"]>(async () => detail),
+        list: vi.fn<SeasonService["list"]>(),
       },
     }).find((candidate) => candidate.name === "get_season");
 
@@ -136,8 +136,8 @@ describe("get_season", () => {
     expect(body).toMatchObject({
       awards: [
         {
-          presentedBy: "Ally",
           player: { slug: "exotiik", url: "https://sarpbc.test/player/exotiik" },
+          presentedBy: "Ally",
         },
       ],
     });

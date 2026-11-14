@@ -8,9 +8,9 @@ import { TeamAlias } from "./team-alias.entity";
  * rows: adopting one would relabel it as PandaScore data and drop the start.gg credit.
  */
 const adoptable = (slug: string) => ({
-  slug,
-  pandascoreId: null,
   mergedInto: null,
+  pandascoreId: null,
+  slug,
   source: { $ne: "startgg" as const },
 });
 

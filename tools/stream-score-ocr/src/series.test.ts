@@ -10,7 +10,7 @@ const score = (
   orange: number,
   clock: number,
   overtime = false,
-): ScoreboardReading => ({ kind: "score", blue, orange, clock, overtime, confidence: 0.9 });
+): ScoreboardReading => ({ blue, clock, confidence: 0.9, kind: "score", orange, overtime });
 
 const feed = (tracker: SeriesTracker, readings: readonly ScoreboardReading[], from = 0): number => {
   for (const [index, reading] of readings.entries()) {
@@ -201,11 +201,11 @@ void describe("SeriesTracker", () => {
       [[1, 0, "regulation", 0.7]],
     );
     assert.deepEqual(proposal.frames, {
-      read: 12,
       accepted: 10,
       hidden: 1,
-      unreadable: 1,
+      read: 12,
       rejected: 1,
+      unreadable: 1,
     });
   });
 

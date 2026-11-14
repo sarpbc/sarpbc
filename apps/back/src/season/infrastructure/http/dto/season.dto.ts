@@ -17,31 +17,31 @@ import {
 const SLUG_MAX_LENGTH = 120;
 
 export const SeasonDto = z.strictObject({
-  name: z.string().trim().min(1).max(SEASON_NAME_MAX_LENGTH),
-  slug: z.string().trim().max(SLUG_MAX_LENGTH).nullish(),
   format: z
     .strictObject({
-      summary: z.string().max(SEASON_FORMAT_SUMMARY_MAX_LENGTH).nullable(),
       phases: z
         .array(
           z.strictObject({
-            name: z.string().trim().min(1).max(SEASON_FORMAT_PHASE_NAME_MAX_LENGTH),
             description: z.string().max(SEASON_FORMAT_PHASE_DESCRIPTION_MAX_LENGTH).nullable(),
+            name: z.string().trim().min(1).max(SEASON_FORMAT_PHASE_NAME_MAX_LENGTH),
           }),
         )
         .max(MAX_SEASON_FORMAT_PHASES),
+      summary: z.string().max(SEASON_FORMAT_SUMMARY_MAX_LENGTH).nullable(),
     })
     .optional(),
+  name: z.string().trim().min(1).max(SEASON_NAME_MAX_LENGTH),
+  slug: z.string().trim().max(SLUG_MAX_LENGTH).nullish(),
   winnerTeamId: z.uuid().nullish(),
 });
 
 export type SeasonInput = z.infer<typeof SeasonDto>;
 
 export const CreateSeasonAwardDto = z.strictObject({
-  playerId: z.uuid(),
   awardType: z.enum(SEASON_AWARD_TYPES),
-  region: z.string().max(SEASON_AWARD_REGION_MAX_LENGTH).nullish(),
+  playerId: z.uuid(),
   presentedBy: z.string().max(SEASON_AWARD_PRESENTER_MAX_LENGTH).nullish(),
+  region: z.string().max(SEASON_AWARD_REGION_MAX_LENGTH).nullish(),
   sourceUrl: z
     .string()
     .trim()
@@ -54,8 +54,8 @@ export type CreateSeasonAwardInput = z.infer<typeof CreateSeasonAwardDto>;
 const PathNote = z.string().max(SEASON_PATH_NOTE_MAX_LENGTH).nullable();
 
 export const CreateSeasonParticipantDto = z.strictObject({
-  teamId: z.uuid(),
   pathNote: PathNote.optional(),
+  teamId: z.uuid(),
 });
 
 export type CreateSeasonParticipantInput = z.infer<typeof CreateSeasonParticipantDto>;

@@ -103,7 +103,7 @@ export const streamFrames = async function* streamFrames(
     let index = 0;
 
     for await (const frame of readPpmFrames(decoder.stdout)) {
-      yield { t: index * settings.intervalSeconds, frame };
+      yield { frame, t: index * settings.intervalSeconds };
       index += 1;
     }
 

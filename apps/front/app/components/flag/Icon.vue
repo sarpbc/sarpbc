@@ -7,9 +7,9 @@ interface Props {
 defineProps<Props>();
 
 const sizeClasses = {
-  sm: "w-3 h-2",
-  md: "w-4 h-3",
   lg: "w-6 h-4",
+  md: "w-4 h-3",
+  sm: "w-3 h-2",
 };
 </script>
 

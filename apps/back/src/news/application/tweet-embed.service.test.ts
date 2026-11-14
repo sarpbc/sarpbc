@@ -28,24 +28,24 @@ describe(TweetEmbedService, () => {
 
   const tweet = {
     __typename: "Tweet",
-    id_str: "2095971934320071030",
-    text: "This marks the end of my playing career. https://t.co/photo",
-    display_text_range: [0, 59],
     created_at: "2026-09-04T20:27:05.000Z",
-    user: {
-      name: "Comm",
-      screen_name: "RL_Comm",
-      profile_image_url_https: "https://pbs.twimg.com/profile_images/comm.jpg",
-    },
+    display_text_range: [0, 59],
+    id_str: "2095971934320071030",
     mediaDetails: [
       {
-        type: "photo",
-        media_url_https: "https://pbs.twimg.com/media/retirement.jpg",
-        original_info: { width: 1200, height: 800 },
         ext_alt_text: "Retirement announcement",
+        media_url_https: "https://pbs.twimg.com/media/retirement.jpg",
+        original_info: { height: 800, width: 1200 },
+        type: "photo",
         url: "https://t.co/photo",
       },
     ],
+    text: "This marks the end of my playing career. https://t.co/photo",
+    user: {
+      name: "Comm",
+      profile_image_url_https: "https://pbs.twimg.com/profile_images/comm.jpg",
+      screen_name: "RL_Comm",
+    },
   };
 
   const url = "https://x.com/RL_Comm/status/2095971934320071030";
@@ -68,11 +68,11 @@ describe(TweetEmbedService, () => {
 
     expect(embedded.media).toStrictEqual([
       {
+        alt: "Retirement announcement",
+        height: 800,
         type: "photo",
         url: tweet.mediaDetails[0]?.media_url_https,
         width: 1200,
-        height: 800,
-        alt: "Retirement announcement",
       },
     ]);
   });
@@ -91,9 +91,9 @@ describe(TweetEmbedService, () => {
     fetchMock.mockImplementation(async () =>
       Response.json({
         ...tweet,
-        text: "A &amp; B 😀",
         display_text_range: [0, 12],
         mediaDetails: undefined,
+        text: "A &amp; B 😀",
       }),
     );
     const embed = await service.embed("https://x.com/RL_Comm/status/2095971934320071030");
@@ -109,9 +109,9 @@ describe(TweetEmbedService, () => {
           ...tweet.mediaDetails,
           {
             ...tweet.mediaDetails[0],
-            type: "video",
-            media_url_https: "https://pbs.twimg.com/media/video.jpg",
             ext_alt_text: undefined,
+            media_url_https: "https://pbs.twimg.com/media/video.jpg",
+            type: "video",
           },
         ],
       }),
@@ -120,11 +120,11 @@ describe(TweetEmbedService, () => {
     expect(embed.url).toBe("https://x.com/RL_Comm/status/2095971934320071030");
     expect(embed.media).toHaveLength(2);
     expect(embed.media[1]).toStrictEqual({
+      alt: "",
+      height: 800,
       type: "video",
       url: "https://pbs.twimg.com/media/video.jpg",
       width: 1200,
-      height: 800,
-      alt: "",
     });
   });
 
@@ -132,8 +132,8 @@ describe(TweetEmbedService, () => {
     fetchMock.mockImplementation(async () =>
       Response.json({
         ...tweet,
-        text: "😀😀 Update https://t.co/photo",
         display_text_range: [0, 11],
+        text: "😀😀 Update https://t.co/photo",
       }),
     );
     const embed = await service.embed("https://x.com/RL_Comm/status/2095971934320071030");
@@ -146,9 +146,9 @@ describe(TweetEmbedService, () => {
     const embed = await service.embed("https://x.com/HereticsRL/status/2116198150683734246");
 
     expect(embed).toMatchObject({
-      id: "2116198150683734246",
       authorHandle: "HereticsRL",
       authorImageUrl: null,
+      id: "2116198150683734246",
       media: [],
     });
     expect(embed.text).toMatch(/^Give a warm welcome to the boys!/u);
@@ -167,7 +167,7 @@ describe(TweetEmbedService, () => {
   it.each([
     {
       ...tweet,
-      mediaDetails: [{ ...tweet.mediaDetails[0], original_info: { width: 0, height: 800 } }],
+      mediaDetails: [{ ...tweet.mediaDetails[0], original_info: { height: 800, width: 0 } }],
     },
     { ...tweet, id_str: "123" },
   ])("rejects invalid upstream data", async (payload) => {

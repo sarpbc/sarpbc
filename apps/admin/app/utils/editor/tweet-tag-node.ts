@@ -4,34 +4,21 @@ import { newsTweetTagStart, parseNewsTweetTag, serializeNewsTweetTag } from "@sa
 import TweetTagNodeView from "~/components/news/TweetTagNodeView.vue";
 
 export const TweetTagNode = Node.create({
-  name: "tweetTag",
-  group: "block",
-  atom: true,
-  draggable: true,
-
   addAttributes() {
     return {
       url: { default: null },
     };
   },
-
-  parseHTML() {
-    return [{ tag: 'div[data-type="tweetTag"]' }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return ["div", mergeAttributes({ "data-type": "tweetTag" }, HTMLAttributes)];
-  },
-
   addNodeView() {
     return VueNodeViewRenderer(TweetTagNodeView);
   },
-
+  atom: true,
+  draggable: true,
+  group: "block",
   markdownTokenName: "tweetTag",
-
   markdownTokenizer: {
-    name: "tweetTag",
     level: "block" as const,
+    name: "tweetTag",
     start: newsTweetTagStart,
     tokenize: (src: string) => {
       const parsed = parseNewsTweetTag(src.trimStart());
@@ -39,16 +26,21 @@ export const TweetTagNode = Node.create({
       const leading = src.length - src.trimStart().length;
 
       return parsed
-        ? { type: "tweetTag", raw: `${src.slice(0, leading)}${parsed.raw}`, url: parsed.url }
+        ? { raw: `${src.slice(0, leading)}${parsed.raw}`, type: "tweetTag", url: parsed.url }
         : undefined;
     },
   },
-
+  name: "tweetTag",
+  parseHTML() {
+    return [{ tag: 'div[data-type="tweetTag"]' }];
+  },
   parseMarkdown: (token) => {
     const parsed = parseNewsTweetTag((token.raw ?? "").trimStart());
 
-    return parsed ? { type: "tweetTag", attrs: { url: parsed.url } } : [];
+    return parsed ? { attrs: { url: parsed.url }, type: "tweetTag" } : [];
   },
-
+  renderHTML({ HTMLAttributes }) {
+    return ["div", mergeAttributes({ "data-type": "tweetTag" }, HTMLAttributes)];
+  },
   renderMarkdown: (node) => serializeNewsTweetTag(String(node.attrs?.url ?? "")),
 });

@@ -21,8 +21,8 @@ export class InterruptedImportsSweeper implements OnApplicationBootstrap {
     if (interrupted > 0) {
       log.warn({
         component: InterruptedImportsSweeper.name,
-        message: "Interrupted stats imports",
         interrupted,
+        message: "Interrupted stats imports",
       });
     }
   }

@@ -12,5 +12,5 @@ export const useOnThisDay = () => {
   const events = computed(() => data.value?.events ?? []);
   const date = computed(() => data.value?.date ?? null);
 
-  return { events, date, pending, error, refresh };
+  return { date, error, events, pending, refresh };
 };

@@ -56,7 +56,7 @@ export interface PlayerCircuitInput {
 }
 
 export const snapshotWorldRanking = (rankings: WorldRankings): CareerRankSnapshotEntry[] =>
-  rankings.teams.map((entry) => ({ teamId: entry.team.id, points: entry.points }));
+  rankings.teams.map((entry) => ({ points: entry.points, teamId: entry.team.id }));
 
 const rosterPlayerFromId = (
   playerId: string,
@@ -64,16 +64,16 @@ const rosterPlayerFromId = (
   player: PlayerCircuitInput,
 ): RankedRosterPlayer => {
   if (playerId === USER_ROSTER_ID) {
-    return { id: playerId, name: player.name, rating: player.rating, isUser: true };
+    return { id: playerId, isUser: true, name: player.name, rating: player.rating };
   }
 
   const npc = world.players[playerId];
 
   return {
     id: playerId,
+    isUser: false,
     name: npc?.name ?? playerId,
     rating: npc?.rating ?? 50,
-    isUser: false,
   };
 };
 
@@ -160,7 +160,7 @@ const computeWorldRankings = (
       rankingScore = strength;
     }
 
-    return { team, roster, strength, rating: rankingScore, points, rank: 0, isPlayerTeam };
+    return { isPlayerTeam, points, rank: 0, rating: rankingScore, roster, strength, team };
   });
 
   if (snapshotOrder) {
@@ -183,13 +183,13 @@ const computeWorldRankings = (
   for (const entry of teams) {
     for (const member of entry.roster) {
       players.push({
+        isUser: member.isUser,
         name: member.name,
+        rank: 0,
+        rating: member.rating,
+        region: entry.team.region,
         teamId: entry.team.id,
         teamName: entry.team.name,
-        region: entry.team.region,
-        rating: member.rating,
-        rank: 0,
-        isUser: member.isUser,
       });
     }
   }
@@ -200,7 +200,7 @@ const computeWorldRankings = (
     entry.rank = index + 1;
   }
 
-  return { teams, players };
+  return { players, teams };
 };
 
 export const getTeamRank = (rankings: WorldRankings, teamId: string): number | null =>
@@ -221,13 +221,13 @@ export const computeStateRankings = (state: CareerState): WorldRankings =>
   computeWorldRankings(
     {
       name: state.playerName || DEFAULT_PLAYER_NAME,
-      teamId: state.currentTeamId || null,
+      previousPoints: state.seasonRecords.at(-1)?.points ?? null,
       rating: state.stats.rating,
       region: state.region,
       season: state.currentSeason,
       splits: state.currentSplits,
+      teamId: state.currentTeamId || null,
       worlds: state.currentWorlds,
-      previousPoints: state.seasonRecords.at(-1)?.points ?? null,
     },
     state.world,
   );

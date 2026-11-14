@@ -10,7 +10,7 @@ const WEBP_OUTPUT = new Uint8Array([9, 9, 9]);
 
 const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
 
-const DEFAULT_SIZE = { width: 512, height: 256 };
+const DEFAULT_SIZE = { height: 256, width: 512 };
 
 const setup = (bytes: Uint8Array, size = DEFAULT_SIZE) => {
   const source = { download: vi.fn<TeamLogoSource["download"]>(async () => bytes) };
@@ -21,12 +21,12 @@ const setup = (bytes: Uint8Array, size = DEFAULT_SIZE) => {
   };
 
   const storage = {
-    put: vi.fn<TeamLogoStorage["put"]>(async (key) => stored(key)),
     copy: vi.fn<TeamLogoStorage["copy"]>(async (_sourceKey, key) => stored(key)),
     delete: vi.fn<TeamLogoStorage["delete"]>(async () => {}),
+    put: vi.fn<TeamLogoStorage["put"]>(async (key) => stored(key)),
   };
 
-  return { source, images, storage, service: new TeamLogoService(source, images, storage) };
+  return { images, service: new TeamLogoService(source, images, storage), source, storage };
 };
 
 describe(TeamLogoService, () => {
@@ -106,7 +106,7 @@ describe(TeamLogoService, () => {
   });
 
   it("stores nothing for a raster logo below the minimum size", async () => {
-    const { storage, service } = setup(PNG, { width: 64, height: 64 });
+    const { storage, service } = setup(PNG, { height: 64, width: 64 });
 
     await expect(service.upload("kc", "light", "https://kcorp.gg/logo.png")).rejects.toThrow(
       InvalidInputError,

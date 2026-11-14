@@ -16,9 +16,9 @@ export const ReplyContentDto = z.strictObject({
 export type ReplyContentInput = z.infer<typeof ReplyContentDto>;
 
 export const CreateReplyDto = ReplyContentDto.extend({
-  postId: z.uuidv4().optional(),
-  newsArticleId: z.uuidv4().optional(),
   matchId: z.uuidv4().optional(),
+  newsArticleId: z.uuidv4().optional(),
+  postId: z.uuidv4().optional(),
 }).refine(
   (dto) =>
     [dto.postId, dto.newsArticleId, dto.matchId].filter((id) => id !== undefined).length === 1,

@@ -16,11 +16,11 @@ describe("NewsService findPublishedShortsByWeek", () => {
   let service: NewsService;
 
   const newsRepository = {
-    findBySlug: unused,
     findById: unused,
+    findBySlug: unused,
+    listAdmin: unused,
     listPublished: unused,
     listWeek: vi.fn<NewsQueries["listWeek"]>(),
-    listAdmin: unused,
   } satisfies NewsQueries;
 
   beforeEach(() => {
@@ -64,21 +64,21 @@ describe("news publication notifications", () => {
   });
 
   const articles = {
-    findBySlug: vi.fn<NewsWriteScope["articles"]["findBySlug"]>(),
+    delete: vi.fn<NewsWriteScope["articles"]["delete"]>(),
     findById: vi.fn<NewsWriteScope["articles"]["findById"]>(),
+    findBySlug: vi.fn<NewsWriteScope["articles"]["findBySlug"]>(),
+    listAdmin: vi.fn<NewsWriteScope["articles"]["listAdmin"]>(),
     listPublished: vi.fn<NewsWriteScope["articles"]["listPublished"]>(),
     listWeek: vi.fn<NewsWriteScope["articles"]["listWeek"]>(),
-    listAdmin: vi.fn<NewsWriteScope["articles"]["listAdmin"]>(),
     save: vi.fn<NewsWriteScope["articles"]["save"]>(),
-    delete: vi.fn<NewsWriteScope["articles"]["delete"]>(),
   };
 
   const scope: NewsWriteScope = {
     articles,
-    users: { findById: vi.fn<NewsWriteScope["users"]["findById"]>() },
     replies: {
       deleteAllForTarget: vi.fn<NewsWriteScope["replies"]["deleteAllForTarget"]>(),
     },
+    users: { findById: vi.fn<NewsWriteScope["users"]["findById"]>() },
   };
 
   const transaction: NewsTransaction = {
@@ -108,18 +108,18 @@ describe("news publication notifications", () => {
     committed = false;
     committedAtSubmission = [];
     article = {
+      author: { id: "editor", userName: "Editor" },
+      content: "Final results",
+      contentFr: null,
+      createdAt: new Date("2026-10-17T12:00:00Z"),
       id: "news-1",
+      imageUrl: null,
+      isDraft: false,
       slug: "old-slug",
       title: "RLCS final",
-      content: "Final results",
       titleFr: null,
-      contentFr: null,
-      author: { id: "editor", userName: "Editor" },
-      createdAt: new Date("2026-10-17T12:00:00Z"),
-      updatedAt: null,
-      isDraft: false,
-      imageUrl: null,
       type: "article",
+      updatedAt: null,
     };
     articles.findBySlug.mockImplementation(async (slug) =>
       slug === article.slug ? article : null,

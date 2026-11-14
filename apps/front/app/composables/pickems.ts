@@ -24,9 +24,9 @@ export interface PickemPersonalRanking {
 
 export const getActivePickemTournaments = async (limit = 1): Promise<TournamentListItem[]> => {
   const { tournaments } = await getAllTournaments({
+    activeOnly: true,
     limit: Math.max(limit, 1),
     pickems: true,
-    activeOnly: true,
   });
 
   return tournaments.filter(isPickemTournamentActive).slice(0, limit);
@@ -56,10 +56,10 @@ export const updatePickemForMatch = async (
   const res = await apiFetch<{ success?: boolean; error?: string }>(
     `/pickem/match/${matchId}/pick`,
     {
-      method: "POST",
       body: {
         pickedParticipantId,
       },
+      method: "POST",
     },
   );
 

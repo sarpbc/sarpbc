@@ -62,12 +62,12 @@ export const defineTool = <Fields extends Record<string, z.ZodType>>(
   const permissions = [spec.permission ?? []].flat();
 
   return {
-    name: spec.name,
     description:
       permissions.length > 0
         ? `${spec.description} Requires ${listOr(permissions)}.`
         : spec.description,
     inputSchema: spec.input,
+    name: spec.name,
     async run(user, input) {
       const allowed =
         permissions.length === 0 ||
@@ -95,21 +95,21 @@ export const defineTool = <Fields extends Record<string, z.ZodType>>(
         const { result, entityId, sourceUrl } = await spec.handler(fields, user);
         log.info({
           component: "McpTool",
-          userId: user.id,
-          tool: spec.name,
           entityId,
-          sourceUrl,
           message: `${spec.name} completed`,
+          sourceUrl,
+          tool: spec.name,
+          userId: user.id,
         });
 
         return textToolResult(JSON.stringify(result, null, 2));
       } catch (error) {
         log.error({
           component: "McpTool",
-          userId: user.id,
-          tool: spec.name,
-          message: `${spec.name} failed`,
           error: asError(error),
+          message: `${spec.name} failed`,
+          tool: spec.name,
+          userId: user.id,
         });
 
         return toolErrorResult(extractErrorMessage(error));

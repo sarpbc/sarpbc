@@ -19,8 +19,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         : "page.authentication.errors.googleFailed";
 
     toast.add({
-      title: i18n.t(titleKey),
       color: "error",
+      title: i18n.t(titleKey),
     });
 
     const { authError: _authError, ...query } = route.query;

@@ -40,8 +40,8 @@ const sourceLabel = (source: MatchVodSource): string => {
 const linkLabel = (vod: MatchVod): string =>
   t("page.match.detail.vods.linkLabel", {
     game: vod.game,
-    source: sourceLabel(vod.source),
     language: languageNames.value.of(vod.language) ?? vod.language,
+    source: sourceLabel(vod.source),
   });
 </script>
 

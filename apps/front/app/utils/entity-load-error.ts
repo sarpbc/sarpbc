@@ -19,8 +19,8 @@ export const throwEntityLoadError: (cause: unknown, messages: EntityLoadErrorMes
   const status = cause === undefined || cause === null ? 404 : getApiErrorStatus(cause);
   const notFound = status === 404;
   throw createError({
-    statusCode: notFound ? 404 : (status ?? 500),
-    message: notFound ? messages.notFound : messages.failed,
     fatal: true,
+    message: notFound ? messages.notFound : messages.failed,
+    statusCode: notFound ? 404 : (status ?? 500),
   });
 };

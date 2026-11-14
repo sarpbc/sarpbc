@@ -5,45 +5,45 @@ import { BALLCHASING_API_URL, BallchasingClient } from "./ballchasing-client";
 
 // Shapes follow the examples of https://ballchasing.com/doc/api (GET /groups/{id}, GET /replays, GET /groups).
 const listedReplay = (id: string, overrides: { date?: string; date_has_tz?: boolean } = {}) => ({
-  id,
-  link: `${BALLCHASING_API_URL}/replays/${id}`,
-  rocket_league_id: `RL-${id}`,
-  replay_title: `Game ${id}`,
-  map_code: "stadium_p",
-  playlist_id: "private",
-  duration: 300,
-  overtime: false,
-  season: 14,
-  date: "2026-06-01T20:05:00+02:00",
-  date_has_tz: true,
-  visibility: "public",
-  created: "2026-06-01T20:30:00Z",
-  uploader: { steam_id: "1", name: "Uploader", profile_url: "", avatar: "" },
-  groups: [{ id: "pilot", name: "Pilot", link: "" }],
   blue: {
-    name: "KARMINE CORP",
     goals: 3,
+    name: "KARMINE CORP",
     players: [
       {
-        start_time: 0,
         end_time: 300,
+        id: { id: "a", platform: "epic" },
         name: "Vatira",
-        id: { platform: "epic", id: "a" },
         score: 500,
+        start_time: 0,
       },
       {
-        start_time: 0,
         end_time: 300,
+        id: { id: "b", platform: "steam" },
         name: "Atow",
-        id: { platform: "steam", id: "b" },
         score: 300,
+        start_time: 0,
       },
     ],
   },
+  created: "2026-06-01T20:30:00Z",
+  date: "2026-06-01T20:05:00+02:00",
+  date_has_tz: true,
+  duration: 300,
+  groups: [{ id: "pilot", link: "", name: "Pilot" }],
+  id,
+  link: `${BALLCHASING_API_URL}/replays/${id}`,
+  map_code: "stadium_p",
   orange: {
     name: "BDS",
-    players: [{ start_time: 0, end_time: 300, name: "Seikoo", id: { platform: "epic", id: "c" } }],
+    players: [{ end_time: 300, id: { id: "c", platform: "epic" }, name: "Seikoo", start_time: 0 }],
   },
+  overtime: false,
+  playlist_id: "private",
+  replay_title: `Game ${id}`,
+  rocket_league_id: `RL-${id}`,
+  season: 14,
+  uploader: { avatar: "", name: "Uploader", profile_url: "", steam_id: "1" },
+  visibility: "public",
   ...overrides,
 });
 
@@ -53,7 +53,7 @@ const json = (
   body: Record<string, Json>,
   status = 200,
   headers: Record<string, string> = {},
-): Response => Response.json(body, { status, headers });
+): Response => Response.json(body, { headers, status });
 
 const client = (routes: (url: string) => Response) => {
   const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(requestUrl(input)));
@@ -65,11 +65,11 @@ const client = (routes: (url: string) => Response) => {
 
   const instance = new BallchasingClient("secret-key", {
     fetch,
-    sleep,
     now: () => clock,
+    sleep,
   });
 
-  return { instance, fetch, sleep, advance: (ms: number) => (clock += ms) };
+  return { advance: (ms: number) => (clock += ms), fetch, instance, sleep };
 };
 
 describe("BallchasingClient.groupReplays", () => {
@@ -106,7 +106,7 @@ describe("BallchasingClient.groupReplays", () => {
         return json({
           count: 1,
           list: [
-            listedReplay("r3", { date_has_tz: false, date: "2026-06-02T18:00:00" }),
+            listedReplay("r3", { date: "2026-06-02T18:00:00", date_has_tz: false }),
             listedReplay("r1"),
           ],
         });
@@ -123,13 +123,13 @@ describe("BallchasingClient.groupReplays", () => {
 
     expect(replays.map((replay) => replay.id)).toStrictEqual(["r1", "r2", "r3"]);
     expect(replays[0]).toStrictEqual({
+      blue: { goals: 3, name: "KARMINE CORP", playerNames: ["Vatira", "Atow"] },
       id: "r1",
-      rocketLeagueId: "RL-r1",
-      title: "Game r1",
+      orange: { goals: 0, name: "BDS", playerNames: ["Seikoo"] },
       playedAt: new Date("2026-06-01T18:05:00Z"),
       playedAtHasTimezone: true,
-      blue: { name: "KARMINE CORP", goals: 3, playerNames: ["Vatira", "Atow"] },
-      orange: { name: "BDS", goals: 0, playerNames: ["Seikoo"] },
+      rocketLeagueId: "RL-r1",
+      title: "Game r1",
     });
     expect(replays[2]).toMatchObject({
       playedAt: new Date("2026-06-02T18:00:00Z"),
@@ -186,48 +186,48 @@ describe("BallchasingClient.groupReplays", () => {
 
 // Excerpt of a live GET /api/replays/{id} response.
 const replayDetail = () => ({
-  id: "r1",
-  status: "ok",
-  rocket_league_id: "RL-r1",
-  title: "Game r1",
-  date: "2026-06-01T20:05:00+02:00",
-  date_has_timezone: true,
   blue: {
     name: "REBELLION",
-    stats: { core: { goals: 2 } },
     players: [
       {
+        id: { id: "76561198327846028", platform: "steam" },
         name: "Firstkiller",
-        id: { platform: "steam", id: "76561198327846028" },
         stats: {
-          core: { goals: 2, assists: 0, saves: 3, shots: 6 },
+          core: { assists: 0, goals: 2, saves: 3, shots: 6 },
           demo: { inflicted: 0, taken: 1 },
         },
       },
       {
+        id: { id: "76561198224723032", platform: "steam" },
         name: "Racer",
-        id: { platform: "steam", id: "76561198224723032" },
         stats: {
-          core: { goals: 0, assists: 0, saves: 1, shots: 2 },
+          core: { assists: 0, goals: 0, saves: 1, shots: 2 },
           demo: { inflicted: 1, taken: 3 },
         },
       },
     ],
+    stats: { core: { goals: 2 } },
   },
+  date: "2026-06-01T20:05:00+02:00",
+  date_has_timezone: true,
+  id: "r1",
   orange: {
     name: "TEAM VITALITY",
-    stats: { core: { goals: 0 } },
     players: [
       {
+        id: { id: "76561198144145654", platform: "steam" },
         name: "zen",
-        id: { platform: "steam", id: "76561198144145654" },
         stats: {
-          core: { goals: 0, assists: 0, saves: 3, shots: 4 },
+          core: { assists: 0, goals: 0, saves: 3, shots: 4 },
           demo: { inflicted: 4, taken: 0 },
         },
       },
     ],
+    stats: { core: { goals: 0 } },
   },
+  rocket_league_id: "RL-r1",
+  status: "ok",
+  title: "Game r1",
 });
 
 describe("BallchasingClient.replayStats", () => {
@@ -235,45 +235,45 @@ describe("BallchasingClient.replayStats", () => {
     const { instance, fetch } = client(() => json(replayDetail()));
 
     await expect(instance.replayStats("r1")).resolves.toStrictEqual({
-      rocketLeagueId: "RL-r1",
-      playedAt: new Date("2026-06-01T18:05:00Z"),
       blueGoals: 2,
       orangeGoals: 0,
+      playedAt: new Date("2026-06-01T18:05:00Z"),
       players: [
         {
+          assists: 0,
+          demolitions: 0,
+          goals: 2,
           name: "Firstkiller",
           platform: "steam",
           platformId: "76561198327846028",
-          side: "blue",
-          goals: 2,
-          assists: 0,
           saves: 3,
           shots: 6,
-          demolitions: 0,
+          side: "blue",
         },
         {
+          assists: 0,
+          demolitions: 1,
+          goals: 0,
           name: "Racer",
           platform: "steam",
           platformId: "76561198224723032",
-          side: "blue",
-          goals: 0,
-          assists: 0,
           saves: 1,
           shots: 2,
-          demolitions: 1,
+          side: "blue",
         },
         {
+          assists: 0,
+          demolitions: 4,
+          goals: 0,
           name: "zen",
           platform: "steam",
           platformId: "76561198144145654",
-          side: "orange",
-          goals: 0,
-          assists: 0,
           saves: 3,
           shots: 4,
-          demolitions: 4,
+          side: "orange",
         },
       ],
+      rocketLeagueId: "RL-r1",
     });
     expect(requestUrl(fetch.mock.calls[0][0])).toBe(`${BALLCHASING_API_URL}/replays/r1`);
   });
@@ -297,11 +297,11 @@ describe("BallchasingClient.replayStats", () => {
 
     expect(stats?.orangeGoals).toBe(0);
     expect(stats?.players[0]).toMatchObject({
-      goals: 2,
       assists: 0,
+      demolitions: 0,
+      goals: 2,
       saves: 0,
       shots: 0,
-      demolitions: 0,
     });
   });
 
@@ -315,7 +315,7 @@ describe("BallchasingClient.replayStats", () => {
     });
 
     const bodies = [
-      withBluePlayer({ name: racer.name, id: racer.id }),
+      withBluePlayer({ id: racer.id, name: racer.name }),
       withBluePlayer({ ...racer, stats: { core: racer.stats.core } }),
       withBluePlayer({ ...racer, stats: { demo: racer.stats.demo } }),
       { ...detail, orange: { name: detail.orange.name, players: detail.orange.players } },

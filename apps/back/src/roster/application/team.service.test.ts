@@ -24,37 +24,37 @@ describe("Roster workflows", () => {
   beforeEach(() => {
     team = Object.assign(new Team(), { id: "team" });
     player = Object.assign(new Player(), { id: "player", team });
-    contract = Object.assign(new Contract(), { id: "contract", team, player });
+    contract = Object.assign(new Contract(), { id: "contract", player, team });
     team.players = [player];
     saveTeam = vi.fn<RosterWriteScope["teams"]["save"]>();
     deleteTeam = vi.fn<RosterWriteScope["teams"]["delete"]>();
     deleteContract = vi.fn<RosterWriteScope["contracts"]["delete"]>();
     stores = {
+      contracts: {
+        delete: deleteContract,
+        findById: async () => contract,
+        findByPlayer: vi.fn<RosterWriteScope["contracts"]["findByPlayer"]>(),
+        findByTeam: async () => [contract],
+        save: vi.fn<RosterWriteScope["contracts"]["save"]>(),
+      },
+      photos: {
+        delete: vi.fn<RosterWriteScope["photos"]["delete"]>(),
+        findById: vi.fn<RosterWriteScope["photos"]["findById"]>(),
+        findByPlayer: vi.fn<RosterWriteScope["photos"]["findByPlayer"]>(),
+        save: vi.fn<RosterWriteScope["photos"]["save"]>(),
+      },
+      players: {
+        delete: vi.fn<RosterWriteScope["players"]["delete"]>(),
+        findById: async () => player,
+        findBySlug: vi.fn<RosterWriteScope["players"]["findBySlug"]>(),
+        save: vi.fn<RosterWriteScope["players"]["save"]>(),
+      },
       teams: {
+        delete: deleteTeam,
         findById: async () => team,
         findBySlug: vi.fn<RosterWriteScope["teams"]["findBySlug"]>(),
         redirectCount: async () => 0,
         save: saveTeam,
-        delete: deleteTeam,
-      },
-      players: {
-        findById: async () => player,
-        findBySlug: vi.fn<RosterWriteScope["players"]["findBySlug"]>(),
-        save: vi.fn<RosterWriteScope["players"]["save"]>(),
-        delete: vi.fn<RosterWriteScope["players"]["delete"]>(),
-      },
-      photos: {
-        findByPlayer: vi.fn<RosterWriteScope["photos"]["findByPlayer"]>(),
-        findById: vi.fn<RosterWriteScope["photos"]["findById"]>(),
-        save: vi.fn<RosterWriteScope["photos"]["save"]>(),
-        delete: vi.fn<RosterWriteScope["photos"]["delete"]>(),
-      },
-      contracts: {
-        findByPlayer: vi.fn<RosterWriteScope["contracts"]["findByPlayer"]>(),
-        findByTeam: async () => [contract],
-        findById: async () => contract,
-        save: vi.fn<RosterWriteScope["contracts"]["save"]>(),
-        delete: deleteContract,
       },
     };
     transactions = 0;
@@ -67,13 +67,13 @@ describe("Roster workflows", () => {
       },
     };
 
-    competition = { participations: 0, matches: 0, prizes: 0 };
+    competition = { matches: 0, participations: 0, prizes: 0 };
 
     const queries: TeamQueries = {
-      search: vi.fn<TeamQueries["search"]>(),
-      searchAndCount: vi.fn<TeamQueries["searchAndCount"]>(),
       findById: vi.fn<TeamQueries["findById"]>(),
       findBySlug: vi.fn<TeamQueries["findBySlug"]>(),
+      search: vi.fn<TeamQueries["search"]>(),
+      searchAndCount: vi.fn<TeamQueries["searchAndCount"]>(),
     };
 
     service = new TeamService(queries, transaction, {
@@ -104,7 +104,7 @@ describe("Roster workflows", () => {
 
   it("names every competition reference that blocks a deletion", async () => {
     emptyTeam();
-    competition = { participations: 2, matches: 5, prizes: 1 };
+    competition = { matches: 5, participations: 2, prizes: 1 };
     await expect(service.delete(team.id)).rejects.toThrow(
       "2 tournament participations, 5 matches, 1 prize",
     );

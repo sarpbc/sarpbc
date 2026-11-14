@@ -15,7 +15,7 @@ const breadcrumbItems = [
   },
 ];
 
-const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
+const dateFormatter = useDateFormatter({ day: "numeric", month: "short", year: "numeric" });
 
 const columns: TableColumn<PatToken>[] = [
   {
@@ -24,21 +24,21 @@ const columns: TableColumn<PatToken>[] = [
   },
   {
     accessorKey: "createdAt",
-    header: t("page.tokens.columns.createdAt"),
     cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
+    header: t("page.tokens.columns.createdAt"),
   },
   {
     accessorKey: "lastUsedAt",
-    header: t("page.tokens.columns.lastUsedAt"),
     cell: ({ row }) => {
       const value = row.original.lastUsedAt;
 
       return value ? dateFormatter.value.format(new Date(value)) : t("page.tokens.lastUsedNever");
     },
+    header: t("page.tokens.columns.lastUsedAt"),
   },
   {
-    id: "actions",
     header: "",
+    id: "actions",
   },
 ];
 
@@ -89,8 +89,8 @@ const copyText = async (text: string, target: "token" | "config") => {
     }, 2000);
   } catch {
     toast.add({
-      title: t("page.tokens.copyFailed"),
       color: "error",
+      title: t("page.tokens.copyFailed"),
     });
   }
 };
@@ -114,8 +114,8 @@ const confirmCreate = async () => {
     await refresh();
   } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(error_) ?? t("page.tokens.create.failed"),
       color: "error",
+      title: getApiErrorMessage(error_) ?? t("page.tokens.create.failed"),
     });
   } finally {
     isCreating.value = false;
@@ -139,14 +139,14 @@ const confirmRevoke = async () => {
     isRevokeModalOpen.value = false;
     tokenToRevoke.value = null;
     toast.add({
-      title: t("page.tokens.revoke.success"),
       color: "success",
+      title: t("page.tokens.revoke.success"),
     });
     await refresh();
   } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(error_) ?? t("page.tokens.revoke.failed"),
       color: "error",
+      title: getApiErrorMessage(error_) ?? t("page.tokens.revoke.failed"),
     });
   } finally {
     isRevoking.value = false;

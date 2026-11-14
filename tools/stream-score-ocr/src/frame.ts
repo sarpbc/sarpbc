@@ -23,10 +23,10 @@ export const scaleRegion = (region: Region, reference: Size, frame: Frame): Regi
   const y = Math.round(region.y * sy);
 
   return {
+    height: Math.max(1, Math.min(frame.height - y, Math.round(region.height * sy))),
+    width: Math.max(1, Math.min(frame.width - x, Math.round(region.width * sx))),
     x,
     y,
-    width: Math.max(1, Math.min(frame.width - x, Math.round(region.width * sx))),
-    height: Math.max(1, Math.min(frame.height - y, Math.round(region.height * sy))),
   };
 };
 
@@ -73,7 +73,7 @@ const parsePpmHeader = (
     throw new Error("Invalid PPM size.");
   }
 
-  return { width, height, size: match[0].length };
+  return { height, size: match[0].length, width };
 };
 
 export const readPpmFrames = async function* readPpmFrames(
@@ -99,9 +99,9 @@ export const readPpmFrames = async function* readPpmFrames(
         }
 
         target = {
-          width: parsed.width,
-          height: parsed.height,
           data: new Uint8Array(parsed.width * parsed.height * 3),
+          height: parsed.height,
+          width: parsed.width,
         };
         filled = 0;
         header = new Uint8Array(0);

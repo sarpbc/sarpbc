@@ -1,7 +1,6 @@
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
-import { describeReferences } from "../../common/domain/references";
-import type { ReferenceNouns } from "../../common/domain/references";
+import { describeReferences, referenceNouns } from "../../common/domain/references";
 import type { Team } from "./team";
 
 export interface TeamCompetitionReferences {
@@ -16,14 +15,14 @@ export interface TeamReferences extends TeamCompetitionReferences {
   redirects: number;
 }
 
-const TEAM_REFERENCE_NOUNS: ReferenceNouns<keyof TeamReferences> = {
-  players: ["current player", "current players"],
-  contracts: ["contract", "contracts"],
-  redirects: ["merged duplicate", "merged duplicates"],
-  participations: ["tournament participation", "tournament participations"],
-  matches: ["match", "matches"],
-  prizes: ["prize", "prizes"],
-};
+const TEAM_REFERENCE_NOUNS = referenceNouns<keyof TeamReferences>()([
+  ["players", "current player", "current players"],
+  ["contracts", "contract", "contracts"],
+  ["redirects", "merged duplicate", "merged duplicates"],
+  ["participations", "tournament participation", "tournament participations"],
+  ["matches", "match", "matches"],
+  ["prizes", "prize", "prizes"],
+]);
 
 export const assertTeamDeletable = (team: Team, references: TeamReferences): void => {
   if (team.mergedIntoId !== null && team.mergedIntoId !== "") {

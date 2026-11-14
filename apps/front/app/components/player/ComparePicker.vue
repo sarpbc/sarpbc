@@ -30,8 +30,8 @@ const query = refDebounced(
 );
 
 const toOption = (candidate: Player): PlayerOption => ({
-  label: candidate.name,
   description: candidate.team?.name,
+  label: candidate.name,
   value: candidate.slug,
 });
 
@@ -44,11 +44,11 @@ const { data: results, status } = useLazyAsyncData(
       return [];
     }
 
-    const { players } = await getAllPlayers({ search: query.value, limit: SEARCH_LIMIT });
+    const { players } = await getAllPlayers({ limit: SEARCH_LIMIT, search: query.value });
 
     return players;
   },
-  { server: false, default: () => [] },
+  { default: () => [], server: false },
 );
 
 const items = computed(() =>

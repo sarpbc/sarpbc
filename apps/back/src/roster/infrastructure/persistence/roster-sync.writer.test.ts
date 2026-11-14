@@ -20,8 +20,8 @@ interface Where {
 describe(RosterSyncWriter, () => {
   const em = {
     findOne: vi.fn<(entity: EntityClass, where: Where) => Promise<Row | null>>(),
-    persist: vi.fn<(row: Team | Player) => void>(),
     getReference: vi.fn<(entity: EntityClass, id: string) => object>(),
+    persist: vi.fn<(row: Team | Player) => void>(),
   };
 
   const manager = Object.assign(unconstructed(EntityManager), em);
@@ -46,10 +46,10 @@ describe(RosterSyncWriter, () => {
       entity === Player && where.pandascoreId === 1 ? player : null,
     );
     await new RosterSyncWriter(manager).upsertPlayer({
-      pandascoreId: 1,
       name: "Drufinho",
-      slug: "renamed",
       nationality: "BR",
+      pandascoreId: 1,
+      slug: "renamed",
     });
     expect(player.slug).toBe("local-drufinho");
     expect(player.team).toBe(team);
@@ -66,16 +66,16 @@ describe(RosterSyncWriter, () => {
 
     em.findOne.mockImplementation(async (entity) => (entity === Player ? player : null));
     const writer = new RosterSyncWriter(manager);
-    await writer.upsertPlayer({ pandascoreId: 2, name: "Comm", slug: "comm" }, "new-team");
+    await writer.upsertPlayer({ name: "Comm", pandascoreId: 2, slug: "comm" }, "new-team");
     expect(player.team?.id).toBe("new-team");
-    await writer.upsertPlayer({ pandascoreId: 2, name: "Comm", slug: "comm" }, null);
+    await writer.upsertPlayer({ name: "Comm", pandascoreId: 2, slug: "comm" }, null);
     expect(player.team).toBeNull();
   });
 
   it("keeps the team of an open contract over the provider's current team", async () => {
     const team = Object.assign(new Team(), { id: "agg" });
     const player = Object.assign(new Player(), { id: "p3", pandascoreId: 3, slug: "joyo", team });
-    const contract = Object.assign(new Contract(), { player, team, endDate: null });
+    const contract = Object.assign(new Contract(), { endDate: null, player, team });
     em.findOne.mockImplementation(async (entity, where) => {
       if (entity === Player && where.pandascoreId === 3) {
         return player;
@@ -88,15 +88,15 @@ describe(RosterSyncWriter, () => {
       return null;
     });
     const writer = new RosterSyncWriter(manager);
-    await writer.upsertPlayer({ pandascoreId: 3, name: "Joyo", slug: "joyo" }, null);
+    await writer.upsertPlayer({ name: "Joyo", pandascoreId: 3, slug: "joyo" }, null);
     expect(player.team).toBe(team);
-    await writer.upsertPlayer({ pandascoreId: 3, name: "Joyo", slug: "joyo" }, "kaydop-corp");
+    await writer.upsertPlayer({ name: "Joyo", pandascoreId: 3, slug: "joyo" }, "kaydop-corp");
     expect(player.team).toBe(team);
   });
 
   it("reuses new identities before commit rather than creating duplicate records", async () => {
     const writer = new RosterSyncWriter(manager);
-    const input = { pandascoreId: 10, name: "Secret", slug: "secret" };
+    const input = { name: "Secret", pandascoreId: 10, slug: "secret" };
     const first = await writer.upsertTeam(input);
     const second = await writer.upsertTeam({ ...input, slug: "changed" });
     expect(second.id).toBe(first.id);
@@ -108,17 +108,17 @@ describe(RosterSyncWriter, () => {
   it("preserves local artwork", async () => {
     const team = Object.assign(new Team(), {
       id: "t",
+      imageUrl: "local.png",
       pandascoreId: 10,
       slug: "local",
-      imageUrl: "local.png",
     });
 
     em.findOne.mockResolvedValue(team);
     await new RosterSyncWriter(manager).upsertTeam({
-      pandascoreId: 10,
-      name: "Secret",
-      slug: "changed",
       imageUrl: "remote.png",
+      name: "Secret",
+      pandascoreId: 10,
+      slug: "changed",
     });
     expect(team.slug).toBe("local");
     expect(team.imageUrl).toBe("local.png");
@@ -138,9 +138,9 @@ describe(RosterSyncWriter, () => {
     );
 
     const writer = new RosterSyncWriter(manager);
-    const input = { pandascoreId: 21, name: "Fixture Before", slug: "fixture-before" };
+    const input = { name: "Fixture Before", pandascoreId: 21, slug: "fixture-before" };
 
-    return { team, results: [await writer.upsertTeam(input), await writer.upsertTeam(input)] };
+    return { results: [await writer.upsertTeam(input), await writer.upsertTeam(input)], team };
   };
 
   it("maps a PandaScore team named in an alias to the aliased team", async () => {

@@ -9,7 +9,7 @@ const route = useRoute();
 const reportError = useReportError();
 const teamId = String(route.params.id);
 
-const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
+const dateFormatter = useDateFormatter({ day: "numeric", month: "short", year: "numeric" });
 
 const formatDate = (dateStr: string | null) =>
   dateStr ? dateFormatter.value.format(new Date(dateStr)) : "-";
@@ -17,9 +17,9 @@ const formatDate = (dateStr: string | null) =>
 const isSavingTeam = ref(false);
 
 const teamForm = ref({
-  name: "",
-  location: "",
   imageUrl: "",
+  location: "",
+  name: "",
 });
 
 const {
@@ -46,9 +46,9 @@ watch(
   (p) => {
     if (p) {
       teamForm.value = {
-        name: p.name ?? "",
-        location: p.location ?? "",
         imageUrl: p.imageUrl ?? "",
+        location: p.location ?? "",
+        name: p.name ?? "",
       };
     }
   },
@@ -96,34 +96,34 @@ const contractForm = ref<{
   startDate: string;
   endDate: string;
 }>({
+  endDate: "",
   playerId: "",
   role: "active",
   startDate: "",
-  endDate: "",
 });
 
 const contractColumns: TableColumn<TeamContract>[] = [
   {
     accessorKey: "player",
-    header: t("page.teams.contracts.columns.player"),
     cell: ({ row }) => row.original.player.name,
+    header: t("page.teams.contracts.columns.player"),
   },
   {
     accessorKey: "role",
-    header: t("page.teams.contracts.columns.role"),
     cell: ({ row }) => t(`common.contractRole.${row.original.role}`),
+    header: t("page.teams.contracts.columns.role"),
   },
   {
     accessorKey: "startDate",
-    header: t("page.teams.contracts.columns.startDate"),
     cell: ({ row }) => formatDate(row.original.startDate),
+    header: t("page.teams.contracts.columns.startDate"),
   },
   {
     accessorKey: "endDate",
-    header: t("page.teams.contracts.columns.endDate"),
     cell: ({ row }) => formatDate(row.original.endDate),
+    header: t("page.teams.contracts.columns.endDate"),
   },
-  { id: "actions", header: "" },
+  { header: "", id: "actions" },
 ];
 
 const {
@@ -131,17 +131,17 @@ const {
   error: contractsError,
   refresh: refreshContracts,
 } = await useLazyAsyncData(`admin-team-contracts-${teamId}`, () => getTeamContracts(teamId), {
-  server: false,
   default: () => [],
+  server: false,
 });
 
 const openCreateContractModal = () => {
   editingContract.value = null;
   contractForm.value = {
+    endDate: "",
     playerId: "",
     role: "active",
     startDate: "",
-    endDate: "",
   };
   isContractModalOpen.value = true;
 };
@@ -149,10 +149,10 @@ const openCreateContractModal = () => {
 const openEditContractModal = (contract: TeamContract) => {
   editingContract.value = contract;
   contractForm.value = {
+    endDate: formatDateForInput(contract.endDate),
     playerId: contract.player.id,
     role: contract.role,
     startDate: formatDateForInput(contract.startDate),
-    endDate: formatDateForInput(contract.endDate),
   };
   isContractModalOpen.value = true;
 };
@@ -166,10 +166,10 @@ const saveContract = async () => {
 
   try {
     const body = {
+      endDate: contractForm.value.endDate || null,
       playerId: contractForm.value.playerId,
       role: contractForm.value.role,
       startDate: contractForm.value.startDate,
-      endDate: contractForm.value.endDate || null,
     };
 
     await (editingContract.value

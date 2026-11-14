@@ -29,11 +29,11 @@ const manualCounterpart = async (
   });
 
   const stage = {
-    eventName,
-    stageName: command.name,
-    leagueId: league?.id ?? null,
     beginAt: command.beginAt ?? null,
     endAt: command.endAt ?? null,
+    eventName,
+    leagueId: league?.id ?? null,
+    stageName: command.name,
   };
 
   const window = counterpartSearchWindow(stage);
@@ -271,22 +271,22 @@ const importExpectedRoster = async (
 
     await scope.tournaments.saveParticipant({
       id: participantId,
-      tournamentId: tournament.id,
-      teamId: team.id,
       playerIds,
       rosterSourceUrl: existingParticipant?.rosterSourceUrl ?? null,
+      teamId: team.id,
+      tournamentId: tournament.id,
     });
 
     if (roster.team.pandascoreId === command.winnerPandascoreTeamId) {
       // Winner identity is sufficient for persistence; full roster views are reloaded after commit.
       tournament.winner = {
+        createdAt: existingParticipant?.createdAt ?? new Date(),
         id: participantId,
-        tournamentId: tournament.id,
-        team:
-          existingParticipant?.team ?? Object.assign(new Team(), { ...roster.team, id: team.id }),
         players: [],
         rosterSourceUrl: existingParticipant?.rosterSourceUrl ?? null,
-        createdAt: existingParticipant?.createdAt ?? new Date(),
+        team:
+          existingParticipant?.team ?? Object.assign(new Team(), { ...roster.team, id: team.id }),
+        tournamentId: tournament.id,
         updatedAt: new Date(),
       };
     }
@@ -337,7 +337,7 @@ export const applyTournament = async (
   const siblings = renamed ? await scope.events.stages(event.id) : [];
 
   return {
-    tournament,
     stageIds: [...new Set([tournament.id, ...siblings.map((stage) => stage.id)])],
+    tournament,
   };
 };

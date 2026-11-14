@@ -19,16 +19,16 @@ export class ImageRepository implements ImageStore {
       await this.em.persist(record).flush();
 
       return {
+        createdAt: record.createdAt,
         id: record.id,
         imageId: record.imageId,
         url: record.url,
-        createdAt: record.createdAt,
       };
     } catch (error) {
       log.error({
         component: ImageRepository.name,
-        imageId,
         error: error instanceof Error ? error : new Error(String(error)),
+        imageId,
       });
       throw new IntegrationError(
         "The image uploaded, but saving its record failed. Try uploading again.",

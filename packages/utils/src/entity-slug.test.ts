@@ -80,8 +80,8 @@ void describe("matchSlug", () => {
   void it("names both teams when they are known", () => {
     assert.equal(
       matchSlug({
-        teamNames: ["Karmine Corp", "Team Falcons"],
         matchName: "Upper bracket final: Karmine Corp vs Team Falcons",
+        teamNames: ["Karmine Corp", "Team Falcons"],
         ...worlds,
         stageSlug: "playoffs",
       }),
@@ -99,8 +99,8 @@ void describe("matchSlug", () => {
   void it("falls back to the round label when a team is missing", () => {
     assert.equal(
       matchSlug({
-        teamNames: ["Karmine Corp", null],
         matchName: "Lower bracket round 2: Karmine Corp vs TBD",
+        teamNames: ["Karmine Corp", null],
         ...worlds,
       }),
       "lower-bracket-round-2-rlcs-world-championship-2026-group-a",
@@ -110,8 +110,8 @@ void describe("matchSlug", () => {
   void it("treats a TBD team name as missing", () => {
     assert.equal(
       matchSlug({
-        teamNames: ["TBD", "TBD"],
         matchName: "Upper bracket final: TBD vs TBD",
+        teamNames: ["TBD", "TBD"],
         ...worlds,
       }),
       "upper-bracket-final-rlcs-world-championship-2026-group-a",
@@ -120,14 +120,14 @@ void describe("matchSlug", () => {
 
   void it("uses no label for an unlabeled TBD match", () => {
     assert.equal(
-      matchSlug({ teamNames: [null, null], matchName: "TBD vs TBD", ...worlds }),
+      matchSlug({ matchName: "TBD vs TBD", teamNames: [null, null], ...worlds }),
       "rlcs-world-championship-2026-group-a",
     );
   });
 
   void it("keeps a colon-free label that is not a TBD placeholder", () => {
     assert.equal(
-      matchSlug({ teamNames: [null, null], matchName: "Grand Final", ...worlds }),
+      matchSlug({ matchName: "Grand Final", teamNames: [null, null], ...worlds }),
       "grand-final-rlcs-world-championship-2026-group-a",
     );
   });
@@ -135,10 +135,10 @@ void describe("matchSlug", () => {
   void it("names a stage slugged like its event only once", () => {
     assert.equal(
       matchSlug({
-        teamNames: ["A", "B"],
-        matchName: "Final",
         eventSlug: "community-cup",
+        matchName: "Final",
         stageSlug: "community-cup",
+        teamNames: ["A", "B"],
       }),
       "a-vs-b-community-cup",
     );
@@ -146,7 +146,7 @@ void describe("matchSlug", () => {
 
   void it("never returns an empty slug", () => {
     assert.equal(
-      matchSlug({ teamNames: [null, null], matchName: "TBD", eventSlug: "", stageSlug: "" }),
+      matchSlug({ eventSlug: "", matchName: "TBD", stageSlug: "", teamNames: [null, null] }),
       "match",
     );
   });

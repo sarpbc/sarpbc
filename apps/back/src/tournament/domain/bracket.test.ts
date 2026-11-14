@@ -116,8 +116,8 @@ describe("bracket links", () => {
 
 describe("PandaScore bracket data", () => {
   const manual = {
-    source: "manual",
     pandascoreId: null,
+    source: "manual",
     tournament: { source: "manual" },
   } as const;
 

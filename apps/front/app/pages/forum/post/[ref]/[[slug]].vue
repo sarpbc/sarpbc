@@ -17,25 +17,25 @@ const {
   () => `forum-post-${postRef.value}`,
   () => getPostById(postRef.value),
   {
-    watch: [postRef],
     // Nuxt's `pick` throws on a null result, which would turn a missing post into a 500.
     transform: (result) =>
       result && {
+        author: result.author,
+        content: result.content,
+        createdAt: result.createdAt,
         id: result.id,
         publicId: result.publicId,
         slug: result.slug,
         title: result.title,
-        content: result.content,
-        author: result.author,
-        createdAt: result.createdAt,
       },
+    watch: [postRef],
   },
 );
 
 if (!post.value) {
   throwEntityLoadError(error.value, {
-    notFound: t("page.forum.post.postNotFound"),
     failed: t("page.forum.post.failedToLoadPostData"),
+    notFound: t("page.forum.post.postNotFound"),
   });
 }
 
@@ -63,7 +63,7 @@ const description = computed(() =>
 watch(
   [title, description],
   () => {
-    setPageSeo({ title: title.value, description: description.value });
+    setPageSeo({ description: description.value, title: title.value });
   },
   { immediate: true },
 );

@@ -15,26 +15,26 @@ const unavailableTweetSchema = z.union([
 
 const tweetSchema = z.object({
   __typename: z.literal("Tweet"),
-  id_str: z.string(),
-  text: z.string(),
   created_at: z.iso.datetime(),
   display_text_range: z.tuple([z.number().int().nonnegative(), z.number().int().nonnegative()]),
-  user: z.object({
-    name: z.string(),
-    screen_name: z.string().regex(/^[A-Za-z0-9_]{1,15}$/u),
-    profile_image_url_https: imageUrl.optional().catch(undefined),
-  }),
+  id_str: z.string(),
   mediaDetails: z
     .array(
       z.object({
-        type: z.enum(["photo", "video", "animated_gif"]),
-        media_url_https: imageUrl,
-        original_info: z.object({ width: z.number().positive(), height: z.number().positive() }),
         ext_alt_text: z.string().optional(),
+        media_url_https: imageUrl,
+        original_info: z.object({ height: z.number().positive(), width: z.number().positive() }),
+        type: z.enum(["photo", "video", "animated_gif"]),
         url: z.string(),
       }),
     )
     .default([]),
+  text: z.string(),
+  user: z.object({
+    name: z.string(),
+    profile_image_url_https: imageUrl.optional().catch(undefined),
+    screen_name: z.string().regex(/^[A-Za-z0-9_]{1,15}$/u),
+  }),
 });
 
 interface CacheEntry {
@@ -109,21 +109,21 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
     text = text.replaceAll("&lt;", "<").replaceAll("&gt;", ">").replaceAll("&amp;", "&").trim();
 
     return {
-      id: parsed.id,
-      url: `https://x.com/${tweet.user.screen_name}/status/${parsed.id}`,
-      authorName: tweet.user.name,
       authorHandle: tweet.user.screen_name,
-      authorUrl: `https://x.com/${tweet.user.screen_name}`,
       authorImageUrl: tweet.user.profile_image_url_https ?? null,
-      text,
-      postedAt: tweet.created_at,
+      authorName: tweet.user.name,
+      authorUrl: `https://x.com/${tweet.user.screen_name}`,
+      id: parsed.id,
       media: tweet.mediaDetails.map((media) => ({
+        alt: media.ext_alt_text ?? "",
+        height: media.original_info.height,
         type: media.type,
         url: media.media_url_https,
         width: media.original_info.width,
-        height: media.original_info.height,
-        alt: media.ext_alt_text ?? "",
       })),
+      postedAt: tweet.created_at,
+      text,
+      url: `https://x.com/${tweet.user.screen_name}/status/${parsed.id}`,
     };
   }
 }

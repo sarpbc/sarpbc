@@ -6,17 +6,10 @@ export const NewsCoverImageUrl = z
   .string()
   .trim()
   .max(NEWS_TEXT_MAX_LENGTH)
-  .pipe(z.url({ protocol: /^(?:https?|ftp)$/u, message: "Enter a valid cover image URL." }));
+  .pipe(z.url({ message: "Enter a valid cover image URL.", protocol: /^(?:https?|ftp)$/u }));
 
 export const createNewsArticleFields = {
-  title: z.string().min(1).max(NEWS_TEXT_MAX_LENGTH),
   content: z.string().min(1),
-  titleFr: z
-    .string()
-    .trim()
-    .max(NEWS_TEXT_MAX_LENGTH)
-    .transform((value) => value || null)
-    .nullish(),
   contentFr: z
     .string()
     .trim()
@@ -29,6 +22,13 @@ export const createNewsArticleFields = {
     .min(1, "Enter a slug, or leave empty to generate one from the title.")
     .max(NEWS_TEXT_MAX_LENGTH)
     .optional(),
+  title: z.string().min(1).max(NEWS_TEXT_MAX_LENGTH),
+  titleFr: z
+    .string()
+    .trim()
+    .max(NEWS_TEXT_MAX_LENGTH)
+    .transform((value) => value || null)
+    .nullish(),
   type: z.enum(NEWS_TYPES).optional(),
 };
 

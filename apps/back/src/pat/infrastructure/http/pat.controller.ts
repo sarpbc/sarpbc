@@ -27,10 +27,10 @@ export class PatController {
 
     return {
       tokens: tokens.map((token) => ({
-        id: token.id,
-        name: token.name,
         createdAt: token.createdAt.toISOString(),
+        id: token.id,
         lastUsedAt: token.lastUsedAt?.toISOString() ?? null,
+        name: token.name,
       })),
     };
   }
@@ -45,9 +45,9 @@ export class PatController {
     const created = await this.patService.createToken(userId, dto.name);
 
     return {
+      createdAt: created.createdAt.toISOString(),
       id: created.id,
       name: created.name,
-      createdAt: created.createdAt.toISOString(),
       token: created.token,
     };
   }

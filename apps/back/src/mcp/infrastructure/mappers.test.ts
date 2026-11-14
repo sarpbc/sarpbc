@@ -17,9 +17,9 @@ import {
 
 const match = (source: DataSource, tournamentSource: DataSource, teamSource: DataSource): Match =>
   Object.assign(new Match(), {
+    participants: [{ team: { source: teamSource } }],
     source,
     tournament: { source: tournamentSource },
-    participants: [{ team: { source: teamSource } }],
   });
 
 describe(isRedistributableMatch, () => {
@@ -36,34 +36,34 @@ describe(isRedistributableMatch, () => {
 const cup = (source: DataSource) => {
   const club = Object.assign(new Team(), {
     id: "team-kc",
-    slug: "karmine-corp",
     name: "Karmine Corp",
+    slug: "karmine-corp",
     source: "startgg",
   });
 
   return Object.assign(new Tournament(), {
-    id: "cup",
-    name: "Coupe",
-    slug: "coupe",
-    source,
-    imageUrl: null,
-    event: { id: "event", slug: "coupe", name: "Coupe" },
     beginAt: null,
-    endAt: null,
-    pickemsEnabled: false,
-    league: null,
     description: null,
-    tier: null,
+    endAt: null,
+    event: { id: "event", name: "Coupe", slug: "coupe" },
     hasBracket: false,
-    winner: null,
+    id: "cup",
+    imageUrl: null,
+    league: null,
+    matches: [match("startgg", source, "startgg")],
+    name: "Coupe",
     participants: [
       Object.assign(new TournamentParticipant(), {
         id: "part-kc",
-        team: club,
         players: [Object.assign(new Player(), { id: "player-vatira", name: "Vatira" })],
+        team: club,
       }),
     ],
-    matches: [match("startgg", source, "startgg")],
+    pickemsEnabled: false,
+    slug: "coupe",
+    source,
+    tier: null,
+    winner: null,
   });
 };
 
@@ -75,9 +75,9 @@ describe("mapTournamentDetail participants", () => {
       {
         id: "part-kc",
         name: "Karmine Corp",
-        team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
         players: [{ id: "player-vatira", name: "Vatira", slug: "" }],
         rosterSourceUrl: null,
+        team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
       },
     ]);
     expect(detail.matches).toStrictEqual([]);
@@ -92,12 +92,12 @@ describe("mapTournamentDetail participants", () => {
 });
 
 const listed = (url: string, source: DataSource): Stream => ({
-  url,
-  platform: "twitch",
   channel: url,
-  language: "en",
   kind: "official",
+  language: "en",
+  platform: "twitch",
   source,
+  url,
 });
 
 describe("MCP streams", () => {
@@ -108,10 +108,10 @@ describe("MCP streams", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const tournament = Object.assign(new Tournament(), {
+      event: { id: "event", name: "Coupe", slug: "coupe" },
       id: "cup",
       slug: "coupe",
       source: "manual",
-      event: { id: "event", slug: "coupe", name: "Coupe" },
       streams: [startgg, manual],
     });
 
@@ -125,20 +125,20 @@ describe("MCP streams", () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const inherited = Object.assign(new Match(), {
-      publicId: 1,
       name: "Final",
+      publicId: 1,
       tournament: {
-        id: "cup",
-        name: "Coupe",
-        slug: "coupe",
-        event: { id: "event", slug: "coupe", name: "Coupe" },
         beginAt: null,
-        league: null,
-        pickemsEnabled: false,
-        source: "manual",
-        pandascoreId: null,
-        streams: [startgg, manual],
+        event: { id: "event", name: "Coupe", slug: "coupe" },
         eventStreams: [],
+        id: "cup",
+        league: null,
+        name: "Coupe",
+        pandascoreId: null,
+        pickemsEnabled: false,
+        slug: "coupe",
+        source: "manual",
+        streams: [startgg, manual],
       },
     });
 
@@ -149,41 +149,41 @@ describe("MCP streams", () => {
 
 const stage = (source: DataSource) =>
   Object.assign(new Tournament(), {
+    event: { id: "event", name: "Coupe", slug: "coupe" },
     id: `stage-${source}`,
     slug: `stage-${source}`,
     source,
-    event: { id: "event", slug: "coupe", name: "Coupe" },
   });
 
 describe("MCP viewership", () => {
   const viewership: Viewership = {
-    peakViewers: 12_000,
     averageViewers: null,
-    scope: "official",
     measuredAt: null,
+    peakViewers: 12_000,
+    scope: "official",
     sourceName: "Esports Charts",
     sourceUrl: "https://escharts.com/tournaments/rl/fake-cup",
   };
 
   const played = (source: DataSource) =>
     Object.assign(new Match(), {
-      publicId: 1,
       name: "Final",
+      publicId: 1,
       source,
-      viewership,
       tournament: {
-        id: "cup",
-        name: "Coupe",
-        slug: "coupe",
-        event: { id: "event", slug: "coupe", name: "Coupe" },
         beginAt: null,
-        league: null,
-        pickemsEnabled: false,
-        source: "manual",
-        pandascoreId: null,
-        streams: [],
+        event: { id: "event", name: "Coupe", slug: "coupe" },
         eventStreams: [],
+        id: "cup",
+        league: null,
+        name: "Coupe",
+        pandascoreId: null,
+        pickemsEnabled: false,
+        slug: "coupe",
+        source: "manual",
+        streams: [],
       },
+      viewership,
     });
 
   it("leaves the viewership of start.gg matches and start.gg-only events out", () => {

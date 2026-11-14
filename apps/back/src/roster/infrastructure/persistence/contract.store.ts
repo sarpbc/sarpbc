@@ -28,7 +28,7 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
   }
 
   async findPastContractsByPlayer(id: string) {
-    return await this.list({ player: { id }, endDate: { $ne: null } }, true);
+    return await this.list({ endDate: { $ne: null }, player: { id } }, true);
   }
 
   async findByTeam(id: string) {
@@ -36,7 +36,7 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
   }
 
   async findFormerPlayersByTeam(id: string) {
-    return await this.list({ team: { id }, endDate: { $ne: null } }, true);
+    return await this.list({ endDate: { $ne: null }, team: { id } }, true);
   }
 
   async findMovements({ teamId, playerId }: ContractMovementFilter) {
@@ -87,15 +87,15 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
     }
 
     Object.assign(row, {
-      id: model.id,
-      player: this.em.getReference(PlayerRow, model.player.id),
-      team: this.em.getReference(TeamRow, model.team.id),
-      startDate: model.startDate,
+      createdAt: model.createdAt,
       endDate: model.endDate,
-      role: model.role,
+      id: model.id,
       joinSourceUrl: model.joinSourceUrl,
       leaveSourceUrl: model.leaveSourceUrl,
-      createdAt: model.createdAt,
+      player: this.em.getReference(PlayerRow, model.player.id),
+      role: model.role,
+      startDate: model.startDate,
+      team: this.em.getReference(TeamRow, model.team.id),
     });
     this.em.persist(row);
   }

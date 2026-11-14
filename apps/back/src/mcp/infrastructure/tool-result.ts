@@ -5,11 +5,11 @@ const INTERNAL_ERROR_MESSAGE =
   "Something went wrong on the server and was logged. Try again later, or ask an admin to check the logs.";
 
 export const textToolResult = (text: string): CallToolResult => ({
-  content: [{ type: "text", text }],
+  content: [{ text, type: "text" }],
 });
 
 export const toolErrorResult = (message: string): CallToolResult => ({
-  content: [{ type: "text", text: message }],
+  content: [{ text: message, type: "text" }],
   isError: true,
 });
 

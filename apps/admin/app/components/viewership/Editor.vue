@@ -35,10 +35,10 @@ const toast = useToast();
 const reportError = useReportError();
 
 const emptyForm = (): ViewershipForm => ({
-  peakViewers: "",
   averageViewers: "",
-  scope: "official",
   measuredAt: "",
+  peakViewers: "",
+  scope: "official",
   sourceName: "",
   sourceUrl: "",
 });
@@ -51,8 +51,8 @@ const saving = ref(false);
 
 const scopeOptions = computed(() =>
   VIEWERSHIP_SCOPES.map((scope) => ({
-    value: scope,
     label: t(`page.tournaments.viewership.scopes.${scope}`),
+    value: scope,
   })),
 );
 
@@ -72,10 +72,10 @@ const toLocalInput = (iso: string | null): string => {
 const toCount = (value: string): number => (value.trim() === "" ? Number.NaN : Number(value));
 
 const toViewership = (values: ViewershipForm): Viewership => ({
-  peakViewers: toCount(values.peakViewers),
   averageViewers: values.averageViewers.trim() === "" ? null : toCount(values.averageViewers),
-  scope: values.scope,
   measuredAt: values.measuredAt ? new Date(values.measuredAt).toISOString() : null,
+  peakViewers: toCount(values.peakViewers),
+  scope: values.scope,
   sourceName: values.sourceName,
   sourceUrl: values.sourceUrl,
 });
@@ -130,10 +130,10 @@ const apply = (viewership: Viewership | null) => {
   stored.value = viewership !== null;
   form.value = viewership
     ? {
-        peakViewers: String(viewership.peakViewers),
         averageViewers: viewership.averageViewers === null ? "" : String(viewership.averageViewers),
-        scope: viewership.scope,
         measuredAt: toLocalInput(viewership.measuredAt),
+        peakViewers: String(viewership.peakViewers),
+        scope: viewership.scope,
         sourceName: viewership.sourceName,
         sourceUrl: viewership.sourceUrl,
       }
@@ -172,7 +172,7 @@ const save = async (viewership: Viewership | null, message: string) => {
     const response = await setViewership(path, viewership);
 
     apply(response.viewership);
-    toast.add({ title: message, color: "success" });
+    toast.add({ color: "success", title: message });
     open.value = false;
   } catch (error) {
     reportError(error, t("page.tournaments.viewership.saveError"));

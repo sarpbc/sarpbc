@@ -10,10 +10,10 @@ const reportError = useReportError();
 const breadcrumbItems = [{ label: t("page.onThisDay.title") }];
 
 const columns: TableColumn<OnThisDayFact>[] = [
-  { id: "date", header: t("page.onThisDay.table.date") },
+  { header: t("page.onThisDay.table.date"), id: "date" },
   { accessorKey: "textEn", header: t("page.onThisDay.table.text") },
-  { id: "link", header: t("page.onThisDay.table.link") },
-  { id: "actions", header: "" },
+  { header: t("page.onThisDay.table.link"), id: "link" },
+  { header: "", id: "actions" },
 ];
 
 const {
@@ -27,7 +27,7 @@ const {
 });
 
 const dayFormat = computed(
-  () => new Intl.DateTimeFormat(locale.value, { month: "long", day: "numeric", timeZone: "UTC" }),
+  () => new Intl.DateTimeFormat(locale.value, { day: "numeric", month: "long", timeZone: "UTC" }),
 );
 
 const dateLabel = (fact: OnThisDayFact): string => {
@@ -65,8 +65,8 @@ const save = async (input: OnThisDayFactInput) => {
     await (current ? updateOnThisDayFact(current.id, input) : createOnThisDayFact(input));
     isFormOpen.value = false;
     toast.add({
-      title: t(current ? "page.onThisDay.edit.saved" : "page.onThisDay.create.success"),
       color: "success",
+      title: t(current ? "page.onThisDay.edit.saved" : "page.onThisDay.create.success"),
     });
     await refresh();
   } catch (saveError) {

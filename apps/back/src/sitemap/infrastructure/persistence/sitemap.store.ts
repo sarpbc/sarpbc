@@ -30,8 +30,8 @@ export class SitemapStore implements SitemapQueries {
     );
 
     return rows.map((row) => ({
-      slug: row.slug,
       lastmod: new Date(row.updatedAt ?? row.createdAt),
+      slug: row.slug,
     }));
   }
 
@@ -39,13 +39,13 @@ export class SitemapStore implements SitemapQueries {
     const rows = await this.em.find(
       Tournament,
       {},
-      { populate: ["event"], fields: ["slug", "updatedAt", "event.slug"] },
+      { fields: ["slug", "updatedAt", "event.slug"], populate: ["event"] },
     );
 
     return rows.map((row) => ({
-      slug: row.slug,
       eventSlug: row.event.slug,
       lastmod: new Date(row.updatedAt),
+      slug: row.slug,
     }));
   }
 
@@ -54,7 +54,6 @@ export class SitemapStore implements SitemapQueries {
       Match,
       {},
       {
-        populate: ["participants.team", "participants.players", "tournament.event"],
         fields: [
           "publicId",
           "name",
@@ -68,19 +67,20 @@ export class SitemapStore implements SitemapQueries {
           "tournament.beginAt",
           "tournament.event.slug",
         ],
+        populate: ["participants.team", "participants.players", "tournament.event"],
       },
     );
 
     return rows.map((row) => ({
-      publicId: row.publicId,
-      name: row.name,
-      status: row.status,
-      participants: row.participants.getItems().map(({ team, players }) => ({
-        team: team ? { name: teamNameAt(team, row.beginAt ?? row.tournament.beginAt) } : null,
-        players: players.getItems().map(({ name }) => ({ name })),
-      })),
-      tournament: { slug: row.tournament.slug, event: { slug: row.tournament.event.slug } },
       lastmod: new Date(row.updatedAt),
+      name: row.name,
+      participants: row.participants.getItems().map(({ team, players }) => ({
+        players: players.getItems().map(({ name }) => ({ name })),
+        team: team ? { name: teamNameAt(team, row.beginAt ?? row.tournament.beginAt) } : null,
+      })),
+      publicId: row.publicId,
+      status: row.status,
+      tournament: { event: { slug: row.tournament.event.slug }, slug: row.tournament.slug },
     }));
   }
 
@@ -93,8 +93,8 @@ export class SitemapStore implements SitemapQueries {
     const rows = await this.em.find(
       Player,
       {
-        mergedInto: null,
         $or: [{ team: { $ne: null } }, { contracts: { $some: {} } }, { id: { $in: appeared } }],
+        mergedInto: null,
       },
       { fields: ["slug"] },
     );
@@ -105,7 +105,7 @@ export class SitemapStore implements SitemapQueries {
   async staffSlugs(): Promise<string[]> {
     const rows = await this.em.find(
       Player,
-      { mergedInto: null, contracts: { $some: { role: { $in: [...STAFF_CONTRACT_ROLES] } } } },
+      { contracts: { $some: { role: { $in: [...STAFF_CONTRACT_ROLES] } } }, mergedInto: null },
       { fields: ["slug"] },
     );
 
@@ -119,12 +119,12 @@ export class SitemapStore implements SitemapQueries {
     const rows = await this.em.find(
       Team,
       {
-        mergedInto: null,
         $or: [
           { players: { $some: { mergedInto: null } } },
           { id: { $in: appeared } },
           { id: { $in: contracted } },
         ],
+        mergedInto: null,
       },
       { fields: ["slug"] },
     );

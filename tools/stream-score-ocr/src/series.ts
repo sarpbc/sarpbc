@@ -74,11 +74,11 @@ export class SeriesTracker {
   readonly #settings: TrackerSettings;
   readonly #games: StreamScoreGame[] = [];
   readonly #frames: StreamScoreFrameCounts = {
-    read: 0,
     accepted: 0,
     hidden: 0,
-    unreadable: 0,
+    read: 0,
     rejected: 0,
+    unreadable: 0,
   };
   #current: CurrentGame | null = null;
   #candidate: Candidate | null = null;
@@ -149,9 +149,9 @@ export class SeriesTracker {
     return {
       ...source,
       bestOf: this.#settings.bestOf,
+      frames: { ...this.#frames },
       games: [...this.#games],
       series: { blue: this.#wins("blue"), orange: this.#wins("orange"), winner: this.#winner() },
-      frames: { ...this.#frames },
     };
   }
 
@@ -179,7 +179,7 @@ export class SeriesTracker {
     const candidate: Candidate =
       previous !== null && previous.blue === reading.blue && previous.orange === reading.orange
         ? { ...previous, count: previous.count + 1 }
-        : { blue: reading.blue, orange: reading.orange, since: t, count: 1 };
+        : { blue: reading.blue, count: 1, orange: reading.orange, since: t };
 
     this.#candidate = candidate;
     const stable = this.#settings.stableReadings;
@@ -188,7 +188,7 @@ export class SeriesTracker {
     if (current !== null && isKickoff(current, reading)) {
       const kickoff: Candidate =
         current.kickoff === null
-          ? { blue: 0, orange: 0, since: t, count: 1 }
+          ? { blue: 0, count: 1, orange: 0, since: t }
           : { ...current.kickoff, count: current.kickoff.count + 1 };
 
       current.kickoff = kickoff;
@@ -286,18 +286,18 @@ export class SeriesTracker {
 
   #start(candidate: Candidate): void {
     this.#current = {
-      startedAt: candidate.since,
-      lastSeen: candidate.since,
-      lastClock: -1,
-      blue: candidate.blue,
-      orange: candidate.orange,
-      readings: candidate.count,
       agreeing: candidate.count,
+      blue: candidate.blue,
+      kickoff: null,
+      lastClock: -1,
+      lastSeen: candidate.since,
+      orange: candidate.orange,
       overtime: false,
       overtimeReadings: 0,
-      zeroClockReadings: 0,
+      readings: candidate.count,
+      startedAt: candidate.since,
       unconfirmed: null,
-      kickoff: null,
+      zeroClockReadings: 0,
     };
     this.#awaitingKickoff = false;
   }
@@ -319,15 +319,15 @@ export class SeriesTracker {
 
     this.#awaitingKickoff = true;
     this.#games.push({
-      number: this.#games.length + 1,
       blue: current.blue,
-      orange: current.orange,
-      winner,
-      endedBy,
-      startedAt: current.startedAt,
-      endedAt,
       confidence:
         winner === null ? 0 : Math.round((current.agreeing / current.readings) * 1000) / 1000,
+      endedAt,
+      endedBy,
+      number: this.#games.length + 1,
+      orange: current.orange,
+      startedAt: current.startedAt,
+      winner,
     });
   }
 }

@@ -72,12 +72,12 @@ export const replaceStreams = (
 
     seen.add(parsed.url);
     streams.push({
-      url: parsed.url,
-      platform: parsed.platform,
       channel,
-      language,
       kind: input.kind,
+      language,
+      platform: parsed.platform,
       source: startgg.has(parsed.url) ? "startgg" : source,
+      url: parsed.url,
     });
   }
 
@@ -101,12 +101,12 @@ export const pandascoreStreams = (official: readonly OfficialMatchStream[]): Str
 
       return [
         {
-          url: parsed.url,
-          platform: parsed.platform,
           channel: parsed.channel ?? new URL(parsed.url).hostname.replace(/^www\./u, ""),
-          language,
           kind: "official" as const,
+          language,
+          platform: parsed.platform,
           source: "pandascore" as const,
+          url: parsed.url,
         },
       ];
     });

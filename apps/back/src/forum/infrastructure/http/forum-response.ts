@@ -35,24 +35,24 @@ export interface TopicResponse extends ForumTopic {
 export type PostWithSlugResponse = PostResponseFields & { slug: string };
 
 const postResponse = (post: PostRecord): PostResponseFields => ({
+  author: { id: post.author.id, userName: post.author.userName },
+  content: post.content,
+  createdAt: post.createdAt,
   id: post.id,
+  postType: post.postType,
   publicId: post.publicId,
   title: post.title,
-  content: post.content,
-  author: { id: post.author.id, userName: post.author.userName },
   topic: { id: post.topic.id, title: post.topic.title },
-  postType: post.postType,
-  createdAt: post.createdAt,
-  updatedAt: post.updatedAt,
   translations: post.translations.map((translation) => ({
-    id: translation.id,
-    post: { id: translation.post.id },
-    locale: translation.locale,
-    title: translation.title,
     content: translation.content,
     createdAt: translation.createdAt,
+    id: translation.id,
+    locale: translation.locale,
+    post: { id: translation.post.id },
+    title: translation.title,
     updatedAt: translation.updatedAt,
   })),
+  updatedAt: post.updatedAt,
 });
 
 export const postWithSlugResponse = (post: PostRecord): PostWithSlugResponse => ({
@@ -62,18 +62,18 @@ export const postWithSlugResponse = (post: PostRecord): PostWithSlugResponse => 
 
 export const postActivityResponse = (activity: PostActivity): PostPreview => ({
   id: activity.id,
-  publicId: activity.publicId,
-  title: activity.title,
-  messageCount: activity.messageCount,
   lastActivity: activity.lastActivity.toISOString(),
+  messageCount: activity.messageCount,
+  publicId: activity.publicId,
   slug: forumPostSlug(activity.title),
+  title: activity.title,
 });
 
 export const topicResponse = (topic: TopicRecord): TopicResponse => ({
-  id: topic.id,
-  title: topic.title,
-  description: topic.description,
   createdAt: topic.createdAt,
-  updatedAt: topic.updatedAt,
+  description: topic.description,
+  id: topic.id,
   posts: topic.posts.map(postResponse),
+  title: topic.title,
+  updatedAt: topic.updatedAt,
 });

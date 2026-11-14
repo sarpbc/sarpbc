@@ -7,9 +7,9 @@ const TWEET_URL = "https://x.com/RLEsports/status/1234567890";
 void describe("parseNewsTweetTag", () => {
   void it("parses inline and block tags", () => {
     assert.deepEqual(parseNewsTweetTag(`:tweet{url="${TWEET_URL}"} after`), {
-      url: TWEET_URL,
-      parsed: { id: "1234567890", handle: "RLEsports", url: TWEET_URL },
+      parsed: { handle: "RLEsports", id: "1234567890", url: TWEET_URL },
       raw: `:tweet{url="${TWEET_URL}"}`,
+      url: TWEET_URL,
     });
     assert.equal(
       parseNewsTweetTag(`::tweet{url="${TWEET_URL}"}\n::\nnext`)?.raw,

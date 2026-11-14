@@ -45,28 +45,28 @@ void describe("client address", () => {
 
   void it("uses CF-Connecting-IP only when the proxy-seen address is Cloudflare", () => {
     assert.equal(
-      resolveClientAddress({ ip: "104.16.0.1", headers: { "cf-connecting-ip": "203.0.113.9" } }),
+      resolveClientAddress({ headers: { "cf-connecting-ip": "203.0.113.9" }, ip: "104.16.0.1" }),
       "203.0.113.9",
     );
     assert.equal(
       resolveClientAddress({
-        ip: "::ffff:104.16.0.1",
         headers: { "cf-connecting-ip": "2001:db8::1" },
+        ip: "::ffff:104.16.0.1",
       }),
       "2001:db8::1",
     );
     assert.equal(
-      resolveClientAddress({ ip: "203.0.113.50", headers: { "cf-connecting-ip": "198.51.100.1" } }),
+      resolveClientAddress({ headers: { "cf-connecting-ip": "198.51.100.1" }, ip: "203.0.113.50" }),
       "203.0.113.50",
     );
     assert.equal(
-      resolveClientAddress({ ip: "104.16.0.1", headers: { "cf-connecting-ip": "10.1.1.1" } }),
+      resolveClientAddress({ headers: { "cf-connecting-ip": "10.1.1.1" }, ip: "104.16.0.1" }),
       "104.16.0.1",
     );
     assert.equal(
       resolveClientAddress({
-        ip: "104.16.0.1",
         headers: { "cf-connecting-ip": ["203.0.113.9", "198.51.100.1"] },
+        ip: "104.16.0.1",
       }),
       "104.16.0.1",
     );
@@ -81,22 +81,22 @@ void describe("client address", () => {
   void it("reads the visitor the same way a trusted proxy in front of Cloudflare does", () => {
     assert.equal(
       visitorAddressFromProxy({
-        socketAddress: "10.0.0.5",
-        forwardedFor: "203.0.113.10, 104.16.0.1",
         connectingIp: "203.0.113.10",
+        forwardedFor: "203.0.113.10, 104.16.0.1",
+        socketAddress: "10.0.0.5",
       }),
       "203.0.113.10",
     );
     assert.equal(
       visitorAddressFromProxy({
-        socketAddress: "203.0.113.77",
-        forwardedFor: "198.51.100.8",
         connectingIp: "203.0.113.10",
+        forwardedFor: "198.51.100.8",
+        socketAddress: "203.0.113.77",
       }),
       "203.0.113.77",
     );
     assert.equal(
-      visitorAddressFromProxy({ socketAddress: "10.0.0.5", forwardedFor: "10.1.1.1" }),
+      visitorAddressFromProxy({ forwardedFor: "10.1.1.1", socketAddress: "10.0.0.5" }),
       undefined,
     );
   });

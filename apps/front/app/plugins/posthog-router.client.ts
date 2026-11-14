@@ -47,7 +47,7 @@ export default defineNuxtPlugin(() => {
         return true;
       });
     },
-    { immediate: true, flush: "sync" },
+    { flush: "sync", immediate: true },
   );
 
   router.afterEach((to, from, failure) => {

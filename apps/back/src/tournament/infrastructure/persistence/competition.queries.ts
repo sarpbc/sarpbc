@@ -152,8 +152,8 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       Tournament,
       { winner: { players: { id } } },
       {
-        populate: ["league", "event", "winner.team", "winner.players"],
         orderBy: { endAt: "DESC" },
+        populate: ["league", "event", "winner.team", "winner.players"],
       },
     );
 
@@ -164,8 +164,8 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       Tournament,
       { winner: { team: { id } } },
       {
-        populate: ["league", "event", "winner.team", "winner.players"],
         orderBy: { endAt: "DESC" },
+        populate: ["league", "event", "winner.team", "winner.players"],
       },
     );
 
@@ -186,8 +186,8 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       Tournament,
       { id: { $in: ids } },
       {
-        populate: ["league", "event", "winner.team", "winner.players"],
         orderBy: { endAt: "DESC" },
+        populate: ["league", "event", "winner.team", "winner.players"],
       },
     );
 
@@ -212,6 +212,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       Match,
       { id: { $in: ids } },
       {
+        orderBy: { endAt: "DESC" },
         populate: [
           ...MATCH_TOURNAMENT_POPULATE,
           "participants.team",
@@ -219,7 +220,6 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
           "results",
           "winner",
         ],
-        orderBy: { endAt: "DESC" },
       },
     );
 

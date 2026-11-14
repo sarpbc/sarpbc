@@ -39,8 +39,8 @@ export const fetchMatchForCalendar = async (id: string): Promise<Match> => {
     return match;
   } catch (error) {
     return rethrowApiError(error, {
-      notFound: "Match not found",
       badGateway: "Could not load match for calendar",
+      notFound: "Match not found",
     });
   }
 };
@@ -58,8 +58,8 @@ export const fetchTournamentForCalendar = async (
     ]);
   } catch (error) {
     rethrowApiError(error, {
-      notFound: "Tournament not found",
       badGateway: "Could not load tournament for calendar",
+      notFound: "Tournament not found",
     });
   }
 
@@ -68,8 +68,8 @@ export const fetchTournamentForCalendar = async (
   }
 
   return {
-    tournament: tournamentRes.tournament,
     matches: matchesRes.matches ?? [],
+    tournament: tournamentRes.tournament,
   };
 };
 
@@ -81,9 +81,9 @@ export const buildMatchIcs = (match: Match, now: Date): string => {
   }
 
   const feed: CalendarFeed = {
-    name: event.summary,
     dtStamp: now,
     events: [event],
+    name: event.summary,
   };
 
   return buildIcs(feed);
@@ -99,9 +99,9 @@ export const buildTournamentIcs = (
   );
 
   return buildIcs({
-    name: tournamentStageLabel(tournament),
     dtStamp: now,
     events,
+    name: tournamentStageLabel(tournament),
   });
 };
 

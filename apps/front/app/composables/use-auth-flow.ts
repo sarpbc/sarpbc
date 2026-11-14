@@ -38,7 +38,7 @@ export const useAuthFlow = () => {
     body: Record<string, string>,
     event: AuthEvent,
   ): Promise<boolean> => {
-    const res = await apiFetch<{ success?: boolean }>(path, { method: "POST", body });
+    const res = await apiFetch<{ success?: boolean }>(path, { body, method: "POST" });
 
     if (res.success !== true) {
       return false;
@@ -60,5 +60,5 @@ export const useAuthFlow = () => {
     window.location.href = `${apiBase}/auth/google`;
   };
 
-  return { leaveIfSignedIn, submit, googleLogin };
+  return { googleLogin, leaveIfSignedIn, submit };
 };

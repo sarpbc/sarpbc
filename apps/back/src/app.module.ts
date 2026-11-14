@@ -43,8 +43,8 @@ import mikroOrmConfig from "./mikro-orm.config";
 @Module({
   imports: [
     ConfigModule.forRoot({
-      load: [configuration],
       isGlobal: true,
+      load: [configuration],
     }),
     EvlogModule.forRoot(),
     ThrottlerModule.forRootAsync({

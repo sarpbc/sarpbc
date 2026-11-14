@@ -239,8 +239,8 @@ export const visitorAddressFromProxy = (input: {
   }
 
   const resolved = resolveClientAddress({
-    ip: seen,
     headers: { "cf-connecting-ip": singleHeader(input.connectingIp) },
+    ip: seen,
   });
 
   return isPublicIp(resolved) ? resolved : undefined;

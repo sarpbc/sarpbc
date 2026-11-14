@@ -69,19 +69,19 @@ const saveArticle = async () => {
 
   try {
     const updated = await editNewsArticle(slug, {
-      title: title.value,
       content: content.value,
-      titleFr: titleFr.value.trim() || null,
       contentFr: contentFr.value.trim() || null,
-      slug: articleSlug.value.trim(),
       imageUrl: imageUrl.value,
+      slug: articleSlug.value.trim(),
+      title: title.value,
+      titleFr: titleFr.value.trim() || null,
       type: articleType.value,
     });
 
     isModalOpen.value = false;
     toast.add({
-      title: t("page.news.edit.saved"),
       color: "success",
+      title: t("page.news.edit.saved"),
     });
 
     if (updated.slug !== slug) {
@@ -106,8 +106,8 @@ const togglePublish = async () => {
 
     isDraft.value = !isDraft.value;
     toast.add({
-      title: isDraft.value ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
       color: "success",
+      title: isDraft.value ? t("page.news.edit.unpublished") : t("page.news.edit.published"),
     });
   } catch (publishError) {
     reportError(publishError, t("page.news.edit.publishFailed"));

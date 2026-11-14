@@ -51,15 +51,34 @@ const hostnameFromUrl = (base: string | undefined): string | undefined => {
 const r2ImageHost = hostnameFromUrl(process.env.NUXT_PUBLIC_R2_PUBLIC_BASE_URL);
 
 export default defineNuxtConfig({
-  imports: {
-    dirs: ["composables/**"],
+  $production: {
+    evlog: {
+      console: false,
+      sampling: {
+        keep: [{ duration: 1000 }, { status: 400 }],
+        rates: {
+          debug: 0,
+          error: 100,
+          info: 5,
+          warn: 50,
+        },
+      },
+    },
+    nitro: {
+      esbuild: {
+        options: {
+          drop: ["debugger"],
+          pure: ["console.debug", "console.log"],
+        },
+      },
+    },
   },
 
   app: {
     head: {
       link: [
         ...apiPreconnectLinks(apiBase),
-        { rel: "preload", href: "/sarpbc.svg", as: "image", type: "image/svg+xml" },
+        { as: "image", href: "/sarpbc.svg", rel: "preload", type: "image/svg+xml" },
       ],
     },
   },
@@ -72,28 +91,25 @@ export default defineNuxtConfig({
     },
   },
 
-  mdc: {
-    components: { map: newsMdcComponentMap("NewsMatchBlock") },
-  },
-
   css: ["~/assets/css/main.css"],
 
   devtools: { enabled: false },
 
-  i18n: i18nOptions,
-
-  image: {
-    domains: [
-      "cdn.pandascore.co",
-      "imagedelivery.net",
-      ...(isNonEmptyString(r2ImageHost) ? [r2ImageHost] : []),
-    ],
+  evlog: {
+    env: {
+      service: "sarpbc-front",
+    },
   },
+
+  experimental: {
+    viewTransition: true,
+    writeEarlyHints: false,
+  },
+
+  i18n: i18nOptions,
 
   icon: {
     clientBundle: {
-      scan: true,
-      sizeLimitKb: 512,
       icons: [
         "fluent:text-align-justify-24-regular",
         "fluent:dismiss-24-regular",
@@ -104,7 +120,25 @@ export default defineNuxtConfig({
         "fluent:weather-sunny-24-regular",
         "ri:twitter-x-fill",
       ],
+      scan: true,
+      sizeLimitKb: 512,
     },
+  },
+
+  image: {
+    domains: [
+      "cdn.pandascore.co",
+      "imagedelivery.net",
+      ...(isNonEmptyString(r2ImageHost) ? [r2ImageHost] : []),
+    ],
+  },
+
+  imports: {
+    dirs: ["composables/**"],
+  },
+
+  mdc: {
+    components: { map: newsMdcComponentMap("NewsMatchBlock") },
   },
 
   modules: [
@@ -118,106 +152,65 @@ export default defineNuxtConfig({
     "@nuxtjs/sitemap",
   ],
 
+  nitro: {
+    compressPublicAssets: {
+      brotli: true,
+      gzip: true,
+    },
+    preset: "node-server",
+  },
+
+  routeRules: localizedRouteRules({
+    "/about": { appLayout: "marketing", ...contentSwr },
+    "/brand": { appLayout: "marketing", ...contentSwr },
+    "/cookie-policy": contentSwr,
+    "/game/career": { appLayout: "game" },
+    "/game/career/**": { appLayout: "game" },
+    "/legal-notice": contentSwr,
+    "/login": { appLayout: "login" },
+    "/privacy-policy": contentSwr,
+    "/register": { appLayout: "login" },
+    "/terms-of-service": contentSwr,
+  }),
+
+  runtimeConfig: {
+    apiBaseServer: "",
+    apiInternalToken: "",
+    indexnowKey: "",
+    public: {
+      adminUrl,
+      apiBase,
+      posthog: {
+        host: posthogHost,
+        publicKey: posthogPublicKey,
+      },
+    },
+  },
+
   site: {
     url: SITE_ORIGIN,
   },
 
   sitemap: {
-    xsl: false,
     credits: false,
     sitemaps: {
       pages: {
-        includeAppSources: true,
         exclude: ["/login", "/register", "/profile", "/forum/new"],
+        includeAppSources: true,
       },
       ...Object.fromEntries(
         SITEMAP_KINDS.map((kind) => [
           kind,
-          { sources: [`/api/__sitemap__/${kind}`], chunks: true },
+          { chunks: true, sources: [`/api/__sitemap__/${kind}`] },
         ]),
       ),
     },
-  },
-
-  evlog: {
-    env: {
-      service: "sarpbc-front",
-    },
-  },
-
-  $production: {
-    evlog: {
-      console: false,
-      sampling: {
-        rates: {
-          info: 5,
-          warn: 50,
-          debug: 0,
-          error: 100,
-        },
-        keep: [{ duration: 1000 }, { status: 400 }],
-      },
-    },
-    nitro: {
-      esbuild: {
-        options: {
-          drop: ["debugger"],
-          pure: ["console.debug", "console.log"],
-        },
-      },
-    },
-  },
-
-  nitro: {
-    preset: "node-server",
-    compressPublicAssets: {
-      gzip: true,
-      brotli: true,
-    },
-  },
-
-  routeRules: localizedRouteRules({
-    "/login": { appLayout: "login" },
-    "/register": { appLayout: "login" },
-    "/game/career": { appLayout: "game" },
-    "/game/career/**": { appLayout: "game" },
-    "/about": { appLayout: "marketing", ...contentSwr },
-    "/brand": { appLayout: "marketing", ...contentSwr },
-    "/privacy-policy": contentSwr,
-    "/terms-of-service": contentSwr,
-    "/legal-notice": contentSwr,
-    "/cookie-policy": contentSwr,
-  }),
-
-  runtimeConfig: {
-    indexnowKey: "",
-    apiBaseServer: "",
-    apiInternalToken: "",
-    public: {
-      apiBase,
-      adminUrl,
-      posthog: {
-        publicKey: posthogPublicKey,
-        host: posthogHost,
-      },
-    },
-  },
-
-  experimental: {
-    writeEarlyHints: false,
-    viewTransition: true,
+    xsl: false,
   },
 
   vite: {
     define: {
       __VUE_PROD_DEVTOOLS__: false,
-    },
-    server: {
-      watch: {
-        usePolling:
-          process.env.CHOKIDAR_USEPOLLING === "true" || process.env.CHOKIDAR_USEPOLLING === "1",
-        interval: 1000,
-      },
     },
     optimizeDeps: {
       include: [
@@ -230,6 +223,13 @@ export default defineNuxtConfig({
         "@nuxt/content > @nuxtjs/mdc > debug",
         "@nuxt/content > @nuxtjs/mdc > unified > extend",
       ],
+    },
+    server: {
+      watch: {
+        interval: 1000,
+        usePolling:
+          process.env.CHOKIDAR_USEPOLLING === "true" || process.env.CHOKIDAR_USEPOLLING === "1",
+      },
     },
   },
 });

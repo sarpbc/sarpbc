@@ -15,7 +15,7 @@ export const useCookieConsent = () => {
     (value) => {
       choice.value = value ?? null;
     },
-    { immediate: import.meta.client, flush: "sync" },
+    { flush: "sync", immediate: import.meta.client },
   );
   const visible = useState<boolean>("cookieConsentVisible", () => !choice.value);
 
@@ -34,9 +34,9 @@ export const useCookieConsent = () => {
 
   return {
     choice: readonly(choice),
-    visible,
-    open,
     close,
+    open,
     setChoice,
+    visible,
   };
 };

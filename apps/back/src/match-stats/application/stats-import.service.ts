@@ -47,23 +47,23 @@ export class StatsImportService {
 
     if (latest !== undefined && isActive(latest)) {
       throw new ConflictError({
-        message: "A stats import is already running for this tournament. Wait for it to finish.",
         code: "stats_import_running",
+        message: "A stats import is already running for this tournament. Wait for it to finish.",
       });
     }
 
     const statsImport: StatsImport = {
-      id: v4(),
-      tournamentId,
+      createdAt: new Date(),
+      error: null,
+      finishedAt: null,
       groupId,
+      id: v4(),
+      items: [],
+      processed: 0,
+      startedAt: null,
       status: "pending",
       total: null,
-      processed: 0,
-      items: [],
-      error: null,
-      createdAt: new Date(),
-      startedAt: null,
-      finishedAt: null,
+      tournamentId,
     };
 
     await this.imports.create(statsImport);
@@ -150,28 +150,28 @@ export class StatsImportService {
     const { replay } = assignment;
 
     const base = {
+      playedAt: replay.playedAt?.toISOString() ?? null,
       replayId: replay.id,
       title: replay.title,
-      playedAt: replay.playedAt?.toISOString() ?? null,
     };
 
     switch (assignment.kind) {
       case "unmatched": {
         return {
           ...base,
-          status: "unmatched",
-          matchId: assignment.matchId,
           blueParticipantId: assignment.sides?.blue ?? null,
+          matchId: assignment.matchId,
           reason: assignment.reason,
+          status: "unmatched",
         };
       }
 
       case "stored": {
         return {
           ...base,
-          status: "already_imported",
-          matchId: assignment.matchId,
           gameNumber: assignment.gameNumber,
+          matchId: assignment.matchId,
+          status: "already_imported",
         };
       }
 
@@ -186,13 +186,13 @@ export class StatsImportService {
       }
     }
 
-    const target = { ...base, matchId: assignment.matchId, gameNumber: assignment.gameNumber };
+    const target = { ...base, gameNumber: assignment.gameNumber, matchId: assignment.matchId };
 
     const failed = (reason: StatsImportFailedReason): StatsImportItem => ({
       ...target,
       blueParticipantId: assignment.sides.blue,
-      status: "failed",
       reason,
+      status: "failed",
     });
 
     let stats: ReplayStats | null;
@@ -222,11 +222,11 @@ export class StatsImportService {
       await this.games.save(
         buildGameRecord(
           {
+            ballchasingId: replay.id,
             matchId: assignment.matchId,
             number: assignment.gameNumber,
-            ballchasingId: replay.id,
-            rocketLeagueId: replay.rocketLeagueId,
             playedAt: replay.playedAt,
+            rocketLeagueId: replay.rocketLeagueId,
             sides: assignment.sides,
           },
           stats,

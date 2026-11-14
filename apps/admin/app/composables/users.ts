@@ -14,8 +14,8 @@ export const getUsers = async (query: {
 
 export const changeUserRole = async (id: string, role: AssignableRole): Promise<UserListItem> => {
   const res = await apiFetch<{ user: UserListItem }>(`/users/${id}/role`, {
-    method: "PATCH",
     body: { role },
+    method: "PATCH",
   });
 
   return res.user;

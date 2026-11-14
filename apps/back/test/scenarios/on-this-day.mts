@@ -48,27 +48,27 @@ const onThisDay = z.object({
     z.discriminatedUnion("kind", [
       z.object({
         kind: z.literal("fact"),
-        year: z.number().nullable(),
-        text: z.object({ en: z.string() }),
         link: z.object({ slug: z.string() }).nullable(),
+        text: z.object({ en: z.string() }),
+        year: z.number().nullable(),
       }),
       z.object({
-        kind: z.literal("title"),
-        year: z.number(),
         date: z.string(),
+        kind: z.literal("title"),
         winner: side,
+        year: z.number(),
       }),
       z.object({
         kind: z.literal("final"),
-        year: z.number(),
-        winner: side.extend({ score: z.number().nullable() }),
         loser: side,
+        winner: side.extend({ score: z.number().nullable() }),
+        year: z.number(),
       }),
       z.object({
         kind: z.literal("transfer"),
-        year: z.number(),
-        type: z.string(),
         team: z.object({ name: z.string() }),
+        type: z.string(),
+        year: z.number(),
       }),
     ]),
   ),
@@ -164,24 +164,24 @@ export const verifyOnThisDay = async ({
   const { player } = await created(playerBody, "/player", { name: "Anniversary Rookie" });
 
   await created(z.unknown(), `/player/${player.id}/contract`, {
-    teamId: away.id,
-    startDate: "2023-02-17",
     endDate: "2024-02-17",
+    startDate: "2023-02-17",
+    teamId: away.id,
   });
   await created(z.unknown(), `/player/${player.id}/contract`, {
-    teamId: home.id,
-    startDate: "2024-02-17",
     endDate: "2025-01-10",
+    startDate: "2024-02-17",
+    teamId: home.id,
   });
 
   const fact = {
-    month: 2,
     day: 17,
-    year: 2017,
+    link: { id: home.id, kind: "team" },
+    month: 2,
+    sourceUrl: "https://www.rocketleague.com/news",
     textEn: "A staff-written anniversary.",
     textFr: "Un anniversaire écrit par le staff.",
-    link: { kind: "team", id: home.id },
-    sourceUrl: "https://www.rocketleague.com/news",
+    year: 2017,
   };
 
   await request("POST", "/on-this-day-facts", fact, memberCookie, 403);
@@ -195,8 +195,8 @@ export const verifyOnThisDay = async ({
   const response7 = await created(savedFact, "/on-this-day-facts", fact);
   const saved = response7.fact;
   assert.deepEqual(saved.link, {
-    kind: "team",
     id: home.id,
+    kind: "team",
     name: home.name,
     slug: home.slug,
     source: null,
@@ -204,8 +204,8 @@ export const verifyOnThisDay = async ({
 
   const response8 = await created(savedFact, "/on-this-day-facts", {
     ...fact,
-    year: 2030,
     link: null,
+    year: 2030,
   });
 
   const future = response8.fact;

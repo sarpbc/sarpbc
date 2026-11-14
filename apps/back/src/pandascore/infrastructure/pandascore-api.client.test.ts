@@ -54,13 +54,13 @@ describe(PandascoreApiClient, () => {
     beforeEach(async () => {
       fetchMock
         .mockResolvedValueOnce(
-          Response.json([{ id: 1, type: "match", modified_at: "2025-01-01T00:00:00Z" }]),
+          Response.json([{ id: 1, modified_at: "2025-01-01T00:00:00Z", type: "match" }]),
         )
         .mockResolvedValueOnce(Response.json([]));
 
       incidents = await client.listIncidents({
-        since: new Date("2025-01-01T00:00:00Z"),
         perPage: 1,
+        since: new Date("2025-01-01T00:00:00Z"),
       });
     });
 

@@ -22,17 +22,17 @@ export class TeamAlias {
 }
 
 const ERRORS = {
-  "missing-name": "A team alias needs a name.",
-  "name-too-long": `The alias name is over ${TEAM_ALIAS_NAME_MAX_LENGTH} characters.`,
-  "invalid-from": "The alias start date must be a real YYYY-MM-DD date.",
-  "invalid-to": "The alias end date must be a real YYYY-MM-DD date.",
-  "to-not-after-from": "The alias end date must come after its start date.",
-  "invalid-source-url": "The alias source must be an http(s) URL.",
+  "forbidden-logo-source": "Liquipedia is not an accepted logo source; use the official asset.",
   "forbidden-source":
     "Liquipedia and BLAST.tv are not accepted sources; cite the team, its players, the organiser, RLEsports or PandaScore.",
+  "invalid-from": "The alias start date must be a real YYYY-MM-DD date.",
   "invalid-logo-url": "The alias logo must be an https URL.",
-  "forbidden-logo-source": "Liquipedia is not an accepted logo source; use the official asset.",
   "invalid-pandascore-id": "The PandaScore team id must be a positive whole number.",
+  "invalid-source-url": "The alias source must be an http(s) URL.",
+  "invalid-to": "The alias end date must be a real YYYY-MM-DD date.",
+  "missing-name": "A team alias needs a name.",
+  "name-too-long": `The alias name is over ${TEAM_ALIAS_NAME_MAX_LENGTH} characters.`,
+  "to-not-after-from": "The alias end date must come after its start date.",
 } satisfies Record<TeamAliasError, string>;
 
 export const requireTeamAliasInput = (input: TeamAliasInput): TeamAliasInput => {
@@ -77,10 +77,10 @@ export const teamAt = (team: Team, at: Date | null): Team => {
   const logo =
     alias.logoUrl !== null && alias.logoUrl !== ""
       ? {
-          imageUrl: alias.logoUrl,
           darkModeImageUrl: null,
-          logoLightUrl: alias.logoUrl,
+          imageUrl: alias.logoUrl,
           logoDarkUrl: null,
+          logoLightUrl: alias.logoUrl,
         }
       : {};
 

@@ -4,7 +4,7 @@ import { GuessDto } from "./guess.dto";
 
 describe("AirRiddle guess input", () => {
   const pipe = new StandardSchemaValidationPipe();
-  const metadata = { type: "body", schema: GuessDto } as const;
+  const metadata = { schema: GuessDto, type: "body" } as const;
 
   it("accepts a player name and an optional final-guess boolean", async () => {
     await expect(pipe.transform({ guess: "Kaydop" }, metadata)).resolves.toStrictEqual({
@@ -21,7 +21,7 @@ describe("AirRiddle guess input", () => {
     { guess: "" },
     { guess: 42 },
     { guess: "Kaydop", last: "true" },
-    { guess: "Kaydop", answer: "Zen" },
+    { answer: "Zen", guess: "Kaydop" },
   ])("rejects malformed input %j", async (input) => {
     await expect(pipe.transform(input, metadata)).rejects.toThrow("Bad Request Exception");
   });

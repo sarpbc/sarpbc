@@ -12,23 +12,23 @@ import { OnThisDayController } from "./http/on-this-day.controller";
 import { OnThisDayFactPersistence } from "./persistence/on-this-day-fact.store";
 
 @Module({
-  imports: [RosterModule, TournamentModule],
   controllers: [OnThisDayController, OnThisDayFactController],
+  imports: [RosterModule, TournamentModule],
   providers: [
     {
+      inject: [EntityManager],
       provide: OnThisDayFactService,
       useFactory: (em: EntityManager) => new OnThisDayFactService(new OnThisDayFactPersistence(em)),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager, TOURNAMENT_QUERIES, TransferService],
       provide: OnThisDayService,
       useFactory: (em: EntityManager, tournaments: TournamentQueries, transfers: TransferService) =>
         new OnThisDayService({
+          facts: new OnThisDayFactPersistence(em),
           tournaments,
           transfers,
-          facts: new OnThisDayFactPersistence(em),
         }),
-      inject: [EntityManager, TOURNAMENT_QUERIES, TransferService],
     },
   ],
 })

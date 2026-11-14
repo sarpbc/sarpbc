@@ -14,27 +14,27 @@ import { AirRiddleService } from "../application/airriddle.service";
 import { RosterModule } from "../../../roster/infrastructure/roster.module";
 
 @Module({
-  imports: [MikroOrmModule.forFeature([AirRiddle]), RosterModule],
   controllers: [AirRiddleController],
+  exports: [AirRiddleService],
+  imports: [MikroOrmModule.forFeature([AirRiddle]), RosterModule],
   providers: [
     AirRiddleJob,
     {
+      inject: [EntityManager, PlayerService],
       provide: AirRiddleService,
       useFactory: (em: EntityManager, players: PlayerService) =>
         new AirRiddleService(new MikroDailyRiddles(em), players, {
           dayStart: () => DateTime.now().setZone(RIDDLE_TIME_ZONE).startOf("day").toJSDate(),
-          now: () => new Date(),
-          id: v4,
-          skipped: () => {
-            log.info({ component: "AirRiddleService", skipped: true, reason: "no_player" });
-          },
           error: (error) => {
             log.error({ component: "AirRiddleService", error });
           },
+          id: v4,
+          now: () => new Date(),
+          skipped: () => {
+            log.info({ component: "AirRiddleService", reason: "no_player", skipped: true });
+          },
         }),
-      inject: [EntityManager, PlayerService],
     },
   ],
-  exports: [AirRiddleService],
 })
 export class AirRiddleModule {}

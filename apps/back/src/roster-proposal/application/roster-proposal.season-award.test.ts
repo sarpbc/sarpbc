@@ -12,11 +12,11 @@ describe("RosterProposalService season award proposals", () => {
   const proposeRegional = async (seasonId = "season-1") =>
     await fixture.service.propose(
       {
-        kind: "award_season_player",
-        seasonId,
-        playerId: "zen",
         awardType: "regional_mvp",
+        kind: "award_season_player",
+        playerId: "zen",
         region: "Europe",
+        seasonId,
       },
       announcement,
       "journalist",
@@ -25,10 +25,10 @@ describe("RosterProposalService season award proposals", () => {
   it("checks the award against the season and keeps it pending", async () => {
     const proposal = await proposeRegional();
 
-    expect(proposal).toMatchObject({ status: "pending", sourceUrl: announcement });
+    expect(proposal).toMatchObject({ sourceUrl: announcement, status: "pending" });
     expect(fixture.seasons.requireAward).toHaveBeenCalledWith("season-1", {
-      playerId: "zen",
       awardType: "regional_mvp",
+      playerId: "zen",
       region: "Europe",
       sourceUrl: announcement,
     });
@@ -47,8 +47,8 @@ describe("RosterProposalService season award proposals", () => {
       entityId: "season-award-1",
     });
     expect(fixture.seasons.addAward).toHaveBeenCalledWith("season-1", {
-      playerId: "zen",
       awardType: "regional_mvp",
+      playerId: "zen",
       region: "Europe",
       sourceUrl: announcement,
     });

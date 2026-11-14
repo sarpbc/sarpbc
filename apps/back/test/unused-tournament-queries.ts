@@ -4,19 +4,19 @@ const unused = async (): Promise<never> => await Promise.reject(new Error("unuse
 
 /** A complete TournamentQueries whose every method rejects; spread it and override what a test reads. */
 export const unusedTournamentQueries: TournamentQueries = {
+  finalsOnDay: unused,
   find: unused,
-  searchByName: unused,
   findById: unused,
-  findPandascoreWithoutMatches: unused,
+  findByPandascoreId: unused,
   findPandascoreActive: unused,
+  findPandascoreWithoutMatches: unused,
   getTournamentsByPlayer: unused,
   getTournamentsByTeam: unused,
   getTournamentsByTeamTenures: unused,
   getTournamentsWonByPlayer: unused,
   getTournamentsWonByTeam: unused,
-  wonOnDay: unused,
-  finalsOnDay: unused,
   knownPandascoreIds: unused,
-  findByPandascoreId: unused,
   leagues: unused,
+  searchByName: unused,
+  wonOnDay: unused,
 };

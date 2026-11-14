@@ -16,8 +16,8 @@ const creating = ref(false);
 
 const teamItems = computed(() =>
   EMPTY_BRACKET_SIZES.map((size) => ({
+    label: t("page.tournaments.emptyBracket.size", { matches: size - 1, teams: size }),
     value: size,
-    label: t("page.tournaments.emptyBracket.size", { teams: size, matches: size - 1 }),
   })),
 );
 
@@ -26,10 +26,10 @@ const create = async () => {
 
   try {
     await createEmptyBracket(tournamentId, {
-      teams: teams.value,
       numberOfGames: numberOfGames.value || undefined,
+      teams: teams.value,
     });
-    toast.add({ title: t("page.tournaments.emptyBracket.created"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.emptyBracket.created") });
     open.value = false;
     emit("created");
   } catch (error) {

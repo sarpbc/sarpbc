@@ -15,17 +15,17 @@ import { CompetitionAfterCommit } from "./after-commit";
 import { TournamentPrizeService } from "./tournament-prize.service";
 
 const entry: PrizeEntry = {
-  placement: 1,
   amount: 1000,
   currency: "USD",
-  teamId: "team-a",
+  placement: 1,
   playerIds: ["player-a"],
   sourceUrl: null,
+  teamId: "team-a",
 };
 
 const RULES = "https://www.rocketleague.com/en/news/rlcs-official-rules";
 
-const rosterA: PrizeParticipant = { teamId: "team-a", playerIds: ["player-a", "player-b"] };
+const rosterA: PrizeParticipant = { playerIds: ["player-a", "player-b"], teamId: "team-a" };
 
 const setup = ({
   exists = true,
@@ -33,19 +33,19 @@ const setup = ({
   source = "manual",
 }: { exists?: boolean; participants?: PrizeParticipant[]; source?: DataSource | null } = {}) => {
   const writer = {
-    tournamentExists: vi.fn<PrizeWriter["tournamentExists"]>().mockResolvedValue(exists),
-    participants: vi.fn<PrizeWriter["participants"]>().mockResolvedValue(participants),
     entries: vi.fn<PrizeWriter["entries"]>().mockResolvedValue([entry]),
+    participants: vi.fn<PrizeWriter["participants"]>().mockResolvedValue(participants),
     replace: vi.fn<PrizeWriter["replace"]>(),
+    tournamentExists: vi.fn<PrizeWriter["tournamentExists"]>().mockResolvedValue(exists),
   };
 
   const reads = {
-    tournamentSource: vi.fn<PrizeQueries["tournamentSource"]>().mockResolvedValue(source),
+    byPlayer: vi.fn<PrizeQueries["byPlayer"]>().mockResolvedValue([]),
+    byTeam: vi.fn<PrizeQueries["byTeam"]>().mockResolvedValue([]),
     byTournament: vi
       .fn<PrizeQueries["byTournament"]>()
-      .mockResolvedValue({ source: "manual", prizepool: null, prizes: [] }),
-    byTeam: vi.fn<PrizeQueries["byTeam"]>().mockResolvedValue([]),
-    byPlayer: vi.fn<PrizeQueries["byPlayer"]>().mockResolvedValue([]),
+      .mockResolvedValue({ prizepool: null, prizes: [], source: "manual" }),
+    tournamentSource: vi.fn<PrizeQueries["tournamentSource"]>().mockResolvedValue(source),
   };
 
   const transaction: PrizeTransaction = { run: async (work) => await work({ prizes: writer }) };
@@ -62,7 +62,7 @@ const setup = ({
     ),
   );
 
-  return { service, reads, writer, cache, diagnostics };
+  return { cache, diagnostics, reads, service, writer };
 };
 
 describe(TournamentPrizeService, () => {
@@ -103,7 +103,7 @@ describe(TournamentPrizeService, () => {
 
   it("rejects a player outside the tournament roster of the team", async () => {
     const { service, writer } = setup({
-      participants: [rosterA, { teamId: "team-b", playerIds: ["player-c"] }],
+      participants: [rosterA, { playerIds: ["player-c"], teamId: "team-b" }],
     });
 
     await expect(
@@ -144,15 +144,15 @@ describe(TournamentPrizeService, () => {
 
   it("corrects one row and re-sources it without touching the other rows", async () => {
     const { service, writer } = setup({
-      participants: [rosterA, { teamId: "team-b", playerIds: [] }],
+      participants: [rosterA, { playerIds: [], teamId: "team-b" }],
     });
 
     const other: PrizeEntry = {
       ...entry,
-      placement: 2,
       amount: 500,
-      teamId: "team-b",
+      placement: 2,
       playerIds: [],
+      teamId: "team-b",
     };
 
     writer.entries.mockResolvedValue([entry, other]);
@@ -181,15 +181,15 @@ describe(TournamentPrizeService, () => {
 
   it("corrects a row while another row of the stage still cites a refused source", async () => {
     const { service, writer } = setup({
-      participants: [rosterA, { teamId: "team-b", playerIds: [] }],
+      participants: [rosterA, { playerIds: [], teamId: "team-b" }],
     });
 
     const legacy: PrizeEntry = {
       ...entry,
       placement: 2,
-      teamId: "team-b",
       playerIds: [],
       sourceUrl: "https://blast.tv/rl/open",
+      teamId: "team-b",
     };
 
     writer.entries.mockResolvedValue([entry, legacy]);

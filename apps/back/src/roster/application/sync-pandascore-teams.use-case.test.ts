@@ -4,7 +4,7 @@ import { SyncPandascoreTeamsUseCase } from "./sync-pandascore-teams.use-case";
 
 describe(SyncPandascoreTeamsUseCase, () => {
   it("initializes from the source when no team exists", async () => {
-    const roster = [{ player: { pandascoreId: 2, name: "Comm", slug: "comm" }, currentTeam: null }];
+    const roster = [{ currentTeam: null, player: { name: "Comm", pandascoreId: 2, slug: "comm" } }];
 
     const writer = {
       hasTeams: async () => false,

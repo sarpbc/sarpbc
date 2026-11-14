@@ -53,16 +53,16 @@ export class CompetitionTournamentWriter implements TournamentWriter {
   async manualCandidates({ from, to }: { from: Date; to: Date }) {
     const rows = await this.em.find(
       TournamentRow,
-      { source: "manual", pandascoreId: null, beginAt: { $gte: from, $lte: to } },
+      { beginAt: { $gte: from, $lte: to }, pandascoreId: null, source: "manual" },
       { orderBy: { id: "ASC" } },
     );
 
     return rows.map((row) => ({
-      id: row.id,
-      name: row.name,
-      leagueId: row.league?.id ?? null,
       beginAt: row.beginAt,
       endAt: row.endAt,
+      id: row.id,
+      leagueId: row.league?.id ?? null,
+      name: row.name,
     }));
   }
   async save(model: Tournament) {
@@ -75,24 +75,24 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     }
 
     Object.assign(row, {
-      pandascoreId: model.pandascoreId,
-      source: model.source,
-      format: model.format,
-      name: model.name,
-      description: model.description,
-      slug: model.slug,
-      tier: model.tier,
       beginAt: model.beginAt,
+      country: model.country,
+      description: model.description,
       endAt: model.endAt,
       endAtCorrected: model.endAtCorrected,
-      winnerType: model.winnerType,
-      type: model.type,
-      country: model.country,
-      prizepool: model.prizepool,
-      imageUrl: model.imageUrl,
-      pickemsEnabled: model.pickemsEnabled,
+      format: model.format,
       hasBracket: model.hasBracket,
+      imageUrl: model.imageUrl,
+      name: model.name,
+      pandascoreId: model.pandascoreId,
+      pickemsEnabled: model.pickemsEnabled,
+      prizepool: model.prizepool,
+      slug: model.slug,
+      source: model.source,
       streams: unchangedJson(row.streams, model.streams),
+      tier: model.tier,
+      type: model.type,
+      winnerType: model.winnerType,
     });
     row.event = this.em.getReference(TournamentEventRow, model.event.id);
     row.league = model.league ? this.em.getReference(LeagueRow, model.league.id) : null;
@@ -123,12 +123,12 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     }
 
     Object.assign(row, {
-      pandascoreId: model.pandascoreId,
-      name: model.name,
-      slug: model.slug,
-      url: model.url,
       imageUrl: model.imageUrl,
       modifiedAt: model.modifiedAt,
+      name: model.name,
+      pandascoreId: model.pandascoreId,
+      slug: model.slug,
+      url: model.url,
     });
     this.em.persist(row);
     this.leagues.set(row.id, row);
@@ -198,8 +198,8 @@ export class CompetitionTournamentWriter implements TournamentWriter {
   async teamPlayers(teamId: string) {
     const rows = await this.em.find(
       Player,
-      { team: { id: teamId }, mergedInto: null },
-      { populate: ["team"], orderBy: { name: "asc" } },
+      { mergedInto: null, team: { id: teamId } },
+      { orderBy: { name: "asc" }, populate: ["team"] },
     );
 
     return rows.map(toPlayer);
@@ -208,18 +208,18 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     const [tournamentWinner, matchParticipant, matchWinner, results] = await Promise.all([
       this.em.count(TournamentRow, { id: tournamentId, winner: { id: participantId } }),
       this.em.count(MatchRow, {
-        tournament: { id: tournamentId },
         participants: { id: participantId },
+        tournament: { id: tournamentId },
       }),
       this.em.count(MatchRow, { tournament: { id: tournamentId }, winner: { id: participantId } }),
       this.em.count(MatchResultRow, { participant: { id: participantId } }),
     ]);
 
     return {
-      tournamentWinner: tournamentWinner > 0,
       matchParticipant: matchParticipant > 0,
       matchWinner: matchWinner > 0,
       results: results > 0,
+      tournamentWinner: tournamentWinner > 0,
     };
   }
 }

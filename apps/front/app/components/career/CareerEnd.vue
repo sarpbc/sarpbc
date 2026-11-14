@@ -22,13 +22,13 @@ const onShare = () => {
 const TROPHY_TYPES = ["worlds", "major", "regional"] as const;
 
 const trophyLines = computed(() => {
-  const counts = { regional: 0, major: 0, worlds: 0 };
+  const counts = { major: 0, regional: 0, worlds: 0 };
 
   for (const trophy of result.trophies) {
     counts[trophy.type] += 1;
   }
 
-  return TROPHY_TYPES.flatMap((type) => (counts[type] > 0 ? [{ type, count: counts[type] }] : []));
+  return TROPHY_TYPES.flatMap((type) => (counts[type] > 0 ? [{ count: counts[type], type }] : []));
 });
 
 const nickname = computed(() => t(`page.game.career.end.nicknames.${result.nicknameKey}`));

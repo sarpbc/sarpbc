@@ -5,8 +5,8 @@ export const competitionDiagnostics: CompetitionDiagnostics = {
   error(message, error) {
     log.error({
       component: "Competition",
-      message,
       error: error instanceof Error ? error : new Error(String(error)),
+      message,
     });
   },
   warn(message, context) {

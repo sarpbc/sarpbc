@@ -38,7 +38,7 @@ describe("season archives (e2e)", () => {
           provide: AuthService,
           useValue: {
             authenticate: async (token: string) =>
-              ["staff", "member"].includes(token) ? { id: token, email: `${token}@test` } : null,
+              ["staff", "member"].includes(token) ? { email: `${token}@test`, id: token } : null,
             refreshSession: async () => null,
           },
         },
@@ -105,7 +105,7 @@ describe("season archives (e2e)", () => {
 
     expect(index.headers["cache-control"]).toBe("public, max-age=60");
     expect(index.body).toStrictEqual({
-      seasons: [{ slug: "pilot-season", name: "Pilot season", winner: null }],
+      seasons: [{ name: "Pilot season", slug: "pilot-season", winner: null }],
     });
   });
 
@@ -114,12 +114,12 @@ describe("season archives (e2e)", () => {
 
     expect(archive.status).toBe(200);
     expect(archive.body).toStrictEqual({
-      slug: "pilot-season",
-      name: "Pilot season",
-      format: { summary: null, phases: [] },
-      winner: null,
-      participants: [],
       awards: [],
+      format: { phases: [], summary: null },
+      name: "Pilot season",
+      participants: [],
+      slug: "pilot-season",
+      winner: null,
     });
     expect(JSON.stringify(archive.body)).not.toContain(pilot.id);
   });
@@ -157,7 +157,7 @@ describe("season archives (e2e)", () => {
       "an unexpected participant field",
       "post",
       (id: string) => `/seasons/${id}/participants`,
-      { teamId: TEAM_ID, extra: true },
+      { extra: true, teamId: TEAM_ID },
       400,
     ],
     [

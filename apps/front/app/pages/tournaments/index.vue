@@ -28,17 +28,17 @@ const {
   () => getEvents({ limit: EVENTS_PER_PAGE, offset: offset.value }),
   {
     default: () => ({ events: [], total: 0 }),
-    watch: [offset],
     getCachedData(key, nuxtApp) {
       return nuxtApp.payload.data[key] ?? nuxtApp.static.data[key];
     },
+    watch: [offset],
   },
 );
 
 const { data: nextEvent } = useLazyAsyncData(
   "tournaments-next-event",
   async () => {
-    const { events: active } = await getEvents({ limit: 50, activeOnly: true });
+    const { events: active } = await getEvents({ activeOnly: true, limit: 50 });
 
     const [next] = active
       .filter((event) => getTournamentStatus(event) === "upcoming")
@@ -48,7 +48,7 @@ const { data: nextEvent } = useLazyAsyncData(
       return null;
     }
 
-    return { slug: next.slug, name: next.name };
+    return { name: next.name, slug: next.slug };
   },
   { default: () => null },
 );
@@ -71,8 +71,8 @@ const nextPageQuery = computed(() => ({
 }));
 
 setPageSeo({
-  title: t("page.tournaments.index.seoTitle"),
   description: t("page.tournaments.index.description", { count: totalEvents.value }),
+  title: t("page.tournaments.index.seoTitle"),
 });
 
 const tournamentsJsonLd = computed(() => {
@@ -82,8 +82,8 @@ const tournamentsJsonLd = computed(() => {
 
   return buildTournamentItemList({
     events: events.value,
-    total: totalEvents.value,
     positionOffset: offset.value,
+    total: totalEvents.value,
   });
 });
 

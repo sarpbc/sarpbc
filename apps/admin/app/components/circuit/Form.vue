@@ -50,12 +50,12 @@ const submit = () => {
   }
 
   const input: CircuitInput = {
-    name: name.value.trim(),
-    season: seasonValue,
-    region: region.value.trim() || null,
     description: description.value.trim() || null,
-    sourceUrl: sourceUrl.value.trim(),
+    name: name.value.trim(),
     qualificationSpots: qualificationSpots.value,
+    region: region.value.trim() || null,
+    season: seasonValue,
+    sourceUrl: sourceUrl.value.trim(),
   };
 
   const trimmedSlug = slug.value.trim();

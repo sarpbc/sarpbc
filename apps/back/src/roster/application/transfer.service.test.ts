@@ -19,12 +19,12 @@ describe(TransferService, () => {
     role = "active",
   ) =>
     Object.assign(new Contract(), {
+      endDate: endDate === null ? null : new Date(endDate),
       id,
       player: zen,
-      team,
-      startDate: new Date(startDate),
-      endDate: endDate === null ? null : new Date(endDate),
       role,
+      startDate: new Date(startDate),
+      team,
     });
 
   const career = [
@@ -38,11 +38,11 @@ describe(TransferService, () => {
   const fixture = () => {
     const contracts: ContractQueries = {
       findByPlayer: async () => [],
-      findPastContractsByPlayer: async () => [],
       findByTeam: async () => [],
       findFormerPlayersByTeam: async () => [],
       findMovements,
       findMovementsOnDay: findMovements,
+      findPastContractsByPlayer: async () => [],
     };
 
     const service = new TransferService(contracts);
@@ -58,7 +58,7 @@ describe(TransferService, () => {
     expect(page.map(({ id }) => id)).toStrictEqual(["k:join", "v:leave"]);
 
     const [departures] = await service.findAndCount(
-      { type: "departure", limit: 25, offset: 0 },
+      { limit: 25, offset: 0, type: "departure" },
       now,
     );
 
@@ -69,7 +69,7 @@ describe(TransferService, () => {
     const { service } = fixture();
 
     const [transfers, count] = await service.findAndCount(
-      { from: new Date("2026-01-01"), to: new Date("2026-12-31"), limit: 25, offset: 0 },
+      { from: new Date("2026-01-01"), limit: 25, offset: 0, to: new Date("2026-12-31") },
       now,
     );
 

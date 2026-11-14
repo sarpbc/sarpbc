@@ -5,22 +5,22 @@ import { orderStreams, parseStreamUrl } from "./stream";
 void describe("parseStreamUrl", () => {
   void it("derives the platform and channel of known hosts", () => {
     assert.deepEqual(parseStreamUrl(" https://www.twitch.tv/rocketleague "), {
-      ok: true,
-      url: "https://www.twitch.tv/rocketleague",
-      platform: "twitch",
       channel: "rocketleague",
+      ok: true,
+      platform: "twitch",
+      url: "https://www.twitch.tv/rocketleague",
     });
     assert.deepEqual(parseStreamUrl("https://kick.com/rlfrance"), {
-      ok: true,
-      url: "https://kick.com/rlfrance",
-      platform: "kick",
       channel: "rlfrance",
+      ok: true,
+      platform: "kick",
+      url: "https://kick.com/rlfrance",
     });
     assert.deepEqual(parseStreamUrl("https://www.youtube.com/@RocketLeague/live"), {
-      ok: true,
-      url: "https://www.youtube.com/@RocketLeague/live",
-      platform: "youtube",
       channel: "@RocketLeague",
+      ok: true,
+      platform: "youtube",
+      url: "https://www.youtube.com/@RocketLeague/live",
     });
   });
 
@@ -31,29 +31,29 @@ void describe("parseStreamUrl", () => {
 
   void it("accepts other https hosts under the other platform", () => {
     assert.deepEqual(parseStreamUrl("https://www.example.tv/live"), {
-      ok: true,
-      url: "https://www.example.tv/live",
-      platform: "other",
       channel: "example.tv",
+      ok: true,
+      platform: "other",
+      url: "https://www.example.tv/live",
     });
   });
 
   void it("rejects non-https and malformed URLs", () => {
-    assert.deepEqual(parseStreamUrl("http://twitch.tv/rl"), { ok: false, error: "not-https" });
-    assert.deepEqual(parseStreamUrl("twitch.tv/rl"), { ok: false, error: "invalid-url" });
+    assert.deepEqual(parseStreamUrl("http://twitch.tv/rl"), { error: "not-https", ok: false });
+    assert.deepEqual(parseStreamUrl("twitch.tv/rl"), { error: "invalid-url", ok: false });
     assert.deepEqual(parseStreamUrl("https://user@twitch.tv/rl"), {
-      ok: false,
       error: "invalid-url",
+      ok: false,
     });
   });
 });
 
 void describe("orderStreams", () => {
   const streams = [
-    { url: "a", language: "en", kind: "costream" as const },
-    { url: "b", language: "fr", kind: "costream" as const },
-    { url: "c", language: "en", kind: "official" as const },
-    { url: "d", language: "fr", kind: "official" as const },
+    { kind: "costream" as const, language: "en", url: "a" },
+    { kind: "costream" as const, language: "fr", url: "b" },
+    { kind: "official" as const, language: "en", url: "c" },
+    { kind: "official" as const, language: "fr", url: "d" },
   ];
 
   void it("puts the reader's language first, then official streams", () => {

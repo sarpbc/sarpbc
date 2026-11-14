@@ -55,17 +55,17 @@ export class EventController {
   @Get()
   async list(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryInput) {
     const [listings, count] = await this.events.list({
+      activeOnly: query.activeOnly === true,
       limit: query.limit,
       offset: query.offset,
       pickems: query.pickems,
-      activeOnly: query.activeOnly === true,
     });
 
     return {
+      count,
       events: listings.map(({ event, stages }) =>
         mapEvent(event, stages.map(mapTournamentListItem)),
       ),
-      count,
     };
   }
 
@@ -103,7 +103,7 @@ export class EventController {
   @UseGuards(AuthGuard, PermissionGuard)
   @Get(":id/streams")
   async getStreams(@Param("id") id: string) {
-    return await this.streamService.find({ kind: "event", id });
+    return await this.streamService.find({ id, kind: "event" });
   }
 
   @RequirePermissions("tournaments.manage")
@@ -113,14 +113,14 @@ export class EventController {
     @Param("id") id: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
-    return await this.streamService.set({ kind: "event", id }, body.streams, "manual");
+    return await this.streamService.set({ id, kind: "event" }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get(":id/viewership")
   async getViewership(@Param("id") id: string) {
-    return await this.viewershipService.find({ kind: "event", id });
+    return await this.viewershipService.find({ id, kind: "event" });
   }
 
   @RequirePermissions("tournaments.manage")
@@ -130,7 +130,7 @@ export class EventController {
     @Param("id") id: string,
     @Body({ schema: SetViewershipDto }) body: SetViewershipInput,
   ) {
-    return await this.viewershipService.set({ kind: "event", id }, body.viewership);
+    return await this.viewershipService.set({ id, kind: "event" }, body.viewership);
   }
 
   @RequirePermissions("tournaments.manage")
@@ -174,7 +174,7 @@ export class EventController {
 
     switch (path.kind) {
       case "legacyStage": {
-        return { kind: "stage", tournament: await this.stage(path.id), tab: path.tab };
+        return { kind: "stage", tab: path.tab, tournament: await this.stage(path.id) };
       }
 
       case "stage": {
@@ -184,7 +184,7 @@ export class EventController {
           throw new NotFoundError(MISSING);
         }
 
-        return { kind: "stage", tournament: await this.stage(id), tab: "overview" };
+        return { kind: "stage", tab: "overview", tournament: await this.stage(id) };
       }
 
       case "event": {
@@ -198,8 +198,8 @@ export class EventController {
         const stages = await Promise.all(found.stages.map(async ({ id }) => await this.stage(id)));
 
         return {
-          kind: "event",
           event: { ...mapEvent(found.event, stages), viewership: found.event.viewership },
+          kind: "event",
         };
       }
 

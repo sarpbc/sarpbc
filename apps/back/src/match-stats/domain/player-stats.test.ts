@@ -14,16 +14,16 @@ const line = (
   teamGoals: number,
   [goals, assists, saves, shots, demolitions]: [number, number, number, number, number],
 ): PlayerGameLine => ({
-  gameId,
   account: JSON.stringify(["steam", player?.id ?? `unlinked-${team.name}`]),
-  player,
-  team,
-  teamGoals,
-  goals,
   assists,
+  demolitions,
+  gameId,
+  goals,
+  player,
   saves,
   shots,
-  demolitions,
+  team,
+  teamGoals,
 });
 
 const games: PlayerGameLine[] = [
@@ -42,22 +42,22 @@ describe(aggregatePlayerStats, () => {
     expect(stats.games).toBe(3);
     expect(stats.players).toStrictEqual([
       {
-        player: kaydop,
-        team: solary,
         games: 2,
-        totals: { goals: 4, assists: 1, saves: 4, shots: 7, demolitions: 2 },
-        perGame: { goals: 2, assists: 0.5, saves: 2, shots: 3.5, demolitions: 1 },
-        shootingPercentage: 57.1,
         goalParticipation: 100,
+        perGame: { assists: 0.5, demolitions: 1, goals: 2, saves: 2, shots: 3.5 },
+        player: kaydop,
+        shootingPercentage: 57.1,
+        team: solary,
+        totals: { assists: 1, demolitions: 2, goals: 4, saves: 4, shots: 7 },
       },
       {
-        player: zen,
-        team: vitality,
         games: 3,
-        totals: { goals: 2, assists: 3, saves: 5, shots: 5, demolitions: 4 },
-        perGame: { goals: 0.67, assists: 1, saves: 1.67, shots: 1.67, demolitions: 1.33 },
-        shootingPercentage: 40,
         goalParticipation: 100,
+        perGame: { assists: 1, demolitions: 1.33, goals: 0.67, saves: 1.67, shots: 1.67 },
+        player: zen,
+        shootingPercentage: 40,
+        team: vitality,
+        totals: { assists: 3, demolitions: 4, goals: 2, saves: 5, shots: 5 },
       },
     ]);
 
@@ -78,14 +78,14 @@ describe(aggregatePlayerStats, () => {
 
     expect(
       stats.players.map(({ team, games: count, totals, goalParticipation }) => ({
-        team: team.name,
         games: count,
-        goals: totals.goals,
         goalParticipation,
+        goals: totals.goals,
+        team: team.name,
       })),
     ).toStrictEqual([
-      { team: "Solary", games: 2, goals: 1, goalParticipation: 33.3 },
-      { team: "Vitality", games: 1, goals: 2, goalParticipation: 100 },
+      { games: 2, goalParticipation: 33.3, goals: 1, team: "Solary" },
+      { games: 1, goalParticipation: 100, goals: 2, team: "Vitality" },
     ]);
   });
 
@@ -107,13 +107,13 @@ describe(aggregatePlayerStats, () => {
       line("g2", zen, { ...duo }, 2, [1, 1, 0, 2, 0]),
     ]);
 
-    expect(stats.players).toMatchObject([{ team: duo, games: 2, totals: { goals: 2 } }]);
+    expect(stats.players).toMatchObject([{ games: 2, team: duo, totals: { goals: 2 } }]);
   });
 
   it("returns null percentages without shots or team goals", () => {
     const [row] = aggregatePlayerStats([line("g1", zen, vitality, 0, [0, 0, 2, 0, 0])]).players;
 
-    expect(row).toMatchObject({ shootingPercentage: null, goalParticipation: null });
+    expect(row).toMatchObject({ goalParticipation: null, shootingPercentage: null });
   });
 
   it("returns no rows and no games when nothing was imported", () => {

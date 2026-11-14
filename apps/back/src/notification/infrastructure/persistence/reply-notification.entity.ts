@@ -13,16 +13,16 @@ export class ReplyNotification {
 
 export const ReplyNotificationSchema = defineEntity({
   class: ReplyNotification,
-  repository: () => ReplyNotificationRepository,
   indexes: [{ properties: ["recipient", "readAt"] }, { properties: ["recipient", "createdAt"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    recipient: p.manyToOne(User),
-    reply: p.manyToOne(Reply).deleteRule("cascade"),
-    readAt: p.datetime().type("timestamptz").nullable(),
     createdAt: p
       .datetime()
       .type("timestamptz")
       .onCreate(() => new Date()),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    readAt: p.datetime().type("timestamptz").nullable(),
+    recipient: p.manyToOne(User),
+    reply: p.manyToOne(Reply).deleteRule("cascade"),
   },
+  repository: () => ReplyNotificationRepository,
 });

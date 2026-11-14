@@ -21,11 +21,11 @@ export const buildWebSite = (options: BuildWebSiteOptions): WebSiteLd =>
   compactJsonLd<WebSiteLd>({
     "@context": SCHEMA_ORG,
     "@type": "WebSite",
-    name: "sarpbc.org",
-    url: SITE_ORIGIN,
     description: options.description,
     inLanguage: options.inLanguage ?? ["en", "fr"],
+    name: "sarpbc.org",
     publisher: {
       "@id": ORGANIZATION_ID,
     },
+    url: SITE_ORIGIN,
   });

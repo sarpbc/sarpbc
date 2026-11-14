@@ -77,6 +77,6 @@ export class RosterSyncWriter {
     return { id: row.id };
   }
   private async hasOpenContract(playerId: string): Promise<boolean> {
-    return (await this.em.findOne(Contract, { player: playerId, endDate: null })) !== null;
+    return (await this.em.findOne(Contract, { endDate: null, player: playerId })) !== null;
   }
 }

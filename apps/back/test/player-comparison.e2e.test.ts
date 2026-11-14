@@ -25,13 +25,13 @@ import { careerSources, zenSeasonAward } from "./career-fixtures";
 const comparisonBody = z.object({
   comparison: z.object({
     a: z.looseObject({
-      player: z.unknown(),
-      titles: z.unknown(),
-      teams: z.unknown(),
-      series: z.unknown(),
-      earnings: z.looseObject({ totals: z.unknown() }),
       awards: z.array(z.looseObject({ id: z.string() })),
+      earnings: z.looseObject({ totals: z.unknown() }),
+      player: z.unknown(),
       seasonAwards: z.unknown(),
+      series: z.unknown(),
+      teams: z.unknown(),
+      titles: z.unknown(),
     }),
     b: z.looseObject({ player: z.unknown() }),
     headToHead: z.unknown(),
@@ -84,7 +84,7 @@ describe("GET /player/compare (e2e)", () => {
 
     expect(response.status).toBe(200);
 
-    return { response, comparison: comparisonBody.parse(response.body).comparison };
+    return { comparison: comparisonBody.parse(response.body).comparison, response };
   };
 
   it("identifies both compared players", async () => {
@@ -100,29 +100,29 @@ describe("GET /player/compare (e2e)", () => {
 
     expect(comparison.a.titles).toStrictEqual([
       {
+        endAt: "2026-05-01T00:00:00.000Z",
+        event: { id: "cup", name: "Cup", slug: "cup" },
         id: "rlcs",
         name: "Title rlcs",
         slug: "rlcs",
-        endAt: "2026-05-01T00:00:00.000Z",
-        event: { id: "cup", slug: "cup", name: "Cup" },
       },
     ]);
     expect(comparison.a.teams).toStrictEqual([
       {
+        endDate: null,
         role: "active",
         startDate: "2023-01-01T00:00:00.000Z",
-        endDate: null,
         team: kc,
       },
     ]);
-    expect(comparison.a.series).toStrictEqual({ wins: 2, losses: 2 });
+    expect(comparison.a.series).toStrictEqual({ losses: 2, wins: 2 });
     expect(comparison.headToHead).toStrictEqual({ a: 1, b: 1 });
   });
 
   it("returns the earnings and awards of a career", async () => {
     const { comparison } = await zenVersusVatira();
 
-    expect(comparison.a.earnings.totals).toStrictEqual([{ currency: "USD", amount: 1500 }]);
+    expect(comparison.a.earnings.totals).toStrictEqual([{ amount: 1500, currency: "USD" }]);
     expect(comparison.a.awards.map(({ id }) => id)).toStrictEqual(["major-mvp"]);
     expect(comparison.a.seasonAwards).toStrictEqual([zenSeasonAward]);
   });

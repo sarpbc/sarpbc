@@ -34,13 +34,13 @@ const formatDate = (value: string | null): string =>
   value ? dateFormatter.value.format(new Date(value)) : t("page.home.dateUnknown");
 
 const proposals = useLazyAsyncData("admin-home-proposals", () => getPendingRosterProposals(), {
-  server: false,
   immediate: canProposals.value,
+  server: false,
 });
 
 const replies = useLazyAsyncData("admin-home-replies", () => getModerationReplies(), {
-  server: false,
   immediate: canModeration.value,
+  server: false,
 });
 
 const articles = useLazyAsyncData(
@@ -50,12 +50,12 @@ const articles = useLazyAsyncData(
 
     return response.data;
   },
-  { server: false, immediate: canNews.value },
+  { immediate: canNews.value, server: false },
 );
 
 const matches = useLazyAsyncData("admin-home-matches", () => getUpcomingMatches(MATCH_LIMIT), {
-  server: false,
   immediate: canMatches.value,
+  server: false,
 });
 
 const proposalCount = computed(() => proposals.data.value?.proposals.length ?? 0);
@@ -73,8 +73,8 @@ const matchTitle = (participants: NamedParticipant[]): string =>
 onMounted(() => {
   if (route.query.forbidden === "1") {
     toast.add({
-      title: t("page.home.forbidden"),
       color: "warning",
+      title: t("page.home.forbidden"),
     });
     const query = { ...route.query };
     delete query.forbidden;

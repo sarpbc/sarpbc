@@ -10,8 +10,8 @@ const { slug, team, teamId, pending, error, refresh } = await useTeamByRouteSlug
 
 if (!team.value) {
   throwEntityLoadError(error.value, {
-    notFound: t("page.team.slug.teamNotFound"),
     failed: t("page.team.slug.failedToLoadTeamData"),
+    notFound: t("page.team.slug.teamNotFound"),
   });
 }
 
@@ -87,9 +87,9 @@ const description = computed(() =>
 );
 
 setPageSeo({
-  title: title.value,
   description: description.value,
   image: team.value?.logoLightUrl || team.value?.imageUrl || undefined,
+  title: title.value,
 });
 </script>
 

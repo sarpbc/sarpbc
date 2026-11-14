@@ -10,11 +10,11 @@ const snapshot = path.join(project, "test/contracts/http-routes.json");
 
 const routeSchema = z.strictObject({
   controller: z.string(),
-  verb: z.string(),
-  path: z.string(),
-  status: z.string().nullable(),
   guards: z.array(z.string()),
+  path: z.string(),
   permissions: z.array(z.string()),
+  status: z.string().nullable(),
+  verb: z.string(),
 });
 
 type Route = z.infer<typeof routeSchema>;
@@ -119,12 +119,24 @@ const decorators = (node: ts.Node, source: ts.SourceFile): Decorator[] =>
     return ts.isCallExpression(expression) && ts.isIdentifier(expression.expression)
       ? [
           {
-            name: expression.expression.text,
             args: decoratorArguments(expression, source),
+            name: expression.expression.text,
           },
         ]
       : [];
   });
+
+// The snapshot's order is controller, verb, path, then the rest; spelling it out keeps it
+// independent of the route object's key order.
+const sortKey = (route: Route): string =>
+  JSON.stringify([
+    route.controller,
+    route.verb,
+    route.path,
+    route.status,
+    route.guards,
+    route.permissions,
+  ]);
 
 const collectRoutes = (sources: SourceText[]): Route[] => {
   const routes: Route[] = [];
@@ -180,24 +192,24 @@ const collectRoutes = (sources: SourceText[]): Route[] => {
           const effective = [...classDecorators, ...methodDecorators];
           routes.push({
             controller: prefix.replaceAll("'", '"'),
-            verb: route.name.toUpperCase(),
-            path: (route.args[0] ?? '""').replaceAll("'", '"'),
-            status:
-              methodDecorators.find((decorator) => decorator.name === "HttpCode")?.args[0] ?? null,
             guards: effective
               .filter((decorator) => decorator.name === "UseGuards")
               .flatMap((decorator) => decorator.args),
+            path: (route.args[0] ?? '""').replaceAll("'", '"'),
             permissions: effective
               .filter((decorator) => decorator.name === "RequirePermissions")
               .flatMap((decorator) => decorator.args)
               .map((argument) => argument.replaceAll("'", '"')),
+            status:
+              methodDecorators.find((decorator) => decorator.name === "HttpCode")?.args[0] ?? null,
+            verb: route.name.toUpperCase(),
           });
         }
       }
     }
   }
 
-  return routes.toSorted((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+  return routes.toSorted((a, b) => sortKey(a).localeCompare(sortKey(b)));
 };
 
 const sources = filesIn(sourceRoot).map((file) => ({ file, text: fs.readFileSync(file, "utf-8") }));

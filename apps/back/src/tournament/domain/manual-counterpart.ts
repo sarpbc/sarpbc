@@ -80,8 +80,8 @@ export const findManualCounterpart = (
   );
 
   if (ids.length === 1) {
-    return { kind: "unique", id: ids[0] };
+    return { id: ids[0], kind: "unique" };
   }
 
-  return ids.length ? { kind: "ambiguous", ids } : { kind: "none" };
+  return ids.length ? { ids, kind: "ambiguous" } : { kind: "none" };
 };

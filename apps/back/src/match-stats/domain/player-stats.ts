@@ -33,11 +33,11 @@ const percentage = (part: number, whole: number): number | null =>
   whole === 0 ? null : round((part * 100) / whole, 1);
 
 const emptyCounts = (): PlayerStatCounts => ({
-  goals: 0,
   assists: 0,
+  demolitions: 0,
+  goals: 0,
   saves: 0,
   shots: 0,
-  demolitions: 0,
 });
 
 const toStats = ({ player, team, games, totals, teamGoals }: Tally): TournamentPlayerStats => {
@@ -48,13 +48,13 @@ const toStats = ({ player, team, games, totals, teamGoals }: Tally): TournamentP
   }
 
   return {
-    player,
-    team,
     games: games.size,
-    totals,
-    perGame,
-    shootingPercentage: percentage(totals.goals, totals.shots),
     goalParticipation: percentage(totals.goals + totals.assists, teamGoals),
+    perGame,
+    player,
+    shootingPercentage: percentage(totals.goals, totals.shots),
+    team,
+    totals,
   };
 };
 
@@ -76,11 +76,11 @@ export const aggregatePlayerStats = (
     const key = JSON.stringify([line.player.id, line.team.id ?? line.team.name]);
 
     const tally = tallies.get(key) ?? {
+      games: new Set<string>(),
       player: line.player,
       team: line.team,
-      games: new Set<string>(),
-      totals: emptyCounts(),
       teamGoals: 0,
+      totals: emptyCounts(),
     };
 
     tallies.set(key, tally);

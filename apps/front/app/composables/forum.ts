@@ -69,8 +69,8 @@ export const createForumPost = async (data: {
 }): Promise<CreateForumPostResult> => {
   try {
     const post = await apiFetch<{ publicId: number; slug: string }>("/posts", {
-      method: "POST",
       body: data,
+      method: "POST",
     });
 
     return { ok: true, post };

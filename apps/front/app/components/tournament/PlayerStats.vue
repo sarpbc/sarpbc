@@ -40,11 +40,11 @@ const ALL_TEAMS = "all";
 
 const view = ref<View>("totals");
 const team = ref(ALL_TEAMS);
-const sort = ref<{ key: SortKey; descending: boolean }>({ key: "goals", descending: true });
+const sort = ref<{ key: SortKey; descending: boolean }>({ descending: true, key: "goals" });
 
 const viewOptions = computed(() => [
-  { value: "totals" as const, label: t("page.tournaments.stats.totals") },
-  { value: "perGame" as const, label: t("page.tournaments.stats.perGame") },
+  { label: t("page.tournaments.stats.totals"), value: "totals" as const },
+  { label: t("page.tournaments.stats.perGame"), value: "perGame" as const },
 ]);
 
 const teamKey = (row: TournamentPlayerStats): string => row.team.id ?? row.team.name;
@@ -57,9 +57,9 @@ const teamOptions = computed(() => {
   }
 
   return [
-    { value: ALL_TEAMS, label: t("page.tournaments.stats.allTeams") },
+    { label: t("page.tournaments.stats.allTeams"), value: ALL_TEAMS },
     ...[...teams]
-      .map(([teamId, label]) => ({ value: teamId, label }))
+      .map(([teamId, label]) => ({ label, value: teamId }))
       .toSorted((a, b) => a.label.localeCompare(b.label)),
   ];
 });
@@ -126,8 +126,8 @@ const rows = computed(() => {
 const sortBy = (key: SortKey): void => {
   sort.value =
     sort.value.key === key
-      ? { key, descending: !sort.value.descending }
-      : { key, descending: key !== "player" && key !== "team" };
+      ? { descending: !sort.value.descending, key }
+      : { descending: key !== "player" && key !== "team", key };
 };
 
 const ariaSort = (key: SortKey): "ascending" | "descending" | undefined => {
@@ -143,7 +143,7 @@ const numberFormat = computed(
 );
 
 const percentFormat = computed(
-  () => new Intl.NumberFormat(locale.value, { style: "percent", maximumFractionDigits: 1 }),
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1, style: "percent" }),
 );
 
 const display = (row: TournamentPlayerStats, column: Column): string => {

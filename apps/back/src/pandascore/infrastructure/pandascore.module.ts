@@ -5,8 +5,8 @@ import { PandascoreCompetitionFeed } from "./pandascore-competition-feed";
 import { PandascoreCurrentRosterSource } from "./pandascore-current-roster-source";
 
 @Module({
+  exports: [PandascoreCompetitionFeed, PandascoreCurrentRosterSource],
   imports: [ConfigModule],
   providers: [PandascoreApiClient, PandascoreCompetitionFeed, PandascoreCurrentRosterSource],
-  exports: [PandascoreCompetitionFeed, PandascoreCurrentRosterSource],
 })
 export class PandascoreModule {}

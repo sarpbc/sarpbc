@@ -43,12 +43,12 @@ export class TwitchAppToken {
 
   private async request(): Promise<string> {
     const response = await fetch(TOKEN_URL, {
-      method: "POST",
       body: new URLSearchParams({
         client_id: this.credentials.clientId,
         client_secret: this.credentials.clientSecret,
         grant_type: "client_credentials",
       }),
+      method: "POST",
       signal: AbortSignal.timeout(TOKEN_REQUEST_TIMEOUT_MS),
     });
 
@@ -59,8 +59,8 @@ export class TwitchAppToken {
     const token = tokenResponse.parse(await response.json());
     const lifetimeMs = token.expires_in * 1000;
     this.cached = {
-      value: token.access_token,
       refreshAt: this.now() + lifetimeMs - Math.min(REFRESH_MARGIN_MS, lifetimeMs / 2),
+      value: token.access_token,
     };
 
     return token.access_token;

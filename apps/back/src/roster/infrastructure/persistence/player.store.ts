@@ -43,7 +43,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       ? await this.em.findOne(
           PlayerRow,
           { id },
-          { refresh: true, lockMode: LockMode.PESSIMISTIC_WRITE },
+          { lockMode: LockMode.PESSIMISTIC_WRITE, refresh: true },
         )
       : await this.em.findOne(PlayerRow, { id }, playerOptions);
 
@@ -99,7 +99,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     const rows = await this.em.find(
       PlayerRow,
       { id: { $in: ids.map(({ id }) => id) } },
-      { populate: ["team"], orderBy: { name: "asc" } },
+      { orderBy: { name: "asc" }, populate: ["team"] },
     );
 
     return rows.map(toPlayer);

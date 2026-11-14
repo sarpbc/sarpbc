@@ -16,13 +16,13 @@ export class PlayerAward {
 
 export const PlayerAwardSchema = defineEntity({
   class: PlayerAward,
-  uniques: [{ properties: ["tournament", "awardType"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    tournament: p.manyToOne(Tournament),
-    participant: p.manyToOne(TournamentParticipant),
-    player: p.manyToOne(Player),
     awardType: p.enum([...PLAYER_AWARD_TYPES]).columnType("text"),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    participant: p.manyToOne(TournamentParticipant),
+    player: p.manyToOne(Player),
+    tournament: p.manyToOne(Tournament),
   },
+  uniques: [{ properties: ["tournament", "awardType"] }],
 });

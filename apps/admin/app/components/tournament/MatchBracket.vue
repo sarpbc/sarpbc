@@ -54,10 +54,10 @@ watch(
 );
 
 const participantItems = computed(() => [
-  { value: TBD, label: t("page.tournaments.bracket.tbd") },
+  { label: t("page.tournaments.bracket.tbd"), value: TBD },
   ...participants.map((participant) => ({
-    value: participant.id,
     label: participantName(participant),
+    value: participant.id,
   })),
 ]);
 
@@ -71,12 +71,12 @@ const stageMatchLabel = (candidate: TournamentDetailMatch): string => {
 const matchItems = computed(() =>
   stageMatches
     .filter((candidate) => candidate.id !== match.id)
-    .map((candidate) => ({ value: candidate.id, label: stageMatchLabel(candidate) })),
+    .map((candidate) => ({ label: stageMatchLabel(candidate), value: candidate.id })),
 );
 
 const typeItems = computed(() => [
-  { value: "winner", label: t("page.tournaments.bracket.types.winner") },
-  { value: "loser", label: t("page.tournaments.bracket.types.loser") },
+  { label: t("page.tournaments.bracket.types.winner"), value: "winner" },
+  { label: t("page.tournaments.bracket.types.loser"), value: "loser" },
 ]);
 
 const chosenSides = computed(() => sides.value.filter((side) => side !== TBD));
@@ -104,7 +104,7 @@ const save = async () => {
       participantIds: chosenSides.value,
       previousMatches: links.value.map(({ previousMatchId, type }) => ({ previousMatchId, type })),
     });
-    toast.add({ title: t("page.tournaments.bracket.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.bracket.saved") });
     open.value = false;
     emit("saved");
   } catch (error) {

@@ -26,8 +26,8 @@ watch(
     }
 
     setPageSeo({
-      title: `${value.title} | sarpbc.org`,
       description: value.description,
+      title: `${value.title} | sarpbc.org`,
     });
   },
   { immediate: true },

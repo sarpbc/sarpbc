@@ -15,19 +15,19 @@ const participant = (name: string): TournamentParticipant =>
 
 const tournament = (): Tournament =>
   Object.assign(new Tournament(), {
+    beginAt: new Date("2026-03-01T00:00:00Z"),
+    event: { id: "event", name: "RLCS Major Paris 2026", slug: "rlcs-major-paris-2026" },
     id: "tournament",
+    league: Object.assign(new League(), { id: "league", name: "RLCS Major" }),
     name: "Playoffs",
     slug: "playoffs",
-    event: { id: "event", slug: "rlcs-major-paris-2026", name: "RLCS Major Paris 2026" },
-    beginAt: new Date("2026-03-01T00:00:00Z"),
-    league: Object.assign(new League(), { id: "league", name: "RLCS Major" }),
   });
 
 const match = (overrides: Partial<Match>): Match =>
   Object.assign(new Match(), {
     id: "match",
-    publicId: 7250,
     name: "Upper bracket final: Karmine Corp vs Team Falcons",
+    publicId: 7250,
     slug: "stored-pandascore-slug",
     ...overrides,
   });
@@ -45,9 +45,9 @@ describe("match links in API payloads", () => {
       publicId: 7250,
       slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
       tournament: {
-        slug: "playoffs",
-        event: { id: "event", slug: "rlcs-major-paris-2026", name: "RLCS Major Paris 2026" },
+        event: { id: "event", name: "RLCS Major Paris 2026", slug: "rlcs-major-paris-2026" },
         league: { id: "league", name: "RLCS Major" },
+        slug: "playoffs",
       },
     });
   });

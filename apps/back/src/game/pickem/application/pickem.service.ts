@@ -47,13 +47,15 @@ export class PickemService {
       }
 
       assertPickAllowed(match, participantId, this.runtime.now(), existing?.scored ?? false);
+      const id = this.runtime.id();
+      const createdAt = this.runtime.now();
       await scope.savePick({
-        id: this.runtime.id(),
-        user: { id: userId },
+        createdAt,
+        id,
         match: { id: matchId },
         points: null,
         scored: false,
-        createdAt: this.runtime.now(),
+        user: { id: userId },
         ...existing,
         pickedParticipant: { id: participantId },
       });
@@ -108,9 +110,9 @@ export class PickemService {
 
     for (const pick of scoredPicks) {
       const entry = entries.get(pick.user.id) ?? {
+        points: 0,
         userId: pick.user.id,
         userName: pick.user.userName,
-        points: 0,
       };
 
       entry.points += pick.points ?? 0;
@@ -124,9 +126,9 @@ export class PickemService {
     const index = entries.findIndex((e) => e.userId === userId);
 
     return {
+      points: entries[index]?.points ?? 0,
       rank: index === -1 ? null : index + 1,
       total: entries.length,
-      points: entries[index]?.points ?? 0,
     };
   }
 }

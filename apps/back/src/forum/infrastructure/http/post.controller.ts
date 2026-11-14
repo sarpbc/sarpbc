@@ -45,13 +45,13 @@ export class PostController {
 
     return {
       posts: posts.map((post) => ({
+        author: post.author.userName,
+        commentCount: commentCounts.get(post.id) ?? 0,
+        createdAt: post.createdAt.toISOString(),
         id: post.id,
         publicId: post.publicId,
         slug: forumPostSlug(post.title),
         title: post.title,
-        author: post.author.userName,
-        createdAt: post.createdAt.toISOString(),
-        commentCount: commentCounts.get(post.id) ?? 0,
         topic: {
           id: post.topic.id,
           title: post.topic.title,

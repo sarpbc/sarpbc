@@ -20,23 +20,23 @@ export class TournamentRepository extends EntityRepository<Tournament> {
       : {};
 
     return await this.findAll({
-      where,
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
       populate: [...TOURNAMENT_POPULATE],
+      where,
     });
   }
 
   async findPandascoreWithoutMatches(): Promise<Pick<Tournament, "id" | "name">[]> {
     return await this.findAll({
-      where: {
-        source: "pandascore",
-        pandascoreId: { $ne: null },
-        matches: { $none: {} },
-      },
       fields: ["id", "name"],
       orderBy: { beginAt: "DESC" },
+      where: {
+        matches: { $none: {} },
+        pandascoreId: { $ne: null },
+        source: "pandascore",
+      },
     });
   }
 
@@ -50,13 +50,13 @@ export class TournamentRepository extends EntityRepository<Tournament> {
     endsAfter: Date;
   }): Promise<Pick<Tournament, "id">[]> {
     return await this.findAll({
-      where: {
-        source: "pandascore",
-        pandascoreId: { $ne: null },
-        beginAt: { $lte: beginsBefore, $gte: beganAfter },
-        $or: [{ endAt: null }, { endAt: { $gte: endsAfter } }],
-      },
       fields: ["id"],
+      where: {
+        $or: [{ endAt: null }, { endAt: { $gte: endsAfter } }],
+        beginAt: { $gte: beganAfter, $lte: beginsBefore },
+        pandascoreId: { $ne: null },
+        source: "pandascore",
+      },
     });
   }
 }

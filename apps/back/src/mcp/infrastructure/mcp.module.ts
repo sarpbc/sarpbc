@@ -12,6 +12,7 @@ import { McpServerFactory } from "./mcp-server.factory";
 import { mcpServicesProvider } from "./mcp-services";
 
 @Module({
+  controllers: [McpController],
   imports: [
     PatModule,
     RosterModule,
@@ -22,7 +23,6 @@ import { mcpServicesProvider } from "./mcp-services";
     CircuitModule,
     SeasonModule,
   ],
-  controllers: [McpController],
   providers: [mcpServicesProvider, McpServerFactory],
 })
 export class McpModule {}

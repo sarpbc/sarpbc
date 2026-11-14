@@ -13,19 +13,19 @@ type Match = NonNullable<ReplyRecord["match"]>;
 const NOW = new Date("2026-06-01T12:00:00Z");
 const GENERATED_ID = "generated-id";
 
-const matchFor = (id: string): Match => ({ id, publicId: 1, name: "Match", slug: "match" });
+const matchFor = (id: string): Match => ({ id, name: "Match", publicId: 1, slug: "match" });
 
 const makeUser = (id = "user-1"): Author => ({ id, userName: "fan" });
 
 const makeReply = (partial: Partial<ReplyRecord> & { id: string }): ReplyRecord => ({
+  author: makeUser(),
   content: "hello",
   createdAt: new Date("2026-01-01"),
-  author: makeUser(),
-  post: null,
-  newsArticle: null,
-  match: null,
-  replyTo: null,
   hiddenAt: null,
+  match: null,
+  newsArticle: null,
+  post: null,
+  replyTo: null,
   ...partial,
 });
 
@@ -33,15 +33,15 @@ describe(ReplyService, () => {
   let service: ReplyService;
 
   const replyRepository = {
-    findByTarget: vi.fn<ReplyWrites["findByTarget"]>(),
-    findById: vi.fn<ReplyWrites["findById"]>(),
-    findLatestByUser: vi.fn<ReplyWrites["findLatestByUser"]>(),
-    countRootsByTarget: vi.fn<ReplyWrites["countRootsByTarget"]>(),
     countByTargetIds: vi.fn<ReplyWrites["countByTargetIds"]>(),
-    findDescendantsForRoots: vi.fn<ReplyWrites["findDescendantsForRoots"]>(),
-    save: vi.fn<ReplyWrites["save"]>(),
+    countRootsByTarget: vi.fn<ReplyWrites["countRootsByTarget"]>(),
     delete: vi.fn<ReplyWrites["delete"]>(),
+    findById: vi.fn<ReplyWrites["findById"]>(),
+    findByTarget: vi.fn<ReplyWrites["findByTarget"]>(),
     findChildren: vi.fn<ReplyWrites["findChildren"]>(),
+    findDescendantsForRoots: vi.fn<ReplyWrites["findDescendantsForRoots"]>(),
+    findLatestByUser: vi.fn<ReplyWrites["findLatestByUser"]>(),
+    save: vi.fn<ReplyWrites["save"]>(),
   };
 
   const replyReportRepository = {
@@ -63,13 +63,12 @@ describe(ReplyService, () => {
 
   beforeEach(async () => {
     const scope: ReplyWriteScope = {
+      notifications: notificationService,
       replies: {
         ...replyRepository,
         findRecentForModeration: vi.fn<ReplyWrites["findRecentForModeration"]>(),
       },
       reports: replyReportRepository,
-      users: userService,
-      notifications: notificationService,
       targets: {
         async find(target: ReplyTarget) {
           const row = await em.findOne(target);
@@ -78,9 +77,10 @@ describe(ReplyService, () => {
             return null;
           }
 
-          return { post: null, newsArticle: null, match: row };
+          return { match: row, newsArticle: null, post: null };
         },
       },
+      users: userService,
     };
 
     service = new ReplyService(
@@ -106,14 +106,14 @@ describe(ReplyService, () => {
       });
 
       expect(replyRepository.save).toHaveBeenCalledExactlyOnceWith({
-        id: GENERATED_ID,
-        content: "Great series",
         author: makeUser(),
+        content: "Great series",
         createdAt: NOW,
         hiddenAt: null,
-        post: null,
-        newsArticle: null,
+        id: GENERATED_ID,
         match,
+        newsArticle: null,
+        post: null,
         replyTo: null,
       });
       expect(result.content).toBe("Great series");
@@ -201,7 +201,7 @@ describe(ReplyService, () => {
 
       const result = await service.findByTargetPaginated("newsArticle", "n1", 1, 10);
 
-      expect(result).toMatchObject({ total: 40, replies: [] });
+      expect(result).toMatchObject({ replies: [], total: 40 });
       expect(replyRepository.findByTarget).toHaveBeenCalledWith("newsArticle", "n1", {
         limit: 10,
         offset: 10,
@@ -225,7 +225,7 @@ describe(ReplyService, () => {
 
   describe("report", () => {
     it("persists a report via the repository save method", async () => {
-      const reply = makeReply({ id: "r1", author: makeUser("author-1") });
+      const reply = makeReply({ author: makeUser("author-1"), id: "r1" });
       replyRepository.findById.mockResolvedValue(reply);
       replyReportRepository.findByReplyAndReporter.mockResolvedValue(null);
       userService.findById.mockResolvedValue(makeUser("reporter-1"));
@@ -234,11 +234,11 @@ describe(ReplyService, () => {
       const result = await service.report("reporter-1", "r1", "spam");
 
       expect(replyReportRepository.save).toHaveBeenCalledExactlyOnceWith({
+        createdAt: NOW,
         id: GENERATED_ID,
+        reason: "spam",
         reply,
         reporter: makeUser("reporter-1"),
-        reason: "spam",
-        createdAt: NOW,
       });
       expect(result.reason).toBe("spam");
     });

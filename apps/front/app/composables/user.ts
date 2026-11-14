@@ -24,8 +24,8 @@ export const getProfile = async (): Promise<User | null> => {
 
 export const updateUserName = async (userName: string): Promise<User> => {
   const res = await apiFetch<{ user: User }>("/user/profile", {
-    method: "PATCH",
     body: { userName },
+    method: "PATCH",
   });
 
   return res.user;

@@ -10,41 +10,41 @@ import { writeTools } from "./write-tools";
 import type { WriteToolServices } from "./write-tools";
 
 const services = (): WriteToolServices => ({
-  newsService: {
-    create: vi.fn<WriteToolServices["newsService"]["create"]>(),
-    update: vi.fn<WriteToolServices["newsService"]["update"]>(),
-    findOneAdminByIdOrSlug: vi.fn<WriteToolServices["newsService"]["findOneAdminByIdOrSlug"]>(),
-  },
-  tournaments: {
-    findById: vi.fn<WriteToolServices["tournaments"]["findById"]>(),
-  },
-  teamService: {
-    findById: vi.fn<WriteToolServices["teamService"]["findById"]>(),
-    findBySlug: vi.fn<WriteToolServices["teamService"]["findBySlug"]>(),
-  },
-  playerService: {
-    findById: vi.fn<WriteToolServices["playerService"]["findById"]>(),
-    findBySlug: vi.fn<WriteToolServices["playerService"]["findBySlug"]>(),
-  },
-  matchService: {
-    createMatch: vi.fn<WriteToolServices["matchService"]["createMatch"]>(),
-    createEmptyBracket: vi.fn<WriteToolServices["matchService"]["createEmptyBracket"]>(),
-    setMatchWinner: vi.fn<WriteToolServices["matchService"]["setMatchWinner"]>(),
-    setGameVods: vi.fn<WriteToolServices["matchService"]["setGameVods"]>(),
-    updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>(),
-    setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>(),
-  },
   manualTournamentService: {
     create: vi.fn<WriteToolServices["manualTournamentService"]["create"]>(),
     update: vi.fn<WriteToolServices["manualTournamentService"]["update"]>(),
+  },
+  matchService: {
+    createEmptyBracket: vi.fn<WriteToolServices["matchService"]["createEmptyBracket"]>(),
+    createMatch: vi.fn<WriteToolServices["matchService"]["createMatch"]>(),
+    setGameVods: vi.fn<WriteToolServices["matchService"]["setGameVods"]>(),
+    setMatchWinner: vi.fn<WriteToolServices["matchService"]["setMatchWinner"]>(),
+    setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>(),
+    updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>(),
+  },
+  newsService: {
+    create: vi.fn<WriteToolServices["newsService"]["create"]>(),
+    findOneAdminByIdOrSlug: vi.fn<WriteToolServices["newsService"]["findOneAdminByIdOrSlug"]>(),
+    update: vi.fn<WriteToolServices["newsService"]["update"]>(),
+  },
+  pandascoreNewTournamentsSync: {
+    execute: vi.fn<WriteToolServices["pandascoreNewTournamentsSync"]["execute"]>(),
   },
   pandascoreTournamentSync: {
     execute: vi.fn<WriteToolServices["pandascoreTournamentSync"]["execute"]>(),
     executeByPandascoreId:
       vi.fn<WriteToolServices["pandascoreTournamentSync"]["executeByPandascoreId"]>(),
   },
-  pandascoreNewTournamentsSync: {
-    execute: vi.fn<WriteToolServices["pandascoreNewTournamentsSync"]["execute"]>(),
+  playerService: {
+    findById: vi.fn<WriteToolServices["playerService"]["findById"]>(),
+    findBySlug: vi.fn<WriteToolServices["playerService"]["findBySlug"]>(),
+  },
+  teamService: {
+    findById: vi.fn<WriteToolServices["teamService"]["findById"]>(),
+    findBySlug: vi.fn<WriteToolServices["teamService"]["findBySlug"]>(),
+  },
+  tournaments: {
+    findById: vi.fn<WriteToolServices["tournaments"]["findById"]>(),
   },
 });
 
@@ -66,11 +66,11 @@ const setup = (role: "admin" | "journalist") => {
 
   const match = Object.assign(new Match(), {
     id: "m1",
-    publicId: 12,
     name: "Final",
     participants: [],
-    tournament: { slug: "playoffs", event: { slug: "worlds" } },
-    vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
+    publicId: 12,
+    tournament: { event: { slug: "worlds" }, slug: "playoffs" },
+    vods: [{ game: 5, language: "fr", source: "youtube", url: "https://youtu.be/g5?t=95" }],
   });
 
   const matchService = {
@@ -82,41 +82,41 @@ const setup = (role: "admin" | "journalist") => {
 
   return {
     matchService,
-    tool,
     run: async (input: ToolArguments) =>
-      await tool.run({ id: "u1", email: "staff@test.com", role }, input),
+      await tool.run({ email: "staff@test.com", id: "u1", role }, input),
+    tool,
   };
 };
 
 describe("set_match_game_vods", () => {
-  const links = [{ url: "https://youtu.be/g5?t=95", language: "fr" }];
+  const links = [{ language: "fr", url: "https://youtu.be/g5?t=95" }];
 
   it("replaces one game's links and returns the match VODs", async () => {
     const { matchService, run } = setup("admin");
-    const result = await run({ matchId: "m1", game: 5, links });
+    const result = await run({ game: 5, links, matchId: "m1" });
     expect(matchService.setGameVods).toHaveBeenCalledWith("m1", 5, links);
     const matchUrl: unknown = expect.stringMatching(/^https:\/\/sarpbc\.test\/matches\/12\//u);
 
     expect(jsonOf(result)).toStrictEqual({
       id: "m1",
-      vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
       url: matchUrl,
+      vods: [{ game: 5, language: "fr", source: "youtube", url: "https://youtu.be/g5?t=95" }],
     });
   });
 
   it("validates its input shape", () => {
     const { tool } = setup("admin");
     const schema = z.object(tool.inputSchema);
-    expect(schema.safeParse({ matchId: "m1", game: 0, links }).success).toBe(false);
+    expect(schema.safeParse({ game: 0, links, matchId: "m1" }).success).toBe(false);
     expect(
-      schema.safeParse({ matchId: "m1", game: 1, links: [{ url: "x", language: "fra" }] }).success,
+      schema.safeParse({ game: 1, links: [{ language: "fra", url: "x" }], matchId: "m1" }).success,
     ).toBe(false);
-    expect(schema.safeParse({ matchId: "m1", game: 1, links: [] }).success).toBe(true);
+    expect(schema.safeParse({ game: 1, links: [], matchId: "m1" }).success).toBe(true);
   });
 
   it("requires tournaments.manage", async () => {
     const { matchService, run } = setup("journalist");
-    const runResult = await run({ matchId: "m1", game: 5, links });
+    const runResult = await run({ game: 5, links, matchId: "m1" });
     expect(runResult.isError).toBe(true);
     expect(matchService.setGameVods).not.toHaveBeenCalled();
   });
@@ -125,7 +125,7 @@ describe("set_match_game_vods", () => {
 const side = (id: string, teamId: string, slug: string, name: string) =>
   Object.assign(new TournamentParticipant(), {
     id,
-    team: Object.assign(new Team(), { id: teamId, slug, name }),
+    team: Object.assign(new Team(), { id: teamId, name, slug }),
   });
 
 const setupCreateMatch = (
@@ -138,27 +138,27 @@ const setupCreateMatch = (
 
   const outsider = Object.assign(new Team(), {
     id: "team-out",
-    slug: "outsider",
     name: "Outsider",
+    slug: "outsider",
   });
 
   const tournament = Object.assign(new Tournament(), {
+    endAt: null,
+    event: { id: "event", name: "Coupe", slug: "cdf" },
     id: "cup",
+    imageUrl: null,
     name: "Coupe",
+    participants: [kc, m8],
     slug: "coupe",
     source,
-    imageUrl: null,
-    endAt: null,
-    event: { id: "event", slug: "cdf", name: "Coupe" },
-    participants: [kc, m8],
   });
 
   const match = Object.assign(new Match(), {
     id: "m1",
-    publicId: 12,
     name: "Bo5",
     participants: [kc, m8],
-    tournament: { slug: "coupe", event: { slug: "cdf" } },
+    publicId: 12,
+    tournament: { event: { slug: "cdf" }, slug: "coupe" },
   });
 
   const clubs = [kc.team, m8.team, outsider];
@@ -193,10 +193,10 @@ const setupCreateMatch = (
 
   const tools = writeTools({
     ...services(),
-    matchService: { ...services().matchService, ...matchService },
-    tournaments,
-    teamService,
     manualTournamentService,
+    matchService: { ...services().matchService, ...matchService },
+    teamService,
+    tournaments,
   });
 
   const registered = (name: string) => defined(tools, name);
@@ -215,13 +215,13 @@ const setupCreateMatch = (
       eventId?: string;
     },
   ) => {
-    const result = await registered(name).run({ id: "u1", email: "staff@test.com", role }, args);
+    const result = await registered(name).run({ email: "staff@test.com", id: "u1", role }, args);
     const text = textOf(result);
 
-    return { result, text, body: result.isError === true ? null : jsonOf(result) };
+    return { body: result.isError === true ? null : jsonOf(result), result, text };
   };
 
-  return { matchService, tournaments, manualTournamentService, registered, call };
+  return { call, manualTournamentService, matchService, registered, tournaments };
 };
 
 describe("create_match participants", () => {
@@ -229,34 +229,34 @@ describe("create_match participants", () => {
     const { matchService, call } = setupCreateMatch();
 
     const { body } = await call("create_match", {
-      tournamentId: "cup",
       name: "Bo5",
       teams: ["karmine-corp", "gentle-mates"],
+      tournamentId: "cup",
     });
 
     expect(matchService.createMatch).toHaveBeenCalledWith("cup", {
-      name: "Bo5",
       beginAt: undefined,
       endAt: undefined,
-      status: undefined,
+      name: "Bo5",
       numberOfGames: undefined,
       participantIds: ["p-kc", "p-m8"],
       results: undefined,
+      status: undefined,
     });
     expect(body).toHaveProperty("participants", [
       {
         id: "p-kc",
         name: "Karmine Corp",
-        team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
         players: [],
         rosterSourceUrl: null,
+        team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
       },
       {
         id: "p-m8",
         name: "Gentle Mates",
-        team: { id: "team-m8", slug: "gentle-mates", name: "Gentle Mates" },
         players: [],
         rosterSourceUrl: null,
+        team: { id: "team-m8", name: "Gentle Mates", slug: "gentle-mates" },
       },
     ]);
   });
@@ -264,9 +264,9 @@ describe("create_match participants", () => {
   it("still accepts participant ids", async () => {
     const { matchService, call } = setupCreateMatch();
     await call("create_match", {
-      tournamentId: "cup",
       name: "Bo5",
       participantIds: ["p-m8", "p-kc"],
+      tournamentId: "cup",
     });
     expect(matchService.createMatch).toHaveBeenCalledWith(
       "cup",
@@ -279,9 +279,9 @@ describe("create_match participants", () => {
     tournaments.findById.mockResolvedValue(null);
 
     const { result, text } = await call("create_match", {
-      tournamentId: "missing",
       name: "Bo5",
       participantIds: ["p-kc", "p-m8"],
+      tournamentId: "missing",
     });
 
     expect(result.isError).toBe(true);
@@ -293,9 +293,9 @@ describe("create_match participants", () => {
     const { matchService, call } = setupCreateMatch();
 
     const { result, text } = await call("create_match", {
-      tournamentId: "cup",
       name: "Bo5",
       teams: ["outsider", "karmine-corp"],
+      tournamentId: "cup",
     });
 
     expect(result.isError).toBe(true);
@@ -307,25 +307,25 @@ describe("create_match participants", () => {
     const { call } = setupCreateMatch("startgg");
 
     const created = await call("create_match", {
-      tournamentId: "cup",
       name: "Bo5",
       participantIds: ["p-kc", "p-m8"],
+      tournamentId: "cup",
     });
 
     expect(created.body).not.toHaveProperty("participants");
 
     const tournament = await call("create_tournament", {
-      name: "Hidden",
       beginAt: "2026-11-02",
       endAt: "2026-11-03",
+      name: "Hidden",
       source: "startgg",
     });
 
     expect(tournament.body).not.toHaveProperty("participants");
 
     const updated = await call("update_tournament", {
-      tournamentId: "cup",
       teamIds: ["11111111-1111-4111-8111-111111111111"],
+      tournamentId: "cup",
     });
 
     expect(updated.body).not.toHaveProperty("participants");
@@ -335,23 +335,23 @@ describe("create_match participants", () => {
     const { call } = setupCreateMatch();
 
     const created = await call("create_tournament", {
-      name: "Coupe",
       beginAt: "2026-11-02",
       endAt: "2026-11-03",
+      name: "Coupe",
     });
 
     expect(created.body).toMatchObject({ participants: [{ id: "p-kc" }, { id: "p-m8" }] });
-    const updated = await call("update_tournament", { tournamentId: "cup", name: "Coupe" });
+    const updated = await call("update_tournament", { name: "Coupe", tournamentId: "cup" });
     expect(updated.body).toMatchObject({ participants: [{}, {}] });
   });
 
   it("passes the target event of a stage and returns it", async () => {
     const { manualTournamentService, call } = setupCreateMatch();
     const eventId = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
-    const created = await call("create_tournament", { name: "Finals", eventId });
-    expect(manualTournamentService.create).toHaveBeenCalledWith({ name: "Finals", eventId });
-    expect(created.body).toHaveProperty("event", { id: "event", slug: "cdf", name: "Coupe" });
-    await call("update_tournament", { tournamentId: "cup", eventId });
+    const created = await call("create_tournament", { eventId, name: "Finals" });
+    expect(manualTournamentService.create).toHaveBeenCalledWith({ eventId, name: "Finals" });
+    expect(created.body).toHaveProperty("event", { id: "event", name: "Coupe", slug: "cdf" });
+    await call("update_tournament", { eventId, tournamentId: "cup" });
     expect(manualTournamentService.update).toHaveBeenCalledWith("cup", { eventId });
   });
 
@@ -360,16 +360,16 @@ describe("create_match participants", () => {
     const schema = z.object(registered("create_match").inputSchema);
     expect(
       schema.safeParse({
-        tournamentId: "cup",
         name: "Bo5",
         teams: ["karmine-corp", "gentle-mates"],
+        tournamentId: "cup",
       }).success,
     ).toBe(true);
 
     const callResult = await call("create_match", {
-      tournamentId: "cup",
       name: "Bo5",
       teams: ["a", "b"],
+      tournamentId: "cup",
     });
 
     expect(callResult.result.isError).toBe(true);
@@ -379,28 +379,28 @@ describe("create_match participants", () => {
 
 const setupBracket = (source: "manual" | "startgg") => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-  const stage = { slug: "finals", event: { slug: "cdf-2026" }, source, streams: [] };
+  const stage = { event: { slug: "cdf-2026" }, slug: "finals", source, streams: [] };
 
   const match = Object.assign(new Match(), {
     id: "final",
-    publicId: 3,
     name: "Grand Final",
-    source,
-    tournament: { ...stage, eventStreams: [] },
     previousMatches: [
       { id: "l1", match: { id: "final" }, previousMatch: { id: "semi-1" }, type: "winner" },
     ],
+    publicId: 3,
+    source,
+    tournament: { ...stage, eventStreams: [] },
   });
 
   const base = services();
 
   const matchService = {
     ...base.matchService,
-    updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>().mockResolvedValue(match),
-    setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>().mockResolvedValue(match),
     createEmptyBracket: vi
       .fn<WriteToolServices["matchService"]["createEmptyBracket"]>()
       .mockResolvedValue([match]),
+    setSource: vi.fn<WriteToolServices["matchService"]["setSource"]>().mockResolvedValue(match),
+    updateMatch: vi.fn<WriteToolServices["matchService"]["updateMatch"]>().mockResolvedValue(match),
   };
 
   const tournaments = {
@@ -412,9 +412,9 @@ const setupBracket = (source: "manual" | "startgg") => {
   const tools = writeTools({ ...base, matchService, tournaments });
 
   const run = async (name: string, input: ToolArguments) =>
-    await defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
+    await defined(tools, name).run({ email: "staff@test.com", id: "u1", role: "admin" }, input);
 
-  return { tools, matchService, run };
+  return { matchService, run, tools };
 };
 
 describe("bracket tools", () => {
@@ -457,18 +457,18 @@ describe("bracket tools", () => {
       update.safeParse({ matchId: "final", previousMatches: [link, link, link] }).success,
     ).toBe(false);
     const generate = z.object(defined(tools, "create_empty_bracket").inputSchema);
-    expect(generate.safeParse({ tournamentId: "finals", teams: 8 }).success).toBe(true);
-    expect(generate.safeParse({ tournamentId: "finals", teams: 6 }).success).toBe(false);
+    expect(generate.safeParse({ teams: 8, tournamentId: "finals" }).success).toBe(true);
+    expect(generate.safeParse({ teams: 6, tournamentId: "finals" }).success).toBe(false);
   });
 
   it("keeps generated start.gg matches out of the response", async () => {
     const { matchService, run } = setupBracket("startgg");
 
-    const body = jsonOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 }));
+    const body = jsonOf(await run("create_empty_bracket", { teams: 4, tournamentId: "finals" }));
 
     expect(matchService.createEmptyBracket).toHaveBeenCalledWith("finals", {
-      teams: 4,
       numberOfGames: undefined,
+      teams: 4,
     });
     expect(body).toMatchObject({ created: 1 });
     expect(body).not.toHaveProperty("matches");
@@ -477,7 +477,7 @@ describe("bracket tools", () => {
   it("lists generated manual matches with their links", async () => {
     const { run } = setupBracket("manual");
 
-    const body = jsonOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 }));
+    const body = jsonOf(await run("create_empty_bracket", { teams: 4, tournamentId: "finals" }));
 
     expect(body).toMatchObject({
       matches: [{ previousMatches: [{ previousMatchId: "semi-1", type: "winner" }] }],

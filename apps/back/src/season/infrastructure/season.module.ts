@@ -8,18 +8,18 @@ import { SeasonPersistence } from "./persistence/season.store";
 
 @Module({
   controllers: [SeasonController, SeasonArchiveController],
+  exports: [SeasonService],
   providers: [
     {
+      inject: [EntityManager],
       provide: SeasonService,
       useFactory: (em: EntityManager) => new SeasonService(new SeasonPersistence(em)),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: SeasonArchiveService,
       useFactory: (em: EntityManager) => new SeasonArchiveService(new SeasonPersistence(em)),
-      inject: [EntityManager],
     },
   ],
-  exports: [SeasonService],
 })
 export class SeasonModule {}

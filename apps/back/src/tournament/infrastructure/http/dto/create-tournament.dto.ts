@@ -4,17 +4,11 @@ import { DATA_SOURCE_URL_MAX_LENGTH } from "@sarpbc/utils";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
 
 const tournamentWriteFields = {
-  eventId: z.uuidv4({ message: "Choose a valid event." }).optional(),
-  slug: z
-    .string()
-    .trim()
-    .min(1, "Enter a slug, or leave empty to generate one from the name.")
-    .max(255)
-    .optional(),
-  tier: z.string().trim().max(50).nullish(),
-  leagueId: z.uuidv4({ message: "Choose a valid league from the list." }).nullish(),
   beginAt: isoDateSchema.nullish(),
   endAt: isoDateSchema.nullish(),
+  eventId: z.uuidv4({ message: "Choose a valid event." }).optional(),
+  format: z.enum(TOURNAMENT_FORMATS).optional(),
+  hasBracket: z.boolean().optional(),
   imageUrl: z
     .string()
     .trim()
@@ -28,11 +22,7 @@ const tournamentWriteFields = {
       ]),
     )
     .nullish(),
-  format: z.enum(TOURNAMENT_FORMATS).optional(),
-  teamIds: z
-    .array(z.uuidv4())
-    .refine((ids) => new Set(ids).size === ids.length, "Each team can only be added once.")
-    .optional(),
+  leagueId: z.uuidv4({ message: "Choose a valid league from the list." }).nullish(),
   playerParticipants: z
     .array(z.array(z.uuidv4()).min(1).max(2))
     .refine(
@@ -40,7 +30,17 @@ const tournamentWriteFields = {
       "Each player can only be in one participant.",
     )
     .optional(),
-  hasBracket: z.boolean().optional(),
+  slug: z
+    .string()
+    .trim()
+    .min(1, "Enter a slug, or leave empty to generate one from the name.")
+    .max(255)
+    .optional(),
+  teamIds: z
+    .array(z.uuidv4())
+    .refine((ids) => new Set(ids).size === ids.length, "Each team can only be added once.")
+    .optional(),
+  tier: z.string().trim().max(50).nullish(),
 };
 
 const tournamentName = z.string().trim().min(1, "Enter a tournament name.").max(255);
@@ -56,11 +56,11 @@ export const CreateTournamentDto = z.strictObject(createTournamentFields);
 export type CreateTournamentInput = z.infer<typeof CreateTournamentDto>;
 
 const participantRoster = z.strictObject({
-  teamId: z.uuidv4(),
   playerIds: z
     .array(z.uuidv4())
     .refine((ids) => new Set(ids).size === ids.length, "Each player can only be listed once."),
   sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable().optional(),
+  teamId: z.uuidv4(),
 });
 
 export const updateTournamentFields = {

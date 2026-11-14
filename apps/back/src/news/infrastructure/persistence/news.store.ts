@@ -9,18 +9,18 @@ import type { NewsArticleRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
 
 export const newsSnapshot = (row: NewsArticle): NewsArticleRecord => ({
+  author: { id: row.author.id, userName: row.author.userName },
+  content: row.content,
+  contentFr: row.contentFr,
+  createdAt: new Date(row.createdAt),
   id: row.id,
+  imageUrl: row.imageUrl,
+  isDraft: row.isDraft,
   slug: row.slug,
   title: row.title,
-  content: row.content,
   titleFr: row.titleFr,
-  contentFr: row.contentFr,
-  author: { id: row.author.id, userName: row.author.userName },
-  createdAt: new Date(row.createdAt),
-  updatedAt: row.updatedAt ? new Date(row.updatedAt) : null,
-  isDraft: row.isDraft,
-  imageUrl: row.imageUrl,
   type: row.type,
+  updatedAt: row.updatedAt ? new Date(row.updatedAt) : null,
 });
 
 type NewsStore = NewsWriteScope["articles"];
@@ -45,7 +45,7 @@ export class MikroNewsStore implements NewsStore {
     const [rows, total] = await this.em.findAndCount(
       NewsArticle,
       type ? { isDraft: false, type } : { isDraft: false },
-      { populate: ["author"], orderBy: { createdAt: "DESC" }, limit, offset: page * limit },
+      { limit, offset: page * limit, orderBy: { createdAt: "DESC" }, populate: ["author"] },
     );
 
     return [rows.map(newsSnapshot), total];
@@ -53,8 +53,8 @@ export class MikroNewsStore implements NewsStore {
   async listWeek(start: Date, end: Date, limit: number) {
     const rows = await this.em.find(
       NewsArticle,
-      { isDraft: false, type: WEEKLY_DIGEST_NEWS_TYPE, createdAt: { $gte: start, $lt: end } },
-      { populate: ["author"], orderBy: { createdAt: "DESC" }, limit },
+      { createdAt: { $gte: start, $lt: end }, isDraft: false, type: WEEKLY_DIGEST_NEWS_TYPE },
+      { limit, orderBy: { createdAt: "DESC" }, populate: ["author"] },
     );
 
     return rows.map(newsSnapshot);
@@ -63,7 +63,7 @@ export class MikroNewsStore implements NewsStore {
     const [rows, total] = await this.em.findAndCount(
       NewsArticle,
       {},
-      { populate: ["author"], orderBy: { createdAt: "DESC" }, limit, offset: page * limit },
+      { limit, offset: page * limit, orderBy: { createdAt: "DESC" }, populate: ["author"] },
     );
 
     return [rows.map(newsSnapshot), total];

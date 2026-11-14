@@ -6,10 +6,10 @@ import type { ReplyTargetLink } from "../../reply/domain/reply";
 const targetFields = (
   target: ReplyTargetLink,
 ): Pick<NotificationDto, "targetType" | "targetId" | "targetLabel" | "targetPath"> => ({
-  targetType: target.targetType,
   targetId: target.targetId,
   targetLabel: target.targetLabel,
   targetPath: target.targetPath,
+  targetType: target.targetType,
 });
 
 const toNotificationDto = (notification: NotificationRecord): NotificationDto | null => {
@@ -20,15 +20,15 @@ const toNotificationDto = (notification: NotificationRecord): NotificationDto | 
   }
 
   return {
-    id: notification.id,
     createdAt: notification.createdAt,
+    id: notification.id,
     readAt: notification.readAt,
     reply: {
-      id: notification.reply.id,
-      content: notification.reply.content,
       author: {
         userName: notification.reply.author.userName,
       },
+      content: notification.reply.content,
+      id: notification.reply.id,
     },
     ...targetFields(target),
   };

@@ -1,7 +1,6 @@
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
-import { describeReferences } from "../../common/domain/references";
-import type { ReferenceNouns } from "../../common/domain/references";
+import { describeReferences, referenceNouns } from "../../common/domain/references";
 import type { Match } from "./match";
 
 export interface MatchReferences {
@@ -10,11 +9,11 @@ export interface MatchReferences {
   nextMatches: number;
 }
 
-const MATCH_REFERENCE_NOUNS: ReferenceNouns<keyof MatchReferences> = {
-  picks: ["pick'em pick", "pick'em picks"],
-  comments: ["comment", "comments"],
-  nextMatches: ["bracket match fed by it", "bracket matches fed by it"],
-};
+const MATCH_REFERENCE_NOUNS = referenceNouns<keyof MatchReferences>()([
+  ["picks", "pick'em pick", "pick'em picks"],
+  ["comments", "comment", "comments"],
+  ["nextMatches", "bracket match fed by it", "bracket matches fed by it"],
+]);
 
 export const assertMatchDeletable = (match: Match, references: MatchReferences): void => {
   if (match.source === "pandascore" || match.pandascoreId !== null) {

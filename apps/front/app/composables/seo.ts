@@ -87,27 +87,27 @@ export const useSarpbcSeo = () => {
       const cleanPath = route.path.replace(/^\/fr(?=\/|$)/u, "") || "/";
 
       const alternateLinks = locales.value.map((loc) => ({
-        rel: "alternate" as const,
-        hreflang: loc.language,
         href: `${SITE_ORIGIN}${localizedPath(cleanPath, uiLocale(loc.code))}`,
+        hreflang: loc.language,
+        rel: "alternate" as const,
       }));
 
       alternateLinks.push({
-        rel: "alternate" as const,
-        hreflang: "x-default",
         href: `${SITE_ORIGIN}${cleanPath}`,
+        hreflang: "x-default",
+        rel: "alternate" as const,
       });
 
       const pageLinks: (
         | { rel: "canonical"; href: string }
         | { rel: "alternate"; href: string; hreflang?: string; type?: string }
-      )[] = [{ rel: "canonical", href: getCanonicalUrl() }, ...alternateLinks];
+      )[] = [{ href: getCanonicalUrl(), rel: "canonical" }, ...alternateLinks];
 
       if (!noIndex) {
         pageLinks.push({
+          href: `${SITE_ORIGIN}${markdownPathFromHtmlPath(route.path)}`,
           rel: "alternate",
           type: "text/markdown",
-          href: `${SITE_ORIGIN}${markdownPathFromHtmlPath(route.path)}`,
         });
       }
 
@@ -115,21 +115,21 @@ export const useSarpbcSeo = () => {
     });
 
     const seoMeta: PageSeoMeta = {
-      title,
-      ogTitle: title,
-      ogSiteName: DEFAULT_SITE_NAME,
       description,
       ogDescription: description,
-      ogUrl: getCanonicalUrl(),
       ogImage: image,
-      ogImageWidth: OG_IMAGE_WIDTH,
       ogImageHeight: OG_IMAGE_HEIGHT,
+      ogImageWidth: OG_IMAGE_WIDTH,
+      ogSiteName: DEFAULT_SITE_NAME,
+      ogTitle: title,
       ogType: "website",
+      ogUrl: getCanonicalUrl(),
+      robots: noIndex ? "noindex, nofollow" : "index, follow",
+      title,
       twitterCard,
-      twitterTitle: title,
       twitterDescription: description,
       twitterImage: image,
-      robots: noIndex ? "noindex, nofollow" : "index, follow",
+      twitterTitle: title,
     };
 
     if (imageType) {
@@ -140,7 +140,7 @@ export const useSarpbcSeo = () => {
   };
 
   return {
-    setPageSeo,
     getCanonicalUrl,
+    setPageSeo,
   };
 };

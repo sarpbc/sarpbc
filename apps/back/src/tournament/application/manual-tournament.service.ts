@@ -29,8 +29,8 @@ const draftTournament = (input: CreateTournamentInput): Tournament => {
   tournament.format = input.format ?? "3v3";
   tournament.hasBracket = input.hasBracket ?? false;
   assertLineupFitsFormat(tournament.format, {
-    teamIds: input.teamIds ?? [],
     playerGroups: input.playerParticipants ?? [],
+    teamIds: input.teamIds ?? [],
   });
   tournament.tier = nonBlank(input.tier) ?? null;
   tournament.imageUrl = nonBlank(input.imageUrl) ?? null;

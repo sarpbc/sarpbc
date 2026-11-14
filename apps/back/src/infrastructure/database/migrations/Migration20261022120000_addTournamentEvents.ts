@@ -62,24 +62,24 @@ const compareStages = (
 
 const stageRow = z
   .object({
-    id: z.string(),
-    name: z.string(),
-    slug: z.string().nullable(),
-    serie: z.string().nullable(),
-    source: z.string(),
     begin_at: z.coerce.date().nullable(),
+    id: z.string(),
     league_id: z.string().nullable(),
     league_name: z.string().nullable(),
+    name: z.string(),
+    serie: z.string().nullable(),
+    slug: z.string().nullable(),
+    source: z.string(),
   })
   .transform((row) => ({
-    id: row.id,
-    name: row.name,
-    slug: row.slug,
-    serie: row.serie,
-    source: row.source,
     beginAt: row.begin_at,
+    id: row.id,
     leagueId: row.league_id,
     leagueName: row.league_name,
+    name: row.name,
+    serie: row.serie,
+    slug: row.slug,
+    source: row.source,
   }));
 
 type StageRow = z.infer<typeof stageRow>;
@@ -144,7 +144,7 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
         const sorted = group.toSorted(chronology);
         const [minId] = group.map((stage) => stage.id).toSorted();
 
-        return { stages: sorted, order: { beginAt: sorted[0].beginAt, id: minId } };
+        return { order: { beginAt: sorted[0].beginAt, id: minId }, stages: sorted };
       })
       .toSorted((a, b) => chronology(a.order, b.order))
       .map((group) => group.stages);

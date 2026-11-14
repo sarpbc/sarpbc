@@ -10,8 +10,8 @@ export const usePlayerStandIns = (playerId: MaybeRef<string | undefined>) => {
     async () =>
       isNonEmptyString(playerIdRef.value) ? await getPlayerStandIns(playerIdRef.value) : [],
     {
-      watch: [playerIdRef],
       default: () => [],
+      watch: [playerIdRef],
     },
   );
 
@@ -20,10 +20,10 @@ export const usePlayerStandIns = (playerId: MaybeRef<string | undefined>) => {
   const hasStandIns = computed(() => standIns.value.length > 0);
 
   return {
-    standIns,
+    error,
     hasStandIns,
     pending,
-    error,
     refresh,
+    standIns,
   };
 };

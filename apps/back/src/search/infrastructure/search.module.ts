@@ -9,16 +9,16 @@ import { RosterModule } from "../../roster/infrastructure/roster.module";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 
 @Module({
-  imports: [RosterModule, TournamentModule],
   controllers: [SearchController],
+  exports: [SearchService],
+  imports: [RosterModule, TournamentModule],
   providers: [
     {
+      inject: [PlayerService, TeamService, TOURNAMENT_QUERIES],
       provide: SearchService,
       useFactory: (players: PlayerService, teams: TeamService, tournaments: TournamentQueries) =>
         new SearchService(players, teams, tournaments),
-      inject: [PlayerService, TeamService, TOURNAMENT_QUERIES],
     },
   ],
-  exports: [SearchService],
 })
 export class SearchModule {}

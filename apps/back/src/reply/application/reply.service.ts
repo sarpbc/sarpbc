@@ -11,18 +11,18 @@ import type { ReplyRecord, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
 
 const toReplyDto = (reply: ReplyRecord, nested: Reply[]): Reply => ({
-  id: reply.id,
-  content: reply.content,
   author: {
     id: reply.author.id,
     userName: reply.author.userName,
   },
+  content: reply.content,
   createdAt: reply.createdAt.toISOString(),
+  id: reply.id,
   replies: nested,
 });
 
 const toThreadedDtos = (replies: ReplyRecord[]): Reply[] => {
-  const dtos = replies.map((reply) => ({ reply, dto: toReplyDto(reply, []) }));
+  const dtos = replies.map((reply) => ({ dto: toReplyDto(reply, []), reply }));
   const byId = new Map(dtos.map(({ reply, dto }) => [reply.id, dto]));
   const roots: Reply[] = [];
 
@@ -73,10 +73,10 @@ export class ReplyService {
     );
 
     return {
+      limit,
+      page,
       replies: toThreadedDtos([...roots, ...descendants]),
       total,
-      page,
-      limit,
     };
   }
 
@@ -99,8 +99,8 @@ export class ReplyService {
 
       if (latestReply && latestReply.createdAt >= cooldownStart) {
         throw new InvalidInputError({
-          message: "You can only create one reply per minute. Wait and try again.",
           code: FORUM_ERROR_CODES.REPLY_RATE_LIMITED,
+          message: "You can only create one reply per minute. Wait and try again.",
         });
       }
 
@@ -140,12 +140,15 @@ export class ReplyService {
         }
       }
 
+      const id = this.id();
+      const createdAt = this.now();
+
       const newReply: ReplyRecord = {
-        id: this.id(),
-        content,
         author: user,
-        createdAt: this.now(),
+        content,
+        createdAt,
         hiddenAt: null,
+        id,
         ...targetFields,
         replyTo,
       };
@@ -218,19 +221,19 @@ export class ReplyService {
       }
 
       const report: ReplyReportRecord = {
+        createdAt: this.now(),
         id: this.id(),
+        reason,
         reply,
         reporter,
-        reason,
-        createdAt: this.now(),
       };
 
       await scope.reports.save(report);
 
       return {
+        createdAt: report.createdAt,
         id: report.id,
         reason: report.reason,
-        createdAt: report.createdAt,
       };
     });
   }

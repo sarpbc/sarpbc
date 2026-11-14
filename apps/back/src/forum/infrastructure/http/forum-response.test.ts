@@ -5,43 +5,43 @@ import { PostType } from "../../domain/post-type.enum";
 import { postActivityResponse, postWithSlugResponse, topicResponse } from "./forum-response";
 
 const post: PostRecord = {
+  author: { id: "user-1", userName: "fan" },
+  content: "Predictions here",
+  createdAt: new Date("2026-01-02T03:04:05Z"),
   id: "post-1",
+  postType: PostType.DISCUSSION,
   publicId: 42,
   title: "Who wins the Open?",
-  content: "Predictions here",
-  author: { id: "user-1", userName: "fan" },
   topic: { id: "topic-1", title: "Rocket League" },
-  postType: PostType.DISCUSSION,
-  createdAt: new Date("2026-01-02T03:04:05Z"),
-  updatedAt: new Date("2026-01-03T03:04:05Z"),
   translations: [
     {
-      id: "translation-1",
-      post: { id: "post-1" },
-      locale: "fr-FR",
-      title: "Qui gagne l'Open ?",
       content: "Pronostics ici",
       createdAt: new Date("2026-01-02T03:04:06Z"),
+      id: "translation-1",
+      locale: "fr-FR",
+      post: { id: "post-1" },
+      title: "Qui gagne l'Open ?",
       updatedAt: null,
     },
   ],
+  updatedAt: new Date("2026-01-03T03:04:05Z"),
 };
 
 const topic: TopicRecord = {
-  id: "topic-1",
-  title: "Rocket League",
-  description: "General discussions",
   createdAt: new Date("2026-01-01T00:00:00Z"),
-  updatedAt: null,
+  description: "General discussions",
+  id: "topic-1",
   posts: [{ ...post, translations: [] }],
+  title: "Rocket League",
+  updatedAt: null,
 };
 
 const activity: PostActivity = {
   id: "post-1",
+  lastActivity: new Date("2026-01-04T00:00:00Z"),
+  messageCount: 3,
   publicId: 42,
   title: "Who wins the Open?",
-  messageCount: 3,
-  lastActivity: new Date("2026-01-04T00:00:00Z"),
 };
 
 describe("forum responses", () => {
@@ -58,6 +58,9 @@ describe("forum responses", () => {
   it("keeps the recent activity JSON identical to the spread record", () => {
     const previous = { ...activity, slug: forumPostSlug(activity.title) };
 
-    expect(JSON.stringify(postActivityResponse(activity))).toBe(JSON.stringify(previous));
+    expect(postActivityResponse(activity)).toStrictEqual({
+      ...previous,
+      lastActivity: previous.lastActivity.toISOString(),
+    });
   });
 });

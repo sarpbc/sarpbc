@@ -10,12 +10,12 @@ import type { TeamAlias } from "../../domain/team-alias";
 
 export const mapTeamSummary = (team: Team): TeamSummary => ({
   id: team.id,
+  imageUrl: team.imageUrl,
+  location: team.location,
+  logoDarkUrl: team.logoDarkUrl,
+  logoLightUrl: team.logoLightUrl,
   name: team.name,
   slug: team.slug,
-  imageUrl: team.imageUrl,
-  logoLightUrl: team.logoLightUrl,
-  logoDarkUrl: team.logoDarkUrl,
-  location: team.location,
 });
 
 export const mapPlayer = (
@@ -23,15 +23,15 @@ export const mapPlayer = (
   options?: { includePhotos?: boolean },
 ): PlayerResponse => {
   const response: PlayerResponse = {
-    id: player.id,
-    name: player.name,
-    slug: player.slug,
     birthday: player.birthday?.toISOString() ?? null,
-    nationality: player.nationality,
     firstName: player.firstName,
-    lastName: player.lastName,
+    id: player.id,
     imageUrl: player.imageUrl,
+    lastName: player.lastName,
+    name: player.name,
+    nationality: player.nationality,
     role: player.currentRole(),
+    slug: player.slug,
     source: player.source,
     team: player.team ? mapTeamSummary(player.team) : null,
   };
@@ -44,19 +44,19 @@ export const mapPlayer = (
 };
 
 export const mapTeamAlias = (alias: TeamAlias): TeamAliasResponse => ({
-  id: alias.id,
-  name: alias.name,
   from: alias.from,
-  to: alias.to,
-  sourceUrl: alias.sourceUrl,
+  id: alias.id,
   logoUrl: alias.logoUrl,
+  name: alias.name,
   pandascoreId: alias.pandascoreId,
+  sourceUrl: alias.sourceUrl,
+  to: alias.to,
 });
 
 export const mapTeam = (team: Team): TeamResponse => ({
   ...mapTeamSummary(team),
-  pandascoreId: team.pandascoreId,
-  source: team.source,
-  players: team.players.map((player) => mapPlayer(player)),
   aliases: team.aliases.map(mapTeamAlias),
+  pandascoreId: team.pandascoreId,
+  players: team.players.map((player) => mapPlayer(player)),
+  source: team.source,
 });

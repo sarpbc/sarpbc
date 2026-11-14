@@ -68,8 +68,8 @@ const hideReply = async (reply: Reply) => {
   try {
     await hideForumReply(reply.id);
     toast.add({
-      title: t("page.forum.messages.hidden"),
       color: "success",
+      title: t("page.forum.messages.hidden"),
     });
     await refresh();
   } catch (hideError) {

@@ -14,14 +14,14 @@ export class PersonalAccessToken {
 export const PersonalAccessTokenSchema = defineEntity({
   class: PersonalAccessToken,
   indexes: [{ properties: ["owner"] }],
-  uniques: [{ properties: ["tokenHash"] }],
   properties: {
-    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
-    owner: p.manyToOne(User),
-    name: p.string(),
-    tokenHash: p.string().hidden(),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     lastUsedAt: p.datetime().type("timestamptz").nullable(),
+    name: p.string(),
+    owner: p.manyToOne(User),
     revokedAt: p.datetime().type("timestamptz").nullable(),
+    tokenHash: p.string().hidden(),
   },
+  uniques: [{ properties: ["tokenHash"] }],
 });

@@ -17,10 +17,10 @@ const tournamentDetailMatch = z.looseObject({
 });
 
 const tournamentDetail = z.looseObject({
-  id: z.string(),
   hasBracket: z.boolean(),
-  participants: z.array(z.looseObject({ id: z.string(), players: z.array(identified) })),
+  id: z.string(),
   matches: z.array(tournamentDetailMatch),
+  participants: z.array(z.looseObject({ id: z.string(), players: z.array(identified) })),
 });
 
 type TournamentDetail = z.infer<typeof tournamentDetail>;
@@ -28,7 +28,7 @@ type TournamentDetail = z.infer<typeof tournamentDetail>;
 const tournamentBody = z.object({ tournament: tournamentDetail });
 
 const generatedMatches = z.object({
-  matches: z.array(z.looseObject({ participants: z.array(identified), numberOfGames: z.number() })),
+  matches: z.array(z.looseObject({ numberOfGames: z.number(), participants: z.array(identified) })),
 });
 
 interface ManualBracketsContext {
@@ -57,7 +57,7 @@ export const verifyManualBrackets = async ({
     const response = await request(
       "POST",
       "/tournaments",
-      { name, format: "1v1", playerParticipants: players.map(({ id }) => [id]) },
+      { format: "1v1", name, playerParticipants: players.map(({ id }) => [id]) },
       staffCookie,
       201,
     );
@@ -191,7 +191,7 @@ export const verifyManualBrackets = async ({
   const response6 = await request(
     "POST",
     `/tournaments/${empty.id}/bracket`,
-    { teams: 4, numberOfGames: 7 },
+    { numberOfGames: 7, teams: 4 },
     staffCookie,
     201,
   );

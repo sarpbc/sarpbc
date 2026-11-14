@@ -55,15 +55,15 @@ void describe("readPpmFrames", () => {
 
 void describe("frame regions", () => {
   void it("scales reference regions to the frame and averages their color", () => {
-    const frame: Frame = { width: 960, height: 540, data: new Uint8Array(960 * 540 * 3).fill(100) };
+    const frame: Frame = { data: new Uint8Array(960 * 540 * 3).fill(100), height: 540, width: 960 };
 
     const region = scaleRegion(
-      { x: 100, y: 50, width: 40, height: 20 },
-      { width: 1920, height: 1080 },
+      { height: 20, width: 40, x: 100, y: 50 },
+      { height: 1080, width: 1920 },
       frame,
     );
 
-    assert.deepEqual(region, { x: 50, y: 25, width: 20, height: 10 });
+    assert.deepEqual(region, { height: 10, width: 20, x: 50, y: 25 });
     assert.deepEqual(meanColor(frame, region), [100, 100, 100]);
     assert.equal(colorDistance([0, 0, 0], [3, 4, 0]), 5);
   });

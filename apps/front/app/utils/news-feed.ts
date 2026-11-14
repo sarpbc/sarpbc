@@ -16,7 +16,7 @@ export const buildNewsFeed = (items: readonly NewsArticleListItem[]): NewsFeedEn
   for (const item of items) {
     switch (item.type) {
       case "article": {
-        entries.push({ kind: "article", article: item });
+        entries.push({ article: item, kind: "article" });
         break;
       }
 
@@ -25,7 +25,7 @@ export const buildNewsFeed = (items: readonly NewsArticleListItem[]): NewsFeedEn
 
         if (!seenWeeks.has(week)) {
           seenWeeks.add(week);
-          entries.push({ kind: "shortWeek", week, latest: item });
+          entries.push({ kind: "shortWeek", latest: item, week });
         }
 
         break;

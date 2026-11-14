@@ -41,11 +41,11 @@ const saving = ref(false);
 let nextKey = 0;
 
 const languageNames = computed(
-  () => new Intl.DisplayNames([locale.value], { type: "language", fallback: "none" }),
+  () => new Intl.DisplayNames([locale.value], { fallback: "none", type: "language" }),
 );
 
 const kindOptions = computed(() =>
-  STREAM_KINDS.map((kind) => ({ value: kind, label: t(`page.tournaments.streams.kinds.${kind}`) })),
+  STREAM_KINDS.map((kind) => ({ label: t(`page.tournaments.streams.kinds.${kind}`), value: kind })),
 );
 
 const normalizeLanguage = (language: string): string => language.trim().toLowerCase();
@@ -123,11 +123,11 @@ const canSave = computed(() => rows.value.every(isRowValid));
 
 const apply = (response: StreamsResponse) => {
   rows.value = response.streams.map(({ url, channel, language, kind }) => ({
-    key: (nextKey += 1),
-    url,
     channel,
-    language,
+    key: (nextKey += 1),
     kind,
+    language,
+    url,
   }));
   inheritedCount.value = response.inherited.length;
 };
@@ -158,11 +158,11 @@ watch(
 const addRow = () => {
   const last = rows.value.at(-1);
   rows.value.push({
-    key: (nextKey += 1),
-    url: "",
     channel: "",
-    language: last?.language ?? "en",
+    key: (nextKey += 1),
     kind: last?.kind ?? "official",
+    language: last?.language ?? "en",
+    url: "",
   });
 };
 
@@ -178,14 +178,14 @@ const save = async () => {
       await setStreams(
         path,
         rows.value.map(({ url, channel, language, kind }) => ({
-          url,
-          language: normalizeLanguage(language),
-          kind,
           channel: channel.trim() || undefined,
+          kind,
+          language: normalizeLanguage(language),
+          url,
         })),
       ),
     );
-    toast.add({ title: t("page.tournaments.streams.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.streams.saved") });
     open.value = false;
   } catch (error) {
     reportError(error, t("page.tournaments.streams.saveError"));

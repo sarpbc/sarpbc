@@ -10,25 +10,25 @@ describe("Match outcome", () => {
 
   const build = (finished: boolean, endAt: Date | null, hasWinner: boolean) =>
     Object.assign(new Match(), {
-      status: finished ? "finished" : "running",
       endAt,
+      status: finished ? "finished" : "running",
       winner: hasWinner ? winner : null,
     });
 
   it.each([
-    { finished: false, endAt: null, ended: false },
-    { finished: true, endAt: null, ended: true },
-    { finished: false, endAt: new Date("2030-01-01"), ended: true },
-    { finished: true, endAt: new Date("2030-01-01"), ended: true },
+    { endAt: null, ended: false, finished: false },
+    { endAt: null, ended: true, finished: true },
+    { endAt: new Date("2030-01-01"), ended: true, finished: false },
+    { endAt: new Date("2030-01-01"), ended: true, finished: true },
   ])("hasEnded (finished=$finished, endAt=$endAt)", ({ finished, endAt, ended }) => {
     expect(build(finished, endAt, false).hasEnded()).toBe(ended);
   });
 
   it.each([
-    { hasWinner: false, ended: false, decided: false },
-    { hasWinner: false, ended: true, decided: false },
-    { hasWinner: true, ended: false, decided: false },
-    { hasWinner: true, ended: true, decided: true },
+    { decided: false, ended: false, hasWinner: false },
+    { decided: false, ended: true, hasWinner: false },
+    { decided: false, ended: false, hasWinner: true },
+    { decided: true, ended: true, hasWinner: true },
   ])("isDecided (winner=$hasWinner, ended=$ended)", ({ hasWinner, ended, decided }) => {
     expect(build(ended, null, hasWinner).isDecided()).toBe(decided);
   });
@@ -62,10 +62,10 @@ describe("Tournament date order", () => {
 
 describe("Participant removal", () => {
   const free: ParticipantReferences = {
-    tournamentWinner: false,
     matchParticipant: false,
     matchWinner: false,
     results: false,
+    tournamentWinner: false,
   };
 
   it("allows a participant without references", () => {
@@ -76,22 +76,22 @@ describe("Participant removal", () => {
 
   it.each([
     {
-      reference: "tournamentWinner" as const,
       message: "Cannot remove a participant that is the tournament winner. Clear the winner first.",
+      reference: "tournamentWinner" as const,
     },
     {
-      reference: "matchParticipant" as const,
       message:
         "Cannot remove a participant that already appears in matches. Remove or reassign those matches first.",
+      reference: "matchParticipant" as const,
     },
     {
-      reference: "matchWinner" as const,
       message:
         "Cannot remove a participant that is recorded as a match winner. Clear those winners first.",
+      reference: "matchWinner" as const,
     },
     {
-      reference: "results" as const,
       message: "Cannot remove a participant that has match results. Remove those results first.",
+      reference: "results" as const,
     },
   ])("rejects a participant referenced by $reference", ({ reference, message }) => {
     expect(() => {
@@ -102,10 +102,10 @@ describe("Participant removal", () => {
   it("reports the first violated reference in check order", () => {
     expect(() => {
       assertParticipantRemovable({
-        tournamentWinner: true,
         matchParticipant: true,
         matchWinner: true,
         results: true,
+        tournamentWinner: true,
       });
     }).toThrow("tournament winner");
   });

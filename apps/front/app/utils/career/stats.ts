@@ -72,27 +72,27 @@ export const applyStatDelta = (
   delta: Partial<CareerStats>,
   rng: StatRng = denyMythicRoll,
 ): CareerStats => ({
-  rating: applyStatChange(stats.rating, delta.rating ?? 0, rng),
   form: applyStatChange(stats.form, delta.form ?? 0, rng),
   morale: applyStatChange(stats.morale, delta.morale ?? 0, rng),
+  rating: applyStatChange(stats.rating, delta.rating ?? 0, rng),
 });
 
 const getBackgroundBaseStats = (background: CareerBackground): CareerStats => {
   switch (background) {
     case "prodigy": {
-      return { rating: 72, form: 55, morale: 60 };
+      return { form: 55, morale: 60, rating: 72 };
     }
 
     case "grinder": {
-      return { rating: 62, form: 70, morale: 65 };
+      return { form: 70, morale: 65, rating: 62 };
     }
 
     case "oneVOne": {
-      return { rating: 70, form: 68, morale: 55 };
+      return { form: 68, morale: 55, rating: 70 };
     }
 
     case "freestyler": {
-      return { rating: 66, form: 52, morale: 78 };
+      return { form: 52, morale: 78, rating: 66 };
     }
 
     default: {
@@ -106,7 +106,7 @@ const getBackgroundBaseStats = (background: CareerBackground): CareerStats => {
 const getRoleDelta = (role: CareerRole): Partial<CareerStats> => {
   switch (role) {
     case "offense": {
-      return { rating: 3, form: -2 };
+      return { form: -2, rating: 3 };
     }
 
     case "technical": {
@@ -136,9 +136,9 @@ export const getAgeDecline = (season: number): Partial<CareerStats> => {
   }
 
   return {
-    rating: -(1 + pastPeak),
     form: -pastPeak,
     morale: pastPeak >= 2 ? -1 : 0,
+    rating: -(1 + pastPeak),
   };
 };
 

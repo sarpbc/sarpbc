@@ -16,14 +16,14 @@ const LLMS_TXT_LINK = `<${SITE_ORIGIN}/llms.txt>; rel="describedby"`;
 
 const sendMarkdown = async (event: H3Event, htmlPath: string, search: string): Promise<void> => {
   const response = await useNitroApp().localFetch(`${htmlPath}${search}`, {
-    method: "GET",
     headers: {
       [INTERNAL_HEADER]: "1",
       accept: "text/html",
-      "sec-fetch-dest": "document",
-      cookie: getHeader(event, "cookie") ?? "",
       "accept-language": getHeader(event, "accept-language") ?? "",
+      cookie: getHeader(event, "cookie") ?? "",
+      "sec-fetch-dest": "document",
     },
+    method: "GET",
   });
 
   setHeader(event, "vary", "Accept, Sec-Fetch-Dest");

@@ -19,7 +19,7 @@ export const useEntityTagLink = () => {
 
   const teamHref = (slug: string): string => href(teamPath(slug));
 
-  const linkAttrs = publicSiteUrl === "" ? {} : { target: "_blank", rel: "noopener noreferrer" };
+  const linkAttrs = publicSiteUrl === "" ? {} : { rel: "noopener noreferrer", target: "_blank" };
 
-  return { playerHref, teamHref, linkAttrs };
+  return { linkAttrs, playerHref, teamHref };
 };

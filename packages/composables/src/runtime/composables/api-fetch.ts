@@ -82,9 +82,9 @@ export const createApiClient = () =>
           const { visitorAddressFromProxy } = await import("@sarpbc/utils/client-address");
 
           const visitor = visitorAddressFromProxy({
-            socketAddress: event.node.req.socket?.remoteAddress,
-            forwardedFor: event.node.req.headers["x-forwarded-for"],
             connectingIp: event.node.req.headers["cf-connecting-ip"],
+            forwardedFor: event.node.req.headers["x-forwarded-for"],
+            socketAddress: event.node.req.socket?.remoteAddress,
           });
 
           if (isNonEmptyString(visitor)) {

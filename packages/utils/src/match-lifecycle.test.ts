@@ -8,7 +8,7 @@ void describe("isMatchFinished", () => {
   void it("is finished by status or by an end time", () => {
     assert.equal(isMatchFinished({ status: "finished" }), true);
     assert.equal(isMatchFinished({ endAt: "2026-01-01T10:00:00Z" }), true);
-    assert.equal(isMatchFinished({ status: "running", endAt: null }), false);
+    assert.equal(isMatchFinished({ endAt: null, status: "running" }), false);
     assert.equal(isMatchFinished({}), false);
   });
 });

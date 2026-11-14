@@ -27,6 +27,6 @@ export class AirRiddleController {
       is_last: body.last ?? false,
     });
 
-    return { results, error, answer };
+    return { answer, error, results };
   }
 }

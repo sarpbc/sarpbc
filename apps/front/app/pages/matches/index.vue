@@ -27,8 +27,8 @@ const {
 } = useMatchesListPage();
 
 setPageSeo({
-  title: t("page.matches.seo.title"),
   description: t("page.matches.seo.description"),
+  title: t("page.matches.seo.title"),
 });
 </script>
 

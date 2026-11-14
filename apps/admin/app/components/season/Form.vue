@@ -29,8 +29,8 @@ const phases = ref<SeasonFormatPhase[]>(season?.format.phases.map((phase) => ({ 
 const winner = ref(season?.winnerTeamId ?? NO_WINNER);
 
 const winnerOptions = computed(() => [
-  { value: NO_WINNER, label: t("page.seasons.form.noWinner") },
-  ...(season?.participants ?? []).map(({ team }) => ({ value: team.id, label: team.name })),
+  { label: t("page.seasons.form.noWinner"), value: NO_WINNER },
+  ...(season?.participants ?? []).map(({ team }) => ({ label: team.name, value: team.id })),
 ]);
 
 const isValid = computed(
@@ -38,7 +38,7 @@ const isValid = computed(
 );
 
 const addPhase = () => {
-  phases.value.push({ name: "", description: null });
+  phases.value.push({ description: null, name: "" });
 };
 
 const removePhase = (index: number) => {
@@ -51,15 +51,15 @@ const submit = () => {
   }
 
   const input: SeasonInput = {
+    format: {
+      phases: phases.value.map((phase) => ({
+        description: phase.description?.trim() || null,
+        name: phase.name.trim(),
+      })),
+      summary: summary.value.trim() || null,
+    },
     name: name.value.trim(),
     slug: slug.value.trim() || null,
-    format: {
-      summary: summary.value.trim() || null,
-      phases: phases.value.map((phase) => ({
-        name: phase.name.trim(),
-        description: phase.description?.trim() || null,
-      })),
-    },
   };
 
   if (season) {

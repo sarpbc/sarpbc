@@ -23,7 +23,7 @@ export class AuthService {
   ) {}
 
   async signTokenPair(user: AuthenticatedUser): Promise<AuthTokenPair> {
-    return await this.tokens.sign({ id: user.id, email: user.email });
+    return await this.tokens.sign({ email: user.email, id: user.id });
   }
 
   async authenticate(accessToken: string): Promise<AuthenticatedUser | null> {
@@ -33,13 +33,13 @@ export class AuthService {
   async refreshSession(refreshToken: string): Promise<AuthSession | null> {
     const user = await this.currentUser(await this.tokens.verify(refreshToken, "refresh"));
 
-    return user ? { user, tokens: await this.signTokenPair(user) } : null;
+    return user ? { tokens: await this.signTokenPair(user), user } : null;
   }
 
   private async currentUser(payload: AuthenticatedUser | null): Promise<AuthenticatedUser | null> {
     const user = payload ? await this.userService.findById(payload.id) : null;
 
-    return user ? { id: user.id, email: user.email } : null;
+    return user ? { email: user.email, id: user.id } : null;
   }
 
   async signIn(input: SignInInput): Promise<AuthTokenPair> {

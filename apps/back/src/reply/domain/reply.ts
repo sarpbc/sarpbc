@@ -53,30 +53,30 @@ export const REPLY_TARGETS = {
     field: "post",
     inputKey: "postId",
     label: "Forum post",
-    sortOrder: "asc",
     link: (post) => ({
       id: post.id,
       label: post.title,
       path: forumPostPath(post.publicId, forumPostSlug(post.title)),
     }),
-  }),
-  newsArticle: replyTargetSpec({
-    field: "newsArticle",
-    inputKey: "newsArticleId",
-    label: "News article",
-    sortOrder: "desc",
-    link: (article) => ({ id: article.id, label: article.title, path: newsPath(article.slug) }),
+    sortOrder: "asc",
   }),
   match: replyTargetSpec({
     field: "match",
     inputKey: "matchId",
     label: "Match",
-    sortOrder: "desc",
     link: (match) => ({
       id: match.id,
       label: match.name,
       path: matchPath(match.publicId, match.slug),
     }),
+    sortOrder: "desc",
+  }),
+  newsArticle: replyTargetSpec({
+    field: "newsArticle",
+    inputKey: "newsArticleId",
+    label: "News article",
+    link: (article) => ({ id: article.id, label: article.title, path: newsPath(article.slug) }),
+    sortOrder: "desc",
   }),
 } satisfies Record<ReplyTargetType, ReplyTargetSpec>;
 
@@ -88,7 +88,7 @@ export const replyTarget = (input: {
   const targets = REPLY_TARGET_TYPES.flatMap((kind) => {
     const id = input[REPLY_TARGETS[kind].inputKey];
 
-    return id !== undefined && id !== "" ? [{ kind, id }] : [];
+    return id !== undefined && id !== "" ? [{ id, kind }] : [];
   });
 
   if (targets.length !== 1) {
@@ -118,10 +118,10 @@ export const resolveReplyTargetLink = (reply: ReplyTargetFields): ReplyTargetLin
 
     if (link) {
       return {
-        targetType: kind,
         targetId: link.id,
         targetLabel: link.label,
         targetPath: link.path,
+        targetType: kind,
       };
     }
   }

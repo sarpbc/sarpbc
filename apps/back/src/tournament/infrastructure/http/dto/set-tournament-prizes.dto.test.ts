@@ -15,14 +15,14 @@ const parse = (
 ) =>
   SetTournamentPrizesDto.safeParse({
     prizes: [
-      { placement: 1, amount: 100, currency: "USD", teamId: TEAM_ID, sourceUrl: null, ...entry },
+      { amount: 100, currency: "USD", placement: 1, sourceUrl: null, teamId: TEAM_ID, ...entry },
     ],
   }).success;
 
 describe("set-tournament-prizes body", () => {
   it("defaults the players of an entry to none", () => {
     const body = SetTournamentPrizesDto.parse({
-      prizes: [{ placement: 1, amount: 100, currency: "USD", teamId: TEAM_ID, sourceUrl: null }],
+      prizes: [{ amount: 100, currency: "USD", placement: 1, sourceUrl: null, teamId: TEAM_ID }],
     });
 
     expect(body.prizes[0]?.playerIds).toStrictEqual([]);
@@ -31,7 +31,7 @@ describe("set-tournament-prizes body", () => {
   it("requires every entry to state its source, so a client unaware of sources cannot clear them", () => {
     expect(
       SetTournamentPrizesDto.safeParse({
-        prizes: [{ placement: 1, amount: 100, currency: "USD", teamId: TEAM_ID }],
+        prizes: [{ amount: 100, currency: "USD", placement: 1, teamId: TEAM_ID }],
       }).success,
     ).toBe(false);
   });

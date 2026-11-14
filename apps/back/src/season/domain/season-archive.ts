@@ -18,7 +18,7 @@ export interface SeasonPathEntryFields {
   tournamentId: string | null;
 }
 
-export const EMPTY_SEASON_FORMAT: SeasonFormat = { summary: null, phases: [] };
+export const EMPTY_SEASON_FORMAT: SeasonFormat = { phases: [], summary: null };
 
 const optionalText = (value: string | null | undefined, max: number, field: string) => {
   const trimmed = value?.trim() ?? "";
@@ -62,15 +62,15 @@ export const parseSeasonFormat = (format: SeasonFormat): SeasonFormat => {
   }
 
   return {
-    summary: optionalText(format.summary, SEASON_FORMAT_SUMMARY_MAX_LENGTH, "format summary"),
     phases: format.phases.map((phase) => ({
-      name: requiredText(phase.name, SEASON_FORMAT_PHASE_NAME_MAX_LENGTH, "phase name"),
       description: optionalText(
         phase.description,
         SEASON_FORMAT_PHASE_DESCRIPTION_MAX_LENGTH,
         "phase description",
       ),
+      name: requiredText(phase.name, SEASON_FORMAT_PHASE_NAME_MAX_LENGTH, "phase name"),
     })),
+    summary: optionalText(format.summary, SEASON_FORMAT_SUMMARY_MAX_LENGTH, "format summary"),
   };
 };
 

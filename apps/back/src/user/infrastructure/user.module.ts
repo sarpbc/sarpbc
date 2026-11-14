@@ -9,24 +9,24 @@ import { passwordHasher } from "./password-hasher";
 
 @Module({
   controllers: [UserController, UsersController],
+  exports: [UserService],
   providers: [
     {
+      inject: [EntityManager],
       provide: MikroUserStore,
       useFactory: (em: EntityManager) => new MikroUserStore(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: MikroUserTransaction,
       useFactory: (em: EntityManager) => new MikroUserTransaction(em),
-      inject: [EntityManager],
     },
     {
+      inject: [MikroUserStore, MikroUserTransaction],
       provide: UserService,
       useFactory: (users: MikroUserStore, transaction: MikroUserTransaction) =>
         new UserService(users, transaction, passwordHasher),
-      inject: [MikroUserStore, MikroUserTransaction],
     },
   ],
-  exports: [UserService],
 })
 export class UserModule {}

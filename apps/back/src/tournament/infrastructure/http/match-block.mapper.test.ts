@@ -14,26 +14,26 @@ const participant = (name: string): TournamentParticipant =>
   });
 
 const tournament = (source: TournamentSummary["source"]): TournamentSummary => ({
-  id: "tournament",
-  name: "Playoffs",
-  slug: "playoffs",
-  event: { id: "event", slug: "rlcs-worlds-2026", name: "RLCS Worlds 2026" },
   beginAt: null,
-  league: null,
-  pickemsEnabled: false,
-  source,
-  pandascoreId: null,
-  streams: [],
+  event: { id: "event", name: "RLCS Worlds 2026", slug: "rlcs-worlds-2026" },
   eventStreams: [],
+  id: "tournament",
+  league: null,
+  name: "Playoffs",
+  pandascoreId: null,
+  pickemsEnabled: false,
+  slug: "playoffs",
+  source,
+  streams: [],
 });
 
 const match = (overrides: Partial<Match>): Match =>
   Object.assign(new Match(), {
     id: "match",
-    publicId: 42,
     name: "Grand final",
-    source: "pandascore",
     participants: [participant("Karmine Corp"), participant("Team Falcons")],
+    publicId: 42,
+    source: "pandascore",
     tournament: tournament("pandascore"),
     ...overrides,
   });
@@ -73,14 +73,14 @@ describe(mapMatchBlockItem, () => {
 
   it("keeps the list item fields and the comment count", () => {
     expect(mapMatchBlockItem(match({}), NOW, 3)).toMatchObject({
-      id: "match",
-      publicId: 42,
-      slug: "karmine-corp-vs-team-falcons-rlcs-worlds-2026-playoffs",
       commentCount: 3,
+      id: "match",
       participants: [
         { id: "participant-Karmine Corp", team: { name: "Karmine Corp" } },
         { id: "participant-Team Falcons", team: { name: "Team Falcons" } },
       ],
+      publicId: 42,
+      slug: "karmine-corp-vs-team-falcons-rlcs-worlds-2026-playoffs",
       tournament: { id: "tournament", slug: "playoffs" },
     });
   });

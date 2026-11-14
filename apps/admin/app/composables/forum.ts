@@ -16,7 +16,7 @@ export const getPostById = async (id: string): Promise<ForumPost> => {
 const getRepliesPage = async (postId: string, page: number): Promise<PaginatedReplies> =>
   await apiFetch<PaginatedReplies>("/replies", {
     method: "GET",
-    query: { targetType: "forumPost", targetId: postId, page, limit: MAX_PAGE_SIZE },
+    query: { limit: MAX_PAGE_SIZE, page, targetId: postId, targetType: "forumPost" },
   });
 
 export const getPostReplies = async (postId: string): Promise<Reply[]> => {
@@ -42,5 +42,5 @@ export const deleteForumReply = async (replyId: string): Promise<void> => {
 };
 
 export const hideForumReply = async (replyId: string): Promise<void> => {
-  await apiFetch(`/replies/${replyId}/hide`, { method: "PATCH", body: {} });
+  await apiFetch(`/replies/${replyId}/hide`, { body: {}, method: "PATCH" });
 };

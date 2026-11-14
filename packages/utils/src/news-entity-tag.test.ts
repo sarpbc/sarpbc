@@ -6,26 +6,26 @@ void describe("parseNewsEntityTag", () => {
   void it("parses player and team tags", () => {
     assert.deepEqual(parseNewsEntityTag(':player{slug="jstn" label="JSTN"} rest'), {
       kind: "player",
-      slug: "jstn",
       label: "JSTN",
       raw: ':player{slug="jstn" label="JSTN"}',
+      slug: "jstn",
     });
     assert.deepEqual(parseNewsEntityTag(':team{label=" Karmine Corp " slug="kc"}'), {
       kind: "team",
-      slug: "kc",
       label: "Karmine Corp",
       raw: ':team{label=" Karmine Corp " slug="kc"}',
+      slug: "kc",
     });
   });
 
   void it("round-trips escaped quotes and backslashes", () => {
-    const raw = serializeNewsEntityTag({ kind: "player", slug: "a\\b", label: 'say "hi"' });
+    const raw = serializeNewsEntityTag({ kind: "player", label: 'say "hi"', slug: "a\\b" });
     assert.equal(raw, ':player{slug="a\\\\b" label="say \\"hi\\""}');
     assert.deepEqual(parseNewsEntityTag(raw), {
       kind: "player",
-      slug: "a\\b",
       label: 'say "hi"',
       raw,
+      slug: "a\\b",
     });
   });
 
@@ -34,16 +34,16 @@ void describe("parseNewsEntityTag", () => {
       parseNewsEntityTag(':player{x="1" slug="old" slug="new" label=unquoted label="L"}'),
       {
         kind: "player",
-        slug: "new",
         label: "L",
         raw: ':player{x="1" slug="old" slug="new" label=unquoted label="L"}',
+        slug: "new",
       },
     );
     assert.deepEqual(parseNewsEntityTag(':player{label="a\\\nb" slug="s" label="ok"}'), {
       kind: "player",
-      slug: "s",
       label: "ok",
       raw: ':player{label="a\\\nb" slug="s" label="ok"}',
+      slug: "s",
     });
   });
 

@@ -18,7 +18,7 @@ const offset = computed(() => (currentPage.value - 1) * TRANSFERS_PER_PAGE);
 const { data, pending, error, refresh } = await useAsyncData(
   () => `transfers-page-${currentPage.value}`,
   () => getTransfers({ limit: TRANSFERS_PER_PAGE, offset: offset.value }),
-  { default: () => ({ transfers: [], total: 0 }) },
+  { default: () => ({ total: 0, transfers: [] }) },
 );
 
 const transfers = computed(() => data.value?.transfers ?? []);
@@ -31,8 +31,8 @@ const hasNext = computed(() => currentPage.value < totalPages.value);
 const pageQuery = (page: number): LocationQueryRaw => (page > 1 ? { page: String(page) } : {});
 
 setPageSeo({
-  title: t("page.transfers.seo.title"),
   description: t("page.transfers.seo.description"),
+  title: t("page.transfers.seo.title"),
 });
 </script>
 

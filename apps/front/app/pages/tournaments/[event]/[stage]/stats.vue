@@ -16,8 +16,8 @@ const {
   () => `tournament-player-stats-${tournamentId.value}`,
   () => getTournamentPlayerStats(tournamentId.value),
   {
-    watch: [tournamentId],
     default: () => null,
+    watch: [tournamentId],
   },
 );
 </script>

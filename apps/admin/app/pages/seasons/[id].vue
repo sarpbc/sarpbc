@@ -49,7 +49,7 @@ const save = async (input: SeasonInput) => {
 
   try {
     season.value = await updateSeason(seasonId.value, input);
-    toast.add({ title: t("page.seasons.edit.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.seasons.edit.saved") });
   } catch (saveError) {
     reportError(saveError, t("page.seasons.edit.failed"));
   } finally {
@@ -63,8 +63,8 @@ const addAward = async (input: SeasonAwardInput) => {
   try {
     const award = await createSeasonAward(seasonId.value, input);
     toast.add({
-      title: t("page.seasons.awards.added", { name: award.player.name, type: awardLabel(award) }),
       color: "success",
+      title: t("page.seasons.awards.added", { name: award.player.name, type: awardLabel(award) }),
     });
     awardForm.value?.reset();
     await refresh();

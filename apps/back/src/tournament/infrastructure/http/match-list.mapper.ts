@@ -17,34 +17,34 @@ export const mapMatchListItem = (match: Match): MatchListItem => {
   const { tournament } = match;
 
   return {
-    id: match.id,
-    publicId: match.publicId,
-    slug: matchPublicSlug(match),
     beginAt: match.beginAt?.toISOString() ?? null,
+    id: match.id,
     participants: participants.map((participant) =>
       mapParticipantRef(participant, (team) => ({
-        name: team.name,
-        imageUrl: team.imageUrl,
         darkModeImageUrl: team.darkModeImageUrl,
-        logoLightUrl: team.logoLightUrl,
+        imageUrl: team.imageUrl,
         logoDarkUrl: team.logoDarkUrl,
+        logoLightUrl: team.logoLightUrl,
+        name: team.name,
       })),
     ),
+    publicId: match.publicId,
     results: results.map((result) => ({
       participant: result.participant.id,
       score: result.score,
     })),
+    slug: matchPublicSlug(match),
     tournament: {
-      id: tournament.id,
-      name: tournament.name,
-      slug: tournament.slug,
       event: tournament.event,
+      id: tournament.id,
       league: tournament.league
         ? {
             id: tournament.league.id,
             name: tournament.league.name,
           }
         : undefined,
+      name: tournament.name,
+      slug: tournament.slug,
     },
   };
 };
@@ -63,39 +63,39 @@ export const mapMatchBlockItem = (
   commentCount: number,
 ): MatchBlockItem => ({
   ...mapMatchListItem(match),
-  state: matchBlockState(match, now),
-  startgg: !isRedistributable(match.source) || !isRedistributable(match.tournament.source),
   commentCount,
+  startgg: !isRedistributable(match.source) || !isRedistributable(match.tournament.source),
+  state: matchBlockState(match, now),
 });
 
 export const mapProfileMatchListItem = (match: Match): ProfileMatchListItem => ({
   ...mapMatchListItem(match),
-  status: match.status,
   endAt: match.endAt,
+  status: match.status,
 });
 
 export const mapTournamentMatchListItem = (match: Match): TournamentMatchListItem => ({
-  id: match.id,
-  publicId: match.publicId,
-  slug: matchPublicSlug(match),
-  status: match.status,
   beginAt: match.beginAt,
   endAt: match.endAt,
+  id: match.id,
   numberOfGames: match.numberOfGames,
   participants: match.participants.map((participant) =>
     mapParticipantRef(participant, (team) => ({
-      id: team.id,
-      name: team.name,
-      imageUrl: team.imageUrl,
       darkModeImageUrl: team.darkModeImageUrl,
-      logoLightUrl: team.logoLightUrl,
+      id: team.id,
+      imageUrl: team.imageUrl,
       logoDarkUrl: team.logoDarkUrl,
+      logoLightUrl: team.logoLightUrl,
+      name: team.name,
     })),
   ),
+  publicId: match.publicId,
   results: match.results.map((result) => ({
     participant: result.participant.id,
     score: result.score,
   })),
+  slug: matchPublicSlug(match),
+  status: match.status,
 });
 
 export const withPublicSlug = (
@@ -103,26 +103,26 @@ export const withPublicSlug = (
 ): Omit<Match, "hasEnded" | "isDecided" | "stampEnd" | "inheritedStreams" | "watchStreams"> & {
   slug: string;
 } => ({
-  id: match.id,
-  publicId: match.publicId,
-  pandascoreId: match.pandascoreId,
-  source: match.source,
-  name: match.name,
   beginAt: match.beginAt,
+  createdAt: match.createdAt,
   endAt: match.endAt,
-  status: match.status,
-  participants: match.participants,
-  winner: match.winner,
+  id: match.id,
+  name: match.name,
   numberOfGames: match.numberOfGames,
-  previousMatches: match.previousMatches,
-  results: match.results,
   officialStreams: match.officialStreams,
+  pandascoreId: match.pandascoreId,
+  participants: match.participants,
+  previousMatches: match.previousMatches,
+  publicId: match.publicId,
+  results: match.results,
+  slug: matchPublicSlug(match),
+  source: match.source,
+  sourceUrl: match.sourceUrl,
+  status: match.status,
   streams: match.streams,
+  tournament: match.tournament,
+  updatedAt: match.updatedAt,
   viewership: match.viewership,
   vods: match.vods,
-  sourceUrl: match.sourceUrl,
-  createdAt: match.createdAt,
-  updatedAt: match.updatedAt,
-  tournament: match.tournament,
-  slug: matchPublicSlug(match),
+  winner: match.winner,
 });

@@ -40,7 +40,7 @@ const inkMask = (frame: Frame, region: Region, threshold: number): Mask => {
     }
   }
 
-  return { width: region.width, height: region.height, ink };
+  return { height: region.height, ink, width: region.width };
 };
 
 const columnInk = (mask: Mask, x: number): number => {
@@ -107,7 +107,7 @@ const lineExtent = (mask: Mask, spans: readonly Span[]): { top: number; bottom: 
     bottom = y;
   }
 
-  return top < 0 ? null : { top, bottom };
+  return top < 0 ? null : { bottom, top };
 };
 
 const coverage = (mask: Mask, x0: number, x1: number, y0: number, y1: number): number => {
@@ -248,7 +248,7 @@ export const readText = (
     confidence = Math.min(confidence, glyph.confidence);
   }
 
-  return { text, confidence };
+  return { confidence, text };
 };
 
 export const templateFromGrid = (char: string, grid: Float32Array, size: Size): GlyphTemplate => {

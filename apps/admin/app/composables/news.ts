@@ -9,7 +9,7 @@ export const createNewsArticle = async (body: {
   contentFr?: string | null;
   type?: NewsType;
 }): Promise<NewsArticleAdmin> =>
-  await apiFetch<NewsArticleAdmin>("/news", { method: "POST", body });
+  await apiFetch<NewsArticleAdmin>("/news", { body, method: "POST" });
 
 export const getNewsArticlesAdmin = async (range: {
   limit: number;
@@ -17,7 +17,7 @@ export const getNewsArticlesAdmin = async (range: {
 }): Promise<PaginatedNewsArticles> =>
   await apiFetch<PaginatedNewsArticles>("/news/admin", {
     method: "GET",
-    query: { page: Math.floor(range.offset / range.limit), limit: range.limit },
+    query: { limit: range.limit, page: Math.floor(range.offset / range.limit) },
   });
 
 export const getNewsArticleAdmin = async (slug: string): Promise<NewsArticleAdmin> =>
@@ -35,14 +35,14 @@ export const editNewsArticle = async (
     type?: NewsType;
   },
 ): Promise<NewsArticleAdmin> =>
-  await apiFetch<NewsArticleAdmin>(`/news/${slug}`, { method: "PATCH", body });
+  await apiFetch<NewsArticleAdmin>(`/news/${slug}`, { body, method: "PATCH" });
 
 export const publishNewsArticle = async (slug: string): Promise<void> => {
-  await apiFetch(`/news/${slug}/publish`, { method: "PATCH", body: {} });
+  await apiFetch(`/news/${slug}/publish`, { body: {}, method: "PATCH" });
 };
 
 export const unpublishNewsArticle = async (slug: string): Promise<void> => {
-  await apiFetch(`/news/${slug}/unpublish`, { method: "PATCH", body: {} });
+  await apiFetch(`/news/${slug}/unpublish`, { body: {}, method: "PATCH" });
 };
 
 export const deleteNewsArticle = async (slug: string): Promise<void> => {

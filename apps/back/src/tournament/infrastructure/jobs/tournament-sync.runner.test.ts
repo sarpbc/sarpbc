@@ -27,8 +27,8 @@ describe(TournamentSyncRunner, () => {
   };
 
   const matchService = {
-    list: vi.fn<MatchService["list"]>(),
     findRecentlyEnded: vi.fn<MatchService["findRecentlyEnded"]>(),
+    list: vi.fn<MatchService["list"]>(),
   };
 
   const tournaments = {

@@ -21,14 +21,14 @@ export class ForumController {
     const topics = await this.topicService.find();
 
     return {
-      totalTopics: topics.length,
       topics: topics.map((topic) => ({
-        id: topic.id,
-        title: topic.title,
-        description: topic.description,
         createdAt: topic.createdAt,
+        description: topic.description,
+        id: topic.id,
         postsCount: topic.posts.length,
+        title: topic.title,
       })),
+      totalTopics: topics.length,
     };
   }
 

@@ -7,4 +7,4 @@ export const setViewership = async (
   path: string,
   viewership: Viewership | null,
 ): Promise<ViewershipResponse> =>
-  await apiFetch<ViewershipResponse>(path, { method: "PUT", body: { viewership } });
+  await apiFetch<ViewershipResponse>(path, { body: { viewership }, method: "PUT" });

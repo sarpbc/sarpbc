@@ -60,7 +60,7 @@ export const formatTournamentShortDateRange = (
     return null;
   }
 
-  const formatter = new Intl.DateTimeFormat(locale, { month: "short", day: "numeric" });
+  const formatter = new Intl.DateTimeFormat(locale, { day: "numeric", month: "short" });
   const end = isNonEmptyDateInput(endAt) ? new Date(endAt) : null;
 
   if (!end || Number.isNaN(end.getTime()) || end < begin) {

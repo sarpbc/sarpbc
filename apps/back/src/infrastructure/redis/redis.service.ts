@@ -22,15 +22,15 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
   onModuleInit() {
     this.client = this.createClient({
       host: this.configService.get<string>("redis.host"),
-      port: this.configService.get<number>("redis.port"),
       password: this.configService.get<string>("redis.password"),
+      port: this.configService.get<number>("redis.port"),
     });
 
     this.client.on("error", (error: Error) => {
       log.error({
         component: RedisService.name,
-        message: "Redis connection error",
         error: error instanceof Error ? error : new Error(String(error)),
+        message: "Redis connection error",
       });
     });
   }

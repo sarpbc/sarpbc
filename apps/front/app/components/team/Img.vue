@@ -12,59 +12,59 @@ interface Props {
 }
 
 const SIZES = {
-  xs: {
-    box: "size-4",
-    width: 16,
-    height: 16,
-    sizes: "16px",
-    icon: "size-2.5",
-    initial: "text-[10px]",
-    radius: "rounded-xs",
-  },
-  list: {
-    box: "size-7",
-    width: 28,
-    height: 28,
-    sizes: "28px",
-    icon: "size-4",
-    initial: "text-sm",
-    radius: "rounded-xs",
-  },
-  sm: {
-    box: "size-10",
-    width: 40,
-    height: 40,
-    sizes: "40px",
-    icon: "size-5",
-    initial: "text-lg",
-    radius: "rounded-sm",
-  },
-  md: {
-    box: "size-16",
-    width: 64,
-    height: 64,
-    sizes: "64px",
-    icon: "size-8",
-    initial: "text-3xl",
-    radius: "rounded-md",
-  },
   lg: {
     box: "size-24",
-    width: 96,
     height: 96,
-    sizes: "96px",
     icon: "size-10",
     initial: "text-5xl",
     radius: "rounded-lg",
+    sizes: "96px",
+    width: 96,
+  },
+  list: {
+    box: "size-7",
+    height: 28,
+    icon: "size-4",
+    initial: "text-sm",
+    radius: "rounded-xs",
+    sizes: "28px",
+    width: 28,
+  },
+  md: {
+    box: "size-16",
+    height: 64,
+    icon: "size-8",
+    initial: "text-3xl",
+    radius: "rounded-md",
+    sizes: "64px",
+    width: 64,
+  },
+  sm: {
+    box: "size-10",
+    height: 40,
+    icon: "size-5",
+    initial: "text-lg",
+    radius: "rounded-sm",
+    sizes: "40px",
+    width: 40,
   },
   xl: {
     box: "size-24 sm:h-auto sm:min-h-0 sm:w-32 md:w-40 sm:self-stretch",
-    width: 160,
     height: 160,
-    sizes: "(max-width: 640px) 96px, (max-width: 768px) 128px, 160px",
     icon: "size-12",
     initial: "text-5xl",
     radius: "rounded-lg",
+    sizes: "(max-width: 640px) 96px, (max-width: 768px) 128px, 160px",
+    width: 160,
+  },
+  xs: {
+    box: "size-4",
+    height: 16,
+    icon: "size-2.5",
+    initial: "text-[10px]",
+    radius: "rounded-xs",
+    sizes: "16px",
+    width: 16,
   },
 };
 
@@ -76,10 +76,10 @@ const variants = computed(() => {
   const dark = resolveThemedLogoUrl(logo, "dark");
 
   return light === dark
-    ? [{ src: light, imgClass: "", fallbackClass: "flex" }]
+    ? [{ fallbackClass: "flex", imgClass: "", src: light }]
     : [
-        { src: light, imgClass: "dark:hidden", fallbackClass: "flex dark:hidden" },
-        { src: dark, imgClass: "hidden dark:block", fallbackClass: "hidden dark:flex" },
+        { fallbackClass: "flex dark:hidden", imgClass: "dark:hidden", src: light },
+        { fallbackClass: "hidden dark:flex", imgClass: "hidden dark:block", src: dark },
       ];
 });
 

@@ -29,15 +29,15 @@ const {
   () => `tournament-path-${stagePath.value}`,
   () => resolveTournamentPath(stagePath.value.split("/")),
   {
-    watch: [stagePath],
     default: () => null,
+    watch: [stagePath],
   },
 );
 
 if (resolved.value?.kind !== "stage") {
   throwEntityLoadError(error.value, {
-    notFound: t("page.tournaments.id.notFound"),
     failed: t("page.tournaments.id.error"),
+    notFound: t("page.tournaments.id.notFound"),
   });
 }
 
@@ -86,8 +86,8 @@ watch(
   [title, description],
   () => {
     setPageSeo({
-      title: title.value,
       description: description.value,
+      title: title.value,
     });
   },
   { immediate: true },

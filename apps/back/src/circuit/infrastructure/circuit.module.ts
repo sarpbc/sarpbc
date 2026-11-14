@@ -6,13 +6,13 @@ import { CircuitPersistence } from "./persistence/circuit.store";
 
 @Module({
   controllers: [CircuitController],
+  exports: [CircuitService],
   providers: [
     {
+      inject: [EntityManager],
       provide: CircuitService,
       useFactory: (em: EntityManager) => new CircuitService(new CircuitPersistence(em)),
-      inject: [EntityManager],
     },
   ],
-  exports: [CircuitService],
 })
 export class CircuitModule {}

@@ -8,17 +8,17 @@ import { REPLY_TARGET_LOADERS } from "./persistence/reply.mapper";
 import { MikroReplyStore, replyReports } from "./persistence/reply.store";
 
 export const replyWriteScope = (em: EntityManager): ReplyWriteScope => ({
+  notifications: directReplyNotifications(em),
   replies: new MikroReplyStore(em),
   reports: replyReports(em),
-  notifications: directReplyNotifications(em),
-  users: authorReader(em),
   targets: {
     async find(target: ReplyTarget) {
       const found = await REPLY_TARGET_LOADERS[target.kind](em, target.id);
 
-      return found && { post: null, newsArticle: null, match: null, ...found };
+      return found && { match: null, newsArticle: null, post: null, ...found };
     },
   },
+  users: authorReader(em),
 });
 
 export const transactionalReplies = (em: EntityManager): ReplyTransaction => ({

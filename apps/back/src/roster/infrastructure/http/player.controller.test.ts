@@ -24,33 +24,33 @@ import { unusedTournamentQueries } from "../../../../test/unused-tournament-quer
 const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
   Object.assign(new Match(), {
     id,
-    publicId,
     name: "Grand Final",
-    source,
     participants: [
       Object.assign(new TournamentParticipant(), { id: `${id}-a`, players: [] }),
       Object.assign(new TournamentParticipant(), { id: `${id}-b`, players: [] }),
     ],
+    publicId,
+    source,
     tournament: {
-      id: `${id}-stage`,
-      name: "Main Stage",
-      slug: "main-stage",
-      event: { id: "fake-event", slug: "fake-cup", name: "Fake Cup" },
       beginAt: null,
-      league: null,
-      pickemsEnabled: false,
-      source,
-      pandascoreId: null,
-      streams: [],
+      event: { id: "fake-event", name: "Fake Cup", slug: "fake-cup" },
       eventStreams: [],
+      id: `${id}-stage`,
+      league: null,
+      name: "Main Stage",
+      pandascoreId: null,
+      pickemsEnabled: false,
+      slug: "main-stage",
+      source,
+      streams: [],
     },
   });
 
 const staffContract = (teamId: string, startDate: Date, endDate: Date | null) =>
   Object.assign(new Contract(), {
-    team: Object.assign(new Team(), { id: teamId }),
-    startDate,
     endDate,
+    startDate,
+    team: Object.assign(new Team(), { id: teamId }),
   });
 
 describe(PlayerController, () => {
@@ -68,36 +68,36 @@ describe(PlayerController, () => {
 
   const tournaments: TournamentQueries = {
     ...unusedTournamentQueries,
-    getTournamentsWonByPlayer,
     getTournamentsByPlayer,
     getTournamentsByTeamTenures,
+    getTournamentsWonByPlayer,
   };
 
   const seasonStore: SeasonStore = {
-    list: vi.fn<SeasonStore["list"]>(),
-    find: vi.fn<SeasonStore["find"]>(),
-    nameTaken: vi.fn<SeasonStore["nameTaken"]>(),
-    save: vi.fn<SeasonStore["save"]>(),
-    remove: vi.fn<SeasonStore["remove"]>(),
+    awardTaken: vi.fn<SeasonStore["awardTaken"]>(),
     awards: vi.fn<SeasonStore["awards"]>(),
     awardsOfPlayer,
-    player: vi.fn<SeasonStore["player"]>(),
-    awardTaken: vi.fn<SeasonStore["awardTaken"]>(),
-    saveAward: vi.fn<SeasonStore["saveAward"]>(),
-    removeAward: vi.fn<SeasonStore["removeAward"]>(),
-    published: vi.fn<SeasonStore["published"]>(),
+    find: vi.fn<SeasonStore["find"]>(),
     findBySlug: vi.fn<SeasonStore["findBySlug"]>(),
+    list: vi.fn<SeasonStore["list"]>(),
+    nameTaken: vi.fn<SeasonStore["nameTaken"]>(),
+    participant: vi.fn<SeasonStore["participant"]>(),
+    participantTaken: vi.fn<SeasonStore["participantTaken"]>(),
+    participants: vi.fn<SeasonStore["participants"]>(),
+    player: vi.fn<SeasonStore["player"]>(),
+    published: vi.fn<SeasonStore["published"]>(),
+    remove: vi.fn<SeasonStore["remove"]>(),
+    removeAward: vi.fn<SeasonStore["removeAward"]>(),
+    removeParticipant: vi.fn<SeasonStore["removeParticipant"]>(),
+    removePathEntry: vi.fn<SeasonStore["removePathEntry"]>(),
+    save: vi.fn<SeasonStore["save"]>(),
+    saveAward: vi.fn<SeasonStore["saveAward"]>(),
+    saveParticipant: vi.fn<SeasonStore["saveParticipant"]>(),
+    savePathEntry: vi.fn<SeasonStore["savePathEntry"]>(),
     slugTaken: vi.fn<SeasonStore["slugTaken"]>(),
     team: vi.fn<SeasonStore["team"]>(),
     tournamentExists: vi.fn<SeasonStore["tournamentExists"]>(),
-    participants: vi.fn<SeasonStore["participants"]>(),
-    participant: vi.fn<SeasonStore["participant"]>(),
-    participantTaken: vi.fn<SeasonStore["participantTaken"]>(),
-    saveParticipant: vi.fn<SeasonStore["saveParticipant"]>(),
     updatePathNote: vi.fn<SeasonStore["updatePathNote"]>(),
-    removeParticipant: vi.fn<SeasonStore["removeParticipant"]>(),
-    savePathEntry: vi.fn<SeasonStore["savePathEntry"]>(),
-    removePathEntry: vi.fn<SeasonStore["removePathEntry"]>(),
   };
 
   const playerEarnings = vi.fn<TournamentPrizeService["playerEarnings"]>();
@@ -208,13 +208,13 @@ describe(PlayerController, () => {
 
     expect(
       standIns.map(({ participantId, startgg, match }) => ({
-        participantId,
-        startgg,
         id: match.id,
+        participantId,
         publicId: match.publicId,
+        startgg,
       })),
     ).toStrictEqual([
-      { participantId: "startgg-final-a", startgg: true, id: "startgg-final", publicId: 7 },
+      { id: "startgg-final", participantId: "startgg-final-a", publicId: 7, startgg: true },
     ]);
   });
 
@@ -229,8 +229,8 @@ describe(PlayerController, () => {
     await controller.getStaffTournaments("kept");
 
     expect(getTournamentsByTeamTenures).toHaveBeenCalledExactlyOnceWith([
-      { teamId: "kc", from, to },
-      { teamId: "vit", from: to, to: null },
+      { from, teamId: "kc", to },
+      { from: to, teamId: "vit", to: null },
     ]);
   });
 });

@@ -24,10 +24,10 @@ const player = (id: string) => Object.assign(new Player(), { id, name: id, slug:
 
 const lineupPlayer = (id: string) => ({
   id,
-  name: id,
-  slug: id,
   imageUrl: null,
+  name: id,
   nationality: null,
+  slug: id,
 });
 
 const participant = (id: string, rosterIds: string[]) =>
@@ -35,25 +35,25 @@ const participant = (id: string, rosterIds: string[]) =>
 
 const match = (id: string, source: DataSource, tournamentSource: DataSource = "manual") =>
   Object.assign(new Match(), {
-    id,
-    source,
     beginAt: new Date("2026-11-07T18:00:00Z"),
+    id,
     participants: [
       participant("side-a", ["alpha", "bravo", "charlie"]),
       participant("side-b", ["echo", "foxtrot", "golf"]),
     ],
+    source,
     tournament: {
-      id: `${id}-stage`,
-      name: "Fake Cup",
-      slug: "fake-cup",
-      event: { id: "fake-event", slug: "fake-cup", name: "Fake Cup" },
       beginAt: null,
-      league: null,
-      pickemsEnabled: false,
-      source: tournamentSource,
-      pandascoreId: null,
-      streams: [],
+      event: { id: "fake-event", name: "Fake Cup", slug: "fake-cup" },
       eventStreams: [],
+      id: `${id}-stage`,
+      league: null,
+      name: "Fake Cup",
+      pandascoreId: null,
+      pickemsEnabled: false,
+      slug: "fake-cup",
+      source: tournamentSource,
+      streams: [],
     },
   });
 
@@ -65,40 +65,40 @@ describe(MatchLineupService, () => {
   let existing = new Set<string>();
 
   const matchWriter: MatchWriter = {
-    load: async (id) => matches.get(id) ?? null,
+    bracket: unused,
     byPandascoreId: unused,
+    load: async (id) => matches.get(id) ?? null,
+    participants: unused,
+    references: unused,
+    remove: unused,
     save: unused,
     timings: unused,
     tournament: unused,
-    participants: unused,
-    bracket: unused,
-    references: unused,
-    remove: unused,
   };
 
   const lineupWriter: LineupWriter = {
     activePlayersExist: async (ids) => ids.every((id) => existing.has(id)),
     replace: async (matchId, lineups) => {
-      replaced.push({ matchId, lineups });
+      replaced.push({ lineups, matchId });
     },
   };
 
   const scope: CompetitionWriteScope = {
-    matches: matchWriter,
-    lineups: lineupWriter,
-    get tournaments() {
+    get awards() {
       return unused();
     },
     get events() {
       return unused();
     },
+    lineups: lineupWriter,
+    matches: matchWriter,
+    get prizes() {
+      return unused();
+    },
     get rosters() {
       return unused();
     },
-    get awards() {
-      return unused();
-    },
-    get prizes() {
+    get tournaments() {
       return unused();
     },
   };
@@ -156,12 +156,11 @@ describe(MatchLineupService, () => {
 
     expect(replaced).toStrictEqual([
       {
-        matchId: "manual-match",
         lineups: [{ participantId: "side-a", playerIds: ["alpha", "delta"] }],
+        matchId: "manual-match",
       },
     ]);
     expect(result).toStrictEqual({
-      source: "manual",
       lineups: [
         {
           participantId: "side-a",
@@ -171,12 +170,13 @@ describe(MatchLineupService, () => {
           ],
         },
       ],
+      source: "manual",
     });
   });
 
   it("clears every lineup when given none", async () => {
     await service.set("manual-match", []);
-    expect(replaced).toStrictEqual([{ matchId: "manual-match", lineups: [] }]);
+    expect(replaced).toStrictEqual([{ lineups: [], matchId: "manual-match" }]);
   });
 
   it("refuses a missing match, a foreign participant and an unknown or merged player", async () => {
@@ -224,10 +224,10 @@ describe(MatchLineupService, () => {
       const standIns = await service.standIns("delta");
 
       expect(
-        standIns.map(({ participantId, match: { id } }) => ({ participantId, id })),
+        standIns.map(({ participantId, match: { id } }) => ({ id, participantId })),
       ).toStrictEqual([
-        { participantId: "side-b", id: "startgg-match" },
-        { participantId: "side-a", id: "manual-match" },
+        { id: "startgg-match", participantId: "side-b" },
+        { id: "manual-match", participantId: "side-a" },
       ]);
     });
 

@@ -12,8 +12,8 @@ export const usePlayerAwards = (playerId: MaybeRef<string | undefined>) => {
         ? await getPlayerAwards(playerIdRef.value)
         : { awards: [], seasonAwards: [] },
     {
-      watch: [playerIdRef],
       default: () => ({ awards: [], seasonAwards: [] }),
+      watch: [playerIdRef],
     },
   );
 
@@ -25,10 +25,10 @@ export const usePlayerAwards = (playerId: MaybeRef<string | undefined>) => {
 
   return {
     awards,
-    seasonAwards,
+    error,
     hasAwards,
     pending,
-    error,
     refresh,
+    seasonAwards,
   };
 };

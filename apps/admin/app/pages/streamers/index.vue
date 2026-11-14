@@ -18,7 +18,7 @@ const breadcrumbItems = [
   },
 ];
 
-const dateFormatter = useDateFormatter({ year: "numeric", month: "short", day: "numeric" });
+const dateFormatter = useDateFormatter({ day: "numeric", month: "short", year: "numeric" });
 
 const columns: TableColumn<TrackedStreamer>[] = [
   {
@@ -27,17 +27,17 @@ const columns: TableColumn<TrackedStreamer>[] = [
   },
   {
     accessorKey: "displayName",
-    header: t("page.streamers.columns.displayName"),
     cell: ({ row }) => row.original.displayName ?? "—",
+    header: t("page.streamers.columns.displayName"),
   },
   {
     accessorKey: "createdAt",
-    header: t("page.streamers.columns.createdAt"),
     cell: ({ row }) => dateFormatter.value.format(new Date(row.original.createdAt)),
+    header: t("page.streamers.columns.createdAt"),
   },
   {
-    id: "actions",
     header: "",
+    id: "actions",
   },
 ];
 
@@ -84,14 +84,14 @@ const confirmAdd = async () => {
     await addTrackedStreamer(normalizedLogin.value, newDisplayName.value.trim() || null);
     isAddModalOpen.value = false;
     toast.add({
-      title: t("page.streamers.add.success"),
       color: "success",
+      title: t("page.streamers.add.success"),
     });
     await refresh();
   } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(error_) ?? t("page.streamers.add.failed"),
       color: "error",
+      title: getApiErrorMessage(error_) ?? t("page.streamers.add.failed"),
     });
   } finally {
     isAdding.value = false;
@@ -110,14 +110,14 @@ const confirmRemove = async () => {
     isRemoveModalOpen.value = false;
     streamerToRemove.value = null;
     toast.add({
-      title: t("page.streamers.remove.success"),
       color: "success",
+      title: t("page.streamers.remove.success"),
     });
     await refresh();
   } catch (error_) {
     toast.add({
-      title: getApiErrorMessage(error_) ?? t("page.streamers.remove.failed"),
       color: "error",
+      title: getApiErrorMessage(error_) ?? t("page.streamers.remove.failed"),
     });
   } finally {
     isRemoving.value = false;

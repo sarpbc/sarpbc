@@ -4,9 +4,9 @@ import { mapOfficialMatchStreams } from "./official-match-streams";
 import type { MatchStreamDto } from "../dto/match.dto";
 
 const stream = (overrides: Partial<MatchStreamDto> = {}): MatchStreamDto => ({
-  main: false,
-  language: "en",
   embed_url: "https://player.twitch.tv/?channel=rlcs",
+  language: "en",
+  main: false,
   official: true,
   raw_url: "https://www.twitch.tv/rocketleague",
   ...overrides,
@@ -22,33 +22,33 @@ describe(mapOfficialMatchStreams, () => {
     expect(
       mapOfficialMatchStreams([
         stream({ official: false, raw_url: "https://www.twitch.tv/fan" }),
-        stream({ language: "fr", raw_url: "https://www.twitch.tv/rocketbaguette", main: true }),
+        stream({ language: "fr", main: true, raw_url: "https://www.twitch.tv/rocketbaguette" }),
         stream({ raw_url: SCRIPT_URL }),
         stream({ raw_url: "not-a-url" }),
-        stream({ raw_url: "  https://www.twitch.tv/rocketleague  ", language: "en" }),
+        stream({ language: "en", raw_url: "  https://www.twitch.tv/rocketleague  " }),
       ]),
     ).toStrictEqual([
-      { url: "https://www.twitch.tv/rocketbaguette", language: "fr", main: true },
-      { url: "https://www.twitch.tv/rocketleague", language: "en", main: false },
+      { language: "fr", main: true, url: "https://www.twitch.tv/rocketbaguette" },
+      { language: "en", main: false, url: "https://www.twitch.tv/rocketleague" },
     ]);
   });
 
   it("dedupes by url and caps the list", () => {
     const streams = Array.from({ length: 20 }, (_, index) =>
       stream({
-        raw_url: `https://www.twitch.tv/channel-${index}`,
         language: "en",
+        raw_url: `https://www.twitch.tv/channel-${index}`,
       }),
     );
 
-    streams.unshift(stream({ raw_url: "https://www.twitch.tv/channel-0", language: "fr" }));
+    streams.unshift(stream({ language: "fr", raw_url: "https://www.twitch.tv/channel-0" }));
 
     const mapped = mapOfficialMatchStreams(streams);
     expect(mapped).toHaveLength(12);
     expect(mapped[0]).toStrictEqual({
-      url: "https://www.twitch.tv/channel-0",
       language: "fr",
       main: false,
+      url: "https://www.twitch.tv/channel-0",
     });
   });
 });

@@ -35,10 +35,10 @@ const toast = useToast();
 const reportError = useReportError();
 
 const dateFormatter = useDateFormatter({
-  year: "numeric",
-  month: "short",
   day: "numeric",
+  month: "short",
   timeZone: "UTC",
+  year: "numeric",
 });
 
 const isOpen = ref(false);
@@ -47,12 +47,12 @@ const editing = ref<TeamAlias | null>(null);
 const aliasToDelete = ref<TeamAlias | null>(null);
 
 const emptyForm = (): AliasForm => ({
-  name: "",
   from: "",
-  to: "",
-  sourceUrl: "",
   logoUrl: "",
+  name: "",
   pandascoreId: "",
+  sourceUrl: "",
+  to: "",
 });
 
 const form = ref<AliasForm>(emptyForm());
@@ -67,21 +67,21 @@ const period = (alias: TeamAlias): string =>
 
 const columns: TableColumn<TeamAlias>[] = [
   { accessorKey: "name", header: t("page.teams.aliases.columns.name") },
-  { id: "period", header: t("page.teams.aliases.columns.period") },
+  { header: t("page.teams.aliases.columns.period"), id: "period" },
   { accessorKey: "sourceUrl", header: t("page.teams.aliases.columns.source") },
-  { id: "actions", header: "" },
+  { header: "", id: "actions" },
 ];
 
 const toInput = (values: AliasForm): TeamAliasInput => {
   const pandascoreId = values.pandascoreId.trim();
 
   return {
-    name: values.name,
     from: values.from,
-    to: values.to || null,
-    sourceUrl: values.sourceUrl,
     logoUrl: values.logoUrl.trim() || null,
+    name: values.name,
     pandascoreId: pandascoreId === "" ? null : Number(pandascoreId),
+    sourceUrl: values.sourceUrl,
+    to: values.to || null,
   };
 };
 
@@ -144,12 +144,12 @@ const openCreate = () => {
 const openEdit = (alias: TeamAlias) => {
   editing.value = alias;
   form.value = {
-    name: alias.name,
     from: alias.from,
-    to: alias.to ?? "",
-    sourceUrl: alias.sourceUrl,
     logoUrl: alias.logoUrl ?? "",
+    name: alias.name,
     pandascoreId: alias.pandascoreId === null ? "" : String(alias.pandascoreId),
+    sourceUrl: alias.sourceUrl,
+    to: alias.to ?? "",
   };
   isOpen.value = true;
 };
@@ -168,7 +168,7 @@ const submit = async () => {
       ? updateTeamAlias(teamId, editing.value.id, result.alias)
       : addTeamAlias(teamId, result.alias));
 
-    toast.add({ title: t("page.teams.aliases.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.teams.aliases.saved") });
     isOpen.value = false;
     emit("changed");
   } catch (error) {

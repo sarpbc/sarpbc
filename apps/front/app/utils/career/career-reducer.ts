@@ -51,9 +51,9 @@ import {
 } from "~/types/career";
 
 const OFFSEASON_DESTINY_CHOICES = {
+  coach: { coach: 2 },
   quit: { quit: 2 },
   streamer: { streamer: 2 },
-  coach: { coach: 2 },
 } as const satisfies Record<string, Partial<CareerDestinyLeanings>>;
 
 type OffseasonDestinyChoiceId = keyof typeof OFFSEASON_DESTINY_CHOICES;
@@ -98,36 +98,36 @@ export const createInitialCareerState = (): CareerState => {
   const id = crypto.randomUUID();
 
   return {
-    id,
-    phase: "menu",
-    resumePhase: null,
-    onboardingStep: "intro",
-    playerName: "",
-    region: null,
-    country: null,
-    role: null,
     background: null,
-    stats: { rating: 60, form: 60, morale: 60 },
+    country: null,
+    currentEventId: null,
     currentSeason: 1,
+    currentSplits: [],
     currentStage: "split1",
     currentTeamId: "",
-    world: createCareerWorld(id),
-    usedEventIds: [],
-    currentEventId: null,
+    currentWorlds: null,
+    destinyLeanings: emptyDestinyLeanings(),
     eventsQueuedForStage: 0,
     eventsResolvedForStage: 0,
-    pendingSkipRegionals: 0,
-    pendingSkipMajor: false,
-    currentSplits: [],
-    currentWorlds: null,
-    seasonRecords: [],
-    pendingOfferTeamIds: [],
-    renewalOffered: false,
+    id,
     isLastChanceOffer: false,
-    offseasonDestinyPending: false,
-    destinyLeanings: emptyDestinyLeanings(),
     lastEventOutcome: null,
+    offseasonDestinyPending: false,
+    onboardingStep: "intro",
+    pendingOfferTeamIds: [],
+    pendingSkipMajor: false,
+    pendingSkipRegionals: 0,
+    phase: "menu",
+    playerName: "",
+    region: null,
+    renewalOffered: false,
     result: null,
+    resumePhase: null,
+    role: null,
+    seasonRecords: [],
+    stats: { form: 60, morale: 60, rating: 60 },
+    usedEventIds: [],
+    world: createCareerWorld(id),
   };
 };
 
@@ -140,12 +140,12 @@ const fieldPlayer = (state: CareerState, skip: { skipRegionals: number; skipMajo
   }
 
   return {
-    teamId: state.currentTeamId,
     rating: state.stats.rating,
-    stats: state.stats,
     role: state.role,
-    skipRegionals: skip.skipRegionals,
     skipMajor: skip.skipMajor,
+    skipRegionals: skip.skipRegionals,
+    stats: state.stats,
+    teamId: state.currentTeamId,
   };
 };
 
@@ -161,9 +161,9 @@ const pickNextEvent = (state: CareerState): CareerState => {
   return {
     ...state,
     currentEventId: event.id,
-    usedEventIds: [...state.usedEventIds, event.id],
     lastEventOutcome: null,
     phase: "event",
+    usedEventIds: [...state.usedEventIds, event.id],
   };
 };
 
@@ -172,8 +172,8 @@ const startStageEvents = (state: CareerState): CareerState => {
     ...state,
     eventsQueuedForStage: getEventsBeforeStage(state.id, state.currentSeason, state.currentStage),
     eventsResolvedForStage: 0,
-    pendingSkipRegionals: 0,
     pendingSkipMajor: false,
+    pendingSkipRegionals: 0,
   };
 
   return pickNextEvent(next);
@@ -194,23 +194,23 @@ const runStageSimulation = (
       const field = simulateSplitField(next.id, next.currentSeason, split, next.world, player);
 
       const sim = field.get(next.currentTeamId) ?? {
-        regionals: [],
         major: null,
         points: 0,
+        regionals: [],
       };
 
       next = {
         ...next,
-        stats: applyStatDelta(next.stats, getSplitFeedback(sim)),
         currentSplits: [
           ...next.currentSplits,
           {
-            split,
-            regionals: sim.regionals,
             major: sim.major,
             points: sim.points,
+            regionals: sim.regionals,
+            split,
           } satisfies CareerSplitRecord,
         ],
+        stats: applyStatDelta(next.stats, getSplitFeedback(sim)),
         world: {
           ...next.world,
           splitFields: upsertSplitField(
@@ -241,8 +241,8 @@ const runStageSimulation = (
       const placement = placements.get(next.currentTeamId) ?? "group";
       next = {
         ...next,
-        stats: applyStatDelta(next.stats, getWorldsFeedback(placement)),
         currentWorlds: placement,
+        stats: applyStatDelta(next.stats, getWorldsFeedback(placement)),
       };
       break;
     }
@@ -254,8 +254,8 @@ const runStageSimulation = (
 
   return {
     ...next,
-    world: tickNpcRatings(next.world, next.id, next.currentSeason, stage),
     phase: "stage_result",
+    world: tickNpcRatings(next.world, next.id, next.currentSeason, stage),
   };
 };
 
@@ -274,13 +274,13 @@ const endSeason = (state: CareerState): CareerState => {
   const worlds = state.currentWorlds;
 
   const record: CareerSeasonRecord = {
-    season: state.currentSeason,
-    teamId: state.currentTeamId,
-    teamName: currentTeamName(state),
-    splits: [...state.currentSplits],
-    worlds,
     points: computeCircuitPoints(state.currentSplits),
     ratingEnd: state.stats.rating,
+    season: state.currentSeason,
+    splits: [...state.currentSplits],
+    teamId: state.currentTeamId,
+    teamName: currentTeamName(state),
+    worlds,
   };
 
   const rankings = computeStateRankings({
@@ -300,20 +300,20 @@ const endSeason = (state: CareerState): CareerState => {
 
   return {
     ...state,
+    isLastChanceOffer:
+      resolution.transferTeamIds.length === 0 && resolution.lastChanceTeamId !== null,
+    offseasonDestinyPending: getSeasonsPastPeak(state.currentSeason + 1) > 0,
+    pendingOfferTeamIds: pendingOfferTeamIds(
+      resolution.transferTeamIds,
+      resolution.lastChanceTeamId,
+    ),
+    phase: "offseason",
+    renewalOffered: resolution.renewalOffered,
     seasonRecords: [...state.seasonRecords, record],
     world: {
       ...state.world,
       rankSnapshot: snapshotWorldRanking(rankings),
     },
-    pendingOfferTeamIds: pendingOfferTeamIds(
-      resolution.transferTeamIds,
-      resolution.lastChanceTeamId,
-    ),
-    renewalOffered: resolution.renewalOffered,
-    isLastChanceOffer:
-      resolution.transferTeamIds.length === 0 && resolution.lastChanceTeamId !== null,
-    offseasonDestinyPending: getSeasonsPastPeak(state.currentSeason + 1) > 0,
-    phase: "offseason",
   };
 };
 
@@ -337,18 +337,18 @@ const goToWorldsOrEndSeason = (state: CareerState): CareerState => {
 const advanceToNextSeason = (state: CareerState): CareerState => ({
   ...state,
   currentSeason: state.currentSeason + 1,
-  world: tickNpcRatings(state.world, state.id, state.currentSeason + 1, "season"),
-  stats: applyStatDelta(state.stats, getAgeDecline(state.currentSeason + 1)),
-  currentStage: "split1",
   currentSplits: [],
+  currentStage: "split1",
   currentWorlds: null,
-  pendingOfferTeamIds: [],
-  renewalOffered: false,
   isLastChanceOffer: false,
-  offseasonDestinyPending: false,
   lastEventOutcome: null,
+  offseasonDestinyPending: false,
+  pendingOfferTeamIds: [],
   phase: "season_intro",
+  renewalOffered: false,
   resumePhase: "season_intro",
+  stats: applyStatDelta(state.stats, getAgeDecline(state.currentSeason + 1)),
+  world: tickNpcRatings(state.world, state.id, state.currentSeason + 1, "season"),
 });
 
 const finishCareer = (state: CareerState, destiny: CareerDestiny): CareerReduceResult => {
@@ -359,40 +359,40 @@ const finishCareer = (state: CareerState, destiny: CareerDestiny): CareerReduceR
   const trophies = deriveTrophies(state.seasonRecords);
 
   const result: CareerResult = {
-    id: state.id,
-    playerName: state.playerName || DEFAULT_PLAYER_NAME,
-    region: state.region,
-    country: state.country,
-    role: state.role,
     background: state.background,
-    finalRating: state.stats.rating,
+    completedAt: new Date().toISOString(),
+    country: state.country,
+    destiny,
     finalForm: state.stats.form,
     finalMorale: state.stats.morale,
+    finalRating: state.stats.rating,
+    id: state.id,
+    nicknameKey: pickCareerNickname({
+      destiny,
+      role: state.role,
+      seasons: state.seasonRecords,
+      trophies,
+    }),
+    playerName: state.playerName || DEFAULT_PLAYER_NAME,
+    region: state.region,
+    retiredAge: getRetiredAge(state.seasonRecords.length),
+    role: state.role,
     seasons: [...state.seasonRecords],
     trophies,
-    retiredAge: getRetiredAge(state.seasonRecords.length),
-    destiny,
-    nicknameKey: pickCareerNickname({
-      role: state.role,
-      destiny,
-      trophies,
-      seasons: state.seasonRecords,
-    }),
-    completedAt: new Date().toISOString(),
   };
 
   return {
+    finishedResult: result,
     state: {
       ...state,
-      result,
       phase: "career_end",
+      result,
       resumePhase: null,
     },
-    finishedResult: result,
   };
 };
 
-const unchanged = (state: CareerState): CareerReduceResult => ({ state, finishedResult: null });
+const unchanged = (state: CareerState): CareerReduceResult => ({ finishedResult: null, state });
 
 const completeOnboarding = (state: CareerState): CareerReduceResult => {
   const { region, country, role, background } = state;
@@ -413,29 +413,29 @@ const completeOnboarding = (state: CareerState): CareerReduceResult => {
   );
 
   return {
+    finishedResult: null,
     state: {
       ...state,
-      stats,
-      world,
       currentTeamId: teamId,
+      onboardingStep: "intro",
       phase: "season_intro",
       resumePhase: "season_intro",
-      onboardingStep: "intro",
+      stats,
+      world,
     },
-    finishedResult: null,
   };
 };
 
 const continueFromMenu = (state: CareerState): CareerReduceResult => {
   if (state.resumePhase && state.resumePhase !== "menu") {
     return {
-      state: { ...state, phase: state.resumePhase, resumePhase: null },
       finishedResult: null,
+      state: { ...state, phase: state.resumePhase, resumePhase: null },
     };
   }
 
   if (state.phase === "onboarding") {
-    return { state: { ...state, resumePhase: null }, finishedResult: null };
+    return { finishedResult: null, state: { ...state, resumePhase: null } };
   }
 
   return unchanged(state);
@@ -447,8 +447,8 @@ const reduceOnboarding = (state: CareerState, action: OnboardingAction): CareerR
       const fresh = createInitialCareerState();
 
       return {
-        state: { ...fresh, phase: "onboarding", resumePhase: null },
         finishedResult: null,
+        state: { ...fresh, phase: "onboarding", resumePhase: null },
       };
     }
 
@@ -458,50 +458,50 @@ const reduceOnboarding = (state: CareerState, action: OnboardingAction): CareerR
 
     case "RETURN_TO_MENU": {
       return {
+        finishedResult: null,
         state: {
           ...createInitialCareerState(),
           phase: "menu",
           resumePhase: null,
         },
-        finishedResult: null,
       };
     }
 
     case "SET_ONBOARDING_STEP": {
       return {
-        state: { ...state, onboardingStep: action.step },
         finishedResult: null,
+        state: { ...state, onboardingStep: action.step },
       };
     }
 
     case "SET_PLAYER_NAME": {
       return {
-        state: { ...state, playerName: action.name.trim() },
         finishedResult: null,
+        state: { ...state, playerName: action.name.trim() },
       };
     }
 
     case "SET_REGION": {
       return {
+        finishedResult: null,
         state: {
           ...state,
-          region: action.region,
           country: state.region === action.region ? state.country : null,
+          region: action.region,
         },
-        finishedResult: null,
       };
     }
 
     case "SET_COUNTRY": {
-      return { state: { ...state, country: action.country }, finishedResult: null };
+      return { finishedResult: null, state: { ...state, country: action.country } };
     }
 
     case "SET_ROLE": {
-      return { state: { ...state, role: action.role }, finishedResult: null };
+      return { finishedResult: null, state: { ...state, role: action.role } };
     }
 
     case "SET_BACKGROUND": {
-      return { state: { ...state, background: action.background }, finishedResult: null };
+      return { finishedResult: null, state: { ...state, background: action.background } };
     }
 
     case "COMPLETE_ONBOARDING": {
@@ -540,14 +540,14 @@ const resolveEventChoice = (state: CareerState, choiceId: string): CareerReduceR
   const destiny = choice.destiny ?? {};
 
   const lastEventOutcome: CareerEventOutcome = {
-    eventId,
     choiceId,
     delta: {
-      rating: nextStats.rating - before.rating,
       form: nextStats.form - before.form,
       morale: nextStats.morale - before.morale,
+      rating: nextStats.rating - before.rating,
     },
     destiny,
+    eventId,
   };
 
   if (resolved.failed) {
@@ -555,14 +555,14 @@ const resolveEventChoice = (state: CareerState, choiceId: string): CareerReduceR
   }
 
   return {
+    finishedResult: null,
     state: {
       ...state,
-      stats: nextStats,
       destinyLeanings: applyDestinyLeanings(state.destinyLeanings, destiny),
       lastEventOutcome,
       phase: "event_result",
+      stats: nextStats,
     },
-    finishedResult: null,
   };
 };
 
@@ -573,24 +573,24 @@ const continueAfterEventOutcome = (state: CareerState): CareerReduceResult => {
 
   let next: CareerState = {
     ...state,
-    pendingSkipRegionals: Math.max(state.pendingSkipRegionals, choice?.skipRegionals ?? 0),
-    pendingSkipMajor: state.pendingSkipMajor || (choice?.skipMajor ?? false),
-    eventsResolvedForStage: state.eventsResolvedForStage + 1,
     currentEventId: null,
+    eventsResolvedForStage: state.eventsResolvedForStage + 1,
     lastEventOutcome: null,
+    pendingSkipMajor: state.pendingSkipMajor || (choice?.skipMajor ?? false),
+    pendingSkipRegionals: Math.max(state.pendingSkipRegionals, choice?.skipRegionals ?? 0),
   };
 
   if (next.eventsResolvedForStage < next.eventsQueuedForStage) {
     next = pickNextEvent(next);
   } else {
     next = runStageSimulation(next, {
-      skipRegionals: next.pendingSkipRegionals,
       skipMajor: next.pendingSkipMajor,
+      skipRegionals: next.pendingSkipRegionals,
     });
-    next = { ...next, pendingSkipRegionals: 0, pendingSkipMajor: false };
+    next = { ...next, pendingSkipMajor: false, pendingSkipRegionals: 0 };
   }
 
-  return { state: next, finishedResult: null };
+  return { finishedResult: null, state: next };
 };
 
 const continueAfterStageResult = (state: CareerState): CareerReduceResult => {
@@ -599,17 +599,17 @@ const continueAfterStageResult = (state: CareerState): CareerReduceResult => {
   switch (stage) {
     case "split1": {
       return {
-        state: startStageEvents({ ...state, currentStage: "split2" }),
         finishedResult: null,
+        state: startStageEvents({ ...state, currentStage: "split2" }),
       };
     }
 
     case "split2": {
-      return { state: goToWorldsOrEndSeason(state), finishedResult: null };
+      return { finishedResult: null, state: goToWorldsOrEndSeason(state) };
     }
 
     case "worlds": {
-      return { state: endSeason(state), finishedResult: null };
+      return { finishedResult: null, state: endSeason(state) };
     }
 
     default: {
@@ -636,7 +636,7 @@ const resolveOffseasonDestiny = (state: CareerState, id: string): CareerReduceRe
     }
 
     case "coach": {
-      return { state: next, finishedResult: null };
+      return { finishedResult: null, state: next };
     }
 
     default: {
@@ -659,8 +659,8 @@ const acceptOffer = (state: CareerState, teamId: string): CareerReduceResult => 
   );
 
   return {
-    state: advanceToNextSeason({ ...state, world, currentTeamId: teamId }),
     finishedResult: null,
+    state: advanceToNextSeason({ ...state, currentTeamId: teamId, world }),
   };
 };
 
@@ -668,13 +668,13 @@ const reduceSeason = (state: CareerState, action: SeasonAction): CareerReduceRes
   switch (action.type) {
     case "START_SEASON": {
       return {
+        finishedResult: null,
         state: startStageEvents({
           ...state,
-          currentStage: "split1",
           currentSplits: [],
+          currentStage: "split1",
           currentWorlds: null,
         }),
-        finishedResult: null,
       };
     }
 
@@ -700,7 +700,7 @@ const reduceSeason = (state: CareerState, action: SeasonAction): CareerReduceRes
 
     case "STAY_WITH_TEAM": {
       return state.renewalOffered
-        ? { state: advanceToNextSeason(state), finishedResult: null }
+        ? { finishedResult: null, state: advanceToNextSeason(state) }
         : unchanged(state);
     }
 

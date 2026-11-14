@@ -11,21 +11,21 @@ const fakes = {
 };
 
 const transport: PublicHttpsTransport = {
-  request: fakes.request,
   lookup: async (hostname): Promise<LookupAddress[]> =>
     (fakes.addresses.get(hostname) ?? []).map((address) => ({
       address,
       family: address.includes(":") ? 6 : 4,
     })),
+  request: fakes.request,
 };
 
 type Reply = { status: number; headers?: Record<string, string>; body?: string[] } | "hang";
 
 const limits = {
-  maxBytes: 16,
-  timeoutMs: 1000,
-  maxRedirects: 2,
   isAllowedHost: (hostname: string) => !/(?:^|\.)liquipedia\.net$/iu.test(hostname),
+  maxBytes: 16,
+  maxRedirects: 2,
+  timeoutMs: 1000,
 };
 
 const resolveDns = (addresses: Record<string, string[]>) => {
@@ -64,8 +64,8 @@ const serve = (routes: Record<string, Reply>) => {
           }
 
           const response = Object.assign(new PassThrough(), {
-            statusCode: reply.status,
             headers: reply.headers ?? {},
+            statusCode: reply.status,
           });
 
           req.emit("response", response);
@@ -119,22 +119,22 @@ describe(downloadPublicHttps, () => {
   beforeEach(() => {
     fakes.request.mockReset();
     resolveDns({
-      "kcorp.gg": ["104.16.0.1"],
       "cdn.kcorp.gg": ["104.16.0.2", "2606:4700::1"],
       "internal.kcorp.gg": ["104.16.0.3", "10.0.0.5"],
+      "kcorp.gg": ["104.16.0.1"],
       "metadata.kcorp.gg": ["169.254.169.254"],
     });
   });
 
   it("downloads a public https resource through the guarded DNS lookup", async () => {
-    serve({ "https://kcorp.gg/logo.png": { status: 200, body: ["logo", "bytes"] } });
+    serve({ "https://kcorp.gg/logo.png": { body: ["logo", "bytes"], status: 200 } });
 
     const bytes = await download("https://kcorp.gg/logo.png");
 
     expect(new TextDecoder().decode(bytes)).toBe("logobytes");
     expect(fakes.request).toHaveBeenCalledWith(
       new URL("https://kcorp.gg/logo.png"),
-      expect.objectContaining({ method: "GET", agent: false }),
+      expect.objectContaining({ agent: false, method: "GET" }),
     );
   });
 
@@ -155,7 +155,7 @@ describe(downloadPublicHttps, () => {
   it.each(["https://metadata.kcorp.gg/logo.png", "https://internal.kcorp.gg/logo.png"])(
     "rejects %s when any resolved address is private",
     async (url) => {
-      serve({ [url]: { status: 200, body: ["secret"] } });
+      serve({ [url]: { body: ["secret"], status: 200 } });
 
       await expect(download(url)).rejects.toThrow("private, loopback or link-local");
     },
@@ -163,8 +163,8 @@ describe(downloadPublicHttps, () => {
 
   it("follows a redirect to another public https host", async () => {
     serve({
-      "https://kcorp.gg/logo.png": { status: 302, headers: { location: "https://cdn.kcorp.gg/a" } },
-      "https://cdn.kcorp.gg/a": { status: 200, body: ["ok"] },
+      "https://cdn.kcorp.gg/a": { body: ["ok"], status: 200 },
+      "https://kcorp.gg/logo.png": { headers: { location: "https://cdn.kcorp.gg/a" }, status: 302 },
     });
 
     expect(new TextDecoder().decode(await download("https://kcorp.gg/logo.png"))).toBe("ok");
@@ -178,15 +178,15 @@ describe(downloadPublicHttps, () => {
     ["https://www.liquipedia.net/kc.png", "not an accepted source"],
   ])("re-checks the redirect target %s", async (location, message) => {
     serve({
-      "https://kcorp.gg/logo.png": { status: 301, headers: { location } },
-      [location]: { status: 200, body: ["secret"] },
+      "https://kcorp.gg/logo.png": { headers: { location }, status: 301 },
+      [location]: { body: ["secret"], status: 200 },
     });
 
     await expect(download("https://kcorp.gg/logo.png")).rejects.toThrow(message);
   });
 
   it("rejects an invalid redirect location as invalid input", async () => {
-    serve({ "https://kcorp.gg/logo.png": { status: 302, headers: { location: "https://[::1" } } });
+    serve({ "https://kcorp.gg/logo.png": { headers: { location: "https://[::1" }, status: 302 } });
 
     const download$ = download("https://kcorp.gg/logo.png");
 
@@ -196,9 +196,9 @@ describe(downloadPublicHttps, () => {
 
   it("stops after the redirect limit", async () => {
     serve({
-      "https://kcorp.gg/a": { status: 302, headers: { location: "/b" } },
-      "https://kcorp.gg/b": { status: 302, headers: { location: "/c" } },
-      "https://kcorp.gg/c": { status: 302, headers: { location: "/d" } },
+      "https://kcorp.gg/a": { headers: { location: "/b" }, status: 302 },
+      "https://kcorp.gg/b": { headers: { location: "/c" }, status: 302 },
+      "https://kcorp.gg/c": { headers: { location: "/d" }, status: 302 },
     });
 
     await expect(download("https://kcorp.gg/a")).rejects.toThrow("redirected too many times");
@@ -207,11 +207,11 @@ describe(downloadPublicHttps, () => {
   it("rejects a declared or streamed body above the limit", async () => {
     serve({
       "https://kcorp.gg/declared": {
-        status: 200,
-        headers: { "content-length": "17" },
         body: ["x"],
+        headers: { "content-length": "17" },
+        status: 200,
       },
-      "https://kcorp.gg/streamed": { status: 200, body: ["0123456789", "0123456789"] },
+      "https://kcorp.gg/streamed": { body: ["0123456789", "0123456789"], status: 200 },
     });
 
     await expect(download("https://kcorp.gg/declared")).rejects.toThrow("larger than");

@@ -21,21 +21,21 @@ const TEAM = "c9e1a3b5-7d9f-4b1d-a3c5-e7f9b1d3f544";
 void describe("parseNewsMatchTag", () => {
   void it("parses each selector", () => {
     assert.deepEqual(parseNewsMatchTag(`:matches{match="${MATCH}"}`)?.block, {
-      kind: "match",
       id: MATCH,
+      kind: "match",
     });
     assert.deepEqual(parseNewsMatchTag(`:matches{ids="${MATCH}, ${OTHER}"}`)?.block, {
-      kind: "matches",
       ids: [MATCH, OTHER],
+      kind: "matches",
     });
     assert.deepEqual(parseNewsMatchTag(`:matches{tournament="${TOURNAMENT}" limit="3"}`)?.block, {
-      kind: "tournament",
       id: TOURNAMENT,
+      kind: "tournament",
       limit: 3,
     });
     assert.deepEqual(parseNewsMatchTag(`:matches{team="${TEAM.toUpperCase()}"}`)?.block, {
-      kind: "team",
       id: TEAM,
+      kind: "team",
       limit: 5,
     });
   });
@@ -84,7 +84,7 @@ void describe("parseNewsMatchTag", () => {
 
   void it("rejects component limits that are not plain positive integers", () => {
     for (const limit of ["5.0", "true"]) {
-      assert.equal(newsMatchBlockFromAttrs({ team: TEAM, limit }), null, limit);
+      assert.equal(newsMatchBlockFromAttrs({ limit, team: TEAM }), null, limit);
     }
   });
 
@@ -95,10 +95,10 @@ void describe("parseNewsMatchTag", () => {
 });
 
 void describe("serializeNewsMatchTag", () => {
-  const match: MatchBlockSelector = { kind: "match", id: MATCH };
-  const ids: MatchBlockSelector = { kind: "matches", ids: [OTHER, MATCH] };
-  const tournament: MatchBlockSelector = { kind: "tournament", id: TOURNAMENT, limit: 8 };
-  const team: MatchBlockSelector = { kind: "team", id: TEAM, limit: 5 };
+  const match: MatchBlockSelector = { id: MATCH, kind: "match" };
+  const ids: MatchBlockSelector = { ids: [OTHER, MATCH], kind: "matches" };
+  const tournament: MatchBlockSelector = { id: TOURNAMENT, kind: "tournament", limit: 8 };
+  const team: MatchBlockSelector = { id: TEAM, kind: "team", limit: 5 };
 
   void it("writes canonical tags", () => {
     assert.equal(serializeNewsMatchTag(match), `:matches{match="${MATCH}"}`);
@@ -134,12 +134,12 @@ void describe("parseNewsMatchBlockKey", () => {
 
 void describe("newsMatchBlockFromAttrs", () => {
   void it("reads MDC props, including numeric limits", () => {
-    assert.deepEqual(newsMatchBlockFromAttrs({ team: TEAM, limit: 7 }), {
-      kind: "team",
+    assert.deepEqual(newsMatchBlockFromAttrs({ limit: 7, team: TEAM }), {
       id: TEAM,
+      kind: "team",
       limit: 7,
     });
-    assert.equal(newsMatchBlockFromAttrs({ match: "", ids: "" }), null);
+    assert.equal(newsMatchBlockFromAttrs({ ids: "", match: "" }), null);
   });
 });
 

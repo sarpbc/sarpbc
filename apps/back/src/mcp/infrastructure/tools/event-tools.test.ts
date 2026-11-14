@@ -18,14 +18,14 @@ const EVENT_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 
 const stage = (id: string, source: DataSource, beginAt: string | null) =>
   Object.assign(new Tournament(), {
+    beginAt: beginAt === null ? null : new Date(beginAt),
+    endAt: beginAt === null ? null : new Date(beginAt),
+    event: { id: "cdf", name: "CDF 2026", slug: "cdf-2026" },
     id,
     name: id,
     slug: id,
     source,
     tier: "B",
-    beginAt: beginAt === null ? null : new Date(beginAt),
-    endAt: beginAt === null ? null : new Date(beginAt),
-    event: { id: "cdf", slug: "cdf-2026", name: "CDF 2026" },
   });
 
 interface ToolInput extends Record<string, unknown> {
@@ -40,8 +40,8 @@ const setup = (role: "admin" | "journalist" = "admin") => {
 
   const event = Object.assign(new TournamentEvent(), {
     id: "cdf",
-    slug: "cdf-2026",
     name: "CDF 2026",
+    slug: "cdf-2026",
   });
 
   const listing = {
@@ -54,13 +54,13 @@ const setup = (role: "admin" | "journalist" = "admin") => {
   };
 
   const catalogService = {
-    leagues: vi.fn<ManualCatalogService["leagues"]>(),
-    findEvent: vi.fn<ManualCatalogService["findEvent"]>().mockResolvedValue(listing),
     createEvent: vi
       .fn<ManualCatalogService["createEvent"]>()
       .mockResolvedValue({ event, stages: [] }),
-    updateEvent: vi.fn<ManualCatalogService["updateEvent"]>().mockResolvedValue(listing),
     createLeague: vi.fn<ManualCatalogService["createLeague"]>(),
+    findEvent: vi.fn<ManualCatalogService["findEvent"]>().mockResolvedValue(listing),
+    leagues: vi.fn<ManualCatalogService["leagues"]>(),
+    updateEvent: vi.fn<ManualCatalogService["updateEvent"]>().mockResolvedValue(listing),
     updateLeague: vi.fn<ManualCatalogService["updateLeague"]>(),
   };
 
@@ -73,22 +73,22 @@ const setup = (role: "admin" | "journalist" = "admin") => {
     competition: redistributableCompetition({
       catalogService,
       events: eventQueries,
-      tournaments: {
-        find: vi.fn<TournamentQueries["find"]>(),
-        findById: vi.fn<TournamentQueries["findById"]>(),
-      },
-      matchService: { list: vi.fn<MatchService["list"]>() },
       matchLineupService: { find: vi.fn<MatchLineupService["find"]>() },
+      matchService: { list: vi.fn<MatchService["list"]>() },
+      playerAwardService: {
+        findByTournamentId: vi.fn<PlayerAwardService["findByTournamentId"]>(),
+      },
       tournamentPlayerStatsService: {
         forStages: vi.fn<TournamentPlayerStatsService["forStages"]>(),
       },
       tournamentPrizeService: {
         findByTournamentId: vi.fn<TournamentPrizeService["findByTournamentId"]>(),
-        teamEarnings: vi.fn<TournamentPrizeService["teamEarnings"]>(),
         playerEarnings: vi.fn<TournamentPrizeService["playerEarnings"]>(),
+        teamEarnings: vi.fn<TournamentPrizeService["teamEarnings"]>(),
       },
-      playerAwardService: {
-        findByTournamentId: vi.fn<PlayerAwardService["findByTournamentId"]>(),
+      tournaments: {
+        find: vi.fn<TournamentQueries["find"]>(),
+        findById: vi.fn<TournamentQueries["findById"]>(),
       },
     }),
   });
@@ -101,20 +101,20 @@ const setup = (role: "admin" | "journalist" = "admin") => {
     }
 
     return async (input: ToolInput) =>
-      await found.run({ id: "u1", email: "staff@test.com", role }, input);
+      await found.run({ email: "staff@test.com", id: "u1", role }, input);
   };
 
-  return { catalogService, eventQueries, tool, listing };
+  return { catalogService, eventQueries, listing, tool };
 };
 
 describe("event tools", () => {
   it("returns an event's redistributable stages earliest first with its overall dates", async () => {
     const { tool } = setup();
     expect(json(await tool("get_event")({ idOrSlug: "cdf-2026" }))).toMatchObject({
-      id: "cdf",
-      editable: true,
       beginAt: "2026-11-05T18:00:00.000Z",
+      editable: true,
       endAt: "2026-11-12T18:00:00.000Z",
+      id: "cdf",
       stages: [
         { id: "pool", tier: "B", url: "https://sarpbc.test/tournaments/cdf-2026/pool" },
         { id: "finals" },
@@ -140,9 +140,9 @@ describe("event tools", () => {
     await tool("list_events")({});
     expect(eventQueries.list).toHaveBeenCalledExactlyOnceWith({
       activeOnly: false,
-      redistributableOnly: true,
       limit: 20,
       offset: 0,
+      redistributableOnly: true,
     });
   });
 
@@ -170,7 +170,7 @@ describe("event tools", () => {
   it("maps leagues with their source", async () => {
     const { tool, catalogService } = setup();
     catalogService.leagues.mockResolvedValue([
-      Object.assign(new League(), { id: "l1", pandascoreId: 1, name: "RLCS" }),
+      Object.assign(new League(), { id: "l1", name: "RLCS", pandascoreId: 1 }),
       Object.assign(new League(), { id: "l2", name: "Coupe de France" }),
     ]);
     expect(json(await tool("list_leagues")({}))).toMatchObject([

@@ -3,8 +3,8 @@ import { ConflictError } from "../../common/domain/errors/conflict-error";
 
 export const replyAlreadyReported = () =>
   new ConflictError({
-    message: "You already reported this comment.",
     code: FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED,
+    message: "You already reported this comment.",
   });
 
 export const replyStillReferenced = () =>

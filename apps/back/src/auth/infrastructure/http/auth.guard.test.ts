@@ -51,11 +51,11 @@ describe(AuthGuard, () => {
   });
 
   it("returns true and attaches the user resolved from a valid access token", async () => {
-    authService.authenticate.mockResolvedValue({ id: "user-1", email: "a@b.com" });
+    authService.authenticate.mockResolvedValue({ email: "a@b.com", id: "user-1" });
     const request: AuthGuardTestRequest = { cookies: { access_token: "valid-token" } };
 
     await expect(guard.canActivate(contextFor(request))).resolves.toBe(true);
-    expect(request.user).toStrictEqual({ id: "user-1", email: "a@b.com" });
+    expect(request.user).toStrictEqual({ email: "a@b.com", id: "user-1" });
     expect(authService.authenticate).toHaveBeenCalledWith("valid-token");
   });
 
@@ -69,13 +69,13 @@ describe(AuthGuard, () => {
 
   it("rotates cookies from a valid refresh token when access is missing", async () => {
     authService.refreshSession.mockResolvedValue({
-      user: { id: "user-1", email: "a@b.com" },
       tokens: { accessToken: "new-access", refreshToken: "new-refresh" },
+      user: { email: "a@b.com", id: "user-1" },
     });
     const request: AuthGuardTestRequest = { cookies: { refresh_token: "refresh-token" } };
 
     await expect(guard.canActivate(contextFor(request))).resolves.toBe(true);
-    expect(request.user).toStrictEqual({ id: "user-1", email: "a@b.com" });
+    expect(request.user).toStrictEqual({ email: "a@b.com", id: "user-1" });
     expect(setCookie).toHaveBeenCalledWith(
       "access_token",
       "new-access",

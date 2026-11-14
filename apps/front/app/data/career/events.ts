@@ -2,253 +2,253 @@ import type { CareerEventDefinition, CareerEventPool } from "~/types/career";
 
 export const CAREER_EVENTS: CareerEventDefinition[] = [
   {
+    choices: [
+      { delta: { form: -2, rating: 5 }, id: "a" },
+      { delta: { form: 1, morale: 1 }, id: "b" },
+      { delta: { form: -2, rating: 2 }, id: "c" },
+    ],
     id: "split-01",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 5, form: -2 } },
-      { id: "b", delta: { form: 1, morale: 1 } },
-      { id: "c", delta: { rating: 2, form: -2 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, morale: -1, rating: 2 }, id: "a" },
+      { delta: { morale: 2 }, id: "b" },
+      { delta: { morale: 1, rating: 2 }, id: "c" },
+    ],
     id: "split-02",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 2, form: -1, morale: -1 } },
-      { id: "b", delta: { morale: 2 } },
-      { id: "c", delta: { rating: 2, morale: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, morale: -2, rating: 5 }, id: "a" },
+      { delta: { form: 2, rating: 1 }, id: "b" },
+      { delta: { form: 2, morale: 1 }, destiny: { quit: 1 }, id: "c" },
+    ],
     id: "split-03",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 5, form: -2, morale: -2 } },
-      { id: "b", delta: { rating: 1, form: 2 } },
-      { id: "c", delta: { form: 2, morale: 1 }, destiny: { quit: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, morale: 2 }, destiny: { streamer: 2 }, id: "a" },
+      { delta: { form: 2 }, id: "b" },
+    ],
     id: "split-04",
     pool: "split",
-    choices: [
-      { id: "a", delta: { morale: 2, form: -2 }, destiny: { streamer: 2 } },
-      { id: "b", delta: { form: 2 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, rating: 2 }, id: "a" },
+      { delta: { form: 1, morale: 1 }, id: "b" },
+    ],
     id: "split-05",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 2, form: -1 } },
-      { id: "b", delta: { form: 1, morale: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { morale: 2, rating: -1 }, destiny: { coach: 2 }, id: "a" },
+      { delta: { morale: -2, rating: 2 }, destiny: { quit: 1 }, id: "b" },
+    ],
     id: "split-06",
     pool: "split",
-    choices: [
-      { id: "a", delta: { morale: 2, rating: -1 }, destiny: { coach: 2 } },
-      { id: "b", delta: { rating: 2, morale: -2 }, destiny: { quit: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: 2, morale: -1 }, id: "a" },
+      { delta: { form: 1, morale: 1, rating: 1 }, id: "b" },
+      { delta: { morale: 2 }, id: "c" },
+    ],
     id: "split-07",
     pool: "split",
-    choices: [
-      { id: "a", delta: { form: 2, morale: -1 } },
-      { id: "b", delta: { rating: 1, form: 1, morale: 1 } },
-      { id: "c", delta: { morale: 2 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, rating: 2 }, id: "a" },
+      { delta: { form: -1, morale: -1 }, id: "b" },
+    ],
     id: "split-08",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 2, form: -2 } },
-      { id: "b", delta: { form: -1, morale: -1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, morale: 2 }, destiny: { streamer: 2 }, id: "a" },
+      { delta: { form: 1, rating: 2 }, destiny: { coach: 1 }, id: "b" },
+    ],
     id: "split-09",
     pool: "split",
-    choices: [
-      { id: "a", delta: { morale: 2, form: -1 }, destiny: { streamer: 2 } },
-      { id: "b", delta: { rating: 2, form: 1 }, destiny: { coach: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, morale: -2, rating: 5 }, id: "a" },
+      { delta: { morale: 2 }, id: "b" },
+    ],
     id: "split-10",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 5, form: -1, morale: -2 } },
-      { id: "b", delta: { morale: 2 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, rating: 2 }, id: "a" },
+      { delta: { form: 1, morale: 2 }, id: "b" },
+    ],
     id: "split-11",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 2, form: -1 } },
-      { id: "b", delta: { morale: 2, form: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: 1, morale: 2 }, destiny: { quit: 2 }, id: "a" },
+      { delta: { morale: 2 }, destiny: { streamer: 1 }, id: "b" },
+      { delta: { morale: -1, rating: 2 }, id: "c" },
+    ],
     id: "split-12",
     pool: "split",
-    choices: [
-      { id: "a", delta: { morale: 2, form: 1 }, destiny: { quit: 2 } },
-      { id: "b", delta: { morale: 2 }, destiny: { streamer: 1 } },
-      { id: "c", delta: { rating: 2, morale: -1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, morale: -1, rating: 2 }, id: "a" },
+      { delta: { form: 2, morale: 1 }, id: "b" },
+    ],
     id: "split-13",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 2, morale: -1, form: -1 } },
-      { id: "b", delta: { form: 2, morale: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: 2, morale: -1 }, id: "a" },
+      { delta: { form: -2, morale: -1, rating: 2 }, id: "b" },
+    ],
     id: "split-14",
     pool: "split",
-    choices: [
-      { id: "a", delta: { form: 2, morale: -1 } },
-      { id: "b", delta: { rating: 2, form: -2, morale: -1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, morale: 2 }, destiny: { streamer: 1 }, id: "a" },
+      { delta: { form: 2, morale: -1 }, id: "b" },
+    ],
     id: "split-15",
     pool: "split",
-    choices: [
-      { id: "a", delta: { morale: 2, form: -1 }, destiny: { streamer: 1 } },
-      { id: "b", delta: { form: 2, morale: -1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, rating: 2 }, id: "a" },
+      { delta: { form: 2, morale: 1 }, id: "b" },
+    ],
     id: "split-16",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 2, form: -2 } },
-      { id: "b", delta: { form: 2, morale: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, morale: 2 }, destiny: { streamer: 2 }, id: "a" },
+      { delta: { form: 2, morale: -1 }, id: "b" },
+    ],
     id: "split-17",
     pool: "split",
-    choices: [
-      { id: "a", delta: { morale: 2, form: -2 }, destiny: { streamer: 2 } },
-      { id: "b", delta: { form: 2, morale: -1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, morale: 1 }, id: "a" },
+      { delta: { form: 2 }, id: "b" },
+      { delta: { form: 1, morale: 2 }, destiny: { coach: 1 }, id: "c" },
+    ],
     id: "split-18",
     pool: "split",
-    choices: [
-      { id: "a", delta: { morale: 1, form: -2 } },
-      { id: "b", delta: { form: 2 } },
-      { id: "c", delta: { morale: 2, form: 1 }, destiny: { coach: 1 } },
-    ],
   },
   {
-    id: "split-19",
-    pool: "split",
     choices: [
       {
+        delta: { form: -2, morale: -2, rating: 5 },
         id: "a",
-        delta: { rating: 5, form: -2, morale: -2 },
-        skipRegionals: 2,
         skipMajor: true,
+        skipRegionals: 2,
       },
-      { id: "b", delta: { form: 2, morale: 1 } },
+      { delta: { form: 2, morale: 1 }, id: "b" },
     ],
+    id: "split-19",
+    pool: "split",
   },
   {
+    choices: [
+      { delta: { form: -2, rating: 5 }, id: "a" },
+      { delta: { form: 1, morale: 1 }, id: "b" },
+    ],
     id: "split-20",
     pool: "split",
-    choices: [
-      { id: "a", delta: { rating: 5, form: -2 } },
-      { id: "b", delta: { form: 1, morale: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, morale: -1, rating: 2 }, id: "a" },
+      { delta: { form: 1, morale: 2 }, id: "b" },
+    ],
     id: "worlds-01",
     pool: "worlds",
-    choices: [
-      { id: "a", delta: { rating: 2, form: -2, morale: -1 } },
-      { id: "b", delta: { morale: 2, form: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: 2, morale: 1 }, id: "a" },
+      { delta: { form: -2, morale: 2, rating: 2 }, id: "b" },
+    ],
     id: "worlds-02",
     pool: "worlds",
-    choices: [
-      { id: "a", delta: { form: 2, morale: 1 } },
-      { id: "b", delta: { rating: 2, form: -2, morale: 2 } },
-    ],
   },
   {
+    choices: [
+      { delta: { morale: 3 }, id: "a" },
+      { delta: { form: 2, morale: -1 }, id: "b" },
+    ],
     id: "worlds-03",
     pool: "worlds",
-    choices: [
-      { id: "a", delta: { morale: 3 } },
-      { id: "b", delta: { form: 2, morale: -1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, rating: 3 }, id: "a" },
+      { delta: { form: 1, morale: 2 }, id: "b" },
+    ],
     id: "worlds-04",
     pool: "worlds",
-    choices: [
-      { id: "a", delta: { rating: 3, form: -2 } },
-      { id: "b", delta: { morale: 2, form: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -1, morale: 2 }, destiny: { streamer: 1 }, id: "a" },
+      { delta: { form: 2 }, destiny: { quit: 1 }, id: "b" },
+    ],
     id: "worlds-05",
     pool: "worlds",
-    choices: [
-      { id: "a", delta: { morale: 2, form: -1 }, destiny: { streamer: 1 } },
-      { id: "b", delta: { form: 2 }, destiny: { quit: 1 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: -2, morale: 1, rating: 3 }, id: "a" },
+      { delta: { form: 2 }, id: "b" },
+    ],
     id: "worlds-06",
     pool: "worlds",
-    choices: [
-      { id: "a", delta: { rating: 3, morale: 1, form: -2 } },
-      { id: "b", delta: { form: 2 } },
-    ],
   },
   {
+    choices: [
+      { delta: { form: 1, morale: 2, rating: -1 }, destiny: { quit: 2 }, id: "a" },
+      { delta: { form: -1, morale: 2 }, destiny: { streamer: 2 }, id: "b" },
+      { delta: { morale: 2 }, destiny: { coach: 2 }, id: "c" },
+    ],
     id: "late-01",
-    pool: "split",
     minSeason: 5,
-    choices: [
-      { id: "a", delta: { morale: 2, form: 1, rating: -1 }, destiny: { quit: 2 } },
-      { id: "b", delta: { morale: 2, form: -1 }, destiny: { streamer: 2 } },
-      { id: "c", delta: { morale: 2 }, destiny: { coach: 2 } },
-    ],
+    pool: "split",
   },
   {
+    choices: [
+      { delta: { form: -2, morale: 2 }, destiny: { streamer: 2 }, id: "a" },
+      { delta: { morale: 2, rating: -1 }, destiny: { coach: 1 }, id: "b" },
+      { delta: { form: 1, morale: 2 }, destiny: { quit: 2 }, id: "c" },
+    ],
     id: "late-02",
-    pool: "split",
     minSeason: 5,
-    choices: [
-      { id: "a", delta: { morale: 2, form: -2 }, destiny: { streamer: 2 } },
-      { id: "b", delta: { morale: 2, rating: -1 }, destiny: { coach: 1 } },
-      { id: "c", delta: { morale: 2, form: 1 }, destiny: { quit: 2 } },
-    ],
+    pool: "split",
   },
   {
-    id: "late-03",
-    pool: "split",
-    minSeason: 6,
     choices: [
-      { id: "a", delta: { morale: 2, rating: -1 }, destiny: { coach: 2 } },
-      { id: "b", delta: { morale: 2, form: -1 }, destiny: { streamer: 1 } },
-      { id: "c", delta: { form: 1, morale: 1 }, destiny: { quit: 2 } },
+      { delta: { morale: 2, rating: -1 }, destiny: { coach: 2 }, id: "a" },
+      { delta: { form: -1, morale: 2 }, destiny: { streamer: 1 }, id: "b" },
+      { delta: { form: 1, morale: 1 }, destiny: { quit: 2 }, id: "c" },
     ],
+    id: "late-03",
+    minSeason: 6,
+    pool: "split",
   },
 ];
 

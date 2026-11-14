@@ -38,8 +38,8 @@ describe(PlayerComparisonService, () => {
   it("counts each player's series record", async () => {
     const { comparison } = await compareZenWithVatira();
 
-    expect(comparison.a.series).toStrictEqual({ wins: 2, losses: 2 });
-    expect(comparison.b.series).toStrictEqual({ wins: 1, losses: 2 });
+    expect(comparison.a.series).toStrictEqual({ losses: 2, wins: 2 });
+    expect(comparison.b.series).toStrictEqual({ losses: 2, wins: 1 });
   });
 
   it("totals earnings from redistributable prizes only", async () => {
@@ -56,7 +56,7 @@ describe(PlayerComparisonService, () => {
 
     expect(comparison.a.player).toBe(vatira);
     expect(comparison.headToHead).toStrictEqual({ a: 1, b: 1 });
-    expect(comparison.b.series).toStrictEqual({ wins: 2, losses: 2 });
+    expect(comparison.b.series).toStrictEqual({ losses: 2, wins: 2 });
   });
 
   it("rejects a player compared with themselves", async () => {

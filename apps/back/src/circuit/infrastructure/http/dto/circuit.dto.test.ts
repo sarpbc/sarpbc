@@ -25,9 +25,9 @@ describe("create-circuit body", () => {
 
 describe("update-circuit body", () => {
   it("leaves omitted fields unchanged, clears optional fields and keeps the season and source", () => {
-    expect(UpdateCircuitDto.parse({ region: null, description: null })).toStrictEqual({
-      region: null,
+    expect(UpdateCircuitDto.parse({ description: null, region: null })).toStrictEqual({
       description: null,
+      region: null,
     });
     expect(UpdateCircuitDto.safeParse({ season: null }).success).toBe(false);
     expect(UpdateCircuitDto.safeParse({ sourceUrl: null }).success).toBe(false);
@@ -37,25 +37,25 @@ describe("update-circuit body", () => {
 
 describe("set-circuit-stage body", () => {
   const TEAM = "11111111-1111-4111-8111-111111111111";
-  const stage = { scale: [{ from: 9, to: 12, points: 2 }], sourceUrl: RULES };
+  const stage = { scale: [{ from: 9, points: 2, to: 12 }], sourceUrl: RULES };
 
   it("accepts a worldwide flag, region teams and staff-entered final placements", () => {
     expect(
       SetCircuitStageDto.parse({
         ...stage,
-        worldwide: true,
+        finishes: [{ placement: 9, teamId: TEAM }],
         regionTeamIds: [TEAM],
-        finishes: [{ teamId: TEAM, placement: 9 }],
+        worldwide: true,
       }),
-    ).toMatchObject({ worldwide: true, regionTeamIds: [TEAM] });
+    ).toMatchObject({ regionTeamIds: [TEAM], worldwide: true });
     expect(SetCircuitStageDto.safeParse(stage).success).toBe(true);
   });
 
   it("refuses team references that are not UUIDs and placements below 1", () => {
     for (const body of [
       { ...stage, regionTeamIds: ["kc"] },
-      { ...stage, finishes: [{ teamId: TEAM, placement: 0 }] },
-      { ...stage, finishes: [{ teamId: "kc", placement: 9 }] },
+      { ...stage, finishes: [{ placement: 0, teamId: TEAM }] },
+      { ...stage, finishes: [{ placement: 9, teamId: "kc" }] },
     ]) {
       expect(SetCircuitStageDto.safeParse(body).success).toBe(false);
     }

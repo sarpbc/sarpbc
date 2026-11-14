@@ -26,7 +26,7 @@ export const parseBracketRoundFromName = (name: string | undefined): BracketRoun
       column = 4;
     }
 
-    return { section: "upper", column };
+    return { column, section: "upper" };
   }
 
   if (normalized.includes("lower bracket")) {
@@ -40,7 +40,7 @@ export const parseBracketRoundFromName = (name: string | undefined): BracketRoun
       column = 2;
     }
 
-    return { section: "lower", column };
+    return { column, section: "lower" };
   }
 
   if (normalized.includes("grand final") || normalized.includes("semifinal")) {
@@ -54,7 +54,7 @@ export const parseBracketRoundFromName = (name: string | undefined): BracketRoun
       column = 4;
     }
 
-    return { section: "finals", column };
+    return { column, section: "finals" };
   }
 
   return null;

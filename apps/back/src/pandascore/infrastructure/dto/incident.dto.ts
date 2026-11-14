@@ -23,19 +23,19 @@ const upsert = z.discriminatedUnion("type", [
   z.object({
     ...base,
     change_type: change,
-    type: z.literal("tournament"),
     object: tournamentSchema,
+    type: z.literal("tournament"),
   }),
-  z.object({ ...base, change_type: change, type: z.literal("match"), object: matchSchema }),
-  z.object({ ...base, change_type: change, type: z.literal("team"), object: teamSchema }),
+  z.object({ ...base, change_type: change, object: matchSchema, type: z.literal("match") }),
+  z.object({ ...base, change_type: change, object: teamSchema, type: z.literal("team") }),
   z.object({
     ...base,
     change_type: change,
-    type: z.literal("player"),
     object: currentPlayerSchema,
+    type: z.literal("player"),
   }),
-  z.object({ ...base, change_type: change, type: z.literal("league"), object: leagueSchema }),
-  z.object({ ...base, change_type: change, type: z.literal("serie"), object: serieSchema }),
+  z.object({ ...base, change_type: change, object: leagueSchema, type: z.literal("league") }),
+  z.object({ ...base, change_type: change, object: serieSchema, type: z.literal("serie") }),
 ]);
 
 export const incidentSchema = z.union([
@@ -43,12 +43,12 @@ export const incidentSchema = z.union([
   z.object({
     ...base,
     change_type: z.literal("deletion"),
-    type: z.enum(["league", "match", "player", "serie", "team", "tournament"]),
     object: z
       .object({ reason: z.string().nullish() })
       .nullish()
       .catch(null)
       .transform((deletion) => deletion?.reason ?? null),
+    type: z.enum(["league", "match", "player", "serie", "team", "tournament"]),
   }),
 ]);
 

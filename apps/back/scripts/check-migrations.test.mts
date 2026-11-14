@@ -41,15 +41,15 @@ const repository = (baseMigrations: string[]): Repository => {
   );
 
   return {
-    directory,
     add: (name: string) => {
       writeFileSync(path.join(directory, name), "");
     },
     delete: (name: string) => {
       rmSync(path.join(directory, name));
     },
+    directory,
     remove: () => {
-      rmSync(root, { recursive: true, force: true });
+      rmSync(root, { force: true, recursive: true });
     },
   };
 };

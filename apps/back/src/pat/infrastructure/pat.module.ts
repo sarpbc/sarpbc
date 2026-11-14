@@ -8,16 +8,16 @@ import { tokenSecrets } from "./token-secrets";
 
 @Module({
   controllers: [PatController],
+  exports: [PatService, PatAuthGuard],
   providers: [
     TokenRepository,
     {
+      inject: [TokenRepository, UserService],
       provide: PatService,
       useFactory: (tokens: TokenRepository, users: UserService) =>
         new PatService(tokens, users, tokenSecrets),
-      inject: [TokenRepository, UserService],
     },
     PatAuthGuard,
   ],
-  exports: [PatService, PatAuthGuard],
 })
 export class PatModule {}

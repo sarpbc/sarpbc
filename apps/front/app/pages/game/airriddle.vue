@@ -32,10 +32,10 @@ const hiddenInputRef = useTemplateRef("hiddenInputRef");
 const isMobile = useMediaQuery("(max-width: 639px)");
 
 const gameState = reactive<GameState>({
-  targetLength: 0,
   attempts: [],
-  isWon: false,
   isGameOver: false,
+  isWon: false,
+  targetLength: 0,
 });
 
 const targetLength = computed(() => gameState.targetLength);
@@ -128,11 +128,11 @@ const persistGameState = () => {
   }
 
   saveAirRiddleStoredState({
-    targetLength: gameState.targetLength,
-    attempts: gameState.attempts,
-    isWon: gameState.isWon,
-    isGameOver: gameState.isGameOver,
     answer: answer.value,
+    attempts: gameState.attempts,
+    isGameOver: gameState.isGameOver,
+    isWon: gameState.isWon,
+    targetLength: gameState.targetLength,
   });
 };
 
@@ -267,8 +267,8 @@ const onPhysicalKeydown = (event: KeyboardEvent) => {
 };
 
 setPageSeo({
-  title: t("page.game.airriddle.seo.title"),
   description: t("page.game.airriddle.seo.description"),
+  title: t("page.game.airriddle.seo.title"),
 });
 
 onMounted(() => {

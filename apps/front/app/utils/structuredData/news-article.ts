@@ -45,19 +45,19 @@ export const buildNewsArticleJsonLd = (article: BuildNewsArticleJsonLdInput): Ne
   return compactJsonLd<NewsArticleLd>({
     "@context": SCHEMA_ORG,
     "@type": "NewsArticle",
-    headline: article.title,
-    datePublished: article.createdAt,
-    url,
-    description,
-    image,
     author: isNonEmptyString(authorName)
       ? {
           "@type": "Person",
           name: authorName,
         }
       : undefined,
+    datePublished: article.createdAt,
+    description,
+    headline: article.title,
+    image,
     publisher: {
       "@id": ORGANIZATION_ID,
     },
+    url,
   });
 };

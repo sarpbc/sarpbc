@@ -10,9 +10,9 @@ export class AirRiddle {
 export const AirRiddleSchema = defineEntity({
   class: AirRiddle,
   properties: {
+    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     playerId: p.string(),
     playerName: p.string(),
-    createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
   },
 });

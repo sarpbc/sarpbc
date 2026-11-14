@@ -28,13 +28,13 @@ const {
 } = await useAsyncData<CircuitStandings | null>(
   () => `circuit-standings-${slug.value}`,
   () => getCircuitStandings(slug.value),
-  { watch: [slug], default: () => null },
+  { default: () => null, watch: [slug] },
 );
 
 if (!standings.value) {
   throwEntityLoadError(error.value, {
-    notFound: t("page.circuits.standings.notFound"),
     failed: t("page.circuits.standings.error"),
+    notFound: t("page.circuits.standings.notFound"),
   });
 }
 
@@ -51,11 +51,11 @@ const tableRows = computed<StandingTableRow[]>(() => {
   const cutoffIndex = spots === null ? -1 : current.rows.findLastIndex((row) => row.rank <= spots);
 
   return current.rows.map((row, index) => ({
-    row,
     cells: current.events.map(
       ({ event }) => row.events.find((cell) => cell.eventId === event.id) ?? null,
     ),
     cutoffBelow: index === cutoffIndex && index < current.rows.length - 1,
+    row,
   }));
 });
 
@@ -103,12 +103,12 @@ watch(
   standings,
   (current) => {
     setPageSeo({
-      title: current
-        ? t("page.circuits.standings.seoTitle", { name: current.name })
-        : t("page.circuits.index.seoTitle"),
       description: current
         ? t("page.circuits.standings.seoDescription", { name: current.name })
         : t("page.circuits.index.description"),
+      title: current
+        ? t("page.circuits.standings.seoTitle", { name: current.name })
+        : t("page.circuits.index.seoTitle"),
     });
   },
   { immediate: true },

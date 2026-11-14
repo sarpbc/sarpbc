@@ -38,9 +38,9 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const destinyPromptChoices = [
-  { id: "quit", endsCareer: true },
-  { id: "streamer", endsCareer: true },
-  { id: "coach", endsCareer: false },
+  { endsCareer: true, id: "quit" },
+  { endsCareer: true, id: "streamer" },
+  { endsCareer: false, id: "coach" },
 ] as const;
 
 const hasOffers = computed(() => offers.length > 0);

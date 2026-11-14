@@ -11,7 +11,7 @@ const reportError = useReportError();
 const { data, status, error, refresh } = await useLazyAsyncData(
   "admin-tournament-leagues",
   () => getTournamentLeagues(),
-  { server: false, default: () => [] },
+  { default: () => [], server: false },
 );
 
 const breadcrumbItems = computed(() => [
@@ -20,15 +20,15 @@ const breadcrumbItems = computed(() => [
 ]);
 
 const columns: TableColumn<League>[] = [
-  { id: "image", header: "" },
+  { header: "", id: "image" },
   { accessorKey: "name", header: t("page.tournaments.leagues.form.name") },
   {
-    id: "slug",
-    header: t("page.tournaments.form.slug"),
     cell: ({ row }) => row.original.slug ?? "-",
+    header: t("page.tournaments.form.slug"),
+    id: "slug",
   },
-  { id: "source", header: t("page.tournaments.columns.source") },
-  { id: "actions", header: t("page.tournaments.columns.actions") },
+  { header: t("page.tournaments.columns.source"), id: "source" },
+  { header: t("page.tournaments.columns.actions"), id: "actions" },
 ];
 
 interface LeagueFormState {
@@ -40,7 +40,7 @@ interface LeagueFormState {
 
 const isOpen = ref(false);
 const editing = ref<League | null>(null);
-const form = ref<LeagueFormState>({ name: "", slug: "", url: "", imageUrl: "" });
+const form = ref<LeagueFormState>({ imageUrl: "", name: "", slug: "", url: "" });
 const isSaving = ref(false);
 const isUploading = ref(false);
 const isSynced = computed(() => (editing.value?.pandascoreId ?? null) !== null);
@@ -50,10 +50,10 @@ const isPandascore = (league: League): boolean => league.pandascoreId !== null;
 const openForm = (league: League | null) => {
   editing.value = league;
   form.value = {
+    imageUrl: league?.imageUrl ?? "",
     name: league?.name ?? "",
     slug: league?.slug ?? "",
     url: league?.url ?? "",
-    imageUrl: league?.imageUrl ?? "",
   };
   isOpen.value = true;
 };
@@ -65,10 +65,10 @@ const buildPayload = (): LeagueInput => {
 
   if (!league) {
     return {
+      imageUrl: imageUrl ?? undefined,
       name: form.value.name.trim(),
       slug: form.value.slug.trim() || undefined,
       url: form.value.url.trim() || undefined,
-      imageUrl: imageUrl ?? undefined,
     };
   }
 
@@ -77,10 +77,10 @@ const buildPayload = (): LeagueInput => {
   }
 
   return {
+    imageUrl,
     name: form.value.name.trim(),
     slug: form.value.slug.trim() || null,
     url: form.value.url.trim() || null,
-    imageUrl,
   };
 };
 
@@ -90,7 +90,7 @@ const handleSubmit = async () => {
   }
 
   if (!isSynced.value && !form.value.name.trim()) {
-    toast.add({ title: t("page.tournaments.leagues.form.nameRequired"), color: "error" });
+    toast.add({ color: "error", title: t("page.tournaments.leagues.form.nameRequired") });
 
     return;
   }
@@ -102,10 +102,10 @@ const handleSubmit = async () => {
       ? updateLeague(editing.value.id, buildPayload())
       : createLeague(buildPayload()));
     toast.add({
+      color: "success",
       title: editing.value
         ? t("page.tournaments.leagues.saved")
         : t("page.tournaments.leagues.created"),
-      color: "success",
     });
     isOpen.value = false;
     await refresh();

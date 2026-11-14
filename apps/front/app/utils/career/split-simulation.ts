@@ -71,9 +71,9 @@ const eventRng = (careerId: string, season: number, key: string): (() => number)
   createRng(hashString(`${careerId}:sim:${season}:${key}`));
 
 const emptySplitSimulation = (): SplitSimulation => ({
-  regionals: Array.from({ length: REGIONALS_PER_SPLIT }, () => "group"),
   major: null,
   points: 0,
+  regionals: Array.from({ length: REGIONALS_PER_SPLIT }, () => "group"),
 });
 
 const rawRegionalPoints = (sim: Pick<SplitSimulation, "regionals">): number =>
@@ -91,15 +91,15 @@ export const circuitPointsForSplit = (
 
 export const getSplitFeedback = (sim: SplitSimulation): Partial<CareerStats> => {
   if (sim.major === "winner") {
-    return { rating: 5, morale: 4 };
+    return { morale: 4, rating: 5 };
   }
 
   if (sim.major === "finalist" || sim.major === "top4") {
-    return { rating: 2, morale: 2 };
+    return { morale: 2, rating: 2 };
   }
 
   if (sim.major === "unavailable") {
-    return { morale: -2, form: -1 };
+    return { form: -1, morale: -2 };
   }
 
   if (sim.major !== null) {
@@ -112,15 +112,15 @@ export const getSplitFeedback = (sim: SplitSimulation): Partial<CareerStats> => 
 export const getWorldsFeedback = (placement: CareerPlacement): Partial<CareerStats> => {
   switch (placement) {
     case "winner": {
-      return { rating: 5, morale: 5 };
+      return { morale: 5, rating: 5 };
     }
 
     case "finalist": {
-      return { rating: 3, morale: 3 };
+      return { morale: 3, rating: 3 };
     }
 
     case "top4": {
-      return { rating: 2, morale: 2 };
+      return { morale: 2, rating: 2 };
     }
 
     case "top8": {
@@ -247,7 +247,7 @@ export const splitFieldToResult = (
     points[teamId] = sim.points;
   }
 
-  return { season, split, points };
+  return { points, season, split };
 };
 
 export const upsertSplitField = (

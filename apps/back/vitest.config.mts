@@ -4,34 +4,7 @@ import { defineConfig } from "vitest/config";
 export default defineConfig({
   plugins: [swc.vite({ module: { type: "es6" } })],
   test: {
-    environment: "node",
-    maxWorkers: 2,
-    projects: [
-      {
-        extends: true,
-        test: {
-          name: "unit",
-          include: ["src/**/*.test.ts"],
-          setupFiles: ["./test/vitest.setup.ts"],
-        },
-      },
-      {
-        extends: true,
-        test: {
-          name: "e2e",
-          include: ["test/**/*.e2e.test.ts"],
-          setupFiles: ["./test/vitest.setup.ts"],
-        },
-      },
-      {
-        extends: true,
-        test: { name: "integration", include: ["test/**/*.integration.test.mts"] },
-      },
-    ],
     coverage: {
-      provider: "v8",
-      reportsDirectory: "./coverage",
-      include: ["src/**/*.ts"],
       exclude: [
         "src/**/*.test.ts",
         "src/**/*.d.ts",
@@ -45,8 +18,35 @@ export default defineConfig({
         "src/mikro-orm.config.ts",
         "src/mikro-orm.entities.ts",
       ],
+      include: ["src/**/*.ts"],
+      provider: "v8",
       reporter: ["text", "html", "lcov", "json-summary"],
+      reportsDirectory: "./coverage",
       thresholds: { lines: 70, statements: 70 },
     },
+    environment: "node",
+    maxWorkers: 2,
+    projects: [
+      {
+        extends: true,
+        test: {
+          include: ["src/**/*.test.ts"],
+          name: "unit",
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: {
+          include: ["test/**/*.e2e.test.ts"],
+          name: "e2e",
+          setupFiles: ["./test/vitest.setup.ts"],
+        },
+      },
+      {
+        extends: true,
+        test: { include: ["test/**/*.integration.test.mts"], name: "integration" },
+      },
+    ],
   },
 });

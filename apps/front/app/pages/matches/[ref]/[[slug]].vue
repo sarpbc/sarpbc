@@ -41,15 +41,15 @@ const {
     }
   },
   {
-    watch: [matchRef],
     default: () => null,
+    watch: [matchRef],
   },
 );
 
 if (!matchDetail.value) {
   throwEntityLoadError(error.value, {
-    notFound: t("page.match.detail.notFound"),
     failed: t("page.match.detail.error"),
+    notFound: t("page.match.detail.notFound"),
   });
 }
 
@@ -162,8 +162,8 @@ watch(
 
     trackMatchDetailViewed({
       matchId: match.value.id,
-      status: matchStatus.value,
       source: discoverySource.value,
+      status: matchStatus.value,
     });
   },
   { immediate: true },
@@ -209,12 +209,12 @@ const seoDescription = computed(() => {
 
     case "upcoming": {
       return t("page.match.detail.seoDescriptionUpcoming", {
-        teamA: teamAName,
-        teamB: teamBName,
-        tournament,
         date: match.value.beginAt
           ? dateTimeFormatter.value.format(new Date(match.value.beginAt))
           : "",
+        teamA: teamAName,
+        teamB: teamBName,
+        tournament,
       });
     }
 
@@ -231,11 +231,11 @@ const seoDescription = computed(() => {
       const scoreB = teamB.value ? getParticipantScore(match.value, teamB.value.id) : null;
 
       return t("page.match.detail.seoDescriptionFinished", {
+        scoreA: scoreA ?? "-",
+        scoreB: scoreB ?? "-",
         teamA: teamAName,
         teamB: teamBName,
         tournament,
-        scoreA: scoreA ?? "-",
-        scoreB: scoreB ?? "-",
       });
     }
 
@@ -257,9 +257,9 @@ watch(
   [seoTitle, seoDescription, match],
   () => {
     setPageSeo({
-      title: seoTitle.value,
       description: seoDescription.value,
       image: match.value ? getMatchOgImageUrl(match.value.id) : undefined,
+      title: seoTitle.value,
     });
   },
   { immediate: true },

@@ -12,23 +12,23 @@ import { transactionalForum } from "./composition";
 import { TopicInitializer } from "./topic-initializer";
 
 @Module({
-  imports: [ReplyModule],
   controllers: [ForumController, PostController, TopicController],
+  exports: [PostService, TopicService],
+  imports: [ReplyModule],
   providers: [
     {
+      inject: [EntityManager],
       provide: PostService,
       useFactory: (em: EntityManager) =>
         new PostService(new MikroPostStore(em), transactionalForum(em)),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: TopicService,
       useFactory: (em: EntityManager) =>
         new TopicService(new MikroTopicStore(em), transactionalForum(em)),
-      inject: [EntityManager],
     },
     TopicInitializer,
   ],
-  exports: [PostService, TopicService],
 })
 export class ForumModule {}

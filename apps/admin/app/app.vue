@@ -5,14 +5,14 @@ const appConfig = useAppConfig();
 const { locale } = useI18n();
 
 useHead({
-  meta: [
-    { charset: "utf-8" },
-    { name: "viewport", content: "width=device-width, initial-scale=1" },
-  ],
-  link: [{ rel: "icon", type: "image/svg+xml", href: "/sarpbc.svg" }],
   htmlAttrs: {
     lang: computed(() => uiLocale(locale.value)),
   },
+  link: [{ href: "/sarpbc.svg", rel: "icon", type: "image/svg+xml" }],
+  meta: [
+    { charset: "utf-8" },
+    { content: "width=device-width, initial-scale=1", name: "viewport" },
+  ],
 });
 </script>
 

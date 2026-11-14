@@ -27,7 +27,7 @@ const save = async () => {
 
   try {
     await setMatchSource(matchId, normalizeSourceUrl(value.value));
-    toast.add({ title: t("page.tournaments.matchSource.saved"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.matchSource.saved") });
     open.value = false;
     emit("saved");
   } catch (error) {

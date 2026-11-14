@@ -82,7 +82,7 @@ export class StreamerService {
     }
 
     try {
-      await this.cache.write({ streams, fetchedAt: this.now() }, claim);
+      await this.cache.write({ fetchedAt: this.now(), streams }, claim);
     } catch (error) {
       this.reportFailure("cache", error);
     }
@@ -102,11 +102,11 @@ export class StreamerService {
 
     return byViewerCount(
       live.map((stream) => ({
-        login: stream.login,
         displayName: names.get(stream.login) ?? stream.displayName,
+        login: stream.login,
         title: stream.title,
-        viewerCount: stream.viewerCount,
         url: twitchChannelUrl(stream.login),
+        viewerCount: stream.viewerCount,
       })),
     );
   }

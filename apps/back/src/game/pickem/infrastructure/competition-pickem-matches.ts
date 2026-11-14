@@ -8,14 +8,14 @@ export class CompetitionPickemMatches implements PickemMatches {
 
     return match
       ? {
-          id: match.id,
-          pickemsEnabled: match.tournament.pickemsEnabled,
           beginAt: match.beginAt,
           endAt: match.endAt,
-          status: match.status,
+          id: match.id,
           participantIds: match.participants.map((p) => p.id),
-          winnerId: match.winner?.id ?? null,
+          pickemsEnabled: match.tournament.pickemsEnabled,
           results: match.results.map((r) => ({ participantId: r.participant.id, score: r.score })),
+          status: match.status,
+          winnerId: match.winner?.id ?? null,
         }
       : null;
   }

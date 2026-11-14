@@ -50,7 +50,7 @@ const requireEligibleAward = async (
     );
   }
 
-  return { tournament, participant };
+  return { participant, tournament };
 };
 
 const requireProposableAward = async (
@@ -115,7 +115,7 @@ export class PlayerAwardService {
     return await this.transaction.run(async ({ awards }) => {
       await requireEligibleAward(awards, tournamentId, { participantId }, playerId);
 
-      return await awards.create({ tournamentId, participantId, playerId, awardType });
+      return await awards.create({ awardType, participantId, playerId, tournamentId });
     });
   }
   async requireProposable(
@@ -144,7 +144,7 @@ export class PlayerAwardService {
         awardType,
       );
 
-      return await awards.create({ tournamentId, participantId, playerId, awardType });
+      return await awards.create({ awardType, participantId, playerId, tournamentId });
     });
   }
   async delete(tournamentId: string, awardId: string) {

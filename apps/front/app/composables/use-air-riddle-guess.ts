@@ -37,11 +37,11 @@ export const useAirRiddleGuess = (maxLength: Ref<number>) => {
   );
 
   return {
-    currentGuess,
-    canSubmit,
-    setGuess,
     appendToGuess,
-    removeFromGuess,
+    canSubmit,
     clearGuess,
+    currentGuess,
+    removeFromGuess,
+    setGuess,
   };
 };

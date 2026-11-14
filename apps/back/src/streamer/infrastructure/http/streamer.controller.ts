@@ -21,10 +21,10 @@ import { CreateStreamerDto } from "./dto/create-streamer.dto";
 import type { CreateStreamerInput } from "./dto/create-streamer.dto";
 
 const mapTrackedStreamer = (streamer: TrackedStreamerRecord): TrackedStreamer => ({
+  createdAt: streamer.createdAt.toISOString(),
+  displayName: streamer.displayName,
   id: streamer.id,
   login: streamer.login,
-  displayName: streamer.displayName,
-  createdAt: streamer.createdAt.toISOString(),
 });
 
 @Controller("streamers")

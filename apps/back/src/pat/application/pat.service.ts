@@ -40,7 +40,7 @@ export class PatService {
     const { raw, hash } = this.secrets.issue();
     const token = await this.tokens.create(userId, name, hash);
 
-    return { id: token.id, name: token.name, createdAt: token.createdAt, token: raw };
+    return { createdAt: token.createdAt, id: token.id, name: token.name, token: raw };
   }
 
   async listTokens(userId: string): Promise<TokenSummary[]> {
@@ -69,6 +69,6 @@ export class PatService {
       await this.tokens.touch(token.id, now);
     }
 
-    return { id: token.owner.id, email: token.owner.email, role: token.owner.role };
+    return { email: token.owner.email, id: token.owner.id, role: token.owner.role };
   }
 }

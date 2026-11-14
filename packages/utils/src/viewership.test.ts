@@ -4,10 +4,10 @@ import type { Viewership } from "@sarpbc/types";
 import { isForbiddenViewershipSource, parseViewership } from "./viewership";
 
 const VALID: Viewership = {
-  peakViewers: 120_000,
   averageViewers: 80_000,
-  scope: "official",
   measuredAt: "2026-05-24T18:00:00+02:00",
+  peakViewers: 120_000,
+  scope: "official",
   sourceName: " Esports Charts ",
   sourceUrl: " https://escharts.com/tournaments/rl/fake-open ",
 };

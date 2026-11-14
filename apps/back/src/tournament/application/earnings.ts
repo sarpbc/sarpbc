@@ -22,7 +22,7 @@ const totals = (lines: ShareLine[]): PrizeAmount[] => {
 
   return [...byCurrency]
     .toSorted(([a], [b]) => a.localeCompare(b))
-    .map(([currency, amount]) => ({ currency, amount: amount / minorUnitScale(currency) }));
+    .map(([currency, amount]) => ({ amount: amount / minorUnitScale(currency), currency }));
 };
 
 const yearOf = (entry: EarningsEntry): number | null => {
@@ -48,9 +48,9 @@ export const summarizeEarnings = (lines: EarningsLine[]): ProfileEarnings => {
   const grouped: EarningsYear[] = [...years]
     .toSorted(([a], [b]) => (b ?? -Infinity) - (a ?? -Infinity))
     .map(([year, yearLines]) => ({
-      year,
-      totals: totals(yearLines),
       entries: yearLines.map(({ entry }) => entry),
+      totals: totals(yearLines),
+      year,
     }));
 
   return { totals: totals(shares), years: grouped };

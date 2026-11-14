@@ -5,15 +5,15 @@ import { Tournament } from "./tournament";
 import { pandascoreStreams, replaceStreams } from "./stream";
 
 const official: StreamInput = {
-  url: "https://twitch.tv/rlesports",
-  language: "en",
   kind: "official",
+  language: "en",
+  url: "https://twitch.tv/rlesports",
 };
 
-const costream: StreamInput = { url: "https://kick.com/kameto", language: "fr", kind: "costream" };
+const costream: StreamInput = { kind: "costream", language: "fr", url: "https://kick.com/kameto" };
 
 const stream = (url: string, source: Stream["source"] = "manual"): Stream => {
-  const streamUrl = replaceStreams([], [{ url, language: "en", kind: "official" }], "manual").at(0);
+  const streamUrl = replaceStreams([], [{ kind: "official", language: "en", url }], "manual").at(0);
 
   if (streamUrl === undefined) {
     throw new Error("fixture");
@@ -25,15 +25,15 @@ const stream = (url: string, source: Stream["source"] = "manual"): Stream => {
 const matchIn = (tournament: { streams: Stream[]; eventStreams: Stream[] }): Match =>
   Object.assign(new Match(), {
     tournament: {
-      id: "stage",
-      name: "Playoffs",
-      slug: "playoffs",
-      event: { id: "event", slug: "rlcs", name: "RLCS" },
       beginAt: null,
+      event: { id: "event", name: "RLCS", slug: "rlcs" },
+      id: "stage",
       league: null,
-      pickemsEnabled: false,
-      source: "manual",
+      name: "Playoffs",
       pandascoreId: null,
+      pickemsEnabled: false,
+      slug: "playoffs",
+      source: "manual",
       ...tournament,
     },
   });
@@ -44,20 +44,20 @@ describe(replaceStreams, () => {
       replaceStreams([], [official, { ...costream, language: " FR " }], "manual"),
     ).toStrictEqual([
       {
-        url: "https://twitch.tv/rlesports",
-        platform: "twitch",
         channel: "rlesports",
-        language: "en",
         kind: "official",
+        language: "en",
+        platform: "twitch",
         source: "manual",
+        url: "https://twitch.tv/rlesports",
       },
       {
-        url: "https://kick.com/kameto",
-        platform: "kick",
         channel: "kameto",
-        language: "fr",
         kind: "costream",
+        language: "fr",
+        platform: "kick",
         source: "manual",
+        url: "https://kick.com/kameto",
       },
     ]);
   });
@@ -120,27 +120,27 @@ describe(pandascoreStreams, () => {
   it("puts the main stream first and skips unusable entries", () => {
     expect(
       pandascoreStreams([
-        { url: "https://www.twitch.tv/rocketleague_es", language: "es", main: false },
-        { url: "https://www.twitch.tv/rocketleague", language: "en", main: true },
-        { url: "not a url", language: "en", main: false },
-        { url: "https://www.twitch.tv/unknown", language: "", main: false },
+        { language: "es", main: false, url: "https://www.twitch.tv/rocketleague_es" },
+        { language: "en", main: true, url: "https://www.twitch.tv/rocketleague" },
+        { language: "en", main: false, url: "not a url" },
+        { language: "", main: false, url: "https://www.twitch.tv/unknown" },
       ]),
     ).toStrictEqual([
       {
-        url: "https://www.twitch.tv/rocketleague",
-        platform: "twitch",
         channel: "rocketleague",
-        language: "en",
         kind: "official",
+        language: "en",
+        platform: "twitch",
         source: "pandascore",
+        url: "https://www.twitch.tv/rocketleague",
       },
       {
-        url: "https://www.twitch.tv/rocketleague_es",
-        platform: "twitch",
         channel: "rocketleague_es",
-        language: "es",
         kind: "official",
+        language: "es",
+        platform: "twitch",
         source: "pandascore",
+        url: "https://www.twitch.tv/rocketleague_es",
       },
     ]);
   });
@@ -149,7 +149,7 @@ describe(pandascoreStreams, () => {
 describe("pandascoreStreams upgrades", () => {
   it("serves a PandaScore http link over https", () => {
     expect(
-      pandascoreStreams([{ url: "http://www.twitch.tv/legacy", language: "en", main: true }]).map(
+      pandascoreStreams([{ language: "en", main: true, url: "http://www.twitch.tv/legacy" }]).map(
         (s) => s.url,
       ),
     ).toStrictEqual(["https://www.twitch.tv/legacy"]);
@@ -162,12 +162,12 @@ describe("watch streams", () => {
   const matchStream = stream("https://twitch.tv/stream-b");
 
   it("shows the tournament list on a match without its own list", () => {
-    const match = matchIn({ streams: [stageStream], eventStreams: [eventStream] });
+    const match = matchIn({ eventStreams: [eventStream], streams: [stageStream] });
     expect(match.watchStreams()).toStrictEqual([stageStream]);
   });
 
   it("falls back to the event list when neither the match nor the tournament has one", () => {
-    const match = matchIn({ streams: [], eventStreams: [eventStream] });
+    const match = matchIn({ eventStreams: [eventStream], streams: [] });
     expect(match.watchStreams()).toStrictEqual([eventStream]);
     expect(
       Object.assign(new Tournament(), { eventStreams: [eventStream] }).watchStreams(),
@@ -175,15 +175,15 @@ describe("watch streams", () => {
   });
 
   it("replaces the inherited list entirely with the match override", () => {
-    const match = matchIn({ streams: [stageStream], eventStreams: [eventStream] });
+    const match = matchIn({ eventStreams: [eventStream], streams: [stageStream] });
     match.streams = [matchStream];
     expect(match.watchStreams()).toStrictEqual([matchStream]);
     expect(match.inheritedStreams()).toStrictEqual([stageStream]);
   });
 
   it("prefers the PandaScore match feed over the tournament list, and staff overrides over both", () => {
-    const match = matchIn({ streams: [stageStream], eventStreams: [] });
-    match.officialStreams = [{ url: "https://twitch.tv/rocketleague", language: "en", main: true }];
+    const match = matchIn({ eventStreams: [], streams: [stageStream] });
+    match.officialStreams = [{ language: "en", main: true, url: "https://twitch.tv/rocketleague" }];
     expect(match.watchStreams().map((s) => s.source)).toStrictEqual(["pandascore"]);
     match.streams = [matchStream];
     expect(match.watchStreams()).toStrictEqual([matchStream]);
@@ -191,8 +191,8 @@ describe("watch streams", () => {
 
   it("prefers a tournament list over its event list", () => {
     const tournament = Object.assign(new Tournament(), {
-      streams: [stageStream],
       eventStreams: [eventStream],
+      streams: [stageStream],
     });
 
     expect(tournament.watchStreams()).toStrictEqual([stageStream]);

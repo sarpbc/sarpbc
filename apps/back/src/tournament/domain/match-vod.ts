@@ -14,10 +14,10 @@ export interface MatchVodInput extends MatchVodLink {
 }
 
 const URL_ERRORS = {
+  "invalid-timestamp": "has an invalid t= timestamp (use seconds or 1h2m3s)",
   "invalid-url": "is not a valid URL",
   "not-https": "must use https",
   "unsupported-host": "must be a twitch.tv, youtube.com or youtu.be link",
-  "invalid-timestamp": "has an invalid t= timestamp (use seconds or 1h2m3s)",
 } satisfies Record<MatchVodUrlError, string>;
 
 const invalid = (index: number, reason: string): InvalidInputError =>
@@ -62,7 +62,7 @@ export const normalizeMatchVods = (
     }
 
     seen.add(key);
-    vods.push({ game: input.game, url: parsed.url, language, source: parsed.source });
+    vods.push({ game: input.game, language, source: parsed.source, url: parsed.url });
   }
 
   for (let game = 1; game <= maxGame; game += 1) {

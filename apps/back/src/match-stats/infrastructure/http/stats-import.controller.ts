@@ -20,8 +20,8 @@ import type { RequestStatsImportInput } from "./dto/request-stats-import.dto";
 const present = (statsImport: StatsImport): StatsImportResponse => ({
   ...statsImport,
   createdAt: statsImport.createdAt.toISOString(),
-  startedAt: statsImport.startedAt?.toISOString() ?? null,
   finishedAt: statsImport.finishedAt?.toISOString() ?? null,
+  startedAt: statsImport.startedAt?.toISOString() ?? null,
 });
 
 @Controller("tournaments/:id/stats-imports")

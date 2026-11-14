@@ -68,9 +68,9 @@ const formatValue = (key: string, value: string | boolean | null): string => {
 
 const formatAmount = (amount: number, currency: string): string =>
   new Intl.NumberFormat(parseLocale(locale.value), {
-    style: "currency",
     currency,
     maximumFractionDigits: 0,
+    style: "currency",
   }).format(amount);
 
 const optionalRow = (
@@ -433,8 +433,8 @@ const changeRows = (proposal: RosterProposal): ProposalRow[] => {
 };
 
 const logoBackgrounds = [
-  { key: "light", class: "bg-white" },
-  { key: "dark", class: "bg-neutral-950" },
+  { class: "bg-white", key: "light" },
+  { class: "bg-neutral-950", key: "dark" },
 ] as const;
 
 const review = async (proposal: RosterProposal, action: "approve" | "reject") => {
@@ -447,11 +447,11 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
   try {
     await reviewRosterProposal(proposal.id, action);
     toast.add({
+      color: "success",
       title:
         action === "approve"
           ? t("page.proposals.messages.approved")
           : t("page.proposals.messages.rejected"),
-      color: "success",
     });
     await refresh();
   } catch (reviewError) {

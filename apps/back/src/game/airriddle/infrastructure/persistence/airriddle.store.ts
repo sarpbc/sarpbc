@@ -10,10 +10,10 @@ export class MikroDailyRiddles implements DailyRiddles {
 
     return row
       ? {
+          createdAt: new Date(row.createdAt),
           id: row.id,
           playerId: row.playerId,
           playerName: row.playerName,
-          createdAt: new Date(row.createdAt),
         }
       : null;
   }

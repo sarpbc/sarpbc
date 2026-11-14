@@ -24,15 +24,15 @@ const {
   () => `tournament-path-${eventParam.value}`,
   () => resolveTournamentPath([eventParam.value]),
   {
-    watch: [eventParam],
     default: () => null,
+    watch: [eventParam],
   },
 );
 
 if (!resolved.value) {
   throwEntityLoadError(error.value, {
-    notFound: t("page.tournaments.event.notFound"),
     failed: t("page.tournaments.event.error"),
+    notFound: t("page.tournaments.event.notFound"),
   });
 }
 
@@ -82,11 +82,11 @@ const tabItems = computed(() => {
   const path = event.value ? localePath(tournamentEventPath(event.value.slug)) : route.path;
 
   return [
-    { to: path, label: t("common.overview"), active: !showStats.value },
+    { active: !showStats.value, label: t("common.overview"), to: path },
     {
-      to: { path, query: { tab: "stats" } },
-      label: t("page.tournaments.stats.tab"),
       active: showStats.value,
+      label: t("page.tournaments.stats.tab"),
+      to: { path, query: { tab: "stats" } },
     },
   ];
 });
@@ -119,12 +119,12 @@ watch(
   event,
   (current) => {
     setPageSeo({
-      title: current
-        ? t("page.tournaments.event.seoTitle", { eventName: current.name })
-        : t("page.tournaments.id.seoTitleDefault"),
       description: current
         ? t("page.tournaments.event.seoDescription", { eventName: current.name })
         : t("page.tournaments.id.seoDescriptionDefault"),
+      title: current
+        ? t("page.tournaments.event.seoTitle", { eventName: current.name })
+        : t("page.tournaments.id.seoTitleDefault"),
     });
   },
   { immediate: true },

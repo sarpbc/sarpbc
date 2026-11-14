@@ -27,7 +27,7 @@ const localePath = useLocalePath();
 const blocks = useNewsMatchBlocks();
 const { isConcealed } = useSpoilerFree();
 
-const block = computed(() => newsMatchBlockFromAttrs({ match, ids, tournament, team, limit }));
+const block = computed(() => newsMatchBlockFromAttrs({ ids, limit, match, team, tournament }));
 
 const items = computed((): MatchBlockItem[] | undefined =>
   block.value ? blocks?.items.value[newsMatchBlockKey(block.value)] : undefined,
@@ -69,9 +69,9 @@ const summary = (item: MatchBlockItem): string => {
     getMatchParticipantScore(item.results, item.participants[index]?.id) ?? "–";
 
   return t("newsTag.matchScore", {
-    teamA: teamName(item, 0),
     scoreA: score(0),
     scoreB: score(1),
+    teamA: teamName(item, 0),
     teamB: teamName(item, 1),
   });
 };

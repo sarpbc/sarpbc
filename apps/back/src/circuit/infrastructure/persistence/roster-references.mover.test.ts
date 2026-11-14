@@ -6,8 +6,8 @@ import { CircuitRosterReferences } from "./roster-references.mover";
 
 const entry = (id: string, teamId: string, stageId: string) => ({
   id,
-  team: { id: teamId },
   stage: { id: stageId },
+  team: { id: teamId },
 });
 
 const mover = (entries: ReturnType<typeof entry>[]) => {
@@ -19,7 +19,7 @@ const mover = (entries: ReturnType<typeof entry>[]) => {
     Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
   );
 
-  return { references, nativeDelete, nativeUpdate };
+  return { nativeDelete, nativeUpdate, references };
 };
 
 describe("CircuitRosterReferences.moveTeam", () => {

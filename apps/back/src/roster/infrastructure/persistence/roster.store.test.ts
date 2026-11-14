@@ -10,8 +10,8 @@ const fixture = () => {
   const findOne = vi.fn<EntityManager["findOne"]>();
 
   const manager = Object.assign(unconstructed(EntityManager), {
-    getConnection: vi.fn<() => { execute: typeof execute }>().mockReturnValue({ execute }),
     findOne,
+    getConnection: vi.fn<() => { execute: typeof execute }>().mockReturnValue({ execute }),
   });
 
   return { execute, findOne, players: new MikroPlayerStore(manager) };
@@ -34,7 +34,7 @@ describe("MikroPlayerStore.getRandomPlayer", () => {
 
     expect(result).toBeInstanceOf(Player);
     expect(result).not.toBe(row);
-    expect(result).toMatchObject({ id: "p1", name: "Vatira", slug: "vatira", photos: [] });
+    expect(result).toMatchObject({ id: "p1", name: "Vatira", photos: [], slug: "vatira" });
   });
 
   it("returns null when the table is empty without loading a player", async () => {

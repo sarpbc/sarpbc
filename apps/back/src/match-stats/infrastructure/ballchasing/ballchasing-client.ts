@@ -11,7 +11,7 @@ export const BALLCHASING_API_URL = `https://${BALLCHASING_HOST}/api`;
 type Endpoint = "list" | "group" | "replay";
 
 /** Spacing for the lowest Ballchasing tier: 2 calls/s on every endpoint used. */
-export const DEFAULT_INTERVALS_MS = { list: 500, group: 500, replay: 500 } satisfies Record<
+export const DEFAULT_INTERVALS_MS = { group: 500, list: 500, replay: 500 } satisfies Record<
   Endpoint,
   number
 >;
@@ -23,21 +23,21 @@ const FIRST_BACKOFF_MS = 1000;
 const MAX_BACKOFF_MS = 30_000;
 
 const team = z.object({
-  name: z.string().optional(),
   goals: z.number().int().nonnegative().optional(),
+  name: z.string().optional(),
   players: z.array(z.object({ name: z.string() })).optional(),
 });
 
 const replayList = z.object({
   list: z.array(
     z.object({
-      id: z.string(),
-      rocket_league_id: z.string().optional(),
-      replay_title: z.string().optional(),
+      blue: team.optional(),
       date: z.string().optional(),
       date_has_tz: z.boolean().optional(),
-      blue: team.optional(),
+      id: z.string(),
       orange: team.optional(),
+      replay_title: z.string().optional(),
+      rocket_league_id: z.string().optional(),
     }),
   ),
   next: z.string().optional(),
@@ -54,34 +54,34 @@ const replayStatus = z.object({ status: z.string() });
 const count = z.number().int().nonnegative().default(0);
 
 const detailSide = z.object({
-  stats: z.object({ core: z.object({ goals: count }) }),
   players: z
     .array(
       z.object({
+        id: z.object({ id: z.string(), platform: z.string() }).optional(),
         name: z.string(),
-        id: z.object({ platform: z.string(), id: z.string() }).optional(),
         stats: z.object({
-          core: z.object({ goals: count, assists: count, saves: count, shots: count }),
+          core: z.object({ assists: count, goals: count, saves: count, shots: count }),
           demo: z.object({ inflicted: count }),
         }),
       }),
     )
     .default([]),
+  stats: z.object({ core: z.object({ goals: count }) }),
 });
 
 const replayDetail = z.object({
-  rocket_league_id: z.string().optional(),
+  blue: detailSide,
   date: z.string().optional(),
   date_has_timezone: z.boolean().optional(),
-  blue: detailSide,
   orange: detailSide,
+  rocket_league_id: z.string().optional(),
 });
 
 type ListedReplay = z.infer<typeof replayList>["list"][number];
 
 const toTeam = (side: z.infer<typeof team> | undefined): ReplayTeam => ({
-  name: nonBlank(side?.name) ?? null,
   goals: side?.goals ?? 0,
+  name: nonBlank(side?.name) ?? null,
   playerNames: (side?.players ?? []).map((player) => player.name),
 });
 
@@ -98,26 +98,26 @@ const playedAt = (raw: string | undefined, hasTimezone: boolean | undefined): Da
 };
 
 const toSummary = (replay: ListedReplay): ReplaySummary => ({
+  blue: toTeam(replay.blue),
   id: replay.id,
-  rocketLeagueId: replay.rocket_league_id ?? null,
-  title: replay.replay_title ?? replay.id,
+  orange: toTeam(replay.orange),
   playedAt: playedAt(replay.date, replay.date_has_tz),
   playedAtHasTimezone: replay.date_has_tz === true,
-  blue: toTeam(replay.blue),
-  orange: toTeam(replay.orange),
+  rocketLeagueId: replay.rocket_league_id ?? null,
+  title: replay.replay_title ?? replay.id,
 });
 
 const toPlayers = (side: Side, detail: z.infer<typeof detailSide>): ReplayPlayerStats[] =>
   detail.players.map(({ name, id, stats }) => ({
+    assists: stats.core.assists,
+    demolitions: stats.demo.inflicted,
+    goals: stats.core.goals,
     name,
     platform: id?.platform ?? "unknown",
     platformId: id?.id === undefined || id.id === "" ? null : id.id,
-    side,
-    goals: stats.core.goals,
-    assists: stats.core.assists,
     saves: stats.core.saves,
     shots: stats.core.shots,
-    demolitions: stats.demo.inflicted,
+    side,
   }));
 
 export interface BallchasingClientOptions {
@@ -202,11 +202,11 @@ export class BallchasingClient implements BallchasingSource {
     }
 
     return {
-      rocketLeagueId: detail.data.rocket_league_id ?? null,
-      playedAt: playedAt(detail.data.date, detail.data.date_has_timezone),
       blueGoals: detail.data.blue.stats.core.goals,
       orangeGoals: detail.data.orange.stats.core.goals,
+      playedAt: playedAt(detail.data.date, detail.data.date_has_timezone),
       players: [...toPlayers("blue", detail.data.blue), ...toPlayers("orange", detail.data.orange)],
+      rocketLeagueId: detail.data.rocket_league_id ?? null,
     };
   }
 

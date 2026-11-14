@@ -30,17 +30,17 @@ const rows = computed(() =>
 
     return {
       id: match.id,
-      path: matchPath(match.publicId, match.slug),
-      title: t("page.player.slug.standIns.forTeam", {
-        team: team ? participantName(team) : t("components.match.tbd"),
-        opponent: opponent ? participantName(opponent) : t("components.match.tbd"),
-      }),
       meta: [
         tournamentStageLabel(match.tournament),
         match.beginAt ? mediumDate.value.format(new Date(match.beginAt)) : null,
       ]
         .filter((part) => part !== null)
         .join(" · "),
+      path: matchPath(match.publicId, match.slug),
+      title: t("page.player.slug.standIns.forTeam", {
+        opponent: opponent ? participantName(opponent) : t("components.match.tbd"),
+        team: team ? participantName(team) : t("components.match.tbd"),
+      }),
     };
   }),
 );

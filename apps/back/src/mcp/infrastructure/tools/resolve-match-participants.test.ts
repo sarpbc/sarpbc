@@ -13,7 +13,7 @@ const M8_ID = "22222222-2222-4222-8222-222222222222";
 const OUT_ID = "33333333-3333-4333-8333-333333333333";
 
 const team = (id: string, slug: string, name: string) =>
-  Object.assign(new Team(), { id, slug, name });
+  Object.assign(new Team(), { id, name, slug });
 
 const participant = (id: string, club: Team) =>
   Object.assign(new TournamentParticipant(), { id, team: club });
@@ -39,7 +39,7 @@ const tournament = () => {
 
   const lookup: IdOrSlugLookup<Team> = { findById, findBySlug };
 
-  return { cup, kc, m8, lookup, findById };
+  return { cup, findById, kc, lookup, m8 };
 };
 
 const noPlayers: IdOrSlugLookup<Player> = {
@@ -54,7 +54,7 @@ describe(resolveMatchParticipantIds, () => {
     const resolved = await resolveMatchParticipantIds(
       cup,
       { participantIds: ["p-kc", "p-m8"] },
-      { teams: lookup, players: noPlayers },
+      { players: noPlayers, teams: lookup },
     );
 
     expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-kc", "p-m8"]);
@@ -67,7 +67,7 @@ describe(resolveMatchParticipantIds, () => {
     const resolved = await resolveMatchParticipantIds(
       cup,
       { participantIds: ["p-kc"], teams: [kc.id, "gentle-mates", "karmine-corp"] },
-      { teams: lookup, players: noPlayers },
+      { players: noPlayers, teams: lookup },
     );
 
     expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-kc", "p-m8"]);
@@ -80,21 +80,21 @@ describe(resolveMatchParticipantIds, () => {
       resolveMatchParticipantIds(
         cup,
         { participantIds: ["missing", "p-kc"] },
-        { teams: lookup, players: noPlayers },
+        { players: noPlayers, teams: lookup },
       ),
     ).rejects.toThrow(InvalidInputError);
     await expect(
       resolveMatchParticipantIds(
         cup,
         { teams: ["missing-slug", "karmine-corp"] },
-        { teams: lookup, players: noPlayers },
+        { players: noPlayers, teams: lookup },
       ),
     ).rejects.toThrow(NotFoundError);
     await expect(
       resolveMatchParticipantIds(
         cup,
         { teams: ["outsider", "karmine-corp"] },
-        { teams: lookup, players: noPlayers },
+        { players: noPlayers, teams: lookup },
       ),
     ).rejects.toThrow('Team "Outsider" (outsider) is not registered in "Coupe"');
   });
@@ -105,7 +105,7 @@ describe(resolveMatchParticipantIds, () => {
       resolveMatchParticipantIds(
         cup,
         { teams: ["p-kc", "gentle-mates"] },
-        { teams: lookup, players: noPlayers },
+        { players: noPlayers, teams: lookup },
       ),
     ).rejects.toThrow(/participant id for Karmine Corp\. Pass it in participantIds/u);
   });
@@ -113,31 +113,31 @@ describe(resolveMatchParticipantIds, () => {
   it("requires two different participants", async () => {
     const { cup, lookup } = tournament();
     await expect(
-      resolveMatchParticipantIds(cup, {}, { teams: lookup, players: noPlayers }),
+      resolveMatchParticipantIds(cup, {}, { players: noPlayers, teams: lookup }),
     ).rejects.toThrow(/at least two different participants/u);
     await expect(
       resolveMatchParticipantIds(
         cup,
         { teams: ["karmine-corp", "karmine-corp"] },
-        { teams: lookup, players: noPlayers },
+        { players: noPlayers, teams: lookup },
       ),
     ).rejects.toThrow(/at least two different participants/u);
   });
 
   it("resolves the 1v1 participants of players without creating a team", async () => {
-    const zen = Object.assign(new Player(), { id: "zen-id", slug: "zen", name: "Zen" });
-    const vatira = Object.assign(new Player(), { id: "vatira-id", slug: "vatira", name: "Vatira" });
+    const zen = Object.assign(new Player(), { id: "zen-id", name: "Zen", slug: "zen" });
+    const vatira = Object.assign(new Player(), { id: "vatira-id", name: "Vatira", slug: "vatira" });
 
     const knockout = Object.assign(new Tournament(), {
+      format: "1v1",
       id: "knockout",
       name: "Fake Knockout",
-      format: "1v1",
       participants: [
-        Object.assign(new TournamentParticipant(), { id: "p-zen", team: null, players: [zen] }),
+        Object.assign(new TournamentParticipant(), { id: "p-zen", players: [zen], team: null }),
         Object.assign(new TournamentParticipant(), {
           id: "p-vatira",
-          team: null,
           players: [vatira],
+          team: null,
         }),
       ],
     });
@@ -150,7 +150,7 @@ describe(resolveMatchParticipantIds, () => {
     const resolved = await resolveMatchParticipantIds(
       knockout,
       { players: ["zen", "vatira"] },
-      { teams: tournament().lookup, players },
+      { players, teams: tournament().lookup },
     );
 
     expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-zen", "p-vatira"]);
@@ -158,7 +158,7 @@ describe(resolveMatchParticipantIds, () => {
       resolveMatchParticipantIds(
         knockout,
         { players: ["p-zen", "vatira"] },
-        { teams: tournament().lookup, players },
+        { players, teams: tournament().lookup },
       ),
     ).rejects.toThrow(/participant id for Zen/u);
   });

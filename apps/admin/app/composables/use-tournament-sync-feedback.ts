@@ -71,9 +71,9 @@ export const useTournamentSyncFeedback = () => {
   };
 
   return {
-    syncingId,
-    iconFor: (id: string) => syncIcon(stateOf(id)),
     colorFor: (id: string) => syncColor(stateOf(id)),
+    iconFor: (id: string) => syncIcon(stateOf(id)),
     run,
+    syncingId,
   };
 };

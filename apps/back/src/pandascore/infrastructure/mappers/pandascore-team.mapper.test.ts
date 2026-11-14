@@ -5,23 +5,23 @@ import { teamSchema } from "../dto/tournament.dto";
 describe("PandascoreTeamMapper", () => {
   it("maps dark_mode_image_url onto the upsert command", () => {
     const dto = teamSchema.parse({
+      acronym: "VIT",
+      dark_mode_image_url: "https://example.com/vitality-dark.png",
       id: 7,
-      name: "Team Vitality",
-      slug: "team-vitality",
+      image_url: "https://example.com/vitality-light.png",
       location: "FR",
       modified_at: "2025-01-01T00:00:00Z",
-      acronym: "VIT",
-      image_url: "https://example.com/vitality-light.png",
-      dark_mode_image_url: "https://example.com/vitality-dark.png",
+      name: "Team Vitality",
+      slug: "team-vitality",
     });
 
     expect(toUpsertTeamCommand(dto)).toStrictEqual({
-      pandascoreId: 7,
-      name: "Team Vitality",
-      slug: "team-vitality",
-      location: "FR",
-      imageUrl: "https://example.com/vitality-light.png",
       darkModeImageUrl: "https://example.com/vitality-dark.png",
+      imageUrl: "https://example.com/vitality-light.png",
+      location: "FR",
+      name: "Team Vitality",
+      pandascoreId: 7,
+      slug: "team-vitality",
     });
   });
 });

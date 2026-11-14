@@ -95,10 +95,10 @@ const description = computed(() => {
 });
 
 setPageSeo({
+  description: description.value,
   title: start.value
     ? t("page.teams.letter.title", { letter: start.value })
     : t("page.teams.index.title"),
-  description: description.value,
 });
 </script>
 

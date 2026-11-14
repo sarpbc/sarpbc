@@ -42,7 +42,7 @@ const saveNote = async () => {
 
   try {
     await updateSeasonPathNote(seasonId, participant.id, pathNote.value.trim() || null);
-    toast.add({ title: t("page.seasons.path.noteSaved"), color: "success" });
+    toast.add({ color: "success", title: t("page.seasons.path.noteSaved") });
     emit("changed");
   } catch (saveError) {
     reportError(saveError, t("page.seasons.path.noteFailed"));

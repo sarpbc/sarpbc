@@ -2,8 +2,8 @@ import type { ProviderDeletion, UpsertSerieCommand } from "../../../tournament/a
 import type { SerieDto } from "../dto/tournament.dto";
 
 export const toUpsertSerieCommand = (dto: SerieDto): UpsertSerieCommand => ({
-  pandascoreId: dto.id,
   fullName: dto.full_name,
+  pandascoreId: dto.id,
   year: dto.year,
 });
 
@@ -19,16 +19,16 @@ export const parseProviderDeletion = (reason: string | null): ProviderDeletion =
   const merged = MERGED.exec(reason);
 
   if (merged?.groups) {
-    return { kind: "merged", intoId: Number(merged.groups.id) };
+    return { intoId: Number(merged.groups.id), kind: "merged" };
   }
 
   const replaced = REPLACED.exec(reason);
 
   if (replaced?.groups) {
     return {
-      kind: "replaced",
-      entity: replaced.groups.entity === "serie" ? "serie" : "tournament",
       byId: Number(replaced.groups.id),
+      entity: replaced.groups.entity === "serie" ? "serie" : "tournament",
+      kind: "replaced",
     };
   }
 

@@ -26,8 +26,8 @@ export const localizedNewsFields = (
   locale: SupportedLocale,
 ): LocalizedNewsFields => {
   if (locale === "fr-FR" && hasFrenchTranslation(article)) {
-    return { title: article.titleFr, content: article.contentFr };
+    return { content: article.contentFr, title: article.titleFr };
   }
 
-  return { title: article.title, content: article.content };
+  return { content: article.content, title: article.title };
 };

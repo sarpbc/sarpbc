@@ -69,10 +69,10 @@ export const syncParticipants = async (
   await mapSequentially(missing, async (teamId) => {
     await writer.saveParticipant({
       id: crypto.randomUUID(),
-      tournamentId: tournament.id,
-      teamId,
       playerIds: await activeRoster(writer, teamId),
       rosterSourceUrl: null,
+      teamId,
+      tournamentId: tournament.id,
     });
   });
 };
@@ -105,10 +105,10 @@ export const syncPlayerParticipants = async (
   await mapSequentially(missing, async (group) => {
     await writer.saveParticipant({
       id: crypto.randomUUID(),
-      tournamentId: tournament.id,
-      teamId: null,
       playerIds: group,
       rosterSourceUrl: null,
+      teamId: null,
+      tournamentId: tournament.id,
     });
   });
 };
@@ -132,10 +132,10 @@ export const assertUpdatedLineup = async (
 
   const current = await writer.participants(tournament.id);
   assertLineupFitsFormat(tournament.format, {
-    teamIds: input.teamIds ?? current.flatMap((p) => (p.team ? [p.team.id] : [])),
     playerGroups:
       input.playerParticipants ??
       current.flatMap((p) => (p.team ? [] : [p.players.map((player) => player.id)])),
+    teamIds: input.teamIds ?? current.flatMap((p) => (p.team ? [p.team.id] : [])),
   });
 };
 
@@ -173,13 +173,13 @@ export const setRosters = async (
   await mapSequentially([...latestByParticipant.values()], async ({ participant, roster }) => {
     await writer.saveParticipant({
       id: participant.id,
-      tournamentId: tournament.id,
-      teamId: roster.teamId,
       playerIds: roster.playerIds,
       rosterSourceUrl:
         roster.sourceUrl === undefined
           ? participant.rosterSourceUrl
           : parseDataSourceUrl(roster.sourceUrl),
+      teamId: roster.teamId,
+      tournamentId: tournament.id,
     });
   });
 };

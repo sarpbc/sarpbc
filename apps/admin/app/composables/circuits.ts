@@ -16,13 +16,13 @@ export const getCircuit = async (idOrSlug: string): Promise<CircuitDetail> =>
   await apiFetch<CircuitDetail>(`/circuits/${idOrSlug}`, { method: "GET" });
 
 export const createCircuit = async (input: CircuitInput): Promise<CircuitSummary> =>
-  await apiFetch<CircuitSummary>("/circuits", { method: "POST", body: input });
+  await apiFetch<CircuitSummary>("/circuits", { body: input, method: "POST" });
 
 export const updateCircuit = async (
   id: string,
   input: Partial<CircuitInput>,
 ): Promise<CircuitSummary> =>
-  await apiFetch<CircuitSummary>(`/circuits/${id}`, { method: "PATCH", body: input });
+  await apiFetch<CircuitSummary>(`/circuits/${id}`, { body: input, method: "PATCH" });
 
 export const deleteCircuit = async (id: string): Promise<void> => {
   await apiFetch(`/circuits/${id}`, { method: "DELETE" });
@@ -34,8 +34,8 @@ export const setCircuitStageScale = async (
   input: CircuitStageScaleInput,
 ): Promise<CircuitDetail> =>
   await apiFetch<CircuitDetail>(`/circuits/${circuitId}/stages/${tournamentId}`, {
-    method: "PUT",
     body: input,
+    method: "PUT",
   });
 
 export const removeCircuitStage = async (

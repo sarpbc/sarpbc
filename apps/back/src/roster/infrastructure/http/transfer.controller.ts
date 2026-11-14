@@ -29,19 +29,19 @@ export class TransferController {
       (query.team !== undefined && query.team !== "" && !team) ||
       (query.player !== undefined && query.player !== "" && !player)
     ) {
-      return { transfers: [], count: 0 };
+      return { count: 0, transfers: [] };
     }
 
     const [transfers, count] = await this.transferService.findAndCount({
-      teamId: team?.id,
-      playerId: player?.id,
-      type: query.type,
       from: query.from !== undefined && query.from !== "" ? new Date(query.from) : undefined,
-      to: query.to !== undefined && query.to !== "" ? new Date(query.to) : undefined,
       limit: query.limit,
       offset: query.offset,
+      playerId: player?.id,
+      teamId: team?.id,
+      to: query.to !== undefined && query.to !== "" ? new Date(query.to) : undefined,
+      type: query.type,
     });
 
-    return { transfers: transfers.map(mapTransfer), count };
+    return { count, transfers: transfers.map(mapTransfer) };
   }
 }

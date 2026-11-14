@@ -4,14 +4,14 @@ import { Redis } from "ioredis";
 import { RedisService } from "./redis.service";
 
 @Module({
+  exports: [RedisService],
   providers: [
     {
+      inject: [ConfigService],
       provide: RedisService,
       useFactory: (config: ConfigService) =>
         new RedisService(config, (options) => new Redis(options)),
-      inject: [ConfigService],
     },
   ],
-  exports: [RedisService],
 })
 export class RedisModule {}

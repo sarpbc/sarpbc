@@ -11,21 +11,21 @@ import { unconstructed } from "../../../../test/doubles";
 describe(TransferController, () => {
   const kc = Object.assign(new Team(), {
     id: "kc",
-    name: "Karmine Corp",
-    slug: "karmine-corp",
     imageUrl: "https://cdn/kc.png",
     logoDarkUrl: "https://cdn.sarpbc.test/teams/kc/logo-dark-abc.webp",
+    name: "Karmine Corp",
+    slug: "karmine-corp",
   });
 
   const zen = Object.assign(new Player(), { id: "zen", name: "zen", slug: "zen", team: kc });
 
   const contract = Object.assign(new Contract(), {
     id: "c1",
-    player: zen,
-    team: kc,
-    startDate: new Date("2025-06-01"),
-    role: "active",
     joinSourceUrl: "https://x.com/KarmineCorp/status/1",
+    player: zen,
+    role: "active",
+    startDate: new Date("2025-06-01"),
+    team: kc,
   });
 
   const findAndCount = vi.fn<TransferService["findAndCount"]>();
@@ -47,11 +47,11 @@ describe(TransferController, () => {
     findAndCount.mockResolvedValue([
       [
         {
-          id: "c1:join",
-          type: "arrival",
-          date: contract.startDate,
           contract,
+          date: contract.startDate,
+          id: "c1:join",
           sourceUrl: contract.joinSourceUrl,
+          type: "arrival",
         },
       ],
       1,
@@ -60,55 +60,55 @@ describe(TransferController, () => {
 
   it("presents transfers with their player, team and calendar day", async () => {
     await expect(controller.find(page)).resolves.toStrictEqual({
+      count: 1,
       transfers: [
         {
-          id: "c1:join",
-          type: "arrival",
           date: "2025-06-01",
+          id: "c1:join",
+          player: { id: "zen", imageUrl: null, name: "zen", nationality: null, slug: "zen" },
           role: "active",
           sourceUrl: "https://x.com/KarmineCorp/status/1",
-          player: { id: "zen", name: "zen", slug: "zen", imageUrl: null, nationality: null },
           team: {
+            darkModeImageUrl: null,
             id: "kc",
+            imageUrl: "https://cdn/kc.png",
+            logoDarkUrl: "https://cdn.sarpbc.test/teams/kc/logo-dark-abc.webp",
+            logoLightUrl: null,
             name: "Karmine Corp",
             slug: "karmine-corp",
-            imageUrl: "https://cdn/kc.png",
-            darkModeImageUrl: null,
-            logoLightUrl: null,
-            logoDarkUrl: "https://cdn.sarpbc.test/teams/kc/logo-dark-abc.webp",
           },
+          type: "arrival",
         },
       ],
-      count: 1,
     });
     expect(findAndCount).toHaveBeenCalledWith({
       ...page,
-      teamId: undefined,
-      playerId: undefined,
-      type: undefined,
       from: undefined,
+      playerId: undefined,
+      teamId: undefined,
       to: undefined,
+      type: undefined,
     });
   });
 
   it("resolves team and player slugs and forwards the filters", async () => {
     await controller.find({
       ...page,
-      team: "old-kc-slug",
-      player: "zen",
-      type: "benched",
       from: "2025-01-01",
+      player: "zen",
+      team: "old-kc-slug",
       to: "2025-12-31",
+      type: "benched",
     });
 
     expect(teamBySlug).toHaveBeenCalledWith("old-kc-slug");
     expect(findAndCount).toHaveBeenCalledWith({
       ...page,
-      teamId: "kc",
-      playerId: "zen",
-      type: "benched",
       from: new Date("2025-01-01"),
+      playerId: "zen",
+      teamId: "kc",
       to: new Date("2025-12-31"),
+      type: "benched",
     });
   });
 
@@ -116,8 +116,8 @@ describe(TransferController, () => {
     teamBySlug.mockResolvedValue(null);
 
     await expect(controller.find({ ...page, team: "missing" })).resolves.toStrictEqual({
-      transfers: [],
       count: 0,
+      transfers: [],
     });
     expect(findAndCount).not.toHaveBeenCalled();
   });

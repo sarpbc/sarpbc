@@ -63,15 +63,15 @@ export class PlayerController {
   @Get()
   async find(@Query({ schema: ListDirectoryQueryDto }) query: ListDirectoryQueryInput) {
     const [players, count] = await this.playerService.findAndCount({
-      name: query.name,
-      start: query.start,
       limit: query.limit,
+      name: query.name,
       offset: query.offset,
+      start: query.start,
     });
 
     return {
-      players: players.map((player) => mapPlayer(player)),
       count,
+      players: players.map((player) => mapPlayer(player)),
     };
   }
 
@@ -232,9 +232,9 @@ export class PlayerController {
 
     return {
       standIns: standIns.map(({ participantId, match }) => ({
+        match: mapProfileMatchListItem(match),
         participantId,
         startgg: !isRedistributable(lineupSource(match)),
-        match: mapProfileMatchListItem(match),
       })),
     };
   }
@@ -264,8 +264,8 @@ export class PlayerController {
 
     const tournaments = await this.tournaments.getTournamentsByTeamTenures(
       contracts.map((contract) => ({
-        teamId: contract.team.id,
         from: contract.startDate,
+        teamId: contract.team.id,
         to: contract.endDate,
       })),
     );

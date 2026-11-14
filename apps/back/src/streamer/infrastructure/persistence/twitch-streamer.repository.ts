@@ -6,10 +6,10 @@ import type { TrackedStreamer } from "../../domain/tracked-streamer";
 import { TwitchStreamer } from "./twitch-streamer.entity";
 
 const detached = (streamer: TwitchStreamer): TrackedStreamer => ({
+  createdAt: streamer.createdAt,
+  displayName: streamer.displayName,
   id: streamer.id,
   login: streamer.login,
-  displayName: streamer.displayName,
-  createdAt: streamer.createdAt,
 });
 
 @Injectable()

@@ -64,8 +64,8 @@ export class AuthController {
       clearAuthCookies(res, this.authCookie());
 
       return await res.code(401).send({
-        statusCode: 401,
         message: "Missing auth token in cookie",
+        statusCode: 401,
       });
     }
 
@@ -75,8 +75,8 @@ export class AuthController {
       clearAuthCookies(res, this.authCookie());
 
       return await res.code(401).send({
-        statusCode: 401,
         message: "Invalid or expired token",
+        statusCode: 401,
       });
     }
 

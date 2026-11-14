@@ -6,9 +6,9 @@ import { TeamAlias } from "./team-alias.entity";
 import { MikroTeamStore } from "./team.store";
 
 const orm = new MikroORM({
-  entities: mikroOrmEntities,
-  dbName: "team-search-test",
   allowGlobalContext: true,
+  dbName: "team-search-test",
+  entities: mikroOrmEntities,
 });
 
 const fixture = (aliasTeamIds: string[]) => {
@@ -37,8 +37,8 @@ describe("MikroTeamStore.search", () => {
       { fields: ["team"] },
     );
     expect(find.mock.calls[1]?.[1]).toStrictEqual({
-      mergedInto: null,
       $or: [{ name: { $ilike: "%origins%" } }, { id: { $in: ["renamed", "other"] } }],
+      mergedInto: null,
     });
   });
 
@@ -46,7 +46,7 @@ describe("MikroTeamStore.search", () => {
     const { find, teams } = fixture([]);
 
     await teams.search({ name: "now" });
-    expect(find.mock.calls[1]?.[1]).toStrictEqual({ name: { $ilike: "%now%" }, mergedInto: null });
+    expect(find.mock.calls[1]?.[1]).toStrictEqual({ mergedInto: null, name: { $ilike: "%now%" } });
 
     find.mockClear();
     find.mockResolvedValueOnce([]);

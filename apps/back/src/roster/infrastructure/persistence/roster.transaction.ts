@@ -6,10 +6,10 @@ import { MikroContractStore } from "./contract.store";
 import { MikroPhotoStore } from "./photo.store";
 
 export const writeScope = (tx: EntityManager): RosterWriteScope => ({
-  players: new MikroPlayerStore(tx, true),
-  teams: new MikroTeamStore(tx),
   contracts: new MikroContractStore(tx),
   photos: new MikroPhotoStore(tx),
+  players: new MikroPlayerStore(tx, true),
+  teams: new MikroTeamStore(tx),
 });
 
 export class MikroRosterTransaction implements RosterTransaction {

@@ -55,9 +55,9 @@ export const parseNewsEntityTag = (raw: string): NewsEntityTag | null => {
 
   return {
     kind,
-    slug,
     label,
     raw: match[0],
+    slug,
   };
 };
 

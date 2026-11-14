@@ -58,19 +58,19 @@ const saveArticle = async () => {
     const trimmedSlug = articleSlug.value.trim();
 
     const created = await createNewsArticle({
-      title: title.value,
       content: content.value,
-      titleFr: titleFr.value.trim() || null,
       contentFr: contentFr.value.trim() || null,
-      slug: trimmedSlug || undefined,
       imageUrl: imageUrl.value ?? undefined,
+      slug: trimmedSlug || undefined,
+      title: title.value,
+      titleFr: titleFr.value.trim() || null,
       type: articleType.value,
     });
 
     isModalOpen.value = false;
     toast.add({
-      title: t("page.news.create.saved"),
       color: "success",
+      title: t("page.news.create.saved"),
     });
     await navigateTo(localePath(`/news/${created.slug}`));
   } catch (saveError) {

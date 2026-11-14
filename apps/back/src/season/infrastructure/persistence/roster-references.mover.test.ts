@@ -8,11 +8,11 @@ import { SeasonParticipant } from "./season-participant.entity";
 import { SeasonPathEntry } from "./season-path-entry.entity";
 
 const award = (id: string, playerId: string, seasonId: string, region: string | null) => ({
+  awardType: "regular_season_mvp",
   id,
   player: { id: playerId },
-  season: { id: seasonId },
-  awardType: "regular_season_mvp",
   region,
+  season: { id: seasonId },
 });
 
 const awardMover = (awards: ReturnType<typeof award>[]) => {
@@ -24,7 +24,7 @@ const awardMover = (awards: ReturnType<typeof award>[]) => {
     Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
   );
 
-  return { references, nativeDelete, nativeUpdate };
+  return { nativeDelete, nativeUpdate, references };
 };
 
 describe("SeasonRosterReferences.movePlayer", () => {
@@ -68,9 +68,9 @@ describe("SeasonRosterReferences.movePlayer", () => {
 
 const participant = (id: string, teamId: string, seasonId: string, pathNote: string | null) => ({
   id,
-  team: { id: teamId },
-  season: { id: seasonId },
   pathNote,
+  season: { id: seasonId },
+  team: { id: teamId },
 });
 
 const participantMover = (participants: ReturnType<typeof participant>[]) => {
@@ -82,7 +82,7 @@ const participantMover = (participants: ReturnType<typeof participant>[]) => {
     Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
   );
 
-  return { references, nativeDelete, nativeUpdate };
+  return { nativeDelete, nativeUpdate, references };
 };
 
 describe("SeasonRosterReferences.moveTeam", () => {

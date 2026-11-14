@@ -1,14 +1,14 @@
 import { currencyFractionDigits, isNonEmptyString } from "@sarpbc/utils";
 
 const CURRENCY_CODES = {
-  "United State Dollar": "USD",
-  "United States Dollar": "USD",
-  "US Dollar": "USD",
+  "British Pound": "GBP",
   Dollar: "USD",
   Euro: "EUR",
-  "British Pound": "GBP",
-  Pound: "GBP",
   "Japanese Yen": "JPY",
+  Pound: "GBP",
+  "US Dollar": "USD",
+  "United State Dollar": "USD",
+  "United States Dollar": "USD",
   Yen: "JPY",
 } as const;
 
@@ -43,10 +43,10 @@ export const formatPrizepool = (prizepool: string | undefined | null, locale = "
 
   try {
     return new Intl.NumberFormat(locale, {
-      style: "currency",
       currency: currencyCode,
-      minimumFractionDigits: 0,
       maximumFractionDigits: 0,
+      minimumFractionDigits: 0,
+      style: "currency",
     }).format(amount);
   } catch {
     return `$${amount.toLocaleString()}`;
@@ -57,9 +57,9 @@ export const formatPrizeAmount = (amount: number, currency: string, locale: stri
   const fractionDigits = Number.isInteger(amount) ? 0 : currencyFractionDigits(currency);
 
   return new Intl.NumberFormat(locale, {
-    style: "currency",
     currency,
-    minimumFractionDigits: fractionDigits,
     maximumFractionDigits: fractionDigits,
+    minimumFractionDigits: fractionDigits,
+    style: "currency",
   }).format(amount);
 };

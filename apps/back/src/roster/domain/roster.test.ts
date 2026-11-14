@@ -18,33 +18,33 @@ describe("roster policies", () => {
     const team = Object.assign(new Team(), { id: "current" });
 
     const player = Object.assign(new Player(), {
-      slug: "local-player",
       imageUrl: "local.png",
-      team,
       role: "Coach",
+      slug: "local-player",
+      team,
     });
 
-    player.synchronizeProfile({ pandascoreId: 42, name: "New name", imageUrl: "remote.png" });
+    player.synchronizeProfile({ imageUrl: "remote.png", name: "New name", pandascoreId: 42 });
     expect(player.slug).toBe("local-player");
     expect(player.imageUrl).toBe("local.png");
     expect(player.team).toBe(team);
     expect(player.role).toBe("Coach");
-    player.synchronizeProfile({ pandascoreId: 42, name: "New name", role: null });
+    player.synchronizeProfile({ name: "New name", pandascoreId: 42, role: null });
     expect(player.role).toBeNull();
   });
 
   it("keeps team artwork and local identity while refreshing imported metadata", () => {
     const team = Object.assign(new Team(), {
-      slug: "local-team",
-      imageUrl: "local.png",
       darkModeImageUrl: "dark-local.png",
+      imageUrl: "local.png",
+      slug: "local-team",
     });
 
     team.synchronizeProfile({
-      pandascoreId: 4,
-      name: "Updated name",
-      imageUrl: "remote.png",
       darkModeImageUrl: "remote-dark.png",
+      imageUrl: "remote.png",
+      name: "Updated name",
+      pandascoreId: 4,
     });
     expect(team.slug).toBe("local-team");
     expect(team.name).toBe("Updated name");
@@ -74,13 +74,13 @@ describe("current role", () => {
   const team = Object.assign(new Team(), { id: "kc" });
 
   const role = (pandascoreRole: string | null) =>
-    Object.assign(new Player(), { team, role: pandascoreRole }).currentRole();
+    Object.assign(new Player(), { role: pandascoreRole, team }).currentRole();
 
   it("comes from the current contract over the imported profile role", () => {
     const player = Object.assign(new Player(), {
-      team,
-      role: "Coach",
       contractRole: "benched",
+      role: "Coach",
+      team,
     });
 
     expect(player.currentRole()).toBe("benched");
@@ -107,12 +107,12 @@ describe("current role", () => {
 
   it("normalizes a long separator run from an imported role", () => {
     const payload = `head${" -".repeat(50_000)}\tcoach${" ".repeat(50_000)}!`;
-    const player = Object.assign(new Player(), { team, role: payload });
+    const player = Object.assign(new Player(), { role: payload, team });
     expect(player.currentRole()).toBe("active");
   });
 
   it("is empty without a current team", () => {
-    const player = Object.assign(new Player(), { role: "Coach", contractRole: null });
+    const player = Object.assign(new Player(), { contractRole: null, role: "Coach" });
     expect(player.currentRole()).toBeNull();
   });
 });

@@ -11,8 +11,8 @@ export const mapCountrySummary = ({ code, players }: NationalityCount): CountryS
 
 export const mapCountry = (page: CountryPage): CountryDetail => ({
   code: page.code,
+  matchTotal: page.matchTotal,
+  matches: page.matches.map(mapMatchListItem),
   players: page.players.map((player) => mapPlayer(player)),
   teams: page.teams.map(mapTeamSummary),
-  matches: page.matches.map(mapMatchListItem),
-  matchTotal: page.matchTotal,
 });

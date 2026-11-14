@@ -36,9 +36,9 @@ export interface FinalScore {
 const GAME_SECONDS = 300;
 
 const RESOLUTIONS: readonly Size[] = [
-  { width: 1920, height: 1080 },
-  { width: 1280, height: 720 },
-  { width: 960, height: 540 },
+  { height: 1080, width: 1920 },
+  { height: 720, width: 1280 },
+  { height: 540, width: 960 },
 ];
 
 export const finalScores = (script: SeriesScript): FinalScore[] =>
@@ -71,7 +71,7 @@ const scriptedGame = (random: () => number, winner: StreamScoreSide): GameScript
   const ordered = [...clocks].toSorted((a, b) => b - a);
 
   const shuffled = sides
-    .map((side) => ({ side, key: random() }))
+    .map((side) => ({ key: random(), side }))
     .toSorted((a, b) => a.key - b.key)
     .map(({ side }) => side);
 
@@ -98,12 +98,12 @@ export const generateSeries = (count: number, seed: number): SeriesScript[] => {
     }
 
     return {
-      id: `series-${String(index + 1).padStart(2, "0")}`,
       bestOf,
-      size: RESOLUTIONS[index % RESOLUTIONS.length] ?? { width: 1920, height: 1080 },
+      games,
+      id: `series-${String(index + 1).padStart(2, "0")}`,
       noise: 6 + Math.floor(random() * 20),
       seed: Math.floor(random() * 2 ** 31),
-      games,
+      size: RESOLUTIONS[index % RESOLUTIONS.length] ?? { height: 1080, width: 1920 },
     };
   });
 };
@@ -112,10 +112,10 @@ const scorebug = (score: FinalScore, clock: number, overtime: boolean): Scorebug
   kind: "scorebug",
   ...score,
   clock,
-  overtime,
-  replay: false,
   fade: 1,
   glitch: false,
+  overtime,
+  replay: false,
 });
 
 export const broadcast = function* broadcast(script: SeriesScript): Generator<TimedScene> {
@@ -134,7 +134,7 @@ export const broadcast = function* broadcast(script: SeriesScript): Generator<Ti
         shown = { ...scene, glitch };
       }
 
-      yield { t, scene: shown };
+      yield { scene: shown, t };
       t += 1;
     }
   };

@@ -15,9 +15,9 @@ export const jsonOf = (result: CallToolResult) =>
   z.json().parse(JSON.parse(textOf(result) || "null"));
 
 export const pendingProposalService = () => ({
+  list: vi.fn<RosterProposalService["list"]>(),
   propose: vi.fn<RosterProposalService["propose"]>(async (change: RosterChange) =>
-    Object.assign(new RosterProposal(), { id: "proposal-1", change }),
+    Object.assign(new RosterProposal(), { change, id: "proposal-1" }),
   ),
   proposeTeamLogo: vi.fn<RosterProposalService["proposeTeamLogo"]>(),
-  list: vi.fn<RosterProposalService["list"]>(),
 });

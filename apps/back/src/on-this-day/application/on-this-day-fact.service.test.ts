@@ -5,13 +5,13 @@ import { MANUAL_STAGE_ID, memoryFactStore } from "../../../test/on-this-day-fixt
 import { OnThisDayFactService } from "./on-this-day-fact.service";
 
 const input = {
-  month: 11,
   day: 13,
-  year: 2016,
+  link: { id: MANUAL_STAGE_ID, kind: "tournament" as const },
+  month: 11,
+  sourceUrl: null,
   textEn: "The first RLCS season ended.",
   textFr: "La première saison des RLCS s'achevait.",
-  link: { kind: "tournament" as const, id: MANUAL_STAGE_ID },
-  sourceUrl: null,
+  year: 2016,
 };
 
 describe(OnThisDayFactService, () => {
@@ -20,13 +20,13 @@ describe(OnThisDayFactService, () => {
 
     const created = await service.create(input);
     expect(created).toMatchObject({
-      month: 11,
       day: 13,
-      link: { kind: "tournament", id: MANUAL_STAGE_ID, name: "Playoffs", source: "manual" },
+      link: { id: MANUAL_STAGE_ID, kind: "tournament", name: "Playoffs", source: "manual" },
+      month: 11,
     });
 
     const updated = await service.update(created.id, { ...input, link: null, year: null });
-    expect(updated).toMatchObject({ id: created.id, year: null, link: null });
+    expect(updated).toMatchObject({ id: created.id, link: null, year: null });
     await expect(service.list()).resolves.toHaveLength(1);
 
     await service.remove(created.id);
@@ -38,7 +38,7 @@ describe(OnThisDayFactService, () => {
     const service = new OnThisDayFactService(memoryFactStore());
 
     await expect(
-      service.create({ ...input, link: { kind: "player", id: MANUAL_STAGE_ID } }),
+      service.create({ ...input, link: { id: MANUAL_STAGE_ID, kind: "player" } }),
     ).rejects.toThrow(InvalidInputError);
     await expect(service.list()).resolves.toStrictEqual([]);
   });

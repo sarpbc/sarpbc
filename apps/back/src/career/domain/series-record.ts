@@ -8,7 +8,7 @@ const sideOf = (match: Match, playerId: string): TournamentParticipant | undefin
 const wonBy = (match: Match, side: TournamentParticipant): boolean => match.winner?.id === side.id;
 
 export const seriesRecord = (matches: Match[], playerId: string): SeriesRecord => {
-  const record: SeriesRecord = { wins: 0, losses: 0 };
+  const record: SeriesRecord = { losses: 0, wins: 0 };
 
   for (const match of matches) {
     const side = sideOf(match, playerId);

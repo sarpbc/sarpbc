@@ -29,6 +29,14 @@ const BALLCHASING_SOURCE = Symbol("BallchasingSource");
 const STATS_CANDIDATES = Symbol("StatsCandidates");
 
 @Module({
+  controllers: [StatsImportController, StatsPlayerLinkController, StatsGameController],
+  exports: [
+    GAME_STATS_STORE,
+    StatsImportService,
+    StatsPlayerLinkService,
+    ManualGameService,
+    TournamentPlayerStatsService,
+  ],
   imports: [
     MikroOrmModule.forFeature([
       MatchGame,
@@ -38,48 +46,54 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
       PlayerPlatformLink,
     ]),
   ],
-  controllers: [StatsImportController, StatsPlayerLinkController, StatsGameController],
   providers: [
     {
+      inject: [ConfigService],
       provide: BALLCHASING_SOURCE,
       useFactory: (config: ConfigService) => {
         const apiKey = config.get<string>("ballchasing.apiKey");
 
         return apiKey !== undefined && apiKey !== "" ? new BallchasingClient(apiKey) : null;
       },
-      inject: [ConfigService],
     },
     {
+      inject: [EntityManager],
       provide: STATS_CANDIDATES,
       useFactory: (em: EntityManager) => new MikroOrmStatsCandidates(em),
-      inject: [EntityManager],
     },
     {
+      inject: [EntityManager],
       provide: GAME_STATS_STORE,
       useFactory: (em: EntityManager) => new MikroOrmGameStatsStore(em),
-      inject: [EntityManager],
     },
     {
+      inject: [GAME_STATS_STORE],
       provide: TournamentPlayerStatsService,
       useFactory: (games: GameStatsStore) => new TournamentPlayerStatsService(games),
-      inject: [GAME_STATS_STORE],
     },
     {
+      inject: [EntityManager, STATS_CANDIDATES],
       provide: StatsPlayerLinkService,
       useFactory: (em: EntityManager, candidates: StatsCandidates) =>
         new StatsPlayerLinkService(candidates, new MikroOrmPlayerLinkStore(em)),
-      inject: [EntityManager, STATS_CANDIDATES],
     },
     {
+      inject: [BALLCHASING_SOURCE, STATS_CANDIDATES, GAME_STATS_STORE],
       provide: ManualGameService,
       useFactory: (
         source: BallchasingClient | null,
         candidates: StatsCandidates,
         games: GameStatsStore,
       ) => new ManualGameService(source, candidates, games),
-      inject: [BALLCHASING_SOURCE, STATS_CANDIDATES, GAME_STATS_STORE],
     },
     {
+      inject: [
+        EntityManager,
+        BALLCHASING_SOURCE,
+        STATS_CANDIDATES,
+        GAME_STATS_STORE,
+        StatsImportRunner,
+      ],
       provide: StatsImportService,
       useFactory: (
         em: EntityManager,
@@ -101,23 +115,9 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
             });
           },
         ),
-      inject: [
-        EntityManager,
-        BALLCHASING_SOURCE,
-        STATS_CANDIDATES,
-        GAME_STATS_STORE,
-        StatsImportRunner,
-      ],
     },
     StatsImportRunner,
     InterruptedImportsSweeper,
-  ],
-  exports: [
-    GAME_STATS_STORE,
-    StatsImportService,
-    StatsPlayerLinkService,
-    ManualGameService,
-    TournamentPlayerStatsService,
   ],
 })
 export class MatchStatsModule {}

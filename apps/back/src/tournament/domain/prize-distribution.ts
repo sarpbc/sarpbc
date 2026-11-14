@@ -56,9 +56,9 @@ export const patchPrizeEntry = (
     entry.teamId === teamId
       ? {
           ...entry,
-          placement: patch.placement ?? entry.placement,
           amount: patch.amount ?? entry.amount,
           currency: patch.currency ?? entry.currency,
+          placement: patch.placement ?? entry.placement,
           playerIds: patch.playerIds ?? entry.playerIds,
           sourceUrl,
         }

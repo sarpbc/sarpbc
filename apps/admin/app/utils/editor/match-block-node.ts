@@ -11,8 +11,8 @@ import MatchBlockNodeView from "~/components/news/MatchBlockNodeView.vue";
 import { EMPTY_MATCH_BLOCK_ATTRS, matchBlockNodeAttrs } from "~/utils/editor/match-block-attrs";
 
 const matchBlockTokenizer: MarkdownTokenizer = {
-  name: "matchBlock",
   level: "block",
+  name: "matchBlock",
   start: newsMatchTagStart,
   tokenize: (src: string) => {
     const parsed = parseNewsMatchTag(src.trimStart());
@@ -20,45 +20,37 @@ const matchBlockTokenizer: MarkdownTokenizer = {
     const leading = src.length - src.trimStart().length;
 
     return parsed
-      ? { type: "matchBlock", raw: `${src.slice(0, leading)}${parsed.raw}` }
+      ? { raw: `${src.slice(0, leading)}${parsed.raw}`, type: "matchBlock" }
       : undefined;
   },
 };
 
 export const MatchBlockNode = Node.create({
-  name: "matchBlock",
-  group: "block",
-  atom: true,
-  draggable: true,
-
   addAttributes() {
     return Object.fromEntries(
       Object.keys(EMPTY_MATCH_BLOCK_ATTRS).map((name) => [name, { default: null }]),
     );
   },
-
-  parseHTML() {
-    return [{ tag: 'div[data-type="matchBlock"]' }];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return ["div", mergeAttributes({ "data-type": "matchBlock" }, HTMLAttributes)];
-  },
-
   addNodeView() {
     return VueNodeViewRenderer(MatchBlockNodeView);
   },
-
+  atom: true,
+  draggable: true,
+  group: "block",
   markdownTokenName: "matchBlock",
-
   markdownTokenizer: matchBlockTokenizer,
-
+  name: "matchBlock",
+  parseHTML() {
+    return [{ tag: 'div[data-type="matchBlock"]' }];
+  },
   parseMarkdown: (token) => {
     const parsed = parseNewsMatchTag((token.raw ?? "").trimStart());
 
-    return parsed ? { type: "matchBlock", attrs: matchBlockNodeAttrs(parsed.block) } : [];
+    return parsed ? { attrs: matchBlockNodeAttrs(parsed.block), type: "matchBlock" } : [];
   },
-
+  renderHTML({ HTMLAttributes }) {
+    return ["div", mergeAttributes({ "data-type": "matchBlock" }, HTMLAttributes)];
+  },
   renderMarkdown: (node) => {
     const block = newsMatchBlockFromAttrs(node.attrs ?? {});
 

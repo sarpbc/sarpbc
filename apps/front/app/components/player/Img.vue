@@ -9,45 +9,45 @@ interface Props {
 }
 
 const SIZES = {
+  lg: {
+    box: "aspect-3/2 w-full min-w-0",
+    height: 128,
+    icon: "size-10",
+    radius: "rounded-md",
+    sizes: "(max-width: 639px) 30vw, 192px",
+    width: 192,
+  },
   list: {
     box: "size-7 shrink-0",
-    width: 28,
     height: 28,
-    sizes: "28px",
     icon: "size-4",
     radius: "rounded-xs",
-  },
-  sm: {
-    box: "h-12 w-16 shrink-0",
-    width: 64,
-    height: 48,
-    sizes: "64px",
-    icon: "size-6",
-    radius: "rounded-sm",
+    sizes: "28px",
+    width: 28,
   },
   row: {
     box: "h-full w-16 shrink-0 lg:w-28",
-    width: 112,
     height: 72,
-    sizes: "(max-width: 1023px) 64px, 112px",
     icon: "size-6",
     radius: "rounded-sm",
+    sizes: "(max-width: 1023px) 64px, 112px",
+    width: 112,
   },
-  lg: {
-    box: "aspect-3/2 w-full min-w-0",
-    width: 192,
-    height: 128,
-    sizes: "(max-width: 639px) 30vw, 192px",
-    icon: "size-10",
-    radius: "rounded-md",
+  sm: {
+    box: "h-12 w-16 shrink-0",
+    height: 48,
+    icon: "size-6",
+    radius: "rounded-sm",
+    sizes: "64px",
+    width: 64,
   },
   xl: {
     box: "h-36 w-48 shrink-0 sm:h-auto sm:min-h-0 sm:w-56 md:w-64 sm:self-stretch",
-    width: 256,
     height: 192,
-    sizes: "(max-width: 640px) 192px, (max-width: 768px) 224px, 256px",
     icon: "size-12",
     radius: "rounded-lg",
+    sizes: "(max-width: 640px) 192px, (max-width: 768px) 224px, 256px",
+    width: 256,
   },
 };
 

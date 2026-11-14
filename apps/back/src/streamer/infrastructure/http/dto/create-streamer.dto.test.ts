@@ -3,23 +3,23 @@ import { CreateStreamerDto } from "./create-streamer.dto";
 
 describe("create-streamer body", () => {
   it("normalizes the login and a blank display name", () => {
-    expect(CreateStreamerDto.parse({ login: "  ZenRLL ", displayName: "  " })).toStrictEqual({
-      login: "zenrll",
+    expect(CreateStreamerDto.parse({ displayName: "  ", login: "  ZenRLL " })).toStrictEqual({
       displayName: null,
+      login: "zenrll",
     });
   });
 
   it("keeps a display name", () => {
-    expect(CreateStreamerDto.parse({ login: "kaydop", displayName: " Kaydop " })).toStrictEqual({
-      login: "kaydop",
+    expect(CreateStreamerDto.parse({ displayName: " Kaydop ", login: "kaydop" })).toStrictEqual({
       displayName: "Kaydop",
+      login: "kaydop",
     });
   });
 
   it("accepts a login without a display name", () => {
     expect(CreateStreamerDto.parse({ login: "rocket_league_1" })).toStrictEqual({
-      login: "rocket_league_1",
       displayName: null,
+      login: "rocket_league_1",
     });
   });
 
@@ -36,11 +36,11 @@ describe("create-streamer body", () => {
 
   it("rejects a display name over 100 characters", () => {
     expect(
-      CreateStreamerDto.safeParse({ login: "zenrll", displayName: "a".repeat(101) }).success,
+      CreateStreamerDto.safeParse({ displayName: "a".repeat(101), login: "zenrll" }).success,
     ).toBe(false);
   });
 
   it("rejects unknown fields", () => {
-    expect(CreateStreamerDto.safeParse({ login: "zenrll", extra: true }).success).toBe(false);
+    expect(CreateStreamerDto.safeParse({ extra: true, login: "zenrll" }).success).toBe(false);
   });
 });

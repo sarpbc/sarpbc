@@ -92,7 +92,7 @@ const openBracket = (match: TournamentMatchListItem) => {
     return;
   }
 
-  bracketMatch.value = { match: detailed, label: matchLabel(match) };
+  bracketMatch.value = { label: matchLabel(match), match: detailed };
   bracketOpen.value = true;
 };
 
@@ -162,7 +162,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
 
   try {
     await setMatchWinner(match.id, participantId);
-    toast.add({ title: t("page.tournaments.match.setWinner"), color: "success" });
+    toast.add({ color: "success", title: t("page.tournaments.match.setWinner") });
     await refreshMatches();
   } catch (winnerError) {
     reportError(winnerError);

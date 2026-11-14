@@ -27,9 +27,9 @@ const setup = (toolName: string, role: StaffRole = "admin") => {
   }
 
   const call = async (args: ToolArguments) =>
-    await tool.run({ id: "u1", email: "staff@test.com", role }, args);
+    await tool.run({ email: "staff@test.com", id: "u1", role }, args);
 
-  return { rosterProposalService, tool, call };
+  return { call, rosterProposalService, tool };
 };
 
 describe("viewership tools", () => {
@@ -44,13 +44,13 @@ describe("viewership tools", () => {
 
     expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
       {
-        kind,
         [idField]: MATCH_ID,
+        kind,
         viewership: {
-          peakViewers: 48_000,
           averageViewers: 30_000,
-          scope: "official",
           measuredAt: null,
+          peakViewers: 48_000,
+          scope: "official",
           sourceName: "Esports Charts",
           sourceUrl: SOURCE,
         },

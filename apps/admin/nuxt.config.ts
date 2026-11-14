@@ -37,9 +37,9 @@ export default defineNuxtConfig({
   app: {
     head: {
       charset: "utf-8",
-      viewport: "width=device-width, initial-scale=1",
-      title: "sarpbc.org Admin",
       link: apiPreconnectLinks(apiBase),
+      title: "sarpbc.org Admin",
+      viewport: "width=device-width, initial-scale=1",
     },
   },
 
@@ -55,27 +55,20 @@ export default defineNuxtConfig({
 
   i18n: i18nOptions,
 
-  modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui", "@nuxtjs/mdc"],
-
   mdc: {
     components: { map: newsMdcComponents },
   },
+
+  modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui", "@nuxtjs/mdc"],
 
   nitro: {
     preset: "node-server",
   },
 
-  // Staff console is SPA-only
-  ssr: false,
-
-  typescript: {
-    typeCheck: false,
-  },
-
   routeRules: {
+    "/**": { appMiddleware: ["admin"] },
     "/login": loginRule,
     [localizedPath("/login", "fr")]: loginRule,
-    "/**": { appMiddleware: ["admin"] },
   },
 
   runtimeConfig: {
@@ -87,22 +80,16 @@ export default defineNuxtConfig({
     },
   },
 
+  // Staff console is SPA-only
+  ssr: false,
+
+  typescript: {
+    typeCheck: false,
+  },
+
   vite: {
     define: {
       __VUE_PROD_DEVTOOLS__: false,
-    },
-    resolve: {
-      dedupe: [
-        "@tiptap/pm",
-        ...prosemirrorPackages,
-        "prosemirror-schema-list",
-        "prosemirror-history",
-        "prosemirror-dropcursor",
-        "prosemirror-gapcursor",
-        "prosemirror-tables",
-        "@tiptap/extension-table",
-      ],
-      alias: prosemirrorAliases,
     },
     optimizeDeps: {
       include: [
@@ -124,6 +111,19 @@ export default defineNuxtConfig({
         "prosemirror-transform",
         "prosemirror-commands",
         "prosemirror-keymap",
+      ],
+    },
+    resolve: {
+      alias: prosemirrorAliases,
+      dedupe: [
+        "@tiptap/pm",
+        ...prosemirrorPackages,
+        "prosemirror-schema-list",
+        "prosemirror-history",
+        "prosemirror-dropcursor",
+        "prosemirror-gapcursor",
+        "prosemirror-tables",
+        "@tiptap/extension-table",
       ],
     },
   },

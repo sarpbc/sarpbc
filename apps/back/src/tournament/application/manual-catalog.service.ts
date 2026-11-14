@@ -45,10 +45,10 @@ export class ManualCatalogService {
   }
   async createLeague(input: CreateLeagueInput): Promise<League> {
     const league = Object.assign(new League(), {
+      imageUrl: nonBlank(input.imageUrl) ?? null,
       name: input.name,
       slug: leagueSlug(input.slug ?? input.name),
       url: nonBlank(input.url) ?? null,
-      imageUrl: nonBlank(input.imageUrl) ?? null,
     });
 
     await this.transaction.run(async ({ tournaments }) => {
@@ -105,8 +105,8 @@ export class ManualCatalogService {
   async createEvent(input: CreateEventInput): Promise<EventListing> {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
       const event = Object.assign(new TournamentEvent(), {
-        name: input.name,
         league: await requireLeague(tournaments, input.leagueId),
+        name: input.name,
       });
 
       event.slug =

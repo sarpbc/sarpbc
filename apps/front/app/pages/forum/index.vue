@@ -5,8 +5,8 @@ const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
 setPageSeo({
-  title: t("page.forum.index.title"),
   description: t("page.forum.index.description"),
+  title: t("page.forum.index.title"),
 });
 
 const localePath = useLocalePath();

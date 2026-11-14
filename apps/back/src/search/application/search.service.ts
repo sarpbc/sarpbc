@@ -49,12 +49,12 @@ export class SearchService {
     return {
       players,
       teams,
-      tournaments,
       total: {
         players: players.length,
         teams: teams.length,
         tournaments: tournaments.length,
       },
+      tournaments,
     };
   }
 }

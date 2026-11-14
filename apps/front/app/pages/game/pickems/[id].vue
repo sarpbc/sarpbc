@@ -108,10 +108,10 @@ watch(
   [displayName, tournament],
   () => {
     setPageSeo({
+      description: t("page.game.pickems.seo.description"),
       title: tournament.value
         ? t("page.game.pickems.detail.seoTitle", { tournament: displayName.value })
         : t("page.game.pickems.title"),
-      description: t("page.game.pickems.seo.description"),
     });
   },
   { immediate: true },
@@ -291,14 +291,14 @@ const pickTeam = async (matchId: string, participantId: string) => {
       tournament_id: tournamentId.value,
     });
     toast.add({
-      title: t("page.game.pickems.detail.pickSaved"),
       color: "success",
+      title: t("page.game.pickems.detail.pickSaved"),
     });
     await Promise.all([refreshPicks(), refreshPersonalRank(), refreshLeaderboard()]);
   } catch (error) {
     toast.add({
-      title: pickemApiErrorMessage(error, t("page.game.pickems.detail.pickFailed")),
       color: "error",
+      title: pickemApiErrorMessage(error, t("page.game.pickems.detail.pickFailed")),
     });
   } finally {
     submittingMatchId.value = null;

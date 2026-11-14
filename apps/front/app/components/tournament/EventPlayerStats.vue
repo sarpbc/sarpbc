@@ -12,8 +12,8 @@ const ALL_STAGES = "all";
 const stage = ref(ALL_STAGES);
 
 const stageOptions = computed(() => [
-  { value: ALL_STAGES, label: t("page.tournaments.stats.allStages") },
-  ...stages.map(({ id, name }) => ({ value: id, label: name })),
+  { label: t("page.tournaments.stats.allStages"), value: ALL_STAGES },
+  ...stages.map(({ id, name }) => ({ label: name, value: id })),
 ]);
 
 const {
@@ -28,8 +28,8 @@ const {
       ? getEventPlayerStats(eventSlug)
       : getTournamentPlayerStats(stage.value),
   {
-    watch: [stage],
     default: () => null,
+    watch: [stage],
   },
 );
 </script>

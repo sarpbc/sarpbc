@@ -50,7 +50,6 @@ watch(userMenuOpen, (open) => {
 
 defineShortcuts({
   escape: {
-    usingInput: true,
     handler: () => {
       if (userMenuOpen.value) {
         userMenuOpen.value = false;
@@ -62,6 +61,7 @@ defineShortcuts({
         navOpen.value = false;
       }
     },
+    usingInput: true,
   },
 });
 </script>

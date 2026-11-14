@@ -3,27 +3,27 @@ import { findManualCounterpart } from "./manual-counterpart";
 import type { ManualCandidate } from "./manual-counterpart";
 
 const stage = {
-  eventName: "RLCS 2025 MENA",
-  stageName: "Open Qualifier 4 Group B",
-  leagueId: "league-rlcs",
   beginAt: new Date("2025-03-01T12:00Z"),
   endAt: null,
+  eventName: "RLCS 2025 MENA",
+  leagueId: "league-rlcs",
+  stageName: "Open Qualifier 4 Group B",
 };
 
 const candidate = (overrides: Partial<ManualCandidate>): ManualCandidate => ({
-  id: "manual-1",
-  name: "RLCS MENA Open Qualifier 4 2025 – Group B",
-  leagueId: null,
   beginAt: new Date("2025-03-01T00:00Z"),
   endAt: new Date("2025-03-02T00:00Z"),
+  id: "manual-1",
+  leagueId: null,
+  name: "RLCS MENA Open Qualifier 4 2025 – Group B",
   ...overrides,
 });
 
 describe(findManualCounterpart, () => {
   it("matches the same words in any order with overlapping dates", () => {
     expect(findManualCounterpart(stage, [candidate({})])).toStrictEqual({
-      kind: "unique",
       id: "manual-1",
+      kind: "unique",
     });
   });
 
@@ -34,11 +34,11 @@ describe(findManualCounterpart, () => {
         candidate({ id: "event", name: "RLCS 2025 MENA Open Qualifier 4" }),
         candidate({ id: "league", leagueId: "league-other" }),
         candidate({
-          id: "late",
           beginAt: new Date("2025-03-10T00:00Z"),
           endAt: new Date("2025-03-11T00:00Z"),
+          id: "late",
         }),
-        candidate({ id: "undated", beginAt: null }),
+        candidate({ beginAt: null, id: "undated" }),
       ]),
     ).toStrictEqual({ kind: "none" });
   });
@@ -47,8 +47,8 @@ describe(findManualCounterpart, () => {
     expect(
       findManualCounterpart(stage, [candidate({}), candidate({ id: "manual-2" })]),
     ).toStrictEqual({
-      kind: "ambiguous",
       ids: ["manual-1", "manual-2"],
+      kind: "ambiguous",
     });
   });
 });

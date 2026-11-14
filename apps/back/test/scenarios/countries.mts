@@ -11,10 +11,10 @@ const countriesBody = z.object({
 const countryBody = z.object({
   country: z.looseObject({
     code: z.string(),
+    matchTotal: z.number(),
+    matches: z.array(z.looseObject({ id: z.string() })),
     players: z.array(z.looseObject({ name: z.string() })),
     teams: z.array(z.looseObject({ id: z.string() })),
-    matches: z.array(z.looseObject({ id: z.string() })),
-    matchTotal: z.number(),
   }),
 });
 
@@ -72,11 +72,11 @@ export const verifyCountries = async ({
     const response4 = await created(
       `/tournaments/${tournament.id}/matches`,
       {
-        name: `Country ${source} Final`,
         beginAt: "2026-06-01T10:00:00Z",
         endAt: "2026-06-01T12:00:00Z",
-        status: "finished",
+        name: `Country ${source} Final`,
         participantIds: tournament.participants.map(({ id }) => id),
+        status: "finished",
       },
       z.object({ match: z.looseObject({ id: z.string() }) }),
     );

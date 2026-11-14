@@ -10,10 +10,10 @@ export class HttpsTeamLogoSource implements TeamLogoSource {
     return await downloadPublicHttps(
       url,
       {
-        maxBytes,
-        timeoutMs: 10_000,
-        maxRedirects: 3,
         isAllowedHost: (hostname) => !isLiquipediaSourceHost(hostname),
+        maxBytes,
+        maxRedirects: 3,
+        timeoutMs: 10_000,
       },
       this.transport,
     );

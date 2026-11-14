@@ -46,7 +46,7 @@ export const useMatchDiscoveryAnalytics = () => {
 
   return {
     matchDetailTo,
-    trackMatchRowClicked,
     trackMatchDetailViewed,
+    trackMatchRowClicked,
   };
 };

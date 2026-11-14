@@ -22,8 +22,8 @@ const faqItems = computed(() => {
     if (teamName && demonym) {
       return t("page.player.slug.faq.who.answerWithTeam", {
         name,
-        team: teamName,
         nationality: demonym,
+        team: teamName,
       });
     }
 
@@ -43,32 +43,32 @@ const faqItems = computed(() => {
   const trophyAnswer =
     trophies.length > 0
       ? t("page.player.slug.faq.trophies.answerWithWins", {
-          name,
           count: trophies.length,
+          name,
           titles: formatTrophyHighlightNames(trophies),
         })
       : t("page.player.slug.faq.trophies.answerNone", { name });
 
   const items = [
     {
-      question: t("page.player.slug.faq.who.question", { name }),
       answer: whoAnswer,
+      question: t("page.player.slug.faq.who.question", { name }),
     },
   ];
 
   if (player.birthday) {
     items.push({
-      question: t("page.player.slug.faq.age.question", { name }),
       answer: t("page.player.slug.faq.age.answerWithAge", {
-        name,
         age: getAgeFromBirthday(new Date(player.birthday)),
+        name,
       }),
+      question: t("page.player.slug.faq.age.question", { name }),
     });
   }
 
   items.push({
-    question: t("page.player.slug.faq.trophies.question", { name }),
     answer: trophyAnswer,
+    question: t("page.player.slug.faq.trophies.question", { name }),
   });
 
   return items;

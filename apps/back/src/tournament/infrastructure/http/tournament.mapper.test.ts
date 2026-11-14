@@ -7,13 +7,13 @@ import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapMatchListItem } from "./match-list.mapper";
 import { mapTournamentDetail, mapTournamentListItem } from "./tournament.mapper";
 
-const event = { id: "event", slug: "fake-knockout", name: "Fake Knockout" };
+const event = { id: "event", name: "Fake Knockout", slug: "fake-knockout" };
 
 const solo = (id: string, name: string) =>
   Object.assign(new TournamentParticipant(), {
     id,
-    team: null,
     players: [Object.assign(new Player(), { id: `player-${id}`, name, slug: name.toLowerCase() })],
+    team: null,
   });
 
 const knockout = () => {
@@ -21,33 +21,33 @@ const knockout = () => {
   const vatira = solo("vatira", "Vatira");
 
   const tournament = Object.assign(new Tournament(), {
-    id: "knockout",
-    source: "manual",
-    format: "1v1",
-    name: "Fake Knockout",
-    slug: "fake-knockout",
     event,
+    format: "1v1",
+    id: "knockout",
+    name: "Fake Knockout",
     participants: [zen, vatira],
+    slug: "fake-knockout",
+    source: "manual",
     winner: zen,
   });
 
   const final = Object.assign(new Match(), {
     id: "final",
-    publicId: 9,
     name: "Final",
-    status: "finished",
-    tournament: Object.assign(new Tournament(), tournament, { league: null }),
     participants: [zen, vatira],
-    winner: zen,
+    publicId: 9,
     results: [
       { id: "r1", match: { id: "final" }, participant: { id: "zen" }, score: 3 },
       { id: "r2", match: { id: "final" }, participant: { id: "vatira" }, score: 1 },
     ],
+    status: "finished",
+    tournament: Object.assign(new Tournament(), tournament, { league: null }),
+    winner: zen,
   });
 
   tournament.matches = [final];
 
-  return { tournament, final };
+  return { final, tournament };
 };
 
 describe("player participants in public responses", () => {
@@ -57,29 +57,29 @@ describe("player participants in public responses", () => {
     expect(detail.format).toBe("1v1");
     expect(detail.winner).toStrictEqual({
       id: "zen",
-      team: null,
       players: [{ id: "player-zen", name: "Zen", slug: "zen" }],
+      team: null,
     });
     expect(detail.participants.map((participant) => participant.team)).toStrictEqual([null, null]);
     expect(detail.matches[0]).toMatchObject({
+      participants: [
+        { id: "zen", players: [{ name: "Zen" }], team: null },
+        { id: "vatira", players: [{ name: "Vatira" }], team: null },
+      ],
       slug: "vatira-vs-zen-fake-knockout",
       winnerId: "zen",
-      participants: [
-        { id: "zen", team: null, players: [{ name: "Zen" }] },
-        { id: "vatira", team: null, players: [{ name: "Vatira" }] },
-      ],
     });
     expect(mapTournamentListItem(tournament).participants[1]).toStrictEqual({
       id: "vatira",
-      team: null,
       players: [{ id: "player-vatira", name: "Vatira", slug: "vatira" }],
+      team: null,
     });
   });
 
   it("lists a 1v1 match with its players and scores", () => {
     const { final } = knockout();
     expect(mapMatchListItem(final)).toMatchObject({
-      participants: [{ team: null, players: [{ slug: "zen" }] }, { team: null }],
+      participants: [{ players: [{ slug: "zen" }], team: null }, { team: null }],
       results: [
         { participant: "zen", score: 3 },
         { participant: "vatira", score: 1 },
@@ -98,11 +98,11 @@ describe("player participants in public responses", () => {
     });
 
     const cup = Object.assign(new Tournament(), {
+      event,
       id: "cup",
       name: "Fake Cup",
-      slug: "fake-cup",
-      event,
       participants: [kc],
+      slug: "fake-cup",
       winner: kc,
     });
 

@@ -11,15 +11,15 @@ export interface ViewershipOwner {
 }
 
 const ERRORS = {
-  "invalid-peak": "Peak viewers must be a whole number of viewers.",
-  "invalid-average": "Average viewers must be a whole number of viewers.",
   "average-above-peak": "Average viewers cannot exceed peak viewers.",
+  "forbidden-source": "Liquipedia, BLAST.tv and start.gg are not accepted viewership sources.",
+  "invalid-average": "Average viewers must be a whole number of viewers.",
+  "invalid-measured-at": "The measurement date is not a valid date.",
+  "invalid-peak": "Peak viewers must be a whole number of viewers.",
+  "invalid-source-url": "The viewership source URL is not a valid URL.",
   "missing-source-name": "Viewership needs the name of its source to credit.",
   "source-name-too-long": `The source name is over ${VIEWERSHIP_SOURCE_NAME_MAX_LENGTH} characters.`,
-  "invalid-source-url": "The viewership source URL is not a valid URL.",
   "source-url-not-https": "The viewership source URL must use https.",
-  "forbidden-source": "Liquipedia, BLAST.tv and start.gg are not accepted viewership sources.",
-  "invalid-measured-at": "The measurement date is not a valid date.",
 } satisfies Record<ViewershipError, string>;
 
 export const requireViewership = (input: Viewership): Viewership => {

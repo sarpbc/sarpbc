@@ -181,7 +181,7 @@ const place = (replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
   const windowed = compatible.flatMap(({ match, sides }) =>
     match.beginAt &&
     windowContains(replay, played, match.beginAt.getTime(), match.endAt?.getTime() ?? null)
-      ? [{ matchId: match.id, sides, begin: match.beginAt.getTime() }]
+      ? [{ begin: match.beginAt.getTime(), matchId: match.id, sides }]
       : [],
   );
 
@@ -288,8 +288,8 @@ const seriesAssignments = (
 
       assignments.push(
         problem
-          ? { kind: "unmatched", replay, reason: problem, matchId: match.id, sides }
-          : { kind: "matched", replay, matchId: match.id, gameNumber: index + 1, sides },
+          ? { kind: "unmatched", matchId: match.id, reason: problem, replay, sides }
+          : { gameNumber: index + 1, kind: "matched", matchId: match.id, replay, sides },
       );
     }
   }
@@ -327,9 +327,9 @@ export const assignReplays = (
     if (excluded.has(replay.id)) {
       assignments.push({
         kind: "unmatched",
-        replay,
-        reason: "excluded_by_staff",
         matchId: null,
+        reason: "excluded_by_staff",
+        replay,
         sides: null,
       });
       continue;
@@ -339,18 +339,18 @@ export const assignReplays = (
 
     if (location) {
       assignments.push({
-        kind: "stored",
-        replay,
-        matchId: location.matchId,
         gameNumber: location.number,
+        kind: "stored",
+        matchId: location.matchId,
+        replay,
       });
     } else if (replay.rocketLeagueId !== null && replay.rocketLeagueId !== "") {
       if (seen.has(replay.rocketLeagueId) || taken.has(replay.rocketLeagueId)) {
         assignments.push({
           kind: "unmatched",
-          replay,
-          reason: "duplicate_replay",
           matchId: null,
+          reason: "duplicate_replay",
+          replay,
           sides: null,
         });
         continue;
@@ -365,9 +365,9 @@ export const assignReplays = (
       if (!location) {
         assignments.push({
           kind: "unmatched",
-          replay,
-          reason: placement.reason,
           matchId: null,
+          reason: placement.reason,
+          replay,
           sides: null,
         });
       }

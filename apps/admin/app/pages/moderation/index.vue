@@ -62,8 +62,8 @@ const hideReply = async (reply: ModerationReply) => {
   try {
     await hideForumReply(reply.id);
     toast.add({
-      title: t("page.moderation.messages.hidden"),
       color: "success",
+      title: t("page.moderation.messages.hidden"),
     });
     await refresh();
   } catch (hideError) {
@@ -75,8 +75,8 @@ const hideReply = async (reply: ModerationReply) => {
 
 const onReplyDeleted = async () => {
   toast.add({
-    title: t("page.moderation.messages.deleted"),
     color: "success",
+    title: t("page.moderation.messages.deleted"),
   });
   await refresh();
 };

@@ -17,13 +17,13 @@ const TOOLS = [
   "remove_match_game",
 ];
 
-const base = (replayId: string) => ({ replayId, title: replayId, playedAt: null });
+const base = (replayId: string) => ({ playedAt: null, replayId, title: replayId });
 
 const stored = (
   replayId: string,
   status: "imported" | "already_imported",
   gameNumber: number,
-): StatsImportItem => ({ ...base(replayId), status, matchId: "m1", gameNumber });
+): StatsImportItem => ({ ...base(replayId), gameNumber, matchId: "m1", status });
 
 const unmatched = (
   replayId: string,
@@ -31,19 +31,18 @@ const unmatched = (
   matchId: string | null = null,
 ): StatsImportItem => ({
   ...base(replayId),
-  status: "unmatched",
-  matchId,
   blueParticipantId: null,
+  matchId,
   reason,
+  status: "unmatched",
 });
 
 const statsImport: StatsImport = {
-  id: "import-1",
-  tournamentId: "t1",
+  createdAt: new Date("2026-06-02T10:00:00Z"),
+  error: null,
+  finishedAt: new Date("2026-06-02T10:05:00Z"),
   groupId: "rlcs-x1",
-  status: "completed",
-  total: 6,
-  processed: 6,
+  id: "import-1",
   items: [
     stored("imported", "imported", 1),
     stored("stored", "already_imported", 2),
@@ -52,60 +51,61 @@ const statsImport: StatsImport = {
     unmatched("incomplete", "incomplete_series", "m2"),
     {
       ...base("failed"),
-      status: "failed",
-      matchId: "m1",
-      gameNumber: 3,
       blueParticipantId: "p1",
+      gameNumber: 3,
+      matchId: "m1",
       reason: "fetch_failed",
+      status: "failed",
     },
   ],
-  error: null,
-  createdAt: new Date("2026-06-02T10:00:00Z"),
+  processed: 6,
   startedAt: new Date("2026-06-02T10:00:01Z"),
-  finishedAt: new Date("2026-06-02T10:05:00Z"),
+  status: "completed",
+  total: 6,
+  tournamentId: "t1",
 };
 
 const accounts: StatsPlayerAccounts = {
   players: [
     {
+      games: 4,
+      name: "Racer",
       platform: "steam",
       platformId: "1",
-      name: "Racer",
-      team: { participantId: "p1", name: "Vitality" },
-      games: 4,
       player: null,
+      team: { name: "Vitality", participantId: "p1" },
     },
     {
+      games: 4,
+      name: "zen",
       platform: "steam",
       platformId: "2",
-      name: "zen",
-      team: { participantId: "p1", name: "Vitality" },
-      games: 4,
       player: { id: "zen", name: "zen" },
+      team: { name: "Vitality", participantId: "p1" },
     },
   ],
-  rosters: [{ participantId: "p1", teamName: "Vitality", players: [{ id: "zen", name: "zen" }] }],
+  rosters: [{ participantId: "p1", players: [{ id: "zen", name: "zen" }], teamName: "Vitality" }],
 };
 
 const game: TournamentStatsGame = {
+  ballchasingId: "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
+  blueGoals: 3,
+  blueParticipantId: "p1",
   matchId: "m1",
   number: 2,
-  ballchasingId: "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
-  playedAt: null,
-  blueParticipantId: "p1",
-  orangeParticipantId: "p2",
-  blueGoals: 3,
   orangeGoals: 1,
+  orangeParticipantId: "p2",
+  playedAt: null,
 };
 
 const setup = (role: "admin" | "journalist") => {
   const statsImportService = {
+    recent: vi.fn<StatsImportService["recent"]>(async () => [statsImport]),
     request: vi.fn<StatsImportService["request"]>(async () => ({
       ...statsImport,
-      status: "pending" as const,
       items: [],
+      status: "pending" as const,
     })),
-    recent: vi.fn<StatsImportService["recent"]>(async () => [statsImport]),
   };
 
   const statsPlayerLinkService = {
@@ -118,7 +118,7 @@ const setup = (role: "admin" | "journalist") => {
     remove: vi.fn<ManualGameService["remove"]>(async () => game),
   };
 
-  const tools = gameStatsTools({ statsImportService, statsPlayerLinkService, manualGameService });
+  const tools = gameStatsTools({ manualGameService, statsImportService, statsPlayerLinkService });
 
   const call = async (name: string, input: Record<string, string | number | boolean>) => {
     const tool = tools.find((defined) => defined.name === name);
@@ -127,13 +127,13 @@ const setup = (role: "admin" | "journalist") => {
       throw new Error(`${name} is not defined`);
     }
 
-    const result = await tool.run({ id: "u1", email: "staff@test.com", role }, input);
+    const result = await tool.run({ email: "staff@test.com", id: "u1", role }, input);
     const text = textOf(result);
 
-    return { result, text, body: result.isError === true ? null : jsonOf(result) };
+    return { body: result.isError === true ? null : jsonOf(result), result, text };
   };
 
-  return { tools, call, statsImportService, statsPlayerLinkService, manualGameService };
+  return { call, manualGameService, statsImportService, statsPlayerLinkService, tools };
 };
 
 describe(summarizeStatsImport, () => {
@@ -141,12 +141,12 @@ describe(summarizeStatsImport, () => {
     const summary = summarizeStatsImport(statsImport, false);
 
     expect(summary.counts).toStrictEqual({
-      imported: 1,
       already_imported: 1,
-      unmatched: 3,
       failed: 1,
+      imported: 1,
+      unmatched: 3,
     });
-    expect(summary.otherStages).toStrictEqual({ unknown_teams: 1, outside_match_window: 1 });
+    expect(summary.otherStages).toStrictEqual({ outside_match_window: 1, unknown_teams: 1 });
     expect(summary.toReview.map((entry) => entry.replayId)).toStrictEqual(["incomplete", "failed"]);
     expect(summary.otherStageReplays).toBeNull();
     expect(summary.progress).toStrictEqual({ processed: 6, total: 6 });
@@ -169,10 +169,10 @@ describe("game stats tools", () => {
   it("starts an import and reports the latest one", async () => {
     const { call, statsImportService } = setup("admin");
 
-    const callResult = await call("import_game_stats", { tournamentId: "t1", group: "rlcs-x1" });
+    const callResult = await call("import_game_stats", { group: "rlcs-x1", tournamentId: "t1" });
     expect(callResult.body).toStrictEqual({
-      id: "import-1",
       groupId: "rlcs-x1",
+      id: "import-1",
       status: "pending",
     });
     expect(statsImportService.request).toHaveBeenCalledWith("t1", "rlcs-x1");
@@ -203,8 +203,8 @@ describe("game stats tools", () => {
     });
 
     const callResult4 = await call("list_unlinked_game_players", {
-      tournamentId: "t1",
       includeLinked: true,
+      tournamentId: "t1",
     });
 
     const all = callResult4.body;
@@ -229,10 +229,10 @@ describe("game stats tools", () => {
     const { call, manualGameService } = setup("admin");
 
     const input = {
+      blueParticipantId: "p1",
+      gameNumber: 2,
       matchId: "m1",
       replay: game.ballchasingId,
-      gameNumber: 2,
-      blueParticipantId: "p1",
     };
 
     const callResult6 = await call("attach_replay_to_game", { tournamentId: "t1", ...input });
@@ -240,9 +240,9 @@ describe("game stats tools", () => {
     expect(manualGameService.attach).toHaveBeenCalledWith("t1", input);
 
     const callResult7 = await call("remove_match_game", {
-      tournamentId: "t1",
-      matchId: "m1",
       gameNumber: 2,
+      matchId: "m1",
+      tournamentId: "t1",
     });
 
     expect(callResult7.body).toStrictEqual(game);
@@ -256,16 +256,16 @@ describe("game stats tools", () => {
     );
 
     const { result } = await call("attach_replay_to_game", {
-      tournamentId: "t1",
+      blueParticipantId: "p1",
+      gameNumber: 2,
       matchId: "m1",
       replay: game.ballchasingId,
-      gameNumber: 2,
-      blueParticipantId: "p1",
+      tournamentId: "t1",
     });
 
     expect(result).toMatchObject({
-      isError: true,
       content: [{ text: "This replay is already attached to game 3 of KC vs BDS in RLCS." }],
+      isError: true,
     });
   });
 
@@ -274,15 +274,15 @@ describe("game stats tools", () => {
       setup("journalist");
 
     const { result, text } = await call(name, {
-      tournamentId: "t1",
+      blueParticipantId: "p1",
+      gameNumber: 1,
       group: "rlcs-x1",
+      matchId: "m1",
       platform: "steam",
       platformId: "1",
       playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
-      matchId: "m1",
       replay: game.ballchasingId,
-      gameNumber: 1,
-      blueParticipantId: "p1",
+      tournamentId: "t1",
     });
 
     expect(result.isError).toBe(true);

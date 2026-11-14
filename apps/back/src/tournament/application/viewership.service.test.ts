@@ -10,26 +10,26 @@ import { ViewershipService } from "./viewership.service";
 import type { ViewershipScope } from "./viewership.service";
 
 const VIEWERSHIP: Viewership = {
-  peakViewers: 64_000,
   averageViewers: 40_000,
-  scope: "with_costreams",
   measuredAt: "2026-05-24T18:00:00Z",
+  peakViewers: 64_000,
+  scope: "with_costreams",
   sourceName: " Esports Charts ",
   sourceUrl: "https://escharts.com/tournaments/rl/fake-open",
 };
 
 const stage = (source: DataSource): TournamentSummary => ({
-  id: `stage-${source}`,
-  name: "Main Event",
-  slug: "main-event",
-  event: { id: "event", slug: "fake-open", name: "Fake Open" },
   beginAt: null,
-  league: null,
-  pickemsEnabled: false,
-  source,
-  pandascoreId: null,
-  streams: [],
+  event: { id: "event", name: "Fake Open", slug: "fake-open" },
   eventStreams: [],
+  id: `stage-${source}`,
+  league: null,
+  name: "Main Event",
+  pandascoreId: null,
+  pickemsEnabled: false,
+  slug: "main-event",
+  source,
+  streams: [],
 });
 
 describe(ViewershipService, () => {
@@ -40,10 +40,10 @@ describe(ViewershipService, () => {
   const scope: ViewershipScope = {
     events: {
       load: async (id) => events.get(id) ?? null,
-      stages: async () => stages,
       save: async (event) => {
         events.set(event.id, event);
       },
+      stages: async () => stages,
     },
     matches: {
       load: async (id) => matches.get(id) ?? null,
@@ -75,47 +75,47 @@ describe(ViewershipService, () => {
   });
 
   it("stores a staff entry with its normalized credit and clears it with null", async () => {
-    const saved = await service.set({ kind: "match", id: "manual" }, VIEWERSHIP);
+    const saved = await service.set({ id: "manual", kind: "match" }, VIEWERSHIP);
 
     expect(saved.viewership).toStrictEqual({
       ...VIEWERSHIP,
       measuredAt: "2026-05-24T18:00:00.000Z",
       sourceName: "Esports Charts",
     });
-    await expect(service.find({ kind: "match", id: "manual" })).resolves.toStrictEqual(saved);
+    await expect(service.find({ id: "manual", kind: "match" })).resolves.toStrictEqual(saved);
 
-    await service.set({ kind: "match", id: "manual" }, null);
+    await service.set({ id: "manual", kind: "match" }, null);
     expect(matches.get("manual")?.viewership).toBeNull();
   });
 
   it("refuses an entry without a source to credit", async () => {
     await expect(
-      service.set({ kind: "event", id: "event" }, { ...VIEWERSHIP, sourceName: "" }),
+      service.set({ id: "event", kind: "event" }, { ...VIEWERSHIP, sourceName: "" }),
     ).rejects.toThrow(InvalidInputError);
     await expect(
-      service.set({ kind: "event", id: "event" }, { ...VIEWERSHIP, sourceUrl: "escharts.com" }),
+      service.set({ id: "event", kind: "event" }, { ...VIEWERSHIP, sourceUrl: "escharts.com" }),
     ).rejects.toThrow("not a valid URL");
     expect(events.get("event")?.viewership).toBeNull();
   });
 
   it("lets staff enter start.gg numbers for the site but refuses them as proposals", async () => {
-    await service.set({ kind: "match", id: "startgg" }, VIEWERSHIP);
+    await service.set({ id: "startgg", kind: "match" }, VIEWERSHIP);
     expect(matches.get("startgg")?.viewership?.peakViewers).toBe(64_000);
 
     await expect(
-      service.requireProposable({ kind: "match", id: "startgg" }, VIEWERSHIP),
+      service.requireProposable({ id: "startgg", kind: "match" }, VIEWERSHIP),
     ).rejects.toThrow("start.gg match");
     stages = [{ id: "s1", name: "Swiss", source: "startgg" }];
     await expect(
-      service.requireProposable({ kind: "event", id: "event" }, VIEWERSHIP),
+      service.requireProposable({ id: "event", kind: "event" }, VIEWERSHIP),
     ).rejects.toThrow("start.gg event");
     stages = [...stages, { id: "s2", name: "Playoffs", source: "manual" }];
     await expect(
-      service.requireProposable({ kind: "event", id: "event" }, VIEWERSHIP),
+      service.requireProposable({ id: "event", kind: "event" }, VIEWERSHIP),
     ).resolves.toBeUndefined();
   });
 
   it("reports a missing owner", async () => {
-    await expect(service.find({ kind: "match", id: "missing" })).rejects.toThrow(NotFoundError);
+    await expect(service.find({ id: "missing", kind: "match" })).rejects.toThrow(NotFoundError);
   });
 });

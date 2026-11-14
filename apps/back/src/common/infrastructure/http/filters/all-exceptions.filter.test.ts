@@ -19,8 +19,8 @@ interface FakeRequest {
 }
 
 const NEWS_REQUEST: FakeRequest = {
-  url: "/news",
   method: "GET",
+  url: "/news",
 };
 
 interface FakeBody {
@@ -35,7 +35,7 @@ type Send = (body: FakeBody) => void;
 const hostWith = (send: Mock<Send>, sent = false, request = NEWS_REQUEST): ExecutionContextHost =>
   new ExecutionContextHost([
     request,
-    { sent, status: vi.fn<(code: number) => void>().mockReturnThis(), send },
+    { send, sent, status: vi.fn<(code: number) => void>().mockReturnThis() },
   ]);
 
 describe(AllExceptionsFilter, () => {
@@ -51,8 +51,8 @@ describe(AllExceptionsFilter, () => {
     const send = vi.fn<Send>();
     filter.catch(new HttpException("Tournament not found", HttpStatus.NOT_FOUND), hostWith(send));
     expect(send).toHaveBeenCalledWith({
-      statusCode: 404,
       message: "Tournament not found",
+      statusCode: 404,
     });
     expect(logError).not.toHaveBeenCalled();
   });
@@ -62,9 +62,9 @@ describe(AllExceptionsFilter, () => {
     filter.catch(
       new InternalServerErrorException("Cover image could not be stored."),
       hostWith(send, false, {
-        url: "/storage/r2/upload",
         method: "POST",
-        user: { id: "user-1", email: "editor@sarpbc.org" },
+        url: "/storage/r2/upload",
+        user: { email: "editor@sarpbc.org", id: "user-1" },
       }),
     );
     const [entry] = logError.mock.calls[0] ?? [];
@@ -72,11 +72,11 @@ describe(AllExceptionsFilter, () => {
     expect(entry).toMatchObject({
       component: AllExceptionsFilter.name,
       message: "HTTP 5xx response",
-      path: "/storage/r2/upload",
       method: "POST",
+      path: "/storage/r2/upload",
       status: 500,
-      userId: "user-1",
       userEmail: "editor@sarpbc.org",
+      userId: "user-1",
     });
     expect(entry).toHaveProperty("environment", expect.any(String));
   });
@@ -92,18 +92,18 @@ describe(AllExceptionsFilter, () => {
   ])("translates application failure %p to HTTP %p", (failure, statusCode, error) => {
     const send = vi.fn<Send>();
     filter.catch(failure, hostWith(send));
-    expect(send).toHaveBeenCalledWith({ statusCode, error, message: failure.message });
+    expect(send).toHaveBeenCalledWith({ error, message: failure.message, statusCode });
   });
 
   it("preserves coded business error payloads", () => {
     const send = vi.fn<Send>();
     filter.catch(
-      new ConflictError({ message: "Already reported", code: "REPLY_ALREADY_REPORTED" }),
+      new ConflictError({ code: "REPLY_ALREADY_REPORTED", message: "Already reported" }),
       hostWith(send),
     );
     expect(send).toHaveBeenCalledWith({
-      message: "Already reported",
       code: "REPLY_ALREADY_REPORTED",
+      message: "Already reported",
     });
   });
 
@@ -111,15 +111,15 @@ describe(AllExceptionsFilter, () => {
     const send = vi.fn<Send>();
     filter.catch(new Error("secret stack"), hostWith(send));
     expect(send).toHaveBeenCalledWith({
-      statusCode: 500,
       message:
         "The server hit an unexpected error. Try again, or report this if it keeps happening.",
+      statusCode: 500,
     });
     expect(logError).toHaveBeenCalledOnce();
     expect(logError.mock.calls[0]?.[0]).toMatchObject({
       component: AllExceptionsFilter.name,
-      message: "Unhandled exception",
       error: new Error("secret stack"),
+      message: "Unhandled exception",
     });
   });
 });

@@ -25,7 +25,7 @@ describe(RedisHealthIndicator, () => {
     ping.mockResolvedValue("NOPE");
 
     await expect(indicator.pingCheck("redis")).resolves.toStrictEqual({
-      redis: { status: "down", message: "Unexpected ping response" },
+      redis: { message: "Unexpected ping response", status: "down" },
     });
   });
 
@@ -33,7 +33,7 @@ describe(RedisHealthIndicator, () => {
     ping.mockRejectedValue(new Error("ECONNREFUSED"));
 
     await expect(indicator.pingCheck("redis")).resolves.toStrictEqual({
-      redis: { status: "down", message: "ECONNREFUSED" },
+      redis: { message: "ECONNREFUSED", status: "down" },
     });
   });
 });

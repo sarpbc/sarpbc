@@ -6,24 +6,24 @@ describe(parseCircuitScale, () => {
   it("orders tiers by placement", () => {
     expect(
       parseCircuitScale([
-        { from: 3, to: 4, points: 2 },
-        { from: 1, to: 2, points: 5 },
+        { from: 3, points: 2, to: 4 },
+        { from: 1, points: 5, to: 2 },
       ]),
     ).toStrictEqual([
-      { from: 1, to: 2, points: 5 },
-      { from: 3, to: 4, points: 2 },
+      { from: 1, points: 5, to: 2 },
+      { from: 3, points: 2, to: 4 },
     ]);
   });
 
   it.each([
-    [[{ from: 0, to: 1, points: 1 }], "Placements"],
-    [[{ from: 4, to: 3, points: 1 }], "Placements"],
-    [[{ from: 1, to: 1, points: 1.5 }], "Points"],
-    [[{ from: 1, to: 1, points: -1 }], "Points"],
+    [[{ from: 0, points: 1, to: 1 }], "Placements"],
+    [[{ from: 4, points: 1, to: 3 }], "Placements"],
+    [[{ from: 1, points: 1.5, to: 1 }], "Points"],
+    [[{ from: 1, points: -1, to: 1 }], "Points"],
     [
       [
-        { from: 1, to: 4, points: 5 },
-        { from: 3, to: 6, points: 2 },
+        { from: 1, points: 5, to: 4 },
+        { from: 3, points: 2, to: 6 },
       ],
       "two tiers",
     ],
@@ -33,7 +33,7 @@ describe(parseCircuitScale, () => {
 });
 
 describe(pointsForPlacement, () => {
-  const scale = [{ from: 5, to: 8, points: 4 }];
+  const scale = [{ from: 5, points: 4, to: 8 }];
 
   it("returns the points of the range holding the placement, or null outside it", () => {
     expect(pointsForPlacement(scale, 5)).toBe(4);

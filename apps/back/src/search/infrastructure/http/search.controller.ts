@@ -6,9 +6,9 @@ import { mapPlayer, mapTeam } from "../../../roster/infrastructure/http/player.m
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 
 const searchCriteria = (query: SearchQueryInput) => ({
-  query: query.q ?? "",
   limit: query.limit,
   offset: query.offset,
+  query: query.q ?? "",
 });
 
 @Controller("search")
@@ -25,8 +25,8 @@ export class SearchController {
     return {
       players: result.players.map((player) => mapPlayer(player)),
       teams: result.teams.map((team) => mapTeam(team)),
-      tournaments: result.tournaments.map((tournament) => mapTournament(tournament)),
       total: result.total,
+      tournaments: result.tournaments.map((tournament) => mapTournament(tournament)),
     };
   }
 

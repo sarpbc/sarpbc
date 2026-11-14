@@ -18,35 +18,35 @@ describe("PlayerService profile photos", () => {
   let transactions: number;
 
   const scope: RosterWriteScope = {
-    players: {
-      findById: async (id) => (id === player.id ? player : null),
-      findBySlug: async () => null,
-      save: async () => {},
-      delete: async () => {},
-    },
-    photos: {
-      findByPlayer: async () => gallery,
-      findById: async (id) => gallery.find((photo) => photo.id === id) ?? null,
-      save: async (photo) => {
-        gallery.push(photo);
-      },
-      delete: async (photo) => {
-        gallery = gallery.filter((existing) => existing !== photo);
-      },
-    },
     contracts: {
+      delete: async () => {},
       findById: async () => null,
       findByPlayer: async () => [],
       findByTeam: async () => [],
       save: async () => {},
+    },
+    photos: {
+      delete: async (photo) => {
+        gallery = gallery.filter((existing) => existing !== photo);
+      },
+      findById: async (id) => gallery.find((photo) => photo.id === id) ?? null,
+      findByPlayer: async () => gallery,
+      save: async (photo) => {
+        gallery.push(photo);
+      },
+    },
+    players: {
       delete: async () => {},
+      findById: async (id) => (id === player.id ? player : null),
+      findBySlug: async () => null,
+      save: async () => {},
     },
     teams: {
+      delete: async () => {},
       findById: async () => null,
       findBySlug: async () => null,
       redirectCount: async () => 0,
       save: async () => {},
-      delete: async () => {},
     },
   };
 
@@ -112,17 +112,17 @@ describe("PlayerService roster moves", () => {
     player = Object.assign(new Player(), { id: "player", name: "Zen", team: oldTeam });
     history = [
       Object.assign(new Contract(), {
+        endDate: new Date("2025-01-01"),
         id: "past",
         player,
-        team: newTeam,
         startDate: new Date("2024-01-01"),
-        endDate: new Date("2025-01-01"),
+        team: newTeam,
       }),
       Object.assign(new Contract(), {
         id: "open",
         player,
-        team: oldTeam,
         startDate: new Date("2025-02-01"),
+        team: oldTeam,
       }),
     ];
     const teams = new Map([oldTeam, newTeam].map((team) => [team.id, team]));
@@ -130,31 +130,31 @@ describe("PlayerService roster moves", () => {
     deleteContract = vi.fn<RosterWriteScope["contracts"]["delete"]>();
     savePlayer = vi.fn<RosterWriteScope["players"]["save"]>();
     stores = {
+      contracts: {
+        delete: deleteContract,
+        findById: vi.fn<RosterWriteScope["contracts"]["findById"]>(),
+        findByPlayer: async () => history,
+        findByTeam: vi.fn<RosterWriteScope["contracts"]["findByTeam"]>(),
+        save: saveContract,
+      },
+      photos: {
+        delete: vi.fn<RosterWriteScope["photos"]["delete"]>(),
+        findById: vi.fn<RosterWriteScope["photos"]["findById"]>(),
+        findByPlayer: vi.fn<RosterWriteScope["photos"]["findByPlayer"]>(),
+        save: vi.fn<RosterWriteScope["photos"]["save"]>(),
+      },
       players: {
+        delete: vi.fn<RosterWriteScope["players"]["delete"]>(),
         findById: async (id) => (id === player.id ? player : null),
         findBySlug: vi.fn<RosterWriteScope["players"]["findBySlug"]>(),
         save: savePlayer,
-        delete: vi.fn<RosterWriteScope["players"]["delete"]>(),
-      },
-      photos: {
-        findByPlayer: vi.fn<RosterWriteScope["photos"]["findByPlayer"]>(),
-        findById: vi.fn<RosterWriteScope["photos"]["findById"]>(),
-        save: vi.fn<RosterWriteScope["photos"]["save"]>(),
-        delete: vi.fn<RosterWriteScope["photos"]["delete"]>(),
-      },
-      contracts: {
-        findByPlayer: async () => history,
-        findByTeam: vi.fn<RosterWriteScope["contracts"]["findByTeam"]>(),
-        findById: vi.fn<RosterWriteScope["contracts"]["findById"]>(),
-        save: saveContract,
-        delete: deleteContract,
       },
       teams: {
+        delete: vi.fn<RosterWriteScope["teams"]["delete"]>(),
         findById: async (id) => teams.get(id) ?? null,
         findBySlug: vi.fn<RosterWriteScope["teams"]["findBySlug"]>(),
         redirectCount: vi.fn<RosterWriteScope["teams"]["redirectCount"]>(),
         save: vi.fn<RosterWriteScope["teams"]["save"]>(),
-        delete: vi.fn<RosterWriteScope["teams"]["delete"]>(),
       },
     };
     service = new PlayerService(unusedPlayerQueries, unusedPhotoQueries, {
@@ -163,23 +163,23 @@ describe("PlayerService roster moves", () => {
   });
 
   const lastSavedContract = () => saveContract.mock.lastCall?.[0];
-  const move = (teamId: string) => ({ teamId, effectiveDate: "2026-10-23", sourceUrl: source });
+  const move = (teamId: string) => ({ effectiveDate: "2026-10-23", sourceUrl: source, teamId });
 
   it("closes the open contract and opens a sourced one when a player joins a team", async () => {
     await service.joinTeam(player.id, move(newTeam.id));
     expect(history[1]).toMatchObject({ endDate: new Date("2026-10-23"), leaveSourceUrl: source });
     expect(history[0].endDate).toStrictEqual(new Date("2025-01-01"));
     expect(lastSavedContract()).toMatchObject({
-      team: newTeam,
-      startDate: new Date("2026-10-23"),
       endDate: null,
       joinSourceUrl: source,
+      startDate: new Date("2026-10-23"),
+      team: newTeam,
     });
   });
 
   it("moves the player to the new team without deleting any contract", async () => {
     await service.joinTeam(player.id, move(newTeam.id));
-    expect(player).toMatchObject({ team: newTeam, status: "active" });
+    expect(player).toMatchObject({ status: "active", team: newTeam });
     expect(saveContract).toHaveBeenCalledTimes(2);
     expect(deleteContract).not.toHaveBeenCalled();
   });
@@ -197,15 +197,15 @@ describe("PlayerService roster moves", () => {
       role: "coach",
     });
     expect(history[1]).toMatchObject({
+      endDate: new Date("2026-10-23"),
       role: "active",
       startDate: new Date("2025-02-01"),
-      endDate: new Date("2026-10-23"),
     });
     expect(lastSavedContract()).toMatchObject({
-      team: oldTeam,
+      endDate: null,
       role: "coach",
       startDate: new Date("2026-10-23"),
-      endDate: null,
+      team: oldTeam,
     });
   });
 
@@ -230,13 +230,13 @@ describe("PlayerService roster moves", () => {
       role: "benched",
     });
     expect(history[1]).toMatchObject({
-      role: "active",
       endDate: new Date("2026-10-23"),
+      role: "active",
     });
     expect(lastSavedContract()).toMatchObject({
-      team: oldTeam,
-      role: "benched",
       endDate: null,
+      role: "benched",
+      team: oldTeam,
     });
   });
 
@@ -254,7 +254,7 @@ describe("PlayerService roster moves", () => {
       status: "retired",
     });
     expect(history[1].leaveSourceUrl).toBe(source);
-    expect(player).toMatchObject({ team: null, status: "retired" });
+    expect(player).toMatchObject({ status: "retired", team: null });
     expect(deleteContract).not.toHaveBeenCalled();
   });
 
@@ -264,7 +264,7 @@ describe("PlayerService roster moves", () => {
       ...move(oldTeam.id),
       status: "free_agent",
     });
-    expect(player).toMatchObject({ team: null, status: "free_agent" });
+    expect(player).toMatchObject({ status: "free_agent", team: null });
   });
 
   it("keeps the current team status when closing a stale contract elsewhere", async () => {
@@ -272,8 +272,8 @@ describe("PlayerService roster moves", () => {
       Object.assign(new Contract(), {
         id: "stale",
         player,
-        team: newTeam,
         startDate: new Date("2025-03-01"),
+        team: newTeam,
       }),
     );
     await service.leaveTeam(player.id, {
@@ -281,7 +281,7 @@ describe("PlayerService roster moves", () => {
       status: "retired",
     });
     expect(history[2].endDate).toStrictEqual(new Date("2026-10-23"));
-    expect(player).toMatchObject({ team: oldTeam, status: "active" });
+    expect(player).toMatchObject({ status: "active", team: oldTeam });
   });
 
   it("rejects leaving a team the player is not on", async () => {

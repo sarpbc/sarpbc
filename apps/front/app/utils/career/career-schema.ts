@@ -27,15 +27,15 @@ const careerStageSchema = z.enum(CAREER_STAGES);
 const careerPlacementSchema = z.enum(CAREER_PLACEMENTS);
 
 const statsSchema = z.object({
-  rating: z.number(),
   form: z.number(),
   morale: z.number(),
+  rating: z.number(),
 });
 
 const destinyLeaningsSchema = z.object({
+  coach: z.number(),
   quit: z.number(),
   streamer: z.number(),
-  coach: z.number(),
 });
 
 const rosterSchema = z
@@ -43,113 +43,113 @@ const rosterSchema = z
   .refine((value) => value.length === ROSTER_SIZE);
 
 const npcPlayerSchema = z.object({
+  form: z.number(),
   id: z.string(),
+  morale: z.number(),
   name: z.string(),
   rating: z.number(),
-  form: z.number(),
-  morale: z.number(),
   region: careerRegionSchema,
 });
 
 const rankSnapshotEntrySchema = z.object({
-  teamId: z.string(),
   points: z.number(),
+  teamId: z.string(),
 });
 
 const splitFieldResultSchema = z.object({
+  points: z.record(z.string(), z.number()),
   season: z.number(),
   split: z.number(),
-  points: z.record(z.string(), z.number()),
 });
 
 const worldStateSchema = z.object({
-  rosters: z.record(z.string(), rosterSchema),
-  players: z.record(z.string(), npcPlayerSchema),
   freeAgentIds: z.array(z.string()),
   nextGeneratedId: z.number(),
+  players: z.record(z.string(), npcPlayerSchema),
   rankSnapshot: z.array(rankSnapshotEntrySchema).nullable().default(null),
+  rosters: z.record(z.string(), rosterSchema),
   splitFields: z.array(splitFieldResultSchema).default([]),
 });
 
 const splitRecordSchema = z.object({
-  split: z.number(),
-  regionals: z.array(careerPlacementSchema),
   major: careerPlacementSchema.nullable(),
   points: z.number(),
+  regionals: z.array(careerPlacementSchema),
+  split: z.number(),
 });
 
 const seasonRecordSchema = z.object({
-  season: z.number(),
-  teamId: z.string(),
-  teamName: z.string(),
-  splits: z.array(splitRecordSchema),
-  worlds: careerPlacementSchema.nullable(),
   points: z.number(),
   ratingEnd: z.number(),
+  season: z.number(),
+  splits: z.array(splitRecordSchema),
+  teamId: z.string(),
+  teamName: z.string(),
+  worlds: careerPlacementSchema.nullable(),
 });
 
 const eventOutcomeSchema = z.object({
-  eventId: z.string(),
   choiceId: z.string(),
   delta: statsSchema.partial(),
   destiny: destinyLeaningsSchema.partial(),
+  eventId: z.string(),
   failed: z.boolean().optional(),
 });
 
 const careerResultSchema = z.object({
-  id: z.string(),
-  playerName: z.string(),
-  region: careerRegionSchema,
-  country: careerCountrySchema,
-  role: careerRoleSchema,
   background: careerBackgroundSchema,
-  finalRating: z.number(),
+  completedAt: z.string(),
+  country: careerCountrySchema,
+  destiny: z.enum(CAREER_DESTINIES),
   finalForm: z.number(),
   finalMorale: z.number(),
+  finalRating: z.number(),
+  id: z.string(),
+  nicknameKey: z.enum(CAREER_NICKNAME_KEYS),
+  playerName: z.string(),
+  region: careerRegionSchema,
+  retiredAge: z.number(),
+  role: careerRoleSchema,
   seasons: z.array(seasonRecordSchema),
   trophies: z.array(
     z.object({
-      type: z.enum(["regional", "major", "worlds"]),
       season: z.number(),
+      type: z.enum(["regional", "major", "worlds"]),
     }),
   ),
-  retiredAge: z.number(),
-  destiny: z.enum(CAREER_DESTINIES),
-  nicknameKey: z.enum(CAREER_NICKNAME_KEYS),
-  completedAt: z.string(),
 });
 
 export const careerStateSchema = z.object({
-  id: z.string(),
-  phase: careerPhaseSchema,
-  resumePhase: z.preprocess((value) => value ?? null, careerPhaseSchema.nullable()),
-  onboardingStep: onboardingStepSchema,
-  playerName: z.string(),
-  region: careerRegionSchema.nullable(),
-  country: careerCountrySchema.nullable(),
-  role: careerRoleSchema.nullable(),
   background: careerBackgroundSchema.nullable(),
-  stats: statsSchema,
+  country: careerCountrySchema.nullable(),
+  currentEventId: z.string().nullable(),
   currentSeason: z.number(),
+  currentSplits: z.array(splitRecordSchema),
   currentStage: careerStageSchema,
   currentTeamId: z.string(),
-  world: worldStateSchema,
-  usedEventIds: z.array(z.string()),
-  currentEventId: z.string().nullable(),
+  currentWorlds: careerPlacementSchema.nullable(),
+  destinyLeanings: destinyLeaningsSchema,
   eventsQueuedForStage: z.number(),
   eventsResolvedForStage: z.number(),
-  pendingSkipRegionals: z.number(),
-  pendingSkipMajor: z.boolean(),
-  currentSplits: z.array(splitRecordSchema),
-  currentWorlds: careerPlacementSchema.nullable(),
-  seasonRecords: z.array(seasonRecordSchema),
-  pendingOfferTeamIds: z.array(z.string()),
-  renewalOffered: z.boolean(),
+  id: z.string(),
   isLastChanceOffer: z.boolean(),
-  offseasonDestinyPending: z.boolean(),
-  destinyLeanings: destinyLeaningsSchema,
   lastEventOutcome: eventOutcomeSchema.nullable(),
+  offseasonDestinyPending: z.boolean(),
+  onboardingStep: onboardingStepSchema,
+  pendingOfferTeamIds: z.array(z.string()),
+  pendingSkipMajor: z.boolean(),
+  pendingSkipRegionals: z.number(),
+  phase: careerPhaseSchema,
+  playerName: z.string(),
+  region: careerRegionSchema.nullable(),
+  renewalOffered: z.boolean(),
   result: careerResultSchema.nullable(),
+  resumePhase: z.preprocess((value) => value ?? null, careerPhaseSchema.nullable()),
+  role: careerRoleSchema.nullable(),
+  seasonRecords: z.array(seasonRecordSchema),
+  stats: statsSchema,
+  usedEventIds: z.array(z.string()),
+  world: worldStateSchema,
 });
 
 /** Legacy saves may omit menu/resumePhase/splitFields — normalize without casting. */
@@ -159,8 +159,8 @@ const normalizeLoadedCareerState = (state: CareerState): CareerState => {
     resumePhase: state.resumePhase ?? null,
     world: {
       ...state.world,
-      splitFields: state.world.splitFields ?? [],
       rankSnapshot: state.world.rankSnapshot ?? null,
+      splitFields: state.world.splitFields ?? [],
     },
   };
 

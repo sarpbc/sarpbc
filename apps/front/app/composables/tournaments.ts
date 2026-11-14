@@ -50,7 +50,7 @@ export const getAllTournaments = async (
 
   const tournaments = res.tournaments ?? [];
 
-  return { tournaments, total: res.count ?? tournaments.length };
+  return { total: res.count ?? tournaments.length, tournaments };
 };
 
 export const getEvents = async (

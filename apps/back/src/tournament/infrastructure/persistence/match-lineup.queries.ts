@@ -10,17 +10,17 @@ export class CompetitionLineupQueries implements LineupQueries {
     const rows = await this.em.find(
       MatchLineupPlayer,
       { match: matchId },
-      { populate: ["player"], orderBy: { position: "ASC" } },
+      { orderBy: { position: "ASC" }, populate: ["player"] },
     );
 
     return rows.map(({ participant, player }) => ({
       participantId: participant.id,
       player: {
         id: player.id,
-        name: player.name,
-        slug: player.slug,
         imageUrl: player.imageUrl,
+        name: player.name,
         nationality: player.nationality,
+        slug: player.slug,
       },
     }));
   }
@@ -30,8 +30,8 @@ export class CompetitionLineupQueries implements LineupQueries {
       MatchLineupPlayer,
       { player: playerId },
       {
+        orderBy: [{ match: { beginAt: QueryOrder.DESC_NULLS_LAST } }, { id: "ASC" }],
         populate: ["participant.players"],
-        orderBy: { match: { beginAt: QueryOrder.DESC_NULLS_LAST }, id: "ASC" },
       },
     );
 

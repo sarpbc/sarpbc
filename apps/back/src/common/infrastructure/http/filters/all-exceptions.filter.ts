@@ -6,13 +6,13 @@ import { ApplicationError } from "../../../domain/errors/application-error";
 import type { FailureKind } from "../../../domain/errors/application-error";
 
 const failureResponses = {
-  "invalid-input": { status: 400, error: "Bad Request" },
-  "not-found": { status: 404, error: "Not Found" },
-  conflict: { status: 409, error: "Conflict" },
-  forbidden: { status: 403, error: "Forbidden" },
-  unauthenticated: { status: 401, error: "Unauthorized" },
-  unprocessable: { status: 422, error: "Unprocessable Entity" },
-  integration: { status: 500, error: "Internal Server Error" },
+  conflict: { error: "Conflict", status: 409 },
+  forbidden: { error: "Forbidden", status: 403 },
+  integration: { error: "Internal Server Error", status: 500 },
+  "invalid-input": { error: "Bad Request", status: 400 },
+  "not-found": { error: "Not Found", status: 404 },
+  unauthenticated: { error: "Unauthorized", status: 401 },
+  unprocessable: { error: "Unprocessable Entity", status: 422 },
 } satisfies Record<FailureKind, { status: number; error: string }>;
 
 @Catch()
@@ -33,15 +33,15 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
         log.error({
           component: AllExceptionsFilter.name,
           ...requestLogContext(request),
-          status,
           error: exception,
+          status,
         });
       }
 
       const body =
         exception.detail.code !== undefined && exception.detail.code !== ""
           ? exception.detail
-          : { statusCode: status, error, ...exception.detail };
+          : { error, statusCode: status, ...exception.detail };
 
       void response.status(status).send(body);
 
@@ -56,8 +56,8 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
           component: AllExceptionsFilter.name,
           message: "HTTP 5xx response",
           ...requestLogContext(request),
-          status,
           error: exception,
+          status,
         });
       }
 
@@ -66,7 +66,7 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
       const body =
         exceptionResponse instanceof Object
           ? exceptionResponse
-          : { statusCode: status, message: exceptionResponse };
+          : { message: exceptionResponse, statusCode: status };
 
       void response.status(status).send(body);
 
@@ -81,9 +81,9 @@ export class AllExceptionsFilter implements ExceptionFilter<Error | HttpExceptio
     });
 
     void response.status(HttpStatus.INTERNAL_SERVER_ERROR).send({
-      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
       message:
         "The server hit an unexpected error. Try again, or report this if it keeps happening.",
+      statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
     });
   }
 }

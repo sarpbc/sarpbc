@@ -51,20 +51,20 @@ export const getTeamById = async (id: string): Promise<Team> => {
   const res = await apiFetch<{ team: Team | null }>(`/team/${id}`, { method: "GET" });
 
   if (!res.team) {
-    throw createError({ statusCode: 404, message: "Team not found" });
+    throw createError({ message: "Team not found", statusCode: 404 });
   }
 
   return res.team;
 };
 
 export const createTeam = async (body: CreateTeamDto): Promise<Team> => {
-  const res = await apiFetch<{ team: Team }>("/team", { method: "POST", body });
+  const res = await apiFetch<{ team: Team }>("/team", { body, method: "POST" });
 
   return res.team;
 };
 
 export const updateTeam = async (id: string, body: UpdateTeamDto): Promise<Team> => {
-  const res = await apiFetch<{ team: Team }>(`/team/${id}`, { method: "PATCH", body });
+  const res = await apiFetch<{ team: Team }>(`/team/${id}`, { body, method: "PATCH" });
 
   return res.team;
 };
@@ -90,8 +90,8 @@ export const createTeamContract = async (
   body: TeamContractDto,
 ): Promise<TeamContract> => {
   const res = await apiFetch<{ contract: TeamContract }>(`/team/${teamId}/contract`, {
-    method: "POST",
     body,
+    method: "POST",
   });
 
   return res.contract;
@@ -103,8 +103,8 @@ export const updateTeamContract = async (
   body: Partial<TeamContractDto>,
 ): Promise<TeamContract> => {
   const res = await apiFetch<{ contract: TeamContract }>(`/team/${teamId}/contract/${contractId}`, {
-    method: "PATCH",
     body,
+    method: "PATCH",
   });
 
   return res.contract;
@@ -116,8 +116,8 @@ export const deleteTeamContract = async (teamId: string, contractId: string): Pr
 
 export const addTeamAlias = async (teamId: string, body: TeamAliasInput): Promise<TeamAlias> => {
   const res = await apiFetch<{ alias: TeamAlias }>(`/team/${teamId}/aliases`, {
-    method: "POST",
     body,
+    method: "POST",
   });
 
   return res.alias;
@@ -129,8 +129,8 @@ export const updateTeamAlias = async (
   body: TeamAliasInput,
 ): Promise<TeamAlias> => {
   const res = await apiFetch<{ alias: TeamAlias }>(`/team/${teamId}/aliases/${aliasId}`, {
-    method: "PUT",
     body,
+    method: "PUT",
   });
 
   return res.alias;
