@@ -8,7 +8,7 @@ export interface NotificationRecord {
 }
 
 export interface NotificationStore {
-  findForRecipient(id: string, limit: number): Promise<NotificationRecord[]>;
-  countUnread(id: string): Promise<number>;
-  markRead(id: string, ids?: string[]): Promise<number>;
+  findForRecipient: (id: string, limit: number) => Promise<NotificationRecord[]>;
+  countUnread: (id: string) => Promise<number>;
+  markRead: (id: string, ids?: string[]) => Promise<number>;
 }

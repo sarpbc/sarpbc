@@ -9,7 +9,9 @@ import type { TeamAliasTransaction, TeamAliasWriteScope } from "./ports";
 async function requireTeamForAlias({ teams }: TeamAliasWriteScope, id: string): Promise<Team> {
   const team = await teams.findById(id);
 
-  if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
+  if (!team) {
+    throw new NotFoundError(`Team with id "${id}" not found`);
+  }
 
   if (team.mergedIntoId !== null && team.mergedIntoId !== "") {
     throw new InvalidInputError(
@@ -23,7 +25,9 @@ async function requireTeamForAlias({ teams }: TeamAliasWriteScope, id: string): 
 function requireTeamAlias(team: Team, aliasId: string): TeamAlias {
   const alias = team.aliases.find(({ id }) => id === aliasId);
 
-  if (!alias) throw new NotFoundError(`Alias "${aliasId}" does not belong to ${team.name}`);
+  if (!alias) {
+    throw new NotFoundError(`Alias "${aliasId}" does not belong to ${team.name}`);
+  }
 
   return alias;
 }

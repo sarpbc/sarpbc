@@ -33,11 +33,17 @@ const { data: userPicks } = useLazyAsyncData(
 );
 
 const showCta = computed(() => {
-  if (matchStatus !== "upcoming") return false;
+  if (matchStatus !== "upcoming") {
+    return false;
+  }
 
-  if (!isPickemOpenForMatch(match)) return false;
+  if (!isPickemOpenForMatch(match)) {
+    return false;
+  }
 
-  if (userPicks.value?.has(match.id)) return false;
+  if (userPicks.value?.has(match.id)) {
+    return false;
+  }
 
   return true;
 });

@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import type { Player } from "@sarpbc/types";
 import { resolveThemedLogoUrl } from "@sarpbc/utils";
-import { fetchPlayerTagWithCache } from "../composables/entityTagCache";
-import { useEntityTagLink } from "../composables/useEntityTagLink";
+import { fetchPlayerTagWithCache } from "../composables/entity-tag-cache";
+import { useEntityTagLink } from "../composables/use-entity-tag-link";
 
 const { slug } = defineProps<{
   slug: string;

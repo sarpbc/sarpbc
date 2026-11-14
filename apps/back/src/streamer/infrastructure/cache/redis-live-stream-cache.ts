@@ -33,7 +33,9 @@ export class RedisLiveStreamCache implements LiveStreamCache {
   async read(): Promise<LiveStreamSnapshot | null> {
     const cached = await this.redis.get(LIVE_STREAMS_KEY);
 
-    if (cached === null) return null;
+    if (cached === null) {
+      return null;
+    }
 
     try {
       const result = snapshot.safeParse(JSON.parse(cached));

@@ -8,14 +8,19 @@ export interface BracketEntrant {
 function nextPowerOfTwo(n: number): number {
   let size = 1;
 
-  while (size < n) size *= 2;
+  while (size < n) {
+    size *= 2;
+  }
 
   return size;
 }
 
 /** Standard single-elim seed order: 1vN, 2vN-1, nested halves. */
 function seedSlots(size: number): number[] {
-  if (size <= 1) return [0];
+  if (size <= 1) {
+    return [0];
+  }
+
   const half = seedSlots(size / 2);
   const slots: number[] = [];
 
@@ -30,17 +35,25 @@ function playMatch(a: BracketEntrant, b: BracketEntrant, rng: () => number): Bra
   const scoreA = a.strength + rng() * 28;
   const scoreB = b.strength + rng() * 28;
 
-  if (scoreA === scoreB) return rng() < 0.5 ? a : b;
+  if (scoreA === scoreB) {
+    return rng() < 0.5 ? a : b;
+  }
 
   return scoreA > scoreB ? a : b;
 }
 
 function placementForLosers(winnersAdvancing: number): CareerPlacement {
-  if (winnersAdvancing <= 1) return "finalist";
+  if (winnersAdvancing <= 1) {
+    return "finalist";
+  }
 
-  if (winnersAdvancing <= 2) return "top4";
+  if (winnersAdvancing <= 2) {
+    return "top4";
+  }
 
-  if (winnersAdvancing <= 4) return "top8";
+  if (winnersAdvancing <= 4) {
+    return "top8";
+  }
 
   return "group";
 }
@@ -51,7 +64,9 @@ export function playSingleElim(
 ): Map<string, CareerPlacement> {
   const placements = new Map<string, CareerPlacement>();
 
-  if (teams.length === 0) return placements;
+  if (teams.length === 0) {
+    return placements;
+  }
 
   const [onlyTeam] = teams;
 
@@ -89,7 +104,9 @@ export function playSingleElim(
 
   const [champion] = round;
 
-  if (champion) placements.set(champion.id, "winner");
+  if (champion) {
+    placements.set(champion.id, "winner");
+  }
 
   return placements;
 }

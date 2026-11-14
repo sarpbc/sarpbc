@@ -59,7 +59,10 @@ const flatReplies = computed(() => {
 });
 
 async function hideReply(reply: Reply) {
-  if (hidingReplyId.value) return;
+  if (hidingReplyId.value) {
+    return;
+  }
+
   hidingReplyId.value = reply.id;
 
   try {

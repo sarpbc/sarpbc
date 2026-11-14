@@ -5,7 +5,8 @@ import type { NewsService } from "../../../news/application/news.service";
 import type { ContractService } from "../../../roster/application/contract.service";
 import type { PlayerService } from "../../../roster/application/player.service";
 import type { TeamService } from "../../../roster/application/team.service";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool } from "../define-tool";
 import {
   mapCareer,
   mapMatchListResponse,
@@ -160,15 +161,18 @@ export function readTools({
           tournamentId !== undefined &&
           tournamentId !== "" &&
           (event === undefined || event === "")
-        )
+        ) {
           return await competition.tournamentPlayerStats(tournamentId);
+        }
 
         if (
           event !== undefined &&
           event !== "" &&
           (tournamentId === undefined || tournamentId === "")
-        )
+        ) {
           return await competition.eventPlayerStats(event);
+        }
+
         throw new InvalidInputError("Pass either tournamentId or event.");
       },
     }),

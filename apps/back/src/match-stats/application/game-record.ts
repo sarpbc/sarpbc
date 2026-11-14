@@ -1,6 +1,7 @@
 import { IntegrationError } from "../../common/domain/errors/integration-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import { resolvePlayerId, type RosterPlayer, type SideAssignment } from "../domain/replay-matching";
+import { resolvePlayerId } from "../domain/replay-matching";
+import type { RosterPlayer, SideAssignment } from "../domain/replay-matching";
 import type {
   BallchasingSource,
   GameRecord,
@@ -20,11 +21,12 @@ export interface GameTarget {
 }
 
 export function requireBallchasing(source: BallchasingSource | null): BallchasingSource {
-  if (!source)
+  if (!source) {
     throw new IntegrationError({
       message: "Ballchasing is not configured. Set BALLCHASING_API_KEY on the API and restart it.",
       code: "ballchasing_not_configured",
     });
+  }
 
   return source;
 }
@@ -33,8 +35,9 @@ export async function requireTournament(
   candidates: StatsCandidates,
   tournamentId: string,
 ): Promise<void> {
-  if (!(await candidates.tournamentExists(tournamentId)))
+  if (!(await candidates.tournamentExists(tournamentId))) {
     throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
+  }
 }
 
 export function hasBothTeams(stats: ReplayStats): boolean {
@@ -64,11 +67,15 @@ export function buildGameRecord(
       (link) => link.platform === platform && link.platformId === platformId,
     );
 
-    if (linked) return { ...player, playerId: linked.playerId };
+    if (linked) {
+      return { ...player, playerId: linked.playerId };
+    }
+
     const playerId = resolvePlayerId(player.name, rosters.get(sides[player.side]) ?? []);
 
-    if (playerId !== null && playerId !== "" && platformId !== null && platformId !== "")
+    if (playerId !== null && playerId !== "" && platformId !== null && platformId !== "") {
       learnedLinks.push({ platform, platformId, playerId });
+    }
 
     return { ...player, playerId };
   });

@@ -56,11 +56,12 @@ export class CompetitionSyncService {
         : await this.applyChange(scope, incident, backfill),
     );
 
-    if (applied)
+    if (applied) {
       await this.afterCommit.settle({
         tournamentIds: applied.stageIds,
         decidedMatchIds: applied.matches,
       });
+    }
   }
   private async applyChange(
     scope: CompetitionWriteScope,
@@ -86,10 +87,16 @@ export class CompetitionSyncService {
 
         let applied: AppliedTournament | null = null;
 
-        if (existing) applied = { tournament: existing, stageIds: [existing.id] };
-        else if (backfill) applied = await applyTournament(scope, this.diagnostics, backfill);
+        if (existing) {
+          applied = { tournament: existing, stageIds: [existing.id] };
+        } else if (backfill) {
+          applied = await applyTournament(scope, this.diagnostics, backfill);
+        }
 
-        if (!applied) return null;
+        if (!applied) {
+          return null;
+        }
+
         assertPandascoreUpsertAllowed(applied.tournament, pandascoreId);
         const matches = await applyMatches(scope, applied.tournament, [incident.command]);
         await settleEndAt(scope, applied.tournament);
@@ -97,10 +104,12 @@ export class CompetitionSyncService {
         return { stageIds: applied.stageIds, matches };
       }
 
-      case "team":
+      case "team": {
         await scope.rosters.upsertTeam(incident.command);
 
         return null;
+      }
+
       case "player": {
         const currentTeam = incident.command.currentTeam
           ? await scope.rosters.upsertTeam(incident.command.currentTeam)
@@ -111,12 +120,16 @@ export class CompetitionSyncService {
         return null;
       }
 
-      case "league":
+      case "league": {
         await applyLeague(scope, incident.command);
 
         return null;
-      case "serie":
+      }
+
+      case "serie": {
         return await applySerie(scope.events, incident.command);
+      }
+
       default: {
         const neverIncident: never = incident;
 

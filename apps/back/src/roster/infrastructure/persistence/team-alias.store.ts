@@ -11,7 +11,9 @@ export class MikroTeamAliasStore implements TeamAliasWriter {
   async pandascoreOwner(pandascoreId: number, exceptAliasId: string) {
     const team = await this.em.findOne(TeamRow, { pandascoreId });
 
-    if (team) return team.name;
+    if (team) {
+      return team.name;
+    }
 
     const alias = await this.em.findOne(
       TeamAliasRow,
@@ -27,7 +29,10 @@ export class MikroTeamAliasStore implements TeamAliasWriter {
       ? await this.em.findOneOrFail(TeamAliasRow, { id: model.id })
       : new TeamAliasRow();
 
-    if (!model.id) model.id = v4();
+    if (!model.id) {
+      model.id = v4();
+    }
+
     Object.assign(row, {
       id: model.id,
       team: this.em.getReference(TeamRow, teamId),

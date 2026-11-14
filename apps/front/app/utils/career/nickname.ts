@@ -32,27 +32,43 @@ function classifyNickname(input: CareerNicknameInput): NicknameTier {
   const majorWins = countTrophies(input.trophies, "major");
   const worldsPodiums = input.seasons.filter((season) => isWorldsPodium(season.worlds)).length;
 
-  if (worldsWins >= 2) return "goat";
+  if (worldsWins >= 2) {
+    return "goat";
+  }
 
-  if (worldsWins === 1) return "champion";
+  if (worldsWins === 1) {
+    return "champion";
+  }
 
-  if (majorWins >= 2) return "majors";
+  if (majorWins >= 2) {
+    return "majors";
+  }
 
-  if (worldsPodiums >= 2) return "nearly";
+  if (worldsPodiums >= 2) {
+    return "nearly";
+  }
 
-  if (input.seasons.length <= 2 && majorWins === 0) return "bust";
+  if (input.seasons.length <= 2 && majorWins === 0) {
+    return "bust";
+  }
 
   return "journeyman";
 }
 
 function nicknameForChampion(role: CareerRole): CareerNicknameKey {
   switch (role) {
-    case "offense":
+    case "offense": {
       return "closer";
-    case "defense":
+    }
+
+    case "defense": {
       return "iceBlood";
-    case "technical":
+    }
+
+    case "technical": {
       return "airSurgeon";
+    }
+
     default: {
       const _exhaustive: never = role;
 
@@ -63,12 +79,18 @@ function nicknameForChampion(role: CareerRole): CareerNicknameKey {
 
 function nicknameForNearly(role: CareerRole): CareerNicknameKey {
   switch (role) {
-    case "offense":
+    case "offense": {
       return "surfaceFox";
-    case "defense":
+    }
+
+    case "defense": {
       return "theWall";
-    case "technical":
+    }
+
+    case "technical": {
       return "resetGhost";
+    }
+
     default: {
       const _exhaustive: never = role;
 
@@ -79,12 +101,18 @@ function nicknameForNearly(role: CareerRole): CareerNicknameKey {
 
 function nicknameForJourneyman(destiny: CareerDestiny): CareerNicknameKey {
   switch (destiny) {
-    case "streamer":
+    case "streamer": {
       return "theMic";
-    case "coach":
+    }
+
+    case "coach": {
       return "sideline";
-    case "quit":
+    }
+
+    case "quit": {
       return "walkedOff";
+    }
+
     default: {
       const _exhaustive: never = destiny;
 
@@ -97,18 +125,30 @@ export function pickCareerNickname(input: CareerNicknameInput): CareerNicknameKe
   const tier = classifyNickname(input);
 
   switch (tier) {
-    case "goat":
+    case "goat": {
       return "goat";
-    case "champion":
+    }
+
+    case "champion": {
       return nicknameForChampion(input.role);
-    case "majors":
+    }
+
+    case "majors": {
       return "majorHunter";
-    case "nearly":
+    }
+
+    case "nearly": {
       return nicknameForNearly(input.role);
-    case "journeyman":
+    }
+
+    case "journeyman": {
       return nicknameForJourneyman(input.destiny);
-    case "bust":
+    }
+
+    case "bust": {
       return "lanTourist";
+    }
+
     default: {
       const _exhaustive: never = tier;
 

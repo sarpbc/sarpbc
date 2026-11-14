@@ -23,13 +23,11 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CircuitService } from "../../application/circuit.service";
-import {
-  CreateCircuitDto,
-  type CreateCircuitInput,
-  SetCircuitStageDto,
-  type SetCircuitStageInput,
-  UpdateCircuitDto,
-  type UpdateCircuitInput,
+import { CreateCircuitDto, SetCircuitStageDto, UpdateCircuitDto } from "./dto/circuit.dto";
+import type {
+  CreateCircuitInput,
+  SetCircuitStageInput,
+  UpdateCircuitInput,
 } from "./dto/circuit.dto";
 
 @Controller("circuits")

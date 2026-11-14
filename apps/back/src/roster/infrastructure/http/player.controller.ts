@@ -20,15 +20,18 @@ import { ContractService } from "../../application/contract.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { CreatePlayerDto, type CreatePlayerInput } from "./dto/create-player.dto";
-import { UpdatePlayerDto, type UpdatePlayerInput } from "./dto/update-player.dto";
-import { CreateContractDto, type CreateContractInput } from "./dto/create-contract.dto";
-import { UpdateContractDto, type UpdateContractInput } from "./dto/update-contract.dto";
-import { AddPlayerPhotoDto, type AddPlayerPhotoInput } from "./dto/add-player-photo.dto";
-import {
-  ListDirectoryQueryDto,
-  type ListDirectoryQueryInput,
-} from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { CreatePlayerDto } from "./dto/create-player.dto";
+import type { CreatePlayerInput } from "./dto/create-player.dto";
+import { UpdatePlayerDto } from "./dto/update-player.dto";
+import type { UpdatePlayerInput } from "./dto/update-player.dto";
+import { CreateContractDto } from "./dto/create-contract.dto";
+import type { CreateContractInput } from "./dto/create-contract.dto";
+import { UpdateContractDto } from "./dto/update-contract.dto";
+import type { UpdateContractInput } from "./dto/update-contract.dto";
+import { AddPlayerPhotoDto } from "./dto/add-player-photo.dto";
+import type { AddPlayerPhotoInput } from "./dto/add-player-photo.dto";
+import { ListDirectoryQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import type { ListDirectoryQueryInput } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
 import { mapPlayer } from "./player.mapper";
 import { mapProfileMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";

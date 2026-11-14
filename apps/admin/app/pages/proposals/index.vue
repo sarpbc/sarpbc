@@ -35,23 +35,38 @@ function nameOf(id: string): string {
 }
 
 function formatValue(key: string, value: string | boolean | null): string {
-  if (value === null) return t("page.proposals.values.ongoing");
+  if (value === null) {
+    return t("page.proposals.values.ongoing");
+  }
 
-  if (value === true) return t("page.proposals.values.yes");
+  if (value === true) {
+    return t("page.proposals.values.yes");
+  }
 
-  if (value === false) return t("page.proposals.values.no");
+  if (value === false) {
+    return t("page.proposals.values.no");
+  }
 
   switch (key) {
-    case "status":
+    case "status": {
       return t(`page.proposals.playerStatus.${value}`);
-    case "contractRole":
+    }
+
+    case "contractRole": {
       return t(`common.contractRole.${value}`);
-    case "variant":
+    }
+
+    case "variant": {
       return t(`page.proposals.logoVariants.${value}`);
-    case "awardType":
+    }
+
+    case "awardType": {
       return t(`page.tournaments.awards.types.${value}`);
-    default:
+    }
+
+    default: {
       return nameOf(value);
+    }
   }
 }
 
@@ -434,7 +449,10 @@ const logoBackgrounds = [
 ] as const;
 
 async function review(proposal: RosterProposal, action: "approve" | "reject") {
-  if (reviewingId.value) return;
+  if (reviewingId.value) {
+    return;
+  }
+
   reviewingId.value = proposal.id;
 
   try {

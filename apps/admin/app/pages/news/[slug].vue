@@ -36,7 +36,10 @@ const isDraft = ref(true);
 watch(
   article,
   (loaded) => {
-    if (!loaded) return;
+    if (!loaded) {
+      return;
+    }
+
     title.value = loaded.title;
     titleFr.value = loaded.titleFr ?? "";
     articleSlug.value = loaded.slug;

@@ -39,7 +39,8 @@ export class Tournament {
     return effectiveStreams(this.streams, this.eventStreams);
   }
   assertDateOrder(): void {
-    if (this.beginAt && this.endAt && this.endAt < this.beginAt)
+    if (this.beginAt && this.endAt && this.endAt < this.beginAt) {
       throw new InvalidInputError("End date must be on or after the start date.");
+    }
   }
 }

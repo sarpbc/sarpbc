@@ -5,8 +5,8 @@ import {
   parseViewership,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
   VIEWERSHIP_SOURCE_URL_MAX_LENGTH,
-  type ViewershipError,
 } from "@sarpbc/utils";
+import type { ViewershipError } from "@sarpbc/utils";
 
 type ViewershipField = "peakViewers" | "averageViewers" | "measuredAt" | "sourceName" | "sourceUrl";
 
@@ -63,7 +63,10 @@ function pad(value: number): string {
 }
 
 function toLocalInput(iso: string | null): string {
-  if (!iso) return "";
+  if (!iso) {
+    return "";
+  }
+
   const date = new Date(iso);
   const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 
@@ -87,20 +90,30 @@ function toViewership(values: ViewershipForm): Viewership {
 
 function fieldOf(error: ViewershipError): ViewershipField {
   switch (error) {
-    case "invalid-peak":
+    case "invalid-peak": {
       return "peakViewers";
+    }
+
     case "invalid-average":
-    case "average-above-peak":
+    case "average-above-peak": {
       return "averageViewers";
+    }
+
     case "missing-source-name":
-    case "source-name-too-long":
+    case "source-name-too-long": {
       return "sourceName";
+    }
+
     case "invalid-source-url":
     case "source-url-not-https":
-    case "forbidden-source":
+    case "forbidden-source": {
       return "sourceUrl";
-    case "invalid-measured-at":
+    }
+
+    case "invalid-measured-at": {
       return "measuredAt";
+    }
+
     default: {
       const exhaustive: never = error;
 
@@ -114,7 +127,9 @@ const parsed = computed(() => parseViewership(toViewership(form.value)));
 function feedback(field: ViewershipField): FieldFeedback {
   const result = parsed.value;
 
-  if (result.ok || fieldOf(result.error) !== field) return {};
+  if (result.ok || fieldOf(result.error) !== field) {
+    return {};
+  }
 
   return { error: t(`page.tournaments.viewership.errors.${result.error}`) };
 }
@@ -151,7 +166,9 @@ async function load() {
 watch(
   open,
   (isOpen) => {
-    if (isOpen) void load();
+    if (isOpen) {
+      void load();
+    }
   },
   { immediate: true },
 );
@@ -175,7 +192,9 @@ async function save(viewership: Viewership | null, message: string) {
 function submit() {
   const result = parsed.value;
 
-  if (result.ok) void save(result.viewership, t("page.tournaments.viewership.saved"));
+  if (result.ok) {
+    void save(result.viewership, t("page.tournaments.viewership.saved"));
+  }
 }
 </script>
 

@@ -1,14 +1,14 @@
 <script setup lang="ts">
 import type { EditorSuggestionMenuItem, EditorToolbarItem } from "@nuxt/ui";
-import { entityTagEditorExtensions } from "~/utils/editor/entityTagNode";
-import { TweetTagNode } from "~/utils/editor/tweetTagNode";
-import { MatchBlockNode } from "~/utils/editor/matchBlockNode";
-import { tableEditorExtensions } from "~/utils/editor/tableExtensions";
-import { useEntityTagEditor } from "~/composables/useEntityTagEditor";
-import { useTweetTagEditor } from "~/composables/useTweetTagEditor";
-import { useMatchBlockEditor } from "~/composables/useMatchBlockEditor";
-import { useTableEditor } from "~/composables/useTableEditor";
-import { newsSurfaceClass } from "~/utils/newsEditorLayout";
+import { entityTagEditorExtensions } from "~/utils/editor/entity-tag-node";
+import { TweetTagNode } from "~/utils/editor/tweet-tag-node";
+import { MatchBlockNode } from "~/utils/editor/match-block-node";
+import { tableEditorExtensions } from "~/utils/editor/table-extensions";
+import { useEntityTagEditor } from "~/composables/use-entity-tag-editor";
+import { useTweetTagEditor } from "~/composables/use-tweet-tag-editor";
+import { useMatchBlockEditor } from "~/composables/use-match-block-editor";
+import { useTableEditor } from "~/composables/use-table-editor";
+import { newsSurfaceClass } from "~/utils/news-editor-layout";
 
 const content = defineModel<string>({ required: true });
 

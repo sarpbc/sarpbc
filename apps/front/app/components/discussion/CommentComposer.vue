@@ -51,7 +51,9 @@ function focusContentInput() {
 }
 
 onMounted(() => {
-  if (autofocus) focusContentInput();
+  if (autofocus) {
+    focusContentInput();
+  }
 });
 
 type CreateCommentResult = Awaited<ReturnType<typeof createComment>>;

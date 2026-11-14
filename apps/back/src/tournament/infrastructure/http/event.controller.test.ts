@@ -126,7 +126,10 @@ describe(EventController, () => {
       },
     });
 
-    if (resolved.kind !== "event") throw new Error("expected an event");
+    if (resolved.kind !== "event") {
+      throw new Error("expected an event");
+    }
+
     expect(resolved.event.stages.map((s) => s.slug)).toStrictEqual(["playoffs", "group-a"]);
     expect(resolved.event.stages[0]).toMatchObject({ matches: [], event: ref });
   });

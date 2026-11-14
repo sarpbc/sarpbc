@@ -217,16 +217,24 @@ export async function verifyOnThisDay({
 
   const summary = events.map((event) => {
     switch (event.kind) {
-      case "fact":
+      case "fact": {
         assert.ok(event.link, "the staff fact links a team");
 
         return [event.kind, event.year, event.text.en, event.link.slug];
-      case "title":
+      }
+
+      case "title": {
         return [event.kind, event.year, event.date, event.winner.team?.name];
-      case "final":
+      }
+
+      case "final": {
         return [event.kind, event.year, event.winner.score, event.loser.team?.name];
-      case "transfer":
+      }
+
+      case "transfer": {
         return [event.kind, event.year, event.type, event.team.name];
+      }
+
       default: {
         const unhandled: never = event;
 

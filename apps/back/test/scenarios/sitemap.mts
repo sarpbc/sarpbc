@@ -106,7 +106,9 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
   const mergedPlayers = await em.getRepository(Player).find({ mergedInto: { $ne: null } });
   assert.ok(mergedPlayers.length > 0, "the scenario runs after a player merge");
 
-  for (const { slug } of mergedPlayers) assert.ok(!players.includes(`/player/${slug}`));
+  for (const { slug } of mergedPlayers) {
+    assert.ok(!players.includes(`/player/${slug}`));
+  }
 
   const staff = await paths("staff");
   assert.ok(staff.includes("/staff/sitemap-coach"));
@@ -128,7 +130,9 @@ export async function verifySitemap({ orm, request, tournament }: SitemapContext
   const mergedTeams = await em.getRepository(Team).find({ mergedInto: { $ne: null } });
   assert.ok(mergedTeams.length > 0, "the scenario runs after a team merge");
 
-  for (const { slug } of mergedTeams) assert.ok(!teams.includes(`/team/${slug}`));
+  for (const { slug } of mergedTeams) {
+    assert.ok(!teams.includes(`/team/${slug}`));
+  }
 
   await request("GET", "/sitemap/bogus", undefined, undefined, 404);
 

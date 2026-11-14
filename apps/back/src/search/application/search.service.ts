@@ -35,11 +35,17 @@ export class SearchService {
     let teams: Team[] = [];
     let tournaments: Tournament[] = [];
 
-    if (includes(type, "player")) players = await this.playerService.find(page);
+    if (includes(type, "player")) {
+      players = await this.playerService.find(page);
+    }
 
-    if (includes(type, "team")) teams = await this.teamService.find(page);
+    if (includes(type, "team")) {
+      teams = await this.teamService.find(page);
+    }
 
-    if (includes(type, "tournament")) tournaments = await this.tournamentService.searchByName(page);
+    if (includes(type, "tournament")) {
+      tournaments = await this.tournamentService.searchByName(page);
+    }
 
     return {
       players,

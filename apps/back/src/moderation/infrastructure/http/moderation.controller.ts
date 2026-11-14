@@ -3,10 +3,8 @@ import type { ModerationReply } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import {
-  ListModerationRepliesQueryDto,
-  type ListModerationRepliesQueryInput,
-} from "./dto/list-moderation-replies-query.dto";
+import { ListModerationRepliesQueryDto } from "./dto/list-moderation-replies-query.dto";
+import type { ListModerationRepliesQueryInput } from "./dto/list-moderation-replies-query.dto";
 import { ModerationService } from "../../application/moderation.service";
 
 @Controller("moderation")

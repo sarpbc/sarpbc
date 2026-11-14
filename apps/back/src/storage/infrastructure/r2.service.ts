@@ -9,11 +9,8 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 import { nodeEnvironment } from "../../infrastructure/config/env.validation";
-import {
-  IMAGE_FILE_EXTENSIONS,
-  type ImageContentType,
-  type ImageUploadTarget,
-} from "@sarpbc/utils";
+import { IMAGE_FILE_EXTENSIONS } from "@sarpbc/utils";
+import type { ImageContentType, ImageUploadTarget } from "@sarpbc/utils";
 import type {
   ObjectStorage,
   ObjectUploadUrl,
@@ -27,9 +24,9 @@ interface R2Connection {
 }
 
 export interface ObjectOperationLogger {
-  set(fields: { stored: boolean }): void;
-  error(error: Error): void;
-  emit(): void;
+  set: (fields: { stored: boolean }) => void;
+  error: (error: Error) => void;
+  emit: () => void;
 }
 
 export type ObjectOperationLoggerFactory = (
@@ -56,7 +53,7 @@ export class R2Service implements ObjectStorage {
     const accountId = this.configService.get<string>("r2_account_id");
 
     const endpoint =
-      this.configService.get<string>("r2_endpoint")?.replace(/\/$/, "") ??
+      this.configService.get<string>("r2_endpoint")?.replace(/\/$/u, "") ??
       (accountId !== undefined && accountId !== ""
         ? `https://${accountId}.r2.cloudflarestorage.com`
         : undefined);
@@ -86,7 +83,7 @@ export class R2Service implements ObjectStorage {
         endpoint,
         credentials: { accessKeyId, secretAccessKey },
       }),
-      publicUrl: (key) => `${publicBaseUrl.replace(/\/$/, "")}/${key}`,
+      publicUrl: (key) => `${publicBaseUrl.replace(/\/$/u, "")}/${key}`,
     };
 
     return this.connection;

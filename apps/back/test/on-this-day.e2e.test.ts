@@ -2,7 +2,8 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { Test } from "@nestjs/testing";
 import { APP_FILTER } from "@nestjs/core";
 import { ConfigService } from "@nestjs/config";
-import { FastifyAdapter, NestFastifyApplication } from "@nestjs/platform-fastify";
+import type { NestFastifyApplication } from "@nestjs/platform-fastify";
+import { FastifyAdapter } from "@nestjs/platform-fastify";
 import request from "supertest";
 import type { StaffPermission } from "@sarpbc/types";
 import { z } from "zod";
@@ -207,6 +208,6 @@ describe("on this day (e2e)", () => {
     const today = await http().get("/on-this-day");
 
     expect(today.status).toBe(200);
-    expect(z.object({ date: z.string() }).parse(today.body).date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(z.object({ date: z.string() }).parse(today.body).date).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
   });
 });

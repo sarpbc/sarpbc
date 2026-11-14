@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { playerPath, teamPath } from "@sarpbc/utils";
-import type { TournamentParticipantEntry } from "~/utils/tournamentParticipants";
+import type { TournamentParticipantEntry } from "~/utils/tournament-participants";
 
 const { entry } = defineProps<{
   entry: TournamentParticipantEntry;

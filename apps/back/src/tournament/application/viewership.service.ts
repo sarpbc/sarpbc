@@ -2,7 +2,8 @@ import type { Viewership, ViewershipResponse } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import { requireViewership, type ViewershipOwner } from "../domain/viewership";
+import { requireViewership } from "../domain/viewership";
+import type { ViewershipOwner } from "../domain/viewership";
 import type { EventWriter, MatchWriter } from "./ports";
 
 export interface ViewershipScope {
@@ -11,13 +12,13 @@ export interface ViewershipScope {
 }
 
 export interface ViewershipTransaction {
-  run<T>(work: (scope: ViewershipScope) => Promise<T>): Promise<T>;
+  run: <T>(work: (scope: ViewershipScope) => Promise<T>) => Promise<T>;
 }
 
 interface LoadedOwner {
   viewership: Viewership | null;
   redistributable: boolean;
-  save(viewership: Viewership | null): Promise<void>;
+  save: (viewership: Viewership | null) => Promise<void>;
 }
 
 async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promise<LoadedOwner> {
@@ -25,7 +26,10 @@ async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promis
     case "event": {
       const event = await scope.events.load(owner.id);
 
-      if (!event) throw new NotFoundError(`Event with id "${owner.id}" was not found.`);
+      if (!event) {
+        throw new NotFoundError(`Event with id "${owner.id}" was not found.`);
+      }
+
       const stages = await scope.events.stages(event.id);
 
       return {
@@ -42,7 +46,9 @@ async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promis
     case "match": {
       const match = await scope.matches.load(owner.id);
 
-      if (!match) throw new NotFoundError("Match not found");
+      if (!match) {
+        throw new NotFoundError("Match not found");
+      }
 
       return {
         viewership: match.viewership,
@@ -90,10 +96,11 @@ export class ViewershipService {
     await this.transaction.run(async (scope) => {
       const loaded = await loadOwner(scope, owner);
 
-      if (!loaded.redistributable)
+      if (!loaded.redistributable) {
         throw new InvalidInputError(
           `The viewership of a start.gg ${owner.kind} cannot be proposed`,
         );
+      }
     });
   }
 }

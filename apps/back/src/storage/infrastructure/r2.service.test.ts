@@ -1,8 +1,10 @@
-import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { MockInstance } from "vitest";
 import { InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { S3Client } from "@aws-sdk/client-s3";
-import { R2Service, type ObjectOperationLogger } from "./r2.service";
+import { R2Service } from "./r2.service";
+import type { ObjectOperationLogger } from "./r2.service";
 import { StorageService } from "../application/storage.service";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
@@ -42,7 +44,7 @@ describe(R2Service, () => {
   it("stores a jpg declared as image/jpg", async () => {
     const result = await service.uploadImage(Buffer.from("jpeg"), "image/jpg", "news");
 
-    expect(result.key).toMatch(/^news\/covers\/.+\.jpg$/);
+    expect(result.key).toMatch(/^news\/covers\/.+\.jpg$/u);
     expect(result.publicUrl).toContain(result.key);
     const input: unknown = expect.objectContaining({ Key: result.key, ContentType: "image/jpeg" });
 
@@ -72,7 +74,7 @@ describe(R2Service, () => {
     const buffer = Buffer.from("png");
     const result = await service.uploadImage(buffer, "image/png", "tournament");
 
-    expect(result.key).toMatch(/^tournaments\/images\/.+\.png$/);
+    expect(result.key).toMatch(/^tournaments\/images\/.+\.png$/u);
     expect(result.publicUrl).toBe(`https://cdn.example/${result.key}`);
 
     const input: unknown = expect.objectContaining({
@@ -167,7 +169,7 @@ describe(R2Service, () => {
     );
 
     await expect(unconfigured.deleteObject("teams/kc/logo.webp")).rejects.toThrow(
-      /R2 storage is not configured/,
+      /R2 storage is not configured/u,
     );
     expect(sendSpy).not.toHaveBeenCalled();
   });

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
-import { isFactShownOn, parseOnThisDayFact, type OnThisDayFactFields } from "./on-this-day-fact";
+import { isFactShownOn, parseOnThisDayFact } from "./on-this-day-fact";
+import type { OnThisDayFactFields } from "./on-this-day-fact";
 
 const input: OnThisDayFactFields = {
   month: 7,
@@ -34,7 +35,7 @@ describe(parseOnThisDayFact, () => {
     "https://blast.tv/rl/tournaments",
     "https://www.blast.tv/news",
   ])("refuses %s as a source", (sourceUrl) => {
-    expect(() => parseOnThisDayFact({ ...input, sourceUrl })).toThrow(/not accepted sources/);
+    expect(() => parseOnThisDayFact({ ...input, sourceUrl })).toThrow(/not accepted sources/u);
   });
 
   it.each([

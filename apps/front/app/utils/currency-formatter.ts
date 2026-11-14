@@ -1,0 +1,65 @@
+import { currencyFractionDigits, isNonEmptyString } from "@sarpbc/utils";
+
+const CURRENCY_CODES = {
+  "United State Dollar": "USD",
+  "United States Dollar": "USD",
+  "US Dollar": "USD",
+  Dollar: "USD",
+  Euro: "EUR",
+  "British Pound": "GBP",
+  Pound: "GBP",
+  "Japanese Yen": "JPY",
+  Yen: "JPY",
+} as const;
+
+function currencyCodeFor(name: string): string {
+  for (const [label, code] of Object.entries(CURRENCY_CODES)) {
+    if (label === name) {
+      return code;
+    }
+  }
+
+  return "USD";
+}
+
+export function formatPrizepool(prizepool: string | undefined | null, locale = "en-US"): string {
+  if (!isNonEmptyString(prizepool)) {
+    return "";
+  }
+
+  const parts = prizepool.trim().split(" ");
+
+  if (parts.length < 2) {
+    return prizepool;
+  }
+
+  const amount = Number((parts[0] ?? "").replaceAll(",", ""));
+
+  if (Number.isNaN(amount)) {
+    return prizepool;
+  }
+
+  const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
+
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  } catch {
+    return `$${amount.toLocaleString()}`;
+  }
+}
+
+export function formatPrizeAmount(amount: number, currency: string, locale: string): string {
+  const fractionDigits = Number.isInteger(amount) ? 0 : currencyFractionDigits(currency);
+
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
+  }).format(amount);
+}

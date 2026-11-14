@@ -21,7 +21,10 @@ const { t, locale } = useI18n();
 const localePath = useLocalePath();
 
 function sidePath(side: Omit<OnThisDaySide, "score">): string | null {
-  if (side.team) return localePath(teamPath(side.team.slug));
+  if (side.team) {
+    return localePath(teamPath(side.team.slug));
+  }
+
   const [only, ...others] = side.players;
 
   return only && others.length === 0 ? localePath(playerPath(only.slug)) : null;
@@ -38,17 +41,25 @@ interface LinkTarget {
 
 function linkTarget(link: OnThisDayLink): LinkTarget {
   switch (link.kind) {
-    case "player":
+    case "player": {
       return { label: link.name, to: localePath(playerPath(link.slug)) };
-    case "team":
+    }
+
+    case "team": {
       return { label: link.name, to: localePath(teamPath(link.slug)) };
-    case "tournament":
+    }
+
+    case "tournament": {
       return {
         label: tournamentStageLabel(link),
         to: localePath(tournamentStagePath(link.event.slug, link.slug)),
       };
-    case "match":
+    }
+
+    case "match": {
       return { label: link.name, to: localePath(matchPath(link.publicId, link.slug)) };
+    }
+
     default: {
       const exhaustive: never = link;
 

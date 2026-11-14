@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import type { MatchRowItem } from "~/types/matches";
-import { getMatchParticipantScore } from "~/utils/matchScore";
-import { daysFromToday, parseMatchDate } from "~/utils/calendarDay";
-import { shortTeamName } from "~/utils/shortTeamName";
+import { getMatchParticipantScore } from "~/utils/match-score";
+import { daysFromToday, parseMatchDate } from "~/utils/calendar-day";
+import { shortTeamName } from "~/utils/short-team-name";
 
 const { locale, t } = useI18n();
 

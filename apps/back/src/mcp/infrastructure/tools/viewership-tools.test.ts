@@ -22,7 +22,9 @@ function setup(toolName: string, role: StaffRole = "admin") {
     (candidate) => candidate.name === toolName,
   );
 
-  if (!tool) throw new Error(`${toolName} is not defined`);
+  if (!tool) {
+    throw new Error(`${toolName} is not defined`);
+  }
 
   const call = async (args: ToolArguments) =>
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);

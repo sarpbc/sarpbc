@@ -20,7 +20,9 @@ function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes"
     ...prizeTools({ rosterProposalService }),
   ].find((candidate) => candidate.name === toolName);
 
-  if (!tool) throw new Error(`${toolName} is not defined`);
+  if (!tool) {
+    throw new Error(`${toolName} is not defined`);
+  }
 
   const call = async (args: ToolArguments) =>
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
@@ -157,8 +159,10 @@ describe("propose_player_award", () => {
       "offensive_mvp",
       "defensive_mvp",
       "breakthrough_player",
-    ])
+    ]) {
       expect(schema.safeParse({ ...input, awardType }).success).toBe(true);
+    }
+
     expect(schema.safeParse({ ...input, awardType: "season_mvp" }).success).toBe(false);
     expect(schema.safeParse({ ...input, awardType: "top_scorer" }).success).toBe(false);
     expect(schema.safeParse({ ...input, sourceUrl: undefined }).success).toBe(false);

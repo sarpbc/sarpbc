@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ExecutionContext } from "@nestjs/common";
+import type { ExecutionContext } from "@nestjs/common";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
-import { Test, TestingModule } from "@nestjs/testing";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
 import { AuthenticationError } from "../../../common/domain/errors/authentication-error";
 import { PatAuthGuard } from "./pat.guard";
-import { PatService, PatUser } from "../../application/pat.service";
+import type { PatUser } from "../../application/pat.service";
+import { PatService } from "../../application/pat.service";
 
 interface PatGuardTestHeaders {
   authorization?: string;

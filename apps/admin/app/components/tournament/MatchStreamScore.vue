@@ -48,10 +48,14 @@ const orangeId = computed(() =>
 
 function sideId(side: StreamScoreSide): string | undefined {
   switch (side) {
-    case "blue":
+    case "blue": {
       return blueId.value;
-    case "orange":
+    }
+
+    case "orange": {
       return blueId.value === undefined ? undefined : orangeId.value;
+    }
+
     default: {
       const exhaustive: never = side;
 
@@ -87,7 +91,9 @@ const results = computed(() => {
   const blue = sideId("blue");
   const orange = sideId("orange");
 
-  if (!proposal.value || blue === undefined || orange === undefined) return null;
+  if (!proposal.value || blue === undefined || orange === undefined) {
+    return null;
+  }
 
   return streamScoreSeriesResults(proposal.value.series, { blue, orange });
 });
@@ -114,7 +120,10 @@ watch(proposal, () => {
 });
 
 watch(open, (isOpen) => {
-  if (!isOpen) return;
+  if (!isOpen) {
+    return;
+  }
+
   text.value = "";
   blueId.value = undefined;
 });
@@ -122,7 +131,10 @@ watch(open, (isOpen) => {
 async function confirm() {
   const series = results.value;
 
-  if (!series || !canConfirm.value) return;
+  if (!series || !canConfirm.value) {
+    return;
+  }
+
   confirming.value = true;
 
   try {

@@ -25,14 +25,18 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       this.tournaments.get(id) ??
       (await this.em.findOne(TournamentRow, { id }, { populate: [...TOURNAMENT_POPULATE] }));
 
-    if (row) this.tournaments.set(row.id, row);
+    if (row) {
+      this.tournaments.set(row.id, row);
+    }
 
     return row ? toTournament(row) : null;
   }
   async byPandascoreId(id: number) {
     const staged = [...this.tournaments.values()].find((t) => t.pandascoreId === id);
 
-    if (staged) return toTournament(staged);
+    if (staged) {
+      return toTournament(staged);
+    }
 
     const row = await this.em.findOne(
       TournamentRow,
@@ -40,7 +44,9 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       { populate: [...TOURNAMENT_POPULATE] },
     );
 
-    if (row) this.tournaments.set(row.id, row);
+    if (row) {
+      this.tournaments.set(row.id, row);
+    }
 
     return row ? toTournament(row) : null;
   }
@@ -136,7 +142,11 @@ export class CompetitionTournamentWriter implements TournamentWriter {
 
     const byId = new Map<string, TournamentParticipantRow>(rows.map((r) => [r.id, r]));
 
-    for (const r of this.participantsStaged.values()) if (r.tournament.id === id) byId.set(r.id, r);
+    for (const r of this.participantsStaged.values()) {
+      if (r.tournament.id === id) {
+        byId.set(r.id, r);
+      }
+    }
 
     return [...byId.values()].flatMap((row) => toParticipant(row) ?? []);
   }
@@ -166,7 +176,10 @@ export class CompetitionTournamentWriter implements TournamentWriter {
         this.participantsStaged.get(id) ??
         (await this.em.findOne(TournamentParticipantRow, { id }));
 
-      if (!row || row.placement === placement) return;
+      if (!row || row.placement === placement) {
+        return;
+      }
+
       row.placement = placement;
       this.em.persist(row);
     });

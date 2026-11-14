@@ -97,12 +97,12 @@ void describe("stream-score-ocr cli", () => {
         "--clock",
         "+1:32",
       ]),
-      /Found 1 glyphs for "17"/,
+      /Found 1 glyphs for "17"/u,
     );
   });
 
   void it("explains its usage when an argument is missing", async () => {
-    await assert.rejects(cli(["read", "--overlay", OVERLAY_PATH]), /--input is required/);
-    await assert.rejects(cli(["unknown"]), /Usage:/);
+    await assert.rejects(cli(["read", "--overlay", OVERLAY_PATH]), /--input is required/u);
+    await assert.rejects(cli(["unknown"]), /Usage:/u);
   });
 });

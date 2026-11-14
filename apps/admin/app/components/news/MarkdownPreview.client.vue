@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { MDCParserResult } from "@nuxtjs/mdc";
 import { parseMarkdown } from "@nuxtjs/mdc/runtime";
-import { newsMdcComponents } from "~/utils/newsMdcComponents";
+import { newsMdcComponents } from "~/utils/news-mdc-components";
 
 const { value } = defineProps<{
   value: string;

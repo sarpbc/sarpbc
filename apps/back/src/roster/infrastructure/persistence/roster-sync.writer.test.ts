@@ -77,9 +77,13 @@ describe(RosterSyncWriter, () => {
     const player = Object.assign(new Player(), { id: "p3", pandascoreId: 3, slug: "joyo", team });
     const contract = Object.assign(new Contract(), { player, team, endDate: null });
     em.findOne.mockImplementation(async (entity, where) => {
-      if (entity === Player && where.pandascoreId === 3) return player;
+      if (entity === Player && where.pandascoreId === 3) {
+        return player;
+      }
 
-      if (entity === Contract && where.player === "p3" && where.endDate === null) return contract;
+      if (entity === Contract && where.player === "p3" && where.endDate === null) {
+        return contract;
+      }
 
       return null;
     });

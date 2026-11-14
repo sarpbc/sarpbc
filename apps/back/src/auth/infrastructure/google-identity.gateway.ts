@@ -1,4 +1,5 @@
-import { auth, oauth2, type oauth2_v2 } from "@googleapis/oauth2";
+import { auth, oauth2 } from "@googleapis/oauth2";
+import type { oauth2_v2 } from "@googleapis/oauth2";
 import { z } from "zod";
 import { AuthenticationError } from "../../common/domain/errors/authentication-error";
 import type {
@@ -20,10 +21,10 @@ type Credentials = Parameters<OAuth2Client["setCredentials"]>[0];
 
 /** One OAuth client with its own credentials, so overlapping callbacks never share state. */
 export interface GoogleOAuthSession {
-  getToken(code: string): Promise<{ tokens: Credentials }>;
-  setCredentials(tokens: Credentials): void;
-  generateAuthUrl(options: Parameters<OAuth2Client["generateAuthUrl"]>[0]): string;
-  userinfo(): Promise<oauth2_v2.Schema$Userinfo>;
+  getToken: (code: string) => Promise<{ tokens: Credentials }>;
+  setCredentials: (tokens: Credentials) => void;
+  generateAuthUrl: (options: Parameters<OAuth2Client["generateAuthUrl"]>[0]) => string;
+  userinfo: () => Promise<oauth2_v2.Schema$Userinfo>;
 }
 
 export function createGoogleOAuthSession(

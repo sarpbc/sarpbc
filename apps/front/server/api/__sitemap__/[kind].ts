@@ -1,5 +1,5 @@
 import { defineSitemapEventHandler } from "#sitemap/server";
-import { apiFetch } from "@sarpbc/composables/apiFetch";
+import { apiFetch } from "@sarpbc/composables/api-fetch";
 import type { SitemapEntry } from "@sarpbc/types";
 import { isNonEmptyString } from "@sarpbc/utils";
 

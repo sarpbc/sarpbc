@@ -263,7 +263,9 @@ export class NewsService {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
     }
 
-    if (article.isDraft) throw new NotFoundError(`News article with slug "${slug}" not found`);
+    if (article.isDraft) {
+      throw new NotFoundError(`News article with slug "${slug}" not found`);
+    }
 
     return mapArticle(article, locale);
   }

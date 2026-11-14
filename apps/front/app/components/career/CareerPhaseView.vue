@@ -8,8 +8,8 @@ import CareerSeasonIntro from "~/components/career/SeasonIntro.vue";
 import CareerStageResult from "~/components/career/StageResult.vue";
 import CareerStatsBar from "~/components/career/StatsBar.vue";
 import CareerWorldRankings from "~/components/career/WorldRankings.vue";
-import { useCareerSimulatorContext } from "~/composables/useCareerSimulator";
-import { showCareerStats } from "~/utils/career/careerReducer";
+import { useCareerSimulatorContext } from "~/composables/use-career-simulator";
+import { showCareerStats } from "~/utils/career/career-reducer";
 
 const emit = defineEmits<{
   share: [];

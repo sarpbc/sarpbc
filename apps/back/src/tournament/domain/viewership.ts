@@ -1,9 +1,6 @@
 import type { Viewership } from "@sarpbc/types";
-import {
-  parseViewership,
-  VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
-  type ViewershipError,
-} from "@sarpbc/utils";
+import { parseViewership, VIEWERSHIP_SOURCE_NAME_MAX_LENGTH } from "@sarpbc/utils";
+import type { ViewershipError } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export type ViewershipOwnerKind = "event" | "match";
@@ -28,7 +25,9 @@ const ERRORS = {
 export function requireViewership(input: Viewership): Viewership {
   const parsed = parseViewership(input);
 
-  if (!parsed.ok) throw new InvalidInputError(ERRORS[parsed.error]);
+  if (!parsed.ok) {
+    throw new InvalidInputError(ERRORS[parsed.error]);
+  }
 
   return parsed.viewership;
 }

@@ -18,10 +18,10 @@ export interface MatchSitemapRow extends MatchSlugSource {
 }
 
 export interface SitemapQueries {
-  news(): Promise<NewsSitemapRow[]>;
-  stages(): Promise<StageSitemapRow[]>;
-  matches(): Promise<MatchSitemapRow[]>;
-  playerSlugs(): Promise<string[]>;
-  staffSlugs(): Promise<string[]>;
-  teamSlugs(): Promise<string[]>;
+  news: () => Promise<NewsSitemapRow[]>;
+  stages: () => Promise<StageSitemapRow[]>;
+  matches: () => Promise<MatchSitemapRow[]>;
+  playerSlugs: () => Promise<string[]>;
+  staffSlugs: () => Promise<string[]>;
+  teamSlugs: () => Promise<string[]>;
 }

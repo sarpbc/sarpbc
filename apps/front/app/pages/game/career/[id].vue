@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import CareerEnd from "~/components/career/CareerEnd.vue";
-import { decodeCareerResultFromShare, loadCareerResult } from "~/composables/useCareerStorage";
+import { decodeCareerResultFromShare, loadCareerResult } from "~/composables/use-career-storage";
 import type { CareerResult } from "~/types/career";
 
 const { t } = useI18n();

@@ -28,7 +28,9 @@ export class PostHogService implements OnModuleDestroy {
     properties?: PostHogProperties;
     sessionId?: string | undefined;
   }): void {
-    if (!this.client || params.distinctId === undefined || params.distinctId === "") return;
+    if (!this.client || params.distinctId === undefined || params.distinctId === "") {
+      return;
+    }
 
     const base = {
       ...params.properties,

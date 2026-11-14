@@ -29,12 +29,18 @@ const hideEmptyLeadOnMobile = computed(
 
 const captionHeightClass = computed(() => {
   switch (caption) {
-    case "lead":
+    case "lead": {
       return "h-row md:h-rail-caption";
-    case "section":
+    }
+
+    case "section": {
       return "h-row";
-    case "none":
+    }
+
+    case "none": {
       return "";
+    }
+
     default: {
       const _exhaustive: never = caption;
 
@@ -45,10 +51,14 @@ const captionHeightClass = computed(() => {
 
 const captionAlignClass = computed(() => {
   switch (captionAlign) {
-    case "start":
+    case "start": {
       return "items-start pl-2 text-start";
-    case "center":
+    }
+
+    case "center": {
       return "items-center text-center";
+    }
+
     default: {
       const _exhaustive: never = captionAlign;
 

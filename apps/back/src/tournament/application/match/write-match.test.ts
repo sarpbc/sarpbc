@@ -452,7 +452,7 @@ describe("Manual bracket writes", () => {
       updateMatchInTransaction(writer, "final", {
         previousMatches: [{ previousMatchId: "other-stage", type: "winner" }],
       }),
-    ).rejects.toThrow(/same stage/);
+    ).rejects.toThrow(/same stage/u);
     expect(writer.save).not.toHaveBeenCalled();
   });
 
@@ -470,7 +470,7 @@ describe("Manual bracket writes", () => {
       updateMatchInTransaction(writer, "semi-1", {
         previousMatches: [{ previousMatchId: "final", type: "winner" }],
       }),
-    ).rejects.toThrow(/cycle/);
+    ).rejects.toThrow(/cycle/u);
     expect(writer.save).not.toHaveBeenCalled();
   });
 
@@ -492,10 +492,10 @@ describe("Manual bracket writes", () => {
     writer.load.mockResolvedValue(synced);
     await expect(
       updateMatchInTransaction(writer, "final", { previousMatches: [...semis] }),
-    ).rejects.toThrow(/PandaScore/);
+    ).rejects.toThrow(/PandaScore/u);
     await expect(
       updateMatchInTransaction(writer, "final", { participantIds: ["a", "b"] }),
-    ).rejects.toThrow(/PandaScore/);
+    ).rejects.toThrow(/PandaScore/u);
     expect(writer.save).not.toHaveBeenCalled();
   });
 
@@ -509,7 +509,7 @@ describe("Manual bracket writes", () => {
         participantIds: ["a", "b"],
         previousMatches: [...semis],
       }),
-    ).rejects.toThrow(/PandaScore/);
+    ).rejects.toThrow(/PandaScore/u);
     expect(writer.save).not.toHaveBeenCalled();
   });
 
@@ -528,7 +528,7 @@ describe("Manual bracket writes", () => {
     );
     await expect(
       updateMatchInTransaction(writer, "final", { participantIds: ["b"] }),
-    ).rejects.toThrow(/scores/);
+    ).rejects.toThrow(/scores/u);
   });
 
   it("generates an empty four-team bracket", async () => {
@@ -558,20 +558,20 @@ describe("Manual bracket writes", () => {
   it("generates an empty bracket only on a manual bracket stage without matches", async () => {
     writer.bracket.mockResolvedValue({ hasBracket: false, matches: [] });
     await expect(createEmptyBracketInTransaction(writer, stage.id, { teams: 4 })).rejects.toThrow(
-      /Enable the bracket/,
+      /Enable the bracket/u,
     );
     writer.bracket.mockResolvedValue({
       hasBracket: true,
       matches: [{ id: "existing", previousMatches: [] }],
     });
     await expect(createEmptyBracketInTransaction(writer, stage.id, { teams: 8 })).rejects.toThrow(
-      /already has matches/,
+      /already has matches/u,
     );
     writer.tournament.mockResolvedValue(
       Object.assign(new Tournament(), { id: "synced", source: "pandascore", pandascoreId: 7 }),
     );
     await expect(createEmptyBracketInTransaction(writer, "synced", { teams: 4 })).rejects.toThrow(
-      /PandaScore/,
+      /PandaScore/u,
     );
     expect(writer.save).not.toHaveBeenCalled();
   });

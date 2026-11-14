@@ -32,12 +32,18 @@ type StreamRosterChange = Extract<
 
 export function streamChangeFor(change: StreamRosterChange): StreamChange {
   switch (change.kind) {
-    case "set_event_streams":
+    case "set_event_streams": {
       return { owner: { kind: "event", id: change.eventId }, streams: change.streams };
-    case "set_tournament_streams":
+    }
+
+    case "set_tournament_streams": {
       return { owner: { kind: "tournament", id: change.tournamentId }, streams: change.streams };
-    case "set_match_streams":
+    }
+
+    case "set_match_streams": {
       return { owner: { kind: "match", id: change.matchId }, streams: change.streams };
+    }
+
     default: {
       const exhaustive: never = change;
 

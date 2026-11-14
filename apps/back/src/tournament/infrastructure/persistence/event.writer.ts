@@ -76,6 +76,8 @@ export class CompetitionEventWriter implements EventWriter {
   async remove(id: string) {
     const row = await this.em.findOne(TournamentEventRow, { id });
 
-    if (row) this.em.remove(row);
+    if (row) {
+      this.em.remove(row);
+    }
   }
 }

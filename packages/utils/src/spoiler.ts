@@ -41,14 +41,18 @@ export function revealSpoilers(
   target: SpoilerRevealTarget,
 ): SpoilerReveals {
   switch (target.kind) {
-    case "match":
+    case "match": {
       return reveals.matchIds.includes(target.id)
         ? reveals
         : { ...reveals, matchIds: [...reveals.matchIds, target.id] };
-    case "tournament":
+    }
+
+    case "tournament": {
       return reveals.tournamentIds.includes(target.id)
         ? reveals
         : { ...reveals, tournamentIds: [...reveals.tournamentIds, target.id] };
+    }
+
     default: {
       const exhaustive: never = target;
 

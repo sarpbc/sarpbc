@@ -4,7 +4,7 @@ import AirRiddleHowToPlayPopover from "~/components/airriddle/HowToPlayPopover.v
 import AirRiddleKeyboard from "~/components/airriddle/Keyboard.vue";
 import AirRiddleTile from "~/components/airriddle/Tile.vue";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
-import { deriveAirRiddleLetterStatuses } from "~/utils/airRiddleLetterStatus";
+import { deriveAirRiddleLetterStatuses } from "~/utils/air-riddle-letter-status";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -259,7 +259,7 @@ function onPhysicalKeydown(event: KeyboardEvent) {
     return;
   }
 
-  if (event.key.length === 1 && /^[a-zA-Z0-9 ]$/.test(event.key)) {
+  if (event.key.length === 1 && /^[a-zA-Z0-9 ]$/u.test(event.key)) {
     event.preventDefault();
     appendToGuess(event.key);
     error.value = undefined;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { isoWeekIdFromDate, isoWeekUtcRange, parseIsoWeekId } from "@sarpbc/utils";
-import { NEWS_PROSE_CLASS } from "~/utils/newsProseClass";
+import { NEWS_PROSE_CLASS } from "~/utils/news-prose-class";
 
 const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();

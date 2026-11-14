@@ -14,12 +14,18 @@ const attrs = useAttrs();
 
 function variantClasses(value: LinkVariant): string {
   switch (value) {
-    case "muted":
+    case "muted": {
       return "text-muted hover:text-highlighted transition-none";
-    case "inline":
+    }
+
+    case "inline": {
       return "text-default hover:text-highlighted transition-none";
-    case "accent":
+    }
+
+    case "accent": {
       return "font-medium text-(--ui-link) hover:text-(--ui-link-hover) transition-none";
+    }
+
     default: {
       const exhaustive: never = value;
 

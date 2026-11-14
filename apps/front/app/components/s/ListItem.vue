@@ -12,16 +12,26 @@ const attrs = useAttrs();
 
 function listItemSizeClasses(value: ListItemSize): string {
   switch (value) {
-    case "compact":
+    case "compact": {
       return "h-row-compact min-h-row-compact";
-    case "default":
+    }
+
+    case "default": {
       return "h-row min-h-row";
-    case "header":
+    }
+
+    case "header": {
       return "h-row-header min-h-row-header";
-    case "double":
+    }
+
+    case "double": {
       return "h-row-double min-h-row-double";
-    case "triple":
+    }
+
+    case "triple": {
       return "h-row-triple min-h-row-triple";
+    }
+
     default: {
       const _exhaustive: never = value;
 

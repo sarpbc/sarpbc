@@ -5,10 +5,10 @@ import {
   readingTimeMinutes,
   uiLocale,
 } from "@sarpbc/utils";
-import { newsCoverTransitionName } from "~/utils/newsCoverTransition";
-import { NEWS_PROSE_CLASS } from "~/utils/newsProseClass";
-import { resolveNewsType } from "~/utils/newsTypeQuery";
-import { buildNewsArticleJsonLd } from "~/utils/structuredData/newsArticle";
+import { newsCoverTransitionName } from "~/utils/news-cover-transition";
+import { NEWS_PROSE_CLASS } from "~/utils/news-prose-class";
+import { resolveNewsType } from "~/utils/news-type-query";
+import { buildNewsArticleJsonLd } from "~/utils/structuredData/news-article";
 
 const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();

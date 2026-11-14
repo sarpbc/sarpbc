@@ -90,21 +90,35 @@ function openCreateModal() {
 }
 
 async function confirmCreate() {
-  if (!newPlayer.value.name) return;
+  if (!newPlayer.value.name) {
+    return;
+  }
+
   isCreating.value = true;
 
   try {
     const body: CreatePlayerDto = { name: newPlayer.value.name };
 
-    if (newPlayer.value.firstName) body.firstName = newPlayer.value.firstName;
+    if (newPlayer.value.firstName) {
+      body.firstName = newPlayer.value.firstName;
+    }
 
-    if (newPlayer.value.lastName) body.lastName = newPlayer.value.lastName;
+    if (newPlayer.value.lastName) {
+      body.lastName = newPlayer.value.lastName;
+    }
 
-    if (newPlayer.value.nationality) body.nationality = newPlayer.value.nationality;
+    if (newPlayer.value.nationality) {
+      body.nationality = newPlayer.value.nationality;
+    }
 
-    if (newPlayer.value.birthday) body.birthday = newPlayer.value.birthday;
+    if (newPlayer.value.birthday) {
+      body.birthday = newPlayer.value.birthday;
+    }
 
-    if (newPlayer.value.imageUrl) body.imageUrl = newPlayer.value.imageUrl;
+    if (newPlayer.value.imageUrl) {
+      body.imageUrl = newPlayer.value.imageUrl;
+    }
+
     const created = await createPlayer(body);
     isCreateModalOpen.value = false;
     await navigateTo(localePath(`/players/${created.id}`));

@@ -1,5 +1,6 @@
 import { defineEntity, p } from "@mikro-orm/core";
-import { NEWS_TYPES, type NewsType } from "@sarpbc/types";
+import { NEWS_TYPES } from "@sarpbc/types";
+import type { NewsType } from "@sarpbc/types";
 import { DEFAULT_NEWS_TYPE } from "../../domain/news-type";
 import { NEWS_TEXT_MAX_LENGTH } from "../../domain/news-limits";
 import { User } from "../../../user/infrastructure/user-persistence";

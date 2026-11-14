@@ -29,7 +29,9 @@ export function lineupSource(match: Pick<Match, "source" | "tournament">): DataS
 async function requireMatch(matches: MatchWriter, id: string): Promise<Match> {
   const match = await matches.load(id);
 
-  if (!match) throw new NotFoundError(`Match with id "${id}" not found`);
+  if (!match) {
+    throw new NotFoundError(`Match with id "${id}" not found`);
+  }
 
   return match;
 }
@@ -46,8 +48,9 @@ async function validLineups(
 
   const lineupPlayerIds = normalized.flatMap(({ playerIds }) => playerIds);
 
-  if (!(await lineups.activePlayersExist(lineupPlayerIds)))
+  if (!(await lineups.activePlayersExist(lineupPlayerIds))) {
     throw new InvalidInputError("Every lineup player must exist and not be a merged duplicate");
+  }
 
   return normalized;
 }
@@ -89,8 +92,10 @@ export class MatchLineupService {
     await this.transaction.run(async ({ matches, lineups }) => {
       const match = await requireMatch(matches, matchId);
 
-      if (!isRedistributable(lineupSource(match)))
+      if (!isRedistributable(lineupSource(match))) {
         throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
+      }
+
       await validLineups(match, lineups, inputs);
     });
   }
@@ -99,7 +104,9 @@ export class MatchLineupService {
     const playerRows = await this.reads.byPlayer(playerId);
     const rows = playerRows.filter(({ rosterIds }) => isStandIn(rosterIds, playerId));
 
-    if (rows.length === 0) return [];
+    if (rows.length === 0) {
+      return [];
+    }
 
     const found = await this.matches.byIds(rows.map(({ matchId }) => matchId));
     const matches = new Map(found.map((match) => [match.id, match]));
@@ -107,7 +114,9 @@ export class MatchLineupService {
     return rows.flatMap(({ matchId, participantId }) => {
       const match = matches.get(matchId);
 
-      if (match?.participants.some(({ id }) => id === participantId) !== true) return [];
+      if (match?.participants.some(({ id }) => id === participantId) !== true) {
+        return [];
+      }
 
       return [{ participantId, match }];
     });

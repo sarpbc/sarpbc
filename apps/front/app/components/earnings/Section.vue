@@ -34,7 +34,9 @@ const hasStartgg = computed(() =>
 function entryMeta(entry: EarningsEntry): string {
   const parts = [distinctStageName(entry.tournament), formatPlacement(entry.placement)];
 
-  if (owner === "player") parts.push(entry.team.name);
+  if (owner === "player") {
+    parts.push(entry.team.name);
+  }
 
   return parts.filter(Boolean).join(" · ");
 }

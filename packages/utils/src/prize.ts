@@ -1,5 +1,5 @@
 export const CURRENCY_CODE_LENGTH = 3;
-const CURRENCY_CODE_PATTERN = new RegExp(`^[A-Z]{${CURRENCY_CODE_LENGTH}}$`);
+const CURRENCY_CODE_PATTERN = new RegExp(`^[A-Z]{${CURRENCY_CODE_LENGTH}}$`, "u");
 const CURRENCY_NAMES = new Intl.DisplayNames(["en"], { type: "currency", fallback: "none" });
 
 export function isIso4217Code(value: string): boolean {

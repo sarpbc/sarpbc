@@ -1,10 +1,10 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { unconstructed } from "../../../../test/doubles";
 import {
-  type EntityName,
   ForeignKeyConstraintViolationException,
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
+import type { EntityName } from "@mikro-orm/core";
 import { describe, expect, it, vi } from "vitest";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import type { NewsArticleRecord } from "../../application/models";

@@ -14,19 +14,28 @@ export class SyncPandascoreTournamentUseCase {
   async execute(id: string): Promise<void> {
     const tournament = await this.reads.findById(id);
 
-    if (!tournament) throw new NotFoundError("Tournament not found");
+    if (!tournament) {
+      throw new NotFoundError("Tournament not found");
+    }
+
     assertPandascoreSyncAllowed(tournament.source);
 
-    if (tournament.pandascoreId === null || tournament.pandascoreId === 0)
+    if (tournament.pandascoreId === null || tournament.pandascoreId === 0) {
       throw new NotFoundError("Tournament does not have a PandaScore ID");
+    }
+
     const command = await this.feed.getTournamentById(tournament.pandascoreId);
 
-    if (command) await this.import(command);
+    if (command) {
+      await this.import(command);
+    }
   }
   async executeByPandascoreId(id: number, linkTournamentId?: string): Promise<Tournament> {
     const command = await this.feed.getTournamentById(id);
 
-    if (!command) throw new NotFoundError(`PandaScore tournament ${id} not found`);
+    if (!command) {
+      throw new NotFoundError(`PandaScore tournament ${id} not found`);
+    }
 
     return await this.import(command, linkTournamentId);
   }

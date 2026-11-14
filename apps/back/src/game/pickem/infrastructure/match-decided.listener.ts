@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { OnEvent } from "@nestjs/event-emitter";
-import { MATCH_DECIDED, type MatchDecided } from "../../../tournament/domain/match-decided";
+import { MATCH_DECIDED } from "../../../tournament/domain/match-decided";
+import type { MatchDecided } from "../../../tournament/domain/match-decided";
 import { PickemService } from "../application/pickem.service";
 
 @Injectable()

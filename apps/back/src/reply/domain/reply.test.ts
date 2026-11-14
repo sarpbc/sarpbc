@@ -1,12 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
-import {
-  replySortOrder,
-  replyTarget,
-  resolveReplyTargetLink,
-  sameReplyTarget,
-  type ReplyTargetFields,
-} from "./reply";
+import { replySortOrder, replyTarget, resolveReplyTargetLink, sameReplyTarget } from "./reply";
+import type { ReplyTargetFields } from "./reply";
 
 function makeReply(partial: Partial<ReplyTargetFields>): ReplyTargetFields {
   return {

@@ -43,7 +43,9 @@ function regionalPlacementPoints(placement: CareerPlacement): number {
 }
 
 function majorPlacementPoints(placement: CareerPlacement | null): number {
-  if (!placement) return 0;
+  if (!placement) {
+    return 0;
+  }
 
   return MAJOR_POINTS[placement];
 }

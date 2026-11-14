@@ -20,7 +20,9 @@ function streamsResponse(data: unknown[], status = 200) {
 function requestedUrl(call: Parameters<typeof fetch>): URL {
   const [input] = call;
 
-  if (!(input instanceof URL)) throw new Error("Expected a URL request");
+  if (!(input instanceof URL)) {
+    throw new TypeError("Expected a URL request");
+  }
 
   return input;
 }
@@ -110,6 +112,6 @@ describe(TwitchHelixSource, () => {
   it("rejects a malformed Helix response", async () => {
     fetchMock.mockResolvedValueOnce(streamsResponse([{ user_login: "zenrll" }]));
 
-    await expect(source.findLiveRocketLeague(["zenrll"])).rejects.toThrow(/user_name/);
+    await expect(source.findLiveRocketLeague(["zenrll"])).rejects.toThrow(/user_name/u);
   });
 });

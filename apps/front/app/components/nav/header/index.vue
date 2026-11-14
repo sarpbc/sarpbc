@@ -13,8 +13,8 @@ const matchesPath = computed(() => localePath("/matches"));
 const resultsPath = computed(() => localePath("/results"));
 
 function isExactPath(path: string): boolean {
-  const current = route.path.replace(/\/$/, "");
-  const target = path.replace(/\/$/, "");
+  const current = route.path.replace(/\/$/u, "");
+  const target = path.replace(/\/$/u, "");
 
   return current === target;
 }
@@ -24,7 +24,7 @@ function isNewsSection(): boolean {
     return true;
   }
 
-  return /(?:^|\/)news(?:\/|$)/.test(route.path);
+  return /(?:^|\/)news(?:\/|$)/u.test(route.path);
 }
 
 function toggleMenu() {

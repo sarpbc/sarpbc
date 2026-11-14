@@ -5,8 +5,8 @@ import {
   internalApiTokenMatches,
   isDirectLoopback,
   resolveClientAddress,
-  type ClientRequest,
 } from "@sarpbc/utils/client-address";
+import type { ClientRequest } from "@sarpbc/utils/client-address";
 
 const PUBLIC_LIMIT = 100;
 const SSR_LIMIT = 400;

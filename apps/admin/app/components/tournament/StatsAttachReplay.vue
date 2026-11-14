@@ -25,7 +25,9 @@ const shown = shallowRef<StatsImportItem | null>(null);
 const open = computed({
   get: () => target.value !== null,
   set: (value) => {
-    if (!value && !saving.value) target.value = null;
+    if (!value && !saving.value) {
+      target.value = null;
+    }
   },
 });
 
@@ -59,7 +61,10 @@ const sideOptions = computed(() =>
 );
 
 watch(target, (item) => {
-  if (item === null) return;
+  if (item === null) {
+    return;
+  }
+
   shown.value = item;
   const known = pickable.value.some((candidate) => candidate.id === item.matchId);
 
@@ -72,11 +77,15 @@ watch(target, (item) => {
 });
 
 watch(matchId, () => {
-  if (!match.value?.participants.some((participant) => participant.id === blueParticipantId.value))
+  if (
+    !match.value?.participants.some((participant) => participant.id === blueParticipantId.value)
+  ) {
     blueParticipantId.value = undefined;
+  }
 
-  if (gameOptions.value.find((option) => option.value === gameNumber.value)?.disabled !== false)
+  if (gameOptions.value.find((option) => option.value === gameNumber.value)?.disabled !== false) {
     gameNumber.value = undefined;
+  }
 });
 
 const canSave = computed(
@@ -86,7 +95,10 @@ const canSave = computed(
 async function save() {
   const item = target.value;
 
-  if (!item || !matchId.value || !gameNumber.value || !blueParticipantId.value) return;
+  if (!item || !matchId.value || !gameNumber.value || !blueParticipantId.value) {
+    return;
+  }
+
   saving.value = true;
 
   try {

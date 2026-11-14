@@ -1,4 +1,5 @@
-import { formatTimeAgo, type UseTimeAgoMessages, type UseTimeAgoUnit } from "@vueuse/core";
+import { formatTimeAgo } from "@vueuse/core";
+import type { UseTimeAgoMessages, UseTimeAgoUnit } from "@vueuse/core";
 
 const RELATIVE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -25,32 +26,42 @@ export function formatLocaleTimeAgo(date: Date) {
   if (now.getTime() - date.getTime() > RELATIVE_WINDOW_MS) {
     const options: Intl.DateTimeFormatOptions = { day: "numeric", month: "short" };
 
-    if (date.getFullYear() !== now.getFullYear()) options.year = "numeric";
+    if (date.getFullYear() !== now.getFullYear()) {
+      options.year = "numeric";
+    }
 
     return new Intl.DateTimeFormat(locale.value, options).format(date);
   }
 
   const messages: UseTimeAgoMessages = {
     justNow: t("timeAgo.just-now"),
-    past: (n) => (/\d/.test(n) ? t("timeAgo.ago", [n]) : n),
-    future: (n) => (/\d/.test(n) ? t("timeAgo.in", [n]) : n),
+    past: (n) => (/\d/u.test(n) ? t("timeAgo.ago", [n]) : n),
+    future: (n) => (/\d/u.test(n) ? t("timeAgo.in", [n]) : n),
     month: (n, past) => {
-      if (n !== 1) return `${n} ${t(`timeAgo.month${pf(past)}`, n)}`;
+      if (n !== 1) {
+        return `${n} ${t(`timeAgo.month${pf(past)}`, n)}`;
+      }
 
       return past ? t("timeAgo.last-month") : t("timeAgo.next-month");
     },
     year: (n, past) => {
-      if (n !== 1) return `${n} ${t(`timeAgo.year${pf(past)}`, n)}`;
+      if (n !== 1) {
+        return `${n} ${t(`timeAgo.year${pf(past)}`, n)}`;
+      }
 
       return past ? t("timeAgo.last-year") : t("timeAgo.next-year");
     },
     day: (n, past) => {
-      if (n !== 1) return `${n} ${t(`timeAgo.day${pf(past)}`, n)}`;
+      if (n !== 1) {
+        return `${n} ${t(`timeAgo.day${pf(past)}`, n)}`;
+      }
 
       return past ? t("timeAgo.yesterday") : t("timeAgo.tomorrow");
     },
     week: (n, past) => {
-      if (n !== 1) return `${n} ${t(`timeAgo.week${pf(past)}`, n)}`;
+      if (n !== 1) {
+        return `${n} ${t(`timeAgo.week${pf(past)}`, n)}`;
+      }
 
       return past ? t("timeAgo.last-week") : t("timeAgo.next-week");
     },

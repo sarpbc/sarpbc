@@ -2,28 +2,19 @@ import { SCRIPT_URL } from "./doubles";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
-import { FastifyAdapter, type NestFastifyApplication } from "@nestjs/platform-fastify";
+import { FastifyAdapter } from "@nestjs/platform-fastify";
+import type { NestFastifyApplication } from "@nestjs/platform-fastify";
 import { configureApp } from "../src/configure-app";
-import {
-  ListTournamentsQueryDto,
-  type ListTournamentsQueryInput,
-} from "../src/tournament/infrastructure/http/dto/list-tournaments-query.dto";
-import {
-  ListNotificationsQueryDto,
-  type ListNotificationsQueryInput,
-} from "../src/notification/infrastructure/http/dto/list-notifications-query.dto";
-import {
-  CreatePostDto,
-  type CreatePostInput,
-} from "../src/forum/infrastructure/http/post/dto/create-post.dto";
-import {
-  UpdateTournamentDto,
-  type UpdateTournamentInput,
-} from "../src/tournament/infrastructure/http/dto/create-tournament.dto";
-import {
-  CreateNewsArticleDto,
-  type CreateNewsArticleInput,
-} from "../src/news/infrastructure/http/dto/create-news-article.dto";
+import { ListTournamentsQueryDto } from "../src/tournament/infrastructure/http/dto/list-tournaments-query.dto";
+import type { ListTournamentsQueryInput } from "../src/tournament/infrastructure/http/dto/list-tournaments-query.dto";
+import { ListNotificationsQueryDto } from "../src/notification/infrastructure/http/dto/list-notifications-query.dto";
+import type { ListNotificationsQueryInput } from "../src/notification/infrastructure/http/dto/list-notifications-query.dto";
+import { CreatePostDto } from "../src/forum/infrastructure/http/post/dto/create-post.dto";
+import type { CreatePostInput } from "../src/forum/infrastructure/http/post/dto/create-post.dto";
+import { UpdateTournamentDto } from "../src/tournament/infrastructure/http/dto/create-tournament.dto";
+import type { UpdateTournamentInput } from "../src/tournament/infrastructure/http/dto/create-tournament.dto";
+import { CreateNewsArticleDto } from "../src/news/infrastructure/http/dto/create-news-article.dto";
+import type { CreateNewsArticleInput } from "../src/news/infrastructure/http/dto/create-news-article.dto";
 
 function echo<T>(value: T): T {
   return value;
@@ -139,7 +130,9 @@ describe("native Nest Zod validation over Fastify", () => {
       ),
     );
 
-    for (const rejected of rejections) expect(rejected.statusCode).toBe(400);
+    for (const rejected of rejections) {
+      expect(rejected.statusCode).toBe(400);
+    }
   });
 
   it("keeps explicit null clears and rejects duplicate tournament teams", async () => {

@@ -2,8 +2,8 @@
 import CareerMenu from "~/components/career/Menu.vue";
 import CareerPhaseView from "~/components/career/CareerPhaseView.vue";
 import CareerEnd from "~/components/career/CareerEnd.vue";
-import { encodeCareerResultForShare } from "~/composables/useCareerStorage";
-import { useCareerSimulator } from "~/composables/useCareerSimulator";
+import { encodeCareerResultForShare } from "~/composables/use-career-storage";
+import { useCareerSimulator } from "~/composables/use-career-simulator";
 
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
@@ -33,7 +33,10 @@ setPageSeo({
 });
 
 function handleShare() {
-  if (!state.value.result) return;
+  if (!state.value.result) {
+    return;
+  }
+
   const encoded = encodeCareerResultForShare(state.value.result);
   const url = `${window.location.origin}${localePath(`/game/career/${state.value.result.id}`)}?d=${encoded}`;
   void navigator.clipboard.writeText(url);
@@ -50,24 +53,32 @@ const pendingConfirm = ref<PendingConfirm | undefined>(undefined);
 const confirmOpen = computed({
   get: () => pendingConfirm.value !== undefined,
   set: (open) => {
-    if (!open) pendingConfirm.value = undefined;
+    if (!open) {
+      pendingConfirm.value = undefined;
+    }
   },
 });
 
 const confirmCopy = computed(() => {
   switch (pendingConfirm.value) {
-    case "abandon":
+    case "abandon": {
       return {
         title: t("page.game.career.actions.abandonConfirm"),
         action: t("page.game.career.actions.abandon"),
       };
-    case "newCareer":
+    }
+
+    case "newCareer": {
       return {
         title: t("page.game.career.menu.newCareerConfirm"),
         action: t("page.game.career.menu.newCareer"),
       };
-    case undefined:
+    }
+
+    case undefined: {
       return { title: "", action: "" };
+    }
+
     default: {
       const exhaustive: never = pendingConfirm.value;
 
@@ -94,8 +105,11 @@ function confirmPending() {
   const confirmed = pendingConfirm.value;
   pendingConfirm.value = undefined;
 
-  if (confirmed === "abandon") returnToMenu();
-  else if (confirmed === "newCareer") startOnboarding();
+  if (confirmed === "abandon") {
+    returnToMenu();
+  } else if (confirmed === "newCareer") {
+    startOnboarding();
+  }
 }
 
 function handleContinue() {

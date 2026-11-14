@@ -29,7 +29,9 @@ function twimgUrl(input: string, base?: string): string | null {
     return null;
   }
 
-  if (!isTweetImageUrl(url.href)) return null;
+  if (!isTweetImageUrl(url.href)) {
+    return null;
+  }
 
   return `${TWIMG_ORIGIN}${url.pathname}${url.search}`;
 }
@@ -59,11 +61,15 @@ async function readImage(response: Response): Promise<TweetImage> {
   for await (const chunk of response.body) {
     const value: unknown = chunk;
 
-    if (!(value instanceof Uint8Array)) throw unavailable();
+    if (!(value instanceof Uint8Array)) {
+      throw unavailable();
+    }
 
     size += value.byteLength;
 
-    if (size > MAX_IMAGE_BYTES) throw unavailable();
+    if (size > MAX_IMAGE_BYTES) {
+      throw unavailable();
+    }
 
     chunks.push(value);
   }
@@ -76,7 +82,9 @@ async function fetchImage(
   redirects: number,
   signal: AbortSignal,
 ): Promise<TweetImage> {
-  if (target === null || target === "") throw unavailable();
+  if (target === null || target === "") {
+    throw unavailable();
+  }
 
   const response = await fetch(target, {
     redirect: "manual",
@@ -91,7 +99,9 @@ async function fetchImage(
   await response.body?.cancel();
   const location = response.headers.get("location");
 
-  if (location === null || location === "" || redirects >= MAX_REDIRECTS) throw unavailable();
+  if (location === null || location === "" || redirects >= MAX_REDIRECTS) {
+    throw unavailable();
+  }
 
   return await fetchImage(twimgUrl(location, target), redirects + 1, signal);
 }
@@ -101,7 +111,10 @@ export class TwimgImageGateway implements TweetImageGateway {
     try {
       return await fetchImage(twimgUrl(url), 0, AbortSignal.timeout(FETCH_TIMEOUT_MS));
     } catch (error) {
-      if (error instanceof ApplicationError) throw error;
+      if (error instanceof ApplicationError) {
+        throw error;
+      }
+
       throw unavailable();
     }
   }

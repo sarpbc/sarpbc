@@ -56,7 +56,9 @@ const activeRoster = computed(() => selectActiveRosterPlayers(team.value?.player
 const staff = computed(() => selectTeamStaff(team.value?.players ?? []));
 
 const teamNationalities = computed(() => {
-  if (!activeRoster.value.length) return [];
+  if (!activeRoster.value.length) {
+    return [];
+  }
 
   return activeRoster.value
     .map((player) => player.nationality)

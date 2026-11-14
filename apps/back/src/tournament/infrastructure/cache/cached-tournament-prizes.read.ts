@@ -53,7 +53,9 @@ export class CachedTournamentPrizesRead {
     const key = tournamentPrizesCacheKey(id);
     const cached = await this.readCached(key);
 
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
 
     const prizes = await this.prizes.findByTournamentId(id);
 
@@ -70,7 +72,10 @@ export class CachedTournamentPrizesRead {
     try {
       const cached = await this.redis.get(key);
 
-      if (cached === null) return null;
+      if (cached === null) {
+        return null;
+      }
+
       const decoded: unknown = JSON.parse(cached);
       const result = distribution.safeParse(decoded);
 

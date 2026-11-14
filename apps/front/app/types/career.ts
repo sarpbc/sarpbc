@@ -53,12 +53,18 @@ export const DEFAULT_PLAYER_NAME = "Rookie";
 
 export function getSplitNumber(stage: CareerStage): number | null {
   switch (stage) {
-    case "split1":
+    case "split1": {
       return 1;
-    case "split2":
+    }
+
+    case "split2": {
       return 2;
-    case "worlds":
+    }
+
+    case "worlds": {
       return null;
+    }
+
     default: {
       const _exhaustive: never = stage;
 
@@ -69,10 +75,14 @@ export function getSplitNumber(stage: CareerStage): number | null {
 
 export function getSplitStage(split: number): CareerStage {
   switch (split) {
-    case 1:
+    case 1: {
       return "split1";
-    case 2:
+    }
+
+    case 2: {
       return "split2";
+    }
+
     default: {
       throw new Error(`Invalid split number: ${split}`);
     }

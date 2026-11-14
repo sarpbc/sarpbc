@@ -109,21 +109,21 @@ describe(resolveMatchParticipantIds, () => {
         { teams: ["p-kc", "gentle-mates"] },
         { teams: lookup, players: noPlayers },
       ),
-    ).rejects.toThrow(/participant id for Karmine Corp\. Pass it in participantIds/);
+    ).rejects.toThrow(/participant id for Karmine Corp\. Pass it in participantIds/u);
   });
 
   it("requires two different participants", async () => {
     const { cup, lookup } = tournament();
     await expect(
       resolveMatchParticipantIds(cup, {}, { teams: lookup, players: noPlayers }),
-    ).rejects.toThrow(/at least two different participants/);
+    ).rejects.toThrow(/at least two different participants/u);
     await expect(
       resolveMatchParticipantIds(
         cup,
         { teams: ["karmine-corp", "karmine-corp"] },
         { teams: lookup, players: noPlayers },
       ),
-    ).rejects.toThrow(/at least two different participants/);
+    ).rejects.toThrow(/at least two different participants/u);
   });
 
   it("resolves the 1v1 participants of players without creating a team", async () => {
@@ -162,6 +162,6 @@ describe(resolveMatchParticipantIds, () => {
         { players: ["p-zen", "vatira"] },
         { teams: tournament().lookup, players },
       ),
-    ).rejects.toThrow(/participant id for Zen/);
+    ).rejects.toThrow(/participant id for Zen/u);
   });
 });

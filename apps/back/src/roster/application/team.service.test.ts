@@ -1,4 +1,5 @@
-import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Mock } from "vitest";
 import { Contract } from "../domain/contract";
 import { Player } from "../domain/player";
 import { Team } from "../domain/team";

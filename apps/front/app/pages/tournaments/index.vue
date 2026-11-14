@@ -1,8 +1,8 @@
 <script lang="ts" setup>
 import type { TournamentEvent, TournamentListItem } from "@sarpbc/types";
 import { tournamentEventPath } from "@sarpbc/utils";
-import { buildTournamentItemList } from "~/utils/structuredData/tournamentItemList";
-import { getTournamentStatus } from "~/utils/tournamentStatus";
+import { buildTournamentItemList } from "~/utils/structuredData/tournament-item-list";
+import { getTournamentStatus } from "~/utils/tournament-status";
 
 const { t } = useI18n();
 const route = useRoute();
@@ -44,7 +44,9 @@ const { data: nextEvent } = useLazyAsyncData(
       .filter((event) => getTournamentStatus(event) === "upcoming")
       .toSorted((a, b) => new Date(a.beginAt ?? 0).getTime() - new Date(b.beginAt ?? 0).getTime());
 
-    if (!next) return null;
+    if (!next) {
+      return null;
+    }
 
     return { slug: next.slug, name: next.name };
   },

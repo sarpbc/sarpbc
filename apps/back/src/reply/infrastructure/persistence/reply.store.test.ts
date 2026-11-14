@@ -1,9 +1,9 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import {
-  type EntityName,
   ForeignKeyConstraintViolationException,
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
+import type { EntityName } from "@mikro-orm/core";
 import { FORUM_ERROR_CODES } from "@sarpbc/types";
 import { describe, expect, it, vi } from "vitest";
 import type { ReplyRecord } from "../../application/models";
@@ -32,7 +32,9 @@ function entityManager(flushFailure: Error | null) {
     persist: vi.fn<EntityManager["persist"]>(),
     remove: vi.fn<EntityManager["remove"]>(),
     flush: vi.fn<() => Promise<void>>(async () => {
-      if (flushFailure) throw flushFailure;
+      if (flushFailure) {
+        throw flushFailure;
+      }
     }),
   };
 }

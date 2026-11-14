@@ -39,7 +39,9 @@ const languageCode = computed(() => language.value.trim().toLowerCase());
 const languageValid = computed(() => isIso6391Code(languageCode.value));
 
 const urlError = computed(() => {
-  if (!url.value.trim() || parsedUrl.value.ok) return;
+  if (!url.value.trim() || parsedUrl.value.ok) {
+    return;
+  }
 
   return t(`page.match.detail.vodAdd.errors.${parsedUrl.value.error}`);
 });
@@ -49,7 +51,10 @@ const languageError = computed(() =>
 );
 
 watch(open, (isOpen) => {
-  if (!isOpen) return;
+  if (!isOpen) {
+    return;
+  }
+
   const lastGame = Math.max(0, ...(match.vods ?? []).map((vod) => vod.game));
   game.value = Math.min(lastGame + 1, maxVodGame(match.numberOfGames));
   url.value = "";
@@ -57,7 +62,9 @@ watch(open, (isOpen) => {
 });
 
 async function submit() {
-  if (!parsedUrl.value.ok || !languageValid.value || saving.value) return;
+  if (!parsedUrl.value.ok || !languageValid.value || saving.value) {
+    return;
+  }
 
   saving.value = true;
 

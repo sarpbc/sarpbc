@@ -38,7 +38,7 @@ const envSchema = databaseSchema.extend({
   TWITCH_CLIENT_SECRET: optionalText,
   BALLCHASING_API_KEY: optionalText,
   INTERNAL_API_TOKEN: optionalText.refine(
-    (value) => value === undefined || /^[\u0021-\u007E]{16,}$/.test(value),
+    (value) => value === undefined || /^[\u0021-\u007E]{16,}$/u.test(value),
     { message: "must be at least 16 visible ASCII characters" },
   ),
   PANDASCORE_SYNC_ON_BOOT: z.string().optional(),

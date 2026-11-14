@@ -25,15 +25,17 @@ import { SeasonArchiveService } from "../../application/season-archive.service";
 import { SeasonService } from "../../application/season.service";
 import {
   CreateSeasonAwardDto,
-  type CreateSeasonAwardInput,
   CreateSeasonParticipantDto,
-  type CreateSeasonParticipantInput,
   CreateSeasonPathEntryDto,
-  type CreateSeasonPathEntryInput,
   SeasonDto,
-  type SeasonInput,
   UpdateSeasonParticipantDto,
-  type UpdateSeasonParticipantInput,
+} from "./dto/season.dto";
+import type {
+  CreateSeasonAwardInput,
+  CreateSeasonParticipantInput,
+  CreateSeasonPathEntryInput,
+  SeasonInput,
+  UpdateSeasonParticipantInput,
 } from "./dto/season.dto";
 
 @Controller("seasons")

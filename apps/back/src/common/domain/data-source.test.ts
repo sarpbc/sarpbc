@@ -21,6 +21,6 @@ describe("data source", () => {
     );
     expect(parseDataSourceUrl("  ")).toBeNull();
     expect(parseDataSourceUrl(null)).toBeNull();
-    expect(() => parseDataSourceUrl("https://blast.tv/rl")).toThrow(/BLAST/);
+    expect(() => parseDataSourceUrl("https://blast.tv/rl")).toThrow(/BLAST/u);
   });
 });

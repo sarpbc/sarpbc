@@ -1,10 +1,5 @@
-import {
-  FORUM_ERROR_CODES,
-  type PaginatedReplies,
-  type Reply,
-  type ReplyReportReason,
-  type ReplyTargetType,
-} from "@sarpbc/types";
+import { FORUM_ERROR_CODES } from "@sarpbc/types";
+import type { PaginatedReplies, Reply, ReplyReportReason, ReplyTargetType } from "@sarpbc/types";
 import { mapSequentially } from "../../common/application/sequentially";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
@@ -36,8 +31,11 @@ function toThreadedDtos(replies: ReplyRecord[]): Reply[] {
   for (const { reply, dto } of dtos) {
     const parentId = reply.replyTo?.id;
 
-    if (parentId === undefined || parentId === "") roots.push(dto);
-    else byId.get(parentId)?.replies.push(dto);
+    if (parentId === undefined || parentId === "") {
+      roots.push(dto);
+    } else {
+      byId.get(parentId)?.replies.push(dto);
+    }
   }
 
   return roots;

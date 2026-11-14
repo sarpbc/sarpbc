@@ -6,7 +6,7 @@ export const NewsCoverImageUrl = z
   .string()
   .trim()
   .max(NEWS_TEXT_MAX_LENGTH)
-  .pipe(z.url({ protocol: /^(?:https?|ftp)$/, message: "Enter a valid cover image URL." }));
+  .pipe(z.url({ protocol: /^(?:https?|ftp)$/u, message: "Enter a valid cover image URL." }));
 
 export const createNewsArticleFields = {
   title: z.string().min(1).max(NEWS_TEXT_MAX_LENGTH),

@@ -46,7 +46,9 @@ function reset() {
 watch(
   open,
   (isOpen) => {
-    if (isOpen) reset();
+    if (isOpen) {
+      reset();
+    }
   },
   { immediate: true },
 );

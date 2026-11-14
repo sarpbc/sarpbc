@@ -18,9 +18,12 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
-import { CreateReplyDto, type CreateReplyInput } from "./dto/create-reply.dto";
-import { ListRepliesQueryDto, type ListRepliesQueryInput } from "./dto/list-replies-query.dto";
-import { ReportReplyDto, type ReportReplyInput } from "./dto/report-reply.dto";
+import { CreateReplyDto } from "./dto/create-reply.dto";
+import type { CreateReplyInput } from "./dto/create-reply.dto";
+import { ListRepliesQueryDto } from "./dto/list-replies-query.dto";
+import type { ListRepliesQueryInput } from "./dto/list-replies-query.dto";
+import { ReportReplyDto } from "./dto/report-reply.dto";
+import type { ReportReplyInput } from "./dto/report-reply.dto";
 
 @Controller("replies")
 export class ReplyController {

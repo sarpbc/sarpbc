@@ -183,7 +183,9 @@ export function mapTournamentParticipant(participant: TournamentParticipant) {
 
 /** start.gg tournaments stay out of MCP responses, including write confirmations. */
 export function mapListedParticipants(source: DataSource, participants: TournamentParticipant[]) {
-  if (!isRedistributable(source)) return {};
+  if (!isRedistributable(source)) {
+    return {};
+  }
 
   return { participants: participants.map(mapTournamentParticipant) };
 }

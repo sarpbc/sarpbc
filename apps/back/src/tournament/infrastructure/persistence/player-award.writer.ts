@@ -65,12 +65,14 @@ export class CompetitionAwardWriter implements AwardWriter {
     try {
       await this.em.flush();
     } catch (error) {
-      if (isUniqueViolation(error))
+      if (isUniqueViolation(error)) {
         throw new ConflictError(
           `${row.tournament.name} already has a ${
             AWARD_LABELS[input.awardType]
           } award. Remove the current award before assigning another player.`,
         );
+      }
+
       throw error;
     }
 
@@ -79,7 +81,10 @@ export class CompetitionAwardWriter implements AwardWriter {
   async remove(tournamentId: string, id: string) {
     const row = await this.em.findOne(PlayerAward, { id, tournament: { id: tournamentId } });
 
-    if (!row) return false;
+    if (!row) {
+      return false;
+    }
+
     this.em.remove(row);
 
     return true;

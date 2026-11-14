@@ -42,15 +42,23 @@ export class RosterMergeService {
   constructor(private readonly transaction: RosterMergeTransaction) {}
 
   async mergePlayers(keptId: string, duplicateId: string): Promise<RosterMerge<Player>> {
-    if (keptId === duplicateId) throw new InvalidInputError("Choose two different players");
+    if (keptId === duplicateId) {
+      throw new InvalidInputError("Choose two different players");
+    }
 
     return await this.transaction.run(async ({ players, references }) => {
       const kept = await players.findById(keptId);
 
-      if (!kept) throw new NotFoundError(`Player with id "${keptId}" not found`);
+      if (!kept) {
+        throw new NotFoundError(`Player with id "${keptId}" not found`);
+      }
+
       const merged = await players.findById(duplicateId);
 
-      if (!merged) throw new NotFoundError(`Player with id "${duplicateId}" not found`);
+      if (!merged) {
+        throw new NotFoundError(`Player with id "${duplicateId}" not found`);
+      }
+
       assertMergeable("player", kept, merged);
 
       if (kept.team && merged.team && kept.team.id !== merged.team.id) {
@@ -65,8 +73,9 @@ export class RosterMergeService {
         (kept.pandascoreId === null || kept.pandascoreId === 0) &&
         merged.pandascoreId !== null &&
         merged.pandascoreId !== 0
-      )
+      ) {
         kept.linkPandascore(merged.pandascoreId);
+      }
 
       if (!kept.team && merged.team) {
         kept.team = merged.team;
@@ -90,15 +99,23 @@ export class RosterMergeService {
   }
 
   async mergeTeams(keptId: string, duplicateId: string): Promise<RosterMerge<Team>> {
-    if (keptId === duplicateId) throw new InvalidInputError("Choose two different teams");
+    if (keptId === duplicateId) {
+      throw new InvalidInputError("Choose two different teams");
+    }
 
     return await this.transaction.run(async ({ teams, references }) => {
       const kept = await teams.findById(keptId);
 
-      if (!kept) throw new NotFoundError(`Team with id "${keptId}" not found`);
+      if (!kept) {
+        throw new NotFoundError(`Team with id "${keptId}" not found`);
+      }
+
       const merged = await teams.findById(duplicateId);
 
-      if (!merged) throw new NotFoundError(`Team with id "${duplicateId}" not found`);
+      if (!merged) {
+        throw new NotFoundError(`Team with id "${duplicateId}" not found`);
+      }
+
       assertMergeable("team", kept, merged);
       // Two participants of one team in a tournament cannot be merged without rewriting matches.
       const shared = await references.sharedTournamentIds(kept.id, merged.id);
@@ -115,8 +132,10 @@ export class RosterMergeService {
         (kept.pandascoreId === null || kept.pandascoreId === 0) &&
         merged.pandascoreId !== null &&
         merged.pandascoreId !== 0
-      )
+      ) {
         kept.linkPandascore(merged.pandascoreId);
+      }
+
       kept.location ??= merged.location;
       kept.imageUrl ??= merged.imageUrl;
       kept.darkModeImageUrl ??= merged.darkModeImageUrl;

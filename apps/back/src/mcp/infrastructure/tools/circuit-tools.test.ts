@@ -25,7 +25,9 @@ function scaleTool() {
     (candidate) => candidate.name === "set_circuit_stage_scale",
   );
 
-  if (!tool) throw new Error("set_circuit_stage_scale is not defined");
+  if (!tool) {
+    throw new Error("set_circuit_stage_scale is not defined");
+  }
 
   return { rosterProposalService, tool };
 }
@@ -170,7 +172,9 @@ describe("get_circuit", () => {
       },
     }).find((candidate) => candidate.name === "get_circuit");
 
-    if (!tool) throw new Error("get_circuit is not defined");
+    if (!tool) {
+      throw new Error("get_circuit is not defined");
+    }
 
     const body = jsonOf(await tool.run(user("journalist"), { idOrSlug: "season" }));
 
@@ -209,7 +213,9 @@ describe("create_circuit and update_circuit", () => {
     const named = (name: string) => {
       const tool = all.find((candidate) => candidate.name === name);
 
-      if (!tool) throw new Error(`${name} is not defined`);
+      if (!tool) {
+        throw new Error(`${name} is not defined`);
+      }
 
       return tool;
     };

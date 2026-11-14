@@ -1,7 +1,8 @@
 import type { ReplyRecord } from "../../reply/application/models";
 import type { ModerationReplies } from "./ports";
 import type { ModerationReplyDto } from "./moderation-reply.view";
-import { resolveReplyTargetLink, type ReplyTargetLink } from "../../reply/domain/reply";
+import { resolveReplyTargetLink } from "../../reply/domain/reply";
+import type { ReplyTargetLink } from "../../reply/domain/reply";
 
 function toModerationDto(
   reply: ReplyRecord,

@@ -4,7 +4,7 @@ import { z } from "zod";
 
 const repository = path.resolve(import.meta.dirname, "..");
 const frameworkFree = ["packages/types", "packages/utils"];
-const frameworkPackage = /^(?:vue(?:$|[/-])|@vue\/|nuxt(?:$|[/-])|@nuxt\/|@nuxtjs\/|#)/;
+const frameworkPackage = /^(?:vue(?:$|[/-])|@vue\/|nuxt(?:$|[/-])|@nuxt\/|@nuxtjs\/|#)/u;
 
 const dependencyFields = ["dependencies", "devDependencies", "peerDependencies"] as const;
 const dependencies = z.record(z.string(), z.string()).optional();
@@ -16,15 +16,17 @@ const packageManifest = z.object({
 });
 
 const specifierPattern =
-  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["'](?<specifier>[^"']+)["']/g;
+  /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["'](?<specifier>[^"']+)["']/gu;
 
 function sourceFiles(directory: string): string[] {
   return readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
 
-    if (entry.isDirectory()) return entry.name === "node_modules" ? [] : sourceFiles(file);
+    if (entry.isDirectory()) {
+      return entry.name === "node_modules" ? [] : sourceFiles(file);
+    }
 
-    return /\.(?:ts|mts|mjs|js|vue)$/.test(entry.name) ? [file] : [];
+    return /\.(?:ts|mts|mjs|js|vue)$/u.test(entry.name) ? [file] : [];
   });
 }
 

@@ -5,7 +5,9 @@ import type { TeamWriter } from "./ports";
 export async function requireTeam(teams: Pick<TeamWriter, "findById">, id: string): Promise<Team> {
   const team = await teams.findById(id);
 
-  if (!team) throw new UnprocessableError(`Team with id "${id}" not found`);
+  if (!team) {
+    throw new UnprocessableError(`Team with id "${id}" not found`);
+  }
 
   return team;
 }

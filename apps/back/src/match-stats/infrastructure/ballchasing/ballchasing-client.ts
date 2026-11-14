@@ -88,9 +88,12 @@ function toTeam(side: z.infer<typeof team> | undefined): ReplayTeam {
 }
 
 function playedAt(raw: string | undefined, hasTimezone: boolean | undefined): Date | null {
-  if (raw === undefined || raw === "") return null;
+  if (raw === undefined || raw === "") {
+    return null;
+  }
+
   // Without a timezone Ballchasing gives the uploader's wall clock; reading it as UTC keeps the order.
-  const value = hasTimezone === true ? raw : `${raw.replace(/(?:Z|[+-]\d\d:\d\d)$/, "")}Z`;
+  const value = hasTimezone === true ? raw : `${raw.replace(/(?:Z|[+-]\d\d:\d\d)$/u, "")}Z`;
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;
@@ -159,7 +162,9 @@ export class BallchasingClient implements BallchasingSource {
     const crawl = async (queue: readonly string[]): Promise<void> => {
       const [group, ...rest] = queue;
 
-      if (group === undefined) return;
+      if (group === undefined) {
+        return;
+      }
 
       if (visited.has(group)) {
         await crawl(rest);
@@ -169,8 +174,9 @@ export class BallchasingClient implements BallchasingSource {
 
       visited.add(group);
 
-      for (const replay of await this.pages(replayList, "replays", group))
+      for (const replay of await this.pages(replayList, "replays", group)) {
         replays.set(replay.id, toSummary(replay));
+      }
 
       const children = await this.pages(groupList, "groups", group);
       await crawl([...rest, ...children.map((child) => child.id)]);
@@ -190,11 +196,15 @@ export class BallchasingClient implements BallchasingSource {
     const body: unknown = await response.json();
     const status = replayStatus.safeParse(body);
 
-    if (status.success && status.data.status !== "ok") return null;
+    if (status.success && status.data.status !== "ok") {
+      return null;
+    }
+
     const detail = replayDetail.safeParse(body);
 
-    if (!status.success || !detail.success)
+    if (!status.success || !detail.success) {
       throw new IntegrationError("Ballchasing returned incomplete stats for a replay.");
+    }
 
     return {
       rocketLeagueId: detail.data.rocket_league_id ?? null,
@@ -218,15 +228,20 @@ export class BallchasingClient implements BallchasingSource {
       const response = await this.request("list", url);
       const page = schema.safeParse(await response.json());
 
-      if (!page.success)
+      if (!page.success) {
         throw new IntegrationError("Ballchasing returned an unexpected response. Try again later.");
+      }
+
       const { next } = page.data;
 
-      if (next === undefined || next === "") return page.data.list;
+      if (next === undefined || next === "") {
+        return page.data.list;
+      }
 
       // The key travels with every request, so never follow a link off the API host.
-      if (!next.startsWith(`${BALLCHASING_API_URL}/`))
+      if (!next.startsWith(`${BALLCHASING_API_URL}/`)) {
         throw new IntegrationError("Ballchasing returned an unexpected response. Try again later.");
+      }
 
       return [...page.data.list, ...(await readFrom(next))];
     };
@@ -259,7 +274,10 @@ export class BallchasingClient implements BallchasingSource {
       return await this.request(endpoint, url, attempt + 1);
     }
 
-    if (response.ok) return response;
+    if (response.ok) {
+      return response;
+    }
+
     throw this.failure(response.status, url);
   }
 
@@ -268,24 +286,29 @@ export class BallchasingClient implements BallchasingSource {
     const slot = Math.max(now, this.nextSlot.get(endpoint) ?? 0);
     this.nextSlot.set(endpoint, slot + this.intervalsMs[endpoint]);
 
-    if (slot > now) await this.sleep(slot - now);
+    if (slot > now) {
+      await this.sleep(slot - now);
+    }
   }
 
   private failure(status: number, url: string): IntegrationError {
-    if (status === 401 || status === 403)
+    if (status === 401 || status === 403) {
       return new IntegrationError("Ballchasing rejected the API key. Check BALLCHASING_API_KEY.");
+    }
 
-    if (status === 404)
+    if (status === 404) {
       return new IntegrationError(
         url.includes("/groups/")
           ? "This Ballchasing group does not exist or is private. Check the link and its visibility."
           : "A Ballchasing replay is no longer available.",
       );
+    }
 
-    if (status === 429)
+    if (status === 429) {
       return new IntegrationError(
         "Ballchasing rate limit reached. Wait an hour or use a key with a higher patron tier, then run the import again.",
       );
+    }
 
     return new IntegrationError(`Ballchasing answered with status ${status}. Try again later.`);
   }

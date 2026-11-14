@@ -13,20 +13,30 @@ export function playerGroupKey(playerIds: readonly string[]): string {
 
 export function assertLineupFitsFormat(format: TournamentFormat, lineup: ParticipantLineup): void {
   switch (format) {
-    case "1v1":
-      if (lineup.teamIds.length)
+    case "1v1": {
+      if (lineup.teamIds.length) {
         throw new InvalidInputError(
           "A 1v1 tournament has players as participants, not teams. Pass them in playerParticipants.",
         );
+      }
+
       break;
-    case "2v2":
+    }
+
+    case "2v2": {
       break;
-    case "3v3":
-      if (lineup.playerGroups.length)
+    }
+
+    case "3v3": {
+      if (lineup.playerGroups.length) {
         throw new InvalidInputError(
           "A 3v3 tournament has teams as participants. Pass them in teamIds, or change the format to 1v1 or 2v2.",
         );
+      }
+
       break;
+    }
+
     default: {
       const exhaustive: never = format;
 
@@ -36,12 +46,15 @@ export function assertLineupFitsFormat(format: TournamentFormat, lineup: Partici
 
   const size = TEAM_SIZE_BY_FORMAT[format];
 
-  if (lineup.playerGroups.some((group) => new Set(group).size !== size))
+  if (lineup.playerGroups.some((group) => new Set(group).size !== size)) {
     throw new InvalidInputError(
       `Each participant of a ${format} tournament without a team has exactly ${size} different player${size === 1 ? "" : "s"}.`,
     );
+  }
+
   const players = lineup.playerGroups.flat();
 
-  if (new Set(players).size !== players.length)
+  if (new Set(players).size !== players.length) {
     throw new InvalidInputError("A player can only be in one participant of a tournament.");
+  }
 }

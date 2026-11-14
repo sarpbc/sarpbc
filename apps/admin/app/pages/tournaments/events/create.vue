@@ -22,7 +22,9 @@ const breadcrumbItems = computed(() => [
 ]);
 
 async function handleSubmit() {
-  if (isSaving.value) return;
+  if (isSaving.value) {
+    return;
+  }
 
   if (!formState.value.name.trim()) {
     toast.add({ title: t("page.tournaments.events.form.nameRequired"), color: "error" });

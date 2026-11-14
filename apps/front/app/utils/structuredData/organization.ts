@@ -1,5 +1,6 @@
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
-import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
+import { compactJsonLd, SCHEMA_ORG } from "./json-ld";
+import type { JsonLdNode } from "./json-ld";
 
 export const ORGANIZATION_ID = `${SITE_ORIGIN}/#organization`;
 

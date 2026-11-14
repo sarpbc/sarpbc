@@ -1,5 +1,7 @@
-import { colorDistance, meanColor, scaleRegion, type Frame } from "./frame.ts";
-import { readText, type GlyphSettings } from "./glyph.ts";
+import { colorDistance, meanColor, scaleRegion } from "./frame.ts";
+import type { Frame } from "./frame.ts";
+import { readText } from "./glyph.ts";
+import type { GlyphSettings } from "./glyph.ts";
 import type { Anchor, GlyphTemplate, Overlay, Region } from "./overlay.ts";
 
 export type ScoreboardReading =
@@ -14,8 +16,8 @@ export type ScoreboardReading =
       confidence: number;
     };
 
-const SCORE_TEXT = /^\d{1,2}$/;
-const CLOCK_TEXT = /^(?<overtime>\+?)(?<minutes>\d{1,2}):(?<seconds>\d{2})$/;
+const SCORE_TEXT = /^\d{1,2}$/u;
+const CLOCK_TEXT = /^(?<overtime>\+?)(?<minutes>\d{1,2}):(?<seconds>\d{2})$/u;
 const DIGITS = new Set("0123456789");
 const CLOCK_CHARS = new Set("0123456789:+");
 
@@ -41,7 +43,9 @@ export function readScoreboard(frame: Frame, overlay: Overlay): ScoreboardReadin
     overlay.visibleWhen.every((anchor) => matches(frame, overlay, anchor)) &&
     !overlay.ignoreWhen.some((anchor) => matches(frame, overlay, anchor));
 
-  if (!visible) return { kind: "hidden" };
+  if (!visible) {
+    return { kind: "hidden" };
+  }
 
   const digits = overlay.templates.filter((template) => DIGITS.has(template.char));
   const clockGlyphs = overlay.templates.filter((template) => CLOCK_CHARS.has(template.char));
@@ -49,7 +53,9 @@ export function readScoreboard(frame: Frame, overlay: Overlay): ScoreboardReadin
   const orange = readRegion(frame, overlay, overlay.regions.orange, digits);
   const clock = readRegion(frame, overlay, overlay.regions.clock, clockGlyphs);
 
-  if (blue === null || orange === null || clock === null) return { kind: "unreadable" };
+  if (blue === null || orange === null || clock === null) {
+    return { kind: "unreadable" };
+  }
 
   const clockParts = CLOCK_TEXT.exec(clock.text);
 
@@ -60,7 +66,9 @@ export function readScoreboard(frame: Frame, overlay: Overlay): ScoreboardReadin
   const seconds = Number(clockParts.groups?.seconds);
   const confidence = Math.min(blue.confidence, orange.confidence, clock.confidence);
 
-  if (seconds > 59 || confidence < overlay.text.minConfidence) return { kind: "unreadable" };
+  if (seconds > 59 || confidence < overlay.text.minConfidence) {
+    return { kind: "unreadable" };
+  }
 
   return {
     kind: "score",

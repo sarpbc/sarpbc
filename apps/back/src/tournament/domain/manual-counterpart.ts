@@ -26,16 +26,19 @@ export type CounterpartMatch =
 function nameKey(name: string): string {
   const tokens = name
     .normalize("NFKD")
-    .replaceAll(/[̀-ͯ]/g, "")
+    .replaceAll(/[̀-ͯ]/gu, "")
     .toLowerCase()
-    .split(/[^a-z0-9]+/)
+    .split(/[^a-z0-9]+/u)
     .filter(Boolean);
 
   return [...new Set(tokens)].toSorted().join(" ");
 }
 
 function overlaps(candidate: ManualCandidate, stage: ProviderStage): boolean {
-  if (!candidate.beginAt || !stage.beginAt) return false;
+  if (!candidate.beginAt || !stage.beginAt) {
+    return false;
+  }
+
   const candidateEnd = candidate.endAt ?? candidate.beginAt;
   const stageEnd = stage.endAt ?? stage.beginAt;
 
@@ -46,7 +49,10 @@ function overlaps(candidate: ManualCandidate, stage: ProviderStage): boolean {
 }
 
 export function counterpartSearchWindow(stage: ProviderStage): { from: Date; to: Date } | null {
-  if (!stage.beginAt) return null;
+  if (!stage.beginAt) {
+    return null;
+  }
+
   const end = stage.endAt ?? stage.beginAt;
 
   return {
@@ -61,7 +67,9 @@ export function findManualCounterpart(
 ): CounterpartMatch {
   const name = nameKey(`${stage.eventName} ${stage.stageName}`);
 
-  if (!name) return { kind: "none" };
+  if (!name) {
+    return { kind: "none" };
+  }
 
   const ids = candidates.flatMap((candidate) =>
     nameKey(candidate.name) === name &&
@@ -71,7 +79,9 @@ export function findManualCounterpart(
       : [],
   );
 
-  if (ids.length === 1) return { kind: "unique", id: ids[0] };
+  if (ids.length === 1) {
+    return { kind: "unique", id: ids[0] };
+  }
 
   return ids.length ? { kind: "ambiguous", ids } : { kind: "none" };
 }

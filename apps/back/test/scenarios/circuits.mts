@@ -565,8 +565,9 @@ export async function verifyCircuits({
     ),
   );
 
-  for (const [index, [, why]] of refusals.entries())
+  for (const [index, [, why]] of refusals.entries()) {
     assert.deepEqual(refusedResults[index], { error: true }, `create_circuit refuses ${why}`);
+  }
 
   const updated = await callTool(
     "update_circuit",

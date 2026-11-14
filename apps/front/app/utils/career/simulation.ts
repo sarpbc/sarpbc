@@ -20,7 +20,7 @@ export {
   qualifiesForWorlds,
   createRng,
   hashString,
-} from "~/utils/career/splitSimulation";
+} from "~/utils/career/split-simulation";
 
 export {
   type RankedRosterPlayer,
@@ -39,6 +39,6 @@ export {
   getTransferBand,
   pickOffseasonOffers,
   resolveOffseasonContracts,
-} from "~/utils/career/transferMarket";
+} from "~/utils/career/transfer-market";
 
 export { deriveTrophies } from "~/utils/career/trophies";

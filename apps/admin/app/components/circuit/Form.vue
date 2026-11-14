@@ -46,7 +46,9 @@ const isValid = computed(
 function submit() {
   const seasonValue = season.value;
 
-  if (!isValid.value || seasonValue === null) return;
+  if (!isValid.value || seasonValue === null) {
+    return;
+  }
 
   const input: CircuitInput = {
     name: name.value.trim(),
@@ -59,7 +61,10 @@ function submit() {
 
   const trimmedSlug = slug.value.trim();
 
-  if (trimmedSlug) input.slug = trimmedSlug;
+  if (trimmedSlug) {
+    input.slug = trimmedSlug;
+  }
+
   emit("submit", input);
 }
 </script>

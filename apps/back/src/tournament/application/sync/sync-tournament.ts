@@ -38,22 +38,31 @@ async function manualCounterpart(
 
   const window = counterpartSearchWindow(stage);
 
-  if (!window) return null;
+  if (!window) {
+    return null;
+  }
+
   const candidates = await scope.tournaments.manualCandidates(window);
   const match = findManualCounterpart(stage, candidates);
 
   switch (match.kind) {
-    case "none":
+    case "none": {
       return null;
-    case "unique":
+    }
+
+    case "unique": {
       return match.id;
-    case "ambiguous":
+    }
+
+    case "ambiguous": {
       diagnostics.warn("Several manual tournaments match a PandaScore stage; none linked", {
         pandascoreId: command.pandascoreId,
         tournamentIds: match.ids,
       });
 
       return null;
+    }
+
     default: {
       const neverMatch: never = match;
 
@@ -72,10 +81,15 @@ async function syncTarget(
   const synced = await scope.tournaments.byPandascoreId(command.pandascoreId);
 
   if (synced) {
-    if (linkTournamentId !== undefined && linkTournamentId !== "" && synced.id !== linkTournamentId)
+    if (
+      linkTournamentId !== undefined &&
+      linkTournamentId !== "" &&
+      synced.id !== linkTournamentId
+    ) {
       throw new ConflictError(
         `PandaScore tournament ${command.pandascoreId} is already imported as tournament ${synced.id}.`,
       );
+    }
 
     return synced;
   }
@@ -83,10 +97,16 @@ async function syncTarget(
   const manualId =
     linkTournamentId ?? (await manualCounterpart(scope, diagnostics, command, league));
 
-  if (manualId === null || manualId === "") return null;
+  if (manualId === null || manualId === "") {
+    return null;
+  }
+
   const manual = await scope.tournaments.load(manualId);
 
-  if (!manual) throw new NotFoundError(`Tournament with id "${manualId}" was not found.`);
+  if (!manual) {
+    throw new NotFoundError(`Tournament with id "${manualId}" was not found.`);
+  }
+
   claimForPandascore(manual, command.pandascoreId, command.endAt ?? null);
 
   return manual;
@@ -96,11 +116,17 @@ export async function settleEndAt(
   scope: CompetitionWriteScope,
   tournament: Tournament,
 ): Promise<void> {
-  if (tournament.endAt || tournament.endAtCorrected) return;
+  if (tournament.endAt || tournament.endAtCorrected) {
+    return;
+  }
+
   const timings = await scope.matches.timings(tournament.id);
   const endAt = inferEndAt(timings);
 
-  if (!endAt) return;
+  if (!endAt) {
+    return;
+  }
+
   tournament.endAt = endAt;
   await scope.tournaments.save(tournament);
 }
@@ -119,7 +145,9 @@ async function findExistingEvent(
 
   const unclaimedCurrent = current?.pandascoreSerieId === null ? current : null;
 
-  if (!serie) return unclaimedCurrent;
+  if (!serie) {
+    return unclaimedCurrent;
+  }
 
   return (
     (await events.bySerieId(serie.pandascoreId)) ??
@@ -173,7 +201,10 @@ function copyTournamentFields(
   tournament.tier = command.tier ?? null;
   tournament.beginAt = command.beginAt ?? null;
 
-  if (!tournament.endAtCorrected) tournament.endAt = command.endAt ?? null;
+  if (!tournament.endAtCorrected) {
+    tournament.endAt = command.endAt ?? null;
+  }
+
   tournament.prizepool = command.prizepool ?? null;
   tournament.type = command.type ?? null;
   tournament.country = command.country ?? null;
@@ -189,7 +220,10 @@ async function dropEmptyPreviousEvent(
 ): Promise<void> {
   const remaining = await events.stages(previousEventId);
 
-  if (remaining.length) return;
+  if (remaining.length) {
+    return;
+  }
+
   const previous = await events.load(previousEventId);
 
   if (previous && event.streams.length === 0 && previous.streams.length > 0) {
@@ -231,8 +265,10 @@ async function importExpectedRoster(
 
     const participantId = existingParticipant?.id ?? v4();
 
-    if (roster.team.pandascoreId !== undefined && roster.team.pandascoreId !== 0)
+    if (roster.team.pandascoreId !== undefined && roster.team.pandascoreId !== 0) {
       pandascoreTeams.set(participantId, roster.team.pandascoreId);
+    }
+
     await scope.tournaments.saveParticipant({
       id: participantId,
       tournamentId: tournament.id,
@@ -273,7 +309,9 @@ export async function applyTournament(
   const league = command.league ? await applyLeague(scope, command.league) : null;
   const existing = await syncTarget(scope, diagnostics, command, league, linkTournamentId);
 
-  if (existing) assertPandascoreUpsertAllowed(existing, command.pandascoreId);
+  if (existing) {
+    assertPandascoreUpsertAllowed(existing, command.pandascoreId);
+  }
 
   const tournament =
     existing ?? Object.assign(new Tournament(), { pandascoreId: command.pandascoreId });
@@ -282,12 +320,17 @@ export async function applyTournament(
   const previousEventId = existing?.event.id ?? null;
   const { event, renamed } = await resolveEvent(scope.events, previousEventId, command, league);
 
-  if (event.id === previousEventId) tournament.event = toEventRef(event);
-  else await placeStage(scope.events, tournament, event);
+  if (event.id === previousEventId) {
+    tournament.event = toEventRef(event);
+  } else {
+    await placeStage(scope.events, tournament, event);
+  }
+
   await scope.tournaments.save(tournament);
 
-  if (previousEventId !== null && previousEventId !== "" && previousEventId !== event.id)
+  if (previousEventId !== null && previousEventId !== "" && previousEventId !== event.id) {
     await dropEmptyPreviousEvent(scope.events, previousEventId, event);
+  }
 
   await importExpectedRoster(scope, tournament, command);
   await scope.tournaments.save(tournament);

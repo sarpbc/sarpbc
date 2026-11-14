@@ -45,9 +45,11 @@ export class MemoryGames implements GameStatsStore {
     this.saved.push(game);
     this.exclusions.delete(game.ballchasingId);
 
-    for (const link of game.learnedLinks)
-      if (!this.linked.some((known) => known.platformId === link.platformId))
+    for (const link of game.learnedLinks) {
+      if (!this.linked.some((known) => known.platformId === link.platformId)) {
         this.linked.push(link);
+      }
+    }
 
     return toTournamentGame(game);
   }
@@ -63,7 +65,10 @@ export class MemoryGames implements GameStatsStore {
   async remove(_tournamentId: string, { matchId, number }: { matchId: string; number: number }) {
     const game = this.saved.find((saved) => saved.matchId === matchId && saved.number === number);
 
-    if (!game) return null;
+    if (!game) {
+      return null;
+    }
+
     this.saved = this.saved.filter((saved) => saved !== game);
     this.exclusions.add(game.ballchasingId);
 

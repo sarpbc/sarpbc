@@ -3,7 +3,7 @@ import { present } from "../../../../test/doubles";
 import { CompetitionAfterCommit } from "../after-commit";
 import { CompetitionSyncService } from "./competition-sync.service";
 import { League } from "../../domain/league";
-import { Match } from "../../domain/match";
+import type { Match } from "../../domain/match";
 import { Tournament } from "../../domain/tournament";
 import { TournamentParticipant } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
@@ -63,7 +63,9 @@ function memoryStore() {
       async (id) => leagues.get(id) ?? null,
     ),
     saveLeague: vi.fn<TournamentWriter["saveLeague"]>(async (league) => {
-      if (league.pandascoreId !== null) leagues.set(league.pandascoreId, copy(League, league));
+      if (league.pandascoreId !== null) {
+        leagues.set(league.pandascoreId, copy(League, league));
+      }
     }),
   };
 
@@ -254,7 +256,7 @@ describe("Competition synchronization", () => {
       pandascoreId: 99,
     });
     await expect(service.upsertTournament({ pandascoreId: 99, name: "Provider" })).rejects.toThrow(
-      /source=manual/,
+      /source=manual/u,
     );
     expect(store.tournamentWriter.save).not.toHaveBeenCalled();
   });

@@ -9,7 +9,9 @@ function xorUint32(left: number, right: number): number {
   let result = 0;
 
   for (let bit = 1; bit < UINT32_MODULUS; bit *= 2) {
-    if (Math.floor(left / bit) % 2 !== Math.floor(right / bit) % 2) result += bit;
+    if (Math.floor(left / bit) % 2 !== Math.floor(right / bit) % 2) {
+      result += bit;
+    }
   }
 
   return result;

@@ -1,6 +1,6 @@
 import { localizedPath, uiLocale } from "@sarpbc/utils";
-import { markdownPathFromHtmlPath } from "~/utils/markdownPath";
-import { resolveSiteUrl } from "~/utils/siteUrl";
+import { markdownPathFromHtmlPath } from "~/utils/markdown-path";
+import { resolveSiteUrl } from "~/utils/site-url";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
 const DEFAULT_TITLE = "Rocket League news & data | sarpbc.org";
@@ -84,7 +84,7 @@ export const useSarpbcSeo = () => {
     const twitterCard = opts?.twitterCard ?? "summary_large_image";
 
     useHead(() => {
-      const cleanPath = route.path.replace(/^\/fr(?=\/|$)/, "") || "/";
+      const cleanPath = route.path.replace(/^\/fr(?=\/|$)/u, "") || "/";
 
       const alternateLinks = locales.value.map((loc) => ({
         rel: "alternate" as const,

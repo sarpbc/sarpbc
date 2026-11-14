@@ -15,20 +15,27 @@ const isDeleting = ref(false);
 const shown = shallowRef<T | null>(target.value);
 
 watch(target, (item) => {
-  if (item !== null) shown.value = item;
+  if (item !== null) {
+    shown.value = item;
+  }
 });
 
 const open = computed({
   get: () => target.value !== null,
   set: (value) => {
-    if (!value) target.value = null;
+    if (!value) {
+      target.value = null;
+    }
   },
 });
 
 async function confirm() {
   const item = target.value;
 
-  if (item === null) return;
+  if (item === null) {
+    return;
+  }
+
   isDeleting.value = true;
 
   try {

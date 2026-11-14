@@ -5,7 +5,8 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { ImagesService } from "../../application/images.service";
-import { SaveImageDto, type SaveImageInput } from "./dto/save-image.dto";
+import { SaveImageDto } from "./dto/save-image.dto";
+import type { SaveImageInput } from "./dto/save-image.dto";
 
 @UseGuards(AuthGuard, PermissionGuard)
 @RequirePermissions("images.manage")

@@ -57,8 +57,10 @@ export class PlayerComparisonService {
   async compare(slugA: string, slugB: string): Promise<Comparison> {
     const [playerA, playerB] = await Promise.all([this.player(slugA), this.player(slugB)]);
 
-    if (playerA.id === playerB.id)
+    if (playerA.id === playerB.id) {
       throw new InvalidInputError("Choose two different players to compare.");
+    }
+
     const [a, b] = await Promise.all([this.career(playerA), this.career(playerB)]);
 
     return { a: a.career, b: b.career, headToHead: headToHead(a.matches, playerA.id, playerB.id) };
@@ -67,7 +69,9 @@ export class PlayerComparisonService {
   private async player(slug: string): Promise<Player> {
     const player = await this.sources.players.findBySlug(slug);
 
-    if (!player) throw new NotFoundError(`Player with slug "${slug}" not found`);
+    if (!player) {
+      throw new NotFoundError(`Player with slug "${slug}" not found`);
+    }
 
     return player;
   }
