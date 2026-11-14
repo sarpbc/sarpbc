@@ -208,6 +208,6 @@ describe("on this day (e2e)", () => {
     const today = await http().get("/on-this-day");
 
     expect(today.status).toBe(200);
-    expect(z.object({ date: z.string() }).parse(today.body).date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(z.object({ date: z.string() }).parse(today.body).date).toMatch(/^\d{4}-\d{2}-\d{2}$/u);
   });
 });

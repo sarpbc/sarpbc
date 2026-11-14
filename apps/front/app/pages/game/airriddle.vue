@@ -259,7 +259,7 @@ function onPhysicalKeydown(event: KeyboardEvent) {
     return;
   }
 
-  if (event.key.length === 1 && /^[a-zA-Z0-9 ]$/.test(event.key)) {
+  if (event.key.length === 1 && /^[a-zA-Z0-9 ]$/u.test(event.key)) {
     event.preventDefault();
     appendToGuess(event.key);
     error.value = undefined;

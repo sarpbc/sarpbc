@@ -9,8 +9,8 @@ const { captionAlign = "center", class: className = null } = defineProps<{
 }>();
 
 defineSlots<{
-  caption?(): VNode[];
-  default(): VNode[];
+  caption?: () => VNode[];
+  default: () => VNode[];
 }>();
 </script>
 

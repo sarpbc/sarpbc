@@ -45,8 +45,8 @@ void describe("readPpmFrames", () => {
   });
 
   void it("rejects truncated and foreign streams", async () => {
-    await assert.rejects(collect(chunked(ppm(4, 3, 0).subarray(0, 30), 8)), /Truncated/);
-    await assert.rejects(collect(chunked(new Uint8Array(80), 16)), /Invalid PPM header/);
+    await assert.rejects(collect(chunked(ppm(4, 3, 0).subarray(0, 30), 8)), /Truncated/u);
+    await assert.rejects(collect(chunked(new Uint8Array(80), 16)), /Invalid PPM header/u);
   });
 });
 

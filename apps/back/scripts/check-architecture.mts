@@ -27,7 +27,7 @@ const layer = (file: string, root: string): string =>
     .split("/")
     .find((part) => ["domain", "application", "infrastructure"].includes(part)) ?? "";
 
-const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|node:crypto)(?:$|\/)/;
+const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|node:crypto)(?:$|\/)/u;
 
 function importsOf(source: ts.SourceFile): string[] {
   const imports: string[] = [];
@@ -63,7 +63,7 @@ function importsOf(source: ts.SourceFile): string[] {
   return imports;
 }
 
-const persistenceFacade = /^[^/]+\/infrastructure\/[^/]+-persistence\.ts$/;
+const persistenceFacade = /^[^/]+\/infrastructure\/[^/]+-persistence\.ts$/u;
 
 const isInner = (file: string, root: string): boolean =>
   ["domain", "application"].includes(layer(file, root));
@@ -253,7 +253,7 @@ function crossFeatureViolations(site: ImportSite, root: string): string[] {
   const target = normalized(resolved, root);
   const [feature] = origin.split("/");
   const [targetFeature] = target.split("/");
-  const composes = /(?:\.module|composition)\.ts$/.test(origin) || !origin.includes("/");
+  const composes = /(?:\.module|composition)\.ts$/u.test(origin) || !origin.includes("/");
   const sharedTarget = targetFeature === "common";
 
   if (feature === "common" && !sharedTarget && targetFeature !== "infrastructure") {
@@ -266,7 +266,7 @@ function crossFeatureViolations(site: ImportSite, root: string): string[] {
     !sharedTarget &&
     !persistenceFacade.test(target) &&
     (target.includes("/infrastructure/persistence/") ||
-      (target.includes("/infrastructure/") && /(?:repository|\.persistence)\.ts$/.test(target)))
+      (target.includes("/infrastructure/") && /(?:repository|\.persistence)\.ts$/u.test(target)))
   ) {
     violations.push(`${origin}: imports private persistence of ${targetFeature}: ${target}`);
   }

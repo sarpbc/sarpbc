@@ -16,8 +16,8 @@ export type ScoreboardReading =
       confidence: number;
     };
 
-const SCORE_TEXT = /^\d{1,2}$/;
-const CLOCK_TEXT = /^(?<overtime>\+?)(?<minutes>\d{1,2}):(?<seconds>\d{2})$/;
+const SCORE_TEXT = /^\d{1,2}$/u;
+const CLOCK_TEXT = /^(?<overtime>\+?)(?<minutes>\d{1,2}):(?<seconds>\d{2})$/u;
 const DIGITS = new Set("0123456789");
 const CLOCK_CHARS = new Set("0123456789:+");
 

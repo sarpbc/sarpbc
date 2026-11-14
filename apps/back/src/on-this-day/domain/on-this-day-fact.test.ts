@@ -35,7 +35,7 @@ describe(parseOnThisDayFact, () => {
     "https://blast.tv/rl/tournaments",
     "https://www.blast.tv/news",
   ])("refuses %s as a source", (sourceUrl) => {
-    expect(() => parseOnThisDayFact({ ...input, sourceUrl })).toThrow(/not accepted sources/);
+    expect(() => parseOnThisDayFact({ ...input, sourceUrl })).toThrow(/not accepted sources/u);
   });
 
   it.each([

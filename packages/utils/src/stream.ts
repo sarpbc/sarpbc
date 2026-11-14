@@ -35,7 +35,7 @@ function channelOf(url: URL, platform: StreamPlatform): string | null {
     }
 
     case "other": {
-      return url.hostname.replace(/^www\./, "");
+      return url.hostname.replace(/^www\./u, "");
     }
 
     default: {

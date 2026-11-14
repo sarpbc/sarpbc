@@ -228,7 +228,7 @@ describe(SeasonArchiveService, () => {
     });
 
     it("omits staff-only fields", () => {
-      expect(JSON.stringify(archive)).not.toMatch(/startgg|Community Open|participant-|"source"/);
+      expect(JSON.stringify(archive)).not.toMatch(/startgg|Community Open|participant-|"source"/u);
     });
 
     it("lists the season with its winner", async () => {

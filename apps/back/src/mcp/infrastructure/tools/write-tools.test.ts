@@ -98,7 +98,7 @@ describe("set_match_game_vods", () => {
     const { matchService, run } = setup("admin");
     const result = await run({ matchId: "m1", game: 5, links });
     expect(matchService.setGameVods).toHaveBeenCalledWith("m1", 5, links);
-    const matchUrl: unknown = expect.stringMatching(/^https:\/\/sarpbc\.test\/matches\/12\//);
+    const matchUrl: unknown = expect.stringMatching(/^https:\/\/sarpbc\.test\/matches\/12\//u);
 
     expect(jsonOf(result)).toStrictEqual({
       id: "m1",

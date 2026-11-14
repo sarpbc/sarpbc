@@ -4,7 +4,7 @@ export const ON_THIS_DAY_SOURCE_URL_MAX_LENGTH = 2048;
 export const ON_THIS_DAY_MIN_YEAR = 2008;
 
 const DAYS_IN_MONTH = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31] as const;
-const ISO_DAY = /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})$/;
+const ISO_DAY = /^(?<year>\d{4})-(?<month>\d{2})-(?<day>\d{2})$/u;
 
 export interface CalendarDay {
   year: number;

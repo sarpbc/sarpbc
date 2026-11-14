@@ -7,7 +7,7 @@ export interface TweetImage {
 }
 
 export interface TweetImageGateway {
-  load(url: string): Promise<TweetImage>;
+  load: (url: string) => Promise<TweetImage>;
 }
 
 export class TweetImageService {

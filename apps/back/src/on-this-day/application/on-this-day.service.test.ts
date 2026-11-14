@@ -97,7 +97,7 @@ describe(OnThisDayService, () => {
         team: kc,
       },
     ]);
-    expect(JSON.stringify(events)).not.toMatch(/"id":/);
+    expect(JSON.stringify(events)).not.toMatch(/"id":/u);
   });
 
   it("drops start.gg titles, finals and facts linked to start.gg from the public payload", async () => {

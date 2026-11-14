@@ -94,10 +94,10 @@ export type CompetitionIncident = { id: number; modifiedAt: Date } & (
 );
 
 export interface CompetitionFeed {
-  listIncidents(params: { since: Date }): Promise<CompetitionIncident[]>;
-  getTournaments(): Promise<UpsertTournamentCommand[]>;
-  getTournamentById(id: number): Promise<UpsertTournamentCommand | null>;
-  getTournamentBrackets(id: number): Promise<UpsertMatchCommand[]>;
-  getTournamentMatches(id: number): Promise<UpsertMatchCommand[]>;
-  getTournamentStandings(id: number): Promise<TournamentStandingCommand[] | null>;
+  listIncidents: (params: { since: Date }) => Promise<CompetitionIncident[]>;
+  getTournaments: () => Promise<UpsertTournamentCommand[]>;
+  getTournamentById: (id: number) => Promise<UpsertTournamentCommand | null>;
+  getTournamentBrackets: (id: number) => Promise<UpsertMatchCommand[]>;
+  getTournamentMatches: (id: number) => Promise<UpsertMatchCommand[]>;
+  getTournamentStandings: (id: number) => Promise<TournamentStandingCommand[] | null>;
 }

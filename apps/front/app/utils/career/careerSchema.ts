@@ -236,7 +236,7 @@ export function encodeCareerResultForShare(result: CareerResult): string {
   return btoa(encodeURIComponent(JSON.stringify(result)))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
-    .replace(/[=]+$/, "");
+    .replace(/[=]+$/u, "");
 }
 
 export function decodeCareerResultFromShare(encoded: string): CareerResult | null {

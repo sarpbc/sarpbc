@@ -162,7 +162,9 @@ function collectRoutes(sources: SourceText[]): Route[] {
           }
 
           assert.ok(
-            input.args.some((argument) => new RegExp(`\\bschema:\\s*${dto}\\b`).test(argument)),
+            input.args.some((argument) =>
+              new RegExp(`\\bschema:\\s*${dto}\\b`, "u").test(argument),
+            ),
             `${file}: ${method.name.getText(source)} must attach the ${dto} schema to @${input.name}`,
           );
         }

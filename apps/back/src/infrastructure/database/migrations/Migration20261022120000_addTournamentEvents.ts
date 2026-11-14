@@ -33,7 +33,7 @@ function eventDisplayName(input: {
   const stage = input.stageName.trim();
 
   if (serie !== undefined) {
-    if (/^\d{4}$/.test(serie)) {
+    if (/^\d{4}$/u.test(serie)) {
       if (league !== undefined) {
         return `${league} ${serie}`;
       }

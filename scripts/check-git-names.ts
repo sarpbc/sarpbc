@@ -3,11 +3,11 @@ import { readFileSync } from "node:fs";
 import { z } from "zod";
 
 const types = "feat|fix|perf|refactor|docs|style|test|build|ci|chore|revert";
-const branchPattern = new RegExp(`^(${types})/[a-z0-9]+(?:-[a-z0-9]+)*$`);
-const subjectPattern = new RegExp(`^(${types})(\\([a-z0-9][a-z0-9/-]*\\))?!?: \\S.*$`);
+const branchPattern = new RegExp(`^(${types})/[a-z0-9]+(?:-[a-z0-9]+)*$`, "u");
+const subjectPattern = new RegExp(`^(${types})(\\([a-z0-9][a-z0-9/-]*\\))?!?: \\S.*$`, "u");
 
 const agentTrailerPattern =
-  /^(?:co-authored-by:.*\b(?:claude|codex|cursor|anthropic|openai)\b.*|(?:claude|codex|cursor)-session:.*)$/im;
+  /^(?:co-authored-by:.*\b(?:claude|codex|cursor|anthropic|openai)\b.*|(?:claude|codex|cursor)-session:.*)$/imu;
 
 const pullRequestEvent = z.object({
   pull_request: z.object({
@@ -57,20 +57,20 @@ try {
 
     case "commit-msg": {
       const message = readFileSync(process.argv[3], "utf-8");
-      checkSubject(message.split(/\r?\n/, 1)[0], "commit subject");
+      checkSubject(message.split(/\r?\n/u, 1)[0], "commit subject");
       checkTrailers(message, "commit message");
       break;
     }
 
     case "pre-push": {
-      for (const line of readFileSync(0, "utf-8").trim().split(/\r?\n/)) {
+      for (const line of readFileSync(0, "utf-8").trim().split(/\r?\n/u)) {
         if (!line) {
           continue;
         }
 
-        const [, localSha, remoteRef] = line.split(/\s+/);
+        const [, localSha, remoteRef] = line.split(/\s+/u);
 
-        if (/^0+$/.test(localSha) || !remoteRef.startsWith("refs/heads/")) {
+        if (/^0+$/u.test(localSha) || !remoteRef.startsWith("refs/heads/")) {
           continue;
         }
 

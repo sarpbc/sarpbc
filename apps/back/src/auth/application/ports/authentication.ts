@@ -15,8 +15,8 @@ export type AuthTokenType = "access" | "refresh";
 export type OAuthReturnTo = "front" | "admin";
 
 export interface SessionTokens {
-  sign(user: AuthenticatedUser): Promise<AuthTokenPair>;
-  verify(token: string, type: AuthTokenType): Promise<AuthenticatedUser | null>;
+  sign: (user: AuthenticatedUser) => Promise<AuthTokenPair>;
+  verify: (token: string, type: AuthTokenType) => Promise<AuthenticatedUser | null>;
 }
 
 export interface GoogleProfile {
@@ -27,8 +27,8 @@ export interface GoogleProfile {
 }
 
 export interface GoogleIdentity {
-  profile(code: string): Promise<GoogleProfile>;
-  authorizationUrl(returnTo: OAuthReturnTo): string;
+  profile: (code: string) => Promise<GoogleProfile>;
+  authorizationUrl: (returnTo: OAuthReturnTo) => string;
 }
 
 export interface AuthDestinations {

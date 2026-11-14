@@ -46,7 +46,7 @@ export const CreateSeasonAwardDto = z.strictObject({
     .string()
     .trim()
     .max(SEASON_AWARD_SOURCE_URL_MAX_LENGTH)
-    .pipe(z.url().regex(/^https?:\/\//, "Use an http(s) URL")),
+    .pipe(z.url().regex(/^https?:\/\//u, "Use an http(s) URL")),
 });
 
 export type CreateSeasonAwardInput = z.infer<typeof CreateSeasonAwardDto>;

@@ -23,7 +23,7 @@ const tournamentWriteFields = {
         z
           .string()
           .max(255)
-          .pipe(z.url({ protocol: /^(?:https?|ftp)$/ })),
+          .pipe(z.url({ protocol: /^(?:https?|ftp)$/u })),
         z.literal(""),
       ]),
     )

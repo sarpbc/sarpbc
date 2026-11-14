@@ -98,7 +98,7 @@ function statusLabel(status: CircuitEventStatus): string | null {
 }
 
 function sourceLabel(url: string): string {
-  return url.replace(/^https?:\/\//, "");
+  return url.replace(/^https?:\/\//u, "");
 }
 
 watch(

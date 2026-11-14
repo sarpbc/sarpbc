@@ -77,7 +77,7 @@ export function assertAwardSourceUrl(value: string): void {
     );
   }
 
-  if (!URL.canParse(value) || !/^https?:$/.test(new URL(value).protocol)) {
+  if (!URL.canParse(value) || !/^https?:$/u.test(new URL(value).protocol)) {
     throw new InvalidInputError("The award source must be an http(s) URL.");
   }
 

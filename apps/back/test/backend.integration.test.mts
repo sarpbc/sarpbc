@@ -195,7 +195,7 @@ const rpcMessage = z.object({
 const portBindings = z.record(z.string(), z.array(z.object({ HostPort: z.string() })).nullable());
 
 function composeImage(name: string): string {
-  const image = new RegExp(`image: (${name}:\\S+)`).exec(compose)?.[1];
+  const image = new RegExp(`image: (${name}:\\S+)`, "u").exec(compose)?.[1];
 
   if (image === undefined) {
     throw new Error(`docker-compose.local.yml has no ${name} image`);
@@ -215,7 +215,7 @@ function cookies(response: JsonResponse): string {
   const values = response.headers["set-cookie"];
   assert.ok(Array.isArray(values) && values.length >= 2, "access and refresh cookies are returned");
   assert.ok(
-    values.every((value) => /HttpOnly/i.test(value)),
+    values.every((value) => /HttpOnly/iu.test(value)),
     "authentication cookies are HttpOnly",
   );
 
@@ -820,7 +820,7 @@ describe("backend integration", () => {
           const response34 = await request("GET", `/tournaments/${tournament.id}`);
           const second = response34.json(z.unknown());
           assert.deepEqual(firstBody, second);
-          assert.match(first.tournament.matches[0].beginAt, /^\d{4}-\d{2}-\d{2}T/);
+          assert.match(first.tournament.matches[0].beginAt, /^\d{4}-\d{2}-\d{2}T/u);
           assert.equal(
             first.tournament.participants[0].team.id,
             tournament.participants[0].team.id,
@@ -860,7 +860,7 @@ describe("backend integration", () => {
               `select indexdef from pg_indexes where indexname = 'tournament_participant_team_id_index'`,
             );
 
-          assert.match(index.indexdef, /team_id/);
+          assert.match(index.indexdef, /team_id/u);
 
           const keys = [
             `team:${team.id}:1`,

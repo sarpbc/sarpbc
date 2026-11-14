@@ -24,9 +24,9 @@ interface R2Connection {
 }
 
 export interface ObjectOperationLogger {
-  set(fields: { stored: boolean }): void;
-  error(error: Error): void;
-  emit(): void;
+  set: (fields: { stored: boolean }) => void;
+  error: (error: Error) => void;
+  emit: () => void;
 }
 
 export type ObjectOperationLoggerFactory = (
@@ -53,7 +53,7 @@ export class R2Service implements ObjectStorage {
     const accountId = this.configService.get<string>("r2_account_id");
 
     const endpoint =
-      this.configService.get<string>("r2_endpoint")?.replace(/\/$/, "") ??
+      this.configService.get<string>("r2_endpoint")?.replace(/\/$/u, "") ??
       (accountId !== undefined && accountId !== ""
         ? `https://${accountId}.r2.cloudflarestorage.com`
         : undefined);
@@ -83,7 +83,7 @@ export class R2Service implements ObjectStorage {
         endpoint,
         credentials: { accessKeyId, secretAccessKey },
       }),
-      publicUrl: (key) => `${publicBaseUrl.replace(/\/$/, "")}/${key}`,
+      publicUrl: (key) => `${publicBaseUrl.replace(/\/$/u, "")}/${key}`,
     };
 
     return this.connection;

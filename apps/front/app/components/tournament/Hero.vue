@@ -38,8 +38,8 @@ const {
 }>();
 
 defineSlots<{
-  kicker?(): VNode[];
-  default?(): VNode[];
+  kicker?: () => VNode[];
+  default?: () => VNode[];
 }>();
 
 const { t, locale, te } = useI18n();

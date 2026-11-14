@@ -21,7 +21,7 @@ export type ParsedViewership =
   | { ok: false; error: ViewershipError };
 
 export function isForbiddenViewershipSource(hostname: string): boolean {
-  const host = hostname.toLowerCase().replace(/\.$/, "");
+  const host = hostname.toLowerCase().replace(/\.$/u, "");
 
   return isForbiddenSourceHost(host) || host === "start.gg" || host.endsWith(".start.gg");
 }

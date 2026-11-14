@@ -65,7 +65,7 @@ describe(HealthController, () => {
     shutdownState.isShuttingDown.mockReturnValue(true);
 
     await expect(controller.ready()).rejects.toThrow(ServiceUnavailableException);
-    await expect(controller.ready()).rejects.toThrow(/Shutting down/);
+    await expect(controller.ready()).rejects.toThrow(/Shutting down/u);
     expect(health.check).not.toHaveBeenCalled();
   });
 });

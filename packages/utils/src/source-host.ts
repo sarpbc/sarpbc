@@ -1,5 +1,5 @@
 function normalizedHost(hostname: string): string {
-  return hostname.toLowerCase().replace(/\.$/, "");
+  return hostname.toLowerCase().replace(/\.$/u, "");
 }
 
 /** Matches Liquipedia mirrors too, which republish its pages under other domains. */

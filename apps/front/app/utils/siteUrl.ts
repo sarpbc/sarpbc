@@ -8,7 +8,7 @@ export function resolveSiteUrl(value: string | undefined | null): string | undef
     return undefined;
   }
 
-  if (/^https?:\/\//i.test(trimmed)) {
+  if (/^https?:\/\//iu.test(trimmed)) {
     return trimmed;
   }
 

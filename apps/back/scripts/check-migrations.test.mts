@@ -75,9 +75,9 @@ void test("reports migrations sharing a timestamp, including ones without a name
     repo.add("Migration20260102000000_other.ts");
     const violations = migrationViolations(repo.directory);
     assert.equal(violations.length, 1);
-    assert.match(violations[0], /^Duplicate migration timestamp 20260101000000: /);
-    assert.match(violations[0], /Migration20260101000000\.ts/);
-    assert.match(violations[0], /Migration20260101000000_addThing\.ts/);
+    assert.match(violations[0], /^Duplicate migration timestamp 20260101000000: /u);
+    assert.match(violations[0], /Migration20260101000000\.ts/u);
+    assert.match(violations[0], /Migration20260101000000_addThing\.ts/u);
   } finally {
     repo.remove();
   }
@@ -92,12 +92,12 @@ void test("reports added migrations that are not newer than the newest migration
     repo.add("Migration20260301000000_newer.ts");
     const violations = migrationViolations(repo.directory, "base");
     assert.equal(violations.length, 3);
-    assert.match(violations[0], /^Duplicate migration timestamp 20260201000000: /);
+    assert.match(violations[0], /^Duplicate migration timestamp 20260201000000: /u);
     assert.match(
       violations[1],
-      /^Migration Migration20260115000000_older\.ts is not newer than 20260201000000, the newest migration on base\./,
+      /^Migration Migration20260115000000_older\.ts is not newer than 20260201000000, the newest migration on base\./u,
     );
-    assert.match(violations[2], /^Migration Migration20260201000000_same\.ts is not newer/);
+    assert.match(violations[2], /^Migration Migration20260201000000_same\.ts is not newer/u);
   } finally {
     repo.remove();
   }
@@ -115,7 +115,7 @@ void test("reports files that are neither migrations nor snapshots", () => {
     assert.equal(violations.length, 4);
 
     for (const violation of violations) {
-      assert.match(violation, /^Unexpected file /);
+      assert.match(violation, /^Unexpected file /u);
     }
   } finally {
     repo.remove();

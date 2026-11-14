@@ -463,7 +463,7 @@ describe("StatsImportService.run", () => {
 
     await service.run(id);
 
-    expect(imports.rows.get(id)?.error).toMatch(/unexpectedly/);
+    expect(imports.rows.get(id)?.error).toMatch(/unexpectedly/u);
     expect(reportFailure).toHaveBeenCalledOnce();
   });
 
