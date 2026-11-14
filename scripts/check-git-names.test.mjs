@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
 const script = fileURLToPath(new URL("./check-git-names.mjs", import.meta.url));
+
 const types = [
   "feat",
   "fix",
@@ -24,6 +25,7 @@ const types = [
 function fixture(t) {
   const directory = mkdtempSync(join(tmpdir(), "sarpbc-git-names-"));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
+
   return directory;
 }
 
@@ -61,6 +63,7 @@ test("branches reject agent prefixes and malformed names", () => {
 
 test("commit messages accept scopes, breaking changes and multiline bodies", (t) => {
   const message = join(fixture(t), "commit message.txt");
+
   for (const subject of [
     ...types.map((type) => `${type}: update player search`),
     "fix(back): réparer la synchronisation",
@@ -74,6 +77,7 @@ test("commit messages accept scopes, breaking changes and multiline bodies", (t)
 
 test("commit messages reject agent prefixes and malformed subjects", (t) => {
   const message = join(fixture(t), "COMMIT_EDITMSG");
+
   for (const subject of [
     "codex: update search",
     "cursor: update search",
@@ -95,6 +99,7 @@ test("commit messages reject agent prefixes and malformed subjects", (t) => {
 
 test("commit messages reject agent co-authors and keep human ones", (t) => {
   const message = join(fixture(t), "COMMIT_EDITMSG");
+
   for (const trailer of [
     "Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>",
     "Co-authored-by: Cursor Agent <cursoragent@cursor.com>",
@@ -104,6 +109,7 @@ test("commit messages reject agent co-authors and keep human ones", (t) => {
     writeFileSync(message, `fix: repair search\r\n\r\nDetails.\r\n\r\n${trailer}\r\n`);
     expectStatus(run(["commit-msg", message]), 1);
   }
+
   writeFileSync(
     message,
     "fix(back): repair redis cursor\n\nCo-authored-by: Jane Doe <jane@example.com>\n",
@@ -133,6 +139,7 @@ test("pushes check destination branches, including refspecs and multiple refs", 
 
 test("PR checks inspect real commits and exclude existing history", (t) => {
   const directory = fixture(t);
+
   const git = (...args) =>
     execFileSync(
       "git",
@@ -147,6 +154,7 @@ test("PR checks inspect real commits and exclude existing history", (t) => {
       ],
       { cwd: directory, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] },
     ).trim();
+
   git("init", "-b", "main");
   git("commit", "--allow-empty", "-m", "Historical nonconforming subject");
   const base = git("rev-parse", "HEAD");
@@ -154,15 +162,19 @@ test("PR checks inspect real commits and exclude existing history", (t) => {
   expectStatus(run(["branch"], { cwd: directory }), 0);
   git("commit", "--allow-empty", "-m", "feat(front): add player search");
   const eventPath = join(directory, "event.json");
+
   const pr = {
     title: "feat(front): add player search",
     base: { sha: base },
     head: { ref: "feat/search", sha: git("rev-parse", "HEAD") },
   };
+
   const checkPr = () => {
     writeFileSync(eventPath, JSON.stringify({ pull_request: pr }));
+
     return run(["pr"], { cwd: directory, env: { ...process.env, GITHUB_EVENT_PATH: eventPath } });
   };
+
   expectStatus(checkPr(), 0);
   pr.title = "Add player search";
   expectStatus(checkPr(), 1);

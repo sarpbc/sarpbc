@@ -47,6 +47,7 @@ describe("PlayerComparisonService", () => {
 
   it("rejects two slugs that resolve to the same merged player", async () => {
     const { sources } = careerSources();
+
     const merged = {
       ...sources,
       players: { findBySlug: async () => zen },

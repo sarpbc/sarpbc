@@ -13,6 +13,7 @@ export class PatAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest<FastifyRequest>();
 
     const authHeader = request.headers.authorization;
+
     if (!authHeader || !BEARER_PREFIX.test(authHeader)) {
       throw new AuthenticationError(
         "Missing API token. Send it as an Authorization: Bearer header.",
@@ -21,6 +22,7 @@ export class PatAuthGuard implements CanActivate {
 
     const rawToken = authHeader.replace(BEARER_PREFIX, "");
     const user = await this.patService.resolveUser(rawToken);
+
     if (!user) {
       throw new AuthenticationError(
         "Invalid or revoked API token. Create a new one in the admin app.",
@@ -28,6 +30,7 @@ export class PatAuthGuard implements CanActivate {
     }
 
     request.user = user;
+
     return true;
   }
 }

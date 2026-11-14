@@ -23,8 +23,10 @@ async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promis
   switch (owner.kind) {
     case "event": {
       const event = await scope.events.load(owner.id);
+
       if (!event) throw new NotFoundError(`Event with id "${owner.id}" was not found.`);
       const stages = await scope.events.stages(event.id);
+
       return {
         viewership: event.viewership,
         redistributable:
@@ -35,9 +37,12 @@ async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promis
         },
       };
     }
+
     case "match": {
       const match = await scope.matches.load(owner.id);
+
       if (!match) throw new NotFoundError("Match not found");
+
       return {
         viewership: match.viewership,
         redistributable:
@@ -48,8 +53,10 @@ async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promis
         },
       };
     }
+
     default: {
       const exhaustive: never = owner.kind;
+
       return exhaustive;
     }
   }
@@ -66,8 +73,10 @@ export class ViewershipService {
 
   async set(owner: ViewershipOwner, input: Viewership | null): Promise<ViewershipResponse> {
     const viewership = input && requireViewership(input);
+
     return this.transaction.run(async (scope) => {
       await (await loadOwner(scope, owner)).save(viewership);
+
       return { viewership };
     });
   }

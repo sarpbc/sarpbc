@@ -29,6 +29,7 @@ const upcomingTitle = computed(() => {
       return t("components.match.upcomingMatches");
     default: {
       const _exhaustive: never = kind;
+
       return _exhaustive;
     }
   }

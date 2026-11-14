@@ -14,9 +14,11 @@ const { transfers, pending, error, refresh } = useLatestTransfers(
 );
 
 const headingId = computed(() => (team ? "team-transfers-title" : "latest-transfers-title"));
+
 const visible = computed(
   () => !team || pending.value || Boolean(error.value) || transfers.value.length > 0,
 );
+
 const allTransfersPath = computed(() => ({
   path: localePath("/transfers"),
   query: team ? { team } : {},

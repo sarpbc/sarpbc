@@ -12,5 +12,6 @@ export const WORLDWIDE_CIRCUIT_REGION = "Worldwide";
 
 export function isWorldwideCircuitRegion(region: string | null | undefined): boolean {
   const trimmed = region?.trim().toLowerCase() ?? "";
+
   return trimmed === "" || trimmed === WORLDWIDE_CIRCUIT_REGION.toLowerCase();
 }

@@ -5,6 +5,7 @@ import type { SitemapEntry } from "@sarpbc/types";
 export default defineSitemapEventHandler(async (event) => {
   const kind = getRouterParam(event, "kind");
   const entries = await apiFetch<SitemapEntry[]>(`/sitemap/${kind}`);
+
   return entries.map(({ path, lastmod }) => ({
     loc: path,
     ...(lastmod && { lastmod }),

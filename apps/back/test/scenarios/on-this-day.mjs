@@ -5,12 +5,15 @@ const DAY = "2026-02-17";
 export async function verifyOnThisDay({ orm, request, staffCookie, memberCookie }) {
   const created = async (path, body) =>
     (await request("POST", path, body, staffCookie, 201)).json();
+
   const sql = (query, params) => orm.em.fork().getConnection().execute(query, params);
 
   const home = (await created("/team", { name: "Anniversary Home" })).team;
   const away = (await created("/team", { name: "Anniversary Away" })).team;
+
   const stage = async (name, source = "manual") =>
     (await created("/tournaments", { name, source, teamIds: [home.id, away.id] })).tournament;
+
   const crown = (tournament, endAt) =>
     sql("update tournament set winner_id = ?, end_at = ? where id = ?", [
       tournament.participants.find(({ team }) => team.id === home.id).id,
@@ -19,16 +22,20 @@ export async function verifyOnThisDay({ orm, request, staffCookie, memberCookie 
     ]);
 
   const bracket = await stage("Anniversary Bracket");
+
   const [homeSide, awaySide] = [home, away].map(
     (team) => bracket.participants.find((participant) => participant.team.id === team.id).id,
   );
+
   await request("PATCH", `/tournaments/${bracket.id}`, { hasBracket: true }, staffCookie);
+
   const semifinal = (
     await created(`/tournaments/${bracket.id}/matches`, {
       name: "Semifinal",
       participantIds: [homeSide, awaySide],
     })
   ).match;
+
   const final = (
     await created(`/tournaments/${bracket.id}/matches`, {
       name: "Grand Final",
@@ -36,6 +43,7 @@ export async function verifyOnThisDay({ orm, request, staffCookie, memberCookie 
       previousMatches: [{ previousMatchId: semifinal.id, type: "winner" }],
     })
   ).match;
+
   for (const [match, homeScore] of [
     [semifinal, 3],
     [final, 4],
@@ -81,6 +89,7 @@ export async function verifyOnThisDay({ orm, request, staffCookie, memberCookie 
     link: { kind: "team", id: home.id },
     sourceUrl: "https://www.rocketleague.com/news",
   };
+
   await request("POST", "/on-this-day-facts", fact, memberCookie, 403);
   await request(
     "POST",
@@ -101,6 +110,7 @@ export async function verifyOnThisDay({ orm, request, staffCookie, memberCookie 
 
   const { date, events } = (await request("GET", `/on-this-day?date=${DAY}`)).json();
   assert.equal(date, DAY);
+
   const summary = events.map((event) => {
     switch (event.kind) {
       case "fact":
@@ -115,6 +125,7 @@ export async function verifyOnThisDay({ orm, request, staffCookie, memberCookie 
         return [event.kind];
     }
   });
+
   assert.deepEqual(
     summary.slice(0, 3),
     [

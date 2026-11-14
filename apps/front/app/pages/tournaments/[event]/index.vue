@@ -38,20 +38,25 @@ if (!resolved.value) {
 
 const canonicalPath = computed(() => {
   const target = resolved.value;
+
   if (!target) return null;
+
   switch (target.kind) {
     case "event":
       return localePath(tournamentEventPath(target.event.slug));
     case "stage": {
       const stage = target.tournament;
+
       return localePath(
         target.tab === "matches"
           ? stageMatchesPath(stage.event.slug, stage.slug)
           : tournamentStagePath(stage.event.slug, stage.slug),
       );
     }
+
     default: {
       const _exhaustive: never = target;
+
       return _exhaustive;
     }
   }
@@ -71,6 +76,7 @@ const showStats = computed(() => statsStages.value.length > 0 && route.query.tab
 
 const tabItems = computed(() => {
   const path = event.value ? localePath(tournamentEventPath(event.value.slug)) : route.path;
+
   return [
     { to: path, label: t("common.overview"), active: !showStats.value },
     {
@@ -83,6 +89,7 @@ const tabItems = computed(() => {
 
 const champion = computed(() => {
   const finalStage = event.value?.stages[0];
+
   return finalStage ? getTournamentChampion(finalStage) : null;
 });
 
@@ -94,6 +101,7 @@ const watchStreams = computed(() =>
 
 function stageMeta(stage: TournamentDetail): string {
   const status = getTournamentStatus(stage);
+
   return [
     nonDefaultFormatLabel(stage.format),
     formatTournamentShortDateRange(stage.beginAt, stage.endAt, locale.value),

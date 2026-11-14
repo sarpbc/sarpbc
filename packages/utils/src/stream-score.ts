@@ -7,6 +7,7 @@ import type {
 import { z } from "zod";
 
 const STREAM_SCORE_SIDES = ["blue", "orange"] as const satisfies readonly StreamScoreSide[];
+
 const STREAM_SCORE_GAME_ENDINGS = [
   "regulation",
   "overtime",
@@ -60,6 +61,7 @@ export function winsNeeded(bestOf: number): number {
 
 export function gameWinner(game: Pick<StreamScoreGame, "blue" | "orange">): StreamScoreSide | null {
   if (game.blue === game.orange) return null;
+
   return game.blue > game.orange ? "blue" : "orange";
 }
 
@@ -68,6 +70,7 @@ function isConsistent(proposal: StreamScoreProposal): boolean {
   const blue = proposal.games.filter((game) => game.winner === "blue").length;
   const orange = proposal.games.filter((game) => game.winner === "orange").length;
   const seriesWinner = blue >= needed ? "blue" : orange >= needed ? "orange" : null;
+
   return (
     proposal.games.length <= proposal.bestOf &&
     Math.max(blue, orange) <= needed &&
@@ -85,13 +88,18 @@ function isConsistent(proposal: StreamScoreProposal): boolean {
 
 export function parseStreamScoreProposal(text: string): ParsedStreamScoreProposal {
   let json: unknown;
+
   try {
     json = JSON.parse(text);
   } catch {
     return { ok: false, error: "invalid-json" };
   }
+
   const parsed = proposalSchema.safeParse(json);
+
   if (!parsed.success) return { ok: false, error: "invalid-proposal" };
+
   if (!isConsistent(parsed.data)) return { ok: false, error: "inconsistent-series" };
+
   return { ok: true, proposal: parsed.data };
 }

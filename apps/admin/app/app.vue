@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { uiLocale } from "@sarpbc/utils";
+
 const appConfig = useAppConfig();
 const { locale } = useI18n();
 

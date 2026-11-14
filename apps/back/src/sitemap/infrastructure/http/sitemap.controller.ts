@@ -16,6 +16,7 @@ export class SitemapController {
     if (!isSitemapKind(kind)) {
       throw new NotFoundError(`Sitemap "${kind}" was not found.`);
     }
+
     return this.sitemapService.entries(kind);
   }
 }

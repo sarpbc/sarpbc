@@ -35,6 +35,7 @@ export default defineNuxtRouteMiddleware(async () => {
   if (import.meta.client) {
     user.value = await getProfile();
     authHydrated.value = true;
+
     return;
   }
 
@@ -42,8 +43,10 @@ export default defineNuxtRouteMiddleware(async () => {
     const event = useRequestEvent();
     const accessToken = event ? getCookie(event, ACCESS_TOKEN_COOKIE) : undefined;
     const refreshToken = event ? getCookie(event, REFRESH_TOKEN_COOKIE) : undefined;
+
     if (!accessToken && !refreshToken) {
       user.value = null;
+
       return;
     }
   }

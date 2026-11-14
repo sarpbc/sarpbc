@@ -7,5 +7,6 @@ export async function getModerationReplies(): Promise<ModerationReply[]> {
     method: "GET",
     query: { limit: MODERATION_REPLIES_LIMIT },
   });
+
   return res.replies;
 }

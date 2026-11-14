@@ -47,6 +47,7 @@ async function submitReport() {
     });
     open.value = false;
     emit("reported");
+
     return;
   }
 
@@ -56,6 +57,7 @@ async function submitReport() {
       color: "warning",
     });
     open.value = false;
+
     return;
   }
 
@@ -64,6 +66,7 @@ async function submitReport() {
       title: t("components.discussion.report.messages.signInRequired"),
       color: "warning",
     });
+
     return;
   }
 

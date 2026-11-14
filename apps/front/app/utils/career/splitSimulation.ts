@@ -41,18 +41,22 @@ export interface FieldPlayer {
 
 function blendWithTeam(personal: number, teamStrength: number | undefined): number {
   if (teamStrength == null) return personal;
+
   return personal * 0.55 + teamStrength * 0.45;
 }
 
 function teamFieldStrength(teamId: string, world: CareerWorldState, player: FieldPlayer): number {
   const team = WORLD_TEAMS.find((entry) => entry.id === teamId);
   const rosterIds = world.rosters[teamId] ?? (team ? [...team.players] : []);
+
   const rosterStrength = rosterIds.length
     ? getRosterMatchStrength(rosterIds, world, player)
     : (team?.baseStrength ?? 50);
+
   if (teamId === player.teamId) {
     return blendWithTeam(computeComposite(player.stats, player.role), rosterStrength);
   }
+
   return rosterStrength;
 }
 
@@ -78,14 +82,19 @@ export function circuitPointsForSplit(
 ): number {
   const regional = Math.round(rawRegionalPoints(sim) * regionalCircuitWeight(region));
   const major = sim.major ? MAJOR_POINTS[sim.major] : 0;
+
   return regional + major;
 }
 
 export function getSplitFeedback(sim: SplitSimulation): Partial<CareerStats> {
   if (sim.major === "winner") return { rating: 5, morale: 4 };
+
   if (sim.major === "finalist" || sim.major === "top4") return { rating: 2, morale: 2 };
+
   if (sim.major === "unavailable") return { morale: -2, form: -1 };
+
   if (sim.major !== null) return { form: 1 };
+
   return { morale: -3 };
 }
 
@@ -105,6 +114,7 @@ export function getWorldsFeedback(placement: CareerPlacement): Partial<CareerSta
       return { morale: -2 };
     default: {
       const _exhaustive: never = placement;
+
       return _exhaustive;
     }
   }
@@ -118,60 +128,77 @@ export function simulateSplitField(
   player: FieldPlayer,
 ): Map<string, SplitSimulation> {
   const results = new Map<string, SplitSimulation>();
+
   for (const team of WORLD_TEAMS) {
     results.set(team.id, emptySplitSimulation());
   }
 
   const stage = getSplitStage(split);
   const skipRegionals = player.skipRegionals ?? 0;
+
   for (const region of CAREER_REGIONS) {
     for (let regional = 0; regional < REGIONALS_PER_SPLIT; regional++) {
       const sitOut =
         player.teamId != null &&
         skipRegionals > regional &&
         getWorldTeamsByRegion(region).some((team) => team.id === player.teamId);
+
       const field = getWorldTeamsByRegion(region)
         .filter((team) => !(sitOut && team.id === player.teamId))
         .map((team) => ({
           id: team.id,
           strength: teamFieldStrength(team.id, world, player),
         }));
+
       const placements = playSingleElim(
         field,
         eventRng(careerId, season, `${stage}:${region}:r${regional}`),
       );
+
       for (const [teamId, placement] of placements) {
         const sim = results.get(teamId);
+
         if (!sim) continue;
         sim.regionals[regional] = placement;
       }
+
       if (sitOut && player.teamId) {
         const sim = results.get(player.teamId);
+
         if (sim) sim.regionals[regional] = "unavailable";
       }
     }
   }
 
   const majorField: { id: string; strength: number }[] = [];
+
   for (const [teamId, sim] of results) {
     const regionalPoints = rawRegionalPoints(sim);
+
     if (regionalPoints < MAJOR_QUALIFICATION_POINTS) continue;
+
     if (player.skipMajor && teamId === player.teamId) {
       sim.major = "unavailable";
       continue;
     }
+
     majorField.push({ id: teamId, strength: teamFieldStrength(teamId, world, player) });
   }
+
   const majorPlacements = playSingleElim(majorField, eventRng(careerId, season, `${stage}:major`));
+
   for (const [teamId, placement] of majorPlacements) {
     const sim = results.get(teamId);
+
     if (sim) sim.major = placement;
   }
 
   for (const team of WORLD_TEAMS) {
     const sim = results.get(team.id);
+
     if (sim) sim.points = circuitPointsForSplit(sim, team.region);
   }
+
   return results;
 }
 
@@ -181,9 +208,11 @@ export function splitFieldToResult(
   field: Map<string, SplitSimulation>,
 ): CareerSplitFieldResult {
   const points: Record<string, number> = {};
+
   for (const [teamId, sim] of field) {
     points[teamId] = sim.points;
   }
+
   return { season, split, points };
 }
 
@@ -208,11 +237,13 @@ export function simulateWorldsField(
     id: teamId,
     strength: teamFieldStrength(teamId, world, player),
   }));
+
   return playSingleElim(field, eventRng(careerId, season, "worlds"));
 }
 
 export function getEventsBeforeStage(careerId: string, season: number, stage: CareerStage): number {
   if (stage === "worlds") return 1;
+
   return 1 + (hashString(`${careerId}:events:${season}:${stage}`) % MAX_EVENTS_BEFORE_SPLIT);
 }
 

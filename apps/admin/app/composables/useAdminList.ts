@@ -1,6 +1,7 @@
 import type { Ref } from "vue";
 
 type AdminListRange = { limit: number; offset: number; search: string };
+
 type AdminListPage<T> = { items: T[]; total: number };
 
 export function useAdminList<T>(

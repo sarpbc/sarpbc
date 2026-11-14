@@ -21,6 +21,7 @@ const {
   refresh,
 } = useAdminList("admin-tournaments-list", async ({ limit, offset }) => {
   const { tournaments, total } = await getAllTournaments({ limit, offset });
+
   return { items: tournaments, total };
 });
 
@@ -63,6 +64,7 @@ function selectRow(e: Event, row: TableRow<TournamentListItem>) {
 
 async function handleSyncAdditions() {
   isSyncingAdditions.value = true;
+
   try {
     await syncTournamentAdditions();
     toast.add({ title: t("page.tournaments.syncAdditions"), color: "success" });
@@ -76,6 +78,7 @@ async function handleSyncAdditions() {
 
 async function handleSyncTournament(e: Event, tournamentId: string) {
   e.stopPropagation();
+
   try {
     await runTournamentSync(tournamentId, refresh);
   } catch (syncError) {

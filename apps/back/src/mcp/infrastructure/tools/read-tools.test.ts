@@ -10,12 +10,14 @@ const user = { id: "u1", email: "staff@test.com", role: "journalist" } as const;
 
 function setup() {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
+
   const team = Object.assign(new Team(), {
     id: "t1",
     slug: "scouted",
     name: "Scouted",
     source: "startgg",
   });
+
   const player = Object.assign(new Player(), {
     id: "p1",
     slug: "scout",
@@ -23,7 +25,9 @@ function setup() {
     source: "startgg",
     team,
   });
+
   const matchService = { list: vi.fn().mockResolvedValue([[], 0]) };
+
   const matchLineupService = {
     find: vi.fn(async (matchId: string) => ({
       source: matchId === "startgg-match" ? ("startgg" as const) : ("manual" as const),
@@ -44,6 +48,7 @@ function setup() {
       ],
     })),
   };
+
   const manualCup = Object.assign(new Tournament(), {
     id: "manual-cup",
     name: "Coupe",
@@ -72,12 +77,14 @@ function setup() {
       }),
     ],
   });
+
   const tournaments = {
     find: vi.fn().mockResolvedValue([[], 0]),
     findById: vi.fn(async (id: string) =>
       id === manualCup.id ? manualCup : Object.assign(new Tournament(), { id, source: "startgg" }),
     ),
   };
+
   const tournamentPrizeService = {
     findByTournamentId: vi
       .fn()
@@ -85,6 +92,7 @@ function setup() {
     teamEarnings: vi.fn().mockResolvedValue({ totals: [], years: [] }),
     playerEarnings: vi.fn().mockResolvedValue({ totals: [], years: [] }),
   };
+
   const playerAwardService = {
     findByTournamentId: vi.fn().mockResolvedValue([
       {
@@ -95,16 +103,19 @@ function setup() {
       },
     ]),
   };
+
   const playerService = {
     find: vi.fn().mockResolvedValue([player]),
     findBySlug: vi.fn().mockResolvedValue(player),
     findById: vi.fn().mockResolvedValue(null),
   };
+
   const teamService = {
     find: vi.fn().mockResolvedValue([team]),
     findBySlug: vi.fn().mockResolvedValue(team),
     findById: vi.fn().mockResolvedValue(team),
   };
+
   const playerLines = vi.fn(async (ids: string[]) =>
     ids.map((id) => ({
       gameId: `game-${id}`,
@@ -119,12 +130,14 @@ function setup() {
       demolitions: 1,
     })),
   );
+
   const catalogService = {
     findEvent: vi.fn(async (idOrSlug: string) => ({
       event: Object.assign(new TournamentEvent(), { id: "event", slug: idOrSlug, name: "Coupe" }),
       stages: [manualCup, Object.assign(new Tournament(), { id: "c1", source: "startgg" })],
     })),
   };
+
   const tools = readTools({
     playerService,
     teamService,
@@ -141,15 +154,21 @@ function setup() {
       tournamentPlayerStatsService: new TournamentPlayerStatsService({ playerLines }),
     }),
   });
+
   const call = (name: string, args = {}) => {
     const tool = tools.find((candidate) => candidate.name === name);
+
     if (!tool) throw new Error(`${name} is not defined`);
+
     return tool.run(user, args);
   };
+
   const json = async (name: string, args = {}) => {
     const block = (await call(name, args)).content[0];
+
     return JSON.parse(block?.type === "text" ? block.text : "null");
   };
+
   return {
     matchService,
     matchLineupService,

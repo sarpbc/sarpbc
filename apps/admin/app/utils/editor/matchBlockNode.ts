@@ -15,11 +15,13 @@ const matchBlockTokenizer: MarkdownTokenizer = {
   start: newsMatchTagStart,
   tokenize: (src: string) => {
     const parsed = parseNewsMatchTag(src.trimStart());
+
     if (!parsed) {
       return undefined;
     }
 
     const leading = src.length - src.trimStart().length;
+
     return {
       type: "matchBlock",
       raw: `${src.slice(0, leading)}${parsed.raw}`,
@@ -57,11 +59,13 @@ export const MatchBlockNode = Node.create({
 
   parseMarkdown: (token) => {
     const parsed = parseNewsMatchTag((token.raw ?? "").trimStart());
+
     return parsed ? { type: "matchBlock", attrs: matchBlockNodeAttrs(parsed.block) } : [];
   },
 
   renderMarkdown: (node) => {
     const block = newsMatchBlockFromAttrs(node.attrs ?? {});
+
     return block ? serializeNewsMatchTag(block) : "";
   },
 });

@@ -84,23 +84,30 @@ function setup(role: "admin" | "journalist") {
     request: vi.fn(async () => ({ ...statsImport, status: "pending" as const, items: [] })),
     recent: vi.fn(async () => [statsImport]),
   };
+
   const statsPlayerLinkService = {
     accounts: vi.fn(async () => accounts),
     link: vi.fn(async () => 7),
   };
+
   const manualGameService = {
     attach: vi.fn(async () => game),
     remove: vi.fn(async () => game),
   };
+
   const tools = gameStatsTools({ statsImportService, statsPlayerLinkService, manualGameService });
+
   const call = async (name: string, input: Record<string, string | number | boolean>) => {
     const tool = tools.find((defined) => defined.name === name);
+
     if (!tool) throw new Error(`${name} is not defined`);
     const result = await tool.run({ id: "u1", email: "staff@test.com", role }, input);
     const block = result.content[0];
     const text = block?.type === "text" ? block.text : "";
+
     return { result, text, body: result.isError ? null : JSON.parse(text) };
   };
+
   return { tools, call, statsImportService, statsPlayerLinkService, manualGameService };
 }
 
@@ -156,9 +163,11 @@ describe("game stats tools", () => {
     const unlinked = (await call("list_unlinked_game_players", { tournamentId: "t1" })).body;
     expect(unlinked.players.map((account: { name: string }) => account.name)).toEqual(["Racer"]);
     expect(unlinked.rosters).toEqual(accounts.rosters);
+
     const all = (
       await call("list_unlinked_game_players", { tournamentId: "t1", includeLinked: true })
     ).body;
+
     expect(all.players).toHaveLength(2);
 
     const link = {
@@ -166,6 +175,7 @@ describe("game stats tools", () => {
       platformId: "1",
       playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
     };
+
     expect((await call("link_game_player", { tournamentId: "t1", ...link })).body).toEqual({
       link,
       linkedRows: 7,
@@ -175,6 +185,7 @@ describe("game stats tools", () => {
 
   it("attaches and removes games through the staff service", async () => {
     const { call, manualGameService } = setup("admin");
+
     const input = {
       matchId: "m1",
       replay: game.ballchasingId,
@@ -228,9 +239,11 @@ describe("game stats tools", () => {
         gameNumber: 1,
         blueParticipantId: "p1",
       });
+
       expect(result.isError, name).toBe(true);
       expect(text).toContain("tournaments.manage");
     }
+
     for (const service of [statsImportService, statsPlayerLinkService, manualGameService])
       for (const method of Object.values(service)) expect(method).not.toHaveBeenCalled();
   });

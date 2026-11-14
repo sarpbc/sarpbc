@@ -45,6 +45,7 @@ function rosterOptions(player: StatsPlayerAccount): SelectItem[][] {
   const rosters = accounts.value?.rosters ?? [];
   const own = rosters.filter((roster) => roster.participantId === player.team.participantId);
   const others = rosters.filter((roster) => roster.participantId !== player.team.participantId);
+
   return [...own, ...others].flatMap((roster) =>
     roster.players.length > 0 ? [rosterGroup(roster)] : [],
   );
@@ -66,8 +67,10 @@ function meta(player: StatsPlayerAccount): string {
 async function save(player: StatsPlayerAccount) {
   const key = keyOf(player);
   const playerId = selected.value[key];
+
   if (!playerId) return;
   savingKey.value = key;
+
   try {
     await linkStatsPlayer(props.tournamentId, {
       platform: player.platform,

@@ -33,6 +33,7 @@ async function findScope(
 ): Promise<Match[]> {
   const scope: MatchListQueryOptions =
     block.kind === "tournament" ? { limit, tournamentId: block.id } : { limit, teamId: block.id };
+
   const [live, upcoming, results] = await Promise.all([
     reads.page("live", {
       ...scope,
@@ -41,6 +42,7 @@ async function findScope(
     reads.page("upcoming", scope),
     reads.page("results", scope),
   ]);
+
   return [...live, ...upcoming, ...results];
 }
 
@@ -56,20 +58,26 @@ export async function findMatchBlocks(
       ),
     ),
   ];
+
   const byId = new Map(
     (ids.length > 0 ? await reads.byIds(ids) : []).map((match) => [match.id, match]),
   );
+
   const pick = (id: string): Match[] => {
     const match = byId.get(id);
+
     return match ? [match] : [];
   };
 
   const limits = new Map<string, { block: ScopedMatchBlock; limit: number }>();
+
   for (const block of blocks.filter(isScoped)) {
     const key = scopeKey(block);
     limits.set(key, { block, limit: Math.max(block.limit, limits.get(key)?.limit ?? 0) });
   }
+
   const scoped = new Map<string, Match[]>();
+
   for (const [key, { block, limit }] of limits) {
     scoped.set(key, await findScope(reads, block, limit, now));
   }
@@ -85,6 +93,7 @@ export async function findMatchBlocks(
         return (scoped.get(scopeKey(block)) ?? []).slice(0, block.limit);
       default: {
         const exhaustive: never = block;
+
         return exhaustive;
       }
     }

@@ -23,9 +23,11 @@ const TROPHY_TYPES = ["worlds", "major", "regional"] as const;
 
 const trophyLines = computed(() => {
   const counts = { regional: 0, major: 0, worlds: 0 };
+
   for (const trophy of props.result.trophies) {
     counts[trophy.type] += 1;
   }
+
   return TROPHY_TYPES.flatMap((type) => (counts[type] > 0 ? [{ type, count: counts[type] }] : []));
 });
 
@@ -33,7 +35,9 @@ const nickname = computed(() => t(`page.game.career.end.nicknames.${props.result
 
 function majorSummary(season: CareerSeasonRecord, split: number): string {
   const record = season.splits.find((entry) => entry.split === split);
+
   if (!record) return t("page.game.career.results.majorNotQualified");
+
   return record.major
     ? t(`page.game.career.placements.${record.major}`)
     : t("page.game.career.results.majorNotQualified");

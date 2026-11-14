@@ -29,13 +29,16 @@ export class PatService {
 
   async createToken(userId: string, name: string): Promise<PatTokenCreated> {
     const user = await this.users.findById(userId);
+
     if (!user || !isStaffRole(user.role)) {
       throw new ForbiddenError(
         "API tokens are limited to staff accounts. Ask an admin for a staff role.",
       );
     }
+
     const { raw, hash } = this.secrets.issue();
     const token = await this.tokens.create(userId, name, hash);
+
     return { id: token.id, name: token.name, createdAt: token.createdAt, token: raw };
   }
 
@@ -51,14 +54,17 @@ export class PatService {
 
   async resolveUser(rawToken: string): Promise<PatUser | null> {
     const token = await this.tokens.findActive(this.secrets.hash(rawToken));
+
     if (!token || !isStaffRole(token.owner.role)) return null;
     const now = this.now();
+
     if (
       !token.lastUsedAt ||
       now.getTime() - token.lastUsedAt.getTime() > LAST_USED_WRITE_INTERVAL_MS
     ) {
       await this.tokens.touch(token.id, now);
     }
+
     return { id: token.owner.id, email: token.owner.email, role: token.owner.role };
   }
 }

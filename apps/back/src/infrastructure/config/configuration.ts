@@ -5,6 +5,7 @@ const DEV_ORIGINS = ["http://localhost:4000", "http://localhost:4001", "http://l
 function sharedParentDomain(urls: string[]): string | undefined {
   const reversed = urls.map((url) => new URL(url).hostname.split(".").reverse());
   const shared: string[] = [];
+
   for (
     let i = 0;
     reversed.every((labels) => labels[i] !== undefined && labels[i] === reversed[0][i]);
@@ -12,14 +13,17 @@ function sharedParentDomain(urls: string[]): string | undefined {
   ) {
     shared.push(reversed[0][i]);
   }
+
   return shared.length >= 2 ? `.${shared.reverse().join(".")}` : undefined;
 }
 
 function originWithWww(url: string): string[] {
   const origin = new URL(url);
+
   if (origin.hostname.startsWith("www.")) return [origin.origin];
   const www = new URL(origin.origin);
   www.hostname = `www.${origin.hostname}`;
+
   return [origin.origin, www.origin];
 }
 

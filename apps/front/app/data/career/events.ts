@@ -268,6 +268,7 @@ export function pickRandomEvent(
   const candidates = lateUnused.length > 0 ? lateUnused : unused.length > 0 ? unused : eligible;
   const available = candidates.length > 0 ? candidates : getEventsForPool(pool);
   const index = Math.abs(seed) % available.length;
+
   return available[index]!;
 }
 

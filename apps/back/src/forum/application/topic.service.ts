@@ -1,5 +1,6 @@
 import type { TopicRecord } from "./models";
 import type { TopicStore, ForumTransaction } from "./ports";
+
 const predefinedTopics = [
   {
     title: "Rocket League",
@@ -29,6 +30,7 @@ export class TopicService {
     return this.transaction.run(async (scope) => {
       for (const topicData of predefinedTopics) {
         const exists = await scope.topics.findByTitle(topicData.title);
+
         if (!exists) {
           const topic: TopicRecord = {
             id: crypto.randomUUID(),
@@ -38,6 +40,7 @@ export class TopicService {
             createdAt: new Date(),
             updatedAt: null,
           };
+
           await scope.topics.save(topic);
         }
       }

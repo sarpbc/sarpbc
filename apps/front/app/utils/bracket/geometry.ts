@@ -3,6 +3,7 @@ export const BRACKET_MATCH_HEIGHT = 44;
 export const BRACKET_TEAM_ROW_HEIGHT = BRACKET_MATCH_HEIGHT / 2;
 export const BRACKET_COLUMN_GAP = 12;
 export const BRACKET_VERTICAL_GAP = 6;
+
 /** Half a match block so stacked rows share a midpoint with connectors. */
 export const BRACKET_ROW_STEP = (BRACKET_MATCH_HEIGHT + BRACKET_VERTICAL_GAP) / 2;
 
@@ -20,6 +21,7 @@ export function bracketMatchCenterY(row: number): number {
 
 export function bracketTeamRowCenterY(row: number, slot: "a" | "b"): number {
   const top = bracketMatchTop(row);
+
   if (slot === "a") {
     return top + BRACKET_TEAM_ROW_HEIGHT / 2;
   }

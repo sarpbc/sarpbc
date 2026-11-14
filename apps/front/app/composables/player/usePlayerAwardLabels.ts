@@ -17,6 +17,7 @@ export function usePlayerAwardLabels() {
         return t("page.player.slug.awards.types.breakthrough_player");
       default: {
         const _exhaustive: never = awardType;
+
         return _exhaustive;
       }
     }
@@ -32,6 +33,7 @@ export function usePlayerAwardLabels() {
         return t("page.player.slug.awards.seasonTypes.regional_mvp");
       default: {
         const _exhaustive: never = awardType;
+
         return _exhaustive;
       }
     }

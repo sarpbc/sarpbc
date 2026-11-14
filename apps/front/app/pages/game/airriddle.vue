@@ -9,6 +9,7 @@ import { deriveAirRiddleLetterStatuses } from "~/utils/airRiddleLetterStatus";
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const posthog = usePostHog();
+
 interface GameAttempt {
   letters: string[];
   results?: AirRiddleResultEnum[];
@@ -38,6 +39,7 @@ const gameState = reactive<GameState>({
 });
 
 const targetLength = computed(() => gameState.targetLength);
+
 const { currentGuess, canSubmit, appendToGuess, removeFromGuess, clearGuess } =
   useAirRiddleGuess(targetLength);
 
@@ -56,9 +58,11 @@ const statusMessage = computed(() => {
       attempts: gameState.attempts.length,
     });
   }
+
   if (gameState.isGameOver) {
     return t("page.game.airriddle.playersNameWas", { name: answer.value });
   }
+
   return t("page.game.airriddle.attemptsLeft", {
     current: gameState.attempts.length,
     max: AIR_RIDDLE_MAX_ATTEMPTS,
@@ -69,6 +73,7 @@ const emptyRows = computed(() => {
   if (gameState.isWon || gameState.isGameOver) {
     return 0;
   }
+
   return Math.max(0, AIR_RIDDLE_MAX_ATTEMPTS - gameState.attempts.length - 1);
 });
 
@@ -84,6 +89,7 @@ function focusHiddenInput() {
   if (isMobile.value || !canType.value) {
     return;
   }
+
   nextTick(() => {
     hiddenInputRef.value?.focus();
   });
@@ -101,6 +107,7 @@ function onPhysicalKeydown(event: KeyboardEvent) {
   if (event.key === "Enter") {
     event.preventDefault();
     submitGuess();
+
     return;
   }
 
@@ -108,6 +115,7 @@ function onPhysicalKeydown(event: KeyboardEvent) {
     event.preventDefault();
     removeFromGuess();
     error.value = undefined;
+
     return;
   }
 
@@ -135,6 +143,7 @@ function onPaste(event: ClipboardEvent) {
 
   const active = document.activeElement;
   const tag = active?.tagName;
+
   if (tag === "INPUT" || tag === "TEXTAREA" || active?.getAttribute("contenteditable") === "true") {
     return;
   }
@@ -160,6 +169,7 @@ function persistGameState() {
 
 function restoreGameState(length: number) {
   const stored = loadAirRiddleStoredState();
+
   if (!stored || stored.targetLength !== length) {
     return;
   }
@@ -172,9 +182,11 @@ function restoreGameState(length: number) {
 
 async function loadTodayRiddle() {
   loading.value = true;
+
   try {
     const length = await getTodayAirRiddleLength();
     gameState.targetLength = length;
+
     if (length > 0) {
       restoreGameState(length);
     }
@@ -221,8 +233,10 @@ async function submitGuess() {
     );
 
     error.value = undefined;
+
     if (results.error) {
       error.value = results.error;
+
       return;
     }
 

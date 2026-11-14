@@ -6,6 +6,7 @@ import type { NewsTransaction, NewsWriteScope } from "./ports";
 
 describe("NewsService findPublishedShortsByWeek", () => {
   let service: NewsService;
+
   const newsRepository = {
     listWeek: vi.fn(),
   };
@@ -38,9 +39,11 @@ describe("NewsService findPublishedShortsByWeek", () => {
 describe("news publication notifications", () => {
   let article: NewsArticleRecord;
   let committed = false;
+
   const commit = vi.fn(async () => {
     committed = true;
   });
+
   const articles = {
     findBySlug: vi.fn(),
     findById: vi.fn(),
@@ -50,23 +53,28 @@ describe("news publication notifications", () => {
     save: vi.fn(),
     delete: vi.fn(),
   };
+
   const scope: NewsWriteScope = {
     articles,
     users: { findById: vi.fn() },
     replies: { deleteAllForTarget: vi.fn() },
   };
+
   const transaction: NewsTransaction = {
     async run(work) {
       const result = await work(scope);
       await commit();
+
       return result;
     },
   };
+
   const indexing = {
     submitNewsSlugs: vi.fn(async (_slugs: string[]) => {
       expect(committed).toBe(true);
     }),
   };
+
   const service = new NewsService(articles, transaction, { countByTargetIds: vi.fn() }, indexing);
 
   beforeEach(() => {

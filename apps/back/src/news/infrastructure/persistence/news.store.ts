@@ -7,6 +7,7 @@ import { User } from "../../../user/infrastructure/user-persistence";
 import { WEEKLY_DIGEST_NEWS_TYPE } from "../../domain/news-type";
 import type { NewsArticleRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
+
 export function newsSnapshot(row: NewsArticle): NewsArticleRecord {
   return {
     id: row.id,
@@ -23,15 +24,19 @@ export function newsSnapshot(row: NewsArticle): NewsArticleRecord {
     type: row.type,
   };
 }
+
 type NewsStore = NewsWriteScope["articles"];
+
 export class MikroNewsStore implements NewsStore {
   constructor(private readonly em: EntityManager) {}
   async findBySlug(slug: string) {
     const row = await this.em.findOne(NewsArticle, { slug }, { populate: ["author"] });
+
     return row ? newsSnapshot(row) : null;
   }
   async findById(id: string) {
     const row = await this.em.findOne(NewsArticle, { id }, { populate: ["author"] });
+
     return row ? newsSnapshot(row) : null;
   }
   async listPublished(
@@ -44,6 +49,7 @@ export class MikroNewsStore implements NewsStore {
       type ? { isDraft: false, type } : { isDraft: false },
       { populate: ["author"], orderBy: { createdAt: "DESC" }, limit, offset: page * limit },
     );
+
     return [rows.map(newsSnapshot), total];
   }
   async listWeek(start: Date, end: Date, limit: number) {
@@ -61,6 +67,7 @@ export class MikroNewsStore implements NewsStore {
       {},
       { populate: ["author"], orderBy: { createdAt: "DESC" }, limit, offset: page * limit },
     );
+
     return [rows.map(newsSnapshot), total];
   }
   async save(model: NewsArticleRecord) {
@@ -78,6 +85,7 @@ export class MikroNewsStore implements NewsStore {
     row.imageUrl = model.imageUrl;
     row.type = model.type;
     this.em.persist(row);
+
     try {
       await this.em.flush();
     } catch (error) {
@@ -90,6 +98,7 @@ export class MikroNewsStore implements NewsStore {
   }
   async delete(model: NewsArticleRecord) {
     const row = await this.em.findOne(NewsArticle, { id: model.id });
+
     if (row) this.em.remove(row);
   }
 }

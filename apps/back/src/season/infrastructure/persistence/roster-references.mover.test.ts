@@ -18,9 +18,11 @@ describe("SeasonRosterReferences.movePlayer", () => {
     const find = vi.fn().mockResolvedValue(awards);
     const nativeDelete = vi.fn();
     const nativeUpdate = vi.fn();
+
     const references = new SeasonRosterReferences(
       Object.assign(Object.create(EntityManager.prototype), { find, nativeDelete, nativeUpdate }),
     );
+
     return { references, nativeDelete, nativeUpdate };
   }
 
@@ -71,9 +73,11 @@ describe("SeasonRosterReferences.moveTeam", () => {
     const find = vi.fn().mockResolvedValue(participants);
     const nativeDelete = vi.fn();
     const nativeUpdate = vi.fn();
+
     const references = new SeasonRosterReferences(
       Object.assign(Object.create(EntityManager.prototype), { find, nativeDelete, nativeUpdate }),
     );
+
     return { references, nativeDelete, nativeUpdate };
   }
 

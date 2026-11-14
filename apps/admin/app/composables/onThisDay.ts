@@ -2,6 +2,7 @@ import type { OnThisDayFact, OnThisDayFactInput } from "@sarpbc/types";
 
 export async function getOnThisDayFacts(): Promise<OnThisDayFact[]> {
   const res = await apiFetch<{ facts: OnThisDayFact[] }>("/on-this-day-facts", { method: "GET" });
+
   return res.facts;
 }
 
@@ -10,6 +11,7 @@ export async function createOnThisDayFact(input: OnThisDayFactInput): Promise<On
     method: "POST",
     body: input,
   });
+
   return res.fact;
 }
 
@@ -21,6 +23,7 @@ export async function updateOnThisDayFact(
     method: "PATCH",
     body: input,
   });
+
   return res.fact;
 }
 

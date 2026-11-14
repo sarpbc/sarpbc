@@ -17,6 +17,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
           $or: [{ name: { $ilike: `%${name}%` } }, { league: { name: { $ilike: `%${name}%` } } }],
         }
       : {};
+
     return this.find(where, {
       limit,
       offset,

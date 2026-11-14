@@ -25,20 +25,26 @@ const RULES = [
 
 async function collectFiles(dir, files = []) {
   const entries = await readdir(dir, { withFileTypes: true });
+
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name);
+
     if (entry.isDirectory()) {
       if (entry.name === "node_modules" || entry.name === ".nuxt" || entry.name === "dist") {
         continue;
       }
+
       await collectFiles(fullPath, files);
       continue;
     }
+
     const ext = path.extname(entry.name);
+
     if (FILE_EXTENSIONS.has(ext)) {
       files.push(fullPath);
     }
   }
+
   return files;
 }
 
@@ -48,6 +54,7 @@ function scanFile(filePath, content) {
 
   for (let index = 0; index < lines.length; index += 1) {
     const line = lines[index];
+
     for (const rule of RULES) {
       if (rule.pattern.test(line)) {
         violations.push({
@@ -65,11 +72,13 @@ function scanFile(filePath, content) {
 
 async function main() {
   const files = [];
+
   for (const root of SCAN_ROOTS) {
     await collectFiles(root, files);
   }
 
   const violations = [];
+
   for (const file of files) {
     const content = await readFile(file, "utf8");
     violations.push(...scanFile(file, content));
@@ -77,13 +86,16 @@ async function main() {
 
   if (violations.length === 0) {
     console.log("lint-hub-row-heights: ok");
+
     return;
   }
 
   console.error("lint-hub-row-heights: banned hub row height utilities found:\n");
+
   for (const violation of violations) {
     console.error(`  ${violation.file}:${violation.line}  [${violation.rule}]  ${violation.text}`);
   }
+
   console.error(
     "\nUse grid-module tokens (h-row, h-row-compact, h-row-header). See apps/front/DESIGN.md.",
   );

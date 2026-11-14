@@ -41,11 +41,14 @@ const BLOCKED_SUBNETS: [string, number, "ipv4" | "ipv6"][] = [
 ];
 
 const blocked = new BlockList();
+
 for (const [network, prefix, family] of BLOCKED_SUBNETS) blocked.addSubnet(network, prefix, family);
 
 export function isPublicAddress(address: string): boolean {
   const family = isIP(address);
+
   if (family === 0) return false;
+
   return !blocked.check(address, family === 4 ? "ipv4" : "ipv6");
 }
 
@@ -53,17 +56,24 @@ export const publicOnlyLookup: LookupFunction = (hostname, options, callback) =>
   void resolvePublicAddresses(hostname, options.family).then((resolved) => {
     if (resolved instanceof Error) {
       callback(resolved, "", 0);
+
       return;
     }
+
     const [first] = resolved;
+
     if (!first) {
       callback(privateAddressError(), "", 0);
+
       return;
     }
+
     if (options.all) {
       callback(null, resolved);
+
       return;
     }
+
     callback(null, first.address, first.family);
   });
 };
@@ -74,7 +84,9 @@ async function resolvePublicAddresses(
 ): Promise<LookupAddress[] | Error> {
   try {
     const resolved = await dnsLookup(hostname, { all: true, family });
+
     if (resolved.some(({ address }) => !isPublicAddress(address))) return privateAddressError();
+
     return resolved;
   } catch (error) {
     return error instanceof Error ? error : new Error(String(error));
@@ -87,25 +99,32 @@ export async function downloadPublicHttps(
 ): Promise<Uint8Array> {
   const signal = AbortSignal.timeout(options.timeoutMs);
   let current = url;
+
   for (let redirects = 0; ; redirects += 1) {
     requirePublicHttpsUrl(current, options.isAllowedHost);
     const response = await get(current, signal);
     const status = response.statusCode ?? 0;
+
     if (status >= 300 && status < 400 && response.headers.location) {
       response.resume();
+
       if (redirects >= options.maxRedirects) {
         throw new InvalidInputError("The image URL redirected too many times.");
       }
+
       if (!URL.canParse(response.headers.location, current)) {
         throw new InvalidInputError("The image URL redirected to an invalid location.");
       }
+
       current = new URL(response.headers.location, current);
       continue;
     }
+
     if (status !== 200) {
       response.resume();
       throw new InvalidInputError(`The image URL answered HTTP ${status}.`);
     }
+
     return readBody(response, options.maxBytes, signal);
   }
 }
@@ -114,15 +133,21 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
   if (url.protocol !== "https:") {
     throw new InvalidInputError("The image URL and its redirects must use https.");
   }
+
   if (url.username || url.password) {
     throw new InvalidInputError("The image URL must not contain credentials.");
   }
+
   if (url.port && url.port !== "443") {
     throw new InvalidInputError("The image URL must use the default https port.");
   }
+
   const host = url.hostname.replace(/^\[|\]$/g, "");
+
   if (isIP(host) && !isPublicAddress(host)) throw privateAddressError();
+
   if (/(^|\.)localhost\.?$/i.test(host)) throw privateAddressError();
+
   if (!isAllowedHost(host)) {
     throw new InvalidInputError(`The image URL host "${host}" is not an accepted source.`);
   }
@@ -137,6 +162,7 @@ function get(url: URL, signal: AbortSignal): Promise<IncomingMessage> {
       agent: false,
       headers: { accept: "image/png,image/webp,image/svg+xml", "user-agent": "sarpbc.org" },
     });
+
     req.once("response", resolve);
     req.once("error", (error) => reject(downloadError(error, signal)));
     req.end();
@@ -149,20 +175,26 @@ function readBody(
   signal: AbortSignal,
 ): Promise<Uint8Array> {
   const declared = Number(response.headers["content-length"]);
+
   if (Number.isFinite(declared) && declared > maxBytes) {
     response.destroy();
+
     return Promise.reject(tooLargeError(maxBytes));
   }
+
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
     response.on("data", (chunk: Buffer) => {
       size += chunk.byteLength;
+
       if (size > maxBytes) {
         response.destroy();
         reject(tooLargeError(maxBytes));
+
         return;
       }
+
       chunks.push(chunk);
     });
     response.once("end", () => resolve(new Uint8Array(Buffer.concat(chunks))));
@@ -175,7 +207,9 @@ function readBody(
 
 function downloadError(error: Error, signal: AbortSignal): Error {
   if (error instanceof InvalidInputError) return error;
+
   if (signal.aborted) return new InvalidInputError("The image download timed out.");
+
   return new InvalidInputError(`The image could not be downloaded: ${error.message}`);
 }
 

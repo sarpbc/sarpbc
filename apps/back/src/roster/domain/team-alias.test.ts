@@ -70,6 +70,7 @@ describe("assertTeamAliasFits", () => {
 
   it("lets an alias keep its own period and refuses the team's own PandaScore id", () => {
     const team = fixtureTeam();
+
     const edited = alias({
       id: "a1",
       name: "Fixture Origins",

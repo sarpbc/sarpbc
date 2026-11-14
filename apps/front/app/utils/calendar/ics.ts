@@ -53,6 +53,7 @@ function escapeIcsText(value: string): string {
 
 function foldIcsLine(line: string): string {
   const encoder = new TextEncoder();
+
   if (encoder.encode(line).length <= FOLD_OCTETS) {
     return line;
   }
@@ -63,6 +64,7 @@ function foldIcsLine(line: string): string {
 
   for (const char of chars) {
     const next = current + char;
+
     if (encoder.encode(next).length > FOLD_OCTETS) {
       folded.push(current);
       current = ` ${char}`;
@@ -114,6 +116,7 @@ function eventLines(event: CalendarEvent): string[] {
   }
 
   lines.push("END:VEVENT");
+
   return lines;
 }
 

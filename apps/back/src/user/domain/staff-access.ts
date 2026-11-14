@@ -25,6 +25,7 @@ export function permissionsForRole(role: StaffRole | null | undefined): readonly
   if (!isStaffRole(role)) {
     return [];
   }
+
   return ROLE_PERMISSIONS[role];
 }
 
@@ -40,5 +41,6 @@ export function roleHasAnyPermission(
   permissions: readonly StaffPermission[],
 ): boolean {
   const granted = permissionsForRole(role);
+
   return permissions.some((permission) => granted.includes(permission));
 }

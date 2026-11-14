@@ -37,6 +37,7 @@ function targetTypeLabel(targetType: ModerationReply["targetType"]): string {
       return t("page.moderation.targetTypes.match");
     default: {
       const _exhaustive: never = targetType;
+
       return String(_exhaustive);
     }
   }
@@ -49,6 +50,7 @@ function publicTargetUrl(reply: ModerationReply): string {
 async function hideReply(reply: ModerationReply) {
   if (hidingReplyId.value) return;
   hidingReplyId.value = reply.id;
+
   try {
     await hideForumReply(reply.id);
     toast.add({

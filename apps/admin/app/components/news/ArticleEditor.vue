@@ -15,8 +15,10 @@ const content = defineModel<string>({ required: true });
 const { t } = useI18n();
 const { pickerOpen, pickerKind, entityTagHandlers, insertEntityTag } = useEntityTagEditor();
 const { tweetPickerOpen, tweetTagHandlers, insertTweetTag } = useTweetTagEditor();
+
 const { matchPickerOpen, matchPickerBlock, matchBlockHandlers, applyMatchBlock } =
   useMatchBlockEditor();
+
 const { tableHandlers, tableToolbarItems, shouldShowTableToolbar } = useTableEditor();
 
 const editorExtensions = [
@@ -25,6 +27,7 @@ const editorExtensions = [
   TweetTagNode,
   MatchBlockNode,
 ];
+
 const editorHandlers = {
   ...entityTagHandlers,
   ...tweetTagHandlers,

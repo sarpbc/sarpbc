@@ -44,6 +44,7 @@ export async function getPostById(id: string): Promise<ForumPost | null> {
     if (getApiErrorStatus(error) === 404) {
       return null;
     }
+
     throw error;
   }
 }
@@ -55,6 +56,7 @@ export async function getForumPostCreationStatus(): Promise<ForumPostCreationSta
     });
   } catch (error) {
     console.error("Error fetching forum post creation status:", error);
+
     return null;
   }
 }

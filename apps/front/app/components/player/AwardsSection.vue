@@ -27,27 +27,34 @@ const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
 const formatEndDate = (value: Date | string | null) => {
   if (!value) return null;
+
   return mediumDate.value.format(new Date(value));
 };
 
 function seasonMetaParts(award: PlayerSeasonAward): string[] {
   const parts: string[] = [];
+
   if (award.region) {
     parts.push(award.region);
   }
+
   if (award.presentedBy) {
     parts.push(t("page.player.slug.awards.presentedBy", { name: award.presentedBy }));
   }
+
   parts.push(t("page.player.slug.awards.officialSource"));
+
   return parts;
 }
 
 function metaParts(award: PlayerProfileAward): string[] {
   const parts: string[] = [];
   const stageName = distinctStageName(award.tournament);
+
   if (stageName) {
     parts.push(stageName);
   }
+
   if (award.tournament.endAt) {
     parts.push(
       t("page.player.slug.awards.awardedOn", {
@@ -55,6 +62,7 @@ function metaParts(award: PlayerProfileAward): string[] {
       }),
     );
   }
+
   return parts;
 }
 </script>

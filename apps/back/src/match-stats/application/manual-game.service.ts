@@ -25,6 +25,7 @@ export class ManualGameService {
 
   async list(tournamentId: string): Promise<TournamentStatsGame[]> {
     await requireTournament(this.candidates, tournamentId);
+
     return this.games.inTournament(tournamentId);
   }
 
@@ -32,9 +33,11 @@ export class ManualGameService {
     const source = requireBallchasing(this.source);
     const replayId = parseBallchasingRef("replay", input.replay);
     await requireTournament(this.candidates, tournamentId);
+
     const match = (await this.candidates.matches(tournamentId)).find(
       (candidate) => candidate.id === input.matchId,
     );
+
     if (!match)
       throw new InvalidInputError({
         message: "Choose a match of this tournament.",
@@ -42,12 +45,14 @@ export class ManualGameService {
       });
     const blue = match.participants.find(({ id }) => id === input.blueParticipantId);
     const orange = match.participants.find(({ id }) => id !== input.blueParticipantId);
+
     if (match.participants.length !== 2 || !blue || !orange)
       throw new InvalidInputError({
         message: "Choose one of the match's two participants as the blue side.",
         code: "participant_not_in_match",
       });
     const { gameNumber } = input;
+
     if (
       !Number.isInteger(gameNumber) ||
       gameNumber < 1 ||
@@ -61,12 +66,14 @@ export class ManualGameService {
         code: "game_number_out_of_range",
       });
     const attached = await this.games.attachment(replayId);
+
     if (attached)
       throw new ConflictError({
         message: `This replay is already attached to game ${attached.number} of ${attached.teams[0]} vs ${attached.teams[1]} in ${attached.tournamentName}. Remove it there first.`,
         code: "replay_already_attached",
       });
     const stored = await this.games.locations(match.storedReplayIds);
+
     if ([...stored.values()].some((location) => location.number === gameNumber))
       throw new ConflictError({
         message: `Game ${gameNumber} of this match already has stats. Remove it first.`,
@@ -74,11 +81,13 @@ export class ManualGameService {
       });
 
     const stats = await source.replayStats(replayId);
+
     if (!stats)
       throw new UnprocessableError({
         message: "Ballchasing has not finished processing this replay. Try again in a few minutes.",
         code: "replay_not_ready",
       });
+
     if (!hasBothTeams(stats))
       throw new UnprocessableError({
         message: "This replay has no players on one side.",
@@ -87,6 +96,7 @@ export class ManualGameService {
 
     const sides = { blue: blue.id, orange: orange.id };
     const rosters = new Map(match.participants.map(({ id, players }) => [id, players] as const));
+
     const record = buildGameRecord(
       {
         matchId: match.id,
@@ -100,6 +110,7 @@ export class ManualGameService {
       rosters,
       await this.games.links(platformAccounts(stats)),
     );
+
     return this.games.save(record);
   }
 
@@ -110,11 +121,13 @@ export class ManualGameService {
   ): Promise<TournamentStatsGame> {
     await requireTournament(this.candidates, tournamentId);
     const removed = await this.games.remove(tournamentId, { matchId, number });
+
     if (!removed)
       throw new NotFoundError({
         message: `Game ${number} of this match has no stats in this tournament.`,
         code: "match_game_not_found",
       });
+
     return removed;
   }
 }

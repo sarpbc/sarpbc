@@ -96,25 +96,33 @@ function rosterIdentifies(team: ReplayTeam, participant: CandidateParticipant): 
 function identifies(team: ReplayTeam, participant: CandidateParticipant): boolean {
   if (rosterIdentifies(team, participant)) return true;
   const replayName = team.name;
+
   const named =
     replayName !== null &&
     participant.teamNames.some((teamName) => teamNameMatches(replayName, teamName));
+
   return named && (rosterOverlap(team, participant) >= 1 || participant.players.length === 0);
 }
 
 function orient(replay: ReplaySummary, match: CandidateMatch): SideAssignment | "ambiguous" | null {
   if (match.participants.length !== 2) return null;
   const [first, second] = match.participants;
+
   const fits = (blue: CandidateParticipant, orange: CandidateParticipant) =>
     identifies(replay.blue, blue) &&
     identifies(replay.orange, orange) &&
     !rosterIdentifies(replay.blue, orange) &&
     !rosterIdentifies(replay.orange, blue);
+
   const straight = fits(first, second);
   const swapped = fits(second, first);
+
   if (straight && swapped) return "ambiguous";
+
   if (straight) return { blue: first.id, orange: second.id };
+
   if (swapped) return { blue: second.id, orange: first.id };
+
   return null;
 }
 
@@ -125,6 +133,7 @@ function windowContains(
   end: number | null,
 ): boolean {
   const slack = replay.playedAtHasTimezone ? 0 : UNKNOWN_TIMEZONE_MS;
+
   return (
     played >= begin - EARLY_START_MS - slack &&
     played <= (end ?? begin + OPEN_MATCH_DURATION_MS) + LATE_END_MS + slack
@@ -137,30 +146,41 @@ type Placement =
 
 function place(replay: ReplaySummary, matches: readonly CandidateMatch[]): Placement {
   const compatible: { match: CandidateMatch; sides: SideAssignment }[] = [];
+
   for (const match of matches) {
     const sides = orient(replay, match);
+
     if (sides === "ambiguous") return { kind: "unmatched", reason: "ambiguous_match" };
+
     if (sides) compatible.push({ match, sides });
   }
+
   if (compatible.length === 0) return { kind: "unmatched", reason: "unknown_teams" };
+
   if (!replay.playedAt) return { kind: "unmatched", reason: "missing_date" };
   const played = replay.playedAt.getTime();
+
   const windowed = compatible.flatMap(({ match, sides }) =>
     match.beginAt &&
     windowContains(replay, played, match.beginAt.getTime(), match.endAt?.getTime() ?? null)
       ? [{ matchId: match.id, sides, begin: match.beginAt.getTime() }]
       : [],
   );
+
   if (windowed.length === 0) return { kind: "unmatched", reason: "outside_match_window" };
+
   if (windowed.length === 1)
     return { kind: "placed", matchId: windowed[0].matchId, sides: windowed[0].sides };
+
   if (!replay.playedAtHasTimezone) return { kind: "unmatched", reason: "ambiguous_match" };
 
   // Overlapping windows (a same-day rematch): the replay belongs to the latest match already begun.
   // Every windowed match qualifies for the early-start slack, so when none has begun it cannot decide.
   const started = windowed.filter(({ begin }) => begin <= played).sort((a, b) => b.begin - a.begin);
+
   if (started.length === 0 || (started.length > 1 && started[0].begin === started[1].begin))
     return { kind: "unmatched", reason: "ambiguous_match" };
+
   return { kind: "placed", matchId: started[0].matchId, sides: started[0].sides };
 }
 
@@ -176,22 +196,30 @@ function seriesProblem(
 ): UnmatchedReason | null {
   if (match.storedReplayIds.some((id) => !games.some((game) => game.replay.id === id)))
     return "match_has_other_stats";
+
   if (match.numberOfGames !== null && games.length > match.numberOfGames)
     return "inconsistent_series";
   const wins = new Map<string, number>();
+
   for (const { replay, sides } of games) {
     if (replay.blue.goals === replay.orange.goals) return "inconsistent_series";
     const winner = replay.blue.goals > replay.orange.goals ? sides.blue : sides.orange;
     wins.set(winner, (wins.get(winner) ?? 0) + 1);
   }
+
   const played = [...match.scores.values()].reduce((sum, score) => sum + score, 0);
+
   if (!match.finished || played === 0) return "match_not_finished";
+
   for (const [participantId, won] of wins)
     if (won > (match.scores.get(participantId) ?? 0)) return "inconsistent_series";
+
   if (games.length < played) return "incomplete_series";
+
   // Staff may have attached a game under another number, and the import never renumbers one.
   if (games.some((game, index) => game.storedNumber !== null && game.storedNumber !== index + 1))
     return "match_has_other_stats";
+
   return null;
 }
 
@@ -211,6 +239,7 @@ export function assignReplays(
 ): ReplayAssignment[] {
   const assignments: ReplayAssignment[] = [];
   const series = new Map<string, SeriesGame[]>();
+
   // Another upload of a stored or removed game must not come back under a new replay id.
   const taken = new Set(
     replays.flatMap((replay) =>
@@ -219,6 +248,7 @@ export function assignReplays(
         : [],
     ),
   );
+
   const seen = new Set<string>();
 
   for (const replay of [...replays].sort(byPlayedAt)) {
@@ -232,7 +262,9 @@ export function assignReplays(
       });
       continue;
     }
+
     const location = stored.get(replay.id);
+
     if (location) {
       assignments.push({
         kind: "stored",
@@ -251,9 +283,12 @@ export function assignReplays(
         });
         continue;
       }
+
       seen.add(replay.rocketLeagueId);
     }
+
     const placement = place(replay, matches);
+
     if (placement.kind === "unmatched") {
       if (!location)
         assignments.push({
@@ -265,6 +300,7 @@ export function assignReplays(
         });
       continue;
     }
+
     // A game staff attached to another match is absent from the series it would fit.
     if (location && location.matchId !== placement.matchId) continue;
     const games = series.get(placement.matchId) ?? [];
@@ -274,6 +310,7 @@ export function assignReplays(
 
   for (const match of matches) {
     const games = series.get(match.id);
+
     if (!games) continue;
     const problem = seriesProblem(match, games);
     games.forEach(({ replay, sides, storedNumber }, index) => {
@@ -294,5 +331,6 @@ export function resolvePlayerId(
   roster: readonly RosterPlayer[],
 ): string | null {
   const found = roster.filter((player) => playerNameMatches(inGameName, player.name));
+
   return found.length === 1 ? found[0].id : null;
 }

@@ -13,10 +13,12 @@ const { t } = useI18n();
 const COLUMNS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
 const selected = ref(String(games[0]?.number ?? 1));
+
 watch(
   () => games,
   (current) => (selected.value = String(current[0]?.number ?? 1)),
 );
+
 const game = computed(
   () => games.find((candidate) => String(candidate.number) === selected.value) ?? games[0],
 );
@@ -30,12 +32,15 @@ const tabs = computed(() =>
 
 const teams = computed(() => {
   const current = game.value;
+
   if (!current) return [];
   const order = participants.map((participant) => participant.id);
+
   return [...current.teams]
     .sort((a, b) => order.indexOf(a.participantId) - order.indexOf(b.participantId))
     .map((team) => {
       const participant = participants.find((entry) => entry.id === team.participantId);
+
       return {
         ...team,
         name: (participant && participantName(participant)) || t("page.match.detail.unknownTeam"),
@@ -47,6 +52,7 @@ const teams = computed(() => {
 });
 
 const replayUrl = computed(() => `https://ballchasing.com/replay/${game.value?.ballchasingId}`);
+
 const replayLabel = computed(() =>
   t("page.match.detail.stats.replayLink", { number: game.value?.number ?? 1 }),
 );

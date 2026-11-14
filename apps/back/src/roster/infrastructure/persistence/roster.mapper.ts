@@ -47,10 +47,13 @@ export function toTeam(row: Record.Team, includePlayers = true): Team {
     mergedIntoId: row.mergedInto?.id ?? null,
     aliases: (row.aliases ?? []).map((alias) => Object.assign(new TeamAlias(), alias)),
   });
+
   if (includePlayers && row.players.isInitialized())
     team.players = row.players.getItems().map((p) => toPlayer(p));
+
   return team;
 }
+
 export function toPlayer(row: Record.Player): Player {
   const player = Object.assign(new Player(), pick(row, PLAYER_COLUMNS), {
     birthday: row.birthday ? new Date(row.birthday) : null,
@@ -58,9 +61,12 @@ export function toPlayer(row: Record.Player): Player {
     mergedIntoId: row.mergedInto?.id ?? null,
     team: row.team ? toTeam(row.team, false) : null,
   });
+
   if (row.photos.isInitialized()) player.photos = row.photos.getItems().map((p) => toPhoto(p));
+
   return player;
 }
+
 export function toContract(row: Record.Contract): Contract {
   return Object.assign(new Contract(), {
     id: row.id,
@@ -74,6 +80,7 @@ export function toContract(row: Record.Contract): Contract {
     createdAt: new Date(row.createdAt),
   });
 }
+
 export function toPhoto(row: Record.PlayerPhoto): PlayerPhoto {
   return Object.assign(new PlayerPhoto(), {
     id: row.id,
@@ -82,7 +89,9 @@ export function toPhoto(row: Record.PlayerPhoto): PlayerPhoto {
     createdAt: new Date(row.createdAt),
   });
 }
+
 export function teamNameAt(row: Pick<Record.Team, "name" | "aliases">, at: Date | null): string {
   if (!at) return row.name;
+
   return teamAliasInForce(row.aliases ?? [], isoDay(new Date(at)))?.name ?? row.name;
 }

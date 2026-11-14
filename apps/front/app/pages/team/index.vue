@@ -7,11 +7,13 @@ const TEAMS_PER_PAGE = 52;
 
 const offset = computed(() => {
   const param = route.query.offset as string;
+
   return param ? parseInt(param, 10) : 0;
 });
 
 const start = computed(() => {
   const param = route.query.start as string;
+
   return param?.toUpperCase() || "";
 });
 
@@ -51,9 +53,11 @@ const previousPageQuery = computed(() => {
   const query: HubListQuery = {
     offset: Math.max(0, offset.value - TEAMS_PER_PAGE).toString(),
   };
+
   if (start.value) {
     query.start = start.value;
   }
+
   return query;
 });
 
@@ -61,9 +65,11 @@ const nextPageQuery = computed(() => {
   const query: HubListQuery = {
     offset: (offset.value + TEAMS_PER_PAGE).toString(),
   };
+
   if (start.value) {
     query.start = start.value;
   }
+
   return query;
 });
 
@@ -71,9 +77,11 @@ const getLetterQuery = (letter: string) => {
   const query: HubListQuery = {
     offset: "0",
   };
+
   if (letter && letter !== "ALL") {
     query.start = letter;
   }
+
   return query;
 };
 
@@ -81,6 +89,7 @@ const pageTitle = computed(() => {
   if (start.value) {
     return t("page.teams.letter.pageTitle", { letter: start.value });
   }
+
   return t("page.teams.index.pageTitle", { count: totalTeams.value });
 });
 
@@ -88,6 +97,7 @@ const description = computed(() => {
   if (start.value) {
     return t("page.teams.letter.description", { letter: start.value });
   }
+
   return t("page.teams.index.description", { count: totalTeams.value });
 });
 

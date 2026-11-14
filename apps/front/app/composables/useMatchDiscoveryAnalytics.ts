@@ -40,9 +40,11 @@ export function useMatchDiscoveryAnalytics() {
       match_id: input.matchId,
       status: input.status,
     };
+
     if (input.source) {
       properties.source = input.source;
     }
+
     posthog.capture("match_detail_viewed", properties);
   }
 

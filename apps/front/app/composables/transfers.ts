@@ -14,7 +14,9 @@ export async function getTransfers(
     method: "GET",
     params: query,
   });
+
   const transfers = res.transfers ?? [];
+
   return { transfers, total: res.count ?? transfers.length };
 }
 

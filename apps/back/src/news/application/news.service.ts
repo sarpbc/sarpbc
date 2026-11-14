@@ -17,6 +17,7 @@ import type {
   PaginatedNewsArticles,
   SupportedLocale,
 } from "@sarpbc/types";
+
 export const NEWS_WEEK_SHORTS_LIMIT = 100;
 
 export interface NewsArticleListItemResponse {
@@ -51,6 +52,7 @@ export interface NewsWeekResponse {
 
 function newsContent(value: string): string {
   assertValidMatchBlocks(value);
+
   return sanitizeNewsHtml(value);
 }
 
@@ -68,6 +70,7 @@ export class NewsService {
     commentCount = 0,
   ): NewsArticleListItemResponse {
     const { title, content } = localizedNewsFields(article, locale);
+
     return {
       id: article.id,
       title,
@@ -82,6 +85,7 @@ export class NewsService {
 
   private mapArticle(article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse {
     const { title, content } = localizedNewsFields(article, locale);
+
     return {
       id: article.id,
       author: article.author.userName,
@@ -107,16 +111,20 @@ export class NewsService {
 
   private async generateUniqueSlug(source: string, articles: NewsQueries): Promise<string> {
     const base = toSlug(source);
+
     if (!base) {
       throw new ConflictError(
         "Could not generate a URL slug from that title. Add a slug manually (letters, numbers, hyphens).",
       );
     }
+
     let slug = base;
     let suffix = 1;
+
     while (await articles.findBySlug(slug)) {
       slug = `${base}-${suffix++}`;
     }
+
     return slug;
   }
 
@@ -126,6 +134,7 @@ export class NewsService {
     excludeArticleId?: string,
   ): Promise<void> {
     const existing = await articles.findBySlug(slug);
+
     if (existing && existing.id !== excludeArticleId) {
       throw new ConflictError(
         `An article with the slug "${slug}" already exists. Choose a different slug.`,
@@ -136,18 +145,22 @@ export class NewsService {
   async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdmin> {
     return this.transaction.run(async (scope) => {
       const author = await scope.users.findById(userId);
+
       if (!author) {
         throw new NotFoundError(`User with id "${userId}" not found`);
       }
 
       let slug: string;
+
       if (dto.slug) {
         slug = toSlug(dto.slug);
+
         if (!slug) {
           throw new ConflictError(
             "Enter a valid slug using letters, numbers, and hyphens (e.g. my-article).",
           );
         }
+
         await this.assertSlugAvailable(scope.articles, slug);
       } else {
         slug = await this.generateUniqueSlug(dto.title, scope.articles);
@@ -167,7 +180,9 @@ export class NewsService {
         type: dto.type ?? DEFAULT_NEWS_TYPE,
         createdAt: new Date(),
       };
+
       await scope.articles.save(article);
+
       return this.mapAdminArticle(article);
     });
   }
@@ -184,10 +199,12 @@ export class NewsService {
     limit: number;
   }> {
     const [articles, total] = await this.newsRepository.listPublished(page, limit, type);
+
     const commentCounts = await this.replyService.countByTargetIds(
       "newsArticle",
       articles.map((article) => article.id),
     );
+
     return {
       data: articles.map((article) =>
         this.mapListArticle(article, locale, commentCounts.get(article.id) ?? 0),
@@ -203,14 +220,17 @@ export class NewsService {
     locale: SupportedLocale = "en-US",
   ): Promise<NewsWeekResponse> {
     const range = isoWeekUtcRange(week);
+
     if (!range) {
       throw new InvalidInputError("Week must be an ISO week id (e.g. 2026-W36).");
     }
+
     const articles = await this.newsRepository.listWeek(
       range.start,
       range.end,
       NEWS_WEEK_SHORTS_LIMIT,
     );
+
     return {
       week,
       start: range.start,
@@ -221,6 +241,7 @@ export class NewsService {
 
   async findAll(page: number, limit: number): Promise<PaginatedNewsArticles> {
     const [articles, total] = await this.newsRepository.listAdmin(page, limit);
+
     return {
       data: articles.map((a) => this.mapAdminArticle(a)),
       total,
@@ -234,28 +255,35 @@ export class NewsService {
     locale: SupportedLocale = "en-US",
   ): Promise<NewsArticleResponse> {
     const article = await this.newsRepository.findBySlug(slug);
+
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
     }
+
     if (article.isDraft) throw new NotFoundError(`News article with slug "${slug}" not found`);
+
     return this.mapArticle(article, locale);
   }
 
   async findOneAdminBySlug(slug: string): Promise<NewsArticleAdmin> {
     const article = await this.newsRepository.findBySlug(slug);
+
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
     }
+
     return this.mapAdminArticle(article);
   }
 
   async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdmin> {
     const bySlug = await this.newsRepository.findBySlug(idOrSlug);
+
     if (bySlug) {
       return this.mapAdminArticle(bySlug);
     }
 
     const byId = await this.newsRepository.findById(idOrSlug);
+
     if (byId) {
       return this.mapAdminArticle(byId);
     }
@@ -267,68 +295,88 @@ export class NewsService {
 
   async findArticleIdBySlug(slug: string): Promise<string> {
     const article = await this.newsRepository.findBySlug(slug);
+
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
     }
+
     return article.id;
   }
 
   async update(slug: string, dto: UpdateNewsArticleInput): Promise<NewsArticleAdmin> {
     const result = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
+
       if (!article) {
         throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
       }
+
       if (dto.title !== undefined) {
         article.title = sanitizePlainText(dto.title);
       }
+
       if (dto.content !== undefined) {
         article.content = newsContent(dto.content);
       }
+
       if (dto.titleFr !== undefined) {
         article.titleFr = dto.titleFr != null ? sanitizePlainText(dto.titleFr) : null;
       }
+
       if (dto.contentFr !== undefined) {
         article.contentFr = dto.contentFr != null ? newsContent(dto.contentFr) : null;
       }
+
       if (dto.imageUrl !== undefined) {
         article.imageUrl = dto.imageUrl ?? null;
       }
+
       if (dto.slug !== undefined) {
         const nextSlug = toSlug(dto.slug);
+
         if (!nextSlug) {
           throw new ConflictError(
             "Enter a valid slug using letters, numbers, and hyphens (e.g. my-article).",
           );
         }
+
         if (nextSlug !== article.slug) {
           await this.assertSlugAvailable(scope.articles, nextSlug, article.id);
           article.slug = nextSlug;
         }
       }
+
       if (dto.type !== undefined) {
         article.type = dto.type;
       }
+
       await scope.articles.save(article);
+
       return this.mapAdminArticle(article);
     });
+
     if (!result.isDraft) {
       await this.indexing.submitNewsSlugs([slug, result.slug]);
     }
+
     return result;
   }
 
   async setDraftStatus(slug: string, isDraft: boolean) {
     const changed = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
+
       if (!article) {
         throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
       }
+
       const wasDraft = article.isDraft;
       article.isDraft = isDraft;
       await scope.articles.save(article);
+
       return wasDraft !== isDraft;
     });
+
     if (changed) {
       await this.indexing.submitNewsSlugs([slug]);
     }
@@ -337,13 +385,17 @@ export class NewsService {
   async delete(slug: string): Promise<void> {
     const wasPublished = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
+
       if (!article) {
         throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
       }
+
       await scope.replies.deleteAllForTarget("newsArticle", article.id);
       await scope.articles.delete(article);
+
       return !article.isDraft;
     });
+
     if (wasPublished) {
       await this.indexing.submitNewsSlugs([slug]);
     }

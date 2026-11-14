@@ -16,6 +16,7 @@ function currencyCodeFor(name: string): string {
   for (const [label, code] of Object.entries(CURRENCY_CODES)) {
     if (label === name) return code;
   }
+
   return "USD";
 }
 
@@ -26,9 +27,11 @@ export function formatPrizepool(
   if (!prizepool) return "";
 
   const parts = prizepool.trim().split(" ");
+
   if (parts.length < 2) return prizepool;
 
   const amount = parseFloat((parts[0] ?? "").replaceAll(",", ""));
+
   if (isNaN(amount)) return prizepool;
 
   const currencyCode = currencyCodeFor(parts.slice(1).join(" "));
@@ -47,6 +50,7 @@ export function formatPrizepool(
 
 export function formatPrizeAmount(amount: number, currency: string, locale: string): string {
   const fractionDigits = Number.isInteger(amount) ? 0 : currencyFractionDigits(currency);
+
   return new Intl.NumberFormat(locale, {
     style: "currency",
     currency,

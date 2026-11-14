@@ -43,6 +43,7 @@ function createEntityTagNode(kind: NewsEntityTagKind, nodeName: string) {
       start: (src: string) => newsEntityTagStart(src, kind),
       tokenize: (src: string) => {
         const parsed = parseNewsEntityTag(src);
+
         if (!parsed || parsed.kind !== kind) {
           return undefined;
         }

@@ -24,9 +24,11 @@ export function isSpoilerConcealed(
   if (!enabled) {
     return false;
   }
+
   if (scope.matchId && reveals.matchIds.includes(scope.matchId)) {
     return false;
   }
+
   return !(scope.tournamentId && reveals.tournamentIds.includes(scope.tournamentId));
 }
 
@@ -45,6 +47,7 @@ export function revealSpoilers(
         : { ...reveals, tournamentIds: [...reveals.tournamentIds, target.id] };
     default: {
       const exhaustive: never = target;
+
       return exhaustive;
     }
   }

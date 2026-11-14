@@ -4,6 +4,7 @@ import type { CurrentRosterSource } from "../../roster/application/ports";
 import { PandascoreApiClient } from "./pandascore-api.client";
 import { currentPlayerSchema } from "./dto/incident.dto";
 import { PandascorePlayerMapper } from "./mappers/pandascore-player.mapper";
+
 @Injectable()
 export class PandascoreCurrentRosterSource implements CurrentRosterSource {
   constructor(private readonly apiClient: PandascoreApiClient) {}

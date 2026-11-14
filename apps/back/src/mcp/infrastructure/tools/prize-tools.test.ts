@@ -11,6 +11,7 @@ const SOURCE = "https://example.com/fake-cup/prizes";
 
 function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes") {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
+
   const rosterProposalService = {
     propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
       id: "proposal-1",
@@ -20,12 +21,15 @@ function setup(role: StaffRole = "admin", toolName = "propose_tournament_prizes"
     proposeTeamLogo: vi.fn(),
     list: vi.fn(),
   };
+
   const tool = [
     ...rosterTools({ rosterProposalService }),
     ...prizeTools({ rosterProposalService }),
   ].find((candidate) => candidate.name === toolName);
+
   if (!tool) throw new Error(`${toolName} is not defined`);
   const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
+
   return { rosterProposalService, tool, call };
 }
 
@@ -100,6 +104,7 @@ describe("propose_tournament_prize_update", () => {
 
 describe("propose_player_award", () => {
   const PLAYER_ID = "3a9d4c7e-5b1f-4e2a-8c6d-9f0e1d2c3b4a";
+
   const input = {
     tournamentId: TOURNAMENT_ID,
     teamId: TEAM_ID,
@@ -107,6 +112,7 @@ describe("propose_player_award", () => {
     awardType: "mvp",
     sourceUrl: SOURCE,
   };
+
   const setupAward = (role?: StaffRole) => setup(role, "propose_player_award");
 
   it("queues a proposal instead of creating the award", async () => {
@@ -152,6 +158,7 @@ describe("propose_player_award", () => {
   it("requires a known award type and a non-Liquipedia source", () => {
     const schema = z.object(setupAward().tool.inputSchema);
     expect(schema.safeParse(input).success).toBe(true);
+
     for (const awardType of [
       "grand_finals_mvp",
       "offensive_mvp",

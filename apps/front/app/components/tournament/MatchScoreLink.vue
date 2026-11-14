@@ -50,6 +50,7 @@ const detailTo = computed(() => {
   if (discoverySource) {
     return matchDetailTo(match, discoverySource);
   }
+
   return localePath(matchPath(match.publicId, match.slug));
 });
 
@@ -68,6 +69,7 @@ function onMatchClick() {
   if (!discoverySource || !discoveryStatus) {
     return;
   }
+
   trackMatchRowClicked({
     matchId: match.id,
     source: discoverySource,

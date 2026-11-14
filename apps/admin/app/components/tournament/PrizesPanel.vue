@@ -85,12 +85,14 @@ const teamOptions = computed<Option[]>(() => {
   const participants = props.participants.flatMap(({ team }) =>
     team ? [{ value: team.id, label: team.name }] : [],
   );
+
   const outsiders = (distribution.value?.prizes ?? [])
     .filter(({ team }) => !isParticipant(team.id))
     .map(({ team }) => ({
       value: team.id,
       label: t("page.tournaments.prizes.notParticipantOption", { name: team.name }),
     }));
+
   return [...participants, ...outsiders].sort((a, b) => a.label.localeCompare(b.label));
 });
 
@@ -99,6 +101,7 @@ function playerOptions(teamId: string | undefined): Option[] {
     value: id,
     label: name,
   }));
+
   const outsiders = (distribution.value?.prizes ?? [])
     .filter(({ team }) => team.id === teamId)
     .flatMap(({ players }) => players)
@@ -107,6 +110,7 @@ function playerOptions(teamId: string | undefined): Option[] {
       value: id,
       label: t("page.tournaments.prizes.notOnRosterOption", { name }),
     }));
+
   return [...roster, ...outsiders];
 }
 
@@ -120,6 +124,7 @@ function playersError(row: PrizeRow): string | undefined {
   if (row.playerIds.length > MAX_PRIZE_PLAYERS) {
     return t("page.tournaments.prizes.errors.tooManyPlayers", { max: MAX_PRIZE_PLAYERS });
   }
+
   return isParticipant(row.teamId) &&
     row.playerIds.some((playerId) => !isOnRoster(row.teamId, playerId))
     ? t("page.tournaments.prizes.errors.notOnRoster")
@@ -147,11 +152,13 @@ function currencyError(currency: string): string | undefined {
 
 const duplicateTeam = computed(() => {
   const teamIds = rows.value.map(({ teamId }) => teamId).filter(Boolean);
+
   return new Set(teamIds).size !== teamIds.length;
 });
 
 function toInput(row: PrizeRow): TournamentPrizeInput | null {
   const { teamId, amount } = row;
+
   if (
     !teamId ||
     !isParticipant(teamId) ||
@@ -163,6 +170,7 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
     sourceUrlError(row.sourceUrl)
   )
     return null;
+
   return {
     placement: row.placement,
     amount,
@@ -176,11 +184,14 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
 const prizeInputs = computed<TournamentPrizeInput[] | null>(() => {
   if (duplicateTeam.value) return null;
   const inputs: TournamentPrizeInput[] = [];
+
   for (const row of rows.value) {
     const input = toInput(row);
+
     if (!input) return null;
     inputs.push(input);
   }
+
   return inputs;
 });
 
@@ -212,8 +223,10 @@ function selectTeam(row: PrizeRow, teamId: string | undefined) {
 
 async function save() {
   const inputs = prizeInputs.value;
+
   if (!inputs) return;
   saving.value = true;
+
   try {
     distribution.value = await setTournamentPrizes(props.tournamentId, inputs);
     toast.add({ title: t("page.tournaments.prizes.saved"), color: "success" });

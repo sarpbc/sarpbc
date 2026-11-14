@@ -21,11 +21,13 @@ function tournament() {
   const kc = team(KC_ID, "karmine-corp", "Karmine Corp");
   const m8 = team(M8_ID, "gentle-mates", "Gentle Mates");
   const outsider = team(OUT_ID, "outsider", "Outsider");
+
   const cup = Object.assign(new Tournament(), {
     id: "cup",
     name: "Coupe",
     participants: [participant("p-kc", kc), participant("p-m8", m8)],
   });
+
   const lookup: IdOrSlugLookup<Team> = {
     findById: vi.fn(
       async (id: string) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
@@ -34,6 +36,7 @@ function tournament() {
       async (slug: string) => [kc, m8, outsider].find((entry) => entry.slug === slug) ?? null,
     ),
   };
+
   return { cup, kc, m8, lookup };
 }
 
@@ -45,22 +48,26 @@ const noPlayers: IdOrSlugLookup<Player> = {
 describe("resolveMatchParticipantIds", () => {
   it("keeps tournament participant ids", async () => {
     const { cup, lookup } = tournament();
+
     const resolved = await resolveMatchParticipantIds(
       cup,
       { participantIds: ["p-kc", "p-m8"] },
       { teams: lookup, players: noPlayers },
     );
+
     expect(resolved.map((entry) => entry.id)).toEqual(["p-kc", "p-m8"]);
     expect(lookup.findById).not.toHaveBeenCalled();
   });
 
   it("resolves team slugs and ids and ignores duplicates", async () => {
     const { cup, kc, lookup } = tournament();
+
     const resolved = await resolveMatchParticipantIds(
       cup,
       { participantIds: ["p-kc"], teams: [kc.id, "gentle-mates", "karmine-corp"] },
       { teams: lookup, players: noPlayers },
     );
+
     expect(resolved.map((entry) => entry.id)).toEqual(["p-kc", "p-m8"]);
     expect(lookup.findById).toHaveBeenCalledWith(KC_ID);
   });
@@ -118,6 +125,7 @@ describe("resolveMatchParticipantIds", () => {
   it("resolves the 1v1 participants of players without creating a team", async () => {
     const zen = Object.assign(new Player(), { id: "zen-id", slug: "zen", name: "Zen" });
     const vatira = Object.assign(new Player(), { id: "vatira-id", slug: "vatira", name: "Vatira" });
+
     const knockout = Object.assign(new Tournament(), {
       id: "knockout",
       name: "Fake Knockout",
@@ -131,15 +139,18 @@ describe("resolveMatchParticipantIds", () => {
         }),
       ],
     });
+
     const players: IdOrSlugLookup<Player> = {
       findById: async (id) => [zen, vatira].find((player) => player.id === id) ?? null,
       findBySlug: async (slug) => [zen, vatira].find((player) => player.slug === slug) ?? null,
     };
+
     const resolved = await resolveMatchParticipantIds(
       knockout,
       { players: ["zen", "vatira"] },
       { teams: tournament().lookup, players },
     );
+
     expect(resolved.map((entry) => entry.id)).toEqual(["p-zen", "p-vatira"]);
     await expect(
       resolveMatchParticipantIds(

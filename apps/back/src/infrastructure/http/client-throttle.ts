@@ -19,7 +19,9 @@ export function createClientThrottleOptions(internalApiToken: string | undefined
       const address = internalApiTokenMatches(request, internalApiToken)
         ? (forwardedPublicClient(request) ?? resolveClientAddress(request))
         : resolveClientAddress(request);
+
       const normalized = normalizeIp(address);
+
       return internalApiTokenMatches(request, internalApiToken) ? `ssr:${normalized}` : normalized;
     },
     throttlers: [

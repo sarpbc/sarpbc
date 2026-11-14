@@ -16,6 +16,7 @@ describe("news locale", () => {
       titleFr: "Français",
       contentFr: "Bonjour",
     };
+
     assert.deepEqual(localizedNewsFields(article, "fr-FR"), {
       title: "Français",
       content: "Bonjour",

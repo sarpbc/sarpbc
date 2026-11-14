@@ -4,6 +4,7 @@ import { resolveMatchRailTitleKind } from "~/utils/matchRailTitle";
 
 const { t } = useI18n();
 const { data } = await useUpcomingMatches();
+
 const { data: results } = await useLazyAsyncData(
   `matches-results`,
   () => getSidebarMatchesResults(),
@@ -21,9 +22,11 @@ const liveMatches = computed(() => data.value?.live ?? []);
 const visibleLiveMatches = computed(() => liveMatches.value.slice(0, MAX_LIVE_MATCHES));
 const hasHiddenLive = computed(() => liveMatches.value.length > MAX_LIVE_MATCHES);
 const upcomingMatches = computed(() => filterMatchesTodayOrTomorrow(data.value?.upcoming ?? []));
+
 const hasSchedule = computed(
   () => liveMatches.value.length > 0 || upcomingMatches.value.length > 0,
 );
+
 const resultMatches = computed(() => results.value?.results ?? []);
 const hasResults = computed(() => resultMatches.value.length > 0);
 
@@ -39,6 +42,7 @@ const upcomingTitle = computed(() => {
       return t("components.match.upcomingMatches");
     default: {
       const _exhaustive: never = kind;
+
       return _exhaustive;
     }
   }

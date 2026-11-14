@@ -78,16 +78,19 @@ function notificationMessage(notification: AppNotification): string {
 
 async function saveUserName(event: FormSubmitEvent<UsernameSchema>) {
   event.preventDefault();
+
   if (isSavingUserName.value) {
     return;
   }
 
   const parsed = usernameSchema.safeParse(usernameState);
+
   if (!parsed.success) {
     return;
   }
 
   isSavingUserName.value = true;
+
   try {
     const updated = await updateUserName(parsed.data.userName);
     user.value = updated;
@@ -113,6 +116,7 @@ async function markAllRead() {
   }
 
   isMarkingRead.value = true;
+
   try {
     await markNotificationsRead();
     await Promise.all([refreshNotifications(), refreshUnreadCount()]);
@@ -138,6 +142,7 @@ function openEditProfile() {
 const handleLogout = async () => {
   menuOpen.value = false;
   isLoggingOut.value = true;
+
   try {
     posthog?.capture("user_logged_out");
     await logout();

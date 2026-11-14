@@ -47,10 +47,12 @@ const contentInputRef = useTemplateRef("contentInput");
 function focusContentInput() {
   nextTick(() => {
     const component = contentInputRef.value;
+
     if (!component) return;
 
     const root =
       component instanceof HTMLElement ? component : (component as { $el?: HTMLElement }).$el;
+
     const textarea = root?.querySelector?.("textarea") ?? root;
     textarea?.focus();
   });
@@ -68,6 +70,7 @@ async function submitComment() {
   const result = schema.safeParse({
     content: state.content?.trim() ?? "",
   });
+
   if (!result.success) {
     return;
   }
@@ -91,6 +94,7 @@ async function submitComment() {
       title: t("components.discussion.messages.created"),
       color: "success",
     });
+
     return;
   }
 

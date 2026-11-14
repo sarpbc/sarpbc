@@ -145,10 +145,12 @@ export class NewsController {
     @Body({ schema: ReplyContentDto }) dto: ReplyContentDto,
   ) {
     const articleId = await this.newsService.findArticleIdBySlug(slug);
+
     const reply = await this.replyService.create(userId, {
       ...dto,
       newsArticleId: articleId,
     });
+
     return { reply };
   }
 }

@@ -13,6 +13,7 @@ export const useSpoilerFree = () => {
     maxAge: 60 * 60 * 24 * 365,
     sameSite: "lax",
   });
+
   const enabled = useState<boolean>(SPOILER_FREE_COOKIE, () => cookie.value === true);
   const reveals = useState<SpoilerReveals>("spoilerReveals", () => NO_SPOILER_REVEALS);
 

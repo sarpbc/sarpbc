@@ -12,9 +12,11 @@ export class ModerationService {
     return rows
       .map(({ reply, reportCount }) => {
         const target = resolveReplyTargetLink(reply);
+
         if (!target) {
           return null;
         }
+
         return this.toModerationDto(reply, reportCount, target);
       })
       .filter((item): item is ModerationReplyDto => item !== null);

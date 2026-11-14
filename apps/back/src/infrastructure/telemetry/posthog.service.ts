@@ -35,6 +35,7 @@ export class PostHogService implements OnModuleDestroy {
       ...params.properties,
       $process_person_profile: false,
     };
+
     if (params.sessionId) {
       properties.$session_id = params.sessionId;
     }

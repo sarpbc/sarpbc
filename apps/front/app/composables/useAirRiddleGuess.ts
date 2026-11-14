@@ -21,6 +21,7 @@ export function useAirRiddleGuess(maxLength: Ref<number>) {
     if (!value || currentGuess.value.length >= maxLength.value) {
       return;
     }
+
     currentGuess.value = sanitizeAirRiddleGuess(currentGuess.value + value, maxLength.value);
   }
 

@@ -10,6 +10,7 @@ export function syncIcon(state: SyncState): string {
       return "i-fluent-arrow-sync-24-regular";
     default: {
       const _exhaustive: never = state;
+
       return _exhaustive;
     }
   }
@@ -25,6 +26,7 @@ function syncColor(state: SyncState): "success" | "error" | "primary" {
       return "primary";
     default: {
       const _exhaustive: never = state;
+
       return _exhaustive;
     }
   }
@@ -44,6 +46,7 @@ export function useTournamentSyncFeedback() {
 
   async function run(id: string, afterSuccess?: () => Promise<void>) {
     syncingId.value = id;
+
     try {
       await syncTournament(id);
     } catch (error) {
@@ -52,6 +55,7 @@ export function useTournamentSyncFeedback() {
     } finally {
       syncingId.value = null;
     }
+
     setState(id, "success");
     await afterSuccess?.();
   }

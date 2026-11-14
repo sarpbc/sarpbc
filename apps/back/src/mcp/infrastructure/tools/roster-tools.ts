@@ -340,6 +340,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       },
       handler: ({ playerId, name, country, status, sourceUrl }, user) => {
         requireUpdateFields({ name, country, status });
+
         return propose(
           { kind: "update_player", playerId, name, nationality: country, status },
           sourceUrl,
@@ -380,6 +381,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       },
       handler: ({ teamId, name, country, imageUrl, active, sourceUrl }, user) => {
         requireUpdateFields({ name, country, imageUrl, active });
+
         return propose(
           { kind: "update_team", teamId, name, location: country, imageUrl, active },
           sourceUrl,
@@ -527,6 +529,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         if (endDate && endDate < startDate) {
           throw new InvalidInputError("endDate must not precede startDate.");
         }
+
         return propose(
           { kind: "create_contract", playerId, teamId, startDate, endDate, contractRole: role },
           sourceUrl,
@@ -555,6 +558,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
       },
       handler: ({ playerId, contractId, teamId, startDate, endDate, role, sourceUrl }, user) => {
         requireUpdateFields({ teamId, startDate, endDate, role });
+
         return propose(
           {
             kind: "update_contract",
@@ -860,6 +864,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
         const { proposals, names } = await rosterProposalService.list(
           status ?? DEFAULT_PROPOSAL_STATUS,
         );
+
         return {
           proposals: proposals.map((proposal) => ({
             id: proposal.id,

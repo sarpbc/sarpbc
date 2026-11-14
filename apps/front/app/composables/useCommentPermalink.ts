@@ -16,17 +16,20 @@ export function useCommentPermalink() {
 
   function focusCommentElement(commentId: string): HTMLElement | null {
     const element = document.getElementById(commentAnchorId(commentId));
+
     if (!element) {
       return null;
     }
 
     element.setAttribute("tabindex", "-1");
     element.focus({ preventScroll: true });
+
     return element;
   }
 
   function scrollToComment(commentId: string): boolean {
     const element = document.getElementById(commentAnchorId(commentId));
+
     if (!element) {
       return false;
     }
@@ -37,6 +40,7 @@ export function useCommentPermalink() {
       behavior: prefersReducedMotion ? "auto" : "smooth",
     });
     focusCommentElement(commentId);
+
     return true;
   }
 
@@ -60,6 +64,7 @@ export function useCommentPermalink() {
 
   function tryScrollFromHash() {
     const commentId = parseCommentHash(route.hash);
+
     if (commentId && scrollToComment(commentId)) {
       highlightComment(commentId);
     }

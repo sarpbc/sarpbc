@@ -6,10 +6,12 @@ import type { TweetEmbedGateway } from "../application/tweet-embed.service";
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 const FETCH_TIMEOUT_MS = 4_000;
 const imageUrl = z.url().startsWith("https://pbs.twimg.com/");
+
 const unavailableTweetSchema = z.union([
   z.strictObject({}),
   z.object({ __typename: z.literal("TweetTombstone") }),
 ]);
+
 const tweetSchema = z.object({
   __typename: z.literal("Tweet"),
   id_str: z.string(),
@@ -44,12 +46,14 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
 
   async load(parsed: ParsedTweetUrl): Promise<TweetEmbed> {
     const cached = this.cache.get(parsed.id);
+
     if (cached && cached.expiresAt > Date.now()) {
       return cached.embed;
     }
 
     const embed = await this.fetchTweet(parsed);
     this.cache.set(parsed.id, { embed, expiresAt: Date.now() + CACHE_TTL_MS });
+
     return embed;
   }
 
@@ -65,11 +69,13 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
 
     let response: Response;
     let payload: unknown;
+
     try {
       response = await fetch(url, {
         headers: { Accept: "application/json" },
         signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
       });
+
       if (response.ok) {
         payload = await response.json();
       }
@@ -87,15 +93,18 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
     }
 
     const result = tweetSchema.safeParse(payload);
+
     if (!response.ok || !result.success || result.data.id_str !== parsed.id) {
       throw new IntegrationError("Could not load this post from X. Try again in a moment.");
     }
 
     const tweet = result.data;
     let text = tweet.text.slice(...tweet.display_text_range);
+
     for (const media of tweet.mediaDetails) {
       text = text.replace(media.url, "");
     }
+
     text = text.replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").trim();
 
     return {

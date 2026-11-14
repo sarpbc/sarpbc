@@ -26,10 +26,13 @@ function isOtherStage(item: StatsImportItem): boolean {
 export function summarizeStatsImport(statsImport: StatsImport, includeOtherStages: boolean) {
   const counts = { imported: 0, already_imported: 0, unmatched: 0, failed: 0 };
   const otherStages = Object.fromEntries(OTHER_STAGE_REASONS.map((reason) => [reason, 0]));
+
   for (const item of statsImport.items) {
     counts[item.status] += 1;
+
     if (item.status === "unmatched" && isOtherStage(item)) otherStages[item.reason] += 1;
   }
+
   return {
     id: statsImport.id,
     groupId: statsImport.groupId,
@@ -81,6 +84,7 @@ export function gameStatsTools({
       },
       handler: async ({ tournamentId: id, group }) => {
         const statsImport = await statsImportService.request(id, group);
+
         return {
           entityId: statsImport.id,
           result: { id: statsImport.id, groupId: statsImport.groupId, status: statsImport.status },
@@ -102,6 +106,7 @@ export function gameStatsTools({
       },
       handler: async ({ tournamentId: id, includeOtherStages }) => {
         const [latest] = await statsImportService.recent(id);
+
         return {
           import: latest ? summarizeStatsImport(latest, includeOtherStages ?? false) : null,
         };
@@ -141,6 +146,7 @@ export function gameStatsTools({
       handler: async ({ tournamentId: id, platform, platformId, playerId }) => {
         const link = { platform, platformId, playerId };
         const linkedRows = await statsPlayerLinkService.link(id, link);
+
         return { entityId: playerId, result: { link, linkedRows } };
       },
     }),
@@ -163,6 +169,7 @@ export function gameStatsTools({
       },
       handler: async ({ tournamentId: id, ...input }) => {
         const game = await manualGameService.attach(id, input);
+
         return { entityId: game.matchId, result: game };
       },
     }),
@@ -180,6 +187,7 @@ export function gameStatsTools({
       },
       handler: async ({ tournamentId: id, matchId, gameNumber }) => {
         const game = await manualGameService.remove(id, matchId, gameNumber);
+
         return { entityId: game.matchId, result: game };
       },
     }),

@@ -10,6 +10,7 @@ export const Files = createParamDecorator(
     ctx: ExecutionContext,
   ): Promise<null | FastifyRequest["storedFiles"]> => {
     const req = ctx.switchToHttp().getRequest<FastifyRequest>();
+
     return req.storedFiles;
   },
 );

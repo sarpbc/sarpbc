@@ -2,6 +2,7 @@ import { z } from "zod";
 import { TOURNAMENT_FORMATS } from "@sarpbc/types";
 import { DATA_SOURCE_URL_MAX_LENGTH } from "@sarpbc/utils";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
+
 const tournamentWriteFields = {
   eventId: z.uuidv4({ message: "Choose a valid event." }).optional(),
   slug: z
@@ -41,14 +42,19 @@ const tournamentWriteFields = {
     .optional(),
   hasBracket: z.boolean().optional(),
 };
+
 const tournamentName = z.string().trim().min(1, "Enter a tournament name.").max(255);
+
 export const createTournamentFields = {
   ...tournamentWriteFields,
   name: tournamentName,
   source: z.enum(["manual", "startgg"]).optional(),
 };
+
 export const CreateTournamentDto = z.strictObject(createTournamentFields);
+
 export type CreateTournamentDto = z.infer<typeof CreateTournamentDto>;
+
 const participantRoster = z.strictObject({
   teamId: z.uuidv4(),
   playerIds: z
@@ -56,6 +62,7 @@ const participantRoster = z.strictObject({
     .refine((ids) => new Set(ids).size === ids.length, "Each player can only be listed once."),
   sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable().optional(),
 });
+
 export const updateTournamentFields = {
   ...tournamentWriteFields,
   name: tournamentName.optional(),
@@ -67,5 +74,7 @@ export const updateTournamentFields = {
     )
     .optional(),
 };
+
 export const UpdateTournamentDto = z.strictObject(updateTournamentFields);
+
 export type UpdateTournamentDto = z.infer<typeof UpdateTournamentDto>;

@@ -13,15 +13,19 @@ const FETCH_TOURNAMENTS = {
 
 function wonBy(kind: EntityKind, tournament: Tournament, entityId: string): boolean {
   const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
+
   switch (kind) {
     case "team": {
       const winnerTeamId = winner?.team instanceof Object ? winner.team.id : undefined;
+
       return winnerTeamId === entityId;
     }
+
     case "player":
       return winner?.players?.some((player) => player.id === entityId) ?? false;
     default: {
       const exhaustive: never = kind;
+
       return exhaustive;
     }
   }
@@ -38,6 +42,7 @@ export function splitTournaments(
 
   for (const tournament of tournaments) {
     const status = getTournamentStatus(tournament, now);
+
     if (status === null) {
       continue;
     }
@@ -54,6 +59,7 @@ export function splitTournaments(
         break;
       default: {
         const exhaustive: never = status;
+
         return exhaustive;
       }
     }

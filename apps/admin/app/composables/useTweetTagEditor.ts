@@ -16,6 +16,7 @@ export function useTweetTagEditor() {
     }
 
     const parsed = parseTweetUrl(url);
+
     if (!parsed) {
       return;
     }
@@ -37,6 +38,7 @@ export function useTweetTagEditor() {
       canExecute: () => true,
       execute: (editor: Editor) => {
         openTweetPicker(editor);
+
         return editor.chain();
       },
       isActive: () => false,

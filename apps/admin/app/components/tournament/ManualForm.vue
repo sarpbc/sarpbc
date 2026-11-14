@@ -44,8 +44,10 @@ const imageUrl = computed({
 const eventOptions = computed(() => {
   const options = props.events.map((event) => ({ value: event.id, label: event.name }));
   const current = props.original?.event;
+
   if (current && !options.some((option) => option.value === current.id))
     options.unshift({ value: current.id, label: current.name });
+
   return props.original
     ? options
     : [{ value: NEW_EVENT, label: t("page.tournaments.form.newEvent") }, ...options];
@@ -59,19 +61,26 @@ const eventId = computed({
 /** Mirrors the API: only an event of its own (one stage, same name) follows the tournament's slug. */
 const sharesEvent = computed(() => {
   const original = props.original;
+
   if (!original) return false;
   const event = props.events.find((candidate) => candidate.id === original.event.id);
+
   return !event || event.stages.length !== 1 || event.name !== original.name;
 });
+
 const showsSlug = computed(
   () => editsEventSlug(props.modelValue, props.original) && !sharesEvent.value,
 );
+
 const movesEvent = computed(
   () => !!props.original && props.modelValue.eventId !== props.original.event.id,
 );
+
 const eventHelp = computed(() => {
   if (movesEvent.value) return t("page.tournaments.form.eventMoveHelp");
+
   if (sharesEvent.value) return t("page.tournaments.form.eventSharedHelp");
+
   return t("page.tournaments.form.eventHelp");
 });
 
@@ -85,9 +94,11 @@ const teamSearch = ref("");
 
 const filteredTeams = computed(() => {
   const query = teamSearch.value.trim().toLowerCase();
+
   if (!query) {
     return props.teams;
   }
+
   return props.teams.filter((team) => team.name.toLowerCase().includes(query));
 });
 
@@ -114,11 +125,13 @@ function onSlugInput(value: string) {
 
 function toggleTeam(teamId: string, checked: boolean) {
   const next = new Set(state.value.teamIds);
+
   if (checked) {
     next.add(teamId);
   } else {
     next.delete(teamId);
   }
+
   updateField("teamIds", Array.from(next));
 }
 

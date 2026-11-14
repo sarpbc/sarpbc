@@ -22,9 +22,11 @@ const blocks = useNewsMatchBlocks();
 const { isConcealed } = useSpoilerFree();
 
 const block = computed(() => newsMatchBlockFromAttrs(props));
+
 const items = computed((): MatchBlockItem[] | undefined =>
   block.value ? blocks?.items.value[newsMatchBlockKey(block.value)] : undefined,
 );
+
 const pending = computed(
   () => items.value === undefined && block.value !== null && blocks?.status.value === "pending",
 );
@@ -58,8 +60,10 @@ function summary(item: MatchBlockItem): string {
   ) {
     return t("newsTag.matchVersus", { teamA: teamName(item, 0), teamB: teamName(item, 1) });
   }
+
   const score = (index: number) =>
     getMatchParticipantScore(item.results, item.participants[index]?.id) ?? "–";
+
   return t("newsTag.matchScore", {
     teamA: teamName(item, 0),
     scoreA: score(0),

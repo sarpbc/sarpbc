@@ -32,6 +32,7 @@ onMounted(async () => {
 
 async function onSubmit(event: Event) {
   event.preventDefault();
+
   if (pending.value) {
     return;
   }
@@ -55,6 +56,7 @@ async function onSubmit(event: Event) {
 
       if (isStaffUser(profile)) {
         await navigateTo("/");
+
         return;
       }
 
@@ -63,6 +65,7 @@ async function onSubmit(event: Event) {
         title: t("page.authentication.errors.notAdmin"),
         color: "error",
       });
+
       return;
     }
 

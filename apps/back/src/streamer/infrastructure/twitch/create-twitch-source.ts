@@ -7,5 +7,6 @@ export function createTwitchSource(
   clientSecret: string | undefined,
 ): LiveStreamSource | null {
   if (!clientId || !clientSecret) return null;
+
   return new TwitchHelixSource(clientId, new TwitchAppToken({ clientId, clientSecret }));
 }

@@ -49,15 +49,18 @@ async function refreshOptions() {
 async function handleSubmit() {
   if (isSaving.value || isUploading.value) return;
   const validationError = validateManualTournamentForm(formState.value);
+
   if (validationError) {
     toast.add({
       title: t(`page.tournaments.form.errors.${validationError}`),
       color: "error",
     });
+
     return;
   }
 
   isSaving.value = true;
+
   try {
     const created = await createTournament(buildManualTournamentPayload(formState.value, null));
     toast.add({ title: t("page.tournaments.create.saved"), color: "success" });

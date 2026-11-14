@@ -26,6 +26,7 @@ function platformLabel(platform: StreamPlatform): string {
       return t("page.match.detail.watch.platforms.other");
     default: {
       const _exhaustive: never = platform;
+
       return _exhaustive;
     }
   }
@@ -39,6 +40,7 @@ function kindLabel(kind: StreamKind): string {
       return t("page.match.detail.watch.kinds.costream");
     default: {
       const _exhaustive: never = kind;
+
       return _exhaustive;
     }
   }
@@ -48,6 +50,7 @@ const rows = computed(() =>
   orderStreams(streams, locale.value.slice(0, 2)).map((stream) => {
     const language = languageNames.value.of(stream.language) ?? stream.language;
     const platform = platformLabel(stream.platform);
+
     return {
       url: stream.url,
       channel: stream.channel,

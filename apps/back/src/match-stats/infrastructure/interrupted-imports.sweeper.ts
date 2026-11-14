@@ -15,6 +15,7 @@ export class InterruptedImportsSweeper implements OnApplicationBootstrap {
     const interrupted = await RequestContext.create(this.orm.em, () =>
       this.imports.failInterrupted(),
     );
+
     if (interrupted > 0)
       log.warn({
         component: InterruptedImportsSweeper.name,

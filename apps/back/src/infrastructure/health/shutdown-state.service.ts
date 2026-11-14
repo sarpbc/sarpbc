@@ -18,6 +18,7 @@ export class ShutdownStateService implements OnModuleInit, OnModuleDestroy {
 
   onModuleDestroy(): void {
     this.shuttingDown = true;
+
     for (const signal of SHUTDOWN_SIGNALS) {
       process.removeListener(signal, this.onSignal);
     }

@@ -25,18 +25,22 @@ export function assertTournamentUpdateAllowed(
       return;
     case "pandascore": {
       const { imageUrl, endAt, ...syncedFields } = patch;
+
       if (
         (imageUrl !== undefined || endAt !== undefined) &&
         Object.values(syncedFields).every((value) => value === undefined)
       ) {
         return;
       }
+
       throw new InvalidInputError(
         "Only the image and the end date can be edited on a PandaScore tournament. Send imageUrl or endAt alone, or null to clear them.",
       );
     }
+
     default: {
       const exhaustive: never = source;
+
       return exhaustive;
     }
   }
@@ -85,6 +89,7 @@ export function assertLeagueUpdateAllowed(
 ): void {
   if (league.pandascoreId === null) return;
   const { imageUrl, ...syncedFields } = patch;
+
   if (imageUrl !== undefined && Object.values(syncedFields).every((value) => value === undefined))
     return;
   throw new InvalidInputError(

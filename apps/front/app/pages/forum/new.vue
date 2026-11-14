@@ -57,12 +57,15 @@ const canSubmit = computed(
 
 const rateLimitMessage = computed(() => {
   if (creationStatusLoadState.value !== "ready" || !creationStatus.value) return null;
+
   if (creationStatus.value.canCreate) return null;
+
   if (!creationStatus.value.nextAvailableAt) return null;
 
   const nextAt = longDateTimeFormatter(locale.value).format(
     new Date(creationStatus.value.nextAvailableAt),
   );
+
   return t("page.forum.new.rateLimitWait", {
     hours: creationStatus.value.cooldownHours,
     time: nextAt,
@@ -82,6 +85,7 @@ onMounted(async () => {
 
   if (!status) {
     creationStatusLoadState.value = "error";
+
     return;
   }
 
@@ -97,6 +101,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   }
 
   const result = schema.safeParse(state);
+
   if (!result.success) {
     return;
   }
@@ -114,11 +119,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
   if (createResult.ok) {
     await navigateTo(localePath(forumPostPath(createResult.post.publicId, createResult.post.slug)));
+
     return;
   }
 
   if (createResult.reason === "rate_limited") {
     const status = await getForumPostCreationStatus();
+
     if (status) {
       creationStatus.value = status;
       creationStatusLoadState.value = "ready";

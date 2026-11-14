@@ -35,12 +35,15 @@ const placeholder = computed(() =>
 
 async function runSearch(searchQuery: string) {
   const trimmed = searchQuery.trim();
+
   if (!trimmed) {
     results.value = [];
+
     return;
   }
 
   pending.value = true;
+
   try {
     results.value =
       props.kind === "player" ? await searchPlayers(trimmed) : await searchTeams(trimmed);
@@ -77,6 +80,7 @@ function itemLogoSrc(item: Player | Team) {
   if (props.kind === "team") {
     return resolveThemedLogoUrl(item, colorMode.value);
   }
+
   return item.imageUrl ?? undefined;
 }
 </script>

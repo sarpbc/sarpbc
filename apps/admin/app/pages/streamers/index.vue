@@ -79,6 +79,7 @@ async function confirmAdd() {
   }
 
   isAdding.value = true;
+
   try {
     await addTrackedStreamer(normalizedLogin.value, newDisplayName.value.trim() || null);
     isAddModalOpen.value = false;
@@ -103,6 +104,7 @@ async function confirmRemove() {
   }
 
   isRemoving.value = true;
+
   try {
     await removeTrackedStreamer(streamerToRemove.value.id);
     isRemoveModalOpen.value = false;

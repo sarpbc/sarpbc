@@ -10,6 +10,7 @@ const { viewership, startgg } = defineProps<{
 const { t, locale } = useI18n();
 
 const numberFormatter = computed(() => new Intl.NumberFormat(locale.value));
+
 const dateTimeFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
@@ -22,6 +23,7 @@ function scopeLabel(scope: ViewershipScope): string {
       return t("components.viewership.scope.withCostreams");
     default: {
       const _exhaustive: never = scope;
+
       return _exhaustive;
     }
   }
@@ -35,6 +37,7 @@ const stats = computed(() => {
       value: numberFormatter.value.format(viewership.peakViewers),
     },
   ];
+
   if (viewership.averageViewers !== null) {
     rows.push({
       key: "average",
@@ -42,6 +45,7 @@ const stats = computed(() => {
       value: numberFormatter.value.format(viewership.averageViewers),
     });
   }
+
   return rows;
 });
 

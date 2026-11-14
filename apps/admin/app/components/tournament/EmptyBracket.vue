@@ -22,6 +22,7 @@ const teamItems = computed(() =>
 
 async function create() {
   creating.value = true;
+
   try {
     await createEmptyBracket(tournamentId, {
       teams: teams.value,

@@ -42,6 +42,7 @@ function redistributable(match: Match): boolean {
 
 export function countrySources() {
   const findByNationality = vi.fn(async (code: string) => (code === "FR" ? french : []));
+
   const list = vi.fn(
     async (
       kind: MatchListKind,
@@ -50,9 +51,11 @@ export function countrySources() {
       const rows = countryMatches.filter(
         (match) => kind === "results" && (!options.redistributableOnly || redistributable(match)),
       );
+
       return [rows, rows.length];
     },
   );
+
   const sources: CountrySources = {
     players: {
       nationalities: async () => [
@@ -63,5 +66,6 @@ export function countrySources() {
     },
     matches: { list },
   };
+
   return { sources, findByNationality, list };
 }

@@ -34,6 +34,7 @@ export class StatsImportController {
   @Get()
   async list(@Param("id") tournamentId: string) {
     const imports = await this.service.recent(tournamentId);
+
     return { imports: imports.map(present) };
   }
 

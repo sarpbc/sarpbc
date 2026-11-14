@@ -20,6 +20,7 @@ const { match, label, participants } = defineProps<{
   label: string;
   participants: TournamentDetailParticipant[];
 }>();
+
 const open = defineModel<boolean>("open", { default: false });
 
 const { t } = useI18n();
@@ -66,6 +67,7 @@ const usableSuggestion = computed(() =>
     participantId: suggestion.participantId,
     picks: suggestion.playerIds.flatMap((id) => {
       const name = knownNames.value.get(id);
+
       return name ? [{ id, name }] : [];
     }),
   })),
@@ -96,9 +98,12 @@ function isStandIn(participantId: string, playerId: string): boolean {
 function rosterOptions(participantId: string): SelectItem[][] {
   const own = participants.filter((participant) => participant.id === participantId);
   const others = participants.filter((participant) => participant.id !== participantId);
+
   return [...own, ...others].flatMap((participant): SelectItem[][] => {
     const players = participant.players.filter((player) => !taken.value.has(player.id));
+
     if (players.length === 0) return [];
+
     return [
       [
         { type: "label", label: participantName(participant) },
@@ -110,6 +115,7 @@ function rosterOptions(participantId: string): SelectItem[][] {
 
 function rememberNames(picks: LineupPick[]) {
   const names = new Map(knownNames.value);
+
   for (const pick of picks) names.set(pick.id, pick.name);
   knownNames.value = names;
 }
@@ -132,6 +138,7 @@ function apply(response: MatchLineupsResponse) {
 async function load() {
   loading.value = true;
   loadFailed.value = false;
+
   try {
     apply(await getMatchLineups(match.id));
   } catch {
@@ -151,11 +158,15 @@ watch(
 
 async function runSearch(searchQuery: string) {
   const trimmed = searchQuery.trim();
+
   if (!trimmed) {
     results.value = [];
+
     return;
   }
+
   searching.value = true;
+
   try {
     results.value = await searchPlayers(trimmed);
   } catch (searchError) {
@@ -177,6 +188,7 @@ function add(participantId: string, pick: LineupPick) {
 function addFromRoster(participantId: string) {
   const playerId = selectedPick.value[participantId];
   const name = playerId ? knownNames.value.get(playerId) : undefined;
+
   if (!playerId || !name) return;
   add(participantId, { id: playerId, name });
   selectedPick.value = { ...selectedPick.value, [participantId]: undefined };
@@ -199,6 +211,7 @@ function fillFromRoster(participantId: string) {
       .filter(([id]) => id !== participantId)
       .flatMap(([, picks]) => picks.map((pick) => pick.id)),
   );
+
   const roster = participants.find((participant) => participant.id === participantId);
   lineups.value = {
     ...lineups.value,
@@ -224,6 +237,7 @@ function fillFromSuggestion() {
 
 async function save() {
   saving.value = true;
+
   try {
     apply(
       await setMatchLineups(

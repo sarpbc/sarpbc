@@ -7,7 +7,9 @@ const { t, locale } = useI18n();
 
 const games = computed(() => {
   const byGame = new Map<number, MatchVod[]>();
+
   for (const vod of vods) byGame.set(vod.game, [...(byGame.get(vod.game) ?? []), vod]);
+
   return [...byGame.entries()].sort(([a], [b]) => a - b).map(([game, links]) => ({ game, links }));
 });
 
@@ -21,6 +23,7 @@ function sourceLabel(source: MatchVodSource): string {
       return t("page.match.detail.vods.sources.youtube");
     default: {
       const exhaustive: never = source;
+
       return exhaustive;
     }
   }

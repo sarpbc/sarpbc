@@ -1,4 +1,5 @@
 import type { NewsType } from "@sarpbc/types";
+
 export interface NewsArticleRecord {
   id: string;
   slug: string;
@@ -13,6 +14,7 @@ export interface NewsArticleRecord {
   imageUrl: string | null;
   type: NewsType;
 }
+
 export interface CreateNewsArticleInput {
   title: string;
   content: string;
@@ -22,6 +24,7 @@ export interface CreateNewsArticleInput {
   slug?: string;
   type?: NewsType;
 }
+
 export type UpdateNewsArticleInput = Omit<Partial<CreateNewsArticleInput>, "imageUrl"> & {
   imageUrl?: string | null;
 };

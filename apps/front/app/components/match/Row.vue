@@ -43,19 +43,23 @@ type ScheduleDisplay =
 
 const schedule = computed((): ScheduleDisplay | null => {
   const beginAt = parseMatchDate(match.beginAt);
+
   if (!beginAt) {
     return null;
   }
 
   const time = hourDf.value.format(beginAt);
+
   if (!showDate) {
     return { kind: "time", time };
   }
 
   const offset = daysFromToday(beginAt);
+
   if (offset === 0) {
     return { kind: "time", time };
   }
+
   if (offset === 1) {
     return { kind: "tomorrow", label: t("components.match.tomorrowShort"), time };
   }
@@ -70,6 +74,7 @@ const teamAName = computed(() => slotName(match.participants, 0) ?? t("component
 const teamBName = computed(() => slotName(match.participants, 1) ?? t("components.match.tbd"));
 
 const { isConcealed } = useSpoilerFree();
+
 const concealed = computed(() =>
   isConcealed({ matchId: match.id, tournamentId: match.tournament?.id }),
 );
@@ -77,6 +82,7 @@ const concealed = computed(() =>
 const scoreA = computed(() =>
   concealed.value ? null : getMatchParticipantScore(match.results, teamA.value?.id),
 );
+
 const scoreB = computed(() =>
   concealed.value ? null : getMatchParticipantScore(match.results, teamB.value?.id),
 );
@@ -88,6 +94,7 @@ watch([scoreA, scoreB], () => {
   if (concealed.value) {
     return;
   }
+
   scoreChanged.value = true;
   clearTimeout(flashTimer);
   flashTimer = setTimeout(() => {
@@ -101,6 +108,7 @@ function liveScoreClass(score: number | null, other: number | null): string {
   if (score === null || other === null || score === other) {
     return "text-highlighted";
   }
+
   return score > other ? "text-highlighted" : "text-muted";
 }
 </script>

@@ -67,7 +67,9 @@ function rosterPlayerFromId(
   if (playerId === USER_ROSTER_ID) {
     return { id: playerId, name: player.name, rating: player.rating, isUser: true };
   }
+
   const npc = world.players[playerId];
+
   return {
     id: playerId,
     name: npc?.name ?? playerId,
@@ -82,6 +84,7 @@ function storedSplitPoints(
   split: number,
 ): Record<string, number> | null {
   const field = world.splitFields.find((entry) => entry.season === season && entry.split === split);
+
   return field?.points ?? null;
 }
 
@@ -92,23 +95,30 @@ function npcSplitPointsByTeam(
   split: number,
 ): Map<string, number> {
   const stored = storedSplitPoints(world, player.season, split);
+
   if (stored) return new Map(Object.entries(stored));
+
   return new Map();
 }
 
 function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldState): WorldRankings {
   const completedSplits = player.splits.length;
+
   const freezeToSnapshot =
     completedSplits === 0 && world.rankSnapshot != null && world.rankSnapshot.length > 0;
+
   const snapshot = freezeToSnapshot ? world.rankSnapshot : null;
+
   const snapshotPoints = world.rankSnapshot
     ? new Map(world.rankSnapshot.map((entry) => [entry.teamId, entry.points]))
     : null;
+
   const snapshotOrder = snapshot
     ? new Map(snapshot.map((entry, index) => [entry.teamId, index]))
     : null;
 
   const npcSplitCaches: Map<string, number>[] = [];
+
   for (let split = 1; split <= completedSplits; split++) {
     npcSplitCaches.push(npcSplitPointsByTeam(player, world, split));
   }
@@ -119,22 +129,29 @@ function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldStat
     const isPlayerTeam = team.id === player.teamId;
     const rosterIds = world.rosters[team.id] ?? [...team.players];
     const roster = rosterIds.map((id) => rosterPlayerFromId(id, world, player));
+
     const strength =
       roster.length > 0 ? getRosterStrength(rosterIds, world, player.rating) : team.baseStrength;
+
     const splitPoints = isPlayerTeam
       ? player.splits.map((record) => record.points)
       : npcSplitCaches.map((cache) => cache.get(team.id) ?? 0);
+
     const points = isPlayerTeam
       ? yearPlayerPoints
       : splitPoints.reduce((sum, value) => sum + value, 0);
+
     const previous = snapshotPoints
       ? (snapshotPoints.get(team.id) ?? 0)
       : isPlayerTeam
         ? (player.previousPoints ?? 0)
         : 0;
+
     const rankingScore = freezeToSnapshot ? previous : completedSplits === 0 ? strength : points;
+
     return { team, roster, strength, rating: rankingScore, points, rank: 0, isPlayerTeam };
   });
+
   if (snapshotOrder) {
     teams.sort(
       (a, b) => (snapshotOrder.get(a.team.id) ?? 999) - (snapshotOrder.get(b.team.id) ?? 999),
@@ -145,11 +162,13 @@ function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldStat
         b.rating - a.rating || b.strength - a.strength || a.team.id.localeCompare(b.team.id),
     );
   }
+
   teams.forEach((entry, index) => {
     entry.rank = index + 1;
   });
 
   const players: RankedPlayer[] = [];
+
   for (const entry of teams) {
     for (const member of entry.roster) {
       players.push({
@@ -163,6 +182,7 @@ function computeWorldRankings(player: PlayerCircuitInput, world: CareerWorldStat
       });
     }
   }
+
   players.sort((a, b) => b.rating - a.rating);
   players.forEach((entry, index) => {
     entry.rank = index + 1;
@@ -178,6 +198,7 @@ export function getTeamRank(rankings: WorldRankings, teamId: string): number | n
 export function pickStartingTeam(region: CareerRegion): string {
   const teams = getWorldTeamsByRegion(region);
   const weakest = [...teams].sort((a, b) => a.baseStrength - b.baseStrength)[0];
+
   return weakest!.id;
 }
 

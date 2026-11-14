@@ -7,6 +7,7 @@ import type { UserTransaction } from "./ports/user-store";
 
 describe("UserService", () => {
   let service: UserService;
+
   const userQueries = {
     list: vi.fn(),
     findByEmail: vi.fn(),
@@ -14,12 +15,14 @@ describe("UserService", () => {
     findByGoogleId: vi.fn(),
     findByEmailWithPassword: vi.fn(),
   };
+
   const userWriter = {
     findById: vi.fn(),
     existsByEmail: vi.fn(),
     existsByUserName: vi.fn(),
     save: vi.fn(),
   };
+
   const transaction: UserTransaction = {
     run: (work) => work({ users: userWriter }),
   };

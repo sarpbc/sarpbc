@@ -12,6 +12,7 @@ export default defineNuxtPlugin(() => {
 
   const capturePageview = (fullPath = router.currentRoute.value.fullPath) => {
     const client = getLoadedPostHogClient();
+
     if (
       choice.value !== "accepted" ||
       !client?.has_opted_in_capturing() ||
@@ -34,6 +35,7 @@ export default defineNuxtPlugin(() => {
       const accepted = choice.value === "accepted";
       setPostHogConsent(accepted, config.public.apiBase);
       lastPageview = null;
+
       if (!accepted) {
         return;
       }

@@ -26,8 +26,10 @@ export class AuthGuard implements CanActivate {
     const refreshToken = request.cookies?.[REFRESH_TOKEN_COOKIE];
 
     const accessUser = accessToken ? await this.authService.authenticate(accessToken) : null;
+
     if (accessUser) {
       request.user = accessUser;
+
       return true;
     }
 
@@ -38,12 +40,14 @@ export class AuthGuard implements CanActivate {
     }
 
     const session = await this.authService.refreshSession(refreshToken);
+
     if (!session) {
       throw new AuthenticationError("Invalid or expired token");
     }
 
     setAuthCookies(reply, session.tokens, this.configService.get<AuthCookieConfig>("authCookie"));
     request.user = session.user;
+
     return true;
   }
 }

@@ -54,11 +54,13 @@ const [
 ]);
 
 const playerLoadFailed = computed(() => Boolean(playerAError.value || playerBError.value));
+
 const unknownSlugs = computed(() =>
   playerLoadFailed.value
     ? []
     : [...(slugA && !playerA.value ? [slugA] : []), ...(slugB && !playerB.value ? [slugB] : [])],
 );
+
 const samePlayer = computed(
   () => Boolean(playerA.value && playerB.value) && playerA.value?.id === playerB.value?.id,
 );
@@ -82,6 +84,7 @@ const {
   `player-compare-${pair.value?.a ?? ""}-${pair.value?.b ?? ""}`,
   async () => {
     const current = pair.value;
+
     return current ? getPlayerComparison(current.a, current.b) : null;
   },
   { default: () => null },
@@ -101,6 +104,7 @@ const yearFormat = computed(() => new Intl.DateTimeFormat(locale.value, { year: 
 
 function leaderOf(a: number, b: number): Side | "tie" {
   if (a === b) return "tie";
+
   return a > b ? "a" : "b";
 }
 
@@ -126,6 +130,7 @@ function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
   const currencies = [
     ...new Set([...a.earnings.totals, ...b.earnings.totals].map(({ currency }) => currency)),
   ].sort();
+
   if (currencies.length === 0)
     return [
       {
@@ -136,9 +141,11 @@ function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
         leader: null,
       },
     ];
+
   return currencies.map((currency) => {
     const amountA = a.earnings.totals.find((total) => total.currency === currency)?.amount ?? 0;
     const amountB = b.earnings.totals.find((total) => total.currency === currency)?.amount ?? 0;
+
     return {
       key: `earnings-${currency}`,
       label:
@@ -154,8 +161,10 @@ function earningsRows(a: PlayerCareer, b: PlayerCareer): SummaryRow[] {
 
 const summaryRows = computed<SummaryRow[]>(() => {
   const current = comparison.value;
+
   if (!current) return [];
   const { a, b, headToHead } = current;
+
   return [
     countRow(
       "titles",
@@ -193,7 +202,9 @@ const summaryRows = computed<SummaryRow[]>(() => {
 
 function valueClass(row: SummaryRow, side: Side): string {
   if (row.leader === null) return "text-default";
+
   if (row.leader === "tie") return "text-toned";
+
   return row.leader === side ? "font-medium text-highlighted" : "text-muted";
 }
 
@@ -204,6 +215,7 @@ function yearOf(value: string | null): string | null {
 function stintRange(stint: CareerStint): string {
   const start = yearOf(stint.startDate) ?? "";
   const end = yearOf(stint.endDate) ?? t("page.player.compare.present");
+
   return start === end ? start : `${start} – ${end}`;
 }
 
@@ -246,7 +258,9 @@ function teamItems(career: PlayerCareer): CareerItem[] {
 
 const detailSections = computed(() => {
   const current = comparison.value;
+
   if (!current) return [];
+
   return [
     {
       key: "titles",

@@ -15,13 +15,16 @@ const eventKey = computed(() => `page.game.career.events.${props.outcome.eventId
 
 const outcomeCopy = computed(() => {
   const key = props.outcome.failed ? "failure" : "outcome";
+
   return t(`${eventKey.value}.choices.${props.outcome.choiceId}.${key}`);
 });
 
 const statRows = computed(() => {
   const keys: (keyof CareerStats)[] = ["rating", "form", "morale"];
+
   return keys.flatMap((stat) => {
     const value = props.outcome.delta[stat] ?? 0;
+
     return value === 0 ? [] : [{ stat, value }];
   });
 });

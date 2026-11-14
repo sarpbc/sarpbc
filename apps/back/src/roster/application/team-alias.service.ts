@@ -15,6 +15,7 @@ export class TeamAliasService {
     return this.transaction.run(async (scope) => {
       const alias = await this.prepare(scope, teamId, input);
       await scope.aliases.save(teamId, alias);
+
       return alias;
     });
   }
@@ -23,6 +24,7 @@ export class TeamAliasService {
     return this.transaction.run(async (scope) => {
       const alias = await this.prepare(scope, teamId, input, aliasId);
       await scope.aliases.save(teamId, alias);
+
       return alias;
     });
   }
@@ -44,31 +46,39 @@ export class TeamAliasService {
     const id = aliasId === undefined ? "" : this.requireAlias(team, aliasId).id;
     const alias = Object.assign(new TeamAlias(), requireTeamAliasInput(input), { id });
     assertTeamAliasFits(alias, team);
+
     if (alias.pandascoreId !== null) {
       const owner = await scope.aliases.pandascoreOwner(alias.pandascoreId, id);
+
       if (owner) {
         throw new ConflictError(
           `PandaScore team ${alias.pandascoreId} already belongs to ${owner}; an alias cannot claim it.`,
         );
       }
     }
+
     return alias;
   }
 
   private async requireTeam({ teams }: TeamAliasWriteScope, id: string): Promise<Team> {
     const team = await teams.findById(id);
+
     if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
+
     if (team.mergedIntoId) {
       throw new InvalidInputError(
         `${team.name} was merged into team "${team.mergedIntoId}"; edit that team instead`,
       );
     }
+
     return team;
   }
 
   private requireAlias(team: Team, aliasId: string): TeamAlias {
     const alias = team.aliases.find(({ id }) => id === aliasId);
+
     if (!alias) throw new NotFoundError(`Alias "${aliasId}" does not belong to ${team.name}`);
+
     return alias;
   }
 }

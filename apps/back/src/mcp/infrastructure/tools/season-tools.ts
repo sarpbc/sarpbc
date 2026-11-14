@@ -24,6 +24,7 @@ export function seasonTools({ seasonService }: SeasonToolServices): McpTool[] {
       input: { id: z.string().uuid().describe("Season UUID from list_seasons.") },
       handler: async ({ id }) => {
         const season = await seasonService.detail(id);
+
         return {
           id: season.id,
           name: season.name,

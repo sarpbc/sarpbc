@@ -26,7 +26,9 @@ const fullName = computed(() => {
   if (!player.value) {
     return null;
   }
+
   const parts = [player.value.firstName, player.value.lastName].filter(Boolean);
+
   return parts.length > 0 ? parts.join(" ") : null;
 });
 
@@ -42,6 +44,7 @@ async function loadPlayer() {
     const response = await fetchWithEntityTagCache(`player:${props.slug}`, () =>
       apiFetch<{ player: Player | null }>(`/player/slug/${encodeURIComponent(props.slug)}`),
     );
+
     player.value = response.player;
     error.value = response.player === null;
   } catch {

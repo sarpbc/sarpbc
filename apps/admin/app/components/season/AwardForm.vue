@@ -45,11 +45,15 @@ const isValid = computed(
 
 async function runSearch(value: string) {
   const trimmed = value.trim();
+
   if (!trimmed) {
     results.value = [];
+
     return;
   }
+
   searching.value = true;
+
   try {
     results.value = await searchPlayers(trimmed);
   } catch (searchError) {

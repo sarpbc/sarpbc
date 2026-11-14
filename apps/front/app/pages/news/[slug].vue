@@ -44,6 +44,7 @@ const seoDescription = computed(() => {
     article.value?.content ?? "",
     NEWS_SEO_DESCRIPTION_MAX_LENGTH,
   );
+
   return excerpt || t("page.news.seoDescriptionDefault");
 });
 
@@ -63,6 +64,7 @@ setJsonLd("ld-json-news-article", () => {
   if (!article.value) {
     return null;
   }
+
   return buildNewsArticleJsonLd({
     title: article.value.title,
     slug: article.value.slug,

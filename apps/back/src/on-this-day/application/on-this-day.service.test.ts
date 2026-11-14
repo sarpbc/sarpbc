@@ -40,6 +40,7 @@ describe("OnThisDayService", () => {
   it("builds titles, finals and transfers from structured fields only", async () => {
     const won = stage("worlds-playoffs", "pandascore", "2024-12-06T21:00:00Z");
     const decided = stage("major-playoffs", "manual", "2023-12-06T20:00:00Z");
+
     const { sources } = onThisDaySources({
       titles: [won, decided],
       finals: [grandFinal(decided, "2023-12-06T19:30:00Z")],
@@ -56,11 +57,13 @@ describe("OnThisDayService", () => {
       logoLightUrl: null,
       logoDarkUrl: null,
     };
+
     const tournament = {
       name: "Playoffs",
       slug: "playoffs",
       event: { name: "RLCS 2024 World Championship", slug: "rlcs-worlds-2024" },
     };
+
     const vatira = { name: "Vatira", slug: "vatira" };
     expect(events).toEqual([
       {
@@ -98,6 +101,7 @@ describe("OnThisDayService", () => {
   it("drops start.gg titles, finals and facts linked to start.gg from the public payload", async () => {
     const startggStage = stage("community-cup", "startgg", "2024-12-06T18:00:00Z");
     const manualStage = stage("cup", "manual", "2021-12-06T18:00:00Z");
+
     const { sources } = onThisDaySources({
       titles: [startggStage, manualStage],
       finals: [
@@ -152,6 +156,7 @@ describe("OnThisDayService", () => {
         source: null,
       },
     });
+
     const { sources } = onThisDaySources({
       facts: [written],
       titles: [stage("worlds-playoffs", "pandascore", "2024-12-06T21:00:00Z")],

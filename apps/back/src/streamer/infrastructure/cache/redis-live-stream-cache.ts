@@ -32,9 +32,12 @@ export class RedisLiveStreamCache implements LiveStreamCache {
 
   async read(): Promise<LiveStreamSnapshot | null> {
     const cached = await this.redis.get(LIVE_STREAMS_KEY);
+
     if (cached === null) return null;
+
     try {
       const result = snapshot.safeParse(JSON.parse(cached));
+
       return result.success ? result.data : null;
     } catch {
       return null;
@@ -43,6 +46,7 @@ export class RedisLiveStreamCache implements LiveStreamCache {
 
   async claimRefresh(): Promise<string | null> {
     const claim = randomUUID();
+
     return (await this.redis.setIfAbsent(LIVE_STREAMS_LOCK_KEY, claim, LOCK_TTL_SECONDS))
       ? claim
       : null;

@@ -7,6 +7,7 @@ import type {
   AwardTransaction,
   AwardWriter,
 } from "./ports";
+
 export class PlayerAwardService {
   constructor(
     private readonly reads: AwardQueries,
@@ -14,12 +15,16 @@ export class PlayerAwardService {
   ) {}
   async findByPlayerId(id: string) {
     const awards = await this.reads.byPlayer(id);
+
     if (!awards) throw new NotFoundError('Player with id "' + id + '" not found');
+
     return awards;
   }
   async findByTournamentId(id: string) {
     const awards = await this.reads.byTournament(id);
+
     if (!awards) throw new NotFoundError('Tournament with id "' + id + '" not found');
+
     return awards;
   }
   async create(
@@ -30,6 +35,7 @@ export class PlayerAwardService {
   ) {
     return this.transaction.run(async ({ awards }) => {
       await this.requireEligible(awards, tournamentId, { participantId }, playerId);
+
       return awards.create({ tournamentId, participantId, playerId, awardType });
     });
   }
@@ -57,6 +63,7 @@ export class PlayerAwardService {
         playerId,
         awardType,
       );
+
       return awards.create({ tournamentId, participantId, playerId, awardType });
     });
   }
@@ -81,8 +88,10 @@ export class PlayerAwardService {
       { teamId },
       playerId,
     );
+
     if (tournament.source === "startgg")
       throw new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
+
     if (await awards.awardTaken(tournamentId, awardType))
       throw new InvalidInputError(
         tournament.name +
@@ -90,6 +99,7 @@ export class PlayerAwardService {
           awardType.replaceAll("_", " ") +
           " award. A tournament has one award of each type.",
       );
+
     return participant.id;
   }
   private async requireEligible(
@@ -106,7 +116,9 @@ export class PlayerAwardService {
       participantRef,
       playerId,
     );
+
     if (!tournament) throw new NotFoundError('Tournament with id "' + tournamentId + '" not found');
+
     if (!participant)
       throw new NotFoundError(
         "Tournament participant " +
@@ -115,7 +127,9 @@ export class PlayerAwardService {
             : 'for team "' + participantRef.teamId + '"') +
           " was not found for this tournament",
       );
+
     if (!player) throw new NotFoundError('Player with id "' + playerId + '" not found');
+
     if (!participant.playerIds.includes(playerId))
       throw new InvalidInputError(
         player.name +
@@ -123,6 +137,7 @@ export class PlayerAwardService {
           participant.name +
           ". Add the player to this participant in the tournament roster first.",
       );
+
     return { tournament, participant };
   }
 }

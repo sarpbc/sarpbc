@@ -16,9 +16,11 @@ export class StorageService {
     target: ImageUploadTarget,
   ): Promise<StoredObject> {
     const type = imageContentType(contentType);
+
     if (bytes.byteLength > MAX_IMAGE_BYTES) {
       throw new InvalidInputError(`Image must be no larger than ${MAX_IMAGE_MEGABYTES} MB.`);
     }
+
     return this.storage.uploadImage(bytes, type, target);
   }
 }

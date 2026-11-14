@@ -9,6 +9,7 @@ describe("PlayerService profile photos", () => {
   let gallery: PlayerPhoto[];
   let service: PlayerService;
   let transactions: number;
+
   const scope: RosterWriteScope = {
     players: {
       findById: async (id) => (id === player.id ? player : null),
@@ -41,6 +42,7 @@ describe("PlayerService profile photos", () => {
       delete: async () => {},
     },
   };
+
   beforeEach(() => {
     player.imageUrl = "old.png";
     gallery = [Object.assign(new PlayerPhoto(), { id: "selected", player, url: "selected.png" })];
@@ -48,6 +50,7 @@ describe("PlayerService profile photos", () => {
     service = new PlayerService({} as PlayerQueries, {} as PhotoQueries, {
       run: async (work) => {
         transactions += 1;
+
         return work(scope);
       },
     });

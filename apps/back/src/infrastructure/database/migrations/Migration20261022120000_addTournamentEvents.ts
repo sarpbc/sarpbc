@@ -25,16 +25,21 @@ function eventDisplayName(input: {
   const league = input.leagueName?.trim();
   const serie = input.serieName?.trim();
   const stage = input.stageName.trim();
+
   if (serie) {
     if (/^\d{4}$/.test(serie)) {
       if (league) return `${league} ${serie}`;
+
       return stage && !GENERIC_STAGE_NAMES.has(stage.toLowerCase()) ? stage : serie;
     }
+
     return league && !serie.toLowerCase().startsWith(league.toLowerCase())
       ? `${league} ${serie}`
       : serie;
   }
+
   if (league && stage) return `${league} ${stage}`;
+
   return stage || league || "";
 }
 
@@ -70,6 +75,7 @@ const stageRow = z
     leagueId: row.league_id,
     leagueName: row.league_name,
   }));
+
 type StageRow = z.infer<typeof stageRow>;
 
 function chronology(
@@ -78,11 +84,13 @@ function chronology(
 ) {
   const at = a.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
   const bt = b.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
+
   return at === bt ? a.id.localeCompare(b.id) : at < bt ? -1 : 1;
 }
 
 function groupKey(stage: StageRow): string {
   const serie = stage.serie?.trim();
+
   return serie ? `${stage.leagueId ?? ""}::${serie}` : `stage::${stage.id}`;
 }
 
@@ -97,15 +105,19 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
           `select t."id", t."name", t."slug", t."serie", t."source", t."begin_at", t."league_id", l."name" as "league_name" from "tournament" t left join "league" l on l."id" = t."league_id";`,
         ),
       );
+
     const groups = new Map<string, StageRow[]>();
+
     for (const stage of stages) {
       const key = groupKey(stage);
       groups.set(key, [...(groups.get(key) ?? []), stage]);
     }
+
     const ordered = [...groups.values()]
       .map((group) => {
         const sorted = [...group].sort(chronology);
         const minId = group.map((stage) => stage.id).sort()[0];
+
         return { stages: sorted, order: { beginAt: sorted[0].beginAt, id: minId } };
       })
       .sort((a, b) => chronology(a.order, b.order))
@@ -117,10 +129,12 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
     await this.execute(`alter table "tournament" add "event_id" varchar(255) null;`);
 
     const eventSlugs = new Set<string>();
+
     for (const group of ordered) {
       const [first] = group;
       const manual = group.length === 1 && first.source === "manual" && !first.serie?.trim();
       const newest = [...group].sort(compareStages)[0];
+
       const name = manual
         ? first.name
         : eventDisplayName({
@@ -128,9 +142,11 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
             serieName: newest.serie,
             stageName: newest.name,
           });
+
       const base = manual
         ? toSlug(first.slug) || eventSlug(name, null)
         : eventSlug(name, first.beginAt?.getUTCFullYear() ?? null);
+
       const slug = await allocateSlug(base, (candidate) => eventSlugs.has(candidate));
       eventSlugs.add(slug);
       const eventId = v4();
@@ -139,10 +155,12 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
         [eventId, slug, name, first.leagueId],
       );
       const stageSlugs = new Set<string>();
+
       for (const stage of group) {
         const allocated = await allocateSlug(stageSlug(stage.name), (candidate) =>
           stageSlugs.has(candidate),
         );
+
         stageSlugs.add(allocated);
         await this.execute(`update "tournament" set "event_id" = ?, "slug" = ? where "id" = ?;`, [
           eventId,

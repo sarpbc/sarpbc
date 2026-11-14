@@ -41,6 +41,7 @@ describe("on this day (e2e)", () => {
   beforeAll(async () => {
     const store = memoryFactStore();
     const { sources } = onThisDaySources();
+
     const moduleFixture = await Test.createTestingModule({
       controllers: [OnThisDayController, OnThisDayFactController],
       providers: [

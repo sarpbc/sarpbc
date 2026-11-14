@@ -20,6 +20,7 @@ export class TwitchStreamerRepository implements TrackedStreamerStore {
 
   async list(): Promise<TrackedStreamer[]> {
     const streamers = await this.em.find(TwitchStreamer, {}, { orderBy: { login: "ASC" } });
+
     return streamers.map(detached);
   }
 
@@ -27,15 +28,19 @@ export class TwitchStreamerRepository implements TrackedStreamerStore {
     const streamer = new TwitchStreamer();
     streamer.login = login;
     streamer.displayName = displayName;
+
     try {
       await this.em.persist(streamer).flush();
     } catch (error) {
       if (isUniqueViolation(error)) {
         this.em.clear();
+
         return null;
       }
+
       throw error;
     }
+
     return detached(streamer);
   }
 

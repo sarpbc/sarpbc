@@ -34,9 +34,11 @@ function close() {
 
 function confirm() {
   submitted.value = true;
+
   if (!parsed.value) {
     return;
   }
+
   emit("select", parsed.value.url);
 }
 </script>

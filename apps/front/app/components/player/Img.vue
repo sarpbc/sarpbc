@@ -55,6 +55,7 @@ const { playerName, img = undefined, size, priority = false } = defineProps<Prop
 
 const spec = computed(() => SIZES[size]);
 const failed = ref(false);
+
 watch(
   () => img,
   () => {

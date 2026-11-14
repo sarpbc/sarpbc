@@ -15,10 +15,12 @@ import type { SeasonRecord, SeasonStore } from "./ports";
 
 function cleanName(name: string): string {
   const trimmed = name.trim();
+
   if (!trimmed || trimmed.length > SEASON_NAME_MAX_LENGTH)
     throw new InvalidInputError(
       `A season name has between 1 and ${SEASON_NAME_MAX_LENGTH} characters.`,
     );
+
   return trimmed;
 }
 
@@ -32,12 +34,14 @@ export class SeasonService {
   async detail(id: string): Promise<SeasonDetail> {
     const season = await this.require(id);
     const participants = await this.store.participants(season.id);
+
     return { ...season, participants, awards: await this.store.awards(season.id) };
   }
 
   async create(input: SeasonInput): Promise<SeasonDetail> {
     if (input.winnerTeamId)
       throw new InvalidInputError("Add the winning team as a participant before naming it.");
+
     const season: SeasonRecord = {
       id: v4(),
       name: await this.freeName(input.name, null),
@@ -45,12 +49,15 @@ export class SeasonService {
       format: input.format ? parseSeasonFormat(input.format) : EMPTY_SEASON_FORMAT,
       winnerTeamId: null,
     };
+
     await this.store.save(season);
+
     return this.detail(season.id);
   }
 
   async update(id: string, input: SeasonInput): Promise<SeasonDetail> {
     const current = await this.require(id);
+
     const season: SeasonRecord = {
       ...current,
       name: await this.freeName(input.name, id),
@@ -61,7 +68,9 @@ export class SeasonService {
           ? current.winnerTeamId
           : await this.participantTeam(id, input.winnerTeamId),
     };
+
     await this.store.save(season);
+
     return this.detail(id);
   }
 
@@ -77,22 +86,27 @@ export class SeasonService {
     const season = await this.require(seasonId);
     const award = parseSeasonAward(input);
     const player = await this.store.player(input.playerId);
+
     if (!player) throw new NotFoundError(`Player with id "${input.playerId}" not found`);
+
     if (player.mergedIntoId)
       throw new InvalidInputError(
         `Player "${player.id}" was merged into "${player.mergedIntoId}"; use that id`,
       );
+
     if (await this.store.awardTaken(season.id, award))
       throw new ConflictError(
         `${season.name} already has a ${SEASON_AWARD_LABELS[award.awardType]}` +
           (award.region ? ` for ${award.region}` : "") +
           ". Remove the current award before assigning another player.",
       );
+
     return award;
   }
 
   async addAward(seasonId: string, input: SeasonAwardInput): Promise<SeasonAward> {
     const award = await this.requireAward(seasonId, input);
+
     return this.store.saveAward(seasonId, input.playerId, award);
   }
 
@@ -103,28 +117,36 @@ export class SeasonService {
 
   private async require(id: string): Promise<SeasonRecord> {
     const season = await this.store.find(id);
+
     if (!season) throw new NotFoundError("Season not found");
+
     return season;
   }
 
   private async freeName(raw: string, exceptId: string | null): Promise<string> {
     const name = cleanName(raw);
+
     if (await this.store.nameTaken(name, exceptId))
       throw new ConflictError(`A season named "${name}" already exists.`);
+
     return name;
   }
 
   private async freeSlug(raw: string | null, exceptId: string | null): Promise<string | null> {
     const slug = parseSeasonSlug(raw);
+
     if (slug !== null && (await this.store.slugTaken(slug, exceptId)))
       throw new ConflictError(`A season with the slug "${slug}" already exists.`);
+
     return slug;
   }
 
   private async participantTeam(seasonId: string, teamId: string | null): Promise<string | null> {
     if (teamId === null) return null;
+
     if (!(await this.store.participantTaken(seasonId, teamId)))
       throw new InvalidInputError("The winner must be one of the season's participants.");
+
     return teamId;
   }
 }

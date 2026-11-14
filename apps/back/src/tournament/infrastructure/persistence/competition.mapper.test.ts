@@ -10,6 +10,7 @@ const orm = new MikroORM({
   dbName: "competition-mapper-test",
   allowGlobalContext: true,
 });
+
 const em = orm.em.fork();
 
 function stage() {
@@ -17,6 +18,7 @@ function stage() {
     slug: "coupe-de-france-slash-2025",
     name: "Slash",
   });
+
   return Object.assign(new Tournament(), { name: "Playoffs", slug: "playoffs", event });
 }
 
@@ -24,6 +26,7 @@ function entry(tournament: Tournament, teamId: string) {
   const team = Object.assign(new Team(), { id: teamId, name: teamId });
   const participant = Object.assign(new TournamentParticipant(), { tournament, team });
   tournament.participants.add(participant);
+
   return participant;
 }
 
@@ -53,10 +56,12 @@ describe("toTournament", () => {
   it("skips a participant whose team was not loaded", () => {
     const tournament = stage();
     entry(tournament, "gentle-mates");
+
     const orphan = Object.assign(new TournamentParticipant(), {
       tournament,
       team: em.getReference(Team, "unloaded-team"),
     });
+
     tournament.participants.add(orphan);
 
     expect(toTournament(tournament).participants.map((p) => p.team?.id)).toEqual(["gentle-mates"]);
@@ -100,6 +105,7 @@ describe("names in force on the date", () => {
         },
       ],
     });
+
     return { tournament, participant };
   }
 
@@ -113,11 +119,13 @@ describe("names in force on the date", () => {
 
   it("names a match side after the match date and keeps the slug on the same name", () => {
     const { tournament, participant } = renamedStage("2022-05-30T18:00:00Z");
+
     const match = Object.assign(new Match(), {
       name: "Final",
       tournament,
       beginAt: new Date("2022-06-02T18:00:00Z"),
     });
+
     match.participants.add(participant);
     match.participants.add(entry(tournament, "opponent"));
 

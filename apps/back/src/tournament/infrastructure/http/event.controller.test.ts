@@ -21,21 +21,26 @@ const unusedStreams = new StreamService(
 const unusedViewerships = new ViewershipService({ run: () => Promise.reject(new Error("unused")) });
 
 const STAGE_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
+
 const league = Object.assign(new League(), {
   id: "league",
   name: "RLCS Major",
   imageUrl: "league.png",
 });
+
 const event = Object.assign(new TournamentEvent(), {
   id: "event",
   slug: "rlcs-major-paris-2026",
   name: "RLCS Major Paris 2026",
   league,
 });
+
 const ref = { id: event.id, slug: event.slug, name: event.name };
+
 function stage(fields: Partial<Tournament>): Tournament {
   return Object.assign(new Tournament(), { event: ref, league, ...fields });
 }
+
 const stages = new Map(
   [
     stage({
@@ -63,12 +68,14 @@ describe("EventController", () => {
   const events = { list: vi.fn(), find: vi.fn(), stageId: vi.fn() };
   const redis = { get: vi.fn(), set: vi.fn() };
   const tournaments = { findById: vi.fn() };
+
   const catalog = {
     manualEvents: vi.fn(),
     findEvent: vi.fn(),
     createEvent: vi.fn(),
     updateEvent: vi.fn(),
   };
+
   const controller = new EventController(
     events as never,
     new CachedTournamentRead(tournaments, redis),
@@ -107,6 +114,7 @@ describe("EventController", () => {
         endAt: "2026-05-10T10:00:00.000Z",
       },
     });
+
     if (resolved.kind !== "event") throw new Error("expected an event");
     expect(resolved.event.stages.map((s) => s.slug)).toEqual(["playoffs", "group-a"]);
     expect(resolved.event.stages[0]).toMatchObject({ matches: [], event: ref });
@@ -174,6 +182,7 @@ describe("EventController", () => {
       segments.length === 1
         ? controller.resolveEvent(segments[0])
         : controller.resolveStage(segments[0], segments[1]);
+
     await expect(request).rejects.toBeInstanceOf(NotFoundError);
   });
 
@@ -202,9 +211,11 @@ describe("EventController", () => {
       slug: "cdf",
       name: "CDF",
     });
+
     const manualStages = [...stages.values()].map((s) =>
       Object.assign(new Tournament(), s, { source: "manual" }),
     );
+
     catalog.manualEvents.mockResolvedValue([
       { event, stages: manualStages },
       { event: empty, stages: [] },
@@ -225,6 +236,7 @@ describe("EventController", () => {
       ...event,
       pandascoreSerieId: 7,
     });
+
     catalog.findEvent.mockResolvedValue({ event: synced, stages: [] });
     expect((await controller.findManual("event")).event).toMatchObject({
       id: "event",

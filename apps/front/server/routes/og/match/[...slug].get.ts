@@ -19,6 +19,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const id = pngMatch?.[1];
+
   if (!id) {
     throw createError({ statusCode: 404, statusMessage: "Match not found" });
   }
@@ -33,6 +34,7 @@ export default defineEventHandler(async (event) => {
     },
     font: getMatchOgResvgFontOptions(),
   });
+
   const pngBuffer = resvg.render().asPng();
 
   setHeader(event, "Content-Type", "image/png");

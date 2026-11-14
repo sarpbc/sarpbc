@@ -102,6 +102,7 @@ export function writeTools({
       }),
       handler: async (input, user) => {
         const article = await newsService.create(input, user.id);
+
         return {
           entityId: article.id,
           result: {
@@ -218,12 +219,15 @@ export function writeTools({
         sourceUrl,
       }) => {
         const tournament = await tournaments.findById(tournamentId);
+
         if (!tournament) throw tournamentNotFound(tournamentId);
+
         const participants = await resolveMatchParticipantIds(
           tournament,
           { participantIds, teams, players },
           { teams: teamService, players: playerService },
         );
+
         const match = await matchService.createMatch(tournamentId, {
           name,
           beginAt: beginAt ? new Date(beginAt) : undefined,
@@ -261,6 +265,7 @@ export function writeTools({
       },
       handler: async ({ matchId, winnerId }) => {
         const match = await matchService.setMatchWinner(matchId, winnerId);
+
         return {
           entityId: match.id,
           result: {
@@ -301,6 +306,7 @@ export function writeTools({
       },
       handler: async ({ matchId, game, links }) => {
         const match = await matchService.setGameVods(matchId, game, links);
+
         return {
           entityId: match.id,
           result: {
@@ -359,6 +365,7 @@ export function writeTools({
         previousMatches,
       }) => {
         requireUpdateFields({ beginAt, endAt, status, results, participantIds, previousMatches });
+
         const match = await matchService.updateMatch(matchId, {
           beginAt: toPatchedDate(beginAt),
           endAt: toPatchedDate(endAt),
@@ -367,6 +374,7 @@ export function writeTools({
           participantIds,
           previousMatches,
         });
+
         return { entityId: match.id, result: mapMatchListResponse(match) };
       },
     }),
@@ -383,6 +391,7 @@ export function writeTools({
       },
       handler: async ({ matchId, sourceUrl }) => {
         const match = await matchService.setSource(matchId, sourceUrl);
+
         return { entityId: match.id, result: mapMatchListResponse(match) };
       },
     }),
@@ -406,16 +415,20 @@ export function writeTools({
       },
       handler: async ({ tournamentId, teams, numberOfGames }) => {
         const tournament = await tournaments.findById(tournamentId);
+
         if (!tournament) throw tournamentNotFound(tournamentId);
+
         const matches = await matchService.createEmptyBracket(tournamentId, {
           teams,
           numberOfGames,
         });
+
         const result = {
           tournamentId,
           created: matches.length,
           url: tournamentUrl(tournament),
         };
+
         return {
           entityId: tournamentId,
           result: isRedistributable(tournament.source)
@@ -537,6 +550,7 @@ export function writeTools({
           pandascoreId,
           tournamentId,
         );
+
         return {
           entityId: tournament.id,
           result: {
@@ -566,6 +580,7 @@ export function writeTools({
       handler: async ({ tournamentId }): Promise<ToolWrite<TriggeredSync>> => {
         if (tournamentId) {
           await pandascoreTournamentSync.execute(tournamentId);
+
           return {
             entityId: tournamentId,
             result: { success: true, tournamentId, scope: "single" },
@@ -573,6 +588,7 @@ export function writeTools({
         }
 
         const sync = await pandascoreNewTournamentsSync.execute();
+
         return { result: { success: true, scope: "new_tournaments", sync } };
       },
     }),
@@ -592,6 +608,7 @@ export function writeTools({
       },
       handler: async ({ pandascoreId }) => {
         const tournament = await pandascoreTournamentSync.executeByPandascoreId(pandascoreId);
+
         return {
           entityId: tournament.id,
           result: {

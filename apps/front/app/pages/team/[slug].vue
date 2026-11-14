@@ -79,6 +79,7 @@ const title = computed(() =>
     ? t("page.team.slug.seoTitleWithName", { name: team.value.name })
     : t("page.team.slug.seoTitleDefault"),
 );
+
 const description = computed(() =>
   team.value?.name
     ? t("page.team.slug.seoDescriptionWithName", { name: team.value.name })

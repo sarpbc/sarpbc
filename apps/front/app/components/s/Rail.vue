@@ -1,5 +1,6 @@
 <script setup lang="ts">
 type RailCaption = "lead" | "section" | "none";
+
 type CaptionAlign = "start" | "center";
 
 const {
@@ -36,6 +37,7 @@ const captionHeightClass = computed(() => {
       return "";
     default: {
       const _exhaustive: never = caption;
+
       return _exhaustive;
     }
   }
@@ -49,6 +51,7 @@ const captionAlignClass = computed(() => {
       return "items-center text-center";
     default: {
       const _exhaustive: never = captionAlign;
+
       return _exhaustive;
     }
   }

@@ -52,8 +52,11 @@ const overlaySchema = z
   );
 
 export type Region = z.infer<typeof regionSchema>;
+
 export type Anchor = z.infer<typeof anchorSchema>;
+
 export type GlyphTemplate = z.infer<typeof templateSchema>;
+
 export type Overlay = z.infer<typeof overlaySchema>;
 
 export function parseOverlay(text: string): Overlay {

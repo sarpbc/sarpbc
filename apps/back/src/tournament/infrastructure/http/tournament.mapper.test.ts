@@ -17,6 +17,7 @@ function solo(id: string, name: string) {
 function knockout() {
   const zen = solo("zen", "Zen");
   const vatira = solo("vatira", "Vatira");
+
   const tournament = Object.assign(new Tournament(), {
     id: "knockout",
     source: "manual",
@@ -27,6 +28,7 @@ function knockout() {
     participants: [zen, vatira],
     winner: zen,
   });
+
   const final = Object.assign(new Match(), {
     id: "final",
     publicId: 9,
@@ -40,7 +42,9 @@ function knockout() {
       { id: "r2", match: { id: "final" }, participant: { id: "vatira" }, score: 1 },
     ],
   });
+
   tournament.matches = [final];
+
   return { tournament, final };
 }
 
@@ -90,6 +94,7 @@ describe("player participants in public responses", () => {
         slug: "karmine-corp",
       }),
     });
+
     const cup = Object.assign(new Tournament(), {
       id: "cup",
       name: "Fake Cup",
@@ -98,6 +103,7 @@ describe("player participants in public responses", () => {
       participants: [kc],
       winner: kc,
     });
+
     expect(mapTournamentListItem(cup).format).toBe("3v3");
     expect(mapTournamentListItem(cup).participants).toEqual([
       { id: "kc", team: expect.objectContaining({ name: "Karmine Corp" }) },

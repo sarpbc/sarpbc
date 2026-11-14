@@ -6,6 +6,7 @@ import { stageFilter } from "./stage-filter";
 import { isUuid } from "../../../common/domain/entity-ref";
 import type { EventListing, EventQueries } from "../../application/ports";
 import type { TournamentListOptions } from "../../application/inputs";
+
 export class CompetitionEventQueries implements EventQueries {
   constructor(private readonly em: EntityManager) {}
   async list({
@@ -14,6 +15,7 @@ export class CompetitionEventQueries implements EventQueries {
     ...filters
   }: TournamentListOptions): Promise<[EventListing[], number]> {
     const where = stageFilter(filters);
+
     const [page, count] = await Promise.all([
       this.em
         .createQueryBuilder(Tournament, "t")
@@ -29,8 +31,11 @@ export class CompetitionEventQueries implements EventQueries {
         .execute<{ id: string }[]>("all", false),
       this.em.createQueryBuilder(Tournament, "t").where(where).getCount("event", true),
     ]);
+
     const ids = page.map((row) => row.id);
+
     if (!ids.length) return [[], count];
+
     const [events, stages] = await Promise.all([
       this.em.find(TournamentEvent, { id: { $in: ids } }, { populate: ["league"] }),
       this.em.find(
@@ -48,10 +53,13 @@ export class CompetitionEventQueries implements EventQueries {
         },
       ),
     ]);
+
     const byId = new Map(events.map((row) => [row.id, toTournamentEvent(row)]));
+
     return [
       ids.flatMap((id) => {
         const event = byId.get(id);
+
         return event
           ? [{ event, stages: stages.filter((s) => s.event.id === id).map(toTournament) }]
           : [];
@@ -65,7 +73,9 @@ export class CompetitionEventQueries implements EventQueries {
       isUuid(idOrSlug) ? { id: idOrSlug.toLowerCase() } : { slug: idOrSlug },
       { populate: ["league"] },
     );
+
     if (!row) return null;
+
     const stages = await this.em.find(
       Tournament,
       { event: row.id },
@@ -81,6 +91,7 @@ export class CompetitionEventQueries implements EventQueries {
         ],
       },
     );
+
     return { event: toTournamentEvent(row), stages: stages.map(toTournament) };
   }
   async unsynced(): Promise<EventListing[]> {
@@ -89,7 +100,9 @@ export class CompetitionEventQueries implements EventQueries {
       { pandascoreSerieId: null },
       { populate: ["league"], orderBy: { createdAt: QueryOrder.DESC, id: QueryOrder.ASC } },
     );
+
     if (!rows.length) return [];
+
     const stages = await this.em.find(
       Tournament,
       { event: { $in: rows.map((row) => row.id) } },
@@ -105,6 +118,7 @@ export class CompetitionEventQueries implements EventQueries {
         ],
       },
     );
+
     return rows.map((row) => ({
       event: toTournamentEvent(row),
       stages: stages.filter((stage) => stage.event.id === row.id).map(toTournament),
@@ -112,6 +126,7 @@ export class CompetitionEventQueries implements EventQueries {
   }
   async stageId(eventSlug: string, stageSlug: string) {
     const row = await this.em.findOne(Tournament, { slug: stageSlug, event: { slug: eventSlug } });
+
     return row?.id ?? null;
   }
 }

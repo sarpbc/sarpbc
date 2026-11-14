@@ -5,6 +5,7 @@ import { sortMatchesByBeginAt } from "./rows";
 
 export function classifyTournamentBracket(tournament: TournamentDetail): TournamentBracketFormat {
   const matches = tournament.matches ?? [];
+
   if (matches.length === 0) {
     return "flat-stage";
   }
@@ -12,6 +13,7 @@ export function classifyTournamentBracket(tournament: TournamentDetail): Tournam
   const hasLoserLinks = matches.some((match) =>
     match.previousMatches?.some((link) => link.type === "loser"),
   );
+
   if (hasLoserLinks) {
     return "linked-double-elimination";
   }
@@ -19,6 +21,7 @@ export function classifyTournamentBracket(tournament: TournamentDetail): Tournam
   const hasWinnerLinks = matches.some((match) =>
     match.previousMatches?.some((link) => link.type === "winner"),
   );
+
   if (hasWinnerLinks) {
     return "linked-single-elimination";
   }
@@ -50,6 +53,7 @@ export function groupMatchesByRound(
     .sort((a, b) => {
       const dateA = a.matches[0]?.beginAt ? new Date(a.matches[0].beginAt).getTime() : 0;
       const dateB = b.matches[0]?.beginAt ? new Date(b.matches[0].beginAt).getTime() : 0;
+
       return dateA - dateB;
     });
 }
