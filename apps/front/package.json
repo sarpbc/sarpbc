@@ -15,7 +15,7 @@
   "dependencies": {
     "@iconify-json/flag": "^1.2.15",
     "@internationalized/date": "^3.12.4",
-    "@mdream/js": "^2.0.3",
+    "@mdream/js": "^2.1.0",
     "@nuxt/content": "^3.16.2",
     "@nuxt/image": "^2.2.1",
     "@nuxt/ui": "catalog:",
@@ -29,7 +29,7 @@
     "@vueuse/core": "^15.0.0",
     "evlog": "catalog:",
     "nuxt": "catalog:",
-    "posthog-js": "^1.445.4",
+    "posthog-js": "^1.447.12",
     "vue": "catalog:",
     "vue-i18n": "catalog:",
     "vue-router": "catalog:",

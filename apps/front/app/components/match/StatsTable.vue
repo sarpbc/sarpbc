@@ -72,9 +72,7 @@ const replayLabel = computed(() =>
     <div class="overflow-x-auto">
       <table class="w-full text-sm">
         <caption class="sr-only">
-          {{
-            t("page.match.detail.stats.caption", { number: game.number })
-          }}
+          {{ t("page.match.detail.stats.caption", { number: game.number }) }}
         </caption>
         <thead>
           <tr class="h-row border-b border-separator text-xs text-muted">
