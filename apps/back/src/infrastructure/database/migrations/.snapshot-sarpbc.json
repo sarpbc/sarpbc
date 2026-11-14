@@ -1271,6 +1271,23 @@
           "enumItems": [],
           "mappedType": "datetime"
         },
+        "forfeited_by_id": {
+          "name": "forfeited_by_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
         "id": {
           "name": "id",
           "type": "varchar(255)",
@@ -1557,6 +1574,15 @@
       "checks": [],
       "triggers": [],
       "foreignKeys": {
+        "match_forfeited_by_id_foreign": {
+          "columnNames": ["forfeited_by_id"],
+          "constraintName": "match_forfeited_by_id_foreign",
+          "localTableName": "public.match",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.tournament_participant",
+          "updateRule": "cascade",
+          "deleteRule": "set null"
+        },
         "match_tournament_id_foreign": {
           "columnNames": ["tournament_id"],
           "constraintName": "match_tournament_id_foreign",

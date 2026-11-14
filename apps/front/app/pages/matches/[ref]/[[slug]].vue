@@ -123,17 +123,26 @@ const winnerParticipantId = computed(() => {
   return scoreA > scoreB ? teamA.value.id : teamB.value.id;
 });
 
-const heroScoreA = computed(() =>
-  match.value && teamA.value
-    ? displayMatchScore(getParticipantScore(match.value, teamA.value.id), matchStatus.value)
-    : "–",
+const forfeiter = computed(() =>
+  concealed.value
+    ? undefined
+    : participants.value.find((participant) => participant.id === match.value?.forfeitedBy),
 );
 
-const heroScoreB = computed(() =>
-  match.value && teamB.value
-    ? displayMatchScore(getParticipantScore(match.value, teamB.value.id), matchStatus.value)
-    : "–",
-);
+const heroScore = (participant: TournamentParticipant | undefined): string | null => {
+  if (!match.value || !participant) {
+    return "–";
+  }
+
+  if (participant.id === forfeiter.value?.id) {
+    return t("components.match.forfeitShort");
+  }
+
+  return displayMatchScore(getParticipantScore(match.value, participant.id), matchStatus.value);
+};
+
+const heroScoreA = computed(() => heroScore(teamA.value));
+const heroScoreB = computed(() => heroScore(teamB.value));
 
 const onVodsSaved = (vods: MatchVod[]) => {
   if (!matchDetail.value) {
@@ -273,10 +282,17 @@ const scoreboardLabel = computed(() => {
     return `${a} vs ${b}`;
   }
 
-  const scoreA = teamA.value ? (getParticipantScore(match.value, teamA.value.id) ?? "-") : "-";
-  const scoreB = teamB.value ? (getParticipantScore(match.value, teamB.value.id) ?? "-") : "-";
+  const score = (participant: TournamentParticipant | undefined) => {
+    if (!match.value || !participant) {
+      return "-";
+    }
 
-  return `${a} ${scoreA} - ${scoreB} ${b}`;
+    return participant.id === forfeiter.value?.id
+      ? t("components.match.forfeit")
+      : (getParticipantScore(match.value, participant.id) ?? "-");
+  };
+
+  return `${a} ${score(teamA.value)} - ${score(teamB.value)} ${b}`;
 });
 </script>
 
@@ -368,7 +384,19 @@ const scoreboardLabel = computed(() => {
         <SRail :title="t('page.match.detail.sections.information')">
           <MatchInfoCard :match="match" class="flex-1" />
         </SRail>
-        <SRail v-if="matchStatus === 'finished'">
+        <SRail v-if="forfeiter" :title="t('page.match.detail.sections.result')">
+          <SCard class="flex-1">
+            <SListItem class="gap-2">
+              <UBadge color="neutral" variant="soft" class="shrink-0">
+                {{ t("components.match.forfeit") }}
+              </UBadge>
+              <span class="min-w-0 text-sm text-default">
+                {{ t("page.match.detail.forfeitNote", { team: participantLabel(forfeiter) }) }}
+              </span>
+            </SListItem>
+          </SCard>
+        </SRail>
+        <SRail v-else-if="matchStatus === 'finished'">
           <template #caption>
             <div class="flex w-full items-center justify-between gap-2">
               {{ t("page.match.detail.sections.replay") }}

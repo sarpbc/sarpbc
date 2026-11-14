@@ -18,6 +18,7 @@ export const mapMatchListItem = (match: Match): MatchListItem => {
 
   return {
     beginAt: match.beginAt?.toISOString() ?? null,
+    forfeitedBy: match.forfeitedBy?.id ?? null,
     id: match.id,
     participants: participants.map((participant) =>
       mapParticipantRef(participant, (team) => ({
@@ -77,6 +78,7 @@ export const mapProfileMatchListItem = (match: Match): ProfileMatchListItem => (
 export const mapTournamentMatchListItem = (match: Match): TournamentMatchListItem => ({
   beginAt: match.beginAt,
   endAt: match.endAt,
+  forfeitedBy: match.forfeitedBy?.id ?? null,
   id: match.id,
   numberOfGames: match.numberOfGames,
   participants: match.participants.map((participant) =>
@@ -100,12 +102,25 @@ export const mapTournamentMatchListItem = (match: Match): TournamentMatchListIte
 
 export const withPublicSlug = (
   match: Match,
-): Omit<Match, "hasEnded" | "isDecided" | "stampEnd" | "inheritedStreams" | "watchStreams"> & {
+): Omit<
+  Match,
+  | "hasEnded"
+  | "isDecided"
+  | "stampEnd"
+  | "inheritedStreams"
+  | "watchStreams"
+  | "declareForfeit"
+  | "clearForfeit"
+  | "dropBrokenForfeit"
+  | "forfeitedBy"
+> & {
   slug: string;
+  forfeitedBy: string | null;
 } => ({
   beginAt: match.beginAt,
   createdAt: match.createdAt,
   endAt: match.endAt,
+  forfeitedBy: match.forfeitedBy?.id ?? null,
   id: match.id,
   name: match.name,
   numberOfGames: match.numberOfGames,

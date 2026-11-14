@@ -16,6 +16,7 @@ export const toUpsertMatchCommand = (dto: MatchDto): UpsertMatchCommand => {
   return {
     beginAt: dto.begin_at !== undefined && dto.begin_at !== "" ? new Date(dto.begin_at) : undefined,
     endAt: dto.end_at !== undefined && dto.end_at !== "" ? new Date(dto.end_at) : undefined,
+    forfeit: dto.forfeit,
     name: dto.name ?? "TBD",
     numberOfGames: dto.number_of_games ?? 0,
     officialStreams: mapOfficialMatchStreams(dto.streams_list),
@@ -34,5 +35,6 @@ export const toUpsertMatchCommand = (dto: MatchDto): UpsertMatchCommand => {
     })),
     status: dto.status,
     tournamentPandascoreId: dto.tournament_id,
+    winnerPandascoreTeamId: dto.winner_id ?? null,
   };
 };

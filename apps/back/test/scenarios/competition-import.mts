@@ -155,6 +155,7 @@ export const verifyCompetitionImport = async ({
   const semifinal = {
     beginAt: new Date(Date.now() - 7_200_000),
     endAt: new Date(Date.now() - 3_600_000),
+    forfeit: false,
     name: "Imported Semifinal",
     numberOfGames: 5,
     officialStreams: [],
@@ -169,6 +170,7 @@ export const verifyCompetitionImport = async ({
     slug: "imported-semifinal",
     status: "finished",
     tournamentPandascoreId: tournamentCommand.pandascoreId,
+    winnerPandascoreTeamId: null,
   };
 
   const final = {

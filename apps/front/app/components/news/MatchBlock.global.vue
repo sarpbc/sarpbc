@@ -65,8 +65,13 @@ const summary = (item: MatchBlockItem): string => {
     return t("newsTag.matchVersus", { teamA: teamName(item, 0), teamB: teamName(item, 1) });
   }
 
-  const score = (index: number) =>
-    getMatchParticipantScore(item.results, item.participants[index]?.id) ?? "–";
+  const score = (index: number) => {
+    const participantId = item.participants[index]?.id;
+
+    return participantId !== undefined && participantId === item.forfeitedBy
+      ? t("components.match.forfeitShort")
+      : (getMatchParticipantScore(item.results, participantId) ?? "–");
+  };
 
   return t("newsTag.matchScore", {
     scoreA: score(0),

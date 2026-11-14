@@ -57,12 +57,16 @@ const setBracketLinks = async (
   match.previousMatches = toBracketLinks(match.id, links);
 };
 
-const saveMatch = async (
-  writer: MatchWriter,
+const persist = async (writer: MatchWriter, match: Match): Promise<void> => {
+  match.dropBrokenForfeit();
+  await writer.save(match);
+};
+
+const applyMatchFields = (
   match: Match,
   participants: TournamentParticipant[],
   input: MatchFields,
-): Promise<Match> => {
+): void => {
   const previousEndAt = match.endAt;
   match.name = input.name;
   match.beginAt = input.beginAt ?? null;
@@ -105,9 +109,6 @@ const saveMatch = async (
   }
 
   match.stampEnd(previousEndAt ?? new Date());
-  await writer.save(match);
-
-  return match;
 };
 
 export const createMatchInTransaction = async (
@@ -131,7 +132,10 @@ export const createMatchInTransaction = async (
     await setBracketLinks(writer, match, input.previousMatches);
   }
 
-  return await saveMatch(writer, match, participants, input);
+  applyMatchFields(match, participants, input);
+  await persist(writer, match);
+
+  return match;
 };
 
 export const createEmptyBracketInTransaction = async (
@@ -178,16 +182,20 @@ export const createEmptyBracketInTransaction = async (
         return previous === undefined ? [] : [{ previousMatchId: previous.match.id, type }];
       }),
     );
-    await saveMatch(writer, match, [], {
+    applyMatchFields(match, [], {
       name: slot.name,
       numberOfGames: input.numberOfGames,
       participantIds: [],
       status: "not_started",
     });
+    await persist(writer, match);
   });
 
   return planned.map(({ match }) => match);
 };
+
+const playedBy = (input: SyncedMatchInput, participant: TournamentParticipant): boolean =>
+  (input.results ?? []).some((r) => r.participantId === participant.id && r.score > 0);
 
 export const upsertSyncedMatchInTransaction = async (
   writer: MatchWriter,
@@ -234,7 +242,57 @@ export const upsertSyncedMatchInTransaction = async (
     );
   }
 
-  return await saveMatch(writer, match, participants, input);
+  const priorForfeiter = match.forfeitedBy;
+  applyMatchFields(match, participants, input);
+  match.clearForfeit();
+
+  const forfeitWinner = match.participants.find((p) => p.id === input.forfeitWinnerId);
+  const reportedForfeiter = match.participants.find((p) => p.id !== input.forfeitWinnerId);
+  const keptForfeiter = match.participants.find((p) => p.id === priorForfeiter?.id);
+
+  if (forfeitWinner && reportedForfeiter && match.participants.length === 2) {
+    match.declareForfeit(reportedForfeiter);
+  } else if (keptForfeiter && match.participants.length === 2 && !playedBy(input, keptForfeiter)) {
+    // The provider often reports a walkover as 0-0 or canceled; a staff forfeit outlives that until it shows the forfeiter playing.
+    match.declareForfeit(keptForfeiter);
+  }
+
+  await persist(writer, match);
+
+  return match;
+};
+
+export const setForfeitInTransaction = async (
+  writer: MatchWriter,
+  id: string,
+  forfeitedById: string | null,
+  sourceUrl?: string | null,
+): Promise<Match> => {
+  const match = await writer.load(id);
+
+  if (!match) {
+    throw new NotFoundError("Match not found");
+  }
+
+  if (sourceUrl !== undefined) {
+    match.sourceUrl = parseDataSourceUrl(sourceUrl);
+  }
+
+  if (forfeitedById === null) {
+    match.clearForfeit();
+  } else {
+    const forfeiter = match.participants.find((p) => p.id === forfeitedById);
+
+    if (!forfeiter) {
+      throw new InvalidInputError("The forfeiting side must be a participant in this match");
+    }
+
+    match.declareForfeit(forfeiter);
+  }
+
+  await persist(writer, match);
+
+  return match;
 };
 
 export const setWinnerInTransaction = async (
@@ -257,7 +315,7 @@ export const setWinnerInTransaction = async (
   match.winner = winner;
   match.status = "finished";
   match.stampEnd(new Date());
-  await writer.save(match);
+  await persist(writer, match);
 
   return match;
 };
@@ -372,7 +430,7 @@ export const updateMatchInTransaction = async (
   }
 
   match.stampEnd(new Date());
-  await writer.save(match);
+  await persist(writer, match);
 
   return match;
 };
@@ -389,7 +447,7 @@ export const setVodsInTransaction = async (
   }
 
   match.vods = normalizeMatchVods(vods, match.numberOfGames);
-  await writer.save(match);
+  await persist(writer, match);
 
   return match;
 };
@@ -406,7 +464,7 @@ export const setSourceInTransaction = async (
   }
 
   match.sourceUrl = parseDataSourceUrl(sourceUrl);
-  await writer.save(match);
+  await persist(writer, match);
 
   return match;
 };
@@ -424,7 +482,7 @@ export const setGameVodsInTransaction = async (
   }
 
   match.vods = replaceGameVods(match.vods, game, links, match.numberOfGames);
-  await writer.save(match);
+  await persist(writer, match);
 
   return match;
 };

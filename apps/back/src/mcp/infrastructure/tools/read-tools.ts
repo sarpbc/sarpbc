@@ -129,7 +129,7 @@ export const readTools = ({
 
   defineTool({
     description:
-      "Get full tournament detail, including matches, the public URL, and format (1v1, 2v2 or 3v3) and registered participants (participant id, display name, team id, slug and name or null for a participant without a team, and players). start.gg tournaments are not returned.",
+      "Get full tournament detail, including matches (each with forfeitedBy: the participant id of the side that forfeited or was disqualified, or null for a played match), the public URL, and format (1v1, 2v2 or 3v3) and registered participants (participant id, display name, team id, slug and name or null for a participant without a team, and players). start.gg tournaments are not returned.",
     handler: async ({ id }) => mapTournamentDetail(await competition.tournament(id)),
     input: { id: z.string().min(1).describe("Tournament UUID.") },
     name: "get_tournament",
@@ -261,7 +261,7 @@ export const readTools = ({
 
   defineTool({
     description:
-      "List recently finished match results across tournaments, mirroring the public /matches results view.",
+      "List recently finished match results across tournaments, mirroring the public /matches results view. forfeitedBy is the participant id of the side that forfeited or was disqualified, or null for a played match.",
     handler: async ({ limit }) => {
       const [results, total] = await competition.matches("results", limit ?? DEFAULT_PAGE_SIZE);
 

@@ -175,6 +175,9 @@ export class CompetitionMatchWriter implements MatchWriter {
     row.winner = model.winner
       ? this.em.getReference(TournamentParticipantRow, model.winner.id)
       : null;
+    row.forfeitedBy = model.forfeitedBy
+      ? this.em.getReference(TournamentParticipantRow, model.forfeitedBy.id)
+      : null;
     row.participants.set(
       model.participants.map((p) => this.em.getReference(TournamentParticipantRow, p.id)),
     );

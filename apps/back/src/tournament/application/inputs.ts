@@ -79,6 +79,8 @@ export interface EmptyBracketInput {
 
 export interface SyncedMatchInput extends MatchFields {
   pandascoreId: number;
+  /** The participant the provider says won by forfeit, or null when the match was played. */
+  forfeitWinnerId: string | null;
   previousMatches?: { type: "winner" | "loser"; matchPandascoreId: number }[];
   officialStreams?: OfficialMatchStream[];
 }

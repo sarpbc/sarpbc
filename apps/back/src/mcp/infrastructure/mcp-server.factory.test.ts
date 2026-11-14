@@ -53,6 +53,7 @@ const TOOL_NAMES = [
   "update_news_article",
   "create_match",
   "set_match_winner",
+  "set_match_forfeit",
   "set_match_game_vods",
   "update_match",
   "set_match_source",

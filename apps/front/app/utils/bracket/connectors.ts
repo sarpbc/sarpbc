@@ -38,6 +38,7 @@ export const toLayoutMatch = (
   beginAt: match.beginAt,
   column,
   endAt: match.endAt,
+  forfeitedBy: match.forfeitedBy,
   matchId: match.id,
   name: match.name,
   participantA: match.participants?.[0],

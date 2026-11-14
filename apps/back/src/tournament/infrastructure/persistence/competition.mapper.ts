@@ -114,21 +114,25 @@ export const toTournamentSummary = (row: TournamentRow): TournamentSummary => ({
   streams: row.streams ?? [],
 });
 
-export const toMatch = (row: MatchRow): Match =>
-  Object.assign(new Match(), {
+export const toMatch = (row: MatchRow): Match => {
+  const participants = row.participants.isInitialized()
+    ? row.participants
+        .getItems()
+        .flatMap((participant) => toParticipant(participant, matchDate(row)) ?? [])
+    : [];
+
+  return Object.assign(new Match(), {
     beginAt: row.beginAt,
     createdAt: row.createdAt,
     endAt: row.endAt,
+    // The forfeiter is always one of the participants, so no read populates the relation.
+    forfeitedBy: participants.find((p) => p.id === row.forfeitedBy?.id) ?? null,
     id: row.id,
     name: row.name,
     numberOfGames: row.numberOfGames,
     officialStreams: row.officialStreams ?? [],
     pandascoreId: row.pandascoreId,
-    participants: row.participants.isInitialized()
-      ? row.participants
-          .getItems()
-          .flatMap((participant) => toParticipant(participant, matchDate(row)) ?? [])
-      : [],
+    participants,
     previousMatches: row.previousMatches.isInitialized()
       ? row.previousMatches.getItems().map((r) => ({
           id: r.id,
@@ -156,6 +160,7 @@ export const toMatch = (row: MatchRow): Match =>
     vods: row.vods ?? [],
     winner: row.winner ? toParticipant(row.winner, matchDate(row)) : null,
   });
+};
 
 export const toTournament = (row: TournamentRow): Tournament =>
   Object.assign(new Tournament(), {

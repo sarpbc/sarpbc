@@ -22,6 +22,10 @@ export const streamSchema = z.object({
 export const matchSchema = z.object({
   begin_at: date,
   end_at: date,
+  forfeit: z
+    .boolean()
+    .nullish()
+    .transform((v) => v === true),
   id: z.number().int().positive(),
   name: text,
   number_of_games: z.number().int().nullish(),
@@ -37,6 +41,7 @@ export const matchSchema = z.object({
   status: text,
   streams_list: z.array(streamSchema).default([]),
   tournament_id: z.number().int().positive(),
+  winner_id: z.number().int().nullish(),
 });
 
 export type MatchStreamDto = z.infer<typeof streamSchema>;

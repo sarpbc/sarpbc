@@ -191,7 +191,9 @@
       "liveShort": "En direct",
       "tbd": "À déterminer",
       "live": "En direct",
-      "viewAll": "Voir tous les matchs"
+      "viewAll": "Voir tous les matchs",
+      "forfeit": "Forfait",
+      "forfeitShort": "FF"
     },
     "tournament": {
       "bracket": {
@@ -1699,7 +1701,8 @@
           "headToHead": "Face-à-face",
           "information": "Informations",
           "watch": "Regarder",
-          "replay": "Revoir"
+          "replay": "Revoir",
+          "result": "Résultat"
         },
         "info": {
           "event": "Tournoi",
@@ -1796,7 +1799,8 @@
           },
           "source": "Stats issues des replays sur Ballchasing",
           "replayLink": "Replay de la game {number} sur Ballchasing (s’ouvre dans un nouvel onglet)"
-        }
+        },
+        "forfeitNote": "Forfait ou disqualification de {team}."
       }
     },
     "brand": {

@@ -37,6 +37,11 @@ export const applyMatches = async (
     async (command) => {
       const match = await upsertSyncedMatchInTransaction(scope.matches, tournament.id, {
         ...command,
+        forfeitWinnerId:
+          command.forfeit && command.winnerPandascoreTeamId !== null
+            ? (participants.find((p) => p.team?.pandascoreId === command.winnerPandascoreTeamId)
+                ?.id ?? null)
+            : null,
         participantIds: opponentParticipantIds(command, participants),
         results: command.results.map((r) => ({
           participantId:

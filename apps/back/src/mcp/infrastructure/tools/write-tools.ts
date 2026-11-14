@@ -31,6 +31,7 @@ import {
   emptyBracketTeamsSchema,
 } from "../../../tournament/infrastructure/http/dto/create-match.dto";
 import { isRedistributable } from "../../../common/domain/data-source";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { requireUpdateFields } from "./update-fields";
 
 const matchSourceUrlInput = dataSourceUrlField(
@@ -66,6 +67,7 @@ export interface WriteToolServices {
     | "setGameVods"
     | "updateMatch"
     | "setSource"
+    | "setForfeit"
   >;
   manualTournamentService: Pick<ManualTournamentService, "create" | "update">;
   pandascoreTournamentSync: Pick<
@@ -319,7 +321,7 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_match_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them.",
+      "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_match_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them. On a forfeited match (forfeitedBy set), scores that make the forfeiting side the winner, sides that leave it out or a status other than finished clear the forfeit.",
     handler: async ({
       matchId,
       beginAt,
@@ -389,6 +391,36 @@ export const writeTools = ({
       sourceUrl: matchSourceUrlInput.nullable().describe("Public source, or null to clear it."),
     },
     name: "set_match_source",
+    permission: "tournaments.manage",
+    write: true,
+  }),
+
+  defineTool({
+    description:
+      "Mark one side of a two-sided match as having forfeited or been disqualified, or clear the forfeit. Works on any match, PandaScore included. When the cited source (for example a start.gg set shown as DQ with a -1 score) reports a forfeit or disqualification, record it here instead of entering the score. A forfeit keeps the series counted normally for circuit points, standings and pick'em: the winner becomes the other side and the score becomes the series default (3-0 in a best of 5; the score is kept when the series length is unknown). Passing participantId null clears the forfeit without touching the score or the winner. sourceUrl is required to declare a forfeit and optional to clear one; when given it is recorded as the match source like set_match_source.",
+    handler: async ({ matchId, participantId, sourceUrl }) => {
+      if (participantId !== null && sourceUrl === undefined) {
+        throw new InvalidInputError(
+          "Give the sourceUrl that shows the forfeit or disqualification.",
+        );
+      }
+
+      const match = await matchService.setForfeit(matchId, participantId, sourceUrl);
+
+      return { entityId: match.id, result: mapMatchListResponse(match), sourceUrl };
+    },
+    input: {
+      matchId: z.string().min(1).describe("Match UUID."),
+      participantId: z
+        .string()
+        .min(1)
+        .nullable()
+        .describe(
+          "Tournament participant UUID (from get_tournament) of the side that forfeited or was disqualified, or null to clear the forfeit.",
+        ),
+      sourceUrl: matchSourceUrlInput.optional(),
+    },
+    name: "set_match_forfeit",
     permission: "tournaments.manage",
     write: true,
   }),

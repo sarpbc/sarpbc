@@ -1,7 +1,8 @@
 import { v4 } from "uuid";
-import { isMatchFinished, matchSlug, participantName } from "@sarpbc/utils";
+import { isMatchFinished, matchSlug, participantName, winsNeeded } from "@sarpbc/utils";
 import type { NamedParticipant } from "@sarpbc/utils";
 import type { MatchVod, Stream, TournamentEventRef, Viewership, DataSource } from "@sarpbc/types";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import type { League } from "./league";
 import type { OfficialMatchStream } from "./official-match-stream";
 import { effectiveStreams, pandascoreStreams } from "./stream";
@@ -46,6 +47,7 @@ export class Match {
   status: string | null = null;
   participants: TournamentParticipant[] = [];
   winner: TournamentParticipant | null = null;
+  forfeitedBy: TournamentParticipant | null = null;
   numberOfGames: number | null = null;
   previousMatches: BracketLink[] = [];
   results: MatchResult[] = [];
@@ -64,6 +66,61 @@ export class Match {
   stampEnd(at: Date): void {
     if (this.status === "finished") {
       this.endAt ??= at;
+    }
+  }
+  /** The opponent wins by the series default score; an unknown series length keeps the score. */
+  declareForfeit(forfeiter: TournamentParticipant): void {
+    if (this.participants.length !== 2) {
+      throw new InvalidInputError("Only a match between two participants can be forfeited");
+    }
+
+    const opponent = this.participants.find((p) => p.id !== forfeiter.id);
+
+    if (opponent === undefined || !this.participants.some((p) => p.id === forfeiter.id)) {
+      throw new InvalidInputError("The forfeiting side must be a participant in this match");
+    }
+
+    this.forfeitedBy = forfeiter;
+    this.winner = opponent;
+    this.status = "finished";
+    this.stampEnd(new Date());
+
+    if (this.numberOfGames !== null && this.numberOfGames > 0) {
+      const wins = winsNeeded(this.numberOfGames);
+      this.results = [
+        { score: wins, side: opponent },
+        { score: 0, side: forfeiter },
+      ].map(({ score, side }) => ({
+        id: v4(),
+        match: { id: this.id },
+        participant: { id: side.id },
+        score,
+      }));
+    }
+  }
+  clearForfeit(): void {
+    this.forfeitedBy = null;
+  }
+  /** Called before every save: a forfeit only stands in a finished two-sided match the other side won. */
+  dropBrokenForfeit(): void {
+    const forfeiter = this.forfeitedBy;
+
+    if (forfeiter === null) {
+      return;
+    }
+
+    const ids = this.participants.map((p) => p.id);
+
+    const stands =
+      ids.length === 2 &&
+      ids.includes(forfeiter.id) &&
+      this.winner !== null &&
+      this.winner.id !== forfeiter.id &&
+      ids.includes(this.winner.id) &&
+      this.status === "finished";
+
+    if (!stands) {
+      this.forfeitedBy = null;
     }
   }
   isDecided(): boolean {

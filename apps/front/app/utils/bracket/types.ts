@@ -28,6 +28,7 @@ export interface BracketLayoutMatch {
   participantBId?: string;
   results?: MatchResult[];
   winnerParticipantId: string | null;
+  forfeitedBy: string | null;
   beginAt: Date | string | null;
   endAt: Date | string | null;
   status: string | null;

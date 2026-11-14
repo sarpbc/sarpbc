@@ -111,6 +111,7 @@ export const MatchSchema = defineEntity({
     beginAt: p.datetime().type("timestamptz").nullable(),
     createdAt: p.datetime().type("timestamptz"),
     endAt: p.datetime().type("timestamptz").nullable(),
+    forfeitedBy: p.manyToOne(TournamentParticipant).nullable(),
     id: p.string().primary(),
     name: p.string(),
     numberOfGames: p.integer().nullable(),

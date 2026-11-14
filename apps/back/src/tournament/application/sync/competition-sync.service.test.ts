@@ -160,6 +160,7 @@ const finished = (endAt: string): MatchTiming => ({
 
 const matchCommand = (pandascoreId: number, status: string) => ({
   beginAt: new Date("2030-01-01"),
+  forfeit: false,
   name: `Match ${pandascoreId}`,
   officialStreams: [],
   opponentPandascoreIds: [1, 2],
@@ -172,6 +173,7 @@ const matchCommand = (pandascoreId: number, status: string) => ({
   ],
   status,
   tournamentPandascoreId: 1,
+  winnerPandascoreTeamId: null,
 });
 
 describe("Competition synchronization", () => {
@@ -543,6 +545,7 @@ describe("Competition synchronization", () => {
       const synced = await service.upsertTournament(stageCommand({}), [
         {
           beginAt: new Date("2025-03-03T10:00Z"),
+          forfeit: false,
           name: "Tiebreaker",
           officialStreams: [],
           opponentSlugs: [],
@@ -551,6 +554,7 @@ describe("Competition synchronization", () => {
           results: [],
           status: "not_started",
           tournamentPandascoreId: 1,
+          winnerPandascoreTeamId: null,
         },
       ]);
 

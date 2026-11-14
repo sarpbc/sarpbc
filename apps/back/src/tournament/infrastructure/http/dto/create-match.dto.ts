@@ -32,6 +32,10 @@ export const SetMatchSourceDto = z.strictObject({
 
 export type SetMatchSourceInput = z.infer<typeof SetMatchSourceDto>;
 
+export const SetMatchForfeitDto = z.strictObject({ participantId: z.string().min(1).nullable() });
+
+export type SetMatchForfeitInput = z.infer<typeof SetMatchForfeitDto>;
+
 export const SetMatchWinnerDto = z.strictObject({ winnerId: z.string() });
 
 export type SetMatchWinnerInput = z.infer<typeof SetMatchWinnerDto>;
