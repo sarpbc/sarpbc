@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TeamAliasService } from "../../application/team-alias.service";
-import { Team } from "../../domain/roster";
+import { Team } from "../../domain/team";
 import { TeamController } from "./team.controller";
 import { TeamService } from "../../application/team.service";
 import { ContractService } from "../../application/contract.service";

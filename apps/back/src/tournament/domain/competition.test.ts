@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { Match } from "./match";
+import { Tournament } from "./tournament";
 import {
-  Match,
-  Tournament,
   TournamentParticipant,
   assertParticipantRemovable,
   type ParticipantReferences,
-} from "./competition";
+} from "./tournament-participant";
 
 describe("Match outcome", () => {
   const winner = new TournamentParticipant();
@@ -37,13 +37,13 @@ describe("Match outcome", () => {
   });
 });
 
-describe("Tournament date order", () => {
-  const build = (beginAt: string | null, endAt: string | null) =>
-    Object.assign(new Tournament(), {
-      beginAt: beginAt === null ? null : new Date(beginAt),
-      endAt: endAt === null ? null : new Date(endAt),
-    });
+const build = (beginAt: string | null, endAt: string | null) =>
+  Object.assign(new Tournament(), {
+    beginAt: beginAt === null ? null : new Date(beginAt),
+    endAt: endAt === null ? null : new Date(endAt),
+  });
 
+describe("Tournament date order", () => {
   it.each([
     { beginAt: null, endAt: null },
     { beginAt: "2030-01-01", endAt: null },

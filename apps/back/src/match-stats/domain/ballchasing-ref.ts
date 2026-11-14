@@ -1,4 +1,4 @@
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export const BALLCHASING_HOST = "ballchasing.com";
 
@@ -11,6 +11,13 @@ const REFS = {
 } as const;
 
 export type BallchasingRefKind = keyof typeof REFS;
+
+function invalidRef(kind: BallchasingRefKind): InvalidInputError {
+  return new InvalidInputError({
+    message: `Enter a Ballchasing ${kind} link (https://${BALLCHASING_HOST}/${kind}/…) or the ${kind} id from that link.`,
+    code: `invalid_ballchasing_${kind}`,
+  });
+}
 
 export function parseBallchasingRef(kind: BallchasingRefKind, input: string): string {
   const value = input.trim();
@@ -35,11 +42,4 @@ export function parseBallchasingRef(kind: BallchasingRefKind, input: string): st
   if (!REFS[kind].id.test(candidate)) throw invalidRef(kind);
 
   return REFS[kind].normalize(candidate);
-}
-
-function invalidRef(kind: BallchasingRefKind): InvalidInputError {
-  return new InvalidInputError({
-    message: `Enter a Ballchasing ${kind} link (https://${BALLCHASING_HOST}/${kind}/…) or the ${kind} id from that link.`,
-    code: `invalid_ballchasing_${kind}`,
-  });
 }

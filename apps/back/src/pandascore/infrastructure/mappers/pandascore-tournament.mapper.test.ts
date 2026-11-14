@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PandascoreTournamentMapper } from "./pandascore-tournament.mapper";
+import { toUpsertTournamentCommand } from "./pandascore-tournament.mapper";
 import { tournamentSchema } from "../dto/tournament.dto";
 
 describe("PandascoreTournamentMapper", () => {
@@ -68,7 +68,7 @@ describe("PandascoreTournamentMapper", () => {
       ],
     });
 
-    const command = PandascoreTournamentMapper.toUpsertCommand(dto);
+    const command = toUpsertTournamentCommand(dto);
 
     expect(command).toEqual({
       pandascoreId: 42,

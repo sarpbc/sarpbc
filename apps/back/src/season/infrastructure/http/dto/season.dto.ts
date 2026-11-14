@@ -35,7 +35,7 @@ export const SeasonDto = z.strictObject({
   winnerTeamId: z.uuid().nullish(),
 });
 
-export type SeasonDto = z.infer<typeof SeasonDto>;
+export type SeasonInput = z.infer<typeof SeasonDto>;
 
 export const CreateSeasonAwardDto = z.strictObject({
   playerId: z.uuid(),
@@ -49,7 +49,7 @@ export const CreateSeasonAwardDto = z.strictObject({
     .pipe(z.url().regex(/^https?:\/\//, "Use an http(s) URL")),
 });
 
-export type CreateSeasonAwardDto = z.infer<typeof CreateSeasonAwardDto>;
+export type CreateSeasonAwardInput = z.infer<typeof CreateSeasonAwardDto>;
 
 const PathNote = z.string().max(SEASON_PATH_NOTE_MAX_LENGTH).nullable();
 
@@ -58,11 +58,11 @@ export const CreateSeasonParticipantDto = z.strictObject({
   pathNote: PathNote.optional(),
 });
 
-export type CreateSeasonParticipantDto = z.infer<typeof CreateSeasonParticipantDto>;
+export type CreateSeasonParticipantInput = z.infer<typeof CreateSeasonParticipantDto>;
 
 export const UpdateSeasonParticipantDto = z.strictObject({ pathNote: PathNote });
 
-export type UpdateSeasonParticipantDto = z.infer<typeof UpdateSeasonParticipantDto>;
+export type UpdateSeasonParticipantInput = z.infer<typeof UpdateSeasonParticipantDto>;
 
 export const CreateSeasonPathEntryDto = z.strictObject({
   label: z.string().trim().min(1).max(SEASON_PATH_LABEL_MAX_LENGTH),
@@ -70,4 +70,4 @@ export const CreateSeasonPathEntryDto = z.strictObject({
   tournamentId: z.uuid().nullish(),
 });
 
-export type CreateSeasonPathEntryDto = z.infer<typeof CreateSeasonPathEntryDto>;
+export type CreateSeasonPathEntryInput = z.infer<typeof CreateSeasonPathEntryDto>;

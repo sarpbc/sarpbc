@@ -24,10 +24,10 @@ const {
   status,
   error,
   refresh,
-} = useAdminList("admin-pickems-tournaments", async ({ limit, offset }) => {
-  const { tournaments, total } = await getAllTournaments({ limit, offset });
+} = useAdminList("admin-pickems-tournaments", async (range) => {
+  const response = await getAllTournaments(range);
 
-  return { items: tournaments, total };
+  return { items: response.tournaments, total: response.total };
 });
 
 const breadcrumbItems = computed(() => [

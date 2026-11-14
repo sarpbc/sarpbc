@@ -63,6 +63,16 @@ function isNextGoal(current: CurrentGame, candidate: Candidate): boolean {
   );
 }
 
+function adoptUnconfirmed(current: CurrentGame): void {
+  const { unconfirmed } = current;
+
+  if (current.blue !== current.orange || unconfirmed === null) return;
+  current.blue = unconfirmed.blue;
+  current.orange = unconfirmed.orange;
+  current.lastSeen = unconfirmed.since;
+  current.agreeing += unconfirmed.count;
+}
+
 export class SeriesTracker {
   readonly #settings: TrackerSettings;
   readonly #games: StreamScoreGame[] = [];
@@ -90,21 +100,21 @@ export class SeriesTracker {
   }
 
   push(t: number, reading: ScoreboardReading): void {
-    this.#frames.read++;
+    this.#frames.read += 1;
 
     if (this.decided) return;
 
     switch (reading.kind) {
       case "hidden":
-        this.#frames.hidden++;
+        this.#frames.hidden += 1;
 
         return;
       case "unreadable":
-        this.#frames.unreadable++;
+        this.#frames.unreadable += 1;
 
         return;
       case "score":
-        this.#frames.accepted++;
+        this.#frames.accepted += 1;
         this.#score(t, reading);
 
         return;
@@ -121,7 +131,7 @@ export class SeriesTracker {
     if (current === null || this.decided) return;
 
     if (!current.overtime && current.lastClock !== 0) return;
-    this.#adoptUnconfirmed(current);
+    adoptUnconfirmed(current);
     this.#close("stream_end", current.lastSeen);
   }
 
@@ -176,7 +186,7 @@ export class SeriesTracker {
 
     if (current !== null) {
       current.kickoff = null;
-      current.readings++;
+      current.readings += 1;
     }
 
     if (candidate.count === stable) this.#commit(candidate);
@@ -191,7 +201,12 @@ export class SeriesTracker {
       return;
     }
 
-    current.agreeing++;
+    this.#advance(current, t, reading);
+  }
+
+  #advance(current: CurrentGame, t: number, reading: ScoreReading): void {
+    const stable = this.#settings.stableReadings;
+    current.agreeing += 1;
     current.lastSeen = t;
     current.lastClock = reading.clock;
     current.overtimeReadings = reading.overtime ? current.overtimeReadings + 1 : 0;
@@ -222,7 +237,7 @@ export class SeriesTracker {
     if (candidate.blue === current.blue && candidate.orange === current.orange) return;
 
     if (candidate.blue < current.blue || candidate.orange < current.orange) {
-      this.#frames.rejected++;
+      this.#frames.rejected += 1;
 
       return;
     }
@@ -234,20 +249,10 @@ export class SeriesTracker {
   }
 
   #restart(current: CurrentGame, kickoff: Candidate): void {
-    this.#adoptUnconfirmed(current);
+    adoptUnconfirmed(current);
     this.#close("reset", current.lastSeen);
 
     if (!this.decided) this.#start(kickoff);
-  }
-
-  #adoptUnconfirmed(current: CurrentGame): void {
-    const { unconfirmed } = current;
-
-    if (current.blue !== current.orange || unconfirmed === null) return;
-    current.blue = unconfirmed.blue;
-    current.orange = unconfirmed.orange;
-    current.lastSeen = unconfirmed.since;
-    current.agreeing += unconfirmed.count;
   }
 
   #start(candidate: Candidate): void {

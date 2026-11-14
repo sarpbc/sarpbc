@@ -7,4 +7,4 @@ export const ChangeUserRoleDto = z.strictObject({
   role: z.enum(CHANGEABLE_ROLES),
 });
 
-export type ChangeUserRoleDto = z.infer<typeof ChangeUserRoleDto>;
+export type ChangeUserRoleInput = z.infer<typeof ChangeUserRoleDto>;

@@ -89,23 +89,6 @@ function getParticipantScore(currentMatch: Match, participantId: string): number
   return getMatchParticipantScore(currentMatch.results, participantId);
 }
 
-const winnerParticipantId = computed(() => {
-  if (concealed.value || !match.value || !teamA.value || !teamB.value) return null;
-
-  if (match.value.winner?.id) {
-    return match.value.winner.id;
-  }
-
-  const scoreA = getParticipantScore(match.value, teamA.value.id);
-  const scoreB = getParticipantScore(match.value, teamB.value.id);
-
-  if (scoreA === null || scoreB === null || scoreA === scoreB) {
-    return null;
-  }
-
-  return scoreA > scoreB ? teamA.value.id : teamB.value.id;
-});
-
 const matchStatus = computed(() => {
   if (!match.value) {
     return "upcoming" as const;
@@ -123,6 +106,23 @@ const historyConcealed = computed(
 );
 
 const concealed = computed(() => historyConcealed.value && matchStatus.value !== "upcoming");
+
+const winnerParticipantId = computed(() => {
+  if (concealed.value || !match.value || !teamA.value || !teamB.value) return null;
+
+  if (match.value.winner?.id) {
+    return match.value.winner.id;
+  }
+
+  const scoreA = getParticipantScore(match.value, teamA.value.id);
+  const scoreB = getParticipantScore(match.value, teamB.value.id);
+
+  if (scoreA === null || scoreB === null || scoreA === scoreB) {
+    return null;
+  }
+
+  return scoreA > scoreB ? teamA.value.id : teamB.value.id;
+});
 
 const heroScoreA = computed(() =>
   match.value && teamA.value

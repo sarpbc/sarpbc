@@ -1,29 +1,62 @@
-import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import {
-  Tournament,
-  assertParticipantRemovable,
-  type TournamentParticipant,
-} from "../domain/competition";
-import { TournamentEvent, ownsEvent, toEventRef } from "../domain/tournament-event";
+import { stageSlug } from "@sarpbc/utils";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { Tournament } from "../domain/tournament";
+import { toEventRef } from "../domain/tournament-event";
 import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
-import { assertLineupFitsFormat, playerGroupKey } from "../domain/tournament-format";
-import type {
-  CreateTournamentInput,
-  ParticipantRosterInput,
-  UpdateTournamentInput,
-} from "./inputs";
+import { assertLineupFitsFormat } from "../domain/tournament-format";
+import type { CreateTournamentInput, UpdateTournamentInput } from "./inputs";
 import type { CompetitionAfterCommit } from "./after-commit";
-import type {
-  CompetitionTransaction,
-  EventWriter,
-  MatchWriter,
-  TournamentQueries,
-  TournamentWriter,
-} from "./ports";
-import { explicitEventSlug, placeStage, requireEvent, requireLeague } from "./event-placement";
-import { parseDataSourceUrl } from "../../common/domain/data-source";
+import type { CompetitionTransaction, MatchWriter, TournamentQueries } from "./ports";
+import { placeStage, requireEvent, requireLeague } from "./event-placement";
+import { createOwnEvent, sharedEventSlugError, updateEvent } from "./manual-tournament-event";
+import {
+  assertUpdatedLineup,
+  setRosters,
+  syncParticipants,
+  syncPlayerParticipants,
+} from "./manual-tournament-lineup";
 import { nonBlank } from "../../common/domain/text";
+
+function optionalDate(value: string | null | undefined): Date | null {
+  return value !== null && value !== undefined && value !== "" ? new Date(value) : null;
+}
+
+function draftTournament(input: CreateTournamentInput): Tournament {
+  const tournament = new Tournament();
+  tournament.source = input.source ?? "manual";
+  tournament.pandascoreId = null;
+  tournament.name = input.name;
+  tournament.format = input.format ?? "3v3";
+  tournament.hasBracket = input.hasBracket ?? false;
+  assertLineupFitsFormat(tournament.format, {
+    teamIds: input.teamIds ?? [],
+    playerGroups: input.playerParticipants ?? [],
+  });
+  tournament.tier = nonBlank(input.tier) ?? null;
+  tournament.imageUrl = nonBlank(input.imageUrl) ?? null;
+  tournament.beginAt = optionalDate(input.beginAt);
+  tournament.endAt = optionalDate(input.endAt);
+  tournament.assertDateOrder();
+
+  return tournament;
+}
+
+async function bracketToggle(
+  matches: MatchWriter,
+  tournamentId: string,
+  hasBracket: boolean,
+): Promise<boolean> {
+  if (hasBracket) return true;
+  const stage = await matches.bracket(tournamentId);
+
+  if (stage.matches.some((match) => match.previousMatches.length > 0))
+    throw new InvalidInputError(
+      "This stage still has bracket links. Remove them from its matches before disabling the bracket.",
+    );
+
+  return false;
+}
 
 export class ManualTournamentService {
   constructor(
@@ -33,27 +66,7 @@ export class ManualTournamentService {
   ) {}
   async create(input: CreateTournamentInput): Promise<Tournament> {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
-      const tournament = new Tournament();
-      tournament.source = input.source ?? "manual";
-      tournament.pandascoreId = null;
-      tournament.name = input.name;
-      tournament.format = input.format ?? "3v3";
-      tournament.hasBracket = input.hasBracket ?? false;
-      assertLineupFitsFormat(tournament.format, {
-        teamIds: input.teamIds ?? [],
-        playerGroups: input.playerParticipants ?? [],
-      });
-      tournament.tier = nonBlank(input.tier) ?? null;
-      tournament.imageUrl = nonBlank(input.imageUrl) ?? null;
-      tournament.beginAt =
-        input.beginAt !== null && input.beginAt !== undefined && input.beginAt !== ""
-          ? new Date(input.beginAt)
-          : null;
-      tournament.endAt =
-        input.endAt !== null && input.endAt !== undefined && input.endAt !== ""
-          ? new Date(input.endAt)
-          : null;
-      tournament.assertDateOrder();
+      const tournament = draftTournament(input);
       tournament.league = await requireLeague(tournaments, input.leagueId);
 
       if (input.eventId !== undefined && input.eventId !== "") {
@@ -61,16 +74,16 @@ export class ManualTournamentService {
         await placeStage(events, tournament, await requireEvent(events, input.eventId));
       } else {
         tournament.slug = stageSlug(input.name);
-        tournament.event = toEventRef(await this.createOwnEvent(events, tournament, input.slug));
+        tournament.event = toEventRef(await createOwnEvent(events, tournament, input.slug));
       }
 
       await tournaments.save(tournament);
 
       if (input.teamIds?.length !== undefined && input.teamIds.length !== 0)
-        await this.syncParticipants(tournaments, tournament, input.teamIds);
+        await syncParticipants(tournaments, tournament, input.teamIds);
 
       if (input.playerParticipants?.length !== undefined && input.playerParticipants.length !== 0)
-        await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
+        await syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
 
       return tournament.id;
     });
@@ -103,17 +116,16 @@ export class ManualTournamentService {
       } else {
         if (input.leagueId !== undefined)
           tournament.league = await requireLeague(tournaments, input.leagueId);
-        await this.updateEvent(events, tournament, previousName, input);
-        await this.assertUpdatedLineup(tournaments, tournament, input);
+        await updateEvent(events, tournament, previousName, input);
+        await assertUpdatedLineup(tournaments, tournament, input);
 
         if (input.teamIds !== undefined)
-          await this.syncParticipants(tournaments, tournament, input.teamIds);
+          await syncParticipants(tournaments, tournament, input.teamIds);
 
         if (input.playerParticipants !== undefined)
-          await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
+          await syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
 
-        if (input.rosters !== undefined)
-          await this.setRosters(tournaments, tournament, input.rosters);
+        if (input.rosters !== undefined) await setRosters(tournaments, tournament, input.rosters);
 
         if (input.hasBracket !== undefined)
           tournament.hasBracket = await bracketToggle(matches, tournament.id, input.hasBracket);
@@ -143,205 +155,4 @@ export class ManualTournamentService {
 
     return tournament;
   }
-  private async createOwnEvent(
-    events: EventWriter,
-    tournament: Tournament,
-    slug: string | undefined,
-  ): Promise<TournamentEvent> {
-    const event = Object.assign(new TournamentEvent(), {
-      name: tournament.name,
-      league: tournament.league,
-    });
-
-    event.slug =
-      slug !== undefined && slug !== ""
-        ? await explicitEventSlug(events, slug, event.id)
-        : await allocateSlug(
-            eventSlug(tournament.name, null),
-            async (taken) => await events.slugTaken(taken, null),
-          );
-    await events.save(event);
-
-    return event;
-  }
-  private async updateEvent(
-    events: EventWriter,
-    tournament: Tournament,
-    previousName: string,
-    input: UpdateTournamentInput,
-  ) {
-    if (input.eventId !== undefined && input.eventId !== tournament.event.id) {
-      if (input.slug !== undefined) throw sharedEventSlugError();
-      await placeStage(events, tournament, await requireEvent(events, input.eventId));
-
-      return;
-    }
-
-    const event = await requireEvent(events, tournament.event.id);
-    const stageIds = (await events.stages(event.id)).map((stage) => stage.id);
-
-    if (!ownsEvent(event, stageIds, { id: tournament.id, name: previousName })) {
-      if (input.slug !== undefined && toSlug(input.slug) !== event.slug)
-        throw sharedEventSlugError();
-
-      return;
-    }
-
-    event.name = tournament.name;
-    event.league = tournament.league;
-
-    if (input.slug !== undefined)
-      event.slug = await explicitEventSlug(events, input.slug, event.id);
-    await events.save(event);
-    tournament.event = toEventRef(event);
-  }
-  private async syncParticipants(
-    writer: TournamentWriter,
-    tournament: Tournament,
-    teamIds: string[],
-  ) {
-    if (new Set(teamIds).size !== teamIds.length || !(await writer.teamsExist(teamIds)))
-      throw new InvalidInputError(
-        "One or more teams were not found. Refresh the team list and try again.",
-      );
-
-    const existing = await writer.participants(tournament.id);
-    const desired = new Set(teamIds);
-
-    for (const p of existing) {
-      if (!p.team || desired.has(p.team.id)) continue;
-      assertParticipantRemovable(await writer.participantReferences(tournament.id, p.id));
-      await writer.removeParticipant(p.id);
-    }
-
-    const present = new Set(existing.flatMap((p) => (p.team ? [p.team.id] : [])));
-
-    for (const teamId of teamIds) {
-      if (!present.has(teamId))
-        await writer.saveParticipant({
-          id: crypto.randomUUID(),
-          tournamentId: tournament.id,
-          teamId,
-          playerIds: await this.activeRoster(writer, teamId),
-          rosterSourceUrl: null,
-        });
-    }
-  }
-  private async syncPlayerParticipants(
-    writer: TournamentWriter,
-    tournament: Tournament,
-    groups: string[][],
-  ) {
-    const playerIds = [...new Set(groups.flat())];
-
-    if (playerIds.length && !(await writer.playersExist(playerIds)))
-      throw new InvalidInputError(
-        "One or more players were not found. Refresh the player list and try again.",
-      );
-
-    const existing = (await writer.participants(tournament.id)).filter((p) => !p.team);
-    const keyOf = (p: TournamentParticipant) =>
-      playerGroupKey(p.players.map((player) => player.id));
-    const desired = new Set(groups.map(playerGroupKey));
-
-    for (const p of existing) {
-      if (desired.has(keyOf(p))) continue;
-      assertParticipantRemovable(await writer.participantReferences(tournament.id, p.id));
-      await writer.removeParticipant(p.id);
-    }
-
-    const present = new Set(existing.map(keyOf));
-
-    for (const group of groups) {
-      if (!present.has(playerGroupKey(group)))
-        await writer.saveParticipant({
-          id: crypto.randomUUID(),
-          tournamentId: tournament.id,
-          teamId: null,
-          playerIds: group,
-          rosterSourceUrl: null,
-        });
-    }
-  }
-  private async assertUpdatedLineup(
-    writer: TournamentWriter,
-    tournament: Tournament,
-    input: UpdateTournamentInput,
-  ) {
-    if (input.format !== undefined) tournament.format = input.format;
-
-    if (
-      input.format === undefined &&
-      input.teamIds === undefined &&
-      input.playerParticipants === undefined
-    )
-      return;
-    const current = await writer.participants(tournament.id);
-    assertLineupFitsFormat(tournament.format, {
-      teamIds: input.teamIds ?? current.flatMap((p) => (p.team ? [p.team.id] : [])),
-      playerGroups:
-        input.playerParticipants ??
-        current.flatMap((p) => (p.team ? [] : [p.players.map((player) => player.id)])),
-    });
-  }
-  /** Copied once when the team joins, so later transfers do not rewrite the tournament's history. */
-  private async activeRoster(writer: TournamentWriter, teamId: string) {
-    return (await writer.teamPlayers(teamId))
-      .filter((player) => player.currentRole() === "active")
-      .map((player) => player.id);
-  }
-  private async setRosters(
-    writer: TournamentWriter,
-    tournament: Tournament,
-    rosters: ParticipantRosterInput[],
-  ) {
-    const playerIds = [...new Set(rosters.flatMap((roster) => roster.playerIds))];
-
-    if (playerIds.length && !(await writer.playersExist(playerIds)))
-      throw new InvalidInputError(
-        "One or more players were not found. Refresh the player list and try again.",
-      );
-    const participants = await writer.participants(tournament.id);
-
-    for (const roster of rosters) {
-      const participant = participants.find((p) => p.team?.id === roster.teamId);
-
-      if (!participant)
-        throw new InvalidInputError(
-          `Team "${roster.teamId}" is not a participant of this tournament. Add it to teamIds first.`,
-        );
-      await writer.saveParticipant({
-        id: participant.id,
-        tournamentId: tournament.id,
-        teamId: roster.teamId,
-        playerIds: roster.playerIds,
-        rosterSourceUrl:
-          roster.sourceUrl === undefined
-            ? participant.rosterSourceUrl
-            : parseDataSourceUrl(roster.sourceUrl),
-      });
-    }
-  }
-}
-
-async function bracketToggle(
-  matches: MatchWriter,
-  tournamentId: string,
-  hasBracket: boolean,
-): Promise<boolean> {
-  if (hasBracket) return true;
-  const stage = await matches.bracket(tournamentId);
-
-  if (stage.matches.some((match) => match.previousMatches.length > 0))
-    throw new InvalidInputError(
-      "This stage still has bracket links. Remove them from its matches before disabling the bracket.",
-    );
-
-  return false;
-}
-
-function sharedEventSlugError() {
-  return new InvalidInputError(
-    "This tournament is a stage of a shared event, so it has no slug of its own. Change the slug on the event instead.",
-  );
 }

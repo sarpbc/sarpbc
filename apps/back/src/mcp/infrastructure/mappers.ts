@@ -1,14 +1,14 @@
 import type { DataSource, Stream, NewsArticleAdmin } from "@sarpbc/types";
 import { isoDay, participantName } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
-import type { Contract, Player, Team } from "../../roster/domain/roster";
+import type { Contract } from "../../roster/domain/contract";
+import type { Player } from "../../roster/domain/player";
+import type { Team } from "../../roster/domain/team";
 import type { TeamAlias } from "../../roster/domain/team-alias";
-import type {
-  League,
-  Match,
-  Tournament,
-  TournamentParticipant,
-} from "../../tournament/domain/competition";
+import type { League } from "../../tournament/domain/league";
+import type { Match } from "../../tournament/domain/match";
+import type { Tournament } from "../../tournament/domain/tournament";
+import type { TournamentParticipant } from "../../tournament/domain/tournament-participant";
 import { isEventSynced } from "../../tournament/domain/tournament-event";
 import type { EventListing } from "../../tournament/application/ports";
 import { mapMatchListItem } from "../../tournament/infrastructure/http/match-list.mapper";
@@ -21,6 +21,14 @@ import {
   teamUrl,
   tournamentUrl,
 } from "./urls";
+
+function days(dates: (Date | null)[]): number[] {
+  return dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
+}
+
+function timeOf(date: Date | null): number {
+  return date?.getTime() ?? Number.POSITIVE_INFINITY;
+}
 
 /** start.gg teams may play in a redistributable match; only the match and tournament source count. */
 export function isRedistributableMatch(match: Match): boolean {
@@ -61,8 +69,8 @@ export function mapCareer(player: Player, contracts: Contract[]) {
       name: player.name,
       currentTeamId: player.team?.id ?? null,
     },
-    contracts: [...contracts]
-      .sort((a, b) => a.startDate.getTime() - b.startDate.getTime())
+    contracts: contracts
+      .toSorted((a, b) => a.startDate.getTime() - b.startDate.getTime())
       .map((contract) => ({
         id: contract.id,
         team: { id: contract.team.id, slug: contract.team.slug, name: contract.team.name },
@@ -141,10 +149,7 @@ export function mapLeague(league: League) {
 export function mapEvent({ event, stages }: EventListing) {
   const phases = stages
     .filter((stage) => isRedistributable(stage.source))
-    .sort((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
-
-  const days = (dates: (Date | null)[]) =>
-    dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
+    .toSorted((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
 
   const starts = days(phases.map((phase) => phase.beginAt));
   const ends = days(phases.map((phase) => phase.endAt));
@@ -164,10 +169,6 @@ export function mapEvent({ event, stages }: EventListing) {
   };
 }
 
-function timeOf(date: Date | null): number {
-  return date?.getTime() ?? Number.POSITIVE_INFINITY;
-}
-
 export function mapTournamentParticipant(participant: TournamentParticipant) {
   return {
     id: participant.id,
@@ -185,21 +186,6 @@ export function mapListedParticipants(source: DataSource, participants: Tourname
   if (!isRedistributable(source)) return {};
 
   return { participants: participants.map(mapTournamentParticipant) };
-}
-
-export function mapTournamentDetail(tournament: Tournament) {
-  return {
-    ...mapTournamentListItem(tournament),
-    description: tournament.description,
-    tier: tournament.tier,
-    hasBracket: tournament.hasBracket,
-    winner: tournament.winner
-      ? { participantId: tournament.winner.id, name: participantName(tournament.winner) }
-      : null,
-    ...mapListedParticipants(tournament.source, tournament.participants),
-    matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
-    streams: redistributableStreams(tournament.watchStreams()),
-  };
 }
 
 export function mapMatchListResponse(match: Match) {
@@ -222,6 +208,21 @@ export function mapMatchListResponse(match: Match) {
     viewership: isRedistributableMatch(match) ? match.viewership : null,
     sourceUrl: match.sourceUrl,
     url: matchUrl(item.publicId, item.slug),
+  };
+}
+
+export function mapTournamentDetail(tournament: Tournament) {
+  return {
+    ...mapTournamentListItem(tournament),
+    description: tournament.description,
+    tier: tournament.tier,
+    hasBracket: tournament.hasBracket,
+    winner: tournament.winner
+      ? { participantId: tournament.winner.id, name: participantName(tournament.winner) }
+      : null,
+    ...mapListedParticipants(tournament.source, tournament.participants),
+    matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
+    streams: redistributableStreams(tournament.watchStreams()),
   };
 }
 

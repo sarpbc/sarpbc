@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { z } from "zod";
+import { mapSequentially } from "../../src/common/application/sequentially.ts";
 import { byJoined } from "./support.mts";
 import type { Orm, Payload, Request } from "./support.mts";
 
@@ -80,23 +81,28 @@ export async function verifyOnThisDay({
   memberCookie,
 }: OnThisDayContext): Promise<void> {
   async function created<T>(schema: z.ZodType<T>, path: string, body: Payload): Promise<T> {
-    return (await request("POST", path, body, staffCookie, 201)).json(schema);
+    const response = await request("POST", path, body, staffCookie, 201);
+
+    return response.json(schema);
   }
 
   const sql = async (query: string, params: (string | number)[]) =>
     await orm.em.fork().getConnection().execute(query, params);
 
-  const home = (await created(teamBody, "/team", { name: "Anniversary Home" })).team;
-  const away = (await created(teamBody, "/team", { name: "Anniversary Away" })).team;
+  const response2 = await created(teamBody, "/team", { name: "Anniversary Home" });
+  const home = response2.team;
+  const response3 = await created(teamBody, "/team", { name: "Anniversary Away" });
+  const away = response3.team;
 
-  const stage = async (name: string, source = "manual"): Promise<StageRef> =>
-    (
-      await created(stageBody, "/tournaments", {
-        name,
-        source,
-        teamIds: [home.id, away.id],
-      })
-    ).tournament;
+  const stage = async (name: string, source = "manual"): Promise<StageRef> => {
+    const response4 = await created(stageBody, "/tournaments", {
+      name,
+      source,
+      teamIds: [home.id, away.id],
+    });
+
+    return response4.tournament;
+  };
 
   const crown = async (tournament: StageRef, endAt: string) =>
     await sql("update tournament set winner_id = ?, end_at = ? where id = ?", [
@@ -111,38 +117,41 @@ export async function verifyOnThisDay({
 
   await request("PATCH", `/tournaments/${bracket.id}`, { hasBracket: true }, staffCookie);
 
-  const semifinal = (
-    await created(matchBody, `/tournaments/${bracket.id}/matches`, {
-      name: "Semifinal",
-      participantIds: [homeSide, awaySide],
-    })
-  ).match;
+  const response5 = await created(matchBody, `/tournaments/${bracket.id}/matches`, {
+    name: "Semifinal",
+    participantIds: [homeSide, awaySide],
+  });
 
-  const final = (
-    await created(matchBody, `/tournaments/${bracket.id}/matches`, {
-      name: "Grand Final",
-      participantIds: [homeSide, awaySide],
-      previousMatches: [{ previousMatchId: semifinal.id, type: "winner" }],
-    })
-  ).match;
+  const semifinal = response5.match;
+
+  const response6 = await created(matchBody, `/tournaments/${bracket.id}/matches`, {
+    name: "Grand Final",
+    participantIds: [homeSide, awaySide],
+    previousMatches: [{ previousMatchId: semifinal.id, type: "winner" }],
+  });
+
+  const final = response6.match;
 
   const finals: [MatchRef, number][] = [
     [semifinal, 3],
     [final, 4],
   ];
 
-  for (const [match, homeScore] of finals)
-    await request(
-      "PUT",
-      `/tournaments/matches/${match.id}/result`,
-      {
-        results: [
-          { participantId: homeSide, score: homeScore },
-          { participantId: awaySide, score: 2 },
-        ],
-      },
-      staffCookie,
-    );
+  await mapSequentially(
+    finals,
+    async ([match, homeScore]) =>
+      await request(
+        "PUT",
+        `/tournaments/matches/${match.id}/result`,
+        {
+          results: [
+            { participantId: homeSide, score: homeScore },
+            { participantId: awaySide, score: 2 },
+          ],
+        },
+        staffCookie,
+      ),
+  );
   await sql("update match set end_at = ? where id = ?", ["2024-02-17T20:00:00Z", semifinal.id]);
   await sql("update match set end_at = ? where id = ?", ["2024-02-17T21:00:00Z", final.id]);
   await crown(bracket, "2024-02-17T21:30:00Z");
@@ -183,7 +192,8 @@ export async function verifyOnThisDay({
     staffCookie,
     400,
   );
-  const saved = (await created(savedFact, "/on-this-day-facts", fact)).fact;
+  const response7 = await created(savedFact, "/on-this-day-facts", fact);
+  const saved = response7.fact;
   assert.deepEqual(saved.link, {
     kind: "team",
     id: home.id,
@@ -192,15 +202,16 @@ export async function verifyOnThisDay({
     source: null,
   });
 
-  const future = (
-    await created(savedFact, "/on-this-day-facts", {
-      ...fact,
-      year: 2030,
-      link: null,
-    })
-  ).fact;
+  const response8 = await created(savedFact, "/on-this-day-facts", {
+    ...fact,
+    year: 2030,
+    link: null,
+  });
 
-  const body = (await request("GET", `/on-this-day?date=${DAY}`)).json(z.json());
+  const future = response8.fact;
+
+  const response9 = await request("GET", `/on-this-day?date=${DAY}`);
+  const body = response9.json(z.json());
   const { date, events } = onThisDay.parse(body);
   assert.equal(date, DAY);
 
@@ -234,7 +245,7 @@ export async function verifyOnThisDay({
     "titles and finals use the Paris day; start.gg, next-day and current-year titles stay out",
   );
   assert.deepEqual(
-    summary.slice(3).sort(byJoined),
+    summary.slice(3).toSorted(byJoined),
     [
       ["transfer", 2023, "arrival", away.name],
       ["transfer", 2024, "arrival", home.name],

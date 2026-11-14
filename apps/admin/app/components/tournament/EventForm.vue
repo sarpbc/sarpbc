@@ -3,13 +3,11 @@ import type { League } from "@sarpbc/types";
 import type { EventFormState } from "~/composables/useEventForm";
 
 const state = defineModel<EventFormState>({ required: true });
-const props = defineProps<{ leagues: League[]; disabled?: boolean }>();
+const { leagues } = defineProps<{ leagues: League[]; disabled?: boolean }>();
 
 const { t } = useI18n();
 
-const leagueItems = computed(() =>
-  leagueOptions(props.leagues, t("page.tournaments.source.pandascore")),
-);
+const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.source.pandascore")));
 </script>
 
 <template>

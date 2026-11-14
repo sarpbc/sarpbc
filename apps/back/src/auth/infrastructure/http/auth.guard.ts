@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { FastifyReply, FastifyRequest } from "fastify";
-import { AuthenticationError } from "../../../common/domain/errors";
+import { AuthenticationError } from "../../../common/domain/errors/authentication-error";
 import { AuthService } from "../../application/auth.service";
 import {
   ACCESS_TOKEN_COOKIE,

@@ -21,15 +21,32 @@ import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import {
   CreateEmptyBracketDto,
+  type CreateEmptyBracketInput,
   CreateMatchDto,
+  type CreateMatchInput,
   SetMatchBracketDto,
+  type SetMatchBracketInput,
   SetMatchResultDto,
+  type SetMatchResultInput,
   SetMatchSourceDto,
+  type SetMatchSourceInput,
   SetMatchVodsDto,
+  type SetMatchVodsInput,
   SetMatchWinnerDto,
+  type SetMatchWinnerInput,
 } from "./dto/create-match.dto";
-import { CreateTournamentDto, UpdateTournamentDto } from "./dto/create-tournament.dto";
-import { CreateLeagueDto, UpdateLeagueDto } from "./dto/manual-catalog.dto";
+import {
+  CreateTournamentDto,
+  type CreateTournamentInput,
+  UpdateTournamentDto,
+  type UpdateTournamentInput,
+} from "./dto/create-tournament.dto";
+import {
+  CreateLeagueDto,
+  type CreateLeagueInput,
+  UpdateLeagueDto,
+  type UpdateLeagueInput,
+} from "./dto/manual-catalog.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -41,24 +58,30 @@ import { ManualTournamentService } from "../../application/manual-tournament.ser
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { MatchService } from "../../application/match/match.service";
 import { StreamService } from "../../application/stream.service";
-import { SetStreamsDto } from "./dto/set-streams.dto";
+import { SetStreamsDto, type SetStreamsInput } from "./dto/set-streams.dto";
 import {
   MatchLineupService,
   type MatchLineups,
 } from "../../application/match/match-lineup.service";
 import { lineupsFromGames } from "../../domain/match-lineup";
-import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
+import { SetMatchLineupsDto, type SetMatchLineupsInput } from "./dto/set-match-lineups.dto";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { ViewershipService } from "../../application/viewership.service";
-import { SetViewershipDto } from "./dto/set-viewership.dto";
+import { SetViewershipDto, type SetViewershipInput } from "./dto/set-viewership.dto";
 import { PlayerAwardService } from "../../application/player-award.service";
-import { CreatePlayerAwardDto } from "./dto/create-player-award.dto";
+import { CreatePlayerAwardDto, type CreatePlayerAwardInput } from "./dto/create-player-award.dto";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
-import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
-import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
+import {
+  SetTournamentPrizesDto,
+  type SetTournamentPrizesInput,
+} from "./dto/set-tournament-prizes.dto";
+import {
+  ListTournamentsQueryDto,
+  type ListTournamentsQueryInput,
+} from "./dto/list-tournaments-query.dto";
 import {
   mapProfileMatchListItem,
   mapTournamentMatchListItem,
@@ -92,7 +115,7 @@ export class TournamentController {
   ) {}
 
   @Get()
-  async find(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryDto) {
+  async find(@Query({ schema: ListTournamentsQueryDto }) query: ListTournamentsQueryInput) {
     const [tournaments, count] = await this.tournaments.find({
       limit: query.limit,
       offset: query.offset,
@@ -116,7 +139,7 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post("leagues")
-  async createLeague(@Body({ schema: CreateLeagueDto }) dto: CreateLeagueDto) {
+  async createLeague(@Body({ schema: CreateLeagueDto }) dto: CreateLeagueInput) {
     return { league: mapLeague(await this.catalogService.createLeague(dto)) };
   }
 
@@ -125,7 +148,7 @@ export class TournamentController {
   @Patch("leagues/:leagueId")
   async updateLeague(
     @Param("leagueId") leagueId: string,
-    @Body({ schema: UpdateLeagueDto }) dto: UpdateLeagueDto,
+    @Body({ schema: UpdateLeagueDto }) dto: UpdateLeagueInput,
   ) {
     return { league: mapLeague(await this.catalogService.updateLeague(leagueId, dto)) };
   }
@@ -142,7 +165,7 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Post()
-  async create(@Body({ schema: CreateTournamentDto }) dto: CreateTournamentDto) {
+  async create(@Body({ schema: CreateTournamentDto }) dto: CreateTournamentInput) {
     const tournament = await this.manualTournamentService.create(dto);
 
     return { tournament: mapTournamentDetail(tournament) };
@@ -164,7 +187,7 @@ export class TournamentController {
   @Patch(":id")
   async update(
     @Param("id") id: string,
-    @Body({ schema: UpdateTournamentDto }) dto: UpdateTournamentDto,
+    @Body({ schema: UpdateTournamentDto }) dto: UpdateTournamentInput,
   ) {
     const tournament = await this.manualTournamentService.update(id, dto);
 
@@ -250,7 +273,7 @@ export class TournamentController {
   @Post(":id/awards")
   async createAward(
     @Param("id") tournamentId: string,
-    @Body({ schema: CreatePlayerAwardDto }) dto: CreatePlayerAwardDto,
+    @Body({ schema: CreatePlayerAwardDto }) dto: CreatePlayerAwardInput,
   ) {
     const award = await this.playerAwardService.create(
       tournamentId,
@@ -280,7 +303,7 @@ export class TournamentController {
   @Put(":id/prizes")
   async setPrizes(
     @Param("id") tournamentId: string,
-    @Body({ schema: SetTournamentPrizesDto }) dto: SetTournamentPrizesDto,
+    @Body({ schema: SetTournamentPrizesDto }) dto: SetTournamentPrizesInput,
   ) {
     return await this.tournamentPrizeService.setDistribution(tournamentId, dto.prizes);
   }
@@ -290,7 +313,7 @@ export class TournamentController {
   @Post(":id/matches")
   async createMatch(
     @Param("id") tournamentId: string,
-    @Body({ schema: CreateMatchDto }) matchData: CreateMatchDto,
+    @Body({ schema: CreateMatchDto }) matchData: CreateMatchInput,
   ) {
     const match = await this.matchService.createMatch(tournamentId, {
       ...matchData,
@@ -312,7 +335,7 @@ export class TournamentController {
   @Post(":id/bracket")
   async createEmptyBracket(
     @Param("id") tournamentId: string,
-    @Body({ schema: CreateEmptyBracketDto }) body: CreateEmptyBracketDto,
+    @Body({ schema: CreateEmptyBracketDto }) body: CreateEmptyBracketInput,
   ) {
     const matches = await this.matchService.createEmptyBracket(tournamentId, body);
 
@@ -324,7 +347,7 @@ export class TournamentController {
   @Put("matches/:matchId/bracket")
   async setMatchBracket(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetMatchBracketDto }) body: SetMatchBracketDto,
+    @Body({ schema: SetMatchBracketDto }) body: SetMatchBracketInput,
   ) {
     const match = await this.matchService.updateMatch(matchId, body);
 
@@ -336,7 +359,7 @@ export class TournamentController {
   @Put("matches/:matchId/winner")
   async setMatchWinner(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerDto,
+    @Body({ schema: SetMatchWinnerDto }) body: SetMatchWinnerInput,
   ) {
     const match = await this.matchService.setMatchWinner(matchId, body.winnerId);
 
@@ -348,7 +371,7 @@ export class TournamentController {
   @Put("matches/:matchId/result")
   async setMatchResult(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetMatchResultDto }) body: SetMatchResultDto,
+    @Body({ schema: SetMatchResultDto }) body: SetMatchResultInput,
   ) {
     const match = await this.matchService.updateMatch(matchId, {
       status: "finished",
@@ -363,7 +386,7 @@ export class TournamentController {
   @Put("matches/:matchId/vods")
   async setMatchVods(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetMatchVodsDto }) body: SetMatchVodsDto,
+    @Body({ schema: SetMatchVodsDto }) body: SetMatchVodsInput,
   ) {
     const match = await this.matchService.setVods(matchId, body.vods);
 
@@ -375,7 +398,7 @@ export class TournamentController {
   @Put("matches/:matchId/source")
   async setMatchSource(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetMatchSourceDto }) body: SetMatchSourceDto,
+    @Body({ schema: SetMatchSourceDto }) body: SetMatchSourceInput,
   ) {
     const match = await this.matchService.setSource(matchId, body.sourceUrl);
 
@@ -394,7 +417,7 @@ export class TournamentController {
   @Put("matches/:matchId/streams")
   async setMatchStreams(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetStreamsDto }) body: SetStreamsDto,
+    @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
     return await this.streamService.set({ kind: "match", id: matchId }, body.streams, "manual");
   }
@@ -418,7 +441,7 @@ export class TournamentController {
   @Put("matches/:matchId/lineups")
   async setMatchLineups(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetMatchLineupsDto }) body: SetMatchLineupsDto,
+    @Body({ schema: SetMatchLineupsDto }) body: SetMatchLineupsInput,
   ): Promise<MatchLineupsResponse> {
     return await this.lineupsResponse(matchId, this.lineupService.set(matchId, body.lineups));
   }
@@ -428,7 +451,7 @@ export class TournamentController {
   @Put("matches/:matchId/viewership")
   async setMatchViewership(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetViewershipDto }) body: SetViewershipDto,
+    @Body({ schema: SetViewershipDto }) body: SetViewershipInput,
   ) {
     return await this.viewershipService.set({ kind: "match", id: matchId }, body.viewership);
   }
@@ -445,7 +468,7 @@ export class TournamentController {
   @Put(":id/streams")
   async setTournamentStreams(
     @Param("id") id: string,
-    @Body({ schema: SetStreamsDto }) body: SetStreamsDto,
+    @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
     return await this.streamService.set({ kind: "tournament", id }, body.streams, "manual");
   }

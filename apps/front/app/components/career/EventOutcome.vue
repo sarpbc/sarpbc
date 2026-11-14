@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CareerEventOutcome, CareerStats } from "~/types/career";
 
-const props = defineProps<{
+const { outcome } = defineProps<{
   outcome: CareerEventOutcome;
 }>();
 
@@ -11,19 +11,19 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const eventKey = computed(() => `page.game.career.events.${props.outcome.eventId}`);
+const eventKey = computed(() => `page.game.career.events.${outcome.eventId}`);
 
 const outcomeCopy = computed(() => {
-  const key = props.outcome.failed ? "failure" : "outcome";
+  const key = outcome.failed ? "failure" : "outcome";
 
-  return t(`${eventKey.value}.choices.${props.outcome.choiceId}.${key}`);
+  return t(`${eventKey.value}.choices.${outcome.choiceId}.${key}`);
 });
 
 const statRows = computed(() => {
   const keys: (keyof CareerStats)[] = ["rating", "form", "morale"];
 
   return keys.flatMap((stat) => {
-    const value = props.outcome.delta[stat] ?? 0;
+    const value = outcome.delta[stat] ?? 0;
 
     return value === 0 ? [] : [{ stat, value }];
   });

@@ -1,5 +1,5 @@
 import { isMatchFinished, winnerFromResults } from "@sarpbc/utils";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 
 export interface PickMatch {
   id: string;

@@ -1,12 +1,12 @@
 import { Body, Controller, Get, Patch, Request, UseGuards } from "@nestjs/common";
 import { Throttle } from "@nestjs/throttler";
-import { NotFoundError } from "../../../common/domain/errors";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { UserService } from "../../application/user.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { CurrentUserId } from "./decorator/current-user.decorator";
-import { UpdateProfileDto } from "./dto/update-profile.dto";
-import { UserMapper } from "./user.mapper";
+import { UpdateProfileDto, type UpdateProfileInput } from "./dto/update-profile.dto";
+import { toUserResponse } from "./user.mapper";
 
 @Controller("user")
 export class UserController {
@@ -21,7 +21,7 @@ export class UserController {
       throw new NotFoundError("User not found");
     }
 
-    const userDto = UserMapper.toDto(user);
+    const userDto = toUserResponse(user);
 
     return { user: userDto };
   }
@@ -31,10 +31,10 @@ export class UserController {
   @Patch("profile")
   async updateProfile(
     @CurrentUserId() userId: string,
-    @Body({ schema: UpdateProfileDto }) dto: UpdateProfileDto,
+    @Body({ schema: UpdateProfileDto }) dto: UpdateProfileInput,
   ) {
     const user = await this.userService.updateUserName(userId, dto.userName);
 
-    return { user: UserMapper.toDto(user) };
+    return { user: toUserResponse(user) };
   }
 }

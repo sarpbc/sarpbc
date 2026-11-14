@@ -1,7 +1,7 @@
 import type { CareerStint, CareerTitle, PlayerCareer, PlayerComparison } from "@sarpbc/types";
-import type { Contract } from "../../../roster/domain/roster";
+import type { Contract } from "../../../roster/domain/contract";
 import { mapPlayer, mapTeamSummary } from "../../../roster/infrastructure/http/player.mapper";
-import type { Tournament } from "../../../tournament/domain/competition";
+import type { Tournament } from "../../../tournament/domain/tournament";
 import { toEventRef } from "../../../tournament/domain/tournament-event";
 import type { Career, Comparison } from "../../application/player-comparison.service";
 

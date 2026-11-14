@@ -1,6 +1,8 @@
 import { allocateSlug, eventSlug, toSlug } from "@sarpbc/utils";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { League } from "../domain/competition";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { League } from "../domain/league";
 import { TournamentEvent, assertEventEditable, isEventSynced } from "../domain/tournament-event";
 import { assertLeagueUpdateAllowed } from "../domain/tournament-source";
 import { explicitEventSlug, requireEvent, requireLeague } from "./event-placement";
@@ -18,6 +20,17 @@ import type {
   EventQueries,
   TournamentQueries,
 } from "./ports";
+
+function leagueSlug(raw: string): string {
+  const slug = toSlug(raw);
+
+  if (!slug)
+    throw new InvalidInputError(
+      "Enter a valid slug using letters, numbers, and hyphens (e.g. rlcs).",
+    );
+
+  return slug;
+}
 
 export class ManualCatalogService {
   constructor(
@@ -64,9 +77,9 @@ export class ManualCatalogService {
     });
   }
   async manualEvents(): Promise<EventListing[]> {
-    return (await this.events.unsynced()).filter(
-      ({ event, stages }) => !isEventSynced(event, stages),
-    );
+    const unsynced = await this.events.unsynced();
+
+    return unsynced.filter(({ event, stages }) => !isEventSynced(event, stages));
   }
   async findEvent(idOrSlug: string): Promise<EventListing> {
     const found = await this.events.find(idOrSlug);
@@ -130,15 +143,4 @@ export class ManualCatalogService {
       await events.remove(event.id);
     });
   }
-}
-
-function leagueSlug(raw: string): string {
-  const slug = toSlug(raw);
-
-  if (!slug)
-    throw new InvalidInputError(
-      "Enter a valid slug using letters, numbers, and hyphens (e.g. rlcs).",
-    );
-
-  return slug;
 }

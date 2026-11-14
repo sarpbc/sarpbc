@@ -8,7 +8,7 @@ import {
 import { fetchTeamTagWithCache } from "../composables/entityTagCache";
 import { useEntityTagLink } from "../composables/useEntityTagLink";
 
-const props = defineProps<{
+const { slug } = defineProps<{
   slug: string;
   label: string;
 }>();
@@ -21,7 +21,7 @@ const pending = ref(false);
 const error = ref(false);
 const team = ref<Team | null>(null);
 
-const href = computed(() => teamHref(props.slug));
+const href = computed(() => teamHref(slug));
 
 const roster = computed(() => selectActiveRosterPlayers(team.value?.players ?? []));
 
@@ -37,8 +37,8 @@ async function loadTeam() {
   error.value = false;
 
   try {
-    const response = await fetchTeamTagWithCache(props.slug, () =>
-      apiFetch<{ team: Team | null }>(`/team/slug/${encodeURIComponent(props.slug)}`),
+    const response = await fetchTeamTagWithCache(slug, () =>
+      apiFetch<{ team: Team | null }>(`/team/slug/${encodeURIComponent(slug)}`),
     );
 
     team.value = response.team;

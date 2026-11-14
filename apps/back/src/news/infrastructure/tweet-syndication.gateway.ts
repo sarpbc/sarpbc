@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { ParsedTweetUrl, TweetEmbed } from "@sarpbc/utils";
-import { NotFoundError, IntegrationError } from "../../common/domain/errors";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { IntegrationError } from "../../common/domain/errors/integration-error";
 import type { TweetEmbedGateway } from "../application/tweet-embed.service";
 
 const CACHE_TTL_MS = 6 * 60 * 60 * 1000;
@@ -64,7 +65,7 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
     // X's syndication endpoint requires this token, also used by vercel/react-tweet.
     url.searchParams.set(
       "token",
-      ((Number(parsed.id) / 1e15) * Math.PI).toString(36).replaceAll(/(0+|\.)/g, ""),
+      ((Number(parsed.id) / 1e15) * Math.PI).toString(36).replaceAll(/(?:0+|\.)/g, ""),
     );
 
     let response: Response;

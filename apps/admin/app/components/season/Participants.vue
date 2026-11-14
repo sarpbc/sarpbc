@@ -2,7 +2,7 @@
 import { watchDebounced } from "@vueuse/core";
 import type { SeasonParticipant, Team } from "@sarpbc/types";
 
-const props = defineProps<{
+const { participants, seasonId } = defineProps<{
   seasonId: string;
   participants: SeasonParticipant[];
   winnerTeamId: string | null;
@@ -20,7 +20,7 @@ const searching = ref(false);
 const adding = ref(false);
 const participantToRemove = ref<SeasonParticipant | null>(null);
 
-const takenTeamIds = computed(() => new Set(props.participants.map(({ team }) => team.id)));
+const takenTeamIds = computed(() => new Set(participants.map(({ team }) => team.id)));
 const candidates = computed(() => results.value.filter((team) => !takenTeamIds.value.has(team.id)));
 
 async function runSearch(value: string) {
@@ -50,7 +50,7 @@ async function add(team: Team) {
   adding.value = true;
 
   try {
-    await createSeasonParticipant(props.seasonId, { teamId: team.id });
+    await createSeasonParticipant(seasonId, { teamId: team.id });
     toast.add({
       title: t("page.seasons.participants.added", { name: team.name }),
       color: "success",

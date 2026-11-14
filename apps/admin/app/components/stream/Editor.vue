@@ -115,7 +115,7 @@ const canSave = computed(() => rows.value.every(isRowValid));
 
 function apply(response: StreamsResponse) {
   rows.value = response.streams.map(({ url, channel, language, kind }) => ({
-    key: nextKey++,
+    key: (nextKey += 1),
     url,
     channel,
     language,
@@ -148,7 +148,7 @@ watch(
 function addRow() {
   const last = rows.value.at(-1);
   rows.value.push({
-    key: nextKey++,
+    key: (nextKey += 1),
     url: "",
     channel: "",
     language: last?.language ?? "en",

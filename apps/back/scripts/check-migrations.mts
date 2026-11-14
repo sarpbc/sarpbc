@@ -1,18 +1,17 @@
 import { execFileSync } from "node:child_process";
 import { readdirSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 const defaultDirectory = path.resolve(
   import.meta.dirname,
   "../src/infrastructure/database/migrations",
 );
 
-const migrationPattern = /^Migration(\d{14})(?:_[A-Za-z0-9]+)?\.ts$/;
+const migrationPattern = /^Migration(?<timestamp>\d{14})(?:_[A-Za-z0-9]+)?\.ts$/;
 const snapshotPattern = /^\.snapshot-[^/]+\.json$/;
 
 function timestampOf(name: string): string | undefined {
-  return migrationPattern.exec(name)?.[1];
+  return migrationPattern.exec(name)?.groups?.timestamp;
 }
 
 function baseMigrationNames(directory: string, baseRef: string): string[] | undefined {
@@ -37,7 +36,7 @@ function baseMigrationNames(directory: string, baseRef: string): string[] | unde
 }
 
 export function migrationViolations(directory = defaultDirectory, baseRef = ""): string[] {
-  const files = readdirSync(directory).sort();
+  const files = readdirSync(directory).toSorted();
   const names = files.filter((name) => timestampOf(name) !== undefined);
 
   const violations = files
@@ -71,7 +70,7 @@ export function migrationViolations(directory = defaultDirectory, baseRef = ""):
 
   const current = new Set(names);
   const baseNames = new Set(baseList);
-  const missing = baseList.filter((name) => !current.has(name)).sort();
+  const missing = baseList.filter((name) => !current.has(name)).toSorted();
 
   for (const name of missing) {
     violations.push(
@@ -83,11 +82,11 @@ export function migrationViolations(directory = defaultDirectory, baseRef = ""):
 
   const newestBase = baseList
     .flatMap((name) => timestampOf(name) ?? [])
-    .sort((a, b) => a.localeCompare(b))
+    .toSorted((a, b) => a.localeCompare(b))
     .at(-1);
 
   if (newestBase !== undefined) {
-    for (const name of names.filter((name) => !baseNames.has(name))) {
+    for (const name of names.filter((candidate) => !baseNames.has(candidate))) {
       const timestamp = timestampOf(name);
 
       if (timestamp !== undefined && timestamp <= newestBase && !missingTimestamps.has(timestamp)) {

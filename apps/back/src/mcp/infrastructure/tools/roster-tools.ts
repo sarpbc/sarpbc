@@ -32,7 +32,7 @@ import {
   isLiquipediaSourceHost,
 } from "@sarpbc/utils";
 import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-source";
-import { InvalidInputError } from "../../../common/domain/errors";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
 import { defineTool, type McpTool } from "../define-tool";

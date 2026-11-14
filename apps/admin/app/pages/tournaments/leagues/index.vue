@@ -43,7 +43,7 @@ const editing = ref<League | null>(null);
 const form = ref<LeagueFormState>({ name: "", slug: "", url: "", imageUrl: "" });
 const isSaving = ref(false);
 const isUploading = ref(false);
-const isSynced = computed(() => editing.value?.pandascoreId != null);
+const isSynced = computed(() => (editing.value?.pandascoreId ?? null) !== null);
 
 function isPandascore(league: League): boolean {
   return league.pandascoreId !== null;
@@ -96,8 +96,9 @@ async function handleSubmit() {
   isSaving.value = true;
 
   try {
-    if (editing.value) await updateLeague(editing.value.id, buildPayload());
-    else await createLeague(buildPayload());
+    await (editing.value
+      ? updateLeague(editing.value.id, buildPayload())
+      : createLeague(buildPayload()));
     toast.add({
       title: editing.value
         ? t("page.tournaments.leagues.saved")
@@ -106,8 +107,8 @@ async function handleSubmit() {
     });
     isOpen.value = false;
     await refresh();
-  } catch (error) {
-    reportError(error, t("page.tournaments.leagues.saveFailed"));
+  } catch (saveError) {
+    reportError(saveError, t("page.tournaments.leagues.saveFailed"));
   } finally {
     isSaving.value = false;
   }

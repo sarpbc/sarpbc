@@ -10,7 +10,13 @@ export function useAuthFlow() {
   function redirectTarget(): string {
     const raw = route.query.redirect;
 
-    if (Array.isArray(raw) || raw == null || !raw.startsWith("/") || raw.startsWith("//")) {
+    if (
+      Array.isArray(raw) ||
+      raw === null ||
+      raw === undefined ||
+      !raw.startsWith("/") ||
+      raw.startsWith("//")
+    ) {
       return localePath("/");
     }
 

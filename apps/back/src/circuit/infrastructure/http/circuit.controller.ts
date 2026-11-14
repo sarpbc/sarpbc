@@ -23,7 +23,14 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CircuitService } from "../../application/circuit.service";
-import { CreateCircuitDto, SetCircuitStageDto, UpdateCircuitDto } from "./dto/circuit.dto";
+import {
+  CreateCircuitDto,
+  type CreateCircuitInput,
+  SetCircuitStageDto,
+  type SetCircuitStageInput,
+  UpdateCircuitDto,
+  type UpdateCircuitInput,
+} from "./dto/circuit.dto";
 
 @Controller("circuits")
 export class CircuitController {
@@ -52,7 +59,9 @@ export class CircuitController {
   @RequirePermissions("tournaments.manage")
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body({ schema: CreateCircuitDto }) dto: CreateCircuitDto): Promise<CircuitSummary> {
+  async create(
+    @Body({ schema: CreateCircuitDto }) dto: CreateCircuitInput,
+  ): Promise<CircuitSummary> {
     return await this.circuits.create(dto);
   }
 
@@ -61,7 +70,7 @@ export class CircuitController {
   @Patch(":id")
   async update(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: UpdateCircuitDto }) dto: UpdateCircuitDto,
+    @Body({ schema: UpdateCircuitDto }) dto: UpdateCircuitInput,
   ): Promise<CircuitSummary> {
     return await this.circuits.update(id, dto);
   }
@@ -80,7 +89,7 @@ export class CircuitController {
   async setStage(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("tournamentId", ParseUUIDPipe) tournamentId: string,
-    @Body({ schema: SetCircuitStageDto }) dto: SetCircuitStageDto,
+    @Body({ schema: SetCircuitStageDto }) dto: SetCircuitStageInput,
   ): Promise<CircuitDetail> {
     await this.circuits.setStageScale(id, tournamentId, dto);
 

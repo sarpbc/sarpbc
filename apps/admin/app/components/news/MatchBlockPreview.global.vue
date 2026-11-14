@@ -2,7 +2,13 @@
 import type { MatchBlockItem, MatchBlockState, MatchBlocksResponse } from "@sarpbc/types";
 import { newsMatchBlockFromAttrs, newsMatchBlockKey, participantName } from "@sarpbc/utils";
 
-const props = defineProps<{
+const {
+  match = null,
+  ids = null,
+  tournament = null,
+  team = null,
+  limit = null,
+} = defineProps<{
   match?: string | null;
   ids?: string | null;
   tournament?: string | null;
@@ -13,7 +19,7 @@ const props = defineProps<{
 const { t, locale } = useI18n();
 
 const blockKey = computed(() => {
-  const block = newsMatchBlockFromAttrs(props);
+  const block = newsMatchBlockFromAttrs({ match, ids, tournament, team, limit });
 
   return block ? newsMatchBlockKey(block) : null;
 });

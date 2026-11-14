@@ -3,7 +3,7 @@ import type { SelectItem } from "@nuxt/ui";
 import type { StatsPlayerAccount, StatsRoster } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { tournamentId, refreshKey } = defineProps<{
   tournamentId: string;
   /** Changes when games are imported, attached or removed, which can add or link rows. */
   refreshKey: string;
@@ -18,9 +18,9 @@ const {
   error,
   refresh,
 } = await useLazyAsyncData(
-  () => `admin-tournament-${props.tournamentId}-stats-players`,
-  () => getStatsPlayerAccounts(props.tournamentId),
-  { server: false, watch: [() => props.tournamentId, () => props.refreshKey] },
+  () => `admin-tournament-${tournamentId}-stats-players`,
+  () => getStatsPlayerAccounts(tournamentId),
+  { server: false, watch: [() => tournamentId, () => refreshKey] },
 );
 
 const unlinked = computed(() => accounts.value?.players.filter((player) => !player.player) ?? []);
@@ -72,7 +72,7 @@ async function save(player: StatsPlayerAccount) {
   savingKey.value = key;
 
   try {
-    await linkStatsPlayer(props.tournamentId, {
+    await linkStatsPlayer(tournamentId, {
       platform: player.platform,
       platformId: player.platformId,
       playerId,
@@ -81,7 +81,7 @@ async function save(player: StatsPlayerAccount) {
       title: t("page.tournaments.statsLinks.saved", { name: player.name }),
       color: "success",
     });
-    delete selected.value[key];
+    selected.value = { ...selected.value, [key]: undefined };
     editing.value = null;
     await refresh();
   } catch (saveError) {

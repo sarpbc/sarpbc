@@ -4,7 +4,8 @@ import type {
   Team as TeamResponse,
   TeamSummary,
 } from "@sarpbc/types";
-import type { Player, Team } from "../../domain/roster";
+import type { Player } from "../../domain/player";
+import type { Team } from "../../domain/team";
 import type { TeamAlias } from "../../domain/team-alias";
 
 export function mapTeamSummary(team: Team): TeamSummary {
@@ -41,16 +42,6 @@ export function mapPlayer(player: Player, options?: { includePhotos?: boolean })
   return response;
 }
 
-export function mapTeam(team: Team): TeamResponse {
-  return {
-    ...mapTeamSummary(team),
-    pandascoreId: team.pandascoreId,
-    source: team.source,
-    players: team.players.map((player) => mapPlayer(player)),
-    aliases: team.aliases.map(mapTeamAlias),
-  };
-}
-
 export function mapTeamAlias(alias: TeamAlias): TeamAliasResponse {
   return {
     id: alias.id,
@@ -60,5 +51,15 @@ export function mapTeamAlias(alias: TeamAlias): TeamAliasResponse {
     sourceUrl: alias.sourceUrl,
     logoUrl: alias.logoUrl,
     pandascoreId: alias.pandascoreId,
+  };
+}
+
+export function mapTeam(team: Team): TeamResponse {
+  return {
+    ...mapTeamSummary(team),
+    pandascoreId: team.pandascoreId,
+    source: team.source,
+    players: team.players.map((player) => mapPlayer(player)),
+    aliases: team.aliases.map(mapTeamAlias),
   };
 }

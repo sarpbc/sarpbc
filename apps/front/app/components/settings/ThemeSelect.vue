@@ -48,7 +48,7 @@ const startViewTransition = (event: MouseEvent) => {
   });
 
   void transition.ready
-    .then(() => {
+    .then(() =>
       root.animate(
         {
           clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${endRadius}px at ${x}px ${y}px)`],
@@ -58,8 +58,8 @@ const startViewTransition = (event: MouseEvent) => {
           easing: "cubic-bezier(0.77, 0, 0.175, 1)",
           pseudoElement: "::view-transition-new(root)",
         },
-      );
-    })
+      ),
+    )
     .catch(() => {
       transition.skipTransition();
     });

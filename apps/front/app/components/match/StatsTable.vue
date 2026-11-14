@@ -30,6 +30,10 @@ const tabs = computed(() =>
   })),
 );
 
+function playerLabel(row: MatchGamePlayerStats): string {
+  return row.player?.name ?? row.name;
+}
+
 const teams = computed(() => {
   const current = game.value;
 
@@ -37,14 +41,14 @@ const teams = computed(() => {
   const order = participants.map((participant) => participant.id);
 
   return [...current.teams]
-    .sort((a, b) => order.indexOf(a.participantId) - order.indexOf(b.participantId))
+    .toSorted((a, b) => order.indexOf(a.participantId) - order.indexOf(b.participantId))
     .map((team) => {
       const participant = participants.find((entry) => entry.id === team.participantId);
 
       return {
         ...team,
         name: (participant && participantName(participant)) || t("page.match.detail.unknownTeam"),
-        players: [...team.players].sort(
+        players: team.players.toSorted(
           (a, b) => b.goals - a.goals || playerLabel(a).localeCompare(playerLabel(b)),
         ),
       };
@@ -56,10 +60,6 @@ const replayUrl = computed(() => `https://ballchasing.com/replay/${game.value?.b
 const replayLabel = computed(() =>
   t("page.match.detail.stats.replayLink", { number: game.value?.number ?? 1 }),
 );
-
-function playerLabel(row: MatchGamePlayerStats): string {
-  return row.player?.name ?? row.name;
-}
 </script>
 
 <template>

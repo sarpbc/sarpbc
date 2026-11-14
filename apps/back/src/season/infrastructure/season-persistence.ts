@@ -1,1 +1,3 @@
-export { Season, SeasonAward } from "./persistence/season.entities";
+export { Season } from "./persistence/season.entity";
+
+export { SeasonAward } from "./persistence/season-award.entity";

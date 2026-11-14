@@ -1,8 +1,10 @@
 import type { DataSource, MatchLineupInput } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
-import { Player } from "../../../roster/domain/roster";
-import { Match, TournamentParticipant } from "../../domain/competition";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
+import { Player } from "../../../roster/domain/player";
+import { Match } from "../../domain/match";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import type { LineupRow } from "../../domain/match-lineup";
 import type {
   CompetitionTransaction,
@@ -190,9 +192,12 @@ describe("MatchLineupService", () => {
   });
 
   it("reports start.gg as the source of a start.gg match or stage", async () => {
-    expect((await service.find("pandascore-match")).source).toBe("pandascore");
-    expect((await service.find("startgg-match")).source).toBe("startgg");
-    expect((await service.find("startgg-stage-match")).source).toBe("startgg");
+    const findResult = await service.find("pandascore-match");
+    expect(findResult.source).toBe("pandascore");
+    const findResult2 = await service.find("startgg-match");
+    expect(findResult2.source).toBe("startgg");
+    const findResult3 = await service.find("startgg-stage-match");
+    expect(findResult3.source).toBe("startgg");
   });
 
   it("accepts proposals for manual and PandaScore matches only", async () => {

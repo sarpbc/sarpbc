@@ -5,4 +5,4 @@ export const SignInUserDto = z.strictObject({
   password: z.string().min(1),
 });
 
-export type SignInUserDto = z.infer<typeof SignInUserDto>;
+export type SignInUserInput = z.infer<typeof SignInUserDto>;

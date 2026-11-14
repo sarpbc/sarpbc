@@ -1,6 +1,8 @@
 import { v4 } from "uuid";
 import type { StatsImportFailedReason, StatsImportItem } from "@sarpbc/types";
-import { ApplicationError, ConflictError } from "../../common/domain/errors";
+import { mapSequentially } from "../../common/application/sequentially";
+import { ApplicationError } from "../../common/domain/errors/application-error";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { parseBallchasingRef } from "../domain/ballchasing-ref";
 import {
   assignReplays,
@@ -85,13 +87,15 @@ export class StatsImportService {
   async run(importId: string): Promise<void> {
     const statsImport = await this.imports.load(importId);
 
-    if (!statsImport || statsImport.status !== "pending" || !this.source) return;
+    const { source } = this;
+
+    if (!statsImport || statsImport.status !== "pending" || !source) return;
     statsImport.status = "running";
     statsImport.startedAt = new Date();
     await this.imports.save(statsImport);
 
     try {
-      const replays = await this.source.groupReplays(statsImport.groupId);
+      const replays = await source.groupReplays(statsImport.groupId);
       const matches = await this.candidates.matches(statsImport.tournamentId);
       const replayIds = replays.map((replay) => replay.id);
 
@@ -106,18 +110,19 @@ export class StatsImportService {
         ),
       );
 
-      const assignments = assignReplays(replays, matches, stored, excluded).sort((a, b) =>
+      const assignments = assignReplays(replays, matches, stored, excluded).toSorted((a, b) =>
         byPlayedAt(a.replay, b.replay),
       );
 
       statsImport.total = assignments.length;
       await this.imports.save(statsImport);
 
-      for (const assignment of assignments) {
-        statsImport.items.push(await this.process(this.source, assignment, rosters));
+      // One replay at a time: the import record is saved after each, and Ballchasing is rate limited.
+      await mapSequentially(assignments, async (assignment) => {
+        statsImport.items.push(await this.process(source, assignment, rosters));
         statsImport.processed += 1;
         await this.imports.save(statsImport);
-      }
+      });
 
       statsImport.status = "completed";
     } catch (error) {

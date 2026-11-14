@@ -256,6 +256,10 @@ export function getEventsForPool(pool: CareerEventPool): CareerEventDefinition[]
   return CAREER_EVENTS.filter((event) => event.pool === pool);
 }
 
+function firstNonEmpty(...lists: CareerEventDefinition[][]): CareerEventDefinition[] {
+  return lists.find((list) => list.length > 0) ?? [];
+}
+
 export function pickRandomEvent(
   pool: CareerEventPool,
   usedIds: string[],
@@ -265,11 +269,14 @@ export function pickRandomEvent(
   const eligible = getEventsForPool(pool).filter((event) => (event.minSeason ?? 1) <= season);
   const unused = eligible.filter((event) => !usedIds.includes(event.id));
   const lateUnused = unused.filter((event) => (event.minSeason ?? 1) >= 5);
-  const candidates = lateUnused.length > 0 ? lateUnused : unused.length > 0 ? unused : eligible;
-  const available = candidates.length > 0 ? candidates : getEventsForPool(pool);
-  const index = Math.abs(seed) % available.length;
+  const candidates = firstNonEmpty(lateUnused, unused, eligible, getEventsForPool(pool));
+  const picked = candidates[Math.abs(seed) % candidates.length];
 
-  return available[index]!;
+  if (!picked) {
+    throw new Error(`No career event available for pool ${pool}`);
+  }
+
+  return picked;
 }
 
 export function getEventById(id: string): CareerEventDefinition | undefined {

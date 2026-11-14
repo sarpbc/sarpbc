@@ -5,13 +5,43 @@ import {
   type ReplyReportReason,
   type ReplyTargetType,
 } from "@sarpbc/types";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { mapSequentially } from "../../common/application/sequentially";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { sanitizePlainText } from "../../common/domain/html";
 import { REPLY_TARGETS, replyTarget, sameReplyTarget } from "../domain/reply";
 import { replyAlreadyReported } from "../domain/reply-errors";
 import { REPLY_CREATION_COOLDOWN_MS } from "../domain/reply-limits";
 import type { ReplyRecord, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
+
+function toReplyDto(reply: ReplyRecord, nested: Reply[]): Reply {
+  return {
+    id: reply.id,
+    content: reply.content,
+    author: {
+      id: reply.author.id,
+      userName: reply.author.userName,
+    },
+    createdAt: reply.createdAt.toISOString(),
+    replies: nested,
+  };
+}
+
+function toThreadedDtos(replies: ReplyRecord[]): Reply[] {
+  const dtos = replies.map((reply) => ({ reply, dto: toReplyDto(reply, []) }));
+  const byId = new Map(dtos.map(({ reply, dto }) => [reply.id, dto]));
+  const roots: Reply[] = [];
+
+  for (const { reply, dto } of dtos) {
+    const parentId = reply.replyTo?.id;
+
+    if (parentId === undefined || parentId === "") roots.push(dto);
+    else byId.get(parentId)?.replies.push(dto);
+  }
+
+  return roots;
+}
 
 export class ReplyService {
   constructor(
@@ -47,7 +77,7 @@ export class ReplyService {
     );
 
     return {
-      replies: this.toThreadedDtos([...roots, ...descendants]),
+      replies: toThreadedDtos([...roots, ...descendants]),
       total,
       page,
       limit,
@@ -130,7 +160,7 @@ export class ReplyService {
         await scope.notifications.createForDirectReply(replyTo.author.id, newReply.id);
       }
 
-      return this.toDto(newReply, []);
+      return toReplyDto(newReply, []);
     });
   }
 
@@ -217,58 +247,23 @@ export class ReplyService {
 
       const rootReplies = replies.filter((reply) => !reply.replyTo);
 
-      for (const reply of rootReplies) {
+      await mapSequentially(rootReplies, async (reply) => {
         await this.deleteWithChildren(scope, reply.id);
-      }
+      });
     });
   }
 
   private async deleteWithChildren(scope: ReplyWriteScope, replyId: string): Promise<void> {
     const children = await scope.replies.findChildren(replyId);
 
-    for (const child of children) {
+    await mapSequentially(children, async (child) => {
       await this.deleteWithChildren(scope, child.id);
-    }
+    });
 
     const reply = await scope.replies.findById(replyId);
 
     if (reply) {
       await scope.replies.delete(reply);
     }
-  }
-
-  private toThreadedDtos(replies: ReplyRecord[]): Reply[] {
-    const byId = new Map<string, Reply>();
-    const roots: Reply[] = [];
-
-    for (const reply of replies) {
-      byId.set(reply.id, this.toDto(reply, []));
-    }
-
-    for (const reply of replies) {
-      const dto = byId.get(reply.id)!;
-      const parentId = reply.replyTo?.id;
-
-      if (parentId !== undefined && parentId !== "" && byId.has(parentId)) {
-        byId.get(parentId)!.replies.push(dto);
-      } else if (parentId === undefined || parentId === "") {
-        roots.push(dto);
-      }
-    }
-
-    return roots;
-  }
-
-  private toDto(reply: ReplyRecord, nested: Reply[]): Reply {
-    return {
-      id: reply.id,
-      content: reply.content,
-      author: {
-        id: reply.author.id,
-        userName: reply.author.userName,
-      },
-      createdAt: reply.createdAt.toISOString(),
-      replies: nested,
-    };
   }
 }

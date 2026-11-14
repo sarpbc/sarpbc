@@ -1,5 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Contract, Player, Team } from "../../domain/roster";
+import { Contract } from "../../domain/contract";
+import { Player } from "../../domain/player";
+import { Team } from "../../domain/team";
 import { TransferController } from "./transfer.controller";
 import { TransferService } from "../../application/transfer.service";
 import { TeamService } from "../../application/team.service";

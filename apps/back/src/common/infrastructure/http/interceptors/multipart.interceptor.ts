@@ -43,7 +43,7 @@ export function MultipartInterceptor(
   messages: MultipartMessages,
 ): Type<NestInterceptor> {
   class MixinInterceptor implements NestInterceptor {
-    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
       const req = context.switchToHttp().getRequest<FastifyRequest>();
 
       if (!req.isMultipart())

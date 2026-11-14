@@ -90,7 +90,7 @@ const canSave = computed(() =>
 );
 
 function toRows(vods: MatchVod[]): VodRow[] {
-  return vods.map(({ game, url, language }) => ({ key: nextKey++, game, url, language }));
+  return vods.map(({ game, url, language }) => ({ key: (nextKey += 1), game, url, language }));
 }
 
 async function load() {
@@ -117,7 +117,7 @@ watch(
 function addRow() {
   const last = rows.value.at(-1);
   rows.value.push({
-    key: nextKey++,
+    key: (nextKey += 1),
     game: last ? Math.min(last.game + 1, maxVodGame(match.numberOfGames)) : 1,
     url: "",
     language: last?.language ?? "en",

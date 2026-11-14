@@ -1,6 +1,6 @@
 import { INDEXNOW_KEY_PATTERN } from "@sarpbc/utils";
 
-export default defineEventHandler((event) => {
+export default defineEventHandler(async (event) => {
   const { indexnowKey } = useRuntimeConfig(event);
 
   if (
@@ -14,5 +14,5 @@ export default defineEventHandler((event) => {
   setHeader(event, "Cache-Control", "no-store");
   setHeader(event, "X-Robots-Tag", "noindex");
 
-  return indexnowKey;
+  await send(event, indexnowKey);
 });

@@ -6,12 +6,12 @@ import {
 } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { tournamentId, participants } = defineProps<{
   tournamentId: string;
   participants: {
     id: string;
     team: { name: string } | null;
-    players?: Array<{ id: string; name: string }>;
+    players?: { id: string; name: string }[];
   }[];
 }>();
 
@@ -28,10 +28,10 @@ const {
   data: awards,
   error,
   refresh: refreshAwards,
-} = await useLazyAsyncData(
-  () => `admin-tournament-${props.tournamentId}-awards`,
-  () => getTournamentAwards(props.tournamentId),
-  { server: false, watch: [() => props.tournamentId] },
+} = useLazyAsyncData(
+  () => `admin-tournament-${tournamentId}-awards`,
+  () => getTournamentAwards(tournamentId),
+  { server: false, watch: [() => tournamentId] },
 );
 
 const assignedTypes = computed(() => new Set((awards.value ?? []).map((award) => award.awardType)));
@@ -52,7 +52,7 @@ const rosterOptions = computed(() => {
     playerName: string;
   }[] = [];
 
-  for (const participant of props.participants) {
+  for (const participant of participants) {
     for (const player of participant.players ?? []) {
       options.push({
         value: player.id,
@@ -64,7 +64,7 @@ const rosterOptions = computed(() => {
     }
   }
 
-  return options.sort((a, b) => a.label.localeCompare(b.label));
+  return options.toSorted((a, b) => a.label.localeCompare(b.label));
 });
 
 const selectedEntry = computed(() =>
@@ -101,7 +101,7 @@ async function handleAssignAward() {
   assigning.value = true;
 
   try {
-    await createTournamentAward(props.tournamentId, {
+    await createTournamentAward(tournamentId, {
       participantId: entry.participantId,
       playerId: entry.playerId,
       awardType,
@@ -126,7 +126,7 @@ async function handleRemoveAward(award: TournamentAwardListItem) {
   removingAwardId.value = award.id;
 
   try {
-    await deleteTournamentAward(props.tournamentId, award.id);
+    await deleteTournamentAward(tournamentId, award.id);
     toast.add({
       title: t("page.tournaments.awards.removed", {
         type: t(`page.tournaments.awards.types.${award.awardType}`),

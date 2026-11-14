@@ -1,6 +1,7 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder, raw } from "@mikro-orm/core";
-import { Tournament, TournamentEvent } from "./tournament.entities";
+import { Tournament } from "./tournament.entity";
+import { TournamentEvent } from "./tournament-event.entity";
 import { toTournament, toTournamentEvent } from "./competition.mapper";
 import { stageFilter } from "./stage-filter";
 import { isUuid } from "../../../common/domain/entity-ref";

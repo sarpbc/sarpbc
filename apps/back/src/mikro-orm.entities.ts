@@ -11,8 +11,8 @@ import {
   TopicSchema,
   PostSchema,
   PostTranslationSchema,
-} from "./forum/infrastructure/persistence/forum.entities";
-import { ReplySchema, ReplyReportSchema } from "./reply/infrastructure/persistence/reply.entities";
+} from "./forum/infrastructure/persistence/forum.schemas";
+import { ReplySchema, ReplyReportSchema } from "./reply/infrastructure/persistence/reply.schemas";
 import { ImageSchema } from "./images/infrastructure/persistence/image.entity";
 import { NewsArticleSchema } from "./news/infrastructure/persistence/news-article.entity";
 import {
@@ -21,7 +21,7 @@ import {
   PlayerPhotoSchema,
   TeamSchema,
   TeamAliasSchema,
-} from "./roster/infrastructure/persistence/player.entities";
+} from "./roster/infrastructure/persistence/player.schemas";
 import {
   LeagueSchema,
   TournamentEventSchema,
@@ -30,18 +30,18 @@ import {
   MatchSchema,
   BracketLinkSchema,
   MatchResultSchema,
-} from "./tournament/infrastructure/persistence/tournament.entities";
+} from "./tournament/infrastructure/persistence/tournament.schemas";
 import {
   CircuitSchema,
   CircuitStageSchema,
   CircuitStageTeamSchema,
-} from "./circuit/infrastructure/persistence/circuit.entities";
+} from "./circuit/infrastructure/persistence/circuit.schemas";
 import {
   SeasonAwardSchema,
   SeasonParticipantSchema,
   SeasonPathEntrySchema,
   SeasonSchema,
-} from "./season/infrastructure/persistence/season.entities";
+} from "./season/infrastructure/persistence/season.schemas";
 import { OnThisDayFactSchema } from "./on-this-day/infrastructure/persistence/on-this-day-fact.entities";
 import { PlayerAwardSchema } from "./tournament/infrastructure/persistence/player-award.entities";
 import { TournamentPrizeSchema } from "./tournament/infrastructure/persistence/tournament-prize.entities";
@@ -57,7 +57,7 @@ import {
   MatchGamePlayerSchema,
   MatchStatsImportSchema,
   PlayerPlatformLinkSchema,
-} from "./match-stats/infrastructure/persistence/match-stats.entities";
+} from "./match-stats/infrastructure/persistence/match-stats.schemas";
 
 export const mikroOrmEntities = [
   UserSchema,

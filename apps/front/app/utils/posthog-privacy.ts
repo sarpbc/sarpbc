@@ -35,7 +35,7 @@ export function sanitizePostHogEvent(event: CaptureResult): CaptureResult {
     if (value.success) {
       properties[key] = sanitizePostHogUrl(value.data);
     } else {
-      delete properties[key];
+      Reflect.deleteProperty(properties, key);
     }
   }
 
@@ -54,15 +54,15 @@ export function sanitizePostHogEvent(event: CaptureResult): CaptureResult {
 
     properties.$heatmap_data = sanitized;
   } else {
-    delete properties.$heatmap_data;
+    Reflect.deleteProperty(properties, "$heatmap_data");
   }
 
   for (const key of ["$title", "$set", "$set_once", "email", "userName", "userId", "user_id"]) {
-    delete properties[key];
+    Reflect.deleteProperty(properties, key);
   }
 
-  delete event.$set;
-  delete event.$set_once;
+  Reflect.deleteProperty(event, "$set");
+  Reflect.deleteProperty(event, "$set_once");
 
   return event;
 }

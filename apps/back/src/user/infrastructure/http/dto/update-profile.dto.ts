@@ -8,4 +8,4 @@ export const UpdateProfileDto = z.strictObject({
     .max(100, "Username must be between 1 and 100 characters."),
 });
 
-export type UpdateProfileDto = z.infer<typeof UpdateProfileDto>;
+export type UpdateProfileInput = z.infer<typeof UpdateProfileDto>;

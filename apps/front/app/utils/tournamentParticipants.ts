@@ -34,7 +34,7 @@ export function buildTournamentParticipantEntries(
 
     const players = participant.players
       .filter((player) => player.slug)
-      .sort((a, b) => a.name.localeCompare(b.name));
+      .toSorted((a, b) => a.name.localeCompare(b.name));
 
     result.push({
       id: key,
@@ -45,5 +45,5 @@ export function buildTournamentParticipantEntries(
     });
   }
 
-  return result.sort((a, b) => a.name.localeCompare(b.name));
+  return result.toSorted((a, b) => a.name.localeCompare(b.name));
 }

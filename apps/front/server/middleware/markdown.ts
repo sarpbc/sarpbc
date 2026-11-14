@@ -14,7 +14,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 const INTERNAL_HEADER = "x-sarpbc-markdown-internal";
 const LLMS_TXT_LINK = `<${SITE_ORIGIN}/llms.txt>; rel="describedby"`;
 
-async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
+async function sendMarkdown(event: H3Event, htmlPath: string, search: string): Promise<void> {
   const response = await useNitroApp().localFetch(`${htmlPath}${search}`, {
     method: "GET",
     headers: {
@@ -50,29 +50,34 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
   if (!contentType.includes("text/html")) {
     setResponseStatus(event, response.status || 404);
 
-    return "Page not found.\n";
+    await send(event, "Page not found.\n");
+
+    return;
   }
 
   const html = await response.text();
   setResponseStatus(event, response.status);
 
-  return htmlToMarkdown(html, {
-    origin: getRequestURL(event).origin,
-    plugins: [
-      frontmatterPlugin(),
-      filterPlugin({
-        exclude: [
-          "header",
-          "footer",
-          "form",
-          "script",
-          "style",
-          "noscript",
-          "[data-markdown-exclude]",
-        ],
-      }),
-    ],
-  });
+  await send(
+    event,
+    htmlToMarkdown(html, {
+      origin: getRequestURL(event).origin,
+      plugins: [
+        frontmatterPlugin(),
+        filterPlugin({
+          exclude: [
+            "header",
+            "footer",
+            "form",
+            "script",
+            "style",
+            "noscript",
+            "[data-markdown-exclude]",
+          ],
+        }),
+      ],
+    }),
+  );
 }
 
 export default defineEventHandler(async (event) => {
@@ -98,7 +103,9 @@ export default defineEventHandler(async (event) => {
       return;
     }
 
-    return await sendMarkdown(event, htmlPath, url.search);
+    await sendMarkdown(event, htmlPath, url.search);
+
+    return;
   }
 
   if (!isMarkdownEligibleHtmlPath(pathname)) {
@@ -108,11 +115,11 @@ export default defineEventHandler(async (event) => {
   if (shouldServeMarkdown(getHeader(event, "accept"), getHeader(event, "sec-fetch-dest"))) {
     setHeader(event, "cache-control", "private, no-store");
 
-    return await sendMarkdown(event, pathname, url.search);
+    await sendMarkdown(event, pathname, url.search);
+
+    return;
   }
 
   setHeader(event, "vary", "Accept, Sec-Fetch-Dest");
   setHeader(event, "link", LLMS_TXT_LINK);
-
-  return;
 });

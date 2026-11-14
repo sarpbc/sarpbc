@@ -56,7 +56,11 @@ export function computeEventFailureChance(context: EventOutcomeContext): number 
   chance += gapChance(WORLD_STRENGTH_BASELINE - context.teamStrength, 120, 0.12);
   chance += gapChance(WORLD_STRENGTH_BASELINE - mean(context.teammateRatings), 180, 0.06);
 
-  if (context.lastSplitPoints != null && context.lastSplitPoints < 12) {
+  if (
+    context.lastSplitPoints !== null &&
+    context.lastSplitPoints !== undefined &&
+    context.lastSplitPoints < 12
+  ) {
     chance += 0.06;
   }
 

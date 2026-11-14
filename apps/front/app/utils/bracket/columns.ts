@@ -23,7 +23,7 @@ function getMatchDayKey(match: TournamentDetailMatch): string | null {
 }
 
 export function compressColumnIndices(columns: Map<string, number>): Map<string, number> {
-  const usedColumns = [...new Set(columns.values())].sort((a, b) => a - b);
+  const usedColumns = [...new Set(columns.values())].toSorted((a, b) => a - b);
   const columnRemap = new Map(usedColumns.map((column, index) => [column, index]));
   const compressed = new Map<string, number>();
 
@@ -42,9 +42,8 @@ export function computeChronologicalColumns(matches: TournamentDetailMatch[]): M
   const matchIds = new Set(matches.map((match) => match.id));
   const columns = new Map<string, number>();
   const dayOrder = new Map<string, number>();
-  let nextDayIndex = 0;
 
-  const sortedByBeginAt = [...matches].sort((a, b) => {
+  const sortedByBeginAt = matches.toSorted((a, b) => {
     const timeA = getMatchBeginAtTime(a);
     const timeB = getMatchBeginAtTime(b);
 
@@ -76,16 +75,16 @@ export function computeChronologicalColumns(matches: TournamentDetailMatch[]): M
       continue;
     }
 
-    if (!dayOrder.has(dayKey)) {
-      dayOrder.set(dayKey, nextDayIndex++);
-    }
-
-    initialColumns.set(match.id, dayOrder.get(dayKey)!);
+    const dayIndex = dayOrder.get(dayKey) ?? dayOrder.size;
+    dayOrder.set(dayKey, dayIndex);
+    initialColumns.set(match.id, dayIndex);
   }
 
   for (const match of matches) {
-    if (initialColumns.has(match.id)) {
-      columns.set(match.id, initialColumns.get(match.id)!);
+    const initialColumn = initialColumns.get(match.id);
+
+    if (initialColumn !== undefined) {
+      columns.set(match.id, initialColumn);
     }
   }
 
@@ -94,7 +93,7 @@ export function computeChronologicalColumns(matches: TournamentDetailMatch[]): M
 
   while (changed && iterations < matches.length + 1) {
     changed = false;
-    iterations++;
+    iterations += 1;
 
     for (const match of matches) {
       const parents = getParentIds(match, matchIds);
@@ -164,7 +163,7 @@ export function computeLowerProgressionDepths(
 
   while (changed && iterations < progressionMatches.length + 1) {
     changed = false;
-    iterations++;
+    iterations += 1;
 
     for (const match of progressionMatches) {
       const parentsInSection = getParentIds(match, matchIds).filter(
@@ -209,7 +208,7 @@ export function remapDepthsToColumnRange(
     return new Map();
   }
 
-  const usedDepths = [...new Set(depths.values())].sort((a, b) => a - b);
+  const usedDepths = [...new Set(depths.values())].toSorted((a, b) => a - b);
 
   const depthRemap = new Map(
     usedDepths.map((depth, index) => {

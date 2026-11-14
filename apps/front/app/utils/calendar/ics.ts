@@ -58,11 +58,10 @@ function foldIcsLine(line: string): string {
     return line;
   }
 
-  const chars = [...line];
   const folded: string[] = [];
   let current = "";
 
-  for (const char of chars) {
+  for (const char of line) {
     const next = current + char;
 
     if (encoder.encode(next).length > FOLD_OCTETS) {
@@ -90,7 +89,7 @@ export function matchEndAt(
   }
 
   const minutes =
-    numberOfGames != null && numberOfGames > 0
+    numberOfGames !== undefined && numberOfGames !== null && numberOfGames > 0
       ? numberOfGames * GAME_MINUTES
       : DEFAULT_DURATION_MINUTES;
 

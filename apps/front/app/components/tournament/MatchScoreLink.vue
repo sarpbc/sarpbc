@@ -11,39 +11,39 @@ const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const {
   match,
-  name,
-  teamAName,
-  teamBName,
-  teamALogo,
-  teamBLogo,
-  participantAId,
-  participantBId,
-  results,
+  name = null,
+  teamAName = null,
+  teamBName = null,
+  teamALogo = null,
+  teamBLogo = null,
+  participantAId = null,
+  participantBId = null,
+  results = null,
   winnerParticipantId = null,
-  tournamentId,
+  tournamentId = null,
   compact = false,
   bracket = false,
   matchStatus,
-  discoverySource,
-  discoveryStatus,
+  discoverySource = null,
+  discoveryStatus = null,
 } = defineProps<{
   match: MatchLinkTarget;
-  name?: string;
-  teamAName?: string;
-  teamBName?: string;
+  name?: string | null;
+  teamAName?: string | null;
+  teamBName?: string | null;
   teamALogo?: ThemedLogo | null;
   teamBLogo?: ThemedLogo | null;
-  participantAId?: string;
-  participantBId?: string;
-  results?: MatchResult[];
+  participantAId?: string | null;
+  participantBId?: string | null;
+  results?: MatchResult[] | null;
   winnerParticipantId?: string | null;
-  tournamentId?: string;
+  tournamentId?: string | null;
   compact?: boolean;
   bracket?: boolean;
   matchStatus: MatchStatus;
   /** When set with discoveryStatus, CTR instrumentation is enabled. */
-  discoverySource?: MatchDiscoverySource;
-  discoveryStatus?: MatchDiscoveryStatus;
+  discoverySource?: MatchDiscoverySource | null;
+  discoveryStatus?: MatchDiscoveryStatus | null;
 }>();
 
 const detailTo = computed(() => {
@@ -55,10 +55,18 @@ const detailTo = computed(() => {
 });
 
 const { isConcealed } = useSpoilerFree();
-const concealed = computed(() => isConcealed({ matchId: match.id, tournamentId }));
 
-const scoreA = computed(() => getMatchParticipantScore(results, participantAId));
-const scoreB = computed(() => getMatchParticipantScore(results, participantBId));
+const concealed = computed(() =>
+  isConcealed({ matchId: match.id, tournamentId: tournamentId ?? undefined }),
+);
+
+const scoreA = computed(() =>
+  getMatchParticipantScore(results ?? undefined, participantAId ?? undefined),
+);
+
+const scoreB = computed(() =>
+  getMatchParticipantScore(results ?? undefined, participantBId ?? undefined),
+);
 
 const displayScoreA = computed(() => displayMatchScore(scoreA.value, matchStatus));
 const displayScoreB = computed(() => displayMatchScore(scoreB.value, matchStatus));
@@ -93,7 +101,7 @@ const displayTeamB = computed(() => {
   return bracket ? shortTeamName(teamBName) : teamBName;
 });
 
-function participantRowClass(participantId: string | undefined): string {
+function participantRowClass(participantId: string | null): string {
   if (concealed.value || !winnerParticipantId || !participantId) {
     return "";
   }

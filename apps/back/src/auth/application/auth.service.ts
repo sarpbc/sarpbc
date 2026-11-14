@@ -1,4 +1,4 @@
-import { AuthenticationError } from "../../common/domain/errors";
+import { AuthenticationError } from "../../common/domain/errors/authentication-error";
 import type { AuthenticatedUser } from "../../common/application/models/authenticated-user";
 import type { UserService } from "../../user/application/user.service";
 import type { CreateAccountInput, SignInInput } from "../../user/application/models/account-input";
@@ -10,6 +10,10 @@ import type {
   OAuthReturnTo,
   SessionTokens,
 } from "./ports/authentication";
+
+export function parseOAuthReturnTo(state: string | undefined): OAuthReturnTo {
+  return state === "admin" ? "admin" : "front";
+}
 
 export class AuthService {
   constructor(
@@ -76,10 +80,6 @@ export class AuthService {
 
   resolveOAuthReturnUrl(returnTo: string | undefined): string {
     return returnTo === "admin" ? this.destinations.adminUrl : this.destinations.frontUrl;
-  }
-
-  parseOAuthReturnTo(state: string | undefined): OAuthReturnTo {
-    return state === "admin" ? "admin" : "front";
   }
 
   getGoogleAuthUrl(returnTo: OAuthReturnTo = "front"): string {

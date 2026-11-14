@@ -5,7 +5,7 @@ import { getParentIds } from "./graph";
 export const MIN_ROW_GAP = 2;
 
 export function sortMatchesByBeginAt(matches: TournamentDetailMatch[]): TournamentDetailMatch[] {
-  return [...matches].sort((a, b) => {
+  return matches.toSorted((a, b) => {
     const dateA = isNonEmptyDateInput(a.beginAt) ? new Date(a.beginAt).getTime() : Number.NaN;
     const dateB = isNonEmptyDateInput(b.beginAt) ? new Date(b.beginAt).getTime() : Number.NaN;
     const hasDateA = !Number.isNaN(dateA);
@@ -62,11 +62,12 @@ export function assignMatchRows(
   }
 
   const firstRound = sortMatchesByBeginAt(byColumn.get(0) ?? []);
-  firstRound.forEach((match, index) => {
-    rows.set(match.id, index * MIN_ROW_GAP);
-  });
 
-  for (let column = 1; column <= maxColumn; column++) {
+  for (const [index, match] of firstRound.entries()) {
+    rows.set(match.id, index * MIN_ROW_GAP);
+  }
+
+  for (let column = 1; column <= maxColumn; column += 1) {
     const columnMatches = sortMatchesByBeginAt(byColumn.get(column) ?? []);
     const takenRows: number[] = [];
 

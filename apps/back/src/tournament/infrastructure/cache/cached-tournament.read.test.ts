@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { log } from "evlog";
-import { Player, Team } from "../../../roster/domain/roster";
-import { Match, Tournament, TournamentParticipant } from "../../domain/competition";
+import { Player } from "../../../roster/domain/player";
+import { Team } from "../../../roster/domain/team";
+import { Match } from "../../domain/match";
+import { Tournament } from "../../domain/tournament";
+import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapTournamentDetail } from "../http/tournament.mapper";
 import { CachedTournamentRead } from "./cached-tournament.read";
 

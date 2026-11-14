@@ -1,3 +1,4 @@
+import { mapSequentially } from "../../common/application/sequentially";
 import type { TopicRecord } from "./models";
 import type { TopicStore, ForumTransaction } from "./ports";
 
@@ -28,7 +29,7 @@ export class TopicService {
 
   async initializeTopics(): Promise<void> {
     await this.transaction.run(async (scope) => {
-      for (const topicData of predefinedTopics) {
+      await mapSequentially(predefinedTopics, async (topicData) => {
         const exists = await scope.topics.findByTitle(topicData.title);
 
         if (!exists) {
@@ -43,7 +44,7 @@ export class TopicService {
 
           await scope.topics.save(topic);
         }
-      }
+      });
     });
   }
 

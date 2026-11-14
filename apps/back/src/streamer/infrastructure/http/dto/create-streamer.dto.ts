@@ -11,4 +11,4 @@ export const CreateStreamerDto = z.strictObject({
     .transform((value) => (value !== null && value !== undefined && value !== "" ? value : null)),
 });
 
-export type CreateStreamerDto = z.infer<typeof CreateStreamerDto>;
+export type CreateStreamerInput = z.infer<typeof CreateStreamerDto>;

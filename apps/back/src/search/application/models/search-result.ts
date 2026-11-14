@@ -1,6 +1,7 @@
 import type { SearchType } from "@sarpbc/types";
-import type { Player, Team } from "../../../roster/domain/roster";
-import type { Tournament } from "../../../tournament/domain/competition";
+import type { Player } from "../../../roster/domain/player";
+import type { Team } from "../../../roster/domain/team";
+import type { Tournament } from "../../../tournament/domain/tournament";
 
 export interface SearchResult {
   players: Player[];

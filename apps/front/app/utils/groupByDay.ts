@@ -41,9 +41,9 @@ export function groupByDay<T>(
     .map(([dateKey, group]) => ({
       dateKey,
       date: group.date,
-      items: group.items.sort((a, b) => sign * (timeOf(a) - timeOf(b))),
+      items: group.items.toSorted((a, b) => sign * (timeOf(a) - timeOf(b))),
     }))
-    .sort((a, b) => sign * (a.date.getTime() - b.date.getTime()));
+    .toSorted((a, b) => sign * (a.date.getTime() - b.date.getTime()));
 
   if (unknown.length > 0) {
     groups.push({ dateKey: UNKNOWN_DAY_KEY, date: null, items: unknown });

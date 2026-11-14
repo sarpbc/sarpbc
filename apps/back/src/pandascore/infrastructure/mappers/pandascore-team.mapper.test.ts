@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PandascoreTeamMapper } from "./pandascore-team.mapper";
+import { toUpsertTeamCommand } from "./pandascore-team.mapper";
 import { teamSchema } from "../dto/tournament.dto";
 
 describe("PandascoreTeamMapper", () => {
@@ -15,7 +15,7 @@ describe("PandascoreTeamMapper", () => {
       dark_mode_image_url: "https://example.com/vitality-dark.png",
     });
 
-    expect(PandascoreTeamMapper.toUpsertCommand(dto)).toEqual({
+    expect(toUpsertTeamCommand(dto)).toEqual({
       pandascoreId: 7,
       name: "Team Vitality",
       slug: "team-vitality",

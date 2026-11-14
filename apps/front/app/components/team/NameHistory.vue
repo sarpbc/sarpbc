@@ -16,7 +16,7 @@ const formatDay = (day: string) => dayFormatter.value.format(new Date(`${day}T00
 const period = (alias: TeamAlias) =>
   `${formatDay(alias.from)} – ${alias.to ? formatDay(alias.to) : t("page.team.slug.nameHistory.present")}`;
 
-const newestFirst = computed(() => [...aliases].sort((a, b) => b.from.localeCompare(a.from)));
+const newestFirst = computed(() => aliases.toSorted((a, b) => b.from.localeCompare(a.from)));
 </script>
 
 <template>

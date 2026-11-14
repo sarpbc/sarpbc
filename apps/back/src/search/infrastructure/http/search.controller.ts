@@ -1,25 +1,25 @@
 import { Controller, Get, Query } from "@nestjs/common";
 import { SearchService } from "../../application/search.service";
-import { SearchQueryDto } from "./dto/search-query.dto";
+import { SearchQueryDto, type SearchQueryInput } from "./dto/search-query.dto";
 import { mapPlayer, mapTeam } from "../../../roster/infrastructure/http/player.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
+
+function searchCriteria(query: SearchQueryInput) {
+  return {
+    query: query.q ?? "",
+    limit: query.limit,
+    offset: query.offset,
+  };
+}
 
 @Controller("search")
 export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
-  private criteria(query: SearchQueryDto) {
-    return {
-      query: query.q ?? "",
-      limit: query.limit,
-      offset: query.offset,
-    };
-  }
-
   @Get()
-  async search(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
+  async search(@Query({ schema: SearchQueryDto }) query: SearchQueryInput) {
     const result = await this.searchService.search({
-      ...this.criteria(query),
+      ...searchCriteria(query),
       type: query.type ?? "all",
     });
 
@@ -32,9 +32,9 @@ export class SearchController {
   }
 
   @Get("players")
-  async searchPlayers(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
+  async searchPlayers(@Query({ schema: SearchQueryDto }) query: SearchQueryInput) {
     const { players } = await this.searchService.search({
-      ...this.criteria(query),
+      ...searchCriteria(query),
       type: "player",
     });
 
@@ -42,16 +42,16 @@ export class SearchController {
   }
 
   @Get("teams")
-  async searchTeams(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
-    const { teams } = await this.searchService.search({ ...this.criteria(query), type: "team" });
+  async searchTeams(@Query({ schema: SearchQueryDto }) query: SearchQueryInput) {
+    const { teams } = await this.searchService.search({ ...searchCriteria(query), type: "team" });
 
     return teams.map((team) => mapTeam(team));
   }
 
   @Get("tournaments")
-  async searchTournaments(@Query({ schema: SearchQueryDto }) query: SearchQueryDto) {
+  async searchTournaments(@Query({ schema: SearchQueryDto }) query: SearchQueryInput) {
     const { tournaments } = await this.searchService.search({
-      ...this.criteria(query),
+      ...searchCriteria(query),
       type: "tournament",
     });
 

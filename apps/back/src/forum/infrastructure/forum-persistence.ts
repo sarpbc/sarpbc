@@ -1,1 +1,1 @@
-export { Post } from "./persistence/forum.entities";
+export { Post } from "./persistence/post.entity";

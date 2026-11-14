@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import {
   assertBracketLinks,
   assertManualBracketMatch,
@@ -7,17 +7,17 @@ import {
   type StageBracket,
 } from "./bracket";
 
-describe("bracket links", () => {
-  const stage = (): StageBracket => ({
-    hasBracket: true,
-    matches: [
-      { id: "semi-1", previousMatches: [] },
-      { id: "semi-2", previousMatches: [] },
-      { id: "final", previousMatches: [] },
-      { id: "third", previousMatches: [] },
-    ],
-  });
+const stage = (): StageBracket => ({
+  hasBracket: true,
+  matches: [
+    { id: "semi-1", previousMatches: [] },
+    { id: "semi-2", previousMatches: [] },
+    { id: "final", previousMatches: [] },
+    { id: "third", previousMatches: [] },
+  ],
+});
 
+describe("bracket links", () => {
   const semis = [
     { previousMatchId: "semi-1", type: "winner" },
     { previousMatchId: "semi-2", type: "winner" },

@@ -2,9 +2,15 @@ import { Body, Controller, Get, Post, Query, Request, Res, UseGuards } from "@ne
 import { Throttle } from "@nestjs/throttler";
 import { useLogger } from "evlog/nestjs";
 import { AuthGuard } from "./auth.guard";
-import { AuthService } from "../../application/auth.service";
-import { CreateUserDto } from "../../../user/infrastructure/http/dto/create-user.dto";
-import { SignInUserDto } from "../../../user/infrastructure/http/dto/signin-user.dto";
+import { AuthService, parseOAuthReturnTo } from "../../application/auth.service";
+import {
+  CreateUserDto,
+  type CreateUserInput,
+} from "../../../user/infrastructure/http/dto/create-user.dto";
+import {
+  SignInUserDto,
+  type SignInUserInput,
+} from "../../../user/infrastructure/http/dto/signin-user.dto";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ConfigService } from "@nestjs/config";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
@@ -39,7 +45,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("login")
   async signIn(
-    @Body({ schema: SignInUserDto }) userData: SignInUserDto,
+    @Body({ schema: SignInUserDto }) userData: SignInUserInput,
     @Res() res: FastifyReply,
     @Request() req: FastifyRequest,
   ) {
@@ -90,7 +96,7 @@ export class AuthController {
   @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @Post("signup")
   async signUp(
-    @Body({ schema: CreateUserDto }) userData: CreateUserDto,
+    @Body({ schema: CreateUserDto }) userData: CreateUserInput,
     @Res() res: FastifyReply,
     @Request() req: FastifyRequest,
   ) {
@@ -110,7 +116,7 @@ export class AuthController {
   @Throttle({ default: { limit: 10, ttl: 60_000 } })
   @Get("google")
   redirectToGoogle(@Query("returnTo") returnTo: string | undefined, @Res() res: FastifyReply) {
-    const destination = this.authService.parseOAuthReturnTo(returnTo);
+    const destination = parseOAuthReturnTo(returnTo);
     const url = this.authService.getGoogleAuthUrl(destination);
 
     return res.code(302).redirect(url);
@@ -125,9 +131,7 @@ export class AuthController {
   ) {
     const log = useLogger();
 
-    const returnUrl = this.authService.resolveOAuthReturnUrl(
-      this.authService.parseOAuthReturnTo(state),
-    );
+    const returnUrl = this.authService.resolveOAuthReturnUrl(parseOAuthReturnTo(state));
 
     try {
       const tokens = await this.authService.handleGoogleCallback(code);

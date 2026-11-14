@@ -7,11 +7,11 @@ const localePath = useLocalePath();
 
 const {
   teamName,
-  teamForm,
+  teamForm = null,
   concealed = false,
 } = defineProps<{
   teamName: string;
-  teamForm?: TeamForm;
+  teamForm?: TeamForm | null;
   concealed?: boolean;
 }>();
 

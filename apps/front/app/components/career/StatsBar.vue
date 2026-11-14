@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CareerStats } from "~/types/career";
 
-const props = defineProps<{
+const { stats, age } = defineProps<{
   stats: CareerStats;
   age: number;
 }>();
@@ -11,10 +11,10 @@ const { t } = useI18n();
 const cells = computed(
   () =>
     [
-      { key: "age", value: props.age },
-      { key: "rating", value: props.stats.rating },
-      { key: "form", value: props.stats.form },
-      { key: "morale", value: props.stats.morale },
+      { key: "age", value: age },
+      { key: "rating", value: stats.rating },
+      { key: "form", value: stats.form },
+      { key: "morale", value: stats.morale },
     ] as const,
 );
 </script>

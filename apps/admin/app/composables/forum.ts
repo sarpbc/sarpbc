@@ -13,21 +13,25 @@ export async function getPostById(id: string): Promise<ForumPost> {
   return res.post;
 }
 
+async function getRepliesPage(postId: string, page: number): Promise<PaginatedReplies> {
+  return await apiFetch<PaginatedReplies>("/replies", {
+    method: "GET",
+    query: { targetType: "forumPost", targetId: postId, page, limit: MAX_PAGE_SIZE },
+  });
+}
+
 export async function getPostReplies(postId: string): Promise<Reply[]> {
-  const replies: Reply[] = [];
+  const first = await getRepliesPage(postId, 0);
+  const remainingPages = Math.max(Math.ceil(first.total / MAX_PAGE_SIZE) - 1, 0);
 
-  for (let page = 0; ; page++) {
-    const res = await apiFetch<PaginatedReplies>("/replies", {
-      method: "GET",
-      query: { targetType: "forumPost", targetId: postId, page, limit: MAX_PAGE_SIZE },
-    });
+  const rest = await Promise.all(
+    Array.from(
+      { length: remainingPages },
+      async (_, index) => await getRepliesPage(postId, index + 1),
+    ),
+  );
 
-    replies.push(...res.replies);
-
-    if (res.replies.length === 0 || (page + 1) * MAX_PAGE_SIZE >= res.total) {
-      return replies;
-    }
-  }
+  return [first, ...rest].flatMap(({ replies }) => replies);
 }
 
 export async function deleteForumPost(postId: string): Promise<void> {

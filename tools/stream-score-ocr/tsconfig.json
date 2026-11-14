@@ -1,6 +1,7 @@
 {
   "extends": "../../packages/tsconfig.base.json",
   "compilerOptions": {
+    "target": "ES2024",
     "types": ["node"],
     "allowImportingTsExtensions": true,
     "erasableSyntaxOnly": true

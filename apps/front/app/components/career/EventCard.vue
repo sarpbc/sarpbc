@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CareerEventDefinition, CareerStage } from "~/types/career";
 
-const props = defineProps<{
+const { event, stage, decisionIndex, decisionCount } = defineProps<{
   event: CareerEventDefinition;
   stage: CareerStage;
   decisionIndex: number;
@@ -14,10 +14,10 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const eventKey = computed(() => `page.game.career.events.${props.event.id}`);
+const eventKey = computed(() => `page.game.career.events.${event.id}`);
 
 const stageLabel = computed(() => {
-  switch (props.stage) {
+  switch (stage) {
     case "split1":
       return t("page.game.career.event.split", { split: 1 });
     case "split2":
@@ -25,7 +25,7 @@ const stageLabel = computed(() => {
     case "worlds":
       return t("page.game.career.event.worlds");
     default: {
-      const _exhaustive: never = props.stage;
+      const _exhaustive: never = stage;
 
       return _exhaustive;
     }
@@ -33,11 +33,11 @@ const stageLabel = computed(() => {
 });
 
 const decisionLabel = computed(() => {
-  if (props.decisionCount <= 1) return "";
+  if (decisionCount <= 1) return "";
 
   return t("page.game.career.event.decision", {
-    current: props.decisionIndex,
-    total: props.decisionCount,
+    current: decisionIndex,
+    total: decisionCount,
   });
 });
 </script>

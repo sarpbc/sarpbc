@@ -65,11 +65,17 @@ export function gameWinner(game: Pick<StreamScoreGame, "blue" | "orange">): Stre
   return game.blue > game.orange ? "blue" : "orange";
 }
 
+function leadingSide(blue: number, orange: number, needed: number): StreamScoreSide | null {
+  if (blue >= needed) return "blue";
+
+  return orange >= needed ? "orange" : null;
+}
+
 function isConsistent(proposal: StreamScoreProposal): boolean {
   const needed = winsNeeded(proposal.bestOf);
   const blue = proposal.games.filter((game) => game.winner === "blue").length;
   const orange = proposal.games.filter((game) => game.winner === "orange").length;
-  const seriesWinner = blue >= needed ? "blue" : orange >= needed ? "orange" : null;
+  const seriesWinner = leadingSide(blue, orange, needed);
 
   return (
     proposal.games.length <= proposal.bestOf &&

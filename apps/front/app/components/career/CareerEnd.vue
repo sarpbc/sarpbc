@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import type { CareerResult, CareerSeasonRecord } from "~/types/career";
 
-const props = defineProps<{
+const { result, shared = false } = defineProps<{
   result: CareerResult;
   shared?: boolean;
 }>();
@@ -24,14 +24,14 @@ const TROPHY_TYPES = ["worlds", "major", "regional"] as const;
 const trophyLines = computed(() => {
   const counts = { regional: 0, major: 0, worlds: 0 };
 
-  for (const trophy of props.result.trophies) {
+  for (const trophy of result.trophies) {
     counts[trophy.type] += 1;
   }
 
   return TROPHY_TYPES.flatMap((type) => (counts[type] > 0 ? [{ type, count: counts[type] }] : []));
 });
 
-const nickname = computed(() => t(`page.game.career.end.nicknames.${props.result.nicknameKey}`));
+const nickname = computed(() => t(`page.game.career.end.nicknames.${result.nicknameKey}`));
 
 function majorSummary(season: CareerSeasonRecord, split: number): string {
   const record = season.splits.find((entry) => entry.split === split);

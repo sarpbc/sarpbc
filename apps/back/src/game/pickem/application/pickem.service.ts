@@ -1,4 +1,6 @@
-import { InvalidInputError, NotFoundError } from "../../../common/domain/errors";
+import { mapSequentially } from "../../../common/application/sequentially";
+import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { assertPickAllowed, derivePickWinner, scorePick } from "../domain/pickem";
 import type {
   PickemMatches,
@@ -18,7 +20,9 @@ export class PickemService {
     private readonly runtime: PickemRuntime,
   ) {}
   async getUserPicksForTournament(tournamentId: string, userId: string): Promise<UserPickDto[]> {
-    return (await this.reads.list(tournamentId, { userId })).map((p) => ({
+    const picks = await this.reads.list(tournamentId, { userId });
+
+    return picks.map((p) => ({
       match: p.match.id,
       pickedParticipant: p.pickedParticipant.id,
       points: p.points,
@@ -66,10 +70,10 @@ export class PickemService {
     return await this.transaction.run(async (scope) => {
       const picks = await scope.unscored(matchId);
 
-      for (const pick of picks) {
-        scorePick(pick, winner);
+      for (const pick of picks) scorePick(pick, winner);
+      await mapSequentially(picks, async (pick) => {
         await scope.savePick(pick);
-      }
+      });
 
       return { updated: picks.length };
     });
@@ -86,7 +90,9 @@ export class PickemService {
   async leaderboard(tournamentId: string): Promise<LeaderboardEntryDto[]> {
     const entries = new Map<string, LeaderboardEntryDto>();
 
-    for (const pick of await this.reads.list(tournamentId, { scoredOnly: true })) {
+    const scoredPicks = await this.reads.list(tournamentId, { scoredOnly: true });
+
+    for (const pick of scoredPicks) {
       const entry = entries.get(pick.user.id) ?? {
         userId: pick.user.id,
         userName: pick.user.userName,
@@ -97,7 +103,7 @@ export class PickemService {
       entries.set(entry.userId, entry);
     }
 
-    return [...entries.values()].sort((a, b) => b.points - a.points);
+    return [...entries.values()].toSorted((a, b) => b.points - a.points);
   }
   async personalRanking(tournamentId: string, userId: string): Promise<PersonalRankingDto> {
     const entries = await this.leaderboard(tournamentId);

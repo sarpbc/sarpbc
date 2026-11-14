@@ -4,22 +4,22 @@ import { SetTournamentPrizesDto } from "./set-tournament-prizes.dto";
 
 const TEAM_ID = "6f1c1f9e-2a4b-4c55-9d1e-0f3a2b1c4d5e";
 
-describe("SetTournamentPrizesDto", () => {
-  const parse = (
-    entry: Partial<{
-      placement: number;
-      amount: number;
-      currency: string;
-      teamId: string;
-      playerIds: string[];
-    }>,
-  ) =>
-    SetTournamentPrizesDto.safeParse({
-      prizes: [
-        { placement: 1, amount: 100, currency: "USD", teamId: TEAM_ID, sourceUrl: null, ...entry },
-      ],
-    }).success;
+const parse = (
+  entry: Partial<{
+    placement: number;
+    amount: number;
+    currency: string;
+    teamId: string;
+    playerIds: string[];
+  }>,
+) =>
+  SetTournamentPrizesDto.safeParse({
+    prizes: [
+      { placement: 1, amount: 100, currency: "USD", teamId: TEAM_ID, sourceUrl: null, ...entry },
+    ],
+  }).success;
 
+describe("SetTournamentPrizesDto", () => {
   it("defaults the players of an entry to none", () => {
     const body = SetTournamentPrizesDto.parse({
       prizes: [{ placement: 1, amount: 100, currency: "USD", teamId: TEAM_ID, sourceUrl: null }],

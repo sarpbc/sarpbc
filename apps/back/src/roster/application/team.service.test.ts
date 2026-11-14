@@ -1,9 +1,12 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
-import { Contract, Player, Team } from "../domain/roster";
+import { Contract } from "../domain/contract";
+import { Player } from "../domain/player";
+import { Team } from "../domain/team";
 import type { TeamCompetitionReferences } from "../domain/team-deletion";
 import type { RosterTransaction, RosterWriteScope, TeamQueries } from "./ports";
 import { TeamService } from "./team.service";
-import { ConflictError, InvalidInputError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 describe("Roster workflows", () => {
   let stores: RosterWriteScope;
@@ -153,7 +156,8 @@ describe("Roster workflows", () => {
 
   it("marks an empty team inactive without deleting it", async () => {
     team.players = [];
-    expect((await service.update(team.id, { active: false })).active).toBe(false);
+    const updateResult = await service.update(team.id, { active: false });
+    expect(updateResult.active).toBe(false);
     expect(saveTeam).toHaveBeenCalledWith(team);
     expect(deleteTeam).not.toHaveBeenCalled();
   });

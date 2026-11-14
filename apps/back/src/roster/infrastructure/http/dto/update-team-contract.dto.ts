@@ -8,4 +8,4 @@ export const UpdateTeamContractDto = z.strictObject({
   role: z.enum(CONTRACT_ROLES).optional(),
 });
 
-export type UpdateTeamContractDto = z.infer<typeof UpdateTeamContractDto>;
+export type UpdateTeamContractInput = z.infer<typeof UpdateTeamContractDto>;

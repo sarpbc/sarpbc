@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { Team } from "./roster";
+import { Team } from "./team";
 import { TeamAlias, assertTeamAliasFits, teamAt } from "./team-alias";
 
 function alias(fields: Partial<TeamAlias>): TeamAlias {

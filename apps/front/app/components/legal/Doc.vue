@@ -4,7 +4,7 @@ import { uiLocale } from "@sarpbc/utils";
 
 type LegalPage = Collections["legal"];
 
-const props = defineProps<{
+const { slug } = defineProps<{
   slug: string;
 }>();
 
@@ -13,8 +13,8 @@ const { setPageSeo } = useSarpbcSeo();
 const localeCode = computed(() => uiLocale(locale.value));
 
 const { data: doc } = await useAsyncData<LegalPage | null>(
-  () => `legal-${props.slug}-${localeCode.value}`,
-  () => queryCollection("legal").path(`/legal/${localeCode.value}/${props.slug}`).first(),
+  () => `legal-${slug}-${localeCode.value}`,
+  () => queryCollection("legal").path(`/legal/${localeCode.value}/${slug}`).first(),
   { watch: [localeCode] },
 );
 

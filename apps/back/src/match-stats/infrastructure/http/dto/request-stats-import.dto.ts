@@ -6,4 +6,4 @@ export const requestStatsImportFields = {
 
 export const RequestStatsImportDto = z.strictObject(requestStatsImportFields);
 
-export type RequestStatsImportDto = z.infer<typeof RequestStatsImportDto>;
+export type RequestStatsImportInput = z.infer<typeof RequestStatsImportDto>;

@@ -51,7 +51,7 @@ export function groupMatchesByRound(
       round,
       matches: sortMatchesByBeginAt(roundMatches),
     }))
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const dateA = isNonEmptyDateInput(a.matches[0]?.beginAt)
         ? new Date(a.matches[0].beginAt).getTime()
         : 0;

@@ -13,14 +13,14 @@ describe("CreateMatchDto", () => {
   });
 });
 
-describe("SetMatchResultDto", () => {
-  const result = (a: number, b: number, second = "b") => ({
-    results: [
-      { participantId: "a", score: a },
-      { participantId: second, score: b },
-    ],
-  });
+const result = (a: number, b: number, second = "b") => ({
+  results: [
+    { participantId: "a", score: a },
+    { participantId: second, score: b },
+  ],
+});
 
+describe("SetMatchResultDto", () => {
   it("accepts the series score of both sides", () => {
     expect(SetMatchResultDto.safeParse(result(3, 1)).success).toBe(true);
   });

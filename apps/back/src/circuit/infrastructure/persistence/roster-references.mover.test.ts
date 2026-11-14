@@ -1,26 +1,26 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { unconstructed } from "../../../../test/doubles";
 import { describe, expect, it, vi } from "vitest";
-import { CircuitStageTeam } from "./circuit.entities";
+import { CircuitStageTeam } from "./circuit-stage-team.entity";
 import { CircuitRosterReferences } from "./roster-references.mover";
 
+function entry(id: string, teamId: string, stageId: string) {
+  return { id, team: { id: teamId }, stage: { id: stageId } };
+}
+
+function mover(entries: ReturnType<typeof entry>[]) {
+  const find = vi.fn().mockResolvedValue(entries);
+  const nativeDelete = vi.fn();
+  const nativeUpdate = vi.fn();
+
+  const references = new CircuitRosterReferences(
+    Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
+  );
+
+  return { references, nativeDelete, nativeUpdate };
+}
+
 describe("CircuitRosterReferences.moveTeam", () => {
-  function entry(id: string, teamId: string, stageId: string) {
-    return { id, team: { id: teamId }, stage: { id: stageId } };
-  }
-
-  function mover(entries: ReturnType<typeof entry>[]) {
-    const find = vi.fn().mockResolvedValue(entries);
-    const nativeDelete = vi.fn();
-    const nativeUpdate = vi.fn();
-
-    const references = new CircuitRosterReferences(
-      Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
-    );
-
-    return { references, nativeDelete, nativeUpdate };
-  }
-
   it("drops the duplicate's entry in a stage the kept team already has, then moves the rest", async () => {
     const { references, nativeDelete, nativeUpdate } = mover([
       entry("kept-major", "kc", "major"),

@@ -5,10 +5,15 @@ type RankingKind = "teams" | "players";
 
 type PlayerListItem = { type: "player"; entry: RankedPlayer } | { type: "divider" };
 
-const props = defineProps<{
+const {
+  kind,
+  teams = null,
+  players = null,
+  hoveredTeamId,
+} = defineProps<{
   kind: RankingKind;
-  teams?: RankedTeam[];
-  players?: RankedPlayer[];
+  teams?: RankedTeam[] | null;
+  players?: RankedPlayer[] | null;
   hoveredTeamId: string | null;
 }>();
 
@@ -18,8 +23,8 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
-const topTeams = computed(() => (props.teams ?? []).slice(0, 16));
-const topPlayers = computed(() => (props.players ?? []).slice(0, 20));
+const topTeams = computed(() => (teams ?? []).slice(0, 16));
+const topPlayers = computed(() => (players ?? []).slice(0, 20));
 
 function playerKey(player: RankedPlayer): string {
   return `${player.name}-${player.teamName}`;
@@ -60,24 +65,24 @@ function onRowLeave(event: MouseEvent, teamId: string): void {
     return;
   }
 
-  if (props.hoveredTeamId === teamId) {
+  if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
 }
 
 const highlightedRosterExtras = computed(() => {
-  const teamId = props.hoveredTeamId;
+  const teamId = hoveredTeamId;
 
   if (!teamId) {
     return [];
   }
 
-  return (props.players ?? [])
+  return (players ?? [])
     .filter((player) => player.teamId === teamId && !topPlayerKeys.value.has(playerKey(player)))
-    .sort((a, b) => a.rank - b.rank);
+    .toSorted((a, b) => a.rank - b.rank);
 });
 
-const userEntry = computed(() => props.players?.find((player) => player.isUser) ?? null);
+const userEntry = computed(() => players?.find((player) => player.isUser) ?? null);
 
 const userExtra = computed(() => {
   const user = userEntry.value;
@@ -117,7 +122,7 @@ const playerFooterItems = computed((): PlayerListItem[] => {
   return items;
 });
 
-const playerTeamEntry = computed(() => props.teams?.find((team) => team.isPlayerTeam) ?? null);
+const playerTeamEntry = computed(() => teams?.find((team) => team.isPlayerTeam) ?? null);
 
 const playerTeamFooter = computed(() => {
   if (!playerTeamEntry.value || playerTeamEntry.value.rank <= topTeams.value.length) {
@@ -142,10 +147,10 @@ const extraTeams = computed((): RankedTeam[] => {
 
   add(playerTeamFooter.value ?? undefined);
 
-  const hoveredId = props.hoveredTeamId;
+  const hoveredId = hoveredTeamId;
 
   if (hoveredId) {
-    add((props.teams ?? []).find((entry) => entry.team.id === hoveredId));
+    add((teams ?? []).find((entry) => entry.team.id === hoveredId));
   }
 
   return extras;
@@ -171,13 +176,13 @@ const tooltipContent = {
 };
 
 const title = computed(() => {
-  switch (props.kind) {
+  switch (kind) {
     case "teams":
       return t("page.game.career.rankings.bestTeams");
     case "players":
       return t("page.game.career.rankings.bestPlayers");
     default: {
-      const _exhaustive: never = props.kind;
+      const _exhaustive: never = kind;
 
       return _exhaustive;
     }
@@ -185,7 +190,7 @@ const title = computed(() => {
 });
 
 function teamRowClass(entry: RankedTeam): string[] {
-  const highlighted = props.hoveredTeamId === entry.team.id;
+  const highlighted = hoveredTeamId === entry.team.id;
 
   return [
     rankingGridClass,
@@ -197,7 +202,7 @@ function teamRowClass(entry: RankedTeam): string[] {
 }
 
 function playerRowClass(entry: RankedPlayer): string[] {
-  const highlighted = props.hoveredTeamId === entry.teamId;
+  const highlighted = hoveredTeamId === entry.teamId;
 
   return [
     rankingGridClass,
@@ -215,7 +220,7 @@ function onTeamFocusOut(event: FocusEvent, teamId: string): void {
     return;
   }
 
-  if (props.hoveredTeamId === teamId) {
+  if (hoveredTeamId === teamId) {
     emit("update:hoveredTeamId", null);
   }
 }

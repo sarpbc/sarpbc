@@ -9,7 +9,9 @@ import type {
   SeasonPathEntryInput,
 } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { parsePathEntry, parsePathNote } from "../domain/season-archive";
 import type { SeasonRecord, SeasonStore } from "./ports";
 

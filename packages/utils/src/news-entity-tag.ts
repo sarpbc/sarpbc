@@ -40,8 +40,8 @@ export function parseNewsEntityTag(raw: string): NewsEntityTag | null {
     return null;
   }
 
-  const kind = match[1];
-  const attrs = parseAttrs(match[2] ?? "");
+  const [, kind, rawAttrs] = match;
+  const attrs = parseAttrs(rawAttrs ?? "");
   const slug = attrs.slug?.trim();
   const label = attrs.label?.trim();
 

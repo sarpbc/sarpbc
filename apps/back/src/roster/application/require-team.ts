@@ -1,5 +1,5 @@
-import { UnprocessableError } from "../../common/domain/errors";
-import type { Team } from "../domain/roster";
+import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
+import type { Team } from "../domain/team";
 import type { TeamWriter } from "./ports";
 
 export async function requireTeam(teams: Pick<TeamWriter, "findById">, id: string): Promise<Team> {

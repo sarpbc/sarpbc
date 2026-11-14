@@ -6,7 +6,7 @@ import type {
   TournamentMatchListItem,
 } from "@sarpbc/types";
 import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
-import { Match, matchPublicSlug } from "../../domain/competition";
+import { Match, matchPublicSlug } from "../../domain/match";
 import { isRedistributable } from "../../../common/domain/data-source";
 import { isMatchBlockLive } from "../../application/match/match-blocks";
 import { mapParticipantRef } from "./participant-ref.mapper";
@@ -102,5 +102,28 @@ export function withPublicSlug(match: Match): Omit<
 > & {
   slug: string;
 } {
-  return { ...match, slug: matchPublicSlug(match) };
+  return {
+    id: match.id,
+    publicId: match.publicId,
+    pandascoreId: match.pandascoreId,
+    source: match.source,
+    name: match.name,
+    beginAt: match.beginAt,
+    endAt: match.endAt,
+    status: match.status,
+    participants: match.participants,
+    winner: match.winner,
+    numberOfGames: match.numberOfGames,
+    previousMatches: match.previousMatches,
+    results: match.results,
+    officialStreams: match.officialStreams,
+    streams: match.streams,
+    viewership: match.viewership,
+    vods: match.vods,
+    sourceUrl: match.sourceUrl,
+    createdAt: match.createdAt,
+    updatedAt: match.updatedAt,
+    tournament: match.tournament,
+    slug: matchPublicSlug(match),
+  };
 }

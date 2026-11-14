@@ -1,7 +1,10 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { FilterQuery } from "@mikro-orm/core";
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import { League, Match, Tournament, TournamentParticipant } from "./tournament.entities";
+import { League } from "./league.entity";
+import { Match } from "./match.entity";
+import { Tournament } from "./tournament.entity";
+import { TournamentParticipant } from "./tournament-participant.entity";
 import { TournamentRepository } from "./tournament.repository";
 import { MatchRepository } from "./match.repository";
 import { toLeague, toMatch, toTournament } from "./competition.mapper";
@@ -66,11 +69,11 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return [rows.map(toTournament), count];
   }
   async searchByName(options: { name: string; limit?: number; offset?: number }) {
-    return (
-      await this.em
-        .getRepository<Tournament, TournamentRepository>(Tournament)
-        .searchByName(options)
-    ).map(toTournament);
+    const rows = await this.em
+      .getRepository<Tournament, TournamentRepository>(Tournament)
+      .searchByName(options);
+
+    return rows.map(toTournament);
   }
   async findById(id: string) {
     const row = await this.em.findOne(
@@ -110,9 +113,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return new Set(rows.flatMap((r) => (r.pandascoreId === null ? [] : [r.pandascoreId])));
   }
   async leagues({ limit, offset = 0 }: { limit: number; offset?: number }) {
-    return (await this.em.find(League, {}, { limit, offset, orderBy: { name: "ASC" } })).map(
-      toLeague,
-    );
+    const rows = await this.em.find(League, {}, { limit, offset, orderBy: { name: "ASC" } });
+
+    return rows.map(toLeague);
   }
   private async tournamentsByParticipants(where: FilterQuery<TournamentParticipant>) {
     const participants = await this.em.find(TournamentParticipant, where, {
@@ -145,28 +148,28 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     });
   }
   async getTournamentsWonByPlayer(id: string) {
-    return (
-      await this.em.find(
-        Tournament,
-        { winner: { players: { id } } },
-        {
-          populate: ["league", "event", "winner.team", "winner.players"],
-          orderBy: { endAt: "DESC" },
-        },
-      )
-    ).map(toTournament);
+    const rows = await this.em.find(
+      Tournament,
+      { winner: { players: { id } } },
+      {
+        populate: ["league", "event", "winner.team", "winner.players"],
+        orderBy: { endAt: "DESC" },
+      },
+    );
+
+    return rows.map(toTournament);
   }
   async getTournamentsWonByTeam(id: string) {
-    return (
-      await this.em.find(
-        Tournament,
-        { winner: { team: { id } } },
-        {
-          populate: ["league", "event", "winner.team", "winner.players"],
-          orderBy: { endAt: "DESC" },
-        },
-      )
-    ).map(toTournament);
+    const rows = await this.em.find(
+      Tournament,
+      { winner: { team: { id } } },
+      {
+        populate: ["league", "event", "winner.team", "winner.players"],
+        orderBy: { endAt: "DESC" },
+      },
+    );
+
+    return rows.map(toTournament);
   }
   async wonOnDay(day: AnniversaryDay) {
     const ids = await this.idsOnDay(
@@ -177,16 +180,16 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
 
     if (ids.length === 0) return [];
 
-    return (
-      await this.em.find(
-        Tournament,
-        { id: { $in: ids } },
-        {
-          populate: ["league", "event", "winner.team", "winner.players"],
-          orderBy: { endAt: "DESC" },
-        },
-      )
-    ).map(toTournament);
+    const rows = await this.em.find(
+      Tournament,
+      { id: { $in: ids } },
+      {
+        populate: ["league", "event", "winner.team", "winner.players"],
+        orderBy: { endAt: "DESC" },
+      },
+    );
+
+    return rows.map(toTournament);
   }
   async finalsOnDay(day: AnniversaryDay) {
     const ids = await this.idsOnDay(
@@ -201,22 +204,22 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
 
     if (ids.length === 0) return [];
 
-    return (
-      await this.em.find(
-        Match,
-        { id: { $in: ids } },
-        {
-          populate: [
-            ...MATCH_TOURNAMENT_POPULATE,
-            "participants.team",
-            "participants.players",
-            "results",
-            "winner",
-          ],
-          orderBy: { endAt: "DESC" },
-        },
-      )
-    ).map(toMatch);
+    const rows = await this.em.find(
+      Match,
+      { id: { $in: ids } },
+      {
+        populate: [
+          ...MATCH_TOURNAMENT_POPULATE,
+          "participants.team",
+          "participants.players",
+          "results",
+          "winner",
+        ],
+        orderBy: { endAt: "DESC" },
+      },
+    );
+
+    return rows.map(toMatch);
   }
   private async idsOnDay(query: string, { month, day, timeZone, beforeYear }: AnniversaryDay) {
     const rows: { id: string }[] = await this.em
@@ -236,17 +239,21 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return [rows.map(toMatch), count];
   }
   async page(kind: MatchListKind, options: MatchListQueryOptions) {
-    return (await this.em.getRepository<Match, MatchRepository>(Match).list(kind, options)).map(
-      toMatch,
-    );
+    const rows = await this.em.getRepository<Match, MatchRepository>(Match).list(kind, options);
+
+    return rows.map(toMatch);
   }
   async byIds(ids: string[]) {
-    return (await this.em.getRepository<Match, MatchRepository>(Match).findByIds(ids)).map(toMatch);
+    const rows = await this.em.getRepository<Match, MatchRepository>(Match).findByIds(ids);
+
+    return rows.map(toMatch);
   }
   async recentlyEnded(options: { limit: number; minutesAgo: number }) {
-    return (
-      await this.em.getRepository<Match, MatchRepository>(Match).findRecentlyEnded(options)
-    ).map(toMatch);
+    const rows = await this.em
+      .getRepository<Match, MatchRepository>(Match)
+      .findRecentlyEnded(options);
+
+    return rows.map(toMatch);
   }
   async detail(ref: EntityRef) {
     const row = await this.em.getRepository<Match, MatchRepository>(Match).findDetail(ref);
@@ -254,9 +261,11 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return row ? toMatch(row) : null;
   }
   async recentByTeam(options: { teamId: string; excludeMatchId: string; limit: number }) {
-    return (
-      await this.em.getRepository<Match, MatchRepository>(Match).findRecentFinishedByTeamId(options)
-    ).map(toMatch);
+    const rows = await this.em
+      .getRepository<Match, MatchRepository>(Match)
+      .findRecentFinishedByTeamId(options);
+
+    return rows.map(toMatch);
   }
   async betweenTeams(options: {
     teamAId: string;
@@ -264,23 +273,25 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     excludeMatchId: string;
     limit: number;
   }) {
-    return (
-      await this.em.getRepository<Match, MatchRepository>(Match).findFinishedBetweenTeams(options)
-    ).map(toMatch);
+    const rows = await this.em
+      .getRepository<Match, MatchRepository>(Match)
+      .findFinishedBetweenTeams(options);
+
+    return rows.map(toMatch);
   }
   private async matchesBy(where: FilterQuery<Match>) {
-    return (
-      await this.em.find(Match, where, {
-        orderBy: { beginAt: "ASC" },
-        populate: [
-          ...MATCH_TOURNAMENT_POPULATE,
-          "participants.team",
-          "participants.players",
-          "results",
-          "winner",
-        ],
-      })
-    ).map(toMatch);
+    const rows = await this.em.find(Match, where, {
+      orderBy: { beginAt: "ASC" },
+      populate: [
+        ...MATCH_TOURNAMENT_POPULATE,
+        "participants.team",
+        "participants.players",
+        "results",
+        "winner",
+      ],
+    });
+
+    return rows.map(toMatch);
   }
   async byPlayer(id: string) {
     return await this.matchesBy({ participants: { players: { id } } });
@@ -289,22 +300,22 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return await this.matchesBy({ participants: { team: { id } } });
   }
   async byTournament(id: string) {
-    return (
-      await this.em.find(
-        Match,
-        { tournament: { id } },
-        {
-          orderBy: { beginAt: "ASC" },
-          populate: [
-            ...MATCH_TOURNAMENT_POPULATE,
-            "participants.team",
-            "participants.players",
-            "results",
-            "winner.team",
-            "winner.players",
-          ],
-        },
-      )
-    ).map(toMatch);
+    const rows = await this.em.find(
+      Match,
+      { tournament: { id } },
+      {
+        orderBy: { beginAt: "ASC" },
+        populate: [
+          ...MATCH_TOURNAMENT_POPULATE,
+          "participants.team",
+          "participants.players",
+          "results",
+          "winner.team",
+          "winner.players",
+        ],
+      },
+    );
+
+    return rows.map(toMatch);
   }
 }

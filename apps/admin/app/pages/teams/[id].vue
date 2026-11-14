@@ -161,11 +161,9 @@ async function saveContract() {
       endDate: contractForm.value.endDate || null,
     };
 
-    if (editingContract.value) {
-      await updateTeamContract(teamId, editingContract.value.id, body);
-    } else {
-      await createTeamContract(teamId, body);
-    }
+    await (editingContract.value
+      ? updateTeamContract(teamId, editingContract.value.id, body)
+      : createTeamContract(teamId, body));
 
     isContractModalOpen.value = false;
     await refreshContracts();

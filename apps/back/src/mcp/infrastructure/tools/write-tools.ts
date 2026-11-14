@@ -13,7 +13,7 @@ import type {
   SyncNewTournamentsUseCase,
 } from "../../../tournament/application/sync/sync-new-tournaments.use-case";
 import type { SyncPandascoreTournamentUseCase } from "../../../tournament/application/sync/sync-pandascore-tournament.use-case";
-import { matchPublicSlug } from "../../../tournament/domain/competition";
+import { matchPublicSlug } from "../../../tournament/domain/match";
 import {
   createTournamentFields,
   updateTournamentFields,

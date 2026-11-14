@@ -1,3 +1,4 @@
+import { mapSequentially } from "../../../common/application/sequentially";
 import type { CompetitionFeed } from "../feed";
 import type { CompetitionDiagnostics, SyncCursor, TournamentQueries } from "../ports";
 import { CompetitionSyncService } from "./competition-sync.service";
@@ -25,10 +26,8 @@ export class SyncPandascoreIncidentsUseCase {
       return;
     }
 
-    let latest = since;
-    let earliestFailure: Date | null = null;
-
-    for (const incident of incidents) {
+    // Incidents are applied in feed order: later ones can depend on earlier ones.
+    const failures = await mapSequentially(incidents, async (incident) => {
       try {
         const backfill =
           incident.changeType !== "deletion" &&
@@ -38,14 +37,25 @@ export class SyncPandascoreIncidentsUseCase {
             : undefined;
 
         await this.synchronization.applyIncident(incident, backfill);
+
+        return null;
       } catch (error) {
         this.diagnostics.error(`PandaScore incident failed: ${incident.id}`, error);
 
-        if (!earliestFailure || incident.modifiedAt < earliestFailure)
-          earliestFailure = incident.modifiedAt;
+        return incident.modifiedAt;
       }
+    });
 
+    let latest = since;
+    let earliestFailure: Date | null = null;
+
+    for (const incident of incidents) {
       if (incident.modifiedAt > latest) latest = incident.modifiedAt;
+    }
+
+    for (const failedAt of failures) {
+      if (failedAt !== null && (!earliestFailure || failedAt < earliestFailure))
+        earliestFailure = failedAt;
     }
 
     await this.cursor.setLastSyncAt(

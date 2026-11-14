@@ -2,8 +2,14 @@ import { Body, Controller, Get, Patch, Query, UseGuards } from "@nestjs/common";
 import type { AppNotification } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
-import { ListNotificationsQueryDto } from "./dto/list-notifications-query.dto";
-import { MarkNotificationsReadDto } from "./dto/mark-notifications-read.dto";
+import {
+  ListNotificationsQueryDto,
+  type ListNotificationsQueryInput,
+} from "./dto/list-notifications-query.dto";
+import {
+  MarkNotificationsReadDto,
+  type MarkNotificationsReadInput,
+} from "./dto/mark-notifications-read.dto";
 import { NotificationService } from "../../application/notification.service";
 
 @Controller("notifications")
@@ -14,7 +20,7 @@ export class NotificationController {
   @Get()
   async list(
     @CurrentUserId() userId: string,
-    @Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryDto,
+    @Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryInput,
   ): Promise<{ notifications: AppNotification[] }> {
     const notifications = await this.notificationService.listForUser(userId, query.limit);
 
@@ -37,7 +43,7 @@ export class NotificationController {
   @Patch("read")
   async markRead(
     @CurrentUserId() userId: string,
-    @Body({ schema: MarkNotificationsReadDto }) body: MarkNotificationsReadDto,
+    @Body({ schema: MarkNotificationsReadDto }) body: MarkNotificationsReadInput,
   ) {
     const result = await this.notificationService.markRead(userId, body.ids);
 

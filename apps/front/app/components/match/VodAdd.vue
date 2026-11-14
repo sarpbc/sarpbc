@@ -66,7 +66,11 @@ async function submit() {
     const { match: latest } = await getMatchById(match.id);
 
     const vods = await setMatchVods(match.id, [
-      ...(latest.vods ?? []).map(({ game, url, language }) => ({ game, url, language })),
+      ...(latest.vods ?? []).map((vod) => ({
+        game: vod.game,
+        url: vod.url,
+        language: vod.language,
+      })),
       { game: game.value, url: parsedUrl.value.url, language: languageCode.value },
     ]);
 

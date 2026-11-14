@@ -1,6 +1,7 @@
 import type { MatchBlockSelector } from "@sarpbc/types";
 import { isMatchLive } from "@sarpbc/utils";
-import type { Match } from "../../domain/competition";
+import { mapSequentially } from "../../../common/application/sequentially";
+import type { Match } from "../../domain/match";
 import type { MatchQueries } from "../ports";
 import type { MatchListQueryOptions } from "./match-list-filters";
 
@@ -11,9 +12,12 @@ type ScopedMatchBlock = Extract<MatchBlockSelector, { kind: "tournament" | "team
 export type MatchBlockReads = Pick<MatchQueries, "byIds" | "page">;
 
 export function isMatchBlockLive(match: Match, now: Date): boolean {
+  const { beginAt } = match;
+
   return (
+    beginAt !== null &&
     isMatchLive(match, now) &&
-    now.getTime() - match.beginAt!.getTime() <= MATCH_BLOCK_LIVE_WINDOW_MS
+    now.getTime() - beginAt.getTime() <= MATCH_BLOCK_LIVE_WINDOW_MS
   );
 }
 
@@ -46,18 +50,29 @@ async function findScope(
   return [...live, ...upcoming, ...results];
 }
 
+function referencedMatchIds(block: MatchBlockSelector): readonly string[] {
+  switch (block.kind) {
+    case "match":
+      return [block.id];
+    case "matches":
+      return block.ids;
+    case "tournament":
+    case "team":
+      return [];
+    default: {
+      const exhaustive: never = block;
+
+      return exhaustive;
+    }
+  }
+}
+
 export async function findMatchBlocks(
   reads: MatchBlockReads,
   blocks: readonly MatchBlockSelector[],
   now: Date,
 ): Promise<Match[][]> {
-  const ids = [
-    ...new Set(
-      blocks.flatMap((block) =>
-        block.kind === "match" ? [block.id] : block.kind === "matches" ? block.ids : [],
-      ),
-    ),
-  ];
+  const ids = [...new Set(blocks.flatMap(referencedMatchIds))];
 
   const byId = new Map(
     (ids.length > 0 ? await reads.byIds(ids) : []).map((match) => [match.id, match]),
@@ -76,11 +91,15 @@ export async function findMatchBlocks(
     limits.set(key, { block, limit: Math.max(block.limit, limits.get(key)?.limit ?? 0) });
   }
 
-  const scoped = new Map<string, Match[]>();
+  const scopedEntries = await mapSequentially(
+    [...limits],
+    async ([key, { block, limit }]): Promise<[string, Match[]]> => [
+      key,
+      await findScope(reads, block, limit, now),
+    ],
+  );
 
-  for (const [key, { block, limit }] of limits) {
-    scoped.set(key, await findScope(reads, block, limit, now));
-  }
+  const scoped = new Map(scopedEntries);
 
   return blocks.map((block) => {
     switch (block.kind) {

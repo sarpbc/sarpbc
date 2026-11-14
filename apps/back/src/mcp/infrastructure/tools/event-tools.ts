@@ -28,7 +28,11 @@ export function eventTools({ catalogService, competition }: EventToolServices): 
       description:
         "List leagues with id, name, slug and source. manual leagues were created by staff; pandascore leagues come from the sync. Use the id as leagueId on events and tournaments.",
       input: {},
-      handler: async () => (await catalogService.leagues()).map(mapLeague),
+      handler: async () => {
+        const leagues = await catalogService.leagues();
+
+        return leagues.map(mapLeague);
+      },
     }),
 
     defineTool({

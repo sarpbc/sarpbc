@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { MatchSitemapRow } from "./ports";
 import { SitemapService } from "./sitemap.service";
 
+const team = (name: string) => ({ team: { name } });
+
 describe("SitemapService", () => {
   const queries = {
     news: vi.fn(),
@@ -15,7 +17,6 @@ describe("SitemapService", () => {
   const service = new SitemapService(queries);
   const older = new Date("2026-02-01T00:00:00.000Z");
   const lastmod = new Date("2026-03-01T12:00:00.000Z");
-  const team = (name: string) => ({ team: { name } });
 
   const match = (overrides: Partial<MatchSitemapRow>): MatchSitemapRow => ({
     publicId: 42,

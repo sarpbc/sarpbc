@@ -13,10 +13,10 @@ import { UserService } from "../../application/user.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "./decorator/current-user.decorator";
 import { RequirePermissions } from "./decorator/require-permissions.decorator";
-import { ChangeUserRoleDto } from "./dto/change-user-role.dto";
-import { ListUsersQueryDto } from "./dto/list-users-query.dto";
+import { ChangeUserRoleDto, type ChangeUserRoleInput } from "./dto/change-user-role.dto";
+import { ListUsersQueryDto, type ListUsersQueryInput } from "./dto/list-users-query.dto";
 import { PermissionGuard } from "./user.guard";
-import { UserMapper } from "./user.mapper";
+import { toUserListItem } from "./user.mapper";
 
 @Controller("users")
 @RequirePermissions("users.manage")
@@ -25,17 +25,17 @@ export class UsersController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  async list(@Query({ schema: ListUsersQueryDto }) query: ListUsersQueryDto): Promise<UserList> {
+  async list(@Query({ schema: ListUsersQueryDto }) query: ListUsersQueryInput): Promise<UserList> {
     const { users, total } = await this.userService.list(query);
 
-    return { users: users.map((user) => UserMapper.toListItemDto(user)), total };
+    return { users: users.map((user) => toUserListItem(user)), total };
   }
 
   @Patch(":id/role")
   async changeRole(
     @CurrentUserId() actorId: string,
     @Param("id", ParseUUIDPipe) id: string,
-    @Body({ schema: ChangeUserRoleDto }) dto: ChangeUserRoleDto,
+    @Body({ schema: ChangeUserRoleDto }) dto: ChangeUserRoleInput,
   ) {
     const user = await this.userService.changeRole(
       actorId,
@@ -43,6 +43,6 @@ export class UsersController {
       dto.role === "member" ? null : dto.role,
     );
 
-    return { user: UserMapper.toListItemDto(user) };
+    return { user: toUserListItem(user) };
   }
 }

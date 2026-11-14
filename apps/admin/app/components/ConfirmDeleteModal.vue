@@ -1,7 +1,7 @@
 <script setup lang="ts" generic="T">
 const target = defineModel<T | null>("target", { required: true });
 
-const props = defineProps<{
+const { remove } = defineProps<{
   title: string;
   confirmLabel: string;
   message: (item: T) => string;
@@ -32,7 +32,7 @@ async function confirm() {
   isDeleting.value = true;
 
   try {
-    await props.remove(item);
+    await remove(item);
     target.value = null;
     emit("deleted");
   } catch (error) {

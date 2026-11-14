@@ -1,15 +1,15 @@
 import assert from "node:assert/strict";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join } from "node:path";
+import path from "node:path";
 import { test } from "node:test";
 import { parityViolations } from "./check-i18n-parity.ts";
 import type { LocaleValue } from "./check-i18n-parity.ts";
 
 function locales(english: LocaleValue, french: LocaleValue): string {
-  const directory = mkdtempSync(join(tmpdir(), "i18n-parity-"));
-  writeFileSync(join(directory, "en-US.json"), JSON.stringify(english));
-  writeFileSync(join(directory, "fr-FR.json"), JSON.stringify(french));
+  const directory = mkdtempSync(path.join(tmpdir(), "i18n-parity-"));
+  writeFileSync(path.join(directory, "en-US.json"), JSON.stringify(english));
+  writeFileSync(path.join(directory, "fr-FR.json"), JSON.stringify(french));
 
   return directory;
 }

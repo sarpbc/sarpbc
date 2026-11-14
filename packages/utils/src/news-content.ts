@@ -12,9 +12,9 @@ export function newsContentToPlainText(content: string): string {
 
   return withLabels
     .replaceAll(/```[\s\S]*?```/g, " ")
-    .replaceAll(/`([^`]+)`/g, "$1")
+    .replaceAll(/`(?<code>[^`]+)`/g, "$<code>")
     .replaceAll(/!\[[^\]]*\]\([^)]*\)/g, " ")
-    .replaceAll(/\[([^\]]+)\]\([^)]*\)/g, "$1")
+    .replaceAll(/\[(?<text>[^\]]+)\]\([^)]*\)/g, "$<text>")
     .replaceAll(/^#{1,6}\s+/gm, "")
     .replaceAll(/^\s*>\s?/gm, "")
     .replaceAll(/^\s*[-*+]\s+/gm, "")

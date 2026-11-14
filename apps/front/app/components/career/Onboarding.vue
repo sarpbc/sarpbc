@@ -11,7 +11,7 @@ import {
   type OnboardingStep,
 } from "~/types/career";
 
-const props = defineProps<{
+const { step, playerName, region, country, role, background } = defineProps<{
   step: OnboardingStep;
   playerName: string;
   region: CareerRegion | null;
@@ -33,37 +33,37 @@ const emit = defineEmits<{
 const { t } = useI18n();
 
 const localName = computed({
-  get: () => props.playerName,
+  get: () => playerName,
   set: (value: string) => emit("update:playerName", value),
 });
 
 const countriesForRegion = computed<readonly CareerCountry[]>(() =>
-  props.region ? CAREER_COUNTRIES[props.region] : [],
+  region ? CAREER_COUNTRIES[region] : [],
 );
 
-function goTo(step: OnboardingStep) {
-  emit("update:step", step);
+function goTo(nextStep: OnboardingStep) {
+  emit("update:step", nextStep);
 }
 
 function onIntroNext() {
-  if (!props.playerName.trim()) return;
+  if (!playerName.trim()) return;
   goTo("region");
 }
 
 function onRegionNext() {
-  if (props.region) goTo("country");
+  if (region) goTo("country");
 }
 
 function onCountryNext() {
-  if (props.country) goTo("role");
+  if (country) goTo("role");
 }
 
 function onRoleNext() {
-  if (props.role) goTo("background");
+  if (role) goTo("background");
 }
 
 function onStart() {
-  if (props.background) emit("complete");
+  if (background) emit("complete");
 }
 </script>
 
@@ -115,7 +115,7 @@ function onStart() {
           color="neutral"
           variant="outline"
           class="selectable"
-          :aria-pressed="props.region === regionOption"
+          :aria-pressed="region === regionOption"
           @click="emit('selectRegion', regionOption)"
         >
           {{ t(`page.game.career.onboarding.regions.${regionOption}`) }}
@@ -140,7 +140,7 @@ function onStart() {
           color="neutral"
           variant="outline"
           class="selectable"
-          :aria-pressed="props.country === countryOption"
+          :aria-pressed="country === countryOption"
           @click="emit('selectCountry', countryOption)"
         >
           {{ t(`page.game.career.onboarding.countries.${countryOption}`) }}
@@ -164,7 +164,7 @@ function onStart() {
           :key="roleOption"
           type="button"
           class="border border-separator p-4 text-left interactive-surface selectable"
-          :aria-pressed="props.role === roleOption"
+          :aria-pressed="role === roleOption"
           @click="emit('selectRole', roleOption)"
         >
           <p class="font-medium">
@@ -193,7 +193,7 @@ function onStart() {
           :key="bg"
           type="button"
           class="border border-separator p-4 text-left interactive-surface selectable"
-          :aria-pressed="props.background === bg"
+          :aria-pressed="background === bg"
           @click="emit('selectBackground', bg)"
         >
           <p class="font-medium">

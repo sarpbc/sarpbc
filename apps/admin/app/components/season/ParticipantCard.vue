@@ -8,7 +8,7 @@ import {
 } from "@sarpbc/utils";
 import type { PickedStage } from "~/components/circuit/StagePicker.vue";
 
-const props = defineProps<{
+const { participant, seasonId } = defineProps<{
   seasonId: string;
   participant: SeasonParticipant;
   isWinner: boolean;
@@ -21,9 +21,9 @@ const localePath = useLocalePath();
 const toast = useToast();
 const reportError = useReportError();
 
-const pathNote = ref(props.participant.pathNote ?? "");
+const pathNote = ref(participant.pathNote ?? "");
 const savingNote = ref(false);
-const noteChanged = computed(() => pathNote.value.trim() !== (props.participant.pathNote ?? ""));
+const noteChanged = computed(() => pathNote.value.trim() !== (participant.pathNote ?? ""));
 
 const label = ref("");
 const result = ref("");
@@ -42,7 +42,7 @@ async function saveNote() {
   savingNote.value = true;
 
   try {
-    await updateSeasonPathNote(props.seasonId, props.participant.id, pathNote.value.trim() || null);
+    await updateSeasonPathNote(seasonId, participant.id, pathNote.value.trim() || null);
     toast.add({ title: t("page.seasons.path.noteSaved"), color: "success" });
     emit("changed");
   } catch (saveError) {
@@ -63,7 +63,7 @@ async function addEntry() {
   addingEntry.value = true;
 
   try {
-    await createSeasonPathEntry(props.seasonId, props.participant.id, {
+    await createSeasonPathEntry(seasonId, participant.id, {
       label: label.value.trim(),
       result: result.value.trim(),
       tournamentId: stage.value?.id ?? null,

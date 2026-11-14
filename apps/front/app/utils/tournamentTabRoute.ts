@@ -5,15 +5,11 @@ import { stageMatchesPath, stageStatsPath, tournamentStagePath } from "@sarpbc/u
 export function getTournamentTabFromRouteName(
   routeBaseName: PropertyKey | undefined,
 ): TournamentTab {
-  switch (routeBaseName) {
-    case "tournaments-event-stage-matches":
-      return "matches";
-    case "tournaments-event-stage-stats":
-      return "stats";
-    case undefined:
-    default:
-      return "overview";
-  }
+  if (routeBaseName === "tournaments-event-stage-matches") return "matches";
+
+  if (routeBaseName === "tournaments-event-stage-stats") return "stats";
+
+  return "overview";
 }
 
 export function tournamentTabPath(tab: TournamentTab, eventSlug: string, stageSlug: string) {

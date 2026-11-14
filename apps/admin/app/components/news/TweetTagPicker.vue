@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { parseTweetUrl } from "@sarpbc/utils";
 
-const props = defineProps<{
+const { open } = defineProps<{
   open: boolean;
 }>();
 
@@ -16,10 +16,10 @@ const submitted = ref(false);
 
 const parsed = computed(() => parseTweetUrl(url.value));
 const invalid = computed(() => submitted.value && url.value.trim().length > 0 && !parsed.value);
-const canInsert = computed(() => parsed.value != null);
+const canInsert = computed(() => parsed.value !== null);
 
 watch(
-  () => props.open,
+  () => open,
   (isOpen) => {
     if (isOpen) {
       url.value = "";

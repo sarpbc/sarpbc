@@ -18,8 +18,15 @@ export function isMatchFinished(match: MatchLifecycle): boolean {
 }
 
 export function isMatchLive(match: MatchLifecycle, now: Instant): boolean {
+  const { beginAt } = match;
+
   return (
-    !isMatchFinished(match) && Boolean(match.beginAt) && toMillis(match.beginAt!) <= toMillis(now)
+    !isMatchFinished(match) &&
+    beginAt !== null &&
+    beginAt !== undefined &&
+    beginAt !== "" &&
+    beginAt !== 0 &&
+    toMillis(beginAt) <= toMillis(now)
   );
 }
 

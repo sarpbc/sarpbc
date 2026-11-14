@@ -1,5 +1,5 @@
 import { Injectable, type PipeTransform } from "@nestjs/common";
-import { NotFoundError } from "../../domain/errors";
+import { NotFoundError } from "../../domain/errors/not-found-error";
 import { parseEntityRef, type EntityRef } from "../../domain/entity-ref";
 
 @Injectable()

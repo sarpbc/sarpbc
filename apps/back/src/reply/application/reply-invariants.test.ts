@@ -4,7 +4,8 @@ import type { ReplyWriteScope, ReplyTransaction } from "./ports";
 import type { Author } from "../../common/domain/author";
 import type { ReplyRecord } from "./models";
 import { FORUM_ERROR_CODES } from "@sarpbc/types";
-import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 
 const now = new Date("2026-10-15T12:00:00Z");
 const author: Author = { id: "author", userName: "Fan" };
@@ -66,7 +67,7 @@ function setup() {
   const transaction: ReplyTransaction = {
     async run(work) {
       const result = await work(scope);
-      commits++;
+      commits += 1;
 
       return result;
     },

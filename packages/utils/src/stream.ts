@@ -64,5 +64,5 @@ export function orderStreams<T extends { language: string; kind: StreamKind }>(
   const rank = (stream: T) =>
     (stream.language === language ? 0 : 2) + (stream.kind === "official" ? 0 : 1);
 
-  return [...streams].sort((a, b) => rank(a) - rank(b));
+  return streams.toSorted((a, b) => rank(a) - rank(b));
 }

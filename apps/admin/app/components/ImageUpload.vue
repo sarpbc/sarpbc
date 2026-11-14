@@ -3,11 +3,15 @@ import { IMAGE_CONTENT_TYPES, MAX_IMAGE_MEGABYTES, type ImageUploadTarget } from
 
 const imageUrl = defineModel<string | null>("imageUrl", { default: null });
 
-const props = defineProps<{
+const {
+  target,
+  articleSlug = null,
+  articleTitle = null,
+} = defineProps<{
   target: ImageUploadTarget;
   disabled?: boolean;
-  articleSlug?: string;
-  articleTitle?: string;
+  articleSlug?: string | null;
+  articleTitle?: string | null;
 }>();
 
 const emit = defineEmits<{ "update:uploading": [boolean] }>();
@@ -48,9 +52,9 @@ async function onFileChange(event: Event) {
 
   try {
     imageUrl.value = await uploadFile(file, {
-      target: props.target,
-      articleSlug: props.articleSlug,
-      articleTitle: props.articleTitle,
+      target,
+      articleSlug,
+      articleTitle,
     });
   } catch (error_) {
     const message = error_ instanceof Error ? error_.message : "";

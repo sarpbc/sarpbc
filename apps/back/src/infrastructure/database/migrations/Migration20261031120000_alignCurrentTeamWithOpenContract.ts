@@ -18,6 +18,4 @@ export class Migration20261031120000_alignCurrentTeamWithOpenContract extends Mi
         and p."team_id" is distinct from open."team_id";
     `);
   }
-
-  override down(): void | Promise<void> {}
 }

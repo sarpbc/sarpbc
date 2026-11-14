@@ -28,7 +28,7 @@ const MATCH_INLINE_OPENER = ":matches{";
 const ATTRS_PATTERN = /^(?:\w+="[^"]*"(?:[ \t]+\w+="[^"]*")*)?$/;
 const LIMIT_PATTERN = /^[1-9]\d*$/;
 const BACKTICK_RUN_PATTERN = /`+/g;
-const FENCE_PATTERN = /^ {0,3}(`{3,}|~{3,})/;
+const FENCE_PATTERN = /^ {0,3}(?<fence>`{3,}|~{3,})/;
 const MAX_TAG_INDENT = 3;
 const SELECTORS = ["match", "ids", "tournament", "team"] as const;
 const ATTR_NAMES = new Set<string>([...SELECTORS, "limit"]);
@@ -38,7 +38,7 @@ function isUuid(value: string): boolean {
 }
 
 function parseLimit(value: string | number | null | undefined): number | null {
-  if (value == null || value === "") {
+  if (value === null || value === undefined || value === "") {
     return NEWS_MATCH_BLOCK_DEFAULT_LIMIT;
   }
 
@@ -94,7 +94,7 @@ export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): MatchBlockS
   const present = SELECTORS.filter((name) => {
     const value = attrs[name];
 
-    return value != null && value.trim() !== "";
+    return value !== null && value !== undefined && value.trim() !== "";
   });
 
   const [selector, ...others] = present;
@@ -104,7 +104,7 @@ export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): MatchBlockS
   }
 
   const value = attrs[selector]?.trim() ?? "";
-  const hasLimit = attrs.limit != null && attrs.limit !== "";
+  const hasLimit = attrs.limit !== null && attrs.limit !== undefined && attrs.limit !== "";
 
   switch (selector) {
     case "match":
@@ -165,7 +165,7 @@ export function parseNewsMatchTag(raw: string): NewsMatchTag | null {
 
 export function serializeNewsMatchTag(block: MatchBlockSelector): string {
   const attrs = Object.entries(newsMatchBlockToAttrs(block))
-    .filter(([, value]) => value != null)
+    .filter(([, value]) => value !== null && value !== undefined)
     .map(([name, value]) => `${name}="${value}"`)
     .join(" ");
 
@@ -193,7 +193,7 @@ export function newsMatchBlockKey(block: MatchBlockSelector): string {
 export function parseNewsMatchBlockKey(key: string): MatchBlockSelector | null {
   const [kind, value, limit, ...rest] = key.split(":");
 
-  if (rest.length > 0 || value == null) {
+  if (rest.length > 0 || value === undefined) {
     return null;
   }
 

@@ -5,4 +5,4 @@ export const ReportReplyDto = z.strictObject({
   reason: z.enum(REPLY_REPORT_REASONS),
 });
 
-export type ReportReplyDto = z.infer<typeof ReportReplyDto>;
+export type ReportReplyInput = z.infer<typeof ReportReplyDto>;

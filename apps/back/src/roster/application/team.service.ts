@@ -1,7 +1,9 @@
 import { toSlug } from "@sarpbc/utils";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { CreateTeamInput, UpdateTeamInput } from "./inputs";
-import { Team } from "../domain/roster";
+import { Team } from "../domain/team";
 import { assertTeamDeletable } from "../domain/team-deletion";
 import type {
   RosterTransaction,
@@ -119,11 +121,14 @@ export class TeamService {
     const team = await teams.findById(id);
 
     if (!team) throw new NotFoundError(`Team with id "${id}" not found`);
+    const teamContracts = await contracts.findByTeam(id);
+    const references = await this.usage.teamReferences(id);
+
     assertTeamDeletable(team, {
       players: team.players.length,
-      contracts: (await contracts.findByTeam(id)).length,
+      contracts: teamContracts.length,
       redirects: await teams.redirectCount(id),
-      ...(await this.usage.teamReferences(id)),
+      ...references,
     });
 
     return team;

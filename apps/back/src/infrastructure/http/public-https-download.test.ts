@@ -1,8 +1,7 @@
 import type { LookupAddress } from "node:dns";
-import { EventEmitter } from "node:events";
 import { PassThrough } from "node:stream";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import {
   downloadPublicHttps,
   isPublicAddress,
@@ -29,7 +28,7 @@ const limits = {
   maxBytes: 16,
   timeoutMs: 1000,
   maxRedirects: 2,
-  isAllowedHost: (hostname: string) => !/(^|\.)liquipedia\.net$/i.test(hostname),
+  isAllowedHost: (hostname: string) => !/(?:^|\.)liquipedia\.net$/i.test(hostname),
 };
 
 function resolveDns(addresses: Record<string, string[]>) {
@@ -42,11 +41,11 @@ function serve(routes: Record<string, Reply>) {
 
     if (!lookup || !signal) throw new Error("The request must use the guarded lookup and a signal");
 
-    const req = Object.assign(new EventEmitter(), {
+    const req = Object.assign(new PassThrough(), {
       end: () => {
-        lookup(url.hostname, { all: true }, (error) => {
-          if (error) {
-            req.emit("error", error);
+        lookup(url.hostname, { all: true }, (lookupError) => {
+          if (lookupError) {
+            req.emit("error", lookupError);
 
             return;
           }

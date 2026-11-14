@@ -13,6 +13,10 @@ const TIME_AGO_UNITS: UseTimeAgoUnit[] = [
   { max: Number.POSITIVE_INFINITY, value: 31_536_000_000, name: "year" },
 ];
 
+function pf(past: boolean): string {
+  return past ? ".past" : ".future";
+}
+
 export function formatLocaleTimeAgo(date: Date) {
   const { t, locale } = useI18n();
 
@@ -26,36 +30,30 @@ export function formatLocaleTimeAgo(date: Date) {
     return new Intl.DateTimeFormat(locale.value, options).format(date);
   }
 
-  const pf = (past: boolean) => (past ? ".past" : ".future");
-
   const messages: UseTimeAgoMessages = {
     justNow: t("timeAgo.just-now"),
     past: (n) => (/\d/.test(n) ? t("timeAgo.ago", [n]) : n),
     future: (n) => (/\d/.test(n) ? t("timeAgo.in", [n]) : n),
-    month: (n, past) =>
-      n === 1
-        ? past
-          ? t("timeAgo.last-month")
-          : t("timeAgo.next-month")
-        : `${n} ${t(`timeAgo.month${pf(past)}`, n)}`,
-    year: (n, past) =>
-      n === 1
-        ? past
-          ? t("timeAgo.last-year")
-          : t("timeAgo.next-year")
-        : `${n} ${t(`timeAgo.year${pf(past)}`, n)}`,
-    day: (n, past) =>
-      n === 1
-        ? past
-          ? t("timeAgo.yesterday")
-          : t("timeAgo.tomorrow")
-        : `${n} ${t(`timeAgo.day${pf(past)}`, n)}`,
-    week: (n, past) =>
-      n === 1
-        ? past
-          ? t("timeAgo.last-week")
-          : t("timeAgo.next-week")
-        : `${n} ${t(`timeAgo.week${pf(past)}`, n)}`,
+    month: (n, past) => {
+      if (n !== 1) return `${n} ${t(`timeAgo.month${pf(past)}`, n)}`;
+
+      return past ? t("timeAgo.last-month") : t("timeAgo.next-month");
+    },
+    year: (n, past) => {
+      if (n !== 1) return `${n} ${t(`timeAgo.year${pf(past)}`, n)}`;
+
+      return past ? t("timeAgo.last-year") : t("timeAgo.next-year");
+    },
+    day: (n, past) => {
+      if (n !== 1) return `${n} ${t(`timeAgo.day${pf(past)}`, n)}`;
+
+      return past ? t("timeAgo.yesterday") : t("timeAgo.tomorrow");
+    },
+    week: (n, past) => {
+      if (n !== 1) return `${n} ${t(`timeAgo.week${pf(past)}`, n)}`;
+
+      return past ? t("timeAgo.last-week") : t("timeAgo.next-week");
+    },
     hour: (n, past) => `${n} ${t(`timeAgo.hour${pf(past)}`, n)}`,
     minute: (n, past) => `${n} ${t(`timeAgo.minute${pf(past)}`, n)}`,
     second: (n, past) => `${n} ${t(`timeAgo.second${pf(past)}`, n)}`,
@@ -63,7 +61,7 @@ export function formatLocaleTimeAgo(date: Date) {
   };
 
   return formatTimeAgo(date, {
-    fullDateFormatter: (date) => date.toLocaleString(),
+    fullDateFormatter: (value) => value.toLocaleString(),
     messages,
     units: TIME_AGO_UNITS,
   });

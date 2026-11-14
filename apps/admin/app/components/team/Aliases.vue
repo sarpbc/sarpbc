@@ -45,11 +45,12 @@ const isOpen = ref(false);
 const saving = ref(false);
 const editing = ref<TeamAlias | null>(null);
 const aliasToDelete = ref<TeamAlias | null>(null);
-const form = ref<AliasForm>(emptyForm());
 
 function emptyForm(): AliasForm {
   return { name: "", from: "", to: "", sourceUrl: "", logoUrl: "", pandascoreId: "" };
 }
+
+const form = ref<AliasForm>(emptyForm());
 
 function formatDay(day: string): string {
   return dateFormatter.value.format(new Date(`${day}T00:00:00Z`));
@@ -144,11 +145,9 @@ async function submit() {
   saving.value = true;
 
   try {
-    if (editing.value) {
-      await updateTeamAlias(teamId, editing.value.id, result.alias);
-    } else {
-      await addTeamAlias(teamId, result.alias);
-    }
+    await (editing.value
+      ? updateTeamAlias(teamId, editing.value.id, result.alias)
+      : addTeamAlias(teamId, result.alias));
 
     toast.add({ title: t("page.teams.aliases.saved"), color: "success" });
     isOpen.value = false;

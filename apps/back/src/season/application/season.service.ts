@@ -8,7 +8,9 @@ import type {
 } from "@sarpbc/types";
 import { SEASON_NAME_MAX_LENGTH } from "@sarpbc/utils";
 import { v4 } from "uuid";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { EMPTY_SEASON_FORMAT, parseSeasonFormat, parseSeasonSlug } from "../domain/season-archive";
 import { SEASON_AWARD_LABELS, parseSeasonAward } from "../domain/season-award";
 import type { SeasonRecord, SeasonStore } from "./ports";

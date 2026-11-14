@@ -1,15 +1,13 @@
 import type { CareerResult, CareerState } from "~/types/career";
-import {
-  decodeCareerResultFromShare,
-  encodeCareerResultForShare,
-  parseCareerResultsJson,
-  parseCareerStateJson,
-} from "~/utils/career/careerSchema";
+import { parseCareerResultsJson, parseCareerStateJson } from "~/utils/career/careerSchema";
 
 export const CAREER_ACTIVE_STORAGE_KEY = "sarpbc:career-active";
 export const CAREER_RESULTS_STORAGE_KEY = "sarpbc:career-results";
 
-export { encodeCareerResultForShare, decodeCareerResultFromShare };
+export {
+  decodeCareerResultFromShare,
+  encodeCareerResultForShare,
+} from "~/utils/career/careerSchema";
 
 export function parseCareerState(raw: string | null): CareerState | null {
   return parseCareerStateJson(raw);

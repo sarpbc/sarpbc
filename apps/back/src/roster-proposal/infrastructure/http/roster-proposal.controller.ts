@@ -17,7 +17,10 @@ import { RequirePermissions } from "../../../user/infrastructure/http/decorator/
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { RosterProposalService } from "../../application/roster-proposal.service";
 import type { RosterProposal } from "../../domain/roster-proposal";
-import { ListRosterProposalsQueryDto } from "./dto/list-roster-proposals-query.dto";
+import {
+  ListRosterProposalsQueryDto,
+  type ListRosterProposalsQueryInput,
+} from "./dto/list-roster-proposals-query.dto";
 
 function mapProposal(proposal: RosterProposal): RosterProposalResponse {
   return {
@@ -40,7 +43,7 @@ export class RosterProposalController {
   @RequirePermissions(...ROSTER_PROPOSAL_PERMISSIONS)
   @UseGuards(AuthGuard, PermissionGuard)
   @Get()
-  async list(@Query({ schema: ListRosterProposalsQueryDto }) query: ListRosterProposalsQueryDto) {
+  async list(@Query({ schema: ListRosterProposalsQueryDto }) query: ListRosterProposalsQueryInput) {
     const { proposals, names } = await this.proposals.list(query.status);
 
     return { proposals: proposals.map(mapProposal), names };

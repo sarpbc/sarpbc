@@ -1,9 +1,12 @@
 import type { CircuitEventTeam, CircuitScaleTier, CircuitSummary } from "@sarpbc/types";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { CircuitStageSettings } from "../domain/circuit-scale";
 import { CircuitService } from "./circuit.service";
 import type { CircuitStore, StoredStageResult } from "./ports";
+import { mapSequentially } from "../../common/application/sequentially";
 
 const SOURCE = "https://example.org/official-rules";
 const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
@@ -66,6 +69,20 @@ function setup() {
   return { service, saved, results };
 }
 
+const result = (overrides: Partial<StoredStageResult>): StoredStageResult => ({
+  source: "pandascore",
+  event: { id: "e1", slug: "e1", name: "Event 1" },
+  beginAt: new Date("2026-01-01T00:00:00Z"),
+  endAt: new Date("2026-01-05T00:00:00Z"),
+  scale,
+  sourceUrl: SOURCE,
+  worldwide: false,
+  regionTeamIds: [],
+  placements: [{ placement: 1, team: team("t1") }],
+  finishes: [],
+  ...overrides,
+});
+
 describe("CircuitService", () => {
   let service: CircuitService;
   let saved: ReturnType<typeof setup>["saved"];
@@ -74,9 +91,14 @@ describe("CircuitService", () => {
 
   beforeEach(async () => {
     ({ service, saved, results } = setup());
-    circuitId = (
-      await service.create({ name: "  Season Circuit  ", season: 2025, sourceUrl: SOURCE })
-    ).id;
+
+    const createResult = await service.create({
+      name: "  Season Circuit  ",
+      season: 2025,
+      sourceUrl: SOURCE,
+    });
+
+    circuitId = createResult.id;
   });
 
   it("creates a circuit with a slug from its name and refuses a taken slug", async () => {
@@ -163,15 +185,18 @@ describe("CircuitService", () => {
     await expect(service.create({ ...valid, season: 1999 })).rejects.toThrow(InvalidInputError);
     await expect(service.create({ ...valid, season: 2026.5 })).rejects.toThrow(InvalidInputError);
 
-    for (const sourceUrl of [
-      "",
-      " ",
-      "ftp://example.org",
-      "https://liquipedia.net/rocketleague/RLCS",
-      "https://liquipedia-mirror.example/rocketleague/RLCS",
-      "https://blast.tv/rl/leaderboard/2026/world-championship/eu",
-    ])
-      await expect(service.create({ ...valid, sourceUrl })).rejects.toThrow(InvalidInputError);
+    await Promise.all(
+      [
+        "",
+        " ",
+        "ftp://example.org",
+        "https://liquipedia.net/rocketleague/RLCS",
+        "https://liquipedia-mirror.example/rocketleague/RLCS",
+        "https://blast.tv/rl/leaderboard/2026/world-championship/eu",
+      ].map(async (sourceUrl) => {
+        await expect(service.create({ ...valid, sourceUrl })).rejects.toThrow(InvalidInputError);
+      }),
+    );
     await expect(service.update(circuitId, { season: 3000 })).rejects.toThrow(InvalidInputError);
     await expect(service.update(circuitId, { sourceUrl: "" })).rejects.toThrow(InvalidInputError);
   });
@@ -192,8 +217,9 @@ describe("CircuitService", () => {
   });
 
   it("accepts manual and start.gg stages", async () => {
-    for (const id of ["manual-stage", "startgg-stage"])
+    await mapSequentially(["manual-stage", "startgg-stage"], async (id) => {
       await service.setStageScale(circuitId, id, { scale, sourceUrl: SOURCE });
+    });
 
     expect([...saved.keys()]).toEqual([`${circuitId}:manual-stage`, `${circuitId}:startgg-stage`]);
   });
@@ -223,30 +249,36 @@ describe("CircuitService", () => {
   it("refuses teams outside the event, repeated teams and invalid final placements", async () => {
     const stage = { scale, sourceUrl: SOURCE };
 
-    for (const refused of [
-      { regionTeamIds: ["bds"] },
-      { regionTeamIds: ["kc", "kc"] },
-      { finishes: [{ teamId: "bds", placement: 9 }] },
-      {
-        finishes: [
-          { teamId: "kc", placement: 9 },
-          { teamId: "kc", placement: 13 },
-        ],
-      },
-      { finishes: [{ teamId: "kc", placement: 0 }] },
-      { finishes: [{ teamId: "kc", placement: 9.5 }] },
-    ])
-      await expect(
-        service.setStageScale(circuitId, "ps-stage", { ...stage, ...refused }),
-      ).rejects.toThrow(InvalidInputError);
+    await Promise.all(
+      [
+        { regionTeamIds: ["bds"] },
+        { regionTeamIds: ["kc", "kc"] },
+        { finishes: [{ teamId: "bds", placement: 9 }] },
+        {
+          finishes: [
+            { teamId: "kc", placement: 9 },
+            { teamId: "kc", placement: 13 },
+          ],
+        },
+        { finishes: [{ teamId: "kc", placement: 0 }] },
+        { finishes: [{ teamId: "kc", placement: 9.5 }] },
+      ].map(async (refused) => {
+        await expect(
+          service.setStageScale(circuitId, "ps-stage", { ...stage, ...refused }),
+        ).rejects.toThrow(InvalidInputError);
+      }),
+    );
     expect(saved.size).toBe(0);
   });
 
   it("requires an accepted source URL and an existing circuit and tournament", async () => {
-    for (const sourceUrl of ["", "https://www.blast.tv/rl/leaderboard/2026"])
-      await expect(
-        service.setStageScale(circuitId, "ps-stage", { scale, sourceUrl }),
-      ).rejects.toThrow(InvalidInputError);
+    await Promise.all(
+      ["", "https://www.blast.tv/rl/leaderboard/2026"].map(async (sourceUrl) => {
+        await expect(
+          service.setStageScale(circuitId, "ps-stage", { scale, sourceUrl }),
+        ).rejects.toThrow(InvalidInputError);
+      }),
+    );
     await expect(
       service.setStageScale(circuitId, "missing", { scale, sourceUrl: SOURCE }),
     ).rejects.toThrow(NotFoundError);
@@ -259,20 +291,6 @@ describe("CircuitService", () => {
   it("lists the teams of the stage's event for staff", async () => {
     expect(await service.stageTeams(circuitId, "ps-stage")).toHaveLength(2);
     await expect(service.stageTeams(circuitId, "missing")).rejects.toThrow(NotFoundError);
-  });
-
-  const result = (overrides: Partial<StoredStageResult>): StoredStageResult => ({
-    source: "pandascore",
-    event: { id: "e1", slug: "e1", name: "Event 1" },
-    beginAt: new Date("2026-01-01T00:00:00Z"),
-    endAt: new Date("2026-01-05T00:00:00Z"),
-    scale,
-    sourceUrl: SOURCE,
-    worldwide: false,
-    regionTeamIds: [],
-    placements: [{ placement: 1, team: team("t1") }],
-    finishes: [],
-    ...overrides,
   });
 
   it("returns standings computed from the stored stage results", async () => {
@@ -334,13 +352,10 @@ describe("CircuitService", () => {
       sourceUrl: SOURCE,
     });
 
-    expect((await service.standings(europe.id)).rows.map(({ team: { id } }) => id)).toEqual([
-      "eu-team",
-    ]);
-    expect((await service.standings(circuitId)).rows.map(({ team: { id } }) => id)).toEqual([
-      "na-team",
-      "eu-team",
-    ]);
+    const standingsResult = await service.standings(europe.id);
+    expect(standingsResult.rows.map(({ team: { id } }) => id)).toEqual(["eu-team"]);
+    const standingsResult2 = await service.standings(circuitId);
+    expect(standingsResult2.rows.map(({ team: { id } }) => id)).toEqual(["na-team", "eu-team"]);
   });
 
   it("reports a missing circuit or stage", async () => {

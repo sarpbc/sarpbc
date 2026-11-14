@@ -3,9 +3,13 @@ import { vi } from "vitest";
 import type { OnThisDaySources } from "../src/on-this-day/application/on-this-day.service";
 import type { OnThisDayFactStore } from "../src/on-this-day/application/ports";
 import type { OnThisDayFactFields } from "../src/on-this-day/domain/on-this-day-fact";
-import { Contract, Player, Team } from "../src/roster/domain/roster";
+import { Contract } from "../src/roster/domain/contract";
+import { Player } from "../src/roster/domain/player";
+import { Team } from "../src/roster/domain/team";
 import type { Transfer } from "../src/roster/domain/transfer";
-import { Match, Tournament, TournamentParticipant } from "../src/tournament/domain/competition";
+import { Match } from "../src/tournament/domain/match";
+import { Tournament } from "../src/tournament/domain/tournament";
+import { TournamentParticipant } from "../src/tournament/domain/tournament-participant";
 
 export const kc = Object.assign(new Team(), {
   id: "kc-id",
@@ -156,11 +160,11 @@ const LINKABLE = [
   },
 ] satisfies FactLink[];
 
+const target = ({ kind, id }: OnThisDayFactLinkInput) =>
+  LINKABLE.find((link) => link.kind === kind && link.id === id) ?? null;
+
 export function memoryFactStore(): OnThisDayFactStore {
   const rows = new Map<string, OnThisDayFact>();
-
-  const target = ({ kind, id }: OnThisDayFactLinkInput) =>
-    LINKABLE.find((link) => link.kind === kind && link.id === id) ?? null;
 
   return {
     list: async () => [...rows.values()],

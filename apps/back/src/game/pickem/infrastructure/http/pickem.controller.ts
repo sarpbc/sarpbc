@@ -6,7 +6,7 @@ import { PermissionGuard } from "../../../../user/infrastructure/http/user.guard
 import { AuthenticatedUserRequest } from "../../../../common/infrastructure/http/types/authenticated.interface";
 import { PostHogService } from "../../../../infrastructure/telemetry/posthog.service";
 import { captureRequestEvent } from "../../../../infrastructure/telemetry/capture-request-event";
-import { MakePickDto } from "./dto/make-pick.dto";
+import { MakePickDto, type MakePickInput } from "./dto/make-pick.dto";
 
 @Controller("pickem")
 export class PickemController {
@@ -31,7 +31,7 @@ export class PickemController {
   async makePick(
     @Request() req: AuthenticatedUserRequest,
     @Param("matchId") matchId: string,
-    @Body({ schema: MakePickDto }) body: MakePickDto,
+    @Body({ schema: MakePickDto }) body: MakePickInput,
   ) {
     await this.pickemService.makePick(req.user.id, matchId, body.pickedParticipantId);
     await captureRequestEvent(this.posthog, req.headers, "server_pickem_pick_submitted", {

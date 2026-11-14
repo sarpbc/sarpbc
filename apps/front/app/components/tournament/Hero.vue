@@ -102,11 +102,11 @@ const showReveal = computed(
 );
 
 const showChampion = computed(
-  () => status.value === "finished" && champion != null && !concealed.value,
+  () => status.value === "finished" && champion !== null && !concealed.value,
 );
 
 const showSubscribeCalendar = computed(
-  () => calendarPath != null && (status.value === "live" || status.value === "upcoming"),
+  () => calendarPath !== null && (status.value === "live" || status.value === "upcoming"),
 );
 </script>
 

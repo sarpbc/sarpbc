@@ -5,4 +5,4 @@ export const GuessDto = z.strictObject({
   last: z.boolean().optional(),
 });
 
-export type GuessDto = z.infer<typeof GuessDto>;
+export type GuessInput = z.infer<typeof GuessDto>;

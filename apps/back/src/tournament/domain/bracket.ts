@@ -5,7 +5,7 @@ import {
   type DataSource,
   type EmptyBracketSize,
 } from "@sarpbc/types";
-import { InvalidInputError } from "../../common/domain/errors";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
 export interface BracketMatch {
   id: string;
@@ -32,6 +32,22 @@ export function assertManualBracketMatch(match: {
     throw new InvalidInputError(
       "PandaScore manages the participants and bracket links of this match.",
     );
+}
+
+function feeds(ancestorId: string, id: string, byId: ReadonlyMap<string, BracketMatch>): boolean {
+  const seen = new Set<string>();
+  const pending = [id];
+
+  for (let current = pending.pop(); current !== undefined; current = pending.pop()) {
+    if (current === ancestorId) return true;
+
+    if (seen.has(current)) continue;
+    seen.add(current);
+
+    for (const link of byId.get(current)?.previousMatches ?? []) pending.push(link.previousMatchId);
+  }
+
+  return false;
 }
 
 export function assertBracketLinks(
@@ -83,22 +99,6 @@ export function assertBracketLinks(
     throw new InvalidInputError("These links would create a cycle in the bracket.");
 }
 
-function feeds(ancestorId: string, id: string, byId: ReadonlyMap<string, BracketMatch>): boolean {
-  const seen = new Set<string>();
-  const pending = [id];
-
-  for (let current = pending.pop(); current !== undefined; current = pending.pop()) {
-    if (current === ancestorId) return true;
-
-    if (seen.has(current)) continue;
-    seen.add(current);
-
-    for (const link of byId.get(current)?.previousMatches ?? []) pending.push(link.previousMatchId);
-  }
-
-  return false;
-}
-
 export interface EmptyBracketMatch {
   name: string;
   previousMatches: { index: number; type: BracketLinkType }[];
@@ -108,6 +108,17 @@ export function isEmptyBracketSize(teams: number): teams is EmptyBracketSize {
   return EMPTY_BRACKET_SIZES.some((size) => size === teams);
 }
 
+function roundName(size: number): string {
+  switch (size) {
+    case 4:
+      return "Semifinal";
+    case 8:
+      return "Quarterfinal";
+    default:
+      return `Round of ${size}`;
+  }
+}
+
 export function emptySingleEliminationBracket(teams: EmptyBracketSize): EmptyBracketMatch[] {
   const matches: EmptyBracketMatch[] = [];
   let previousRound: number[] = [];
@@ -115,7 +126,7 @@ export function emptySingleEliminationBracket(teams: EmptyBracketSize): EmptyBra
   for (let size: number = teams; size >= 2; size /= 2) {
     const round: number[] = [];
 
-    for (let slot = 0; slot < size / 2; slot++) {
+    for (let slot = 0; slot < size / 2; slot += 1) {
       round.push(matches.length);
       const feeders = previousRound.slice(slot * 2, slot * 2 + 2);
       matches.push({
@@ -128,15 +139,4 @@ export function emptySingleEliminationBracket(teams: EmptyBracketSize): EmptyBra
   }
 
   return matches;
-}
-
-function roundName(size: number): string {
-  switch (size) {
-    case 4:
-      return "Semifinal";
-    case 8:
-      return "Quarterfinal";
-    default:
-      return `Round of ${size}`;
-  }
 }

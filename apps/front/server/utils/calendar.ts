@@ -26,14 +26,16 @@ export function sendIcs(event: H3Event, ics: string, filename: string): string {
 
 export function parseIcsSlug(pathname: string): string | null {
   const segment = pathname.split("/").pop() ?? "";
-  const match = /^(.+)\.ics$/i.exec(segment);
+  const match = /^(?<slug>.+)\.ics$/i.exec(segment);
 
-  return match?.[1] ?? null;
+  return match?.groups?.slug ?? null;
 }
 
 export async function fetchMatchForCalendar(id: string): Promise<Match> {
   try {
-    return (await getMatchById(id)).match;
+    const { match } = await getMatchById(id);
+
+    return match;
   } catch (error) {
     return rethrowApiError(error, {
       notFound: "Match not found",

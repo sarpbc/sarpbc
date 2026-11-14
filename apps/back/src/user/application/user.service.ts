@@ -1,4 +1,6 @@
-import { ConflictError, ForbiddenError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { User } from "../domain/user";
 import type { CreateAccountInput, SignInInput } from "./models/account-input";
 import type { PasswordHasher } from "./ports/password-hasher";

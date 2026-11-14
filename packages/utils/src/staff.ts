@@ -18,41 +18,35 @@ export function canModerateComments(user: User | null | undefined): boolean {
   return hasPermission(user, "forum.moderate");
 }
 
-export function requiredPermission(change: RosterChange): StaffPermission {
-  switch (change.kind) {
-    case "add_player_to_team":
-    case "remove_player_from_team":
-    case "create_player":
-    case "update_player":
-    case "merge_players":
-    case "create_contract":
-    case "update_contract":
-      return "players.manage";
-    case "create_team":
-    case "update_team":
-    case "upload_team_logo":
-    case "add_team_alias":
-    case "update_team_alias":
-    case "merge_teams":
-    case "delete_team":
-      return "teams.manage";
-    case "set_tournament_prizes":
-    case "update_tournament_prize":
-    case "award_player":
-    case "award_season_player":
-    case "set_event_streams":
-    case "set_tournament_streams":
-    case "set_match_streams":
-    case "set_match_lineups":
-    case "set_event_viewership":
-    case "set_match_viewership":
-    case "set_circuit_stage_scale":
-    case "delete_match":
-      return "tournaments.manage";
-    default: {
-      const exhaustive: never = change;
+const REQUIRED_PERMISSION: Record<RosterChange["kind"], StaffPermission> = {
+  add_player_to_team: "players.manage",
+  remove_player_from_team: "players.manage",
+  create_player: "players.manage",
+  update_player: "players.manage",
+  merge_players: "players.manage",
+  create_contract: "players.manage",
+  update_contract: "players.manage",
+  create_team: "teams.manage",
+  update_team: "teams.manage",
+  upload_team_logo: "teams.manage",
+  add_team_alias: "teams.manage",
+  update_team_alias: "teams.manage",
+  merge_teams: "teams.manage",
+  delete_team: "teams.manage",
+  set_tournament_prizes: "tournaments.manage",
+  update_tournament_prize: "tournaments.manage",
+  award_player: "tournaments.manage",
+  award_season_player: "tournaments.manage",
+  set_event_streams: "tournaments.manage",
+  set_tournament_streams: "tournaments.manage",
+  set_match_streams: "tournaments.manage",
+  set_match_lineups: "tournaments.manage",
+  set_event_viewership: "tournaments.manage",
+  set_match_viewership: "tournaments.manage",
+  set_circuit_stage_scale: "tournaments.manage",
+  delete_match: "tournaments.manage",
+};
 
-      return exhaustive;
-    }
-  }
+export function requiredPermission(change: RosterChange): StaffPermission {
+  return REQUIRED_PERMISSION[change.kind];
 }

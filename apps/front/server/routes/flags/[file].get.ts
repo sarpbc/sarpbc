@@ -7,8 +7,8 @@ import { isNonEmptyString } from "@sarpbc/utils";
  */
 export default defineEventHandler((event) => {
   const code = getRouterParam(event, "file")
-    ?.match(/^([a-z-]+)\.svg$/i)?.[1]
-    ?.toLowerCase();
+    ?.match(/^(?<code>[a-z-]+)\.svg$/i)
+    ?.groups?.code?.toLowerCase();
 
   const name = `${code}-4x3`;
   const icon = icons.icons[name] ?? icons.icons[icons.aliases?.[name]?.parent ?? ""];

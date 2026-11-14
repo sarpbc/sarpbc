@@ -1,6 +1,7 @@
 import type { LiveStreamer } from "@sarpbc/types";
 import { twitchChannelUrl } from "@sarpbc/utils";
-import { ConflictError, NotFoundError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { byViewerCount } from "../domain/live-stream";
 import type { TrackedStreamer } from "../domain/tracked-streamer";
 import type { LiveStreamCache, LiveStreamSnapshot } from "./ports/live-stream-cache";

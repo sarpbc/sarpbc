@@ -1,6 +1,9 @@
 import { beforeEach, describe, expect, it } from "vitest";
-import { InvalidInputError, UnprocessableError } from "../../common/domain/errors";
-import { Contract, Player, Team } from "../domain/roster";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
+import { Contract } from "../domain/contract";
+import { Player } from "../domain/player";
+import { Team } from "../domain/team";
 import { ContractService } from "./contract.service";
 import type { ContractQueries, ContractWriter, RosterWriteScope } from "./ports";
 import {

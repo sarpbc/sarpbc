@@ -16,6 +16,8 @@ export function usePostHog(): PostHogClient {
       if (choice.value === "accepted" && client?.has_opted_in_capturing() === true) {
         fn(client);
       }
+
+      return client;
     });
   };
 

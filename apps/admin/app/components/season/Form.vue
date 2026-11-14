@@ -10,8 +10,8 @@ import {
 
 const NO_WINNER = "none";
 
-const props = defineProps<{
-  season?: SeasonDetail;
+const { season = null } = defineProps<{
+  season?: SeasonDetail | null;
   submitLabel: string;
   loading: boolean;
 }>();
@@ -20,19 +20,17 @@ const emit = defineEmits<{ submit: [input: SeasonInput] }>();
 
 const { t } = useI18n();
 
-const name = ref(props.season?.name ?? "");
-const slug = ref(props.season?.slug ?? "");
-const summary = ref(props.season?.format.summary ?? "");
+const name = ref(season?.name ?? "");
+const slug = ref(season?.slug ?? "");
+const summary = ref(season?.format.summary ?? "");
 
-const phases = ref<SeasonFormatPhase[]>(
-  props.season?.format.phases.map((phase) => ({ ...phase })) ?? [],
-);
+const phases = ref<SeasonFormatPhase[]>(season?.format.phases.map((phase) => ({ ...phase })) ?? []);
 
-const winner = ref(props.season?.winnerTeamId ?? NO_WINNER);
+const winner = ref(season?.winnerTeamId ?? NO_WINNER);
 
 const winnerOptions = computed(() => [
   { value: NO_WINNER, label: t("page.seasons.form.noWinner") },
-  ...(props.season?.participants ?? []).map(({ team }) => ({ value: team.id, label: team.name })),
+  ...(season?.participants ?? []).map(({ team }) => ({ value: team.id, label: team.name })),
 ]);
 
 const isValid = computed(
@@ -62,7 +60,7 @@ function submit() {
     },
   };
 
-  if (props.season) input.winnerTeamId = winner.value === NO_WINNER ? null : winner.value;
+  if (season) input.winnerTeamId = winner.value === NO_WINNER ? null : winner.value;
   emit("submit", input);
 }
 </script>

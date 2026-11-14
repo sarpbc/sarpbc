@@ -1,7 +1,9 @@
 import type { TeamAliasInput } from "@sarpbc/types";
 import { describe, expect, it, vi } from "vitest";
-import { ConflictError, InvalidInputError, NotFoundError } from "../../common/domain/errors";
-import { Team } from "../domain/roster";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
+import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
+import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { Team } from "../domain/team";
 import { TeamAlias } from "../domain/team-alias";
 import type { TeamAliasTransaction } from "./ports";
 import { TeamAliasService } from "./team-alias.service";

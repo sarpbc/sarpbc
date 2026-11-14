@@ -39,6 +39,7 @@ const hasNext = computed(() => offset.value + TEAMS_PER_PAGE < totalTeams.value)
 interface HubListQuery {
   offset: string;
   start?: string;
+  [key: string]: string | undefined;
 }
 
 const previousPageQuery = computed(() => {

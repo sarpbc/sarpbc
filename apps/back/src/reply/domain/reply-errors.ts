@@ -1,5 +1,5 @@
 import { FORUM_ERROR_CODES } from "@sarpbc/types";
-import { ConflictError } from "../../common/domain/errors";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
 
 export const replyAlreadyReported = () =>
   new ConflictError({
