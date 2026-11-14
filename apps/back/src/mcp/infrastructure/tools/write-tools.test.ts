@@ -17,6 +17,7 @@ function services(): WriteToolServices {
       setMatchWinner: vi.fn(),
       setGameVods: vi.fn(),
       updateMatch: vi.fn(),
+      setSource: vi.fn(),
     },
     manualTournamentService: { create: vi.fn(), update: vi.fn() },
     pandascoreTournamentSync: { execute: vi.fn(), executeByPandascoreId: vi.fn() },
@@ -185,12 +186,14 @@ describe("create_match participants", () => {
         name: "Karmine Corp",
         team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
         players: [],
+        rosterSourceUrl: null,
       },
       {
         id: "p-m8",
         name: "Gentle Mates",
         team: { id: "team-m8", slug: "gentle-mates", name: "Gentle Mates" },
         players: [],
+        rosterSourceUrl: null,
       },
     ]);
   });
@@ -316,6 +319,7 @@ describe("bracket tools", () => {
     const matchService = {
       ...base.matchService,
       updateMatch: vi.fn().mockResolvedValue(match),
+      setSource: vi.fn().mockResolvedValue(match),
       createEmptyBracket: vi.fn().mockResolvedValue([match]),
     };
     const tournaments = {
@@ -342,6 +346,29 @@ describe("bracket tools", () => {
       expect.objectContaining({ participantIds: ["a"], previousMatches }),
     );
     expect(JSON.parse(textOf(result)).previousMatches).toEqual(previousMatches);
+  });
+
+  it("sets only the source of a match, PandaScore included, without a manual update", async () => {
+    const { matchService, run } = setup("manual");
+    const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
+    await run("update_match", { matchId: "final", sourceUrl });
+    expect(matchService.setSource).toHaveBeenCalledWith("final", sourceUrl);
+    expect(matchService.updateMatch).not.toHaveBeenCalled();
+
+    await run("update_match", { matchId: "final", status: "finished", sourceUrl });
+    expect(matchService.updateMatch).toHaveBeenCalledWith(
+      "final",
+      expect.objectContaining({ status: "finished", sourceUrl }),
+    );
+  });
+
+  it("refuses a BLAST.tv match source", () => {
+    const { tools } = setup("manual");
+    const update = z.object(defined(tools, "update_match").inputSchema);
+    expect(update.safeParse({ matchId: "final", sourceUrl: "https://blast.tv/rl" }).success).toBe(
+      false,
+    );
+    expect(update.safeParse({ matchId: "final", sourceUrl: null }).success).toBe(true);
   });
 
   it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {

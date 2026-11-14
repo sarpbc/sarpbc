@@ -164,6 +164,64 @@ function changeRows(proposal: RosterProposal): { key: string; label: string; val
           }))),
     ];
   }
+  if (change.kind === "update_tournament_prize") {
+    const { patch } = change;
+    const patched = [
+      ...(patch.placement === undefined
+        ? []
+        : [
+            {
+              key: "placement",
+              label: t("page.tournaments.prizes.placement"),
+              value: String(patch.placement),
+            },
+          ]),
+      ...(patch.amount === undefined
+        ? []
+        : [
+            {
+              key: "amount",
+              label: t("page.tournaments.prizes.amount"),
+              value: String(patch.amount),
+            },
+          ]),
+      ...(patch.currency === undefined
+        ? []
+        : [
+            {
+              key: "currency",
+              label: t("page.tournaments.prizes.currency"),
+              value: patch.currency,
+            },
+          ]),
+      ...(patch.playerIds === undefined
+        ? []
+        : [
+            {
+              key: "playerIds",
+              label: t("page.tournaments.prizes.players"),
+              value: patch.playerIds.map(nameOf).join(", ") || t("page.proposals.values.noPlayers"),
+            },
+          ]),
+    ];
+    return [
+      {
+        key: "tournamentId",
+        label: t("page.proposals.fields.tournamentId"),
+        value: nameOf(change.tournamentId),
+      },
+      { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
+      ...(patched.length === 0
+        ? [
+            {
+              key: "patch",
+              label: t("page.proposals.fields.prizes"),
+              value: t("page.proposals.values.sourceOnly"),
+            },
+          ]
+        : patched),
+    ];
+  }
   if (change.kind === "set_circuit_stage_scale") {
     return [
       {

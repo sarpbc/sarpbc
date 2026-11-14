@@ -1,4 +1,4 @@
-import type { PrizeEntry, ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
+import type { PrizeEntry, PrizeEntryPatch, ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
 import { InvalidInputError, NotFoundError } from "../../common/domain/errors";
 import { assertPrizeDistribution } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
@@ -41,6 +41,13 @@ export class TournamentPrizeService {
       throw new InvalidInputError("Prize distributions of start.gg tournaments cannot be proposed");
   }
 
+  async requireProposablePrize(tournamentId: string, teamId: string): Promise<void> {
+    await this.requireProposableTournament(tournamentId);
+    const { prizes } = await this.findByTournamentId(tournamentId);
+    if (!prizes.some((prize) => prize.team.id === teamId))
+      throw new NotFoundError(`Team "${teamId}" has no prize in tournament "${tournamentId}"`);
+  }
+
   async teamEarnings(teamId: string, scope: EarningsScope): Promise<ProfileEarnings> {
     return summarizeEarnings(await this.reads.byTeam(teamId, scope));
   }
@@ -54,6 +61,38 @@ export class TournamentPrizeService {
     await this.transaction.run(async ({ prizes }) => {
       if (!(await prizes.tournamentExists(tournamentId)))
         throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+      assertParticipants(entries, await prizes.participants(tournamentId));
+      await prizes.replace(tournamentId, entries);
+    });
+    await this.afterCommit.settle({ tournamentIds: [tournamentId] });
+    return this.findByTournamentId(tournamentId);
+  }
+
+  async updateEntry(
+    tournamentId: string,
+    teamId: string,
+    patch: PrizeEntryPatch,
+    sourceUrl: string,
+  ): Promise<TournamentPrizes> {
+    await this.transaction.run(async ({ prizes }) => {
+      if (!(await prizes.tournamentExists(tournamentId)))
+        throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+      const current = await prizes.entries(tournamentId);
+      if (!current.some((entry) => entry.teamId === teamId))
+        throw new NotFoundError(`Team "${teamId}" has no prize in tournament "${tournamentId}"`);
+      const entries = current.map((entry) =>
+        entry.teamId === teamId
+          ? {
+              ...entry,
+              placement: patch.placement ?? entry.placement,
+              amount: patch.amount ?? entry.amount,
+              currency: patch.currency ?? entry.currency,
+              playerIds: patch.playerIds ?? entry.playerIds,
+              sourceUrl,
+            }
+          : entry,
+      );
+      assertPrizeDistribution(entries);
       assertParticipants(entries, await prizes.participants(tournamentId));
       await prizes.replace(tournamentId, entries);
     });

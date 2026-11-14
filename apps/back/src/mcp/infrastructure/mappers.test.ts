@@ -74,6 +74,7 @@ describe("mapTournamentDetail participants", () => {
         name: "Karmine Corp",
         team: { id: "team-kc", slug: "karmine-corp", name: "Karmine Corp" },
         players: [{ id: "player-vatira", name: "Vatira", slug: "" }],
+        rosterSourceUrl: null,
       },
     ]);
     expect(detail.matches).toEqual([]);

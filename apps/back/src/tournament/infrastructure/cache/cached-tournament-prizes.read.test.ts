@@ -20,6 +20,7 @@ const distribution: TournamentPrizes = {
         darkModeImageUrl: null,
       },
       players: [{ id: "player-a", name: "Player A", slug: "player-a" }],
+      sourceUrl: "https://www.rocketleague.com/en/news/rlcs-rules",
     },
   ],
 };

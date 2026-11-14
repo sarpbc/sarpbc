@@ -12,7 +12,8 @@
       "assistant_coach": "Assistant Coach",
       "analyst": "Analyst",
       "manager": "Manager"
-    }
+    },
+    "sourceUrlInvalid": "Enter a valid http or https URL. Liquipedia and BLAST.tv are not accepted sources."
   },
   "imageUpload": {
     "hint": "JPEG, PNG, WebP or GIF, up to {max} MB",
@@ -238,6 +239,7 @@
         "create_contract": "New contract",
         "update_contract": "Contract update",
         "set_tournament_prizes": "Prize distribution",
+        "update_tournament_prize": "Prize source or fix",
         "set_event_streams": "Event streams",
         "set_tournament_streams": "Tournament streams",
         "set_match_streams": "Match streams",
@@ -313,7 +315,9 @@
         "ongoing": "Ongoing",
         "noPrizes": "Clear the distribution",
         "noStreams": "Clear the list",
-        "noLineups": "Clear the lineups"
+        "noLineups": "Clear the lineups",
+        "sourceOnly": "Source only",
+        "noPlayers": "Clear the players"
       },
       "messages": {
         "approved": "Proposal approved and applied",
@@ -345,6 +349,15 @@
         "manual": "Manual",
         "pandascore": "PandaScore",
         "startgg": "start.gg"
+      },
+      "matchSource": {
+        "action": "Source",
+        "title": "Source · {match}",
+        "description": "The page that backs this match's result. Leave empty to remove the source.",
+        "save": "Save Source",
+        "saved": "Match source saved",
+        "saveError": "Could not save the match source",
+        "none": "No source"
       },
       "create": {
         "action": "Create Tournament",
@@ -744,7 +757,12 @@
           "tooManyPlayers": "A placement can credit up to {max} players.",
           "currency": "Use an ISO 4217 code such as USD or EUR.",
           "duplicateTeam": "Each team can appear only once."
-        }
+        },
+        "sourceUrl": "Source URL",
+        "bulkSource": "Source for every prize",
+        "bulkSourceHint": "Fills the source of every prize below, for example with the official rulebook. Save to apply.",
+        "applySource": "Apply to All",
+        "openSource": "Open source"
       },
       "events": {
         "title": "Events",
@@ -844,6 +862,13 @@
         "confirm": "Remove the stats of game {number} of {match}? Later imports will leave this replay out until it is attached again.",
         "confirmButton": "Remove",
         "removed": "Game {number} removed"
+      },
+      "rosterSources": {
+        "title": "Roster Sources",
+        "hint": "The page each team's roster for this tournament comes from. Leave empty to remove the source.",
+        "save": "Save",
+        "saved": "Roster source saved",
+        "saveError": "Could not save the roster source"
       }
     },
     "pickems": {

@@ -12,7 +12,8 @@
       "assistant_coach": "Coach adjoint",
       "analyst": "Analyste",
       "manager": "Manager"
-    }
+    },
+    "sourceUrlInvalid": "Saisissez une URL http ou https valide. Liquipedia et BLAST.tv ne sont pas des sources acceptées."
   },
   "imageUpload": {
     "hint": "JPEG, PNG, WebP ou GIF, jusqu’à {max} Mo",
@@ -238,6 +239,7 @@
         "create_contract": "Nouveau contrat",
         "update_contract": "Modification du contrat",
         "set_tournament_prizes": "Répartition des gains",
+        "update_tournament_prize": "Source ou correction de gain",
         "award_player": "Récompense joueur",
         "award_season_player": "Récompense de saison",
         "set_event_streams": "Streams de l'événement",
@@ -313,7 +315,9 @@
         "ongoing": "En cours",
         "noPrizes": "Vider la répartition",
         "noStreams": "Vider la liste",
-        "noLineups": "Vider les alignements"
+        "noLineups": "Vider les alignements",
+        "sourceOnly": "Source uniquement",
+        "noPlayers": "Retirer les joueurs"
       },
       "messages": {
         "approved": "Proposition validée et appliquée",
@@ -345,6 +349,15 @@
         "manual": "Manuel",
         "pandascore": "PandaScore",
         "startgg": "start.gg"
+      },
+      "matchSource": {
+        "action": "Source",
+        "title": "Source · {match}",
+        "description": "La page qui atteste le résultat de ce match. Laissez vide pour retirer la source.",
+        "save": "Enregistrer la source",
+        "saved": "Source du match enregistrée",
+        "saveError": "Impossible d’enregistrer la source du match",
+        "none": "Aucune source"
       },
       "create": {
         "action": "Créer un Tournoi",
@@ -744,7 +757,12 @@
           "tooManyPlayers": "Une place peut créditer jusqu’à {max} joueurs.",
           "currency": "Utilisez un code ISO 4217 comme USD ou EUR.",
           "duplicateTeam": "Chaque équipe ne peut apparaître qu’une fois."
-        }
+        },
+        "sourceUrl": "URL de la source",
+        "bulkSource": "Source de tous les gains",
+        "bulkSourceHint": "Renseigne la source de chaque gain ci-dessous, par exemple avec le règlement officiel. Enregistrez pour appliquer.",
+        "applySource": "Appliquer à tous",
+        "openSource": "Ouvrir la source"
       },
       "events": {
         "title": "Événements",
@@ -844,6 +862,13 @@
         "confirm": "Retirer les stats de la game {number} de {match} ? Les prochains imports ignoreront ce replay tant qu’il n’est pas rattaché à nouveau.",
         "confirmButton": "Retirer",
         "removed": "Game {number} retirée"
+      },
+      "rosterSources": {
+        "title": "Sources des effectifs",
+        "hint": "La page d’où provient l’effectif de chaque équipe pour ce tournoi. Laissez vide pour retirer la source.",
+        "save": "Enregistrer",
+        "saved": "Source de l’effectif enregistrée",
+        "saveError": "Impossible d’enregistrer la source de l’effectif"
       }
     },
     "pickems": {

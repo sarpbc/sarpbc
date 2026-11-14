@@ -6,6 +6,7 @@ import {
   MAX_PRIZE_PLAYERS,
   MIN_PRIZE_AMOUNT,
   MIN_PRIZE_PLACEMENT,
+  DATA_SOURCE_URL_MAX_LENGTH,
 } from "@sarpbc/utils";
 
 export const TournamentPrizeEntryDto = z.strictObject({
@@ -14,6 +15,7 @@ export const TournamentPrizeEntryDto = z.strictObject({
   currency: z.string().length(CURRENCY_CODE_LENGTH),
   teamId: z.uuid(),
   playerIds: z.array(z.uuid()).max(MAX_PRIZE_PLAYERS).default([]),
+  sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable().default(null),
 });
 
 export const SetTournamentPrizesDto = z.strictObject({

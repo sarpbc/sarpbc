@@ -1,4 +1,16 @@
 import type { DataSource } from "@sarpbc/types";
+import { isAcceptedDataSourceUrl } from "@sarpbc/utils";
+import { InvalidInputError } from "./errors";
+
+export const REFUSED_DATA_SOURCE_MESSAGE =
+  "A source must be an http(s) URL of the official rules or announcement; Liquipedia and BLAST.tv are refused";
+
+export function parseDataSourceUrl(value: string | null): string | null {
+  const url = value?.trim() ?? "";
+  if (!url) return null;
+  if (!isAcceptedDataSourceUrl(url)) throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
+  return url;
+}
 
 /**
  * start.gg terms allow display with credit. Its players and teams are public; its tournaments

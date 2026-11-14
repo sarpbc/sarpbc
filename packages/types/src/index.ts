@@ -114,6 +114,8 @@ export type {
   EarningsYear,
   PrizeAmount,
   PrizeEntry,
+  PrizeEntryPatch,
+  ProposedPrizeEntry,
   ProfileEarnings,
   TournamentPrize,
   TournamentPrizes,

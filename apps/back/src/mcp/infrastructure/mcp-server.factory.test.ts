@@ -56,6 +56,7 @@ const TOOL_NAMES = [
   "create_empty_bracket",
   "update_contract",
   "propose_tournament_prizes",
+  "propose_tournament_prize_update",
   "propose_player_award",
   "propose_season_award",
   "set_event_streams",

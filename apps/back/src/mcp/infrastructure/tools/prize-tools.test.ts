@@ -72,6 +72,40 @@ describe("propose_tournament_prizes", () => {
   });
 });
 
+describe("propose_tournament_prize_update", () => {
+  const RULES = "https://www.rocketleague.com/en/news/rlcs-official-rules";
+
+  it("queues a source-only correction with an empty patch", async () => {
+    const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
+    await call({ tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, sourceUrl: RULES });
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      { kind: "update_tournament_prize", tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, patch: {} },
+      RULES,
+      "u1",
+    );
+  });
+
+  it("queues only the corrected fields", async () => {
+    const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
+    await call({ tournamentId: TOURNAMENT_ID, teamId: TEAM_ID, amount: 1800, sourceUrl: RULES });
+    expect(rosterProposalService.propose).toHaveBeenCalledWith(
+      expect.objectContaining({ patch: { amount: 1800 } }),
+      RULES,
+      "u1",
+    );
+  });
+
+  it("refuses BLAST.tv as a source", () => {
+    const { tool } = setup("admin", "propose_tournament_prize_update");
+    const schema = z.object(tool.inputSchema);
+    const base = { tournamentId: TOURNAMENT_ID, teamId: TEAM_ID };
+    expect(schema.safeParse({ ...base, sourceUrl: "https://blast.tv/rl/open" }).success).toBe(
+      false,
+    );
+    expect(schema.safeParse({ ...base, sourceUrl: RULES }).success).toBe(true);
+  });
+});
+
 describe("propose_player_award", () => {
   const PLAYER_ID = "3a9d4c7e-5b1f-4e2a-8c6d-9f0e1d2c3b4a";
   const input = {

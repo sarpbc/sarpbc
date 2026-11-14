@@ -9,6 +9,7 @@ const entry: PrizeEntry = {
   currency: "USD",
   teamId: "team-a",
   playerIds: ["player-a"],
+  sourceUrl: null,
 };
 
 describe("assertPrizeDistribution", () => {

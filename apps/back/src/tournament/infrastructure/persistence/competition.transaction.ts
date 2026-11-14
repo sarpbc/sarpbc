@@ -147,6 +147,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     row.tournament = this.em.getReference(Row.Tournament, model.tournamentId);
     row.team = model.teamId ? this.em.getReference(Team, model.teamId) : null;
     row.players.set(model.playerIds.map((id) => this.em.getReference(Player, id)));
+    row.rosterSourceUrl = model.rosterSourceUrl;
     this.em.persist(row);
     this.participantsStaged.set(row.id, row);
   }
@@ -318,6 +319,7 @@ export class CompetitionMatchWriter implements MatchWriter {
       streams: unchangedJson(row.streams, model.streams),
       viewership: unchangedJson(row.viewership, model.viewership),
       vods: model.vods,
+      sourceUrl: model.sourceUrl,
     });
     row.tournament = this.em.getReference(Row.Tournament, model.tournament.id);
     row.winner = model.winner

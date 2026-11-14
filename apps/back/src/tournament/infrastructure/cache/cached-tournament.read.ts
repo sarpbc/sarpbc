@@ -35,6 +35,7 @@ const participant = z.strictObject({
       nationality: nullableText,
     }),
   ),
+  rosterSourceUrl: nullableText,
 });
 const match = z.strictObject({
   id: z.string(),
@@ -51,6 +52,7 @@ const match = z.strictObject({
   previousMatches: z.array(
     z.strictObject({ previousMatch: z.string(), type: z.enum(["winner", "loser"]) }),
   ),
+  sourceUrl: nullableText,
 });
 const stream = z.strictObject({
   url: z.string(),

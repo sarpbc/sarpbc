@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { isoDateSchema } from "../../../../common/infrastructure/http/dto/iso-date.schema";
 import { EMPTY_BRACKET_SIZES } from "@sarpbc/types";
+import { DATA_SOURCE_URL_MAX_LENGTH } from "@sarpbc/utils";
 import { MAX_INCOMING_BRACKET_LINKS } from "../../../domain/bracket";
 export const bracketLinksSchema = z
   .array(
@@ -18,8 +19,13 @@ export const CreateMatchDto = z.strictObject({
   numberOfGames: z.number().optional(),
   participantIds: z.array(z.string()).min(2),
   previousMatches: bracketLinksSchema.optional(),
+  sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable().optional(),
 });
 export type CreateMatchDto = z.infer<typeof CreateMatchDto>;
+export const SetMatchSourceDto = z.strictObject({
+  sourceUrl: z.string().max(DATA_SOURCE_URL_MAX_LENGTH).nullable(),
+});
+export type SetMatchSourceDto = z.infer<typeof SetMatchSourceDto>;
 export const SetMatchWinnerDto = z.strictObject({ winnerId: z.string() });
 export type SetMatchWinnerDto = z.infer<typeof SetMatchWinnerDto>;
 export const SetMatchResultDto = z.strictObject({

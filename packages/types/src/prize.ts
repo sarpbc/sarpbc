@@ -13,7 +13,12 @@ export interface PrizeEntry {
   currency: string;
   teamId: string;
   playerIds: string[];
+  sourceUrl: string | null;
 }
+
+export type ProposedPrizeEntry = Omit<PrizeEntry, "sourceUrl">;
+
+export type PrizeEntryPatch = Partial<Omit<PrizeEntry, "teamId" | "sourceUrl">>;
 
 export interface TournamentPrize {
   id: string;
@@ -26,6 +31,7 @@ export interface TournamentPrize {
     slug: string;
   };
   players: { id: string; name: string; slug: string }[];
+  sourceUrl: string | null;
 }
 
 export interface TournamentPrizes {

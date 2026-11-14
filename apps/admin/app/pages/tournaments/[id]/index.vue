@@ -22,6 +22,8 @@ const viewershipTarget = ref<{ path: string; title: string } | null>(null);
 const viewershipOpen = ref(false);
 const bracketMatch = ref<{ match: TournamentDetailMatch; label: string } | null>(null);
 const bracketOpen = ref(false);
+const sourceMatch = ref<TournamentMatchListItem | null>(null);
+const sourceOpen = ref(false);
 const emptyBracketOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
@@ -82,6 +84,17 @@ function matchLabel(match: TournamentMatchListItem): string {
   const sides = `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
   const name = tournament.value?.matches.find((candidate) => candidate.id === match.id)?.name;
   return name ? `${name} · ${sides}` : sides;
+}
+
+function matchSourceUrl(match: TournamentMatchListItem): string | null {
+  return (
+    tournament.value?.matches.find((candidate) => candidate.id === match.id)?.sourceUrl ?? null
+  );
+}
+
+function openSource(match: TournamentMatchListItem) {
+  sourceMatch.value = match;
+  sourceOpen.value = true;
 }
 
 function matchScore(match: TournamentMatchListItem): string {
@@ -233,6 +246,13 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
           :participants="tournament.participants ?? []"
         />
 
+        <TournamentRosterSources
+          v-if="tournament?.source === 'manual'"
+          :tournament-id="tournamentId"
+          :participants="tournament.participants ?? []"
+          @saved="refreshTournament()"
+        />
+
         <TournamentStatsImportPanel
           v-if="tournament"
           :tournament-id="tournamentId"
@@ -263,6 +283,15 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 {{ match.status ?? "unknown" }}
                 · {{ $t("page.tournaments.match.score") }}: {{ matchScore(match) }}
               </p>
+              <ULink
+                v-if="matchSourceUrl(match)"
+                :to="matchSourceUrl(match)!"
+                external
+                target="_blank"
+                class="truncate text-sm text-primary hover:underline"
+              >
+                {{ matchSourceUrl(match) }}
+              </ULink>
             </div>
 
             <div class="flex shrink-0 flex-row flex-wrap gap-1">
@@ -272,6 +301,13 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
                 icon="i-fluent-video-clip-24-regular"
                 :label="$t('page.tournaments.vods.action')"
                 @click="openVods(match)"
+              />
+              <UButton
+                size="xs"
+                variant="soft"
+                icon="i-fluent-link-24-regular"
+                :label="$t('page.tournaments.matchSource.action')"
+                @click="openSource(match)"
               />
               <UButton
                 size="xs"
@@ -359,6 +395,16 @@ async function handleSetWinner(match: TournamentMatchListItem, participantId: st
       v-model:open="vodsOpen"
       :match="vodsMatch"
       :label="matchLabel(vodsMatch)"
+    />
+
+    <TournamentMatchSource
+      v-if="sourceMatch"
+      :key="sourceMatch.id"
+      v-model:open="sourceOpen"
+      :match-id="sourceMatch.id"
+      :label="matchLabel(sourceMatch)"
+      :source-url="matchSourceUrl(sourceMatch)"
+      @saved="refreshTournament()"
     />
 
     <TournamentMatchLineups

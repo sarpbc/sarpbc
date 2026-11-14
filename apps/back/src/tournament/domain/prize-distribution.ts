@@ -1,5 +1,11 @@
 import type { PrizeEntry } from "@sarpbc/types";
-import { MAX_PRIZE_AMOUNT, MAX_PRIZE_ENTRIES, isIso4217Code } from "@sarpbc/utils";
+import {
+  MAX_PRIZE_AMOUNT,
+  MAX_PRIZE_ENTRIES,
+  isAcceptedDataSourceUrl,
+  isIso4217Code,
+} from "@sarpbc/utils";
+import { REFUSED_DATA_SOURCE_MESSAGE } from "../../common/domain/data-source";
 import { InvalidInputError } from "../../common/domain/errors";
 
 export function assertPrizeDistribution(entries: PrizeEntry[]): void {
@@ -16,6 +22,8 @@ export function assertPrizeDistribution(entries: PrizeEntry[]): void {
       );
     if (!isIso4217Code(entry.currency))
       throw new InvalidInputError(`"${entry.currency}" is not an ISO 4217 currency code`);
+    if (entry.sourceUrl !== null && !isAcceptedDataSourceUrl(entry.sourceUrl))
+      throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
     if (teams.has(entry.teamId))
       throw new InvalidInputError(`Team "${entry.teamId}" appears twice in the distribution`);
     teams.add(entry.teamId);

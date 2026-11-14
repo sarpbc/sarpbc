@@ -133,7 +133,7 @@ export function readTools({
     defineTool({
       name: "get_tournament_prizes",
       description:
-        "Get a tournament stage prize distribution: placement, amount and ISO 4217 currency per team, with the players it lists. prizepool is the overall prize pool synced from PandaScore. Amounts are never converted between currencies.",
+        "Get a tournament stage prize distribution: placement, amount and ISO 4217 currency per team, with the players it lists and the sourceUrl the row was entered from (null when unknown). prizepool is the overall prize pool synced from PandaScore. Amounts are never converted between currencies.",
       input: { id: z.string().min(1).describe("Tournament UUID.") },
       handler: async ({ id }) => {
         const distribution = await competition.prizeDistribution(id);

@@ -74,6 +74,7 @@ export interface TournamentDetailParticipant {
   id: string;
   team: TeamSummary | null;
   players: { id: string; name: string; slug: string; nationality: string | null }[];
+  rosterSourceUrl: string | null;
 }
 
 export interface TournamentDetailMatch {
@@ -89,6 +90,7 @@ export interface TournamentDetailMatch {
   participants: ParticipantRef<TeamSummary>[];
   results: { participant: string; score: number }[];
   previousMatches: { previousMatch: string; type: BracketLinkType }[];
+  sourceUrl: string | null;
 }
 
 export interface TournamentDetail {

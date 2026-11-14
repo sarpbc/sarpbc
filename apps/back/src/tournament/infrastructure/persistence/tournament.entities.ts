@@ -69,6 +69,7 @@ export class TournamentParticipant {
   team: Team | null = null;
   players = new Collection<Player>(this);
   placement: number | null = null;
+  rosterSourceUrl: string | null = null;
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
 }
@@ -105,6 +106,7 @@ export class Match {
   streams: Stream[] = [];
   viewership: Viewership | null = null;
   vods: MatchVod[] = [];
+  sourceUrl: string | null = null;
   createdAt: Date = new Date();
   updatedAt: Date = new Date();
   tournament!: Tournament;
@@ -194,6 +196,7 @@ export const TournamentParticipantSchema = defineEntity({
     team: p.manyToOne(Team).nullable().deleteRule("no action"),
     players: p.manyToMany(Player),
     placement: p.integer().nullable(),
+    rosterSourceUrl: p.text().nullable(),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()
@@ -223,6 +226,7 @@ export const MatchSchema = defineEntity({
     streams: p.json().$type<Stream[]>().default([]),
     viewership: p.json().$type<Viewership>().nullable(),
     vods: p.json().$type<MatchVod[]>().default([]),
+    sourceUrl: p.text().nullable(),
     createdAt: p.datetime().type("timestamptz"),
     updatedAt: p
       .datetime()

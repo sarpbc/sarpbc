@@ -174,6 +174,7 @@ export function mapTournamentParticipant(participant: TournamentParticipant) {
       ? { id: participant.team.id, slug: participant.team.slug, name: participant.team.name }
       : null,
     players: participant.players.map(({ id, name, slug }) => ({ id, name, slug })),
+    rosterSourceUrl: participant.rosterSourceUrl,
   };
 }
 
@@ -215,6 +216,7 @@ export function mapMatchListResponse(match: Match) {
     })),
     streams: redistributableStreams(match.watchStreams()),
     viewership: isRedistributableMatch(match) ? match.viewership : null,
+    sourceUrl: match.sourceUrl,
     url: matchUrl(item.publicId, item.slug),
   };
 }

@@ -17,6 +17,7 @@ import {
   createEmptyBracketInTransaction,
   createMatchInTransaction,
   setGameVodsInTransaction,
+  setSourceInTransaction,
   setVodsInTransaction,
   setWinnerInTransaction,
   updateMatchInTransaction,
@@ -254,6 +255,12 @@ export class MatchService {
   async setVods(matchId: string, vods: readonly MatchVodInput[]): Promise<Match> {
     const written = await this.transaction.run(({ matches }) =>
       setVodsInTransaction(matches, matchId, vods),
+    );
+    return this.committed(written.id);
+  }
+  async setSource(matchId: string, sourceUrl: string | null): Promise<Match> {
+    const written = await this.transaction.run(({ matches }) =>
+      setSourceInTransaction(matches, matchId, sourceUrl),
     );
     return this.committed(written.id);
   }

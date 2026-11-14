@@ -25,6 +25,7 @@ function toPrizeItem(row: TournamentPrize): TournamentPrizeItem {
       .getItems()
       .map(({ id, name, slug }) => ({ id, name, slug }))
       .sort((a, b) => a.name.localeCompare(b.name)),
+    sourceUrl: row.sourceUrl,
   };
 }
 
@@ -131,6 +132,22 @@ export class CompetitionPrizeWriter implements PrizeWriter {
     );
   }
 
+  async entries(tournamentId: string): Promise<PrizeEntry[]> {
+    const rows = await this.em.find(
+      TournamentPrize,
+      { tournament: tournamentId },
+      { populate: ["players"], orderBy: { placement: "ASC", amount: "DESC" } },
+    );
+    return rows.map((row) => ({
+      placement: row.placement,
+      amount: row.amount,
+      currency: row.currency,
+      teamId: row.team.id,
+      playerIds: row.players.getItems().map(({ id }) => id),
+      sourceUrl: row.sourceUrl,
+    }));
+  }
+
   async replace(tournamentId: string, entries: PrizeEntry[]) {
     await this.em.nativeDelete(TournamentPrize, { tournament: tournamentId });
     for (const entry of entries) {
@@ -142,6 +159,7 @@ export class CompetitionPrizeWriter implements PrizeWriter {
       row.currency = entry.currency;
       row.team = this.em.getReference(Team, entry.teamId);
       row.players.set(entry.playerIds.map((id) => this.em.getReference(Player, id)));
+      row.sourceUrl = entry.sourceUrl;
       this.em.persist(row);
     }
   }

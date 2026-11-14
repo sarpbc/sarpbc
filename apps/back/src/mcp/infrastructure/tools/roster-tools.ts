@@ -32,6 +32,7 @@ import {
   TEAM_ALIAS_URL_MAX_LENGTH,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
   isForbiddenCircuitSourceHost,
+  isForbiddenDataSourceHost,
   isForbiddenViewershipSource,
   isLiquipediaSourceHost,
   isIso4217Code,
@@ -58,13 +59,19 @@ const withoutLiquipedia = (use: string) =>
     `Liquipedia is not an accepted source; ${use}`,
   ] as const;
 
+const withoutBlast = [
+  (url: string) => !URL.canParse(url) || !isForbiddenDataSourceHost(new URL(url).hostname),
+  "BLAST.tv is not an accepted source; its terms forbid reusing its data. Cite the official Rocket League rules or the organiser's announcement",
+] as const;
+
 const sourceUrlSchema = z
   .string()
   .url()
   .regex(/^https?:\/\//, "Use an http(s) URL")
   .refine(...withoutLiquipedia("cite the official announcement it relies on"))
+  .refine(...withoutBlast)
   .describe(
-    "Required public source: the official team or player announcement, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
+    "Required public source: the official team or player announcement, the official Rocket League rules, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia or BLAST.tv. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
   );
 
 const streamsSchema = z
@@ -622,7 +629,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
     defineTool({
       name: "propose_tournament_prizes",
       description:
-        "Propose the prize distribution of one tournament stage. Once approved, it replaces the whole distribution of that stage, so list every paid placement. Read get_tournament_prizes first. Every team must be a participant of the stage and every listed player must be on that team's stage roster. start.gg tournaments are refused. Enter each amount in the currency the source states; never convert it.",
+        "Propose the prize distribution of one tournament stage. Once approved, it replaces the whole distribution of that stage, so list every paid placement, and every row takes sourceUrl as its source. To correct one row or only its source, use propose_tournament_prize_update. Read get_tournament_prizes first. Every team must be a participant of the stage and every listed player must be on that team's stage roster. start.gg tournaments are refused. Enter each amount in the currency the source states; never convert it.",
       write: true,
       permission: "tournaments.manage",
       input: {
@@ -668,6 +675,57 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
               ...prize,
               playerIds: playerIds ?? [],
             })),
+          },
+          sourceUrl,
+          user.id,
+        ),
+    }),
+
+    defineTool({
+      name: "propose_tournament_prize_update",
+      description:
+        "Propose a correction of one prize row of a tournament stage, keyed by its team, without replacing the rest of the distribution. Send only the fields that change; send none of them to re-source the row without changing its value. Once approved, the row's source becomes sourceUrl. Read get_tournament_prizes first: the team must already have a prize in that stage. start.gg tournaments are refused. Enter the amount in the currency the source states; never convert it.",
+      write: true,
+      permission: "tournaments.manage",
+      input: {
+        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
+        teamId: z.string().uuid().describe("UUID of the team whose prize row changes."),
+        placement: z.number().int().min(1).optional().describe("Corrected final placement."),
+        amount: z
+          .number()
+          .int()
+          .min(1)
+          .max(MAX_PRIZE_AMOUNT)
+          .optional()
+          .describe("Corrected whole amount in the stated currency."),
+        currency: z
+          .string()
+          .refine(isIso4217Code, "Use an ISO 4217 currency code")
+          .optional()
+          .describe("Corrected ISO 4217 currency code."),
+        playerIds: z
+          .array(z.string().uuid())
+          .max(MAX_PRIZE_PLAYERS)
+          .optional()
+          .describe("Replacement list of player UUIDs from the team's stage roster."),
+        sourceUrl: sourceUrlSchema.describe(
+          "Required public source of the corrected row, usually the official Rocket League rules (prize attachments) or the organiser's announcement. Never Liquipedia or BLAST.tv.",
+        ),
+      },
+      handler: (
+        { tournamentId, teamId, placement, amount, currency, playerIds, sourceUrl },
+        user,
+      ) =>
+        propose(
+          {
+            kind: "update_tournament_prize",
+            tournamentId,
+            teamId,
+            patch: Object.fromEntries(
+              Object.entries({ placement, amount, currency, playerIds }).filter(
+                ([, value]) => value !== undefined,
+              ),
+            ),
           },
           sourceUrl,
           user.id,
@@ -951,7 +1009,7 @@ export function rosterTools({ rosterProposalService }: RosterToolServices): McpT
 
     defineTool({
       name: "list_roster_proposals",
-      description: `List roster proposals, ${DEFAULT_PROPOSAL_STATUS} by default. Check pending proposals before proposing a change so the same player, team or move is not proposed twice. Applied proposals carry the created or updated entityId.`,
+      description: `List every staff-reviewed proposal (players, teams, contracts, prizes, awards, streams, lineups, viewership, circuits, deletions), ${DEFAULT_PROPOSAL_STATUS} by default, with its change, status and sourceUrl. Check pending proposals before proposing a change so the same change is not proposed twice. Applied proposals carry the created or updated entityId.`,
       permission: ROSTER_PROPOSAL_PERMISSIONS,
       input: {
         status: z

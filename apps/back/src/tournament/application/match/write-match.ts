@@ -22,6 +22,7 @@ import {
   emptySingleEliminationBracket,
 } from "../../domain/bracket";
 import type { BracketLinkInput } from "@sarpbc/types";
+import { parseDataSourceUrl } from "../../../common/domain/data-source";
 async function requireParticipants(
   writer: MatchWriter,
   tournamentId: string,
@@ -103,6 +104,7 @@ export async function createMatchInTransaction(
   const match = new Match();
   match.tournament = tournament;
   match.source = tournament.source === "startgg" ? "startgg" : "manual";
+  match.sourceUrl = parseDataSourceUrl(input.sourceUrl ?? null);
   if (input.previousMatches?.length) await setBracketLinks(writer, match, input.previousMatches);
   return saveMatch(writer, match, participants, input);
 }
@@ -204,6 +206,7 @@ export async function updateMatchInTransaction(
     await replaceParticipants(writer, match, input.participantIds, input.results !== undefined);
   if (input.previousMatches !== undefined)
     await setBracketLinks(writer, match, input.previousMatches);
+  if (input.sourceUrl !== undefined) match.sourceUrl = parseDataSourceUrl(input.sourceUrl);
   if (input.beginAt !== undefined) match.beginAt = input.beginAt;
   if (input.endAt !== undefined) match.endAt = input.endAt;
   if (input.status !== undefined) match.status = input.status;
@@ -264,6 +267,17 @@ export async function setVodsInTransaction(
   const match = await writer.load(id);
   if (!match) throw new NotFoundError("Match not found");
   match.vods = normalizeMatchVods(vods, match.numberOfGames);
+  await writer.save(match);
+  return match;
+}
+export async function setSourceInTransaction(
+  writer: MatchWriter,
+  id: string,
+  sourceUrl: string | null,
+): Promise<Match> {
+  const match = await writer.load(id);
+  if (!match) throw new NotFoundError("Match not found");
+  match.sourceUrl = parseDataSourceUrl(sourceUrl);
   await writer.save(match);
   return match;
 }

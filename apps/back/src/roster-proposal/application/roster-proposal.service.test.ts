@@ -253,7 +253,24 @@ describe("RosterProposalService", () => {
     const approved = await service.approve(id, "admin");
 
     expect(staff.permissions).toEqual(["tournaments.manage"]);
-    expect(prizes.setDistribution).toHaveBeenCalledWith("cup", [prizeEntry]);
+    expect(prizes.setDistribution).toHaveBeenCalledWith("cup", [
+      { ...prizeEntry, sourceUrl: source },
+    ]);
+    expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
+  });
+
+  it("applies a prize row correction with the proposal's source", async () => {
+    const { id } = await service.propose(
+      { kind: "update_tournament_prize", tournamentId: "cup", teamId: "kc", patch: {} },
+      source,
+      "journalist",
+    );
+    expect(prizes.requireProposablePrize).toHaveBeenCalledWith("cup", "kc");
+
+    const approved = await service.approve(id, "admin");
+
+    expect(staff.permissions).toEqual(["tournaments.manage"]);
+    expect(prizes.updateEntry).toHaveBeenCalledWith("cup", "kc", {}, source);
     expect(approved).toMatchObject({ status: "applied", entityId: "cup" });
   });
 

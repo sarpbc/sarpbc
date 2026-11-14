@@ -18,7 +18,10 @@ const entry: PrizeEntry = {
   currency: "USD",
   teamId: "team-a",
   playerIds: ["player-a"],
+  sourceUrl: null,
 };
+
+const RULES = "https://www.rocketleague.com/en/news/rlcs-official-rules";
 
 const rosterA: PrizeParticipant = { teamId: "team-a", playerIds: ["player-a", "player-b"] };
 
@@ -30,6 +33,7 @@ function setup({
   const writer = {
     tournamentExists: vi.fn<PrizeWriter["tournamentExists"]>().mockResolvedValue(exists),
     participants: vi.fn<PrizeWriter["participants"]>().mockResolvedValue(participants),
+    entries: vi.fn<PrizeWriter["entries"]>().mockResolvedValue([entry]),
     replace: vi.fn<PrizeWriter["replace"]>(),
   };
   const reads = {
@@ -125,5 +129,48 @@ describe("TournamentPrizeService", () => {
     await expect(
       setup({ source: "startgg" }).service.requireProposableTournament("cup"),
     ).rejects.toThrow(InvalidInputError);
+  });
+
+  it("corrects one row and re-sources it without touching the other rows", async () => {
+    const { service, writer } = setup({
+      participants: [rosterA, { teamId: "team-b", playerIds: [] }],
+    });
+    const other: PrizeEntry = {
+      ...entry,
+      placement: 2,
+      amount: 500,
+      teamId: "team-b",
+      playerIds: [],
+    };
+    writer.entries.mockResolvedValue([entry, other]);
+
+    await service.updateEntry("cup", "team-a", { amount: 1800 }, RULES);
+
+    expect(writer.replace).toHaveBeenCalledWith("cup", [
+      { ...entry, amount: 1800, sourceUrl: RULES },
+      other,
+    ]);
+  });
+
+  it("re-sources a row alone when the patch is empty", async () => {
+    const { service, writer } = setup();
+
+    await service.updateEntry("cup", "team-a", {}, RULES);
+
+    expect(writer.replace).toHaveBeenCalledWith("cup", [{ ...entry, sourceUrl: RULES }]);
+  });
+
+  it("refuses a correction for a team without a prize row", async () => {
+    const { service, writer } = setup();
+    await expect(service.updateEntry("cup", "team-z", {}, RULES)).rejects.toThrow(NotFoundError);
+    expect(writer.replace).not.toHaveBeenCalled();
+  });
+
+  it("refuses a BLAST.tv source", async () => {
+    const { service, writer } = setup();
+    await expect(
+      service.updateEntry("cup", "team-a", {}, "https://blast.tv/rl/open"),
+    ).rejects.toThrow(InvalidInputError);
+    expect(writer.replace).not.toHaveBeenCalled();
   });
 });
