@@ -41,7 +41,9 @@ export interface FieldPlayer {
 }
 
 function blendWithTeam(personal: number, teamStrength: number | undefined): number {
-  if (teamStrength === undefined || teamStrength === null) return personal;
+  if (teamStrength === undefined || teamStrength === null) {
+    return personal;
+  }
 
   return personal * 0.55 + teamStrength * 0.45;
 }
@@ -88,31 +90,51 @@ export function circuitPointsForSplit(
 }
 
 export function getSplitFeedback(sim: SplitSimulation): Partial<CareerStats> {
-  if (sim.major === "winner") return { rating: 5, morale: 4 };
+  if (sim.major === "winner") {
+    return { rating: 5, morale: 4 };
+  }
 
-  if (sim.major === "finalist" || sim.major === "top4") return { rating: 2, morale: 2 };
+  if (sim.major === "finalist" || sim.major === "top4") {
+    return { rating: 2, morale: 2 };
+  }
 
-  if (sim.major === "unavailable") return { morale: -2, form: -1 };
+  if (sim.major === "unavailable") {
+    return { morale: -2, form: -1 };
+  }
 
-  if (sim.major !== null) return { form: 1 };
+  if (sim.major !== null) {
+    return { form: 1 };
+  }
 
   return { morale: -3 };
 }
 
 export function getWorldsFeedback(placement: CareerPlacement): Partial<CareerStats> {
   switch (placement) {
-    case "winner":
+    case "winner": {
       return { rating: 5, morale: 5 };
-    case "finalist":
+    }
+
+    case "finalist": {
       return { rating: 3, morale: 3 };
-    case "top4":
+    }
+
+    case "top4": {
       return { rating: 2, morale: 2 };
-    case "top8":
+    }
+
+    case "top8": {
       return { morale: 1 };
-    case "group":
+    }
+
+    case "group": {
       return { morale: -2 };
-    case "unavailable":
+    }
+
+    case "unavailable": {
       return { morale: -2 };
+    }
+
     default: {
       const _exhaustive: never = placement;
 
@@ -159,14 +181,19 @@ export function simulateSplitField(
       for (const [teamId, placement] of placements) {
         const sim = results.get(teamId);
 
-        if (!sim) continue;
+        if (!sim) {
+          continue;
+        }
+
         sim.regionals[regional] = placement;
       }
 
       if (sitOut && isNonEmptyString(player.teamId)) {
         const sim = results.get(player.teamId);
 
-        if (sim) sim.regionals[regional] = "unavailable";
+        if (sim) {
+          sim.regionals[regional] = "unavailable";
+        }
       }
     }
   }
@@ -176,7 +203,9 @@ export function simulateSplitField(
   for (const [teamId, sim] of results) {
     const regionalPoints = rawRegionalPoints(sim);
 
-    if (regionalPoints < MAJOR_QUALIFICATION_POINTS) continue;
+    if (regionalPoints < MAJOR_QUALIFICATION_POINTS) {
+      continue;
+    }
 
     if (player.skipMajor === true && teamId === player.teamId) {
       sim.major = "unavailable";
@@ -191,13 +220,17 @@ export function simulateSplitField(
   for (const [teamId, placement] of majorPlacements) {
     const sim = results.get(teamId);
 
-    if (sim) sim.major = placement;
+    if (sim) {
+      sim.major = placement;
+    }
   }
 
   for (const team of WORLD_TEAMS) {
     const sim = results.get(team.id);
 
-    if (sim) sim.points = circuitPointsForSplit(sim, team.region);
+    if (sim) {
+      sim.points = circuitPointsForSplit(sim, team.region);
+    }
   }
 
   return results;
@@ -243,7 +276,9 @@ export function simulateWorldsField(
 }
 
 export function getEventsBeforeStage(careerId: string, season: number, stage: CareerStage): number {
-  if (stage === "worlds") return 1;
+  if (stage === "worlds") {
+    return 1;
+  }
 
   return 1 + (hashString(`${careerId}:events:${season}:${stage}`) % MAX_EVENTS_BEFORE_SPLIT);
 }

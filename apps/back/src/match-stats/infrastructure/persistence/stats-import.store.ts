@@ -1,6 +1,7 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import type { StatsImportStore } from "../../application/ports";
-import { ACTIVE_IMPORT_STATUSES, type StatsImport } from "../../domain/stats-import";
+import { ACTIVE_IMPORT_STATUSES } from "../../domain/stats-import";
+import type { StatsImport } from "../../domain/stats-import";
 import { MatchStatsImport } from "./match-stats-import.entity";
 
 function toImport(row: MatchStatsImport): StatsImport {

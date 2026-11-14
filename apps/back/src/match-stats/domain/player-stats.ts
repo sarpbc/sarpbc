@@ -40,7 +40,9 @@ function emptyCounts(): PlayerStatCounts {
 function toStats({ player, team, games, totals, teamGoals }: Tally): TournamentPlayerStats {
   const perGame = emptyCounts();
 
-  for (const count of COUNTS) perGame[count] = round(totals[count] / games.size, 2);
+  for (const count of COUNTS) {
+    perGame[count] = round(totals[count] / games.size, 2);
+  }
 
   return {
     player,
@@ -80,10 +82,15 @@ export function aggregatePlayerStats(
 
     tallies.set(key, tally);
 
-    if (!tally.games.has(line.gameId)) tally.teamGoals += line.teamGoals;
+    if (!tally.games.has(line.gameId)) {
+      tally.teamGoals += line.teamGoals;
+    }
+
     tally.games.add(line.gameId);
 
-    for (const count of COUNTS) tally.totals[count] += line[count];
+    for (const count of COUNTS) {
+      tally.totals[count] += line[count];
+    }
   }
 
   return {

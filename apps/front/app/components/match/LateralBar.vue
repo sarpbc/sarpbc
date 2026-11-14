@@ -34,12 +34,18 @@ const upcomingTitle = computed(() => {
   const kind = resolveMatchRailTitleKind(liveMatches.value, upcomingMatches.value);
 
   switch (kind) {
-    case "today":
+    case "today": {
       return t("components.match.todaysMatch");
-    case "tomorrow":
+    }
+
+    case "tomorrow": {
       return t("components.match.tomorrowsMatch");
-    case "upcoming":
+    }
+
+    case "upcoming": {
       return t("components.match.upcomingMatches");
+    }
+
     default: {
       const _exhaustive: never = kind;
 

@@ -3,10 +3,8 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { parseDataSourceUrl } from "../../common/domain/data-source";
 import type { Tournament } from "../domain/tournament";
 import { assertLineupFitsFormat, playerGroupKey } from "../domain/tournament-format";
-import {
-  assertParticipantRemovable,
-  type TournamentParticipant,
-} from "../domain/tournament-participant";
+import { assertParticipantRemovable } from "../domain/tournament-participant";
+import type { TournamentParticipant } from "../domain/tournament-participant";
 import type { ParticipantRosterInput, UpdateTournamentInput } from "./inputs";
 import type { TournamentWriter } from "./ports";
 
@@ -37,7 +35,10 @@ async function removeParticipants(
     async (p) => await writer.participantReferences(tournamentId, p.id),
   );
 
-  for (const reference of references) assertParticipantRemovable(reference);
+  for (const reference of references) {
+    assertParticipantRemovable(reference);
+  }
+
   await mapSequentially(participants, async (p) => {
     await writer.removeParticipant(p.id);
   });
@@ -48,10 +49,11 @@ export async function syncParticipants(
   tournament: Tournament,
   teamIds: string[],
 ): Promise<void> {
-  if (new Set(teamIds).size !== teamIds.length || !(await writer.teamsExist(teamIds)))
+  if (new Set(teamIds).size !== teamIds.length || !(await writer.teamsExist(teamIds))) {
     throw new InvalidInputError(
       "One or more teams were not found. Refresh the team list and try again.",
     );
+  }
 
   const existing = await writer.participants(tournament.id);
   const desired = new Set(teamIds);
@@ -84,7 +86,9 @@ export async function syncPlayerParticipants(
 ): Promise<void> {
   const playerIds = [...new Set(groups.flat())];
 
-  if (playerIds.length && !(await writer.playersExist(playerIds))) throw playersNotFound();
+  if (playerIds.length && !(await writer.playersExist(playerIds))) {
+    throw playersNotFound();
+  }
 
   const participants = await writer.participants(tournament.id);
   const existing = participants.filter((p) => !p.team);
@@ -116,14 +120,18 @@ export async function assertUpdatedLineup(
   tournament: Tournament,
   input: UpdateTournamentInput,
 ): Promise<void> {
-  if (input.format !== undefined) tournament.format = input.format;
+  if (input.format !== undefined) {
+    tournament.format = input.format;
+  }
 
   if (
     input.format === undefined &&
     input.teamIds === undefined &&
     input.playerParticipants === undefined
-  )
+  ) {
     return;
+  }
+
   const current = await writer.participants(tournament.id);
   assertLineupFitsFormat(tournament.format, {
     teamIds: input.teamIds ?? current.flatMap((p) => (p.team ? [p.team.id] : [])),
@@ -140,7 +148,10 @@ export async function setRosters(
 ): Promise<void> {
   const playerIds = [...new Set(rosters.flatMap((roster) => roster.playerIds))];
 
-  if (playerIds.length && !(await writer.playersExist(playerIds))) throw playersNotFound();
+  if (playerIds.length && !(await writer.playersExist(playerIds))) {
+    throw playersNotFound();
+  }
+
   const participants = await writer.participants(tournament.id);
 
   // A team listed twice keeps its last roster, as when the rosters were saved one after another.
@@ -152,10 +163,12 @@ export async function setRosters(
   for (const roster of rosters) {
     const participant = participants.find((p) => p.team?.id === roster.teamId);
 
-    if (!participant)
+    if (!participant) {
       throw new InvalidInputError(
         `Team "${roster.teamId}" is not a participant of this tournament. Add it to teamIds first.`,
       );
+    }
+
     latestByParticipant.set(participant.id, { participant, roster });
   }
 

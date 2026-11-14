@@ -1,5 +1,6 @@
 import { createHash } from "node:crypto";
-import { UnderscoreNamingStrategy, type NamingStrategy } from "@mikro-orm/core";
+import { UnderscoreNamingStrategy } from "@mikro-orm/core";
+import type { NamingStrategy } from "@mikro-orm/core";
 
 const PG_IDENTIFIER_LIMIT = 63;
 

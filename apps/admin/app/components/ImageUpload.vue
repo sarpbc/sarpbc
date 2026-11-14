@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { IMAGE_CONTENT_TYPES, MAX_IMAGE_MEGABYTES, type ImageUploadTarget } from "@sarpbc/utils";
+import { IMAGE_CONTENT_TYPES, MAX_IMAGE_MEGABYTES } from "@sarpbc/utils";
+import type { ImageUploadTarget } from "@sarpbc/utils";
 
 const imageUrl = defineModel<string | null>("imageUrl", { default: null });
 

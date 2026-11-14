@@ -9,15 +9,21 @@ export type TournamentPath =
 export function parseTournamentPath(segments: readonly string[]): TournamentPath | null {
   const [first, second, ...rest] = segments.map((segment) => segment.toLowerCase());
 
-  if (!first || rest.length > 0) return null;
+  if (!first || rest.length > 0) {
+    return null;
+  }
 
   if (isUuid(first)) {
-    if (second === undefined) return { kind: "legacyStage", id: first, tab: "overview" };
+    if (second === undefined) {
+      return { kind: "legacyStage", id: first, tab: "overview" };
+    }
 
     return second === "matches" ? { kind: "legacyStage", id: first, tab: "matches" } : null;
   }
 
-  if (second === undefined) return { kind: "event", eventSlug: first };
+  if (second === undefined) {
+    return { kind: "event", eventSlug: first };
+  }
 
   return second ? { kind: "stage", eventSlug: first, stageSlug: second } : null;
 }

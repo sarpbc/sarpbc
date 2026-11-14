@@ -8,10 +8,8 @@ import {
   STREAM_KINDS,
   TEAM_LOGO_VARIANTS,
   VIEWERSHIP_SCOPES,
-  type PlayerStatus,
-  type RosterChange,
-  type RosterProposalStatus,
 } from "@sarpbc/types";
+import type { PlayerStatus, RosterChange, RosterProposalStatus } from "@sarpbc/types";
 import {
   MAX_LINEUP_PLAYERS,
   MAX_CIRCUIT_PLACEMENT,
@@ -35,7 +33,8 @@ import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-so
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool } from "../define-tool";
 import { proposalSourceUrlSchema as sourceUrlSchema, proposed, proposer } from "./proposals";
 import { requireUpdateFields } from "./update-fields";
 

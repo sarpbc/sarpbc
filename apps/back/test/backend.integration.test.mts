@@ -197,7 +197,9 @@ const portBindings = z.record(z.string(), z.array(z.object({ HostPort: z.string(
 function composeImage(name: string): string {
   const image = new RegExp(`image: (${name}:\\S+)`).exec(compose)?.[1];
 
-  if (image === undefined) throw new Error(`docker-compose.local.yml has no ${name} image`);
+  if (image === undefined) {
+    throw new Error(`docker-compose.local.yml has no ${name} image`);
+  }
 
   return image;
 }
@@ -258,7 +260,9 @@ describe("backend integration", () => {
       containers.push(name);
 
       async function ready(attempt: number): Promise<number> {
-        if (attempt >= 60) throw new Error(`${service} did not become ready within 30 seconds`);
+        if (attempt >= 60) {
+          throw new Error(`${service} did not become ready within 30 seconds`);
+        }
 
         try {
           docker("exec", name, ...readiness);
@@ -375,7 +379,9 @@ describe("backend integration", () => {
       const request: Request = async (method, url, payload, cookie, status = 200, headers = {}) => {
         const requestHeaders = { ...headers };
 
-        if (cookie !== undefined) requestHeaders.cookie = cookie;
+        if (cookie !== undefined) {
+          requestHeaders.cookie = cookie;
+        }
 
         const response = await app.inject({
           method,
@@ -461,7 +467,9 @@ describe("backend integration", () => {
       await app.init();
       await app.getHttpAdapter().getInstance().ready();
 
-      for (const job of app.get(SchedulerRegistry).getCronJobs().values()) void job.stop();
+      for (const job of app.get(SchedulerRegistry).getCronJobs().values()) {
+        void job.stop();
+      }
 
       let staffCookie: string;
       let memberCookie: string;
@@ -1654,10 +1662,16 @@ describe("backend integration", () => {
             JSON.parse(data === undefined ? response.body : data.slice("data: ".length)),
           );
 
-          if (message.error !== undefined) return { error: true };
+          if (message.error !== undefined) {
+            return { error: true };
+          }
+
           assert.ok(message.result, "the MCP response carries a result");
 
-          if (message.result.isError === true) return { error: true };
+          if (message.result.isError === true) {
+            return { error: true };
+          }
+
           const text = message.result.content?.[0]?.text;
           assert.ok(text !== undefined, "the MCP result carries content");
 
@@ -1698,7 +1712,9 @@ describe("backend integration", () => {
             refusedWith ?? 200,
           );
 
-          if (refusedWith !== undefined) return undefined;
+          if (refusedWith !== undefined) {
+            return undefined;
+          }
 
           return response.json(z.object({ proposal: reviewedProposal })).proposal;
         }
@@ -1927,8 +1943,9 @@ describe("backend integration", () => {
           ].map(async (invalid) => await callTool("create_contract", invalid, toolFailure)),
         );
 
-        for (const invalidResult of invalidResults)
+        for (const invalidResult of invalidResults) {
           assert.deepEqual(invalidResult, { error: true });
+        }
 
         const conflicts: [Payload, number][] = [
           [{ ...stint, teamId: alpha, startDate: "2025-06-01", endDate: "2026-03-01" }, 422],
@@ -2418,8 +2435,10 @@ describe("backend integration", () => {
             { populate: ["players"] },
           );
 
-          for (const id of playerIds)
+          for (const id of playerIds) {
             participant.players.add(em.getReference(rosterRows.Player, id));
+          }
+
           await em.flush();
         };
 
@@ -2656,7 +2675,10 @@ describe("backend integration", () => {
           [first, second].map(async (id) => await playerTeam(id)),
         );
 
-        for (const owner of playerTeams) assert.equal(owner, keeper);
+        for (const owner of playerTeams) {
+          assert.equal(owner, keeper);
+        }
+
         assert.equal(await participantTeam(droppedEntry), keeper);
         assert.equal(await participantTeam(keeperCup.participantOf(keeper)), keeper);
         assert.equal(await participantTeam(droppedCup.participantOf(opponent)), opponent);
@@ -3000,8 +3022,12 @@ describe("backend integration", () => {
       }
     }
 
-    if (failures.length === 1) throw failures[0];
+    if (failures.length === 1) {
+      throw failures[0];
+    }
 
-    if (failures.length > 1) throw new AggregateError(failures, "Integration verification failed");
+    if (failures.length > 1) {
+      throw new AggregateError(failures, "Integration verification failed");
+    }
   }, 120_000);
 });

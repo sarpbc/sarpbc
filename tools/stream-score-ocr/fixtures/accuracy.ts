@@ -3,7 +3,8 @@ import { parseStreamScoreProposal } from "@sarpbc/utils/stream-score";
 import { loadOverlay } from "../src/overlay.ts";
 import { readScoreboard } from "../src/scoreboard.ts";
 import { SeriesTracker } from "../src/series.ts";
-import { broadcast, finalScores, generateSeries, type SeriesScript } from "./broadcast.ts";
+import { broadcast, finalScores, generateSeries } from "./broadcast.ts";
+import type { SeriesScript } from "./broadcast.ts";
 import { FixtureRenderer } from "./render.ts";
 
 export const OVERLAY_PATH = fileURLToPath(
@@ -29,7 +30,9 @@ export interface Measure {
 }
 
 function seriesOutcome(winner: string | null, expectedWinner: string): SeriesOutcome {
-  if (winner === null) return "undetermined";
+  if (winner === null) {
+    return "undetermined";
+  }
 
   return winner === expectedWinner ? "correct" : "wrong";
 }
@@ -40,10 +43,15 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
   const tracker = new SeriesTracker({ bestOf: script.bestOf, stableReadings: 2 });
 
   for (const { t, scene } of broadcast(script)) {
-    if (t % intervalSeconds !== 0) continue;
+    if (t % intervalSeconds !== 0) {
+      continue;
+    }
+
     tracker.push(t, readScoreboard(renderer.render(scene, script.noise), overlay));
 
-    if (tracker.decided) break;
+    if (tracker.decided) {
+      break;
+    }
   }
 
   tracker.finish();
@@ -54,7 +62,10 @@ async function replay(script: SeriesScript, intervalSeconds: number): Promise<Se
     ),
   );
 
-  if (!parsed.ok) throw new Error(`${script.id} produced an invalid proposal: ${parsed.error}`);
+  if (!parsed.ok) {
+    throw new Error(`${script.id} produced an invalid proposal: ${parsed.error}`);
+  }
+
   const expected = finalScores(script);
 
   const correctGames = expected.filter((score, index) => {

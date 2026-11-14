@@ -3,7 +3,8 @@ import { watchDebounced } from "@vueuse/core";
 import { getApiErrorMessage } from "@sarpbc/utils";
 import type { TableColumn } from "@nuxt/ui";
 import type { UserListItem } from "@sarpbc/types";
-import { ASSIGNABLE_ROLES, type AssignableRole } from "~/types/user";
+import { ASSIGNABLE_ROLES } from "~/types/user";
+import type { AssignableRole } from "~/types/user";
 
 const { t } = useI18n();
 const toast = useToast();

@@ -1,4 +1,4 @@
-import { EntityManager, type FilterQuery } from "@mikro-orm/postgresql";
+import type { EntityManager, FilterQuery } from "@mikro-orm/postgresql";
 import { User as Account } from "../../domain/user";
 import type { UserListQuery, UserQueries, UserWriter } from "../../application/ports/user-store";
 import { User } from "./user.entity";

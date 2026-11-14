@@ -56,11 +56,17 @@ const canSubmit = computed(
 );
 
 const rateLimitMessage = computed(() => {
-  if (creationStatusLoadState.value !== "ready" || !creationStatus.value) return null;
+  if (creationStatusLoadState.value !== "ready" || !creationStatus.value) {
+    return null;
+  }
 
-  if (creationStatus.value.canCreate) return null;
+  if (creationStatus.value.canCreate) {
+    return null;
+  }
 
-  if (!creationStatus.value.nextAvailableAt) return null;
+  if (!creationStatus.value.nextAvailableAt) {
+    return null;
+  }
 
   const nextAt = longDateTimeFormatter(locale.value).format(
     new Date(creationStatus.value.nextAvailableAt),

@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { RosterSyncWriter } from "../../../roster/infrastructure/roster-persistence";
 import type { CompetitionTransaction, CompetitionWriteScope } from "../../application/ports";
 import { CompetitionAwardWriter } from "./player-award.writer";

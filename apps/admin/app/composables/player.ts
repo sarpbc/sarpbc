@@ -47,7 +47,9 @@ export async function getAllPlayers(query: {
 export async function getPlayerById(id: string): Promise<Player> {
   const res = await apiFetch<{ player: Player | null }>(`/player/${id}`, { method: "GET" });
 
-  if (!res.player) throw createError({ statusCode: 404, message: "Player not found" });
+  if (!res.player) {
+    throw createError({ statusCode: 404, message: "Player not found" });
+  }
 
   return res.player;
 }

@@ -65,7 +65,9 @@ let nextKey = 0;
 const open = computed({
   get: () => target.value !== null,
   set: (value) => {
-    if (!value) target.value = null;
+    if (!value) {
+      target.value = null;
+    }
   },
 });
 
@@ -76,18 +78,26 @@ async function loadTeams(tournamentId: string) {
   try {
     const teams = await getCircuitStageTeams(circuitId, tournamentId);
 
-    if (target.value?.tournamentId !== tournamentId) return;
+    if (target.value?.tournamentId !== tournamentId) {
+      return;
+    }
+
     eventTeams.value = teams;
     teamsStatus.value = "success";
   } catch {
-    if (target.value?.tournamentId === tournamentId) teamsStatus.value = "error";
+    if (target.value?.tournamentId === tournamentId) {
+      teamsStatus.value = "error";
+    }
   }
 }
 
 watch(
   target,
   (value) => {
-    if (value === null) return;
+    if (value === null) {
+      return;
+    }
+
     shown.value = value;
     rows.value = value.scale.map((tier) => ({ key: (nextKey += 1), ...tier }));
     sourceUrl.value = value.sourceUrl;
@@ -147,7 +157,9 @@ const hasRepeatedFinish = computed(() => {
 });
 
 function finishError(row: FinishRow): string | undefined {
-  if (toFinish(row) !== null) return undefined;
+  if (toFinish(row) !== null) {
+    return undefined;
+  }
 
   if (row.teamId === undefined || row.placement === null) {
     return t("page.circuits.scale.finishes.errors.incomplete");
@@ -189,13 +201,17 @@ function toTier(row: TierRow): ValidTier | null {
 }
 
 function rowError(row: TierRow): string | undefined {
-  if (toTier(row) !== null) return undefined;
+  if (toTier(row) !== null) {
+    return undefined;
+  }
 
   if (row.from === null || row.to === null || row.points === null) {
     return t("page.circuits.scale.errors.incomplete");
   }
 
-  if (row.to < row.from) return t("page.circuits.scale.errors.range");
+  if (row.to < row.from) {
+    return t("page.circuits.scale.errors.range");
+  }
 
   return t("page.circuits.scale.errors.numbers", {
     maxPlacement: MAX_CIRCUIT_PLACEMENT,
@@ -247,7 +263,10 @@ async function save() {
   const scale = tiers.value;
   const finishList = finishes.value;
 
-  if (current === null || scale === null || finishList === null || !canSave.value) return;
+  if (current === null || scale === null || finishList === null || !canSave.value) {
+    return;
+  }
+
   saving.value = true;
   saveError.value = null;
 

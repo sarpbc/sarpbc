@@ -89,16 +89,20 @@ export class MikroNewsStore implements NewsStore {
     try {
       await this.em.flush();
     } catch (error) {
-      if (isUniqueViolation(error))
+      if (isUniqueViolation(error)) {
         throw new ConflictError(
           "An article with this slug already exists. Choose a different slug.",
         );
+      }
+
       throw error;
     }
   }
   async delete(model: NewsArticleRecord) {
     const row = await this.em.findOne(NewsArticle, { id: model.id });
 
-    if (row) this.em.remove(row);
+    if (row) {
+      this.em.remove(row);
+    }
   }
 }

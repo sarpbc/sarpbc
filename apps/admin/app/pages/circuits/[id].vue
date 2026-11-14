@@ -44,7 +44,10 @@ async function save(input: CircuitInput) {
   try {
     const summary = await updateCircuit(circuitId.value, input);
 
-    if (circuit.value) setCircuit({ ...circuit.value, ...summary });
+    if (circuit.value) {
+      setCircuit({ ...circuit.value, ...summary });
+    }
+
     toast.add({ title: t("page.circuits.edit.saved"), color: "success" });
   } catch (saveError) {
     reportError(saveError, t("page.circuits.edit.failed"));
@@ -82,7 +85,9 @@ function editStage(stage: CircuitStage) {
 }
 
 function regionSummary(stage: CircuitStage): string | null {
-  if (!stage.worldwide) return null;
+  if (!stage.worldwide) {
+    return null;
+  }
 
   if (isWorldwideCircuitRegion(circuit.value?.region)) {
     return t("page.circuits.stages.worldwide");

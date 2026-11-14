@@ -7,7 +7,8 @@ import {
   updateEventFields,
   updateLeagueFields,
 } from "../../../tournament/infrastructure/http/dto/manual-catalog.dto";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool } from "../define-tool";
 import { mapEvent, mapLeague } from "../mappers";
 import type { RedistributableCompetition } from "../redistributable-competition";
 import { describeFields, listLimit } from "./tool-input";

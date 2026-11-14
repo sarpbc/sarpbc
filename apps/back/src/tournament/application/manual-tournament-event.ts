@@ -41,7 +41,10 @@ export async function updateEvent(
   input: UpdateTournamentInput,
 ): Promise<void> {
   if (input.eventId !== undefined && input.eventId !== tournament.event.id) {
-    if (input.slug !== undefined) throw sharedEventSlugError();
+    if (input.slug !== undefined) {
+      throw sharedEventSlugError();
+    }
+
     await placeStage(events, tournament, await requireEvent(events, input.eventId));
 
     return;
@@ -52,7 +55,9 @@ export async function updateEvent(
   const stageIds = stages.map((stage) => stage.id);
 
   if (!ownsEvent(event, stageIds, { id: tournament.id, name: previousName })) {
-    if (input.slug !== undefined && toSlug(input.slug) !== event.slug) throw sharedEventSlugError();
+    if (input.slug !== undefined && toSlug(input.slug) !== event.slug) {
+      throw sharedEventSlugError();
+    }
 
     return;
   }
@@ -60,7 +65,10 @@ export async function updateEvent(
   event.name = tournament.name;
   event.league = tournament.league;
 
-  if (input.slug !== undefined) event.slug = await explicitEventSlug(events, input.slug, event.id);
+  if (input.slug !== undefined) {
+    event.slug = await explicitEventSlug(events, input.slug, event.id);
+  }
+
   await events.save(event);
   tournament.event = toEventRef(event);
 }

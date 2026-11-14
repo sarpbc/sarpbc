@@ -1,11 +1,9 @@
 import { Controller, Get, Query } from "@nestjs/common";
-import { PlayerService } from "../../application/player.service";
-import { TeamService } from "../../application/team.service";
-import { TransferService } from "../../application/transfer.service";
-import {
-  ListTransfersQueryDto,
-  type ListTransfersQueryInput,
-} from "./dto/list-transfers-query.dto";
+import type { PlayerService } from "../../application/player.service";
+import type { TeamService } from "../../application/team.service";
+import type { TransferService } from "../../application/transfer.service";
+import { ListTransfersQueryDto } from "./dto/list-transfers-query.dto";
+import type { ListTransfersQueryInput } from "./dto/list-transfers-query.dto";
 import { mapTransfer } from "./transfer.mapper";
 
 @Controller("transfers")

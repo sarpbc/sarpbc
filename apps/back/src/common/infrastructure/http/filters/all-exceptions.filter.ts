@@ -1,8 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from "@nestjs/common";
+import type { ArgumentsHost, ExceptionFilter } from "@nestjs/common";
+import { Catch, HttpException, HttpStatus } from "@nestjs/common";
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { log } from "evlog";
 import { requestLogContext } from "../../logging/request-log-context";
-import { ApplicationError, type FailureKind } from "../../../domain/errors/application-error";
+import { ApplicationError } from "../../../domain/errors/application-error";
+import type { FailureKind } from "../../../domain/errors/application-error";
 
 const failureResponses = {
   "invalid-input": { status: 400, error: "Bad Request" },

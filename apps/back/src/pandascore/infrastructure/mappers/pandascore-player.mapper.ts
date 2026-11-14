@@ -1,6 +1,6 @@
-import { ImportedPlayer, UpsertPlayerCommand } from "../../../roster/application/imports";
-import { CurrentPlayerDto } from "../dto/incident.dto";
-import { PlayerDto } from "../dto/tournament.dto";
+import type { ImportedPlayer, UpsertPlayerCommand } from "../../../roster/application/imports";
+import type { CurrentPlayerDto } from "../dto/incident.dto";
+import type { PlayerDto } from "../dto/tournament.dto";
 import { toUpsertTeamCommand } from "./pandascore-team.mapper";
 
 export function toUpsertPlayerCommand(dto: PlayerDto): UpsertPlayerCommand {

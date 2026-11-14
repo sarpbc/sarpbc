@@ -22,8 +22,10 @@ function wonBy(kind: EntityKind, tournament: Tournament, entityId: string): bool
       return winnerTeamId === entityId;
     }
 
-    case "player":
+    case "player": {
       return winner?.players?.some((player) => player.id === entityId) ?? false;
+    }
+
     default: {
       const exhaustive: never = kind;
 
@@ -49,15 +51,21 @@ export function splitTournaments(
     }
 
     switch (status) {
-      case "live":
+      case "live": {
         live.push(tournament);
         break;
-      case "upcoming":
+      }
+
+      case "upcoming": {
         upcoming.push(tournament);
         break;
-      case "finished":
+      }
+
+      case "finished": {
         past.push(tournament);
         break;
+      }
+
       default: {
         const exhaustive: never = status;
 

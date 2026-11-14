@@ -10,7 +10,8 @@ import {
 import { z } from "zod";
 import { isRedistributable } from "../../../common/domain/data-source";
 import type { CircuitService } from "../../../circuit/application/circuit.service";
-import { defineTool, type McpTool, type ToolWrite } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool, ToolWrite } from "../define-tool";
 import { circuitUrl, tournamentUrl } from "../urls";
 import { dataSourceUrlField, idOrSlugField } from "./tool-input";
 import { requireUpdateFields } from "./update-fields";

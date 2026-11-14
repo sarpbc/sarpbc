@@ -5,12 +5,18 @@ const { tone } = defineProps<{
 
 const toneClass = computed(() => {
   switch (tone) {
-    case "success":
+    case "success": {
       return "bg-success text-ink-950";
-    case "warning":
+    }
+
+    case "warning": {
       return "bg-warning text-ink-950";
-    case "accented":
+    }
+
+    case "accented": {
       return "bg-elevated text-highlighted";
+    }
+
     default: {
       const _exhaustive: never = tone;
 

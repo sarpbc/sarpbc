@@ -1,9 +1,6 @@
 <script lang="ts" setup>
-import {
-  PLAYER_AWARD_TYPES,
-  type PlayerAwardType,
-  type TournamentAwardListItem,
-} from "@sarpbc/types";
+import { PLAYER_AWARD_TYPES } from "@sarpbc/types";
+import type { PlayerAwardType, TournamentAwardListItem } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { tournamentId, participants } = defineProps<{

@@ -14,7 +14,9 @@ export async function findByIdOrSlug<Entity>(
   lookup: IdOrSlugLookup<Entity>,
   token: string,
 ): Promise<Entity | null> {
-  if (!isUuid(token)) return await lookup.findBySlug(token);
+  if (!isUuid(token)) {
+    return await lookup.findBySlug(token);
+  }
 
   return await ((await lookup.findById(token)) ?? lookup.findBySlug(token));
 }

@@ -1,11 +1,7 @@
 <script lang="ts" setup>
 import { watchDebounced } from "@vueuse/core";
-import {
-  SEASON_AWARD_TYPES,
-  type Player,
-  type SeasonAwardInput,
-  type SeasonAwardType,
-} from "@sarpbc/types";
+import { SEASON_AWARD_TYPES } from "@sarpbc/types";
+import type { Player, SeasonAwardInput, SeasonAwardType } from "@sarpbc/types";
 import {
   SEASON_AWARD_PRESENTER_MAX_LENGTH,
   SEASON_AWARD_REGION_MAX_LENGTH,
@@ -80,7 +76,10 @@ function reset() {
 }
 
 function submit() {
-  if (!isValid.value || !player.value) return;
+  if (!isValid.value || !player.value) {
+    return;
+  }
+
   emit("submit", {
     playerId: player.value.id,
     awardType: awardType.value,

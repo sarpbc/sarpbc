@@ -18,7 +18,9 @@ function awardTool() {
     (candidate) => candidate.name === "propose_season_award",
   );
 
-  if (!tool) throw new Error("propose_season_award is not defined");
+  if (!tool) {
+    throw new Error("propose_season_award is not defined");
+  }
 
   return { rosterProposalService, tool };
 }
@@ -125,7 +127,9 @@ describe("get_season", () => {
       },
     }).find((candidate) => candidate.name === "get_season");
 
-    if (!tool) throw new Error("get_season is not defined");
+    if (!tool) {
+      throw new Error("get_season is not defined");
+    }
 
     const body = jsonOf(await tool.run(user("journalist"), { id: SEASON_ID }));
 

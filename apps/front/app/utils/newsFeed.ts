@@ -15,9 +15,11 @@ export function buildNewsFeed(items: readonly NewsArticleListItem[]): NewsFeedEn
 
   for (const item of items) {
     switch (item.type) {
-      case "article":
+      case "article": {
         entries.push({ kind: "article", article: item });
         break;
+      }
+
       case "short": {
         const week = isoWeekIdFromDate(new Date(item.createdAt));
 

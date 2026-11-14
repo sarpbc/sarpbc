@@ -40,10 +40,14 @@ const hasMatches = computed(() => live.value.length > 0 || activeMatches.value.l
 
 const listVariant = computed<"upcoming" | "result">(() => {
   switch (tab.value) {
-    case "upcoming":
+    case "upcoming": {
       return "upcoming";
-    case "past":
+    }
+
+    case "past": {
       return "result";
+    }
+
     default: {
       const exhaustive: never = tab.value;
 

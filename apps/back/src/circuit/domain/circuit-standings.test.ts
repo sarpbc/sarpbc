@@ -1,6 +1,7 @@
 import type { CircuitScaleTier, TournamentEventRef } from "@sarpbc/types";
 import { describe, expect, it } from "vitest";
-import { computeCircuitStandings, type CircuitStageResult } from "./circuit-standings";
+import { computeCircuitStandings } from "./circuit-standings";
+import type { CircuitStageResult } from "./circuit-standings";
 
 const now = new Date("2026-06-01T00:00:00Z");
 const past = (day: number) => new Date(`2026-0${day}-01T00:00:00Z`);
@@ -208,13 +209,14 @@ describe("computeCircuitStandings in a regional circuit", () => {
   });
 
   it("credits every team of a worldwide stage in a worldwide circuit", () => {
-    for (const region of [null, "Worldwide"])
+    for (const region of [null, "Worldwide"]) {
       expect(totals([major()], region)).toStrictEqual([
         ["nrg", 30],
         ["kc", 20],
         ["flcn", 14],
         ["vit", 14],
       ]);
+    }
   });
 
   it("credits nobody from a worldwide stage whose region teams are not entered yet", () => {

@@ -12,8 +12,9 @@ import type { TournamentStatsGame } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { ManualGameService } from "../../application/manual-game.service";
-import { AttachReplayDto, type AttachReplayInput } from "./dto/attach-replay.dto";
+import type { ManualGameService } from "../../application/manual-game.service";
+import { AttachReplayDto } from "./dto/attach-replay.dto";
+import type { AttachReplayInput } from "./dto/attach-replay.dto";
 
 @Controller("tournaments/:id/stats-games")
 @UseGuards(AuthGuard, PermissionGuard)

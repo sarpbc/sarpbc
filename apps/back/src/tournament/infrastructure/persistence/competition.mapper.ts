@@ -7,7 +7,8 @@ import type { TournamentParticipant as TournamentParticipantRow } from "./tourna
 import type { Tournament as TournamentRow } from "./tournament.entity";
 import type { Match as MatchRow } from "./match.entity";
 import { League } from "../../domain/league";
-import { Match, matchPublicSlug, type TournamentSummary } from "../../domain/match";
+import { Match, matchPublicSlug } from "../../domain/match";
+import type { TournamentSummary } from "../../domain/match";
 import { Tournament } from "../../domain/tournament";
 import { TournamentParticipant } from "../../domain/tournament-participant";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
@@ -55,7 +56,9 @@ export const MATCH_WRITE_POPULATE = [
 
 export function eventRefOf(row: TournamentEventRow): TournamentEventRef {
   // An unpopulated reference would silently map to an empty slug and break every public URL.
-  if (!wrap(row).isInitialized()) throw new Error(`Tournament event ${row.id} is not populated`);
+  if (!wrap(row).isInitialized()) {
+    throw new Error(`Tournament event ${row.id} is not populated`);
+  }
 
   return toEventRef(row);
 }

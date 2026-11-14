@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import type { TrackedStreamerStore } from "../../application/ports/tracked-streamer-store";
 import type { TrackedStreamer } from "../../domain/tracked-streamer";

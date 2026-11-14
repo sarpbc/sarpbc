@@ -1,4 +1,5 @@
-import { loadEnv, type Env } from "./env.validation";
+import { loadEnv } from "./env.validation";
+import type { Env } from "./env.validation";
 
 const DEV_ORIGINS = ["http://localhost:4000", "http://localhost:4001", "http://localhost:4002"];
 
@@ -20,7 +21,10 @@ function sharedParentDomain(urls: string[]): string | undefined {
 function originWithWww(url: string): string[] {
   const origin = new URL(url);
 
-  if (origin.hostname.startsWith("www.")) return [origin.origin];
+  if (origin.hostname.startsWith("www.")) {
+    return [origin.origin];
+  }
+
   const www = new URL(origin.origin);
   www.hostname = `www.${origin.hostname}`;
 

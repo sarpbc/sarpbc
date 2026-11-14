@@ -2,15 +2,11 @@ import { Body, Controller, Get, Patch, Query, UseGuards } from "@nestjs/common";
 import type { AppNotification } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
-import {
-  ListNotificationsQueryDto,
-  type ListNotificationsQueryInput,
-} from "./dto/list-notifications-query.dto";
-import {
-  MarkNotificationsReadDto,
-  type MarkNotificationsReadInput,
-} from "./dto/mark-notifications-read.dto";
-import { NotificationService } from "../../application/notification.service";
+import { ListNotificationsQueryDto } from "./dto/list-notifications-query.dto";
+import type { ListNotificationsQueryInput } from "./dto/list-notifications-query.dto";
+import { MarkNotificationsReadDto } from "./dto/mark-notifications-read.dto";
+import type { MarkNotificationsReadInput } from "./dto/mark-notifications-read.dto";
+import type { NotificationService } from "../../application/notification.service";
 
 @Controller("notifications")
 @UseGuards(AuthGuard)

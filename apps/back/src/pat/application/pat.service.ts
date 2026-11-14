@@ -56,7 +56,10 @@ export class PatService {
   async resolveUser(rawToken: string): Promise<PatUser | null> {
     const token = await this.tokens.findActive(this.secrets.hash(rawToken));
 
-    if (!token || !isStaffRole(token.owner.role)) return null;
+    if (!token || !isStaffRole(token.owner.role)) {
+      return null;
+    }
+
     const now = this.now();
 
     if (

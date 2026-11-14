@@ -4,7 +4,8 @@ import { apiFetch } from "@sarpbc/composables/apiFetch";
 import type { Match } from "~/types/matches";
 import { rethrowApiError } from "./apiError";
 import { getMatchById } from "~/composables/matches/api";
-import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
+import { buildIcs } from "~/utils/calendar/ics";
+import type { CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
 import { tournamentStageLabel } from "@sarpbc/utils";
 

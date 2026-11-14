@@ -5,16 +5,26 @@ export function usePlayerAwardLabels() {
 
   function awardTypeLabel(awardType: PlayerAwardType): string {
     switch (awardType) {
-      case "mvp":
+      case "mvp": {
         return t("page.player.slug.awards.types.mvp");
-      case "grand_finals_mvp":
+      }
+
+      case "grand_finals_mvp": {
         return t("page.player.slug.awards.types.grand_finals_mvp");
-      case "offensive_mvp":
+      }
+
+      case "offensive_mvp": {
         return t("page.player.slug.awards.types.offensive_mvp");
-      case "defensive_mvp":
+      }
+
+      case "defensive_mvp": {
         return t("page.player.slug.awards.types.defensive_mvp");
-      case "breakthrough_player":
+      }
+
+      case "breakthrough_player": {
         return t("page.player.slug.awards.types.breakthrough_player");
+      }
+
       default: {
         const _exhaustive: never = awardType;
 
@@ -25,12 +35,18 @@ export function usePlayerAwardLabels() {
 
   function seasonAwardTypeLabel(awardType: SeasonAwardType): string {
     switch (awardType) {
-      case "season_mvp":
+      case "season_mvp": {
         return t("page.player.slug.awards.seasonTypes.season_mvp");
-      case "regular_season_mvp":
+      }
+
+      case "regular_season_mvp": {
         return t("page.player.slug.awards.seasonTypes.regular_season_mvp");
-      case "regional_mvp":
+      }
+
+      case "regional_mvp": {
         return t("page.player.slug.awards.seasonTypes.regional_mvp");
+      }
+
       default: {
         const _exhaustive: never = awardType;
 

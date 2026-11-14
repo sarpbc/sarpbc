@@ -167,8 +167,9 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
     !isValidAmount(amount) ||
     currencyError(row.currency) ||
     sourceUrlError(row.sourceUrl)
-  )
+  ) {
     return null;
+  }
 
   return {
     placement: row.placement,
@@ -181,13 +182,19 @@ function toInput(row: PrizeRow): TournamentPrizeInput | null {
 }
 
 const prizeInputs = computed<TournamentPrizeInput[] | null>(() => {
-  if (duplicateTeam.value) return null;
+  if (duplicateTeam.value) {
+    return null;
+  }
+
   const inputs: TournamentPrizeInput[] = [];
 
   for (const row of rows.value) {
     const input = toInput(row);
 
-    if (!input) return null;
+    if (!input) {
+      return null;
+    }
+
     inputs.push(input);
   }
 
@@ -208,7 +215,9 @@ function addRow() {
 }
 
 function applySourceToAll() {
-  for (const row of rows.value) row.sourceUrl = bulkSourceUrl.value.trim();
+  for (const row of rows.value) {
+    row.sourceUrl = bulkSourceUrl.value.trim();
+  }
 }
 
 function removeRow(key: number) {
@@ -223,7 +232,10 @@ function selectTeam(row: PrizeRow, teamId: string | undefined) {
 async function save() {
   const inputs = prizeInputs.value;
 
-  if (!inputs) return;
+  if (!inputs) {
+    return;
+  }
+
   saving.value = true;
 
   try {

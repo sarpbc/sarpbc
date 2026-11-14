@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { findManualCounterpart, type ManualCandidate } from "./manual-counterpart";
+import { findManualCounterpart } from "./manual-counterpart";
+import type { ManualCandidate } from "./manual-counterpart";
 
 const stage = {
   eventName: "RLCS 2025 MENA",

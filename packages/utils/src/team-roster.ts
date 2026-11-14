@@ -1,4 +1,5 @@
-import { STAFF_CONTRACT_ROLES, type ContractRole, type StaffContractRole } from "@sarpbc/types";
+import { STAFF_CONTRACT_ROLES } from "@sarpbc/types";
+import type { ContractRole, StaffContractRole } from "@sarpbc/types";
 
 export const ACTIVE_ROSTER_LIMIT = 3;
 

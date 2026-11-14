@@ -1,9 +1,5 @@
-import {
-  FORUM_ERROR_CODES,
-  type ForumPost,
-  type ForumPostCreationStatus,
-  type SupportedLocale,
-} from "@sarpbc/types";
+import { FORUM_ERROR_CODES } from "@sarpbc/types";
+import type { ForumPost, ForumPostCreationStatus, SupportedLocale } from "@sarpbc/types";
 import { forumPostSlug } from "@sarpbc/utils";
 import { mapSequentially } from "../../common/application/sequentially";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
@@ -50,7 +46,10 @@ export class PostService {
   async findByIdDto(ref: EntityRef, locale: SupportedLocale): Promise<ForumPost | null> {
     const post = await this.findById(ref);
 
-    if (!post) return null;
+    if (!post) {
+      return null;
+    }
+
     const translation = post.translations.find((t) => t.locale === locale);
 
     return {
@@ -143,7 +142,9 @@ export class PostService {
     });
     const created = await this.postRepository.findById(createPostInput.id);
 
-    if (!created) throw new NotFoundError("Post not found");
+    if (!created) {
+      throw new NotFoundError("Post not found");
+    }
 
     return { publicId: created.publicId, slug: forumPostSlug(created.title) };
   }

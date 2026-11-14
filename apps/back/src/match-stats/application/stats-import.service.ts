@@ -4,13 +4,10 @@ import { mapSequentially } from "../../common/application/sequentially";
 import { ApplicationError } from "../../common/domain/errors/application-error";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { parseBallchasingRef } from "../domain/ballchasing-ref";
-import {
-  assignReplays,
-  byPlayedAt,
-  type ReplayAssignment,
-  type RosterPlayer,
-} from "../domain/replay-matching";
-import { isActive, type StatsImport } from "../domain/stats-import";
+import { assignReplays, byPlayedAt } from "../domain/replay-matching";
+import type { ReplayAssignment, RosterPlayer } from "../domain/replay-matching";
+import { isActive } from "../domain/stats-import";
+import type { StatsImport } from "../domain/stats-import";
 import {
   buildGameRecord,
   hasBothTeams,
@@ -48,11 +45,12 @@ export class StatsImportService {
     await requireTournament(this.candidates, tournamentId);
     const [latest]: (StatsImport | undefined)[] = await this.imports.latest(tournamentId, 1);
 
-    if (latest !== undefined && isActive(latest))
+    if (latest !== undefined && isActive(latest)) {
       throw new ConflictError({
         message: "A stats import is already running for this tournament. Wait for it to finish.",
         code: "stats_import_running",
       });
+    }
 
     const statsImport: StatsImport = {
       id: v4(),
@@ -89,7 +87,10 @@ export class StatsImportService {
 
     const { source } = this;
 
-    if (!statsImport || statsImport.status !== "pending" || !source) return;
+    if (!statsImport || statsImport.status !== "pending" || !source) {
+      return;
+    }
+
     statsImport.status = "running";
     statsImport.startedAt = new Date();
     await this.imports.save(statsImport);
@@ -132,7 +133,9 @@ export class StatsImportService {
           ? error.message
           : "The import failed unexpectedly. Check the API logs, then run it again.";
 
-      if (!(error instanceof ApplicationError)) this.reportFailure(error);
+      if (!(error instanceof ApplicationError)) {
+        this.reportFailure(error);
+      }
     }
 
     statsImport.finishedAt = new Date();
@@ -153,7 +156,7 @@ export class StatsImportService {
     };
 
     switch (assignment.kind) {
-      case "unmatched":
+      case "unmatched": {
         return {
           ...base,
           status: "unmatched",
@@ -161,15 +164,21 @@ export class StatsImportService {
           blueParticipantId: assignment.sides?.blue ?? null,
           reason: assignment.reason,
         };
-      case "stored":
+      }
+
+      case "stored": {
         return {
           ...base,
           status: "already_imported",
           matchId: assignment.matchId,
           gameNumber: assignment.gameNumber,
         };
-      case "matched":
+      }
+
+      case "matched": {
         break;
+      }
+
       default: {
         const exhaustive: never = assignment;
 
@@ -196,12 +205,17 @@ export class StatsImportService {
       return failed("fetch_failed");
     }
 
-    if (!stats) return failed("replay_not_ready");
+    if (!stats) {
+      return failed("replay_not_ready");
+    }
 
-    if (stats.blueGoals !== replay.blue.goals || stats.orangeGoals !== replay.orange.goals)
+    if (stats.blueGoals !== replay.blue.goals || stats.orangeGoals !== replay.orange.goals) {
       return failed("score_mismatch");
+    }
 
-    if (!hasBothTeams(stats)) return failed("player_mismatch");
+    if (!hasBothTeams(stats)) {
+      return failed("player_mismatch");
+    }
 
     try {
       const links = await this.games.links(platformAccounts(stats));

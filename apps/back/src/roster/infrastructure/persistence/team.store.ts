@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Team as TeamRow } from "./team.entity";
 import { TeamAlias as TeamAliasRow } from "./team-alias.entity";
@@ -16,7 +16,9 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
   private async teamDirectoryQuery(options: Partial<DirectorySearchProps>) {
     const { where, page } = directoryQuery(options);
 
-    if (options.name === undefined || options.name === "") return { where, page };
+    if (options.name === undefined || options.name === "") {
+      return { where, page };
+    }
 
     const aliases = await this.em.find(
       TeamAliasRow,
@@ -24,7 +26,10 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
       { fields: ["team"] },
     );
 
-    if (aliases.length === 0) return { where, page };
+    if (aliases.length === 0) {
+      return { where, page };
+    }
+
     const { name, ...rest } = where;
     const formerly = { id: { $in: [...new Set(aliases.map(({ team }) => team.id))] } };
 
@@ -65,7 +70,10 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
   async save(model: Team) {
     const row = model.id ? await this.em.findOneOrFail(TeamRow, { id: model.id }) : new TeamRow();
 
-    if (!model.id) model.id = v4();
+    if (!model.id) {
+      model.id = v4();
+    }
+
     Object.assign(row, teamColumns(model), {
       mergedInto:
         model.mergedIntoId !== null && model.mergedIntoId !== ""

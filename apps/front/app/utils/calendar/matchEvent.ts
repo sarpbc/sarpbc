@@ -1,14 +1,11 @@
 import type { TournamentEventRef } from "@sarpbc/types";
 import type { MatchLinkTarget } from "~/types/matches";
-import {
-  isNonEmptyDateInput,
-  isNonEmptyString,
-  tournamentStageLabel,
-  type NamedParticipant,
-} from "@sarpbc/utils";
+import { isNonEmptyDateInput, isNonEmptyString, tournamentStageLabel } from "@sarpbc/utils";
+import type { NamedParticipant } from "@sarpbc/utils";
 import { slotName } from "~/utils/participantSlot";
 import { TBD_LABEL } from "~/utils/tbdLabel";
-import { matchEndAt, matchEventUid, matchPageUrl, type CalendarEvent } from "./ics";
+import { matchEndAt, matchEventUid, matchPageUrl } from "./ics";
+import type { CalendarEvent } from "./ics";
 
 interface CalendarMatch extends MatchLinkTarget {
   beginAt?: Date | string | null;

@@ -1,7 +1,5 @@
-import {
-  downloadPublicHttps,
-  type PublicHttpsTransport,
-} from "../../../infrastructure/http/public-https-download";
+import { downloadPublicHttps } from "../../../infrastructure/http/public-https-download";
+import type { PublicHttpsTransport } from "../../../infrastructure/http/public-https-download";
 import type { TeamLogoSource } from "../../application/ports";
 import { isLiquipediaSourceHost } from "@sarpbc/utils";
 

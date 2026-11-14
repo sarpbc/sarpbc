@@ -39,11 +39,15 @@ if (!resolved.value) {
 const canonicalPath = computed(() => {
   const target = resolved.value;
 
-  if (!target) return null;
+  if (!target) {
+    return null;
+  }
 
   switch (target.kind) {
-    case "event":
+    case "event": {
       return localePath(tournamentEventPath(target.event.slug));
+    }
+
     case "stage": {
       const stage = target.tournament;
 

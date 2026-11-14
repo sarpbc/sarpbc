@@ -22,7 +22,9 @@ const href = computed(() => {
 });
 
 const nameClass = computed(() => {
-  if (winner === undefined) return "font-medium text-highlighted";
+  if (winner === undefined) {
+    return "font-medium text-highlighted";
+  }
 
   return winner ? "font-medium text-highlighted" : "text-muted";
 });

@@ -20,7 +20,10 @@ function repository(baseMigrations: string[]): Repository {
   const git = (...args: string[]) => execFileSync("git", args, { cwd: root, stdio: "ignore" });
   git("init", "--quiet", "--initial-branch", "base");
 
-  for (const name of baseMigrations) writeFileSync(path.join(directory, name), "");
+  for (const name of baseMigrations) {
+    writeFileSync(path.join(directory, name), "");
+  }
+
   writeFileSync(path.join(directory, ".snapshot-sarpbc.json"), "{}");
   git("add", ".");
   git(
@@ -111,7 +114,9 @@ void test("reports files that are neither migrations nor snapshots", () => {
     const violations = migrationViolations(repo.directory);
     assert.equal(violations.length, 4);
 
-    for (const violation of violations) assert.match(violation, /^Unexpected file /);
+    for (const violation of violations) {
+      assert.match(violation, /^Unexpected file /);
+    }
   } finally {
     repo.remove();
   }

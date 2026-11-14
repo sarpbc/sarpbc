@@ -52,7 +52,10 @@ export class TwitchHelixSource implements LiveStreamSource {
   private async fetchStreams(logins: string[]): Promise<HelixStream[]> {
     const url = new URL(STREAMS_URL);
 
-    for (const login of logins) url.searchParams.append("user_login", login);
+    for (const login of logins) {
+      url.searchParams.append("user_login", login);
+    }
+
     url.searchParams.set("first", String(HELIX_LOGINS_PER_REQUEST));
 
     let token = await this.token.get();

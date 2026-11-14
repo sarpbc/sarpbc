@@ -21,8 +21,10 @@ export function assertTournamentUpdateAllowed(
 ): void {
   switch (source) {
     case "manual":
-    case "startgg":
+    case "startgg": {
       return;
+    }
+
     case "pandascore": {
       const { imageUrl, endAt, ...syncedFields } = patch;
 
@@ -74,10 +76,12 @@ export function claimForPandascore(
   pandascoreId: number,
   providerEndAt: Date | null,
 ): void {
-  if (tournament.source !== "manual")
+  if (tournament.source !== "manual") {
     throw new InvalidInputError(
       `Only manual tournaments can be linked to PandaScore; this one is source=${tournament.source}.`,
     );
+  }
+
   tournament.source = "pandascore";
   tournament.pandascoreId = pandascoreId;
   tournament.endAtCorrected = tournament.endAt !== null && providerEndAt === null;
@@ -87,11 +91,16 @@ export function assertLeagueUpdateAllowed(
   league: { pandascoreId: number | null },
   patch: { name?: string; slug?: string | null; url?: string | null; imageUrl?: string | null },
 ): void {
-  if (league.pandascoreId === null) return;
+  if (league.pandascoreId === null) {
+    return;
+  }
+
   const { imageUrl, ...syncedFields } = patch;
 
-  if (imageUrl !== undefined && Object.values(syncedFields).every((value) => value === undefined))
+  if (imageUrl !== undefined && Object.values(syncedFields).every((value) => value === undefined)) {
     return;
+  }
+
   throw new InvalidInputError(
     "Only the image can be edited on a PandaScore league. Send imageUrl alone.",
   );

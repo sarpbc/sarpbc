@@ -1,11 +1,6 @@
 import { isNonEmptyString } from "@sarpbc/utils";
-import {
-  FORUM_ERROR_CODES,
-  type PaginatedReplies,
-  type Reply,
-  type ReplyReportReason,
-  type ReplyTargetType,
-} from "@sarpbc/types";
+import { FORUM_ERROR_CODES } from "@sarpbc/types";
+import type { PaginatedReplies, Reply, ReplyReportReason, ReplyTargetType } from "@sarpbc/types";
 import type { CreateCommentResult, ReportCommentResult } from "~/types/discussion";
 
 const MAX_REFETCH_LIMIT = 100;
@@ -67,15 +62,21 @@ export async function createComment(data: {
   };
 
   switch (data.targetType) {
-    case "forumPost":
+    case "forumPost": {
       body.postId = data.targetId;
       break;
-    case "newsArticle":
+    }
+
+    case "newsArticle": {
       body.newsArticleId = data.targetId;
       break;
-    case "match":
+    }
+
+    case "match": {
       body.matchId = data.targetId;
       break;
+    }
+
     default: {
       const _exhaustive: never = data.targetType;
 

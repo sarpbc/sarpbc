@@ -1,5 +1,6 @@
-import { Injectable, OnModuleDestroy } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
+import type { OnModuleDestroy } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import type { ConfigService } from "@nestjs/config";
 import { PostHog } from "posthog-node";
 
 export type PostHogProperties = Record<string, string | number | boolean | null>;
@@ -28,7 +29,9 @@ export class PostHogService implements OnModuleDestroy {
     properties?: PostHogProperties;
     sessionId?: string | undefined;
   }): void {
-    if (!this.client || params.distinctId === undefined || params.distinctId === "") return;
+    if (!this.client || params.distinctId === undefined || params.distinctId === "") {
+      return;
+    }
 
     const base = {
       ...params.properties,

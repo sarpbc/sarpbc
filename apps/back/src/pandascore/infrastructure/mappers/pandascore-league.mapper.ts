@@ -1,5 +1,5 @@
-import { UpsertLeagueCommand } from "../../../tournament/application/feed";
-import { LeagueDto } from "../dto/tournament.dto";
+import type { UpsertLeagueCommand } from "../../../tournament/application/feed";
+import type { LeagueDto } from "../dto/tournament.dto";
 
 export function toUpsertLeagueCommand(dto: LeagueDto): UpsertLeagueCommand {
   return {

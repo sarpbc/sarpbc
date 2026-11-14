@@ -179,7 +179,9 @@ function setup() {
   const call = async (name: string, args = {}) => {
     const tool = tools.find((candidate) => candidate.name === name);
 
-    if (!tool) throw new Error(`${name} is not defined`);
+    if (!tool) {
+      throw new Error(`${name} is not defined`);
+    }
 
     return await tool.run(user, args);
   };

@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { EMPTY_BRACKET_SIZES, type EmptyBracketSize } from "@sarpbc/types";
+import { EMPTY_BRACKET_SIZES } from "@sarpbc/types";
+import type { EmptyBracketSize } from "@sarpbc/types";
 
 const { tournamentId } = defineProps<{ tournamentId: string }>();
 const open = defineModel<boolean>("open", { default: false });

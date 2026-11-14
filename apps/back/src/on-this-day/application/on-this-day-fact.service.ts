@@ -23,16 +23,20 @@ export class OnThisDayFactService {
   }
 
   async remove(id: string): Promise<void> {
-    if (!(await this.store.remove(id))) throw new NotFoundError("Fact not found");
+    if (!(await this.store.remove(id))) {
+      throw new NotFoundError("Fact not found");
+    }
   }
 
   private async write(id: string, input: OnThisDayFactInput): Promise<OnThisDayFact> {
     const fields = parseOnThisDayFact(input);
 
-    if (fields.link && !(await this.store.linkExists(fields.link)))
+    if (fields.link && !(await this.store.linkExists(fields.link))) {
       throw new InvalidInputError(
         `No ${fields.link.kind} with id "${fields.link.id}"; link an existing, unmerged ${fields.link.kind}.`,
       );
+    }
+
     await this.store.save(id, fields);
 
     return await this.require(id);
@@ -41,7 +45,9 @@ export class OnThisDayFactService {
   private async require(id: string): Promise<OnThisDayFact> {
     const fact = await this.store.find(id);
 
-    if (!fact) throw new NotFoundError("Fact not found");
+    if (!fact) {
+      throw new NotFoundError("Fact not found");
+    }
 
     return fact;
   }

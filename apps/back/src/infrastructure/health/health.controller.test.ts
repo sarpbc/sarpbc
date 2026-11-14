@@ -1,11 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ServiceUnavailableException } from "@nestjs/common";
-import { Test, TestingModule } from "@nestjs/testing";
-import {
-  HealthCheckService,
-  type HealthCheckResult,
-  type HealthIndicatorResult,
-} from "@nestjs/terminus";
+import type { TestingModule } from "@nestjs/testing";
+import { Test } from "@nestjs/testing";
+import { HealthCheckService } from "@nestjs/terminus";
+import type { HealthCheckResult, HealthIndicatorResult } from "@nestjs/terminus";
 import { HealthController } from "./health.controller";
 import { PostgresHealthIndicator } from "./postgres.health";
 import { RedisHealthIndicator } from "./redis.health";

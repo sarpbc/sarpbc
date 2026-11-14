@@ -74,7 +74,10 @@ async function reload() {
 const isManual = computed(() => tournament.value?.source !== "pandascore");
 
 async function handleSubmit() {
-  if (!tournament.value || isSaving.value || isUploading.value) return;
+  if (!tournament.value || isSaving.value || isUploading.value) {
+    return;
+  }
+
   const validationError = isManual.value ? validateManualTournamentForm(formState.value) : null;
 
   if (validationError) {

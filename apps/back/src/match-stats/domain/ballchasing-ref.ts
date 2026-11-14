@@ -34,12 +34,16 @@ export function parseBallchasingRef(kind: BallchasingRefKind, input: string): st
 
     const [pathKind, id] = url.pathname.split("/").filter(Boolean);
 
-    if (url.hostname.replace(/^www\./, "") !== BALLCHASING_HOST || pathKind !== kind || !id)
+    if (url.hostname.replace(/^www\./, "") !== BALLCHASING_HOST || pathKind !== kind || !id) {
       throw invalidRef(kind);
+    }
+
     candidate = id;
   }
 
-  if (!REFS[kind].id.test(candidate)) throw invalidRef(kind);
+  if (!REFS[kind].id.test(candidate)) {
+    throw invalidRef(kind);
+  }
 
   return REFS[kind].normalize(candidate);
 }

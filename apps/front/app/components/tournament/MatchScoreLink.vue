@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import { matchPath, type ThemedLogo } from "@sarpbc/utils";
+import { matchPath } from "@sarpbc/utils";
+import type { ThemedLogo } from "@sarpbc/utils";
 import type { MatchLinkTarget, MatchResult, MatchStatus } from "~/types/matches";
 import { displayMatchScore, getMatchParticipantScore } from "~/utils/matchScore";
 import { shortTeamName } from "~/utils/shortTeamName";

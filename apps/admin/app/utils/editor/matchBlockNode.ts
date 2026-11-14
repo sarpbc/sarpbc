@@ -1,4 +1,5 @@
-import { Node, mergeAttributes, type MarkdownTokenizer } from "@tiptap/core";
+import { Node, mergeAttributes } from "@tiptap/core";
+import type { MarkdownTokenizer } from "@tiptap/core";
 import { VueNodeViewRenderer } from "@tiptap/vue-3";
 import {
   newsMatchBlockFromAttrs,

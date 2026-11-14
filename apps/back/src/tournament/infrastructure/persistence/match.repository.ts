@@ -1,7 +1,7 @@
 import { EntityRepository } from "@mikro-orm/core";
 import type { DataSource } from "@sarpbc/types";
 import type { EntityRef } from "../../../common/domain/entity-ref";
-import { Match } from "./match.entity";
+import type { Match } from "./match.entity";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import type {
   MatchListKind,
@@ -109,7 +109,9 @@ function mergeScopeFilters(base: MatchListFilter, scope: MatchListScopeFilters):
   const query: MatchListFilter = { ...base };
   const tournamentFilter = buildTournamentFilter(scope);
 
-  if (tournamentFilter) query.tournament = tournamentFilter;
+  if (tournamentFilter) {
+    query.tournament = tournamentFilter;
+  }
 
   if ((scope.teamId !== undefined && scope.teamId !== "") || scope.playerIds) {
     query.participants = {
@@ -130,27 +132,33 @@ function listQuery(
   { limit, offset = 0, todayOnly = false, liveSince, ...scope }: MatchListQueryOptions,
 ) {
   switch (kind) {
-    case "upcoming":
+    case "upcoming": {
       return {
         where: mergeScopeFilters(buildUpcomingQuery(todayOnly), scope),
         orderBy: { beginAt: "ASC" } as const,
         limit,
         offset,
       };
-    case "live":
+    }
+
+    case "live": {
       return {
         where: mergeScopeFilters(buildLiveQuery(todayOnly, liveSince), scope),
         orderBy: { beginAt: "ASC" } as const,
         limit,
         offset,
       };
-    case "results":
+    }
+
+    case "results": {
       return {
         where: mergeScopeFilters({ endAt: { $ne: null } }, scope),
         orderBy: { endAt: "DESC" } as const,
         limit,
         offset,
       };
+    }
+
     default: {
       const unreachable: never = kind;
 

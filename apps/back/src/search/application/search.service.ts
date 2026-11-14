@@ -2,7 +2,7 @@ import type { SearchType } from "@sarpbc/types";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { TeamService } from "../../roster/application/team.service";
 import type { TournamentQueries } from "../../tournament/application/ports";
-import { SearchResult, SearchParams } from "./models/search-result";
+import type { SearchResult, SearchParams } from "./models/search-result";
 import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
 import type { Tournament } from "../../tournament/domain/tournament";
@@ -35,11 +35,17 @@ export class SearchService {
     let teams: Team[] = [];
     let tournaments: Tournament[] = [];
 
-    if (includes(type, "player")) players = await this.playerService.find(page);
+    if (includes(type, "player")) {
+      players = await this.playerService.find(page);
+    }
 
-    if (includes(type, "team")) teams = await this.teamService.find(page);
+    if (includes(type, "team")) {
+      teams = await this.teamService.find(page);
+    }
 
-    if (includes(type, "tournament")) tournaments = await this.tournamentService.searchByName(page);
+    if (includes(type, "tournament")) {
+      tournaments = await this.tournamentService.searchByName(page);
+    }
 
     return {
       players,

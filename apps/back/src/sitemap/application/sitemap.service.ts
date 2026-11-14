@@ -23,7 +23,9 @@ function tournamentEntries(stages: StageSitemapRow[]): SitemapEntry[] {
   for (const { eventSlug, lastmod } of stages) {
     const latest = eventLastmods.get(eventSlug);
 
-    if (!latest || latest < lastmod) eventLastmods.set(eventSlug, lastmod);
+    if (!latest || latest < lastmod) {
+      eventLastmods.set(eventSlug, lastmod);
+    }
   }
 
   return [
@@ -52,8 +54,10 @@ export class SitemapService {
         return news.map(({ slug, lastmod }) => dated(newsPath(slug), lastmod));
       }
 
-      case "tournaments":
+      case "tournaments": {
         return tournamentEntries(await this.queries.stages());
+      }
+
       case "matches": {
         const matches = await this.queries.matches();
 

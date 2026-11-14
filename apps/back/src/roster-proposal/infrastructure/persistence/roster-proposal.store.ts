@@ -1,5 +1,5 @@
 import { LockMode } from "@mikro-orm/core";
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { RosterProposal } from "../../domain/roster-proposal";
 import type { RosterProposalStore, RosterProposalTransaction } from "../../application/ports";
@@ -78,7 +78,9 @@ export function rosterProposalStore(em: EntityManager, inTransaction = false): R
       });
       em.persist(row);
 
-      if (!inTransaction) await em.flush();
+      if (!inTransaction) {
+        await em.flush();
+      }
     },
     names: async (ids) => {
       const [players, teams, users, tournaments, matches, events, circuits, seasons] =

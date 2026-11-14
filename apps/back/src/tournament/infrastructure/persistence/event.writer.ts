@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import type { FilterQuery } from "@mikro-orm/core";
 import { Tournament as TournamentRow } from "./tournament.entity";
 import { League as LeagueRow } from "./league.entity";
@@ -76,6 +76,8 @@ export class CompetitionEventWriter implements EventWriter {
   async remove(id: string) {
     const row = await this.em.findOne(TournamentEventRow, { id });
 
-    if (row) this.em.remove(row);
+    if (row) {
+      this.em.remove(row);
+    }
   }
 }

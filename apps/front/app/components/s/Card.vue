@@ -8,12 +8,18 @@ const { size = null } = defineProps<{
 
 function cardSizeClasses(value: CardSize): string {
   switch (value) {
-    case "s":
+    case "s": {
       return "min-h-card-s h-row-snap";
-    case "m":
+    }
+
+    case "m": {
       return "min-h-card-m h-row-snap";
-    case "l":
+    }
+
+    case "l": {
       return "min-h-card-l h-row-snap";
+    }
+
     default: {
       const _exhaustive: never = value;
 

@@ -107,8 +107,10 @@ export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): MatchBlockS
   const hasLimit = attrs.limit !== null && attrs.limit !== undefined && attrs.limit !== "";
 
   switch (selector) {
-    case "match":
+    case "match": {
       return !hasLimit && isUuid(value) ? { kind: "match", id: value.toLowerCase() } : null;
+    }
+
     case "ids": {
       const ids = hasLimit ? null : parseIds(value);
 
@@ -134,14 +136,22 @@ export function newsMatchBlockFromAttrs(attrs: NewsMatchBlockAttrs): MatchBlockS
 
 export function newsMatchBlockToAttrs(block: MatchBlockSelector): NewsMatchBlockAttrs {
   switch (block.kind) {
-    case "match":
+    case "match": {
       return { match: block.id };
-    case "matches":
+    }
+
+    case "matches": {
       return { ids: block.ids.join(",") };
-    case "tournament":
+    }
+
+    case "tournament": {
       return { tournament: block.id, limit: String(block.limit) };
-    case "team":
+    }
+
+    case "team": {
       return { team: block.id, limit: String(block.limit) };
+    }
+
     default: {
       const exhaustive: never = block;
 
@@ -174,14 +184,22 @@ export function serializeNewsMatchTag(block: MatchBlockSelector): string {
 
 export function newsMatchBlockKey(block: MatchBlockSelector): string {
   switch (block.kind) {
-    case "match":
+    case "match": {
       return `match:${block.id}`;
-    case "matches":
+    }
+
+    case "matches": {
       return `matches:${block.ids.join(",")}`;
-    case "tournament":
+    }
+
+    case "tournament": {
       return `tournament:${block.id}:${block.limit}`;
-    case "team":
+    }
+
+    case "team": {
       return `team:${block.id}:${block.limit}`;
+    }
+
     default: {
       const exhaustive: never = block;
 
@@ -200,18 +218,25 @@ export function parseNewsMatchBlockKey(key: string): MatchBlockSelector | null {
   let block: MatchBlockSelector | null;
 
   switch (kind) {
-    case "match":
+    case "match": {
       block = limit === undefined ? newsMatchBlockFromAttrs({ match: value }) : null;
       break;
-    case "matches":
+    }
+
+    case "matches": {
       block = limit === undefined ? newsMatchBlockFromAttrs({ ids: value }) : null;
       break;
+    }
+
     case "tournament":
-    case "team":
+    case "team": {
       block = limit === undefined ? null : newsMatchBlockFromAttrs({ [kind]: value, limit });
       break;
-    default:
+    }
+
+    default: {
       return null;
+    }
   }
 
   return block && newsMatchBlockKey(block) === key ? block : null;

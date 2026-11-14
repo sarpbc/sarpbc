@@ -34,7 +34,9 @@ function eventDisplayName(input: {
 
   if (serie !== undefined) {
     if (/^\d{4}$/.test(serie)) {
-      if (league !== undefined) return `${league} ${serie}`;
+      if (league !== undefined) {
+        return `${league} ${serie}`;
+      }
 
       return stage && !GENERIC_STAGE_NAMES.has(stage.toLowerCase()) ? stage : serie;
     }
@@ -44,7 +46,9 @@ function eventDisplayName(input: {
       : serie;
   }
 
-  if (league !== undefined && stage) return `${league} ${stage}`;
+  if (league !== undefined && stage) {
+    return `${league} ${stage}`;
+  }
 
   return stage || (league ?? "");
 }
@@ -91,7 +95,9 @@ function chronology(
   const at = a.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
   const bt = b.beginAt?.getTime() ?? Number.POSITIVE_INFINITY;
 
-  if (at === bt) return a.id.localeCompare(b.id);
+  if (at === bt) {
+    return a.id.localeCompare(b.id);
+  }
 
   return at < bt ? -1 : 1;
 }
@@ -101,7 +107,10 @@ async function inOrder<Item>(
   task: (item: Item) => Promise<void>,
 ): Promise<void> {
   const step = async (index: number): Promise<void> => {
-    if (index === items.length) return;
+    if (index === items.length) {
+      return;
+    }
+
     await task(items[index]);
     await step(index + 1);
   };

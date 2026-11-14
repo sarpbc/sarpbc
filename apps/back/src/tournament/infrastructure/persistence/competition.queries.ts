@@ -1,12 +1,12 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import type { FilterQuery } from "@mikro-orm/core";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { League } from "./league.entity";
 import { Match } from "./match.entity";
 import { Tournament } from "./tournament.entity";
 import { TournamentParticipant } from "./tournament-participant.entity";
-import { TournamentRepository } from "./tournament.repository";
-import { MatchRepository } from "./match.repository";
+import type { TournamentRepository } from "./tournament.repository";
+import type { MatchRepository } from "./match.repository";
 import { toLeague, toMatch, toTournament } from "./competition.mapper";
 import { TOURNAMENT_POPULATE } from "./tournament-populate";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
@@ -138,7 +138,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
     return await this.tournamentsByParticipants({ team: { id } });
   }
   async getTournamentsByTeamTenures(tenures: TeamTenure[]) {
-    if (tenures.length === 0) return [];
+    if (tenures.length === 0) {
+      return [];
+    }
 
     return await this.tournamentsByParticipants({
       $or: tenures.map(({ teamId, from, to }) => ({
@@ -178,7 +180,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       day,
     );
 
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
 
     const rows = await this.em.find(
       Tournament,
@@ -202,7 +206,9 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       day,
     );
 
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
 
     const rows = await this.em.find(
       Match,

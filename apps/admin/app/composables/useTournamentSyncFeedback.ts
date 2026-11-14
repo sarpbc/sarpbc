@@ -2,12 +2,18 @@ export type SyncState = "idle" | "success" | "error";
 
 export function syncIcon(state: SyncState): string {
   switch (state) {
-    case "success":
+    case "success": {
       return "i-fluent-checkmark-24-regular";
-    case "error":
+    }
+
+    case "error": {
       return "i-fluent-dismiss-circle-24-regular";
-    case "idle":
+    }
+
+    case "idle": {
       return "i-fluent-arrow-sync-24-regular";
+    }
+
     default: {
       const _exhaustive: never = state;
 
@@ -18,12 +24,18 @@ export function syncIcon(state: SyncState): string {
 
 function syncColor(state: SyncState): "success" | "error" | "primary" {
   switch (state) {
-    case "success":
+    case "success": {
       return "success";
-    case "error":
+    }
+
+    case "error": {
       return "error";
-    case "idle":
+    }
+
+    case "idle": {
       return "primary";
+    }
+
     default: {
       const _exhaustive: never = state;
 

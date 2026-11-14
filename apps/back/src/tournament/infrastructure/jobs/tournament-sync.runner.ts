@@ -2,9 +2,9 @@ import { MAX_PAGE_SIZE } from "@sarpbc/utils";
 import { mapSequentially } from "../../../common/application/sequentially";
 import { Inject, Injectable } from "@nestjs/common";
 import { createLogger } from "evlog";
-import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
-import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
-import { MatchService } from "../../application/match/match.service";
+import type { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
+import type { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
+import type { MatchService } from "../../application/match/match.service";
 import type { TournamentQueries } from "../../application/ports";
 import { TOURNAMENT_QUERIES } from "../competition-queries.tokens";
 

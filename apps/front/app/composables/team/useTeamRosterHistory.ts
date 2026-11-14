@@ -1,6 +1,7 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
-import { CONTRACT_ROLES, type TeamContract } from "@sarpbc/types";
+import { CONTRACT_ROLES } from "@sarpbc/types";
+import type { TeamContract } from "@sarpbc/types";
 import { getTeamContracts } from "~/composables/team/api";
 import type { TeamRosterEra, TeamRosterEraMember } from "~/types/roster";
 
@@ -31,7 +32,9 @@ function sortMembers(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
   return members.toSorted((a, b) => {
     const roleDiff = CONTRACT_ROLES.indexOf(a.role) - CONTRACT_ROLES.indexOf(b.role);
 
-    if (roleDiff !== 0) return roleDiff;
+    if (roleDiff !== 0) {
+      return roleDiff;
+    }
 
     return a.name.localeCompare(b.name, "en");
   });
@@ -70,15 +73,23 @@ function getMembersAt(normalized: NormalizedContract[], timeMs: number): TeamRos
   const seen = new Set<string>();
 
   for (const { contract, startMs, endMs } of normalized) {
-    if (startMs > timeMs) continue;
-
-    if (endMs !== null) {
-      if (endMs < timeMs) continue;
-
-      if (endMs === timeMs && endMs !== startMs) continue;
+    if (startMs > timeMs) {
+      continue;
     }
 
-    if (seen.has(contract.player.id)) continue;
+    if (endMs !== null) {
+      if (endMs < timeMs) {
+        continue;
+      }
+
+      if (endMs === timeMs && endMs !== startMs) {
+        continue;
+      }
+    }
+
+    if (seen.has(contract.player.id)) {
+      continue;
+    }
 
     seen.add(contract.player.id);
     members.push(toMember(contract));
@@ -92,7 +103,9 @@ function sortByPlayerId(members: TeamRosterEraMember[]): TeamRosterEraMember[] {
 }
 
 function sameRoster(a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean {
-  if (a.length !== b.length) return false;
+  if (a.length !== b.length) {
+    return false;
+  }
 
   const sortedA = sortByPlayerId(a);
   const sortedB = sortByPlayerId(b);
@@ -133,7 +146,9 @@ function mergeAdjacentEras(
     members: TeamRosterEraMember[];
   }[],
 ): typeof eras {
-  if (eras.length <= 1) return eras;
+  if (eras.length <= 1) {
+    return eras;
+  }
 
   const merged: typeof eras = [];
 
@@ -155,7 +170,9 @@ function mergeAdjacentEras(
 function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRosterEra[] {
   const normalized = normalizeContracts(contracts, now);
 
-  if (normalized.length === 0) return [];
+  if (normalized.length === 0) {
+    return [];
+  }
 
   const boundarySet = new Set<number>();
 
@@ -185,7 +202,9 @@ function buildTeamRosterEras(contracts: TeamContract[], now: number): TeamRoster
   for (const [index, startMs] of boundaries.entries()) {
     const members = getMembersAt(normalized, startMs);
 
-    if (members.length === 0) continue;
+    if (members.length === 0) {
+      continue;
+    }
 
     const isLast = index === boundaries.length - 1;
     let endMs: number | null;

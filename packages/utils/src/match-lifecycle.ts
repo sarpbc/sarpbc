@@ -34,7 +34,9 @@ export function isMatchLive(match: MatchLifecycle, now: Instant): boolean {
 export function winnerFromResults(results: readonly MatchResultScore[]): string | null {
   const scored = results.filter((result) => result.participantId);
 
-  if (scored.length < 2) return null;
+  if (scored.length < 2) {
+    return null;
+  }
 
   const top = Math.max(...scored.map((result) => result.score));
   const leaders = scored.filter((result) => result.score === top);

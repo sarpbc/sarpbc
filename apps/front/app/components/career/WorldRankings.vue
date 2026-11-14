@@ -32,10 +32,14 @@ function playerKey(player: RankedPlayer): string {
 
 function playerListKey(item: PlayerListItem): string {
   switch (item.type) {
-    case "divider":
+    case "divider": {
       return "roster-divider";
-    case "player":
+    }
+
+    case "player": {
       return playerKey(item.entry);
+    }
+
     default: {
       const _exhaustive: never = item;
 
@@ -177,10 +181,14 @@ const tooltipContent = {
 
 const title = computed(() => {
   switch (kind) {
-    case "teams":
+    case "teams": {
       return t("page.game.career.rankings.bestTeams");
-    case "players":
+    }
+
+    case "players": {
       return t("page.game.career.rankings.bestPlayers");
+    }
+
     default: {
       const _exhaustive: never = kind;
 

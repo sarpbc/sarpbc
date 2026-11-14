@@ -1,10 +1,5 @@
-import {
-  isMatchFinished,
-  isMatchLive,
-  isNonEmptyDateInput,
-  isNonEmptyString,
-  type MatchLifecycle,
-} from "@sarpbc/utils";
+import { isMatchFinished, isMatchLive, isNonEmptyDateInput, isNonEmptyString } from "@sarpbc/utils";
+import type { MatchLifecycle } from "@sarpbc/utils";
 import type { Match } from "~/types/matches";
 
 interface PickemTournamentState {
@@ -22,12 +17,17 @@ export function isPickemTournamentActive(
   tournament: PickemTournamentState,
   now = Date.now(),
 ): boolean {
-  if (tournament.pickemsEnabled !== true) return false;
-
-  if (hasTournamentWinner(tournament)) return false;
-
-  if (isNonEmptyDateInput(tournament.endAt) && new Date(tournament.endAt).getTime() < now)
+  if (tournament.pickemsEnabled !== true) {
     return false;
+  }
+
+  if (hasTournamentWinner(tournament)) {
+    return false;
+  }
+
+  if (isNonEmptyDateInput(tournament.endAt) && new Date(tournament.endAt).getTime() < now) {
+    return false;
+  }
 
   return true;
 }
@@ -50,11 +50,17 @@ export function getPickOutcome(
   match: { winnerId: string | null },
   pick: PickemPickState | undefined,
 ): "correct" | "incorrect" | "pending" | "none" {
-  if (!pick) return "none";
+  if (!pick) {
+    return "none";
+  }
 
-  if (!pick.scored) return "pending";
+  if (!pick.scored) {
+    return "pending";
+  }
 
-  if ((pick.points ?? 0) > 0) return "correct";
+  if ((pick.points ?? 0) > 0) {
+    return "correct";
+  }
 
   if (isNonEmptyString(match.winnerId)) {
     return pick.pickedParticipant === match.winnerId ? "correct" : "incorrect";

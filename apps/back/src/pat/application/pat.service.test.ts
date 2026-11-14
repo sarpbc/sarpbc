@@ -35,7 +35,10 @@ describe(PatService, () => {
       findActive: async (hash) =>
         !revoked && hash === savedHash ? { id: "token-1", owner, lastUsedAt } : null,
       revokeOwned: async (ownerId, id) => {
-        if (ownerId !== owner.id || id !== "token-1" || revoked) return false;
+        if (ownerId !== owner.id || id !== "token-1" || revoked) {
+          return false;
+        }
+
         revoked = true;
 
         return true;

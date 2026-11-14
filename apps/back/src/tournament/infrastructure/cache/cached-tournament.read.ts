@@ -3,7 +3,8 @@ import { z } from "zod";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentQueries } from "../../application/ports";
 import { DATA_SOURCES, STREAM_KINDS, STREAM_PLATFORMS, TOURNAMENT_FORMATS } from "@sarpbc/types";
-import { mapTournamentDetail, type TournamentDetailResponse } from "../http/tournament.mapper";
+import { mapTournamentDetail } from "../http/tournament.mapper";
+import type { TournamentDetailResponse } from "../http/tournament.mapper";
 
 const date = z.iso.datetime().transform((value) => new Date(value));
 const nullableText = z.string().nullable();
@@ -115,11 +116,16 @@ export class CachedTournamentRead {
     const key = tournamentCacheKey(id);
     const cached = await this.readCached(key, id);
 
-    if (cached) return cached;
+    if (cached) {
+      return cached;
+    }
 
     const model = await this.tournaments.findById(id);
 
-    if (!model) return null;
+    if (!model) {
+      return null;
+    }
+
     const mapped = mapTournamentDetail(model);
 
     try {
@@ -135,7 +141,10 @@ export class CachedTournamentRead {
     try {
       const cached = await this.redis.get(key);
 
-      if (cached === null) return null;
+      if (cached === null) {
+        return null;
+      }
+
       const decoded: unknown = JSON.parse(cached);
       const result = tournament.safeParse(decoded);
 

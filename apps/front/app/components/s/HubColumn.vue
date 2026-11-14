@@ -8,10 +8,14 @@ const { variant = "main", class: className = null } = defineProps<{
 
 const variantClass = computed(() => {
   switch (variant) {
-    case "rail":
+    case "rail": {
       return "mt-4 md:mt-0";
-    case "main":
+    }
+
+    case "main": {
       return "";
+    }
+
     default: {
       const _exhaustive: never = variant;
 

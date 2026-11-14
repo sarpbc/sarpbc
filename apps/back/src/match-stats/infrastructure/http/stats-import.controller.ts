@@ -12,12 +12,10 @@ import type { StatsImport as StatsImportResponse } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
-import { StatsImportService } from "../../application/stats-import.service";
+import type { StatsImportService } from "../../application/stats-import.service";
 import type { StatsImport } from "../../domain/stats-import";
-import {
-  RequestStatsImportDto,
-  type RequestStatsImportInput,
-} from "./dto/request-stats-import.dto";
+import { RequestStatsImportDto } from "./dto/request-stats-import.dto";
+import type { RequestStatsImportInput } from "./dto/request-stats-import.dto";
 
 function present(statsImport: StatsImport): StatsImportResponse {
   return {

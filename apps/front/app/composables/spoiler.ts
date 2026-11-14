@@ -3,10 +3,8 @@ import {
   SPOILER_FREE_COOKIE,
   isSpoilerConcealed,
   revealSpoilers,
-  type SpoilerReveals,
-  type SpoilerRevealTarget,
-  type SpoilerScope,
 } from "@sarpbc/utils";
+import type { SpoilerReveals, SpoilerRevealTarget, SpoilerScope } from "@sarpbc/utils";
 
 export const useSpoilerFree = () => {
   const cookie = useCookie<boolean | null>(SPOILER_FREE_COOKIE, {

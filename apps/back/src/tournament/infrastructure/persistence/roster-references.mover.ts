@@ -26,10 +26,12 @@ export class TournamentRosterReferences
       tournament: { participants: { team: null, players: to } },
     });
 
-    if (clashes > 0)
+    if (clashes > 0) {
       throw new ConflictError(
         "Both players are participants without a team in the same tournament. Remove one of them from that tournament before merging.",
       );
+    }
+
     await em.nativeUpdate(PlayerAward, { player: from }, { player: to });
     const keptLineups = await em.find(MatchLineupPlayer, { player: to }, { fields: ["match"] });
     await em.nativeDelete(MatchLineupPlayer, {
@@ -99,11 +101,14 @@ export class TournamentRosterReferences
       ({ team, tournament }) => team.id === from && kept.has(tournament.id),
     );
 
-    for (const duplicate of duplicates)
+    for (const duplicate of duplicates) {
       kept.get(duplicate.tournament.id)?.players.add(duplicate.players.getItems());
+    }
 
-    if (duplicates.length > 0)
+    if (duplicates.length > 0) {
       await em.nativeDelete(TournamentPrize, { id: { $in: duplicates.map(({ id }) => id) } });
+    }
+
     await em.nativeUpdate(TournamentPrize, { team: from }, { team: to });
   }
 }

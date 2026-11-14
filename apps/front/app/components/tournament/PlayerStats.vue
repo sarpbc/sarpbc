@@ -54,7 +54,9 @@ function teamKey(row: TournamentPlayerStats): string {
 const teamOptions = computed(() => {
   const teams = new Map<string, string>();
 
-  for (const row of stats?.players ?? []) teams.set(teamKey(row), row.team.name);
+  for (const row of stats?.players ?? []) {
+    teams.set(teamKey(row), row.team.name);
+  }
 
   return [
     { value: ALL_TEAMS, label: t("page.tournaments.stats.allTeams") },
@@ -67,23 +69,31 @@ const teamOptions = computed(() => {
 watch(
   () => stats,
   () => {
-    if (!teamOptions.value.some((option) => option.value === team.value)) team.value = ALL_TEAMS;
+    if (!teamOptions.value.some((option) => option.value === team.value)) {
+      team.value = ALL_TEAMS;
+    }
   },
 );
 
 function value(row: TournamentPlayerStats, column: Column): number | null {
   switch (column) {
-    case "games":
+    case "games": {
       return row.games;
+    }
+
     case "shootingPercentage":
-    case "goalParticipation":
+    case "goalParticipation": {
       return row[column];
+    }
+
     case "goals":
     case "assists":
     case "saves":
     case "shots":
-    case "demolitions":
+    case "demolitions": {
       return view.value === "totals" ? row.totals[column] : row.perGame[column];
+    }
+
     default: {
       const unreachable: never = column;
 
@@ -93,9 +103,13 @@ function value(row: TournamentPlayerStats, column: Column): number | null {
 }
 
 function compare(a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKey): number {
-  if (key === "player") return a.player.name.localeCompare(b.player.name);
+  if (key === "player") {
+    return a.player.name.localeCompare(b.player.name);
+  }
 
-  if (key === "team") return a.team.name.localeCompare(b.team.name);
+  if (key === "team") {
+    return a.team.name.localeCompare(b.team.name);
+  }
 
   return (value(a, key) ?? -1) - (value(b, key) ?? -1);
 }
@@ -119,7 +133,9 @@ function sortBy(key: SortKey): void {
 }
 
 function ariaSort(key: SortKey): "ascending" | "descending" | undefined {
-  if (sort.value.key !== key) return undefined;
+  if (sort.value.key !== key) {
+    return undefined;
+  }
 
   return sort.value.descending ? "descending" : "ascending";
 }
@@ -135,7 +151,9 @@ const percentFormat = computed(
 function display(row: TournamentPlayerStats, column: Column): string {
   const current = value(row, column);
 
-  if (current === null) return "–";
+  if (current === null) {
+    return "–";
+  }
 
   return PERCENTAGES.has(column)
     ? percentFormat.value.format(current / 100)

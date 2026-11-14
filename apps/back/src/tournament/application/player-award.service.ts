@@ -24,9 +24,11 @@ async function requireEligibleAward(
     playerId,
   );
 
-  if (!tournament) throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+  if (!tournament) {
+    throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
+  }
 
-  if (!participant)
+  if (!participant) {
     throw new NotFoundError(
       `Tournament participant ${
         "participantId" in participantRef
@@ -34,15 +36,19 @@ async function requireEligibleAward(
           : `for team "${participantRef.teamId}"`
       } was not found for this tournament`,
     );
+  }
 
-  if (!player) throw new NotFoundError(`Player with id "${playerId}" not found`);
+  if (!player) {
+    throw new NotFoundError(`Player with id "${playerId}" not found`);
+  }
 
-  if (!participant.playerIds.includes(playerId))
+  if (!participant.playerIds.includes(playerId)) {
     throw new InvalidInputError(
       `${player.name} is not on the roster for ${
         participant.name
       }. Add the player to this participant in the tournament roster first.`,
     );
+  }
 
   return { tournament, participant };
 }
@@ -61,16 +67,18 @@ async function requireProposableAward(
     playerId,
   );
 
-  if (tournament.source === "startgg")
+  if (tournament.source === "startgg") {
     throw new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
+  }
 
-  if (await awards.awardTaken(tournamentId, awardType))
+  if (await awards.awardTaken(tournamentId, awardType)) {
     throw new InvalidInputError(
       `${tournament.name} already has a ${awardType.replaceAll(
         "_",
         " ",
       )} award. A tournament has one award of each type.`,
     );
+  }
 
   return participant.id;
 }
@@ -83,14 +91,18 @@ export class PlayerAwardService {
   async findByPlayerId(id: string) {
     const awards = await this.reads.byPlayer(id);
 
-    if (!awards) throw new NotFoundError(`Player with id "${id}" not found`);
+    if (!awards) {
+      throw new NotFoundError(`Player with id "${id}" not found`);
+    }
 
     return awards;
   }
   async findByTournamentId(id: string) {
     const awards = await this.reads.byTournament(id);
 
-    if (!awards) throw new NotFoundError(`Tournament with id "${id}" not found`);
+    if (!awards) {
+      throw new NotFoundError(`Tournament with id "${id}" not found`);
+    }
 
     return awards;
   }
@@ -137,10 +149,11 @@ export class PlayerAwardService {
   }
   async delete(tournamentId: string, awardId: string) {
     await this.transaction.run(async ({ awards }) => {
-      if (!(await awards.remove(tournamentId, awardId)))
+      if (!(await awards.remove(tournamentId, awardId))) {
         throw new NotFoundError(
           `Award with id "${awardId}" was not found for tournament "${tournamentId}"`,
         );
+      }
     });
   }
 }

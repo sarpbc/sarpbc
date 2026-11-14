@@ -5,7 +5,7 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import { log } from "evlog";
 import { PatAuthGuard } from "../../pat/infrastructure/http/pat.guard";
 import type { PatUser } from "../../pat/application/pat.service";
-import { McpServerFactory } from "./mcp-server.factory";
+import type { McpServerFactory } from "./mcp-server.factory";
 
 const METHOD_NOT_ALLOWED_BODY = {
   jsonrpc: "2.0",

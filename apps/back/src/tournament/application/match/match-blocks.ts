@@ -52,13 +52,19 @@ async function findScope(
 
 function referencedMatchIds(block: MatchBlockSelector): readonly string[] {
   switch (block.kind) {
-    case "match":
+    case "match": {
       return [block.id];
-    case "matches":
+    }
+
+    case "matches": {
       return block.ids;
+    }
+
     case "tournament":
-    case "team":
+    case "team": {
       return [];
+    }
+
     default: {
       const exhaustive: never = block;
 
@@ -103,13 +109,19 @@ export async function findMatchBlocks(
 
   return blocks.map((block) => {
     switch (block.kind) {
-      case "match":
+      case "match": {
         return pick(block.id);
-      case "matches":
+      }
+
+      case "matches": {
         return block.ids.flatMap(pick);
+      }
+
       case "tournament":
-      case "team":
+      case "team": {
         return (scoped.get(scopeKey(block)) ?? []).slice(0, block.limit);
+      }
+
       default: {
         const exhaustive: never = block;
 

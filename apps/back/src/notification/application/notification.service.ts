@@ -1,6 +1,7 @@
 import type { NotificationStore, NotificationRecord } from "./ports";
 import type { NotificationDto } from "./notification.view";
-import { resolveReplyTargetLink, type ReplyTargetLink } from "../../reply/domain/reply";
+import { resolveReplyTargetLink } from "../../reply/domain/reply";
+import type { ReplyTargetLink } from "../../reply/domain/reply";
 
 function targetFields(
   target: ReplyTargetLink,

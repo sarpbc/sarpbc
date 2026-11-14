@@ -176,13 +176,17 @@ function normalizeLoadedCareerState(state: CareerState): CareerState {
 }
 
 export function parseCareerStateJson(raw: string | null): CareerState | null {
-  if (!isNonEmptyString(raw)) return null;
+  if (!isNonEmptyString(raw)) {
+    return null;
+  }
 
   try {
     const parsed: unknown = JSON.parse(raw);
     const result = careerStateSchema.safeParse(parsed);
 
-    if (!result.success) return null;
+    if (!result.success) {
+      return null;
+    }
 
     return normalizeLoadedCareerState(result.data);
   } catch {
@@ -205,15 +209,21 @@ const careerResultsSchema = z.record(z.string(), careerResultSchema.nullable().c
 export function parseCareerResultsJson(raw: string | null): Map<string, CareerResult> {
   const results = new Map<string, CareerResult>();
 
-  if (!isNonEmptyString(raw)) return results;
+  if (!isNonEmptyString(raw)) {
+    return results;
+  }
 
   try {
     const parsed = careerResultsSchema.safeParse(JSON.parse(raw));
 
-    if (!parsed.success) return results;
+    if (!parsed.success) {
+      return results;
+    }
 
     for (const [id, result] of Object.entries(parsed.data)) {
-      if (result) results.set(id, result);
+      if (result) {
+        results.set(id, result);
+      }
     }
   } catch {
     return new Map();

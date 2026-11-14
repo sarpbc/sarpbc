@@ -2,8 +2,9 @@ import { Controller, Get, Header, Query } from "@nestjs/common";
 import type { OnThisDay } from "@sarpbc/types";
 import { parseIsoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
-import { OnThisDayService } from "../../application/on-this-day.service";
-import { OnThisDayQueryDto, type OnThisDayQueryInput } from "./dto/on-this-day.dto";
+import type { OnThisDayService } from "../../application/on-this-day.service";
+import { OnThisDayQueryDto } from "./dto/on-this-day.dto";
+import type { OnThisDayQueryInput } from "./dto/on-this-day.dto";
 
 @Controller("on-this-day")
 export class OnThisDayController {
@@ -14,10 +15,15 @@ export class OnThisDayController {
   async forDay(
     @Query({ schema: OnThisDayQueryDto }) { date }: OnThisDayQueryInput,
   ): Promise<OnThisDay> {
-    if (date === undefined) return await this.onThisDay.forDay(null);
+    if (date === undefined) {
+      return await this.onThisDay.forDay(null);
+    }
+
     const day = parseIsoDay(date);
 
-    if (!day) throw new InvalidInputError("The date is not a calendar date.");
+    if (!day) {
+      throw new InvalidInputError("The date is not a calendar date.");
+    }
 
     return await this.onThisDay.forDay(day);
   }

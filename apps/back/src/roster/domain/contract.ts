@@ -18,10 +18,12 @@ export class Contract {
   leaveSourceUrl: string | null = null;
   createdAt = new Date();
   close(endDate: Date, sourceUrl: string): void {
-    if (endDate < this.startDate)
+    if (endDate < this.startDate) {
       throw new InvalidInputError(
         `The departure date precedes the contract start (${isoDay(this.startDate)}).`,
       );
+    }
+
     this.endDate = endDate;
     this.leaveSourceUrl = sourceUrl;
   }

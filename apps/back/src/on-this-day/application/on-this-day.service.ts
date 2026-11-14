@@ -8,7 +8,8 @@ import type {
   OnThisDayTeam,
   OnThisDayTournament,
 } from "@sarpbc/types";
-import { SITE_TIME_ZONE, calendarDayIn, formatIsoDay, type CalendarDay } from "@sarpbc/utils";
+import { SITE_TIME_ZONE, calendarDayIn, formatIsoDay } from "@sarpbc/utils";
+import type { CalendarDay } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
 import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
@@ -70,7 +71,9 @@ function dated(at: Date) {
 function title(tournament: Tournament): OnThisDayEvent[] {
   const { winner, endAt } = tournament;
 
-  if (!winner || !endAt || !isRedistributable(tournament.source)) return [];
+  if (!winner || !endAt || !isRedistributable(tournament.source)) {
+    return [];
+  }
 
   return [
     {
@@ -88,12 +91,19 @@ function title(tournament: Tournament): OnThisDayEvent[] {
 function final(match: Match): OnThisDayEvent[] {
   const { winner, endAt, tournament } = match;
 
-  if (!winner || !endAt) return [];
+  if (!winner || !endAt) {
+    return [];
+  }
 
-  if (!isRedistributable(match.source) || !isRedistributable(tournament.source)) return [];
+  if (!isRedistributable(match.source) || !isRedistributable(tournament.source)) {
+    return [];
+  }
+
   const loser = match.participants.find((participant) => participant.id !== winner.id);
 
-  if (match.participants.length !== 2 || !loser) return [];
+  if (match.participants.length !== 2 || !loser) {
+    return [];
+  }
 
   return [
     {
@@ -120,19 +130,27 @@ function transfer({ type, date, contract }: Transfer): OnThisDayEvent {
 
 function publicLink(link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink {
   switch (link.kind) {
-    case "player":
+    case "player": {
       return { kind: "player", name: link.name, slug: link.slug };
-    case "team":
+    }
+
+    case "team": {
       return { kind: "team", name: link.name, slug: link.slug };
-    case "tournament":
+    }
+
+    case "tournament": {
       return {
         kind: "tournament",
         name: link.name,
         slug: link.slug,
         event: { name: link.event.name, slug: link.event.slug },
       };
-    case "match":
+    }
+
+    case "match": {
       return { kind: "match", name: link.name, publicId: link.publicId, slug: link.slug };
+    }
+
     default: {
       const exhaustive: never = link;
 
@@ -142,7 +160,9 @@ function publicLink(link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink {
 }
 
 function fact({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisDayEvent[] {
-  if (link?.source && !isRedistributable(link.source)) return [];
+  if (link?.source && !isRedistributable(link.source)) {
+    return [];
+  }
 
   return [
     {
@@ -157,13 +177,19 @@ function fact({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisD
 
 function rank(event: OnThisDayEvent): number {
   switch (event.kind) {
-    case "fact":
+    case "fact": {
       return 0;
+    }
+
     case "title":
-    case "final":
+    case "final": {
       return 1;
-    case "transfer":
+    }
+
+    case "transfer": {
       return 2;
+    }
+
     default: {
       const exhaustive: never = event;
 

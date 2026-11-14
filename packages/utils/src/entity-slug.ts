@@ -13,7 +13,10 @@ export interface MatchSlugInput {
 }
 
 function truncateAtHyphen(slug: string): string {
-  if (slug.length <= MAX_SLUG_LENGTH) return slug;
+  if (slug.length <= MAX_SLUG_LENGTH) {
+    return slug;
+  }
+
   const window = slug.slice(0, MAX_SLUG_LENGTH + 1);
   const cut = window.lastIndexOf("-");
 
@@ -51,7 +54,9 @@ export async function allocateSlug(
   const allocate = async (attempt: number): Promise<string> => {
     const slug = attempt === 1 ? base : `${base}-${attempt}`;
 
-    if (!UUID_PATTERN.test(slug) && !(await isTaken(slug))) return slug;
+    if (!UUID_PATTERN.test(slug) && !(await isTaken(slug))) {
+      return slug;
+    }
 
     return await allocate(attempt + 1);
   };
@@ -62,10 +67,15 @@ export async function allocateSlug(
 function roundLabel(matchName: string | null | undefined): string | null {
   const name = matchName?.trim();
 
-  if (!isNonEmptyString(name)) return null;
+  if (!isNonEmptyString(name)) {
+    return null;
+  }
+
   const colon = name.indexOf(":");
 
-  if (colon !== -1) return name.slice(0, colon);
+  if (colon !== -1) {
+    return name.slice(0, colon);
+  }
 
   return /tbd/i.test(name) ? null : name;
 }

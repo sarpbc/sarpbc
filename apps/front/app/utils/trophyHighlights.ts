@@ -15,11 +15,16 @@ export function formatTrophyHighlightNames(
   const seen = new Set<string>();
 
   for (const trophy of sorted) {
-    if (!trophy.displayName || seen.has(trophy.displayName)) continue;
+    if (!trophy.displayName || seen.has(trophy.displayName)) {
+      continue;
+    }
+
     seen.add(trophy.displayName);
     names.push(trophy.displayName);
 
-    if (names.length >= limit) break;
+    if (names.length >= limit) {
+      break;
+    }
   }
 
   return names.join(", ");

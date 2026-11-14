@@ -46,7 +46,9 @@ export class StreamerService {
   }
 
   async listLive(): Promise<LiveStreamer[]> {
-    if (!this.source) return [];
+    if (!this.source) {
+      return [];
+    }
 
     let snapshot: LiveStreamSnapshot | null;
     let claim: string | null;
@@ -54,7 +56,10 @@ export class StreamerService {
     try {
       snapshot = await this.cache.read();
 
-      if (snapshot && this.isFresh(snapshot)) return snapshot.streams;
+      if (snapshot && this.isFresh(snapshot)) {
+        return snapshot.streams;
+      }
+
       claim = await this.cache.claimRefresh();
     } catch (error) {
       this.reportFailure("cache", error);
@@ -62,7 +67,9 @@ export class StreamerService {
       return [];
     }
 
-    if (claim === null) return snapshot?.streams ?? [];
+    if (claim === null) {
+      return snapshot?.streams ?? [];
+    }
 
     let streams: LiveStreamer[];
 
@@ -86,7 +93,9 @@ export class StreamerService {
   private async fetchLive(source: LiveStreamSource): Promise<LiveStreamer[]> {
     const tracked = await this.streamers.list();
 
-    if (tracked.length === 0) return [];
+    if (tracked.length === 0) {
+      return [];
+    }
 
     const names = new Map(tracked.map((streamer) => [streamer.login, streamer.displayName]));
     const live = await source.findLiveRocketLeague([...names.keys()]);

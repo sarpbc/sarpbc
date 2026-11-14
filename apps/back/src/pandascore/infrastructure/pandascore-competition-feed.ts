@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import type { CompetitionFeed, CompetitionIncident } from "../../tournament/application/feed";
-import { PandascoreApiClient } from "./pandascore-api.client";
+import type { PandascoreApiClient } from "./pandascore-api.client";
 import { standingSchema, tournamentSchema } from "./dto/tournament.dto";
 import { matchSchema } from "./dto/match.dto";
 import { incidentSchema } from "./dto/incident.dto";
@@ -37,7 +37,9 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
   async getTournamentStandings(id: number) {
     const standings = await this.apiClient.getTournamentStandings(id);
 
-    if (standings === null) return null;
+    if (standings === null) {
+      return null;
+    }
 
     return standings.flatMap((value) => {
       const { rank, team } = standingSchema.parse(value);
@@ -52,58 +54,72 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
       const i = incidentSchema.parse(v);
       const base = { id: i.id, modifiedAt: new Date(i.modified_at) };
 
-      if (i.change_type === "deletion")
+      if (i.change_type === "deletion") {
         return {
           ...base,
           changeType: "deletion",
           kind: i.type,
           deletion: parseProviderDeletion(i.object),
         };
+      }
+
       const changeType = i.change_type;
 
       switch (i.type) {
-        case "tournament":
+        case "tournament": {
           return {
             ...base,
             changeType,
             kind: i.type,
             command: toUpsertTournamentCommand(i.object),
           };
-        case "match":
+        }
+
+        case "match": {
           return {
             ...base,
             changeType,
             kind: i.type,
             command: toUpsertMatchCommand(i.object),
           };
-        case "team":
+        }
+
+        case "team": {
           return {
             ...base,
             changeType,
             kind: i.type,
             command: toUpsertTeamCommand(i.object),
           };
-        case "player":
+        }
+
+        case "player": {
           return {
             ...base,
             changeType,
             kind: i.type,
             command: toImportedPlayer(i.object),
           };
-        case "league":
+        }
+
+        case "league": {
           return {
             ...base,
             changeType,
             kind: i.type,
             command: toUpsertLeagueCommand(i.object),
           };
-        case "serie":
+        }
+
+        case "serie": {
           return {
             ...base,
             changeType,
             kind: i.type,
             command: toUpsertSerieCommand(i.object),
           };
+        }
+
         default: {
           const neverIncident: never = i;
 

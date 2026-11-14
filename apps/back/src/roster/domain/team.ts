@@ -25,22 +25,28 @@ export class Team {
   synchronizeProfile(input: ImportedTeamProfile): void {
     this.name = input.name;
 
-    if (input.pandascoreId !== undefined) this.linkPandascore(input.pandascoreId);
+    if (input.pandascoreId !== undefined) {
+      this.linkPandascore(input.pandascoreId);
+    }
 
-    if (input.location !== undefined) this.location = input.location;
+    if (input.location !== undefined) {
+      this.location = input.location;
+    }
 
     if (
       (this.imageUrl === null || this.imageUrl === "") &&
       input.imageUrl !== undefined &&
       input.imageUrl !== ""
-    )
+    ) {
       this.imageUrl = input.imageUrl;
+    }
 
     if (
       (this.darkModeImageUrl === null || this.darkModeImageUrl === "") &&
       input.darkModeImageUrl !== undefined &&
       input.darkModeImageUrl !== ""
-    )
+    ) {
       this.darkModeImageUrl = input.darkModeImageUrl;
+    }
   }
 }

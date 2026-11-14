@@ -11,8 +11,10 @@ import {
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { formatPrizepool } from "~/utils/currencyFormatter";
 import { resolveSiteUrl } from "~/utils/siteUrl";
-import { getTournamentStatus, type TournamentStatus } from "~/utils/tournamentStatus";
-import { compactJsonLd, SCHEMA_ORG, type JsonLdNode } from "./jsonLd";
+import { getTournamentStatus } from "~/utils/tournamentStatus";
+import type { TournamentStatus } from "~/utils/tournamentStatus";
+import { compactJsonLd, SCHEMA_ORG } from "./jsonLd";
+import type { JsonLdNode } from "./jsonLd";
 
 export const ROCKET_LEAGUE_SPORT = "Rocket League";
 
@@ -125,8 +127,10 @@ export function sportsEventStatusUrl(status: TournamentStatus | null): string | 
   switch (status) {
     case "upcoming":
     case "live":
-    case "finished":
+    case "finished": {
       return `${SCHEMA_ORG}/EventScheduled`;
+    }
+
     default: {
       const _exhaustive: never = status;
 
@@ -143,8 +147,10 @@ export function formatLabel(type: string | null): string | undefined {
   switch (type) {
     case "online":
     case "offline":
-    case "online/offline":
+    case "online/offline": {
       return FORMAT_LABEL[type];
+    }
+
     default: {
       const _exhaustive: never = type;
 
@@ -196,18 +202,24 @@ export function eventVenue(
   }
 
   switch (type) {
-    case "online":
+    case "online": {
       return onlineVenue(url);
-    case "offline":
+    }
+
+    case "offline": {
       return {
         eventAttendanceMode: `${SCHEMA_ORG}/OfflineEventAttendanceMode`,
         location: place,
       };
-    case "online/offline":
+    }
+
+    case "online/offline": {
       return {
         eventAttendanceMode: `${SCHEMA_ORG}/MixedEventAttendanceMode`,
         location: [virtualLocation(url), place],
       };
+    }
+
     default: {
       const _exhaustive: never = type;
 

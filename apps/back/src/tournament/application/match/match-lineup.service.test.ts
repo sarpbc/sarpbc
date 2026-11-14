@@ -134,8 +134,9 @@ describe(MatchLineupService, () => {
       match("pandascore-match", "pandascore"),
       match("startgg-match", "startgg", "startgg"),
       match("startgg-stage-match", "manual", "startgg"),
-    ])
+    ]) {
       matches.set(found.id, found);
+    }
   });
 
   it("replaces the lineups with validated sides and returns them with stand-in badges", async () => {

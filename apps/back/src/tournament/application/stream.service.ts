@@ -2,7 +2,8 @@ import type { Stream, StreamInput } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import { replaceStreams, type StreamEditSource, type StreamOwner } from "../domain/stream";
+import { replaceStreams } from "../domain/stream";
+import type { StreamEditSource, StreamOwner } from "../domain/stream";
 import type { CompetitionAfterCommit } from "./after-commit";
 import { requireEvent } from "./event-placement";
 import type { CompetitionTransaction, CompetitionWriteScope } from "./ports";
@@ -40,7 +41,9 @@ async function loadOwner(scope: CompetitionWriteScope, owner: StreamOwner): Prom
     case "tournament": {
       const tournament = await scope.tournaments.load(owner.id);
 
-      if (!tournament) throw new NotFoundError(`Tournament with id "${owner.id}" was not found.`);
+      if (!tournament) {
+        throw new NotFoundError(`Tournament with id "${owner.id}" was not found.`);
+      }
 
       return {
         streams: tournament.streams,
@@ -57,7 +60,9 @@ async function loadOwner(scope: CompetitionWriteScope, owner: StreamOwner): Prom
     case "match": {
       const match = await scope.matches.load(owner.id);
 
-      if (!match) throw new NotFoundError("Match not found");
+      if (!match) {
+        throw new NotFoundError("Match not found");
+      }
 
       return {
         streams: match.streams,
@@ -122,8 +127,10 @@ export class StreamService {
     await this.transaction.run(async (scope) => {
       const loaded = await loadOwner(scope, owner);
 
-      if (!loaded.redistributable)
+      if (!loaded.redistributable) {
         throw new InvalidInputError(`Streams of a start.gg ${owner.kind} cannot be proposed`);
+      }
+
       replaceStreams(loaded.streams, inputs, "manual");
     });
   }

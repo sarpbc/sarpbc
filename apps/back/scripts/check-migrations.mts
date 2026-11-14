@@ -56,7 +56,9 @@ export function migrationViolations(directory = defaultDirectory, baseRef = ""):
     }
   }
 
-  if (!baseRef) return violations;
+  if (!baseRef) {
+    return violations;
+  }
 
   const baseList = baseMigrationNames(directory, baseRef);
 

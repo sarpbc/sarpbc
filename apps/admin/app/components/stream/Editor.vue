@@ -62,14 +62,22 @@ function languageFeedback(language: string): FieldFeedback {
 
 function platformLabel(platform: StreamPlatform): string {
   switch (platform) {
-    case "twitch":
+    case "twitch": {
       return t("page.tournaments.streams.platforms.twitch");
-    case "youtube":
+    }
+
+    case "youtube": {
       return t("page.tournaments.streams.platforms.youtube");
-    case "kick":
+    }
+
+    case "kick": {
       return t("page.tournaments.streams.platforms.kick");
-    case "other":
+    }
+
+    case "other": {
       return t("page.tournaments.streams.platforms.other");
+    }
+
     default: {
       const exhaustive: never = platform;
 
@@ -79,7 +87,10 @@ function platformLabel(platform: StreamPlatform): string {
 }
 
 function urlFeedback(url: string): FieldFeedback {
-  if (!url.trim()) return {};
+  if (!url.trim()) {
+    return {};
+  }
+
   const parsed = parseStreamUrl(url);
 
   return parsed.ok
@@ -98,7 +109,9 @@ function derivedChannel(url: string): string | null {
 }
 
 function channelFeedback(row: StreamRow): FieldFeedback {
-  if (row.channel.trim() || derivedChannel(row.url) || !row.url.trim()) return {};
+  if (row.channel.trim() || derivedChannel(row.url) || !row.url.trim()) {
+    return {};
+  }
 
   return { error: t("page.tournaments.streams.errors.channel-required") };
 }
@@ -140,7 +153,9 @@ async function load() {
 watch(
   open,
   (isOpen) => {
-    if (isOpen) void load();
+    if (isOpen) {
+      void load();
+    }
   },
   { immediate: true },
 );

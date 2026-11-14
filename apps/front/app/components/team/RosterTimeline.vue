@@ -30,7 +30,9 @@ const visibleEras = computed(() => (showAll.value ? eras : eras.slice(0, VISIBLE
 const hasHiddenEras = computed(() => eras.length > VISIBLE_ERAS);
 
 const formatDate = (value: string | null) => {
-  if (!value) return null;
+  if (!value) {
+    return null;
+  }
 
   return mediumDate.value.format(new Date(value));
 };

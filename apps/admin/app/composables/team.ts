@@ -50,7 +50,9 @@ export async function getEveryTeam(): Promise<Team[]> {
 export async function getTeamById(id: string): Promise<Team> {
   const res = await apiFetch<{ team: Team | null }>(`/team/${id}`, { method: "GET" });
 
-  if (!res.team) throw createError({ statusCode: 404, message: "Team not found" });
+  if (!res.team) {
+    throw createError({ statusCode: 404, message: "Team not found" });
+  }
 
   return res.team;
 }

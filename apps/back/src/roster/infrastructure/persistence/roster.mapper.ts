@@ -97,7 +97,9 @@ export function toPlayer(row: PlayerRow): Player {
     team: row.team ? toBareTeam(row.team) : null,
   });
 
-  if (row.photos.isInitialized()) player.photos = row.photos.getItems().map((p) => toPhoto(p));
+  if (row.photos.isInitialized()) {
+    player.photos = row.photos.getItems().map((p) => toPhoto(p));
+  }
 
   return player;
 }
@@ -105,8 +107,9 @@ export function toPlayer(row: PlayerRow): Player {
 export function toTeam(row: TeamRow, includePlayers = true): Team {
   const team = toBareTeam(row);
 
-  if (includePlayers && row.players.isInitialized())
+  if (includePlayers && row.players.isInitialized()) {
     team.players = row.players.getItems().map((p) => toPlayer(p));
+  }
 
   return team;
 }
@@ -126,7 +129,9 @@ export function toContract(row: ContractRow): Contract {
 }
 
 export function teamNameAt(row: Pick<TeamRow, "name" | "aliases">, at: Date | null): string {
-  if (!at) return row.name;
+  if (!at) {
+    return row.name;
+  }
 
   return teamAliasInForce(row.aliases ?? [], isoDay(new Date(at)))?.name ?? row.name;
 }

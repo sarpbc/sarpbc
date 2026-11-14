@@ -15,31 +15,28 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import { TeamService } from "../../application/team.service";
-import { TeamAliasService } from "../../application/team-alias.service";
+import type { TeamService } from "../../application/team.service";
+import type { TeamAliasService } from "../../application/team-alias.service";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
-import { ContractService } from "../../application/contract.service";
-import { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-teams.use-case";
-import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
+import type { ContractService } from "../../application/contract.service";
+import type { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-teams.use-case";
+import type { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
 import { TOURNAMENT_QUERIES } from "../../../tournament/infrastructure/competition-queries.tokens";
-import { CreateTeamDto, type CreateTeamInput } from "./dto/create-team.dto";
-import { UpdateTeamDto, type UpdateTeamInput } from "./dto/update-team.dto";
-import { TeamAliasDto, type TeamAliasInput } from "./dto/team-alias.dto";
-import {
-  CreateTeamContractDto,
-  type CreateTeamContractInput,
-} from "./dto/create-team-contract.dto";
-import {
-  UpdateTeamContractDto,
-  type UpdateTeamContractInput,
-} from "./dto/update-team-contract.dto";
-import {
-  ListDirectoryQueryDto,
-  type ListDirectoryQueryInput,
-} from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import { CreateTeamDto } from "./dto/create-team.dto";
+import type { CreateTeamInput } from "./dto/create-team.dto";
+import { UpdateTeamDto } from "./dto/update-team.dto";
+import type { UpdateTeamInput } from "./dto/update-team.dto";
+import { TeamAliasDto } from "./dto/team-alias.dto";
+import type { TeamAliasInput } from "./dto/team-alias.dto";
+import { CreateTeamContractDto } from "./dto/create-team-contract.dto";
+import type { CreateTeamContractInput } from "./dto/create-team-contract.dto";
+import { UpdateTeamContractDto } from "./dto/update-team-contract.dto";
+import type { UpdateTeamContractInput } from "./dto/update-team-contract.dto";
+import { ListDirectoryQueryDto } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
+import type { ListDirectoryQueryInput } from "../../../common/infrastructure/http/dto/list-directory-query.dto";
 import { mapTeam, mapTeamAlias } from "./player.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 

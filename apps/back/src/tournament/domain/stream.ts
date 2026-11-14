@@ -4,8 +4,8 @@ import {
   STREAM_CHANNEL_MAX_LENGTH,
   isIso6391Code,
   parseStreamUrl,
-  type StreamUrlError,
 } from "@sarpbc/utils";
+import type { StreamUrlError } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { nonBlank } from "../../common/domain/text";
 import type { OfficialMatchStream } from "./official-match-stream";
@@ -33,8 +33,9 @@ export function replaceStreams(
   inputs: readonly StreamInput[],
   source: StreamEditSource,
 ): Stream[] {
-  if (inputs.length > MAX_STREAMS)
+  if (inputs.length > MAX_STREAMS) {
     throw new InvalidInputError(`A stream list holds at most ${MAX_STREAMS} streams.`);
+  }
 
   const startgg = new Set(
     current.flatMap((stream) => (stream.source === "startgg" ? [stream.url] : [])),
@@ -46,19 +47,30 @@ export function replaceStreams(
   for (const [index, input] of inputs.entries()) {
     const parsed = parseStreamUrl(input.url);
 
-    if (!parsed.ok) throw invalid(index, URL_ERRORS[parsed.error]);
+    if (!parsed.ok) {
+      throw invalid(index, URL_ERRORS[parsed.error]);
+    }
+
     const language = input.language.trim().toLowerCase();
 
-    if (!isIso6391Code(language))
+    if (!isIso6391Code(language)) {
       throw invalid(index, "needs a two-letter ISO 639-1 language code (e.g. en, fr)");
+    }
+
     const channel = nonBlank(input.channel) ?? parsed.channel;
 
-    if (channel === null || channel === "") throw invalid(index, "needs a channel name");
+    if (channel === null || channel === "") {
+      throw invalid(index, "needs a channel name");
+    }
 
-    if (channel.length > STREAM_CHANNEL_MAX_LENGTH)
+    if (channel.length > STREAM_CHANNEL_MAX_LENGTH) {
       throw invalid(index, `has a channel name over ${STREAM_CHANNEL_MAX_LENGTH} characters`);
+    }
 
-    if (seen.has(parsed.url)) continue;
+    if (seen.has(parsed.url)) {
+      continue;
+    }
+
     seen.add(parsed.url);
     streams.push({
       url: parsed.url,
@@ -84,7 +96,9 @@ export function pandascoreStreams(official: readonly OfficialMatchStream[]): Str
       const parsed = parseStreamUrl(stream.url.trim().replace(/^http:\/\//i, "https://"));
       const [language = ""] = stream.language.trim().toLowerCase().split("-");
 
-      if (!parsed.ok || !isIso6391Code(language)) return [];
+      if (!parsed.ok || !isIso6391Code(language)) {
+        return [];
+      }
 
       return [
         {

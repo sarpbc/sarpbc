@@ -20,18 +20,28 @@ export const MAJOR_POINTS = {
 
 export function regionalCircuitWeight(region: CareerRegion): number {
   switch (region) {
-    case "eu":
+    case "eu": {
       return 1;
-    case "na":
+    }
+
+    case "na": {
       return 0.9;
+    }
+
     case "sam":
-    case "mena":
+    case "mena": {
       return 0.75;
+    }
+
     case "oce":
-    case "apac":
+    case "apac": {
       return 0.55;
-    case "ssa":
+    }
+
+    case "ssa": {
       return 0.5;
+    }
+
     default: {
       const _exhaustive: never = region;
 

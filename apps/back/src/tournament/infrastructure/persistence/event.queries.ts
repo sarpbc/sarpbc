@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder, raw } from "@mikro-orm/core";
 import { Tournament } from "./tournament.entity";
 import { TournamentEvent } from "./tournament-event.entity";
@@ -35,7 +35,9 @@ export class CompetitionEventQueries implements EventQueries {
 
     const ids = page.map((row) => row.id);
 
-    if (!ids.length) return [[], count];
+    if (!ids.length) {
+      return [[], count];
+    }
 
     const [events, stages] = await Promise.all([
       this.em.find(TournamentEvent, { id: { $in: ids } }, { populate: ["league"] }),
@@ -75,7 +77,9 @@ export class CompetitionEventQueries implements EventQueries {
       { populate: ["league"] },
     );
 
-    if (!row) return null;
+    if (!row) {
+      return null;
+    }
 
     const stages = await this.em.find(
       Tournament,
@@ -102,7 +106,9 @@ export class CompetitionEventQueries implements EventQueries {
       { populate: ["league"], orderBy: { createdAt: QueryOrder.DESC, id: QueryOrder.ASC } },
     );
 
-    if (!rows.length) return [];
+    if (!rows.length) {
+      return [];
+    }
 
     const stages = await this.em.find(
       Tournament,

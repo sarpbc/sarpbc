@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import { v4 } from "uuid";
 import { Player as PlayerRow } from "./player.entity";
 import { Team as TeamRow } from "./team.entity";
@@ -47,7 +47,9 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
         )
       : await this.em.findOne(PlayerRow, { id }, playerOptions);
 
-    if (row && this.locking) await this.em.populate(row, ["team", "photos"], { refresh: true });
+    if (row && this.locking) {
+      await this.em.populate(row, ["team", "photos"], { refresh: true });
+    }
 
     return row ? toPlayer(row) : null;
   }
@@ -90,7 +92,9 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
         code,
       ]);
 
-    if (ids.length === 0) return [];
+    if (ids.length === 0) {
+      return [];
+    }
 
     const rows = await this.em.find(
       PlayerRow,
@@ -106,7 +110,10 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       ? await this.em.findOneOrFail(PlayerRow, { id: model.id })
       : new PlayerRow();
 
-    if (!model.id) model.id = v4();
+    if (!model.id) {
+      model.id = v4();
+    }
+
     Object.assign(row, playerColumns(model), {
       mergedInto:
         model.mergedIntoId !== null && model.mergedIntoId !== ""

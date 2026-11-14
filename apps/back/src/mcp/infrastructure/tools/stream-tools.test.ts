@@ -21,7 +21,9 @@ function setup(toolName: string, role: StaffRole = "admin") {
     (candidate) => candidate.name === toolName,
   );
 
-  if (!tool) throw new Error(`${toolName} is not defined`);
+  if (!tool) {
+    throw new Error(`${toolName} is not defined`);
+  }
 
   const call = async (args: ToolArguments) =>
     await tool.run({ id: "u1", email: "staff@test.com", role }, args);
@@ -93,7 +95,9 @@ describe("stream tools", () => {
       (candidate) => candidate.name === "list_roster_proposals",
     );
 
-    if (!list) throw new Error("list_roster_proposals is not defined");
+    if (!list) {
+      throw new Error("list_roster_proposals is not defined");
+    }
 
     const result = await list.run({ id: "u1", email: "staff@test.com", role: "admin" }, {});
     expect(jsonOf(result)).toMatchObject({

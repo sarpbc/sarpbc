@@ -9,12 +9,14 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import type { UserList } from "@sarpbc/types";
-import { UserService } from "../../application/user.service";
+import type { UserService } from "../../application/user.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "./decorator/current-user.decorator";
 import { RequirePermissions } from "./decorator/require-permissions.decorator";
-import { ChangeUserRoleDto, type ChangeUserRoleInput } from "./dto/change-user-role.dto";
-import { ListUsersQueryDto, type ListUsersQueryInput } from "./dto/list-users-query.dto";
+import { ChangeUserRoleDto } from "./dto/change-user-role.dto";
+import type { ChangeUserRoleInput } from "./dto/change-user-role.dto";
+import { ListUsersQueryDto } from "./dto/list-users-query.dto";
+import type { ListUsersQueryInput } from "./dto/list-users-query.dto";
 import { PermissionGuard } from "./user.guard";
 import { toUserListItem } from "./user.mapper";
 

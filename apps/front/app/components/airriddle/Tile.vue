@@ -18,29 +18,43 @@ const { t } = useI18n();
 
 const tileClass = computed(() => {
   switch (result) {
-    case AirRiddleResultEnum.CORRECT:
+    case AirRiddleResultEnum.CORRECT: {
       return "bg-success text-ink-950";
-    case AirRiddleResultEnum.MISPLACED:
+    }
+
+    case AirRiddleResultEnum.MISPLACED: {
       return "bg-warning text-ink-950";
-    case AirRiddleResultEnum.INCORRECT:
+    }
+
+    case AirRiddleResultEnum.INCORRECT: {
       return "bg-elevated text-highlighted";
-    default:
+    }
+
+    default: {
       return variant === "current" && letter
         ? "bg-default text-highlighted"
         : "bg-default text-dimmed";
+    }
   }
 });
 
 const resultLabel = computed(() => {
   switch (result) {
-    case AirRiddleResultEnum.CORRECT:
+    case AirRiddleResultEnum.CORRECT: {
       return t("page.game.airriddle.result.correct");
-    case AirRiddleResultEnum.MISPLACED:
+    }
+
+    case AirRiddleResultEnum.MISPLACED: {
       return t("page.game.airriddle.result.misplaced");
-    case AirRiddleResultEnum.INCORRECT:
+    }
+
+    case AirRiddleResultEnum.INCORRECT: {
       return t("page.game.airriddle.result.incorrect");
-    default:
+    }
+
+    default: {
       return null;
+    }
   }
 });
 

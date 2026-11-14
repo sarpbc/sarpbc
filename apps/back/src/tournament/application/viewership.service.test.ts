@@ -2,10 +2,12 @@ import type { DataSource, Viewership } from "@sarpbc/types";
 import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import { Match, type TournamentSummary } from "../domain/match";
+import { Match } from "../domain/match";
+import type { TournamentSummary } from "../domain/match";
 import { TournamentEvent } from "../domain/tournament-event";
 import type { EventStage } from "./ports";
-import { ViewershipService, type ViewershipScope } from "./viewership.service";
+import { ViewershipService } from "./viewership.service";
+import type { ViewershipScope } from "./viewership.service";
 
 const VIEWERSHIP: Viewership = {
   peakViewers: 64_000,

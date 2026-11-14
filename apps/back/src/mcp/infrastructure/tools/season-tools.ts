@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { SeasonService } from "../../../season/application/season.service";
-import { defineTool, type McpTool } from "../define-tool";
+import { defineTool } from "../define-tool";
+import type { McpTool } from "../define-tool";
 import { playerUrl } from "../urls";
 
 export interface SeasonToolServices {

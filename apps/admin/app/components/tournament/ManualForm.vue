@@ -1,11 +1,6 @@
 <script lang="ts" setup>
-import {
-  TOURNAMENT_FORMATS,
-  type League,
-  type ManualEvent,
-  type Team,
-  type TournamentDetail,
-} from "@sarpbc/types";
+import { TOURNAMENT_FORMATS } from "@sarpbc/types";
+import type { League, ManualEvent, Team, TournamentDetail } from "@sarpbc/types";
 import { toSlug } from "@sarpbc/utils";
 import type { ManualTournamentFormState } from "~/composables/useManualTournamentForm";
 
@@ -52,8 +47,9 @@ const eventOptions = computed(() => {
   const options = events.map((event) => ({ value: event.id, label: event.name }));
   const current = original?.event;
 
-  if (current && !options.some((option) => option.value === current.id))
+  if (current && !options.some((option) => option.value === current.id)) {
     options.unshift({ value: current.id, label: current.name });
+  }
 
   return original
     ? options
@@ -67,7 +63,10 @@ const eventId = computed({
 
 /** Mirrors the API: only an event of its own (one stage, same name) follows the tournament's slug. */
 const sharesEvent = computed(() => {
-  if (!original) return false;
+  if (!original) {
+    return false;
+  }
+
   const event = events.find((candidate) => candidate.id === original.event.id);
 
   return !event || event.stages.length !== 1 || event.name !== original.name;
@@ -78,9 +77,13 @@ const showsSlug = computed(() => editsEventSlug(modelValue, original) && !shares
 const movesEvent = computed(() => !!original && modelValue.eventId !== original.event.id);
 
 const eventHelp = computed(() => {
-  if (movesEvent.value) return t("page.tournaments.form.eventMoveHelp");
+  if (movesEvent.value) {
+    return t("page.tournaments.form.eventMoveHelp");
+  }
 
-  if (sharesEvent.value) return t("page.tournaments.form.eventSharedHelp");
+  if (sharesEvent.value) {
+    return t("page.tournaments.form.eventSharedHelp");
+  }
 
   return t("page.tournaments.form.eventHelp");
 });

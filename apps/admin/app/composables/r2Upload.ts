@@ -1,9 +1,5 @@
-import {
-  getApiErrorBody,
-  isNonEmptyString,
-  parseR2UploadResponse,
-  type ImageUploadTarget,
-} from "@sarpbc/utils";
+import { getApiErrorBody, isNonEmptyString, parseR2UploadResponse } from "@sarpbc/utils";
+import type { ImageUploadTarget } from "@sarpbc/utils";
 
 interface ImageUploadContext {
   target: ImageUploadTarget;
@@ -23,7 +19,9 @@ function messageFromNestBody(responseText: string): string | undefined {
 
     const text = message?.trim();
 
-    if (isNonEmptyString(text)) return text;
+    if (isNonEmptyString(text)) {
+      return text;
+    }
   } catch {
     return undefined;
   }

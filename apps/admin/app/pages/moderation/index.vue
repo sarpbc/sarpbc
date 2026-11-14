@@ -29,12 +29,18 @@ const replies = computed(() => data.value ?? []);
 
 function targetTypeLabel(targetType: ModerationReply["targetType"]): string {
   switch (targetType) {
-    case "forumPost":
+    case "forumPost": {
       return t("page.moderation.targetTypes.forumPost");
-    case "newsArticle":
+    }
+
+    case "newsArticle": {
       return t("page.moderation.targetTypes.newsArticle");
-    case "match":
+    }
+
+    case "match": {
       return t("page.moderation.targetTypes.match");
+    }
+
     default: {
       const _exhaustive: never = targetType;
 
@@ -48,7 +54,10 @@ function publicTargetUrl(reply: ModerationReply): string {
 }
 
 async function hideReply(reply: ModerationReply) {
-  if (hidingReplyId.value) return;
+  if (hidingReplyId.value) {
+    return;
+  }
+
   hidingReplyId.value = reply.id;
 
   try {

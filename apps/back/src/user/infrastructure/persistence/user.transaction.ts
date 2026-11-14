@@ -1,4 +1,4 @@
-import { EntityManager } from "@mikro-orm/postgresql";
+import type { EntityManager } from "@mikro-orm/postgresql";
 import type { UserTransaction, UserWriteScope } from "../../application/ports/user-store";
 import { MikroUserStore } from "./user.store";
 
