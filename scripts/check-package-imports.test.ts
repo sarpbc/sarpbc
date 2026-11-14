@@ -20,7 +20,7 @@ function packageWith(
   return directory;
 }
 
-test("accepts framework-free sources", () => {
+void test("accepts framework-free sources", () => {
   const directory = packageWith({
     "pure.ts": 'import { z } from "zod";\nexport * from "./other";',
   });
@@ -32,7 +32,7 @@ test("accepts framework-free sources", () => {
   }
 });
 
-test("rejects Vue and Nuxt imports and dependencies", () => {
+void test("rejects Vue and Nuxt imports and dependencies", () => {
   const directory = packageWith(
     {
       "a.ts": 'import { ref } from "vue";',
@@ -50,7 +50,7 @@ test("rejects Vue and Nuxt imports and dependencies", () => {
   }
 });
 
-test("rejects relative imports that name a .ts extension", () => {
+void test("rejects relative imports that name a .ts extension", () => {
   const directory = packageWith({
     "index.ts": 'export { ROLES } from "./roles.ts";\nimport type { Role } from "./roles.ts";',
   });

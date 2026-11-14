@@ -40,7 +40,7 @@ function serve(routes: Record<string, Reply>) {
     if (!lookup || !signal) throw new Error("The request must use the guarded lookup and a signal");
 
     const req = Object.assign(new EventEmitter(), {
-      end: () =>
+      end: () => {
         lookup(url.hostname, { all: true }, (error) => {
           if (error) {
             req.emit("error", error);
@@ -67,15 +67,16 @@ function serve(routes: Record<string, Reply>) {
 
           for (const chunk of reply.body ?? []) response.write(chunk);
           response.end();
-        }),
+        });
+      },
     });
 
     return req;
   });
 }
 
-const download = (url: string, overrides: Partial<typeof limits> = {}) =>
-  downloadPublicHttps(new URL(url), { ...limits, ...overrides });
+const download = async (url: string, overrides: Partial<typeof limits> = {}) =>
+  await downloadPublicHttps(new URL(url), { ...limits, ...overrides });
 
 describe("isPublicAddress", () => {
   it.each([

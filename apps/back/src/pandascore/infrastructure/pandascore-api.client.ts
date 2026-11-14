@@ -53,7 +53,7 @@ export class PandascoreApiClient {
     since,
     perPage = 100,
   }: ListIncidentsClientParams): Promise<PandascoreJson[]> {
-    return this.paginateAll("/incidents", {
+    return await this.paginateAll("/incidents", {
       params: { sort: "modified_at", since: since.toISOString(), videogame: [VIDEOGAME] },
       perPage,
     });
@@ -87,11 +87,11 @@ export class PandascoreApiClient {
   }
 
   async getTournamentBrackets(tournamentId: number): Promise<PandascoreJson[]> {
-    return this.paginateAll(`/tournaments/${tournamentId}/brackets`);
+    return await this.paginateAll(`/tournaments/${tournamentId}/brackets`);
   }
 
   async getTournamentMatches(tournamentId: number): Promise<PandascoreJson[]> {
-    return this.paginateAll(`/tournaments/${tournamentId}/matches`);
+    return await this.paginateAll(`/tournaments/${tournamentId}/matches`);
   }
 
   async getTournamentStandings(tournamentId: number): Promise<PandascoreJson[] | null> {
@@ -114,7 +114,7 @@ export class PandascoreApiClient {
   }
 
   async getRocketLeaguePlayers(): Promise<PandascoreJson[]> {
-    return this.paginateAll(`/${VIDEOGAME}/players`, {
+    return await this.paginateAll(`/${VIDEOGAME}/players`, {
       params: { sort: "name" },
       rateLimitMs: 200,
     });
@@ -203,7 +203,7 @@ export class PandascoreApiClient {
     return jsonSchema.parse(await response.json());
   }
 
-  private sleep(ms: number): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, ms));
+  private async sleep(ms: number): Promise<void> {
+    return await new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

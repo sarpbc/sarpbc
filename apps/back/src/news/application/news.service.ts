@@ -143,7 +143,7 @@ export class NewsService {
   }
 
   async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdmin> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const author = await scope.users.findById(userId);
 
       if (!author) {

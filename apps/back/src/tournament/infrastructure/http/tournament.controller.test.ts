@@ -12,7 +12,7 @@ import { ViewershipService } from "../../application/viewership.service";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 
 const unusedStreams = new StreamService(
-  { run: () => Promise.reject(new Error("unused")) },
+  { run: async () => await Promise.reject(new Error("unused")) },
   new CompetitionAfterCommit(
     { invalidateTournament: async () => {} },
     { publish: async () => {} },
@@ -23,11 +23,13 @@ const unusedStreams = new StreamService(
 const unusedLineups = new MatchLineupService(
   { byMatch: async () => [], byPlayer: async () => [] },
   { byIds: async () => [] },
-  { run: () => Promise.reject(new Error("unused")) },
+  { run: async () => await Promise.reject(new Error("unused")) },
 );
 
 const unusedGameStats = { byMatch: async () => [] };
-const unusedViewerships = new ViewershipService({ run: () => Promise.reject(new Error("unused")) });
+const unusedViewerships = new ViewershipService({
+  run: async () => await Promise.reject(new Error("unused")),
+});
 
 const playerLines = vi.fn(async (ids: string[]) =>
   ids.map((id) => ({

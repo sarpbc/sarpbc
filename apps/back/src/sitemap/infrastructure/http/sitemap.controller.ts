@@ -12,11 +12,11 @@ export class SitemapController {
   constructor(private readonly sitemapService: SitemapService) {}
 
   @Get(":kind")
-  entries(@Param("kind") kind: string) {
+  async entries(@Param("kind") kind: string) {
     if (!isSitemapKind(kind)) {
       throw new NotFoundError(`Sitemap "${kind}" was not found.`);
     }
 
-    return this.sitemapService.entries(kind);
+    return await this.sitemapService.entries(kind);
   }
 }

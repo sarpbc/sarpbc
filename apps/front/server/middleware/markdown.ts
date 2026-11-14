@@ -32,7 +32,7 @@ async function sendMarkdown(event: H3Event, htmlPath: string, search: string) {
   if (response.status >= 300 && response.status < 400 && location) {
     const target = new URL(location, getRequestURL(event).origin);
 
-    return sendRedirect(
+    return await sendRedirect(
       event,
       `${markdownPathFromHtmlPath(target.pathname)}${target.search}`,
       response.status,
@@ -95,7 +95,7 @@ export default defineEventHandler(async (event) => {
       return;
     }
 
-    return sendMarkdown(event, htmlPath, url.search);
+    return await sendMarkdown(event, htmlPath, url.search);
   }
 
   if (!isMarkdownEligibleHtmlPath(pathname)) {
@@ -105,7 +105,7 @@ export default defineEventHandler(async (event) => {
   if (shouldServeMarkdown(getHeader(event, "accept"), getHeader(event, "sec-fetch-dest"))) {
     setHeader(event, "cache-control", "private, no-store");
 
-    return sendMarkdown(event, pathname, url.search);
+    return await sendMarkdown(event, pathname, url.search);
   }
 
   setHeader(event, "vary", "Accept, Sec-Fetch-Dest");

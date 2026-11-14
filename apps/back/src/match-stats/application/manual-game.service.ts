@@ -26,7 +26,7 @@ export class ManualGameService {
   async list(tournamentId: string): Promise<TournamentStatsGame[]> {
     await requireTournament(this.candidates, tournamentId);
 
-    return this.games.inTournament(tournamentId);
+    return await this.games.inTournament(tournamentId);
   }
 
   async attach(tournamentId: string, input: AttachReplayInput): Promise<TournamentStatsGame> {
@@ -111,7 +111,7 @@ export class ManualGameService {
       await this.games.links(platformAccounts(stats)),
     );
 
-    return this.games.save(record);
+    return await this.games.save(record);
   }
 
   async remove(

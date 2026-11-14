@@ -203,10 +203,13 @@ export async function verifyMatchStats({
     ],
   });
   const merges = app.get(RosterMergeService);
-  await RequestContext.create(orm.em.fork(), () => merges.mergePlayers(playerId, duplicateId));
+  await RequestContext.create(
+    orm.em.fork(),
+    async () => await merges.mergePlayers(playerId, duplicateId),
+  );
 
-  const statRows = (player: string): Promise<number> =>
-    orm.em.fork().count(MatchGamePlayer, { player });
+  const statRows = async (player: string): Promise<number> =>
+    await orm.em.fork().count(MatchGamePlayer, { player });
 
   assert.equal(await statRows(duplicateId), 0, "a player merge leaves no stats on the duplicate");
   assert.equal(await statRows(playerId), 2, "a player merge moves stats to the kept player");
@@ -286,12 +289,12 @@ export async function verifyMatchStats({
   rival.players.add(setup.getReference(Player, otherId));
   await setup.flush();
 
-  const saveGame = (
+  const saveGame = async (
     number: number,
     players: GamePlayerRecord[],
     learnedLinks: PlayerLink[] = [],
   ): Promise<TournamentStatsGame> =>
-    new MikroOrmGameStatsStore(orm.em.fork()).save({
+    await new MikroOrmGameStatsStore(orm.em.fork()).save({
       ...game,
       number,
       ballchasingId: `integration-replay-${number}`,
@@ -373,8 +376,8 @@ export async function verifyMatchStats({
   assert(rosterIds(rivalParticipantId).includes(otherId));
   assert(rosterIds(participantId).includes(playerId), "every roster of the tournament is offered");
 
-  const link = (body: StatsPlayerLinkInput, status?: number): Promise<JsonResponse> =>
-    request("PUT", `${linksUrl}/link`, body, staffCookie, status);
+  const link = async (body: StatsPlayerLinkInput, status?: number): Promise<JsonResponse> =>
+    await request("PUT", `${linksUrl}/link`, body, staffCookie, status);
 
   await link({ platform: "steam", platformId: " ", playerId }, 400);
   await link({ platform: "steam", platformId: "s-renamed", playerId: twinId }, 400);
@@ -444,7 +447,10 @@ export async function verifyMatchStats({
     }),
   );
   await twinLink.flush();
-  await RequestContext.create(orm.em.fork(), () => merges.mergePlayers(otherId, twinId));
+  await RequestContext.create(
+    orm.em.fork(),
+    async () => await merges.mergePlayers(otherId, twinId),
+  );
   assert.equal(await linkOf("s-twin"), otherId, "a player merge moves links to the kept player");
 
   const gamesUrl = `/tournaments/${tournamentId}/stats-games`;

@@ -13,8 +13,8 @@ export class StatsPlayerLinkController {
   constructor(private readonly service: StatsPlayerLinkService) {}
 
   @Get()
-  accounts(@Param("id") tournamentId: string): Promise<StatsPlayerAccounts> {
-    return this.service.accounts(tournamentId);
+  async accounts(@Param("id") tournamentId: string): Promise<StatsPlayerAccounts> {
+    return await this.service.accounts(tournamentId);
   }
 
   @Put("link")

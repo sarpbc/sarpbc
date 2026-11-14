@@ -38,7 +38,11 @@ export class TeamLogoService {
     const normalized = await this.images.normalize(bytes, format, TEAM_LOGO_PIXELS);
     const hash = createHash("sha256").update(normalized).digest("hex").slice(0, 16);
 
-    return this.storage.put(pendingTeamLogoKey(teamId, variant, hash), normalized, "image/webp");
+    return await this.storage.put(
+      pendingTeamLogoKey(teamId, variant, hash),
+      normalized,
+      "image/webp",
+    );
   }
 
   async publish(pendingKey: string): Promise<StoredTeamLogo> {

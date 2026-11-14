@@ -59,28 +59,28 @@ const PROPOSAL: StreamScoreProposal = {
   frames: { read: 800, accepted: 700, hidden: 80, unreadable: 15, rejected: 5 },
 };
 
-describe("stream score confirmation", () => {
+void describe("stream score confirmation", () => {
   const review = { numberOfGames: 5, checkedGames: new Set([2, 3]), bestOfAcknowledged: false };
 
-  it("flags low-confidence games and games read after the 0:00 moment", () => {
+  void it("flags low-confidence games and games read after the 0:00 moment", () => {
     assert.deepEqual(
       PROPOSAL.games.map((game) => streamScoreGameNeedsCheck(game)),
       [false, true, true, false],
     );
   });
 
-  it("allows a decided series once every flagged game is checked", () => {
+  void it("allows a decided series once every flagged game is checked", () => {
     assert.deepEqual(streamScoreConfirmBlockers(PROPOSAL, review), []);
   });
 
-  it("blocks a flagged game until staff checks it", () => {
+  void it("blocks a flagged game until staff checks it", () => {
     assert.deepEqual(
       streamScoreConfirmBlockers(PROPOSAL, { ...review, checkedGames: new Set([2]) }),
       ["unchecked-game"],
     );
   });
 
-  it("blocks an unread game even when staff checked it", () => {
+  void it("blocks an unread game even when staff checked it", () => {
     const [first, second] = PROPOSAL.games;
     assert.ok(first && second);
 
@@ -96,7 +96,7 @@ describe("stream score confirmation", () => {
     );
   });
 
-  it("blocks a best-of that disagrees with the match until staff acknowledges it", () => {
+  void it("blocks a best-of that disagrees with the match until staff acknowledges it", () => {
     const mismatch = { ...review, numberOfGames: 7 };
     assert.deepEqual(streamScoreConfirmBlockers(PROPOSAL, mismatch), ["best-of-mismatch"]);
     assert.deepEqual(
@@ -106,7 +106,7 @@ describe("stream score confirmation", () => {
     assert.deepEqual(streamScoreConfirmBlockers(PROPOSAL, { ...review, numberOfGames: null }), []);
   });
 
-  it("refuses a Liquipedia source and accepts a stream or a local file", () => {
+  void it("refuses a Liquipedia source and accepts a stream or a local file", () => {
     assert.equal(isForbiddenStreamScoreSource("https://liquipedia.net/rocketleague/X"), true);
     assert.equal(isForbiddenStreamScoreSource("https://www.twitch.tv/videos/1"), false);
     assert.equal(isForbiddenStreamScoreSource("vod.mp4"), false);
@@ -119,7 +119,7 @@ describe("stream score confirmation", () => {
     );
   });
 
-  it("maps the series score to the participant on each side", () => {
+  void it("maps the series score to the participant on each side", () => {
     assert.deepEqual(
       streamScoreSeriesResults(PROPOSAL.series, { blue: "vitality", orange: "karmine" }),
       [

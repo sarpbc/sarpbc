@@ -69,10 +69,10 @@ export class CompetitionSyncService {
     incident: CompetitionIncident,
     backfill?: UpsertTournamentCommand | null,
   ): Promise<void> {
-    const applied = await this.transaction.run((scope) =>
+    const applied = await this.transaction.run(async (scope) =>
       incident.changeType === "deletion"
-        ? this.applyDeletion(scope, incident)
-        : this.applyChange(scope, incident, backfill),
+        ? await this.applyDeletion(scope, incident)
+        : await this.applyChange(scope, incident, backfill),
     );
 
     if (applied)
@@ -131,7 +131,7 @@ export class CompetitionSyncService {
 
         return null;
       case "serie":
-        return this.applySerie(scope.events, incident.command);
+        return await this.applySerie(scope.events, incident.command);
       default: {
         const neverIncident: never = incident;
 
@@ -145,7 +145,7 @@ export class CompetitionSyncService {
   ): Promise<Applied | null> {
     switch (incident.kind) {
       case "serie":
-        return this.applySerieDeletion(scope, incident.id, incident.deletion);
+        return await this.applySerieDeletion(scope, incident.id, incident.deletion);
       case "league":
       case "match":
       case "player":
@@ -166,7 +166,7 @@ export class CompetitionSyncService {
   ): Promise<Applied | null> {
     switch (deletion.kind) {
       case "merged":
-        return this.mergeSerie(scope, serieId, deletion.intoId);
+        return await this.mergeSerie(scope, serieId, deletion.intoId);
       case "replaced":
       case "deleted":
         return null;
@@ -435,9 +435,9 @@ export class CompetitionSyncService {
 
     const lookups: Array<() => Promise<TournamentEvent | null>> = serie
       ? [
-          () => events.bySerieId(serie.pandascoreId),
+          async () => await events.bySerieId(serie.pandascoreId),
           async () => unclaimedCurrent,
-          () => events.unclaimedByName(league?.id ?? null, name),
+          async () => await events.unclaimedByName(league?.id ?? null, name),
         ]
       : [async () => unclaimedCurrent];
 
@@ -453,8 +453,9 @@ export class CompetitionSyncService {
 
     if (!found) {
       const year = serie?.year ?? command.beginAt?.getUTCFullYear() ?? null;
-      event.slug = await allocateSlug(eventSlug(name, year), (slug) =>
-        events.slugTaken(slug, null),
+      event.slug = await allocateSlug(
+        eventSlug(name, year),
+        async (slug) => await events.slugTaken(slug, null),
       );
     }
 

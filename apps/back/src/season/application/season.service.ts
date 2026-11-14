@@ -27,8 +27,8 @@ function cleanName(name: string): string {
 export class SeasonService {
   constructor(private readonly store: SeasonStore) {}
 
-  list(): Promise<SeasonSummary[]> {
-    return this.store.list();
+  async list(): Promise<SeasonSummary[]> {
+    return await this.store.list();
   }
 
   async detail(id: string): Promise<SeasonDetail> {
@@ -52,7 +52,7 @@ export class SeasonService {
 
     await this.store.save(season);
 
-    return this.detail(season.id);
+    return await this.detail(season.id);
   }
 
   async update(id: string, input: SeasonInput): Promise<SeasonDetail> {
@@ -71,15 +71,15 @@ export class SeasonService {
 
     await this.store.save(season);
 
-    return this.detail(id);
+    return await this.detail(id);
   }
 
   async remove(id: string): Promise<void> {
     if (!(await this.store.remove(id))) throw new NotFoundError("Season not found");
   }
 
-  awardsOfPlayer(playerId: string): Promise<PlayerSeasonAward[]> {
-    return this.store.awardsOfPlayer(playerId);
+  async awardsOfPlayer(playerId: string): Promise<PlayerSeasonAward[]> {
+    return await this.store.awardsOfPlayer(playerId);
   }
 
   async requireAward(seasonId: string, input: SeasonAwardInput) {
@@ -107,7 +107,7 @@ export class SeasonService {
   async addAward(seasonId: string, input: SeasonAwardInput): Promise<SeasonAward> {
     const award = await this.requireAward(seasonId, input);
 
-    return this.store.saveAward(seasonId, input.playerId, award);
+    return await this.store.saveAward(seasonId, input.playerId, award);
   }
 
   async removeAward(seasonId: string, awardId: string): Promise<void> {

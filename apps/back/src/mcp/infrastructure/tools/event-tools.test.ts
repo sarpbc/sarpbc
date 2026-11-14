@@ -78,7 +78,8 @@ function setup(role: "admin" | "journalist" = "admin") {
 
     if (!found) throw new Error(`${name} is not defined`);
 
-    return (input: ToolInput) => found.run({ id: "u1", email: "staff@test.com", role }, input);
+    return async (input: ToolInput) =>
+      await found.run({ id: "u1", email: "staff@test.com", role }, input);
   };
 
   return { catalogService, eventQueries, tool, listing };

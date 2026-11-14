@@ -40,8 +40,8 @@ export async function verifyCompetitionSyncLookups({
 
   const league = { pandascoreId: 9701, name: "Lookup League", slug: "lookup-league" };
 
-  const upsert = (command: Omit<UpsertTournamentCommand, "league">) =>
-    run(() => sync.upsertTournament({ league, ...command }));
+  const upsert = async (command: Omit<UpsertTournamentCommand, "league">) =>
+    await run(async () => await sync.upsertTournament({ league, ...command }));
 
   const view = async (id: string): Promise<StageView> =>
     (await request("GET", `/tournaments/${id}`)).json<{ tournament: StageView }>().tournament;
@@ -201,18 +201,20 @@ export async function verifyPandascoreAdoption({
     return RequestContext.create(orm.em.fork(), work);
   }
 
-  const importPlayer = (pandascoreId: number, slug: string) =>
-    run(() =>
-      sync.applyIncident({
-        id: pandascoreId,
-        modifiedAt: new Date(),
-        changeType: "creation",
-        kind: "player",
-        command: { player: { pandascoreId, name: slug, slug }, currentTeam: null },
-      }),
+  const importPlayer = async (pandascoreId: number, slug: string) =>
+    await run(
+      async () =>
+        await sync.applyIncident({
+          id: pandascoreId,
+          modifiedAt: new Date(),
+          changeType: "creation",
+          kind: "player",
+          command: { player: { pandascoreId, name: slug, slug }, currentTeam: null },
+        }),
     );
 
-  const imported = (pandascoreId: number) => orm.em.fork().findOneOrFail(Player, { pandascoreId });
+  const imported = async (pandascoreId: number) =>
+    await orm.em.fork().findOneOrFail(Player, { pandascoreId });
 
   const legacy = (
     await request("POST", "/player", { name: "Adoption Legacy" }, staffCookie, 201)
@@ -313,7 +315,9 @@ export async function verifyRedistributableScope({
   const startggCup = await finishedMatchOf("startgg");
 
   const finishedCups = async (options: { redistributableOnly: boolean }): Promise<string[]> => {
-    const [rows, total] = await run(() => matches.list("results", { teamId: alpha, ...options }));
+    const [rows, total] = await run(
+      async () => await matches.list("results", { teamId: alpha, ...options }),
+    );
     assert.equal(total, rows.length, "the total counts the rows that are returned");
 
     return rows.map((match) => match.tournament.id).sort();
@@ -330,7 +334,7 @@ export async function verifyRedistributableScope({
   );
 
   const earned = async (redistributableOnly: boolean) =>
-    (await run(() => prizes.teamEarnings(alpha, { redistributableOnly }))).totals;
+    (await run(async () => await prizes.teamEarnings(alpha, { redistributableOnly }))).totals;
 
   assert.deepEqual(await earned(false), [{ currency: "USD", amount: 2000 }]);
   assert.deepEqual(

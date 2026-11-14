@@ -52,7 +52,7 @@ describe("ViewershipService", () => {
     },
   };
 
-  const service = new ViewershipService({ run: (work) => work(scope) });
+  const service = new ViewershipService({ run: async (work) => await work(scope) });
 
   beforeEach(() => {
     events.clear();

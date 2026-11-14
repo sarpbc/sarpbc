@@ -150,7 +150,7 @@ describe("post transaction and policies", () => {
   it("does not delete the post or commit when dependent deletion fails", async () => {
     const f = setup();
     await f.service.create("user", input);
-    const post = f.saved[0]!;
+    const post = f.saved[0];
     f.scope.posts.findWithDetails = async () => post;
     f.scope.replies.deleteAllForPost = async () => {
       throw new Error("reply deletion failed");

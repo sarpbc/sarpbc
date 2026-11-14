@@ -9,21 +9,21 @@ export async function createNewsArticle(body: {
   contentFr?: string | null;
   type?: NewsType;
 }): Promise<NewsArticleAdmin> {
-  return apiFetch<NewsArticleAdmin>("/news", { method: "POST", body });
+  return await apiFetch<NewsArticleAdmin>("/news", { method: "POST", body });
 }
 
 export async function getNewsArticlesAdmin(range: {
   limit: number;
   offset: number;
 }): Promise<PaginatedNewsArticles> {
-  return apiFetch<PaginatedNewsArticles>("/news/admin", {
+  return await apiFetch<PaginatedNewsArticles>("/news/admin", {
     method: "GET",
     query: { page: Math.floor(range.offset / range.limit), limit: range.limit },
   });
 }
 
 export async function getNewsArticleAdmin(slug: string): Promise<NewsArticleAdmin> {
-  return apiFetch<NewsArticleAdmin>(`/news/admin/${slug}`, { method: "GET" });
+  return await apiFetch<NewsArticleAdmin>(`/news/admin/${slug}`, { method: "GET" });
 }
 
 export async function editNewsArticle(
@@ -38,7 +38,7 @@ export async function editNewsArticle(
     type?: NewsType;
   },
 ): Promise<NewsArticleAdmin> {
-  return apiFetch<NewsArticleAdmin>(`/news/${slug}`, { method: "PATCH", body });
+  return await apiFetch<NewsArticleAdmin>(`/news/${slug}`, { method: "PATCH", body });
 }
 
 export async function publishNewsArticle(slug: string): Promise<void> {

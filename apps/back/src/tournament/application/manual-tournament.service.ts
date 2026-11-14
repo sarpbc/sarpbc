@@ -68,7 +68,7 @@ export class ManualTournamentService {
       return tournament.id;
     });
 
-    return this.detail(id);
+    return await this.detail(id);
   }
   async update(id: string, input: UpdateTournamentInput): Promise<Tournament> {
     await this.transaction.run(async ({ tournaments, events, matches }) => {
@@ -116,7 +116,7 @@ export class ManualTournamentService {
     });
     await this.afterCommit.settle({ tournamentIds: [id] });
 
-    return this.detail(id);
+    return await this.detail(id);
   }
   async setPickemsEnabled(id: string, enabled: boolean): Promise<void> {
     await this.transaction.run(async ({ tournaments }) => {
@@ -148,8 +148,9 @@ export class ManualTournamentService {
 
     event.slug = slug
       ? await explicitEventSlug(events, slug, event.id)
-      : await allocateSlug(eventSlug(tournament.name, null), (taken) =>
-          events.slugTaken(taken, null),
+      : await allocateSlug(
+          eventSlug(tournament.name, null),
+          async (taken) => await events.slugTaken(taken, null),
         );
     await events.save(event);
 

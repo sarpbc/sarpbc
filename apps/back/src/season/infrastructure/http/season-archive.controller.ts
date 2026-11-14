@@ -14,7 +14,7 @@ export class SeasonArchiveController {
 
   @Get(":slug")
   @Header("Cache-Control", "public, max-age=60")
-  archive(@Param("slug") slug: string): Promise<SeasonArchive> {
-    return this.archives.archive(slug);
+  async archive(@Param("slug") slug: string): Promise<SeasonArchive> {
+    return await this.archives.archive(slug);
   }
 }

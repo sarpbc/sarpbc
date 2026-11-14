@@ -57,7 +57,7 @@ describe("MatchService deletion", () => {
     },
   };
 
-  const transaction: CompetitionTransaction = { run: (work) => work(scope) };
+  const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };
 
   const reads: MatchQueries = {
     list: vi.fn(),

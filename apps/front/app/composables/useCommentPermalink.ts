@@ -55,7 +55,7 @@ export function useCommentPermalink() {
 
   function navigateToComment(commentId: string) {
     void router.replace({ hash: commentPermalinkHash(commentId) });
-    nextTick(() => {
+    void nextTick(() => {
       if (scrollToComment(commentId)) {
         highlightComment(commentId);
       }

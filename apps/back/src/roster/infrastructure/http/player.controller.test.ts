@@ -97,7 +97,7 @@ describe("PlayerController", () => {
   const lineups = new MatchLineupService(
     { byMatch: async () => [], byPlayer },
     { byIds: async () => standInMatches },
-    { run: () => Promise.reject(new Error("unused")) },
+    { run: async () => await Promise.reject(new Error("unused")) },
   );
 
   const controller = new PlayerController(

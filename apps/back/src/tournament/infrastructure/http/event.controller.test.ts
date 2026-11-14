@@ -10,7 +10,7 @@ import { ViewershipService } from "../../application/viewership.service";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 
 const unusedStreams = new StreamService(
-  { run: () => Promise.reject(new Error("unused")) },
+  { run: async () => await Promise.reject(new Error("unused")) },
   new CompetitionAfterCommit(
     { invalidateTournament: async () => {} },
     { publish: async () => {} },
@@ -18,7 +18,9 @@ const unusedStreams = new StreamService(
   ),
 );
 
-const unusedViewerships = new ViewershipService({ run: () => Promise.reject(new Error("unused")) });
+const unusedViewerships = new ViewershipService({
+  run: async () => await Promise.reject(new Error("unused")),
+});
 
 const STAGE_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 

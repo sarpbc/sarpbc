@@ -13,7 +13,7 @@ const hasTarget = () => REPLY_HAS_TARGET.map((target) => ({ reply: target }));
 
 export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
   async findForRecipient(recipientId: string, limit: number): Promise<ReplyNotification[]> {
-    return this.find(
+    return await this.find(
       { recipient: { id: recipientId }, $or: hasTarget() },
       {
         populate: ["reply", ...REPLY_POPULATE.map((relation) => `reply.${relation}` as const)],
@@ -24,7 +24,7 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
   }
 
   async countUnread(recipientId: string): Promise<number> {
-    return this.count({
+    return await this.count({
       recipient: { id: recipientId },
       readAt: null,
       $or: hasTarget(),

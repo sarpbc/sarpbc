@@ -39,7 +39,7 @@ function checkSubject(subject: string, label: string): void {
 }
 
 function checkTrailers(message: string, label: string): void {
-  const trailer = message.match(agentTrailerPattern)?.[0];
+  const trailer = agentTrailerPattern.exec(message)?.[0];
 
   if (trailer !== undefined) {
     throw new Error(

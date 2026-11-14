@@ -255,7 +255,7 @@ export class FixtureRenderer {
 
         for (let row = firstRow; row <= lastRow; row++) {
           for (let column = firstColumn; column <= lastColumn; column++) {
-            if (ink[row]?.[column] !== true) continue;
+            if (!ink[row]?.[column]) continue;
             const cellX = originX + column * FONT_PIXEL;
             const cellY = originY + row * FONT_PIXEL;
             area +=

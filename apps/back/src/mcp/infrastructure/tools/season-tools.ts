@@ -14,7 +14,7 @@ export function seasonTools({ seasonService }: SeasonToolServices): McpTool[] {
       description:
         "List the seasons and leagues staff created on sarpbc.org to hold awards that no single tournament stage holds, such as a Season MVP or a Regional MVP. Use get_season for the awards already recorded.",
       input: {},
-      handler: () => seasonService.list(),
+      handler: async () => await seasonService.list(),
     }),
 
     defineTool({

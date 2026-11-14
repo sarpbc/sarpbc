@@ -60,7 +60,8 @@ describe("set_match_game_vods", () => {
     return {
       matchService,
       tool,
-      run: (input: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, input),
+      run: async (input: ToolArguments) =>
+        await tool.run({ id: "u1", email: "staff@test.com", role }, input),
     };
   }
 
@@ -366,8 +367,8 @@ describe("bracket tools", () => {
 
     const tools = writeTools({ ...base, matchService, tournaments });
 
-    const run = (name: string, input: ToolArguments) =>
-      defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
+    const run = async (name: string, input: ToolArguments) =>
+      await defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
 
     return { tools, matchService, run };
   }

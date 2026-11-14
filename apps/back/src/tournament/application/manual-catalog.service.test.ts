@@ -38,8 +38,8 @@ describe("ManualCatalogService", () => {
   };
 
   const tx = {
-    run: <T>(work: (scope: never) => Promise<T>) =>
-      work({ tournaments: tournamentWriter, events: eventWriter } as never),
+    run: async <T>(work: (scope: never) => Promise<T>) =>
+      await work({ tournaments: tournamentWriter, events: eventWriter } as never),
   };
 
   const queries = {

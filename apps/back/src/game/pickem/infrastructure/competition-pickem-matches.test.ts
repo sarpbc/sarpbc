@@ -33,7 +33,9 @@ describe("deciding a match from pick'ems", () => {
 
     const competition = new MatchService(
       { detail: async () => stored } as never,
-      { run: (work) => work({ matches: writer } as never) } satisfies CompetitionTransaction,
+      {
+        run: async (work) => await work({ matches: writer } as never),
+      } satisfies CompetitionTransaction,
       new CompetitionAfterCommit({ invalidateTournament: vi.fn() }, events, {
         error: vi.fn(),
       }),
@@ -42,7 +44,7 @@ describe("deciding a match from pick'ems", () => {
     const pickems = new PickemService(
       { list: async () => [] },
       new CompetitionPickemMatches(competition),
-      { run: async (work) => work({ unscored: async () => [] } as never) },
+      { run: async (work) => await work({ unscored: async () => [] } as never) },
       { now: () => new Date("2026-01-01T12:00:00Z"), id: () => "id", warn: vi.fn() },
     );
 

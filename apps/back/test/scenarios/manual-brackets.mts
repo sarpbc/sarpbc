@@ -107,8 +107,8 @@ export async function verifyManualBrackets({
     "the public stage carries the links the bracket tree is drawn from",
   );
 
-  const setBracket = (matchId: string, body: Payload, status = 200): Promise<JsonResponse> =>
-    request("PUT", `/tournaments/matches/${matchId}/bracket`, body, staffCookie, status);
+  const setBracket = async (matchId: string, body: Payload, status = 200): Promise<JsonResponse> =>
+    await request("PUT", `/tournaments/matches/${matchId}/bracket`, body, staffCookie, status);
 
   await setBracket(
     semi1.id,

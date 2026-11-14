@@ -16,6 +16,6 @@ export class TweetImageService {
     if (!isTweetImageUrl(url))
       throw new InvalidInputError("Only https://pbs.twimg.com images from X posts can be loaded.");
 
-    return this.gateway.load(url);
+    return await this.gateway.load(url);
   }
 }

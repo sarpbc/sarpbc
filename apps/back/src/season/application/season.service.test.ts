@@ -143,8 +143,8 @@ describe("SeasonService", () => {
   });
 
   it("holds one Regional MVP per region and one of every other type", async () => {
-    const regional = (playerId: string, region: string) =>
-      service.addAward(season.id, {
+    const regional = async (playerId: string, region: string) =>
+      await service.addAward(season.id, {
         playerId,
         awardType: "regional_mvp",
         region,
@@ -157,8 +157,8 @@ describe("SeasonService", () => {
       "RLCS 2024 already has a Regional MVP for Europe",
     );
 
-    const seasonMvp = () =>
-      service.addAward(season.id, {
+    const seasonMvp = async () =>
+      await service.addAward(season.id, {
         playerId: "zen",
         awardType: "season_mvp",
         sourceUrl: ANNOUNCEMENT,

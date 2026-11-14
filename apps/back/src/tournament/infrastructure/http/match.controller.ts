@@ -82,10 +82,10 @@ function attachCommentCounts(
 @Controller("matches")
 export class MatchController {
   constructor(
-    private matchService: MatchService,
-    private replyService: ReplyService,
-    private lineupService: MatchLineupService,
-    @Inject(GAME_STATS_STORE) private gameStats: GameStatsStore,
+    private readonly matchService: MatchService,
+    private readonly replyService: ReplyService,
+    private readonly lineupService: MatchLineupService,
+    @Inject(GAME_STATS_STORE) private readonly gameStats: GameStatsStore,
   ) {}
 
   @Get("upcoming")

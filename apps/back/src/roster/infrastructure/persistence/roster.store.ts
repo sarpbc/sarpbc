@@ -191,8 +191,8 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
     return row ? toTeam(row) : null;
   }
 
-  redirectCount(id: string) {
-    return this.em.count(Row.Team, { mergedInto: id });
+  async redirectCount(id: string) {
+    return await this.em.count(Row.Team, { mergedInto: id });
   }
 
   async save(model: Team) {
@@ -263,20 +263,20 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
     ).map(toContract);
   }
 
-  findByPlayer(id: string) {
-    return this.list({ player: { id } });
+  async findByPlayer(id: string) {
+    return await this.list({ player: { id } });
   }
 
-  findPastContractsByPlayer(id: string) {
-    return this.list({ player: { id }, endDate: { $ne: null } }, true);
+  async findPastContractsByPlayer(id: string) {
+    return await this.list({ player: { id }, endDate: { $ne: null } }, true);
   }
 
-  findByTeam(id: string) {
-    return this.list({ team: { id } });
+  async findByTeam(id: string) {
+    return await this.list({ team: { id } });
   }
 
-  findFormerPlayersByTeam(id: string) {
-    return this.list({ team: { id }, endDate: { $ne: null } }, true);
+  async findFormerPlayersByTeam(id: string) {
+    return await this.list({ team: { id }, endDate: { $ne: null } }, true);
   }
 
   async findMovements({ teamId, playerId }: ContractMovementFilter) {
@@ -384,8 +384,8 @@ function writeScope(tx: EntityManager): RosterWriteScope {
 
 export class MikroRosterTransaction implements RosterTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (scope: RosterWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: RosterWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const result = await work(writeScope(tx));
       await tx.flush();
 
@@ -396,8 +396,8 @@ export class MikroRosterTransaction implements RosterTransaction {
 
 export class MikroTeamAliasTransaction implements TeamAliasTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (scope: TeamAliasWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: TeamAliasWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const result = await work({
         teams: new MikroTeamStore(tx),
         aliases: new MikroTeamAliasStore(tx),
@@ -470,7 +470,8 @@ function rosterReferences(
 
       for (const mover of others.movers) await mover.moveTeam(from, to);
     },
-    sharedTournamentIds: (teamId, otherTeamId) => others.sharedTournamentIds(teamId, otherTeamId),
+    sharedTournamentIds: async (teamId, otherTeamId) =>
+      await others.sharedTournamentIds(teamId, otherTeamId),
   };
 }
 
@@ -479,8 +480,8 @@ export class MikroRosterMergeTransaction implements RosterMergeTransaction {
     private readonly em: EntityManager,
     private readonly participantsFor: (tx: EntityManager) => RosterMergeParticipants,
   ) {}
-  run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const result = await work({
         ...writeScope(tx),
         references: rosterReferences(tx, this.participantsFor(tx)),

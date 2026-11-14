@@ -1,12 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { Team } from "../../../roster/domain/roster";
-import {
-  League,
-  Match,
-  Tournament,
-  TournamentParticipant,
-  type TournamentSummary,
-} from "../../domain/competition";
+import { League, Match, Tournament, TournamentParticipant } from "../../domain/competition";
 import { mapMatchListItem } from "./match-list.mapper";
 import { mapTournamentDetail } from "./tournament.mapper";
 
@@ -43,7 +37,7 @@ describe("match links in API payloads", () => {
     const item = mapMatchListItem(
       match({
         participants: [participant("Karmine Corp"), participant("Team Falcons")],
-        tournament: tournament() as TournamentSummary,
+        tournament: tournament(),
       }),
     );
 
@@ -63,7 +57,7 @@ describe("match links in API payloads", () => {
       match({
         name: "Lower bracket round 2: TBD vs Team Falcons",
         participants: [participant("Team Falcons")],
-        tournament: tournament() as TournamentSummary,
+        tournament: tournament(),
       }),
     );
 
@@ -75,7 +69,7 @@ describe("match links in API payloads", () => {
     parent.matches = [
       match({
         participants: [participant("Karmine Corp"), participant("Team Falcons")],
-        tournament: { ...parent, league: null } as TournamentSummary,
+        tournament: { ...parent, league: null },
       }),
     ];
 

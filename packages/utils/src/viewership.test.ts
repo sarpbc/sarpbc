@@ -12,8 +12,8 @@ const VALID: Viewership = {
   sourceUrl: " https://escharts.com/tournaments/rl/fake-open ",
 };
 
-describe("parseViewership", () => {
-  it("normalizes the credit, the source URL and the measured date", () => {
+void describe("parseViewership", () => {
+  void it("normalizes the credit, the source URL and the measured date", () => {
     assert.deepEqual(parseViewership(VALID), {
       ok: true,
       viewership: {
@@ -26,7 +26,7 @@ describe("parseViewership", () => {
     assert.equal(parseViewership({ ...VALID, averageViewers: null, measuredAt: null }).ok, true);
   });
 
-  it("requires a source name and an https source URL", () => {
+  void it("requires a source name and an https source URL", () => {
     const error = (input: Partial<Viewership>) => {
       const parsed = parseViewership({ ...VALID, ...input });
 
@@ -41,7 +41,7 @@ describe("parseViewership", () => {
     assert.equal(error({ sourceUrl: "https://www.blast.tv/rl" }), "forbidden-source");
   });
 
-  it("refuses impossible viewer counts", () => {
+  void it("refuses impossible viewer counts", () => {
     const error = (input: Partial<Viewership>) => {
       const parsed = parseViewership({ ...VALID, ...input });
 
@@ -56,8 +56,8 @@ describe("parseViewership", () => {
   });
 });
 
-describe("isForbiddenViewershipSource", () => {
-  it("matches the forbidden hosts and their subdomains only", () => {
+void describe("isForbiddenViewershipSource", () => {
+  void it("matches the forbidden hosts and their subdomains only", () => {
     assert.equal(isForbiddenViewershipSource("Liquipedia.net"), true);
     assert.equal(isForbiddenViewershipSource("blast.tv"), true);
     assert.equal(isForbiddenViewershipSource("www.start.gg"), true);

@@ -8,11 +8,11 @@ export class TeamAliasService {
   constructor(private readonly transaction: TeamAliasTransaction) {}
 
   async requireProposable(teamId: string, input: TeamAliasInput, aliasId?: string): Promise<void> {
-    await this.transaction.run((scope) => this.prepare(scope, teamId, input, aliasId));
+    await this.transaction.run(async (scope) => await this.prepare(scope, teamId, input, aliasId));
   }
 
   async add(teamId: string, input: TeamAliasInput): Promise<TeamAlias> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const alias = await this.prepare(scope, teamId, input);
       await scope.aliases.save(teamId, alias);
 
@@ -21,7 +21,7 @@ export class TeamAliasService {
   }
 
   async update(teamId: string, aliasId: string, input: TeamAliasInput): Promise<TeamAlias> {
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       const alias = await this.prepare(scope, teamId, input, aliasId);
       await scope.aliases.save(teamId, alias);
 

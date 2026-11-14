@@ -25,7 +25,7 @@ export function sendIcs(event: H3Event, ics: string, filename: string): string {
 
 export function parseIcsSlug(pathname: string): string | null {
   const segment = pathname.split("/").pop() ?? "";
-  const match = segment.match(/^(.+)\.ics$/i);
+  const match = /^(.+)\.ics$/i.exec(segment);
 
   return match?.[1] ?? null;
 }

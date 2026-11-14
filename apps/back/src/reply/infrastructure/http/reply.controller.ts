@@ -24,11 +24,11 @@ import { ReportReplyDto } from "./dto/report-reply.dto";
 
 @Controller("replies")
 export class ReplyController {
-  constructor(private replyService: ReplyService) {}
+  constructor(private readonly replyService: ReplyService) {}
 
   @Get()
   async findByTarget(@Query({ schema: ListRepliesQueryDto }) query: ListRepliesQueryDto) {
-    return this.replyService.findByTargetPaginated(
+    return await this.replyService.findByTargetPaginated(
       query.targetType,
       query.targetId,
       query.page,

@@ -90,12 +90,12 @@ export class CompetitionPrizeQueries implements PrizeQueries {
     return rows.map((row) => toEarningsLine(row, row.players.length));
   }
 
-  private earnings(
+  private async earnings(
     where: FilterQuery<TournamentPrize>,
     { redistributableOnly }: EarningsScope,
     populate: "players"[] = [],
   ) {
-    return this.em.find(
+    return await this.em.find(
       TournamentPrize,
       {
         $and: [

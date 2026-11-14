@@ -87,11 +87,11 @@ export function redistributableCompetition(services: RedistributableCompetitionS
     async tournamentAwards(tournamentId: string) {
       await tournament(tournamentId);
 
-      return playerAwardService.findByTournamentId(tournamentId);
+      return await playerAwardService.findByTournamentId(tournamentId);
     },
 
-    matches(kind: MatchListKind, limit: number) {
-      return matchService.list(kind, { limit, redistributableOnly: true });
+    async matches(kind: MatchListKind, limit: number) {
+      return await matchService.list(kind, { limit, redistributableOnly: true });
     },
 
     async matchLineups(matchId: string) {
@@ -110,26 +110,26 @@ export function redistributableCompetition(services: RedistributableCompetitionS
       return distribution;
     },
 
-    teamEarnings(teamId: string) {
-      return tournamentPrizeService.teamEarnings(teamId, { redistributableOnly: true });
+    async teamEarnings(teamId: string) {
+      return await tournamentPrizeService.teamEarnings(teamId, { redistributableOnly: true });
     },
 
-    playerEarnings(playerId: string) {
-      return tournamentPrizeService.playerEarnings(playerId, { redistributableOnly: true });
+    async playerEarnings(playerId: string) {
+      return await tournamentPrizeService.playerEarnings(playerId, { redistributableOnly: true });
     },
 
-    events(options: { activeOnly: boolean; limit: number; offset: number }) {
-      return eventQueries.list({ ...options, redistributableOnly: true });
+    async events(options: { activeOnly: boolean; limit: number; offset: number }) {
+      return await eventQueries.list({ ...options, redistributableOnly: true });
     },
 
     event,
 
     async tournamentPlayerStats(tournamentId: string) {
-      return tournamentPlayerStatsService.forStages([await tournament(tournamentId)]);
+      return await tournamentPlayerStatsService.forStages([await tournament(tournamentId)]);
     },
 
     async eventPlayerStats(idOrSlug: string) {
-      return tournamentPlayerStatsService.forStages((await event(idOrSlug)).stages);
+      return await tournamentPlayerStatsService.forStages((await event(idOrSlug)).stages);
     },
   };
 }

@@ -13,11 +13,15 @@ import { parseOverlay } from "./overlay.ts";
 const run = promisify(execFile);
 const CLI = fileURLToPath(new URL("./cli.ts", import.meta.url));
 
-function cli(args: readonly string[]): Promise<{ stdout: string; stderr: string }> {
-  return run(process.execPath, ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", CLI, ...args]);
+async function cli(args: readonly string[]): Promise<{ stdout: string; stderr: string }> {
+  return await run(process.execPath, [
+    "--disable-warning=MODULE_TYPELESS_PACKAGE_JSON",
+    CLI,
+    ...args,
+  ]);
 }
 
-describe("stream-score-ocr cli", () => {
+void describe("stream-score-ocr cli", () => {
   let directory = "";
   before(async () => {
     directory = await mkdtemp(join(tmpdir(), "stream-score-ocr-"));
@@ -26,7 +30,7 @@ describe("stream-score-ocr cli", () => {
     await rm(directory, { recursive: true, force: true });
   });
 
-  it("learns glyph templates from a labelled frame", async () => {
+  void it("learns glyph templates from a labelled frame", async () => {
     const overlay = parseOverlay(await readFile(OVERLAY_PATH, "utf8"));
     const partial = join(directory, "overlay.json");
     await writeFile(
@@ -78,7 +82,7 @@ describe("stream-score-ocr cli", () => {
     );
   });
 
-  it("refuses a calibration label that does not match the glyphs on screen", async () => {
+  void it("refuses a calibration label that does not match the glyphs on screen", async () => {
     await assert.rejects(
       cli([
         "calibrate",
@@ -97,7 +101,7 @@ describe("stream-score-ocr cli", () => {
     );
   });
 
-  it("explains its usage when an argument is missing", async () => {
+  void it("explains its usage when an argument is missing", async () => {
     await assert.rejects(cli(["read", "--overlay", OVERLAY_PATH]), /--input is required/);
     await assert.rejects(cli(["unknown"]), /Usage:/);
   });

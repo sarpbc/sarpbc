@@ -139,7 +139,8 @@ export class BallchasingClient implements BallchasingSource {
     options: BallchasingClientOptions = {},
   ) {
     this.fetch = options.fetch ?? fetch;
-    this.sleep = options.sleep ?? ((ms) => new Promise((resolve) => setTimeout(resolve, ms)));
+    this.sleep =
+      options.sleep ?? (async (ms) => await new Promise((resolve) => setTimeout(resolve, ms)));
     this.now = options.now ?? Date.now;
     this.intervalsMs = options.intervalsMs ?? DEFAULT_INTERVALS_MS;
   }

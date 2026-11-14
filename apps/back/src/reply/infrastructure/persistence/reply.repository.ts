@@ -33,7 +33,7 @@ export class ReplyRepository {
 
     if (rootsOnly) where.replyTo = null;
 
-    return this.rows.find(where, {
+    return await this.rows.find(where, {
       populate: [...REPLY_POPULATE],
       orderBy: { createdAt: replySortOrder(targetType) },
       limit,
@@ -42,18 +42,18 @@ export class ReplyRepository {
   }
 
   async findById(id: string): Promise<Reply | null> {
-    return this.rows.findOne({ id }, { populate: [...REPLY_POPULATE] });
+    return await this.rows.findOne({ id }, { populate: [...REPLY_POPULATE] });
   }
 
   async findLatestByUser(userId: string): Promise<Reply | null> {
-    return this.rows.findOne(
+    return await this.rows.findOne(
       { author: { id: userId } },
       { populate: [...REPLY_POPULATE], orderBy: { createdAt: QueryOrder.DESC } },
     );
   }
 
   async countRootsByTarget(targetType: ReplyTargetType, targetId: string): Promise<number> {
-    return this.rows.count({
+    return await this.rows.count({
       ...onTarget(targetType, { id: targetId }),
       hiddenAt: null,
       replyTo: null,
@@ -121,7 +121,7 @@ export class ReplyRepository {
   }
 
   async findChildren(replyId: string): Promise<Reply[]> {
-    return this.rows.find({ replyTo: { id: replyId } }, { populate: [...REPLY_POPULATE] });
+    return await this.rows.find({ replyTo: { id: replyId } }, { populate: [...REPLY_POPULATE] });
   }
 
   async findRecentForModeration(

@@ -39,13 +39,19 @@ function repository(baseMigrations: string[]): Repository {
 
   return {
     directory,
-    add: (name: string) => writeFileSync(join(directory, name), ""),
-    delete: (name: string) => rmSync(join(directory, name)),
-    remove: () => rmSync(root, { recursive: true, force: true }),
+    add: (name: string) => {
+      writeFileSync(join(directory, name), "");
+    },
+    delete: (name: string) => {
+      rmSync(join(directory, name));
+    },
+    remove: () => {
+      rmSync(root, { recursive: true, force: true });
+    },
   };
 }
 
-test("accepts unique migrations newer than every migration on base", () => {
+void test("accepts unique migrations newer than every migration on base", () => {
   const repo = repository(["Migration20250815162622.ts", "Migration20250817144821_addPlayer.ts"]);
 
   try {
@@ -57,7 +63,7 @@ test("accepts unique migrations newer than every migration on base", () => {
   }
 });
 
-test("reports migrations sharing a timestamp, including ones without a name suffix", () => {
+void test("reports migrations sharing a timestamp, including ones without a name suffix", () => {
   const repo = repository([]);
 
   try {
@@ -74,7 +80,7 @@ test("reports migrations sharing a timestamp, including ones without a name suff
   }
 });
 
-test("reports added migrations that are not newer than the newest migration on base", () => {
+void test("reports added migrations that are not newer than the newest migration on base", () => {
   const repo = repository(["Migration20250815162622.ts", "Migration20260201000000_onBase.ts"]);
 
   try {
@@ -94,7 +100,7 @@ test("reports added migrations that are not newer than the newest migration on b
   }
 });
 
-test("reports files that are neither migrations nor snapshots", () => {
+void test("reports files that are neither migrations nor snapshots", () => {
   const repo = repository(["Migration20250815162622.ts"]);
 
   try {
@@ -111,7 +117,7 @@ test("reports files that are neither migrations nor snapshots", () => {
   }
 });
 
-test("reports a base ref that does not resolve without throwing", () => {
+void test("reports a base ref that does not resolve without throwing", () => {
   const repo = repository(["Migration20250815162622.ts"]);
 
   try {
@@ -123,7 +129,7 @@ test("reports a base ref that does not resolve without throwing", () => {
   }
 });
 
-test("reports a renamed base migration as renamed instead of not newer", () => {
+void test("reports a renamed base migration as renamed instead of not newer", () => {
   const repo = repository(["Migration20250815162622.ts", "Migration20260201000000_onBase.ts"]);
 
   try {

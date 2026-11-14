@@ -14,7 +14,7 @@ export class UserService {
   ) {}
 
   async list(query: UserListQuery): Promise<{ users: User[]; total: number }> {
-    return this.users.list(query);
+    return await this.users.list(query);
   }
 
   async changeRole(actorId: string, targetId: string, role: StaffRole | null): Promise<User> {
@@ -22,7 +22,7 @@ export class UserService {
       throw new ForbiddenError("You cannot change your own role. Ask another admin.");
     }
 
-    return this.transaction.run(async ({ users }) => {
+    return await this.transaction.run(async ({ users }) => {
       const user = await users.findById(targetId);
 
       if (!user) {
@@ -37,15 +37,15 @@ export class UserService {
   }
 
   async findOneByEmail(email: string): Promise<User | null> {
-    return this.users.findByEmail(email);
+    return await this.users.findByEmail(email);
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.users.findById(id);
+    return await this.users.findById(id);
   }
 
   async findOneByGoogleId(googleId: string): Promise<User | null> {
-    return this.users.findByGoogleId(googleId);
+    return await this.users.findByGoogleId(googleId);
   }
 
   async signIn(dto: SignInInput): Promise<User | null> {
@@ -63,7 +63,7 @@ export class UserService {
   }
 
   async create(dto: CreateAccountInput): Promise<User> {
-    return this.transaction.run(async ({ users }) => {
+    return await this.transaction.run(async ({ users }) => {
       if (await users.existsByEmail(dto.email)) {
         throw new ConflictError(
           "An account with this email already exists. Log in or use a different email.",
@@ -94,7 +94,7 @@ export class UserService {
     googleId: string,
     avatarUrl: string | null | undefined,
   ): Promise<User> {
-    return this.transaction.run(async ({ users }) => {
+    return await this.transaction.run(async ({ users }) => {
       if (await users.existsByEmail(email)) {
         throw new ConflictError(
           "An account with this email already exists. Log in or link Google from your profile.",
@@ -109,7 +109,7 @@ export class UserService {
   }
 
   async updateUserName(userId: string, userName: string): Promise<User> {
-    return this.transaction.run(async ({ users }) => {
+    return await this.transaction.run(async ({ users }) => {
       const user = await users.findById(userId);
 
       if (!user) {
@@ -136,7 +136,7 @@ export class UserService {
       user.avatarUrl = avatarUrl;
     }
 
-    await this.transaction.run(({ users }) => users.save(user));
+    await this.transaction.run(async ({ users }) => await users.save(user));
 
     return user;
   }

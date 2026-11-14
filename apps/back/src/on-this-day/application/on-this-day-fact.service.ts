@@ -7,18 +7,18 @@ import type { OnThisDayFactStore } from "./ports";
 export class OnThisDayFactService {
   constructor(private readonly store: OnThisDayFactStore) {}
 
-  list(): Promise<OnThisDayFact[]> {
-    return this.store.list();
+  async list(): Promise<OnThisDayFact[]> {
+    return await this.store.list();
   }
 
-  create(input: OnThisDayFactInput): Promise<OnThisDayFact> {
-    return this.write(v4(), input);
+  async create(input: OnThisDayFactInput): Promise<OnThisDayFact> {
+    return await this.write(v4(), input);
   }
 
   async update(id: string, input: OnThisDayFactInput): Promise<OnThisDayFact> {
     await this.require(id);
 
-    return this.write(id, input);
+    return await this.write(id, input);
   }
 
   async remove(id: string): Promise<void> {
@@ -34,7 +34,7 @@ export class OnThisDayFactService {
       );
     await this.store.save(id, fields);
 
-    return this.require(id);
+    return await this.require(id);
   }
 
   private async require(id: string): Promise<OnThisDayFact> {

@@ -18,7 +18,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
         }
       : {};
 
-    return this.find(where, {
+    return await this.find(where, {
       limit,
       offset,
       orderBy: { beginAt: "DESC" },
@@ -27,7 +27,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
   }
 
   async findPandascoreWithoutMatches(): Promise<Pick<Tournament, "id" | "name">[]> {
-    return this.find(
+    return await this.find(
       {
         source: "pandascore",
         pandascoreId: { $ne: null },
@@ -49,7 +49,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
     beganAfter: Date;
     endsAfter: Date;
   }): Promise<Pick<Tournament, "id">[]> {
-    return this.find(
+    return await this.find(
       {
         source: "pandascore",
         pandascoreId: { $ne: null },

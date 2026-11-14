@@ -25,8 +25,8 @@ export function replyWriteScope(em: EntityManager): ReplyWriteScope {
 
 export function transactionalReplies(em: EntityManager): ReplyTransaction {
   return {
-    run: (work) =>
-      em.transactional(async (tx) => {
+    run: async (work) =>
+      await em.transactional(async (tx) => {
         const result = await work(replyWriteScope(tx));
         await tx.flush();
 
@@ -38,11 +38,11 @@ export function transactionalReplies(em: EntityManager): ReplyTransaction {
 // The caller already owns the transaction; never open an independent unit of work.
 export function replyDeletion(em: EntityManager) {
   const scope = replyWriteScope(em);
-  const service = new ReplyService(scope.replies, { run: (work) => work(scope) });
+  const service = new ReplyService(scope.replies, { run: async (work) => await work(scope) });
 
   return {
-    deleteAllForPost: (id: string) => service.deleteAllForTarget("forumPost", id),
-    deleteAllForTarget: (type: ReplyTarget["kind"], id: string) =>
-      service.deleteAllForTarget(type, id),
+    deleteAllForPost: async (id: string) => await service.deleteAllForTarget("forumPost", id),
+    deleteAllForTarget: async (type: ReplyTarget["kind"], id: string) =>
+      await service.deleteAllForTarget(type, id),
   };
 }

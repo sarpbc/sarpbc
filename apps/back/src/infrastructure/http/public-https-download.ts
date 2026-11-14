@@ -125,7 +125,7 @@ export async function downloadPublicHttps(
       throw new InvalidInputError(`The image URL answered HTTP ${status}.`);
     }
 
-    return readBody(response, options.maxBytes, signal);
+    return await readBody(response, options.maxBytes, signal);
   }
 }
 
@@ -153,8 +153,8 @@ function requirePublicHttpsUrl(url: URL, isAllowedHost: (hostname: string) => bo
   }
 }
 
-function get(url: URL, signal: AbortSignal): Promise<IncomingMessage> {
-  return new Promise((resolve, reject) => {
+async function get(url: URL, signal: AbortSignal): Promise<IncomingMessage> {
+  return await new Promise((resolve, reject) => {
     const req = request(url, {
       method: "GET",
       lookup: publicOnlyLookup,
@@ -164,12 +164,14 @@ function get(url: URL, signal: AbortSignal): Promise<IncomingMessage> {
     });
 
     req.once("response", resolve);
-    req.once("error", (error) => reject(downloadError(error, signal)));
+    req.once("error", (error) => {
+      reject(downloadError(error, signal));
+    });
     req.end();
   });
 }
 
-function readBody(
+async function readBody(
   response: IncomingMessage,
   maxBytes: number,
   signal: AbortSignal,
@@ -179,10 +181,10 @@ function readBody(
   if (Number.isFinite(declared) && declared > maxBytes) {
     response.destroy();
 
-    return Promise.reject(tooLargeError(maxBytes));
+    return await Promise.reject(tooLargeError(maxBytes));
   }
 
-  return new Promise((resolve, reject) => {
+  return await new Promise((resolve, reject) => {
     const chunks: Buffer[] = [];
     let size = 0;
     response.on("data", (chunk: Buffer) => {
@@ -197,11 +199,15 @@ function readBody(
 
       chunks.push(chunk);
     });
-    response.once("end", () => resolve(new Uint8Array(Buffer.concat(chunks))));
-    response.once("error", (error) => reject(downloadError(error, signal)));
-    response.once("close", () =>
-      reject(downloadError(new Error("the connection closed early"), signal)),
-    );
+    response.once("end", () => {
+      resolve(new Uint8Array(Buffer.concat(chunks)));
+    });
+    response.once("error", (error) => {
+      reject(downloadError(error, signal));
+    });
+    response.once("close", () => {
+      reject(downloadError(new Error("the connection closed early"), signal));
+    });
   });
 }
 

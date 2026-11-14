@@ -132,14 +132,16 @@ export async function verifyPlayerTournaments({
 
   assert.equal(match.slug, "fake-solo-one-vs-fake-solo-two-fake-knockout");
 
-  const scored = await RequestContext.create(orm.em.fork(), () =>
-    app.get(MatchService).updateMatch(match.id, {
-      status: "finished",
-      results: [
-        { participantId: soloParticipant, score: 1 },
-        { participantId: rivalParticipant, score: 0 },
-      ],
-    }),
+  const scored = await RequestContext.create(
+    orm.em.fork(),
+    async () =>
+      await app.get(MatchService).updateMatch(match.id, {
+        status: "finished",
+        results: [
+          { participantId: soloParticipant, score: 1 },
+          { participantId: rivalParticipant, score: 0 },
+        ],
+      }),
   );
 
   assert(scored.winner, "the scored match has a winner");
@@ -243,8 +245,9 @@ export async function verifyPlayerTournaments({
   assert(attachment, "the replay is attached");
   assert.deepEqual(attachment.teams, ["Fake Solo Two", "Fake Solo One"]);
   await assert.rejects(
-    RequestContext.create(orm.em.fork(), () =>
-      app.get(RosterMergeService).mergePlayers(solo.id, rival.id),
+    RequestContext.create(
+      orm.em.fork(),
+      async () => await app.get(RosterMergeService).mergePlayers(solo.id, rival.id),
     ),
     ConflictError,
     "two players of one 1v1 tournament cannot be merged into one participant",

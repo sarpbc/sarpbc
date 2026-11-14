@@ -43,8 +43,8 @@ function setup(role: "admin" | "journalist") {
     return found;
   };
 
-  const call = (name: string, args: ToolArguments) =>
-    tool(name).run({ id: "u1", email: "staff@test.com", role }, args);
+  const call = async (name: string, args: ToolArguments) =>
+    await tool(name).run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
 }

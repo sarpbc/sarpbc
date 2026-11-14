@@ -62,7 +62,7 @@ describe("ReplyService", () => {
       },
     };
 
-    service = new ReplyService(scope.replies, { run: (work) => work(scope) });
+    service = new ReplyService(scope.replies, { run: async (work) => await work(scope) });
     vi.clearAllMocks();
   });
 

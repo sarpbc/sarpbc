@@ -68,7 +68,9 @@ export class MatchLineupService {
   }
 
   async find(matchId: string): Promise<MatchLineups> {
-    const match = await this.transaction.run(({ matches }) => requireMatch(matches, matchId));
+    const match = await this.transaction.run(
+      async ({ matches }) => await requireMatch(matches, matchId),
+    );
 
     return { source: lineupSource(match), lineups: await this.forMatch(match) };
   }
@@ -79,7 +81,7 @@ export class MatchLineupService {
       await lineups.replace(matchId, await validLineups(match, lineups, inputs));
     });
 
-    return this.find(matchId);
+    return await this.find(matchId);
   }
 
   async requireProposable(matchId: string, inputs: readonly MatchLineupInput[]): Promise<void> {

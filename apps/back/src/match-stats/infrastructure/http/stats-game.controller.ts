@@ -27,19 +27,19 @@ export class StatsGameController {
   }
 
   @Post()
-  attach(
+  async attach(
     @Param("id") tournamentId: string,
     @Body({ schema: AttachReplayDto }) dto: AttachReplayDto,
   ): Promise<TournamentStatsGame> {
-    return this.service.attach(tournamentId, dto);
+    return await this.service.attach(tournamentId, dto);
   }
 
   @Delete(":matchId/:number")
-  remove(
+  async remove(
     @Param("id") tournamentId: string,
     @Param("matchId") matchId: string,
     @Param("number", ParseIntPipe) number: number,
   ): Promise<TournamentStatsGame> {
-    return this.service.remove(tournamentId, matchId, number);
+    return await this.service.remove(tournamentId, matchId, number);
   }
 }

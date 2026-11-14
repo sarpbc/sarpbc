@@ -84,7 +84,7 @@ export class TournamentPrizeService {
 
     assertPrizeDistribution(sourced);
 
-    return this.write(tournamentId, async () => sourced);
+    return await this.write(tournamentId, async () => sourced);
   }
 
   async updateEntry(
@@ -95,7 +95,7 @@ export class TournamentPrizeService {
   ): Promise<TournamentPrizes> {
     const source = parseDataSourceUrl(sourceUrl);
 
-    return this.write(tournamentId, async (prizes) =>
+    return await this.write(tournamentId, async (prizes) =>
       patchPrizeEntry(await prizes.entries(tournamentId), teamId, patch, source),
     );
   }
@@ -114,6 +114,6 @@ export class TournamentPrizeService {
     });
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
 
-    return this.findByTournamentId(tournamentId);
+    return await this.findByTournamentId(tournamentId);
   }
 }

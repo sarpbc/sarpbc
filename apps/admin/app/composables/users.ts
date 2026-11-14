@@ -6,7 +6,7 @@ export async function getUsers(query: {
   limit: number;
   offset: number;
 }): Promise<UserList> {
-  return apiFetch<UserList>("/users", {
+  return await apiFetch<UserList>("/users", {
     method: "GET",
     query: { ...query, search: query.search || undefined },
   });

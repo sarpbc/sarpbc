@@ -34,7 +34,7 @@ function setup(source: "manual" | "startgg" = "manual") {
     remove: vi.fn<AwardWriter["remove"]>(),
   } satisfies AwardWriter;
 
-  const transaction: AwardTransaction = { run: (work) => work({ awards: writer }) };
+  const transaction: AwardTransaction = { run: async (work) => await work({ awards: writer }) };
   const service = new PlayerAwardService({ byPlayer: vi.fn(), byTournament: vi.fn() }, transaction);
 
   return { service, writer };

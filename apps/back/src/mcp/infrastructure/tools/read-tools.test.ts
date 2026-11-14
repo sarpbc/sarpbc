@@ -155,12 +155,12 @@ function setup() {
     }),
   });
 
-  const call = (name: string, args = {}) => {
+  const call = async (name: string, args = {}) => {
     const tool = tools.find((candidate) => candidate.name === name);
 
     if (!tool) throw new Error(`${name} is not defined`);
 
-    return tool.run(user, args);
+    return await tool.run(user, args);
   };
 
   const json = async (name: string, args = {}) => {

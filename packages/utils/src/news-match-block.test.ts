@@ -18,8 +18,8 @@ const OTHER = "6f1d2b0a-93c4-4e8f-b7a2-5c1e8d4f0a22";
 const TOURNAMENT = "a3c5e7f9-1b2d-4f6a-8c0e-2d4f6a8c0e33";
 const TEAM = "c9e1a3b5-7d9f-4b1d-a3c5-e7f9b1d3f544";
 
-describe("parseNewsMatchTag", () => {
-  it("parses each selector", () => {
+void describe("parseNewsMatchTag", () => {
+  void it("parses each selector", () => {
     assert.deepEqual(parseNewsMatchTag(`:matches{match="${MATCH}"}`)?.block, {
       kind: "match",
       id: MATCH,
@@ -40,12 +40,12 @@ describe("parseNewsMatchTag", () => {
     });
   });
 
-  it("accepts the MDC block form and keeps the raw tag", () => {
+  void it("accepts the MDC block form and keeps the raw tag", () => {
     const raw = `::matches{match="${MATCH}"}\n::`;
     assert.equal(parseNewsMatchTag(`${raw}\n\nNext paragraph.`)?.raw, raw);
   });
 
-  it("rejects malformed tags", () => {
+  void it("rejects malformed tags", () => {
     for (const raw of [
       ":matches{}",
       `:matches{match="${MATCH}" team="${TEAM}"}`,
@@ -63,7 +63,7 @@ describe("parseNewsMatchTag", () => {
     }
   });
 
-  it("rejects attributes that MDC would read differently", () => {
+  void it("rejects attributes that MDC would read differently", () => {
     for (const raw of [
       `:matches{team="${TEAM}" limit=7}`,
       `:matches{match="${MATCH}" limit}`,
@@ -82,25 +82,25 @@ describe("parseNewsMatchTag", () => {
     }
   });
 
-  it("rejects component limits that are not plain positive integers", () => {
+  void it("rejects component limits that are not plain positive integers", () => {
     for (const limit of ["5.0", "true"]) {
       assert.equal(newsMatchBlockFromAttrs({ team: TEAM, limit }), null, limit);
     }
   });
 
-  it("accepts the MDC block form with Windows line endings", () => {
+  void it("accepts the MDC block form with Windows line endings", () => {
     const raw = `::matches{match="${MATCH}"}\r\n::`;
     assert.equal(parseNewsMatchTag(raw)?.raw, raw);
   });
 });
 
-describe("serializeNewsMatchTag", () => {
+void describe("serializeNewsMatchTag", () => {
   const match: MatchBlockSelector = { kind: "match", id: MATCH };
   const ids: MatchBlockSelector = { kind: "matches", ids: [OTHER, MATCH] };
   const tournament: MatchBlockSelector = { kind: "tournament", id: TOURNAMENT, limit: 8 };
   const team: MatchBlockSelector = { kind: "team", id: TEAM, limit: 5 };
 
-  it("writes canonical tags", () => {
+  void it("writes canonical tags", () => {
     assert.equal(serializeNewsMatchTag(match), `:matches{match="${MATCH}"}`);
     assert.equal(serializeNewsMatchTag(ids), `:matches{ids="${OTHER},${MATCH}"}`);
     assert.equal(
@@ -109,7 +109,7 @@ describe("serializeNewsMatchTag", () => {
     );
   });
 
-  it("round-trips through the parser and the batch key", () => {
+  void it("round-trips through the parser and the batch key", () => {
     for (const block of [match, ids, tournament, team]) {
       assert.deepEqual(parseNewsMatchTag(serializeNewsMatchTag(block))?.block, block);
       assert.deepEqual(parseNewsMatchBlockKey(newsMatchBlockKey(block)), block);
@@ -117,8 +117,8 @@ describe("serializeNewsMatchTag", () => {
   });
 });
 
-describe("parseNewsMatchBlockKey", () => {
-  it("rejects keys that are not canonical", () => {
+void describe("parseNewsMatchBlockKey", () => {
+  void it("rejects keys that are not canonical", () => {
     for (const key of [
       `match:${MATCH}:5`,
       `tournament:${TOURNAMENT}`,
@@ -132,8 +132,8 @@ describe("parseNewsMatchBlockKey", () => {
   });
 });
 
-describe("newsMatchBlockFromAttrs", () => {
-  it("reads MDC props, including numeric limits", () => {
+void describe("newsMatchBlockFromAttrs", () => {
+  void it("reads MDC props, including numeric limits", () => {
     assert.deepEqual(newsMatchBlockFromAttrs({ team: TEAM, limit: 7 }), {
       kind: "team",
       id: TEAM,
@@ -143,7 +143,7 @@ describe("newsMatchBlockFromAttrs", () => {
   });
 });
 
-describe("article content", () => {
+void describe("article content", () => {
   const content = [
     "Falcons opened the event.",
     "",
@@ -158,18 +158,18 @@ describe("article content", () => {
     "They play again tomorrow.",
   ].join("\n");
 
-  it("extracts valid blocks once each", () => {
+  void it("extracts valid blocks once each", () => {
     assert.deepEqual(extractNewsMatchBlocks(content).map(newsMatchBlockKey), [
       `match:${MATCH}`,
       `tournament:${TOURNAMENT}:3`,
     ]);
   });
 
-  it("reports invalid tags", () => {
+  void it("reports invalid tags", () => {
     assert.deepEqual(findInvalidNewsMatchTags(content), [':matches{team="falcons"}']);
   });
 
-  it("requires each block on its own line", () => {
+  void it("requires each block on its own line", () => {
     const tag = `:matches{match="${MATCH}"}`;
     assert.deepEqual(findInvalidNewsMatchTags(`Watch ${tag} live.`), [tag]);
     assert.deepEqual(findInvalidNewsMatchTags(`- ${tag}`), [tag]);
@@ -181,7 +181,7 @@ describe("article content", () => {
     assert.deepEqual(findInvalidNewsMatchTags(`> ${tag}`), [tag]);
   });
 
-  it("ignores tags written as code", () => {
+  void it("ignores tags written as code", () => {
     const documented = [
       'Write `:matches{team="<team id>"}` or `` :matches{} `` on its own line.',
       "",
@@ -201,7 +201,7 @@ describe("article content", () => {
     ]);
   });
 
-  it("drops match blocks from plain text", () => {
+  void it("drops match blocks from plain text", () => {
     assert.equal(
       newsContentToPlainText(content),
       "Falcons opened the event. They play again tomorrow.",
@@ -209,7 +209,7 @@ describe("article content", () => {
   });
 });
 
-describe("hostile content", () => {
+void describe("hostile content", () => {
   function assertFast(content: string) {
     assert.deepEqual(extractNewsMatchBlocks(content), []);
     assert.equal(parseNewsMatchTag(content), null);
@@ -217,12 +217,12 @@ describe("hostile content", () => {
     stripNewsMatchTags(content);
   }
 
-  it("scans a block tag followed by whitespace in linear time", () => {
+  void it("scans a block tag followed by whitespace in linear time", () => {
     assertFast(`::matches{}${" ".repeat(200_000)}`);
     assertFast(`::matches{}${" \t".repeat(100_000)}x`);
   });
 
-  it("scans unterminated and repeated tags in linear time", () => {
+  void it("scans unterminated and repeated tags in linear time", () => {
     assertFast("::matches{".repeat(50_000));
     assertFast(`::matches{${"a".repeat(200_000)}`);
     assertFast(`:matches{${'a="b" '.repeat(40_000)}}`);
@@ -230,7 +230,7 @@ describe("hostile content", () => {
     assertFast(`:matches{${"0".repeat(200_000)}="1"}`);
   });
 
-  it("scans backtick runs in linear time", () => {
+  void it("scans backtick runs in linear time", () => {
     assertFast("`".repeat(200_000));
     assertFast("`a".repeat(100_000));
     assertFast(Array.from({ length: 600 }, (_, index) => "`".repeat(index + 1)).join(" "));

@@ -32,6 +32,6 @@ export function useLinkDelegation(onLinkClick?: (link: HTMLAnchorElement) => voi
     }
 
     event.preventDefault();
-    router.push(link.pathname + link.search + link.hash);
+    void router.push(link.pathname + link.search + link.hash);
   };
 }

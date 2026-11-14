@@ -284,8 +284,8 @@ export class CompetitionMatchWriter implements MatchWriter {
 
     return [...byId.values()].map(({ status, beginAt, endAt }) => ({ status, beginAt, endAt }));
   }
-  tournament(id: string) {
-    return this.tournaments.load(id);
+  async tournament(id: string) {
+    return await this.tournaments.load(id);
   }
   async references(id: string) {
     const counts: unknown = await this.em.execute(
@@ -306,8 +306,8 @@ export class CompetitionMatchWriter implements MatchWriter {
     await this.em.nativeDelete(Row.Match, { id });
     this.staged.delete(id);
   }
-  participants(id: string) {
-    return this.tournaments.participants(id);
+  async participants(id: string) {
+    return await this.tournaments.participants(id);
   }
   async bracket(tournamentId: string) {
     const [stage] = stageBracketRows.parse(
@@ -425,14 +425,14 @@ export class CompetitionEventWriter implements EventWriter {
 
     return row ? toTournamentEvent(row) : null;
   }
-  load(id: string) {
-    return this.find({ id });
+  async load(id: string) {
+    return await this.find({ id });
   }
-  bySerieId(id: number) {
-    return this.find({ pandascoreSerieId: id });
+  async bySerieId(id: number) {
+    return await this.find({ pandascoreSerieId: id });
   }
-  unclaimedByName(leagueId: string | null, name: string) {
-    return this.find({
+  async unclaimedByName(leagueId: string | null, name: string) {
+    return await this.find({
       pandascoreSerieId: null,
       league: leagueId,
       name,
@@ -527,8 +527,8 @@ function lazyWriteScope(em: EntityManager): CompetitionWriteScope {
 
 export class MikroOrmCompetitionTransaction implements CompetitionTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (em) => {
+  async run<T>(work: (scope: CompetitionWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (em) => {
       const result = await work(lazyWriteScope(em));
       await em.flush();
 

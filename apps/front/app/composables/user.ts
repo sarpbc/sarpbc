@@ -53,5 +53,5 @@ export async function logout(): Promise<void> {
   }
 
   user.value = null;
-  navigateTo("/login");
+  void navigateTo("/login");
 }

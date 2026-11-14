@@ -6,8 +6,11 @@ import type { ObjectStorage, ObjectUploadUrl, StoredObject } from "./ports/objec
 export class StorageService {
   constructor(private readonly storage: ObjectStorage) {}
 
-  createImageUploadUrl(contentType: string, target: ImageUploadTarget): Promise<ObjectUploadUrl> {
-    return this.storage.createImageUploadUrl(imageContentType(contentType), target);
+  async createImageUploadUrl(
+    contentType: string,
+    target: ImageUploadTarget,
+  ): Promise<ObjectUploadUrl> {
+    return await this.storage.createImageUploadUrl(imageContentType(contentType), target);
   }
 
   async uploadImage(
@@ -21,6 +24,6 @@ export class StorageService {
       throw new InvalidInputError(`Image must be no larger than ${MAX_IMAGE_MEGABYTES} MB.`);
     }
 
-    return this.storage.uploadImage(bytes, type, target);
+    return await this.storage.uploadImage(bytes, type, target);
   }
 }

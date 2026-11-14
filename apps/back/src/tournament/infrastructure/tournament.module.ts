@@ -269,9 +269,9 @@ export class TournamentModule implements OnModuleInit {
   ) {}
   onModuleInit() {
     if (this.configService.get<boolean>("pandascore_sync_on_boot"))
-      this.startSync().catch((error) =>
-        competitionDiagnostics.error("Failed to sync tournaments on module init", error),
-      );
+      this.startSync().catch((error) => {
+        competitionDiagnostics.error("Failed to sync tournaments on module init", error);
+      });
   }
   @CreateRequestContext()
   private async startSync() {

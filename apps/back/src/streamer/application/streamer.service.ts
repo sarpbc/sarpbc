@@ -20,8 +20,8 @@ export class StreamerService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  list(): Promise<TrackedStreamer[]> {
-    return this.streamers.list();
+  async list(): Promise<TrackedStreamer[]> {
+    return await this.streamers.list();
   }
 
   async add(login: string, displayName: string | null): Promise<TrackedStreamer> {

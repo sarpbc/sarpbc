@@ -56,7 +56,7 @@ describe("ContractService sourced career periods", () => {
   beforeEach(() => {
     career = [stint(kc, "2025-06-01", null)];
     service = new ContractService({} as ContractQueries, {} as TeamQueries, {
-      run: async (work) => work(scope),
+      run: async (work) => await work(scope),
     });
   });
 
@@ -174,7 +174,7 @@ describe("ContractService staff contracts", () => {
     };
 
     const service = new ContractService(queries, {} as TeamQueries, {
-      run: (work) => work({} as RosterWriteScope),
+      run: async (work) => await work({} as RosterWriteScope),
     });
 
     const staff = await service.getStaffContractsByPlayer("zen");

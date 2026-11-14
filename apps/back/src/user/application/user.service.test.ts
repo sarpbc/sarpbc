@@ -24,7 +24,7 @@ describe("UserService", () => {
   };
 
   const transaction: UserTransaction = {
-    run: (work) => work({ users: userWriter }),
+    run: async (work) => await work({ users: userWriter }),
   };
 
   const passwords: PasswordHasher = {

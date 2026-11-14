@@ -8,9 +8,9 @@ import { mapTransfer } from "./transfer.mapper";
 @Controller("transfers")
 export class TransferController {
   constructor(
-    private transferService: TransferService,
-    private teamService: TeamService,
-    private playerService: PlayerService,
+    private readonly transferService: TransferService,
+    private readonly teamService: TeamService,
+    private readonly playerService: PlayerService,
   ) {}
 
   @Get()

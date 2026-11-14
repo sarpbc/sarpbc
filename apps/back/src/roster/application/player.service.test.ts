@@ -51,7 +51,7 @@ describe("PlayerService profile photos", () => {
       run: async (work) => {
         transactions += 1;
 
-        return work(scope);
+        return await work(scope);
       },
     });
   });
@@ -139,7 +139,7 @@ describe("PlayerService roster moves", () => {
       },
     };
     service = new PlayerService({} as PlayerQueries, {} as PhotoQueries, {
-      run: async (work) => work(stores),
+      run: async (work) => await work(stores),
     });
   });
 
