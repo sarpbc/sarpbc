@@ -24,6 +24,8 @@ const bracketMatch = ref<{ match: TournamentDetailMatch; label: string } | null>
 const bracketOpen = ref(false);
 const sourceMatch = ref<TournamentMatchListItem | null>(null);
 const sourceOpen = ref(false);
+const forfeitMatch = ref<TournamentMatchListItem | null>(null);
+const forfeitOpen = ref(false);
 const emptyBracketOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
@@ -104,6 +106,11 @@ const openSource = (match: TournamentMatchListItem) => {
   sourceOpen.value = true;
 };
 
+const openForfeit = (match: TournamentMatchListItem) => {
+  forfeitMatch.value = match;
+  forfeitOpen.value = true;
+};
+
 const matchScore = (match: TournamentMatchListItem): string => {
   if (!match.participants?.length) {
     return "-";
@@ -112,8 +119,11 @@ const matchScore = (match: TournamentMatchListItem): string => {
   return match.participants
     .map((participant) => {
       const result = match.results?.find((r) => r.participant === participant.id);
+      const score = `${participantName(participant)}: ${result?.score ?? "-"}`;
 
-      return `${participantName(participant)}: ${result?.score ?? "-"}`;
+      return participant.id === match.forfeitedBy
+        ? `${score} (${t("page.tournaments.matchForfeit.forfeit")})`
+        : score;
     })
     .join(" · ");
 };
@@ -321,6 +331,13 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
               <UButton
                 size="xs"
                 variant="soft"
+                icon="i-fluent-flag-24-regular"
+                :label="$t('page.tournaments.matchForfeit.action')"
+                @click="openForfeit(match)"
+              />
+              <UButton
+                size="xs"
+                variant="soft"
                 icon="i-fluent-live-24-regular"
                 :label="$t('page.tournaments.streams.matchAction')"
                 @click="openStreams(`/tournaments/matches/${match.id}/streams`, matchLabel(match))"
@@ -414,6 +431,15 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
       :label="matchLabel(sourceMatch)"
       :source-url="matchSourceUrl(sourceMatch)"
       @saved="refreshTournament()"
+    />
+
+    <TournamentMatchForfeit
+      v-if="forfeitMatch"
+      :key="forfeitMatch.id"
+      v-model:open="forfeitOpen"
+      :match="forfeitMatch"
+      :label="matchLabel(forfeitMatch)"
+      @saved="reload()"
     />
 
     <TournamentMatchLineups

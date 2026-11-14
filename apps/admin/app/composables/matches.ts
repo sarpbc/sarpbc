@@ -43,6 +43,16 @@ export const setMatchVods = async (
   return res.match.vods;
 };
 
+export const setMatchForfeit = async (
+  matchId: string,
+  participantId: string | null,
+): Promise<void> => {
+  await apiFetch(`/tournaments/matches/${matchId}/forfeit`, {
+    body: { participantId },
+    method: "PUT",
+  });
+};
+
 export const setMatchBracket = async (
   matchId: string,
   body: { participantIds: string[]; previousMatches: BracketLinkInput[] },

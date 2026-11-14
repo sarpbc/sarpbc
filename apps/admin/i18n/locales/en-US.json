@@ -361,6 +361,17 @@
         "saveError": "Could not save the match source",
         "none": "No source"
       },
+      "matchForfeit": {
+        "action": "Forfeit",
+        "title": "Forfeit · {match}",
+        "description": "Mark the side that forfeited or was disqualified. The other side wins with the series default score. Turning the forfeit off keeps the score and the winner.",
+        "forfeit": "Forfeit",
+        "side": "Forfeiting team",
+        "needsTwoSides": "Only a match with two sides can be forfeited.",
+        "save": "Save Forfeit",
+        "saved": "Match forfeit saved",
+        "saveError": "Could not save the match forfeit"
+      },
       "create": {
         "action": "Create Tournament",
         "title": "Create Tournament",

@@ -361,6 +361,17 @@
         "saveError": "Impossible d’enregistrer la source du match",
         "none": "Aucune source"
       },
+      "matchForfeit": {
+        "action": "Forfait",
+        "title": "Forfait · {match}",
+        "description": "Indiquez l’équipe qui a déclaré forfait ou a été disqualifiée. L’autre équipe gagne avec le score par défaut de la série. Retirer le forfait conserve le score et le vainqueur.",
+        "forfeit": "Forfait",
+        "side": "Équipe forfait",
+        "needsTwoSides": "Seul un match entre deux équipes peut être déclaré forfait.",
+        "save": "Enregistrer le forfait",
+        "saved": "Forfait du match enregistré",
+        "saveError": "Impossible d’enregistrer le forfait du match"
+      },
       "create": {
         "action": "Créer un Tournoi",
         "title": "Créer un Tournoi",
