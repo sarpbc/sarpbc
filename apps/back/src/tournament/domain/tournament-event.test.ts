@@ -55,7 +55,7 @@ describe("eventDisplayName", () => {
 describe("compareStages", () => {
   const stage = (name: string, beginAt: string | null) => ({
     name,
-    beginAt: beginAt ? new Date(beginAt) : null,
+    beginAt: beginAt === null ? null : new Date(beginAt),
   });
 
   it("orders newest day first, then name within a day", () => {

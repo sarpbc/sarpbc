@@ -42,8 +42,8 @@ export class PatService {
     return { id: token.id, name: token.name, createdAt: token.createdAt, token: raw };
   }
 
-  listTokens(userId: string): Promise<TokenSummary[]> {
-    return this.tokens.listActive(userId);
+  async listTokens(userId: string): Promise<TokenSummary[]> {
+    return await this.tokens.listActive(userId);
   }
 
   async revokeToken(userId: string, tokenId: string): Promise<void> {

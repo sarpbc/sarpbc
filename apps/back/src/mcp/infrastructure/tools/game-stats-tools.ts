@@ -105,10 +105,11 @@ export function gameStatsTools({
           .describe("Also list the replays counted in otherStages. Defaults to false."),
       },
       handler: async ({ tournamentId: id, includeOtherStages }) => {
-        const [latest] = await statsImportService.recent(id);
+        const [latest]: (StatsImport | undefined)[] = await statsImportService.recent(id);
 
         return {
-          import: latest ? summarizeStatsImport(latest, includeOtherStages ?? false) : null,
+          import:
+            latest !== undefined ? summarizeStatsImport(latest, includeOtherStages ?? false) : null,
         };
       },
     }),

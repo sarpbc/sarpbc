@@ -33,7 +33,7 @@ export async function markNotificationsRead(ids?: string[]): Promise<number> {
   try {
     const res = await apiFetch<{ marked: number }>("/notifications/read", {
       method: "PATCH",
-      body: ids?.length ? { ids } : {},
+      body: ids !== undefined && ids.length > 0 ? { ids } : {},
     });
 
     return res.marked;

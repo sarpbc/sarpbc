@@ -45,11 +45,17 @@ describe("pointsForPlacement", () => {
 
 describe("assertCircuitSourceUrl", () => {
   it("accepts an http(s) source and refuses other values and Liquipedia", () => {
-    expect(() => assertCircuitSourceUrl("https://example.org/rules")).not.toThrow();
-    expect(() => assertCircuitSourceUrl("")).toThrow(InvalidInputError);
-    expect(() => assertCircuitSourceUrl("ftp://example.org/rules")).toThrow(InvalidInputError);
-    expect(() => assertCircuitSourceUrl("https://liquipedia.net/rocketleague/x")).toThrow(
-      "Liquipedia",
-    );
+    expect(() => {
+      assertCircuitSourceUrl("https://example.org/rules");
+    }).not.toThrow();
+    expect(() => {
+      assertCircuitSourceUrl("");
+    }).toThrow(InvalidInputError);
+    expect(() => {
+      assertCircuitSourceUrl("ftp://example.org/rules");
+    }).toThrow(InvalidInputError);
+    expect(() => {
+      assertCircuitSourceUrl("https://liquipedia.net/rocketleague/x");
+    }).toThrow("Liquipedia");
   });
 });

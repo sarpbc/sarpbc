@@ -39,8 +39,8 @@ export class MikroPostStore implements PostStore {
 
     return row ? postSnapshot(row) : null;
   }
-  findRecentActivity(limit: number) {
-    return this.rows.findRecentActivity(limit);
+  async findRecentActivity(limit: number) {
+    return await this.rows.findRecentActivity(limit);
   }
   async save(model: NewPostRecord) {
     const row = (await this.rows.findById(model.id)) ?? new Post();

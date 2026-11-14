@@ -1,3 +1,5 @@
+import { isNonEmptyDateInput } from "@sarpbc/utils";
+
 function startOfLocalDay(date: Date): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
@@ -7,7 +9,7 @@ export function localDayKey(date: Date): string {
 }
 
 export function parseMatchDate(value: Date | string | null | undefined): Date | null {
-  if (!value) {
+  if (!isNonEmptyDateInput(value)) {
     return null;
   }
 

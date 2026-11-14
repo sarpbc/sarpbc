@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import * as z from "zod";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
@@ -54,7 +55,7 @@ export function parseAirRiddleStoredState(
   raw: string | null,
   today: string,
 ): AirRiddleStoredState | null {
-  if (!raw) {
+  if (!isNonEmptyString(raw)) {
     return null;
   }
 

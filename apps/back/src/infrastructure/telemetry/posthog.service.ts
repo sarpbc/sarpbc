@@ -29,14 +29,14 @@ export class PostHogService implements OnModuleDestroy {
     properties?: PostHogProperties;
     sessionId?: string | undefined;
   }): void {
-    if (!this.client || !params.distinctId) return;
+    if (!this.client || params.distinctId === undefined || params.distinctId === "") return;
 
     const properties: PostHogProperties = {
       ...params.properties,
       $process_person_profile: false,
     };
 
-    if (params.sessionId) {
+    if (params.sessionId !== undefined && params.sessionId !== "") {
       properties.$session_id = params.sessionId;
     }
 

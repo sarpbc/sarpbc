@@ -2,6 +2,7 @@ import type { TournamentDetail, TournamentMatchListItem } from "@sarpbc/types";
 import type { H3Event } from "h3";
 import { apiFetch } from "@sarpbc/composables/apiFetch";
 import type { Match } from "~/types/matches";
+import { rethrowApiError } from "./apiError";
 import { getMatchById } from "~/composables/matches/api";
 import { buildIcs, type CalendarFeed } from "~/utils/calendar/ics";
 import { isMatchOnCalendar, matchToCalendarEvent } from "~/utils/calendar/matchEvent";
@@ -25,7 +26,7 @@ export function sendIcs(event: H3Event, ics: string, filename: string): string {
 
 export function parseIcsSlug(pathname: string): string | null {
   const segment = pathname.split("/").pop() ?? "";
-  const match = segment.match(/^(.+)\.ics$/i);
+  const match = /^(.+)\.ics$/i.exec(segment);
 
   return match?.[1] ?? null;
 }
@@ -34,7 +35,7 @@ export async function fetchMatchForCalendar(id: string): Promise<Match> {
   try {
     return (await getMatchById(id)).match;
   } catch (cause) {
-    rethrowApiError(cause, {
+    return rethrowApiError(cause, {
       notFound: "Match not found",
       badGateway: "Could not load match for calendar",
     });

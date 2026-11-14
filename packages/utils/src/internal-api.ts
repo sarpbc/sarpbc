@@ -1,3 +1,5 @@
+import { isNonEmptyString } from "./text";
+
 export const INTERNAL_API_HEADER = "x-sarpbc-internal";
 export const INTERNAL_CLIENT_HEADER = "x-sarpbc-client";
 
@@ -24,7 +26,7 @@ export function resolveApiBase(
 
   const server = serverBase?.trim();
 
-  if (!server) {
+  if (!isNonEmptyString(server)) {
     return fallback;
   }
 

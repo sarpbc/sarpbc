@@ -14,7 +14,7 @@ function locales(english: LocaleValue, french: LocaleValue): string {
   return directory;
 }
 
-test("accepts locales with the same nested keys", () => {
+void test("accepts locales with the same nested keys", () => {
   const directory = locales({ a: { b: "x" }, c: "y" }, { a: { b: "z" }, c: "w" });
 
   try {
@@ -24,7 +24,7 @@ test("accepts locales with the same nested keys", () => {
   }
 });
 
-test("reports a key missing from either locale", () => {
+void test("reports a key missing from either locale", () => {
   const directory = locales({ a: { b: "x" }, only: "y" }, { a: {}, extra: "w" });
 
   try {

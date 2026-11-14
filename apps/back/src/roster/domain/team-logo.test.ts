@@ -50,12 +50,16 @@ describe("team logo rules", () => {
     const svg =
       '<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><defs><linearGradient id="g"/></defs><rect fill="url(#g)"/><use xlink:href="#g"/><use href=\'#g\'/></svg>';
 
-    expect(() => requireSafeSvg(text(svg))).not.toThrow();
+    expect(() => {
+      requireSafeSvg(text(svg));
+    }).not.toThrow();
   });
 
   it("accepts an embedded raster image", () => {
     const svg = '<svg><image href="data:image/png;base64,iVBORw0KGgo="/></svg>';
-    expect(() => requireSafeSvg(text(svg))).not.toThrow();
+    expect(() => {
+      requireSafeSvg(text(svg));
+    }).not.toThrow();
   });
 
   it.each([
@@ -71,14 +75,18 @@ describe("team logo rules", () => {
     ["<svg><style>@import 'https://evil.test/a.css';</style></svg>", "a stylesheet import"],
     ['<svg><iframe src="https://evil.test"/></svg>', "an embedded element"],
   ])("rejects an unsafe SVG: %s", (svg, reason) => {
-    expect(() => requireSafeSvg(text(svg))).toThrow(reason);
+    expect(() => {
+      requireSafeSvg(text(svg));
+    }).toThrow(reason);
   });
 
   it("requires at least 128 pixels on each side", () => {
-    expect(() => requireTeamLogoDimensions(128, 400)).not.toThrow();
-    expect(() => requireTeamLogoDimensions(400, 127)).toThrow(
-      "The logo is 400x127 pixels; it must be at least 128x128.",
-    );
+    expect(() => {
+      requireTeamLogoDimensions(128, 400);
+    }).not.toThrow();
+    expect(() => {
+      requireTeamLogoDimensions(400, 127);
+    }).toThrow("The logo is 400x127 pixels; it must be at least 128x128.");
   });
 
   it("only downloads https assets outside Liquipedia", () => {

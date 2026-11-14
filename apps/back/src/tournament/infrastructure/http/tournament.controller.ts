@@ -74,21 +74,21 @@ import {
 @Controller("tournaments")
 export class TournamentController {
   constructor(
-    @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
-    private syncNewTournaments: SyncNewTournamentsUseCase,
-    private syncTournaments: SyncPandascoreTournamentUseCase,
-    private manualTournamentService: ManualTournamentService,
-    private matchService: MatchService,
-    private tournamentRead: CachedTournamentRead,
-    private playerAwardService: PlayerAwardService,
-    private tournamentPrizeService: TournamentPrizeService,
-    private tournamentPrizesRead: CachedTournamentPrizesRead,
-    private catalogService: ManualCatalogService,
-    private streamService: StreamService,
-    private lineupService: MatchLineupService,
-    @Inject(GAME_STATS_STORE) private gameStats: Pick<GameStatsStore, "byMatch">,
-    private viewershipService: ViewershipService,
-    private playerStatsService: TournamentPlayerStatsService,
+    @Inject(TOURNAMENT_QUERIES) private readonly tournaments: TournamentQueries,
+    private readonly syncNewTournaments: SyncNewTournamentsUseCase,
+    private readonly syncTournaments: SyncPandascoreTournamentUseCase,
+    private readonly manualTournamentService: ManualTournamentService,
+    private readonly matchService: MatchService,
+    private readonly tournamentRead: CachedTournamentRead,
+    private readonly playerAwardService: PlayerAwardService,
+    private readonly tournamentPrizeService: TournamentPrizeService,
+    private readonly tournamentPrizesRead: CachedTournamentPrizesRead,
+    private readonly catalogService: ManualCatalogService,
+    private readonly streamService: StreamService,
+    private readonly lineupService: MatchLineupService,
+    @Inject(GAME_STATS_STORE) private readonly gameStats: Pick<GameStatsStore, "byMatch">,
+    private readonly viewershipService: ViewershipService,
+    private readonly playerStatsService: TournamentPlayerStatsService,
   ) {}
 
   @Get()
@@ -235,7 +235,7 @@ export class TournamentController {
       throw new NotFoundException(`Tournament with id "${id}" not found`);
     }
 
-    return this.playerStatsService.forStages([tournament]);
+    return await this.playerStatsService.forStages([tournament]);
   }
 
   @Get(":id/awards")
@@ -272,7 +272,7 @@ export class TournamentController {
 
   @Get(":id/prizes")
   async getPrizes(@Param("id") id: string) {
-    return this.tournamentPrizesRead.findByTournamentId(id);
+    return await this.tournamentPrizesRead.findByTournamentId(id);
   }
 
   @RequirePermissions("tournaments.manage")
@@ -282,7 +282,7 @@ export class TournamentController {
     @Param("id") tournamentId: string,
     @Body({ schema: SetTournamentPrizesDto }) dto: SetTournamentPrizesDto,
   ) {
-    return this.tournamentPrizeService.setDistribution(tournamentId, dto.prizes);
+    return await this.tournamentPrizeService.setDistribution(tournamentId, dto.prizes);
   }
 
   @RequirePermissions("tournaments.manage")
@@ -294,8 +294,14 @@ export class TournamentController {
   ) {
     const match = await this.matchService.createMatch(tournamentId, {
       ...matchData,
-      beginAt: matchData.beginAt ? new Date(matchData.beginAt) : undefined,
-      endAt: matchData.endAt ? new Date(matchData.endAt) : undefined,
+      beginAt:
+        matchData.beginAt !== undefined && matchData.beginAt !== ""
+          ? new Date(matchData.beginAt)
+          : undefined,
+      endAt:
+        matchData.endAt !== undefined && matchData.endAt !== ""
+          ? new Date(matchData.endAt)
+          : undefined,
     });
 
     return { match: withPublicSlug(match) };
@@ -379,69 +385,69 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get("matches/:matchId/streams")
-  getMatchStreams(@Param("matchId") matchId: string) {
-    return this.streamService.find({ kind: "match", id: matchId });
+  async getMatchStreams(@Param("matchId") matchId: string) {
+    return await this.streamService.find({ kind: "match", id: matchId });
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put("matches/:matchId/streams")
-  setMatchStreams(
+  async setMatchStreams(
     @Param("matchId") matchId: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsDto,
   ) {
-    return this.streamService.set({ kind: "match", id: matchId }, body.streams, "manual");
+    return await this.streamService.set({ kind: "match", id: matchId }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get("matches/:matchId/lineups")
-  getMatchLineups(@Param("matchId") matchId: string): Promise<MatchLineupsResponse> {
-    return this.lineupsResponse(matchId, this.lineupService.find(matchId));
+  async getMatchLineups(@Param("matchId") matchId: string): Promise<MatchLineupsResponse> {
+    return await this.lineupsResponse(matchId, this.lineupService.find(matchId));
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get("matches/:matchId/viewership")
-  getMatchViewership(@Param("matchId") matchId: string) {
-    return this.viewershipService.find({ kind: "match", id: matchId });
+  async getMatchViewership(@Param("matchId") matchId: string) {
+    return await this.viewershipService.find({ kind: "match", id: matchId });
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put("matches/:matchId/lineups")
-  setMatchLineups(
+  async setMatchLineups(
     @Param("matchId") matchId: string,
     @Body({ schema: SetMatchLineupsDto }) body: SetMatchLineupsDto,
   ): Promise<MatchLineupsResponse> {
-    return this.lineupsResponse(matchId, this.lineupService.set(matchId, body.lineups));
+    return await this.lineupsResponse(matchId, this.lineupService.set(matchId, body.lineups));
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put("matches/:matchId/viewership")
-  setMatchViewership(
+  async setMatchViewership(
     @Param("matchId") matchId: string,
     @Body({ schema: SetViewershipDto }) body: SetViewershipDto,
   ) {
-    return this.viewershipService.set({ kind: "match", id: matchId }, body.viewership);
+    return await this.viewershipService.set({ kind: "match", id: matchId }, body.viewership);
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get(":id/streams")
-  getTournamentStreams(@Param("id") id: string) {
-    return this.streamService.find({ kind: "tournament", id });
+  async getTournamentStreams(@Param("id") id: string) {
+    return await this.streamService.find({ kind: "tournament", id });
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put(":id/streams")
-  setTournamentStreams(
+  async setTournamentStreams(
     @Param("id") id: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsDto,
   ) {
-    return this.streamService.set({ kind: "tournament", id }, body.streams, "manual");
+    return await this.streamService.set({ kind: "tournament", id }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")

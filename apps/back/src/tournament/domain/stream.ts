@@ -7,6 +7,7 @@ import {
   type StreamUrlError,
 } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors";
+import { nonBlank } from "../../common/domain/text";
 import type { OfficialMatchStream } from "./official-match-stream";
 
 export type StreamOwnerKind = "event" | "tournament" | "match";
@@ -49,9 +50,9 @@ export function replaceStreams(
 
     if (!isIso6391Code(language))
       throw invalid(index, "needs a two-letter ISO 639-1 language code (e.g. en, fr)");
-    const channel = input.channel?.trim() || parsed.channel;
+    const channel = nonBlank(input.channel) ?? parsed.channel;
 
-    if (!channel) throw invalid(index, "needs a channel name");
+    if (channel === null || channel === "") throw invalid(index, "needs a channel name");
 
     if (channel.length > STREAM_CHANNEL_MAX_LENGTH)
       throw invalid(index, `has a channel name over ${STREAM_CHANNEL_MAX_LENGTH} characters`);

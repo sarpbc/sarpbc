@@ -16,7 +16,7 @@ export function useAdminList<T>(
 
   const { status, data, error, refresh } = useLazyAsyncData(
     () => `${key}-${search.value}-${page.value}`,
-    () => fetchPage({ limit, offset: (page.value - 1) * limit, search: search.value }),
+    async () => await fetchPage({ limit, offset: (page.value - 1) * limit, search: search.value }),
     { watch: [page, search], server: false },
   );
 

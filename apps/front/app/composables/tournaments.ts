@@ -31,7 +31,7 @@ function listPath(path: string, query: TournamentListQuery): string {
     params.set("pickems", pickems ? "true" : "false");
   }
 
-  if (activeOnly) {
+  if (activeOnly === true) {
     params.set("activeOnly", "true");
   }
 
@@ -110,16 +110,21 @@ export async function getTournamentMatches(
   return res.matches ?? [];
 }
 
-export function getTournamentPlayerStats(
+export async function getTournamentPlayerStats(
   tournamentId: string,
 ): Promise<TournamentPlayerStatsResponse> {
-  return apiFetch<TournamentPlayerStatsResponse>(`/tournaments/${tournamentId}/player-stats`, {
-    method: "GET",
-  });
+  return await apiFetch<TournamentPlayerStatsResponse>(
+    `/tournaments/${tournamentId}/player-stats`,
+    {
+      method: "GET",
+    },
+  );
 }
 
-export function getEventPlayerStats(eventSlug: string): Promise<TournamentPlayerStatsResponse> {
-  return apiFetch<TournamentPlayerStatsResponse>(
+export async function getEventPlayerStats(
+  eventSlug: string,
+): Promise<TournamentPlayerStatsResponse> {
+  return await apiFetch<TournamentPlayerStatsResponse>(
     `/events/${encodeURIComponent(eventSlug)}/player-stats`,
     { method: "GET" },
   );

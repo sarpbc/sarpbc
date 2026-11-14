@@ -97,32 +97,32 @@ export class EventController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get(":id/streams")
-  getStreams(@Param("id") id: string) {
-    return this.streamService.find({ kind: "event", id });
+  async getStreams(@Param("id") id: string) {
+    return await this.streamService.find({ kind: "event", id });
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put(":id/streams")
-  setStreams(@Param("id") id: string, @Body({ schema: SetStreamsDto }) body: SetStreamsDto) {
-    return this.streamService.set({ kind: "event", id }, body.streams, "manual");
+  async setStreams(@Param("id") id: string, @Body({ schema: SetStreamsDto }) body: SetStreamsDto) {
+    return await this.streamService.set({ kind: "event", id }, body.streams, "manual");
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get(":id/viewership")
-  getViewership(@Param("id") id: string) {
-    return this.viewershipService.find({ kind: "event", id });
+  async getViewership(@Param("id") id: string) {
+    return await this.viewershipService.find({ kind: "event", id });
   }
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Put(":id/viewership")
-  setViewership(
+  async setViewership(
     @Param("id") id: string,
     @Body({ schema: SetViewershipDto }) body: SetViewershipDto,
   ) {
-    return this.viewershipService.set({ kind: "event", id }, body.viewership);
+    return await this.viewershipService.set({ kind: "event", id }, body.viewership);
   }
 
   @RequirePermissions("tournaments.manage")
@@ -137,24 +137,24 @@ export class EventController {
   async playerStats(@Param("event") event: string): Promise<TournamentPlayerStatsResponse> {
     const found = await this.events.find(event);
 
-    if (!found?.stages.some((stage) => isRedistributable(stage.source))) {
+    if (found?.stages.some((stage) => isRedistributable(stage.source)) !== true) {
       throw new NotFoundError(MISSING);
     }
 
-    return this.playerStatsService.forStages(found.stages);
+    return await this.playerStatsService.forStages(found.stages);
   }
 
   @Get("resolve/:event")
-  resolveEvent(@Param("event") event: string): Promise<TournamentPathResponse> {
-    return this.resolve([event]);
+  async resolveEvent(@Param("event") event: string): Promise<TournamentPathResponse> {
+    return await this.resolve([event]);
   }
 
   @Get("resolve/:event/:stage")
-  resolveStage(
+  async resolveStage(
     @Param("event") event: string,
     @Param("stage") stage: string,
   ): Promise<TournamentPathResponse> {
-    return this.resolve([event, stage]);
+    return await this.resolve([event, stage]);
   }
 
   private async resolve(segments: string[]): Promise<TournamentPathResponse> {
@@ -168,7 +168,7 @@ export class EventController {
       case "stage": {
         const id = await this.events.stageId(path.eventSlug, path.stageSlug);
 
-        if (!id) throw new NotFoundError(MISSING);
+        if (id === null || id === "") throw new NotFoundError(MISSING);
 
         return { kind: "stage", tournament: await this.stage(id), tab: "overview" };
       }
@@ -177,8 +177,9 @@ export class EventController {
         const found = await this.events.find(path.eventSlug);
 
         // An event left empty by moving its stages elsewhere stays stored but is not public.
-        if (!found?.stages.length) throw new NotFoundError(MISSING);
-        const stages = await Promise.all(found.stages.map(({ id }) => this.stage(id)));
+        if (found?.stages.length === undefined || found?.stages.length === 0)
+          throw new NotFoundError(MISSING);
+        const stages = await Promise.all(found.stages.map(async ({ id }) => await this.stage(id)));
 
         return {
           kind: "event",

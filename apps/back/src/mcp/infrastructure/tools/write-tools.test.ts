@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Match, Tournament, TournamentParticipant } from "../../../tournament/domain/competition";
 import { Team } from "../../../roster/domain/roster";
 import type { McpTool, ToolArguments } from "../define-tool";
+import { jsonOf } from "../../../../test/mcp-result";
 import { writeTools, type WriteToolServices } from "./write-tools";
 
 function services(): WriteToolServices {
@@ -60,7 +61,8 @@ describe("set_match_game_vods", () => {
     return {
       matchService,
       tool,
-      run: (input: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, input),
+      run: async (input: ToolArguments) =>
+        await tool.run({ id: "u1", email: "staff@test.com", role }, input),
     };
   }
 
@@ -70,10 +72,12 @@ describe("set_match_game_vods", () => {
     const { matchService, run } = setup("admin");
     const result = await run({ matchId: "m1", game: 5, links });
     expect(matchService.setGameVods).toHaveBeenCalledWith("m1", 5, links);
-    expect(JSON.parse(textOf(result))).toEqual({
+    const matchUrl: unknown = expect.stringMatching(/^https:\/\/sarpbc\.test\/matches\/12\//);
+
+    expect(jsonOf(result)).toEqual({
       id: "m1",
       vods: [{ game: 5, url: "https://youtu.be/g5?t=95", language: "fr", source: "youtube" }],
-      url: expect.stringMatching(/^https:\/\/sarpbc\.test\/matches\/12\//),
+      url: matchUrl,
     });
   });
 
@@ -176,7 +180,7 @@ describe("create_match participants", () => {
       const result = await registered(name).run({ id: "u1", email: "staff@test.com", role }, args);
       const text = textOf(result);
 
-      return { result, text, body: result.isError ? null : JSON.parse(text) };
+      return { result, text, body: result.isError === true ? null : jsonOf(result) };
     };
 
     return { matchService, tournaments, manualTournamentService, registered, call };
@@ -200,7 +204,7 @@ describe("create_match participants", () => {
       participantIds: ["p-kc", "p-m8"],
       results: undefined,
     });
-    expect(body.participants).toEqual([
+    expect(body).toHaveProperty("participants", [
       {
         id: "p-kc",
         name: "Karmine Corp",
@@ -297,12 +301,9 @@ describe("create_match participants", () => {
       endAt: "2026-11-03",
     });
 
-    expect(created.body.participants.map((participant: { id: string }) => participant.id)).toEqual([
-      "p-kc",
-      "p-m8",
-    ]);
+    expect(created.body).toMatchObject({ participants: [{ id: "p-kc" }, { id: "p-m8" }] });
     const updated = await call("update_tournament", { tournamentId: "cup", name: "Coupe" });
-    expect(updated.body.participants).toHaveLength(2);
+    expect(updated.body).toMatchObject({ participants: [{}, {}] });
   });
 
   it("passes the target event of a stage and returns it", async () => {
@@ -310,7 +311,7 @@ describe("create_match participants", () => {
     const eventId = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
     const created = await call("create_tournament", { name: "Finals", eventId });
     expect(manualTournamentService.create).toHaveBeenCalledWith({ name: "Finals", eventId });
-    expect(created.body.event).toEqual({ id: "event", slug: "cdf", name: "Coupe" });
+    expect(created.body).toHaveProperty("event", { id: "event", slug: "cdf", name: "Coupe" });
     await call("update_tournament", { tournamentId: "cup", eventId });
     expect(manualTournamentService.update).toHaveBeenCalledWith("cup", { eventId });
   });
@@ -366,8 +367,8 @@ describe("bracket tools", () => {
 
     const tools = writeTools({ ...base, matchService, tournaments });
 
-    const run = (name: string, input: ToolArguments) =>
-      defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
+    const run = async (name: string, input: ToolArguments) =>
+      await defined(tools, name).run({ id: "u1", email: "staff@test.com", role: "admin" }, input);
 
     return { tools, matchService, run };
   }
@@ -386,7 +387,7 @@ describe("bracket tools", () => {
       "final",
       expect.objectContaining({ participantIds: ["a"], previousMatches }),
     );
-    expect(JSON.parse(textOf(result)).previousMatches).toEqual(previousMatches);
+    expect(jsonOf(result)).toHaveProperty("previousMatches", previousMatches);
   });
 
   it("records or clears a match source and refuses BLAST.tv and Liquipedia mirrors", async () => {
@@ -417,27 +418,23 @@ describe("bracket tools", () => {
   it("keeps generated start.gg matches out of the response", async () => {
     const { matchService, run } = setup("startgg");
 
-    const body = JSON.parse(
-      textOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 })),
-    );
+    const body = jsonOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 }));
 
     expect(matchService.createEmptyBracket).toHaveBeenCalledWith("finals", {
       teams: 4,
       numberOfGames: undefined,
     });
     expect(body).toMatchObject({ created: 1 });
-    expect(body.matches).toBeUndefined();
+    expect(body).not.toHaveProperty("matches");
   });
 
   it("lists generated manual matches with their links", async () => {
     const { run } = setup("manual");
 
-    const body = JSON.parse(
-      textOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 })),
-    );
+    const body = jsonOf(await run("create_empty_bracket", { tournamentId: "finals", teams: 4 }));
 
-    expect(body.matches[0].previousMatches).toEqual([
-      { previousMatchId: "semi-1", type: "winner" },
-    ]);
+    expect(body).toMatchObject({
+      matches: [{ previousMatches: [{ previousMatchId: "semi-1", type: "winner" }] }],
+    });
   });
 });

@@ -61,7 +61,7 @@ function match(
 ): CandidateMatch {
   return {
     id,
-    beginAt: beginAt ? at(beginAt) : null,
+    beginAt: beginAt === null ? null : at(beginAt),
     endAt: null,
     finished: true,
     numberOfGames: 5,
@@ -86,7 +86,7 @@ function replay(
     id: `r-${String(sequence).padStart(3, "0")}`,
     rocketLeagueId: `guid-${sequence}`,
     title: `Replay ${sequence}`,
-    playedAt: playedAt ? at(playedAt) : null,
+    playedAt: playedAt === null ? null : at(playedAt),
     playedAtHasTimezone: true,
     blue: { name: blue.name ?? null, goals: blue.goals, playerNames: blue.names },
     orange: { name: orange.name ?? null, goals: orange.goals, playerNames: orange.names },
@@ -102,7 +102,7 @@ function byReplay(assignments: ReplayAssignment[]) {
         ? `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`
         : assignment.kind === "stored"
           ? `stored:${assignment.matchId}#${assignment.gameNumber}`
-          : `unmatched:${assignment.reason}${assignment.matchId ? `@${assignment.matchId}` : ""}`,
+          : `unmatched:${assignment.reason}${assignment.matchId !== null ? `@${assignment.matchId}` : ""}`,
     ]),
   );
 }

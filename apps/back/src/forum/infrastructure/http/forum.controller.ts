@@ -10,9 +10,9 @@ import { postActivityResponse } from "./forum-response";
 @Controller("forum")
 export class ForumController {
   constructor(
-    private topicService: TopicService,
-    private postService: PostService,
-    private replyService: ReplyService,
+    private readonly topicService: TopicService,
+    private readonly postService: PostService,
+    private readonly replyService: ReplyService,
   ) {}
 
   @Get()

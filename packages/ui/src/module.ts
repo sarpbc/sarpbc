@@ -19,9 +19,9 @@ export default defineNuxtModule({
       }
     }
 
-    const { resolve } = createResolver(import.meta.url);
+    const resolver = createResolver(import.meta.url);
     addComponentsDir({
-      path: resolve("./runtime/components-mdc"),
+      path: resolver.resolve("./runtime/components-mdc"),
       pathPrefix: false,
       prefix: "Sarp",
       global: true,
@@ -30,15 +30,15 @@ export default defineNuxtModule({
     // Host apps that show news tags link to the public site when this is set; empty keeps routes relative.
     addImports({
       name: "useMatchStateLabel",
-      from: resolve("./runtime/composables/useMatchStateLabel"),
+      from: resolver.resolve("./runtime/composables/useMatchStateLabel"),
     });
 
-    nuxt.options.runtimeConfig.public.publicSiteUrl ||= "";
+    nuxt.options.runtimeConfig.public.publicSiteUrl ??= "";
 
     // @nuxtjs/i18n calls this hook while it sets up, so list this module before it.
     nuxt.hook("i18n:registerModule", (register) => {
       register({
-        langDir: resolve("./runtime/locales"),
+        langDir: resolver.resolve("./runtime/locales"),
         locales: [
           { code: "en", file: "en-US.json" },
           { code: "fr", file: "fr-FR.json" },

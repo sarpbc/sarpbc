@@ -57,23 +57,23 @@ describe("client throttle behind a trusted proxy", () => {
   }) {
     const headers: Record<string, string> = {};
 
-    if (options.forwardedFor) {
+    if (options.forwardedFor !== undefined) {
       headers["x-forwarded-for"] = options.forwardedFor;
     }
 
-    if (options.connectingIp) {
+    if (options.connectingIp !== undefined) {
       headers["cf-connecting-ip"] = options.connectingIp;
     }
 
-    if (options.token) {
+    if (options.token !== undefined) {
       headers[INTERNAL_API_HEADER] = options.token;
     }
 
-    if (options.client) {
+    if (options.client !== undefined) {
       headers[INTERNAL_CLIENT_HEADER] = options.client;
     }
 
-    return app.getHttpAdapter().getInstance().inject({
+    return await app.getHttpAdapter().getInstance().inject({
       method: "GET",
       url: "/probe",
       remoteAddress: options.remoteAddress,
@@ -119,8 +119,8 @@ describe("client throttle behind a trusted proxy", () => {
   });
 
   it("does not let a public client prepend a forged forwarding hop", async () => {
-    const forged = (attempt: number) =>
-      app
+    const forged = async (attempt: number) =>
+      await app
         .getHttpAdapter()
         .getInstance()
         .inject({
@@ -153,7 +153,8 @@ describe("client throttle behind a trusted proxy", () => {
   });
 
   it("limits internal SSR calls per forwarded visitor above the public limit", async () => {
-    const call = (client: string) => hit({ remoteAddress: "10.0.0.12", token: TOKEN, client });
+    const call = async (client: string) =>
+      await hit({ remoteAddress: "10.0.0.12", token: TOKEN, client });
 
     for (let attempt = 0; attempt < SSR_LIMIT; attempt += 1) {
       expect((await call("203.0.113.50")).statusCode).toBe(200);
@@ -177,8 +178,8 @@ describe("client throttle behind a trusted proxy", () => {
   });
 
   it("does not split the SSR bucket on a private forwarded visitor", async () => {
-    const call = (client: string) =>
-      hit({
+    const call = async (client: string) =>
+      await hit({
         remoteAddress: "10.0.0.22",
         forwardedFor: "198.51.100.88",
         token: TOKEN,

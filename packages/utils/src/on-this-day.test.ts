@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { calendarDayIn, formatIsoDay, isMonthDay, parseIsoDay } from "./on-this-day";
 
-describe("on this day calendar", () => {
-  it("accepts every day of the year, February 29 included", () => {
+void describe("on this day calendar", () => {
+  void it("accepts every day of the year, February 29 included", () => {
     assert.equal(isMonthDay(2, 29), true);
     assert.equal(isMonthDay(12, 31), true);
     assert.equal(isMonthDay(4, 31), false);
@@ -12,7 +12,7 @@ describe("on this day calendar", () => {
     assert.equal(isMonthDay(1.5, 2), false);
   });
 
-  it("reads the calendar day in the site time zone", () => {
+  void it("reads the calendar day in the site time zone", () => {
     assert.deepEqual(calendarDayIn(new Date("2024-06-30T22:30:00Z"), "Europe/Paris"), {
       year: 2024,
       month: 7,
@@ -25,7 +25,7 @@ describe("on this day calendar", () => {
     });
   });
 
-  it("parses and formats ISO days, refusing impossible dates", () => {
+  void it("parses and formats ISO days, refusing impossible dates", () => {
     assert.deepEqual(parseIsoDay("2024-02-29"), { year: 2024, month: 2, day: 29 });
     assert.equal(parseIsoDay("2023-02-29"), null);
     assert.equal(parseIsoDay("2024-2-9"), null);

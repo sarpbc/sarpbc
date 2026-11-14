@@ -2,10 +2,10 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { StaffPermission } from "@sarpbc/types";
 import { log } from "evlog";
-import type { z } from "zod";
+import { z } from "zod";
 import type { PatUser } from "../../pat/application/pat.service";
 import { roleHasPermission } from "../../user/domain/staff-access";
-import { extractErrorMessage, jsonToolResult, toolErrorResult } from "./tool-result";
+import { extractErrorMessage, textToolResult, toolErrorResult } from "./tool-result";
 
 type ToolInput<Fields extends Record<string, z.ZodType>> = z.infer<z.ZodObject<Fields>>;
 
@@ -67,6 +67,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
   spec: ReadToolSpec<Fields, Output> | WriteToolSpec<Fields, Output>,
 ): McpTool {
   const permissions = [spec.permission ?? []].flat();
+  const jsonResult = (data: Output) => textToolResult(JSON.stringify(data, null, 2));
 
   return {
     name: spec.name,
@@ -87,9 +88,13 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
       }
 
       try {
-        const fields = input as ToolInput<Fields>;
+        const parsed = z.object(spec.input).safeParse(input);
 
-        if (!spec.write) return jsonToolResult(await spec.handler(fields, user));
+        if (!parsed.success) return toolErrorResult(z.prettifyError(parsed.error));
+
+        const fields = parsed.data;
+
+        if (spec.write !== true) return jsonResult(await spec.handler(fields, user));
 
         const { result, entityId, sourceUrl } = await spec.handler(fields, user);
         log.info({
@@ -101,7 +106,7 @@ export function defineTool<Fields extends Record<string, z.ZodType>, Output>(
           message: `${spec.name} completed`,
         });
 
-        return jsonToolResult(result);
+        return jsonResult(result);
       } catch (error) {
         log.error({
           component: "McpTool",
@@ -122,7 +127,7 @@ export function registerTools(server: McpServer, user: PatUser, tools: readonly 
     server.registerTool(
       tool.name,
       { description: tool.description, inputSchema: tool.inputSchema },
-      (input) => tool.run(user, input),
+      async (input) => await tool.run(user, input),
     );
   }
 }

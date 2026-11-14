@@ -11,9 +11,12 @@ import {
 } from "@nestjs/common";
 import { FastifyRequest } from "fastify";
 import { createLogger } from "evlog";
+import { z } from "zod";
 import type { Storage } from "../fastify";
 import { requestLogContext } from "../../logging/request-log-context";
 import { getFileFromPart, MultipartOptions, validateFile } from "../multipart-file";
+
+const fieldValue = z.string().catch("");
 
 interface StoredFilesByField {
   [fieldname: string]: Storage.MultipartFile[];
@@ -56,18 +59,18 @@ export function MultipartInterceptor(
       try {
         for await (const part of req.parts()) {
           if (part.type !== "file") {
-            body[part.fieldname] = part.value == null ? "" : String(part.value);
+            body[part.fieldname] = fieldValue.parse(part.value);
             continue;
           }
 
           const file = await getFileFromPart(part);
           const validationResult = await validateFile(file, options);
 
-          if (validationResult)
+          if (validationResult !== undefined)
             throw new HttpException(validationResult, HttpStatus.UNPROCESSABLE_ENTITY);
 
-          files[part.fieldname] = files[part.fieldname] || [];
-          files[part.fieldname].push(file);
+          const existing: Storage.MultipartFile[] | undefined = files[part.fieldname];
+          files[part.fieldname] = [...(existing ?? []), file];
         }
       } catch (error) {
         if (error instanceof HttpException) {

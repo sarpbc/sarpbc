@@ -1,6 +1,7 @@
 import { dirname } from "node:path";
 import { createRequire } from "node:module";
 import { localizedPath } from "@sarpbc/utils/entity-path";
+import { isNonEmptyString } from "@sarpbc/utils/text";
 import { DEFAULT_API_BASE, SITE_ORIGIN, apiPreconnectLinks, i18nOptions } from "@sarpbc/ui/config";
 import { newsMdcComponents } from "./app/utils/newsMdcComponents";
 
@@ -26,7 +27,10 @@ const prosemirrorAliases = Object.fromEntries(
   prosemirrorPackages.map((name) => [name, prosemirrorAlias(name)]),
 );
 
-const apiBase = process.env.NUXT_PUBLIC_API_BASE || DEFAULT_API_BASE;
+const apiBase = isNonEmptyString(process.env.NUXT_PUBLIC_API_BASE)
+  ? process.env.NUXT_PUBLIC_API_BASE
+  : DEFAULT_API_BASE;
+
 const loginRule = { appLayout: "login" } as const;
 
 export default defineNuxtConfig({
@@ -75,6 +79,8 @@ export default defineNuxtConfig({
   },
 
   runtimeConfig: {
+    apiBaseServer: "",
+    apiInternalToken: "",
     public: {
       apiBase,
       publicSiteUrl: SITE_ORIGIN,

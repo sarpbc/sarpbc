@@ -1,3 +1,5 @@
+import { isNonEmptyString } from "@sarpbc/utils";
+
 export type OffsetPageQuery = {
   offset?: string;
 };
@@ -7,7 +9,7 @@ export const MATCH_LIST_PAGE_SIZE = 20;
 export function parseRouteOffset(value: string | null | (string | null)[] | undefined): number {
   const raw = Array.isArray(value) ? value[0] : value;
 
-  if (!raw) {
+  if (!isNonEmptyString(raw)) {
     return 0;
   }
 

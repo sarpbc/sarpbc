@@ -43,8 +43,8 @@ function filesIn(dir: string): string[] {
 
 const packagesRoot = path.resolve(project, "../../packages");
 
-function stringConstants() {
-  const constants = new Map();
+function stringConstants(): Map<string, string[]> {
+  const constants = new Map<string, string[]>();
 
   for (const pkg of fs.readdirSync(packagesRoot)) {
     const dir = path.join(packagesRoot, pkg, "src");
@@ -142,7 +142,7 @@ function collectRoutes(sources: SourceText[]): Route[] {
             ["Body", "Query"].includes(decorator.name),
           );
 
-          if (!input || !dto?.endsWith("Dto")) continue;
+          if (input === undefined || dto?.endsWith("Dto") !== true) continue;
           assert(
             input.args.some((argument) => new RegExp(`\\bschema:\\s*${dto}\\b`).test(argument)),
             `${file}: ${method.name.getText(source)} must attach the ${dto} schema to @${input.name}`,

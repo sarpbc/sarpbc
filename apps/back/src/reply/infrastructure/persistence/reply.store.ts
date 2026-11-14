@@ -33,11 +33,11 @@ export class MikroReplyStore implements ReplyWrites {
 
     return row ? replySnapshot(row) : null;
   }
-  countRootsByTarget(type: ReplyTargetType, id: string) {
-    return this.rows.countRootsByTarget(type, id);
+  async countRootsByTarget(type: ReplyTargetType, id: string) {
+    return await this.rows.countRootsByTarget(type, id);
   }
-  countByTargetIds(type: ReplyTargetType, ids: string[]) {
-    return this.rows.countByTargetIds(type, ids);
+  async countByTargetIds(type: ReplyTargetType, ids: string[]) {
+    return await this.rows.countByTargetIds(type, ids);
   }
   async findDescendantsForRoots(type: ReplyTargetType, id: string, roots: string[]) {
     return (await this.rows.findDescendantsForRoots(type, id, roots)).map(replySnapshot);

@@ -7,7 +7,9 @@ export async function withTimeout<T>(promise: Promise<T>, ms: number, message: s
     return await Promise.race([
       promise,
       new Promise<never>((_, reject) => {
-        timer = setTimeout(() => reject(new Error(message)), ms);
+        timer = setTimeout(() => {
+          reject(new Error(message));
+        }, ms);
       }),
     ]);
   } finally {

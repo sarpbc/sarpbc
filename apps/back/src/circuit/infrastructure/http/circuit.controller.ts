@@ -37,33 +37,33 @@ export class CircuitController {
 
   @Get(":ref/standings")
   @Header("Cache-Control", "public, max-age=60")
-  standings(@Param("ref") ref: string): Promise<CircuitStandings> {
-    return this.circuits.standings(ref);
+  async standings(@Param("ref") ref: string): Promise<CircuitStandings> {
+    return await this.circuits.standings(ref);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("tournaments.manage")
   @Get(":ref")
-  detail(@Param("ref") ref: string): Promise<CircuitDetail> {
-    return this.circuits.detail(ref);
+  async detail(@Param("ref") ref: string): Promise<CircuitDetail> {
+    return await this.circuits.detail(ref);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("tournaments.manage")
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body({ schema: CreateCircuitDto }) dto: CreateCircuitDto): Promise<CircuitSummary> {
-    return this.circuits.create(dto);
+  async create(@Body({ schema: CreateCircuitDto }) dto: CreateCircuitDto): Promise<CircuitSummary> {
+    return await this.circuits.create(dto);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("tournaments.manage")
   @Patch(":id")
-  update(
+  async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body({ schema: UpdateCircuitDto }) dto: UpdateCircuitDto,
   ): Promise<CircuitSummary> {
-    return this.circuits.update(id, dto);
+    return await this.circuits.update(id, dto);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -84,7 +84,7 @@ export class CircuitController {
   ): Promise<CircuitDetail> {
     await this.circuits.setStageScale(id, tournamentId, dto);
 
-    return this.circuits.detail(id);
+    return await this.circuits.detail(id);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

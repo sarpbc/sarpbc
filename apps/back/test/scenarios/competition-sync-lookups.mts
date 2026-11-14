@@ -1,18 +1,24 @@
 import assert from "node:assert/strict";
+import { z } from "zod";
 import type { UpsertTournamentCommand } from "../../src/tournament/application/feed.ts";
 import { verifyCountries } from "./countries.mts";
+import { byText } from "./support.mts";
 import type { Application, Orm, Payload, Request, RequestContextType } from "./support.mts";
 
-interface StageView {
-  id: string;
-  source: string;
-  event: { slug: string; name: string };
-  league: { id: string };
-}
+const idRef = z.object({ id: z.string() });
 
-interface IdRef {
-  id: string;
-}
+const stageView = z.looseObject({
+  id: z.string(),
+  source: z.string(),
+  event: z.looseObject({ slug: z.string(), name: z.string() }),
+  league: idRef,
+});
+
+const stageBody = z.object({ tournament: stageView });
+
+type StageView = z.infer<typeof stageView>;
+
+type IdRef = z.infer<typeof idRef>;
 
 export interface CompetitionSyncContext {
   app: Application;
@@ -40,11 +46,11 @@ export async function verifyCompetitionSyncLookups({
 
   const league = { pandascoreId: 9701, name: "Lookup League", slug: "lookup-league" };
 
-  const upsert = (command: Omit<UpsertTournamentCommand, "league">) =>
-    run(() => sync.upsertTournament({ league, ...command }));
+  const upsert = async (command: Omit<UpsertTournamentCommand, "league">) =>
+    await run(async () => await sync.upsertTournament({ league, ...command }));
 
   const view = async (id: string): Promise<StageView> =>
-    (await request("GET", `/tournaments/${id}`)).json<{ tournament: StageView }>().tournament;
+    (await request("GET", `/tournaments/${id}`)).json(stageBody).tournament;
 
   const eventSlugOf = async (tournament: IdRef): Promise<string> =>
     (await view(tournament.id)).event.slug;
@@ -103,7 +109,7 @@ export async function verifyCompetitionSyncLookups({
       staffCookie,
       201,
     )
-  ).json<{ tournament: StageView }>().tournament;
+  ).json(stageBody).tournament;
 
   assert.equal(manualEvent.event.name, "Lookup League Group C");
 
@@ -136,7 +142,7 @@ export async function verifyCompetitionSyncLookups({
       staffCookie,
       201,
     )
-  ).json<{ tournament: StageView }>().tournament;
+  ).json(stageBody).tournament;
 
   const counterpart = await upsert({
     pandascoreId: 9715,
@@ -163,9 +169,7 @@ export async function verifyCompetitionSyncLookups({
 
   for (const body of ambiguous)
     twins.push(
-      (await request("POST", "/tournaments", body, staffCookie, 201)).json<{
-        tournament: StageView;
-      }>().tournament,
+      (await request("POST", "/tournaments", body, staffCookie, 201)).json(stageBody).tournament,
     );
 
   const separate = await upsert({
@@ -201,22 +205,24 @@ export async function verifyPandascoreAdoption({
     return RequestContext.create(orm.em.fork(), work);
   }
 
-  const importPlayer = (pandascoreId: number, slug: string) =>
-    run(() =>
-      sync.applyIncident({
+  const importPlayer = async (pandascoreId: number, slug: string): Promise<void> => {
+    await run(async () => {
+      await sync.applyIncident({
         id: pandascoreId,
         modifiedAt: new Date(),
         changeType: "creation",
         kind: "player",
         command: { player: { pandascoreId, name: slug, slug }, currentTeam: null },
-      }),
-    );
+      });
+    });
+  };
 
-  const imported = (pandascoreId: number) => orm.em.fork().findOneOrFail(Player, { pandascoreId });
+  const imported = async (pandascoreId: number) =>
+    await orm.em.fork().findOneOrFail(Player, { pandascoreId });
 
   const legacy = (
     await request("POST", "/player", { name: "Adoption Legacy" }, staffCookie, 201)
-  ).json<{ player: { id: string; slug: string } }>().player;
+  ).json(z.object({ player: z.looseObject({ id: z.string(), slug: z.string() }) })).player;
 
   await importPlayer(9951, legacy.slug);
   assert.equal(
@@ -267,30 +273,39 @@ export async function verifyRedistributableScope({
     return RequestContext.create(orm.em.fork(), work);
   }
 
-  async function created<T>(path: string, body: Payload): Promise<T> {
-    return (await request("POST", path, body, staffCookie, 201)).json<T>();
+  async function created<T>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> {
+    return (await request("POST", path, body, staffCookie, 201)).json(schema);
   }
 
-  const alpha = (await created<{ team: IdRef }>("/team", { name: "Scope Alpha" })).team.id;
-  const beta = (await created<{ team: IdRef }>("/team", { name: "Scope Beta" })).team.id;
+  const teamBody = z.object({ team: idRef });
+  const alpha = (await created("/team", { name: "Scope Alpha" }, teamBody)).team.id;
+  const beta = (await created("/team", { name: "Scope Beta" }, teamBody)).team.id;
 
   const finishedMatchOf = async (source: string): Promise<string> => {
-    const { tournament } = await created<{ tournament: { id: string; participants: IdRef[] } }>(
+    const { tournament } = await created(
       "/tournaments",
       {
         name: `Scope ${source} Cup`,
         source,
         teamIds: [alpha, beta],
       },
+      z.object({
+        tournament: z.looseObject({ id: z.string(), participants: z.array(idRef) }),
+      }),
     );
 
-    await created(`/tournaments/${tournament.id}/matches`, {
-      name: `Scope ${source} Final`,
-      beginAt: "2026-06-01T10:00:00Z",
-      endAt: "2026-06-01T12:00:00Z",
-      status: "finished",
-      participantIds: tournament.participants.map(({ id }) => id),
-    });
+    await created(
+      `/tournaments/${tournament.id}/matches`,
+      {
+        name: `Scope ${source} Final`,
+        beginAt: "2026-06-01T10:00:00Z",
+        endAt: "2026-06-01T12:00:00Z",
+        status: "finished",
+        participantIds: tournament.participants.map(({ id }) => id),
+      },
+      z.looseObject({}),
+    );
+
     const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
 
     const response = await request(
@@ -301,7 +316,8 @@ export async function verifyRedistributableScope({
     );
 
     assert.equal(
-      response.json<{ prizes: { sourceUrl: string }[] }>().prizes[0].sourceUrl,
+      response.json(z.object({ prizes: z.array(z.looseObject({ sourceUrl: z.string() })) }))
+        .prizes[0]?.sourceUrl,
       sourceUrl,
       "a prize keeps the source staff entered",
     );
@@ -313,10 +329,13 @@ export async function verifyRedistributableScope({
   const startggCup = await finishedMatchOf("startgg");
 
   const finishedCups = async (options: { redistributableOnly: boolean }): Promise<string[]> => {
-    const [rows, total] = await run(() => matches.list("results", { teamId: alpha, ...options }));
+    const [rows, total] = await run(
+      async () => await matches.list("results", { teamId: alpha, ...options }),
+    );
+
     assert.equal(total, rows.length, "the total counts the rows that are returned");
 
-    return rows.map((match) => match.tournament.id).sort();
+    return rows.map((match) => match.tournament.id).sort(byText);
   };
 
   assert.deepEqual(
@@ -330,7 +349,7 @@ export async function verifyRedistributableScope({
   );
 
   const earned = async (redistributableOnly: boolean) =>
-    (await run(() => prizes.teamEarnings(alpha, { redistributableOnly }))).totals;
+    (await run(async () => await prizes.teamEarnings(alpha, { redistributableOnly }))).totals;
 
   assert.deepEqual(await earned(false), [{ currency: "USD", amount: 2000 }]);
   assert.deepEqual(

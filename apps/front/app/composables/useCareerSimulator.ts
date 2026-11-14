@@ -1,3 +1,4 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import { getEventById } from "~/data/career/events";
 import { getWorldTeamById } from "~/data/career/world";
 import {
@@ -79,7 +80,7 @@ export function useCareerSimulator() {
   });
 
   const currentEvent = computed(() => {
-    if (!state.value.currentEventId) return null;
+    if (!isNonEmptyString(state.value.currentEventId)) return null;
 
     return getEventById(state.value.currentEventId) ?? null;
   });
@@ -150,26 +151,60 @@ export function useCareerSimulator() {
     hydrate,
     resetCareer,
     dispatch,
-    setOnboardingStep: (step: OnboardingStep) => dispatch({ type: "SET_ONBOARDING_STEP", step }),
-    setPlayerName: (name: string) => dispatch({ type: "SET_PLAYER_NAME", name }),
-    setRegion: (region: CareerRegion) => dispatch({ type: "SET_REGION", region }),
-    setCountry: (country: CareerCountry) => dispatch({ type: "SET_COUNTRY", country }),
-    setRole: (role: CareerRole) => dispatch({ type: "SET_ROLE", role }),
-    setBackground: (background: CareerBackground) =>
-      dispatch({ type: "SET_BACKGROUND", background }),
-    completeOnboarding: () => dispatch({ type: "COMPLETE_ONBOARDING" }),
-    startSeason: () => dispatch({ type: "START_SEASON" }),
-    resolveEventChoice: (choiceId: string) => dispatch({ type: "RESOLVE_EVENT_CHOICE", choiceId }),
-    continueAfterEventOutcome: () => dispatch({ type: "CONTINUE_AFTER_EVENT_OUTCOME" }),
-    continueAfterResult: () => dispatch({ type: "CONTINUE_AFTER_STAGE_RESULT" }),
-    resolveOffseasonDestiny: (choiceId: string) =>
-      dispatch({ type: "RESOLVE_OFFSEASON_DESTINY", choiceId }),
-    acceptOffer: (teamId: string) => dispatch({ type: "ACCEPT_OFFER", teamId }),
-    stayWithTeam: () => dispatch({ type: "STAY_WITH_TEAM" }),
-    retireCareer: () => dispatch({ type: "RETIRE_CAREER" }),
-    startOnboarding: () => dispatch({ type: "START_ONBOARDING" }),
-    continueFromMenu: () => dispatch({ type: "CONTINUE_FROM_MENU" }),
-    returnToMenu: () => dispatch({ type: "RETURN_TO_MENU" }),
+    setOnboardingStep: (step: OnboardingStep) => {
+      dispatch({ type: "SET_ONBOARDING_STEP", step });
+    },
+    setPlayerName: (name: string) => {
+      dispatch({ type: "SET_PLAYER_NAME", name });
+    },
+    setRegion: (region: CareerRegion) => {
+      dispatch({ type: "SET_REGION", region });
+    },
+    setCountry: (country: CareerCountry) => {
+      dispatch({ type: "SET_COUNTRY", country });
+    },
+    setRole: (role: CareerRole) => {
+      dispatch({ type: "SET_ROLE", role });
+    },
+    setBackground: (background: CareerBackground) => {
+      dispatch({ type: "SET_BACKGROUND", background });
+    },
+    completeOnboarding: () => {
+      dispatch({ type: "COMPLETE_ONBOARDING" });
+    },
+    startSeason: () => {
+      dispatch({ type: "START_SEASON" });
+    },
+    resolveEventChoice: (choiceId: string) => {
+      dispatch({ type: "RESOLVE_EVENT_CHOICE", choiceId });
+    },
+    continueAfterEventOutcome: () => {
+      dispatch({ type: "CONTINUE_AFTER_EVENT_OUTCOME" });
+    },
+    continueAfterResult: () => {
+      dispatch({ type: "CONTINUE_AFTER_STAGE_RESULT" });
+    },
+    resolveOffseasonDestiny: (choiceId: string) => {
+      dispatch({ type: "RESOLVE_OFFSEASON_DESTINY", choiceId });
+    },
+    acceptOffer: (teamId: string) => {
+      dispatch({ type: "ACCEPT_OFFER", teamId });
+    },
+    stayWithTeam: () => {
+      dispatch({ type: "STAY_WITH_TEAM" });
+    },
+    retireCareer: () => {
+      dispatch({ type: "RETIRE_CAREER" });
+    },
+    startOnboarding: () => {
+      dispatch({ type: "START_ONBOARDING" });
+    },
+    continueFromMenu: () => {
+      dispatch({ type: "CONTINUE_FROM_MENU" });
+    },
+    returnToMenu: () => {
+      dispatch({ type: "RETURN_TO_MENU" });
+    },
   };
 
   provide(careerSimulatorKey, api);

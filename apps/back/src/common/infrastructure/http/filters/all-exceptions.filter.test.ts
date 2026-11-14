@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi, type Mock } from "vitest";
+import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import {
   AuthenticationError,
   ConflictError,
@@ -8,12 +9,7 @@ import {
   NotFoundError,
   UnprocessableError,
 } from "../../../domain/errors";
-import {
-  ArgumentsHost,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
-} from "@nestjs/common";
+import { HttpException, HttpStatus, InternalServerErrorException } from "@nestjs/common";
 import { log } from "evlog";
 import { AllExceptionsFilter } from "./all-exceptions.filter";
 
@@ -27,17 +23,14 @@ describe("AllExceptionsFilter", () => {
       url: "/news",
       method: "GET",
     },
-  ): ArgumentsHost {
-    return {
-      switchToHttp: () => ({
-        getResponse: () => ({ sent, status: vi.fn().mockReturnThis(), send }),
-        getRequest: () => request,
-      }),
-    } as ArgumentsHost;
+  ): ExecutionContextHost {
+    return new ExecutionContextHost([request, { sent, status: vi.fn().mockReturnThis(), send }]);
   }
 
+  const logError = vi.spyOn(log, "error");
+
   beforeEach(() => {
-    (log.error as Mock).mockClear();
+    logError.mockClear();
   });
 
   it("preserves HttpException response bodies", () => {
@@ -47,7 +40,7 @@ describe("AllExceptionsFilter", () => {
       statusCode: 404,
       message: "Tournament not found",
     });
-    expect(log.error).not.toHaveBeenCalled();
+    expect(logError).not.toHaveBeenCalled();
   });
 
   it("logs HTTP 5xx with environment and user", () => {
@@ -60,18 +53,18 @@ describe("AllExceptionsFilter", () => {
         user: { id: "user-1", email: "editor@sarpbc.org" },
       }),
     );
-    expect(log.error).toHaveBeenCalledWith(
-      expect.objectContaining({
-        component: AllExceptionsFilter.name,
-        message: "HTTP 5xx response",
-        path: "/storage/r2/upload",
-        method: "POST",
-        status: 500,
-        userId: "user-1",
-        userEmail: "editor@sarpbc.org",
-        environment: expect.any(String),
-      }),
-    );
+    const [entry] = logError.mock.calls[0] ?? [];
+
+    expect(entry).toMatchObject({
+      component: AllExceptionsFilter.name,
+      message: "HTTP 5xx response",
+      path: "/storage/r2/upload",
+      method: "POST",
+      status: 500,
+      userId: "user-1",
+      userEmail: "editor@sarpbc.org",
+    });
+    expect(entry).toHaveProperty("environment", expect.any(String));
   });
 
   it.each([
@@ -108,6 +101,6 @@ describe("AllExceptionsFilter", () => {
       message:
         "The server hit an unexpected error. Try again, or report this if it keeps happening.",
     });
-    expect(log.error).toHaveBeenCalled();
+    expect(logError).toHaveBeenCalled();
   });
 });

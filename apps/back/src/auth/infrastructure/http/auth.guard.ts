@@ -13,8 +13,8 @@ import {
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-    private authService: AuthService,
-    private configService: ConfigService,
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,7 +25,10 @@ export class AuthGuard implements CanActivate {
     const accessToken = request.cookies?.[ACCESS_TOKEN_COOKIE];
     const refreshToken = request.cookies?.[REFRESH_TOKEN_COOKIE];
 
-    const accessUser = accessToken ? await this.authService.authenticate(accessToken) : null;
+    const accessUser =
+      accessToken !== undefined && accessToken !== ""
+        ? await this.authService.authenticate(accessToken)
+        : null;
 
     if (accessUser) {
       request.user = accessUser;
@@ -33,9 +36,11 @@ export class AuthGuard implements CanActivate {
       return true;
     }
 
-    if (!refreshToken) {
+    if (refreshToken === undefined || refreshToken === "") {
       throw new AuthenticationError(
-        accessToken ? "Invalid or expired token" : "Missing auth token in cookie",
+        accessToken !== undefined && accessToken !== ""
+          ? "Invalid or expired token"
+          : "Missing auth token in cookie",
       );
     }
 

@@ -49,7 +49,7 @@ describe("HealthController", () => {
   it("ready pings postgres and redis", async () => {
     health.check.mockImplementation(
       async (indicators: Array<() => Promise<HealthIndicatorResult>>) => {
-        await Promise.all(indicators.map((indicator) => indicator()));
+        await Promise.all(indicators.map(async (indicator) => await indicator()));
 
         return { status: "ok" };
       },
@@ -60,11 +60,11 @@ describe("HealthController", () => {
     expect(redis.pingCheck).toHaveBeenCalledWith("redis");
   });
 
-  it("ready returns 503 while shutting down", () => {
+  it("ready returns 503 while shutting down", async () => {
     shutdownState.isShuttingDown.mockReturnValue(true);
 
-    expect(() => controller.ready()).toThrow(ServiceUnavailableException);
-    expect(() => controller.ready()).toThrow(/Shutting down/);
+    await expect(controller.ready()).rejects.toThrow(ServiceUnavailableException);
+    await expect(controller.ready()).rejects.toThrow(/Shutting down/);
     expect(health.check).not.toHaveBeenCalled();
   });
 });

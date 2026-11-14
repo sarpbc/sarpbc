@@ -24,7 +24,7 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
       write: true,
       permission: "tournaments.manage",
       input: {
-        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
+        tournamentId: z.uuid().describe("Tournament stage UUID."),
         prizes: z
           .array(
             z.object({
@@ -43,9 +43,9 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
                 .string()
                 .refine(isIso4217Code, "Use an ISO 4217 currency code")
                 .describe("ISO 4217 currency code as stated by the source (e.g. USD, EUR)."),
-              teamId: z.string().uuid().describe("Team UUID."),
+              teamId: z.uuid().describe("Team UUID."),
               playerIds: z
-                .array(z.string().uuid())
+                .array(z.uuid())
                 .max(MAX_PRIZE_PLAYERS)
                 .optional()
                 .describe(
@@ -57,8 +57,8 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
           .describe("Every paid placement of the stage."),
         sourceUrl: proposalSourceUrlSchema,
       },
-      handler: ({ tournamentId, prizes, sourceUrl }, user) =>
-        propose(
+      handler: async ({ tournamentId, prizes, sourceUrl }, user) =>
+        await propose(
           {
             kind: "set_tournament_prizes",
             tournamentId,
@@ -79,8 +79,8 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
       write: true,
       permission: "tournaments.manage",
       input: {
-        tournamentId: z.string().uuid().describe("Tournament stage UUID."),
-        teamId: z.string().uuid().describe("UUID of the team whose prize row changes."),
+        tournamentId: z.uuid().describe("Tournament stage UUID."),
+        teamId: z.uuid().describe("UUID of the team whose prize row changes."),
         placement: z.number().int().min(1).optional().describe("Corrected final placement."),
         amount: z
           .number()
@@ -95,7 +95,7 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
           .optional()
           .describe("Corrected ISO 4217 currency code."),
         playerIds: z
-          .array(z.string().uuid())
+          .array(z.uuid())
           .max(MAX_PRIZE_PLAYERS)
           .optional()
           .describe("Replacement list of player UUIDs from the team's stage roster."),
@@ -103,11 +103,11 @@ export function prizeTools({ rosterProposalService }: PrizeToolServices): McpToo
           "Required public source of the corrected row, usually the official Rocket League rules (prize attachments) or the organiser's announcement. Never Liquipedia, a mirror of it or BLAST.tv.",
         ),
       },
-      handler: (
+      handler: async (
         { tournamentId, teamId, placement, amount, currency, playerIds, sourceUrl },
         user,
       ) =>
-        propose(
+        await propose(
           {
             kind: "update_tournament_prize",
             tournamentId,

@@ -19,27 +19,31 @@ export class TeamService {
   ) {}
 
   async find(options: Partial<DirectorySearchProps>): Promise<Team[]> {
-    return this.teams.search(options);
+    return await this.teams.search(options);
   }
 
   async findAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]> {
-    return this.teams.searchAndCount(options);
+    return await this.teams.searchAndCount(options);
   }
 
   async findById(id: string): Promise<Team | null> {
-    return this.resolveMerged(await this.teams.findById(id));
+    return await this.resolveMerged(await this.teams.findById(id));
   }
 
   async findBySlug(slug: string): Promise<Team | null> {
-    return this.resolveMerged(await this.teams.findBySlug(slug));
+    return await this.resolveMerged(await this.teams.findBySlug(slug));
   }
 
   private async resolveMerged(team: Team | null): Promise<Team | null> {
-    return team?.mergedIntoId ? this.teams.findById(team.mergedIntoId) : team;
+    return team?.mergedIntoId !== null &&
+      team?.mergedIntoId !== undefined &&
+      team.mergedIntoId !== ""
+      ? await this.teams.findById(team.mergedIntoId)
+      : team;
   }
 
   async create(dto: CreateTeamInput): Promise<Team> {
-    return this.transaction.run(async ({ teams }) => {
+    return await this.transaction.run(async ({ teams }) => {
       const team = new Team();
       team.name = dto.name;
       team.location = dto.location ?? null;
@@ -60,14 +64,14 @@ export class TeamService {
   }
 
   async update(id: string, dto: UpdateTeamInput): Promise<Team> {
-    return this.transaction.run(async ({ teams }) => {
+    return await this.transaction.run(async ({ teams }) => {
       const team = await teams.findById(id);
 
       if (!team) {
         throw new NotFoundError(`Team with id "${id}" not found`);
       }
 
-      if (team.mergedIntoId) {
+      if (team.mergedIntoId !== null && team.mergedIntoId !== "") {
         throw new InvalidInputError(
           `${team.name} was merged into team "${team.mergedIntoId}"; edit that team instead`,
         );
@@ -102,11 +106,11 @@ export class TeamService {
   }
 
   async requireDeletable(id: string): Promise<void> {
-    await this.transaction.run((scope) => this.deletable(scope, id));
+    await this.transaction.run(async (scope) => await this.deletable(scope, id));
   }
 
   async delete(id: string): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       await scope.teams.delete(await this.deletable(scope, id));
     });
   }

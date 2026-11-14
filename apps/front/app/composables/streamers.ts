@@ -9,11 +9,15 @@ export async function getLiveStreamers(): Promise<LiveStreamer[]> {
 }
 
 export function useLiveStreamers() {
-  const { data, execute } = useLazyAsyncData("live-streamers", () => getLiveStreamers(), {
-    server: false,
-    immediate: false,
-    default: (): LiveStreamer[] => [],
-  });
+  const { data, execute } = useLazyAsyncData(
+    "live-streamers",
+    async () => await getLiveStreamers(),
+    {
+      server: false,
+      immediate: false,
+      default: (): LiveStreamer[] => [],
+    },
+  );
 
   return { streamers: data, load: execute };
 }

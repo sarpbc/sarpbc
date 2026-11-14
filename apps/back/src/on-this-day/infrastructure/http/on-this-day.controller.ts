@@ -11,12 +11,14 @@ export class OnThisDayController {
 
   @Get()
   @Header("Cache-Control", "public, max-age=300")
-  forDay(@Query({ schema: OnThisDayQueryDto }) { date }: OnThisDayQueryDto): Promise<OnThisDay> {
-    if (date === undefined) return this.onThisDay.forDay(null);
+  async forDay(
+    @Query({ schema: OnThisDayQueryDto }) { date }: OnThisDayQueryDto,
+  ): Promise<OnThisDay> {
+    if (date === undefined) return await this.onThisDay.forDay(null);
     const day = parseIsoDay(date);
 
     if (!day) throw new InvalidInputError("The date is not a calendar date.");
 
-    return this.onThisDay.forDay(day);
+    return await this.onThisDay.forDay(day);
   }
 }

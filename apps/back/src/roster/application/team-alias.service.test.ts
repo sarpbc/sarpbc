@@ -42,7 +42,7 @@ function setup(owner: string | null = null) {
 
   const known = new Map([team, merged].map((entry) => [entry.id, entry]));
   const teams = { findById: vi.fn(async (id: string) => known.get(id) ?? null) };
-  const transaction: TeamAliasTransaction = { run: (work) => work({ teams, aliases }) };
+  const transaction: TeamAliasTransaction = { run: async (work) => await work({ teams, aliases }) };
 
   return { aliases, service: new TeamAliasService(transaction) };
 }

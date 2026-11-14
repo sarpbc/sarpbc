@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { parseNewsEntityTag, serializeNewsEntityTag } from "./news-entity-tag";
 
-describe("parseNewsEntityTag", () => {
-  it("parses player and team tags", () => {
+void describe("parseNewsEntityTag", () => {
+  void it("parses player and team tags", () => {
     assert.deepEqual(parseNewsEntityTag(':player{slug="jstn" label="JSTN"} rest'), {
       kind: "player",
       slug: "jstn",
@@ -18,7 +18,7 @@ describe("parseNewsEntityTag", () => {
     });
   });
 
-  it("round-trips escaped quotes and backslashes", () => {
+  void it("round-trips escaped quotes and backslashes", () => {
     const raw = serializeNewsEntityTag({ kind: "player", slug: "a\\b", label: 'say "hi"' });
     assert.equal(raw, ':player{slug="a\\\\b" label="say \\"hi\\""}');
     assert.deepEqual(parseNewsEntityTag(raw), {
@@ -29,7 +29,7 @@ describe("parseNewsEntityTag", () => {
     });
   });
 
-  it("keeps the last duplicate attribute and ignores unknown or malformed ones", () => {
+  void it("keeps the last duplicate attribute and ignores unknown or malformed ones", () => {
     assert.deepEqual(
       parseNewsEntityTag(':player{x="1" slug="old" slug="new" label=unquoted label="L"}'),
       {
@@ -47,14 +47,14 @@ describe("parseNewsEntityTag", () => {
     });
   });
 
-  it("rejects tags without a slug or label", () => {
+  void it("rejects tags without a slug or label", () => {
     assert.equal(parseNewsEntityTag(':player{slug="jstn"}'), null);
     assert.equal(parseNewsEntityTag(':player{slug=" " label="x"}'), null);
     assert.equal(parseNewsEntityTag(':coach{slug="a" label="b"}'), null);
     assert.equal(parseNewsEntityTag(':player{slug="a label="b"'), null);
   });
 
-  it("rejects pathological attribute input without stalling", () => {
+  void it("rejects pathological attribute input without stalling", () => {
     assert.equal(parseNewsEntityTag(`:player{${"a".repeat(50_000)}}`), null);
     assert.equal(parseNewsEntityTag(`:player{a="${"x".repeat(50_000)}\\\n}`), null);
   });

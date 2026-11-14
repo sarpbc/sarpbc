@@ -1,3 +1,8 @@
+import type { R2UploadResponse } from "@sarpbc/types";
+import * as z from "zod/mini";
+
+const r2UploadResponseSchema = z.object({ publicUrl: z.string(), key: z.string() });
+
 export const MAX_IMAGE_MEGABYTES = 5;
 export const MAX_IMAGE_BYTES = MAX_IMAGE_MEGABYTES * 1024 * 1024;
 
@@ -25,4 +30,14 @@ export function canonicalImageContentType(contentType: string): string {
   return (IMAGE_CONTENT_TYPE_ALIASES as readonly string[]).includes(normalized)
     ? "image/jpeg"
     : normalized;
+}
+
+export function parseR2UploadResponse(text: string): R2UploadResponse | undefined {
+  try {
+    const parsed = r2UploadResponseSchema.safeParse(JSON.parse(text));
+
+    return parsed.success ? parsed.data : undefined;
+  } catch {
+    return undefined;
+  }
 }

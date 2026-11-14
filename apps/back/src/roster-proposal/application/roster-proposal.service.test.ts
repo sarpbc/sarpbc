@@ -58,8 +58,8 @@ describe("RosterProposalService", () => {
     } = setup());
   });
 
-  const addZen = () =>
-    service.propose(
+  const addZen = async () =>
+    await service.propose(
       { kind: "add_player_to_team", playerId: "zen", teamId: "kc", effectiveDate: "2026-10-24" },
       source,
       "journalist",
@@ -297,8 +297,8 @@ describe("RosterProposalService", () => {
   });
 
   it("rejects prize proposals with an unknown or start.gg tournament, team or invalid currency", async () => {
-    const propose = (tournamentId: string, entry: typeof prizeEntry) =>
-      service.propose(
+    const propose = async (tournamentId: string, entry: typeof prizeEntry) =>
+      await service.propose(
         { kind: "set_tournament_prizes", tournamentId, prizes: [entry] },
         source,
         "journalist",
@@ -346,8 +346,8 @@ describe("RosterProposalService", () => {
   });
 
   it("rejects award proposals the tournament cannot take", async () => {
-    const propose = (change: Partial<typeof award>) =>
-      service.propose({ ...award, ...change }, source, "journalist");
+    const propose = async (change: Partial<typeof award>) =>
+      await service.propose({ ...award, ...change }, source, "journalist");
 
     await expect(propose({ tournamentId: "missing" })).rejects.toThrow(NotFoundError);
     await expect(propose({ tournamentId: "startgg-cup" })).rejects.toThrow(InvalidInputError);
@@ -394,8 +394,8 @@ describe("RosterProposalService", () => {
     const publishedKey = "teams/kc/logo-dark-0123456789abcdef.webp";
     const publishedUrl = `https://cdn.sarpbc.test/${publishedKey}`;
 
-    const proposeDarkLogo = () =>
-      service.proposeTeamLogo(
+    const proposeDarkLogo = async () =>
+      await service.proposeTeamLogo(
         { teamId: "kc", variant: "dark", imageUrl: "https://kcorp.gg/logo-dark.svg" },
         source,
         "journalist",
@@ -497,15 +497,15 @@ describe("RosterProposalService", () => {
   });
 
   describe("deletions", () => {
-    const deleteMatch = (matchId: string) =>
-      service.propose(
+    const deleteMatch = async (matchId: string) =>
+      await service.propose(
         { kind: "delete_match", matchId, reason: "Series imported twice" },
         "",
         "journalist",
       );
 
-    const deleteTeam = (teamId: string, mergeIntoTeamId?: string) =>
-      service.propose(
+    const deleteTeam = async (teamId: string, mergeIntoTeamId?: string) =>
+      await service.propose(
         { kind: "delete_team", teamId, reason: "Empty duplicate", mergeIntoTeamId },
         "",
         "journalist",
@@ -604,8 +604,8 @@ describe("RosterProposalService", () => {
       { url: "https://twitch.tv/kameto", language: "fr", kind: "costream" },
     ];
 
-    const setMatchStreams = (sourceUrl: string, matchId = "match-1") =>
-      service.propose(
+    const setMatchStreams = async (sourceUrl: string, matchId = "match-1") =>
+      await service.propose(
         { kind: "set_match_streams", matchId, streams: list },
         sourceUrl,
         "journalist",
@@ -662,11 +662,9 @@ describe("RosterProposalService", () => {
         list,
         "startgg",
       );
-      const applied = await streams.set.mock.results[1]?.value;
-      expect(applied.streams.map((stream: { source: string }) => stream.source)).toEqual([
-        "startgg",
-        "startgg",
-      ]);
+      const result = streams.set.mock.results[1];
+      const applied = result?.type === "return" ? await result.value : undefined;
+      expect(applied?.streams.map((stream) => stream.source)).toEqual(["startgg", "startgg"]);
     });
 
     it("asks the reviewer for the tournament permission", async () => {
@@ -685,8 +683,8 @@ describe("RosterProposalService", () => {
       { participantId: "part-bds", playerIds: [] },
     ];
 
-    const setLineups = (sourceUrl: string, matchId = "match-1") =>
-      service.propose(
+    const setLineups = async (sourceUrl: string, matchId = "match-1") =>
+      await service.propose(
         { kind: "set_match_lineups", matchId, lineups: sides },
         sourceUrl,
         "journalist",
@@ -807,8 +805,8 @@ describe("RosterProposalService", () => {
     const scale: CircuitScaleTier[] = [{ from: 1, to: 1, points: 10 }];
     const rules = "https://example.org/official-rules";
 
-    const setScale = (tournamentId = "ps-stage") =>
-      service.propose(
+    const setScale = async (tournamentId = "ps-stage") =>
+      await service.propose(
         { kind: "set_circuit_stage_scale", circuitId: "circuit-1", tournamentId, scale },
         rules,
         "journalist",

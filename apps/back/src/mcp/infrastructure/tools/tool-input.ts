@@ -23,7 +23,16 @@ export function idOrSlugField(what: string, example?: string) {
   return z
     .string()
     .min(1)
-    .describe(`${what} slug${example ? ` (e.g. ${example})` : ""} or internal UUID.`);
+    .describe(
+      `${what} slug${example !== undefined && example !== "" ? ` (e.g. ${example})` : ""} or internal UUID.`,
+    );
+}
+
+function keepsFields<Fields extends Record<string, z.ZodType>>(
+  described: Record<string, z.ZodType>,
+  fields: Fields,
+): described is Fields {
+  return Object.keys(fields).every((field) => field in described);
 }
 
 /** The input fields of a REST DTO, with MCP descriptions added, so a tool never keeps a second copy of the DTO's rules. */
@@ -31,13 +40,20 @@ export function describeFields<Fields extends Record<string, z.ZodType>>(
   fields: Fields,
   descriptions: { [Field in keyof Fields]?: string },
 ): Fields {
-  return Object.fromEntries(
-    Object.entries<z.ZodType>(fields).map(([field, schema]) => {
+  const described = Object.fromEntries(
+    Object.entries<z.ZodType>(fields).map(([field, schema]): [string, z.ZodType] => {
       const description = descriptions[field];
 
-      return [field, description ? schema.describe(description) : schema];
+      return [
+        field,
+        description !== undefined && description !== "" ? schema.describe(description) : schema,
+      ];
     }),
-  ) as Fields;
+  );
+
+  if (!keepsFields(described, fields)) throw new Error("describeFields dropped an input field");
+
+  return described;
 }
 
 /** PATCH semantics: undefined leaves the date untouched, null clears it. */

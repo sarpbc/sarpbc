@@ -1,6 +1,26 @@
 import { describe, expect, it } from "vitest";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { InMemoryTransport } from "@modelcontextprotocol/sdk/inMemory.js";
+import { unconstructed } from "../../../test/doubles";
+import { CircuitService } from "../../circuit/application/circuit.service";
+import { ManualGameService } from "../../match-stats/application/manual-game.service";
+import { StatsImportService } from "../../match-stats/application/stats-import.service";
+import { StatsPlayerLinkService } from "../../match-stats/application/stats-player-link.service";
+import { TournamentPlayerStatsService } from "../../match-stats/application/tournament-player-stats.service";
+import { NewsService } from "../../news/application/news.service";
+import { ContractService } from "../../roster/application/contract.service";
+import { PlayerService } from "../../roster/application/player.service";
+import { TeamService } from "../../roster/application/team.service";
+import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
+import { SeasonService } from "../../season/application/season.service";
+import { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
+import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
+import { MatchService } from "../../tournament/application/match/match.service";
+import { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
+import { PlayerAwardService } from "../../tournament/application/player-award.service";
+import { SyncNewTournamentsUseCase } from "../../tournament/application/sync/sync-new-tournaments.use-case";
+import { SyncPandascoreTournamentUseCase } from "../../tournament/application/sync/sync-pandascore-tournament.use-case";
+import { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 import { McpServerFactory } from "./mcp-server.factory";
 import type { McpServices } from "./mcp-services";
 
@@ -84,9 +104,51 @@ const TOOL_NAMES = [
   "update_circuit",
 ];
 
+const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
+
+const services: McpServices = {
+  playerService: unconstructed(PlayerService),
+  contractService: unconstructed(ContractService),
+  teamService: unconstructed(TeamService),
+  tournaments: {
+    find: unused,
+    searchByName: unused,
+    findById: unused,
+    findPandascoreWithoutMatches: unused,
+    findPandascoreActive: unused,
+    getTournamentsByPlayer: unused,
+    getTournamentsByTeam: unused,
+    getTournamentsByTeamTenures: unused,
+    getTournamentsWonByPlayer: unused,
+    getTournamentsWonByTeam: unused,
+    wonOnDay: unused,
+    finalsOnDay: unused,
+    knownPandascoreIds: unused,
+    findByPandascoreId: unused,
+    leagues: unused,
+  },
+  pandascoreTournamentSync: unconstructed(SyncPandascoreTournamentUseCase),
+  pandascoreNewTournamentsSync: unconstructed(SyncNewTournamentsUseCase),
+  manualTournamentService: unconstructed(ManualTournamentService),
+  catalogService: unconstructed(ManualCatalogService),
+  events: { list: unused, find: unused, unsynced: unused, stageId: unused },
+  matchService: unconstructed(MatchService),
+  matchLineupService: unconstructed(MatchLineupService),
+  newsService: unconstructed(NewsService),
+  rosterProposalService: unconstructed(RosterProposalService),
+  tournamentPrizeService: unconstructed(TournamentPrizeService),
+  playerAwardService: unconstructed(PlayerAwardService),
+  statsImportService: unconstructed(StatsImportService),
+  statsPlayerLinkService: unconstructed(StatsPlayerLinkService),
+  manualGameService: unconstructed(ManualGameService),
+  tournamentPlayerStatsService: unconstructed(TournamentPlayerStatsService),
+  circuitService: unconstructed(CircuitService),
+  seasonService: unconstructed(SeasonService),
+};
+
 describe("McpServerFactory", () => {
   it("serves every tool with a JSON schema and a stated permission", async () => {
-    const factory = new McpServerFactory({} as McpServices);
+    const factory = new McpServerFactory(services);
     const server = factory.createServer({ id: "u1", email: "staff@test.com", role: "admin" });
     const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
     const client = new Client({ name: "test", version: "1.0.0" });

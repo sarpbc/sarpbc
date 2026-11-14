@@ -12,24 +12,27 @@ export class PostRepository extends EntityRepository<Post> {
     limit?: number;
     offset?: number;
   }): Promise<Post[]> {
-    return super.find(
+    return await super.find(
       {},
       { limit, offset, populate: ["author", "topic"], orderBy: { createdAt: "DESC" } },
     );
   }
 
   async findByTopicId(topicId: string): Promise<Post[]> {
-    return super.find({ topic: { id: topicId } }, { populate: ["author", "topic"] });
+    return await super.find({ topic: { id: topicId } }, { populate: ["author", "topic"] });
   }
 
   async findById(id: string): Promise<Post | null> {
-    return this.findOne({ id }, { populate: ["author", "topic"] });
+    return await this.findOne({ id }, { populate: ["author", "topic"] });
   }
 
   async findWithDetails(ref: EntityRef): Promise<Post | null> {
-    return this.findOne(ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value }, {
-      populate: ["author", "topic", "translations"],
-    });
+    return await this.findOne(
+      ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value },
+      {
+        populate: ["author", "topic", "translations"],
+      },
+    );
   }
 
   async findRecentActivity(limit: number): Promise<
@@ -80,7 +83,7 @@ export class PostRepository extends EntityRepository<Post> {
   }
 
   async findLatestByUser(userId: string): Promise<Post | null> {
-    return this.findOne(
+    return await this.findOne(
       { author: { id: userId } },
       { populate: ["author", "topic"], orderBy: { createdAt: "DESC" } },
     );

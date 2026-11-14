@@ -27,7 +27,7 @@ export class TopicService {
   ) {}
 
   async initializeTopics(): Promise<void> {
-    return this.transaction.run(async (scope) => {
+    await this.transaction.run(async (scope) => {
       for (const topicData of predefinedTopics) {
         const exists = await scope.topics.findByTitle(topicData.title);
 
@@ -48,10 +48,10 @@ export class TopicService {
   }
 
   async find(): Promise<TopicRecord[]> {
-    return this.topicRepository.findAllTopics();
+    return await this.topicRepository.findAllTopics();
   }
 
   async findById(id: string): Promise<TopicRecord | null> {
-    return this.topicRepository.findById(id);
+    return await this.topicRepository.findById(id);
   }
 }

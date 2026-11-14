@@ -1,18 +1,26 @@
-const cache = new Map<string, Promise<unknown>>();
+import type { Player, Team } from "@sarpbc/types";
 
-export function fetchWithEntityTagCache<T>(key: string, fetcher: () => Promise<T>): Promise<T> {
-  const existing = cache.get(key);
+function createEntityTagCache<T>() {
+  const cache = new Map<string, Promise<T>>();
 
-  if (existing) {
-    return existing as Promise<T>;
-  }
+  return async (slug: string, fetcher: () => Promise<T>): Promise<T> => {
+    const existing = cache.get(slug);
 
-  const pending = fetcher().catch((cause) => {
-    cache.delete(key);
-    throw cause;
-  });
+    if (existing !== undefined) {
+      return await existing;
+    }
 
-  cache.set(key, pending);
+    const pending = fetcher();
+    cache.set(slug, pending);
 
-  return pending;
+    try {
+      return await pending;
+    } catch (cause) {
+      cache.delete(slug);
+      throw cause;
+    }
+  };
 }
+
+export const fetchPlayerTagWithCache = createEntityTagCache<{ player: Player | null }>();
+export const fetchTeamTagWithCache = createEntityTagCache<{ team: Team | null }>();

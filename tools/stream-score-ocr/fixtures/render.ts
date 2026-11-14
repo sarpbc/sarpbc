@@ -83,7 +83,7 @@ function rectCoverage(region: Region, x0: number, x1: number, y0: number, y1: nu
 }
 
 function textInk(text: string) {
-  const glyphs = [...text].map((char) => {
+  const glyphs = Array.from(text).map((char) => {
     const rows = FONT.get(char);
 
     if (rows === undefined) throw new Error(`No fixture glyph for ${char}`);
@@ -92,10 +92,16 @@ function textInk(text: string) {
   });
 
   const ink: boolean[][] = Array.from({ length: FONT_ROWS }, () => []);
-  glyphs.forEach((rows, index) => {
-    if (index > 0) ink.forEach((row) => row.push(false));
-    rows.forEach((row, y) => ink[y]?.push(...[...row].map((cell) => cell === "#")));
-  });
+
+  for (const [index, rows] of glyphs.entries()) {
+    if (index > 0) {
+      for (const row of ink) row.push(false);
+    }
+
+    for (const [y, row] of rows.entries()) {
+      ink[y]?.push(...Array.from(row).map((cell) => cell === "#"));
+    }
+  }
 
   return { columns: ink[0]?.length ?? 0, ink };
 }
@@ -255,7 +261,7 @@ export class FixtureRenderer {
 
         for (let row = firstRow; row <= lastRow; row++) {
           for (let column = firstColumn; column <= lastColumn; column++) {
-            if (ink[row]?.[column] !== true) continue;
+            if (!ink[row]?.[column]) continue;
             const cellX = originX + column * FONT_PIXEL;
             const cellY = originY + row * FONT_PIXEL;
             area +=

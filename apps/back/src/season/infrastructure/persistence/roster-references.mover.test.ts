@@ -1,4 +1,5 @@
 import { EntityManager } from "@mikro-orm/postgresql";
+import { unconstructed } from "../../../../test/doubles";
 import { describe, expect, it, vi } from "vitest";
 import { SeasonRosterReferences } from "./roster-references.mover";
 import { Season, SeasonAward, SeasonParticipant, SeasonPathEntry } from "./season.entities";
@@ -20,7 +21,7 @@ describe("SeasonRosterReferences.movePlayer", () => {
     const nativeUpdate = vi.fn();
 
     const references = new SeasonRosterReferences(
-      Object.assign(Object.create(EntityManager.prototype), { find, nativeDelete, nativeUpdate }),
+      Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
     );
 
     return { references, nativeDelete, nativeUpdate };
@@ -75,7 +76,7 @@ describe("SeasonRosterReferences.moveTeam", () => {
     const nativeUpdate = vi.fn();
 
     const references = new SeasonRosterReferences(
-      Object.assign(Object.create(EntityManager.prototype), { find, nativeDelete, nativeUpdate }),
+      Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
     );
 
     return { references, nativeDelete, nativeUpdate };

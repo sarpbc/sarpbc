@@ -23,6 +23,7 @@ import type {
 } from "./ports";
 import { explicitEventSlug, placeStage, requireEvent, requireLeague } from "./event-placement";
 import { parseDataSourceUrl } from "../../common/domain/data-source";
+import { nonBlank } from "../../common/domain/text";
 
 export class ManualTournamentService {
   constructor(
@@ -42,14 +43,20 @@ export class ManualTournamentService {
         teamIds: input.teamIds ?? [],
         playerGroups: input.playerParticipants ?? [],
       });
-      tournament.tier = input.tier?.trim() || null;
-      tournament.imageUrl = input.imageUrl?.trim() || null;
-      tournament.beginAt = input.beginAt ? new Date(input.beginAt) : null;
-      tournament.endAt = input.endAt ? new Date(input.endAt) : null;
+      tournament.tier = nonBlank(input.tier) ?? null;
+      tournament.imageUrl = nonBlank(input.imageUrl) ?? null;
+      tournament.beginAt =
+        input.beginAt !== null && input.beginAt !== undefined && input.beginAt !== ""
+          ? new Date(input.beginAt)
+          : null;
+      tournament.endAt =
+        input.endAt !== null && input.endAt !== undefined && input.endAt !== ""
+          ? new Date(input.endAt)
+          : null;
       tournament.assertDateOrder();
       tournament.league = await requireLeague(tournaments, input.leagueId);
 
-      if (input.eventId) {
+      if (input.eventId !== undefined && input.eventId !== "") {
         if (input.slug !== undefined) throw sharedEventSlugError();
         await placeStage(events, tournament, await requireEvent(events, input.eventId));
       } else {
@@ -59,16 +66,16 @@ export class ManualTournamentService {
 
       await tournaments.save(tournament);
 
-      if (input.teamIds?.length)
+      if (input.teamIds?.length !== undefined && input.teamIds.length !== 0)
         await this.syncParticipants(tournaments, tournament, input.teamIds);
 
-      if (input.playerParticipants?.length)
+      if (input.playerParticipants?.length !== undefined && input.playerParticipants.length !== 0)
         await this.syncPlayerParticipants(tournaments, tournament, input.playerParticipants);
 
       return tournament.id;
     });
 
-    return this.detail(id);
+    return await this.detail(id);
   }
   async update(id: string, input: UpdateTournamentInput): Promise<Tournament> {
     await this.transaction.run(async ({ tournaments, events, matches }) => {
@@ -80,7 +87,7 @@ export class ManualTournamentService {
 
       if (input.name !== undefined) tournament.name = input.name;
 
-      if (input.tier !== undefined) tournament.tier = input.tier?.trim() || null;
+      if (input.tier !== undefined) tournament.tier = nonBlank(input.tier) ?? null;
 
       if (input.beginAt !== undefined)
         tournament.beginAt = input.beginAt === null ? null : new Date(input.beginAt);
@@ -88,7 +95,7 @@ export class ManualTournamentService {
       if (input.endAt !== undefined)
         tournament.endAt = input.endAt === null ? null : new Date(input.endAt);
 
-      if (input.imageUrl !== undefined) tournament.imageUrl = input.imageUrl?.trim() || null;
+      if (input.imageUrl !== undefined) tournament.imageUrl = nonBlank(input.imageUrl) ?? null;
       tournament.assertDateOrder();
 
       if (tournament.source === "pandascore") {
@@ -116,7 +123,7 @@ export class ManualTournamentService {
     });
     await this.afterCommit.settle({ tournamentIds: [id] });
 
-    return this.detail(id);
+    return await this.detail(id);
   }
   async setPickemsEnabled(id: string, enabled: boolean): Promise<void> {
     await this.transaction.run(async ({ tournaments }) => {
@@ -146,11 +153,13 @@ export class ManualTournamentService {
       league: tournament.league,
     });
 
-    event.slug = slug
-      ? await explicitEventSlug(events, slug, event.id)
-      : await allocateSlug(eventSlug(tournament.name, null), (taken) =>
-          events.slugTaken(taken, null),
-        );
+    event.slug =
+      slug !== undefined && slug !== ""
+        ? await explicitEventSlug(events, slug, event.id)
+        : await allocateSlug(
+            eventSlug(tournament.name, null),
+            async (taken) => await events.slugTaken(taken, null),
+          );
     await events.save(event);
 
     return event;

@@ -17,7 +17,7 @@ export class SyncPandascoreTournamentUseCase {
     if (!tournament) throw new NotFoundError("Tournament not found");
     assertPandascoreSyncAllowed(tournament.source);
 
-    if (!tournament.pandascoreId)
+    if (tournament.pandascoreId === null || tournament.pandascoreId === 0)
       throw new NotFoundError("Tournament does not have a PandaScore ID");
     const command = await this.feed.getTournamentById(tournament.pandascoreId);
 
@@ -28,19 +28,20 @@ export class SyncPandascoreTournamentUseCase {
 
     if (!command) throw new NotFoundError("PandaScore tournament " + id + " not found");
 
-    return this.import(command, linkTournamentId);
+    return await this.import(command, linkTournamentId);
   }
   private async import(
     command: UpsertTournamentCommand,
     linkTournamentId?: string,
   ): Promise<Tournament> {
-    const matches = command.hasBracket
-      ? await this.feed.getTournamentBrackets(command.pandascoreId)
-      : await this.feed.getTournamentMatches(command.pandascoreId);
+    const matches =
+      command.hasBracket === true
+        ? await this.feed.getTournamentBrackets(command.pandascoreId)
+        : await this.feed.getTournamentMatches(command.pandascoreId);
 
     const standings = await this.feed.getTournamentStandings(command.pandascoreId);
 
-    return this.synchronization.upsertTournament(
+    return await this.synchronization.upsertTournament(
       standings ? { ...command, standings } : command,
       matches,
       linkTournamentId,

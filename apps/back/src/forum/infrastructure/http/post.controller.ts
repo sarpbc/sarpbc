@@ -29,8 +29,8 @@ import { ReplyService } from "../../../reply/application/reply.service";
 @Controller("posts")
 export class PostController {
   constructor(
-    private postService: PostService,
-    private replyService: ReplyService,
+    private readonly postService: PostService,
+    private readonly replyService: ReplyService,
   ) {}
 
   @Get()
@@ -69,7 +69,7 @@ export class PostController {
   @Get("creation-status")
   @UseGuards(AuthGuard)
   async getCreationStatus(@CurrentUserId() userId: string): Promise<ForumPostCreationStatus> {
-    return this.postService.getCreationStatus(userId);
+    return await this.postService.getCreationStatus(userId);
   }
 
   @Get(":ref")
@@ -88,7 +88,7 @@ export class PostController {
     @CurrentUserId() userId: string,
     @Body({ schema: CreatePostDto }) createPostDto: CreatePostDto,
   ): Promise<CreatedPost> {
-    return this.postService.create(userId, createPostDto);
+    return await this.postService.create(userId, createPostDto);
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

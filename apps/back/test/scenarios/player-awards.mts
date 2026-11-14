@@ -1,14 +1,20 @@
 import assert from "node:assert/strict";
-import type { PlayerProfileAward, TournamentAwardListItem } from "@sarpbc/types";
+import { z } from "zod";
 import type { Request } from "./support.mts";
 
-interface AwardsBody {
-  awards: TournamentAwardListItem[];
-}
+const tournamentAward = z.object({
+  id: z.string(),
+  awardType: z.string(),
+  player: z.object({ id: z.string() }),
+  participant: z.object({ id: z.string() }),
+});
 
-interface ProfileBody {
-  awards: PlayerProfileAward[];
-}
+const awardBody = z.object({ award: tournamentAward });
+const awardsBody = z.object({ awards: z.array(tournamentAward) });
+
+const profileBody = z.object({
+  awards: z.array(z.object({ id: z.string(), tournament: z.object({ id: z.string() }) })),
+});
 
 export interface PlayerAwardsContext {
   request: Request;
@@ -31,9 +37,7 @@ export async function verifyPlayerAwards({
   await request("POST", url, input, memberCookie, 403);
   await request("POST", url, { ...input, playerId: outsiderPlayerId }, staffCookie, 400);
 
-  const award = (await request("POST", url, input, staffCookie, 201)).json<{
-    award: TournamentAwardListItem;
-  }>().award;
+  const award = (await request("POST", url, input, staffCookie, 201)).json(awardBody).award;
 
   assert.equal(award.player.id, playerId);
   assert.equal(award.participant.id, participantId);
@@ -42,10 +46,10 @@ export async function verifyPlayerAwards({
 
   const grandFinals = (
     await request("POST", url, { ...input, awardType: "grand_finals_mvp" }, staffCookie, 201)
-  ).json<{ award: TournamentAwardListItem }>().award;
+  ).json(awardBody).award;
 
   await request("POST", url, { ...input, awardType: "grand_finals_mvp" }, staffCookie, 409);
-  const tournamentAwards = (await request("GET", url)).json<AwardsBody>().awards;
+  const tournamentAwards = (await request("GET", url)).json(awardsBody).awards;
   assert.deepEqual(
     tournamentAwards.map((a) => [a.id, a.awardType]),
     [
@@ -55,15 +59,16 @@ export async function verifyPlayerAwards({
   );
   await request("DELETE", `${url}/${grandFinals.id}`, undefined, staffCookie, 204);
 
-  const profileAwards = (await request("GET", `/player/${playerId}/awards`)).json<ProfileBody>()
-    .awards;
+  const profileAwards = (await request("GET", `/player/${playerId}/awards`)).json(
+    profileBody,
+  ).awards;
 
   assert(profileAwards.some((a) => a.id === award.id && a.tournament.id === tournamentId));
   await request("DELETE", `${url}/${award.id}`, undefined, memberCookie, 403);
   await request("DELETE", `${url}/${award.id}`, undefined, staffCookie, 204);
-  assert.deepEqual((await request("GET", url)).json<AwardsBody>().awards, []);
+  assert.deepEqual((await request("GET", url)).json(awardsBody).awards, []);
   assert.deepEqual(
-    (await request("GET", `/player/${playerId}/awards`)).json<ProfileBody>().awards,
+    (await request("GET", `/player/${playerId}/awards`)).json(profileBody).awards,
     [],
   );
   await request("DELETE", `${url}/${award.id}`, undefined, staffCookie, 404);

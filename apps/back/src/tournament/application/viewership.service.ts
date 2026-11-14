@@ -65,8 +65,8 @@ async function loadOwner(scope: ViewershipScope, owner: ViewershipOwner): Promis
 export class ViewershipService {
   constructor(private readonly transaction: ViewershipTransaction) {}
 
-  find(owner: ViewershipOwner): Promise<ViewershipResponse> {
-    return this.transaction.run(async (scope) => ({
+  async find(owner: ViewershipOwner): Promise<ViewershipResponse> {
+    return await this.transaction.run(async (scope) => ({
       viewership: (await loadOwner(scope, owner)).viewership,
     }));
   }
@@ -74,7 +74,7 @@ export class ViewershipService {
   async set(owner: ViewershipOwner, input: Viewership | null): Promise<ViewershipResponse> {
     const viewership = input && requireViewership(input);
 
-    return this.transaction.run(async (scope) => {
+    return await this.transaction.run(async (scope) => {
       await (await loadOwner(scope, owner)).save(viewership);
 
       return { viewership };

@@ -52,8 +52,8 @@ export class RedisLiveStreamCache implements LiveStreamCache {
       : null;
   }
 
-  write(value: LiveStreamSnapshot, claim: string): Promise<boolean> {
-    return this.redis.setWhileHeld(
+  async write(value: LiveStreamSnapshot, claim: string): Promise<boolean> {
+    return await this.redis.setWhileHeld(
       LIVE_STREAMS_LOCK_KEY,
       claim,
       LIVE_STREAMS_KEY,

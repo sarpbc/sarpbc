@@ -24,7 +24,7 @@ const TEAM_REFERENCE_NOUNS: ReferenceNouns<keyof TeamReferences> = {
 };
 
 export function assertTeamDeletable(team: Team, references: TeamReferences): void {
-  if (team.mergedIntoId) {
+  if (team.mergedIntoId !== null && team.mergedIntoId !== "") {
     throw new InvalidInputError(
       `${team.name} was merged into team "${team.mergedIntoId}" and is kept as its redirect`,
     );
@@ -38,7 +38,7 @@ export function assertTeamDeletable(team: Team, references: TeamReferences): voi
 
   const blocking = describeReferences(references, TEAM_REFERENCE_NOUNS);
 
-  if (blocking) {
+  if (blocking !== null && blocking !== "") {
     throw new ConflictError(
       `${team.name} still has ${blocking}. Merge it into the team it duplicates instead of deleting it.`,
     );

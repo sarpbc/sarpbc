@@ -6,13 +6,11 @@ export class PandascoreMatchMapper {
   static toUpsertCommand(dto: MatchDto): UpsertMatchCommand {
     const opponentSlugs: string[] = [];
 
-    if (dto.opponents) {
-      for (const opponentWrapper of dto.opponents) {
-        const slug = opponentWrapper.opponent?.slug;
+    for (const opponentWrapper of dto.opponents) {
+      const slug = opponentWrapper.opponent?.slug;
 
-        if (slug) {
-          opponentSlugs.push(slug);
-        }
+      if (slug !== undefined && slug !== "") {
+        opponentSlugs.push(slug);
       }
     }
 
@@ -20,13 +18,14 @@ export class PandascoreMatchMapper {
       pandascoreId: dto.id,
       tournamentPandascoreId: dto.tournament_id,
       name: dto.name ?? "TBD",
-      beginAt: dto.begin_at ? new Date(dto.begin_at) : undefined,
-      endAt: dto.end_at ? new Date(dto.end_at) : undefined,
+      beginAt:
+        dto.begin_at !== undefined && dto.begin_at !== "" ? new Date(dto.begin_at) : undefined,
+      endAt: dto.end_at !== undefined && dto.end_at !== "" ? new Date(dto.end_at) : undefined,
       status: dto.status,
       numberOfGames: dto.number_of_games ?? 0,
       opponentSlugs,
       opponentPandascoreIds: (dto.opponents ?? []).flatMap((o) =>
-        o.opponent?.id ? [o.opponent.id] : [],
+        o.opponent?.id !== undefined && o.opponent.id !== 0 ? [o.opponent.id] : [],
       ),
       results: (dto.results ?? []).map((result) => ({
         teamPandascoreId: result.team_id,

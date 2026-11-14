@@ -10,7 +10,7 @@ import { UserMapper } from "./user.mapper";
 
 @Controller("user")
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(private readonly userService: UserService) {}
 
   @UseGuards(AuthGuard)
   @Get("profile")

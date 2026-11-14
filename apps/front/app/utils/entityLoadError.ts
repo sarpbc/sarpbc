@@ -10,7 +10,7 @@ export function throwEntityLoadError(
   cause: unknown,
   messages: { notFound: string; failed: string },
 ): never {
-  const status = cause ? getApiErrorStatus(cause) : 404;
+  const status = cause === undefined || cause === null ? 404 : getApiErrorStatus(cause);
   const notFound = status === 404;
   throw createError({
     statusCode: notFound ? 404 : (status ?? 500),

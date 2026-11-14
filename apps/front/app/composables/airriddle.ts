@@ -6,7 +6,7 @@ export async function getTodayAirRiddleLength(): Promise<number> {
       method: "GET",
     });
 
-    return res.length || 0;
+    return res.length ?? 0;
   } catch (error) {
     console.error("Error fetching air riddle length:", error);
 

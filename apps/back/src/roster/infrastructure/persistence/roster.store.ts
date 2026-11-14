@@ -34,10 +34,18 @@ const NATIONALITY_CODE = "upper(trim(nationality))";
 
 /** A name search wins over a first-letter filter; both leave out merged duplicates. */
 function directoryQuery({ name, start, limit, offset }: Partial<DirectorySearchProps>) {
-  const pattern = name ? `%${name}%` : start ? `${start}%` : null;
+  const pattern =
+    name !== undefined && name !== ""
+      ? `%${name}%`
+      : start !== undefined && start !== ""
+        ? `${start}%`
+        : null;
 
   return {
-    where: { ...(pattern && { name: { $ilike: pattern } }), mergedInto: null },
+    where: {
+      ...(pattern !== null && pattern !== "" && { name: { $ilike: pattern } }),
+      mergedInto: null,
+    },
     page: { limit: limit ?? 25, offset: offset ?? 0, orderBy: { name: "asc" as const } },
   };
 }
@@ -90,9 +98,12 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       .getConnection()
       .execute("SELECT id FROM player WHERE merged_into_id IS NULL ORDER BY random() LIMIT 1");
 
-    const row = rows[0]
-      ? await this.em.findOne(Row.Player, { id: rows[0].id }, playerOptions)
-      : null;
+    const first: { id: string } | undefined = rows[0];
+
+    const row =
+      first !== undefined
+        ? await this.em.findOne(Row.Player, { id: first.id }, playerOptions)
+        : null;
 
     return row ? toPlayer(row) : null;
   }
@@ -132,7 +143,10 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
 
     if (!model.id) model.id = v4();
     Object.assign(row, playerColumns(model), {
-      mergedInto: model.mergedIntoId ? this.em.getReference(Row.Player, model.mergedIntoId) : null,
+      mergedInto:
+        model.mergedIntoId !== null && model.mergedIntoId !== ""
+          ? this.em.getReference(Row.Player, model.mergedIntoId)
+          : null,
       team: model.team ? this.em.getReference(Row.Team, model.team.id) : null,
     });
     this.em.persist(row);
@@ -149,7 +163,7 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
   private async teamDirectoryQuery(options: Partial<DirectorySearchProps>) {
     const { where, page } = directoryQuery(options);
 
-    if (!options.name) return { where, page };
+    if (options.name === undefined || options.name === "") return { where, page };
 
     const aliases = await this.em.find(
       Row.TeamAlias,
@@ -191,8 +205,8 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
     return row ? toTeam(row) : null;
   }
 
-  redirectCount(id: string) {
-    return this.em.count(Row.Team, { mergedInto: id });
+  async redirectCount(id: string) {
+    return await this.em.count(Row.Team, { mergedInto: id });
   }
 
   async save(model: Team) {
@@ -200,7 +214,10 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
 
     if (!model.id) model.id = v4();
     Object.assign(row, teamColumns(model), {
-      mergedInto: model.mergedIntoId ? this.em.getReference(Row.Team, model.mergedIntoId) : null,
+      mergedInto:
+        model.mergedIntoId !== null && model.mergedIntoId !== ""
+          ? this.em.getReference(Row.Team, model.mergedIntoId)
+          : null,
     });
     this.em.persist(row);
   }
@@ -263,26 +280,26 @@ export class MikroContractStore implements ContractQueries, ContractWriter {
     ).map(toContract);
   }
 
-  findByPlayer(id: string) {
-    return this.list({ player: { id } });
+  async findByPlayer(id: string) {
+    return await this.list({ player: { id } });
   }
 
-  findPastContractsByPlayer(id: string) {
-    return this.list({ player: { id }, endDate: { $ne: null } }, true);
+  async findPastContractsByPlayer(id: string) {
+    return await this.list({ player: { id }, endDate: { $ne: null } }, true);
   }
 
-  findByTeam(id: string) {
-    return this.list({ team: { id } });
+  async findByTeam(id: string) {
+    return await this.list({ team: { id } });
   }
 
-  findFormerPlayersByTeam(id: string) {
-    return this.list({ team: { id }, endDate: { $ne: null } }, true);
+  async findFormerPlayersByTeam(id: string) {
+    return await this.list({ team: { id }, endDate: { $ne: null } }, true);
   }
 
   async findMovements({ teamId, playerId }: ContractMovementFilter) {
     const where: FilterQuery<Row.Contract> = {
-      ...(teamId && { team: teamId }),
-      ...(playerId && { player: playerId }),
+      ...(teamId !== undefined && teamId !== "" && { team: teamId }),
+      ...(playerId !== undefined && playerId !== "" && { player: playerId }),
     };
 
     return (await this.em.find(Row.Contract, where, { populate: ["player", "team"] })).map(
@@ -384,8 +401,8 @@ function writeScope(tx: EntityManager): RosterWriteScope {
 
 export class MikroRosterTransaction implements RosterTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (scope: RosterWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: RosterWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const result = await work(writeScope(tx));
       await tx.flush();
 
@@ -396,8 +413,8 @@ export class MikroRosterTransaction implements RosterTransaction {
 
 export class MikroTeamAliasTransaction implements TeamAliasTransaction {
   constructor(private readonly em: EntityManager) {}
-  run<T>(work: (scope: TeamAliasWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: TeamAliasWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const result = await work({
         teams: new MikroTeamStore(tx),
         aliases: new MikroTeamAliasStore(tx),
@@ -470,7 +487,8 @@ function rosterReferences(
 
       for (const mover of others.movers) await mover.moveTeam(from, to);
     },
-    sharedTournamentIds: (teamId, otherTeamId) => others.sharedTournamentIds(teamId, otherTeamId),
+    sharedTournamentIds: async (teamId, otherTeamId) =>
+      await others.sharedTournamentIds(teamId, otherTeamId),
   };
 }
 
@@ -479,8 +497,8 @@ export class MikroRosterMergeTransaction implements RosterMergeTransaction {
     private readonly em: EntityManager,
     private readonly participantsFor: (tx: EntityManager) => RosterMergeParticipants,
   ) {}
-  run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {
-    return this.em.transactional(async (tx) => {
+  async run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {
+    return await this.em.transactional(async (tx) => {
       const result = await work({
         ...writeScope(tx),
         references: rosterReferences(tx, this.participantsFor(tx)),

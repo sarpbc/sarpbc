@@ -2,31 +2,45 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { TeamAliasService } from "../../application/team-alias.service";
 import { Team } from "../../domain/roster";
 import { TeamController } from "./team.controller";
+import { TeamService } from "../../application/team.service";
+import { ContractService } from "../../application/contract.service";
+import { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-teams.use-case";
+import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
+import type { TournamentQueries } from "../../../tournament/application/ports";
+import { unconstructed } from "../../../../test/doubles";
+import { unusedTournamentQueries } from "../../../../test/unused-tournament-queries";
 
 describe("TeamController", () => {
   const kept = Object.assign(new Team(), { id: "kept", name: "Kept" });
-  const teams = { findById: vi.fn() };
-  const contracts = { getFormerPlayersByTeam: vi.fn(), getContractsByTeam: vi.fn() };
-  const tournaments = { getTournamentsWonByTeam: vi.fn(), getTournamentsByTeam: vi.fn() };
+  const findById = vi.fn();
+  const getFormerPlayersByTeam = vi.fn();
+  const getContractsByTeam = vi.fn();
+  const getTournamentsWonByTeam = vi.fn();
+  const getTournamentsByTeam = vi.fn();
   const teamEarnings = vi.fn();
-  const prizes = { teamEarnings } as never;
+
+  const tournaments: TournamentQueries = {
+    ...unusedTournamentQueries,
+    getTournamentsByTeam,
+    getTournamentsWonByTeam,
+  };
 
   const controller = new TeamController(
-    teams as never,
-    new TeamAliasService({ run: async () => Promise.reject(new Error("unused")) }),
-    contracts as never,
-    tournaments as never,
-    prizes,
-    {} as never,
+    Object.assign(unconstructed(TeamService), { findById }),
+    new TeamAliasService({ run: async () => await Promise.reject(new Error("unused")) }),
+    Object.assign(unconstructed(ContractService), { getFormerPlayersByTeam, getContractsByTeam }),
+    tournaments,
+    Object.assign(unconstructed(TournamentPrizeService), { teamEarnings }),
+    unconstructed(SyncPandascoreTeamsUseCase),
   );
 
   beforeEach(() => {
     vi.resetAllMocks();
-    teams.findById.mockResolvedValue(kept);
-    contracts.getFormerPlayersByTeam.mockResolvedValue([]);
-    contracts.getContractsByTeam.mockResolvedValue([]);
-    tournaments.getTournamentsWonByTeam.mockResolvedValue([]);
-    tournaments.getTournamentsByTeam.mockResolvedValue([]);
+    findById.mockResolvedValue(kept);
+    getFormerPlayersByTeam.mockResolvedValue([]);
+    getContractsByTeam.mockResolvedValue([]);
+    getTournamentsWonByTeam.mockResolvedValue([]);
+    getTournamentsByTeam.mockResolvedValue([]);
     teamEarnings.mockResolvedValue({ totals: [], years: [] });
   });
 
@@ -37,10 +51,10 @@ describe("TeamController", () => {
     await controller.getContracts("merged");
     await controller.getEarnings("merged");
 
-    expect(tournaments.getTournamentsWonByTeam).toHaveBeenCalledWith("kept");
-    expect(tournaments.getTournamentsByTeam).toHaveBeenCalledWith("kept");
-    expect(contracts.getFormerPlayersByTeam).toHaveBeenCalledWith("kept");
-    expect(contracts.getContractsByTeam).toHaveBeenCalledWith("kept");
+    expect(getTournamentsWonByTeam).toHaveBeenCalledWith("kept");
+    expect(getTournamentsByTeam).toHaveBeenCalledWith("kept");
+    expect(getFormerPlayersByTeam).toHaveBeenCalledWith("kept");
+    expect(getContractsByTeam).toHaveBeenCalledWith("kept");
     expect(teamEarnings).toHaveBeenCalledWith("kept", { redistributableOnly: false });
   });
 });

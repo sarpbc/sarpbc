@@ -11,7 +11,7 @@ type SharpFactory = (input: Uint8Array, options: SharpOptions) => Sharp;
 
 let sharpFactory: Promise<SharpFactory> | undefined;
 
-function loadSharp(): Promise<SharpFactory> {
+async function loadSharp(): Promise<SharpFactory> {
   sharpFactory ??= import("sharp").then(({ default: sharp }) => {
     sharp.cache(false);
     sharp.concurrency(1);
@@ -19,13 +19,13 @@ function loadSharp(): Promise<SharpFactory> {
     return sharp;
   });
 
-  return sharpFactory;
+  return await sharpFactory;
 }
 
 export class SharpTeamLogoImages implements TeamLogoImages {
   async dimensions(bytes: Uint8Array): Promise<{ width: number; height: number }> {
     const image = await this.open(bytes);
-    const { width, height } = await this.decode(() => image.metadata());
+    const { width, height } = await this.decode(async () => await image.metadata());
 
     return { width, height };
   }
@@ -34,13 +34,14 @@ export class SharpTeamLogoImages implements TeamLogoImages {
     const density = format === "svg" ? await this.svgDensity(bytes, pixels) : undefined;
     const image = await this.open(bytes, { density });
 
-    const output = await this.decode(() =>
-      image
-        .timeout({ seconds: PIPELINE_TIMEOUT_SECONDS })
-        .ensureAlpha()
-        .resize(pixels, pixels, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
-        .webp({ quality: 90, alphaQuality: 100, effort: 4 })
-        .toBuffer(),
+    const output = await this.decode(
+      async () =>
+        await image
+          .timeout({ seconds: PIPELINE_TIMEOUT_SECONDS })
+          .ensureAlpha()
+          .resize(pixels, pixels, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+          .webp({ quality: 90, alphaQuality: 100, effort: 4 })
+          .toBuffer(),
     );
 
     return new Uint8Array(output);
@@ -48,7 +49,7 @@ export class SharpTeamLogoImages implements TeamLogoImages {
 
   private async svgDensity(bytes: Uint8Array, pixels: number): Promise<number> {
     const image = await this.open(bytes, { limitInputPixels: false });
-    const { width, height } = await this.decode(() => image.metadata());
+    const { width, height } = await this.decode(async () => await image.metadata());
     const longest = Math.max(width, height, 1);
 
     return Math.min(MAX_SVG_DENSITY, Math.max(1, Math.ceil((72 * pixels) / longest)));

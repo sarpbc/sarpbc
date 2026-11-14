@@ -1,4 +1,10 @@
 {
   "extends": "../tsconfig.base.json",
-  "include": ["src/module.ts", "src/config.ts"]
+  "compilerOptions": {
+    "types": ["nuxt/app"],
+    "paths": {
+      "#i18n": ["./node_modules/@nuxtjs/i18n/dist/runtime/composables/index.d.ts"]
+    }
+  },
+  "include": ["src/**/*.ts"]
 }

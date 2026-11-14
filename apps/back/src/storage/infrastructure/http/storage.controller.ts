@@ -31,8 +31,8 @@ export class StorageController {
   constructor(private readonly r2Service: StorageService) {}
 
   @Post("upload-url")
-  createUploadUrl(@Body({ schema: R2UploadUrlDto }) dto: R2UploadUrlDto) {
-    return this.r2Service.createImageUploadUrl(dto.contentType, dto.target);
+  async createUploadUrl(@Body({ schema: R2UploadUrlDto }) dto: R2UploadUrlDto) {
+    return await this.r2Service.createImageUploadUrl(dto.contentType, dto.target);
   }
 
   @Post("upload")
@@ -46,7 +46,7 @@ export class StorageController {
       },
     ),
   )
-  uploadImage(
+  async uploadImage(
     @Files() files: Record<string, Storage.MultipartFile[]> | null,
     @Req() request: FastifyRequest,
     @Body({ schema: R2UploadDto }) dto: R2UploadDto,
@@ -69,6 +69,6 @@ export class StorageController {
       },
     });
 
-    return this.r2Service.uploadImage(file.buffer, file.mimetype, dto.target);
+    return await this.r2Service.uploadImage(file.buffer, file.mimetype, dto.target);
   }
 }

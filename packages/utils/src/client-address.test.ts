@@ -14,8 +14,8 @@ import { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER } from "./internal-api";
 
 const TOKEN = "internal-api-token-value";
 
-describe("client address", () => {
-  it("unwraps IPv4-mapped loopback and rejects junk", () => {
+void describe("client address", () => {
+  void it("unwraps IPv4-mapped loopback and rejects junk", () => {
     assert.equal(canonicalIp("::ffff:127.0.0.1"), "127.0.0.1");
     assert.equal(canonicalIp("::FFFF:104.16.0.1"), "104.16.0.1");
     assert.equal(canonicalIp("203.0.113.9"), "203.0.113.9");
@@ -23,7 +23,7 @@ describe("client address", () => {
     assert.equal(canonicalIp("203.0.113.9, 198.51.100.1"), undefined);
   });
 
-  it("recognises Cloudflare edges and public visitors", () => {
+  void it("recognises Cloudflare edges and public visitors", () => {
     assert.equal(isCloudflareIp("104.16.0.1"), true);
     assert.equal(isCloudflareIp("::ffff:104.24.1.1"), true);
     assert.equal(isCloudflareIp("2606:4700:4700::1111"), true);
@@ -38,7 +38,7 @@ describe("client address", () => {
     assert.equal(isPublicIp("::1"), false);
   });
 
-  it("uses CF-Connecting-IP only when the proxy-seen address is Cloudflare", () => {
+  void it("uses CF-Connecting-IP only when the proxy-seen address is Cloudflare", () => {
     assert.equal(
       resolveClientAddress({ ip: "104.16.0.1", headers: { "cf-connecting-ip": "203.0.113.9" } }),
       "203.0.113.9",
@@ -67,13 +67,13 @@ describe("client address", () => {
     );
   });
 
-  it("treats a direct loopback socket as local even when the header says otherwise", () => {
+  void it("treats a direct loopback socket as local even when the header says otherwise", () => {
     assert.equal(isDirectLoopback({ socket: { remoteAddress: "::ffff:127.0.0.1" } }), true);
     assert.equal(isDirectLoopback({ socket: { remoteAddress: "10.0.0.8" } }), false);
     assert.equal(isDirectLoopback({ ip: "127.0.0.1" }), false);
   });
 
-  it("reads the visitor the same way a trusted proxy in front of Cloudflare does", () => {
+  void it("reads the visitor the same way a trusted proxy in front of Cloudflare does", () => {
     assert.equal(
       visitorAddressFromProxy({
         socketAddress: "10.0.0.5",
@@ -96,7 +96,7 @@ describe("client address", () => {
     );
   });
 
-  it("accepts a public forwarded client and ignores a private one", () => {
+  void it("accepts a public forwarded client and ignores a private one", () => {
     const forwarded = (address: string) =>
       forwardedPublicClient({ headers: { [INTERNAL_CLIENT_HEADER]: address } });
 
@@ -105,7 +105,7 @@ describe("client address", () => {
     assert.equal(forwarded("100.80.0.4"), undefined);
   });
 
-  it("accepts the internal token with a constant-time compare and ignores a wrong length", () => {
+  void it("accepts the internal token with a constant-time compare and ignores a wrong length", () => {
     const withToken = (value: string) => ({ headers: { [INTERNAL_API_HEADER]: value } });
     assert.equal(internalApiTokenMatches(withToken(TOKEN), TOKEN), true);
     assert.equal(internalApiTokenMatches(withToken("nope"), TOKEN), false);

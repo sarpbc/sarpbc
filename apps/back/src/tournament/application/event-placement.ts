@@ -6,7 +6,7 @@ import { toEventRef, type TournamentEvent } from "../domain/tournament-event";
 import type { EventWriter, TournamentWriter } from "./ports";
 
 export async function requireLeague(writer: TournamentWriter, id: string | null | undefined) {
-  if (!id) return null;
+  if (id === null || id === undefined || id === "") return null;
   const league = await writer.league(id);
 
   if (!league)
@@ -47,8 +47,9 @@ export async function placeStage(
   tournament: Tournament,
   event: TournamentEvent,
 ) {
-  tournament.slug = await allocateSlug(stageSlug(tournament.name), (slug) =>
-    events.stageSlugTaken(event.id, slug, tournament.id),
+  tournament.slug = await allocateSlug(
+    stageSlug(tournament.name),
+    async (slug) => await events.stageSlugTaken(event.id, slug, tournament.id),
   );
   tournament.event = toEventRef(event);
 }

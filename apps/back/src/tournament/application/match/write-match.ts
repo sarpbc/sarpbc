@@ -95,7 +95,7 @@ async function saveMatch(
       ),
     );
 
-    if (winnerId) {
+    if (winnerId !== null && winnerId !== "") {
       match.winner = participants.find((p) => p.id === winnerId) ?? null;
 
       if (match.winner) match.status = "finished";
@@ -122,9 +122,10 @@ export async function createMatchInTransaction(
   match.source = tournament.source === "startgg" ? "startgg" : "manual";
   match.sourceUrl = parseDataSourceUrl(input.sourceUrl ?? null);
 
-  if (input.previousMatches?.length) await setBracketLinks(writer, match, input.previousMatches);
+  if (input.previousMatches?.length !== undefined && input.previousMatches.length !== 0)
+    await setBracketLinks(writer, match, input.previousMatches);
 
-  return saveMatch(writer, match, participants, input);
+  return await saveMatch(writer, match, participants, input);
 }
 
 export async function createEmptyBracketInTransaction(
@@ -160,9 +161,9 @@ export async function createEmptyBracketInTransaction(
     match.previousMatches = toBracketLinks(
       match.id,
       slot.previousMatches.flatMap(({ index, type }) => {
-        const previous = planned[index];
+        const previous: (typeof planned)[number] | undefined = planned[index];
 
-        return previous ? [{ previousMatchId: previous.match.id, type }] : [];
+        return previous !== undefined ? [{ previousMatchId: previous.match.id, type }] : [];
       }),
     );
     await saveMatch(writer, match, [], {
@@ -196,7 +197,7 @@ export async function upsertSyncedMatchInTransaction(
 
   if (input.officialStreams !== undefined) match.officialStreams = input.officialStreams;
 
-  if (input.previousMatches?.length) {
+  if (input.previousMatches?.length !== undefined && input.previousMatches.length !== 0) {
     match.previousMatches = [];
 
     for (const link of input.previousMatches) {
@@ -212,7 +213,7 @@ export async function upsertSyncedMatchInTransaction(
     }
   }
 
-  return saveMatch(writer, match, participants, input);
+  return await saveMatch(writer, match, participants, input);
 }
 
 export async function setWinnerInTransaction(
@@ -274,7 +275,10 @@ export async function updateMatchInTransaction(
     }));
   }
 
-  const finished = input.status ? input.status === "finished" : match.hasEnded();
+  const finished =
+    input.status !== undefined && input.status !== ""
+      ? input.status === "finished"
+      : match.hasEnded();
 
   if (!finished) {
     match.winner = null;

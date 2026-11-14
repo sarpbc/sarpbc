@@ -1,4 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { competitionFeed } from "../../../../test/competition-doubles";
+import { unconstructed } from "../../../../test/doubles";
+import { CompetitionSyncService } from "./competition-sync.service";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
 
 describe("SyncPandascoreTournamentUseCase", () => {
@@ -11,7 +14,13 @@ describe("SyncPandascoreTournamentUseCase", () => {
 
   const reads = { findById: vi.fn() };
   const sync = { upsertTournament: vi.fn() };
-  const useCase = new SyncPandascoreTournamentUseCase(feed as never, reads, sync as never);
+
+  const useCase = new SyncPandascoreTournamentUseCase(
+    competitionFeed(feed),
+    reads,
+    Object.assign(unconstructed(CompetitionSyncService), sync),
+  );
+
   beforeEach(() => {
     vi.clearAllMocks();
     reads.findById.mockResolvedValue({

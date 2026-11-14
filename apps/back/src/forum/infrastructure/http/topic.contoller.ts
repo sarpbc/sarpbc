@@ -4,7 +4,7 @@ import { topicResponse } from "./forum-response";
 
 @Controller("forum/topics")
 export class TopicController {
-  constructor(private topicService: TopicService) {}
+  constructor(private readonly topicService: TopicService) {}
 
   @Get()
   async find() {

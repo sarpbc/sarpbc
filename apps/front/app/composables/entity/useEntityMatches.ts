@@ -1,6 +1,6 @@
 import type { MaybeRef } from "vue";
 import type { ProfileMatchListItem } from "@sarpbc/types";
-import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
+import { isMatchFinished, isMatchLive, isNonEmptyString } from "@sarpbc/utils";
 import { getPlayerMatches } from "~/composables/player/api";
 import { getTeamMatches } from "~/composables/team/api";
 import type { EntityKind, EntityMatchSections } from "~/types/entity";
@@ -14,7 +14,9 @@ const FETCH_MATCHES = {
 } satisfies Record<EntityKind, (id: string) => Promise<ProfileMatchListItem[]>>;
 
 function isLive(match: ProfileMatchListItem, now: number): boolean {
-  return Boolean(match.status && LIVE_STATUSES.has(match.status)) || isMatchLive(match, now);
+  return (
+    (isNonEmptyString(match.status) && LIVE_STATUSES.has(match.status)) || isMatchLive(match, now)
+  );
 }
 
 function splitMatches(matches: ProfileMatchListItem[], now: number): EntityMatchSections {
@@ -45,7 +47,7 @@ export function useEntityMatches(kind: EntityKind, entityId: MaybeRef<string | u
   const { data, pending, error, refresh } = useAsyncData(
     () => `${kind}-matches-${idRef.value ?? "unknown"}`,
     async () => ({
-      matches: idRef.value ? await FETCH_MATCHES[kind](idRef.value) : [],
+      matches: isNonEmptyString(idRef.value) ? await FETCH_MATCHES[kind](idRef.value) : [],
       /** Captured with the fetch so the server and client split matches identically on hydration. */
       fetchedAt: Date.now(),
     }),

@@ -24,37 +24,41 @@ describe("bracket links", () => {
   ] as const;
 
   it("links two semifinals into a final", () => {
-    expect(() => assertBracketLinks("final", [...semis], stage())).not.toThrow();
+    expect(() => {
+      assertBracketLinks("final", [...semis], stage());
+    }).not.toThrow();
   });
 
   it("accepts clearing the links of a stage without a bracket", () => {
-    expect(() => assertBracketLinks("final", [], { ...stage(), hasBracket: false })).not.toThrow();
+    expect(() => {
+      assertBracketLinks("final", [], { ...stage(), hasBracket: false });
+    }).not.toThrow();
   });
 
   it("refuses links on a stage without a bracket", () => {
-    expect(() =>
-      assertBracketLinks("final", [...semis], { ...stage(), hasBracket: false }),
-    ).toThrow(/hasBracket/);
+    expect(() => {
+      assertBracketLinks("final", [...semis], { ...stage(), hasBracket: false });
+    }).toThrow(/hasBracket/);
   });
 
   it("refuses a previous match from another stage", () => {
-    expect(() =>
-      assertBracketLinks("final", [{ previousMatchId: "elsewhere", type: "winner" }], stage()),
-    ).toThrow(/same stage/);
+    expect(() => {
+      assertBracketLinks("final", [{ previousMatchId: "elsewhere", type: "winner" }], stage());
+    }).toThrow(/same stage/);
   });
 
   it("refuses more than two incoming links", () => {
-    expect(() =>
+    expect(() => {
       assertBracketLinks(
         "final",
         [...semis, { previousMatchId: "third", type: "winner" }],
         stage(),
-      ),
-    ).toThrow(/at most 2/);
+      );
+    }).toThrow(/at most 2/);
   });
 
   it("refuses the same previous match twice and a match feeding itself", () => {
-    expect(() =>
+    expect(() => {
       assertBracketLinks(
         "final",
         [
@@ -62,11 +66,11 @@ describe("bracket links", () => {
           { previousMatchId: "semi-1", type: "loser" },
         ],
         stage(),
-      ),
-    ).toThrow(InvalidInputError);
-    expect(() =>
-      assertBracketLinks("final", [{ previousMatchId: "final", type: "winner" }], stage()),
-    ).toThrow(/itself/);
+      );
+    }).toThrow(InvalidInputError);
+    expect(() => {
+      assertBracketLinks("final", [{ previousMatchId: "final", type: "winner" }], stage());
+    }).toThrow(/itself/);
   });
 
   it("refuses a cycle", () => {
@@ -74,9 +78,9 @@ describe("bracket links", () => {
     linked.matches = linked.matches.map((match) =>
       match.id === "final" ? { ...match, previousMatches: [...semis] } : match,
     );
-    expect(() =>
-      assertBracketLinks("semi-1", [{ previousMatchId: "final", type: "loser" }], linked),
-    ).toThrow(/cycle/);
+    expect(() => {
+      assertBracketLinks("semi-1", [{ previousMatchId: "final", type: "loser" }], linked);
+    }).toThrow(/cycle/);
   });
 
   it("refuses a winner already sent to another match", () => {
@@ -84,10 +88,10 @@ describe("bracket links", () => {
     linked.matches = linked.matches.map((match) =>
       match.id === "final" ? { ...match, previousMatches: [...semis] } : match,
     );
-    expect(() =>
-      assertBracketLinks("third", [{ previousMatchId: "semi-1", type: "winner" }], linked),
-    ).toThrow(/already goes/);
-    expect(() =>
+    expect(() => {
+      assertBracketLinks("third", [{ previousMatchId: "semi-1", type: "winner" }], linked);
+    }).toThrow(/already goes/);
+    expect(() => {
       assertBracketLinks(
         "third",
         [
@@ -95,8 +99,8 @@ describe("bracket links", () => {
           { previousMatchId: "semi-2", type: "loser" },
         ],
         linked,
-      ),
-    ).not.toThrow();
+      );
+    }).not.toThrow();
   });
 
   it("lets a match keep its own links when they are resent", () => {
@@ -104,7 +108,9 @@ describe("bracket links", () => {
     linked.matches = linked.matches.map((match) =>
       match.id === "final" ? { ...match, previousMatches: [...semis] } : match,
     );
-    expect(() => assertBracketLinks("final", [...semis], linked)).not.toThrow();
+    expect(() => {
+      assertBracketLinks("final", [...semis], linked);
+    }).not.toThrow();
   });
 });
 
@@ -116,17 +122,21 @@ describe("PandaScore bracket data", () => {
   } as const;
 
   it("accepts a manual match of a manual stage", () => {
-    expect(() => assertManualBracketMatch(manual)).not.toThrow();
+    expect(() => {
+      assertManualBracketMatch(manual);
+    }).not.toThrow();
   });
 
   it("refuses a PandaScore match or a match of a PandaScore stage", () => {
-    expect(() => assertManualBracketMatch({ ...manual, pandascoreId: 12 })).toThrow(/PandaScore/);
-    expect(() => assertManualBracketMatch({ ...manual, source: "pandascore" })).toThrow(
-      /PandaScore/,
-    );
-    expect(() =>
-      assertManualBracketMatch({ ...manual, tournament: { source: "pandascore" } }),
-    ).toThrow(/PandaScore/);
+    expect(() => {
+      assertManualBracketMatch({ ...manual, pandascoreId: 12 });
+    }).toThrow(/PandaScore/);
+    expect(() => {
+      assertManualBracketMatch({ ...manual, source: "pandascore" });
+    }).toThrow(/PandaScore/);
+    expect(() => {
+      assertManualBracketMatch({ ...manual, tournament: { source: "pandascore" } });
+    }).toThrow(/PandaScore/);
   });
 });
 

@@ -7,11 +7,11 @@ export class ImagesService {
     private readonly host: ImageHost,
   ) {}
 
-  createUploadUrl(): Promise<ImageUploadUrl> {
-    return this.host.createUploadUrl();
+  async createUploadUrl(): Promise<ImageUploadUrl> {
+    return await this.host.createUploadUrl();
   }
 
-  saveImage(imageId: string): Promise<ImageMetadata> {
-    return this.images.register(imageId, this.host.imageUrl(imageId));
+  async saveImage(imageId: string): Promise<ImageMetadata> {
+    return await this.images.register(imageId, this.host.imageUrl(imageId));
   }
 }

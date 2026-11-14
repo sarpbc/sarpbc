@@ -1,7 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
-import type { RosterChange, StaffRole } from "@sarpbc/types";
+import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import type { ToolArguments } from "../define-tool";
+import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
 import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -15,22 +16,16 @@ const INPUT = {
 };
 
 function setup(toolName: string, role: StaffRole = "admin") {
-  const rosterProposalService = {
-    propose: vi.fn().mockImplementation(async (change: RosterChange) => ({
-      id: "proposal-1",
-      status: "pending",
-      change,
-    })),
-    proposeTeamLogo: vi.fn(),
-    list: vi.fn(),
-  };
+  const rosterProposalService = pendingProposalService();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
   );
 
   if (!tool) throw new Error(`${toolName} is not defined`);
-  const call = (args: ToolArguments) => tool.run({ id: "u1", email: "staff@test.com", role }, args);
+
+  const call = async (args: ToolArguments) =>
+    await tool.run({ id: "u1", email: "staff@test.com", role }, args);
 
   return { rosterProposalService, tool, call };
 }
@@ -61,8 +56,7 @@ describe("viewership tools", () => {
       SOURCE,
       "u1",
     );
-    const block = result.content[0];
-    expect(JSON.parse(block?.type === "text" ? block.text : "null")).toMatchObject({
+    expect(jsonOf(result)).toMatchObject({
       kind,
       status: "pending",
     });

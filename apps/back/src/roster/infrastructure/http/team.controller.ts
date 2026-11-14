@@ -37,12 +37,12 @@ import { mapTournament } from "../../../tournament/infrastructure/http/tournamen
 @Controller("team")
 export class TeamController {
   constructor(
-    private teamService: TeamService,
-    private teamAliasService: TeamAliasService,
-    private contractService: ContractService,
-    @Inject(TOURNAMENT_QUERIES) private tournaments: TournamentQueries,
-    private tournamentPrizeService: TournamentPrizeService,
-    private syncPandascoreTeams: SyncPandascoreTeamsUseCase,
+    private readonly teamService: TeamService,
+    private readonly teamAliasService: TeamAliasService,
+    private readonly contractService: ContractService,
+    @Inject(TOURNAMENT_QUERIES) private readonly tournaments: TournamentQueries,
+    private readonly tournamentPrizeService: TournamentPrizeService,
+    private readonly syncPandascoreTeams: SyncPandascoreTeamsUseCase,
   ) {}
 
   @Get()

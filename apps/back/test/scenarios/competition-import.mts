@@ -1,57 +1,58 @@
 import assert from "node:assert/strict";
+import { z } from "zod";
 import type { TournamentQueries } from "../../src/tournament/application/ports.ts";
 import type { Application, Orm, Request, RequestContextType } from "./support.mts";
 
-interface ParticipantView {
-  id: string;
-  team: { id: string; slug: string };
-  players: { id: string }[];
-}
+const idRow = z.looseObject({ id: z.string() });
 
-interface MatchView {
-  id: string;
-  name: string;
-  winnerId: string | null;
-  results: { participant: string; score: number }[];
-  previousMatches: { previousMatch: string }[];
-}
+const participantView = z.object({
+  id: z.string(),
+  team: z.looseObject({ id: z.string(), slug: z.string() }),
+  players: z.array(idRow),
+});
 
-interface TournamentView {
-  source: string;
-  slug: string;
-  name: string;
-  country: string;
-  imageUrl: string | null;
-  event: { slug: string; name: string };
-  league: { id: string };
-  winner: { id: string };
-  participants: ParticipantView[];
-  matches: MatchView[];
-}
+const matchView = z.looseObject({
+  id: z.string(),
+  name: z.string(),
+  winnerId: z.string().nullable(),
+  results: z.array(z.looseObject({ participant: z.string(), score: z.number() })),
+  previousMatches: z.array(z.looseObject({ previousMatch: z.string() })),
+});
 
-interface IdRow {
-  id: string;
-}
+const tournamentRecord = z.looseObject({
+  source: z.string(),
+  slug: z.string(),
+  name: z.string(),
+  country: z.string().nullable(),
+  imageUrl: z.string().nullable(),
+  event: z.looseObject({ slug: z.string(), name: z.string() }),
+  league: idRow,
+  winner: idRow.nullable(),
+  participants: z.array(participantView),
+  matches: z.array(matchView),
+});
 
-interface PlayerView {
-  slug: string;
-  team: { id: string } | null;
-}
+const playerRecord = z.looseObject({
+  slug: z.string(),
+  team: idRow.nullable(),
+});
 
-interface EventView {
-  event: { stages: IdRow[] };
-}
+const eventView = z.object({ event: z.looseObject({ stages: z.array(idRow) }) });
 
-interface MatchDetail {
-  match: {
-    id: string;
-    winner: { id: string };
-    officialStreams: { language: string }[];
-    results: { participant: { id: string }; score: number }[];
-  };
-  headToHead: { totalMeetings: number };
-  teamForms: Record<string, { record: { wins: number } }>;
-}
+const matchDetail = z.object({
+  match: z.looseObject({
+    id: z.string(),
+    winner: idRow.nullable(),
+    officialStreams: z.array(z.looseObject({ language: z.string() })),
+    results: z.array(z.looseObject({ participant: idRow, score: z.number() })),
+  }),
+  headToHead: z.looseObject({ totalMeetings: z.number() }),
+  teamForms: z.record(z.string(), z.looseObject({ record: z.looseObject({ wins: z.number() }) })),
+});
+
+type TournamentView = z.infer<typeof tournamentRecord>;
+
+type PlayerView = z.infer<typeof playerRecord>;
 
 export interface CompetitionImportContext {
   app: Application;
@@ -109,15 +110,15 @@ export async function verifyCompetitionImport({
   const oldTeam = { pandascoreId: 9202, name: "Historical Roster", slug: "historical-roster" };
   const rival = { pandascoreId: 9203, name: "Historical Rival", slug: "historical-rival" };
 
-  await run(() =>
-    sync.applyIncident({
+  await run(async () => {
+    await sync.applyIncident({
       id: 1,
       modifiedAt: new Date(),
       changeType: "creation",
       kind: "player",
       command: { player: veteran, currentTeam },
-    }),
-  );
+    });
+  });
 
   const player = await orm.em
     .fork()
@@ -185,17 +186,20 @@ export async function verifyCompetitionImport({
     officialStreams: [{ url: "https://twitch.tv/example", language: "en", main: true }],
   };
 
-  const imported = await run(() => sync.upsertTournament(tournamentCommand, [final, semifinal]));
+  const imported = await run(
+    async () => await sync.upsertTournament(tournamentCommand, [final, semifinal]),
+  );
 
-  async function read<T>(path: string): Promise<T> {
-    return (await request("GET", path)).json<T>();
+  async function read<T>(path: string, schema: z.ZodType<T>): Promise<T> {
+    return (await request("GET", path)).json(schema);
   }
 
   const playerView = async (): Promise<PlayerView> =>
-    (await read<{ player: PlayerView }>(`/player/${player.id}`)).player;
+    (await read(`/player/${player.id}`, z.object({ player: playerRecord }))).player;
 
   const tournamentView = async (id: string): Promise<TournamentView> =>
-    (await request("GET", `/tournaments/${id}`)).json<{ tournament: TournamentView }>().tournament;
+    (await request("GET", `/tournaments/${id}`)).json(z.object({ tournament: tournamentRecord }))
+      .tournament;
 
   let view = await tournamentView(imported.id);
   assert.equal(view.source, "pandascore");
@@ -210,7 +214,7 @@ export async function verifyCompetitionImport({
   const participant = view.participants.find((p) => p.team.slug === oldTeam.slug);
   assert(participant, "the historical team remains a tournament participant");
   assert.equal(participant.players[0].id, player.id);
-  assert.equal(view.winner.id, participant.id);
+  assert.equal(view.winner?.id, participant.id);
   const semiView = view.matches.find((m) => m.name === semifinal.name);
   const finalView = view.matches.find((m) => m.name === final.name);
   assert(semiView && finalView, "both imported matches are listed");
@@ -224,15 +228,16 @@ export async function verifyCompetitionImport({
     { imageUrl: "https://example.test/local-cup.png" },
     staffCookie,
   );
-  await run(() =>
-    sync.upsertTournament(
-      {
-        ...tournamentCommand,
-        name: "Imported Championship Updated",
-        serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
-      },
-      [semifinal, final],
-    ),
+  await run(
+    async () =>
+      await sync.upsertTournament(
+        {
+          ...tournamentCommand,
+          name: "Imported Championship Updated",
+          serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
+        },
+        [semifinal, final],
+      ),
   );
   view = await tournamentView(imported.id);
   assert.equal(view.name, "Imported Championship Updated");
@@ -254,15 +259,16 @@ export async function verifyCompetitionImport({
   };
 
   const versionsBeforeResync = await rowVersions();
-  await run(() =>
-    sync.upsertTournament(
-      {
-        ...tournamentCommand,
-        name: "Imported Championship Updated",
-        serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
-      },
-      [semifinal, final],
-    ),
+  await run(
+    async () =>
+      await sync.upsertTournament(
+        {
+          ...tournamentCommand,
+          name: "Imported Championship Updated",
+          serie: { ...tournamentCommand.serie, fullName: "Spring Major" },
+        },
+        [semifinal, final],
+      ),
   );
   assert.deepEqual(
     await rowVersions(),
@@ -270,9 +276,9 @@ export async function verifyCompetitionImport({
     "an unchanged re-sync keeps each stage and match sitemap lastmod",
   );
   const eventPath = `/events/resolve/${view.event.slug}`;
-  assert.equal((await read<EventView>(eventPath)).event.stages[0].id, imported.id);
+  assert.equal((await read(eventPath, eventView)).event.stages[0].id, imported.id);
   assert.equal(
-    (await read<{ tournament: { id: string } }>(`${eventPath}/imported-championship`)).tournament
+    (await read(`${eventPath}/imported-championship`, z.object({ tournament: idRow }))).tournament
       .id,
     imported.id,
   );
@@ -285,41 +291,54 @@ export async function verifyCompetitionImport({
   assert.equal(refreshedPlayer.slug, "local-veteran");
   assert.equal(refreshedPlayer.team?.id, currentTeamId);
 
-  const finalDetail = await read<MatchDetail>(`/matches/${finalView.id}`);
+  const finalDetail = await read(`/matches/${finalView.id}`, matchDetail);
   assert.equal(finalDetail.match.officialStreams[0].language, "en");
   assert.equal(finalDetail.headToHead.totalMeetings, 1);
   assert.equal(finalDetail.teamForms[participant.team.id].record.wins, 1);
   assert.equal(
-    (await read<{ total: number }>(`/matches/results?tournamentId=${imported.id}`)).total,
+    (await read(`/matches/results?tournamentId=${imported.id}`, z.object({ total: z.number() })))
+      .total,
     1,
   );
   assert.equal(
-    (await read<{ total: number }>(`/matches/upcoming?leagueId=${view.league.id}`)).total,
+    (await read(`/matches/upcoming?leagueId=${view.league.id}`, z.object({ total: z.number() })))
+      .total,
     1,
-  );
-  assert(
-    (await read<{ trophies: IdRow[] }>(`/player/${player.id}/trophies`)).trophies.some(
-      (t) => t.id === imported.id,
-    ),
   );
   assert(
     (
-      await read<{ tournaments: IdRow[] }>(`/team/${participant.team.id}/tournaments`)
+      await read(`/player/${player.id}/trophies`, z.object({ trophies: z.array(idRow) }))
+    ).trophies.some((t) => t.id === imported.id),
+  );
+  assert(
+    (
+      await read(
+        `/team/${participant.team.id}/tournaments`,
+        z.object({ tournaments: z.array(idRow) }),
+      )
     ).tournaments.some((t) => t.id === imported.id),
   );
   assert(
-    (await read<{ trophies: IdRow[] }>(`/team/${participant.team.id}/trophies`)).trophies.some(
-      (t) => t.id === imported.id,
-    ),
+    (
+      await read(`/team/${participant.team.id}/trophies`, z.object({ trophies: z.array(idRow) }))
+    ).trophies.some((t) => t.id === imported.id),
   );
-  assert((await read<{ matches: IdRow[] }>(`/player/${player.id}/matches`)).matches.length >= 2);
+  assert(
+    (await read(`/player/${player.id}/matches`, z.object({ matches: z.array(idRow) }))).matches
+      .length >= 2,
+  );
   assert.equal(
-    (await run(() => tournaments.findByPandascoreId(tournamentCommand.pandascoreId)))?.id,
+    (await run(async () => await tournaments.findByPandascoreId(tournamentCommand.pandascoreId)))
+      ?.id,
     imported.id,
   );
-  assert((await run(() => tournaments.knownPandascoreIds())).has(tournamentCommand.pandascoreId));
-  await run(() =>
-    sync.applyIncident({
+  assert(
+    (await run(async () => await tournaments.knownPandascoreIds())).has(
+      tournamentCommand.pandascoreId,
+    ),
+  );
+  await run(async () => {
+    await sync.applyIncident({
       id: 3,
       modifiedAt: new Date(),
       changeType: "update",
@@ -331,26 +350,26 @@ export async function verifyCompetitionImport({
           { teamPandascoreId: rival.pandascoreId, score: 2 },
         ],
       },
-    }),
-  );
-  const updatedSemifinal = (await read<MatchDetail>(`/matches/${semiView.id}`)).match;
+    });
+  });
+  const updatedSemifinal = (await read(`/matches/${semiView.id}`, matchDetail)).match;
   assert.equal(updatedSemifinal.id, semiView.id);
-  assert.equal(updatedSemifinal.winner.id, participant.id);
+  assert.equal(updatedSemifinal.winner?.id, participant.id);
   assert.equal(updatedSemifinal.results.length, 2);
   assert.equal(
     updatedSemifinal.results.find((result) => result.participant.id !== participant.id)?.score,
     2,
   );
 
-  await run(() =>
-    sync.applyIncident({
+  await run(async () => {
+    await sync.applyIncident({
       id: 2,
       modifiedAt: new Date(),
       changeType: "update",
       kind: "player",
       command: { player: veteran, currentTeam: null },
-    }),
-  );
+    });
+  });
   assert.equal((await playerView()).team, null);
   assert.equal(
     (await tournamentView(imported.id)).participants.find((p) => p.id === participant.id)
@@ -358,25 +377,26 @@ export async function verifyCompetitionImport({
     player.id,
   );
 
-  const qualifier = await run(() =>
-    sync.upsertTournament({
-      pandascoreId: 9302,
-      name: "Imported Championship Updated",
-      league: tournamentCommand.league,
-      serie: { pandascoreId: 9602, fullName: "Spring Qualifier", year: 2026 },
-    }),
+  const qualifier = await run(
+    async () =>
+      await sync.upsertTournament({
+        pandascoreId: 9302,
+        name: "Imported Championship Updated",
+        league: tournamentCommand.league,
+        serie: { pandascoreId: 9602, fullName: "Spring Qualifier", year: 2026 },
+      }),
   );
 
   assert.equal(qualifier.event.slug, "imported-league-spring-qualifier-2026");
-  await run(() =>
-    sync.applyIncident({
+  await run(async () => {
+    await sync.applyIncident({
       id: 9602,
       modifiedAt: new Date(),
       changeType: "deletion",
       kind: "serie",
       deletion: { kind: "merged", intoId: tournamentCommand.serie.pandascoreId },
-    }),
-  );
+    });
+  });
   const merged = await tournamentView(qualifier.id);
   assert.deepEqual(
     [merged.event.slug, merged.slug],
@@ -384,7 +404,7 @@ export async function verifyCompetitionImport({
   );
   await request("GET", `/events/resolve/${qualifier.event.slug}`, undefined, undefined, 404);
   assert.deepEqual(
-    (await read<EventView>(`/events/resolve/${merged.event.slug}`)).event.stages
+    (await read(`/events/resolve/${merged.event.slug}`, eventView)).event.stages
       .map((stage) => stage.id)
       .sort(),
     [imported.id, qualifier.id].sort(),

@@ -1,7 +1,7 @@
 import { getAllTournaments } from "~/composables/tournaments";
 import { isPickemTournamentActive } from "~/utils/pickems";
 import type { TournamentListItem } from "@sarpbc/types";
-import { getApiErrorMessage } from "@sarpbc/utils";
+import { getApiErrorMessage, isNonEmptyString } from "@sarpbc/utils";
 
 export type UserPickemPick = {
   match: string;
@@ -43,7 +43,7 @@ export async function getUserPickemsForTournament(tournamentId: string): Promise
     match: pick.match,
     pickedParticipant: pick.pickedParticipant,
     points: pick.points ?? null,
-    scored: Boolean(pick.scored),
+    scored: pick.scored,
   }));
 }
 
@@ -61,8 +61,8 @@ export async function updatePickemForMatch(
     },
   );
 
-  if (res && res.success === false) {
-    throw new Error(res.error || "Pick failed");
+  if (res.success === false) {
+    throw new Error(isNonEmptyString(res.error) ? res.error : "Pick failed");
   }
 }
 

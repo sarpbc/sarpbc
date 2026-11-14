@@ -30,13 +30,14 @@ import { createTwitchSource } from "./twitch/create-twitch-source";
             config.get<string>("twitch.clientSecret"),
           ),
           new RedisLiveStreamCache(redis),
-          (operation, error) =>
+          (operation, error) => {
             log.warn({
               component: StreamerService.name,
               message: "Live streamers degraded",
               operation,
               error: error instanceof Error ? error : new Error(String(error)),
-            }),
+            });
+          },
         ),
       inject: [TwitchStreamerRepository, RedisService, ConfigService],
     },

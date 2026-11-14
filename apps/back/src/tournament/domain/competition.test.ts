@@ -40,8 +40,8 @@ describe("Match outcome", () => {
 describe("Tournament date order", () => {
   const build = (beginAt: string | null, endAt: string | null) =>
     Object.assign(new Tournament(), {
-      beginAt: beginAt ? new Date(beginAt) : null,
-      endAt: endAt ? new Date(endAt) : null,
+      beginAt: beginAt === null ? null : new Date(beginAt),
+      endAt: endAt === null ? null : new Date(endAt),
     });
 
   it.each([
@@ -51,13 +51,15 @@ describe("Tournament date order", () => {
     { beginAt: "2030-01-01", endAt: "2030-01-01" },
     { beginAt: "2030-01-01", endAt: "2030-01-02" },
   ])("accepts beginAt=$beginAt endAt=$endAt", ({ beginAt, endAt }) => {
-    expect(() => build(beginAt, endAt).assertDateOrder()).not.toThrow();
+    expect(() => {
+      build(beginAt, endAt).assertDateOrder();
+    }).not.toThrow();
   });
 
   it("rejects an end date before the start date", () => {
-    expect(() => build("2030-01-02", "2030-01-01").assertDateOrder()).toThrow(
-      new InvalidInputError("End date must be on or after the start date."),
-    );
+    expect(() => {
+      build("2030-01-02", "2030-01-01").assertDateOrder();
+    }).toThrow(new InvalidInputError("End date must be on or after the start date."));
   });
 });
 
@@ -70,7 +72,9 @@ describe("Participant removal", () => {
   };
 
   it("allows a participant without references", () => {
-    expect(() => assertParticipantRemovable(free)).not.toThrow();
+    expect(() => {
+      assertParticipantRemovable(free);
+    }).not.toThrow();
   });
 
   it.each([
@@ -93,19 +97,19 @@ describe("Participant removal", () => {
       message: "Cannot remove a participant that has match results. Remove those results first.",
     },
   ])("rejects a participant referenced by $reference", ({ reference, message }) => {
-    expect(() => assertParticipantRemovable({ ...free, [reference]: true })).toThrow(
-      new InvalidInputError(message),
-    );
+    expect(() => {
+      assertParticipantRemovable({ ...free, [reference]: true });
+    }).toThrow(new InvalidInputError(message));
   });
 
   it("reports the first violated reference in check order", () => {
-    expect(() =>
+    expect(() => {
       assertParticipantRemovable({
         tournamentWinner: true,
         matchParticipant: true,
         matchWinner: true,
         results: true,
-      }),
-    ).toThrow("tournament winner");
+      });
+    }).toThrow("tournament winner");
   });
 });

@@ -11,7 +11,12 @@ export class IndexNowService implements NewsIndexing {
   async submitNewsSlugs(slugs: string[]): Promise<void> {
     const key = this.configService.get<string>("indexnow.key");
 
-    if (!this.configService.get<boolean>("production") || !key || slugs.length === 0) {
+    if (
+      this.configService.get<boolean>("production") !== true ||
+      key === undefined ||
+      key === "" ||
+      slugs.length === 0
+    ) {
       return;
     }
 

@@ -3,6 +3,7 @@ import { join } from "node:path";
 import type { MatchDetailResponse } from "~/types/matches";
 import { getMatchParticipantScore } from "~/utils/matchScore";
 import { TBD_LABEL } from "~/utils/tbdLabel";
+import { rethrowApiError } from "./apiError";
 import { getMatchById } from "~/composables/matches/api";
 import { resolveMatchDiscoveryStatus } from "~/utils/matchDiscoveryAnalytics";
 import { participantName, tournamentStageLabel } from "@sarpbc/utils";
@@ -114,7 +115,7 @@ export async function fetchMatchDetailForOg(id: string): Promise<MatchDetailResp
   try {
     return await getMatchById(id);
   } catch (cause) {
-    rethrowApiError(cause, {
+    return rethrowApiError(cause, {
       notFound: "Match not found",
       badGateway: "Could not load match for OG image",
     });

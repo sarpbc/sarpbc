@@ -59,7 +59,7 @@ export function assertBracketLinks(
   const byId = new Map(stage.matches.map((match) => [match.id, match]));
   const outsider = previousIds.find((id) => !byId.has(id));
 
-  if (outsider)
+  if (outsider !== undefined && outsider !== "")
     throw new InvalidInputError(
       `Previous match "${outsider}" is not a match of this stage. Link matches of the same stage only.`,
     );

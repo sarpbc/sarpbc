@@ -15,7 +15,7 @@ export default defineNuxtPlugin(() => {
 
     if (
       choice.value !== "accepted" ||
-      !client?.has_opted_in_capturing() ||
+      client?.has_opted_in_capturing() !== true ||
       lastPageview === fullPath
     ) {
       return;

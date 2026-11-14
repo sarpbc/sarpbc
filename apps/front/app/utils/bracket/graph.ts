@@ -1,8 +1,9 @@
+import { isNonEmptyString } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getMatchParticipantScore } from "~/utils/matchScore";
 
 export function getMatchWinnerParticipantId(match: TournamentDetailMatch): string | null {
-  if (match.winnerId) {
+  if (isNonEmptyString(match.winnerId)) {
     return match.winnerId;
   }
 

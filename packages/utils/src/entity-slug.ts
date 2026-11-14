@@ -1,4 +1,5 @@
 import slugify from "slugify";
+import { isNonEmptyString } from "./text";
 
 const MAX_SLUG_LENGTH = 120;
 const YEAR_PATTERN = /\b(?:19|20)\d{2}\b/;
@@ -57,7 +58,7 @@ export async function allocateSlug(
 function roundLabel(matchName: string | null | undefined): string | null {
   const name = matchName?.trim();
 
-  if (!name) return null;
+  if (!isNonEmptyString(name)) return null;
   const colon = name.indexOf(":");
 
   if (colon >= 0) return name.slice(0, colon);
@@ -75,9 +76,11 @@ export function matchSlug({ teamNames, matchName, eventSlug, stageSlug }: MatchS
   const [teamA, teamB] = teamNames.map((name) => (isKnownTeamName(name) ? name!.trim() : null));
 
   const [first, second] =
-    teamA && teamB && toSlug(teamA) > toSlug(teamB) ? [teamB, teamA] : [teamA, teamB];
+    teamA !== null && teamB !== null && toSlug(teamA) > toSlug(teamB)
+      ? [teamB, teamA]
+      : [teamA, teamB];
 
-  const lead = first && second ? [first, "vs", second] : [roundLabel(matchName)];
+  const lead = first !== null && second !== null ? [first, "vs", second] : [roundLabel(matchName)];
 
   // A manual tournament is the only stage of an event slugged after the same name.
   return toSlug(...lead, eventSlug, stageSlug === eventSlug ? null : stageSlug) || "match";

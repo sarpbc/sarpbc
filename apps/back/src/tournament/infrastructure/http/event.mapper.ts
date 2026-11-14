@@ -1,5 +1,6 @@
 import type { ManualEvent, TournamentEvent as TournamentEventResponse } from "@sarpbc/types";
 import type { EventListing } from "../../application/ports";
+import { nonBlank } from "../../../common/domain/text";
 import { compareStages, isEventSynced, type TournamentEvent } from "../../domain/tournament-event";
 import { mapLeague, mapTournamentListItem, type TournamentResponse } from "./tournament.mapper";
 
@@ -20,16 +21,18 @@ export function mapEvent<Stage extends EventStage>(
 ): TournamentEventResponse<Stage> {
   const ordered = [...stages].sort(compareStages);
   const [newest] = ordered;
+
   // Only the main stage carries the prize pool; its type wins over qualifier stages.
-  const main = ordered.find((stage) => stage.prizepool) ?? newest;
+  const main =
+    ordered.find((stage) => stage.prizepool !== null && stage.prizepool !== "") ?? newest;
 
   return {
     id: event.id,
     slug: event.slug,
     name: event.name,
     league: mapLeague(event.league),
-    logoUrl: newest?.imageUrl?.trim() || event.league?.imageUrl?.trim() || null,
-    prizepool: main?.prizepool || null,
+    logoUrl: nonBlank(newest?.imageUrl) ?? nonBlank(event.league?.imageUrl) ?? null,
+    prizepool: main?.prizepool === undefined || main.prizepool === "" ? null : main.prizepool,
     type: main?.type ?? null,
     beginAt: bound(
       ordered.map((stage) => stage.beginAt),

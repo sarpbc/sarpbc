@@ -14,7 +14,7 @@ export async function getRecentForumActivities(): Promise<PostPreview[]> {
     method: "GET",
   });
 
-  return res.recentPosts || [];
+  return res.recentPosts;
 }
 
 export async function getTopics(): Promise<ForumTopic[]> {
@@ -22,7 +22,7 @@ export async function getTopics(): Promise<ForumTopic[]> {
     method: "GET",
   });
 
-  return res.topics || [];
+  return res.topics;
 }
 
 export async function getPosts(): Promise<ForumPostListItem[]> {
@@ -30,7 +30,7 @@ export async function getPosts(): Promise<ForumPostListItem[]> {
     method: "GET",
   });
 
-  return res.posts || [];
+  return res.posts;
 }
 
 export async function getPostById(id: string): Promise<ForumPost | null> {
@@ -39,7 +39,7 @@ export async function getPostById(id: string): Promise<ForumPost | null> {
       method: "GET",
     });
 
-    return res.post || null;
+    return res.post;
   } catch (error) {
     if (getApiErrorStatus(error) === 404) {
       return null;

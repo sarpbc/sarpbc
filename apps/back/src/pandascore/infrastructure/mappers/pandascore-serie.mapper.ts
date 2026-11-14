@@ -12,7 +12,7 @@ const REPLACED = /^Replaced by (serie|tournament) ([0-9]+)$/;
 
 /** PandaScore deletion reasons: "Merged with <id>", "Replaced by serie|tournament <id>", "Model deleted". */
 export function parseProviderDeletion(reason: string | null): ProviderDeletion {
-  if (!reason) return { kind: "deleted" };
+  if (reason === null || reason === "") return { kind: "deleted" };
   const merged = MERGED.exec(reason);
 
   if (merged) return { kind: "merged", intoId: Number(merged[1]) };

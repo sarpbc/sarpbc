@@ -38,7 +38,7 @@ export function mapOfficialMatchStreams(
     official.push({
       url,
       language: stream.language?.trim() ?? "",
-      main: Boolean(stream.main),
+      main: stream.main,
     });
 
     if (official.length >= MAX_OFFICIAL_STREAMS) {
