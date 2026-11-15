@@ -1,5 +1,6 @@
 import type { Redis as RedisClient } from "ioredis";
 import { describe, it } from "vitest";
+import { isoWeekIdFromDate, newsWeekPath } from "@sarpbc/utils";
 import { z } from "zod";
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
@@ -589,7 +590,7 @@ describe("backend integration", () => {
         const response9 = await request("GET", "/sitemap/news");
         assert.deepEqual(
           response9.json(z.array(pathEntry)).map(({ path }) => path),
-          [`/news/${article.slug}`],
+          [`/news/${article.slug}`, newsWeekPath(isoWeekIdFromDate(new Date()))],
         );
 
         const response10 = await request("GET", "/news?locale=en-US&page=0&limit=10");

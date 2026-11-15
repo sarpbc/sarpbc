@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { randomUUID } from "node:crypto";
+import { forumPostPath, forumPostSlug } from "@sarpbc/utils";
 import { z } from "zod";
 import type { Orm, Request } from "./support.mts";
 
@@ -32,6 +34,14 @@ export const verifySitemap = async ({
 
   const { Player } = await import("../../src/roster/infrastructure/persistence/player.entity.ts");
   const { Team } = await import("../../src/roster/infrastructure/persistence/team.entity.ts");
+
+  const { Circuit } =
+    await import("../../src/circuit/infrastructure/persistence/circuit.entity.ts");
+
+  const { Season } = await import("../../src/season/infrastructure/persistence/season.entity.ts");
+  const { Post } = await import("../../src/forum/infrastructure/persistence/post.entity.ts");
+  const { Topic } = await import("../../src/forum/infrastructure/persistence/topic.entity.ts");
+  const { User } = await import("../../src/user/infrastructure/persistence/user.entity.ts");
 
   type TournamentParticipantRow = InstanceType<typeof TournamentParticipant>;
 
@@ -69,7 +79,7 @@ export const verifySitemap = async ({
   Object.assign(emptyPlayer, { name: "Sitemap Empty Player", slug: "sitemap-empty-player" });
   em.persist(emptyPlayer);
   const coach = new Player();
-  Object.assign(coach, { name: "Sitemap Coach", slug: "sitemap-coach" });
+  Object.assign(coach, { name: "Sitemap Coach", nationality: " zz ", slug: "sitemap-coach" });
   const coaching = new Contract();
   Object.assign(coaching, {
     endDate: null,
@@ -79,6 +89,23 @@ export const verifySitemap = async ({
     team: participants[0].team,
   });
   em.persist([coach, coaching]);
+  const circuit = new Circuit();
+  Object.assign(circuit, { name: "Sitemap Circuit", slug: "sitemap-circuit" });
+  const archived = new Season();
+  Object.assign(archived, { name: "Sitemap Season", slug: "sitemap-season" });
+  const unpublished = new Season();
+  Object.assign(unpublished, { name: "Sitemap Unpublished Season", slug: null });
+  const [author] = await em.getRepository(User).findAll({ limit: 1 });
+  const [topic] = await em.getRepository(Topic).findAll({ limit: 1 });
+  const post = new Post();
+  Object.assign(post, {
+    author,
+    content: "Sitemap post",
+    id: randomUUID(),
+    title: "Sitemap Forum Post",
+    topic,
+  });
+  em.persist([circuit, archived, unpublished, post]);
   const stageBeginAt = stage.beginAt;
   stage.beginAt = new Date("2026-01-10T12:00:00Z");
   await em.flush();
@@ -138,6 +165,22 @@ export const verifySitemap = async ({
     assert.ok(!teams.includes(`/team/${slug}`));
   }
 
+  const circuits = await paths("circuits");
+  assert.ok(circuits.includes("/circuits/sitemap-circuit"));
+  const seasons = await paths("seasons");
+  assert.ok(seasons.includes("/seasons/sitemap-season"));
+  assert.ok(seasons.every((path) => path !== "/seasons/" && path !== "/seasons/null"));
+  const countries = await paths("countries");
+  assert.ok(countries.includes("/countries/zz"), "a padded lowercase nationality is normalized");
+  const posts = await em.getRepository(Post).findAll();
+  assert.ok(posts.includes(post));
+  const forum = await paths("forum");
+
+  assert.deepEqual(
+    forum.toSorted(),
+    posts.map(({ publicId, title }) => forumPostPath(publicId, forumPostSlug(title))).toSorted(),
+  );
+
   await request("GET", "/sitemap/bogus", undefined, undefined, 404);
 
   em.remove([
@@ -151,6 +194,10 @@ export const verifySitemap = async ({
     emptyPlayer,
     coaching,
     coach,
+    circuit,
+    archived,
+    unpublished,
+    post,
   ]);
   stage.beginAt = stageBeginAt;
   await em.flush();
