@@ -66,9 +66,9 @@ const save = async () => {
           :disabled="!canForfeit"
           :label="t('page.tournaments.matchForfeit.forfeit')"
         />
-        <UFormField v-if="forfeited" :label="t('page.tournaments.matchForfeit.side')">
+        <SbFormField v-if="forfeited" :label="t('page.tournaments.matchForfeit.side')">
           <USelect v-model="forfeitedBy" :items="sides" class="w-full" />
-        </UFormField>
+        </SbFormField>
       </div>
     </template>
 

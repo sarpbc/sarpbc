@@ -208,13 +208,12 @@ const confirmRemove = async () => {
     >
       <template #body>
         <form class="flex flex-col gap-4" @submit.prevent="confirmAdd">
-          <UFormField
+          <SbFormField
             :label="$t('page.streamers.add.loginLabel')"
             :hint="$t('page.streamers.add.loginHint')"
-            name="login"
             required
           >
-            <UInput
+            <SbInput
               v-model="newLogin"
               :placeholder="$t('page.streamers.add.loginPlaceholder')"
               :maxlength="TWITCH_LOGIN_MAX_LENGTH"
@@ -222,19 +221,18 @@ const confirmRemove = async () => {
               class="w-full"
               autofocus
             />
-          </UFormField>
-          <UFormField
+          </SbFormField>
+          <SbFormField
             :label="$t('page.streamers.add.displayNameLabel')"
             :hint="$t('page.streamers.add.displayNameHint')"
-            name="displayName"
           >
-            <UInput
+            <SbInput
               v-model="newDisplayName"
               :placeholder="$t('page.streamers.add.displayNamePlaceholder')"
               :maxlength="TRACKED_STREAMER_NAME_MAX_LENGTH"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
         </form>
       </template>
       <template #footer>

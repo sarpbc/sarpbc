@@ -190,7 +190,7 @@ const save = async () => {
           :key="row.key"
           class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[8rem_minmax(0,1fr)_12rem_auto] sm:items-start"
         >
-          <UFormField :label="t('page.tournaments.vods.gameLabel')">
+          <SbFormField :label="t('page.tournaments.vods.gameLabel')">
             <USelect
               v-model="row.game"
               :items="gameOptions"
@@ -198,30 +198,30 @@ const save = async () => {
               label-key="label"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
 
-          <UFormField :label="t('page.tournaments.vods.url')" v-bind="urlFeedback(row.url)">
-            <UInput
+          <SbFormField :label="t('page.tournaments.vods.url')" v-bind="urlFeedback(row.url)">
+            <SbInput
               v-model="row.url"
               type="url"
               inputmode="url"
               class="w-full"
               :placeholder="t('page.tournaments.vods.urlPlaceholder')"
             />
-          </UFormField>
+          </SbFormField>
 
-          <UFormField
+          <SbFormField
             :label="t('page.tournaments.vods.language')"
             v-bind="languageFeedback(row.language)"
           >
-            <UInput
+            <SbInput
               v-model="row.language"
               :maxlength="LANGUAGE_CODE_LENGTH"
               autocomplete="off"
               spellcheck="false"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
 
           <SbButton
             class="sm:mt-6"

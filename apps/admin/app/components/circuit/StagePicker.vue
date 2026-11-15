@@ -77,7 +77,7 @@ const choose = (stage: PickedStage) => {
   >
     <template #body>
       <div class="flex flex-col gap-3">
-        <UInput
+        <SbInput
           v-model="query"
           :loading="searching"
           :placeholder="$t('page.circuits.picker.placeholder')"

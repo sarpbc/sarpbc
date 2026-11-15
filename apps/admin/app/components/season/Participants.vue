@@ -74,7 +74,7 @@ const add = async (team: Team) => {
     </div>
 
     <div class="flex max-w-xl flex-col gap-2">
-      <UInput
+      <SbInput
         v-model="query"
         :loading="searching"
         :disabled="adding"

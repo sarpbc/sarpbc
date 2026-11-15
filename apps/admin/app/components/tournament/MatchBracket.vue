@@ -125,7 +125,7 @@ const save = async () => {
     <template #body>
       <div class="flex flex-col gap-4">
         <div class="grid gap-2 sm:grid-cols-2">
-          <UFormField
+          <SbFormField
             v-for="(_, index) in sides"
             :key="index"
             :label="t('page.tournaments.bracket.side', { number: index + 1 })"
@@ -137,7 +137,7 @@ const save = async () => {
               label-key="label"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
         </div>
 
         <div class="flex flex-col gap-2">
@@ -152,7 +152,7 @@ const save = async () => {
             :key="link.key"
             class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[minmax(0,1fr)_10rem_auto] sm:items-end"
           >
-            <UFormField :label="t('page.tournaments.bracket.previousMatch')">
+            <SbFormField :label="t('page.tournaments.bracket.previousMatch')">
               <USelect
                 v-model="link.previousMatchId"
                 :items="matchItems"
@@ -161,8 +161,8 @@ const save = async () => {
                 class="w-full"
                 :placeholder="t('page.tournaments.bracket.choosePreviousMatch')"
               />
-            </UFormField>
-            <UFormField :label="t('page.tournaments.bracket.type')">
+            </SbFormField>
+            <SbFormField :label="t('page.tournaments.bracket.type')">
               <USelect
                 v-model="link.type"
                 :items="typeItems"
@@ -170,7 +170,7 @@ const save = async () => {
                 label-key="label"
                 class="w-full"
               />
-            </UFormField>
+            </SbFormField>
             <SbButton
               variant="tertiary"
               danger

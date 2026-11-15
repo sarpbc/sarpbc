@@ -12,22 +12,21 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
 
 <template>
   <div class="flex max-w-2xl flex-col gap-4">
-    <UFormField :label="$t('page.tournaments.events.form.name')" name="name" required>
-      <UInput
+    <SbFormField :label="$t('page.tournaments.events.form.name')" required>
+      <SbInput
         v-model="state.name"
         class="w-full"
         autocomplete="off"
         :disabled="disabled"
         :placeholder="$t('page.tournaments.events.form.namePlaceholder')"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       :label="$t('page.tournaments.form.slug')"
-      name="slug"
       :hint="$t('page.tournaments.events.form.slugHint')"
     >
-      <UInput
+      <SbInput
         v-model="state.slug"
         class="w-full"
         spellcheck="false"
@@ -35,9 +34,9 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
         :disabled="disabled"
         :placeholder="$t('page.tournaments.form.slugPlaceholder')"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField :label="$t('page.tournaments.form.league')" name="leagueId">
+    <SbFormField :label="$t('page.tournaments.form.league')">
       <div class="flex gap-2">
         <USelectMenu
           v-model="state.leagueId"
@@ -58,6 +57,6 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
           @click="state.leagueId = ''"
         />
       </div>
-    </UFormField>
+    </SbFormField>
   </div>
 </template>

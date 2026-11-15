@@ -222,7 +222,7 @@ const submit = () => {
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
     <div class="grid gap-4 sm:grid-cols-3">
-      <UFormField :label="$t('page.onThisDay.form.month')" name="month" required>
+      <SbFormField :label="$t('page.onThisDay.form.month')" required>
         <USelect
           v-model="month"
           :items="monthOptions"
@@ -230,8 +230,8 @@ const submit = () => {
           label-key="label"
           class="w-full"
         />
-      </UFormField>
-      <UFormField :label="$t('page.onThisDay.form.day')" name="day" required>
+      </SbFormField>
+      <SbFormField :label="$t('page.onThisDay.form.day')" required>
         <USelect
           v-model="day"
           :items="dayOptions"
@@ -239,33 +239,31 @@ const submit = () => {
           label-key="label"
           class="w-full"
         />
-      </UFormField>
-      <UFormField
+      </SbFormField>
+      <SbFormField
         :label="$t('page.onThisDay.form.year')"
         :hint="$t('page.onThisDay.form.yearHint')"
         :error="yearError"
-        name="year"
       >
-        <UInput v-model="year" inputmode="numeric" autocomplete="off" class="w-full" />
-      </UFormField>
+        <SbInput v-model="year" inputmode="numeric" autocomplete="off" class="w-full" />
+      </SbFormField>
     </div>
 
-    <UFormField
+    <SbFormField
       :label="$t('page.onThisDay.form.textEn')"
       :hint="$t('page.onThisDay.form.textHint')"
-      name="textEn"
       required
     >
-      <UTextarea
+      <SbTextarea
         v-model="textEn"
         :maxlength="ON_THIS_DAY_TEXT_MAX_LENGTH"
         :rows="2"
         autoresize
         class="w-full"
       />
-    </UFormField>
-    <UFormField :label="$t('page.onThisDay.form.textFr')" name="textFr" required>
-      <UTextarea
+    </SbFormField>
+    <SbFormField :label="$t('page.onThisDay.form.textFr')" required>
+      <SbTextarea
         v-model="textFr"
         :maxlength="ON_THIS_DAY_TEXT_MAX_LENGTH"
         :rows="2"
@@ -273,12 +271,11 @@ const submit = () => {
         lang="fr"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       :label="$t('page.onThisDay.form.link.label')"
       :hint="$t('page.onThisDay.form.link.hint')"
-      name="linkKind"
     >
       <div class="flex flex-col gap-2">
         <USelect
@@ -334,7 +331,7 @@ const submit = () => {
             <p v-else class="text-sm text-muted">{{ $t("page.onThisDay.form.link.noMatches") }}</p>
           </div>
           <template v-else>
-            <UInput
+            <SbInput
               v-model="query"
               :loading="searching"
               :placeholder="
@@ -375,15 +372,14 @@ const submit = () => {
           </template>
         </template>
       </div>
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       :label="$t('page.onThisDay.form.sourceUrl')"
       :hint="$t('page.onThisDay.form.sourceUrlHint')"
       :error="sourceError"
-      name="sourceUrl"
     >
-      <UInput
+      <SbInput
         v-model="sourceUrl"
         type="url"
         :maxlength="ON_THIS_DAY_SOURCE_URL_MAX_LENGTH"
@@ -392,7 +388,7 @@ const submit = () => {
         placeholder="https://"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
 
     <div>
       <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />

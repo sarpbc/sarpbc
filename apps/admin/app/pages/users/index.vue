@@ -116,7 +116,7 @@ const confirmChange = async () => {
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <UInput
+        <SbInput
           v-model="searchInput"
           icon="i-lucide-search"
           class="w-full max-w-sm"

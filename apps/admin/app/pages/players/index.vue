@@ -192,24 +192,24 @@ const confirmCreate = async () => {
     >
       <template #body>
         <div class="flex flex-col gap-3">
-          <UFormField :label="$t('page.players.fields.name')" required>
-            <UInput v-model="newPlayer.name" class="w-full" autofocus />
-          </UFormField>
-          <UFormField :label="$t('page.players.fields.firstName')">
-            <UInput v-model="newPlayer.firstName" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.players.fields.lastName')">
-            <UInput v-model="newPlayer.lastName" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.players.fields.nationality')">
-            <UInput v-model="newPlayer.nationality" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.players.fields.birthday')">
-            <UInput v-model="newPlayer.birthday" type="date" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.players.fields.imageUrl')">
-            <UInput v-model="newPlayer.imageUrl" class="w-full" />
-          </UFormField>
+          <SbFormField :label="$t('page.players.fields.name')" required>
+            <SbInput v-model="newPlayer.name" class="w-full" autofocus />
+          </SbFormField>
+          <SbFormField :label="$t('page.players.fields.firstName')">
+            <SbInput v-model="newPlayer.firstName" class="w-full" />
+          </SbFormField>
+          <SbFormField :label="$t('page.players.fields.lastName')">
+            <SbInput v-model="newPlayer.lastName" class="w-full" />
+          </SbFormField>
+          <SbFormField :label="$t('page.players.fields.nationality')">
+            <SbInput v-model="newPlayer.nationality" class="w-full" />
+          </SbFormField>
+          <SbFormField :label="$t('page.players.fields.birthday')">
+            <SbInput v-model="newPlayer.birthday" type="date" class="w-full" />
+          </SbFormField>
+          <SbFormField :label="$t('page.players.fields.imageUrl')">
+            <SbInput v-model="newPlayer.imageUrl" class="w-full" />
+          </SbFormField>
         </div>
       </template>
       <template #footer>

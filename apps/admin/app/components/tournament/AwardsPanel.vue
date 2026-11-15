@@ -182,15 +182,15 @@ defineExpose({ refreshAwards });
       v-if="availableAwardTypeOptions.length > 0 && rosterOptions.length > 0"
       class="flex flex-col gap-2 sm:flex-row sm:items-end"
     >
-      <UFormField :label="$t('page.tournaments.awards.awardType')" class="min-w-0 sm:w-48">
+      <SbFormField :label="$t('page.tournaments.awards.awardType')" class="min-w-0 sm:w-48">
         <USelect
           v-model="selectedAwardType"
           :items="availableAwardTypeOptions"
           value-key="value"
           label-key="label"
         />
-      </UFormField>
-      <UFormField :label="$t('page.tournaments.awards.selectPlayer')" class="min-w-0 flex-1">
+      </SbFormField>
+      <SbFormField :label="$t('page.tournaments.awards.selectPlayer')" class="min-w-0 flex-1">
         <USelect
           v-model="selectedPlayerId"
           :items="rosterOptions"
@@ -198,7 +198,7 @@ defineExpose({ refreshAwards });
           label-key="label"
           :placeholder="$t('page.tournaments.awards.selectPlayer')"
         />
-      </UFormField>
+      </SbFormField>
       <SbButton
         :loading="assigning"
         :disabled="!selectedPlayerId || !selectedAwardType"

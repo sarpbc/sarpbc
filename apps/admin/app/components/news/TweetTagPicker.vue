@@ -51,18 +51,17 @@ const confirm = () => {
   >
     <template #body>
       <form class="flex flex-col gap-3" @submit.prevent="confirm">
-        <UFormField
+        <SbFormField
           :label="t('page.news.editor.tweet.urlLabel')"
-          name="tweetUrl"
           :error="invalid ? t('page.news.editor.tweet.urlInvalid') : undefined"
         >
-          <UInput
+          <SbInput
             v-model="url"
             :placeholder="t('page.news.editor.tweet.urlPlaceholder')"
             autofocus
             icon="i-ri-twitter-x-fill"
           />
-        </UFormField>
+        </SbFormField>
       </form>
     </template>
 

@@ -26,22 +26,17 @@ const handleBlur = (): void => {
 };
 
 defineExpose({
-  blur: () => inputRef.value?.inputRef?.blur(),
+  blur: () => inputRef.value?.blur(),
 });
 </script>
 
 <template>
-  <UInput
+  <SbInput
     ref="inputRef"
     :placeholder="t('components.input.search')"
     :aria-label="t('components.input.search')"
     :model-value="search"
     icon="i-fluent-search-24-regular"
-    variant="soft"
-    color="neutral"
-    :ui="{
-      base: 'border border-transparent bg-default',
-    }"
     @update:model-value="updateSearch"
     @focus="handleFocus"
     @blur="handleBlur"

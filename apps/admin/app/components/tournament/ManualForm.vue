@@ -135,16 +135,16 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
 
 <template>
   <div class="flex max-w-2xl flex-col gap-4">
-    <UFormField :label="$t('page.tournaments.form.name')" name="name" required>
-      <UInput
+    <SbFormField :label="$t('page.tournaments.form.name')" required>
+      <SbInput
         :model-value="state.name"
         class="w-full"
         autocomplete="off"
         @update:model-value="onNameInput"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField :label="$t('page.tournaments.form.event')" name="eventId" :help="eventHelp">
+    <SbFormField :label="$t('page.tournaments.form.event')" :help="eventHelp">
       <USelectMenu
         v-model="eventId"
         :items="eventOptions"
@@ -153,15 +153,14 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
         :loading="eventsPending"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       v-if="showsSlug"
       :label="$t('page.tournaments.form.slug')"
-      name="slug"
       :hint="$t('page.tournaments.form.slugHint')"
     >
-      <UInput
+      <SbInput
         :model-value="state.slug"
         class="w-full"
         spellcheck="false"
@@ -169,19 +168,19 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
         :placeholder="$t('page.tournaments.form.slugPlaceholder')"
         @update:model-value="onSlugInput"
       />
-    </UFormField>
+    </SbFormField>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <UFormField :label="$t('page.tournaments.form.tier')" name="tier">
-        <UInput
+      <SbFormField :label="$t('page.tournaments.form.tier')">
+        <SbInput
           :model-value="state.tier"
           class="w-full"
           :placeholder="$t('page.tournaments.form.tierPlaceholder')"
           @update:model-value="updateField('tier', $event)"
         />
-      </UFormField>
+      </SbFormField>
 
-      <UFormField :label="$t('page.tournaments.form.league')" name="leagueId">
+      <SbFormField :label="$t('page.tournaments.form.league')">
         <USelect
           :model-value="state.leagueId || undefined"
           :items="leagueItems"
@@ -191,27 +190,27 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
           :placeholder="$t('page.tournaments.form.leaguePlaceholder')"
           @update:model-value="updateField('leagueId', String($event ?? ''))"
         />
-      </UFormField>
+      </SbFormField>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <UFormField :label="$t('page.tournaments.form.beginAt')" name="beginAt">
-        <UInput
+      <SbFormField :label="$t('page.tournaments.form.beginAt')">
+        <SbInput
           :model-value="state.beginAt"
           type="date"
           class="w-full"
           @update:model-value="updateField('beginAt', $event)"
         />
-      </UFormField>
+      </SbFormField>
 
-      <UFormField :label="$t('page.tournaments.form.endAt')" name="endAt">
-        <UInput
+      <SbFormField :label="$t('page.tournaments.form.endAt')">
+        <SbInput
           :model-value="state.endAt"
           type="date"
           class="w-full"
           @update:model-value="updateField('endAt', $event)"
         />
-      </UFormField>
+      </SbFormField>
     </div>
 
     <TournamentImageField
@@ -220,9 +219,8 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
       @update:uploading="emit('update:uploading', $event)"
     />
 
-    <UFormField
+    <SbFormField
       :label="$t('page.tournaments.form.format')"
-      name="format"
       :help="$t('page.tournaments.form.formatHelp')"
     >
       <USelect
@@ -233,20 +231,19 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
         class="w-full sm:w-40"
         @update:model-value="updateField('format', $event)"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField name="hasBracket" :help="$t('page.tournaments.form.hasBracketHelp')">
+    <SbFormField :help="$t('page.tournaments.form.hasBracketHelp')">
       <USwitch
         :model-value="state.hasBracket"
         :label="$t('page.tournaments.form.hasBracket')"
         @update:model-value="updateField('hasBracket', $event)"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       v-if="state.format !== '3v3'"
       :label="$t('page.tournaments.form.players')"
-      name="playerParticipants"
       :help="$t('page.tournaments.form.playersHelp')"
     >
       <TournamentPlayerParticipants
@@ -254,15 +251,11 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
         :format="state.format"
         @update:model-value="updateField('playerParticipants', $event)"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
-      v-if="state.format !== '1v1'"
-      :label="$t('page.tournaments.form.teams')"
-      name="teamIds"
-    >
+    <SbFormField v-if="state.format !== '1v1'" :label="$t('page.tournaments.form.teams')">
       <div class="flex flex-col gap-3 border border-default p-4">
-        <UInput
+        <SbInput
           v-model="teamSearch"
           class="w-full"
           :placeholder="$t('page.tournaments.form.teamsSearch')"
@@ -291,6 +284,6 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
           </p>
         </div>
       </div>
-    </UFormField>
+    </SbFormField>
   </div>
 </template>

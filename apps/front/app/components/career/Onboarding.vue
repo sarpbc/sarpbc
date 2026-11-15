@@ -89,12 +89,8 @@ const onStart = () => {
         class="flex w-full flex-col gap-4"
         @submit="onIntroNext"
       >
-        <UFormField
-          class="w-full"
-          :label="t('page.game.career.onboarding.playerNameLabel')"
-          name="playerName"
-        >
-          <UInput
+        <SbFormField class="w-full" :label="t('page.game.career.onboarding.playerNameLabel')">
+          <SbInput
             v-model="localName"
             class="w-full"
             :placeholder="t('page.game.career.onboarding.playerNamePlaceholder')"
@@ -102,7 +98,7 @@ const onStart = () => {
             autocomplete="nickname"
             spellcheck="false"
           />
-        </UFormField>
+        </SbFormField>
         <SbButton type="submit" block>
           {{ t("page.game.career.onboarding.next") }}
         </SbButton>

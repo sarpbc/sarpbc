@@ -193,15 +193,15 @@ const onSyncTeams = async () => {
     >
       <template #body>
         <div class="flex flex-col gap-3">
-          <UFormField :label="$t('page.teams.fields.name')" required>
-            <UInput v-model="newTeam.name" class="w-full" autofocus />
-          </UFormField>
-          <UFormField :label="$t('page.teams.fields.location')">
-            <UInput v-model="newTeam.location" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.teams.fields.imageUrl')">
-            <UInput v-model="newTeam.imageUrl" class="w-full" />
-          </UFormField>
+          <SbFormField :label="$t('page.teams.fields.name')" required>
+            <SbInput v-model="newTeam.name" class="w-full" autofocus />
+          </SbFormField>
+          <SbFormField :label="$t('page.teams.fields.location')">
+            <SbInput v-model="newTeam.location" class="w-full" />
+          </SbFormField>
+          <SbFormField :label="$t('page.teams.fields.imageUrl')">
+            <SbInput v-model="newTeam.imageUrl" class="w-full" />
+          </SbFormField>
         </div>
       </template>
       <template #footer>

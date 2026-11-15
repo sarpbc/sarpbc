@@ -291,13 +291,8 @@ setPageSeo({
           class="w-full"
           @submit="saveUserName"
         >
-          <UFormField
-            :label="$t('page.profile.username.label')"
-            name="userName"
-            required
-            class="w-full"
-          >
-            <UInput
+          <SbFormField :label="$t('page.profile.username.label')" required class="w-full">
+            <SbInput
               v-model="usernameState.userName"
               type="text"
               autocomplete="username"
@@ -305,7 +300,7 @@ setPageSeo({
               class="w-full"
               :disabled="isSavingUserName"
             />
-          </UFormField>
+          </SbFormField>
         </UForm>
       </template>
       <template #footer>

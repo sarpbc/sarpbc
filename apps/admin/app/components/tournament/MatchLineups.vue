@@ -385,7 +385,7 @@ const save = async () => {
         </div>
 
         <div class="flex flex-col gap-2">
-          <UInput
+          <SbInput
             v-model="query"
             class="w-full"
             :placeholder="t('page.tournaments.lineups.search')"

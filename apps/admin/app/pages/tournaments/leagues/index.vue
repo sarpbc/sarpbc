@@ -197,24 +197,23 @@ const uploadedImageUrl = computed({
     >
       <template #body>
         <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
-          <UFormField :label="$t('page.tournaments.leagues.form.name')" name="name" required>
-            <UInput v-model="form.name" class="w-full" autocomplete="off" :disabled="isSynced" />
-          </UFormField>
-          <UFormField
+          <SbFormField :label="$t('page.tournaments.leagues.form.name')" required>
+            <SbInput v-model="form.name" class="w-full" autocomplete="off" :disabled="isSynced" />
+          </SbFormField>
+          <SbFormField
             :label="$t('page.tournaments.form.slug')"
-            name="slug"
             :hint="$t('page.tournaments.leagues.form.slugHint')"
           >
-            <UInput
+            <SbInput
               v-model="form.slug"
               class="w-full"
               spellcheck="false"
               autocomplete="off"
               :disabled="isSynced"
             />
-          </UFormField>
-          <UFormField :label="$t('page.tournaments.leagues.form.url')" name="url">
-            <UInput
+          </SbFormField>
+          <SbFormField :label="$t('page.tournaments.leagues.form.url')">
+            <SbInput
               v-model="form.url"
               type="url"
               class="w-full"
@@ -223,17 +222,17 @@ const uploadedImageUrl = computed({
               placeholder="https://…"
               :disabled="isSynced"
             />
-          </UFormField>
-          <UFormField :label="$t('page.tournaments.leagues.form.image')">
+          </SbFormField>
+          <SbFormField :label="$t('page.tournaments.leagues.form.image')">
             <ImageUpload
               v-model:image-url="uploadedImageUrl"
               target="tournament"
               :disabled="isSaving"
               @update:uploading="isUploading = $event"
             />
-          </UFormField>
-          <UFormField :label="$t('page.tournaments.form.imageUrl')" name="imageUrl">
-            <UInput
+          </SbFormField>
+          <SbFormField :label="$t('page.tournaments.form.imageUrl')">
+            <SbInput
               v-model="form.imageUrl"
               type="url"
               class="w-full"
@@ -242,7 +241,7 @@ const uploadedImageUrl = computed({
               placeholder="https://…"
               :disabled="isSaving || isUploading"
             />
-          </UFormField>
+          </SbFormField>
           <button type="submit" class="hidden" />
         </form>
       </template>

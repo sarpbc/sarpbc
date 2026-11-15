@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useAttrs } from "vue";
+import { computed, useAttrs, useTemplateRef } from "vue";
 
 import { useDesignAdapters } from "../adapters.ts";
 import { useFormField } from "../form-field.ts";
@@ -8,7 +8,7 @@ import Spinner from "./Spinner.vue";
 
 defineOptions({ inheritAttrs: false });
 
-const model = defineModel<string | number | null>({ default: null });
+const model = defineModel<string>({ default: "" });
 
 const {
   icon = null,
@@ -21,12 +21,18 @@ const {
   id?: string | null;
   loading?: boolean;
   trailingIcon?: string | null;
-  type?: "text" | "email" | "password" | "search" | "url" | "tel" | "number";
+  type?: "text" | "email" | "password" | "search" | "url" | "tel" | "date" | "datetime-local";
 }>();
 
 const attrs = useAttrs();
 const adapters = useDesignAdapters();
 const field = useFormField();
+const input = useTemplateRef("input");
+
+defineExpose({
+  blur: (): void => input.value?.blur(),
+  focus: (): void => input.value?.focus(),
+});
 
 const invalid = computed(() => field?.invalid.value ?? false);
 const leading = computed(() => loading || icon !== null);
@@ -42,6 +48,7 @@ const inputAttrs = computed(() =>
     <input
       v-bind="inputAttrs"
       :id="id ?? field?.id"
+      ref="input"
       v-model="model"
       class="sb-input__field"
       :type="type"

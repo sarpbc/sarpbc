@@ -257,7 +257,7 @@ const close = () => {
       <div class="flex flex-col gap-4">
         <URadioGroup v-model="kind" orientation="horizontal" variant="table" :items="kindItems" />
 
-        <UFormField
+        <SbFormField
           :label="
             searchesTeams
               ? t('page.news.editor.matches.teamLabel')
@@ -276,7 +276,7 @@ const close = () => {
             />
           </div>
           <div v-else class="flex flex-col gap-2">
-            <UInput
+            <SbInput
               v-model="query"
               autofocus
               icon="i-lucide-search"
@@ -298,9 +298,9 @@ const close = () => {
               {{ t("page.news.editor.picker.empty") }}
             </p>
           </div>
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           v-if="source && picksMatches"
           :label="t('page.news.editor.matches.matchesLabel')"
           :hint="
@@ -327,15 +327,15 @@ const close = () => {
             </li>
           </ul>
           <p v-else class="text-sm text-muted">{{ t("newsTag.matchesEmpty") }}</p>
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           v-if="source && !picksMatches"
           :label="t('page.news.editor.matches.limitLabel')"
           :hint="t('page.news.editor.matches.limitHint')"
         >
           <UInputNumber v-model="limit" :min="1" :max="NEWS_MATCH_BLOCK_MAX_MATCHES" />
-        </UFormField>
+        </SbFormField>
       </div>
     </template>
 

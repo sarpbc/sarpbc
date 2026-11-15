@@ -218,33 +218,33 @@ const submit = () => {
         class="grid grid-cols-1 gap-3 sm:grid-cols-2"
         @submit.prevent="submit"
       >
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.viewership.peakViewers')"
           required
           v-bind="feedback('peakViewers')"
         >
-          <UInput
+          <SbInput
             v-model="form.peakViewers"
             inputmode="numeric"
             autocomplete="off"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.viewership.averageViewers')"
           :hint="t('page.tournaments.viewership.optional')"
           v-bind="feedback('averageViewers')"
         >
-          <UInput
+          <SbInput
             v-model="form.averageViewers"
             inputmode="numeric"
             autocomplete="off"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField :label="t('page.tournaments.viewership.scope')">
+        <SbFormField :label="t('page.tournaments.viewership.scope')">
           <USelect
             v-model="form.scope"
             :items="scopeOptions"
@@ -252,36 +252,36 @@ const submit = () => {
             label-key="label"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.viewership.measuredAt')"
           :hint="t('page.tournaments.viewership.optional')"
           v-bind="feedback('measuredAt')"
         >
-          <UInput v-model="form.measuredAt" type="datetime-local" step="1" class="w-full" />
-        </UFormField>
+          <SbInput v-model="form.measuredAt" type="datetime-local" step="1" class="w-full" />
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.viewership.sourceName')"
           required
           v-bind="feedback('sourceName')"
         >
-          <UInput
+          <SbInput
             v-model="form.sourceName"
             :maxlength="VIEWERSHIP_SOURCE_NAME_MAX_LENGTH"
             autocomplete="off"
             class="w-full"
             :placeholder="t('page.tournaments.viewership.sourceNamePlaceholder')"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.viewership.sourceUrl')"
           required
           v-bind="feedback('sourceUrl')"
         >
-          <UInput
+          <SbInput
             v-model="form.sourceUrl"
             type="url"
             inputmode="url"
@@ -289,7 +289,7 @@ const submit = () => {
             class="w-full"
             :placeholder="t('page.tournaments.viewership.sourceUrlPlaceholder')"
           />
-        </UFormField>
+        </SbFormField>
 
         <p class="text-xs text-muted sm:col-span-2">
           {{ t("page.tournaments.viewership.sourceRules") }}
