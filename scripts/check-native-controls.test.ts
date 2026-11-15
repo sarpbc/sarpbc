@@ -29,7 +29,7 @@ void test("accepts library components", () => {
   assert.deepEqual(
     check({
       "Ok.vue":
-        '<template>\n  <SbButton label="Save" />\n  <SbInput v-model="name" />\n</template>\n',
+        '<template>\n  <SButton label="Save" />\n  <SInput v-model="name" />\n</template>\n',
     }),
     [],
   );
@@ -42,15 +42,15 @@ void test("rejects native controls with their replacement", () => {
   });
 
   assert.equal(violations.length, 4);
-  assert.match(violations[0] ?? "", /Native\.vue:2: <button> — use SbButton/u);
-  assert.match(violations[3] ?? "", /<textarea> — use SbTextarea/u);
+  assert.match(violations[0] ?? "", /Native\.vue:2: <button> — use SButton/u);
+  assert.match(violations[3] ?? "", /<textarea> — use STextarea/u);
 });
 
 void test("accepts an exception that states its reason", () => {
   assert.deepEqual(
     check({
       "Upload.vue":
-        '<template>\n  <!-- native-control: hidden file input behind an SbButton -->\n  <input type="file" hidden />\n</template>\n',
+        '<template>\n  <!-- native-control: hidden file input behind an SButton -->\n  <input type="file" hidden />\n</template>\n',
     }),
     [],
   );
@@ -68,7 +68,7 @@ void test("ignores script code and lookalike component names", () => {
   assert.deepEqual(
     check({
       "Script.vue":
-        '<script setup lang="ts">\nconst html = "<button>";\n</script>\n\n<template>\n  <buttonGroup />\n  <SbButton />\n</template>\n',
+        '<script setup lang="ts">\nconst html = "<button>";\n</script>\n\n<template>\n  <buttonGroup />\n  <SButton />\n</template>\n',
     }),
     [],
   );

@@ -65,12 +65,12 @@ const handleEnablePickems = async (tournamentId: string) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <SbErrorState
+        <SErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
           @retry="refresh()"
@@ -109,7 +109,7 @@ const handleEnablePickems = async (tournamentId: string) => {
             </div>
 
             <div class="flex shrink-0 flex-row gap-1">
-              <SbButton
+              <SButton
                 variant="tertiary"
                 size="sm"
                 icon="i-fluent-arrow-expand-24-regular"
@@ -117,7 +117,7 @@ const handleEnablePickems = async (tournamentId: string) => {
                 :aria-label="$t('page.pickems.expand')"
                 :to="localePath(`/pickems/${tournament.id}`)"
               />
-              <SbButton
+              <SButton
                 variant="tertiary"
                 size="sm"
                 :icon="iconFor(tournament.id)"
@@ -127,7 +127,7 @@ const handleEnablePickems = async (tournamentId: string) => {
                 :loading="syncingId === tournament.id"
                 @click="handleSyncTournament(tournament.id)"
               />
-              <SbButton
+              <SButton
                 variant="tertiary"
                 size="sm"
                 icon="i-fluent-predictions-24-regular"
@@ -144,7 +144,7 @@ const handleEnablePickems = async (tournamentId: string) => {
           {{ $t("page.pickems.noTournaments") }}
         </div>
 
-        <SbPagination
+        <SPagination
           v-if="total > limit"
           :page="page"
           :total="total"

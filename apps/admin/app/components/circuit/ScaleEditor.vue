@@ -290,7 +290,7 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="$t('page.circuits.scale.title')"
     :description="shown?.label ?? ''"
@@ -300,13 +300,13 @@ const save = async () => {
       <form class="flex flex-col gap-4" @submit.prevent="save">
         <p class="text-sm text-muted">{{ $t("page.circuits.scale.hint") }}</p>
 
-        <SbFormField
+        <SFormField
           :label="$t('page.circuits.scale.sourceUrl')"
           :hint="$t('page.circuits.scale.sourceUrlHint')"
           :error="sourceUrlError"
           required
         >
-          <SbInput
+          <SInput
             v-model="sourceUrl"
             type="url"
             autocomplete="off"
@@ -314,7 +314,7 @@ const save = async () => {
             placeholder="https://"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
 
         <p v-if="rows.length === 0" class="text-sm text-muted">
           {{ $t("page.circuits.scale.empty") }}
@@ -325,34 +325,34 @@ const save = async () => {
           :key="row.key"
           class="grid grid-cols-[1fr_1fr_1fr_auto] items-start gap-2 border border-default p-3"
         >
-          <SbFormField :label="$t('page.circuits.scale.from')" :error="rowError(row)">
-            <SbInputNumber
+          <SFormField :label="$t('page.circuits.scale.from')" :error="rowError(row)">
+            <SInputNumber
               v-model="row.from"
               :min="1"
               :max="MAX_CIRCUIT_PLACEMENT"
               :step="1"
               class="w-full"
             />
-          </SbFormField>
-          <SbFormField :label="$t('page.circuits.scale.to')">
-            <SbInputNumber
+          </SFormField>
+          <SFormField :label="$t('page.circuits.scale.to')">
+            <SInputNumber
               v-model="row.to"
               :min="1"
               :max="MAX_CIRCUIT_PLACEMENT"
               :step="1"
               class="w-full"
             />
-          </SbFormField>
-          <SbFormField :label="$t('page.circuits.scale.points')">
-            <SbInputNumber
+          </SFormField>
+          <SFormField :label="$t('page.circuits.scale.points')">
+            <SInputNumber
               v-model="row.points"
               :min="0"
               :max="MAX_CIRCUIT_POINTS"
               :step="1"
               class="w-full"
             />
-          </SbFormField>
-          <SbButton
+          </SFormField>
+          <SButton
             class="mt-6"
             variant="tertiary"
             danger
@@ -367,7 +367,7 @@ const save = async () => {
         </p>
 
         <div>
-          <SbButton
+          <SButton
             variant="secondary"
             icon="i-fluent-add-24-regular"
             :label="$t('page.circuits.scale.addTier')"
@@ -387,7 +387,7 @@ const save = async () => {
           <legend class="px-1 text-sm font-medium">
             {{ $t("page.circuits.scale.region.title") }}
           </legend>
-          <SbSwitch
+          <SSwitch
             v-model="worldwide"
             :label="$t('page.circuits.scale.region.worldwide')"
             :description="$t('page.circuits.scale.region.worldwideHint')"
@@ -407,7 +407,7 @@ const save = async () => {
                 {{ $t("page.circuits.scale.noTeams") }}
               </p>
               <div v-else class="grid gap-2 sm:grid-cols-2">
-                <SbCheckbox
+                <SCheckbox
                   v-for="option in teamOptions"
                   :key="option.value"
                   :model-value="regionTeamIds.includes(option.value)"
@@ -432,24 +432,24 @@ const save = async () => {
             :key="row.key"
             class="grid grid-cols-[2fr_1fr_auto] items-start gap-2"
           >
-            <SbFormField :label="$t('page.circuits.scale.finishes.team')" :error="finishError(row)">
-              <SbSelect
+            <SFormField :label="$t('page.circuits.scale.finishes.team')" :error="finishError(row)">
+              <SSelect
                 v-model="row.teamId"
                 :items="teamOptions"
                 :placeholder="$t('page.circuits.scale.finishes.selectTeam')"
                 class="w-full"
               />
-            </SbFormField>
-            <SbFormField :label="$t('page.circuits.scale.finishes.placement')">
-              <SbInputNumber
+            </SFormField>
+            <SFormField :label="$t('page.circuits.scale.finishes.placement')">
+              <SInputNumber
                 v-model="row.placement"
                 :min="1"
                 :max="MAX_CIRCUIT_PLACEMENT"
                 :step="1"
                 class="w-full"
               />
-            </SbFormField>
-            <SbButton
+            </SFormField>
+            <SButton
               class="mt-6"
               variant="tertiary"
               danger
@@ -462,7 +462,7 @@ const save = async () => {
             {{ $t("page.circuits.scale.finishes.errors.repeated") }}
           </p>
           <div>
-            <SbButton
+            <SButton
               variant="secondary"
               icon="i-fluent-add-24-regular"
               :label="$t('page.circuits.scale.finishes.add')"
@@ -476,18 +476,18 @@ const save = async () => {
       </form>
     </template>
     <template #footer>
-      <SbButton
+      <SButton
         :label="$t('page.circuits.scale.save')"
         :loading="saving"
         :disabled="!canSave"
         @click="save"
       />
-      <SbButton
+      <SButton
         variant="secondary"
         :label="$t('common.cancel')"
         :disabled="saving"
         @click="open = false"
       />
     </template>
-  </SbModal>
+  </SModal>
 </template>

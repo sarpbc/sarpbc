@@ -73,16 +73,16 @@ watch(
   <HubPageBody>
     <HubCard v-if="pending" aria-live="polite">
       <div class="flex h-row items-center justify-between gap-3 border-y border-separator px-3">
-        <SbSkeleton class="h-3 w-48" />
-        <SbSkeleton class="h-3 w-32" />
+        <SSkeleton class="h-3 w-48" />
+        <SSkeleton class="h-3 w-32" />
       </div>
       <div class="flex min-h-row items-center border-b border-separator px-3">
-        <SbSkeleton class="h-3 w-2/3" />
+        <SSkeleton class="h-3 w-2/3" />
       </div>
     </HubCard>
 
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.forum.post.failedToLoadPostData')" @retry="refresh()" />
+      <SErrorState :message="t('page.forum.post.failedToLoadPostData')" @retry="refresh()" />
     </HubCard>
 
     <template v-else-if="post">

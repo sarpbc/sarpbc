@@ -29,26 +29,26 @@ const {
     </HubPageHeader>
     <HubCard v-if="pending && !posts?.length" aria-live="polite">
       <HubListItem v-for="index in 4" :key="index" size="default" class="gap-3">
-        <SbSkeleton class="h-3 w-48" />
-        <SbSkeleton class="ml-auto h-3 w-20" />
+        <SSkeleton class="h-3 w-48" />
+        <SSkeleton class="ml-auto h-3 w-20" />
       </HubListItem>
     </HubCard>
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.forum.index.error')" @retry="refresh()" />
+      <SErrorState :message="t('page.forum.index.error')" @retry="refresh()" />
     </HubCard>
     <HubCard v-else-if="posts?.length">
       <ForumPostCard v-for="post in posts" :key="post.id" :post="post" />
     </HubCard>
     <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-      <SbEmptyState
+      <SEmptyState
         icon="i-fluent-chat-multiple-24-regular"
         :title="t('page.forum.index.noPosts')"
         :hint="t('page.forum.index.emptyHint')"
       >
-        <SbButton variant="secondary" :to="localePath('/forum/new')">
+        <SButton variant="secondary" :to="localePath('/forum/new')">
           {{ t("page.forum.index.createNewPost") }}
-        </SbButton>
-      </SbEmptyState>
+        </SButton>
+      </SEmptyState>
     </HubCard>
   </div>
 </template>

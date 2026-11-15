@@ -60,9 +60,9 @@ watch(
         </span>
       </template>
       <template #meta>
-        <SbLink :to="$localePath('/countries')" variant="muted">
+        <SLink :to="$localePath('/countries')" variant="muted">
           {{ t("page.countries.detail.allCountries") }}
-        </SbLink>
+        </SLink>
       </template>
     </HubPageHeader>
 
@@ -107,7 +107,7 @@ watch(
           </ul>
         </HubCard>
         <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SbEmptyState
+          <SEmptyState
             icon="i-fluent-people-team-24-regular"
             :title="t('page.countries.detail.teams.empty')"
           />
@@ -143,7 +143,7 @@ watch(
           />
         </template>
         <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SbEmptyState
+          <SEmptyState
             icon="i-fluent-trophy-24-regular"
             :title="t('page.countries.detail.matches.empty')"
           />

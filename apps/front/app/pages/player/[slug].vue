@@ -164,14 +164,14 @@ setPageSeo({
               v-if="currentPlayer.nationality || realName"
               class="flex min-w-0 flex-row items-center gap-2"
             >
-              <SbLink
+              <SLink
                 v-if="nationalityCode"
                 :to="$localePath(countryPath(nationalityCode))"
                 :aria-label="countryName(nationalityCode)"
                 class="inline-flex"
               >
                 <FlagIcon :nationality="nationalityCode" size="md" />
-              </SbLink>
+              </SLink>
               <FlagIcon v-else :nationality="currentPlayer.nationality" size="md" />
               <span v-if="realName" class="truncate text-sm text-muted">{{ realName }}</span>
             </div>
@@ -182,11 +182,11 @@ setPageSeo({
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.age") }}</dt>
                 <dd class="min-w-0">
-                  <SbTooltip align="center" side="top" :text="mediumDate.format(birthday)">
+                  <STooltip align="center" side="top" :text="mediumDate.format(birthday)">
                     <span class="text-sm font-medium tabular-nums">
                       {{ t("page.player.slug.xYears", { years: getAgeFromBirthday(birthday) }) }}
                     </span>
-                  </SbTooltip>
+                  </STooltip>
                 </dd>
               </div>
               <div
@@ -194,7 +194,7 @@ setPageSeo({
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.currentTeam") }}</dt>
                 <dd class="min-w-0 flex justify-end">
-                  <SbLink
+                  <SLink
                     v-if="currentPlayer.team"
                     :to="$localePath(teamPath(currentPlayer.team.slug))"
                     variant="inline"
@@ -206,7 +206,7 @@ setPageSeo({
                       size="xs"
                     />
                     <span class="truncate">{{ currentPlayer.team.name }}</span>
-                  </SbLink>
+                  </SLink>
                   <span v-else class="text-sm text-muted">
                     {{ t("page.player.slug.freeAgent") }}
                   </span>
@@ -227,13 +227,13 @@ setPageSeo({
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.staffCareer") }}</dt>
                 <dd class="min-w-0">
-                  <SbLink
+                  <SLink
                     :to="$localePath(staffPath(currentPlayer.slug))"
                     variant="inline"
                     class="text-sm font-medium"
                   >
                     {{ t("page.player.slug.viewStaffProfile") }}
-                  </SbLink>
+                  </SLink>
                 </dd>
               </div>
               <div
@@ -241,13 +241,13 @@ setPageSeo({
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.player.slug.compare") }}</dt>
                 <dd class="min-w-0">
-                  <SbLink
+                  <SLink
                     :to="$localePath({ path: '/player/compare', query: { a: currentPlayer.slug } })"
                     variant="inline"
                     class="text-sm font-medium"
                   >
                     {{ t("page.player.slug.compareCareers") }}
-                  </SbLink>
+                  </SLink>
                 </dd>
               </div>
             </dl>
@@ -256,7 +256,7 @@ setPageSeo({
       </HubCrossCard>
 
       <div class="flex h-row items-center justify-center px-2">
-        <SbTabs
+        <STabs
           :model-value="tab"
           :items="tabItems"
           :ariaLabel="t('page.player.slug.tabsLabel')"

@@ -159,7 +159,7 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.vods.title', { match: label })"
     :description="t('page.tournaments.vods.description')"
@@ -172,7 +172,7 @@ const save = async () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.vods.loadError") }}</p>
-        <SbButton
+        <SButton
           variant="secondary"
           size="sm"
           :label="t('page.tournaments.vods.retry')"
@@ -190,34 +190,34 @@ const save = async () => {
           :key="row.key"
           class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[8rem_minmax(0,1fr)_12rem_auto] sm:items-start"
         >
-          <SbFormField :label="t('page.tournaments.vods.gameLabel')">
-            <SbSelect v-model="row.game" :items="gameOptions" class="w-full" />
-          </SbFormField>
+          <SFormField :label="t('page.tournaments.vods.gameLabel')">
+            <SSelect v-model="row.game" :items="gameOptions" class="w-full" />
+          </SFormField>
 
-          <SbFormField :label="t('page.tournaments.vods.url')" v-bind="urlFeedback(row.url)">
-            <SbInput
+          <SFormField :label="t('page.tournaments.vods.url')" v-bind="urlFeedback(row.url)">
+            <SInput
               v-model="row.url"
               type="url"
               inputmode="url"
               class="w-full"
               :placeholder="t('page.tournaments.vods.urlPlaceholder')"
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbFormField
+          <SFormField
             :label="t('page.tournaments.vods.language')"
             v-bind="languageFeedback(row.language)"
           >
-            <SbInput
+            <SInput
               v-model="row.language"
               :maxlength="LANGUAGE_CODE_LENGTH"
               autocomplete="off"
               spellcheck="false"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbButton
+          <SButton
             class="sm:mt-6"
             variant="tertiary"
             danger
@@ -231,7 +231,7 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.vods.add')"
@@ -239,12 +239,12 @@ const save = async () => {
           @click="addRow"
         />
         <div class="flex flex-row gap-2">
-          <SbButton
+          <SButton
             variant="tertiary"
             :label="t('page.tournaments.vods.cancel')"
             @click="open = false"
           />
-          <SbButton
+          <SButton
             :label="t('page.tournaments.vods.save')"
             :loading="saving"
             :disabled="loading || loadFailed || !canSave"
@@ -253,5 +253,5 @@ const save = async () => {
         </div>
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

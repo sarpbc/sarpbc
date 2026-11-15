@@ -25,12 +25,12 @@ Component tokens are `--sb-*` custom properties in `packages/design/src/styles/t
 
 ### Accents (state only)
 
-| Meaning                | Geist     | sarpbc.org                                            |
-| ---------------------- | --------- | ----------------------------------------------------- |
-| Primary / link / focus | blue-700  | `variant="primary"` on `SbButton`, `text-primary`     |
-| Error / destructive    | red-800   | `danger` on `SbButton`, `color="danger"` on `SbBadge` |
-| Warning                | amber-700 | `color="warning"` on `SbBadge`                        |
-| Success                | green-700 | `color="success"` on `SbBadge`                        |
+| Meaning                | Geist     | sarpbc.org                                          |
+| ---------------------- | --------- | --------------------------------------------------- |
+| Primary / link / focus | blue-700  | `variant="primary"` on `SButton`, `text-primary`    |
+| Error / destructive    | red-800   | `danger` on `SButton`, `color="danger"` on `SBadge` |
+| Warning                | amber-700 | `color="warning"` on `SBadge`                       |
+| Success                | green-700 | `color="success"` on `SBadge`                       |
 
 Don't use accent color for decoration. One primary action per view.
 
@@ -100,7 +100,7 @@ Prefer borders first. When needed:
 /* Raised card */
 shadow-sm /* or custom: 0 2px 2px rgba(0,0,0,0.04) */
 
-/* Popover — use the `SbPopover` defaults */
+/* Popover — use the `SPopover` defaults */
 ```
 
 ## Focus ring

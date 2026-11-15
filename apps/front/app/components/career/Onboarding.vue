@@ -101,8 +101,8 @@ const onStart = () => {
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.introBody") }}</p>
       </div>
       <form class="flex w-full flex-col gap-4" @submit.prevent="onIntroNext">
-        <SbFormField class="w-full" :label="t('page.game.career.onboarding.playerNameLabel')">
-          <SbInput
+        <SFormField class="w-full" :label="t('page.game.career.onboarding.playerNameLabel')">
+          <SInput
             v-model="localName"
             class="w-full"
             :placeholder="t('page.game.career.onboarding.playerNamePlaceholder')"
@@ -110,10 +110,10 @@ const onStart = () => {
             autocomplete="nickname"
             spellcheck="false"
           />
-        </SbFormField>
-        <SbButton type="submit" block>
+        </SFormField>
+        <SButton type="submit" block>
           {{ t("page.game.career.onboarding.next") }}
-        </SbButton>
+        </SButton>
       </form>
     </div>
 
@@ -125,7 +125,7 @@ const onStart = () => {
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.regionBody") }}</p>
       </div>
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <SbButton
+        <SButton
           v-for="regionOption in CAREER_REGIONS"
           :key="regionOption"
           variant="secondary"
@@ -134,11 +134,11 @@ const onStart = () => {
           @click="emit('selectRegion', regionOption)"
         >
           {{ t(`page.game.career.onboarding.regions.${regionOption}`) }}
-        </SbButton>
+        </SButton>
       </div>
-      <SbButton block :disabled="!region" @click="onRegionNext">
+      <SButton block :disabled="!region" @click="onRegionNext">
         {{ t("page.game.career.onboarding.next") }}
-      </SbButton>
+      </SButton>
     </div>
 
     <div v-else-if="step === 'country'" class="flex flex-col gap-4">
@@ -149,7 +149,7 @@ const onStart = () => {
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.countryBody") }}</p>
       </div>
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <SbButton
+        <SButton
           v-for="countryOption in countriesForRegion"
           :key="countryOption"
           variant="secondary"
@@ -158,11 +158,11 @@ const onStart = () => {
           @click="emit('selectCountry', countryOption)"
         >
           {{ t(`page.game.career.onboarding.countries.${countryOption}`) }}
-        </SbButton>
+        </SButton>
       </div>
-      <SbButton block :disabled="!country" @click="onCountryNext">
+      <SButton block :disabled="!country" @click="onCountryNext">
         {{ t("page.game.career.onboarding.next") }}
-      </SbButton>
+      </SButton>
     </div>
 
     <div v-else-if="step === 'role'" class="flex flex-col gap-4">
@@ -172,16 +172,16 @@ const onStart = () => {
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.roleBody") }}</p>
       </div>
-      <SbRadioGroup
+      <SRadioGroup
         :model-value="role"
         :items="roleItems"
         variant="cards"
         :aria-label="t('page.game.career.onboarding.roleTitle')"
         @update:model-value="$event !== null && emit('selectRole', $event)"
       />
-      <SbButton block :disabled="!role" @click="onRoleNext">
+      <SButton block :disabled="!role" @click="onRoleNext">
         {{ t("page.game.career.onboarding.next") }}
-      </SbButton>
+      </SButton>
     </div>
 
     <div v-else-if="step === 'background'" class="flex flex-col gap-4">
@@ -191,16 +191,16 @@ const onStart = () => {
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.backgroundBody") }}</p>
       </div>
-      <SbRadioGroup
+      <SRadioGroup
         :model-value="background"
         :items="backgroundItems"
         variant="cards"
         :aria-label="t('page.game.career.onboarding.backgroundTitle')"
         @update:model-value="$event !== null && emit('selectBackground', $event)"
       />
-      <SbButton block :disabled="!background" @click="onStart">
+      <SButton block :disabled="!background" @click="onStart">
         {{ t("page.game.career.onboarding.startCareer") }}
-      </SbButton>
+      </SButton>
     </div>
   </div>
 </template>

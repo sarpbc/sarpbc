@@ -65,7 +65,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
           <h2 :id="headingId">
             {{ t(`page.${kind}.slug.matches.sectionTitle`) }}
           </h2>
-          <SbTabs
+          <STabs
             :model-value="tab"
             :items="tabItems"
             :ariaLabel="t(`page.${kind}.slug.matches.sectionTitle`)"
@@ -78,16 +78,16 @@ const listVariant = computed<"upcoming" | "result">(() => {
         <HubCard v-for="index in 3" :key="index">
           <div class="w-full grid grid-cols-3 gap-2 py-2 px-2 items-center">
             <div class="col-span-2 flex flex-col gap-1">
-              <SbSkeleton class="h-3 w-24" />
-              <SbSkeleton class="h-3 w-28" />
+              <SSkeleton class="h-3 w-24" />
+              <SSkeleton class="h-3 w-28" />
             </div>
-            <SbSkeleton class="col-span-1 h-3 w-10 justify-self-end" />
+            <SSkeleton class="col-span-1 h-3 w-10 justify-self-end" />
           </div>
         </HubCard>
       </div>
 
       <HubCard v-else-if="hasError">
-        <SbErrorState :message="t(`page.${kind}.slug.matches.error`)" @retry="emit('retry')" />
+        <SErrorState :message="t(`page.${kind}.slug.matches.error`)" @retry="emit('retry')" />
       </HubCard>
 
       <div v-else-if="hasMatches" class="flex flex-col gap-4">

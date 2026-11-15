@@ -42,7 +42,7 @@ const {
     @retry="refresh()"
   >
     <template v-if="stages.length > 1" #filters>
-      <SbSelect
+      <SSelect
         v-model="stage"
         :items="stageOptions"
         :aria-label="t('page.tournaments.stats.stage')"

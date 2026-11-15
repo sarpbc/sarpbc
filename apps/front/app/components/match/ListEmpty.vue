@@ -31,13 +31,13 @@ const secondaryLabel = computed(() =>
 
 <template>
   <HubCard class="flex min-h-row-stack h-row-grid items-center">
-    <SbEmptyState :icon="iconName" :title="message" :hint="hint">
-      <SbButton :to="localePath('/tournaments')">
+    <SEmptyState :icon="iconName" :title="message" :hint="hint">
+      <SButton :to="localePath('/tournaments')">
         {{ t("page.matches.empty.viewTournaments") }}
-      </SbButton>
-      <SbButton variant="secondary" :to="secondaryTo">
+      </SButton>
+      <SButton variant="secondary" :to="secondaryTo">
         {{ secondaryLabel }}
-      </SbButton>
-    </SbEmptyState>
+      </SButton>
+    </SEmptyState>
   </HubCard>
 </template>

@@ -5,9 +5,9 @@ const { t } = useI18n();
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SbButton class="self-start" variant="secondary" @click="open">
+    <SButton class="self-start" variant="secondary" @click="open">
       {{ t("components.cookiePopup.manage") }}
-    </SbButton>
+    </SButton>
     <LegalDoc slug="cookie-policy" />
   </div>
 </template>

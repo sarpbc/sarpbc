@@ -60,14 +60,14 @@ const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
       <HubCard v-if="pending" aria-live="polite">
         <HubListItem v-for="index in 2" :key="index">
           <div class="flex w-full min-w-0 flex-col gap-0.5">
-            <SbSkeleton class="h-3.5 w-3/5 max-w-48" />
-            <SbSkeleton class="h-3 w-2/5 max-w-32" />
+            <SSkeleton class="h-3.5 w-3/5 max-w-48" />
+            <SSkeleton class="h-3 w-2/5 max-w-32" />
           </div>
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="hasError">
-        <SbErrorState :message="t('page.player.slug.standIns.error')" @retry="emit('retry')" />
+        <SErrorState :message="t('page.player.slug.standIns.error')" @retry="emit('retry')" />
       </HubCard>
 
       <HubCard v-else-if="rows.length > 0">
@@ -86,7 +86,7 @@ const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
         <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
           <span>
             {{ t("common.prizes.dataFrom") }}
-            <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
+            <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
           </span>
         </p>
       </HubCard>

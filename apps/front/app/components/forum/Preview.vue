@@ -21,7 +21,7 @@ const activities = computed(() => recentForumActivities.value ?? []);
   <div class="w-full flex flex-col">
     <HubRail caption="lead" :title="$t('components.forum.recentPosts')">
       <HubCard>
-        <SbErrorState
+        <SErrorState
           v-if="error"
           :message="$t('components.forum.recentPostsError')"
           @retry="refresh()"

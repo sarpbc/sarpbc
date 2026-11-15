@@ -176,7 +176,7 @@ setPageSeo({
       >
         <div class="min-w-0">
           <div class="flex min-w-0 items-center gap-2">
-            <SbAvatar :src="user.avatarUrl" :alt="user.userName" size="lg" />
+            <SAvatar :src="user.avatarUrl" :alt="user.userName" size="lg" />
             <div class="min-w-0">
               <p class="truncate text-base font-medium text-highlighted" translate="no">
                 {{ user.userName }}
@@ -186,8 +186,8 @@ setPageSeo({
           </div>
         </div>
 
-        <SbPopover v-model:open="menuOpen">
-          <SbButton
+        <SPopover v-model:open="menuOpen">
+          <SButton
             variant="tertiary"
             icon="i-fluent-more-vertical-24-regular"
             class="size-row p-0 justify-center"
@@ -204,7 +204,7 @@ setPageSeo({
               class="flex min-w-40 flex-col p-1"
               :aria-label="$t('page.profile.actions')"
             >
-              <SbButton
+              <SButton
                 variant="tertiary"
                 size="sm"
                 icon="i-fluent-edit-24-regular"
@@ -214,7 +214,7 @@ setPageSeo({
                 :label="$t('page.profile.editProfile')"
                 @click="openEditProfile"
               />
-              <SbButton
+              <SButton
                 v-if="showStaffConsole"
                 variant="tertiary"
                 size="sm"
@@ -228,7 +228,7 @@ setPageSeo({
                 :label="$t('page.profile.staff')"
                 @click="menuOpen = false"
               />
-              <SbButton
+              <SButton
                 variant="tertiary"
                 danger
                 size="sm"
@@ -243,14 +243,14 @@ setPageSeo({
               />
             </div>
           </template>
-        </SbPopover>
+        </SPopover>
       </HubCard>
 
       <HubRail v-if="hasNotifications">
         <template #caption>
           <div class="flex w-full min-w-0 items-center justify-between gap-2 pr-2">
             <h2>{{ $t("page.profile.notifications.title") }}</h2>
-            <SbButton
+            <SButton
               v-if="unreadNotifications.length > 0"
               variant="tertiary"
               size="sm"
@@ -283,7 +283,7 @@ setPageSeo({
       </HubRail>
     </div>
 
-    <SbModal
+    <SModal
       v-if="user"
       v-model:open="editOpen"
       :title="$t('page.profile.editProfile')"
@@ -291,13 +291,13 @@ setPageSeo({
     >
       <template #body>
         <form id="edit-username-form" class="w-full" novalidate @submit.prevent="saveUserName">
-          <SbFormField
+          <SFormField
             :label="$t('page.profile.username.label')"
             :error="usernameErrors.userName"
             required
             class="w-full"
           >
-            <SbInput
+            <SInput
               v-model="usernameState.userName"
               type="text"
               autocomplete="username"
@@ -305,11 +305,11 @@ setPageSeo({
               class="w-full"
               :disabled="isSavingUserName"
             />
-          </SbFormField>
+          </SFormField>
         </form>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           type="submit"
           form="edit-username-form"
           :loading="isSavingUserName"
@@ -319,6 +319,6 @@ setPageSeo({
           "
         />
       </template>
-    </SbModal>
+    </SModal>
   </div>
 </template>

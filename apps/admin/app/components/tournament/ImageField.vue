@@ -22,16 +22,16 @@ const onUploading = (value: boolean) => {
 
 <template>
   <div class="flex max-w-2xl flex-col gap-4">
-    <SbFormField :label="t('page.tournaments.form.image')">
+    <SFormField :label="t('page.tournaments.form.image')">
       <ImageUpload
         v-model:image-url="uploadedImageUrl"
         target="tournament"
         :disabled="disabled"
         @update:uploading="onUploading"
       />
-    </SbFormField>
-    <SbFormField :label="t('page.tournaments.form.imageUrl')">
-      <SbInput
+    </SFormField>
+    <SFormField :label="t('page.tournaments.form.imageUrl')">
+      <SInput
         v-model="imageUrl"
         type="url"
         class="w-full"
@@ -40,6 +40,6 @@ const onUploading = (value: boolean) => {
         :disabled="disabled || uploading"
         :placeholder="t('page.tournaments.form.imageUrlPlaceholder')"
       />
-    </SbFormField>
+    </SFormField>
   </div>
 </template>

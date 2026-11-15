@@ -62,7 +62,7 @@ watch(open, (isOpen) => {
 </script>
 
 <template>
-  <SbHoverCard v-model:open="open">
+  <SHoverCard v-model:open="open">
     <NuxtLink
       :to="href"
       v-bind="linkAttrs"
@@ -75,18 +75,18 @@ watch(open, (isOpen) => {
     <template #content>
       <div v-if="pending" class="flex w-72 flex-col" aria-busy="true">
         <div class="flex items-center gap-3 p-3">
-          <SbSkeleton class="size-16 shrink-0 rounded-none" />
+          <SSkeleton class="size-16 shrink-0 rounded-none" />
           <div class="flex min-w-0 flex-1 flex-col gap-1.5">
-            <SbSkeleton class="h-4 w-24" />
-            <SbSkeleton class="h-3 w-32" />
+            <SSkeleton class="h-4 w-24" />
+            <SSkeleton class="h-3 w-32" />
           </div>
         </div>
         <div class="flex h-row items-center gap-2 border-t border-default px-3">
-          <SbSkeleton class="size-5 shrink-0 rounded-none" />
-          <SbSkeleton class="h-3 w-28" />
+          <SSkeleton class="size-5 shrink-0 rounded-none" />
+          <SSkeleton class="h-3 w-28" />
         </div>
         <div class="flex h-row items-center border-t border-default px-3">
-          <SbSkeleton class="h-3 w-24" />
+          <SSkeleton class="h-3 w-24" />
         </div>
       </div>
 
@@ -146,5 +146,5 @@ watch(open, (isOpen) => {
         </NuxtLink>
       </div>
     </template>
-  </SbHoverCard>
+  </SHoverCard>
 </template>

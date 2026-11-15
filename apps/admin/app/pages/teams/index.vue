@@ -123,11 +123,11 @@ const onSyncTeams = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div class="flex flex-row gap-2">
-        <SbButton
+        <SButton
           icon="i-fluent-arrow-sync-24-regular"
           variant="secondary"
           :label="isSyncing ? $t('page.teams.syncingPandascore') : $t('page.teams.syncPandascore')"
@@ -135,7 +135,7 @@ const onSyncTeams = async () => {
           :disabled="isSyncing"
           @click="onSyncTeams"
         />
-        <SbButton
+        <SButton
           icon="i-fluent-add-24-regular"
           :label="$t('page.teams.create.title')"
           @click="openCreateModal"
@@ -144,13 +144,13 @@ const onSyncTeams = async () => {
     </template>
 
     <DashboardContent>
-      <SbErrorState
+      <SErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <SbTable
+        <STable
           :data="teams"
           :columns="columns"
           :loading="status === 'pending'"
@@ -161,7 +161,7 @@ const onSyncTeams = async () => {
             {{ $t("page.teams.empty") }}
           </template>
           <template #actions-cell="{ row }">
-            <SbButton
+            <SButton
               v-if="row.original.source !== 'pandascore'"
               icon="i-fluent-delete-24-regular"
               variant="tertiary"
@@ -171,12 +171,12 @@ const onSyncTeams = async () => {
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>
-        </SbTable>
+        </STable>
         <div v-if="total > limit" class="mt-4 flex w-full flex-row justify-between">
           <span class="text-muted">
             {{ t("page.teams.teamsCount", { count: total }) }}
           </span>
-          <SbPagination
+          <SPagination
             :page="page"
             :total="total"
             :items-per-page="limit"
@@ -186,40 +186,40 @@ const onSyncTeams = async () => {
       </ClientOnly>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isCreateModalOpen"
       :title="$t('page.teams.create.title')"
       :dismissible="!isCreating"
     >
       <template #body>
         <div class="flex flex-col gap-3">
-          <SbFormField :label="$t('page.teams.fields.name')" required>
-            <SbInput v-model="newTeam.name" class="w-full" autofocus />
-          </SbFormField>
-          <SbFormField :label="$t('page.teams.fields.location')">
-            <SbInput v-model="newTeam.location" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.teams.fields.imageUrl')">
-            <SbInput v-model="newTeam.imageUrl" class="w-full" />
-          </SbFormField>
+          <SFormField :label="$t('page.teams.fields.name')" required>
+            <SInput v-model="newTeam.name" class="w-full" autofocus />
+          </SFormField>
+          <SFormField :label="$t('page.teams.fields.location')">
+            <SInput v-model="newTeam.location" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.teams.fields.imageUrl')">
+            <SInput v-model="newTeam.imageUrl" class="w-full" />
+          </SFormField>
         </div>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.teams.create.save')"
           :loading="isCreating"
           :disabled="!newTeam.name"
           @click="confirmCreate"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isCreating"
           @click="isCreateModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="teamToDelete"

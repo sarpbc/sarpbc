@@ -212,10 +212,10 @@ const contractModalTitle = computed(() =>
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         v-if="player"
         icon="i-fluent-save-24-regular"
         :label="$t('page.players.save')"
@@ -226,7 +226,7 @@ const contractModalTitle = computed(() =>
     </template>
 
     <DashboardContent>
-      <SbErrorState
+      <SErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
@@ -238,24 +238,24 @@ const contractModalTitle = computed(() =>
             {{ $t("page.players.info.title") }}
           </h2>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <SbFormField :label="$t('page.players.fields.name')" required>
-              <SbInput v-model="playerForm.name" class="w-full" />
-            </SbFormField>
-            <SbFormField :label="$t('page.players.fields.firstName')">
-              <SbInput v-model="playerForm.firstName" class="w-full" />
-            </SbFormField>
-            <SbFormField :label="$t('page.players.fields.lastName')">
-              <SbInput v-model="playerForm.lastName" class="w-full" />
-            </SbFormField>
-            <SbFormField :label="$t('page.players.fields.nationality')">
-              <SbInput v-model="playerForm.nationality" class="w-full" />
-            </SbFormField>
-            <SbFormField :label="$t('page.players.fields.birthday')">
-              <SbInput v-model="playerForm.birthday" type="date" class="w-full" />
-            </SbFormField>
-            <SbFormField :label="$t('page.players.fields.imageUrl')">
-              <SbInput v-model="playerForm.imageUrl" class="w-full" />
-            </SbFormField>
+            <SFormField :label="$t('page.players.fields.name')" required>
+              <SInput v-model="playerForm.name" class="w-full" />
+            </SFormField>
+            <SFormField :label="$t('page.players.fields.firstName')">
+              <SInput v-model="playerForm.firstName" class="w-full" />
+            </SFormField>
+            <SFormField :label="$t('page.players.fields.lastName')">
+              <SInput v-model="playerForm.lastName" class="w-full" />
+            </SFormField>
+            <SFormField :label="$t('page.players.fields.nationality')">
+              <SInput v-model="playerForm.nationality" class="w-full" />
+            </SFormField>
+            <SFormField :label="$t('page.players.fields.birthday')">
+              <SInput v-model="playerForm.birthday" type="date" class="w-full" />
+            </SFormField>
+            <SFormField :label="$t('page.players.fields.imageUrl')">
+              <SInput v-model="playerForm.imageUrl" class="w-full" />
+            </SFormField>
           </div>
         </div>
 
@@ -264,7 +264,7 @@ const contractModalTitle = computed(() =>
             <h2 class="text-base font-semibold">
               {{ $t("page.players.contracts.title") }}
             </h2>
-            <SbButton
+            <SButton
               icon="i-fluent-add-24-regular"
               size="sm"
               :label="$t('page.players.contracts.create.title')"
@@ -272,24 +272,24 @@ const contractModalTitle = computed(() =>
             />
           </div>
 
-          <SbErrorState
+          <SErrorState
             v-if="contractsError"
             :message="getApiErrorMessage(contractsError) ?? $t('common.loadFailed')"
             @retry="refreshContracts()"
           />
-          <SbTable v-else :data="contracts" :columns="contractColumns">
+          <STable v-else :data="contracts" :columns="contractColumns">
             <template #empty>
               {{ $t("page.players.contracts.empty") }}
             </template>
             <template #actions-cell="{ row }">
               <div class="flex flex-row gap-1">
-                <SbButton
+                <SButton
                   icon="i-fluent-edit-24-regular"
                   variant="tertiary"
                   size="sm"
                   @click="openEditContractModal(row.original)"
                 />
-                <SbButton
+                <SButton
                   icon="i-fluent-delete-24-regular"
                   variant="tertiary"
                   danger
@@ -298,48 +298,48 @@ const contractModalTitle = computed(() =>
                 />
               </div>
             </template>
-          </SbTable>
+          </STable>
         </div>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isContractModalOpen"
       :title="contractModalTitle"
       :dismissible="!isSavingContract"
     >
       <template #body>
         <div class="flex flex-col gap-3">
-          <SbFormField :label="$t('page.players.contracts.fields.teamId')" required>
-            <SbInput v-model="contractForm.teamId" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.contracts.fields.role')" required>
-            <SbSelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.contracts.fields.startDate')" required>
-            <SbInput v-model="contractForm.startDate" type="date" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.contracts.fields.endDate')">
-            <SbInput v-model="contractForm.endDate" type="date" class="w-full" />
-          </SbFormField>
+          <SFormField :label="$t('page.players.contracts.fields.teamId')" required>
+            <SInput v-model="contractForm.teamId" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.players.contracts.fields.role')" required>
+            <SSelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.players.contracts.fields.startDate')" required>
+            <SInput v-model="contractForm.startDate" type="date" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.players.contracts.fields.endDate')">
+            <SInput v-model="contractForm.endDate" type="date" class="w-full" />
+          </SFormField>
         </div>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.players.contracts.save')"
           :loading="isSavingContract"
           :disabled="!contractForm.teamId || !contractForm.startDate"
           @click="saveContract"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isSavingContract"
           @click="isContractModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="contractToDelete"

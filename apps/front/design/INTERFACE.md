@@ -39,7 +39,7 @@ Solve real problems for players, admins, and teammates. Every surface should mak
 
 **Incorrect:** Decorative dashboard widget with no action path.
 
-**Correct:** Empty tournaments list with copy pointing to the first action and a primary `SbButton` to create or sync.
+**Correct:** Empty tournaments list with copy pointing to the first action and a primary `SButton` to create or sync.
 
 ### 1.2 Own the Whole Experience (`de-whole-experience`)
 
@@ -53,7 +53,7 @@ Shape product, interface, and implementation together. Design **all states** bef
 | Success        | Toast names the thing changed (`Player created`)             |
 | Dense / sparse | Layout survives 1 item and 500 items                         |
 
-`error.vue` renders its own markup (status code, heading, an `SbButton` back home); page-level error boundaries for feature areas.
+`error.vue` renders its own markup (status code, heading, an `SButton` back home); page-level error boundaries for feature areas.
 
 ### 1.3 Understand Constraints (`de-constraints`)
 
@@ -91,8 +91,8 @@ Use semantic tokens via `@sarpbc/design` / Tailwind—not raw hex in components.
 | Disabled          | `text-dimmed` / `disabled` variant                                |
 | Page surface      | `bg-default`                                                      |
 | Subtle separation | `bg-elevated`, `border-default`                                   |
-| Primary action    | `variant="primary"` on `SbButton`                                 |
-| Destructive       | `danger` on `SbButton`                                            |
+| Primary action    | `variant="primary"` on `SButton`                                  |
+| Destructive       | `danger` on `SButton`                                             |
 | Focus ring        | Built into `@sarpbc/design` focus styles—don't remove             |
 | Radius            | `--ui-radius: 0rem` in `main.css` (sharp corners—stay consistent) |
 
@@ -135,16 +135,16 @@ Hierarchy: **borders + tonal surfaces first**, shadows second.
 
 **Prefer `@sarpbc/design` primitives** before custom markup:
 
-| Need       | Use                                            |
-| ---------- | ---------------------------------------------- |
-| Button     | `SbButton`                                     |
-| Form       | `<form>`, `SbFormField`, `SbInput`, `SbSelect` |
-| One choice | `SbRadioGroup` (`list` or `cards`)             |
-| Table      | `SbTable` (dashboard lists)                    |
-| Link       | `SbLink` / `NuxtLink`                          |
-| Modal      | `SbModal`                                      |
-| Toast      | `useToast()`                                   |
-| Error page | Own markup in `error.vue`                      |
+| Need       | Use                                         |
+| ---------- | ------------------------------------------- |
+| Button     | `SButton`                                   |
+| Form       | `<form>`, `SFormField`, `SInput`, `SSelect` |
+| One choice | `SRadioGroup` (`list` or `cards`)           |
+| Table      | `STable` (dashboard lists)                  |
+| Link       | `SLink` / `NuxtLink`                        |
+| Modal      | `SModal`                                    |
+| Toast      | `useToast()`                                |
+| Error page | Own markup in `error.vue`                   |
 
 Extend `app/components/hub/` when the same hub layout repeats; generic components go in `@sarpbc/design`.
 
@@ -172,13 +172,13 @@ Extend `app/components/hub/` when the same hub layout repeats; generic component
 **Incorrect:**
 
 ```vue
-<SbButton @click="navigateTo('/player')">Players</SbButton>
+<SButton @click="navigateTo('/player')">Players</SButton>
 ```
 
 **Correct:**
 
 ```vue
-<SbLink :to="$localePath('/player')">{{ $t('nav.players') }}</SbLink>
+<SLink :to="$localePath('/player')">{{ $t('nav.players') }}</SLink>
 ```
 
 Supports Cmd/Ctrl+click, middle-click, prefetch.
@@ -197,7 +197,7 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 - Loading buttons: show spinner **and** keep original label (`Saving…`)
 - Skeleton show-delay ~150–300ms; min visible ~300–500ms to avoid flicker
 - Optimistic updates where success is likely; rollback + toast on failure
-- Announce async updates: `aria-live="polite"` for toasts (`SbToaster`)
+- Announce async updates: `aria-live="polite"` for toasts (`SToaster`)
 
 ### 3.6 Other Interaction Rules
 
@@ -206,7 +206,7 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 | Pointer on interactives  | Links, buttons, and clickable inputs use `cursor: pointer` (`main.css`). Text fields (`input` type text/email/password, `textarea`) use `cursor: text`. Do not restore Geist/Linear `cursor: default` on `<a>`. Disabled: `disabled:cursor-not-allowed` or default. |
 | Don't block paste        | Never `@paste.prevent` on inputs                                                                                                                                                                                                                                    |
 | Ellipsis for in-progress | `{{ $t('common.saving') }}` → `"Saving…"` in locale file                                                                                                                                                                                                            |
-| Confirm destructive      | `SbModal` confirm or undo window                                                                                                                                                                                                                                    |
+| Confirm destructive      | `SModal` confirm or undo window                                                                                                                                                                                                                                     |
 | Deep-link everything     | Tabs, expanded panels, filters in query                                                                                                                                                                                                                             |
 | Respect zoom             | Never disable browser zoom                                                                                                                                                                                                                                          |
 | Mobile inputs            | `text-base` (16px) on mobile inputs to avoid iOS zoom                                                                                                                                                                                                               |
@@ -239,13 +239,13 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 **Incorrect:**
 
 ```vue
-<SbButton>Save Player</SbButton>
+<SButton>Save Player</SButton>
 ```
 
 **Correct:**
 
 ```vue
-<SbButton>{{ $t('page.players.save') }}</SbButton>
+<SButton>{{ $t('page.players.save') }}</SButton>
 ```
 
 - Use `$localePath()` for internal links (prefix strategy: `prefix_except_default`)
@@ -270,12 +270,12 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 
 ### 5.1 Structure (`form-labels`)
 
-Use a native `<form @submit.prevent>` with `SbFormField` and zod. `useFormErrors(schema, state)` (`apps/front/app/composables/use-form-errors.ts`) shows field errors after the first submit through `SbFormField :error`.
+Use a native `<form @submit.prevent>` with `SFormField` and zod. `useFormErrors(schema, state)` (`apps/front/app/composables/use-form-errors.ts`) shows field errors after the first submit through `SFormField :error`.
 
 ```vue
-<SbFormField :label="$t('fields.email')" required :error="errors.email">
-  <SbInput v-model="state.email" type="email" autocomplete="email" />
-</SbFormField>
+<SFormField :label="$t('fields.email')" required :error="errors.email">
+  <SInput v-model="state.email" type="email" autocomplete="email" />
+</SFormField>
 ```
 
 - Every control has a label (visible or `aria-label`)
@@ -285,9 +285,9 @@ Use a native `<form @submit.prevent>` with `SbFormField` and zod. `useFormErrors
 ### 5.2 Submission (`form-submit`)
 
 ```vue
-<SbButton type="submit" :loading="pending" :disabled="pending">
+<SButton type="submit" :loading="pending" :disabled="pending">
   {{ pending ? $t('common.saving') : $t('common.save') }}
-</SbButton>
+</SButton>
 ```
 
 - Trim trailing whitespace from text inputs before validate
@@ -369,7 +369,7 @@ Apply Geist motion discipline:
 
 ### 8.3 Lists & Assets (`perf-lists`)
 
-- Paginate dashboard `SbTable` data (align with NestJS `PaginationQueryDto`)
+- Paginate dashboard `STable` data (align with NestJS `PaginationQueryDto`)
 - Set explicit image dimensions (`Player/Img.vue` patterns)
 - Lazy-load below-fold images
 - `font-variant-numeric: tabular-nums` on stats columns
@@ -412,7 +412,7 @@ throw new BadRequestException({
 });
 ```
 
-Frontend maps `field` errors to the `error` prop of `SbFormField`.
+Frontend maps `field` errors to the `error` prop of `SFormField`.
 
 ### 9.2 Validation Messages (`api-validation`)
 

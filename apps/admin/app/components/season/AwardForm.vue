@@ -95,10 +95,10 @@ defineExpose({ reset });
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
     <div class="grid gap-4 sm:grid-cols-2">
-      <SbFormField :label="$t('page.seasons.awards.awardType')" required>
-        <SbSelect v-model="awardType" :items="awardTypeOptions" class="w-full" />
-      </SbFormField>
-      <SbFormField
+      <SFormField :label="$t('page.seasons.awards.awardType')" required>
+        <SSelect v-model="awardType" :items="awardTypeOptions" class="w-full" />
+      </SFormField>
+      <SFormField
         v-if="showsRegion"
         :label="$t('page.seasons.awards.region')"
         :hint="
@@ -108,20 +108,20 @@ defineExpose({ reset });
         "
         :required="requiresRegion"
       >
-        <SbInput
+        <SInput
           v-model="region"
           :maxlength="SEASON_AWARD_REGION_MAX_LENGTH"
           autocomplete="off"
           class="w-full"
         />
-      </SbFormField>
+      </SFormField>
     </div>
 
-    <SbFormField :label="$t('page.seasons.awards.player')" required>
+    <SFormField :label="$t('page.seasons.awards.player')" required>
       <div class="flex flex-col gap-2">
         <div v-if="player" class="flex flex-row items-center justify-between gap-2 text-sm">
           <span class="font-medium" translate="no">{{ player.name }}</span>
-          <SbButton
+          <SButton
             type="button"
             variant="tertiary"
             size="sm"
@@ -131,7 +131,7 @@ defineExpose({ reset });
           />
         </div>
         <template v-else>
-          <SbInput
+          <SInput
             v-model="query"
             :loading="searching"
             :placeholder="$t('page.seasons.awards.searchPlayer')"
@@ -146,7 +146,7 @@ defineExpose({ reset });
           >
             <ul v-if="results.length" class="flex flex-col gap-1">
               <li v-for="candidate in results" :key="candidate.id">
-                <SbButton
+                <SButton
                   type="button"
                   variant="tertiary"
                   size="sm"
@@ -161,26 +161,26 @@ defineExpose({ reset });
           </div>
         </template>
       </div>
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       :label="$t('page.seasons.awards.presentedBy')"
       :hint="$t('page.seasons.awards.presentedByHint')"
     >
-      <SbInput
+      <SInput
         v-model="presentedBy"
         :maxlength="SEASON_AWARD_PRESENTER_MAX_LENGTH"
         autocomplete="off"
         class="w-full"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       :label="$t('page.seasons.awards.sourceUrl')"
       :hint="$t('page.seasons.awards.sourceUrlHint')"
       required
     >
-      <SbInput
+      <SInput
         v-model="sourceUrl"
         type="url"
         :maxlength="SEASON_AWARD_SOURCE_URL_MAX_LENGTH"
@@ -189,10 +189,10 @@ defineExpose({ reset });
         placeholder="https://"
         class="w-full"
       />
-    </SbFormField>
+    </SFormField>
 
     <div>
-      <SbButton
+      <SButton
         type="submit"
         :label="$t('page.seasons.awards.add')"
         :loading="loading"

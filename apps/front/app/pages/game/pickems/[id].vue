@@ -357,7 +357,7 @@ watch(
           {{ pageTitle }}
         </h1>
         <div v-if="tournament" class="flex w-full gap-2">
-          <SbButton
+          <SButton
             :to="tabTo('pickem')"
             :label="t('page.game.pickems.detail.tabs.pickem')"
             variant="secondary"
@@ -365,7 +365,7 @@ watch(
             :aria-current="activeTab === 'pickem' ? 'page' : undefined"
             class="min-w-0 flex-1 items-center justify-center selectable"
           />
-          <SbButton
+          <SButton
             :to="tabTo('leaderboard')"
             :label="t('page.game.pickems.detail.tabs.leaderboard')"
             variant="secondary"
@@ -383,14 +383,14 @@ watch(
       aria-live="polite"
     >
       <div class="flex flex-col gap-3 animate-pulse">
-        <SbSkeleton class="h-6 w-48 mx-auto" />
-        <SbSkeleton class="h-16 w-full" />
-        <SbSkeleton class="h-16 w-full" />
+        <SSkeleton class="h-6 w-48 mx-auto" />
+        <SSkeleton class="h-16 w-full" />
+        <SSkeleton class="h-16 w-full" />
       </div>
     </HubCard>
 
     <HubCard v-else-if="tournamentError" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.game.pickems.detail.error')" @retry="refreshTournament()" />
+      <SErrorState :message="t('page.game.pickems.detail.error')" @retry="refreshTournament()" />
     </HubCard>
 
     <template v-else-if="tournament">
@@ -410,9 +410,9 @@ watch(
             <p class="text-sm text-pretty text-muted">
               {{ t("page.game.pickems.detail.signInPrompt") }}
             </p>
-            <SbButton :to="loginRedirectPath()">
+            <SButton :to="loginRedirectPath()">
               {{ t("page.game.pickems.detail.signInCta") }}
-            </SbButton>
+            </SButton>
           </div>
           <p v-if="isSignedIn && personalRank?.rank != null" class="text-sm text-muted mb-3">
             {{
@@ -430,7 +430,7 @@ watch(
             {{ t("page.game.pickems.detail.leaderboard.noRankYet") }}
           </p>
           <div v-if="leaderboardPending && topLeaderboard.length === 0" class="flex flex-col gap-2">
-            <SbSkeleton v-for="i in 3" :key="i" class="h-6 w-full" />
+            <SSkeleton v-for="i in 3" :key="i" class="h-6 w-full" />
           </div>
           <ol v-else-if="topLeaderboard.length > 0" class="flex flex-col gap-1">
             <li
@@ -460,9 +460,9 @@ watch(
           <p class="text-sm text-pretty text-muted">
             {{ t("page.game.pickems.detail.signInPrompt") }}
           </p>
-          <SbButton :to="loginRedirectPath()">
+          <SButton :to="loginRedirectPath()">
             {{ t("page.game.pickems.detail.signInCta") }}
-          </SbButton>
+          </SButton>
         </div>
         <div class="flex flex-1 flex-col items-center justify-center gap-2 px-4 text-center">
           <p class="text-sm text-muted text-pretty">
@@ -480,9 +480,9 @@ watch(
             <p class="text-sm text-pretty text-muted">
               {{ t("page.game.pickems.detail.signInPrompt") }}
             </p>
-            <SbButton :to="loginRedirectPath()">
+            <SButton :to="loginRedirectPath()">
               {{ t("page.game.pickems.detail.signInCta") }}
-            </SbButton>
+            </SButton>
           </div>
         </HubCard>
         <div
@@ -500,7 +500,7 @@ watch(
               :key="match.id"
               size="default"
             >
-              <SbRadioGroup
+              <SRadioGroup
                 :model-value="pickedParticipant(match)"
                 variant="cards"
                 orientation="horizontal"
@@ -511,14 +511,14 @@ watch(
                 :aria-label="pickLabel(match)"
                 @update:model-value="$event !== null && pickTeam(match.id, $event)"
               >
-                <SbRadio
+                <SRadio
                   :value="match.participants?.[0]?.id ?? `${match.id}-slot-0`"
                   :disabled="!match.participants?.[0]?.id"
                   :status="pickStatus(match, match.participants?.[0]?.id)"
                   class="w-full"
                 >
                   {{ slotName(match.participants, 0) }}
-                </SbRadio>
+                </SRadio>
                 <NuxtLink
                   :to="localePath(matchPath(match.publicId, match.slug))"
                   class="flex min-w-0 self-stretch flex-col items-center justify-center text-xs text-muted hover:text-default"
@@ -531,15 +531,15 @@ watch(
                     {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
                   </span>
                 </NuxtLink>
-                <SbRadio
+                <SRadio
                   :value="match.participants?.[1]?.id ?? `${match.id}-slot-1`"
                   :disabled="!match.participants?.[1]?.id"
                   :status="pickStatus(match, match.participants?.[1]?.id)"
                   class="w-full"
                 >
                   {{ slotName(match.participants, 1) }}
-                </SbRadio>
-              </SbRadioGroup>
+                </SRadio>
+              </SRadioGroup>
             </HubListItem>
           </HubCard>
         </div>

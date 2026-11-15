@@ -4,7 +4,7 @@ const localePath = useLocalePath();
 
 <template>
   <div class="relative w-full flex flex-col h-svh">
-    <SbButton
+    <SButton
       icon="i-fluent-dismiss-24-regular"
       :to="localePath('/')"
       variant="tertiary"

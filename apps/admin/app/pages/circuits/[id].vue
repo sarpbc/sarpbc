@@ -108,7 +108,7 @@ const formatDates = (stage: CircuitStage): string => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -116,7 +116,7 @@ const formatDates = (stage: CircuitStage): string => {
         {{ $t("page.circuits.loading") }}
       </p>
 
-      <SbErrorState
+      <SErrorState
         v-else-if="error || !circuit"
         :message="getApiErrorMessage(error) ?? $t('page.circuits.loadError')"
         @retry="refresh()"
@@ -140,7 +140,7 @@ const formatDates = (stage: CircuitStage): string => {
               <h2 class="text-lg font-semibold">{{ $t("page.circuits.stages.title") }}</h2>
               <p class="text-sm text-muted">{{ $t("page.circuits.stages.hint") }}</p>
             </div>
-            <SbButton
+            <SButton
               icon="i-fluent-add-24-regular"
               :label="$t('page.circuits.stages.add')"
               @click="isPickerOpen = true"
@@ -158,9 +158,9 @@ const formatDates = (stage: CircuitStage): string => {
               class="flex flex-row flex-wrap items-start justify-between gap-3 border border-default p-3"
             >
               <div class="flex min-w-0 flex-col gap-1 text-sm">
-                <SbLink :to="localePath(`/tournaments/${stage.tournament.id}`)" class="font-medium">
+                <SLink :to="localePath(`/tournaments/${stage.tournament.id}`)" class="font-medium">
                   {{ stageLabel(stage) }}
-                </SbLink>
+                </SLink>
                 <span class="text-muted">
                   {{ formatDates(stage) }} ·
                   {{ $t(`page.tournaments.source.${stage.tournament.source}`) }} ·
@@ -186,7 +186,7 @@ const formatDates = (stage: CircuitStage): string => {
                 <span v-if="stage.tournament.source === 'startgg'" class="text-muted">
                   {{ $t("page.circuits.stages.startggNotice") }}
                 </span>
-                <SbLink
+                <SLink
                   variant="accent"
                   :to="stage.sourceUrl"
                   external
@@ -194,17 +194,17 @@ const formatDates = (stage: CircuitStage): string => {
                   class="break-all"
                 >
                   {{ stage.sourceUrl }}
-                </SbLink>
+                </SLink>
               </div>
               <div class="flex flex-row items-center gap-1">
-                <SbButton
+                <SButton
                   variant="secondary"
                   size="sm"
                   icon="i-fluent-edit-24-regular"
                   :label="$t('page.circuits.stages.edit')"
                   @click="editStage(stage)"
                 />
-                <SbButton
+                <SButton
                   variant="tertiary"
                   danger
                   size="sm"

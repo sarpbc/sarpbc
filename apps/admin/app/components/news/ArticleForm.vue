@@ -27,7 +27,7 @@ const preview = computed(() =>
   <div class="flex min-h-0 flex-1 flex-col">
     <div class="flex items-center justify-between gap-3 border-b border-default px-4">
       <div class="flex items-center gap-1" role="tablist" :aria-label="$t('page.news.locale.tabs')">
-        <SbButton
+        <SButton
           role="tab"
           :aria-selected="editorLocale === 'en'"
           variant="tertiary"
@@ -40,8 +40,8 @@ const preview = computed(() =>
           @click="editorLocale = 'en'"
         >
           {{ $t("page.news.locale.en") }}
-        </SbButton>
-        <SbButton
+        </SButton>
+        <SButton
           role="tab"
           :aria-selected="editorLocale === 'fr'"
           variant="tertiary"
@@ -54,14 +54,14 @@ const preview = computed(() =>
           @click="editorLocale = 'fr'"
         >
           {{ $t("page.news.locale.fr") }}
-        </SbButton>
+        </SButton>
       </div>
-      <SbTooltip
+      <STooltip
         :text="
           previewing ? $t('page.news.create.preview.hide') : $t('page.news.create.preview.show')
         "
       >
-        <SbButton
+        <SButton
           icon="i-lucide-eye"
           size="sm"
           :variant="previewing ? 'secondary' : 'tertiary'"
@@ -71,7 +71,7 @@ const preview = computed(() =>
           "
           @click="previewing = !previewing"
         />
-      </SbTooltip>
+      </STooltip>
     </div>
 
     <DashboardContent v-show="!previewing" class="flex min-h-0 flex-1 flex-col gap-3 p-0 px-0 py-4">

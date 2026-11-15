@@ -50,20 +50,20 @@ const postedAtLabel = computed(() =>
       aria-busy="true"
     >
       <span class="flex items-center gap-3 px-3 py-2">
-        <SbSkeleton class="size-10 shrink-0 rounded-none" />
+        <SSkeleton class="size-10 shrink-0 rounded-none" />
         <span class="flex min-w-0 flex-1 flex-col gap-1.5">
-          <SbSkeleton class="h-4 w-32" />
-          <SbSkeleton class="h-3 w-20" />
+          <SSkeleton class="h-4 w-32" />
+          <SSkeleton class="h-3 w-20" />
         </span>
       </span>
       <span class="flex flex-col gap-2 border-t border-default p-3">
-        <SbSkeleton class="h-3 w-full" />
-        <SbSkeleton class="h-3 w-5/6" />
-        <SbSkeleton class="h-3 w-2/3" />
+        <SSkeleton class="h-3 w-full" />
+        <SSkeleton class="h-3 w-5/6" />
+        <SSkeleton class="h-3 w-2/3" />
       </span>
       <span class="flex h-row items-center justify-between gap-3 border-t border-default px-3">
-        <SbSkeleton class="h-3 w-24" />
-        <SbSkeleton class="h-3 w-16" />
+        <SSkeleton class="h-3 w-24" />
+        <SSkeleton class="h-3 w-16" />
       </span>
     </span>
 

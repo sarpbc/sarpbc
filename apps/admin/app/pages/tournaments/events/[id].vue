@@ -86,23 +86,23 @@ const handleSubmit = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div v-if="event" class="flex flex-row gap-2">
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.eventAction')"
           @click="streamsOpen = true"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-people-audience-24-regular"
           :label="$t('page.tournaments.viewership.eventAction')"
           @click="viewershipOpen = true"
         />
-        <SbButton
+        <SButton
           v-if="event.editable && event.stages.length === 0"
           icon="i-fluent-delete-24-regular"
           variant="secondary"
@@ -110,7 +110,7 @@ const handleSubmit = async () => {
           :label="$t('page.tournaments.events.delete.title')"
           @click="eventToDelete = event"
         />
-        <SbButton
+        <SButton
           v-if="event.editable"
           icon="i-fluent-save-24-regular"
           :label="$t('page.tournaments.events.save')"
@@ -126,7 +126,7 @@ const handleSubmit = async () => {
           {{ $t("page.tournaments.loading") }}
         </p>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error' || !event"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.events.loadOneError')"
           @retry="refresh()"
@@ -159,7 +159,7 @@ const handleSubmit = async () => {
               <h2 class="text-sm font-semibold">
                 {{ $t("page.tournaments.events.stages.title") }}
               </h2>
-              <SbButton
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-add-24-regular"
@@ -186,7 +186,7 @@ const handleSubmit = async () => {
                     {{ formatDate(stage.beginAt) }} – {{ formatDate(stage.endAt) }}
                   </span>
                 </div>
-                <SbButton
+                <SButton
                   variant="tertiary"
                   size="sm"
                   icon="i-fluent-edit-24-regular"

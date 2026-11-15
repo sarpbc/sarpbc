@@ -196,7 +196,7 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="title"
     :description="t('page.tournaments.streams.description')"
@@ -209,7 +209,7 @@ const save = async () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.streams.loadError") }}</p>
-        <SbButton
+        <SButton
           variant="secondary"
           size="sm"
           :label="t('page.tournaments.streams.retry')"
@@ -227,21 +227,21 @@ const save = async () => {
           :key="row.key"
           class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[minmax(0,1fr)_7rem_10rem_auto] sm:items-start"
         >
-          <SbFormField
+          <SFormField
             class="sm:col-span-3"
             :label="t('page.tournaments.streams.url')"
             v-bind="urlFeedback(row.url)"
           >
-            <SbInput
+            <SInput
               v-model="row.url"
               type="url"
               inputmode="url"
               class="w-full"
               :placeholder="t('page.tournaments.streams.urlPlaceholder')"
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbButton
+          <SButton
             class="sm:mt-6"
             variant="tertiary"
             danger
@@ -250,8 +250,8 @@ const save = async () => {
             @click="removeRow(row.key)"
           />
 
-          <SbFormField :label="t('page.tournaments.streams.channel')" v-bind="channelFeedback(row)">
-            <SbInput
+          <SFormField :label="t('page.tournaments.streams.channel')" v-bind="channelFeedback(row)">
+            <SInput
               v-model="row.channel"
               :maxlength="STREAM_CHANNEL_MAX_LENGTH"
               autocomplete="off"
@@ -261,31 +261,31 @@ const save = async () => {
                 derivedChannel(row.url) ?? t('page.tournaments.streams.channelPlaceholder')
               "
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbFormField
+          <SFormField
             :label="t('page.tournaments.streams.language')"
             v-bind="languageFeedback(row.language)"
           >
-            <SbInput
+            <SInput
               v-model="row.language"
               :maxlength="LANGUAGE_CODE_LENGTH"
               autocomplete="off"
               spellcheck="false"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbFormField :label="t('page.tournaments.streams.kind')">
-            <SbSelect v-model="row.kind" :items="kindOptions" class="w-full" />
-          </SbFormField>
+          <SFormField :label="t('page.tournaments.streams.kind')">
+            <SSelect v-model="row.kind" :items="kindOptions" class="w-full" />
+          </SFormField>
         </div>
       </div>
     </template>
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.streams.add')"
@@ -293,12 +293,12 @@ const save = async () => {
           @click="addRow"
         />
         <div class="flex flex-row gap-2">
-          <SbButton
+          <SButton
             variant="tertiary"
             :label="t('page.tournaments.streams.cancel')"
             @click="open = false"
           />
-          <SbButton
+          <SButton
             :label="t('page.tournaments.streams.save')"
             :loading="saving"
             :disabled="loading || loadFailed || !canSave"
@@ -307,5 +307,5 @@ const save = async () => {
         </div>
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

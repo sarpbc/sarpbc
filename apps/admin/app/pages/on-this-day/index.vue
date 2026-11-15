@@ -83,10 +83,10 @@ const save = async (input: OnThisDayFactInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.onThisDay.create.button')"
         @click="openCreate"
@@ -101,7 +101,7 @@ const save = async (input: OnThisDayFactInput) => {
           {{ $t("page.onThisDay.loading") }}
         </p>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.onThisDay.loadError')"
           @retry="refresh()"
@@ -115,7 +115,7 @@ const save = async (input: OnThisDayFactInput) => {
             <h2 class="text-lg font-semibold">{{ $t("page.onThisDay.empty.title") }}</h2>
             <p class="text-sm text-muted">{{ $t("page.onThisDay.empty.description") }}</p>
           </div>
-          <SbButton
+          <SButton
             icon="i-fluent-add-24-regular"
             :label="$t('page.onThisDay.create.button')"
             @click="openCreate"
@@ -123,7 +123,7 @@ const save = async (input: OnThisDayFactInput) => {
         </div>
 
         <ClientOnly v-else>
-          <SbTable :data="facts" :columns="columns" sticky>
+          <STable :data="facts" :columns="columns" sticky>
             <template #date-cell="{ row }">
               <span class="whitespace-nowrap tabular-nums">{{ dateLabel(row.original) }}</span>
             </template>
@@ -136,22 +136,22 @@ const save = async (input: OnThisDayFactInput) => {
             <template #link-cell="{ row }">
               <div v-if="row.original.link" class="flex flex-col items-start gap-1">
                 <span class="text-sm" translate="no">{{ linkLabel(row.original.link) }}</span>
-                <SbBadge v-if="row.original.link.source === 'startgg'" color="warning">
+                <SBadge v-if="row.original.link.source === 'startgg'" color="warning">
                   {{ $t("page.onThisDay.table.hiddenStartgg") }}
-                </SbBadge>
+                </SBadge>
               </div>
               <span v-else class="text-sm text-muted">{{ $t("page.onThisDay.table.noLink") }}</span>
             </template>
             <template #actions-cell="{ row }">
               <div class="flex justify-end gap-1">
-                <SbButton
+                <SButton
                   variant="tertiary"
                   size="sm"
                   icon="i-fluent-edit-24-regular"
                   :aria-label="$t('page.onThisDay.edit.title')"
                   @click="openEdit(row.original)"
                 />
-                <SbButton
+                <SButton
                   variant="tertiary"
                   danger
                   size="sm"
@@ -161,12 +161,12 @@ const save = async (input: OnThisDayFactInput) => {
                 />
               </div>
             </template>
-          </SbTable>
+          </STable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isFormOpen"
       :title="$t(editing ? 'page.onThisDay.edit.title' : 'page.onThisDay.create.title')"
       :description="$t('page.onThisDay.form.description')"
@@ -183,7 +183,7 @@ const save = async (input: OnThisDayFactInput) => {
           @submit="save"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="factToDelete"

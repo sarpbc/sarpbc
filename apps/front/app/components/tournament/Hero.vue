@@ -150,9 +150,9 @@ const showSubscribeCalendar = computed(
           <span v-if="dateRange" class="tabular-nums">{{ dateRange }}</span>
           <template v-if="showSubscribeCalendar && calendarPath">
             <span v-if="status || dateRange" aria-hidden="true">·</span>
-            <SbLink :to="calendarPath" variant="muted" external>
+            <SLink :to="calendarPath" variant="muted" external>
               {{ t("page.tournaments.id.subscribeCalendar") }}
-            </SbLink>
+            </SLink>
           </template>
         </div>
 
@@ -169,7 +169,7 @@ const showSubscribeCalendar = computed(
           </span>
           <span v-if="showChampion && champion" class="inline-flex items-center gap-2">
             <span class="text-sm text-muted">{{ t("page.tournaments.id.hero.champion") }}</span>
-            <SbLink
+            <SLink
               v-if="championPath"
               :to="$localePath(championPath)"
               variant="inline"
@@ -177,7 +177,7 @@ const showSubscribeCalendar = computed(
             >
               <TeamImg :team-name="championName" :logo="champion.team" size="xs" />
               {{ championName }}
-            </SbLink>
+            </SLink>
             <span v-else class="inline-flex min-h-10 items-center gap-2 text-highlighted">
               <TeamImg :team-name="championName" size="xs" />
               {{ championName }}

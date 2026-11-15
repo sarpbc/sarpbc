@@ -222,36 +222,36 @@ const submit = () => {
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
     <div class="grid gap-4 sm:grid-cols-3">
-      <SbFormField :label="$t('page.onThisDay.form.month')" required>
-        <SbSelect v-model="month" :items="monthOptions" class="w-full" />
-      </SbFormField>
-      <SbFormField :label="$t('page.onThisDay.form.day')" required>
-        <SbSelect v-model="day" :items="dayOptions" class="w-full" />
-      </SbFormField>
-      <SbFormField
+      <SFormField :label="$t('page.onThisDay.form.month')" required>
+        <SSelect v-model="month" :items="monthOptions" class="w-full" />
+      </SFormField>
+      <SFormField :label="$t('page.onThisDay.form.day')" required>
+        <SSelect v-model="day" :items="dayOptions" class="w-full" />
+      </SFormField>
+      <SFormField
         :label="$t('page.onThisDay.form.year')"
         :hint="$t('page.onThisDay.form.yearHint')"
         :error="yearError"
       >
-        <SbInput v-model="year" inputmode="numeric" autocomplete="off" class="w-full" />
-      </SbFormField>
+        <SInput v-model="year" inputmode="numeric" autocomplete="off" class="w-full" />
+      </SFormField>
     </div>
 
-    <SbFormField
+    <SFormField
       :label="$t('page.onThisDay.form.textEn')"
       :hint="$t('page.onThisDay.form.textHint')"
       required
     >
-      <SbTextarea
+      <STextarea
         v-model="textEn"
         :maxlength="ON_THIS_DAY_TEXT_MAX_LENGTH"
         :rows="2"
         autoresize
         class="w-full"
       />
-    </SbFormField>
-    <SbFormField :label="$t('page.onThisDay.form.textFr')" required>
-      <SbTextarea
+    </SFormField>
+    <SFormField :label="$t('page.onThisDay.form.textFr')" required>
+      <STextarea
         v-model="textFr"
         :maxlength="ON_THIS_DAY_TEXT_MAX_LENGTH"
         :rows="2"
@@ -259,17 +259,17 @@ const submit = () => {
         lang="fr"
         class="w-full"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       :label="$t('page.onThisDay.form.link.label')"
       :hint="$t('page.onThisDay.form.link.hint')"
     >
       <div class="flex flex-col gap-2">
-        <SbSelect v-model="linkKind" :items="linkKindOptions" class="w-full" />
+        <SSelect v-model="linkKind" :items="linkKindOptions" class="w-full" />
         <div v-if="linked" class="flex flex-row items-center justify-between gap-2 text-sm">
           <span class="font-medium" translate="no">{{ linked.label }}</span>
-          <SbButton
+          <SButton
             type="button"
             variant="tertiary"
             size="sm"
@@ -282,7 +282,7 @@ const submit = () => {
           <div v-if="matchStage" class="flex flex-col gap-2">
             <div class="flex flex-row items-center justify-between gap-2 text-sm">
               <span class="text-muted" translate="no">{{ matchStage.label }}</span>
-              <SbButton
+              <SButton
                 type="button"
                 variant="tertiary"
                 size="sm"
@@ -299,7 +299,7 @@ const submit = () => {
               class="flex max-h-56 flex-col gap-1 overflow-y-auto"
             >
               <li v-for="match in stageMatches" :key="match.id">
-                <SbButton
+                <SButton
                   type="button"
                   variant="tertiary"
                   size="sm"
@@ -313,7 +313,7 @@ const submit = () => {
             <p v-else class="text-sm text-muted">{{ $t("page.onThisDay.form.link.noMatches") }}</p>
           </div>
           <template v-else>
-            <SbInput
+            <SInput
               v-model="query"
               :loading="searching"
               :placeholder="
@@ -336,7 +336,7 @@ const submit = () => {
             >
               <ul v-if="results.length" class="flex flex-col gap-1">
                 <li v-for="candidate in results" :key="candidate.id">
-                  <SbButton
+                  <SButton
                     type="button"
                     variant="tertiary"
                     size="sm"
@@ -354,14 +354,14 @@ const submit = () => {
           </template>
         </template>
       </div>
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       :label="$t('page.onThisDay.form.sourceUrl')"
       :hint="$t('page.onThisDay.form.sourceUrlHint')"
       :error="sourceError"
     >
-      <SbInput
+      <SInput
         v-model="sourceUrl"
         type="url"
         :maxlength="ON_THIS_DAY_SOURCE_URL_MAX_LENGTH"
@@ -370,10 +370,10 @@ const submit = () => {
         placeholder="https://"
         class="w-full"
       />
-    </SbFormField>
+    </SFormField>
 
     <div>
-      <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
+      <SButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
     </div>
   </form>
 </template>

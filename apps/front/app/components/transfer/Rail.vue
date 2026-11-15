@@ -36,15 +36,15 @@ const transferLabel = (transfer: Transfer): string => {
       <HubCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
         <HubListItem v-for="index in RAIL_TRANSFERS" :key="index" class="gap-2">
-          <SbSkeleton class="size-7 shrink-0" />
-          <SbSkeleton class="ms-auto size-4" />
-          <SbSkeleton class="size-4" />
-          <SbSkeleton class="size-4" />
+          <SSkeleton class="size-7 shrink-0" />
+          <SSkeleton class="ms-auto size-4" />
+          <SSkeleton class="size-4" />
+          <SSkeleton class="size-4" />
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error" class="p-2">
-        <SbErrorState :message="t('components.transfer.latest.error')" @retry="refresh()" />
+        <SErrorState :message="t('components.transfer.latest.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else>

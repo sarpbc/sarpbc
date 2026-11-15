@@ -176,23 +176,23 @@ const onDeleted = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="items" />
+      <SBreadcrumb :items="items" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.news.create.title')"
         :to="localePath('/news/create')"
       />
     </template>
     <DashboardContent>
-      <SbErrorState
+      <SErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <SbTable
+        <STable
           :data="newsArticles"
           :columns="columns"
           :loading="status === 'pending'"
@@ -203,22 +203,22 @@ const onDeleted = async () => {
           </template>
           <template #actions-cell="{ row }">
             <div class="flex justify-end" @click.stop @pointerdown.stop>
-              <SbDropdownMenu :items="articleActions(row.original)" align="end">
-                <SbButton
+              <SDropdownMenu :items="articleActions(row.original)" align="end">
+                <SButton
                   variant="tertiary"
                   size="sm"
                   icon="i-fluent-more-vertical-24-regular"
                   :aria-label="$t('page.news.actions.menu')"
                 />
-              </SbDropdownMenu>
+              </SDropdownMenu>
             </div>
           </template>
-        </SbTable>
+        </STable>
         <div v-if="total > limit" class="flex w-full flex-row justify-between">
           <span class="text-muted">
             {{ t("page.news.articlesCount", { count: total }) }}
           </span>
-          <SbPagination
+          <SPagination
             :page="page"
             :total="total"
             :items-per-page="limit"
@@ -227,39 +227,39 @@ const onDeleted = async () => {
         </div>
       </ClientOnly>
 
-      <SbModal
+      <SModal
         v-model:open="isRenameModalOpen"
         :title="$t('page.news.actions.renameTitle')"
         :dismissible="!isRenaming"
       >
         <template #body>
           <div class="flex flex-col gap-4">
-            <SbFormField :label="$t('page.news.locale.titleEn')" required>
-              <SbInput v-model="renameTitle" class="w-full" autofocus />
-            </SbFormField>
-            <SbFormField
+            <SFormField :label="$t('page.news.locale.titleEn')" required>
+              <SInput v-model="renameTitle" class="w-full" autofocus />
+            </SFormField>
+            <SFormField
               :label="$t('page.news.locale.titleFr')"
               :hint="$t('page.news.locale.fallbackHint')"
             >
-              <SbInput v-model="renameTitleFr" class="w-full" />
-            </SbFormField>
+              <SInput v-model="renameTitleFr" class="w-full" />
+            </SFormField>
           </div>
         </template>
         <template #footer>
-          <SbButton
+          <SButton
             :loading="isRenaming"
             :disabled="isRenaming"
             :label="$t('page.news.actions.editName')"
             @click="saveTitle"
           />
-          <SbButton
+          <SButton
             variant="secondary"
             :label="$t('common.cancel')"
             :disabled="isRenaming"
             @click="isRenameModalOpen = false"
           />
         </template>
-      </SbModal>
+      </SModal>
 
       <ConfirmDeleteModal
         v-model:target="articleToDelete"

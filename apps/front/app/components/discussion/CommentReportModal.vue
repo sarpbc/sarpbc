@@ -80,7 +80,7 @@ const submitReport = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="$t('components.discussion.report.title')"
     :dismissible="!isSubmitting"
@@ -89,23 +89,23 @@ const submitReport = async () => {
       <p class="text-sm text-muted mb-4">
         {{ $t("components.discussion.report.description") }}
       </p>
-      <SbFormField :label="$t('components.discussion.report.reasonLegend')">
-        <SbRadioGroup v-model="selectedReason" :items="reasonItems" />
-      </SbFormField>
+      <SFormField :label="$t('components.discussion.report.reasonLegend')">
+        <SRadioGroup v-model="selectedReason" :items="reasonItems" />
+      </SFormField>
     </template>
     <template #footer>
-      <SbButton
+      <SButton
         :label="$t('components.discussion.report.submit')"
         :loading="isSubmitting"
         :disabled="!selectedReason || isSubmitting"
         @click="submitReport"
       />
-      <SbButton
+      <SButton
         variant="secondary"
         :label="$t('common.cancel')"
         :disabled="isSubmitting"
         @click="open = false"
       />
     </template>
-  </SbModal>
+  </SModal>
 </template>

@@ -103,7 +103,7 @@ const keyClass = (letter: string): string => {
       :key="`row-${rowIndex}`"
       class="flex justify-center gap-1"
     >
-      <SbButton
+      <SButton
         v-for="letter in row"
         :key="letter"
         type="button"
@@ -115,11 +115,11 @@ const keyClass = (letter: string): string => {
         @click="onLetterPress(letter)"
       >
         {{ letter }}
-      </SbButton>
+      </SButton>
     </div>
 
     <div class="flex justify-center gap-1">
-      <SbButton
+      <SButton
         v-for="digit in numberRow"
         :key="digit"
         type="button"
@@ -131,11 +131,11 @@ const keyClass = (letter: string): string => {
         @click="onLetterPress(digit)"
       >
         {{ digit }}
-      </SbButton>
+      </SButton>
     </div>
 
     <div class="flex justify-center gap-1">
-      <SbButton
+      <SButton
         type="button"
         variant="secondary"
         class="inline-flex h-11 min-h-11 flex-2 items-center justify-center font-mono text-sm font-medium uppercase"
@@ -144,8 +144,8 @@ const keyClass = (letter: string): string => {
         @click="onLetterPress(' ')"
       >
         {{ t("page.game.airriddle.keyboardSpace") }}
-      </SbButton>
-      <SbButton
+      </SButton>
+      <SButton
         type="button"
         variant="secondary"
         icon="i-fluent-backspace-24-regular"
@@ -154,7 +154,7 @@ const keyClass = (letter: string): string => {
         :disabled="disabled"
         @click="emit('backspace')"
       />
-      <SbButton
+      <SButton
         type="button"
         class="inline-flex h-11 min-h-11 flex-1 items-center justify-center font-mono text-sm font-medium"
         :disabled="disabled || !canSubmit"
@@ -163,7 +163,7 @@ const keyClass = (letter: string): string => {
         @click="emit('submit')"
       >
         {{ loading ? t("page.game.airriddle.submitting") : t("page.game.airriddle.keyboardEnter") }}
-      </SbButton>
+      </SButton>
     </div>
   </div>
 </template>

@@ -18,7 +18,7 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
       class="flex w-full min-w-max items-center gap-px px-1.5"
       :aria-label="t('common.filterByLetter')"
     >
-      <SbButton
+      <SButton
         variant="tertiary"
         size="sm"
         :to="to('')"
@@ -26,8 +26,8 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
         class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10 selectable"
       >
         {{ t("common.all") }}
-      </SbButton>
-      <SbButton
+      </SButton>
+      <SButton
         v-for="letter in letters"
         :key="letter"
         variant="tertiary"
@@ -37,7 +37,7 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
         class="h-7 min-w-6 flex-1 justify-center px-0.5 pointer-coarse:h-10 pointer-coarse:min-w-10 selectable"
       >
         {{ letter }}
-      </SbButton>
+      </SButton>
     </nav>
   </HubCard>
 </template>

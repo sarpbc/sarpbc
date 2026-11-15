@@ -1,11 +1,11 @@
 # Admin design
 
-Scope: `apps/admin`, the staff console. The public site's hub layout does not apply. Use `@sarpbc/design` components (`Sb*`), semantic tokens and the existing `header` layout (breadcrumb, command palette, actions).
+Scope: `apps/admin`, the staff console. The public site's hub layout does not apply. Use `@sarpbc/design` components (`S*`), semantic tokens and the existing `header` layout (breadcrumb, command palette, actions).
 
 ## Navigation
 
 - Desktop (`lg` and up): hover-reveal sidebar stays as is.
-- Below `lg`: a burger button in the header opens a `SbSlideover` (left) holding the same link list as the sidebar. Touch only, no hover. It closes on link click, on outside click and on `Escape`.
+- Below `lg`: a burger button in the header opens a `SSlideover` (left) holding the same link list as the sidebar. Touch only, no hover. It closes on link click, on outside click and on `Escape`.
 - The link list lives in one composable (`useAdminNavLinks`), shared by the sidebar and the drawer, so permission filtering is defined once.
 - The header needs the burger on small screens; the breadcrumb and the palette must not overflow at 375 px.
 
@@ -28,7 +28,7 @@ Every section has loading, empty and error states. No pageviews, DAU or charts.
 
 - Page `/users`, admin-only (`ROLE` check via a new `users.manage` permission, granted to `admin` only).
 - Table: user name, email, role, created date. Search by email or name, server-side pagination (25 per page).
-- Role change inline (`SbSelect`: `member`, `journalist`, `moderator`, `admin`), with a confirmation modal for any change to or from `admin`. `member` stores `role = null`.
+- Role change inline (`SSelect`: `member`, `journalist`, `moderator`, `admin`), with a confirmation modal for any change to or from `admin`. `member` stores `role = null`.
 - An admin cannot change their own role (prevents locking out the last admin).
 - Out of scope: impersonation, password reset, ban or deletion.
 - Backend: `GET /users?search=&limit=&offset=` and `PATCH /users/:id/role`, both guarded by `users.manage`. Follows `apps/back/ARCHITECTURE.md`: query and command on `UserService`, persistence behind the user port, DTO validation in infrastructure.

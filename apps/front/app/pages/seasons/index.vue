@@ -30,14 +30,14 @@ setPageSeo({
         <span class="sr-only">{{ t("common.loading") }}</span>
         <HubListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 flex-col gap-2">
-            <SbSkeleton class="h-3 w-40" />
-            <SbSkeleton class="h-3 w-64 max-w-full" />
+            <SSkeleton class="h-3 w-40" />
+            <SSkeleton class="h-3 w-64 max-w-full" />
           </div>
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t('page.seasons.index.error')" @retry="refresh()" />
+        <SErrorState :message="t('page.seasons.index.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else-if="seasons.length">
@@ -64,7 +64,7 @@ setPageSeo({
       </HubCard>
 
       <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-calendar-ltr-24-regular"
           :title="t('page.seasons.index.empty')"
           :hint="t('page.seasons.index.emptyHint')"

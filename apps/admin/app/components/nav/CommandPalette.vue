@@ -207,8 +207,8 @@ const groups = computed<CommandGroup[]>(() => {
 </script>
 
 <template>
-  <SbModal v-if="canSearch" v-model:open="open" :title="$t('page.search.title')">
-    <SbButton
+  <SModal v-if="canSearch" v-model:open="open" :title="$t('page.search.title')">
+    <SButton
       variant="secondary"
       icon="i-lucide-search"
       class="w-full max-w-sm justify-start"
@@ -216,14 +216,14 @@ const groups = computed<CommandGroup[]>(() => {
     >
       <template #trailing>
         <div class="hidden items-center gap-0.5 sm:flex">
-          <SbKbd value="meta" size="sm" />
-          <SbKbd value="k" size="sm" />
+          <SKbd value="meta" size="sm" />
+          <SKbd value="k" size="sm" />
         </div>
       </template>
-    </SbButton>
+    </SButton>
 
     <template #content>
-      <SbCommandPalette
+      <SCommandPalette
         v-model:search-term="searchTerm"
         :groups="groups"
         :loading="pending"
@@ -232,5 +232,5 @@ const groups = computed<CommandGroup[]>(() => {
         class="h-80"
       />
     </template>
-  </SbModal>
+  </SModal>
 </template>

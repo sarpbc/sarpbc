@@ -56,7 +56,7 @@ watchEffect(() => {
     </HubCrossCard>
 
     <HubCard v-if="!loaded" class="p-6">
-      <SbSkeleton class="h-32 w-full" />
+      <SSkeleton class="h-32 w-full" />
     </HubCard>
 
     <HubCard v-else-if="result" class="p-4 sm:p-6">
@@ -72,9 +72,9 @@ watchEffect(() => {
             {{ t("page.game.career.share.notFoundBody") }}
           </p>
         </div>
-        <SbButton :to="localePath('/game/career')">
+        <SButton :to="localePath('/game/career')">
           {{ t("page.game.career.share.startOwn") }}
-        </SbButton>
+        </SButton>
       </div>
     </HubCard>
   </section>

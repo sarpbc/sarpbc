@@ -267,7 +267,7 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.lineups.title', { match: label })"
     :description="t('page.tournaments.lineups.description', { max: MAX_LINEUP_PLAYERS })"
@@ -280,7 +280,7 @@ const save = async () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.lineups.loadError") }}</p>
-        <SbButton variant="secondary" size="sm" :label="t('common.retry')" @click="load" />
+        <SButton variant="secondary" size="sm" :label="t('common.retry')" @click="load" />
       </div>
 
       <div v-else class="flex flex-col gap-4">
@@ -300,7 +300,7 @@ const save = async () => {
               }}
             </p>
           </div>
-          <SbButton
+          <SButton
             variant="secondary"
             size="sm"
             icon="i-fluent-arrow-sync-24-regular"
@@ -332,11 +332,11 @@ const save = async () => {
               >
                 <span class="flex min-w-0 items-center gap-2">
                   <span class="truncate">{{ pick.name }}</span>
-                  <SbBadge v-if="isStandIn(side.id, pick.id)" color="warning" class="shrink-0">
+                  <SBadge v-if="isStandIn(side.id, pick.id)" color="warning" class="shrink-0">
                     {{ t("page.tournaments.lineups.standIn") }}
-                  </SbBadge>
+                  </SBadge>
                 </span>
-                <SbButton
+                <SButton
                   variant="tertiary"
                   size="sm"
                   icon="i-fluent-dismiss-24-regular"
@@ -348,7 +348,7 @@ const save = async () => {
             <p v-else class="text-sm text-muted">{{ t("page.tournaments.lineups.empty") }}</p>
 
             <form class="flex items-center gap-2" @submit.prevent="addFromRoster(side.id)">
-              <SbSelect
+              <SSelect
                 v-model="selectedPick[side.id]"
                 :groups="rosterOptions(side.id)"
                 class="min-w-0 flex-1"
@@ -356,7 +356,7 @@ const save = async () => {
                 :aria-label="t('page.tournaments.lineups.chooseFor', { name: side.name })"
                 :disabled="isFull(side.id)"
               />
-              <SbButton
+              <SButton
                 type="submit"
                 variant="secondary"
                 size="sm"
@@ -365,7 +365,7 @@ const save = async () => {
               />
             </form>
 
-            <SbButton
+            <SButton
               v-if="hasRoster(side.id)"
               variant="tertiary"
               size="sm"
@@ -377,7 +377,7 @@ const save = async () => {
         </div>
 
         <div class="flex flex-col gap-2">
-          <SbInput
+          <SInput
             v-model="query"
             class="w-full"
             :placeholder="t('page.tournaments.lineups.search')"
@@ -397,7 +397,7 @@ const save = async () => {
               >
                 <span class="truncate">{{ player.name }}</span>
                 <div class="flex flex-wrap gap-1">
-                  <SbButton
+                  <SButton
                     v-for="side in sides"
                     :key="side.id"
                     variant="tertiary"
@@ -418,8 +418,8 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <SbButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
-        <SbButton
+        <SButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
+        <SButton
           :label="t('page.tournaments.lineups.save')"
           :loading="saving"
           :disabled="loading || loadFailed"
@@ -427,5 +427,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

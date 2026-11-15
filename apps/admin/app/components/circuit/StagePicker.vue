@@ -70,14 +70,14 @@ const choose = (stage: PickedStage) => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="title ?? $t('page.circuits.picker.title')"
     :description="description ?? $t('page.circuits.picker.hint')"
   >
     <template #body>
       <div class="flex flex-col gap-3">
-        <SbInput
+        <SInput
           v-model="query"
           :loading="searching"
           :placeholder="$t('page.circuits.picker.placeholder')"
@@ -92,7 +92,7 @@ const choose = (stage: PickedStage) => {
         </p>
         <ul v-else class="flex flex-col gap-1">
           <li v-for="stage in results" :key="stage.id">
-            <SbButton
+            <SButton
               variant="tertiary"
               block
               class="justify-start"
@@ -103,5 +103,5 @@ const choose = (stage: PickedStage) => {
         </ul>
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

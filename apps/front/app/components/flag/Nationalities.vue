@@ -297,7 +297,7 @@ const tooltipText = computed(() => {
 </script>
 
 <template>
-  <SbTooltip v-if="flagToDisplay" :text="tooltipText">
+  <STooltip v-if="flagToDisplay" :text="tooltipText">
     <img
       :src="`/flags/${flagToDisplay}.svg`"
       alt=""
@@ -308,5 +308,5 @@ const tooltipText = computed(() => {
       :class="sizeClasses[size]"
       class="inline-block"
     />
-  </SbTooltip>
+  </STooltip>
 </template>

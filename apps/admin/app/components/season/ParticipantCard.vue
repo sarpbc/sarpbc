@@ -88,18 +88,18 @@ const addEntry = async () => {
   <article class="flex flex-col gap-4 border border-default p-3">
     <header class="flex flex-row flex-wrap items-center justify-between gap-2">
       <div class="flex min-w-0 flex-row items-center gap-2">
-        <SbLink
+        <SLink
           :to="localePath(`/teams/${participant.team.id}`)"
           class="truncate font-medium"
           translate="no"
         >
           {{ participant.team.name }}
-        </SbLink>
-        <SbBadge v-if="isWinner" color="info">
+        </SLink>
+        <SBadge v-if="isWinner" color="info">
           {{ $t("page.seasons.participants.winner") }}
-        </SbBadge>
+        </SBadge>
       </div>
-      <SbButton
+      <SButton
         variant="tertiary"
         danger
         size="sm"
@@ -110,16 +110,16 @@ const addEntry = async () => {
     </header>
 
     <form class="flex max-w-xl flex-col gap-2" @submit.prevent="saveNote">
-      <SbFormField :label="$t('page.seasons.path.note')" :hint="$t('page.seasons.path.noteHint')">
-        <SbTextarea
+      <SFormField :label="$t('page.seasons.path.note')" :hint="$t('page.seasons.path.noteHint')">
+        <STextarea
           v-model="pathNote"
           :maxlength="SEASON_PATH_NOTE_MAX_LENGTH"
           :rows="2"
           class="w-full"
         />
-      </SbFormField>
+      </SFormField>
       <div>
-        <SbButton
+        <SButton
           type="submit"
           variant="secondary"
           size="sm"
@@ -148,12 +148,12 @@ const addEntry = async () => {
             </span>
             <span v-if="entry.tournament" class="flex flex-row items-center gap-2 text-muted">
               {{ entryTournamentLabel(entry) }}
-              <SbBadge v-if="entry.tournament.source === 'startgg'" color="warning">
+              <SBadge v-if="entry.tournament.source === 'startgg'" color="warning">
                 {{ $t("page.seasons.path.startgg") }}
-              </SbBadge>
+              </SBadge>
             </span>
           </div>
-          <SbButton
+          <SButton
             variant="tertiary"
             danger
             size="sm"
@@ -167,29 +167,29 @@ const addEntry = async () => {
 
     <form class="flex max-w-xl flex-col gap-3" @submit.prevent="addEntry">
       <div class="grid gap-3 sm:grid-cols-2">
-        <SbFormField :label="$t('page.seasons.path.label')" required>
-          <SbInput
+        <SFormField :label="$t('page.seasons.path.label')" required>
+          <SInput
             v-model="label"
             :maxlength="SEASON_PATH_LABEL_MAX_LENGTH"
             :placeholder="$t('page.seasons.path.labelPlaceholder')"
             class="w-full"
           />
-        </SbFormField>
-        <SbFormField :label="$t('page.seasons.path.result')" required>
-          <SbInput
+        </SFormField>
+        <SFormField :label="$t('page.seasons.path.result')" required>
+          <SInput
             v-model="result"
             :maxlength="SEASON_PATH_RESULT_MAX_LENGTH"
             :placeholder="$t('page.seasons.path.resultPlaceholder')"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
       </div>
       <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
         <template v-if="stage">
           <span class="text-muted">{{
             $t("page.seasons.path.linked", { name: stage.label })
           }}</span>
-          <SbButton
+          <SButton
             type="button"
             variant="tertiary"
             size="sm"
@@ -198,7 +198,7 @@ const addEntry = async () => {
             @click="stage = null"
           />
         </template>
-        <SbButton
+        <SButton
           v-else
           type="button"
           variant="secondary"
@@ -209,7 +209,7 @@ const addEntry = async () => {
         />
       </div>
       <div>
-        <SbButton
+        <SButton
           type="submit"
           size="sm"
           :label="$t('page.seasons.path.add')"

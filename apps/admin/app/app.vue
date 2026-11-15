@@ -16,9 +16,9 @@ useHead({
 </script>
 
 <template>
-  <SbToaster>
+  <SToaster>
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-  </SbToaster>
+  </SToaster>
 </template>

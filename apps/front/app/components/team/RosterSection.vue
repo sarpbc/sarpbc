@@ -18,7 +18,7 @@ const headingId = "team-roster-title";
     </h2>
 
     <div v-if="players.length" class="grid flex-1 grid-cols-3 gap-2">
-      <SbLink
+      <SLink
         v-for="player in players"
         :key="player.id"
         :to="$localePath(playerPath(player.slug))"
@@ -43,7 +43,7 @@ const headingId = "team-roster-title";
             {{ player.name }}
           </span>
         </div>
-      </SbLink>
+      </SLink>
     </div>
 
     <div

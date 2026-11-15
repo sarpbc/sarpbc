@@ -94,13 +94,13 @@ const finalScore = computed(() =>
         <span>{{ factText }}</span>
         <template v-if="factLink">
           {{ " " }}
-          <SbLink :to="factLink.to" class="text-xs" translate="no">{{ factLink.label }}</SbLink>
+          <SLink :to="factLink.to" class="text-xs" translate="no">{{ factLink.label }}</SLink>
         </template>
         <template v-if="event.sourceUrl">
           {{ " · " }}
-          <SbLink :to="event.sourceUrl" target="_blank" rel="noopener noreferrer" class="text-xs">
+          <SLink :to="event.sourceUrl" target="_blank" rel="noopener noreferrer" class="text-xs">
             {{ t("components.onThisDay.source") }}
-          </SbLink>
+          </SLink>
         </template>
       </template>
 
@@ -111,7 +111,7 @@ const finalScore = computed(() =>
         scope="global"
       >
         <template #winner>
-          <SbLink
+          <SLink
             v-if="sidePath(event.winner)"
             :to="sidePath(event.winner) ?? ''"
             variant="inline"
@@ -119,15 +119,15 @@ const finalScore = computed(() =>
             translate="no"
           >
             {{ participantName(event.winner) }}
-          </SbLink>
+          </SLink>
           <span v-else class="font-medium" translate="no">
             {{ participantName(event.winner) }}
           </span>
         </template>
         <template #tournament>
-          <SbLink :to="tournamentPath(event.tournament)" variant="inline" translate="no">
+          <SLink :to="tournamentPath(event.tournament)" variant="inline" translate="no">
             {{ tournamentStageLabel(event.tournament) }}
-          </SbLink>
+          </SLink>
         </template>
       </i18n-t>
 
@@ -146,18 +146,18 @@ const finalScore = computed(() =>
           <span translate="no">{{ participantName(event.loser) }}</span>
         </template>
         <template #score>
-          <SbLink
+          <SLink
             :to="localePath(matchPath(event.match.publicId, event.match.slug))"
             variant="inline"
             class="tabular-nums"
           >
             {{ finalScore }}
-          </SbLink>
+          </SLink>
         </template>
         <template #tournament>
-          <SbLink :to="tournamentPath(event.tournament)" variant="inline" translate="no">
+          <SLink :to="tournamentPath(event.tournament)" variant="inline" translate="no">
             {{ tournamentStageLabel(event.tournament) }}
-          </SbLink>
+          </SLink>
         </template>
       </i18n-t>
 
@@ -168,19 +168,19 @@ const finalScore = computed(() =>
         scope="global"
       >
         <template #player>
-          <SbLink
+          <SLink
             :to="localePath(playerPath(event.player.slug))"
             variant="inline"
             class="font-medium"
             translate="no"
           >
             {{ event.player.name }}
-          </SbLink>
+          </SLink>
         </template>
         <template #team>
-          <SbLink :to="localePath(teamPath(event.team.slug))" variant="inline" translate="no">
+          <SLink :to="localePath(teamPath(event.team.slug))" variant="inline" translate="no">
             {{ event.team.name }}
-          </SbLink>
+          </SLink>
         </template>
       </i18n-t>
     </p>

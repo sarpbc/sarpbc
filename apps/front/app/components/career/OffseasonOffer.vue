@@ -167,7 +167,7 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
     </p>
 
     <template v-if="destinyPromptPending">
-      <SbActionList :items="destinyItems" @select="emit('destiny', $event)" />
+      <SActionList :items="destinyItems" @select="emit('destiny', $event)" />
     </template>
 
     <template v-else>
@@ -194,9 +194,9 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
             </p>
           </div>
           <div class="px-3 py-3">
-            <SbButton block @click="emit('accept', offer.teamId)">
+            <SButton block @click="emit('accept', offer.teamId)">
               {{ t("page.game.career.offseason.accept") }}
-            </SbButton>
+            </SButton>
           </div>
         </div>
         <div
@@ -215,9 +215,9 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
             </p>
           </div>
           <div class="px-3 py-3">
-            <SbButton variant="secondary" block @click="emit('stay')">
+            <SButton variant="secondary" block @click="emit('stay')">
               {{ t("page.game.career.offseason.continue") }}
-            </SbButton>
+            </SButton>
           </div>
         </div>
         <div
@@ -232,9 +232,9 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
             </p>
           </div>
           <div class="px-3 py-3">
-            <SbButton danger block @click="emit('retire')">
+            <SButton danger block @click="emit('retire')">
               {{ t("page.game.career.offseason.retire") }}
-            </SbButton>
+            </SButton>
           </div>
         </div>
       </div>

@@ -10,7 +10,7 @@ const { player } = defineProps<Props>();
 </script>
 
 <template>
-  <SbButton
+  <SButton
     class="flex items-center gap-2"
     variant="tertiary"
     :to="$localePath(playerPath(player.slug))"
@@ -24,5 +24,5 @@ const { player } = defineProps<Props>();
         </span>
       </div>
     </div>
-  </SbButton>
+  </SButton>
 </template>

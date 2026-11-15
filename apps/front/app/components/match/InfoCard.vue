@@ -31,9 +31,9 @@ const facts = computed(() => {
       <HubListItem class="justify-between gap-4 text-sm">
         <dt class="shrink-0 text-muted">{{ t("page.match.detail.info.event") }}</dt>
         <dd class="min-w-0">
-          <SbLink :to="$localePath(tournamentMatchesPath)" variant="muted" class="block truncate">
+          <SLink :to="$localePath(tournamentMatchesPath)" variant="muted" class="block truncate">
             {{ tournamentStageLabel(match.tournament) }}
-          </SbLink>
+          </SLink>
         </dd>
       </HubListItem>
       <HubListItem v-for="fact in facts" :key="fact.label" class="justify-between gap-4 text-sm">

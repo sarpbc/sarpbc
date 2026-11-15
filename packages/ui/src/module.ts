@@ -25,7 +25,7 @@ export default defineNuxtModule({
 
     const resolver = createResolver(import.meta.url);
 
-    // @sarpbc/design: its components as `Sb*`, its tokens, and Nuxt's <Icon> and <NuxtLink> as its adapters.
+    // @sarpbc/design: its components as `S*`, its tokens, and Nuxt's <Icon> and <NuxtLink> as its adapters.
     const { resolve } = createRequire(import.meta.url);
     // Generated imports need forward slashes, including on Windows.
     // Point at single files, not the index: importing the index would bundle every component (and inline its styles) on every page.
@@ -47,7 +47,7 @@ export default defineNuxtModule({
       innerHTML: "@layer theme, base, components, utilities;",
       tagPriority: "critical",
     });
-    addComponentsDir({ path: `${design}/components`, prefix: "Sb" });
+    addComponentsDir({ path: `${design}/components`, prefix: "S" });
     addImports({ from: `${design}/toast.ts`, name: "useToast", priority: 1 });
     addPluginTemplate({
       filename: "sarpbc-design.mjs",

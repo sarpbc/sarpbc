@@ -55,16 +55,16 @@ const entryMeta = (entry: EarningsEntry): string => {
         <HubListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <SbSkeleton class="h-3.5 w-3/5 max-w-48" />
-              <SbSkeleton class="h-3 w-2/5 max-w-32" />
+              <SSkeleton class="h-3.5 w-3/5 max-w-48" />
+              <SSkeleton class="h-3 w-2/5 max-w-32" />
             </div>
-            <SbSkeleton class="h-3.5 w-16" />
+            <SSkeleton class="h-3.5 w-16" />
           </div>
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error">
-        <SbErrorState :message="t('common.prizes.earnings.error')" @retry="refresh()" />
+        <SErrorState :message="t('common.prizes.earnings.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else-if="years.length > 0">
@@ -109,7 +109,7 @@ const entryMeta = (entry: EarningsEntry): string => {
           <span v-if="owner === 'player'">{{ t("common.prizes.earnings.splitHint") }}</span>
           <span v-if="hasStartgg">
             {{ t("common.prizes.dataFrom") }}
-            <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
+            <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
           </span>
         </p>
       </HubCard>

@@ -7,7 +7,7 @@ Repo-specific implementation notes for `apps/front`.
 ```
 apps/front/
 ├── app/
-│   ├── app.vue          # SbToaster + layout + i18n locale
+│   ├── app.vue          # SToaster + layout + i18n locale
 │   ├── app.config.ts    # Site title only
 │   ├── assets/css/main.css
 │   ├── components/
@@ -26,7 +26,7 @@ apps/front/
 
 | Module               | Role                                          |
 | -------------------- | --------------------------------------------- |
-| `@sarpbc/ui`         | Registers `@sarpbc/design` as `Sb*`, theme    |
+| `@sarpbc/ui`         | Registers `@sarpbc/design` as `S*`, theme     |
 | `@nuxt/icon`         | Icons                                         |
 | `@nuxt/fonts`        | Fonts                                         |
 | `@nuxtjs/color-mode` | Light and dark mode                           |
@@ -35,7 +35,7 @@ apps/front/
 
 ## Forms
 
-Forms are a native `<form @submit.prevent>` validated with zod. `useFormErrors(schema, state)` (`app/composables/use-form-errors.ts`) returns `errors` and `markSubmitted`: errors stay hidden until the first submit, then follow the input. Pass each one to `SbFormField :error`.
+Forms are a native `<form @submit.prevent>` validated with zod. `useFormErrors(schema, state)` (`app/composables/use-form-errors.ts`) returns `errors` and `markSubmitted`: errors stay hidden until the first submit, then follow the input. Pass each one to `SFormField :error`.
 
 ## Page Meta & SEO
 
@@ -69,7 +69,7 @@ Staff console lives in `apps/admin` (`admin.sarpbc.org`):
 
 - Layout: `default` + `header` (see `apps/admin/app/layouts/`)
 - Middleware: `admin` via `routeRules` in `apps/admin/nuxt.config.ts`
-- Lists: `SbTable` + `SbButton` actions + `SbModal` for create/edit
+- Lists: `STable` + `SButton` actions + `SModal` for create/edit
 - Reference: `apps/admin/app/pages/players/index.vue`
 
 ## Custom UI Primitives
@@ -141,13 +141,13 @@ Match layout/middleware when adding new auth or staff pages (including `/fr/...`
 
 ## Toaster
 
-`app.vue` wraps the app in `SbToaster`; raise toasts with `useToast()` from `@sarpbc/design` (auto-imported). Colors are `success`, `info`, `warning` and `danger`.
+`app.vue` wraps the app in `SToaster`; raise toasts with `useToast()` from `@sarpbc/design` (auto-imported). Colors are `success`, `info`, `warning` and `danger`.
 
 Toast copy: specific, no period, from i18n where possible.
 
 ## Error Page
 
-`error.vue` renders its own markup (status code, heading and an `SbButton` back home)—ensure status codes and messages remain user-friendly for production.
+`error.vue` renders its own markup (status code, heading and an `SButton` back home)—ensure status codes and messages remain user-friendly for production.
 
 ## Pair With
 

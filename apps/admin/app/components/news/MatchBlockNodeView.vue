@@ -25,14 +25,14 @@ const edit = () => {
     data-drag-handle
   >
     <div class="flex items-center justify-end gap-1">
-      <SbButton
+      <SButton
         variant="secondary"
         size="sm"
         icon="i-lucide-pencil"
         :label="t('page.news.editor.matches.edit')"
         @click="edit"
       />
-      <SbButton
+      <SButton
         variant="secondary"
         danger
         size="sm"

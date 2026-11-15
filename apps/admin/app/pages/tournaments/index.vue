@@ -89,29 +89,29 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div class="flex flex-row flex-wrap gap-2">
-        <SbButton
+        <SButton
           variant="tertiary"
           icon="i-fluent-calendar-ltr-24-regular"
           :label="$t('page.tournaments.events.title')"
           :to="localePath('/tournaments/events')"
         />
-        <SbButton
+        <SButton
           variant="tertiary"
           icon="i-fluent-ribbon-24-regular"
           :label="$t('page.tournaments.leagues.title')"
           :to="localePath('/tournaments/leagues')"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="$t('page.tournaments.create.action')"
           :to="localePath('/tournaments/create')"
         />
-        <SbButton
+        <SButton
           :loading="isSyncingAdditions"
           icon="i-fluent-arrow-sync-24-regular"
           :label="$t('page.tournaments.syncAdditions')"
@@ -121,13 +121,13 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
     </template>
 
     <DashboardContent>
-      <SbErrorState
+      <SErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <SbTable
+        <STable
           :data="tournaments"
           :columns="columns"
           :loading="status === 'pending'"
@@ -138,14 +138,14 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
             {{ $t("page.tournaments.noTournaments") }}
           </template>
           <template #source-cell="{ row }">
-            <SbBadge
+            <SBadge
               :color="isManualTournament(row.original) ? 'info' : 'neutral'"
               :label="$t(`page.tournaments.source.${row.original.source}`)"
             />
           </template>
           <template #actions-cell="{ row }">
             <div class="flex flex-row items-center justify-end gap-1">
-              <SbButton
+              <SButton
                 variant="tertiary"
                 size="sm"
                 icon="i-fluent-edit-24-regular"
@@ -153,7 +153,7 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
                 :to="localePath(`/tournaments/${row.original.id}/edit`)"
                 @click.stop
               />
-              <SbButton
+              <SButton
                 v-if="!isManualTournament(row.original)"
                 variant="tertiary"
                 size="sm"
@@ -165,7 +165,7 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
               />
             </div>
           </template>
-        </SbTable>
+        </STable>
 
         <div
           v-if="status !== 'pending' && tournaments.length > 0"
@@ -174,7 +174,7 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
           <span class="text-muted">
             {{ t("page.tournaments.tournamentsCount", { count: total }) }}
           </span>
-          <SbPagination
+          <SPagination
             v-if="total > limit"
             :page="page"
             :total="total"

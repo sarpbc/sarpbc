@@ -195,11 +195,11 @@ const contractModalTitle = computed(() =>
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div v-if="team" class="flex flex-row gap-2">
-        <SbButton
+        <SButton
           v-if="team.source !== 'pandascore'"
           icon="i-fluent-delete-24-regular"
           variant="secondary"
@@ -207,7 +207,7 @@ const contractModalTitle = computed(() =>
           :label="$t('page.teams.delete.title')"
           @click="teamToDelete = team"
         />
-        <SbButton
+        <SButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.teams.save')"
           :loading="isSavingTeam"
@@ -218,7 +218,7 @@ const contractModalTitle = computed(() =>
     </template>
 
     <DashboardContent>
-      <SbErrorState
+      <SErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
@@ -230,15 +230,15 @@ const contractModalTitle = computed(() =>
             {{ $t("page.teams.info.title") }}
           </h2>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <SbFormField :label="$t('page.teams.fields.name')" required>
-              <SbInput v-model="teamForm.name" class="w-full" />
-            </SbFormField>
-            <SbFormField :label="$t('page.teams.fields.location')">
-              <SbInput v-model="teamForm.location" class="w-full" />
-            </SbFormField>
-            <SbFormField :label="$t('page.teams.fields.imageUrl')">
-              <SbInput v-model="teamForm.imageUrl" class="w-full" />
-            </SbFormField>
+            <SFormField :label="$t('page.teams.fields.name')" required>
+              <SInput v-model="teamForm.name" class="w-full" />
+            </SFormField>
+            <SFormField :label="$t('page.teams.fields.location')">
+              <SInput v-model="teamForm.location" class="w-full" />
+            </SFormField>
+            <SFormField :label="$t('page.teams.fields.imageUrl')">
+              <SInput v-model="teamForm.imageUrl" class="w-full" />
+            </SFormField>
           </div>
         </div>
 
@@ -249,7 +249,7 @@ const contractModalTitle = computed(() =>
             <h2 class="text-base font-semibold">
               {{ $t("page.teams.contracts.title") }}
             </h2>
-            <SbButton
+            <SButton
               icon="i-fluent-add-24-regular"
               size="sm"
               :label="$t('page.teams.contracts.create.title')"
@@ -257,24 +257,24 @@ const contractModalTitle = computed(() =>
             />
           </div>
 
-          <SbErrorState
+          <SErrorState
             v-if="contractsError"
             :message="getApiErrorMessage(contractsError) ?? $t('common.loadFailed')"
             @retry="refreshContracts()"
           />
-          <SbTable v-else :data="contracts" :columns="contractColumns">
+          <STable v-else :data="contracts" :columns="contractColumns">
             <template #empty>
               {{ $t("page.teams.contracts.empty") }}
             </template>
             <template #actions-cell="{ row }">
               <div class="flex flex-row gap-1">
-                <SbButton
+                <SButton
                   icon="i-fluent-edit-24-regular"
                   variant="tertiary"
                   size="sm"
                   @click="openEditContractModal(row.original)"
                 />
-                <SbButton
+                <SButton
                   icon="i-fluent-delete-24-regular"
                   variant="tertiary"
                   danger
@@ -283,48 +283,48 @@ const contractModalTitle = computed(() =>
                 />
               </div>
             </template>
-          </SbTable>
+          </STable>
         </div>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isContractModalOpen"
       :title="contractModalTitle"
       :dismissible="!isSavingContract"
     >
       <template #body>
         <div class="flex flex-col gap-3">
-          <SbFormField :label="$t('page.teams.contracts.fields.playerId')" required>
-            <SbInput v-model="contractForm.playerId" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.teams.contracts.fields.role')" required>
-            <SbSelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.teams.contracts.fields.startDate')" required>
-            <SbInput v-model="contractForm.startDate" type="date" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.teams.contracts.fields.endDate')">
-            <SbInput v-model="contractForm.endDate" type="date" class="w-full" />
-          </SbFormField>
+          <SFormField :label="$t('page.teams.contracts.fields.playerId')" required>
+            <SInput v-model="contractForm.playerId" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.teams.contracts.fields.role')" required>
+            <SSelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.teams.contracts.fields.startDate')" required>
+            <SInput v-model="contractForm.startDate" type="date" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.teams.contracts.fields.endDate')">
+            <SInput v-model="contractForm.endDate" type="date" class="w-full" />
+          </SFormField>
         </div>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.teams.contracts.save')"
           :loading="isSavingContract"
           :disabled="!contractForm.playerId || !contractForm.startDate"
           @click="saveContract"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isSavingContract"
           @click="isContractModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="teamToDelete"

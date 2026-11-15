@@ -81,7 +81,7 @@ const handleLinkClick = (event: MouseEvent): void => {
 </script>
 
 <template>
-  <SbPopover v-model:open="open" :dismissible="false">
+  <SPopover v-model:open="open" :dismissible="false">
     <template #anchor>
       <InputSearch
         ref="inputRef"
@@ -111,5 +111,5 @@ const handleLinkClick = (event: MouseEvent): void => {
         </div>
       </div>
     </template>
-  </SbPopover>
+  </SPopover>
 </template>

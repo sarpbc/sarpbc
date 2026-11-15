@@ -70,8 +70,8 @@ const save = async (participant: (typeof teamParticipants.value)[number]) => {
       <p class="truncate text-sm font-medium text-highlighted sm:mt-2">
         {{ participant.team.name }}
       </p>
-      <SbFormField :error="sourceUrlError(values[participant.id] ?? '')">
-        <SbInput
+      <SFormField :error="sourceUrlError(values[participant.id] ?? '')">
+        <SInput
           v-model="values[participant.id]"
           type="url"
           autocomplete="off"
@@ -79,7 +79,7 @@ const save = async (participant: (typeof teamParticipants.value)[number]) => {
           class="w-full"
         />
         <template v-if="participant.rosterSourceUrl" #help>
-          <SbLink
+          <SLink
             variant="accent"
             :to="participant.rosterSourceUrl"
             external
@@ -87,10 +87,10 @@ const save = async (participant: (typeof teamParticipants.value)[number]) => {
             class="break-all"
           >
             {{ t("common.openSource") }}
-          </SbLink>
+          </SLink>
         </template>
-      </SbFormField>
-      <SbButton
+      </SFormField>
+      <SButton
         variant="secondary"
         :label="t('page.tournaments.rosterSources.save')"
         :loading="savingId === participant.id"

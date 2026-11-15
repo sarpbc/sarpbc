@@ -18,7 +18,7 @@ const soloPlayer = computed(() =>
 </script>
 
 <template>
-  <SbLink
+  <SLink
     v-if="soloPlayer"
     :to="$localePath(playerPath(soloPlayer.slug))"
     variant="muted"
@@ -26,10 +26,10 @@ const soloPlayer = computed(() =>
   >
     <TeamImg :team-name="entry.name" size="sm" />
     <span class="text-sm font-medium truncate">{{ entry.name }}</span>
-  </SbLink>
+  </SLink>
 
-  <SbHoverCard v-else v-model:open="open">
-    <SbButton
+  <SHoverCard v-else v-model:open="open">
+    <SButton
       variant="tertiary"
       block
       class="h-row min-h-row justify-start gap-2 border-r border-b border-separator px-2 text-sm"
@@ -42,7 +42,7 @@ const soloPlayer = computed(() =>
         <TeamImg :team-name="entry.name" :logo="entry.team" size="sm" />
       </template>
       {{ entry.name }}
-    </SbButton>
+    </SButton>
 
     <template #content>
       <div
@@ -51,7 +51,7 @@ const soloPlayer = computed(() =>
         role="dialog"
         :aria-labelledby="titleId"
       >
-        <SbLink
+        <SLink
           v-if="entry.team"
           :id="titleId"
           :to="$localePath(teamPath(entry.team.slug))"
@@ -61,11 +61,11 @@ const soloPlayer = computed(() =>
         >
           <TeamImg :team-name="entry.name" :logo="entry.team" size="xs" />
           <span class="truncate">{{ entry.name }}</span>
-        </SbLink>
+        </SLink>
         <p v-else :id="titleId" class="truncate text-sm font-medium">{{ entry.name }}</p>
 
         <div v-if="entry.players.length" class="flex flex-col gap-1">
-          <SbLink
+          <SLink
             v-for="player in entry.players"
             :key="player.id"
             :to="$localePath(playerPath(player.slug))"
@@ -74,12 +74,12 @@ const soloPlayer = computed(() =>
           >
             <FlagIcon :nationality="player.nationality" size="sm" />
             <span class="truncate">{{ player.name }}</span>
-          </SbLink>
+          </SLink>
         </div>
         <p v-else class="text-sm text-muted">
           {{ t("page.tournaments.id.participants.rosterEmpty") }}
         </p>
       </div>
     </template>
-  </SbHoverCard>
+  </SHoverCard>
 </template>

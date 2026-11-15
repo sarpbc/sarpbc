@@ -9,8 +9,8 @@ const titleId = "airriddle-how-to-play-title";
 </script>
 
 <template>
-  <SbPopover v-model:open="open">
-    <SbButton
+  <SPopover v-model:open="open">
+    <SButton
       variant="tertiary"
       class="inline-flex size-9 min-h-9 min-w-9 items-center justify-center p-0 text-base font-medium leading-none tabular-nums"
       :aria-label="t('page.game.airriddle.howToPlayLabel')"
@@ -20,7 +20,7 @@ const titleId = "airriddle-how-to-play-title";
       @click.stop
     >
       ?
-    </SbButton>
+    </SButton>
 
     <template #content>
       <div
@@ -54,5 +54,5 @@ const titleId = "airriddle-how-to-play-title";
         </ul>
       </div>
     </template>
-  </SbPopover>
+  </SPopover>
 </template>

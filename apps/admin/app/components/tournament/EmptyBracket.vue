@@ -41,38 +41,38 @@ const create = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.emptyBracket.title')"
     :description="t('page.tournaments.emptyBracket.description')"
   >
     <template #body>
       <div class="grid gap-4 sm:grid-cols-2">
-        <SbFormField :label="t('page.tournaments.emptyBracket.teams')">
-          <SbSelect v-model="teams" :items="teamItems" class="w-full" />
-        </SbFormField>
-        <SbFormField
+        <SFormField :label="t('page.tournaments.emptyBracket.teams')">
+          <SSelect v-model="teams" :items="teamItems" class="w-full" />
+        </SFormField>
+        <SFormField
           :label="t('page.tournaments.emptyBracket.numberOfGames')"
           :help="t('page.tournaments.emptyBracket.numberOfGamesHelp')"
         >
-          <SbInputNumber v-model="numberOfGames" :min="1" :max="9" class="w-full" />
-        </SbFormField>
+          <SInputNumber v-model="numberOfGames" :min="1" :max="9" class="w-full" />
+        </SFormField>
       </div>
     </template>
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <SbButton
+        <SButton
           variant="tertiary"
           :label="t('page.tournaments.emptyBracket.cancel')"
           @click="open = false"
         />
-        <SbButton
+        <SButton
           :label="t('page.tournaments.emptyBracket.create')"
           :loading="creating"
           @click="create"
         />
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

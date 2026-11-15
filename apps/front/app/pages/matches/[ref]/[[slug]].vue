@@ -328,7 +328,7 @@ const scoreboardLabel = computed(() => {
 
   <HubPageBody v-else-if="error">
     <HubCard class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.match.detail.error')" @retry="refresh()" />
+      <SErrorState :message="t('page.match.detail.error')" @retry="refresh()" />
     </HubCard>
   </HubPageBody>
 
@@ -387,9 +387,9 @@ const scoreboardLabel = computed(() => {
         <HubRail v-if="forfeiter" :title="t('page.match.detail.sections.result')">
           <HubCard class="flex-1">
             <HubListItem class="gap-2">
-              <SbBadge class="shrink-0">
+              <SBadge class="shrink-0">
                 {{ t("components.match.forfeit") }}
-              </SbBadge>
+              </SBadge>
               <span class="min-w-0 text-sm text-default">
                 {{ t("page.match.detail.forfeitNote", { team: participantLabel(forfeiter) }) }}
               </span>

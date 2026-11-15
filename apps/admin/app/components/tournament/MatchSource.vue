@@ -39,21 +39,21 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.matchSource.title', { match: label })"
     :description="t('page.tournaments.matchSource.description')"
   >
     <template #body>
-      <SbFormField :label="t('common.sourceUrl')" :error="sourceUrlError(value)">
-        <SbInput v-model="value" type="url" autocomplete="off" class="w-full" />
-      </SbFormField>
+      <SFormField :label="t('common.sourceUrl')" :error="sourceUrlError(value)">
+        <SInput v-model="value" type="url" autocomplete="off" class="w-full" />
+      </SFormField>
     </template>
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <SbButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
-        <SbButton
+        <SButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
+        <SButton
           :label="t('page.tournaments.matchSource.save')"
           :loading="saving"
           :disabled="!!sourceUrlError(value)"
@@ -61,5 +61,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

@@ -52,12 +52,12 @@ const breadcrumbItems = computed(() => [
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <SbErrorState
+        <SErrorState
           v-if="loadError"
           :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
           @retry="reload()"

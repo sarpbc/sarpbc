@@ -97,8 +97,8 @@ const submit = async () => {
 </script>
 
 <template>
-  <SbPopover v-if="canManage" v-model:open="open">
-    <SbButton
+  <SPopover v-if="canManage" v-model:open="open">
+    <SButton
       icon="i-fluent-more-horizontal-24-regular"
       variant="tertiary"
       size="sm"
@@ -111,11 +111,11 @@ const submit = async () => {
         <p class="text-sm font-medium text-highlighted">
           {{ t("page.match.detail.vodAdd.title") }}
         </p>
-        <SbFormField :label="t('page.match.detail.vodAdd.game')">
-          <SbSelect v-model="game" :items="gameOptions" class="w-full" />
-        </SbFormField>
-        <SbFormField :label="t('page.match.detail.vodAdd.url')" :error="urlError">
-          <SbInput
+        <SFormField :label="t('page.match.detail.vodAdd.game')">
+          <SSelect v-model="game" :items="gameOptions" class="w-full" />
+        </SFormField>
+        <SFormField :label="t('page.match.detail.vodAdd.url')" :error="urlError">
+          <SInput
             v-model="url"
             type="url"
             inputmode="url"
@@ -123,17 +123,17 @@ const submit = async () => {
             class="w-full"
             :placeholder="t('page.match.detail.vodAdd.urlPlaceholder')"
           />
-        </SbFormField>
-        <SbFormField :label="t('page.match.detail.vodAdd.language')" :error="languageError">
-          <SbInput
+        </SFormField>
+        <SFormField :label="t('page.match.detail.vodAdd.language')" :error="languageError">
+          <SInput
             v-model="language"
             maxlength="2"
             autocomplete="off"
             spellcheck="false"
             class="w-full"
           />
-        </SbFormField>
-        <SbButton
+        </SFormField>
+        <SButton
           type="submit"
           block
           :label="t('page.match.detail.vodAdd.submit')"
@@ -142,5 +142,5 @@ const submit = async () => {
         />
       </form>
     </template>
-  </SbPopover>
+  </SPopover>
 </template>

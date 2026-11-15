@@ -31,24 +31,24 @@ const allTransfersPath = computed(() => ({
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2 pr-2">
           <h2 :id="headingId">{{ t("components.transfer.latest.title") }}</h2>
-          <SbLink :to="allTransfersPath" class="text-xs">
+          <SLink :to="allTransfersPath" class="text-xs">
             {{ t("components.transfer.latest.viewAll") }}
-          </SbLink>
+          </SLink>
         </div>
       </template>
 
       <HubCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
         <HubListItem v-for="index in LATEST_TRANSFERS" :key="index" class="gap-3">
-          <SbSkeleton class="h-3 w-20 shrink-0" />
-          <SbSkeleton class="size-7 shrink-0" />
-          <SbSkeleton class="h-3 max-w-40 flex-1" />
-          <SbSkeleton class="h-3 w-20" />
+          <SSkeleton class="h-3 w-20 shrink-0" />
+          <SSkeleton class="size-7 shrink-0" />
+          <SSkeleton class="h-3 max-w-40 flex-1" />
+          <SSkeleton class="h-3 w-20" />
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t('components.transfer.latest.error')" @retry="refresh()" />
+        <SErrorState :message="t('components.transfer.latest.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else-if="transfers.length > 0">
@@ -61,7 +61,7 @@ const allTransfersPath = computed(() => ({
       </HubCard>
 
       <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-people-swap-24-regular"
           :title="t('components.transfer.empty.title')"
           :hint="t('components.transfer.empty.hint')"

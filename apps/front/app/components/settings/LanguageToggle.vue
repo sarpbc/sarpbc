@@ -21,7 +21,7 @@ const current = computed<UiLocale>({
 </script>
 
 <template>
-  <SbRadioGroup
+  <SRadioGroup
     :model-value="current"
     :items="options"
     variant="text"

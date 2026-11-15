@@ -128,10 +128,10 @@ const confirmRemove = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.streamers.add.button')"
         @click="openAddModal"
@@ -148,7 +148,7 @@ const confirmRemove = async () => {
           {{ $t("page.streamers.loading") }}
         </p>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.streamers.loadError')"
           @retry="refresh()"
@@ -171,7 +171,7 @@ const confirmRemove = async () => {
                 {{ $t("page.streamers.empty.description") }}
               </p>
             </div>
-            <SbButton
+            <SButton
               icon="i-fluent-add-24-regular"
               :label="$t('page.streamers.add.button')"
               @click="openAddModal"
@@ -179,18 +179,14 @@ const confirmRemove = async () => {
           </div>
 
           <ClientOnly>
-            <SbTable v-if="streamers.length > 0" :data="streamers" :columns="columns" sticky>
+            <STable v-if="streamers.length > 0" :data="streamers" :columns="columns" sticky>
               <template #login-cell="{ row }">
-                <SbLink
-                  :to="twitchChannelUrl(row.original.login)"
-                  target="_blank"
-                  class="font-mono"
-                >
+                <SLink :to="twitchChannelUrl(row.original.login)" target="_blank" class="font-mono">
                   {{ row.original.login }}
-                </SbLink>
+                </SLink>
               </template>
               <template #actions-cell="{ row }">
-                <SbButton
+                <SButton
                   variant="tertiary"
                   danger
                   size="sm"
@@ -199,25 +195,25 @@ const confirmRemove = async () => {
                   @click="openRemoveModal(row.original)"
                 />
               </template>
-            </SbTable>
+            </STable>
           </ClientOnly>
         </template>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isAddModalOpen"
       :title="$t('page.streamers.add.title')"
       :dismissible="!isAdding"
     >
       <template #body>
         <form class="flex flex-col gap-4" @submit.prevent="confirmAdd">
-          <SbFormField
+          <SFormField
             :label="$t('page.streamers.add.loginLabel')"
             :hint="$t('page.streamers.add.loginHint')"
             required
           >
-            <SbInput
+            <SInput
               v-model="newLogin"
               :placeholder="$t('page.streamers.add.loginPlaceholder')"
               :maxlength="TWITCH_LOGIN_MAX_LENGTH"
@@ -225,38 +221,38 @@ const confirmRemove = async () => {
               class="w-full"
               autofocus
             />
-          </SbFormField>
-          <SbFormField
+          </SFormField>
+          <SFormField
             :label="$t('page.streamers.add.displayNameLabel')"
             :hint="$t('page.streamers.add.displayNameHint')"
           >
-            <SbInput
+            <SInput
               v-model="newDisplayName"
               :placeholder="$t('page.streamers.add.displayNamePlaceholder')"
               :maxlength="TRACKED_STREAMER_NAME_MAX_LENGTH"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
         </form>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-add-24-regular"
           :label="$t('page.streamers.add.submit')"
           :loading="isAdding"
           :disabled="!isLoginValid"
           @click="confirmAdd"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isAdding"
           @click="isAddModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
 
-    <SbModal
+    <SModal
       v-model:open="isRemoveModalOpen"
       :title="$t('page.streamers.remove.title')"
       :dismissible="!isRemoving"
@@ -271,20 +267,20 @@ const confirmRemove = async () => {
         </p>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-delete-24-regular"
           danger
           :label="$t('page.streamers.remove.confirmButton')"
           :loading="isRemoving"
           @click="confirmRemove"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isRemoving"
           @click="isRemoveModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
   </NuxtLayout>
 </template>

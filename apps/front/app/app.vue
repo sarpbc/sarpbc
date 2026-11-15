@@ -22,10 +22,10 @@ useHead({
 </script>
 
 <template>
-  <SbToaster>
+  <SToaster>
     <NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-  </SbToaster>
+  </SToaster>
 </template>

@@ -80,7 +80,7 @@ const playground = computed(() => PLAYGROUNDS.get(selected.value));
       <header class="page-header">
         <p class="eyebrow">@sarpbc/design</p>
         <h1>{{ selected }}</h1>
-        <p class="lede">Used as <code>Sb{{ selected }}</code> in the apps.</p>
+        <p class="lede">Used as <code>S{{ selected }}</code> in the apps.</p>
       </header>
       <PlaygroundPanel
         v-if="playground"

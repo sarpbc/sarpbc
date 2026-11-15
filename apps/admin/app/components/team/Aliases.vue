@@ -183,7 +183,7 @@ const submit = async () => {
   <div>
     <div class="mb-1 flex flex-row items-center justify-between">
       <h2 class="text-base font-semibold">{{ t("page.teams.aliases.title") }}</h2>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         size="sm"
         :label="t('page.teams.aliases.add')"
@@ -192,29 +192,29 @@ const submit = async () => {
     </div>
     <p class="mb-3 text-sm text-muted">{{ t("page.teams.aliases.description") }}</p>
 
-    <SbTable :data="aliases" :columns="columns">
+    <STable :data="aliases" :columns="columns">
       <template #empty>{{ t("page.teams.aliases.empty") }}</template>
       <template #period-cell="{ row }">{{ period(row.original) }}</template>
       <template #sourceUrl-cell="{ row }">
-        <SbLink
+        <SLink
           :to="row.original.sourceUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="break-all"
         >
           {{ row.original.sourceUrl }}
-        </SbLink>
+        </SLink>
       </template>
       <template #actions-cell="{ row }">
         <div class="flex flex-row gap-1">
-          <SbButton
+          <SButton
             icon="i-fluent-edit-24-regular"
             variant="tertiary"
             size="sm"
             :aria-label="t('page.teams.aliases.edit')"
             @click="openEdit(row.original)"
           />
-          <SbButton
+          <SButton
             icon="i-fluent-delete-24-regular"
             variant="tertiary"
             danger
@@ -224,9 +224,9 @@ const submit = async () => {
           />
         </div>
       </template>
-    </SbTable>
+    </STable>
 
-    <SbModal
+    <SModal
       v-model:open="isOpen"
       :title="editing ? t('page.teams.aliases.edit') : t('page.teams.aliases.add')"
       :dismissible="!saving"
@@ -238,78 +238,78 @@ const submit = async () => {
           class="grid grid-cols-1 gap-3 sm:grid-cols-2"
           @submit.prevent="submit"
         >
-          <SbFormField
+          <SFormField
             :label="t('page.teams.aliases.fields.name')"
             required
             class="sm:col-span-2"
             v-bind="feedback('name')"
           >
-            <SbInput
+            <SInput
               v-model="form.name"
               :maxlength="TEAM_ALIAS_NAME_MAX_LENGTH"
               autocomplete="off"
               class="w-full"
             />
-          </SbFormField>
-          <SbFormField
+          </SFormField>
+          <SFormField
             :label="t('page.teams.aliases.fields.from')"
             required
             v-bind="feedback('from')"
           >
-            <SbInput v-model="form.from" type="date" class="w-full" />
-          </SbFormField>
-          <SbFormField
+            <SInput v-model="form.from" type="date" class="w-full" />
+          </SFormField>
+          <SFormField
             :label="t('page.teams.aliases.fields.to')"
             :help="t('page.teams.aliases.fields.toHelp')"
             v-bind="feedback('to')"
           >
-            <SbInput v-model="form.to" type="date" class="w-full" />
-          </SbFormField>
-          <SbFormField
+            <SInput v-model="form.to" type="date" class="w-full" />
+          </SFormField>
+          <SFormField
             :label="t('page.teams.aliases.fields.sourceUrl')"
             :help="t('page.teams.aliases.fields.sourceHelp')"
             required
             class="sm:col-span-2"
             v-bind="feedback('sourceUrl')"
           >
-            <SbInput
+            <SInput
               v-model="form.sourceUrl"
               type="url"
               inputmode="url"
               :maxlength="TEAM_ALIAS_URL_MAX_LENGTH"
               class="w-full"
             />
-          </SbFormField>
-          <SbFormField
+          </SFormField>
+          <SFormField
             :label="t('page.teams.aliases.fields.logoUrl')"
             :hint="t('page.teams.aliases.optional')"
             v-bind="feedback('logoUrl')"
           >
-            <SbInput
+            <SInput
               v-model="form.logoUrl"
               type="url"
               inputmode="url"
               :maxlength="TEAM_ALIAS_URL_MAX_LENGTH"
               class="w-full"
             />
-          </SbFormField>
-          <SbFormField
+          </SFormField>
+          <SFormField
             :label="t('page.teams.aliases.fields.pandascoreId')"
             :hint="t('page.teams.aliases.optional')"
             :help="t('page.teams.aliases.fields.pandascoreHelp')"
             v-bind="feedback('pandascoreId')"
           >
-            <SbInput
+            <SInput
               v-model="form.pandascoreId"
               inputmode="numeric"
               autocomplete="off"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
         </form>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           type="submit"
           form="team-alias-form"
           icon="i-fluent-save-24-regular"
@@ -317,14 +317,14 @@ const submit = async () => {
           :loading="saving"
           :disabled="!parsed.ok"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="t('common.cancel')"
           :disabled="saving"
           @click="isOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="aliasToDelete"

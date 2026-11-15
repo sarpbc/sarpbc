@@ -68,7 +68,7 @@ const startViewTransition = (event: MouseEvent) => {
 
 <template>
   <ClientOnly>
-    <SbButton
+    <SButton
       variant="tertiary"
       size="sm"
       :icon="

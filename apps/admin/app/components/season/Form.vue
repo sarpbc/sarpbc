@@ -72,29 +72,29 @@ const submit = () => {
 
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
-    <SbFormField
+    <SFormField
       :label="$t('page.seasons.form.name')"
       :hint="$t('page.seasons.form.nameHint')"
       required
     >
-      <SbInput v-model="name" :maxlength="SEASON_NAME_MAX_LENGTH" class="w-full" />
-    </SbFormField>
+      <SInput v-model="name" :maxlength="SEASON_NAME_MAX_LENGTH" class="w-full" />
+    </SFormField>
 
-    <SbFormField :label="$t('page.seasons.form.slug')" :hint="$t('page.seasons.form.slugHint')">
-      <SbInput v-model="slug" autocomplete="off" spellcheck="false" class="w-full" />
-    </SbFormField>
+    <SFormField :label="$t('page.seasons.form.slug')" :hint="$t('page.seasons.form.slugHint')">
+      <SInput v-model="slug" autocomplete="off" spellcheck="false" class="w-full" />
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       :label="$t('page.seasons.form.formatSummary')"
       :hint="$t('page.seasons.form.formatSummaryHint')"
     >
-      <SbTextarea
+      <STextarea
         v-model="summary"
         :maxlength="SEASON_FORMAT_SUMMARY_MAX_LENGTH"
         :rows="3"
         class="w-full"
       />
-    </SbFormField>
+    </SFormField>
 
     <fieldset class="flex flex-col gap-3">
       <legend class="mb-1 text-sm font-medium">{{ $t("page.seasons.form.phases") }}</legend>
@@ -106,18 +106,18 @@ const submit = () => {
           class="flex flex-col gap-2 border border-default p-3"
         >
           <div class="flex flex-row items-end gap-2">
-            <SbFormField
+            <SFormField
               :label="$t('page.seasons.form.phaseName', { number: index + 1 })"
               required
               class="flex-1"
             >
-              <SbInput
+              <SInput
                 v-model="phase.name"
                 :maxlength="SEASON_FORMAT_PHASE_NAME_MAX_LENGTH"
                 class="w-full"
               />
-            </SbFormField>
-            <SbButton
+            </SFormField>
+            <SButton
               type="button"
               variant="tertiary"
               danger
@@ -126,19 +126,19 @@ const submit = () => {
               @click="removePhase(index)"
             />
           </div>
-          <SbFormField :label="$t('page.seasons.form.phaseDescription')">
-            <SbTextarea
+          <SFormField :label="$t('page.seasons.form.phaseDescription')">
+            <STextarea
               :model-value="phase.description ?? ''"
               :maxlength="SEASON_FORMAT_PHASE_DESCRIPTION_MAX_LENGTH"
               :rows="2"
               class="w-full"
               @update:model-value="phase.description = String($event)"
             />
-          </SbFormField>
+          </SFormField>
         </li>
       </ol>
       <div>
-        <SbButton
+        <SButton
           type="button"
           variant="secondary"
           icon="i-fluent-add-24-regular"
@@ -149,16 +149,16 @@ const submit = () => {
       </div>
     </fieldset>
 
-    <SbFormField
+    <SFormField
       v-if="season"
       :label="$t('page.seasons.form.winner')"
       :hint="$t('page.seasons.form.winnerHint')"
     >
-      <SbSelect v-model="winner" :items="winnerOptions" class="w-full" />
-    </SbFormField>
+      <SSelect v-model="winner" :items="winnerOptions" class="w-full" />
+    </SFormField>
 
     <div>
-      <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
+      <SButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
     </div>
   </form>
 </template>

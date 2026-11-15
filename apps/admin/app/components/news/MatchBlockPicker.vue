@@ -246,7 +246,7 @@ const close = () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     :open="open"
     :title="
       initialBlock ? t('page.news.editor.matches.editTitle') : t('page.news.editor.matches.title')
@@ -255,9 +255,9 @@ const close = () => {
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <SbRadioGroup v-model="kind" orientation="horizontal" variant="cards" :items="kindItems" />
+        <SRadioGroup v-model="kind" orientation="horizontal" variant="cards" :items="kindItems" />
 
-        <SbFormField
+        <SFormField
           :label="
             searchesTeams
               ? t('page.news.editor.matches.teamLabel')
@@ -268,7 +268,7 @@ const close = () => {
             <span class="truncate text-sm font-medium text-highlighted" translate="no">
               {{ source.label }}
             </span>
-            <SbButton
+            <SButton
               variant="secondary"
               size="sm"
               :label="t('page.news.editor.matches.change')"
@@ -276,7 +276,7 @@ const close = () => {
             />
           </div>
           <div v-else class="flex flex-col gap-2">
-            <SbInput
+            <SInput
               v-model="query"
               autofocus
               icon="i-lucide-search"
@@ -289,18 +289,18 @@ const close = () => {
             />
             <ul v-if="results.length > 0" class="flex max-h-56 flex-col gap-1 overflow-y-auto">
               <li v-for="result in results" :key="result.id">
-                <SbButton variant="tertiary" class="w-full justify-start" @click="choose(result)">
+                <SButton variant="tertiary" class="w-full justify-start" @click="choose(result)">
                   <span class="truncate" translate="no">{{ result.label }}</span>
-                </SbButton>
+                </SButton>
               </li>
             </ul>
             <p v-else-if="query.trim() && !searching" class="text-sm text-muted">
               {{ t("page.news.editor.picker.empty") }}
             </p>
           </div>
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           v-if="source && picksMatches"
           :label="t('page.news.editor.matches.matchesLabel')"
           :hint="
@@ -313,12 +313,12 @@ const close = () => {
           "
         >
           <div v-if="loadingMatches" class="flex flex-col gap-2" aria-busy="true">
-            <SbSkeleton class="h-5 w-full" />
-            <SbSkeleton class="h-5 w-4/5" />
+            <SSkeleton class="h-5 w-full" />
+            <SSkeleton class="h-5 w-4/5" />
           </div>
           <ul v-else-if="matches.length > 0" class="flex max-h-72 flex-col gap-2 overflow-y-auto">
             <li v-for="match in matches" :key="match.id">
-              <SbCheckbox
+              <SCheckbox
                 :model-value="matchIds.includes(match.id)"
                 :disabled="!canToggle(match.id)"
                 :label="matchLabel(match)"
@@ -327,20 +327,20 @@ const close = () => {
             </li>
           </ul>
           <p v-else class="text-sm text-muted">{{ t("newsTag.matchesEmpty") }}</p>
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           v-if="source && !picksMatches"
           :label="t('page.news.editor.matches.limitLabel')"
           :hint="t('page.news.editor.matches.limitHint')"
         >
-          <SbInputNumber v-model="limit" :min="1" :max="NEWS_MATCH_BLOCK_MAX_MATCHES" />
-        </SbFormField>
+          <SInputNumber v-model="limit" :min="1" :max="NEWS_MATCH_BLOCK_MAX_MATCHES" />
+        </SFormField>
       </div>
     </template>
 
     <template #footer>
-      <SbButton
+      <SButton
         icon="i-fluent-trophy-24-regular"
         :label="
           initialBlock ? t('page.news.editor.matches.update') : t('page.news.editor.matches.insert')
@@ -348,7 +348,7 @@ const close = () => {
         :disabled="!block"
         @click="confirm"
       />
-      <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
+      <SButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
-  </SbModal>
+  </SModal>
 </template>

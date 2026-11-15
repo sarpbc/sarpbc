@@ -191,7 +191,7 @@ const submit = () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="title"
     :description="t('page.tournaments.viewership.description')"
@@ -204,7 +204,7 @@ const submit = () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.viewership.loadError") }}</p>
-        <SbButton
+        <SButton
           variant="secondary"
           size="sm"
           :label="t('page.tournaments.viewership.retry')"
@@ -218,64 +218,64 @@ const submit = () => {
         class="grid grid-cols-1 gap-3 sm:grid-cols-2"
         @submit.prevent="submit"
       >
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.viewership.peakViewers')"
           required
           v-bind="feedback('peakViewers')"
         >
-          <SbInput
+          <SInput
             v-model="form.peakViewers"
             inputmode="numeric"
             autocomplete="off"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.viewership.averageViewers')"
           :hint="t('page.tournaments.viewership.optional')"
           v-bind="feedback('averageViewers')"
         >
-          <SbInput
+          <SInput
             v-model="form.averageViewers"
             inputmode="numeric"
             autocomplete="off"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField :label="t('page.tournaments.viewership.scope')">
-          <SbSelect v-model="form.scope" :items="scopeOptions" class="w-full" />
-        </SbFormField>
+        <SFormField :label="t('page.tournaments.viewership.scope')">
+          <SSelect v-model="form.scope" :items="scopeOptions" class="w-full" />
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.viewership.measuredAt')"
           :hint="t('page.tournaments.viewership.optional')"
           v-bind="feedback('measuredAt')"
         >
-          <SbInput v-model="form.measuredAt" type="datetime-local" step="1" class="w-full" />
-        </SbFormField>
+          <SInput v-model="form.measuredAt" type="datetime-local" step="1" class="w-full" />
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.viewership.sourceName')"
           required
           v-bind="feedback('sourceName')"
         >
-          <SbInput
+          <SInput
             v-model="form.sourceName"
             :maxlength="VIEWERSHIP_SOURCE_NAME_MAX_LENGTH"
             autocomplete="off"
             class="w-full"
             :placeholder="t('page.tournaments.viewership.sourceNamePlaceholder')"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.viewership.sourceUrl')"
           required
           v-bind="feedback('sourceUrl')"
         >
-          <SbInput
+          <SInput
             v-model="form.sourceUrl"
             type="url"
             inputmode="url"
@@ -283,7 +283,7 @@ const submit = () => {
             class="w-full"
             :placeholder="t('page.tournaments.viewership.sourceUrlPlaceholder')"
           />
-        </SbFormField>
+        </SFormField>
 
         <p class="text-xs text-muted sm:col-span-2">
           {{ t("page.tournaments.viewership.sourceRules") }}
@@ -293,7 +293,7 @@ const submit = () => {
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <SbButton
+        <SButton
           variant="secondary"
           danger
           icon="i-fluent-delete-24-regular"
@@ -302,12 +302,12 @@ const submit = () => {
           @click="save(null, t('page.tournaments.viewership.cleared'))"
         />
         <div class="flex flex-row gap-2">
-          <SbButton
+          <SButton
             variant="tertiary"
             :label="t('page.tournaments.viewership.cancel')"
             @click="open = false"
           />
-          <SbButton
+          <SButton
             type="submit"
             form="viewership-form"
             :label="t('page.tournaments.viewership.save')"
@@ -317,5 +317,5 @@ const submit = () => {
         </div>
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

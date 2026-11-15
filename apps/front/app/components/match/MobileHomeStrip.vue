@@ -53,10 +53,10 @@ const isLive = (matchId: string): boolean => liveMatches.value.some((m) => m.id 
             <HubListItem v-for="i in 3" :key="i" size="default">
               <div class="grid w-full grid-cols-3 items-center gap-2">
                 <div class="col-span-2 flex flex-col gap-1">
-                  <SbSkeleton class="h-3 max-w-28" />
-                  <SbSkeleton class="h-3 max-w-24" />
+                  <SSkeleton class="h-3 max-w-28" />
+                  <SSkeleton class="h-3 max-w-24" />
                 </div>
-                <SbSkeleton class="col-span-1 h-3 w-10 justify-self-end" />
+                <SSkeleton class="col-span-1 h-3 w-10 justify-self-end" />
               </div>
             </HubListItem>
           </template>

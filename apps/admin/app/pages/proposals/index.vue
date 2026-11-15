@@ -465,7 +465,7 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -481,7 +481,7 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
           </div>
         </div>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.proposals.loadError')"
           @retry="refresh()"
@@ -499,9 +499,9 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
           >
             <div class="flex flex-row flex-wrap items-center justify-between gap-2">
               <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
-                <SbBadge :color="isDeletion(proposal) ? 'danger' : 'info'">
+                <SBadge :color="isDeletion(proposal) ? 'danger' : 'info'">
                   {{ $t(`page.proposals.kinds.${proposal.change.kind}`) }}
-                </SbBadge>
+                </SBadge>
                 <span class="text-muted" translate="no">{{ nameOf(proposal.proposedById) }}</span>
                 <span class="text-muted">·</span>
                 <span class="text-muted tabular-nums">{{
@@ -509,14 +509,14 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
                 }}</span>
               </div>
               <div v-if="canReview(proposal)" class="flex flex-row items-center gap-1">
-                <SbButton
+                <SButton
                   icon="i-fluent-checkmark-24-regular"
                   :label="$t('page.proposals.approve')"
                   :loading="reviewingId === proposal.id"
                   :disabled="reviewingId !== null"
                   @click="review(proposal, 'approve')"
                 />
-                <SbButton
+                <SButton
                   variant="tertiary"
                   :label="$t('page.proposals.reject')"
                   :disabled="reviewingId !== null"
@@ -559,9 +559,9 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
               <template v-if="proposal.sourceUrl">
                 <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
                 <dd class="break-all">
-                  <SbLink variant="accent" :to="proposal.sourceUrl" external target="_blank">
+                  <SLink variant="accent" :to="proposal.sourceUrl" external target="_blank">
                     {{ proposal.sourceUrl }}
-                  </SbLink>
+                  </SLink>
                 </dd>
               </template>
             </dl>

@@ -17,13 +17,13 @@ watch(
 </script>
 
 <template>
-  <SbSlideover
+  <SSlideover
     v-model:open="open"
     side="left"
     :title="$t('page.nav.admin')"
     :description="$t('page.nav.drawerDescription')"
   >
-    <SbButton
+    <SButton
       variant="tertiary"
       icon="i-fluent-navigation-24-regular"
       :aria-label="$t('page.nav.openMenu')"
@@ -31,7 +31,7 @@ watch(
     />
 
     <template #body>
-      <SbNavigationMenu
+      <SNavigationMenu
         orientation="vertical"
         :items="links"
         class="data-[orientation=vertical]:w-full"
@@ -41,13 +41,13 @@ watch(
     <template v-if="user" #footer>
       <div class="flex w-full min-w-0 flex-col gap-2">
         <div class="flex min-w-0 items-center gap-2">
-          <SbAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
+          <SAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
           <div class="min-w-0">
             <p class="truncate text-sm" translate="no">{{ user.userName }}</p>
             <p class="truncate text-xs text-muted" translate="no">{{ user.email }}</p>
           </div>
         </div>
-        <SbButton
+        <SButton
           variant="tertiary"
           danger
           icon="i-fluent-sign-out-24-regular"
@@ -59,5 +59,5 @@ watch(
         />
       </div>
     </template>
-  </SbSlideover>
+  </SSlideover>
 </template>

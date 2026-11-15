@@ -75,25 +75,25 @@ const hasMatches = computed(() => matches.length > 0);
             v-if="kind === 'results'"
             class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1"
           >
-            <SbSkeleton class="h-3 max-w-32" />
-            <SbSkeleton class="h-3 w-4 justify-self-end" />
-            <SbSkeleton class="h-3 max-w-28" />
-            <SbSkeleton class="h-3 w-4 justify-self-end" />
+            <SSkeleton class="h-3 max-w-32" />
+            <SSkeleton class="h-3 w-4 justify-self-end" />
+            <SSkeleton class="h-3 max-w-28" />
+            <SSkeleton class="h-3 w-4 justify-self-end" />
           </div>
           <div v-else class="grid w-full grid-cols-3 items-center">
             <div class="col-span-2 flex flex-col gap-0.5">
-              <SbSkeleton class="h-3 w-24" />
-              <SbSkeleton class="h-3 w-28" />
+              <SSkeleton class="h-3 w-24" />
+              <SSkeleton class="h-3 w-28" />
             </div>
             <div class="col-span-1 flex justify-end">
-              <SbSkeleton class="h-3 w-10" />
+              <SSkeleton class="h-3 w-10" />
             </div>
           </div>
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="hasError" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t(errorKey)" @retry="emit('retry')" />
+        <SErrorState :message="t(errorKey)" @retry="emit('retry')" />
       </HubCard>
 
       <template v-else-if="hasMatches">

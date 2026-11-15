@@ -90,15 +90,15 @@ const socialLinks = computed<SocialLink[]>(() => [
     <div class="border-t border-default md:px-2 xl:px-0">
       <div class="mx-auto grid max-w-7xl grid-cols-2 gap-px bg-(--ui-border) md:grid-cols-4">
         <div class="col-span-2 flex flex-col gap-3 bg-default p-4 md:col-span-1 md:pl-0">
-          <SbLink :to="localePath('/')" class="w-fit" :aria-label="$t('components.header.home')">
+          <SLink :to="localePath('/')" class="w-fit" :aria-label="$t('components.header.home')">
             <img src="/sarpbc.svg" alt="" width="48" height="48" class="size-12" />
-          </SbLink>
+          </SLink>
           <p class="max-w-64 text-xs text-muted">{{ $t("page.home.seo.description") }}</p>
           <ul class="flex items-center gap-3">
             <li v-for="social in socialLinks" :key="social.to">
-              <SbLink :to="social.to" :aria-label="social.label" class="flex transition-none">
+              <SLink :to="social.to" :aria-label="social.label" class="flex transition-none">
                 <Icon :name="social.icon" class="size-4" aria-hidden="true" />
-              </SbLink>
+              </SLink>
             </li>
           </ul>
         </div>
@@ -115,9 +115,9 @@ const socialLinks = computed<SocialLink[]>(() => [
             </h2>
             <ul class="flex flex-col items-start gap-2">
               <li v-for="link in column.links" :key="link.label">
-                <SbLink :to="link.to" variant="muted" class="text-xs">
+                <SLink :to="link.to" variant="muted" class="text-xs">
                   {{ link.label }}
-                </SbLink>
+                </SLink>
               </li>
             </ul>
           </div>
@@ -146,9 +146,9 @@ const socialLinks = computed<SocialLink[]>(() => [
           class="col-span-2 flex flex-wrap items-start gap-x-4 gap-y-2 bg-default p-4 text-xs text-muted md:col-span-1 md:pr-0"
         >
           <li v-for="link in legalLinks" :key="link.label">
-            <SbLink :to="link.to" variant="muted">
+            <SLink :to="link.to" variant="muted">
               {{ link.label }}
-            </SbLink>
+            </SLink>
           </li>
         </ul>
       </div>
