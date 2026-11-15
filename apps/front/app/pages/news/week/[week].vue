@@ -49,6 +49,7 @@ const rangeLabel = computed(() => {
   const format = new Intl.DateTimeFormat(locale.value, {
     day: "numeric",
     month: "short",
+    timeZone: "UTC",
     year: "numeric",
   });
 
@@ -61,8 +62,8 @@ const rangeLabel = computed(() => {
 const title = computed(() => (isCurrentWeek.value ? t("page.news.week.title") : rangeLabel.value));
 
 setPageSeo({
-  description: t("page.news.week.seoDescription"),
-  title: t("page.news.week.seoTitle"),
+  description: t("page.news.week.seoDescription", { range: rangeLabel.value }),
+  title: t("page.news.week.seoTitle", { range: rangeLabel.value }),
 });
 </script>
 

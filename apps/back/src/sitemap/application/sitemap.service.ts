@@ -1,33 +1,60 @@
 import type { SitemapEntry, SitemapKind } from "@sarpbc/types";
 import {
+  circuitPath,
+  countryPath,
+  forumPostPath,
+  forumPostSlug,
   isKnownTeamName,
+  isoWeekIdFromDate,
   participantName,
   matchPath,
   newsPath,
+  newsWeekPath,
   playerPath,
+  seasonArchivePath,
   staffPath,
   teamPath,
   tournamentEventPath,
   tournamentStagePath,
 } from "@sarpbc/utils";
 import { matchPublicSlug } from "../../tournament/domain/match";
-import type { MatchSitemapRow, SitemapQueries, StageSitemapRow } from "./ports";
+import type {
+  MatchSitemapRow,
+  SitemapQueries,
+  StageSitemapRow,
+  WeeklyDigestSitemapRow,
+} from "./ports";
 
 const dated = (path: string, lastmod: Date): SitemapEntry => ({
   lastmod: lastmod.toISOString(),
   path,
 });
 
-const tournamentEntries = (stages: StageSitemapRow[]): SitemapEntry[] => {
-  const eventLastmods = new Map<string, Date>();
+const latestByKey = (rows: { key: string; lastmod: Date }[]): Map<string, Date> => {
+  const latest = new Map<string, Date>();
 
-  for (const { eventSlug, lastmod } of stages) {
-    const latest = eventLastmods.get(eventSlug);
+  for (const { key, lastmod } of rows) {
+    const current = latest.get(key);
 
-    if (!latest || latest < lastmod) {
-      eventLastmods.set(eventSlug, lastmod);
+    if (!current || current < lastmod) {
+      latest.set(key, lastmod);
     }
   }
+
+  return latest;
+};
+
+const weekEntries = (digests: WeeklyDigestSitemapRow[]): SitemapEntry[] =>
+  [
+    ...latestByKey(
+      digests.map(({ createdAt, lastmod }) => ({ key: isoWeekIdFromDate(createdAt), lastmod })),
+    ),
+  ].map(([week, lastmod]) => dated(newsWeekPath(week), lastmod));
+
+const tournamentEntries = (stages: StageSitemapRow[]): SitemapEntry[] => {
+  const eventLastmods = latestByKey(
+    stages.map(({ eventSlug, lastmod }) => ({ key: eventSlug, lastmod })),
+  );
 
   return [
     ...[...eventLastmods].map(([slug, lastmod]) => dated(tournamentEventPath(slug), lastmod)),
@@ -47,9 +74,15 @@ export class SitemapService {
   async entries(kind: SitemapKind): Promise<SitemapEntry[]> {
     switch (kind) {
       case "news": {
-        const news = await this.queries.news();
+        const [news, digests] = await Promise.all([
+          this.queries.news(),
+          this.queries.weeklyDigests(),
+        ]);
 
-        return news.map(({ slug, lastmod }) => dated(newsPath(slug), lastmod));
+        return [
+          ...news.map(({ slug, lastmod }) => dated(newsPath(slug), lastmod)),
+          ...weekEntries(digests),
+        ];
       }
 
       case "tournaments": {
@@ -80,6 +113,32 @@ export class SitemapService {
         const slugs = await this.queries.teamSlugs();
 
         return slugs.map((slug) => ({ lastmod: null, path: teamPath(slug) }));
+      }
+
+      case "circuits": {
+        const circuits = await this.queries.circuits();
+
+        return circuits.map(({ slug, lastmod }) => dated(circuitPath(slug), lastmod));
+      }
+
+      case "seasons": {
+        const seasons = await this.queries.seasons();
+
+        return seasons.map(({ slug, lastmod }) => dated(seasonArchivePath(slug), lastmod));
+      }
+
+      case "countries": {
+        const codes = await this.queries.countryCodes();
+
+        return codes.map((code) => ({ lastmod: null, path: countryPath(code) }));
+      }
+
+      case "forum": {
+        const posts = await this.queries.forumPosts();
+
+        return posts.map(({ publicId, title, lastmod }) =>
+          dated(forumPostPath(publicId, forumPostSlug(title)), lastmod),
+        );
       }
 
       default: {

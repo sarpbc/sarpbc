@@ -1,28 +1,35 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { STAFF_CONTRACT_ROLES } from "@sarpbc/types";
+import { Circuit } from "../../../circuit/infrastructure/circuit-persistence";
+import { Post } from "../../../forum/infrastructure/forum-persistence";
+import { WEEKLY_DIGEST_NEWS_TYPE } from "../../../news/domain/news-type";
 import { NewsArticle } from "../../../news/infrastructure/news-persistence";
 import {
   Contract,
+  PLAYER_NATIONALITY_CODE,
   Player,
   Team,
   teamNameAt,
 } from "../../../roster/infrastructure/roster-persistence";
+import { Season } from "../../../season/infrastructure/season-persistence";
 import {
   Match,
   Tournament,
   TournamentParticipant,
 } from "../../../tournament/infrastructure/competition-persistence";
 import type {
+  ForumPostSitemapRow,
   MatchSitemapRow,
-  NewsSitemapRow,
   SitemapQueries,
+  SlugSitemapRow,
   StageSitemapRow,
+  WeeklyDigestSitemapRow,
 } from "../../application/ports";
 
 export class SitemapStore implements SitemapQueries {
   constructor(private readonly em: EntityManager) {}
 
-  async news(): Promise<NewsSitemapRow[]> {
+  async news(): Promise<SlugSitemapRow[]> {
     const rows = await this.em.find(
       NewsArticle,
       { isDraft: false },
@@ -32,6 +39,19 @@ export class SitemapStore implements SitemapQueries {
     return rows.map((row) => ({
       lastmod: new Date(row.updatedAt ?? row.createdAt),
       slug: row.slug,
+    }));
+  }
+
+  async weeklyDigests(): Promise<WeeklyDigestSitemapRow[]> {
+    const rows = await this.em.find(
+      NewsArticle,
+      { isDraft: false, type: WEEKLY_DIGEST_NEWS_TYPE },
+      { fields: ["createdAt", "updatedAt"] },
+    );
+
+    return rows.map((row) => ({
+      createdAt: new Date(row.createdAt),
+      lastmod: new Date(row.updatedAt ?? row.createdAt),
     }));
   }
 
@@ -130,5 +150,49 @@ export class SitemapStore implements SitemapQueries {
     );
 
     return rows.map((row) => row.slug);
+  }
+
+  async circuits(): Promise<SlugSitemapRow[]> {
+    const rows = await this.em.find(Circuit, {}, { fields: ["slug", "updatedAt"] });
+
+    return rows.map((row) => ({ lastmod: new Date(row.updatedAt), slug: row.slug }));
+  }
+
+  async seasons(): Promise<SlugSitemapRow[]> {
+    const rows = await this.em.find(
+      Season,
+      { slug: { $ne: null } },
+      { fields: ["slug", "updatedAt"] },
+    );
+
+    return rows.flatMap((row) =>
+      row.slug === null || row.slug === ""
+        ? []
+        : [{ lastmod: new Date(row.updatedAt), slug: row.slug }],
+    );
+  }
+
+  async countryCodes(): Promise<string[]> {
+    const rows: { code: string }[] = await this.em
+      .getConnection()
+      .execute(
+        `SELECT DISTINCT ${PLAYER_NATIONALITY_CODE} AS code FROM player WHERE merged_into_id IS NULL AND ${PLAYER_NATIONALITY_CODE} ~ '^[A-Z]{2}$' ORDER BY 1`,
+      );
+
+    return rows.map(({ code }) => code);
+  }
+
+  async forumPosts(): Promise<ForumPostSitemapRow[]> {
+    const rows = await this.em.find(
+      Post,
+      {},
+      { fields: ["publicId", "title", "createdAt", "updatedAt"] },
+    );
+
+    return rows.map((row) => ({
+      lastmod: new Date(row.updatedAt ?? row.createdAt),
+      publicId: row.publicId,
+      title: row.title,
+    }));
   }
 }

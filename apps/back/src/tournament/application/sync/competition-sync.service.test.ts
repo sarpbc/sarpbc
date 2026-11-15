@@ -362,7 +362,7 @@ describe("Competition synchronization", () => {
       }),
     );
     expect(store.eventOf(stage.id)).toMatchObject({
-      name: "RLCS Major Major Paris 2026",
+      name: "RLCS Major Paris 2026",
       slug: "rlcs-major-paris-2026",
     });
     expect(log).toStrictEqual(["commit", `invalidate ${stage.id}`]);

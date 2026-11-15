@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { newsWeekPath } from "@sarpbc/utils";
 import type { NewsArticleListItem } from "~/types/news";
 
 const localePath = useLocalePath();
@@ -11,7 +12,7 @@ const { week, latest } = defineProps<{
 </script>
 
 <template>
-  <HubListItem :to="localePath(`/news/week/${week}`)" class="min-w-0 gap-x-4 overflow-hidden">
+  <HubListItem :to="localePath(newsWeekPath(week))" class="min-w-0 gap-x-4 overflow-hidden">
     <h2 class="min-w-0 flex-1 truncate text-row text-default group-hover:text-highlighted">
       {{ t("page.home.latestShort", { title: latest.title }) }}
     </h2>

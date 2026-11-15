@@ -66,9 +66,24 @@ const tournament = computed(() =>
 
 const teamCount = computed(() => tournament.value?.participants?.length ?? 0);
 
+const tabSeoKeys: Record<TournamentTab, { title: string; description: string }> = {
+  matches: {
+    description: "page.tournaments.id.seoDescriptionMatches",
+    title: "page.tournaments.id.seoTitleMatches",
+  },
+  overview: {
+    description: "page.tournaments.id.seoDescription",
+    title: "page.tournaments.id.seoTitle",
+  },
+  stats: {
+    description: "page.tournaments.id.seoDescriptionStats",
+    title: "page.tournaments.id.seoTitleStats",
+  },
+};
+
 const title = computed(() =>
   tournament.value
-    ? t("page.tournaments.id.seoTitle", {
+    ? t(tabSeoKeys[activeTab.value].title, {
         tournamentName: tournamentStageLabel(tournament.value),
       })
     : t("page.tournaments.id.seoTitleDefault"),
@@ -76,7 +91,7 @@ const title = computed(() =>
 
 const description = computed(() =>
   tournament.value
-    ? t("page.tournaments.id.seoDescription", {
+    ? t(tabSeoKeys[activeTab.value].description, {
         tournamentName: tournamentStageLabel(tournament.value),
       })
     : t("page.tournaments.id.seoDescriptionDefault"),

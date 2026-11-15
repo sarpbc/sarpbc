@@ -66,6 +66,27 @@ const GENERIC_STAGE_NAMES = new Set([
 
 const isGenericStageName = (name: string): boolean => GENERIC_STAGE_NAMES.has(name.toLowerCase());
 
+/** "RLCS NA Season" + "season 8 2019" reads "RLCS NA Season 8 2019", not "Season season". */
+const prefixLeague = (league: string, serie: string): string => {
+  if (serie.toLowerCase().startsWith(league.toLowerCase())) {
+    return serie;
+  }
+
+  const leagueWords = league.split(/\s+/u);
+  const serieWords = serie.split(/\s+/u);
+
+  for (let overlap = Math.min(leagueWords.length, serieWords.length); overlap > 0; overlap -= 1) {
+    const tail = leagueWords.slice(-overlap).join(" ").toLowerCase();
+    const head = serieWords.slice(0, overlap).join(" ").toLowerCase();
+
+    if (tail === head) {
+      return [league, ...serieWords.slice(overlap)].join(" ");
+    }
+  }
+
+  return `${league} ${serie}`;
+};
+
 export const eventDisplayName = (input: {
   leagueName: string | null;
   serieName: string | null;
@@ -84,9 +105,7 @@ export const eventDisplayName = (input: {
       return stage && !isGenericStageName(stage) ? stage : serie;
     }
 
-    return league !== undefined && !serie.toLowerCase().startsWith(league.toLowerCase())
-      ? `${league} ${serie}`
-      : serie;
+    return league === undefined ? serie : prefixLeague(league, serie);
   }
 
   if (league !== undefined && stage) {

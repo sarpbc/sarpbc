@@ -80,11 +80,19 @@ const title = computed(() =>
     : t("page.team.slug.seoTitleDefault"),
 );
 
-const description = computed(() =>
-  team.value?.name
-    ? t("page.team.slug.seoDescriptionWithName", { name: team.value.name })
-    : t("page.team.slug.seoDescriptionDefault"),
-);
+const description = computed(() => {
+  const name = team.value?.name;
+
+  if (!name) {
+    return t("page.team.slug.seoDescriptionDefault");
+  }
+
+  const players = activeRoster.value.map((player) => player.name).join(", ");
+
+  return players
+    ? t("page.team.slug.seoDescriptionWithRoster", { name, players })
+    : t("page.team.slug.seoDescriptionWithName", { name });
+});
 
 setPageSeo({
   description: description.value,

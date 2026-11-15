@@ -211,7 +211,7 @@ export default defineNuxtConfig({
     credits: false,
     sitemaps: {
       pages: {
-        exclude: ["/login", "/register", "/profile", "/forum/new"],
+        exclude: ["/login", "/register", "/profile", "/forum/new", "/news"],
         includeAppSources: true,
       },
       ...Object.fromEntries(

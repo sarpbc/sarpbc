@@ -1,5 +1,5 @@
 ---
-title: "Contacter sarpbc.org"
+title: "Contacter sarpbc.org : corrections, presse et partenariats"
 description: "Contactez l’éditeur de sarpbc.org pour une correction, un retour sur la couverture esport Rocket League, une demande presse, un partenariat ou la confidentialité."
 ---
 

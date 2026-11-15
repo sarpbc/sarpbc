@@ -8,7 +8,7 @@ const { slug } = defineProps<{
   slug: string;
 }>();
 
-const { locale } = useI18n();
+const { locale, t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const localeCode = computed(() => uiLocale(locale.value));
 
@@ -27,7 +27,7 @@ watch(
 
     setPageSeo({
       description: value.description,
-      title: `${value.title} | sarpbc.org`,
+      title: t("components.legal.seoTitle", { title: value.title }),
     });
   },
   { immediate: true },

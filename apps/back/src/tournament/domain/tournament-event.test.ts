@@ -22,6 +22,16 @@ describe(eventDisplayName, () => {
     ).toBe("rlcs 2026 Major Paris");
   });
 
+  it("does not repeat the words a serie shares with the end of its league", () => {
+    expect(
+      eventDisplayName({
+        leagueName: "RLCS NA Season",
+        serieName: "season 8 2019",
+        stageName: "Group Stage",
+      }),
+    ).toBe("RLCS NA Season 8 2019");
+  });
+
   it("names a year-only serie after its league", () => {
     expect(
       eventDisplayName({

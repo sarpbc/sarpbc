@@ -6,12 +6,17 @@ const team = (name: string) => ({ team: { name } });
 
 describe(SitemapService, () => {
   const queries = {
+    circuits: vi.fn<SitemapQueries["circuits"]>(),
+    countryCodes: vi.fn<SitemapQueries["countryCodes"]>(),
+    forumPosts: vi.fn<SitemapQueries["forumPosts"]>(),
     matches: vi.fn<SitemapQueries["matches"]>(),
     news: vi.fn<SitemapQueries["news"]>(),
     playerSlugs: vi.fn<SitemapQueries["playerSlugs"]>(),
+    seasons: vi.fn<SitemapQueries["seasons"]>(),
     staffSlugs: vi.fn<SitemapQueries["staffSlugs"]>(),
     stages: vi.fn<SitemapQueries["stages"]>(),
     teamSlugs: vi.fn<SitemapQueries["teamSlugs"]>(),
+    weeklyDigests: vi.fn<SitemapQueries["weeklyDigests"]>(),
   };
 
   const service = new SitemapService(queries);
@@ -34,9 +39,44 @@ describe(SitemapService, () => {
 
   it("links news to their article", async () => {
     queries.news.mockResolvedValue([{ lastmod, slug: "a-news" }]);
+    queries.weeklyDigests.mockResolvedValue([]);
 
     await expect(service.entries("news")).resolves.toStrictEqual([
       { lastmod: lastmod.toISOString(), path: "/news/a-news" },
+    ]);
+  });
+
+  it("links each week of short news once, dated by its latest short", async () => {
+    queries.news.mockResolvedValue([]);
+    queries.weeklyDigests.mockResolvedValue([
+      { createdAt: new Date("2026-03-02T10:00:00.000Z"), lastmod: older },
+      { createdAt: new Date("2026-03-08T22:00:00.000Z"), lastmod },
+      { createdAt: new Date("2026-03-09T08:00:00.000Z"), lastmod: older },
+    ]);
+
+    await expect(service.entries("news")).resolves.toStrictEqual([
+      { lastmod: lastmod.toISOString(), path: "/news/week/2026-W10" },
+      { lastmod: older.toISOString(), path: "/news/week/2026-W11" },
+    ]);
+  });
+
+  it("links circuits, season archives, countries and forum posts", async () => {
+    queries.circuits.mockResolvedValue([{ lastmod, slug: "rlcs-2026-europe" }]);
+    queries.seasons.mockResolvedValue([{ lastmod, slug: "rlcs-season-8" }]);
+    queries.countryCodes.mockResolvedValue(["FR"]);
+    queries.forumPosts.mockResolvedValue([{ lastmod, publicId: 7, title: "Who wins Worlds?" }]);
+
+    await expect(service.entries("circuits")).resolves.toStrictEqual([
+      { lastmod: lastmod.toISOString(), path: "/circuits/rlcs-2026-europe" },
+    ]);
+    await expect(service.entries("seasons")).resolves.toStrictEqual([
+      { lastmod: lastmod.toISOString(), path: "/seasons/rlcs-season-8" },
+    ]);
+    await expect(service.entries("countries")).resolves.toStrictEqual([
+      { lastmod: null, path: "/countries/fr" },
+    ]);
+    await expect(service.entries("forum")).resolves.toStrictEqual([
+      { lastmod: lastmod.toISOString(), path: "/forum/post/7/who-wins-worlds" },
     ]);
   });
 

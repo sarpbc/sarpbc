@@ -122,13 +122,17 @@ const title = computed(() =>
     : t("page.player.slug.seoTitleDefault"),
 );
 
-const description = computed(() =>
-  currentPlayer.value.name
-    ? t("page.player.slug.seoDescriptionWithName", {
-        name: currentPlayer.value.name,
-      })
-    : t("page.player.slug.seoDescriptionDefault"),
-);
+const description = computed(() => {
+  const { name, team } = currentPlayer.value;
+
+  if (!name) {
+    return t("page.player.slug.seoDescriptionDefault");
+  }
+
+  return team?.name
+    ? t("page.player.slug.seoDescriptionWithTeam", { name, team: team.name })
+    : t("page.player.slug.seoDescriptionWithName", { name });
+});
 
 setPageSeo({
   description: description.value,

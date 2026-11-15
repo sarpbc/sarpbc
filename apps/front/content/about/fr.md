@@ -1,5 +1,5 @@
 ---
-title: "À propos de sarpbc.org"
+title: "À propos de sarpbc.org, plateforme indépendante d’esport Rocket League"
 description: "Découvrez sarpbc.org, une plateforme indépendante consacrée à l’esport Rocket League : actualités, matchs, résultats, profils de joueurs et jeux communautaires."
 ---
 
