@@ -59,12 +59,4 @@ app.provide(DESIGN_ADAPTERS, { icon: Icon, link: NuxtLink });
 
 `@sarpbc/ui` wires the library into `apps/front` and `apps/admin`: it registers the components as `Sb*` (`<SbButton>`), loads the tokens, provides `<Icon>` and `<NuxtLink>` as adapters, and declares the cascade layer order so the `components` layer stays above Tailwind's preflight and below its utilities.
 
-`apps/admin` keeps lighter dark surfaces where the front darkens them. Its stylesheet declares:
-
-```css
-.dark {
-  --sb-bg: var(--sb-ink-900);
-  --sb-bg-muted: var(--sb-ink-800);
-  --sb-bg-elevated: var(--sb-ink-800);
-}
-```
+Front and admin share one look: the font, the `ink` scale, the surfaces, links and focus rules live in `packages/ui/src/runtime/theme.css`, and neither app overrides the design tokens.
