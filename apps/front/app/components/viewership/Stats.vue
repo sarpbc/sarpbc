@@ -88,14 +88,13 @@ const details = computed(() =>
           external
           target="_blank"
           rel="noopener noreferrer nofollow"
-          variant="inline"
         >
           {{ viewership.sourceName }}
         </SLink>
       </span>
       <span v-if="startgg">
         {{ t("common.prizes.dataFrom") }}
-        <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
+        <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
       </span>
     </p>
   </HubCard>

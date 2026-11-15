@@ -223,7 +223,6 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
         <template #player-cell="{ row }">
           <SLink
             :to="$localePath(playerPath(row.original.player.slug))"
-            variant="inline"
             class="block max-w-40 truncate"
           >
             {{ row.original.player.name }}
@@ -233,7 +232,6 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
           <SLink
             v-if="row.original.team.slug"
             :to="$localePath(teamPath(row.original.team.slug))"
-            variant="muted"
             class="block max-w-40 truncate"
           >
             {{ row.original.team.name }}

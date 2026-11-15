@@ -95,7 +95,7 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
     <HubPageHeader>
       <template #title>{{ t("page.tournaments.index.title") }}</template>
       <template v-if="nextEvent" #meta>
-        <SLink :to="$localePath(tournamentEventPath(nextEvent.slug))" variant="muted">
+        <SLink :to="$localePath(tournamentEventPath(nextEvent.slug))">
           {{ t("page.hub.headers.nextEvent", { name: nextEvent.name }) }}
         </SLink>
       </template>

@@ -37,11 +37,7 @@ const formatRange = (contract: PlayerContract): string => {
         <li v-for="contract in contracts" :key="contract.id" class="flex items-center gap-3 p-3">
           <TeamImg :team-name="contract.team.name" :logo="contract.team" size="sm" />
           <div class="flex min-w-0 flex-1 flex-col">
-            <SLink
-              :to="$localePath(teamPath(contract.team.slug))"
-              variant="inline"
-              class="truncate"
-            >
+            <SLink :to="$localePath(teamPath(contract.team.slug))" class="truncate">
               {{ contract.team.name }}
             </SLink>
             <span class="text-sm text-muted">

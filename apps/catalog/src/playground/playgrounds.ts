@@ -505,7 +505,7 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
       render: (bindings) =>
         h(HoverCard, bindings, {
           content: () => card("Karmine Corp · EU · 4 titles"),
-          default: () => h(Link, { to: "#/HoverCard", variant: "accent" }, () => "Karmine Corp"),
+          default: () => h(Link, { to: "#/HoverCard", variant: "primary" }, () => "Karmine Corp"),
         }),
     },
   ],
@@ -581,12 +581,12 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
     {
       category: "Navigation",
       controls: [
-        choice("variant", LINK_VARIANTS, "muted"),
+        choice("variant", LINK_VARIANTS, "secondary"),
         required(text("to", "#/Link")),
         demo(text("text", "View the bracket")),
       ],
       description:
-        "Navigation inside text or lists. muted for secondary links, inline inside running text, accent for the one link a block leads to.",
+        "Navigation in lists, tables and copy. secondary for every link by default (navigation, names, meta); primary for the one link a block leads to. NavigationMenu items share these styles.",
       render: (bindings, sample) =>
         h(Link, { to: "", ...bindings }, () => z.string().catch("Link").parse(sample.text)),
       variants: { rows: "variant" },

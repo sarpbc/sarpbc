@@ -112,7 +112,6 @@ setPageSeo({
                   <SLink
                     v-if="currentContract"
                     :to="$localePath(teamPath(currentContract.team.slug))"
-                    variant="inline"
                     class="inline-flex items-center gap-2 min-w-0 text-sm font-medium"
                   >
                     <TeamImg
@@ -144,11 +143,7 @@ setPageSeo({
                   {{ t("page.staff.slug.playerCareer") }}
                 </dt>
                 <dd class="min-w-0">
-                  <SLink
-                    :to="$localePath(playerPath(person.slug))"
-                    variant="inline"
-                    class="text-sm font-medium"
-                  >
+                  <SLink :to="$localePath(playerPath(person.slug))" class="text-sm font-medium">
                     {{ t("page.staff.slug.viewPlayerProfile") }}
                   </SLink>
                 </dd>

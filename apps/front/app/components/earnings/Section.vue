@@ -109,7 +109,7 @@ const entryMeta = (entry: EarningsEntry): string => {
           <span v-if="owner === 'player'">{{ t("common.prizes.earnings.splitHint") }}</span>
           <span v-if="hasStartgg">
             {{ t("common.prizes.dataFrom") }}
-            <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
+            <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
           </span>
         </p>
       </HubCard>

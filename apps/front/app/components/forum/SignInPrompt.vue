@@ -21,7 +21,6 @@ const signInLabel = computed(() =>
   <SLink
     v-else-if="sessionReady"
     :to="localePath('/login')"
-    variant="muted"
     :class="
       action === 'create' ? 'w-full h-full flex items-center justify-center text-sm' : 'text-sm'
     "

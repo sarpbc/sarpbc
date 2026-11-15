@@ -159,7 +159,6 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
         <template #kicker>
           <SLink
             :to="localePath(tournamentEventPath(tournament.event.slug))"
-            variant="muted"
             class="text-sm text-pretty"
           >
             {{ tournament.event.name }}

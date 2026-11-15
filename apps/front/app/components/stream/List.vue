@@ -115,7 +115,7 @@ const hasStartgg = computed(() => streams.some((stream) => stream.source === "st
     <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
       <span>
         {{ t("page.match.detail.watch.dataFrom") }}
-        <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
+        <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
       </span>
     </p>
   </HubCard>

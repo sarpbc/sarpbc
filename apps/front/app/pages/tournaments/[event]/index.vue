@@ -214,10 +214,7 @@ watch(
             <template #caption>
               <div class="flex w-full min-w-0 items-center gap-2 pr-2">
                 <h2 :id="`tournament-stage-title-${stage.id}`" class="min-w-0 flex-1 truncate">
-                  <SLink
-                    :to="localePath(tournamentStagePath(event.slug, stage.slug))"
-                    variant="inline"
-                  >
+                  <SLink :to="localePath(tournamentStagePath(event.slug, stage.slug))">
                     {{ stage.name }}
                   </SLink>
                 </h2>

@@ -62,7 +62,7 @@ const blocks = computed((): ListBlock[] => {
       <HubRail v-for="group in block.events" :key="group.key" caption="section">
         <template #caption>
           <h4 class="h-fit min-w-0 truncate text-sm font-medium">
-            <SLink :to="$localePath(group.matchesPath)" variant="muted">
+            <SLink :to="$localePath(group.matchesPath)">
               {{ group.displayName }}
             </SLink>
           </h4>

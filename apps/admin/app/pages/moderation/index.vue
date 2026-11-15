@@ -159,7 +159,7 @@ const onReplyDeleted = async () => {
 
             <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
               <span class="text-muted">{{ targetTypeLabel(reply.targetType) }}</span>
-              <SLink variant="accent" :to="publicTargetUrl(reply)" external target="_blank">
+              <SLink variant="primary" :to="publicTargetUrl(reply)" external target="_blank">
                 {{ reply.targetLabel }}
               </SLink>
               <SLink

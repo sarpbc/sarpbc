@@ -35,7 +35,6 @@ const nameClass = computed(() => {
     <SLink
       v-if="href"
       :to="$localePath(href)"
-      variant="muted"
       class="flex max-w-full flex-col items-center justify-center gap-2 text-center text-balance break-words"
       :class="nameClass"
     >

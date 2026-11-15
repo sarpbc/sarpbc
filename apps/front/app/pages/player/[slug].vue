@@ -201,7 +201,6 @@ setPageSeo({
                   <SLink
                     v-if="currentPlayer.team"
                     :to="$localePath(teamPath(currentPlayer.team.slug))"
-                    variant="inline"
                     class="inline-flex items-center gap-2 min-w-0 text-sm font-medium"
                   >
                     <TeamImg
@@ -233,7 +232,6 @@ setPageSeo({
                 <dd class="min-w-0">
                   <SLink
                     :to="$localePath(staffPath(currentPlayer.slug))"
-                    variant="inline"
                     class="text-sm font-medium"
                   >
                     {{ t("page.player.slug.viewStaffProfile") }}
@@ -247,7 +245,6 @@ setPageSeo({
                 <dd class="min-w-0">
                   <SLink
                     :to="$localePath({ path: '/player/compare', query: { a: currentPlayer.slug } })"
-                    variant="inline"
                     class="text-sm font-medium"
                   >
                     {{ t("page.player.slug.compareCareers") }}

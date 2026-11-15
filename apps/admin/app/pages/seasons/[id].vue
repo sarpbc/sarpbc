@@ -99,7 +99,7 @@ const addAward = async (input: SeasonAwardInput) => {
           <p class="text-sm text-muted">
             <template v-if="publicUrl">
               {{ $t("page.seasons.edit.publishedAt") }}
-              <SLink variant="accent" :to="publicUrl" external target="_blank">
+              <SLink variant="primary" :to="publicUrl" external target="_blank">
                 {{ publicUrl }}
               </SLink>
             </template>
@@ -148,7 +148,7 @@ const addAward = async (input: SeasonAwardInput) => {
                   {{ $t("page.seasons.awards.presentedByValue", { name: award.presentedBy }) }}
                 </p>
                 <SLink
-                  variant="accent"
+                  variant="primary"
                   :to="award.sourceUrl"
                   external
                   target="_blank"

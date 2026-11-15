@@ -59,7 +59,7 @@ watch(
     <HubPageHeader>
       <template #title>{{ season.name }}</template>
       <template #meta>
-        <SLink :to="$localePath('/seasons')" variant="muted">
+        <SLink :to="$localePath('/seasons')">
           {{ t("page.seasons.archive.allSeasons") }}
         </SLink>
       </template>
@@ -165,7 +165,6 @@ watch(
                           tournamentStagePath(entry.tournament.event.slug, entry.tournament.slug),
                         )
                       "
-                      variant="inline"
                     >
                       {{ entry.label }}
                     </SLink>

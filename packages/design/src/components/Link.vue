@@ -3,7 +3,7 @@ import { useDesignAdapters } from "../adapters.ts";
 
 import type { LinkVariant } from "../types.ts";
 
-const { to, variant = "muted" } = defineProps<{
+const { to, variant = "secondary" } = defineProps<{
   /** A path, a URL or a route location; the app's link adapter resolves it. */
   to: string | object;
   variant?: LinkVariant;
@@ -39,11 +39,7 @@ const adapters = useDesignAdapters();
     }
   }
 
-  .sb-link[data-variant="inline"] {
-    --ink: var(--sb-text);
-  }
-
-  .sb-link[data-variant="accent"] {
+  .sb-link[data-variant="primary"] {
     --ink: var(--sb-link);
     --ink-hover: var(--sb-link-hover);
 

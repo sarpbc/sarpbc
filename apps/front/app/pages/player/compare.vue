@@ -336,7 +336,6 @@ setPageSeo({
               <SLink
                 v-if="entry.player"
                 :to="$localePath(playerPath(entry.player.slug))"
-                variant="inline"
                 class="flex min-w-0 items-center gap-2"
               >
                 <PlayerImg

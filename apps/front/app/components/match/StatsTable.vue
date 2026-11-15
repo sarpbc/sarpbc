@@ -121,7 +121,6 @@ const replayLabel = computed(() =>
               <SLink
                 v-if="row.player"
                 :to="$localePath(playerPath(row.player.slug))"
-                variant="inline"
                 class="block truncate"
               >
                 {{ playerLabel(row) }}
@@ -142,7 +141,6 @@ const replayLabel = computed(() =>
         external
         target="_blank"
         rel="noopener noreferrer"
-        variant="muted"
         :aria-label="replayLabel"
       >
         {{ t("page.match.detail.stats.source") }}

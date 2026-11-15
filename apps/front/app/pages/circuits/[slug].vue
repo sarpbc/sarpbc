@@ -123,7 +123,7 @@ watch(
         <SSkeleton v-else class="mx-auto h-5 w-48" />
       </template>
       <template #meta>
-        <SLink :to="$localePath('/circuits')" variant="muted">
+        <SLink :to="$localePath('/circuits')">
           {{ t("page.circuits.standings.title") }}
         </SLink>
       </template>
@@ -192,7 +192,6 @@ watch(
                   <div class="flex flex-col items-end gap-1">
                     <SLink
                       :to="$localePath(tournamentEventPath(column.event.slug))"
-                      variant="inline"
                       class="line-clamp-2 text-balance"
                     >
                       {{ column.event.name }}
@@ -226,7 +225,6 @@ watch(
                     <TeamImg :team-name="entry.row.team.name" :logo="entry.row.team" size="xs" />
                     <SLink
                       :to="$localePath(teamPath(entry.row.team.slug))"
-                      variant="inline"
                       class="min-w-0 truncate font-medium"
                     >
                       {{ entry.row.team.name }}
@@ -284,7 +282,7 @@ watch(
                 <span>{{ t("page.circuits.standings.scaleSource") }}</span>
                 <ul class="flex flex-col gap-1">
                   <li v-for="url in standings.sourceUrls" :key="url" class="min-w-0 truncate">
-                    <SLink :to="url" external target="_blank" variant="inline">
+                    <SLink :to="url" external target="_blank">
                       {{ sourceLabel(url) }}
                     </SLink>
                   </li>

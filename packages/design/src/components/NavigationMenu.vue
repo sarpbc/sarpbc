@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { useDesignAdapters } from "../adapters.ts";
+import Link from "./Link.vue";
 
 import type { NavigationItem } from "../types.ts";
 
@@ -16,8 +17,7 @@ const adapters = useDesignAdapters();
   <nav class="sb-nav" :data-orientation="orientation">
     <ul class="sb-nav__list">
       <li v-for="item in items" :key="item.label" class="sb-nav__item">
-        <component
-          :is="adapters.link"
+        <Link
           :to="item.to"
           :target="item.target"
           class="sb-nav__link"
@@ -25,7 +25,7 @@ const adapters = useDesignAdapters();
         >
           <component :is="adapters.icon" v-if="item.icon" :name="item.icon" class="sb-nav__icon" />
           <span class="sb-nav__label">{{ item.label }}</span>
-        </component>
+        </Link>
       </li>
     </ul>
   </nav>
@@ -46,32 +46,19 @@ const adapters = useDesignAdapters();
     align-items: stretch;
   }
 
+  /* Colors, hover and focus come from SLink; the menu adds its layout and active state. */
   .sb-nav__link {
     display: flex;
     gap: 0.375rem;
     align-items: center;
     min-width: 0;
-    color: var(--sb-text-muted);
     font-size: 0.875rem;
     font-weight: 500;
     line-height: 1.25rem;
-    text-decoration: none;
-    transition: color var(--sb-duration-fast);
   }
 
   .sb-nav[data-orientation="horizontal"] .sb-nav__link {
     padding: 0.375rem 0.625rem;
-  }
-
-  .sb-nav__link:focus-visible {
-    outline: 1px solid var(--sb-primary);
-    outline-offset: 2px;
-  }
-
-  @media (hover: hover) {
-    .sb-nav__link:hover {
-      color: var(--sb-text-highlighted);
-    }
   }
 
   /* An item is active when the app says so, or when the router matches its link. */
