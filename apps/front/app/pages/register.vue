@@ -63,13 +63,11 @@ const onSubmit = async (event: Event) => {
           .
         </div>
 
-        <UButton
+        <SbButton
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
-          color="neutral"
+          variant="secondary"
           class="w-full flex flex-row justify-center text-highlighted"
-          size="lg"
-          variant="outline"
           @click="googleLogin"
         />
 
@@ -100,11 +98,9 @@ const onSubmit = async (event: Event) => {
             {{ errorMessage }}
           </p>
 
-          <UButton
+          <SbButton
             :label="$t('page.authentication.toRegister')"
             type="submit"
-            color="primary"
-            size="lg"
             class="w-full flex flex-col items-center"
           />
         </UForm>

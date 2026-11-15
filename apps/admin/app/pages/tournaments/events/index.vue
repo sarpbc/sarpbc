@@ -48,7 +48,7 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.tournaments.events.create.action')"
         :to="localePath('/tournaments/events/create')"

@@ -125,12 +125,11 @@ const menuToggleLabel = computed(() =>
       </div>
       <div class="flex items-center md:hidden">
         <SettingsSpoilerToggle />
-        <UButton
+        <SbButton
           :icon="
             !menuOpen ? 'i-fluent-text-align-justify-24-regular' : 'i-fluent-dismiss-24-regular'
           "
-          color="neutral"
-          variant="ghost"
+          variant="tertiary"
           class="flex items-center justify-center size-10 ml-2"
           :aria-label="menuToggleLabel"
           :aria-expanded="menuOpen"

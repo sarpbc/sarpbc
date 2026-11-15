@@ -353,10 +353,10 @@ const save = async () => {
               class="w-full"
             />
           </UFormField>
-          <UButton
+          <SbButton
             class="mt-6"
-            color="error"
-            variant="ghost"
+            variant="tertiary"
+            danger
             icon="i-fluent-delete-24-regular"
             :aria-label="$t('page.circuits.scale.removeTier')"
             @click="removeRow(row.key)"
@@ -368,8 +368,8 @@ const save = async () => {
         </p>
 
         <div>
-          <UButton
-            variant="soft"
+          <SbButton
+            variant="secondary"
             icon="i-fluent-add-24-regular"
             :label="$t('page.circuits.scale.addTier')"
             :disabled="rows.length >= MAX_CIRCUIT_SCALE_TIERS"
@@ -452,10 +452,10 @@ const save = async () => {
                 class="w-full"
               />
             </UFormField>
-            <UButton
+            <SbButton
               class="mt-6"
-              color="error"
-              variant="ghost"
+              variant="tertiary"
+              danger
               icon="i-fluent-delete-24-regular"
               :aria-label="$t('page.circuits.scale.finishes.remove')"
               @click="removeFinish(row.key)"
@@ -465,8 +465,8 @@ const save = async () => {
             {{ $t("page.circuits.scale.finishes.errors.repeated") }}
           </p>
           <div>
-            <UButton
-              variant="soft"
+            <SbButton
+              variant="secondary"
               icon="i-fluent-add-24-regular"
               :label="$t('page.circuits.scale.finishes.add')"
               :disabled="finishRows.length >= MAX_CIRCUIT_STAGE_TEAMS || teamOptions.length === 0"
@@ -479,15 +479,14 @@ const save = async () => {
       </form>
     </template>
     <template #footer>
-      <UButton
+      <SbButton
         :label="$t('page.circuits.scale.save')"
         :loading="saving"
         :disabled="!canSave"
         @click="save"
       />
-      <UButton
-        color="neutral"
-        variant="subtle"
+      <SbButton
+        variant="secondary"
         :label="$t('common.cancel')"
         :disabled="saving"
         @click="open = false"

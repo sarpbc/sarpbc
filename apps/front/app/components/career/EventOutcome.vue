@@ -79,8 +79,8 @@ const formatDelta = (value: number): string => (value > 0 ? `+${value}` : `${val
       </li>
     </ul>
 
-    <UButton block @click="emit('continue')">
+    <SbButton block @click="emit('continue')">
       {{ t("page.game.career.event.continue") }}
-    </UButton>
+    </SbButton>
   </div>
 </template>

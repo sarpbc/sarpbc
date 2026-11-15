@@ -82,7 +82,7 @@ const handleSubmit = async () => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         type="button"
         icon="i-fluent-save-24-regular"
         :label="$t('page.tournaments.form.save')"

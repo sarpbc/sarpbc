@@ -212,7 +212,7 @@ const submit = async () => {
           class="w-full"
         />
       </UFormField>
-      <UButton
+      <SbButton
         type="submit"
         icon="i-fluent-arrow-download-24-regular"
         :loading="submitting"
@@ -227,9 +227,9 @@ const submit = async () => {
 
     <div v-else-if="error && !imports" class="flex flex-col items-start gap-2">
       <p class="text-sm text-error">{{ t("page.tournaments.statsImport.loadError") }}</p>
-      <UButton
+      <SbButton
+        variant="secondary"
         size="sm"
-        variant="soft"
         :label="t('page.tournaments.statsImport.retry')"
         @click="refresh()"
       />
@@ -300,10 +300,10 @@ const submit = async () => {
                   })
                 }}
               </span>
-              <UButton
+              <SbButton
                 v-else
-                size="xs"
-                variant="soft"
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-link-24-regular"
                 :label="t('page.tournaments.statsAttach.action')"
                 :aria-label="t('page.tournaments.statsAttach.actionFor', { title: row.title })"

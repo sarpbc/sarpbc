@@ -103,9 +103,9 @@ const onStart = () => {
             spellcheck="false"
           />
         </UFormField>
-        <UButton type="submit" block>
+        <SbButton type="submit" block>
           {{ t("page.game.career.onboarding.next") }}
-        </UButton>
+        </SbButton>
       </UForm>
     </div>
 
@@ -117,21 +117,20 @@ const onStart = () => {
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.regionBody") }}</p>
       </div>
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <UButton
+        <SbButton
           v-for="regionOption in CAREER_REGIONS"
           :key="regionOption"
-          color="neutral"
-          variant="outline"
+          variant="secondary"
           class="selectable"
           :aria-pressed="region === regionOption"
           @click="emit('selectRegion', regionOption)"
         >
           {{ t(`page.game.career.onboarding.regions.${regionOption}`) }}
-        </UButton>
+        </SbButton>
       </div>
-      <UButton block :disabled="!region" @click="onRegionNext">
+      <SbButton block :disabled="!region" @click="onRegionNext">
         {{ t("page.game.career.onboarding.next") }}
-      </UButton>
+      </SbButton>
     </div>
 
     <div v-else-if="step === 'country'" class="flex flex-col gap-4">
@@ -142,21 +141,20 @@ const onStart = () => {
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.countryBody") }}</p>
       </div>
       <div class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <UButton
+        <SbButton
           v-for="countryOption in countriesForRegion"
           :key="countryOption"
-          color="neutral"
-          variant="outline"
+          variant="secondary"
           class="selectable"
           :aria-pressed="country === countryOption"
           @click="emit('selectCountry', countryOption)"
         >
           {{ t(`page.game.career.onboarding.countries.${countryOption}`) }}
-        </UButton>
+        </SbButton>
       </div>
-      <UButton block :disabled="!country" @click="onCountryNext">
+      <SbButton block :disabled="!country" @click="onCountryNext">
         {{ t("page.game.career.onboarding.next") }}
-      </UButton>
+      </SbButton>
     </div>
 
     <div v-else-if="step === 'role'" class="flex flex-col gap-4">
@@ -183,9 +181,9 @@ const onStart = () => {
           </p>
         </button>
       </div>
-      <UButton block :disabled="!role" @click="onRoleNext">
+      <SbButton block :disabled="!role" @click="onRoleNext">
         {{ t("page.game.career.onboarding.next") }}
-      </UButton>
+      </SbButton>
     </div>
 
     <div v-else-if="step === 'background'" class="flex flex-col gap-4">
@@ -212,9 +210,9 @@ const onStart = () => {
           </p>
         </button>
       </div>
-      <UButton block :disabled="!background" @click="onStart">
+      <SbButton block :disabled="!background" @click="onStart">
         {{ t("page.game.career.onboarding.startCareer") }}
-      </UButton>
+      </SbButton>
     </div>
   </div>
 </template>

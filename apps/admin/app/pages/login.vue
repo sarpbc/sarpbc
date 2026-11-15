@@ -107,13 +107,11 @@ const googleLogin = () => {
           {{ $t("page.authentication.staffOnly") }}
         </p>
 
-        <UButton
+        <SbButton
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
-          color="neutral"
+          variant="secondary"
           class="flex w-full flex-row justify-center text-highlighted"
-          size="lg"
-          variant="outline"
           @click="googleLogin"
         />
 
@@ -143,9 +141,8 @@ const googleLogin = () => {
             />
           </UFormField>
 
-          <UButton
+          <SbButton
             :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"
-            color="neutral"
             type="submit"
             :loading="pending"
             :disabled="pending"

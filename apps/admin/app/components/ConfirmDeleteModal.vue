@@ -56,16 +56,15 @@ const confirm = async () => {
       <p>{{ shown === null ? "" : message(shown) }}</p>
     </template>
     <template #footer>
-      <UButton
+      <SbButton
         icon="i-fluent-delete-24-regular"
-        color="error"
+        danger
         :label="confirmLabel"
         :loading="isDeleting"
         @click="confirm"
       />
-      <UButton
-        color="neutral"
-        variant="subtle"
+      <SbButton
+        variant="secondary"
         :label="$t('common.cancel')"
         :disabled="isDeleting"
         @click="open = false"

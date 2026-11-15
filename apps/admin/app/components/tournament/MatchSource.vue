@@ -52,13 +52,8 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <UButton
-          color="neutral"
-          variant="ghost"
-          :label="t('common.cancel')"
-          @click="open = false"
-        />
-        <UButton
+        <SbButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
+        <SbButton
           :label="t('page.tournaments.matchSource.save')"
           :loading="saving"
           :disabled="!!sourceUrlError(value)"

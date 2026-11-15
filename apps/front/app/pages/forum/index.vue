@@ -45,9 +45,9 @@ const {
         :title="t('page.forum.index.noPosts')"
         :hint="t('page.forum.index.emptyHint')"
       >
-        <UButton color="neutral" variant="outline" :to="localePath('/forum/new')">
+        <SbButton variant="secondary" :to="localePath('/forum/new')">
           {{ t("page.forum.index.createNewPost") }}
-        </UButton>
+        </SbButton>
       </SEmptyState>
     </SCard>
   </div>

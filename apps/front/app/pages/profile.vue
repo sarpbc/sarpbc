@@ -181,10 +181,8 @@ setPageSeo({
         </div>
 
         <UPopover v-model:open="menuOpen">
-          <UButton
-            square
-            variant="ghost"
-            color="neutral"
+          <SbButton
+            variant="tertiary"
             icon="i-fluent-more-vertical-24-regular"
             class="size-row p-0 justify-center"
             sound="press"
@@ -200,10 +198,9 @@ setPageSeo({
               class="flex min-w-40 flex-col p-1"
               :aria-label="$t('page.profile.actions')"
             >
-              <UButton
+              <SbButton
+                variant="tertiary"
                 size="sm"
-                variant="ghost"
-                color="neutral"
                 icon="i-fluent-edit-24-regular"
                 class="justify-start"
                 sound="press"
@@ -211,11 +208,10 @@ setPageSeo({
                 :label="$t('page.profile.editProfile')"
                 @click="openEditProfile"
               />
-              <UButton
+              <SbButton
                 v-if="showStaffConsole"
+                variant="tertiary"
                 size="sm"
-                variant="ghost"
-                color="neutral"
                 icon="i-fluent-shield-24-regular"
                 class="justify-start"
                 sound="press"
@@ -226,10 +222,10 @@ setPageSeo({
                 :label="$t('page.profile.staff')"
                 @click="menuOpen = false"
               />
-              <UButton
+              <SbButton
+                variant="tertiary"
+                danger
                 size="sm"
-                variant="ghost"
-                color="error"
                 icon="i-fluent-sign-out-24-regular"
                 class="justify-start"
                 sound="press"
@@ -248,11 +244,10 @@ setPageSeo({
         <template #caption>
           <div class="flex w-full min-w-0 items-center justify-between gap-2 pr-2">
             <h2>{{ $t("page.profile.notifications.title") }}</h2>
-            <UButton
+            <SbButton
               v-if="unreadNotifications.length > 0"
-              size="xs"
-              variant="ghost"
-              color="neutral"
+              variant="tertiary"
+              size="sm"
               :label="$t('page.profile.notifications.markAllRead')"
               :loading="isMarkingRead"
               :disabled="isMarkingRead"
@@ -314,10 +309,9 @@ setPageSeo({
         </UForm>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           type="submit"
           form="edit-username-form"
-          color="primary"
           :loading="isSavingUserName"
           :disabled="isSavingUserName"
           :label="

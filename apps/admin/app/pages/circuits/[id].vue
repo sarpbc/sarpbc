@@ -140,7 +140,7 @@ const formatDates = (stage: CircuitStage): string => {
               <h2 class="text-lg font-semibold">{{ $t("page.circuits.stages.title") }}</h2>
               <p class="text-sm text-muted">{{ $t("page.circuits.stages.hint") }}</p>
             </div>
-            <UButton
+            <SbButton
               icon="i-fluent-add-24-regular"
               :label="$t('page.circuits.stages.add')"
               @click="isPickerOpen = true"
@@ -196,17 +196,16 @@ const formatDates = (stage: CircuitStage): string => {
                 </ULink>
               </div>
               <div class="flex flex-row items-center gap-1">
-                <UButton
-                  color="neutral"
-                  variant="soft"
+                <SbButton
+                  variant="secondary"
                   size="sm"
                   icon="i-fluent-edit-24-regular"
                   :label="$t('page.circuits.stages.edit')"
                   @click="editStage(stage)"
                 />
-                <UButton
-                  color="error"
-                  variant="ghost"
+                <SbButton
+                  variant="tertiary"
+                  danger
                   size="sm"
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.circuits.stages.remove.title')"

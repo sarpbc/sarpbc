@@ -272,13 +272,8 @@ const confirm = async () => {
 
     <template #footer>
       <div class="flex w-full justify-end gap-2">
-        <UButton
-          color="neutral"
-          variant="ghost"
-          :label="t('common.cancel')"
-          @click="open = false"
-        />
-        <UButton
+        <SbButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
+        <SbButton
           :loading="confirming"
           :disabled="!canConfirm"
           icon="i-fluent-trophy-24-regular"

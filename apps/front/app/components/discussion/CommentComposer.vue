@@ -155,9 +155,8 @@ const onEnterKey = (event: KeyboardEvent) => {
         />
       </UFormField>
 
-      <UButton
+      <SbButton
         type="submit"
-        color="primary"
         class="w-fit self-end px-4"
         :loading="isSubmitting"
         :disabled="isSubmitting"
@@ -165,7 +164,7 @@ const onEnterKey = (event: KeyboardEvent) => {
         {{
           isSubmitting ? $t("components.discussion.submitting") : $t("components.discussion.submit")
         }}
-      </UButton>
+      </SbButton>
     </UForm>
   </div>
 </template>

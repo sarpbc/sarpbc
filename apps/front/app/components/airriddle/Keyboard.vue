@@ -103,12 +103,11 @@ const keyClass = (letter: string): string => {
       :key="`row-${rowIndex}`"
       class="flex justify-center gap-1"
     >
-      <UButton
+      <SbButton
         v-for="letter in row"
         :key="letter"
         type="button"
-        variant="soft"
-        color="neutral"
+        variant="secondary"
         class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-medium uppercase sm:max-w-11"
         :class="keyClass(letter)"
         :disabled="disabled"
@@ -116,16 +115,15 @@ const keyClass = (letter: string): string => {
         @click="onLetterPress(letter)"
       >
         {{ letter }}
-      </UButton>
+      </SbButton>
     </div>
 
     <div class="flex justify-center gap-1">
-      <UButton
+      <SbButton
         v-for="digit in numberRow"
         :key="digit"
         type="button"
-        variant="soft"
-        color="neutral"
+        variant="secondary"
         class="inline-flex h-11 min-h-11 max-w-10 flex-1 items-center justify-center px-0 font-mono text-sm font-medium tabular-nums sm:max-w-11"
         :class="keyClass(digit)"
         :disabled="disabled"
@@ -133,34 +131,31 @@ const keyClass = (letter: string): string => {
         @click="onLetterPress(digit)"
       >
         {{ digit }}
-      </UButton>
+      </SbButton>
     </div>
 
     <div class="flex justify-center gap-1">
-      <UButton
+      <SbButton
         type="button"
-        variant="soft"
-        color="neutral"
+        variant="secondary"
         class="inline-flex h-11 min-h-11 flex-2 items-center justify-center font-mono text-sm font-medium uppercase"
         :disabled="disabled"
         :aria-label="t('page.game.airriddle.keyboardSpace')"
         @click="onLetterPress(' ')"
       >
         {{ t("page.game.airriddle.keyboardSpace") }}
-      </UButton>
-      <UButton
+      </SbButton>
+      <SbButton
         type="button"
-        variant="soft"
-        color="neutral"
+        variant="secondary"
         icon="i-fluent-backspace-24-regular"
         class="inline-flex h-11 min-h-11 flex-1 items-center justify-center"
         :aria-label="t('page.game.airriddle.keyboardBackspace')"
         :disabled="disabled"
         @click="emit('backspace')"
       />
-      <UButton
+      <SbButton
         type="button"
-        color="primary"
         class="inline-flex h-11 min-h-11 flex-1 items-center justify-center font-mono text-sm font-medium"
         :disabled="disabled || !canSubmit"
         :loading="loading"
@@ -168,7 +163,7 @@ const keyClass = (letter: string): string => {
         @click="emit('submit')"
       >
         {{ loading ? t("page.game.airriddle.submitting") : t("page.game.airriddle.keyboardEnter") }}
-      </UButton>
+      </SbButton>
     </div>
   </div>
 </template>

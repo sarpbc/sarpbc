@@ -4,13 +4,11 @@ const localePath = useLocalePath();
 
 <template>
   <div class="relative w-full flex flex-col h-svh">
-    <UButton
+    <SbButton
       icon="i-fluent-dismiss-24-regular"
       :to="localePath('/')"
-      variant="ghost"
-      color="neutral"
+      variant="tertiary"
       class="absolute top-4 left-4"
-      size="lg"
       :aria-label="$t('common.close')"
     />
     <slot />

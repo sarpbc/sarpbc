@@ -67,94 +67,96 @@ const inputAttrs = computed(() =>
 
 <style scoped>
 /* One look: a hairline field that rings in primary on focus and in error when invalid. */
-.sb-input {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-}
+@layer components {
+  .sb-input {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
 
-.sb-input__field {
-  --focus-tone: var(--sb-primary);
-
-  width: 100%;
-  /* 28px tall, aligned with a md button. */
-  padding: 0.25rem 0.5rem;
-  border: 0;
-  border-radius: 0;
-  appearance: none;
-  background: var(--sb-bg);
-  box-shadow: inset 0 0 0 1px var(--sb-border);
-  color: var(--sb-text-highlighted);
-  font: inherit;
-  font-size: 1rem;
-  line-height: 1.25rem;
-  transition-property: color, background-color, box-shadow;
-  transition-duration: var(--sb-duration-fast);
-}
-
-@media (width >= 48rem) {
   .sb-input__field {
-    font-size: 0.875rem;
+    --focus-tone: var(--sb-primary);
+
+    width: 100%;
+    /* 28px tall, aligned with a md button. */
+    padding: 0.25rem 0.5rem;
+    border: 0;
+    border-radius: 0;
+    appearance: none;
+    background: var(--sb-bg);
+    box-shadow: inset 0 0 0 1px var(--sb-border);
+    color: var(--sb-text-highlighted);
+    font: inherit;
+    font-size: 1rem;
+    line-height: 1.25rem;
+    transition-property: color, background-color, box-shadow;
+    transition-duration: var(--sb-duration-fast);
   }
-}
 
-.sb-input__field::placeholder {
-  color: var(--sb-text-dimmed);
-}
-
-@media (hover: hover) {
-  .sb-input__field:hover:enabled:not(:focus-visible, [aria-invalid="true"]) {
-    box-shadow: inset 0 0 0 1px var(--sb-border-accented);
+  @media (width >= 48rem) {
+    .sb-input__field {
+      font-size: 0.875rem;
+    }
   }
-}
 
-.sb-input__field:focus-visible {
-  /* The border color alone marks focus; no halo. */
-  outline: none;
-  box-shadow: inset 0 0 0 1px var(--focus-tone);
-}
+  .sb-input__field::placeholder {
+    color: var(--sb-text-dimmed);
+  }
 
-.sb-input__field:disabled {
-  opacity: 0.75;
-  cursor: not-allowed;
-}
+  @media (hover: hover) {
+    .sb-input__field:hover:enabled:not(:focus-visible, [aria-invalid="true"]) {
+      box-shadow: inset 0 0 0 1px var(--sb-border-accented);
+    }
+  }
 
-.sb-input__field[aria-invalid="true"] {
-  --focus-tone: var(--sb-error);
+  .sb-input__field:focus-visible {
+    /* The border color alone marks focus; no halo. */
+    outline: none;
+    box-shadow: inset 0 0 0 1px var(--focus-tone);
+  }
 
-  box-shadow: inset 0 0 0 1px var(--sb-error);
-}
+  .sb-input__field:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
 
-.sb-input__field[data-leading] {
-  padding-inline-start: 2rem;
-}
+  .sb-input__field[aria-invalid="true"] {
+    --focus-tone: var(--sb-error);
 
-.sb-input__field[data-trailing] {
-  padding-inline-end: 2rem;
-}
+    box-shadow: inset 0 0 0 1px var(--sb-error);
+  }
 
-.sb-input__adornment {
-  position: absolute;
-  inset-block: 0;
-  display: flex;
-  align-items: center;
-  color: var(--sb-text-dimmed);
-  pointer-events: none;
-}
+  .sb-input__field[data-leading] {
+    padding-inline-start: 2rem;
+  }
 
-.sb-input__adornment--leading {
-  inset-inline-start: 0;
-  padding-inline-start: 0.5rem;
-}
+  .sb-input__field[data-trailing] {
+    padding-inline-end: 2rem;
+  }
 
-.sb-input__adornment--trailing {
-  inset-inline-end: 0;
-  padding-inline-end: 0.5rem;
-}
+  .sb-input__adornment {
+    position: absolute;
+    inset-block: 0;
+    display: flex;
+    align-items: center;
+    color: var(--sb-text-dimmed);
+    pointer-events: none;
+  }
 
-.sb-input__icon {
-  flex-shrink: 0;
-  width: 1.125rem;
-  height: 1.125rem;
+  .sb-input__adornment--leading {
+    inset-inline-start: 0;
+    padding-inline-start: 0.5rem;
+  }
+
+  .sb-input__adornment--trailing {
+    inset-inline-end: 0;
+    padding-inline-end: 0.5rem;
+  }
+
+  .sb-input__icon {
+    flex-shrink: 0;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
 }
 </style>

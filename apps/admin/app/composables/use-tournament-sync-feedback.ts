@@ -22,28 +22,6 @@ export const syncIcon = (state: SyncState): string => {
   }
 };
 
-const syncColor = (state: SyncState): "success" | "error" | "primary" => {
-  switch (state) {
-    case "success": {
-      return "success";
-    }
-
-    case "error": {
-      return "error";
-    }
-
-    case "idle": {
-      return "primary";
-    }
-
-    default: {
-      const _exhaustive: never = state;
-
-      return _exhaustive;
-    }
-  }
-};
-
 export const useTournamentSyncFeedback = () => {
   const syncingId = ref<string | null>(null);
   const states = ref(new Map<string, SyncState>());
@@ -71,7 +49,7 @@ export const useTournamentSyncFeedback = () => {
   };
 
   return {
-    colorFor: (id: string) => syncColor(stateOf(id)),
+    failedFor: (id: string) => stateOf(id) === "error",
     iconFor: (id: string) => syncIcon(stateOf(id)),
     run,
     syncingId,

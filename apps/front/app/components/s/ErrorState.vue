@@ -17,8 +17,8 @@ const { t } = useI18n();
   >
     <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" aria-hidden="true" />
     <p class="text-sm text-muted text-pretty">{{ message }}</p>
-    <UButton variant="outline" color="neutral" @click="emit('retry')">
+    <SbButton variant="secondary" @click="emit('retry')">
       {{ t("common.retry") }}
-    </UButton>
+    </SbButton>
   </div>
 </template>

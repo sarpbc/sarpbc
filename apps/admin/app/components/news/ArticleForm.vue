@@ -27,12 +27,11 @@ const preview = computed(() =>
   <div class="flex min-h-0 flex-1 flex-col">
     <div class="flex items-center justify-between gap-3 border-b border-default px-4">
       <div class="flex items-center gap-1" role="tablist" :aria-label="$t('page.news.locale.tabs')">
-        <UButton
+        <SbButton
           role="tab"
           :aria-selected="editorLocale === 'en'"
+          variant="tertiary"
           size="sm"
-          color="neutral"
-          variant="link"
           :class="
             editorLocale === 'en'
               ? 'rounded-none border-b-2 border-highlighted text-highlighted'
@@ -41,13 +40,12 @@ const preview = computed(() =>
           @click="editorLocale = 'en'"
         >
           {{ $t("page.news.locale.en") }}
-        </UButton>
-        <UButton
+        </SbButton>
+        <SbButton
           role="tab"
           :aria-selected="editorLocale === 'fr'"
+          variant="tertiary"
           size="sm"
-          color="neutral"
-          variant="link"
           :class="
             editorLocale === 'fr'
               ? 'rounded-none border-b-2 border-highlighted text-highlighted'
@@ -56,19 +54,17 @@ const preview = computed(() =>
           @click="editorLocale = 'fr'"
         >
           {{ $t("page.news.locale.fr") }}
-        </UButton>
+        </SbButton>
       </div>
       <UTooltip
         :text="
           previewing ? $t('page.news.create.preview.hide') : $t('page.news.create.preview.show')
         "
       >
-        <UButton
+        <SbButton
           icon="i-lucide-eye"
           size="sm"
-          square
-          color="neutral"
-          :variant="previewing ? 'soft' : 'ghost'"
+          :variant="previewing ? 'secondary' : 'tertiary'"
           :aria-pressed="previewing"
           :aria-label="
             previewing ? $t('page.news.create.preview.hide') : $t('page.news.create.preview.show')

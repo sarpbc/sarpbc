@@ -4,13 +4,11 @@ const config = useRuntimeConfig();
 
 <template>
   <div class="flex h-svh max-h-svh w-full flex-col bg-default">
-    <UButton
+    <SbButton
       icon="fluent:dismiss-24-regular"
       :to="config.public.publicSiteUrl"
-      variant="ghost"
-      color="neutral"
+      variant="tertiary"
       class="absolute top-4 left-4"
-      size="lg"
       :aria-label="$t('page.nav.backToSite')"
     />
     <slot />

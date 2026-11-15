@@ -156,9 +156,9 @@ const addAward = async (input: SeasonAwardInput) => {
                   {{ award.sourceUrl }}
                 </ULink>
               </div>
-              <UButton
-                color="error"
-                variant="ghost"
+              <SbButton
+                variant="tertiary"
+                danger
                 size="sm"
                 icon="i-fluent-delete-24-regular"
                 :aria-label="$t('page.seasons.awards.remove.title')"

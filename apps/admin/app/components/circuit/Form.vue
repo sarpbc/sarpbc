@@ -140,7 +140,7 @@ const submit = () => {
       />
     </UFormField>
     <div>
-      <UButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
+      <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
     </div>
   </form>
 </template>

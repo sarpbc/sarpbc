@@ -280,7 +280,7 @@ const save = async () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.lineups.loadError") }}</p>
-        <UButton size="sm" variant="soft" :label="t('common.retry')" @click="load" />
+        <SbButton variant="secondary" size="sm" :label="t('common.retry')" @click="load" />
       </div>
 
       <div v-else class="flex flex-col gap-4">
@@ -300,9 +300,9 @@ const save = async () => {
               }}
             </p>
           </div>
-          <UButton
+          <SbButton
+            variant="secondary"
             size="sm"
-            variant="soft"
             icon="i-fluent-arrow-sync-24-regular"
             :label="t('page.tournaments.lineups.fillSuggested')"
             :disabled="unnamedSuggestedCount === suggestedCount"
@@ -342,10 +342,9 @@ const save = async () => {
                     {{ t("page.tournaments.lineups.standIn") }}
                   </UBadge>
                 </span>
-                <UButton
-                  size="xs"
-                  color="neutral"
-                  variant="ghost"
+                <SbButton
+                  variant="tertiary"
+                  size="sm"
                   icon="i-fluent-dismiss-24-regular"
                   :aria-label="t('page.tournaments.lineups.remove', { name: pick.name })"
                   @click="remove(side.id, pick.id)"
@@ -365,20 +364,19 @@ const save = async () => {
                 :aria-label="t('page.tournaments.lineups.chooseFor', { name: side.name })"
                 :disabled="isFull(side.id)"
               />
-              <UButton
+              <SbButton
                 type="submit"
+                variant="secondary"
                 size="sm"
-                variant="soft"
                 :label="t('page.tournaments.lineups.add')"
                 :disabled="!selectedPick[side.id] || isFull(side.id)"
               />
             </form>
 
-            <UButton
+            <SbButton
               v-if="hasRoster(side.id)"
-              size="xs"
-              color="neutral"
-              variant="ghost"
+              variant="tertiary"
+              size="sm"
               class="self-start"
               :label="t('page.tournaments.lineups.useRoster')"
               @click="fillFromRoster(side.id)"
@@ -407,11 +405,11 @@ const save = async () => {
               >
                 <span class="truncate">{{ player.name }}</span>
                 <div class="flex flex-wrap gap-1">
-                  <UButton
+                  <SbButton
                     v-for="side in sides"
                     :key="side.id"
-                    size="xs"
-                    variant="ghost"
+                    variant="tertiary"
+                    size="sm"
                     icon="i-fluent-add-24-regular"
                     :label="t('page.tournaments.lineups.addTo', { name: side.name })"
                     :disabled="isFull(side.id)"
@@ -428,13 +426,8 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <UButton
-          color="neutral"
-          variant="ghost"
-          :label="t('common.cancel')"
-          @click="open = false"
-        />
-        <UButton
+        <SbButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
+        <SbButton
           :label="t('page.tournaments.lineups.save')"
           :loading="saving"
           :disabled="loading || loadFailed"

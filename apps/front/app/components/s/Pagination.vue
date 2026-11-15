@@ -41,33 +41,31 @@ const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
       class="flex w-full items-center justify-between gap-2 px-1.5"
       :aria-label="t('common.page')"
     >
-      <UButton
-        color="neutral"
-        variant="ghost"
-        size="xs"
+      <SbButton
+        variant="tertiary"
+        size="sm"
         :disabled="!hasPrevious"
         :to="previousTo"
         class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10"
         @click="scrollToTopOnNavigate($event, hasPrevious)"
       >
         {{ t("common.previous") }}
-      </UButton>
+      </SbButton>
 
       <div class="text-sm text-muted tabular-nums">
         {{ t("common.page") }} {{ currentPage }} / {{ totalPages }}
       </div>
 
-      <UButton
-        color="neutral"
-        variant="ghost"
-        size="xs"
+      <SbButton
+        variant="tertiary"
+        size="sm"
         :disabled="!hasNext"
         :to="nextTo"
         class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10"
         @click="scrollToTopOnNavigate($event, hasNext)"
       >
         {{ t("common.next") }}
-      </UButton>
+      </SbButton>
     </nav>
   </SCard>
 </template>

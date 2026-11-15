@@ -7,7 +7,7 @@ sarpbc.org's own component library, replacing Nuxt UI and Tailwind. Components a
 - Every variant is a decision, not an option. The UI is dense: `sm` sizes are for tables and toolbars, and nothing is larger than `md`.
 - Tokens live in `src/styles/tokens.css` as `--sb-*` custom properties named by role (`--sb-bg-elevated`, `--sb-text-muted`), never by value. Dark mode follows the `.dark` class the apps' color mode sets on `<html>`.
 - Props are closed unions from `src/types.ts`. Color is never free: a button is blue or grey because of its role, and red only when `danger`.
-- The library renders no icon set and knows no router. Apps provide both through `DESIGN_ADAPTERS`:
+- The library renders no icon set and knows no router. Hosts provide both through `DESIGN_ADAPTERS`:
 
 ```ts
 import { DESIGN_ADAPTERS } from "@sarpbc/design";
@@ -31,9 +31,11 @@ app.provide(DESIGN_ADAPTERS, { icon: Icon, link: NuxtLink });
 
 The catalog's `@sarpbc/design` pages map every look production renders today to its new call. That mapping is the specification for the codemod that migrates the apps.
 
-## Adopting it in an app
+## In the Nuxt apps
 
-`apps/admin` keeps Nuxt UI's default dark surfaces where the front darkens them. When admin adopts the library, its stylesheet declares:
+`@sarpbc/ui` wires the library into `apps/front` and `apps/admin`: it registers the components as `Sb*` (`<SbButton>`), loads the tokens, provides `<Icon>` and `<NuxtLink>` as adapters, and declares the cascade layer order so the `components` layer stays above Tailwind's preflight and below its utilities.
+
+`apps/admin` keeps Nuxt UI's default dark surfaces where the front darkens them. Its stylesheet declares:
 
 ```css
 .dark {

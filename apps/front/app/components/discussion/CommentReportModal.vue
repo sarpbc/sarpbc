@@ -94,16 +94,14 @@ const submitReport = async () => {
       </UFormField>
     </template>
     <template #footer>
-      <UButton
-        color="primary"
+      <SbButton
         :label="$t('components.discussion.report.submit')"
         :loading="isSubmitting"
         :disabled="!selectedReason || isSubmitting"
         @click="submitReport"
       />
-      <UButton
-        color="neutral"
-        variant="outline"
+      <SbButton
+        variant="secondary"
         :label="$t('common.cancel')"
         :disabled="isSubmitting"
         @click="open = false"

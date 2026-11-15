@@ -290,11 +290,10 @@ const submit = () => {
         />
         <div v-if="linked" class="flex flex-row items-center justify-between gap-2 text-sm">
           <span class="font-medium" translate="no">{{ linked.label }}</span>
-          <UButton
+          <SbButton
             type="button"
-            size="xs"
-            color="neutral"
-            variant="ghost"
+            variant="tertiary"
+            size="sm"
             icon="i-fluent-dismiss-24-regular"
             :aria-label="$t('page.onThisDay.form.link.clear', { name: linked.label })"
             @click="clearLink"
@@ -304,11 +303,10 @@ const submit = () => {
           <div v-if="matchStage" class="flex flex-col gap-2">
             <div class="flex flex-row items-center justify-between gap-2 text-sm">
               <span class="text-muted" translate="no">{{ matchStage.label }}</span>
-              <UButton
+              <SbButton
                 type="button"
-                size="xs"
-                color="neutral"
-                variant="ghost"
+                variant="tertiary"
+                size="sm"
                 icon="i-fluent-dismiss-24-regular"
                 :aria-label="$t('page.onThisDay.form.link.clear', { name: matchStage.label })"
                 @click="clearLink"
@@ -322,10 +320,9 @@ const submit = () => {
               class="flex max-h-56 flex-col gap-1 overflow-y-auto"
             >
               <li v-for="match in stageMatches" :key="match.id">
-                <UButton
+                <SbButton
                   type="button"
-                  color="neutral"
-                  variant="ghost"
+                  variant="tertiary"
                   size="sm"
                   block
                   class="justify-start"
@@ -360,10 +357,9 @@ const submit = () => {
             >
               <ul v-if="results.length" class="flex flex-col gap-1">
                 <li v-for="candidate in results" :key="candidate.id">
-                  <UButton
+                  <SbButton
                     type="button"
-                    color="neutral"
-                    variant="ghost"
+                    variant="tertiary"
                     size="sm"
                     block
                     class="justify-start"
@@ -399,7 +395,7 @@ const submit = () => {
     </UFormField>
 
     <div>
-      <UButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
+      <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
     </div>
   </form>
 </template>

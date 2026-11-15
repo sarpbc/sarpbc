@@ -90,27 +90,27 @@ const handleSubmit = async () => {
     </template>
     <template #action>
       <div v-if="event" class="flex flex-row gap-2">
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.eventAction')"
           @click="streamsOpen = true"
         />
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-people-audience-24-regular"
           :label="$t('page.tournaments.viewership.eventAction')"
           @click="viewershipOpen = true"
         />
-        <UButton
+        <SbButton
           v-if="event.editable && event.stages.length === 0"
           icon="i-fluent-delete-24-regular"
-          color="error"
-          variant="soft"
+          variant="secondary"
+          danger
           :label="$t('page.tournaments.events.delete.title')"
           @click="eventToDelete = event"
         />
-        <UButton
+        <SbButton
           v-if="event.editable"
           icon="i-fluent-save-24-regular"
           :label="$t('page.tournaments.events.save')"
@@ -159,8 +159,8 @@ const handleSubmit = async () => {
               <h2 class="text-sm font-semibold">
                 {{ $t("page.tournaments.events.stages.title") }}
               </h2>
-              <UButton
-                variant="soft"
+              <SbButton
+                variant="secondary"
                 size="sm"
                 icon="i-fluent-add-24-regular"
                 :label="$t('page.tournaments.create.action')"
@@ -186,9 +186,9 @@ const handleSubmit = async () => {
                     {{ formatDate(stage.beginAt) }} – {{ formatDate(stage.endAt) }}
                   </span>
                 </div>
-                <UButton
-                  variant="ghost"
-                  size="xs"
+                <SbButton
+                  variant="tertiary"
+                  size="sm"
                   icon="i-fluent-edit-24-regular"
                   :label="$t('page.tournaments.edit.action')"
                   :to="localePath(`/tournaments/${stage.id}/edit`)"

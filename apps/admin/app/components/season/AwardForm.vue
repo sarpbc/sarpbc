@@ -128,11 +128,10 @@ defineExpose({ reset });
       <div class="flex flex-col gap-2">
         <div v-if="player" class="flex flex-row items-center justify-between gap-2 text-sm">
           <span class="font-medium" translate="no">{{ player.name }}</span>
-          <UButton
+          <SbButton
             type="button"
-            size="xs"
-            color="neutral"
-            variant="ghost"
+            variant="tertiary"
+            size="sm"
             icon="i-fluent-dismiss-24-regular"
             :aria-label="$t('page.seasons.awards.clearPlayer', { name: player.name })"
             @click="player = null"
@@ -154,10 +153,9 @@ defineExpose({ reset });
           >
             <ul v-if="results.length" class="flex flex-col gap-1">
               <li v-for="candidate in results" :key="candidate.id">
-                <UButton
+                <SbButton
                   type="button"
-                  color="neutral"
-                  variant="ghost"
+                  variant="tertiary"
                   size="sm"
                   block
                   class="justify-start"
@@ -203,7 +201,7 @@ defineExpose({ reset });
     </UFormField>
 
     <div>
-      <UButton
+      <SbButton
         type="submit"
         :label="$t('page.seasons.awards.add')"
         :loading="loading"

@@ -67,13 +67,13 @@ const confirm = () => {
     </template>
 
     <template #footer>
-      <UButton
+      <SbButton
         icon="i-ri-twitter-x-fill"
         :label="t('page.news.editor.tweet.insert')"
         :disabled="!canInsert"
         @click="confirm"
       />
-      <UButton color="neutral" variant="subtle" :label="t('common.cancel')" @click="close" />
+      <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
   </UModal>
 </template>

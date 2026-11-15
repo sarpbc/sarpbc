@@ -89,38 +89,35 @@ const clearCover = () => {
         class="max-h-40 w-full rounded-sm object-contain border border-default"
       />
       <div class="flex flex-wrap gap-2">
-        <UButton
+        <SbButton
+          variant="secondary"
           size="sm"
-          color="neutral"
-          variant="outline"
           :disabled="disabled || isUploading"
           @click="openFilePicker"
         >
           {{ t("imageUpload.replace") }}
-        </UButton>
-        <UButton
+        </SbButton>
+        <SbButton
+          variant="tertiary"
           size="sm"
-          color="neutral"
-          variant="ghost"
           :disabled="disabled || isUploading"
           @click="clearCover"
         >
           {{ t("imageUpload.remove") }}
-        </UButton>
+        </SbButton>
       </div>
     </div>
-    <UButton
+    <SbButton
       v-else
+      variant="secondary"
       size="sm"
-      color="neutral"
-      variant="outline"
       icon="i-lucide-image"
       :loading="isUploading"
       :disabled="disabled || isUploading"
       @click="openFilePicker"
     >
       {{ t("imageUpload.upload") }}
-    </UButton>
+    </SbButton>
     <p v-if="isUploading" class="text-sm text-muted">
       {{ t("imageUpload.progress", { percent: progress }) }}
     </p>

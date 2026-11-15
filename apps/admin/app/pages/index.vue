@@ -214,14 +214,13 @@ onMounted(() => {
         <section v-if="hasAnyTool" class="flex flex-col gap-3">
           <h2 class="text-sm font-semibold">{{ $t("page.home.shortcuts") }}</h2>
           <div class="flex flex-wrap gap-2">
-            <UButton
+            <SbButton
               v-for="link in shortcuts"
               :key="link.to"
               :to="link.to"
               :icon="link.icon"
               :label="link.label"
-              color="neutral"
-              variant="outline"
+              variant="secondary"
             />
           </div>
         </section>

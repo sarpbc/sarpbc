@@ -244,9 +244,9 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
           />
         </UFormField>
 
-        <UButton type="submit" color="primary" :disabled="!canSubmit" :loading="isSubmitting">
+        <SbButton type="submit" :disabled="!canSubmit" :loading="isSubmitting">
           {{ $t("page.forum.new.form.submit") }}
-        </UButton>
+        </SbButton>
       </UForm>
     </SCard>
   </div>

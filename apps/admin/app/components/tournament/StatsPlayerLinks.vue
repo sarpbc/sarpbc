@@ -110,9 +110,9 @@ const ROW_CLASS =
 
     <div v-else-if="error && !accounts" class="flex flex-col items-start gap-2">
       <p class="text-sm text-error">{{ t("page.tournaments.statsLinks.loadError") }}</p>
-      <UButton
+      <SbButton
+        variant="secondary"
         size="sm"
-        variant="soft"
         :label="t('page.tournaments.statsLinks.retry')"
         @click="refresh()"
       />
@@ -140,7 +140,7 @@ const ROW_CLASS =
               :aria-label="t('page.tournaments.statsLinks.playerFor', { name: player.name })"
               :disabled="savingKey !== null"
             />
-            <UButton
+            <SbButton
               type="submit"
               size="sm"
               :label="t('page.tournaments.statsLinks.save')"
@@ -182,7 +182,7 @@ const ROW_CLASS =
                 :aria-label="t('page.tournaments.statsLinks.playerFor', { name: player.name })"
                 :disabled="savingKey !== null"
               />
-              <UButton
+              <SbButton
                 type="submit"
                 size="sm"
                 :label="t('page.tournaments.statsLinks.save')"
@@ -193,19 +193,18 @@ const ROW_CLASS =
                   savingKey !== null
                 "
               />
-              <UButton
+              <SbButton
+                variant="tertiary"
                 size="sm"
-                color="neutral"
-                variant="ghost"
                 :label="$t('common.cancel')"
                 :disabled="savingKey !== null"
                 @click="editing = null"
               />
             </form>
-            <UButton
+            <SbButton
               v-else
+              variant="secondary"
               size="sm"
-              variant="soft"
               :label="t('page.tournaments.statsLinks.change')"
               :aria-label="t('page.tournaments.statsLinks.changeFor', { name: player.name })"
               :disabled="savingKey !== null"

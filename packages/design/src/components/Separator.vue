@@ -15,15 +15,17 @@ const { orientation = "horizontal" } = defineProps<{
 
 <style scoped>
 /* Mirrors Nuxt UI's separator theme (neutral, solid, xs). */
-.sb-separator {
-  width: 100%;
-  border-top: 1px solid var(--sb-border);
-}
+@layer components {
+  .sb-separator {
+    width: 100%;
+    border-top: 1px solid var(--sb-border);
+  }
 
-.sb-separator[data-orientation="vertical"] {
-  width: auto;
-  height: 100%;
-  border-top: 0;
-  border-inline-start: 1px solid var(--sb-border);
+  .sb-separator[data-orientation="vertical"] {
+    width: auto;
+    height: 100%;
+    border-top: 0;
+    border-inline-start: 1px solid var(--sb-border);
+  }
 }
 </style>

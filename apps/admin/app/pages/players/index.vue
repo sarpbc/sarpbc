@@ -136,7 +136,7 @@ const confirmCreate = async () => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.players.create.title')"
         @click="openCreateModal"
@@ -161,11 +161,11 @@ const confirmCreate = async () => {
             {{ $t("page.players.empty") }}
           </template>
           <template #actions-cell="{ row }">
-            <UButton
+            <SbButton
               icon="i-fluent-delete-24-regular"
-              color="error"
-              variant="ghost"
-              size="xs"
+              variant="tertiary"
+              danger
+              size="sm"
               :aria-label="$t('page.players.delete.title')"
               @click="(e) => openDeleteModal(e, row.original)"
             />
@@ -213,16 +213,15 @@ const confirmCreate = async () => {
         </div>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.players.create.save')"
           :loading="isCreating"
           :disabled="!newPlayer.name"
           @click="confirmCreate"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isCreating"
           @click="isCreateModalOpen = false"

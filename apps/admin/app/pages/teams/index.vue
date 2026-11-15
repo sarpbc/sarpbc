@@ -127,16 +127,15 @@ const onSyncTeams = async () => {
     </template>
     <template #action>
       <div class="flex flex-row gap-2">
-        <UButton
+        <SbButton
           icon="i-fluent-arrow-sync-24-regular"
-          color="neutral"
-          variant="outline"
+          variant="secondary"
           :label="isSyncing ? $t('page.teams.syncingPandascore') : $t('page.teams.syncPandascore')"
           :loading="isSyncing"
           :disabled="isSyncing"
           @click="onSyncTeams"
         />
-        <UButton
+        <SbButton
           icon="i-fluent-add-24-regular"
           :label="$t('page.teams.create.title')"
           @click="openCreateModal"
@@ -162,12 +161,12 @@ const onSyncTeams = async () => {
             {{ $t("page.teams.empty") }}
           </template>
           <template #actions-cell="{ row }">
-            <UButton
+            <SbButton
               v-if="row.original.source !== 'pandascore'"
               icon="i-fluent-delete-24-regular"
-              color="error"
-              variant="ghost"
-              size="xs"
+              variant="tertiary"
+              danger
+              size="sm"
               :aria-label="$t('page.teams.delete.title')"
               @click="(e) => openDeleteModal(e, row.original)"
             />
@@ -206,16 +205,15 @@ const onSyncTeams = async () => {
         </div>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.teams.create.save')"
           :loading="isCreating"
           :disabled="!newTeam.name"
           @click="confirmCreate"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isCreating"
           @click="isCreateModalOpen = false"

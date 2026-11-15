@@ -32,12 +32,12 @@ const secondaryLabel = computed(() =>
 <template>
   <SCard class="flex min-h-row-stack h-row-grid items-center">
     <SEmptyState :icon="iconName" :title="message" :hint="hint">
-      <UButton color="primary" :to="localePath('/tournaments')">
+      <SbButton :to="localePath('/tournaments')">
         {{ t("page.matches.empty.viewTournaments") }}
-      </UButton>
-      <UButton variant="outline" color="neutral" :to="secondaryTo">
+      </SbButton>
+      <SbButton variant="secondary" :to="secondaryTo">
         {{ secondaryLabel }}
-      </UButton>
+      </SbButton>
     </SEmptyState>
   </SCard>
 </template>

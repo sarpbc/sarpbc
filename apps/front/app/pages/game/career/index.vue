@@ -163,13 +163,8 @@ const handleContinue = () => {
 
     <UModal v-model:open="confirmOpen" :title="confirmCopy.title">
       <template #footer>
-        <UButton color="error" :label="confirmCopy.action" @click="confirmPending" />
-        <UButton
-          color="neutral"
-          variant="outline"
-          :label="t('common.cancel')"
-          @click="confirmOpen = false"
-        />
+        <SbButton danger :label="confirmCopy.action" @click="confirmPending" />
+        <SbButton variant="secondary" :label="t('common.cancel')" @click="confirmOpen = false" />
       </template>
     </UModal>
   </section>

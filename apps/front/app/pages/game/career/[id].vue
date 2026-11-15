@@ -72,9 +72,9 @@ watchEffect(() => {
             {{ t("page.game.career.share.notFoundBody") }}
           </p>
         </div>
-        <UButton :to="localePath('/game/career')">
+        <SbButton :to="localePath('/game/career')">
           {{ t("page.game.career.share.startOwn") }}
-        </UButton>
+        </SbButton>
       </div>
     </SCard>
   </section>

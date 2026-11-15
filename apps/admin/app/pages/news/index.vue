@@ -185,7 +185,7 @@ const onDeleted = async () => {
       <UBreadcrumb :items="items" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.news.create.title')"
         :to="localePath('/news/create')"
@@ -210,10 +210,9 @@ const onDeleted = async () => {
           <template #actions-cell="{ row }">
             <div class="flex justify-end" @click.stop @pointerdown.stop>
               <UDropdownMenu :items="articleActions(row.original)" :content="{ align: 'end' }">
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
+                <SbButton
+                  variant="tertiary"
+                  size="sm"
                   icon="i-fluent-more-vertical-24-regular"
                   :aria-label="$t('page.news.actions.menu')"
                 />
@@ -254,15 +253,14 @@ const onDeleted = async () => {
           </div>
         </template>
         <template #footer>
-          <UButton
+          <SbButton
             :loading="isRenaming"
             :disabled="isRenaming"
             :label="$t('page.news.actions.editName')"
             @click="saveTitle"
           />
-          <UButton
-            color="neutral"
-            variant="subtle"
+          <SbButton
+            variant="secondary"
             :label="$t('common.cancel')"
             :disabled="isRenaming"
             @click="isRenameModalOpen = false"

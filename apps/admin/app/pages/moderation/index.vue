@@ -138,17 +138,16 @@ const onReplyDeleted = async () => {
                 </UBadge>
               </div>
               <div class="flex flex-row items-center gap-1">
-                <UButton
-                  color="neutral"
-                  variant="ghost"
+                <SbButton
+                  variant="tertiary"
                   :label="$t('page.moderation.hide')"
                   :loading="hidingReplyId === reply.id"
                   :disabled="hidingReplyId !== null || !!reply.hiddenAt"
                   @click="hideReply(reply)"
                 />
-                <UButton
-                  color="error"
-                  variant="ghost"
+                <SbButton
+                  variant="tertiary"
+                  danger
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.moderation.delete')"
                   @click="replyToDelete = reply"

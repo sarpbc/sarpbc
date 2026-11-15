@@ -172,7 +172,12 @@ const save = async () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.vods.loadError") }}</p>
-        <UButton size="sm" variant="soft" :label="t('page.tournaments.vods.retry')" @click="load" />
+        <SbButton
+          variant="secondary"
+          size="sm"
+          :label="t('page.tournaments.vods.retry')"
+          @click="load"
+        />
       </div>
 
       <div v-else class="flex flex-col gap-3">
@@ -218,10 +223,10 @@ const save = async () => {
             />
           </UFormField>
 
-          <UButton
+          <SbButton
             class="sm:mt-6"
-            color="error"
-            variant="ghost"
+            variant="tertiary"
+            danger
             icon="i-fluent-delete-24-regular"
             :aria-label="t('page.tournaments.vods.remove')"
             @click="removeRow(row.key)"
@@ -232,21 +237,20 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.vods.add')"
           :disabled="loading || loadFailed"
           @click="addRow"
         />
         <div class="flex flex-row gap-2">
-          <UButton
-            color="neutral"
-            variant="ghost"
+          <SbButton
+            variant="tertiary"
             :label="t('page.tournaments.vods.cancel')"
             @click="open = false"
           />
-          <UButton
+          <SbButton
             :label="t('page.tournaments.vods.save')"
             :loading="saving"
             :disabled="loading || loadFailed || !canSave"

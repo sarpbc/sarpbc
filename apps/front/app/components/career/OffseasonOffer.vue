@@ -205,9 +205,9 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
             </p>
           </div>
           <div class="px-3 py-3">
-            <UButton color="primary" block @click="emit('accept', offer.teamId)">
+            <SbButton block @click="emit('accept', offer.teamId)">
               {{ t("page.game.career.offseason.accept") }}
-            </UButton>
+            </SbButton>
           </div>
         </div>
         <div
@@ -226,9 +226,9 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
             </p>
           </div>
           <div class="px-3 py-3">
-            <UButton color="neutral" variant="outline" block @click="emit('stay')">
+            <SbButton variant="secondary" block @click="emit('stay')">
               {{ t("page.game.career.offseason.continue") }}
-            </UButton>
+            </SbButton>
           </div>
         </div>
         <div
@@ -243,9 +243,9 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
             </p>
           </div>
           <div class="px-3 py-3">
-            <UButton color="error" block @click="emit('retire')">
+            <SbButton danger block @click="emit('retire')">
               {{ t("page.game.career.offseason.retire") }}
-            </UButton>
+            </SbButton>
           </div>
         </div>
       </div>

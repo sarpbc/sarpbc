@@ -92,7 +92,7 @@ const saveArticle = async () => {
         :title="$t('page.news.create.title')"
         :dismissible="!isSaving"
       >
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.news.create.save')"
           @click="openSaveModal"
@@ -156,16 +156,15 @@ const saveArticle = async () => {
         </template>
 
         <template #footer>
-          <UButton
+          <SbButton
             icon="i-fluent-save-24-regular"
             :label="$t('page.news.create.save')"
             :loading="isSaving"
             :disabled="isSaving"
             @click="saveArticle"
           />
-          <UButton
-            color="neutral"
-            variant="subtle"
+          <SbButton
+            variant="secondary"
             :label="$t('page.news.create.cancel')"
             :disabled="isSaving"
             @click="isModalOpen = false"

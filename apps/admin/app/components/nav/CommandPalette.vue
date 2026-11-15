@@ -210,9 +210,8 @@ const groups = computed<CommandPaletteGroup[]>(() => {
 
 <template>
   <UModal v-if="canSearch" v-model:open="open">
-    <UButton
-      color="neutral"
-      variant="outline"
+    <SbButton
+      variant="secondary"
       icon="i-lucide-search"
       class="w-full max-w-sm justify-start"
       :label="$t('page.search.placeholder')"
@@ -223,7 +222,7 @@ const groups = computed<CommandPaletteGroup[]>(() => {
           <UKbd value="k" size="sm" />
         </div>
       </template>
-    </UButton>
+    </SbButton>
 
     <template #content>
       <UCommandPalette

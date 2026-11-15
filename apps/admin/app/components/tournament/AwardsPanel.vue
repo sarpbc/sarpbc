@@ -168,10 +168,10 @@ defineExpose({ refreshAwards });
           {{ award.participant.team.name }}
         </p>
       </div>
-      <UButton
+      <SbButton
+        variant="secondary"
+        danger
         size="sm"
-        color="error"
-        variant="soft"
         :loading="removingAwardId === award.id"
         :label="$t('page.tournaments.awards.remove')"
         @click="handleRemoveAward(award)"
@@ -199,7 +199,7 @@ defineExpose({ refreshAwards });
           :placeholder="$t('page.tournaments.awards.selectPlayer')"
         />
       </UFormField>
-      <UButton
+      <SbButton
         :loading="assigning"
         :disabled="!selectedPlayerId || !selectedAwardType"
         :label="$t('page.tournaments.awards.assignAction')"

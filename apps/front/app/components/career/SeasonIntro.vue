@@ -31,8 +31,8 @@ const { t } = useI18n();
         })
       }}
     </p>
-    <UButton block @click="emit('begin')">
+    <SbButton block @click="emit('begin')">
       {{ t("page.game.career.season.begin") }}
-    </UButton>
+    </SbButton>
   </div>
 </template>

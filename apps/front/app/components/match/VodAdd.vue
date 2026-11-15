@@ -98,11 +98,10 @@ const submit = async () => {
 
 <template>
   <UPopover v-if="canManage" v-model:open="open">
-    <UButton
+    <SbButton
       icon="i-fluent-more-horizontal-24-regular"
-      color="neutral"
-      variant="ghost"
-      size="xs"
+      variant="tertiary"
+      size="sm"
       class="-my-1"
       :aria-label="t('page.match.detail.vodAdd.title')"
     />
@@ -140,7 +139,7 @@ const submit = async () => {
             class="w-full"
           />
         </UFormField>
-        <UButton
+        <SbButton
           type="submit"
           block
           :label="t('page.match.detail.vodAdd.submit')"

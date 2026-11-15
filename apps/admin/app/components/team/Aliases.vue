@@ -183,7 +183,7 @@ const submit = async () => {
   <div>
     <div class="mb-1 flex flex-row items-center justify-between">
       <h2 class="text-base font-semibold">{{ t("page.teams.aliases.title") }}</h2>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         size="sm"
         :label="t('page.teams.aliases.add')"
@@ -207,18 +207,18 @@ const submit = async () => {
       </template>
       <template #actions-cell="{ row }">
         <div class="flex flex-row gap-1">
-          <UButton
+          <SbButton
             icon="i-fluent-edit-24-regular"
-            variant="ghost"
-            size="xs"
+            variant="tertiary"
+            size="sm"
             :aria-label="t('page.teams.aliases.edit')"
             @click="openEdit(row.original)"
           />
-          <UButton
+          <SbButton
             icon="i-fluent-delete-24-regular"
-            color="error"
-            variant="ghost"
-            size="xs"
+            variant="tertiary"
+            danger
+            size="sm"
             :aria-label="t('page.teams.aliases.delete.title')"
             @click="aliasToDelete = row.original"
           />
@@ -309,7 +309,7 @@ const submit = async () => {
         </form>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           type="submit"
           form="team-alias-form"
           icon="i-fluent-save-24-regular"
@@ -317,9 +317,8 @@ const submit = async () => {
           :loading="saving"
           :disabled="!parsed.ok"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="t('common.cancel')"
           :disabled="saving"
           @click="isOpen = false"

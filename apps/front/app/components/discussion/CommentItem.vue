@@ -114,11 +114,9 @@ const onDelete = async () => {
 
       <div class="flex flex-row items-center justify-end gap-1 border-t border-separator px-2 py-1">
         <ForumSignInPrompt action="reply">
-          <UButton
-            square
-            size="xs"
-            variant="ghost"
-            color="neutral"
+          <SbButton
+            variant="tertiary"
+            size="sm"
             icon="i-fluent-arrow-reply-24-regular"
             class="justify-center pointer-coarse:size-10"
             sound="press"
@@ -128,11 +126,9 @@ const onDelete = async () => {
         </ForumSignInPrompt>
 
         <UPopover v-model:open="menuOpen">
-          <UButton
-            square
-            size="xs"
-            variant="ghost"
-            color="neutral"
+          <SbButton
+            variant="tertiary"
+            size="sm"
             icon="i-fluent-more-horizontal-24-regular"
             class="justify-center pointer-coarse:size-10"
             sound="press"
@@ -148,10 +144,9 @@ const onDelete = async () => {
               class="flex min-w-40 flex-col p-1"
               :aria-label="$t('components.discussion.moreActions')"
             >
-              <UButton
+              <SbButton
+                variant="tertiary"
                 size="sm"
-                variant="ghost"
-                color="neutral"
                 icon="i-fluent-link-24-regular"
                 class="justify-start"
                 sound="press"
@@ -159,11 +154,10 @@ const onDelete = async () => {
                 :label="$t('components.discussion.permalink')"
                 @click="onPermalinkClick"
               />
-              <UButton
+              <SbButton
                 v-if="canReport"
+                variant="tertiary"
                 size="sm"
-                variant="ghost"
-                color="neutral"
                 icon="i-fluent-flag-24-regular"
                 class="justify-start"
                 sound="press"
@@ -171,11 +165,10 @@ const onDelete = async () => {
                 :label="$t('components.discussion.report.action')"
                 @click="onReportClick"
               />
-              <UButton
+              <SbButton
                 v-if="canModerate"
+                variant="tertiary"
                 size="sm"
-                variant="ghost"
-                color="neutral"
                 icon="i-fluent-eye-off-24-regular"
                 class="justify-start"
                 sound="press"
@@ -185,11 +178,11 @@ const onDelete = async () => {
                 :disabled="isModerating"
                 @click="onHide"
               />
-              <UButton
+              <SbButton
                 v-if="canModerate"
+                variant="tertiary"
+                danger
                 size="sm"
-                variant="ghost"
-                color="error"
                 icon="i-fluent-delete-24-regular"
                 class="justify-start"
                 sound="press"

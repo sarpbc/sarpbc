@@ -16,10 +16,9 @@ const revealAll = () => {
 </script>
 
 <template>
-  <UButton
+  <SbButton
     icon="i-fluent-eye-24-regular"
-    color="neutral"
-    variant="outline"
+    variant="secondary"
     :label="label"
     data-spoiler-reveal
     @click="revealAll"

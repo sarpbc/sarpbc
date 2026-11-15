@@ -185,14 +185,13 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <UButton
-          color="neutral"
-          variant="ghost"
+        <SbButton
+          variant="tertiary"
           :label="$t('common.cancel')"
           :disabled="saving"
           @click="open = false"
         />
-        <UButton
+        <SbButton
           type="submit"
           form="stats-attach-replay"
           icon="i-fluent-link-24-regular"

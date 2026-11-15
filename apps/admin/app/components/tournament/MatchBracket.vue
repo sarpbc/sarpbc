@@ -171,9 +171,9 @@ const save = async () => {
                 class="w-full"
               />
             </UFormField>
-            <UButton
-              color="error"
-              variant="ghost"
+            <SbButton
+              variant="tertiary"
+              danger
               icon="i-fluent-delete-24-regular"
               :aria-label="t('page.tournaments.bracket.removeFeeder')"
               @click="removeLink(link.key)"
@@ -185,21 +185,20 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.bracket.addFeeder')"
           :disabled="links.length >= MAX_LINKS || matchItems.length === 0"
           @click="addLink"
         />
         <div class="flex flex-row gap-2">
-          <UButton
-            color="neutral"
-            variant="ghost"
+          <SbButton
+            variant="tertiary"
             :label="t('page.tournaments.bracket.cancel')"
             @click="open = false"
           />
-          <UButton
+          <SbButton
             :label="t('page.tournaments.bracket.save')"
             :loading="saving"
             :disabled="!canSave"

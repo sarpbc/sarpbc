@@ -83,11 +83,10 @@ const remove = (index: number) => {
         <span :class="{ 'text-error': players.length !== size }">
           {{ participantName({ team: null, players }) }}
         </span>
-        <UButton
+        <SbButton
           type="button"
-          size="xs"
-          color="neutral"
-          variant="ghost"
+          variant="tertiary"
+          size="sm"
           icon="i-fluent-dismiss-24-regular"
           :aria-label="
             $t('page.tournaments.form.playersRemove', {
@@ -115,10 +114,9 @@ const remove = (index: number) => {
     <div v-if="query.trim() && !pending" class="max-h-56 overflow-y-auto overscroll-contain">
       <ul v-if="available.length" class="space-y-1">
         <li v-for="player in available" :key="player.id">
-          <UButton
+          <SbButton
             type="button"
-            color="neutral"
-            variant="ghost"
+            variant="tertiary"
             size="sm"
             class="w-full justify-start"
             :label="player.name"

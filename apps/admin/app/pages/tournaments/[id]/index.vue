@@ -29,7 +29,7 @@ const forfeitOpen = ref(false);
 const emptyBracketOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
-const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
+const { syncingId, failedFor, iconFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
 const {
   data: tournament,
@@ -189,48 +189,48 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
     </template>
     <template #action>
       <div class="flex flex-row gap-2">
-        <UButton
+        <SbButton
           v-if="tournament"
-          variant="soft"
+          variant="secondary"
           icon="i-fluent-edit-24-regular"
           :label="$t('page.tournaments.edit.action')"
           :to="localePath(`/tournaments/${tournamentId}/edit`)"
         />
-        <UButton
+        <SbButton
           v-if="tournament"
-          variant="soft"
+          variant="secondary"
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.tournamentAction')"
           @click="openStreams(`/tournaments/${tournamentId}/streams`, tournament.name)"
         />
-        <UButton
+        <SbButton
           v-if="tournament"
-          variant="soft"
+          variant="secondary"
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.eventAction')"
           @click="openStreams(`/events/${tournament.event.id}/streams`, tournament.event.name)"
         />
-        <UButton
+        <SbButton
           v-if="tournament"
-          variant="soft"
+          variant="secondary"
           icon="i-fluent-people-audience-24-regular"
           :label="$t('page.tournaments.viewership.eventAction')"
           @click="
             openViewership(`/events/${tournament.event.id}/viewership`, tournament.event.name)
           "
         />
-        <UButton
+        <SbButton
           v-if="canGenerateBracket"
-          variant="soft"
+          variant="secondary"
           icon="i-fluent-organization-horizontal-24-regular"
           :label="$t('page.tournaments.emptyBracket.action')"
           @click="emptyBracketOpen = true"
         />
-        <UButton
+        <SbButton
           v-if="tournament?.source === 'pandascore'"
           :loading="syncingId === tournamentId"
           :icon="iconFor(tournamentId)"
-          :color="colorFor(tournamentId)"
+          :danger="failedFor(tournamentId)"
           :label="$t('page.tournaments.match.syncScores')"
           @click="handleRefresh"
         />
@@ -314,79 +314,79 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
             </div>
 
             <div class="flex shrink-0 flex-row flex-wrap gap-1">
-              <UButton
-                size="xs"
-                variant="soft"
+              <SbButton
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-video-clip-24-regular"
                 :label="$t('page.tournaments.vods.action')"
                 @click="openVods(match)"
               />
-              <UButton
-                size="xs"
-                variant="soft"
+              <SbButton
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-link-24-regular"
                 :label="$t('page.tournaments.matchSource.action')"
                 @click="openSource(match)"
               />
-              <UButton
-                size="xs"
-                variant="soft"
+              <SbButton
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-flag-24-regular"
                 :label="$t('page.tournaments.matchForfeit.action')"
                 @click="openForfeit(match)"
               />
-              <UButton
-                size="xs"
-                variant="soft"
+              <SbButton
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-live-24-regular"
                 :label="$t('page.tournaments.streams.matchAction')"
                 @click="openStreams(`/tournaments/matches/${match.id}/streams`, matchLabel(match))"
               />
-              <UButton
-                size="xs"
-                variant="soft"
+              <SbButton
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-people-team-24-regular"
                 :label="$t('page.tournaments.lineups.action')"
                 @click="openLineups(match)"
               />
-              <UButton
-                size="xs"
-                variant="soft"
+              <SbButton
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-people-audience-24-regular"
                 :label="$t('page.tournaments.viewership.matchAction')"
                 @click="
                   openViewership(`/tournaments/matches/${match.id}/viewership`, matchLabel(match))
                 "
               />
-              <UButton
+              <SbButton
                 v-if="tournament?.source === 'manual'"
-                size="xs"
-                variant="soft"
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-scan-text-24-regular"
                 :label="$t('page.tournaments.streamScore.action')"
                 @click="openStreamScore(match)"
               />
-              <UButton
+              <SbButton
                 v-if="editsBracket"
-                size="xs"
-                variant="soft"
+                variant="secondary"
+                size="sm"
                 icon="i-fluent-organization-horizontal-24-regular"
                 :label="$t('page.tournaments.bracket.action')"
                 @click="openBracket(match)"
               />
-              <UButton
+              <SbButton
                 v-for="participant in match.participants"
                 :key="participant.id"
-                size="xs"
-                variant="ghost"
+                variant="tertiary"
+                size="sm"
                 :loading="settingWinnerMatchId === match.id"
                 :label="`${$t('page.tournaments.match.setWinner')}: ${participantName(participant)}`"
                 @click="handleSetWinner(match, participant.id)"
               />
-              <UButton
-                size="xs"
-                color="error"
-                variant="ghost"
+              <SbButton
+                variant="tertiary"
+                danger
+                size="sm"
                 icon="i-fluent-delete-24-regular"
                 :label="$t('page.tournaments.match.delete.action')"
                 @click="matchToDelete = match"

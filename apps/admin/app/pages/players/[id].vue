@@ -215,7 +215,7 @@ const contractModalTitle = computed(() =>
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         v-if="player"
         icon="i-fluent-save-24-regular"
         :label="$t('page.players.save')"
@@ -264,7 +264,7 @@ const contractModalTitle = computed(() =>
             <h2 class="text-base font-semibold">
               {{ $t("page.players.contracts.title") }}
             </h2>
-            <UButton
+            <SbButton
               icon="i-fluent-add-24-regular"
               size="sm"
               :label="$t('page.players.contracts.create.title')"
@@ -283,17 +283,17 @@ const contractModalTitle = computed(() =>
             </template>
             <template #actions-cell="{ row }">
               <div class="flex flex-row gap-1">
-                <UButton
+                <SbButton
                   icon="i-fluent-edit-24-regular"
-                  variant="ghost"
-                  size="xs"
+                  variant="tertiary"
+                  size="sm"
                   @click="openEditContractModal(row.original)"
                 />
-                <UButton
+                <SbButton
                   icon="i-fluent-delete-24-regular"
-                  color="error"
-                  variant="ghost"
-                  size="xs"
+                  variant="tertiary"
+                  danger
+                  size="sm"
                   @click="contractToDelete = row.original"
                 />
               </div>
@@ -325,16 +325,15 @@ const contractModalTitle = computed(() =>
         </div>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.players.contracts.save')"
           :loading="isSavingContract"
           :disabled="!contractForm.teamId || !contractForm.startDate"
           @click="saveContract"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isSavingContract"
           @click="isContractModalOpen = false"

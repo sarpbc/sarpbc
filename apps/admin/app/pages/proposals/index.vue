@@ -509,16 +509,15 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
                 }}</span>
               </div>
               <div v-if="canReview(proposal)" class="flex flex-row items-center gap-1">
-                <UButton
+                <SbButton
                   icon="i-fluent-checkmark-24-regular"
                   :label="$t('page.proposals.approve')"
                   :loading="reviewingId === proposal.id"
                   :disabled="reviewingId !== null"
                   @click="review(proposal, 'approve')"
                 />
-                <UButton
-                  color="neutral"
-                  variant="ghost"
+                <SbButton
+                  variant="tertiary"
                   :label="$t('page.proposals.reject')"
                   :disabled="reviewingId !== null"
                   @click="review(proposal, 'reject')"
