@@ -71,7 +71,7 @@ const onSubmit = async (event: Event) => {
           @click="googleLogin"
         />
 
-        <USeparator :label="$t('page.authentication.or')" class="my-6" />
+        <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
           <SbFormField :label="$t('page.authentication.userName')" class="w-full pb-4">

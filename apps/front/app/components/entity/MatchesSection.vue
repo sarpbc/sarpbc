@@ -78,10 +78,10 @@ const listVariant = computed<"upcoming" | "result">(() => {
         <SCard v-for="index in 3" :key="index">
           <div class="w-full grid grid-cols-3 gap-2 py-2 px-2 items-center">
             <div class="col-span-2 flex flex-col gap-1">
-              <USkeleton class="h-3 w-24" />
-              <USkeleton class="h-3 w-28" />
+              <SbSkeleton class="h-3 w-24" />
+              <SbSkeleton class="h-3 w-28" />
             </div>
-            <USkeleton class="col-span-1 h-3 w-10 justify-self-end" />
+            <SbSkeleton class="col-span-1 h-3 w-10 justify-self-end" />
           </div>
         </SCard>
       </div>

@@ -126,9 +126,9 @@ setPageSeo({
 
       <SCard v-if="pending" aria-live="polite">
         <SListItem v-for="index in 8" :key="index" class="gap-3">
-          <USkeleton class="size-7 shrink-0" />
-          <USkeleton class="h-3 max-w-40 flex-1" />
-          <USkeleton class="h-3 w-20" />
+          <SbSkeleton class="size-7 shrink-0" />
+          <SbSkeleton class="h-3 max-w-40 flex-1" />
+          <SbSkeleton class="h-3 w-20" />
         </SListItem>
       </SCard>
 

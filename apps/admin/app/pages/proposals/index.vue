@@ -499,9 +499,9 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
           >
             <div class="flex flex-row flex-wrap items-center justify-between gap-2">
               <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
-                <UBadge :color="isDeletion(proposal) ? 'error' : 'primary'" variant="subtle">
+                <SbBadge :color="isDeletion(proposal) ? 'danger' : 'info'">
                   {{ $t(`page.proposals.kinds.${proposal.change.kind}`) }}
-                </UBadge>
+                </SbBadge>
                 <span class="text-muted" translate="no">{{ nameOf(proposal.proposedById) }}</span>
                 <span class="text-muted">·</span>
                 <span class="text-muted tabular-nums">{{

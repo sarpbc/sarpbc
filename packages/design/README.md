@@ -28,7 +28,7 @@ app.provide(DESIGN_ADAPTERS, { icon: Icon, link: NuxtLink });
 | `FormField` | `label`, `required`, `hint`, `description`, `help`, `error`; wires id and aria to inputs  | `UFormField` |
 | `Skeleton`  | Sized by the caller                                                                       | `USkeleton`  |
 | `Kbd`       | `size`: sm, md                                                                            | `UKbd`       |
-| `Separator` | `orientation`                                                                             | `USeparator` |
+| `Separator` | `orientation`, `label`                                                                    | `USeparator` |
 
 The catalog's `@sarpbc/design` pages map every look production renders today to its new call. That mapping is the specification for the codemod that migrates the apps.
 

@@ -115,7 +115,7 @@ const googleLogin = () => {
           @click="googleLogin"
         />
 
-        <USeparator :label="$t('page.authentication.or')" class="my-6" />
+        <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <UForm :state="state" class="h-fit w-80" method="post" @submit="onSubmit">
           <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">

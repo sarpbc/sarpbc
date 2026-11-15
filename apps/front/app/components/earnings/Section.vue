@@ -55,10 +55,10 @@ const entryMeta = (entry: EarningsEntry): string => {
         <SListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <USkeleton class="h-3.5 w-3/5 max-w-48" />
-              <USkeleton class="h-3 w-2/5 max-w-32" />
+              <SbSkeleton class="h-3.5 w-3/5 max-w-48" />
+              <SbSkeleton class="h-3 w-2/5 max-w-32" />
             </div>
-            <USkeleton class="h-3.5 w-16" />
+            <SbSkeleton class="h-3.5 w-16" />
           </div>
         </SListItem>
       </SCard>

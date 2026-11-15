@@ -60,8 +60,8 @@ const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
       <SCard v-if="pending" aria-live="polite">
         <SListItem v-for="index in 2" :key="index">
           <div class="flex w-full min-w-0 flex-col gap-0.5">
-            <USkeleton class="h-3.5 w-3/5 max-w-48" />
-            <USkeleton class="h-3 w-2/5 max-w-32" />
+            <SbSkeleton class="h-3.5 w-3/5 max-w-48" />
+            <SbSkeleton class="h-3 w-2/5 max-w-32" />
           </div>
         </SListItem>
       </SCard>

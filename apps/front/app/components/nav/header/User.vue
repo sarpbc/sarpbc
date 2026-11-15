@@ -22,16 +22,14 @@ const { count: unreadCount } = useUnreadNotificationCount();
       class="relative truncate text-lg md:text-sm font-medium md:font-normal"
     >
       {{ `${user.userName}` }}
-      <UBadge
+      <SbBadge
         v-if="unreadCount > 0"
-        color="error"
-        variant="solid"
-        size="xs"
+        color="danger"
         class="absolute -top-1 -right-2 min-w-4 justify-center tabular-nums"
         :aria-label="t('components.header.unreadNotifications', { count: unreadCount })"
       >
         {{ unreadCount > 9 ? "9+" : unreadCount }}
-      </UBadge>
+      </SbBadge>
     </SLink>
     <template #fallback>
       <SLink

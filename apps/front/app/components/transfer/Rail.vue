@@ -36,10 +36,10 @@ const transferLabel = (transfer: Transfer): string => {
       <SCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
         <SListItem v-for="index in RAIL_TRANSFERS" :key="index" class="gap-2">
-          <USkeleton class="size-7 shrink-0" />
-          <USkeleton class="ms-auto size-4" />
-          <USkeleton class="size-4" />
-          <USkeleton class="size-4" />
+          <SbSkeleton class="size-7 shrink-0" />
+          <SbSkeleton class="ms-auto size-4" />
+          <SbSkeleton class="size-4" />
+          <SbSkeleton class="size-4" />
         </SListItem>
       </SCard>
 

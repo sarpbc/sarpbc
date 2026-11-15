@@ -29,8 +29,8 @@ const {
     </SHubPageHeader>
     <SCard v-if="pending && !posts?.length" aria-live="polite">
       <SListItem v-for="index in 4" :key="index" size="default" class="gap-3">
-        <USkeleton class="h-3 w-48" />
-        <USkeleton class="ml-auto h-3 w-20" />
+        <SbSkeleton class="h-3 w-48" />
+        <SbSkeleton class="ml-auto h-3 w-20" />
       </SListItem>
     </SCard>
     <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">

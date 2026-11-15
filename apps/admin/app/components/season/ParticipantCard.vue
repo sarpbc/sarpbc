@@ -95,9 +95,9 @@ const addEntry = async () => {
         >
           {{ participant.team.name }}
         </ULink>
-        <UBadge v-if="isWinner" color="primary" variant="subtle" size="sm">
+        <SbBadge v-if="isWinner" color="info">
           {{ $t("page.seasons.participants.winner") }}
-        </UBadge>
+        </SbBadge>
       </div>
       <SbButton
         variant="tertiary"
@@ -148,14 +148,9 @@ const addEntry = async () => {
             </span>
             <span v-if="entry.tournament" class="flex flex-row items-center gap-2 text-muted">
               {{ entryTournamentLabel(entry) }}
-              <UBadge
-                v-if="entry.tournament.source === 'startgg'"
-                color="warning"
-                variant="subtle"
-                size="sm"
-              >
+              <SbBadge v-if="entry.tournament.source === 'startgg'" color="warning">
                 {{ $t("page.seasons.path.startgg") }}
-              </UBadge>
+              </SbBadge>
             </span>
           </div>
           <SbButton

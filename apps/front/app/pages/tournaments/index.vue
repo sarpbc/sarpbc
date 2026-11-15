@@ -105,13 +105,13 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
       <div v-if="pending && !events.length" class="w-full flex flex-col" aria-live="polite">
         <SRail v-for="group in 2" :key="group" caption="section">
           <template #caption>
-            <USkeleton class="h-3 w-40" />
+            <SbSkeleton class="h-3 w-40" />
           </template>
           <SCard>
             <SListItem v-for="row in 3" :key="row" class="gap-3">
-              <USkeleton class="h-3 max-w-32 flex-1" />
-              <USkeleton class="h-3 w-24 sm:w-32" />
-              <USkeleton class="h-3 w-20" />
+              <SbSkeleton class="h-3 max-w-32 flex-1" />
+              <SbSkeleton class="h-3 w-24 sm:w-32" />
+              <SbSkeleton class="h-3 w-20" />
             </SListItem>
           </SCard>
         </SRail>

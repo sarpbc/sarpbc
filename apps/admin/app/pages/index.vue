@@ -166,11 +166,9 @@ onMounted(() => {
                 >
                   <span class="flex min-w-0 items-center gap-2">
                     <span class="min-w-0 truncate text-sm font-medium">{{ article.title }}</span>
-                    <UBadge
+                    <SbBadge
                       v-if="article.isDraft"
                       color="warning"
-                      variant="subtle"
-                      size="sm"
                       :label="$t('page.home.articles.draft')"
                     />
                   </span>

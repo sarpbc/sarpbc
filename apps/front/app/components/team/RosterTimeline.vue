@@ -67,11 +67,11 @@ const memberNames = (members: TeamRosterEra["members"]) =>
 
       <div v-if="pending" class="flex flex-col gap-4" aria-live="polite">
         <div v-for="index in 3" :key="index" class="flex gap-4 pl-1">
-          <USkeleton class="w-0.5 shrink-0 self-stretch" />
+          <SbSkeleton class="w-0.5 shrink-0 self-stretch" />
           <div class="flex flex-1 flex-col gap-2 pb-4">
-            <USkeleton class="h-4 w-40" />
-            <USkeleton class="h-10 w-full" />
-            <USkeleton class="h-10 w-full" />
+            <SbSkeleton class="h-4 w-40" />
+            <SbSkeleton class="h-10 w-full" />
+            <SbSkeleton class="h-10 w-full" />
           </div>
         </div>
       </div>
@@ -110,9 +110,9 @@ const memberNames = (members: TeamRosterEra["members"]) =>
                 >
                   {{ formatEraRange(era) }}
                 </time>
-                <UBadge v-if="era.isCurrent" color="primary" variant="subtle" size="sm">
+                <SbBadge v-if="era.isCurrent" color="info">
                   {{ t("page.team.slug.rosterHistory.current") }}
-                </UBadge>
+                </SbBadge>
               </div>
 
               <ul class="flex flex-col gap-2 list-none m-0 p-0">

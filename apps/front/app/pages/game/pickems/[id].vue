@@ -361,9 +361,9 @@ watch(
 
     <SCard v-if="tournamentPending && !tournament" class="min-h-row-triple p-4" aria-live="polite">
       <div class="flex flex-col gap-3 animate-pulse">
-        <USkeleton class="h-6 w-48 mx-auto" />
-        <USkeleton class="h-16 w-full" />
-        <USkeleton class="h-16 w-full" />
+        <SbSkeleton class="h-6 w-48 mx-auto" />
+        <SbSkeleton class="h-16 w-full" />
+        <SbSkeleton class="h-16 w-full" />
       </div>
     </SCard>
 
@@ -408,7 +408,7 @@ watch(
             {{ t("page.game.pickems.detail.leaderboard.noRankYet") }}
           </p>
           <div v-if="leaderboardPending && topLeaderboard.length === 0" class="flex flex-col gap-2">
-            <USkeleton v-for="i in 3" :key="i" class="h-6 w-full" />
+            <SbSkeleton v-for="i in 3" :key="i" class="h-6 w-full" />
           </div>
           <ol v-else-if="topLeaderboard.length > 0" class="flex flex-col gap-1">
             <li

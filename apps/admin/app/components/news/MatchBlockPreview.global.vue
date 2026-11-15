@@ -58,10 +58,10 @@ const score = (item: MatchBlockItem, index: number): string => {
   return result ? String(result.score) : "–";
 };
 
-const stateColor = (state: MatchBlockState): "error" | "info" | "neutral" => {
+const stateColor = (state: MatchBlockState): "danger" | "info" | "neutral" => {
   switch (state) {
     case "live": {
-      return "error";
+      return "danger";
     }
 
     case "upcoming": {
@@ -90,8 +90,8 @@ const stateLabel = useMatchStateLabel(t, (beginAt) => dateFormatter.value.format
       class="flex flex-col gap-2 p-3"
       aria-busy="true"
     >
-      <USkeleton class="h-4 w-2/3" />
-      <USkeleton class="h-4 w-1/2" />
+      <SbSkeleton class="h-4 w-2/3" />
+      <SbSkeleton class="h-4 w-1/2" />
     </div>
 
     <p v-else-if="!blockKey" class="p-3 text-sm text-error">
@@ -118,12 +118,7 @@ const stateLabel = useMatchStateLabel(t, (beginAt) => dateFormatter.value.format
             <span class="tabular-nums text-muted">{{ score(item, 0) }} – {{ score(item, 1) }}</span>
             {{ teamName(item, 1) }}
           </span>
-          <UBadge
-            :color="stateColor(item.state)"
-            variant="subtle"
-            size="sm"
-            :label="stateLabel(item)"
-          />
+          <SbBadge :color="stateColor(item.state)" :label="stateLabel(item)" />
           <span class="col-span-2 truncate text-xs text-muted" translate="no">
             {{ item.tournament.event.name }} · {{ item.tournament.name }}
           </span>

@@ -44,10 +44,10 @@ const formatEndDate = (value: Date | string | null) => {
       <SCard v-if="pending" aria-live="polite">
         <SListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
-            <USkeleton class="size-5 shrink-0" />
+            <SbSkeleton class="size-5 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <USkeleton class="h-3.5 w-40" />
-              <USkeleton class="h-3 w-24" />
+              <SbSkeleton class="h-3.5 w-40" />
+              <SbSkeleton class="h-3 w-24" />
             </div>
           </div>
         </SListItem>
