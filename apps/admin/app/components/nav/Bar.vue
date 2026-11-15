@@ -110,9 +110,8 @@ defineShortcuts({
     />
 
     <UPopover v-if="user" v-model:open="userMenuOpen" :content="{ align: 'start', side: 'top' }">
-      <UButton
-        color="neutral"
-        variant="ghost"
+      <SbButton
+        variant="tertiary"
         class="mt-2 w-full justify-start gap-2"
         :aria-label="$t('page.home.signedInAs')"
         aria-haspopup="menu"
@@ -120,15 +119,15 @@ defineShortcuts({
       >
         <UAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
         <span class="min-w-0 truncate text-sm" translate="no">{{ user.userName }}</span>
-      </UButton>
+      </SbButton>
       <template #content>
         <div class="flex min-w-40 flex-col p-1" role="menu">
           <p class="truncate px-2 py-1.5 text-xs text-muted" translate="no">
             {{ user.email }}
           </p>
-          <UButton
-            color="error"
-            variant="ghost"
+          <SbButton
+            variant="tertiary"
+            danger
             icon="i-fluent-sign-out-24-regular"
             class="justify-start"
             role="menuitem"

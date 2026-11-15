@@ -130,7 +130,7 @@ const uploadedImageUrl = computed({
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.tournaments.leagues.create')"
         @click="openForm(null)"
@@ -174,9 +174,9 @@ const uploadedImageUrl = computed({
             </template>
             <template #actions-cell="{ row }">
               <div class="flex justify-end">
-                <UButton
-                  variant="ghost"
-                  size="xs"
+                <SbButton
+                  variant="tertiary"
+                  size="sm"
                   icon="i-fluent-edit-24-regular"
                   :title="$t('page.tournaments.leagues.edit')"
                   :aria-label="$t('page.tournaments.leagues.edit')"
@@ -247,16 +247,15 @@ const uploadedImageUrl = computed({
         </form>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.tournaments.leagues.save')"
           :loading="isSaving"
           :disabled="isUploading"
           @click="handleSubmit"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isSaving"
           @click="isOpen = false"

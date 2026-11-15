@@ -84,9 +84,9 @@ const remove = async (game: TournamentStatsGame): Promise<void> => {
 
     <div v-else-if="failed && !games" class="flex flex-col items-start gap-2">
       <p class="text-sm text-error">{{ t("page.tournaments.statsGames.loadError") }}</p>
-      <UButton
+      <SbButton
+        variant="secondary"
         size="sm"
-        variant="soft"
         :label="t('page.tournaments.statsGames.retry')"
         @click="emit('retry')"
       />
@@ -112,10 +112,10 @@ const remove = async (game: TournamentStatsGame): Promise<void> => {
           >
             {{ row.label }}
           </ULink>
-          <UButton
-            size="xs"
-            color="error"
-            variant="ghost"
+          <SbButton
+            variant="tertiary"
+            danger
+            size="sm"
             icon="i-fluent-delete-24-regular"
             :aria-label="row.removeLabel"
             @click="toRemove = row.game"

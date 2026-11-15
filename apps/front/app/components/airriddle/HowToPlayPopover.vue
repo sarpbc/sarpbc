@@ -10,9 +10,8 @@ const titleId = "airriddle-how-to-play-title";
 
 <template>
   <UPopover v-model:open="open">
-    <UButton
-      variant="ghost"
-      color="neutral"
+    <SbButton
+      variant="tertiary"
       class="inline-flex size-9 min-h-9 min-w-9 items-center justify-center p-0 text-base font-medium leading-none tabular-nums"
       :aria-label="t('page.game.airriddle.howToPlayLabel')"
       aria-haspopup="dialog"
@@ -21,7 +20,7 @@ const titleId = "airriddle-how-to-play-title";
       @click.stop
     >
       ?
-    </UButton>
+    </SbButton>
 
     <template #content>
       <div

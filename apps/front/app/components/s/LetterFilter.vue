@@ -18,28 +18,26 @@ const letters = [..."ABCDEFGHIJKLMNOPQRSTUVWXYZ".split(""), "123"];
       class="flex w-full min-w-max items-center gap-px px-1.5"
       :aria-label="t('common.filterByLetter')"
     >
-      <UButton
-        color="neutral"
-        variant="ghost"
-        size="xs"
+      <SbButton
+        variant="tertiary"
+        size="sm"
         :to="to('')"
         :aria-current="!active ? 'page' : undefined"
         class="h-7 shrink-0 justify-center px-2 pointer-coarse:h-10 selectable"
       >
         {{ t("common.all") }}
-      </UButton>
-      <UButton
+      </SbButton>
+      <SbButton
         v-for="letter in letters"
         :key="letter"
-        color="neutral"
-        variant="ghost"
-        size="xs"
+        variant="tertiary"
+        size="sm"
         :to="to(letter)"
         :aria-current="active === letter ? 'page' : undefined"
         class="h-7 min-w-6 flex-1 justify-center px-0.5 pointer-coarse:h-10 pointer-coarse:min-w-10 selectable"
       >
         {{ letter }}
-      </UButton>
+      </SbButton>
     </nav>
   </SCard>
 </template>

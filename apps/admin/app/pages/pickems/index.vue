@@ -14,7 +14,7 @@ const reportError = useReportError();
 const colorMode = useColorMode();
 
 const enablingTournamentId = ref<string | null>(null);
-const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
+const { syncingId, failedFor, iconFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
 const {
   items: tournaments,
@@ -109,27 +109,27 @@ const handleEnablePickems = async (tournamentId: string) => {
             </div>
 
             <div class="flex shrink-0 flex-row gap-1">
-              <UButton
-                variant="ghost"
-                size="xs"
+              <SbButton
+                variant="tertiary"
+                size="sm"
                 icon="i-fluent-arrow-expand-24-regular"
                 :title="$t('page.pickems.expand')"
                 :aria-label="$t('page.pickems.expand')"
                 :to="localePath(`/pickems/${tournament.id}`)"
               />
-              <UButton
-                variant="ghost"
-                size="xs"
+              <SbButton
+                variant="tertiary"
+                size="sm"
                 :icon="iconFor(tournament.id)"
-                :color="colorFor(tournament.id)"
+                :danger="failedFor(tournament.id)"
                 :title="$t('page.pickems.syncTournament')"
                 :aria-label="$t('page.pickems.syncTournament')"
                 :loading="syncingId === tournament.id"
                 @click="handleSyncTournament(tournament.id)"
               />
-              <UButton
-                variant="ghost"
-                size="xs"
+              <SbButton
+                variant="tertiary"
+                size="sm"
                 icon="i-fluent-predictions-24-regular"
                 :title="$t('page.pickems.enablePickems')"
                 :aria-label="$t('page.pickems.enablePickems')"

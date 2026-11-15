@@ -7,9 +7,9 @@ defineEmits<{ retry: [] }>();
 <template>
   <div class="flex flex-col items-start gap-3 rounded-lg border border-default p-6">
     <p class="text-sm text-muted">{{ message }}</p>
-    <UButton
+    <SbButton
       icon="i-fluent-arrow-clockwise-24-regular"
-      variant="soft"
+      variant="secondary"
       :label="$t('common.retry')"
       @click="$emit('retry')"
     />

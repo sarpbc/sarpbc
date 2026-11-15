@@ -209,9 +209,9 @@ const save = async () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.streams.loadError") }}</p>
-        <UButton
+        <SbButton
+          variant="secondary"
           size="sm"
-          variant="soft"
           :label="t('page.tournaments.streams.retry')"
           @click="load"
         />
@@ -241,10 +241,10 @@ const save = async () => {
             />
           </UFormField>
 
-          <UButton
+          <SbButton
             class="sm:mt-6"
-            color="error"
-            variant="ghost"
+            variant="tertiary"
+            danger
             icon="i-fluent-delete-24-regular"
             :aria-label="t('page.tournaments.streams.remove')"
             @click="removeRow(row.key)"
@@ -291,21 +291,20 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.streams.add')"
           :disabled="loading || loadFailed || rows.length >= MAX_STREAMS"
           @click="addRow"
         />
         <div class="flex flex-row gap-2">
-          <UButton
-            color="neutral"
-            variant="ghost"
+          <SbButton
+            variant="tertiary"
             :label="t('page.tournaments.streams.cancel')"
             @click="open = false"
           />
-          <UButton
+          <SbButton
             :label="t('page.tournaments.streams.save')"
             :loading="saving"
             :disabled="loading || loadFailed || !canSave"

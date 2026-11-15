@@ -93,10 +93,10 @@ const openDeleteModal = (e: Event, post: ForumPostListItem) => {
             @select="selectRow"
           >
             <template #actions-cell="{ row }">
-              <UButton
-                color="error"
-                variant="ghost"
-                size="xs"
+              <SbButton
+                variant="tertiary"
+                danger
+                size="sm"
                 icon="i-fluent-delete-24-regular"
                 :aria-label="$t('page.forum.delete.postTitle')"
                 @click="(e) => openDeleteModal(e, row.original)"

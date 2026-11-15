@@ -160,7 +160,7 @@ const confirmRevoke = async () => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.tokens.create.button')"
         @click="openCreateModal"
@@ -196,7 +196,7 @@ const confirmRevoke = async () => {
                 {{ $t("page.tokens.empty.description") }}
               </p>
             </div>
-            <UButton
+            <SbButton
               icon="i-fluent-add-24-regular"
               :label="$t('page.tokens.create.button')"
               @click="openCreateModal"
@@ -206,10 +206,10 @@ const confirmRevoke = async () => {
           <ClientOnly>
             <UTable v-if="tokens.length > 0" :data="tokens" :columns="columns" sticky>
               <template #actions-cell="{ row }">
-                <UButton
-                  color="error"
-                  variant="ghost"
-                  size="xs"
+                <SbButton
+                  variant="tertiary"
+                  danger
+                  size="sm"
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.tokens.revoke.title')"
                   @click="openRevokeModal(row.original)"
@@ -240,16 +240,15 @@ const confirmRevoke = async () => {
         </form>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-key-24-regular"
           :label="$t('page.tokens.create.submit')"
           :loading="isCreating"
           :disabled="!newTokenName.trim()"
           @click="confirmCreate"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isCreating"
           @click="isCreateModalOpen = false"
@@ -275,14 +274,14 @@ const confirmRevoke = async () => {
               >
                 {{ revealedToken }}
               </code>
-              <UButton
+              <SbButton
                 :icon="copied === 'token' ? 'i-lucide-copy-check' : 'i-lucide-copy'"
                 :label="
                   copied === 'token'
                     ? $t('page.tokens.reveal.copied')
                     : $t('page.tokens.reveal.copy')
                 "
-                variant="soft"
+                variant="secondary"
                 class="shrink-0"
                 @click="revealedToken && copyText(revealedToken, 'token')"
               />
@@ -297,14 +296,14 @@ const confirmRevoke = async () => {
               <pre
                 class="overflow-x-auto rounded border border-default bg-muted p-3 font-mono text-sm whitespace-pre-wrap"
                 >{{ mcpConfigSnippet }}</pre>
-              <UButton
+              <SbButton
                 :icon="copied === 'config' ? 'i-lucide-copy-check' : 'i-lucide-copy'"
                 :label="
                   copied === 'config'
                     ? $t('page.tokens.reveal.copied')
                     : $t('page.tokens.reveal.copyConfig')
                 "
-                variant="soft"
+                variant="secondary"
                 size="sm"
                 class="self-start"
                 @click="copyText(mcpConfigSnippet, 'config')"
@@ -314,7 +313,7 @@ const confirmRevoke = async () => {
         </div>
       </template>
       <template #footer>
-        <UButton :label="$t('page.tokens.reveal.dismiss')" @click="closeRevealModal" />
+        <SbButton :label="$t('page.tokens.reveal.dismiss')" @click="closeRevealModal" />
       </template>
     </UModal>
 
@@ -333,16 +332,15 @@ const confirmRevoke = async () => {
         </p>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-delete-24-regular"
-          color="error"
+          danger
           :label="$t('page.tokens.revoke.confirmButton')"
           :loading="isRevoking"
           @click="confirmRevoke"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isRevoking"
           @click="isRevokeModalOpen = false"

@@ -199,15 +199,15 @@ const contractModalTitle = computed(() =>
     </template>
     <template #action>
       <div v-if="team" class="flex flex-row gap-2">
-        <UButton
+        <SbButton
           v-if="team.source !== 'pandascore'"
           icon="i-fluent-delete-24-regular"
-          color="error"
-          variant="soft"
+          variant="secondary"
+          danger
           :label="$t('page.teams.delete.title')"
           @click="teamToDelete = team"
         />
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.teams.save')"
           :loading="isSavingTeam"
@@ -249,7 +249,7 @@ const contractModalTitle = computed(() =>
             <h2 class="text-base font-semibold">
               {{ $t("page.teams.contracts.title") }}
             </h2>
-            <UButton
+            <SbButton
               icon="i-fluent-add-24-regular"
               size="sm"
               :label="$t('page.teams.contracts.create.title')"
@@ -268,17 +268,17 @@ const contractModalTitle = computed(() =>
             </template>
             <template #actions-cell="{ row }">
               <div class="flex flex-row gap-1">
-                <UButton
+                <SbButton
                   icon="i-fluent-edit-24-regular"
-                  variant="ghost"
-                  size="xs"
+                  variant="tertiary"
+                  size="sm"
                   @click="openEditContractModal(row.original)"
                 />
-                <UButton
+                <SbButton
                   icon="i-fluent-delete-24-regular"
-                  color="error"
-                  variant="ghost"
-                  size="xs"
+                  variant="tertiary"
+                  danger
+                  size="sm"
                   @click="contractToDelete = row.original"
                 />
               </div>
@@ -310,16 +310,15 @@ const contractModalTitle = computed(() =>
         </div>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.teams.contracts.save')"
           :loading="isSavingContract"
           :disabled="!contractForm.playerId || !contractForm.startDate"
           @click="saveContract"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isSavingContract"
           @click="isContractModalOpen = false"

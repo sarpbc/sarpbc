@@ -182,13 +182,12 @@ const confirmChange = async () => {
       "
     >
       <template #footer>
-        <UButton
-          color="neutral"
-          variant="ghost"
+        <SbButton
+          variant="tertiary"
           :label="$t('page.users.confirm.cancel')"
           @click="isConfirmOpen = false"
         />
-        <UButton color="error" :label="$t('page.users.confirm.confirm')" @click="confirmChange" />
+        <SbButton danger :label="$t('page.users.confirm.confirm')" @click="confirmChange" />
       </template>
     </UModal>
   </NuxtLayout>

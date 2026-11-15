@@ -25,18 +25,17 @@ const edit = () => {
     data-drag-handle
   >
     <div class="flex items-center justify-end gap-1">
-      <UButton
-        size="xs"
-        color="neutral"
-        variant="subtle"
+      <SbButton
+        variant="secondary"
+        size="sm"
         icon="i-lucide-pencil"
         :label="t('page.news.editor.matches.edit')"
         @click="edit"
       />
-      <UButton
-        size="xs"
-        color="error"
-        variant="subtle"
+      <SbButton
+        variant="secondary"
+        danger
+        size="sm"
         icon="i-lucide-trash-2"
         :label="t('page.news.editor.matches.remove')"
         @click="deleteNode()"

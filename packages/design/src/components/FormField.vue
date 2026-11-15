@@ -67,47 +67,49 @@ provide(FORM_FIELD, { describedBy, id, invalid: computed(() => error !== null) }
 
 <style scoped>
 /* Mirrors Nuxt UI's form field theme (size md, vertical). */
-.sb-form-field {
-  font-size: 0.875rem;
-  line-height: 1.25rem;
-}
+@layer components {
+  .sb-form-field {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
 
-.sb-form-field__label-row {
-  display: flex;
-  gap: 0.25rem;
-  align-items: center;
-  justify-content: space-between;
-}
+  .sb-form-field__label-row {
+    display: flex;
+    gap: 0.25rem;
+    align-items: center;
+    justify-content: space-between;
+  }
 
-.sb-form-field__label {
-  display: block;
-  color: var(--sb-text);
-  font-weight: 500;
-}
+  .sb-form-field__label {
+    display: block;
+    color: var(--sb-text);
+    font-weight: 500;
+  }
 
-.sb-form-field__label[data-required]::after {
-  content: "*";
-  margin-inline-start: 0.125rem;
-  color: var(--sb-error);
-}
+  .sb-form-field__label[data-required]::after {
+    content: "*";
+    margin-inline-start: 0.125rem;
+    color: var(--sb-error);
+  }
 
-.sb-form-field__hint,
-.sb-form-field__description {
-  margin: 0;
-  color: var(--sb-text-muted);
-}
+  .sb-form-field__hint,
+  .sb-form-field__description {
+    margin: 0;
+    color: var(--sb-text-muted);
+  }
 
-.sb-form-field__control {
-  position: relative;
-  margin-top: 0.25rem;
-}
+  .sb-form-field__control {
+    position: relative;
+    margin-top: 0.25rem;
+  }
 
-.sb-form-field__message {
-  margin: 0.5rem 0 0;
-  color: var(--sb-text-muted);
-}
+  .sb-form-field__message {
+    margin: 0.5rem 0 0;
+    color: var(--sb-text-muted);
+  }
 
-.sb-form-field__message[data-error] {
-  color: var(--sb-error);
+  .sb-form-field__message[data-error] {
+    color: var(--sb-error);
+  }
 }
 </style>

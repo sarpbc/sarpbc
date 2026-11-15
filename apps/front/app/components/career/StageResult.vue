@@ -137,8 +137,8 @@ const pointsTooltip = (points: number): string => {
       }}
     </div>
 
-    <UButton block @click="emit('continue')">
+    <SbButton block @click="emit('continue')">
       {{ t("page.game.career.results.continue") }}
-    </UButton>
+    </SbButton>
   </div>
 </template>

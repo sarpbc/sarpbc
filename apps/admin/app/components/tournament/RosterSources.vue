@@ -89,8 +89,8 @@ const save = async (participant: (typeof teamParticipants.value)[number]) => {
           </ULink>
         </template>
       </UFormField>
-      <UButton
-        variant="soft"
+      <SbButton
+        variant="secondary"
         :label="t('page.tournaments.rosterSources.save')"
         :loading="savingId === participant.id"
         :disabled="!!sourceUrlError(values[participant.id] ?? '')"

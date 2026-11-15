@@ -263,9 +263,9 @@ const save = async () => {
 
     <div v-else-if="error" class="flex flex-col items-start gap-2">
       <p class="text-sm text-error">{{ t("page.tournaments.prizes.loadError") }}</p>
-      <UButton
+      <SbButton
+        variant="secondary"
         size="sm"
-        variant="soft"
         :label="t('page.tournaments.prizes.retry')"
         @click="refresh()"
       />
@@ -289,9 +289,9 @@ const save = async () => {
         >
           <UInput v-model="bulkSourceUrl" type="url" autocomplete="off" class="w-full" />
         </UFormField>
-        <UButton
+        <SbButton
           class="sm:mt-6"
-          variant="soft"
+          variant="secondary"
           :label="t('page.tournaments.prizes.applySource')"
           :disabled="!!sourceUrlError(bulkSourceUrl)"
           @click="applySourceToAll"
@@ -367,10 +367,10 @@ const save = async () => {
           />
         </UFormField>
 
-        <UButton
+        <SbButton
           class="sm:mt-6"
-          color="error"
-          variant="ghost"
+          variant="tertiary"
+          danger
           icon="i-fluent-delete-24-regular"
           :aria-label="t('page.tournaments.prizes.remove')"
           @click="removeRow(row.key)"
@@ -400,14 +400,14 @@ const save = async () => {
       </p>
 
       <div class="flex flex-row flex-wrap justify-between gap-2">
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.prizes.add')"
           :disabled="participants.length === 0 || rows.length >= MAX_PRIZE_ENTRIES"
           @click="addRow"
         />
-        <UButton
+        <SbButton
           :label="t('page.tournaments.prizes.save')"
           :loading="saving"
           :disabled="!prizeInputs"

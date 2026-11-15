@@ -70,54 +70,46 @@ const onSubmit = async (event: Event) => {
           .
         </div>
 
-        <UButton
+        <SbButton
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
-          color="neutral"
-          class="w-full flex flex-row justify-center text-highlighted"
-          size="lg"
-          variant="outline"
+          variant="secondary"
+          block
           @click="googleLogin"
         />
 
         <USeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
-          <UFormField :label="$t('page.authentication.email')" name="email" class="w-full pb-4">
-            <UInput
+          <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
+            <SbInput
               v-model="state.email"
               type="email"
               autocomplete="email"
               spellcheck="false"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
 
-          <UFormField
-            :label="$t('page.authentication.password')"
-            name="password"
-            class="w-full pb-8"
-          >
-            <UInput
+          <SbFormField :label="$t('page.authentication.password')" class="w-full pb-8">
+            <SbInput
               v-model="state.password"
               type="password"
               autocomplete="current-password"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
 
           <p v-if="errorMessage" role="alert" class="-mt-4 mb-4 text-sm text-error">
             {{ errorMessage }}
           </p>
 
-          <UButton
+          <SbButton
             :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"
-            color="primary"
-            size="lg"
             type="submit"
             :loading="pending"
             :disabled="pending"
-            class="w-full flex flex-col items-center"
+            block
           />
         </UForm>
       </div>

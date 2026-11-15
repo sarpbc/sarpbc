@@ -74,12 +74,12 @@ const copyHex = async (): Promise<void> => {
       </div>
     </div>
     <div class="flex flex-wrap gap-3 mt-4">
-      <UButton to="/sarpbc.svg" download="sarpbc.svg" external color="neutral" variant="outline">
+      <SbButton to="/sarpbc.svg" download="sarpbc.svg" external variant="secondary">
         {{ $t("page.brand.downloadSvg") }}
-      </UButton>
-      <UButton to="/sarpbc.png" download="sarpbc.png" external color="neutral" variant="outline">
+      </SbButton>
+      <SbButton to="/sarpbc.png" download="sarpbc.png" external variant="secondary">
         {{ $t("page.brand.downloadPng") }}
-      </UButton>
+      </SbButton>
     </div>
 
     <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
@@ -98,9 +98,9 @@ const copyHex = async (): Promise<void> => {
       />
     </div>
     <div class="mt-4">
-      <UButton to="/favicon.ico" download="favicon.ico" external color="neutral" variant="outline">
+      <SbButton to="/favicon.ico" download="favicon.ico" external variant="secondary">
         {{ $t("page.brand.downloadIco") }}
-      </UButton>
+      </SbButton>
     </div>
 
     <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
@@ -119,15 +119,9 @@ const copyHex = async (): Promise<void> => {
       />
     </div>
     <div class="mt-4">
-      <UButton
-        to="/og-image.jpg"
-        download="og-image.jpg"
-        external
-        color="neutral"
-        variant="outline"
-      >
+      <SbButton to="/og-image.jpg" download="og-image.jpg" external variant="secondary">
         {{ $t("page.brand.downloadJpg") }}
-      </UButton>
+      </SbButton>
     </div>
 
     <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
@@ -144,9 +138,9 @@ const copyHex = async (): Promise<void> => {
         </p>
         <div class="flex items-center justify-between gap-3 min-h-10">
           <p class="text-xs text-muted font-mono" translate="no">{{ BRAND_BLUE }}</p>
-          <UButton color="neutral" variant="ghost" size="sm" @click="copyHex">
+          <SbButton variant="tertiary" size="sm" @click="copyHex">
             {{ $t("page.brand.copyHex") }}
-          </UButton>
+          </SbButton>
         </div>
       </div>
     </div>

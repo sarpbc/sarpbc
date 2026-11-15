@@ -68,13 +68,12 @@ const create = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <UButton
-          color="neutral"
-          variant="ghost"
+        <SbButton
+          variant="tertiary"
           :label="t('page.tournaments.emptyBracket.cancel')"
           @click="open = false"
         />
-        <UButton
+        <SbButton
           :label="t('page.tournaments.emptyBracket.create')"
           :loading="creating"
           @click="create"

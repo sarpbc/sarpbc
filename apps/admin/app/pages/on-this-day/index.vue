@@ -86,7 +86,7 @@ const save = async (input: OnThisDayFactInput) => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.onThisDay.create.button')"
         @click="openCreate"
@@ -115,7 +115,7 @@ const save = async (input: OnThisDayFactInput) => {
             <h2 class="text-lg font-semibold">{{ $t("page.onThisDay.empty.title") }}</h2>
             <p class="text-sm text-muted">{{ $t("page.onThisDay.empty.description") }}</p>
           </div>
-          <UButton
+          <SbButton
             icon="i-fluent-add-24-regular"
             :label="$t('page.onThisDay.create.button')"
             @click="openCreate"
@@ -149,18 +149,17 @@ const save = async (input: OnThisDayFactInput) => {
             </template>
             <template #actions-cell="{ row }">
               <div class="flex justify-end gap-1">
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  size="xs"
+                <SbButton
+                  variant="tertiary"
+                  size="sm"
                   icon="i-fluent-edit-24-regular"
                   :aria-label="$t('page.onThisDay.edit.title')"
                   @click="openEdit(row.original)"
                 />
-                <UButton
-                  color="error"
-                  variant="ghost"
-                  size="xs"
+                <SbButton
+                  variant="tertiary"
+                  danger
+                  size="sm"
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.onThisDay.delete.title')"
                   @click="factToDelete = row.original"

@@ -92,9 +92,8 @@ const choose = (stage: PickedStage) => {
         </p>
         <ul v-else class="flex flex-col gap-1">
           <li v-for="stage in results" :key="stage.id">
-            <UButton
-              color="neutral"
-              variant="ghost"
+            <SbButton
+              variant="tertiary"
               block
               class="justify-start"
               :label="stage.label"

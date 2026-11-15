@@ -87,10 +87,9 @@ const add = async (team: Team) => {
       <div v-if="query.trim() && !searching" class="max-h-56 overflow-y-auto overscroll-contain">
         <ul v-if="candidates.length" class="flex flex-col gap-1">
           <li v-for="team in candidates" :key="team.id">
-            <UButton
+            <SbButton
               type="button"
-              color="neutral"
-              variant="ghost"
+              variant="tertiary"
               size="sm"
               block
               class="justify-start"

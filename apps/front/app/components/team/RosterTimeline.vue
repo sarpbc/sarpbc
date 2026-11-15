@@ -157,10 +157,9 @@ const memberNames = (members: TeamRosterEra["members"]) =>
           </li>
         </ol>
 
-        <UButton
+        <SbButton
           v-if="hasHiddenEras"
-          variant="ghost"
-          color="neutral"
+          variant="tertiary"
           class="self-start"
           @click="showAll = !showAll"
         >
@@ -169,7 +168,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
               ? t("page.team.slug.rosterHistory.showLess")
               : t("page.team.slug.rosterHistory.showAll", { count: eras.length })
           }}
-        </UButton>
+        </SbButton>
       </div>
     </SRail>
   </section>

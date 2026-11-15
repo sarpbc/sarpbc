@@ -9,7 +9,7 @@ const toast = useToast();
 const reportError = useReportError();
 
 const isSyncingAdditions = ref(false);
-const { syncingId, iconFor, colorFor, run: runTournamentSync } = useTournamentSyncFeedback();
+const { syncingId, failedFor, iconFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
 const {
   items: tournaments,
@@ -93,25 +93,25 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
     </template>
     <template #action>
       <div class="flex flex-row flex-wrap gap-2">
-        <UButton
-          variant="ghost"
+        <SbButton
+          variant="tertiary"
           icon="i-fluent-calendar-ltr-24-regular"
           :label="$t('page.tournaments.events.title')"
           :to="localePath('/tournaments/events')"
         />
-        <UButton
-          variant="ghost"
+        <SbButton
+          variant="tertiary"
           icon="i-fluent-ribbon-24-regular"
           :label="$t('page.tournaments.leagues.title')"
           :to="localePath('/tournaments/leagues')"
         />
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="$t('page.tournaments.create.action')"
           :to="localePath('/tournaments/create')"
         />
-        <UButton
+        <SbButton
           :loading="isSyncingAdditions"
           icon="i-fluent-arrow-sync-24-regular"
           :label="$t('page.tournaments.syncAdditions')"
@@ -146,20 +146,20 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
           </template>
           <template #actions-cell="{ row }">
             <div class="flex flex-row items-center justify-end gap-1">
-              <UButton
-                variant="ghost"
-                size="xs"
+              <SbButton
+                variant="tertiary"
+                size="sm"
                 icon="i-fluent-edit-24-regular"
                 :title="$t('page.tournaments.edit.action')"
                 :to="localePath(`/tournaments/${row.original.id}/edit`)"
                 @click.stop
               />
-              <UButton
+              <SbButton
                 v-if="!isManualTournament(row.original)"
-                variant="ghost"
-                size="xs"
+                variant="tertiary"
+                size="sm"
                 :icon="iconFor(row.original.id)"
-                :color="colorFor(row.original.id)"
+                :danger="failedFor(row.original.id)"
                 :loading="syncingId === row.original.id"
                 :title="$t('page.tournaments.syncTournament')"
                 @click="(e) => handleSyncTournament(e, row.original.id)"

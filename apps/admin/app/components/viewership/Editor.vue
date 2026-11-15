@@ -204,9 +204,9 @@ const submit = () => {
 
       <div v-else-if="loadFailed" class="flex flex-col items-start gap-2">
         <p class="text-sm text-error">{{ t("page.tournaments.viewership.loadError") }}</p>
-        <UButton
+        <SbButton
+          variant="secondary"
           size="sm"
-          variant="soft"
           :label="t('page.tournaments.viewership.retry')"
           @click="load"
         />
@@ -299,22 +299,21 @@ const submit = () => {
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <UButton
-          color="error"
-          variant="soft"
+        <SbButton
+          variant="secondary"
+          danger
           icon="i-fluent-delete-24-regular"
           :label="t('page.tournaments.viewership.clear')"
           :disabled="loading || loadFailed || !stored || saving"
           @click="save(null, t('page.tournaments.viewership.cleared'))"
         />
         <div class="flex flex-row gap-2">
-          <UButton
-            color="neutral"
-            variant="ghost"
+          <SbButton
+            variant="tertiary"
             :label="t('page.tournaments.viewership.cancel')"
             @click="open = false"
           />
-          <UButton
+          <SbButton
             type="submit"
             form="viewership-form"
             :label="t('page.tournaments.viewership.save')"

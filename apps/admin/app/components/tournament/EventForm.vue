@@ -48,10 +48,9 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
           :disabled="disabled"
           :placeholder="$t('page.tournaments.form.leaguePlaceholder')"
         />
-        <UButton
+        <SbButton
           v-if="state.leagueId"
-          variant="ghost"
-          color="neutral"
+          variant="tertiary"
           icon="i-fluent-dismiss-24-regular"
           :title="$t('page.tournaments.events.form.clearLeague')"
           :aria-label="$t('page.tournaments.events.form.clearLeague')"

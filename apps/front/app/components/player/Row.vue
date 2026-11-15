@@ -10,10 +10,9 @@ const { player } = defineProps<Props>();
 </script>
 
 <template>
-  <UButton
+  <SbButton
     class="flex items-center gap-2"
-    variant="ghost"
-    color="neutral"
+    variant="tertiary"
     :to="$localePath(playerPath(player.slug))"
   >
     <FlagIcon :nationality="player.nationality" size="sm" />
@@ -25,5 +24,5 @@ const { player } = defineProps<Props>();
         </span>
       </div>
     </div>
-  </UButton>
+  </SbButton>
 </template>

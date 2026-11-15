@@ -123,21 +123,20 @@ const togglePublish = async () => {
       <UBreadcrumb :items="items" />
     </template>
     <template #action>
-      <UButton
-        color="neutral"
-        variant="outline"
+      <SbButton
+        variant="secondary"
         :loading="isPublishing"
         :disabled="isPublishing || isSaving"
         @click="togglePublish"
       >
         {{ isDraft ? $t("page.news.edit.publish") : $t("page.news.edit.unpublish") }}
-      </UButton>
+      </SbButton>
       <UModal
         v-model:open="isModalOpen"
         :title="$t('page.news.edit.save')"
         :dismissible="!isSaving"
       >
-        <UButton
+        <SbButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.news.edit.save')"
           @click="openSaveModal"
@@ -201,16 +200,15 @@ const togglePublish = async () => {
         </template>
 
         <template #footer>
-          <UButton
+          <SbButton
             icon="i-fluent-save-24-regular"
             :label="$t('page.news.edit.save')"
             :loading="isSaving"
             :disabled="isSaving"
             @click="saveArticle"
           />
-          <UButton
-            color="neutral"
-            variant="subtle"
+          <SbButton
+            variant="secondary"
             :label="$t('page.news.create.cancel')"
             :disabled="isSaving"
             @click="isModalOpen = false"

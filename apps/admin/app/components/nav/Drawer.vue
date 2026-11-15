@@ -18,9 +18,8 @@ const items = computed(() =>
     :description="$t('page.nav.drawerDescription')"
     :ui="{ content: 'max-w-72' }"
   >
-    <UButton
-      color="neutral"
-      variant="ghost"
+    <SbButton
+      variant="tertiary"
       icon="i-fluent-navigation-24-regular"
       :aria-label="$t('page.nav.openMenu')"
       class="lg:hidden"
@@ -43,9 +42,9 @@ const items = computed(() =>
             <p class="truncate text-xs text-muted" translate="no">{{ user.email }}</p>
           </div>
         </div>
-        <UButton
-          color="error"
-          variant="ghost"
+        <SbButton
+          variant="tertiary"
+          danger
           icon="i-fluent-sign-out-24-regular"
           class="justify-start"
           :label="loggingOut ? $t('page.home.loggingOut') : $t('page.home.logout')"

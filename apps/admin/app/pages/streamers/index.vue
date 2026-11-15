@@ -131,7 +131,7 @@ const confirmRemove = async () => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.streamers.add.button')"
         @click="openAddModal"
@@ -171,7 +171,7 @@ const confirmRemove = async () => {
                 {{ $t("page.streamers.empty.description") }}
               </p>
             </div>
-            <UButton
+            <SbButton
               icon="i-fluent-add-24-regular"
               :label="$t('page.streamers.add.button')"
               @click="openAddModal"
@@ -186,10 +186,10 @@ const confirmRemove = async () => {
                 </ULink>
               </template>
               <template #actions-cell="{ row }">
-                <UButton
-                  color="error"
-                  variant="ghost"
-                  size="xs"
+                <SbButton
+                  variant="tertiary"
+                  danger
+                  size="sm"
                   icon="i-fluent-delete-24-regular"
                   :aria-label="$t('page.streamers.remove.title')"
                   @click="openRemoveModal(row.original)"
@@ -238,16 +238,15 @@ const confirmRemove = async () => {
         </form>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-add-24-regular"
           :label="$t('page.streamers.add.submit')"
           :loading="isAdding"
           :disabled="!isLoginValid"
           @click="confirmAdd"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isAdding"
           @click="isAddModalOpen = false"
@@ -270,16 +269,15 @@ const confirmRemove = async () => {
         </p>
       </template>
       <template #footer>
-        <UButton
+        <SbButton
           icon="i-fluent-delete-24-regular"
-          color="error"
+          danger
           :label="$t('page.streamers.remove.confirmButton')"
           :loading="isRemoving"
           @click="confirmRemove"
         />
-        <UButton
-          color="neutral"
-          variant="subtle"
+        <SbButton
+          variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isRemoving"
           @click="isRemoveModalOpen = false"

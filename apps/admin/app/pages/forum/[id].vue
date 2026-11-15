@@ -86,10 +86,10 @@ const hideReply = async (reply: Reply) => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         v-if="post"
-        color="error"
-        variant="soft"
+        variant="secondary"
+        danger
         icon="i-fluent-delete-24-regular"
         :label="$t('page.forum.delete.postTitle')"
         @click="postToDelete = post"
@@ -135,17 +135,16 @@ const hideReply = async (reply: Reply) => {
               <p class="whitespace-pre-wrap">{{ reply.content }}</p>
             </div>
             <div class="flex shrink-0 flex-row items-center gap-1">
-              <UButton
-                color="neutral"
-                variant="ghost"
+              <SbButton
+                variant="tertiary"
                 :label="$t('page.forum.hide')"
                 :loading="hidingReplyId === reply.id"
                 :disabled="hidingReplyId !== null"
                 @click="hideReply(reply)"
               />
-              <UButton
-                color="error"
-                variant="ghost"
+              <SbButton
+                variant="tertiary"
+                danger
                 icon="i-fluent-delete-24-regular"
                 :aria-label="$t('page.forum.delete.replyTitle')"
                 @click="replyToDelete = reply"

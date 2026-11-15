@@ -52,7 +52,7 @@ const create = async (input: SeasonInput) => {
       <UBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <UButton
+      <SbButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.seasons.create.button')"
         @click="isCreateOpen = true"
@@ -81,7 +81,7 @@ const create = async (input: SeasonInput) => {
             <h2 class="text-lg font-semibold">{{ $t("page.seasons.empty.title") }}</h2>
             <p class="text-sm text-muted">{{ $t("page.seasons.empty.description") }}</p>
           </div>
-          <UButton
+          <SbButton
             icon="i-fluent-add-24-regular"
             :label="$t('page.seasons.create.button')"
             @click="isCreateOpen = true"
@@ -102,10 +102,10 @@ const create = async (input: SeasonInput) => {
               <span v-else class="text-sm text-muted">{{ $t("page.seasons.unpublished") }}</span>
             </template>
             <template #actions-cell="{ row }">
-              <UButton
-                color="error"
-                variant="ghost"
-                size="xs"
+              <SbButton
+                variant="tertiary"
+                danger
+                size="sm"
                 icon="i-fluent-delete-24-regular"
                 :aria-label="$t('page.seasons.delete.title')"
                 @click="seasonToDelete = row.original"

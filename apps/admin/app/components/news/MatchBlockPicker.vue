@@ -268,10 +268,9 @@ const close = () => {
             <span class="truncate text-sm font-medium text-highlighted" translate="no">
               {{ source.label }}
             </span>
-            <UButton
-              size="xs"
-              color="neutral"
-              variant="subtle"
+            <SbButton
+              variant="secondary"
+              size="sm"
               :label="t('page.news.editor.matches.change')"
               @click="source = null"
             />
@@ -290,14 +289,9 @@ const close = () => {
             />
             <ul v-if="results.length > 0" class="flex max-h-56 flex-col gap-1 overflow-y-auto">
               <li v-for="result in results" :key="result.id">
-                <UButton
-                  color="neutral"
-                  variant="ghost"
-                  class="w-full justify-start"
-                  @click="choose(result)"
-                >
+                <SbButton variant="tertiary" class="w-full justify-start" @click="choose(result)">
                   <span class="truncate" translate="no">{{ result.label }}</span>
-                </UButton>
+                </SbButton>
               </li>
             </ul>
             <p v-else-if="query.trim() && !searching" class="text-sm text-muted">
@@ -346,7 +340,7 @@ const close = () => {
     </template>
 
     <template #footer>
-      <UButton
+      <SbButton
         icon="i-fluent-trophy-24-regular"
         :label="
           initialBlock ? t('page.news.editor.matches.update') : t('page.news.editor.matches.insert')
@@ -354,7 +348,7 @@ const close = () => {
         :disabled="!block"
         @click="confirm"
       />
-      <UButton color="neutral" variant="subtle" :label="t('common.cancel')" @click="close" />
+      <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
   </UModal>
 </template>

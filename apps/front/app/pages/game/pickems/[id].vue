@@ -339,20 +339,18 @@ watch(
           {{ pageTitle }}
         </h1>
         <div v-if="tournament" class="flex w-full gap-2">
-          <UButton
+          <SbButton
             :to="tabTo('pickem')"
             :label="t('page.game.pickems.detail.tabs.pickem')"
-            color="neutral"
-            variant="outline"
+            variant="secondary"
             size="sm"
             :aria-current="activeTab === 'pickem' ? 'page' : undefined"
             class="min-w-0 flex-1 items-center justify-center selectable"
           />
-          <UButton
+          <SbButton
             :to="tabTo('leaderboard')"
             :label="t('page.game.pickems.detail.tabs.leaderboard')"
-            color="neutral"
-            variant="outline"
+            variant="secondary"
             size="sm"
             :aria-current="activeTab === 'leaderboard' ? 'page' : undefined"
             class="min-w-0 flex-1 items-center justify-center selectable"
@@ -390,9 +388,9 @@ watch(
             <p class="text-sm text-pretty text-muted">
               {{ t("page.game.pickems.detail.signInPrompt") }}
             </p>
-            <UButton :to="loginRedirectPath()" color="primary">
+            <SbButton :to="loginRedirectPath()">
               {{ t("page.game.pickems.detail.signInCta") }}
-            </UButton>
+            </SbButton>
           </div>
           <p v-if="isSignedIn && personalRank?.rank != null" class="text-sm text-muted mb-3">
             {{
@@ -440,9 +438,9 @@ watch(
           <p class="text-sm text-pretty text-muted">
             {{ t("page.game.pickems.detail.signInPrompt") }}
           </p>
-          <UButton :to="loginRedirectPath()" color="primary">
+          <SbButton :to="loginRedirectPath()">
             {{ t("page.game.pickems.detail.signInCta") }}
-          </UButton>
+          </SbButton>
         </div>
         <div class="flex flex-1 flex-col items-center justify-center gap-2 px-4 text-center">
           <p class="text-sm text-muted text-pretty">
@@ -460,9 +458,9 @@ watch(
             <p class="text-sm text-pretty text-muted">
               {{ t("page.game.pickems.detail.signInPrompt") }}
             </p>
-            <UButton :to="loginRedirectPath()" color="primary">
+            <SbButton :to="loginRedirectPath()">
               {{ t("page.game.pickems.detail.signInCta") }}
-            </UButton>
+            </SbButton>
           </div>
         </SCard>
         <div

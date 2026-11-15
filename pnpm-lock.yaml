@@ -716,6 +716,9 @@ importers:
       '@nuxt/ui':
         specifier: 'catalog:'
         version: 4.12.0(2e24dbae924ff6c0f93b9e3e7f382d1c)
+      '@sarpbc/design':
+        specifier: workspace:*
+        version: link:../design
       '@sarpbc/types':
         specifier: workspace:*
         version: link:../types

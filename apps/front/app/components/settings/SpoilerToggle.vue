@@ -9,10 +9,9 @@ const tooltip = computed(() =>
 
 <template>
   <UTooltip :text="tooltip">
-    <UButton
+    <SbButton
       :icon="enabled ? 'i-fluent-eye-off-24-regular' : 'i-fluent-eye-24-regular'"
-      color="neutral"
-      variant="ghost"
+      variant="tertiary"
       class="selectable"
       :aria-pressed="enabled"
       :aria-label="t('components.spoiler.toggle')"

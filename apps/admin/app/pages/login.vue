@@ -107,49 +107,42 @@ const googleLogin = () => {
           {{ $t("page.authentication.staffOnly") }}
         </p>
 
-        <UButton
+        <SbButton
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
-          color="neutral"
-          class="flex w-full flex-row justify-center text-highlighted"
-          size="lg"
-          variant="outline"
+          variant="secondary"
+          block
           @click="googleLogin"
         />
 
         <USeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <UForm :state="state" class="h-fit w-80" method="post" @submit="onSubmit">
-          <UFormField :label="$t('page.authentication.email')" name="email" class="w-full pb-4">
-            <UInput
+          <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
+            <SbInput
               v-model="state.email"
               type="email"
               autocomplete="email"
               spellcheck="false"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
 
-          <UFormField
-            :label="$t('page.authentication.password')"
-            name="password"
-            class="w-full pb-8"
-          >
-            <UInput
+          <SbFormField :label="$t('page.authentication.password')" class="w-full pb-8">
+            <SbInput
               v-model="state.password"
               type="password"
               autocomplete="current-password"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
 
-          <UButton
+          <SbButton
             :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"
-            color="neutral"
             type="submit"
             :loading="pending"
             :disabled="pending"
-            class="flex w-full flex-col items-center"
+            block
           />
         </UForm>
       </div>

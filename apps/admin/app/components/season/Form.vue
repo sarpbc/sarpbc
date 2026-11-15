@@ -124,10 +124,10 @@ const submit = () => {
                 class="w-full"
               />
             </UFormField>
-            <UButton
+            <SbButton
               type="button"
-              color="error"
-              variant="ghost"
+              variant="tertiary"
+              danger
               icon="i-fluent-delete-24-regular"
               :aria-label="$t('page.seasons.form.removePhase', { number: index + 1 })"
               @click="removePhase(index)"
@@ -148,10 +148,9 @@ const submit = () => {
         </li>
       </ol>
       <div>
-        <UButton
+        <SbButton
           type="button"
-          color="neutral"
-          variant="outline"
+          variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="$t('page.seasons.form.addPhase')"
           :disabled="phases.length >= MAX_SEASON_FORMAT_PHASES"
@@ -176,7 +175,7 @@ const submit = () => {
     </UFormField>
 
     <div>
-      <UButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
+      <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
     </div>
   </form>
 </template>

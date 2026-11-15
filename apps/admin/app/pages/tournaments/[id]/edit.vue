@@ -117,13 +117,13 @@ const handleSubmit = async () => {
     </template>
     <template #action>
       <div class="flex flex-row gap-2">
-        <UButton
-          variant="soft"
+        <SbButton
+          variant="secondary"
           icon="i-fluent-trophy-24-regular"
           :label="$t('page.tournaments.viewMatches')"
           :to="localePath(`/tournaments/${tournamentId}`)"
         />
-        <UButton
+        <SbButton
           v-if="tournament"
           type="button"
           icon="i-fluent-save-24-regular"

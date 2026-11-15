@@ -45,6 +45,11 @@
 
 .dark {
   color-scheme: dark;
+
+  /* Admin keeps Nuxt UI's default dark surfaces, lighter than the front's. */
+  --sb-bg: var(--sb-ink-900);
+  --sb-bg-muted: var(--sb-ink-800);
+  --sb-bg-elevated: var(--sb-ink-800);
 }
 
 .light {

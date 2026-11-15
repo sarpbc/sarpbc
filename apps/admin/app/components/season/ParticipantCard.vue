@@ -99,9 +99,9 @@ const addEntry = async () => {
           {{ $t("page.seasons.participants.winner") }}
         </UBadge>
       </div>
-      <UButton
-        color="error"
-        variant="ghost"
+      <SbButton
+        variant="tertiary"
+        danger
         size="sm"
         icon="i-fluent-delete-24-regular"
         :aria-label="$t('page.seasons.participants.remove.label', { name: participant.team.name })"
@@ -123,11 +123,10 @@ const addEntry = async () => {
         />
       </UFormField>
       <div>
-        <UButton
+        <SbButton
           type="submit"
+          variant="secondary"
           size="sm"
-          color="neutral"
-          variant="outline"
           :label="$t('page.seasons.path.saveNote')"
           :loading="savingNote"
           :disabled="!noteChanged"
@@ -163,10 +162,10 @@ const addEntry = async () => {
               </UBadge>
             </span>
           </div>
-          <UButton
-            color="error"
-            variant="ghost"
-            size="xs"
+          <SbButton
+            variant="tertiary"
+            danger
+            size="sm"
             icon="i-fluent-delete-24-regular"
             :aria-label="$t('page.seasons.path.remove.title')"
             @click="entryToRemove = entry"
@@ -207,29 +206,27 @@ const addEntry = async () => {
           <span class="text-muted">{{
             $t("page.seasons.path.linked", { name: stage.label })
           }}</span>
-          <UButton
+          <SbButton
             type="button"
-            size="xs"
-            color="neutral"
-            variant="ghost"
+            variant="tertiary"
+            size="sm"
             icon="i-fluent-dismiss-24-regular"
             :aria-label="$t('page.seasons.path.unlink')"
             @click="stage = null"
           />
         </template>
-        <UButton
+        <SbButton
           v-else
           type="button"
+          variant="secondary"
           size="sm"
-          color="neutral"
-          variant="outline"
           icon="i-fluent-link-24-regular"
           :label="$t('page.seasons.path.link')"
           @click="isPickerOpen = true"
         />
       </div>
       <div>
-        <UButton
+        <SbButton
           type="submit"
           size="sm"
           :label="$t('page.seasons.path.add')"

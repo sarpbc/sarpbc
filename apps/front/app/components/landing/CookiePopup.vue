@@ -38,12 +38,12 @@ const rejectCookies = () => {
         </SLink>
 
         <div class="flex justify-start space-x-2">
-          <UButton variant="outline" color="neutral" @click="acceptCookies">
+          <SbButton variant="secondary" @click="acceptCookies">
             {{ t("common.accept") }}
-          </UButton>
-          <UButton variant="outline" color="neutral" @click="rejectCookies">
+          </SbButton>
+          <SbButton variant="secondary" @click="rejectCookies">
             {{ t("common.decline") }}
-          </UButton>
+          </SbButton>
         </div>
       </SCard>
     </section>

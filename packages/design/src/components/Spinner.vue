@@ -13,14 +13,16 @@
 </template>
 
 <style scoped>
-.sb-spinner {
-  flex-shrink: 0;
-  animation: sb-spin 1s linear infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
+@layer components {
   .sb-spinner {
-    animation-duration: 3s;
+    flex-shrink: 0;
+    animation: sb-spin 1s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .sb-spinner {
+      animation-duration: 3s;
+    }
   }
 }
 </style>
