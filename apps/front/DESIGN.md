@@ -53,7 +53,7 @@ Configured in `app/app.config.ts`:
 | Primary | `blue`                                            |
 | Neutral | `ink` (custom scale in `app/assets/css/main.css`) |
 
-`ink` is defined in OKLCH with one hue (256) and one chroma (0.008): only lightness changes between steps, so every grey reads as the same cool charcoal. Dark surfaces climb in even 4-point steps: page `950` (L 10%), image fallbacks `900` (14%), hover `850` (18%), borders `800` (22%), accented `700` (26%). Text steps keep their contrast: `200` (91%), `300` (82%), `400` (68%), `500` (50%). Add or change a step by picking its lightness, never a hex.
+`ink` comes from `@sarpbc/design` (`packages/design/src/styles/tokens.css`), the source of truth the apps read through `--sb-ink-*`. It is defined in OKLCH with one hue (256) and a chroma of 0.004: only lightness changes between steps, so every grey reads as the same cool charcoal. Dark surfaces climb in even 4-point steps: page `950` (L 10%), image fallbacks `900` (14%), hover `850` (18%), borders `800` (22%), accented `700` (26%). Text steps keep their contrast: `200` (91%), `300` (82%), `400` (68%), `500` (50%). Add or change a step in the design tokens by picking its lightness, never a hex.
 
 In dark mode `--ui-bg` is `ink-950`, `--ui-bg-muted` is `ink-900`, `--ui-bg-elevated` is `ink-850` and `--ui-border` is `ink-800`, so hover and borders are two different greys.
 

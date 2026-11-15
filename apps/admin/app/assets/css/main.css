@@ -2,18 +2,18 @@
 @import "@nuxt/ui";
 
 @theme static {
-  --color-ink-50: oklch(98% 0.008 256);
-  --color-ink-100: oklch(95% 0.008 256);
-  --color-ink-200: oklch(91% 0.008 256);
-  --color-ink-300: oklch(82% 0.008 256);
-  --color-ink-400: oklch(68% 0.008 256);
-  --color-ink-500: oklch(50% 0.008 256);
-  --color-ink-600: oklch(36% 0.008 256);
-  --color-ink-700: oklch(26% 0.008 256);
-  --color-ink-800: oklch(22% 0.008 256);
-  --color-ink-850: oklch(18% 0.008 256);
-  --color-ink-900: oklch(14% 0.008 256);
-  --color-ink-950: oklch(10% 0.008 256);
+  --color-ink-50: var(--sb-ink-50);
+  --color-ink-100: var(--sb-ink-100);
+  --color-ink-200: var(--sb-ink-200);
+  --color-ink-300: var(--sb-ink-300);
+  --color-ink-400: var(--sb-ink-400);
+  --color-ink-500: var(--sb-ink-500);
+  --color-ink-600: var(--sb-ink-600);
+  --color-ink-700: var(--sb-ink-700);
+  --color-ink-800: var(--sb-ink-800);
+  --color-ink-850: var(--sb-ink-850);
+  --color-ink-900: var(--sb-ink-900);
+  --color-ink-950: var(--sb-ink-950);
 }
 
 @theme {
