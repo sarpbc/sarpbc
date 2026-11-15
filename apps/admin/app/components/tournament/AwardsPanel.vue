@@ -148,7 +148,7 @@ defineExpose({ refreshAwards });
       <p class="text-sm text-muted">{{ $t("page.tournaments.awards.hint") }}</p>
     </div>
 
-    <LoadError
+    <SbErrorState
       v-if="error"
       :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
       @retry="refreshAwards()"

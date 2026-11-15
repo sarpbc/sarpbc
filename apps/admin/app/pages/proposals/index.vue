@@ -481,7 +481,7 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
           </div>
         </div>
 
-        <LoadError
+        <SbErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.proposals.loadError')"
           @retry="refresh()"

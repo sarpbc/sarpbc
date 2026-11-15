@@ -19,14 +19,14 @@ const activities = computed(() => recentForumActivities.value ?? []);
 
 <template>
   <div class="w-full flex flex-col">
-    <SRail caption="lead" :title="$t('components.forum.recentPosts')">
-      <SCard>
-        <SErrorState
+    <HubRail caption="lead" :title="$t('components.forum.recentPosts')">
+      <HubCard>
+        <SbErrorState
           v-if="error"
           :message="$t('components.forum.recentPostsError')"
           @retry="refresh()"
         />
-        <SListItem
+        <HubListItem
           v-for="activity in activities"
           :key="activity.id"
           size="compact"
@@ -36,9 +36,9 @@ const activities = computed(() => recentForumActivities.value ?? []);
         >
           <div class="min-w-0 flex-1 truncate">{{ activity.title }}</div>
           <div class="shrink-0 tabular-nums text-muted">{{ activity.messageCount }}</div>
-        </SListItem>
+        </HubListItem>
         <ClientOnly>
-          <SListItem
+          <HubListItem
             v-if="user"
             size="compact"
             :to="localePath('/forum/new')"
@@ -46,10 +46,10 @@ const activities = computed(() => recentForumActivities.value ?? []);
             class="border-t border-separator text-xs font-normal text-muted hover:text-highlighted"
           >
             {{ $t("components.forum.createPost") }}
-          </SListItem>
+          </HubListItem>
         </ClientOnly>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
     <LazyGameSidebarPromo class="hidden w-full md:block" hydrate-on-idle />
   </div>
 </template>

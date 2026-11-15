@@ -10,7 +10,7 @@ const activePlayerCount = computed(() => selectActiveRosterPlayers(team.players 
 </script>
 
 <template>
-  <SListItem :to="$localePath(teamPath(team.slug))" class="min-w-0 gap-3">
+  <HubListItem :to="$localePath(teamPath(team.slug))" class="min-w-0 gap-3">
     <TeamImg :team-name="team.name" :logo="team" size="list" />
     <h2 class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
       {{ team.name }}
@@ -23,5 +23,5 @@ const activePlayerCount = computed(() => selectActiveRosterPlayers(team.players 
         {{ $t("page.teams.index.activePlayers", { count: activePlayerCount }) }}
       </template>
     </span>
-  </SListItem>
+  </HubListItem>
 </template>

@@ -26,7 +26,7 @@ const stageHref = (event: TournamentEvent<TournamentListItem>, stage: Tournament
 
 <template>
   <section class="w-full flex flex-col">
-    <SRail v-for="event in events" :key="event.id" caption="section">
+    <HubRail v-for="event in events" :key="event.id" caption="section">
       <template #caption>
         <div class="flex w-full min-w-0 items-center gap-2 pr-2">
           <NuxtImg
@@ -54,14 +54,14 @@ const stageHref = (event: TournamentEvent<TournamentListItem>, stage: Tournament
         </div>
       </template>
 
-      <SCard>
+      <HubCard>
         <TournamentRow
           v-for="stage in event.stages"
           :key="stage.id"
           :tournament="stage"
           :to="stageHref(event, stage)"
         />
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

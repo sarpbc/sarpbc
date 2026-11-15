@@ -26,20 +26,20 @@ const facts = computed(() => {
 </script>
 
 <template>
-  <SCard>
+  <HubCard>
     <dl class="flex flex-col">
-      <SListItem class="justify-between gap-4 text-sm">
+      <HubListItem class="justify-between gap-4 text-sm">
         <dt class="shrink-0 text-muted">{{ t("page.match.detail.info.event") }}</dt>
         <dd class="min-w-0">
           <SbLink :to="$localePath(tournamentMatchesPath)" variant="muted" class="block truncate">
             {{ tournamentStageLabel(match.tournament) }}
           </SbLink>
         </dd>
-      </SListItem>
-      <SListItem v-for="fact in facts" :key="fact.label" class="justify-between gap-4 text-sm">
+      </HubListItem>
+      <HubListItem v-for="fact in facts" :key="fact.label" class="justify-between gap-4 text-sm">
         <dt class="text-muted">{{ fact.label }}</dt>
         <dd class="truncate text-highlighted tabular-nums">{{ fact.value }}</dd>
-      </SListItem>
+      </HubListItem>
     </dl>
-  </SCard>
+  </HubCard>
 </template>

@@ -59,7 +59,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
@@ -75,7 +75,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
       </template>
 
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <SCard v-for="index in 3" :key="index">
+        <HubCard v-for="index in 3" :key="index">
           <div class="w-full grid grid-cols-3 gap-2 py-2 px-2 items-center">
             <div class="col-span-2 flex flex-col gap-1">
               <SbSkeleton class="h-3 w-24" />
@@ -83,12 +83,12 @@ const listVariant = computed<"upcoming" | "result">(() => {
             </div>
             <SbSkeleton class="col-span-1 h-3 w-10 justify-self-end" />
           </div>
-        </SCard>
+        </HubCard>
       </div>
 
-      <SCard v-else-if="hasError">
-        <SErrorState :message="t(`page.${kind}.slug.matches.error`)" @retry="emit('retry')" />
-      </SCard>
+      <HubCard v-else-if="hasError">
+        <SbErrorState :message="t(`page.${kind}.slug.matches.error`)" @retry="emit('retry')" />
+      </HubCard>
 
       <div v-else-if="hasMatches" class="flex flex-col gap-4">
         <MatchListGroup v-if="live.length > 0" :matches="live" variant="live" />
@@ -99,7 +99,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
         />
       </div>
 
-      <SCard v-else>
+      <HubCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <Icon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -109,7 +109,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
             {{ t(`page.${kind}.slug.matches.${tab}.emptyHint`) }}
           </p>
         </div>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

@@ -11,21 +11,21 @@ const isHome = computed(() => getRouteBaseName(route) === "index");
       <div class="w-full max-w-7xl flex flex-1 flex-col py-4 px-2 xl:px-0">
         <div class="flex flex-1 flex-col gap-2 md:grid md:grid-cols-12 md:gap-6 lg:gap-8">
           <div class="hidden md:flex md:col-span-3 lg:col-span-3">
-            <SHubColumn variant="main">
+            <HubColumn variant="main">
               <LazyMatchLateralBar hydrate-on-visible />
-            </SHubColumn>
+            </HubColumn>
           </div>
 
-          <SHubColumn variant="main" class="md:col-span-6 hub-column-rules">
+          <HubColumn variant="main" class="md:col-span-6 hub-column-rules">
             <slot />
-          </SHubColumn>
+          </HubColumn>
 
-          <SHubColumn variant="rail" class="hidden md:col-span-3 md:flex">
+          <HubColumn variant="rail" class="hidden md:col-span-3 md:flex">
             <ClientOnly>
               <LazyForumPreview hydrate-on-idle />
               <LazyTransferRail v-if="isHome" hydrate-on-idle />
             </ClientOnly>
-          </SHubColumn>
+          </HubColumn>
         </div>
       </div>
     </div>

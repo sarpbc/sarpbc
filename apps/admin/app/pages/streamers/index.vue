@@ -148,7 +148,7 @@ const confirmRemove = async () => {
           {{ $t("page.streamers.loading") }}
         </p>
 
-        <LoadError
+        <SbErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.streamers.loadError')"
           @retry="refresh()"

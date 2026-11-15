@@ -4,7 +4,7 @@ const { t } = useI18n();
 
 <template>
   <SbBadge color="danger" class="text-xs w-fit shrink-0 whitespace-nowrap flex items-center gap-2">
-    <SBadgeLiveDot />
+    <MatchLiveDot />
     {{ t("components.match.live") }}
   </SbBadge>
 </template>

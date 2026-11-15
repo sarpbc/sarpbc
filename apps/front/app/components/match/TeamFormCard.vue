@@ -20,7 +20,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
 
 <template>
   <div class="flex h-full min-w-0 flex-col divide-y divide-separator">
-    <SListItem size="default" class="min-w-0 shrink-0">
+    <HubListItem size="default" class="min-w-0 shrink-0">
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <h3 class="min-w-0 truncate text-default">{{ teamName }}</h3>
         <span
@@ -35,15 +35,15 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
           }}
         </span>
       </div>
-    </SListItem>
+    </HubListItem>
 
-    <SListItem v-if="!hasRecentMatches" size="default" class="min-w-0 shrink-0">
+    <HubListItem v-if="!hasRecentMatches" size="default" class="min-w-0 shrink-0">
       <p class="min-w-0 truncate text-xs text-muted">
         {{ t("page.match.detail.formEmpty") }}
       </p>
-    </SListItem>
+    </HubListItem>
 
-    <SListItem
+    <HubListItem
       v-for="recentMatch in teamForm?.recent ?? []"
       :key="recentMatch.id"
       size="default"
@@ -81,6 +81,6 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
           }}
         </span>
       </div>
-    </SListItem>
+    </HubListItem>
   </div>
 </template>

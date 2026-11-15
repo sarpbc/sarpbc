@@ -195,25 +195,25 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
       />
     </div>
 
-    <SCard v-if="pending" class="min-h-row-stack p-2" aria-live="polite">
+    <HubCard v-if="pending" class="min-h-row-stack p-2" aria-live="polite">
       <div class="flex w-full flex-col gap-2">
         <SbSkeleton v-for="index in 6" :key="index" class="h-row" />
       </div>
-    </SCard>
+    </HubCard>
 
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.tournaments.stats.error')" @retry="emit('retry')" />
-    </SCard>
+    <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.tournaments.stats.error')" @retry="emit('retry')" />
+    </HubCard>
 
-    <SCard v-else-if="!hasStats" class="flex min-h-row-stack h-row-grid items-center">
-      <SEmptyState
+    <HubCard v-else-if="!hasStats" class="flex min-h-row-stack h-row-grid items-center">
+      <SbEmptyState
         icon="i-fluent-data-bar-vertical-24-regular"
         :title="t('page.tournaments.stats.empty')"
         :hint="t('page.tournaments.stats.emptyHint')"
       />
-    </SCard>
+    </HubCard>
 
-    <SCard v-else class="flex flex-col">
+    <HubCard v-else class="flex flex-col">
       <SbTable
         v-model:sorting="sort"
         :caption="t('page.tournaments.stats.caption')"
@@ -250,6 +250,6 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
           {{ t("page.tournaments.stats.unlinked", stats.unlinkedAccounts) }}
         </span>
       </p>
-    </SCard>
+    </HubCard>
   </div>
 </template>

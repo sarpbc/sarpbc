@@ -12,7 +12,7 @@ const headingId = useId();
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.team.slug.staff") }}
@@ -32,6 +32,6 @@ const headingId = useId();
           />
         </li>
       </ul>
-    </SRail>
+    </HubRail>
   </section>
 </template>

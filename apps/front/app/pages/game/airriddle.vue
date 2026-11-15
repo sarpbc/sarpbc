@@ -285,15 +285,15 @@ onUnmounted(() => {
 
 <template>
   <section class="flex w-full flex-col gap-4">
-    <SCrossCard class="min-h-row-header">
+    <HubCrossCard class="min-h-row-header">
       <div class="flex w-full items-center justify-center py-3 text-center">
         <h1 class="text-xl font-medium tracking-tight">
           {{ t("page.game.airriddle.title") }}
         </h1>
       </div>
-    </SCrossCard>
+    </HubCrossCard>
 
-    <SCard v-if="loading" class="relative h-row-snap w-full p-6">
+    <HubCard v-if="loading" class="relative h-row-snap w-full p-6">
       <div class="absolute right-3 top-3" @click.stop>
         <AirRiddleHowToPlayPopover />
       </div>
@@ -319,10 +319,13 @@ onUnmounted(() => {
           {{ t("page.game.airriddle.loadingChallenge") }}
         </p>
       </div>
-    </SCard>
+    </HubCard>
 
     <template v-else-if="gameState.targetLength > 0">
-      <SCard class="relative flex h-row-snap w-full flex-col p-4 sm:p-6" @click="focusHiddenInput">
+      <HubCard
+        class="relative flex h-row-snap w-full flex-col p-4 sm:p-6"
+        @click="focusHiddenInput"
+      >
         <div class="absolute right-3 top-3" @click.stop>
           <AirRiddleHowToPlayPopover />
         </div>
@@ -437,14 +440,14 @@ onUnmounted(() => {
             />
           </div>
         </div>
-      </SCard>
+      </HubCard>
     </template>
 
-    <SCard v-else class="relative flex min-h-row-stack h-row-grid w-full items-center">
+    <HubCard v-else class="relative flex min-h-row-stack h-row-grid w-full items-center">
       <div class="absolute right-3 top-3" @click.stop>
         <AirRiddleHowToPlayPopover />
       </div>
-      <SErrorState :message="t('page.game.airriddle.failedToLoad')" @retry="loadTodayRiddle()" />
-    </SCard>
+      <SbErrorState :message="t('page.game.airriddle.failedToLoad')" @retry="loadTodayRiddle()" />
+    </HubCard>
   </section>
 </template>

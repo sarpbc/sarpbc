@@ -59,13 +59,13 @@ const hasMatches = computed(() => matches.length > 0);
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ t(titleKey) }}</template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <div>
-      <SCard v-if="pending" class="flex flex-col" aria-live="polite">
-        <SListItem
+      <HubCard v-if="pending" class="flex flex-col" aria-live="polite">
+        <HubListItem
           v-for="index in 20"
           :key="index"
           size="default"
@@ -89,12 +89,12 @@ const hasMatches = computed(() => matches.length > 0);
               <SbSkeleton class="h-3 w-10" />
             </div>
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="hasError" class="flex min-h-row-stack h-row-grid items-center">
-        <SErrorState :message="t(errorKey)" @retry="emit('retry')" />
-      </SCard>
+      <HubCard v-else-if="hasError" class="flex min-h-row-stack h-row-grid items-center">
+        <SbErrorState :message="t(errorKey)" @retry="emit('retry')" />
+      </HubCard>
 
       <template v-else-if="hasMatches">
         <MatchListGroup
@@ -104,7 +104,7 @@ const hasMatches = computed(() => matches.length > 0);
           :discovery-source="discoverySource"
         />
 
-        <SPagination
+        <HubPagination
           v-if="totalMatches > MATCH_LIST_PAGE_SIZE"
           :current-page="currentPage"
           :total-pages="totalPages"

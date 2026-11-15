@@ -55,17 +55,17 @@ const phase = computed(() => state.value.phase);
 
 <template>
   <div class="flex flex-col gap-4 md:grid md:grid-cols-12 md:items-start md:gap-4">
-    <SHubColumn variant="main" class="order-2 md:order-1 md:col-span-3">
+    <HubColumn variant="main" class="order-2 md:order-1 md:col-span-3">
       <CareerWorldRankings
         kind="teams"
         :teams="worldRankings.teams"
         v-model:hovered-team-id="hoveredTeamId"
       />
-    </SHubColumn>
+    </HubColumn>
 
-    <SHubColumn variant="main" class="order-1 md:order-2 md:col-span-6">
+    <HubColumn variant="main" class="order-1 md:order-2 md:col-span-6">
       <div class="flex flex-col gap-4">
-        <SCrossCard class="h-row-header">
+        <HubCrossCard class="h-row-header">
           <div class="flex h-full w-full items-center justify-between gap-2 px-4">
             <p class="min-w-0 truncate text-sm font-medium">
               {{ state.playerName || $t("page.game.career.title") }}
@@ -75,7 +75,7 @@ const phase = computed(() => state.value.phase);
               {{ $t("page.game.career.actions.abandon") }}
             </SbButton>
           </div>
-        </SCrossCard>
+        </HubCrossCard>
 
         <div>
           <div v-if="showCareerStats(phase)" class="mb-6">
@@ -165,14 +165,14 @@ const phase = computed(() => state.value.phase);
           </p>
         </div>
       </div>
-    </SHubColumn>
+    </HubColumn>
 
-    <SHubColumn variant="rail" class="order-3 md:col-span-3">
+    <HubColumn variant="rail" class="order-3 md:col-span-3">
       <CareerWorldRankings
         kind="players"
         :players="worldRankings.players"
         v-model:hovered-team-id="hoveredTeamId"
       />
-    </SHubColumn>
+    </HubColumn>
   </div>
 </template>

@@ -70,7 +70,7 @@ const handleEnablePickems = async (tournamentId: string) => {
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <LoadError
+        <SbErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
           @retry="refresh()"

@@ -90,7 +90,7 @@ const googleLogin = () => {
 
 <template>
   <div class="flex h-full w-full flex-col items-center justify-center">
-    <SCrossCard class="p-4">
+    <CrossCard class="p-4">
       <div class="flex w-full flex-col items-center justify-center">
         <img
           src="/sarpbc.svg"
@@ -146,6 +146,6 @@ const googleLogin = () => {
           />
         </form>
       </div>
-    </SCrossCard>
+    </CrossCard>
   </div>
 </template>

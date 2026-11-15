@@ -34,5 +34,5 @@ const tabItems = computed(() =>
 </script>
 
 <template>
-  <STabNav :items="tabItems" :ariaLabel="t('page.tournaments.id.sections')" />
+  <HubTabNav :items="tabItems" :ariaLabel="t('page.tournaments.id.sections')" />
 </template>

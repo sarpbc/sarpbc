@@ -39,32 +39,32 @@ const showSection = computed(
 
 <template>
   <section v-if="showSection" class="w-full" :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId" class="text-balance">
           {{ t("page.tournaments.id.prizes.title") }}
         </h2>
       </template>
 
-      <SCard v-if="pending" aria-live="polite">
-        <SListItem v-for="index in 3" :key="index">
+      <HubCard v-if="pending" aria-live="polite">
+        <HubListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <SbSkeleton class="h-3.5 w-8 shrink-0" />
             <SbSkeleton class="size-5 shrink-0" />
             <SbSkeleton class="h-3.5 w-2/5 max-w-40" />
             <SbSkeleton class="ms-auto h-3.5 w-16" />
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="error">
-        <SErrorState :message="t('page.tournaments.id.prizes.error')" @retry="refresh()" />
-      </SCard>
+      <HubCard v-else-if="error">
+        <SbErrorState :message="t('page.tournaments.id.prizes.error')" @retry="refresh()" />
+      </HubCard>
 
-      <SCard v-else>
+      <HubCard v-else>
         <ol>
           <li v-for="prize in prizes" :key="prize.id">
-            <SListItem v-if="concealed" class="min-w-0 gap-2">
+            <HubListItem v-if="concealed" class="min-w-0 gap-2">
               <span class="w-10 shrink-0 text-sm text-muted tabular-nums">
                 {{ formatPlacement(prize.placement) }}
               </span>
@@ -74,8 +74,8 @@ const showSection = computed(
               <span class="shrink-0 text-sm font-medium tabular-nums">
                 {{ formatAmount(prize.amount, prize.currency) }}
               </span>
-            </SListItem>
-            <SListItem v-else :to="$localePath(teamPath(prize.team.slug))" class="min-w-0 gap-2">
+            </HubListItem>
+            <HubListItem v-else :to="$localePath(teamPath(prize.team.slug))" class="min-w-0 gap-2">
               <span class="w-10 shrink-0 text-sm text-muted tabular-nums">
                 {{ formatPlacement(prize.placement) }}
               </span>
@@ -86,7 +86,7 @@ const showSection = computed(
               <span class="shrink-0 text-sm font-medium tabular-nums">
                 {{ formatAmount(prize.amount, prize.currency) }}
               </span>
-            </SListItem>
+            </HubListItem>
           </li>
         </ol>
         <p
@@ -98,7 +98,7 @@ const showSection = computed(
             <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
           </span>
         </p>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

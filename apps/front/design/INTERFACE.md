@@ -66,7 +66,7 @@ Before choosing a solution, identify the real constraint:
 
 ### 1.4 Build for Everyone (`de-accessible-by-default`)
 
-Progressive disclosure: simple default path, advanced options available but not required. Pair color with text/icons for status (e.g. `SBadgeLive` + label).
+Progressive disclosure: simple default path, advanced options available but not required. Pair color with text/icons for status (e.g. `MatchLiveBadge` + label).
 
 ### 1.5 Make It Excellent (`de-craft`)
 
@@ -127,7 +127,7 @@ Full mapping: [references/tokens.md](TOKENS.md)
 
 Hierarchy: **borders + tonal surfaces first**, shadows second.
 
-- Cards: `frame` separators (`SCard`) or no frame (`SCrossCard`)
+- Cards: `frame` separators (`HubCard`) or no frame (`HubCrossCard`)
 - Popovers/menus: default `@sarpbc/design` elevation
 - Avoid heavy shadows on flat dashboard tables
 
@@ -146,7 +146,7 @@ Hierarchy: **borders + tonal surfaces first**, shadows second.
 | Toast      | `useToast()`                                   |
 | Error page | Own markup in `error.vue`                      |
 
-Extend shared patterns in `app/components/s/` when the same layout repeats.
+Extend `app/components/hub/` when the same hub layout repeats; generic components go in `@sarpbc/design`.
 
 ---
 

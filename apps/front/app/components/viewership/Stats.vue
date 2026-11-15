@@ -68,7 +68,7 @@ const details = computed(() =>
 </script>
 
 <template>
-  <SCard>
+  <HubCard>
     <dl class="grid grid-cols-2 border-b border-separator">
       <div
         v-for="stat in stats"
@@ -98,5 +98,5 @@ const details = computed(() =>
         <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
       </span>
     </p>
-  </SCard>
+  </HubCard>
 </template>

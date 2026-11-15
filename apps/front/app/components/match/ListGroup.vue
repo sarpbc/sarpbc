@@ -59,7 +59,7 @@ const blocks = computed((): ListBlock[] => {
         {{ block.dateLabel }}
       </h3>
 
-      <SRail v-for="group in block.events" :key="group.key" caption="section">
+      <HubRail v-for="group in block.events" :key="group.key" caption="section">
         <template #caption>
           <h4 class="h-fit min-w-0 truncate text-sm font-medium">
             <SbLink :to="$localePath(group.matchesPath)" variant="muted">
@@ -68,7 +68,7 @@ const blocks = computed((): ListBlock[] => {
           </h4>
         </template>
 
-        <SCard
+        <HubCard
           class="flex flex-col"
           :class="
             variant === 'live' ? 'border-error/30 bg-error/5 ring-1 ring-error/15' : undefined
@@ -81,8 +81,8 @@ const blocks = computed((): ListBlock[] => {
             :live-match-ids="liveMatchIds"
             :show-date="!useDateGrouping"
           />
-        </SCard>
-      </SRail>
+        </HubCard>
+      </HubRail>
     </div>
   </section>
 </template>

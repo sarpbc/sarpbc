@@ -227,8 +227,8 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
 </script>
 
 <template>
-  <SRail caption="lead" :title="title">
-    <SCard>
+  <HubRail caption="lead" :title="title">
+    <HubCard>
       <template v-if="kind === 'teams'">
         <ol
           v-for="(section, index) in teamSections"
@@ -328,6 +328,6 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
           </template>
         </ol>
       </template>
-    </SCard>
-  </SRail>
+    </HubCard>
+  </HubRail>
 </template>

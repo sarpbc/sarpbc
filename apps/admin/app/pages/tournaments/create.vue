@@ -103,7 +103,7 @@ const handleSubmit = async () => {
           </p>
         </div>
 
-        <LoadError
+        <SbErrorState
           v-if="optionsError"
           :message="getApiErrorMessage(optionsError) ?? $t('common.loadFailed')"
           @retry="refreshOptions()"

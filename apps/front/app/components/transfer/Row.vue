@@ -22,7 +22,7 @@ const typeLabel = computed(() =>
 </script>
 
 <template>
-  <SListItem class="min-w-0 gap-3">
+  <HubListItem class="min-w-0 gap-3">
     <time
       :datetime="transfer.date"
       class="w-20 shrink-0 truncate text-xs text-muted tabular-nums sm:w-24"
@@ -62,5 +62,5 @@ const typeLabel = computed(() =>
       <TeamImg :team-name="transfer.team.name" :logo="transfer.team" size="xs" />
       <span class="truncate text-sm">{{ transfer.team.name }}</span>
     </SbLink>
-  </SListItem>
+  </HubListItem>
 </template>

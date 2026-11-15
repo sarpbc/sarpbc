@@ -213,7 +213,7 @@ const togglePublish = async () => {
       </SbModal>
     </template>
 
-    <LoadError
+    <SbErrorState
       v-if="error"
       :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
       @retry="refresh()"

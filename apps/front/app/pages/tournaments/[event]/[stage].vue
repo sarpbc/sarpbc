@@ -112,18 +112,18 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
 </script>
 
 <template>
-  <SHubPageBody>
-    <SCard v-if="pending" class="min-h-row-stack" aria-live="polite">
+  <HubPageBody>
+    <HubCard v-if="pending" class="min-h-row-stack" aria-live="polite">
       <div class="w-full p-4 animate-pulse flex flex-col gap-3 items-center">
         <div class="h-3 w-32 rounded bg-elevated" />
         <div class="h-8 w-full max-w-md rounded bg-elevated" />
         <div class="h-3 w-48 rounded bg-elevated" />
       </div>
-    </SCard>
+    </HubCard>
 
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.tournaments.id.error')" @retry="refresh()" />
-    </SCard>
+    <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.tournaments.id.error')" @retry="refresh()" />
+    </HubCard>
 
     <template v-else-if="tournament">
       <TournamentHero
@@ -159,5 +159,5 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
       </TournamentHero>
       <NuxtPage :tournament="tournament" />
     </template>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

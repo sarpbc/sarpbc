@@ -21,7 +21,7 @@ Component tokens are `--sb-*` custom properties in `packages/design/src/styles/t
 | -------------- | ---------------- | --------------------------------------- |
 | background-100 | `bg-default`     | Page, cards                             |
 | background-200 | `bg-elevated`    | Subtle separation only—not general fill |
-| gray-alpha-400 | `border-default` | Card borders (`SCard`)                  |
+| gray-alpha-400 | `border-default` | Card borders (`HubCard`)                |
 
 ### Accents (state only)
 
@@ -82,7 +82,7 @@ Named row heights in `apps/front/app/assets/css/main.css` (`@theme` spacing). Hu
 | card-l       | `--spacing-card-l` (`calc(row × 8)`)        | 352   | `min-h-card-l`                     | Large padded card / forms                                   |
 | rail-caption | `--spacing-rail-caption` (`4.5rem`)         | 72    | `h-rail-caption`                   | Lead rail only (first in column); section rails use `h-row` |
 
-**Rule:** use these primitives — not `h-11.25`, `h-11.5`, `h-8.25`, or `py-[2.75px]`. Padded cards: `SCard size="s"` \| `"m"` \| `"l"` (even row multiples + `h-row-snap`; the `frame` outline adds no height). List stacks omit `size`.
+**Rule:** use these primitives — not `h-11.25`, `h-11.5`, `h-8.25`, or `py-[2.75px]`. Padded cards: `HubCard size="s"` \| `"m"` \| `"l"` (even row multiples + `h-row-snap`; the `frame` outline adds no height). List stacks omit `size`.
 
 ## Radius
 

@@ -25,7 +25,7 @@ const formatRange = (contract: PlayerContract): string => {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.staff.slug.timeline.title") }}
@@ -55,6 +55,6 @@ const formatRange = (contract: PlayerContract): string => {
           </SbBadge>
         </li>
       </ol>
-    </SRail>
+    </HubRail>
   </section>
 </template>

@@ -83,13 +83,13 @@ const headingId = "player-faq-title";
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.player.slug.faq.title") }}
         </h2>
       </template>
-      <SCard>
+      <HubCard>
         <details
           v-for="(item, index) in faqItems"
           :key="index"
@@ -108,7 +108,7 @@ const headingId = "player-faq-title";
             {{ item.answer }}
           </p>
         </details>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

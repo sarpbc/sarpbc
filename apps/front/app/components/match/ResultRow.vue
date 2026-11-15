@@ -52,7 +52,7 @@ const participantClass = (participantId: string | undefined): string => {
 </script>
 
 <template>
-  <SListItem :size="compact ? 'compact' : 'default'" class="min-w-0">
+  <HubListItem :size="compact ? 'compact' : 'default'" class="min-w-0">
     <div
       v-if="teamA && teamB"
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_minmax(2rem,auto)_auto_minmax(0,1fr)] items-center gap-x-1 text-xs"
@@ -78,5 +78,5 @@ const participantClass = (participantId: string | undefined): string => {
         {{ shortTeamName(nameB) || $t("components.match.tbd") }}
       </span>
     </div>
-  </SListItem>
+  </HubListItem>
 </template>

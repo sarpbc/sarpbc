@@ -52,7 +52,7 @@ watch(
 
 <template>
   <div v-if="country" class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>
         <span class="inline-flex items-center gap-2">
           <FlagIcon :nationality="country.code" size="lg" />
@@ -64,37 +64,37 @@ watch(
           {{ t("page.countries.detail.allCountries") }}
         </SbLink>
       </template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <section aria-labelledby="country-players-title">
-      <SRail>
+      <HubRail>
         <template #caption>
           <h2 id="country-players-title">
             {{ t("page.countries.detail.players.title") }}
           </h2>
         </template>
-        <SCard>
+        <HubCard>
           <ul>
             <li v-for="player in country.players" :key="player.id">
               <PlayerLink :player="player" />
             </li>
           </ul>
-        </SCard>
+        </HubCard>
         <p class="px-2 pt-2 text-xs text-muted text-pretty">
           {{ t("page.countries.detail.players.rule") }}
         </p>
-      </SRail>
+      </HubRail>
     </section>
 
     <section aria-labelledby="country-teams-title">
-      <SRail>
+      <HubRail>
         <template #caption>
           <h2 id="country-teams-title">{{ t("page.countries.detail.teams.title") }}</h2>
         </template>
-        <SCard v-if="country.teams.length">
+        <HubCard v-if="country.teams.length">
           <ul>
             <li v-for="team in country.teams" :key="team.id">
-              <SListItem :to="$localePath(teamPath(team.slug))" class="min-w-0 gap-3">
+              <HubListItem :to="$localePath(teamPath(team.slug))" class="min-w-0 gap-3">
                 <TeamImg :team-name="team.name" :logo="team" size="list" />
                 <span
                   class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted"
@@ -102,30 +102,30 @@ watch(
                 >
                   {{ team.name }}
                 </span>
-              </SListItem>
+              </HubListItem>
             </li>
           </ul>
-        </SCard>
-        <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SEmptyState
+        </HubCard>
+        <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+          <SbEmptyState
             icon="i-fluent-people-team-24-regular"
             :title="t('page.countries.detail.teams.empty')"
           />
-        </SCard>
+        </HubCard>
         <p class="px-2 pt-2 text-xs text-muted text-pretty">
           {{ t("page.countries.detail.teams.rule") }}
         </p>
-      </SRail>
+      </HubRail>
     </section>
 
     <section aria-labelledby="country-matches-title">
-      <SRail>
+      <HubRail>
         <template #caption>
           <h2 id="country-matches-title">{{ t("page.countries.detail.matches.title") }}</h2>
         </template>
         <template v-if="country.matches.length">
           <MatchListGroup :matches="country.matches" variant="result" />
-          <SPagination
+          <HubPagination
             v-if="country.matchTotal > MATCH_LIST_PAGE_SIZE"
             :current-page="currentPage"
             :total-pages="totalPages"
@@ -142,16 +142,16 @@ watch(
             class="mt-row"
           />
         </template>
-        <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SEmptyState
+        <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+          <SbEmptyState
             icon="i-fluent-trophy-24-regular"
             :title="t('page.countries.detail.matches.empty')"
           />
-        </SCard>
+        </HubCard>
         <p class="px-2 pt-2 text-xs text-muted text-pretty">
           {{ t("page.countries.detail.matches.rule") }}
         </p>
-      </SRail>
+      </HubRail>
     </section>
   </div>
 </template>

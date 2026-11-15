@@ -218,7 +218,7 @@ const contractModalTitle = computed(() =>
     </template>
 
     <DashboardContent>
-      <LoadError
+      <SbErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
@@ -257,7 +257,7 @@ const contractModalTitle = computed(() =>
             />
           </div>
 
-          <LoadError
+          <SbErrorState
             v-if="contractsError"
             :message="getApiErrorMessage(contractsError) ?? $t('common.loadFailed')"
             @retry="refreshContracts()"

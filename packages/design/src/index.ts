@@ -20,6 +20,10 @@ export { default as CommandPalette } from "./components/CommandPalette.vue";
 
 export { default as DropdownMenu } from "./components/DropdownMenu.vue";
 
+export { default as EmptyState } from "./components/EmptyState.vue";
+
+export { default as ErrorState } from "./components/ErrorState.vue";
+
 export { default as FormField } from "./components/FormField.vue";
 
 export { default as HoverCard } from "./components/HoverCard.vue";

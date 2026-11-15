@@ -76,9 +76,9 @@ const formatDayHeader = (group: { date: Date | null; dateKey: string }) => {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SCard v-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.tournaments.id.matchesError')" @retry="refresh()" />
-    </SCard>
+    <HubCard v-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.tournaments.id.matchesError')" @retry="refresh()" />
+    </HubCard>
     <div v-else-if="hasMatches" class="flex flex-col gap-4">
       <section v-if="displayGroupedMatches.upcoming.length > 0" class="flex flex-col">
         <h2
@@ -95,14 +95,14 @@ const formatDayHeader = (group: { date: Date | null; dateKey: string }) => {
           <h3 class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted">
             {{ formatDayHeader(dayGroup) }}
           </h3>
-          <SCard class="w-full">
+          <HubCard class="w-full">
             <MatchLinkRows
               :matches="dayGroup.items"
               variant="upcoming"
               :source="SOURCE"
               :show-date="false"
             />
-          </SCard>
+          </HubCard>
         </div>
       </section>
 
@@ -114,16 +114,16 @@ const formatDayHeader = (group: { date: Date | null; dateKey: string }) => {
         <h3 class="flex h-row min-h-row items-end pb-2 pl-2 text-sm font-medium text-highlighted">
           {{ formatDayHeader(dayGroup) }}
         </h3>
-        <SCard class="w-full">
+        <HubCard class="w-full">
           <MatchLinkRows :matches="dayGroup.items" variant="result" :source="SOURCE" />
-        </SCard>
+        </HubCard>
       </section>
     </div>
-    <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-      <SEmptyState
+    <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+      <SbEmptyState
         icon="i-fluent-calendar-clock-24-regular"
         :title="t('page.tournaments.id.noMatches')"
       />
-    </SCard>
+    </HubCard>
   </div>
 </template>

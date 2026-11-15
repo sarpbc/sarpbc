@@ -44,15 +44,15 @@ const entryMeta = (entry: EarningsEntry): string => {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("common.prizes.earnings.title") }}
         </h2>
       </template>
 
-      <SCard v-if="pending" aria-live="polite">
-        <SListItem v-for="index in 3" :key="index">
+      <HubCard v-if="pending" aria-live="polite">
+        <HubListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
               <SbSkeleton class="h-3.5 w-3/5 max-w-48" />
@@ -60,29 +60,29 @@ const entryMeta = (entry: EarningsEntry): string => {
             </div>
             <SbSkeleton class="h-3.5 w-16" />
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="error">
-        <SErrorState :message="t('common.prizes.earnings.error')" @retry="refresh()" />
-      </SCard>
+      <HubCard v-else-if="error">
+        <SbErrorState :message="t('common.prizes.earnings.error')" @retry="refresh()" />
+      </HubCard>
 
-      <SCard v-else-if="years.length > 0">
-        <SListItem class="justify-between gap-4">
+      <HubCard v-else-if="years.length > 0">
+        <HubListItem class="justify-between gap-4">
           <span class="text-sm text-muted">{{ t("common.prizes.earnings.total") }}</span>
           <span class="text-sm font-medium text-highlighted tabular-nums">
             {{ formatTotals(totals) }}
           </span>
-        </SListItem>
+        </HubListItem>
 
         <template v-for="year in years" :key="year.year ?? 'undated'">
-          <SListItem class="justify-between gap-4 bg-elevated/50">
+          <HubListItem class="justify-between gap-4 bg-elevated/50">
             <h3 class="text-sm font-medium tabular-nums">
               {{ year.year ?? t("common.prizes.earnings.undated") }}
             </h3>
             <span class="text-sm text-muted tabular-nums">{{ formatTotals(year.totals) }}</span>
-          </SListItem>
-          <SListItem
+          </HubListItem>
+          <HubListItem
             v-for="entry in year.entries"
             :key="entry.id"
             :to="
@@ -99,7 +99,7 @@ const entryMeta = (entry: EarningsEntry): string => {
             <span class="shrink-0 text-sm tabular-nums">
               {{ formatAmount(entry.amount, entry.currency) }}
             </span>
-          </SListItem>
+          </HubListItem>
         </template>
 
         <p
@@ -112,9 +112,9 @@ const entryMeta = (entry: EarningsEntry): string => {
             <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
           </span>
         </p>
-      </SCard>
+      </HubCard>
 
-      <SCard v-else>
+      <HubCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <Icon name="i-fluent-money-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -124,7 +124,7 @@ const entryMeta = (entry: EarningsEntry): string => {
             {{ t("common.prizes.earnings.emptyHint") }}
           </p>
         </div>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

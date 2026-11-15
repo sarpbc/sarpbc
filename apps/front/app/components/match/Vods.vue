@@ -46,7 +46,7 @@ const linkLabel = (vod: MatchVod): string =>
 </script>
 
 <template>
-  <SCard>
+  <HubCard>
     <ul v-if="games.length > 0" class="flex flex-col">
       <li
         v-for="{ game, links } in games"
@@ -74,8 +74,8 @@ const linkLabel = (vod: MatchVod): string =>
         </ul>
       </li>
     </ul>
-    <SListItem v-else class="text-sm text-muted">
+    <HubListItem v-else class="text-sm text-muted">
       {{ t("page.match.detail.watch.noReplay") }}
-    </SListItem>
-  </SCard>
+    </HubListItem>
+  </HubCard>
 </template>

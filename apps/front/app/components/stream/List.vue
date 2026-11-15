@@ -80,10 +80,10 @@ const hasStartgg = computed(() => streams.some((stream) => stream.source === "st
 </script>
 
 <template>
-  <SCard>
+  <HubCard>
     <ul v-if="rows.length > 0" class="flex flex-col">
       <li v-for="row in rows" :key="row.url">
-        <SListItem
+        <HubListItem
           :to="row.url"
           size="double"
           target="_blank"
@@ -96,7 +96,7 @@ const hasStartgg = computed(() => streams.some((stream) => stream.source === "st
               class="flex min-w-0 items-center gap-2 text-default group-hover:text-highlighted"
               translate="no"
             >
-              <SBadgeLiveDot v-if="live" />
+              <MatchLiveDot v-if="live" />
               <span class="truncate">{{ row.channel }}</span>
             </span>
             <span class="truncate text-xs text-muted">{{ row.details }}</span>
@@ -106,17 +106,17 @@ const hasStartgg = computed(() => streams.some((stream) => stream.source === "st
             class="size-4 shrink-0 self-center text-muted"
             aria-hidden="true"
           />
-        </SListItem>
+        </HubListItem>
       </li>
     </ul>
-    <SListItem v-else class="text-sm text-muted">
+    <HubListItem v-else class="text-sm text-muted">
       {{ t("page.match.detail.watch.noStream") }}
-    </SListItem>
+    </HubListItem>
     <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
       <span>
         {{ t("page.match.detail.watch.dataFrom") }}
         <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
       </span>
     </p>
-  </SCard>
+  </HubCard>
 </template>

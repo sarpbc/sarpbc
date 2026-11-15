@@ -46,11 +46,11 @@ const isLive = (matchId: string): boolean => liveMatches.value.some((m) => m.id 
 
 <template>
   <div v-if="showRail" class="md:hidden w-full flex flex-col mb-2">
-    <SRail caption="lead" :title="upcomingTitle">
-      <SCard>
+    <HubRail caption="lead" :title="upcomingTitle">
+      <HubCard>
         <div class="w-full flex flex-col">
           <template v-if="pending && matches.length === 0">
-            <SListItem v-for="i in 3" :key="i" size="default">
+            <HubListItem v-for="i in 3" :key="i" size="default">
               <div class="grid w-full grid-cols-3 items-center gap-2">
                 <div class="col-span-2 flex flex-col gap-1">
                   <SbSkeleton class="h-3 max-w-28" />
@@ -58,7 +58,7 @@ const isLive = (matchId: string): boolean => liveMatches.value.some((m) => m.id 
                 </div>
                 <SbSkeleton class="col-span-1 h-3 w-10 justify-self-end" />
               </div>
-            </SListItem>
+            </HubListItem>
           </template>
           <template v-else>
             <MatchDiscoveryLink
@@ -72,13 +72,13 @@ const isLive = (matchId: string): boolean => liveMatches.value.some((m) => m.id 
             </MatchDiscoveryLink>
           </template>
         </div>
-        <SListItem
+        <HubListItem
           :to="$localePath('/matches')"
           class="text-sm font-medium text-muted hover:text-highlighted"
         >
           {{ $t("components.match.viewAll") }}
-        </SListItem>
-      </SCard>
-    </SRail>
+        </HubListItem>
+      </HubCard>
+    </HubRail>
   </div>
 </template>

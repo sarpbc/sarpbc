@@ -57,8 +57,8 @@ const upcomingTitle = computed(() => {
 
 <template>
   <div class="w-full flex flex-col">
-    <SRail v-if="hasSchedule" caption="lead" :title="upcomingTitle">
-      <SCard>
+    <HubRail v-if="hasSchedule" caption="lead" :title="upcomingTitle">
+      <HubCard>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
             v-for="match in visibleLiveMatches"
@@ -69,13 +69,13 @@ const upcomingTitle = computed(() => {
           >
             <MatchRow :match="match" :live="true" compact />
           </MatchDiscoveryLink>
-          <SListItem
+          <HubListItem
             v-if="hasHiddenLive"
             :to="$localePath('/matches')"
             class="text-xs font-medium text-muted hover:text-highlighted"
           >
             {{ $t("components.match.viewAll") }}
-          </SListItem>
+          </HubListItem>
           <MatchDiscoveryLink
             v-for="match in upcomingMatches"
             :key="match.id"
@@ -86,14 +86,14 @@ const upcomingTitle = computed(() => {
             <MatchRow :match="match" compact />
           </MatchDiscoveryLink>
         </div>
-      </SCard>
-    </SRail>
-    <SRail
+      </HubCard>
+    </HubRail>
+    <HubRail
       v-if="hasResults"
       :caption="hasSchedule ? 'section' : 'lead'"
       :title="$t('components.match.results')"
     >
-      <SCard>
+      <HubCard>
         <div class="w-full flex flex-col">
           <MatchDiscoveryLink
             v-for="match in resultMatches"
@@ -105,7 +105,7 @@ const upcomingTitle = computed(() => {
             <MatchResultRow :match="match" compact />
           </MatchDiscoveryLink>
         </div>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </div>
 </template>

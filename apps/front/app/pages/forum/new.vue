@@ -173,14 +173,14 @@ const onSubmit = async () => {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SCrossCard class="w-full h-row-header">
+    <HubCrossCard class="w-full h-row-header">
       <div class="w-full flex justify-center items-center">
         <h1 class="text-xl font-medium tracking-tight text-highlighted">
           {{ $t("page.forum.new.pageTitle") }}
         </h1>
       </div>
-    </SCrossCard>
-    <SCard size="l" class="p-4">
+    </HubCrossCard>
+    <HubCard size="l" class="p-4">
       <p v-if="creationStatusLoadState === 'loading'" class="text-sm text-muted mb-4">
         {{ $t("page.forum.new.statusLoading") }}
       </p>
@@ -244,6 +244,6 @@ const onSubmit = async () => {
           {{ $t("page.forum.new.form.submit") }}
         </SbButton>
       </form>
-    </SCard>
+    </HubCard>
   </div>
 </template>

@@ -8,7 +8,7 @@ defineProps<{
 </script>
 
 <template>
-  <SListItem :to="$localePath(playerPath(player.slug))" class="min-w-0 gap-3">
+  <HubListItem :to="$localePath(playerPath(player.slug))" class="min-w-0 gap-3">
     <PlayerImg :player-name="player.name" :img="player.imageUrl" size="list" />
     <h2 class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
       {{ player.name }}
@@ -19,5 +19,5 @@ defineProps<{
     <span class="flex w-4 shrink-0 justify-end">
       <FlagIcon v-if="player.nationality" :nationality="player.nationality" size="md" />
     </span>
-  </SListItem>
+  </HubListItem>
 </template>

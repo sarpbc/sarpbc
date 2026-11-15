@@ -58,7 +58,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.team.slug.rosterHistory.title") }}
@@ -76,11 +76,11 @@ const memberNames = (members: TeamRosterEra["members"]) =>
         </div>
       </div>
 
-      <SCard v-else-if="hasError">
-        <SErrorState :message="t('page.team.slug.rosterHistory.error')" @retry="emit('retry')" />
-      </SCard>
+      <HubCard v-else-if="hasError">
+        <SbErrorState :message="t('page.team.slug.rosterHistory.error')" @retry="emit('retry')" />
+      </HubCard>
 
-      <SCard v-else-if="eras.length === 0">
+      <HubCard v-else-if="eras.length === 0">
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <Icon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -90,7 +90,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
             {{ t("page.team.slug.rosterHistory.emptyHint") }}
           </p>
         </div>
-      </SCard>
+      </HubCard>
 
       <div v-else class="flex flex-col gap-2">
         <ol class="flex flex-col gap-0 list-none m-0 p-0">
@@ -170,6 +170,6 @@ const memberNames = (members: TeamRosterEra["members"]) =>
           }}
         </SbButton>
       </div>
-    </SRail>
+    </HubRail>
   </section>
 </template>

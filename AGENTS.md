@@ -94,8 +94,8 @@ a dependency on a personal plugin to make the project usable.
 For frontend work, reuse the affected app's Nuxt 4 conventions and `@sarpbc/design`
 (`Sb*`) components; `pnpm check:native-controls` rejects native `button`, `input`,
 `select` and `textarea` in app templates. Use SSR-aware data fetching, localized navigation and cookie
-credentials to the NestJS API. Public primitives live in
-`apps/front/app/components/s/`; cross-app UI belongs in `packages/ui`. Inspect
+credentials to the NestJS API. Generic components belong in `@sarpbc/design`; the
+public hub grid lives in `apps/front/app/components/hub/`. Inspect
 existing helpers before adding a wrapper. Cover loading, empty, error and
 populated states, keyboard use and the supported locales.
 

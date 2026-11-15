@@ -28,7 +28,7 @@ const rejectCookies = () => {
       :aria-label="t('components.cookiePopup.label')"
       class="cookie-popup fixed bottom-4 z-50 max-w-sm w-full left-1/2 -translate-x-1/2 md:right-4 md:left-auto md:translate-x-0"
     >
-      <SCard class="bg-default p-2">
+      <HubCard class="bg-default p-2">
         <p class="text-toned text-sm mb-4">
           {{ t("components.cookiePopup.description") }}
         </p>
@@ -45,7 +45,7 @@ const rejectCookies = () => {
             {{ t("common.decline") }}
           </SbButton>
         </div>
-      </SCard>
+      </HubCard>
     </section>
   </Transition>
 </template>

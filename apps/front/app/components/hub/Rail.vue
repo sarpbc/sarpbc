@@ -11,7 +11,7 @@ const {
 } = defineProps<{
   title?: string | null;
   /**
-   * `lead` — first rail in a hub column (72px from `md`); aligns with `SHubPageHeader` + gap.
+   * `lead` — first rail in a hub column (72px from `md`); aligns with `HubPageHeader` + gap.
    * `section` — stacked rails / mid-page blocks (44px / `h-row`).
    * `none` — no caption band; use after a `h-row-header` + `gap-4` page header.
    */

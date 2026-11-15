@@ -71,15 +71,15 @@ const metaParts = (award: PlayerProfileAward): string[] => {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.player.slug.awards.title") }}
         </h2>
       </template>
 
-      <SCard v-if="pending" aria-live="polite">
-        <SListItem v-for="index in 2" :key="index">
+      <HubCard v-if="pending" aria-live="polite">
+        <HubListItem v-for="index in 2" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <SbSkeleton class="size-5 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -87,15 +87,15 @@ const metaParts = (award: PlayerProfileAward): string[] => {
               <SbSkeleton class="h-3 w-2/5 max-w-32" />
             </div>
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="hasError">
-        <SErrorState :message="t('page.player.slug.awards.error')" @retry="emit('retry')" />
-      </SCard>
+      <HubCard v-else-if="hasError">
+        <SbErrorState :message="t('page.player.slug.awards.error')" @retry="emit('retry')" />
+      </HubCard>
 
-      <SCard v-else-if="awards.length > 0 || seasonAwards.length > 0">
-        <SListItem
+      <HubCard v-else-if="awards.length > 0 || seasonAwards.length > 0">
+        <HubListItem
           v-for="award in seasonAwards"
           :key="award.id"
           :to="award.sourceUrl"
@@ -119,8 +119,8 @@ const metaParts = (award: PlayerProfileAward): string[] => {
               aria-hidden="true"
             />
           </div>
-        </SListItem>
-        <SListItem
+        </HubListItem>
+        <HubListItem
           v-for="award in awards"
           :key="award.id"
           :to="$localePath(tournamentStagePath(award.tournament.event.slug, award.tournament.slug))"
@@ -137,8 +137,8 @@ const metaParts = (award: PlayerProfileAward): string[] => {
               </p>
             </div>
           </div>
-        </SListItem>
-      </SCard>
-    </SRail>
+        </HubListItem>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

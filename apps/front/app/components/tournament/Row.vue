@@ -19,7 +19,7 @@ const teamCount = computed(() => tournament.participants?.length ?? 0);
 </script>
 
 <template>
-  <SListItem :to="to" class="min-w-0 gap-3">
+  <HubListItem :to="to" class="min-w-0 gap-3">
     <h3 class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
       {{ tournament.name }}
     </h3>
@@ -34,5 +34,5 @@ const teamCount = computed(() => tournament.participants?.length ?? 0);
         {{ t(participantsCountKey(tournament.format), { count: teamCount }) }}
       </template>
     </span>
-  </SListItem>
+  </HubListItem>
 </template>

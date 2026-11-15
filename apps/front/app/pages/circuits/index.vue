@@ -19,29 +19,29 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ t("page.circuits.index.title") }}</template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <div>
-      <SCard v-if="pending && !circuits.length" aria-live="polite">
+      <HubCard v-if="pending && !circuits.length" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
-        <SListItem v-for="index in 3" :key="index">
+        <HubListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 flex-col gap-2">
             <SbSkeleton class="h-3 w-40" />
             <SbSkeleton class="h-3 w-64 max-w-full" />
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SErrorState :message="t('page.circuits.index.error')" @retry="refresh()" />
-      </SCard>
+      <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+        <SbErrorState :message="t('page.circuits.index.error')" @retry="refresh()" />
+      </HubCard>
 
-      <SCard v-else-if="circuits.length">
+      <HubCard v-else-if="circuits.length">
         <ul>
           <li v-for="circuit in circuits" :key="circuit.id">
-            <SListItem :to="$localePath(circuitPath(circuit.slug))" class="min-w-0">
+            <HubListItem :to="$localePath(circuitPath(circuit.slug))" class="min-w-0">
               <div class="flex w-full min-w-0 flex-col">
                 <span class="truncate text-sm font-medium text-highlighted">
                   {{ circuit.name }}
@@ -50,18 +50,18 @@ setPageSeo({
                   {{ circuit.description }}
                 </span>
               </div>
-            </SListItem>
+            </HubListItem>
           </li>
         </ul>
-      </SCard>
+      </HubCard>
 
-      <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SEmptyState
+      <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+        <SbEmptyState
           icon="i-fluent-trophy-24-regular"
           :title="t('page.circuits.index.empty')"
           :hint="t('page.circuits.index.emptyHint')"
         />
-      </SCard>
+      </HubCard>
     </div>
   </div>
 </template>

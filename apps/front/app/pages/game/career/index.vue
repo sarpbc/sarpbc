@@ -119,7 +119,7 @@ const handleContinue = () => {
 
 <template>
   <section class="flex w-full flex-col gap-4">
-    <SCrossCard
+    <HubCrossCard
       v-if="state.phase === 'menu' || state.phase === 'career_end'"
       class="min-h-row-header"
     >
@@ -129,14 +129,14 @@ const handleContinue = () => {
         </h1>
         <p class="text-sm text-muted">{{ t("page.game.career.subtitle") }}</p>
       </div>
-    </SCrossCard>
+    </HubCrossCard>
 
-    <SCard v-if="!hydrated" class="p-6">
+    <HubCard v-if="!hydrated" class="p-6">
       <div class="flex flex-col items-center gap-4">
         <SbSkeleton class="h-4 w-48" />
         <SbSkeleton class="h-24 w-full" />
       </div>
-    </SCard>
+    </HubCard>
 
     <div v-else-if="state.phase === 'menu'" class="mx-auto w-full max-w-md">
       <CareerMenu

@@ -18,7 +18,7 @@ defineEmits<{ retry: [] }>();
       <div v-for="n in 3" :key="n" class="h-10 w-full animate-pulse rounded-sm bg-elevated" />
     </div>
 
-    <LoadError v-else-if="status === 'error'" :message="errorLabel" @retry="$emit('retry')" />
+    <SbErrorState v-else-if="status === 'error'" :message="errorLabel" @retry="$emit('retry')" />
 
     <p v-else-if="empty" class="rounded-lg border border-default p-4 text-sm text-muted">
       {{ emptyLabel }}

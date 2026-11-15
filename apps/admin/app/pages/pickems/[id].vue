@@ -57,7 +57,7 @@ const breadcrumbItems = computed(() => [
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <LoadError
+        <SbErrorState
           v-if="loadError"
           :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
           @retry="reload()"

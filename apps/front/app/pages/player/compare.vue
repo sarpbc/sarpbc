@@ -315,9 +315,9 @@ setPageSeo({
 </script>
 
 <template>
-  <SHubPageBody>
+  <HubPageBody>
     <div class="flex w-full min-w-0 flex-col gap-8">
-      <SCrossCard class="w-full min-w-0">
+      <HubCrossCard class="w-full min-w-0">
         <div class="flex w-full min-w-0 flex-col gap-4 p-6">
           <div class="flex flex-col gap-1">
             <h1 class="text-xl font-medium text-highlighted">
@@ -352,63 +352,63 @@ setPageSeo({
             </div>
           </div>
         </div>
-      </SCrossCard>
+      </HubCrossCard>
 
-      <SCard v-if="playerLoadFailed" class="flex min-h-row-stack h-row-grid items-center">
-        <SErrorState :message="t('page.player.compare.loadFailed')" @retry="retryPlayers()" />
-      </SCard>
+      <HubCard v-if="playerLoadFailed" class="flex min-h-row-stack h-row-grid items-center">
+        <SbErrorState :message="t('page.player.compare.loadFailed')" @retry="retryPlayers()" />
+      </HubCard>
 
-      <SCard
+      <HubCard
         v-else-if="unknownSlugs.length > 0"
         class="flex min-h-row-stack h-row-grid items-center"
       >
-        <SEmptyState
+        <SbEmptyState
           icon="i-fluent-person-question-mark-24-regular"
           :title="t('page.player.compare.notFound', { slug: unknownSlugs.join(', ') })"
           :hint="t('page.player.compare.notFoundHint')"
         />
-      </SCard>
+      </HubCard>
 
-      <SCard v-else-if="samePlayer" class="flex min-h-row-stack h-row-grid items-center">
-        <SEmptyState
+      <HubCard v-else-if="samePlayer" class="flex min-h-row-stack h-row-grid items-center">
+        <SbEmptyState
           icon="i-fluent-people-swap-24-regular"
           :title="t('page.player.compare.samePlayer')"
           :hint="t('page.player.compare.samePlayerHint')"
         />
-      </SCard>
+      </HubCard>
 
-      <SCard v-else-if="!pair" class="flex min-h-row-stack h-row-grid items-center">
-        <SEmptyState
+      <HubCard v-else-if="!pair" class="flex min-h-row-stack h-row-grid items-center">
+        <SbEmptyState
           icon="i-fluent-people-24-regular"
           :title="t('page.player.compare.choose')"
           :hint="t('page.player.compare.chooseHint')"
         />
-      </SCard>
+      </HubCard>
 
-      <SCard v-else-if="comparisonStatus === 'pending'" aria-live="polite">
-        <SListItem v-for="index in 6" :key="index" class="grid grid-cols-[1fr_auto_1fr] gap-4">
+      <HubCard v-else-if="comparisonStatus === 'pending'" aria-live="polite">
+        <HubListItem v-for="index in 6" :key="index" class="grid grid-cols-[1fr_auto_1fr] gap-4">
           <SbSkeleton class="h-3.5 w-16 justify-self-end" />
           <SbSkeleton class="h-3 w-24" />
           <SbSkeleton class="h-3.5 w-16" />
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard
+      <HubCard
         v-else-if="comparisonError || !comparison"
         class="flex min-h-row-stack h-row-grid items-center"
       >
-        <SErrorState :message="t('page.player.compare.error')" @retry="refreshComparison()" />
-      </SCard>
+        <SbErrorState :message="t('page.player.compare.error')" @retry="refreshComparison()" />
+      </HubCard>
 
       <template v-else>
         <section aria-labelledby="player-compare-summary-title">
-          <SRail>
+          <HubRail>
             <template #caption>
               <h2 id="player-compare-summary-title">
                 {{ t("page.player.compare.sections.summary") }}
               </h2>
             </template>
-            <SCard>
+            <HubCard>
               <table class="w-full table-fixed text-sm">
                 <caption class="sr-only">
                   {{
@@ -445,8 +445,8 @@ setPageSeo({
                   </tr>
                 </tbody>
               </table>
-            </SCard>
-          </SRail>
+            </HubCard>
+          </HubRail>
         </section>
 
         <section
@@ -454,11 +454,11 @@ setPageSeo({
           :key="section.key"
           :aria-labelledby="`player-compare-${section.key}-title`"
         >
-          <SRail>
+          <HubRail>
             <template #caption>
               <h2 :id="`player-compare-${section.key}-title`">{{ section.title }}</h2>
             </template>
-            <SCard>
+            <HubCard>
               <div class="grid grid-cols-2">
                 <ul
                   v-for="column in [
@@ -470,7 +470,7 @@ setPageSeo({
                   :class="['min-w-0', column.side === 'b' && 'border-s border-separator']"
                 >
                   <li v-for="item in column.items" :key="item.key">
-                    <SListItem :to="item.to" class="min-w-0">
+                    <HubListItem :to="item.to" class="min-w-0">
                       <div class="flex min-w-0 flex-col">
                         <span class="truncate text-sm group-hover:text-highlighted">{{
                           item.label
@@ -479,19 +479,19 @@ setPageSeo({
                           item.meta
                         }}</span>
                       </div>
-                    </SListItem>
+                    </HubListItem>
                   </li>
                   <li v-if="column.items.length === 0">
-                    <SListItem>
+                    <HubListItem>
                       <span class="truncate text-xs text-muted">{{ section.empty }}</span>
-                    </SListItem>
+                    </HubListItem>
                   </li>
                 </ul>
               </div>
-            </SCard>
-          </SRail>
+            </HubCard>
+          </HubRail>
         </section>
       </template>
     </div>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

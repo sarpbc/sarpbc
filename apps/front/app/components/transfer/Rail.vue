@@ -28,27 +28,27 @@ const transferLabel = (transfer: Transfer): string => {
     aria-labelledby="rail-transfers-title"
     class="w-full"
   >
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 id="rail-transfers-title">{{ t("components.transfer.latest.title") }}</h2>
       </template>
 
-      <SCard v-if="pending" aria-live="polite">
+      <HubCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
-        <SListItem v-for="index in RAIL_TRANSFERS" :key="index" class="gap-2">
+        <HubListItem v-for="index in RAIL_TRANSFERS" :key="index" class="gap-2">
           <SbSkeleton class="size-7 shrink-0" />
           <SbSkeleton class="ms-auto size-4" />
           <SbSkeleton class="size-4" />
           <SbSkeleton class="size-4" />
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="error" class="p-2">
-        <SErrorState :message="t('components.transfer.latest.error')" @retry="refresh()" />
-      </SCard>
+      <HubCard v-else-if="error" class="p-2">
+        <SbErrorState :message="t('components.transfer.latest.error')" @retry="refresh()" />
+      </HubCard>
 
-      <SCard v-else>
-        <SListItem
+      <HubCard v-else>
+        <HubListItem
           v-for="transfer in transfers"
           :key="transfer.id"
           :to="localePath(playerPath(transfer.player.slug))"
@@ -82,8 +82,8 @@ const transferLabel = (transfer: Transfer): string => {
             />
             <TeamImg :team-name="transfer.team.name" :logo="transfer.team" size="xs" />
           </span>
-        </SListItem>
-      </SCard>
-    </SRail>
+        </HubListItem>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

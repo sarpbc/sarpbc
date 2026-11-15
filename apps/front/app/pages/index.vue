@@ -69,11 +69,11 @@ const { data: activePickemTournament } = await useLazyAsyncData(
         variant="homepage"
       />
       <template v-if="hasNews">
-        <SRail
+        <HubRail
           :caption="activePickemTournament ? 'section' : 'lead'"
           :title="$t('page.home.latest')"
         >
-          <SCard>
+          <HubCard>
             <template v-for="entry in feed">
               <NewsWeekRow
                 v-if="entry.kind === 'shortWeek'"
@@ -92,24 +92,24 @@ const { data: activePickemTournament } = await useLazyAsyncData(
               :label="newsPending ? $t('common.loading') : $t('page.home.loadMore')"
               @click="loadMoreNews"
             />
-          </SCard>
-        </SRail>
+          </HubCard>
+        </HubRail>
       </template>
-      <SRail
+      <HubRail
         v-else
         :caption="activePickemTournament ? 'none' : 'lead'"
         :title="activePickemTournament ? undefined : $t('page.home.latest')"
       >
-        <SCard class="flex min-h-row-stack h-row-grid items-center">
-          <SErrorState v-if="newsError" :message="$t('page.home.error')" @retry="refreshNews()" />
-          <SEmptyState
+        <HubCard class="flex min-h-row-stack h-row-grid items-center">
+          <SbErrorState v-if="newsError" :message="$t('page.home.error')" @retry="refreshNews()" />
+          <SbEmptyState
             v-else
             icon="i-fluent-news-24-regular"
             :title="$t('page.home.empty')"
             :hint="$t('page.home.emptyHint')"
           />
-        </SCard>
-      </SRail>
+        </HubCard>
+      </HubRail>
       <OnThisDayBlock :limit="5" />
       <TransferLatest class="md:hidden" />
     </div>

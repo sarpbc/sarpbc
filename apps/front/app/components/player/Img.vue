@@ -2,7 +2,7 @@
 interface Props {
   playerName: string;
   img?: string | null;
-  /** `row` fills the height of a stretched parent row (e.g. an `SListItem` double row). */
+  /** `row` fills the height of a stretched parent row (e.g. an `HubListItem` double row). */
   size: "list" | "sm" | "row" | "lg" | "xl";
   /** Use for above-the-fold / LCP images */
   priority?: boolean;

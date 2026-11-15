@@ -21,26 +21,26 @@ const {
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ t("page.forum.index.pageTitle") }}</template>
       <template v-if="posts?.length" #meta>
         <span>{{ t("page.hub.headers.forumPosts", { count: posts.length }) }}</span>
       </template>
-    </SHubPageHeader>
-    <SCard v-if="pending && !posts?.length" aria-live="polite">
-      <SListItem v-for="index in 4" :key="index" size="default" class="gap-3">
+    </HubPageHeader>
+    <HubCard v-if="pending && !posts?.length" aria-live="polite">
+      <HubListItem v-for="index in 4" :key="index" size="default" class="gap-3">
         <SbSkeleton class="h-3 w-48" />
         <SbSkeleton class="ml-auto h-3 w-20" />
-      </SListItem>
-    </SCard>
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.forum.index.error')" @retry="refresh()" />
-    </SCard>
-    <SCard v-else-if="posts?.length">
+      </HubListItem>
+    </HubCard>
+    <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.forum.index.error')" @retry="refresh()" />
+    </HubCard>
+    <HubCard v-else-if="posts?.length">
       <ForumPostCard v-for="post in posts" :key="post.id" :post="post" />
-    </SCard>
-    <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-      <SEmptyState
+    </HubCard>
+    <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+      <SbEmptyState
         icon="i-fluent-chat-multiple-24-regular"
         :title="t('page.forum.index.noPosts')"
         :hint="t('page.forum.index.emptyHint')"
@@ -48,7 +48,7 @@ const {
         <SbButton variant="secondary" :to="localePath('/forum/new')">
           {{ t("page.forum.index.createNewPost") }}
         </SbButton>
-      </SEmptyState>
-    </SCard>
+      </SbEmptyState>
+    </HubCard>
   </div>
 </template>
