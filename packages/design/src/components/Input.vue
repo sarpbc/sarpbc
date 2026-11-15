@@ -79,7 +79,7 @@ const inputAttrs = computed(() =>
 
     width: 100%;
     /* 28px tall, aligned with a md button. */
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.625rem;
     border: 0;
     border-radius: 0;
     appearance: none;
@@ -95,7 +95,7 @@ const inputAttrs = computed(() =>
 
   @media (width >= 48rem) {
     .sb-input__field {
-      font-size: 0.875rem;
+      font-size: var(--sb-control-text);
     }
   }
 
@@ -145,18 +145,18 @@ const inputAttrs = computed(() =>
 
   .sb-input__adornment--leading {
     inset-inline-start: 0;
-    padding-inline-start: 0.5rem;
+    padding-inline-start: 0.625rem;
   }
 
   .sb-input__adornment--trailing {
     inset-inline-end: 0;
-    padding-inline-end: 0.5rem;
+    padding-inline-end: 0.625rem;
   }
 
   .sb-input__icon {
     flex-shrink: 0;
-    width: 1.125rem;
-    height: 1.125rem;
+    width: 1rem;
+    height: 1rem;
   }
 }
 </style>

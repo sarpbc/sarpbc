@@ -75,7 +75,7 @@ watch(model, fitContent);
 
     width: 100%;
     /* 28px tall, aligned with a md button. */
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.625rem;
     border: 0;
     border-radius: 0;
     appearance: none;
@@ -91,7 +91,7 @@ watch(model, fitContent);
 
   @media (width >= 48rem) {
     .sb-textarea__field {
-      font-size: 0.875rem;
+      font-size: var(--sb-control-text);
     }
   }
 

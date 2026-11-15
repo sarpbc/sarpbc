@@ -6,6 +6,7 @@ sarpbc.org's own component library, replacing Nuxt UI and Tailwind. Components a
 
 - Every variant is a decision, not an option. The UI is dense: `sm` sizes are for tables and toolbars, and nothing is larger than `md`.
 - Tokens live in `src/styles/tokens.css` as `--sb-*` custom properties named by role (`--sb-bg-elevated`, `--sb-text-muted`), never by value. Dark mode follows the `.dark` class the apps' color mode sets on `<html>`.
+- Buttons and fields share one text size (`--sb-control-text`, 13px) and fixed heights: `sm` 24px, `md` 28px. Sizes change only the height and side padding, and a field is as tall as a `md` button.
 - Props are closed unions from `src/types.ts`. Color is never free: a button is blue or grey because of its role, and red only when `danger`.
 - The library renders no icon set and knows no router. Hosts provide both through `DESIGN_ADAPTERS`:
 

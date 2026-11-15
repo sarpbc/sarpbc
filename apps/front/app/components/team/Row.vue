@@ -12,7 +12,7 @@ const { team, formerName = null } = defineProps<Props>();
 
 <template>
   <SbButton
-    class="flex items-center gap-3"
+    class="flex h-auto items-center gap-3 py-1"
     variant="tertiary"
     :to="$localePath(teamPath(team.slug))"
   >

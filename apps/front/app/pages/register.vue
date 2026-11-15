@@ -67,42 +67,30 @@ const onSubmit = async (event: Event) => {
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
           variant="secondary"
-          class="w-full flex flex-row justify-center text-highlighted"
+          block
           @click="googleLogin"
         />
 
         <USeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
-          <UFormField
-            :label="$t('page.authentication.userName')"
-            name="userName"
-            class="w-full pb-4"
-          >
-            <UInput v-model="state.userName" type="text" class="w-full" />
-          </UFormField>
+          <SbFormField :label="$t('page.authentication.userName')" class="w-full pb-4">
+            <SbInput v-model="state.userName" type="text" class="w-full" />
+          </SbFormField>
 
-          <UFormField :label="$t('page.authentication.email')" name="email" class="w-full pb-4">
-            <UInput v-model="state.email" type="email" class="w-full" />
-          </UFormField>
+          <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
+            <SbInput v-model="state.email" type="email" class="w-full" />
+          </SbFormField>
 
-          <UFormField
-            :label="$t('page.authentication.password')"
-            name="password"
-            class="w-full pb-8"
-          >
-            <UInput v-model="state.password" type="password" class="w-full" />
-          </UFormField>
+          <SbFormField :label="$t('page.authentication.password')" class="w-full pb-8">
+            <SbInput v-model="state.password" type="password" class="w-full" />
+          </SbFormField>
 
           <p v-if="errorMessage" role="alert" class="-mt-4 mb-4 text-sm text-error">
             {{ errorMessage }}
           </p>
 
-          <SbButton
-            :label="$t('page.authentication.toRegister')"
-            type="submit"
-            class="w-full flex flex-col items-center"
-          />
+          <SbButton :label="$t('page.authentication.toRegister')" type="submit" block />
         </UForm>
       </div>
     </SCrossCard>

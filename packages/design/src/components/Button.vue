@@ -46,6 +46,8 @@ const adapters = useDesignAdapters();
 
 const hasLabel = computed(() => label !== null || slots.default !== undefined);
 const isLink = computed(() => to !== null);
+const hasLeading = computed(() => loading || icon !== null || slots.leading !== undefined);
+const hasTrailing = computed(() => trailingIcon !== null || slots.trailing !== undefined);
 
 /* A link cannot be disabled natively, so a disabled one swallows the click. */
 const onClick = (event: MouseEvent): void => {
@@ -68,6 +70,8 @@ const onClick = (event: MouseEvent): void => {
     :data-danger="danger || undefined"
     :data-block="block || undefined"
     :data-square="!hasLabel || undefined"
+    :data-leading="hasLeading || undefined"
+    :data-trailing="hasTrailing || undefined"
     :to="to ?? undefined"
     :type="isLink ? undefined : type"
     :disabled="isLink ? undefined : disabled || loading"
@@ -106,29 +110,29 @@ const onClick = (event: MouseEvent): void => {
 @layer components {
   .sb-button {
     --tone: var(--sb-primary);
-    --icon-size: 1.125rem;
-
     /* Reset so state variables never leak in from an ancestor. */
     --fill: transparent;
     --fill-hover: initial;
     --ink: var(--sb-text);
     --ring: none;
 
-    display: inline-flex;
-    gap: 0.3125rem;
-    align-items: center;
     /*
-     * md is sm scaled by 7/6: text is half the height (14px in 28px, 12px in
-     * 24px) and horizontal padding is twice the vertical one.
+     * Sizes change the height and side padding only; the text and icons stay
+     * the same, so a sm and a md button read as one family.
      */
-    padding: 0.25rem 0.5rem;
+    display: inline-flex;
+    flex-shrink: 0;
+    gap: 0.375rem;
+    align-items: center;
+    height: 1.75rem;
+    padding: 0 0.625rem;
     border: 0;
     border-radius: 0;
     background: var(--fill);
     box-shadow: var(--ring);
     color: var(--ink);
     font: inherit;
-    font-size: 0.875rem;
+    font-size: var(--sb-control-text);
     font-weight: 500;
     line-height: 1.25rem;
     text-decoration: none;
@@ -165,20 +169,28 @@ const onClick = (event: MouseEvent): void => {
   }
 
   .sb-button[data-size="sm"] {
-    --icon-size: 1rem;
-
     gap: 0.25rem;
-    padding: 0.25rem 0.5rem;
-    font-size: 0.75rem;
-    line-height: 1rem;
+    height: 1.5rem;
+    padding: 0 0.5rem;
+  }
+
+  /* An icon carries its own optical margin, so its side needs less padding. */
+  .sb-button[data-leading] {
+    padding-inline-start: 0.375rem;
+  }
+
+  .sb-button[data-trailing] {
+    padding-inline-end: 0.375rem;
   }
 
   .sb-button[data-square] {
-    padding: 0.3125rem;
+    justify-content: center;
+    width: 1.75rem;
+    padding: 0;
   }
 
   .sb-button[data-square][data-size="sm"] {
-    padding: 0.25rem;
+    width: 1.5rem;
   }
 
   .sb-button[data-block] {
@@ -194,8 +206,8 @@ const onClick = (event: MouseEvent): void => {
 
   .sb-button__icon {
     flex-shrink: 0;
-    width: var(--icon-size);
-    height: var(--icon-size);
+    width: 1rem;
+    height: 1rem;
   }
 
   .sb-button[data-block] .sb-button__icon--trailing {

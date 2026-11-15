@@ -50,6 +50,9 @@
   --sb-warning: oklch(79.5% 0.184 86.047);
   --sb-error: oklch(63.7% 0.237 25.331);
 
+  /* Text of buttons and fields at every size; only height and padding scale. */
+  --sb-control-text: 0.8125rem;
+
   --sb-duration-fast: 150ms;
   --sb-ease-out: cubic-bezier(0, 0, 0.2, 1);
 }
