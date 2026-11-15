@@ -40,7 +40,7 @@ export const useLogout = () => {
       }
 
       if (!confirmed) {
-        toast.add({ color: "error", title: $i18n.t("page.home.logoutFailed") });
+        toast.add({ color: "danger", title: $i18n.t("page.home.logoutFailed") });
 
         return;
       }

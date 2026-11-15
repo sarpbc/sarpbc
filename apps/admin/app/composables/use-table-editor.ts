@@ -1,5 +1,5 @@
 import type { Editor } from "@tiptap/core";
-import type { EditorToolbarItem } from "@nuxt/ui";
+import type { EditorToolbarItem } from "~/utils/editor/handlers";
 
 const DEFAULT_TABLE = { cols: 3, rows: 3, withHeaderRow: true } as const;
 
@@ -27,57 +27,57 @@ export const useTableEditor = () => {
     [
       {
         icon: "i-lucide-arrow-up-to-line",
+        label: t("page.news.editor.tableAddRowBefore"),
         onClick: () => {
           editor.chain().focus().addRowBefore().run();
         },
-        tooltip: { text: t("page.news.editor.tableAddRowBefore") },
       },
       {
         icon: "i-lucide-arrow-down-to-line",
+        label: t("page.news.editor.tableAddRowAfter"),
         onClick: () => {
           editor.chain().focus().addRowAfter().run();
         },
-        tooltip: { text: t("page.news.editor.tableAddRowAfter") },
       },
       {
         icon: "i-lucide-trash-2",
+        label: t("page.news.editor.tableDeleteRow"),
         onClick: () => {
           editor.chain().focus().deleteRow().run();
         },
-        tooltip: { text: t("page.news.editor.tableDeleteRow") },
       },
     ],
     [
       {
         icon: "i-lucide-arrow-left-to-line",
+        label: t("page.news.editor.tableAddColumnBefore"),
         onClick: () => {
           editor.chain().focus().addColumnBefore().run();
         },
-        tooltip: { text: t("page.news.editor.tableAddColumnBefore") },
       },
       {
         icon: "i-lucide-arrow-right-to-line",
+        label: t("page.news.editor.tableAddColumnAfter"),
         onClick: () => {
           editor.chain().focus().addColumnAfter().run();
         },
-        tooltip: { text: t("page.news.editor.tableAddColumnAfter") },
       },
       {
         icon: "i-lucide-trash-2",
+        label: t("page.news.editor.tableDeleteColumn"),
         onClick: () => {
           editor.chain().focus().deleteColumn().run();
         },
-        tooltip: { text: t("page.news.editor.tableDeleteColumn") },
       },
     ],
     [
       {
-        color: "error" as const,
+        danger: true,
         icon: "i-lucide-table-2",
+        label: t("page.news.editor.tableDeleteTable"),
         onClick: () => {
           editor.chain().focus().deleteTable().run();
         },
-        tooltip: { text: t("page.news.editor.tableDeleteTable") },
       },
     ],
   ];

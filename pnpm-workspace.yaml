@@ -51,12 +51,19 @@ catalog:
   vue: 3.5.45
   vue-router: ^5.5.0
   vue-i18n: 11.4.18
-  "@nuxt/ui": ^4.12.0
   "@nuxtjs/i18n": ^10.6.0
-  "@tiptap/core": ^3.33.1
-  "@tiptap/extension-table": ^3.33.1
-  "@tiptap/pm": ^3.33.1
-  "@tiptap/vue-3": ^3.33.1
+  "@tiptap/core": ^3.34.0
+  "@tiptap/extension-table": ^3.34.0
+  "@tiptap/extension-code": ^3.34.0
+  "@tiptap/extension-drag-handle-vue-3": ^3.34.0
+  "@tiptap/extension-horizontal-rule": ^3.34.0
+  "@tiptap/extension-image": ^3.34.0
+  "@tiptap/extension-placeholder": ^3.34.0
+  "@tiptap/markdown": ^3.34.0
+  "@tiptap/starter-kit": ^3.34.0
+  "@tiptap/suggestion": ^3.34.0
+  "@tiptap/pm": ^3.34.0
+  "@tiptap/vue-3": ^3.34.0
   vue-tsc: ^3.3.14
   "@iconify-json/fluent": ^1.2.61
   "@iconify-json/lucide": ^1.2.153

@@ -86,3 +86,32 @@ export interface NavigationItem {
   target?: "_blank";
   to: string;
 }
+
+export type ToastColor = "success" | "info" | "warning" | "danger";
+
+/** A short confirmation or failure after an action; it dismisses itself. */
+export interface ToastMessage {
+  color: ToastColor;
+  description?: string;
+  title: string;
+}
+
+/** One entry of a command palette: a search result or an action. */
+export interface CommandItem {
+  icon?: string;
+  id: string;
+  /** A logo or photo; it replaces the icon. */
+  image?: string;
+  label: string;
+  loading?: boolean;
+  onSelect: () => void;
+  suffix?: string;
+}
+
+export interface CommandGroup {
+  id: string;
+  items: readonly CommandItem[];
+  label: string;
+  /** Items already match the search (server results), so the palette does not filter them. */
+  remote?: boolean;
+}

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTimeoutFn } from "@vueuse/core";
+import { onKeyStroke, useTimeoutFn } from "@vueuse/core";
 
 const NAV_CLOSE_DELAY_MS = 120;
 
@@ -48,21 +48,16 @@ watch(userMenuOpen, (open) => {
   scheduleCloseNav();
 });
 
-defineShortcuts({
-  escape: {
-    handler: () => {
-      if (userMenuOpen.value) {
-        userMenuOpen.value = false;
+onKeyStroke("Escape", () => {
+  if (userMenuOpen.value) {
+    userMenuOpen.value = false;
 
-        return;
-      }
+    return;
+  }
 
-      if (navOpen.value) {
-        navOpen.value = false;
-      }
-    },
-    usingInput: true,
-  },
+  if (navOpen.value) {
+    navOpen.value = false;
+  }
 });
 </script>
 

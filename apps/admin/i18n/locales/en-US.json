@@ -964,18 +964,22 @@
         "label": "Cover Image"
       },
       "editor": {
+        "blockquote": "Blockquote",
+        "blocks": "Blocks",
+        "bold": "Bold",
+        "bulletList": "Bullet list",
+        "code": "Code",
+        "codeBlock": "Code block",
+        "divider": "Divider",
+        "heading": "Heading {level}",
+        "insert": "Insert",
+        "insertMatches": "Matches",
         "insertPlayer": "Player Tag",
+        "insertTable": "Table",
         "insertTeam": "Team Tag",
         "insertTweet": "X Post",
-        "insertMatches": "Matches",
-        "insertTable": "Table",
-        "tweet": {
-          "title": "Insert X Post",
-          "urlLabel": "Post URL",
-          "urlPlaceholder": "https://x.com/user/status/…",
-          "urlInvalid": "Paste a full X post URL (x.com/…/status/…).",
-          "insert": "Insert Post"
-        },
+        "italic": "Italic",
+        "lists": "Lists",
         "matches": {
           "title": "Insert Matches",
           "editTitle": "Edit Matches",
@@ -998,20 +1002,33 @@
           "edit": "Edit",
           "remove": "Remove"
         },
-        "tableAddRowBefore": "Add Row Before",
-        "tableAddRowAfter": "Add Row After",
-        "tableDeleteRow": "Delete Row",
-        "tableAddColumnBefore": "Add Column Before",
-        "tableAddColumnAfter": "Add Column After",
-        "tableDeleteColumn": "Delete Column",
-        "tableDeleteTable": "Delete Table",
+        "noBlock": "No matching block",
+        "orderedList": "Numbered list",
+        "paragraph": "Paragraph",
         "picker": {
           "titlePlayer": "Insert Player Tag",
           "titleTeam": "Insert Team Tag",
           "placeholderPlayer": "Search players by name…",
           "placeholderTeam": "Search teams by name…",
           "empty": "No results. Try a different search."
-        }
+        },
+        "strike": "Strikethrough",
+        "tableAddColumnAfter": "Add Column After",
+        "tableAddColumnBefore": "Add Column Before",
+        "tableAddRowAfter": "Add Row After",
+        "tableAddRowBefore": "Add Row Before",
+        "tableDeleteColumn": "Delete Column",
+        "tableDeleteRow": "Delete Row",
+        "tableDeleteTable": "Delete Table",
+        "text": "Text",
+        "tweet": {
+          "title": "Insert X Post",
+          "urlLabel": "Post URL",
+          "urlPlaceholder": "https://x.com/user/status/…",
+          "urlInvalid": "Paste a full X post URL (x.com/…/status/…).",
+          "insert": "Insert Post"
+        },
+        "underline": "Underline"
       }
     },
     "players": {

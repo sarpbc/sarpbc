@@ -186,7 +186,7 @@ const submit = async () => {
     toast.add({ color: "success", title: t("page.tournaments.statsImport.started") });
   } catch (requestError) {
     toast.add({
-      color: "error",
+      color: "danger",
       description: getApiErrorMessage(requestError) ?? undefined,
       title: t("page.tournaments.statsImport.startError"),
     });

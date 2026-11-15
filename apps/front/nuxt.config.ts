@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import type { NuxtConfig } from "nuxt/schema";
 import { SITEMAP_KINDS } from "@sarpbc/types";
 import { localizedPath } from "@sarpbc/utils/entity-path";
@@ -83,6 +84,11 @@ export default defineNuxtConfig({
     },
   },
 
+  colorMode: {
+    classSuffix: "",
+    disableTransition: true,
+  },
+
   compatibilityDate: "2026-07-01",
 
   content: {
@@ -106,6 +112,12 @@ export default defineNuxtConfig({
     writeEarlyHints: false,
   },
 
+  fonts: {
+    defaults: {
+      weights: [400, 500, 600, 700],
+    },
+  },
+
   i18n: i18nOptions,
 
   icon: {
@@ -123,6 +135,8 @@ export default defineNuxtConfig({
       scan: true,
       sizeLimitKb: 512,
     },
+    // Utilities and component styles must be able to size icons.
+    cssLayer: "base",
   },
 
   image: {
@@ -146,7 +160,9 @@ export default defineNuxtConfig({
     "@sarpbc/ui",
     "evlog/nuxt",
     "@nuxtjs/i18n",
-    "@nuxt/ui",
+    "@nuxt/icon",
+    "@nuxt/fonts",
+    "@nuxtjs/color-mode",
     "@nuxt/content",
     "@nuxt/image",
     "@nuxtjs/sitemap",
@@ -224,6 +240,7 @@ export default defineNuxtConfig({
         "@nuxt/content > @nuxtjs/mdc > unified > extend",
       ],
     },
+    plugins: [tailwindcss()],
     server: {
       watch: {
         interval: 1000,

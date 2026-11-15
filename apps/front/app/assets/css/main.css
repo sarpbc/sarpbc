@@ -1,5 +1,8 @@
 @import "tailwindcss";
-@import "@nuxt/ui";
+@import "@sarpbc/ui/theme.css";
+
+@source "../../";
+@source inline("isolate");
 /* Workspace packages resolve through node_modules, which Tailwind's auto-detection skips. */
 @source "../../../../../packages/ui/src/runtime";
 

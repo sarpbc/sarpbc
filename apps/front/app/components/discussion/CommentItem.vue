@@ -65,7 +65,7 @@ const onHide = async () => {
   }
 
   toast.add({
-    color: "error",
+    color: "danger",
     description: t("components.discussion.messages.moderateError"),
     title: t("components.discussion.messages.errorTitle"),
   });
@@ -85,7 +85,7 @@ const onDelete = async () => {
   }
 
   toast.add({
-    color: "error",
+    color: "danger",
     description: t("components.discussion.messages.moderateError"),
     title: t("components.discussion.messages.errorTitle"),
   });

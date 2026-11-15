@@ -82,7 +82,7 @@ const handleSubmit = async () => {
 
   if (validationError) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: t(`page.tournaments.form.errors.${validationError}`),
     });
 

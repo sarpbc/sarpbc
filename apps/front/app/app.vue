@@ -1,8 +1,6 @@
 <script setup lang="ts">
 import { uiLocale } from "@sarpbc/utils";
-import { uiComponentDefaults } from "~/config/ui-component-defaults";
 
-const appConfig = useAppConfig();
 const { locale } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const colorMode = useColorMode();
@@ -24,12 +22,10 @@ useHead({
 </script>
 
 <template>
-  <UApp :toaster="appConfig.toaster" :scroll-body="false">
-    <UTheme :props="uiComponentDefaults">
-      <NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
-      <NuxtLayout>
-        <NuxtPage />
-      </NuxtLayout>
-    </UTheme>
-  </UApp>
+  <SbToaster>
+    <NuxtLoadingIndicator color="var(--ui-primary)" :height="2" />
+    <NuxtLayout>
+      <NuxtPage />
+    </NuxtLayout>
+  </SbToaster>
 </template>

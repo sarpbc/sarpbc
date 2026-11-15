@@ -14,6 +14,8 @@ export { default as Checkbox } from "./components/Checkbox.vue";
 
 export { default as Combobox } from "./components/Combobox.vue";
 
+export { default as CommandPalette } from "./components/CommandPalette.vue";
+
 export { default as DropdownMenu } from "./components/DropdownMenu.vue";
 
 export { default as FormField } from "./components/FormField.vue";
@@ -58,6 +60,10 @@ export { default as Tabs } from "./components/Tabs.vue";
 
 export { default as Textarea } from "./components/Textarea.vue";
 
+export { default as Toaster } from "./components/Toaster.vue";
+
 export { default as Tooltip } from "./components/Tooltip.vue";
+
+export { useToast } from "./toast.ts";
 
 export * from "./types.ts";

@@ -90,7 +90,7 @@ const handleSubmit = async () => {
   }
 
   if (!isSynced.value && !form.value.name.trim()) {
-    toast.add({ color: "error", title: t("page.tournaments.leagues.form.nameRequired") });
+    toast.add({ color: "danger", title: t("page.tournaments.leagues.form.nameRequired") });
 
     return;
   }

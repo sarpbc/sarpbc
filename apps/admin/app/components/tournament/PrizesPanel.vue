@@ -233,7 +233,7 @@ const save = async () => {
     toast.add({ color: "success", title: t("page.tournaments.prizes.saved") });
   } catch (saveError) {
     toast.add({
-      color: "error",
+      color: "danger",
       description: getApiErrorMessage(saveError) ?? undefined,
       title: t("page.tournaments.prizes.saveError"),
     });

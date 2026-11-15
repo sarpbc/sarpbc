@@ -10,7 +10,7 @@ import {
   hasNuxtModule,
 } from "@nuxt/kit";
 
-const REQUIRED_MODULES = ["@nuxt/ui", "@nuxtjs/i18n", "@sarpbc/composables"];
+const REQUIRED_MODULES = ["@nuxtjs/i18n", "@sarpbc/composables"];
 
 export default defineNuxtModule({
   meta: {
@@ -27,8 +27,14 @@ export default defineNuxtModule({
 
     // @sarpbc/design: its components as `Sb*`, its tokens, and Nuxt's <Icon> and <NuxtLink> as its adapters.
     const { resolve } = createRequire(import.meta.url);
-    const design = resolve("@sarpbc/design");
+    // Generated imports need forward slashes, including on Windows.
+    const design = resolve("@sarpbc/design").replaceAll("\\", "/");
     nuxt.options.css.unshift(resolve("@sarpbc/design/tokens.css"));
+    nuxt.options.css.push(resolver.resolve("./runtime/prose.css"));
+    // Overlays render at the end of <body>; isolating the app keeps its z-indexes below them.
+    nuxt.options.app.rootAttrs.class = [nuxt.options.app.rootAttrs.class, "isolate"]
+      .filter(Boolean)
+      .join(" ");
     /*
      * Design styles sit in the `components` layer, so Tailwind utilities passed by
      * the apps still win. Nuxt inlines component styles and Nuxt UI's colors
@@ -41,6 +47,7 @@ export default defineNuxtModule({
       tagPriority: "critical",
     });
     addComponentsDir({ path: path.join(path.dirname(design), "components"), prefix: "Sb" });
+    addImports({ from: design, name: "useToast", priority: 1 });
     addPluginTemplate({
       filename: "sarpbc-design.mjs",
       getContents: () => `import { defineNuxtPlugin } from "#app";

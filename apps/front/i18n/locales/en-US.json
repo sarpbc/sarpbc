@@ -22,6 +22,7 @@
     "close": "Close",
     "loading": "Loading...",
     "errorPage": {
+      "backHome": "Back to home",
       "notFound": "Not Found",
       "serverError": "Server Error"
     },

@@ -84,7 +84,7 @@ const save = async (player: StatsPlayerAccount) => {
     await refresh();
   } catch (saveError) {
     toast.add({
-      color: "error",
+      color: "danger",
       description: getApiErrorMessage(saveError) ?? undefined,
       title: t("page.tournaments.statsLinks.saveError"),
     });

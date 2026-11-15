@@ -89,7 +89,7 @@ const copyText = async (text: string, target: "token" | "config") => {
     }, 2000);
   } catch {
     toast.add({
-      color: "error",
+      color: "danger",
       title: t("page.tokens.copyFailed"),
     });
   }
@@ -114,7 +114,7 @@ const confirmCreate = async () => {
     await refresh();
   } catch (error_) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: getApiErrorMessage(error_) ?? t("page.tokens.create.failed"),
     });
   } finally {
@@ -145,7 +145,7 @@ const confirmRevoke = async () => {
     await refresh();
   } catch (error_) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: getApiErrorMessage(error_) ?? t("page.tokens.revoke.failed"),
     });
   } finally {

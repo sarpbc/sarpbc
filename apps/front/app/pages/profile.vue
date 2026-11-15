@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as z from "zod";
-import type { FormSubmitEvent } from "@nuxt/ui";
 import type { AppNotification } from "@sarpbc/types";
 import { getApiErrorMessage, isStaffUser } from "@sarpbc/utils";
 
@@ -75,12 +74,17 @@ const notificationMessage = (notification: AppNotification): string =>
     user: notification.reply.author.userName,
   });
 
-const saveUserName = async (event: FormSubmitEvent<UsernameSchema>) => {
-  event.preventDefault();
+const { errors: usernameErrors, markSubmitted: markUsernameSubmitted } = useFormErrors(
+  usernameSchema,
+  usernameState,
+);
 
+const saveUserName = async () => {
   if (isSavingUserName.value) {
     return;
   }
+
+  markUsernameSubmitted();
 
   const parsed = usernameSchema.safeParse(usernameState);
 
@@ -101,7 +105,7 @@ const saveUserName = async (event: FormSubmitEvent<UsernameSchema>) => {
     });
   } catch (error) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: getApiErrorMessage(error) ?? t("page.profile.username.updateFailed"),
     });
   } finally {
@@ -146,7 +150,7 @@ const handleLogout = async () => {
     posthog?.capture("user_logged_out");
     await logout();
   } catch {
-    toast.add({ color: "error", title: t("page.profile.logoutFailed") });
+    toast.add({ color: "danger", title: t("page.profile.logoutFailed") });
   } finally {
     isLoggingOut.value = false;
     navigateTo(localePath("/"));
@@ -284,14 +288,13 @@ setPageSeo({
       :dismissible="!isSavingUserName"
     >
       <template #body>
-        <UForm
-          id="edit-username-form"
-          :schema="usernameSchema"
-          :state="usernameState"
-          class="w-full"
-          @submit="saveUserName"
-        >
-          <SbFormField :label="$t('page.profile.username.label')" required class="w-full">
+        <form id="edit-username-form" class="w-full" novalidate @submit.prevent="saveUserName">
+          <SbFormField
+            :label="$t('page.profile.username.label')"
+            :error="usernameErrors.userName"
+            required
+            class="w-full"
+          >
             <SbInput
               v-model="usernameState.userName"
               type="text"
@@ -301,7 +304,7 @@ setPageSeo({
               :disabled="isSavingUserName"
             />
           </SbFormField>
-        </UForm>
+        </form>
       </template>
       <template #footer>
         <SbButton

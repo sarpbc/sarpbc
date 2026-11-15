@@ -1,0 +1,171 @@
+/*
+ * Base typography for rendered Markdown (MDC and ContentRenderer), the look
+ * Nuxt UI's prose components gave it. It sits in `base` so each container's
+ * own descendant utilities (`[&_p]:mb-3`, `.news-prose a`) still win.
+ */
+@layer base {
+  .sb-prose p {
+    margin-block: 1.25rem;
+    line-height: 1.75rem;
+    text-wrap: pretty;
+  }
+
+  .sb-prose :is(h1, h2, h3, h4) {
+    position: relative;
+    color: var(--sb-text-highlighted);
+    font-weight: 700;
+  }
+
+  .sb-prose :is(h1, h2, h3, h4) > a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .sb-prose h1 {
+    margin-bottom: 2rem;
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+
+  .sb-prose h2 {
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+
+  .sb-prose h3 {
+    margin-top: 2rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+
+  .sb-prose h4 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+
+  .sb-prose :where(p, li, td, th, blockquote) a {
+    border-bottom: 1px solid transparent;
+    color: var(--sb-primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: border-color var(--sb-duration-fast);
+  }
+
+  @media (hover: hover) {
+    .sb-prose :where(p, li, td, th, blockquote) a:hover {
+      border-color: var(--sb-primary);
+    }
+  }
+
+  .sb-prose ul {
+    margin-block: 1.25rem;
+    padding-inline-start: 1.5rem;
+    list-style: disc;
+  }
+
+  .sb-prose ul::marker,
+  .sb-prose ul > li::marker {
+    color: var(--sb-border-accented);
+  }
+
+  .sb-prose ol {
+    margin-block: 1.25rem;
+    padding-inline-start: 1.5rem;
+    list-style: decimal;
+  }
+
+  .sb-prose ol > li::marker {
+    color: var(--sb-text-muted);
+  }
+
+  .sb-prose li {
+    margin-block: 0.375rem;
+    padding-inline-start: 0.375rem;
+    line-height: 1.75rem;
+  }
+
+  .sb-prose li > ul {
+    margin-block: 0;
+  }
+
+  .sb-prose blockquote {
+    padding-inline-start: 1rem;
+    border-inline-start: 4px solid var(--sb-border-accented);
+    font-style: italic;
+  }
+
+  .sb-prose hr {
+    margin-block: 3rem;
+    border: 0;
+    border-top: 1px solid var(--sb-border);
+  }
+
+  .sb-prose table {
+    width: 100%;
+    margin-block: 1.25rem;
+    border-spacing: 0;
+    border-collapse: separate;
+  }
+
+  .sb-prose thead {
+    background: var(--sb-bg-muted);
+  }
+
+  .sb-prose :is(th, td) {
+    padding: 0.75rem 1rem;
+    border-inline-end: 1px solid var(--sb-border);
+    border-bottom: 1px solid var(--sb-border);
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    text-align: start;
+  }
+
+  .sb-prose :is(th, td):first-child {
+    border-inline-start: 1px solid var(--sb-border);
+  }
+
+  .sb-prose th {
+    border-top: 1px solid var(--sb-border);
+    font-weight: 600;
+  }
+
+  .sb-prose td {
+    vertical-align: top;
+  }
+
+  .sb-prose code {
+    display: inline-block;
+    padding: 0.125rem 0.375rem;
+    background: var(--sb-bg-muted);
+    box-shadow: inset 0 0 0 1px var(--sb-border);
+    color: var(--sb-text-highlighted);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  .sb-prose pre {
+    overflow-x: auto;
+    margin-block: 1.25rem;
+    padding: 0.75rem 1rem;
+    background: var(--sb-bg-muted);
+    box-shadow: inset 0 0 0 1px var(--sb-border);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    white-space: pre-wrap;
+  }
+
+  .sb-prose pre code {
+    display: inline;
+    padding: 0;
+    background: none;
+    box-shadow: none;
+    color: inherit;
+  }
+}

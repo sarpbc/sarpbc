@@ -27,7 +27,7 @@ const handleSubmit = async () => {
   }
 
   if (!formState.value.name.trim()) {
-    toast.add({ color: "error", title: t("page.tournaments.events.form.nameRequired") });
+    toast.add({ color: "danger", title: t("page.tournaments.events.form.nameRequired") });
 
     return;
   }

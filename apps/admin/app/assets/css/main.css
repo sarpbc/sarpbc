@@ -1,5 +1,8 @@
 @import "tailwindcss";
-@import "@nuxt/ui";
+@import "@sarpbc/ui/theme.css";
+
+@source "../../";
+@source inline("isolate");
 
 @theme static {
   --color-ink-50: var(--sb-ink-50);

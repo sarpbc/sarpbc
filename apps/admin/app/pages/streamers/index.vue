@@ -90,7 +90,7 @@ const confirmAdd = async () => {
     await refresh();
   } catch (error_) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: getApiErrorMessage(error_) ?? t("page.streamers.add.failed"),
     });
   } finally {
@@ -116,7 +116,7 @@ const confirmRemove = async () => {
     await refresh();
   } catch (error_) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: getApiErrorMessage(error_) ?? t("page.streamers.remove.failed"),
     });
   } finally {

@@ -14,7 +14,8 @@ const {
   sticky = false,
 } = defineProps<{
   columns: TableColumn<T>[];
-  data: readonly T[];
+  /** Passed by reference: TanStack recomputes rows whenever this identity changes. */
+  data: T[];
   loading?: boolean;
   /** Makes rows clickable (`@select`). */
   onSelect?: ((event: MouseEvent, row: TableRow<T>) => void) | null;
@@ -29,12 +30,23 @@ defineSlots<
   }
 >();
 
+/* A button, link or field inside a row acts on its own; only the rest of the row selects it. */
+const INTERACTIVE = "a, button, input, select, textarea, label, [role='menuitem']";
+
+const selectRow = (event: MouseEvent, row: TableRow<T>): void => {
+  if (event.target instanceof Element && event.target.closest(INTERACTIVE) !== null) {
+    return;
+  }
+
+  onSelect?.(event, row);
+};
+
 const table = useVueTable({
   get columns() {
     return columns;
   },
   get data() {
-    return [...data];
+    return data;
   },
   getCoreRowModel: getCoreRowModel(),
 });
@@ -60,7 +72,7 @@ const table = useVueTable({
           :key="row.id"
           class="sb-table__row"
           :data-selectable="onSelect !== null || undefined"
-          @click="onSelect?.($event, row)"
+          @click="selectRow($event, row)"
         >
           <td v-for="cell in row.getVisibleCells()" :key="cell.id" class="sb-table__td">
             <slot :name="`${cell.column.id}-cell`" :row="row">

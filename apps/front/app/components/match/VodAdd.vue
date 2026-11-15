@@ -86,7 +86,7 @@ const submit = async () => {
     open.value = false;
   } catch (error) {
     toast.add({
-      color: "error",
+      color: "danger",
       description: getApiErrorMessage(error) ?? undefined,
       title: t("page.match.detail.vodAdd.saveError"),
     });

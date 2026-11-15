@@ -22,6 +22,7 @@
     "close": "Fermer",
     "loading": "Chargement...",
     "errorPage": {
+      "backHome": "Retour à l’accueil",
       "notFound": "Introuvable",
       "serverError": "Erreur serveur"
     },

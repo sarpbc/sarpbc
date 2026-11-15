@@ -19,7 +19,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         : "page.authentication.errors.googleFailed";
 
     toast.add({
-      color: "error",
+      color: "danger",
       title: i18n.t(titleKey),
     });
 

@@ -315,7 +315,7 @@ const pickTeam = async (matchId: string, participantId: string) => {
     await Promise.all([refreshPicks(), refreshPersonalRank(), refreshLeaderboard()]);
   } catch (error) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: pickemApiErrorMessage(error, t("page.game.pickems.detail.pickFailed")),
     });
   } finally {

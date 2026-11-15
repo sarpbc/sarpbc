@@ -72,7 +72,7 @@ const submitReport = async () => {
   }
 
   toast.add({
-    color: "error",
+    color: "danger",
     description: result.message ?? t("components.discussion.report.messages.error"),
     title: t("components.discussion.messages.errorTitle"),
   });

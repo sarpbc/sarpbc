@@ -80,7 +80,7 @@ const onSubmit = async (event: Event) => {
 
         <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
+        <form class="w-full h-fit" method="post" @submit="onSubmit">
           <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
             <SbInput
               v-model="state.email"
@@ -111,7 +111,7 @@ const onSubmit = async (event: Event) => {
             :disabled="pending"
             block
           />
-        </UForm>
+        </form>
       </div>
     </SCrossCard>
   </div>
