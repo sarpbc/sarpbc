@@ -46,12 +46,12 @@ sarpbc.org has two public design modes. Same tokens and components; different de
 
 ## Color & theme
 
-Configured in `app/app.config.ts`:
+The theme lives in `packages/ui/src/runtime/theme.css` (the `--ui-*` variables and the semantic utilities below), imported by `app/assets/css/main.css`:
 
-| Intent  | Value                                             |
-| ------- | ------------------------------------------------- |
-| Primary | `blue`                                            |
-| Neutral | `ink` (custom scale in `app/assets/css/main.css`) |
+| Intent  | Value                                                          |
+| ------- | -------------------------------------------------------------- |
+| Primary | `blue`                                                         |
+| Neutral | `ink` (the `--color-ink-*` scale, read from the design tokens) |
 
 `ink` comes from `@sarpbc/design` (`packages/design/src/styles/tokens.css`), the source of truth the apps read through `--sb-ink-*`. It is defined in OKLCH with one hue (256) and a chroma of 0.004: only lightness changes between steps, so every grey reads as the same cool charcoal. Dark surfaces climb in even 4-point steps: page `950` (L 10%), image fallbacks `900` (14%), hover `850` (18%), borders `800` (22%), accented `700` (26%). Text steps keep their contrast: `200` (91%), `300` (82%), `400` (68%), `500` (50%). Add or change a step in the design tokens by picking its lightness, never a hex.
 
@@ -66,8 +66,8 @@ Use semantic classes — not raw hex:
 | Image fallbacks   | `bg-muted`                                              |
 | List separators   | `border-separator` / `row-separator` (`--ui-separator`) |
 | Control edges     | `border-default`                                        |
-| Primary action    | `color="primary"` on `@nuxt/ui`                         |
-| Destructive       | `color="error"`                                         |
+| Primary action    | `variant="primary"` on `SbButton`                       |
+| Destructive       | `danger` on `SbButton`                                  |
 
 ### Text hierarchy (black → white)
 
@@ -85,21 +85,21 @@ Ink strength on light surfaces. Never put caption chrome and list titles on the 
 
 Color signals **state** (live, error, success) — not decoration. One primary action per view.
 
-**Results are not states.** Scores, winners and losers stay neutral: the winner's name and score use `font-medium text-highlighted`, the loser's use `text-muted` at normal weight (unresolved or tied: `text-toned`). This applies to result rows, live scores, brackets and the match hero. Never color a score green or red, and never tint a winner's row. Recent-form W/L badges keep `success` / `error` because each badge is a status label with text, not a score.
+**Results are not states.** Scores, winners and losers stay neutral: the winner's name and score use `font-medium text-highlighted`, the loser's use `text-muted` at normal weight (unresolved or tied: `text-toned`). This applies to result rows, live scores, brackets and the match hero. Never color a score green or red, and never tint a winner's row. Recent-form W/L badges keep `success` / `danger` because each badge is a status label with text, not a score.
 
 **Spoiler-free mode.** The eye toggle in the header stores a `spoilerFree` cookie, so the server renders the same concealed page the visitor sees and logged-out visitors keep the setting. While it is on, every result surface reads `useSpoilerFree()`: scores become `SpoilerHidden`, winners and losers lose their weight difference, and champions, prize placements, winner badges, head-to-head and recent form are hidden, as are scores in match SEO descriptions, the match heading and tournament structured data. `SpoilerRevealButton` reveals one match (match hero, head-to-head, recent form) or one tournament (tournament hero, which also reveals its bracket, match list and prizes). Rows that are links show the hidden placeholder only, because a button cannot sit inside a link. Reveals last until the next full page load, and turning the mode off or on resets them.
 
 Radius: `--ui-radius: 0rem` in `app/assets/css/main.css` (sharp corners). Stay consistent; don't mix soft Geist-style radii into hub chrome.
 
-Input fields keep a subtle 1px inset border (`--ui-border`), strengthened on hover (`--ui-border-accented`). All interactive elements use primary for keyboard focus, which takes precedence over hover. The global rules in `app/assets/css/main.css` cover native controls, links and Nuxt UI components without changing their dimensions. Buttons and inline text links only receive the focus outline. Do not add thicker local focus rings. Forced-colors mode retains its system outline.
+Input fields keep a subtle 1px inset border (`--ui-border`), strengthened on hover (`--ui-border-accented`). All interactive elements use primary for keyboard focus, which takes precedence over hover. The global rules in `app/assets/css/main.css` cover native controls, links and `@sarpbc/design` components without changing their dimensions. Buttons and inline text links only receive the focus outline. Do not add thicker local focus rings. Forced-colors mode retains its system outline.
 
-Text links in news prose and `SLink variant="accent"` use `--ui-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-link-hover`; links are never underlined. Article cards connect directly to the discussion composer with a single shared border.
+Text links in news prose and `SbLink variant="accent"` use `--ui-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-link-hover`; links are never underlined. Article cards connect directly to the discussion composer with a single shared border.
 
 ---
 
 ## Typography
 
-Prefer system / Nuxt UI sans. Mono for IDs, codes, and aligned stats (`font-mono`, `tabular-nums`).
+Prefer the system sans. Mono for IDs, codes, and aligned stats (`font-mono`, `tabular-nums`).
 
 | Role                  | Classes                                                                 |
 | --------------------- | ----------------------------------------------------------------------- |
@@ -114,7 +114,7 @@ Prefer system / Nuxt UI sans. Mono for IDs, codes, and aligned stats (`font-mono
 | Match hero            | Score `text-4xl tabular-nums`; team names `text-base`; meta `text-sm`   |
 | Marketing H1          | Larger (`text-2xl`–`text-3xl`), `tracking-tight`, more lead-in space    |
 
-**Two weights:** `font-normal` (400) and `font-medium` (500). Medium is the only emphasis weight — titles, headings, captions, links, `strong`, winners — and matches Nuxt UI's controls. Do not use `font-semibold` or `font-bold`; emphasis beyond medium comes from size and the text hierarchy, not weight. UI labels default to `text-sm` (14px).
+**Two weights:** `font-normal` (400) and `font-medium` (500). Medium is the only emphasis weight — titles, headings, captions, links, `strong`, winners — and matches the 13px controls of `@sarpbc/design`. Do not use `font-semibold` or `font-bold`; emphasis beyond medium comes from size and the text hierarchy, not weight. UI labels default to `text-sm` (14px).
 
 Headings in news prose are real `##` / `###` headings, larger than the body text. Do not fake a heading with a bold paragraph.
 
@@ -161,44 +161,42 @@ Shared list/rail components (`SListItem`, `SRail`, `SHubColumn`) encode these si
 
 ## Components
 
-Prefer `@nuxt/ui` (`UButton`, `UForm`, `ULink`, `UModal`, `UTable`, …). Extend shared primitives under `app/components/s/` when a pattern repeats 3+ times.
+Prefer `@sarpbc/design` (`SbButton`, `SbFormField`, `SbLink`, `SbModal`, `SbTable`, …), auto-imported with the `Sb` prefix. Extend shared primitives under `app/components/s/` when a pattern repeats 3+ times. A later step renames the library prefix from `Sb` to `S` once all of `components/s/` moves into the library.
 
-| Primitive        | Role                                                                                                                                                                                                                                                                                                                                      |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `SCard`          | List or body container (`frame`: separator above, open below, no side edges, no fill); `size` `s` \| `m` \| `l` for padded bodies on the row grid                                                                                                                                                                                         |
-| `SCrossCard`     | Hub title band / hero block, with no frame                                                                                                                                                                                                                                                                                                |
-| `SLink`          | Internal link — `variant`: `muted` (nav/meta), `inline` (entity names) or `accent` (standalone text links). No hover sound.                                                                                                                                                                                                               |
-| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link; rows have no separators                                                                                                                                                                                                                                           |
-| `SBadgeLive`     | Live status with text + color                                                                                                                                                                                                                                                                                                             |
-| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (52px, default)                                                                                                                                                                                                                            |
-| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                                                                                                                                                                                                                                     |
-| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                                                                                                                                                                                                                                 |
-| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                                                                                                                                                                                                                                     |
-| `SErrorState`    | Failed load: warning icon, message, neutral outline **Retry** (`common.retry`). Never swallow a fetch error into an empty list                                                                                                                                                                                                            |
-| `SEmptyState`    | Nothing to show: icon, title, optional hint, actions in the default slot                                                                                                                                                                                                                                                                  |
-| `SPagination`    | Previous / page / next bar on one `h-row`                                                                                                                                                                                                                                                                                                 |
-| `SLetterFilter`  | Directory A–Z filter on one `h-row`; scrolls horizontally when the column is too narrow                                                                                                                                                                                                                                                   |
-| `STabs`          | Every in-page tab set (section views, profile sections, game picker): `text-xs` labels split by a dimmed `/`, the active one `text-highlighted`, boxed in `border-default` (28px tall, no fill), instant states. A tab set on its own row is centred; one in a section caption stays on the right. Built on `UTabs` for keyboard and ARIA |
-| `STabNav`        | Same look as `STabs` for tabs that are routes (`aria-current`), e.g. tournament stage sections                                                                                                                                                                                                                                            |
+| Primitive        | Role                                                                                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SCard`          | List or body container (`frame`: separator above, open below, no side edges, no fill); `size` `s` \| `m` \| `l` for padded bodies on the row grid |
+| `SCrossCard`     | Hub title band / hero block, with no frame                                                                                                        |
+| `SListItem`      | Hub list row — fixed row height (`h-row` / size tokens), optional link; rows have no separators                                                   |
+| `SBadgeLive`     | Live status with text + color                                                                                                                     |
+| `SRail`          | Rail section: caption band + card body. `caption`: `lead` (72px, first in column) \| `section` (52px, default)                                    |
+| `SHubColumn`     | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                                             |
+| `SHubPageBody`   | Main-column page shell: `SRail caption="lead"` + body gap so first content aligns with sidebar lead rails                                         |
+| `SHubPageHeader` | List-page title band (`SCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                                             |
+| `SErrorState`    | Failed load: warning icon, message, neutral outline **Retry** (`common.retry`). Never swallow a fetch error into an empty list                    |
+| `SEmptyState`    | Nothing to show: icon, title, optional hint, actions in the default slot                                                                          |
+| `SPagination`    | Previous / page / next bar on one `h-row`                                                                                                         |
+| `SLetterFilter`  | Directory A–Z filter on one `h-row`; scrolls horizontally when the column is too narrow                                                           |
+| `STabNav`        | Same look as `SbTabs` for tabs that are routes (`aria-current`), e.g. tournament stage sections                                                   |
 
 #### Actions and interactive states
 
-Use `UButton` directly. Every button picks one rung of this ladder; no other color/variant pairs.
+Use `SbButton` directly. Every button picks one rung of this ladder; its props are closed, so there are no other variants.
 
-| Rung        | `UButton` props                                  | Use                                                                      |
-| ----------- | ------------------------------------------------ | ------------------------------------------------------------------------ |
-| Primary     | `color="primary"` (solid)                        | The one action the view exists for: submit, sign in, start. One per view |
-| Secondary   | `color="neutral" variant="outline"`              | Alternatives, cancel, retry, rail and promo calls to action, consent     |
-| Tertiary    | `color="neutral" variant="ghost"`                | Inline row actions, icon buttons, toolbars, filters                      |
-| Destructive | `color="error"` (solid to confirm, ghost inline) | Delete, abandon, retire                                                  |
+| Rung        | `SbButton` props                                                  | Use                                                                      |
+| ----------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Primary     | `variant="primary"`                                               | The one action the view exists for: submit, sign in, start. One per view |
+| Secondary   | `variant="secondary"`                                             | Alternatives, cancel, retry, rail and promo calls to action, consent     |
+| Tertiary    | `variant="tertiary"`                                              | Inline row actions, icon buttons, toolbars, filters                      |
+| Destructive | `danger` on any variant (`primary` to confirm, `tertiary` inline) | Delete, abandon, retire                                                  |
 
 - Primary is brand blue in both themes. Do not use inverted neutral solid buttons as the main action.
-- Outline buttons draw their edge in `border-default` (set once in `app/app.config.ts`), the same hairline as cards and rows, so a button sitting against a card reads as one surface.
-- Do not use `soft` or `subtle` variants. Air Riddle keyboard keys are the only exception, because they mimic physical keys.
+- Secondary buttons draw their edge in the same hairline as cards and rows, so a button sitting against a card reads as one surface.
+- Buttons are `sm` (24px) or `md` (28px, default) and share the 13px control text with fields. A single choice among options is an `SbRadioGroup` (`list` or `cards`), not a row of buttons.
 - Labels inside a clickable row are text (`text-muted`), not badges or buttons. The row hover already signals the target.
-- **Hover:** clickable rows, tiles and cards use the `interactive-surface` utility (`bg-elevated` on hover and press, no transition), matching Nuxt UI ghost buttons. Do not add other hover fills.
+- **Hover:** clickable rows, tiles and cards use the `interactive-surface` utility (`bg-elevated` on hover and press, no transition), matching tertiary buttons. Do not add other hover fills.
 - **Selected:** toggles set `aria-pressed`, and in-page view switches set `aria-current="page"`. Both use the `selectable` utility, which adds `bg-elevated`, `text-highlighted` and a 1px inverted inner outline. Keyboard focus keeps priority. Do not mark a selection with primary color or thicker rings.
-- **Text links:** `SLink` — `muted` for navigation and meta, `inline` for entity names, `accent` for standalone links in copy (auth switches, policies).
+- **Text links:** `SbLink` — `muted` for navigation and meta, `inline` for entity names, `accent` for standalone links in copy (auth switches, policies).
 
 #### `SListItem` sizes
 
@@ -293,7 +291,7 @@ API messages from NestJS often surface in toasts — keep them actionable (see [
 1. Read this file before changing hub chrome, list density, or `/about`.
 2. **Hub vs marketing:** pick one mode per route; don't add hub sidebars to marketing or marketing heroes to `/`.
 3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI. `scripts/lint-hub-row-heights.ts` (wired into `pnpm lint`) bans a fixed list of literal classes (`h-11.25`, `h-11.5`, `h-8.25`, `h-67`, `mt-11`, `leading-5.5`, `py-[`); other arbitrary heights are caught in review.
-4. **Primitives first:** `@nuxt/ui` → existing `S*` (`app/components/s/`) → new `S*` only when reuse is clear.
+4. **Primitives first:** `@sarpbc/design` (`Sb*`) → existing `S*` (`app/components/s/`) → new `S*` only when reuse is clear.
 5. **i18n:** every user-visible string in en + fr.
 6. **States:** empty, loading (skeleton matching layout), error, success — before shipping.
 7. **Agents:** read the root [AGENTS.md](../../AGENTS.md), this design document and the supporting references relevant to the change. Link the applicable decision in PRs rather than copying the full guide.

@@ -2,12 +2,8 @@
   "extends": "../../packages/tsconfig.base.json",
   "compilerOptions": {
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
-    "types": ["node", "vite/client"],
-    "allowImportingTsExtensions": true,
-    "paths": {
-      "#inventory-types": ["./src/inventory/types.ts"],
-      "#styles-types": ["./src/styles/types.ts"]
-    }
+    "types": ["vite/client"],
+    "allowImportingTsExtensions": true
   },
   "include": ["vite.config.ts", "src/**/*.ts", "src/**/*.vue"]
 }

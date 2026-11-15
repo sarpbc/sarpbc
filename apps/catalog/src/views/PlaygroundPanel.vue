@@ -1,13 +1,17 @@
 <script setup lang="ts">
 import { computed, reactive } from "vue";
 
-import { callOf } from "../parity/call.ts";
-import { SAMPLE_ICON } from "../parity/playground.ts";
+import { callOf } from "../playground/call.ts";
+import { SAMPLE_ICON } from "../playground/playgrounds.ts";
 
-import type { MigratedProp, MigratedProps, ParityCase } from "../parity/cases.ts";
-import type { Control, Playground } from "../parity/playground.ts";
+import type {
+  Control,
+  Playground,
+  PlaygroundProp,
+  PlaygroundProps,
+} from "../playground/playgrounds.ts";
 
-const { parity, playground } = defineProps<{ parity: ParityCase; playground: Playground }>();
+const { component, playground } = defineProps<{ component: string; playground: Playground }>();
 
 const values = reactive(
   new Map<string, string | boolean>(
@@ -22,7 +26,7 @@ const reset = (): void => {
 };
 
 /* Only what differs from the component's defaults ends up in the call. */
-const propOf = (control: Control): MigratedProp[] => {
+const propOf = (control: Control): PlaygroundProp[] => {
   const value = values.get(control.name) ?? control.initial;
 
   switch (control.kind) {
@@ -48,9 +52,9 @@ const propOf = (control: Control): MigratedProp[] => {
   }
 };
 
-const props = computed((): MigratedProps => playground.controls.flatMap(propOf));
+const props = computed((): PlaygroundProps => playground.controls.flatMap(propOf));
 
-const preview = computed(() => (playground.render ?? parity.render)(props.value));
+const preview = computed(() => playground.render(props.value));
 
 const onSelect = (name: string, event: Event): void => {
   if (event.target instanceof HTMLSelectElement) {
@@ -114,6 +118,6 @@ const textValue = (name: string): string => {
         Reset
       </button>
     </form>
-    <code class="playground__call">{{ callOf(parity.name, props) }}</code>
+    <code class="playground__call">{{ callOf(`Sb${component}`, props) }}</code>
   </section>
 </template>
