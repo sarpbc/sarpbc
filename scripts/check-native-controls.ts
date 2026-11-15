@@ -2,7 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 
 const repository = path.resolve(import.meta.dirname, "..");
-const appSources = ["apps/front/app", "apps/admin/app", "packages/ui/src"];
+const appSources = ["apps/front/app", "apps/admin/app", "apps/catalog/src", "packages/ui/src"];
 
 /* Each native control has a @sarpbc/design component that owns its look, focus and states. */
 const REPLACEMENTS: ReadonlyMap<string, string> = new Map([
