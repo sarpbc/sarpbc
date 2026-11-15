@@ -261,3 +261,209 @@
   --fill-default: var(--ui-border);
   --fill-inverted: var(--ui-border-inverted);
 }
+
+/*
+ * sarpbc.org's look, shared by front and admin: one font, one neutral scale,
+ * one set of surfaces, links and focus rules. Apps only add their own layout
+ * (row heights, page utilities) on top.
+ */
+@theme static {
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  /* Brand neutral `ink`, read from the design tokens: one hue and chroma, only lightness moves. */
+  --color-ink-50: var(--sb-ink-50);
+  --color-ink-100: var(--sb-ink-100);
+  --color-ink-200: var(--sb-ink-200);
+  --color-ink-300: var(--sb-ink-300);
+  --color-ink-400: var(--sb-ink-400);
+  --color-ink-500: var(--sb-ink-500);
+  --color-ink-600: var(--sb-ink-600);
+  --color-ink-700: var(--sb-ink-700);
+  --color-ink-800: var(--sb-ink-800);
+  --color-ink-850: var(--sb-ink-850);
+  --color-ink-900: var(--sb-ink-900);
+  --color-ink-950: var(--sb-ink-950);
+  --spacing-header: 4rem;
+  --spacing-px: 1px;
+  --radius-scrollbar: 5px;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-slow: 300ms;
+  --ease-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@theme inline {
+  --color-separator: var(--ui-separator);
+}
+
+:root {
+  --ui-radius: 0rem;
+  --ui-bg-inverted-pressed: color-mix(in oklch, var(--ui-bg-inverted) 90%, var(--color-ink-950));
+  --ui-link: var(--color-blue-600);
+  --ui-link-hover: var(--color-blue-700);
+  --ui-separator: var(--color-ink-100);
+}
+
+/* Dark surfaces climb in even 4-point steps; 850 exists so hover and border stay distinct. */
+.dark {
+  color-scheme: dark;
+  --ui-bg: var(--color-ink-950);
+  --ui-bg-muted: var(--color-ink-900);
+  --ui-bg-elevated: var(--color-ink-850);
+  --ui-border: var(--color-ink-800);
+  --ui-separator: var(--color-ink-900);
+  --ui-link: color-mix(in oklch, var(--color-blue-400) 50%, var(--color-blue-500));
+  --ui-link-hover: var(--color-blue-400);
+}
+
+.light {
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    color-scheme: dark;
+  }
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
+  }
+
+  button {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  a:not([aria-disabled="true"]):not([disabled]),
+  button:enabled,
+  input:enabled:is(
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="checkbox"],
+      [type="radio"],
+      [type="file"],
+      [type="color"],
+      [type="range"],
+      [type="image"]
+    ),
+  select:enabled,
+  summary,
+  label {
+    cursor: pointer;
+  }
+
+  input:enabled:not(
+      [type="button"],
+      [type="submit"],
+      [type="reset"],
+      [type="checkbox"],
+      [type="radio"],
+      [type="file"],
+      [type="color"],
+      [type="range"],
+      [type="image"],
+      [type="hidden"]
+    ),
+  textarea:enabled {
+    cursor: text;
+  }
+}
+
+:where(input:not([type="hidden"]), textarea, select, [role="combobox"], [contenteditable="true"]) {
+  outline: 1px solid var(--ui-border);
+  outline-offset: -1px;
+}
+
+@media (hover: hover) {
+  :where(
+    input:enabled:not([type="hidden"]),
+    textarea:enabled,
+    select:enabled,
+    [role="combobox"]:not([disabled]):not([aria-disabled="true"]),
+    [contenteditable="true"]
+  ):hover {
+    outline-color: var(--ui-border-accented);
+  }
+}
+
+:where(
+  a,
+  button,
+  input,
+  textarea,
+  select,
+  summary,
+  [tabindex],
+  [contenteditable="true"]
+):focus-visible {
+  outline: 1px solid var(--ui-primary);
+  outline-offset: -1px;
+}
+
+@media (forced-colors: active) {
+  :root {
+    forced-color-adjust: none;
+  }
+
+  *:focus-visible {
+    outline: 2px solid HighlightText;
+    outline-offset: 2px;
+  }
+
+  .border,
+  [class*="border-"] {
+    border-color: CanvasText;
+  }
+}
+
+html {
+  /* Reserve scrollbar space so Reka UI body lock (selects, menus, modals) does not shift layout. */
+  scrollbar-gutter: stable;
+  scrollbar-color: var(--color-neutral-300) transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  transition-duration: var(--duration-slow);
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: var(--radius-scrollbar);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
+}
+
+input[type="number"] {
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+}
