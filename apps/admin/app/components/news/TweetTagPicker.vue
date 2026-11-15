@@ -44,7 +44,7 @@ const confirm = () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     :open="open"
     :title="t('page.news.editor.tweet.title')"
     @update:open="emit('update:open', $event)"
@@ -74,5 +74,5 @@ const confirm = () => {
       />
       <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
-  </UModal>
+  </SbModal>
 </template>

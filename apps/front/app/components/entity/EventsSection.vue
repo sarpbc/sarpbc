@@ -89,7 +89,7 @@ const eventMeta = (event: EntityEventListItem): string =>
             {{ t(`page.${kind}.slug.events.live`) }}
           </h3>
           <div class="flex flex-col border border-separator divide-y divide-separator">
-            <ULink
+            <SbLink
               v-for="event in live"
               :key="event.id"
               :to="$localePath(tournamentStagePath(event.event.slug, event.slug))"
@@ -102,7 +102,7 @@ const eventMeta = (event: EntityEventListItem): string =>
                 </p>
               </div>
               <SBadgeLive />
-            </ULink>
+            </SbLink>
           </div>
         </div>
 
@@ -110,7 +110,7 @@ const eventMeta = (event: EntityEventListItem): string =>
           v-if="activeEvents.length > 0"
           class="flex flex-col border border-separator divide-y divide-separator"
         >
-          <ULink
+          <SbLink
             v-for="event in activeEvents"
             :key="event.id"
             :to="$localePath(tournamentStagePath(event.event.slug, event.slug))"
@@ -136,13 +136,13 @@ const eventMeta = (event: EntityEventListItem): string =>
                 {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>
             </div>
-          </ULink>
+          </SbLink>
         </div>
       </div>
 
       <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
-          <UIcon :name="emptyIcon" class="text-3xl text-muted" />
+          <Icon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
             {{ t(`page.${kind}.slug.events.${tab}.empty`) }}
           </p>

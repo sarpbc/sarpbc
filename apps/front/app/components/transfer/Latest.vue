@@ -31,9 +31,9 @@ const allTransfersPath = computed(() => ({
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2 pr-2">
           <h2 :id="headingId">{{ t("components.transfer.latest.title") }}</h2>
-          <SLink :to="allTransfersPath" class="text-xs">
+          <SbLink :to="allTransfersPath" class="text-xs">
             {{ t("components.transfer.latest.viewAll") }}
-          </SLink>
+          </SbLink>
         </div>
       </template>
 

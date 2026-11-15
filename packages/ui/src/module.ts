@@ -48,7 +48,11 @@ import { Icon, NuxtLink } from "#components";
 import { DESIGN_ADAPTERS } from ${JSON.stringify(design)};
 
 export default defineNuxtPlugin((nuxtApp) => {
-  nuxtApp.vueApp.provide(DESIGN_ADAPTERS, { icon: Icon, link: NuxtLink });
+  nuxtApp.vueApp.provide(DESIGN_ADAPTERS, {
+    icon: Icon,
+    link: NuxtLink,
+    translate: (message) => nuxtApp.$i18n.t(\`design.\${message}\`),
+  });
 });
 `,
     });

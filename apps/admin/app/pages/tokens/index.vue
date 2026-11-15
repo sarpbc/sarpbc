@@ -221,7 +221,7 @@ const confirmRevoke = async () => {
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateModalOpen"
       :title="$t('page.tokens.create.title')"
       :dismissible="!isCreating"
@@ -254,9 +254,9 @@ const confirmRevoke = async () => {
           @click="isCreateModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
 
-    <UModal
+    <SbModal
       v-model:open="isRevealModalOpen"
       :title="$t('page.tokens.reveal.title')"
       :dismissible="false"
@@ -315,9 +315,9 @@ const confirmRevoke = async () => {
       <template #footer>
         <SbButton :label="$t('page.tokens.reveal.dismiss')" @click="closeRevealModal" />
       </template>
-    </UModal>
+    </SbModal>
 
-    <UModal
+    <SbModal
       v-model:open="isRevokeModalOpen"
       :title="$t('page.tokens.revoke.title')"
       :dismissible="!isRevoking"
@@ -346,6 +346,6 @@ const confirmRevoke = async () => {
           @click="isRevokeModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
   </NuxtLayout>
 </template>

@@ -99,9 +99,9 @@ const addAward = async (input: SeasonAwardInput) => {
           <p class="text-sm text-muted">
             <template v-if="publicUrl">
               {{ $t("page.seasons.edit.publishedAt") }}
-              <ULink :to="publicUrl" external target="_blank" class="text-primary hover:underline">
+              <SbLink variant="accent" :to="publicUrl" external target="_blank">
                 {{ publicUrl }}
-              </ULink>
+              </SbLink>
             </template>
             <template v-else>{{ $t("page.seasons.edit.unpublished") }}</template>
           </p>
@@ -140,21 +140,22 @@ const addAward = async (input: SeasonAwardInput) => {
               <div class="flex min-w-0 flex-col gap-1 text-sm">
                 <p class="font-medium">
                   {{ awardLabel(award) }}:
-                  <ULink :to="localePath(`/players/${award.player.id}`)" translate="no">
+                  <SbLink :to="localePath(`/players/${award.player.id}`)" translate="no">
                     {{ award.player.name }}
-                  </ULink>
+                  </SbLink>
                 </p>
                 <p v-if="award.presentedBy" class="text-muted">
                   {{ $t("page.seasons.awards.presentedByValue", { name: award.presentedBy }) }}
                 </p>
-                <ULink
+                <SbLink
+                  variant="accent"
                   :to="award.sourceUrl"
                   external
                   target="_blank"
-                  class="break-all text-primary hover:underline"
+                  class="break-all"
                 >
                   {{ award.sourceUrl }}
-                </ULink>
+                </SbLink>
               </div>
               <SbButton
                 variant="tertiary"

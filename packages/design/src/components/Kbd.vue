@@ -1,15 +1,48 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from "vue";
+
 import type { KbdSize } from "../types.ts";
 
 const { size = "md", value = null } = defineProps<{
   size?: KbdSize;
+  /** A character, or a key name such as `meta`, `enter` or `escape`. */
   value?: string | null;
 }>();
+
+/* Modifier glyphs depend on the platform, known only in the browser. */
+const isMac = ref(false);
+
+onMounted(() => {
+  isMac.value = /Mac|iPhone|iPad/u.test(navigator.userAgent);
+});
+
+const KEYS: ReadonlyMap<string, readonly [mac: string, other: string]> = new Map([
+  ["alt", ["⌥", "Alt"]],
+  ["arrowdown", ["↓", "↓"]],
+  ["arrowleft", ["←", "←"]],
+  ["arrowright", ["→", "→"]],
+  ["arrowup", ["↑", "↑"]],
+  ["ctrl", ["⌃", "Ctrl"]],
+  ["enter", ["↵", "↵"]],
+  ["escape", ["Esc", "Esc"]],
+  ["meta", ["⌘", "Ctrl"]],
+  ["shift", ["⇧", "Shift"]],
+]);
+
+const label = computed(() => {
+  if (value === null) {
+    return null;
+  }
+
+  const glyphs = KEYS.get(value.toLowerCase());
+
+  return glyphs === undefined ? value : glyphs[isMac.value ? 0 : 1];
+});
 </script>
 
 <template>
   <kbd class="sb-kbd" :data-size="size">
-    <slot>{{ value }}</slot>
+    <slot>{{ label }}</slot>
   </kbd>
 </template>
 

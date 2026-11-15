@@ -161,11 +161,11 @@ const handleContinue = () => {
       @abandon="handleAbandon"
     />
 
-    <UModal v-model:open="confirmOpen" :title="confirmCopy.title">
+    <SbModal v-model:open="confirmOpen" :title="confirmCopy.title">
       <template #footer>
         <SbButton danger :label="confirmCopy.action" @click="confirmPending" />
         <SbButton variant="secondary" :label="t('common.cancel')" @click="confirmOpen = false" />
       </template>
-    </UModal>
+    </SbModal>
   </section>
 </template>

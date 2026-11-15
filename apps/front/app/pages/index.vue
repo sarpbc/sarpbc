@@ -90,7 +90,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
               :disabled="newsPending"
               @click="loadMoreNews"
             >
-              <UIcon
+              <Icon
                 v-if="newsPending"
                 name="i-fluent-arrow-clockwise-24-regular"
                 class="size-4 motion-safe:animate-spin"

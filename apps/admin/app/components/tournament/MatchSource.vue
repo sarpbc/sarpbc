@@ -39,7 +39,7 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.matchSource.title', { match: label })"
     :description="t('page.tournaments.matchSource.description')"
@@ -61,5 +61,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

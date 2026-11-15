@@ -168,7 +168,7 @@ const confirmChange = async () => {
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isConfirmOpen"
       :title="$t('page.users.confirm.title')"
       :description="
@@ -189,6 +189,6 @@ const confirmChange = async () => {
         />
         <SbButton danger :label="$t('page.users.confirm.confirm')" @click="confirmChange" />
       </template>
-    </UModal>
+    </SbModal>
   </NuxtLayout>
 </template>

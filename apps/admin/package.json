@@ -17,6 +17,7 @@
     "@nuxtjs/i18n": "catalog:",
     "@nuxtjs/mdc": "^0.23.3",
     "@sarpbc/composables": "workspace:*",
+    "@sarpbc/design": "workspace:*",
     "@sarpbc/types": "workspace:*",
     "@sarpbc/ui": "workspace:*",
     "@sarpbc/utils": "workspace:*",

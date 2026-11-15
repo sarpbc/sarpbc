@@ -41,7 +41,7 @@ const onClick = () => {
 </script>
 
 <template>
-  <ULink :to="to" :class="linkClass" v-bind="delegatedAttrs" @click="onClick">
+  <SbLink :to="to" :class="linkClass" v-bind="delegatedAttrs" @click="onClick">
     <slot />
-  </ULink>
+  </SbLink>
 </template>

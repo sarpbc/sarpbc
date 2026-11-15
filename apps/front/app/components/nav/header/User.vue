@@ -7,15 +7,15 @@ const { count: unreadCount } = useUnreadNotificationCount();
 
 <template>
   <ClientOnly>
-    <SLink
+    <SbLink
       v-if="!user"
       :to="$localePath('/login')"
       variant="muted"
       class="text-lg md:text-sm font-medium md:font-normal"
     >
       {{ t("components.header.signin") }}
-    </SLink>
-    <SLink
+    </SbLink>
+    <SbLink
       v-else
       :to="$localePath('/profile')"
       variant="muted"
@@ -30,15 +30,15 @@ const { count: unreadCount } = useUnreadNotificationCount();
       >
         {{ unreadCount > 9 ? "9+" : unreadCount }}
       </SbBadge>
-    </SLink>
+    </SbLink>
     <template #fallback>
-      <SLink
+      <SbLink
         :to="$localePath('/login')"
         variant="muted"
         class="text-lg md:text-sm font-medium md:font-normal"
       >
         {{ t("components.header.signin") }}
-      </SLink>
+      </SbLink>
     </template>
   </ClientOnly>
 </template>

@@ -246,7 +246,7 @@ const close = () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     :open="open"
     :title="
       initialBlock ? t('page.news.editor.matches.editTitle') : t('page.news.editor.matches.title')
@@ -350,5 +350,5 @@ const close = () => {
       />
       <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
-  </UModal>
+  </SbModal>
 </template>

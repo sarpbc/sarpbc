@@ -181,9 +181,13 @@ const confirmRemove = async () => {
           <ClientOnly>
             <UTable v-if="streamers.length > 0" :data="streamers" :columns="columns" sticky>
               <template #login-cell="{ row }">
-                <ULink :to="twitchChannelUrl(row.original.login)" target="_blank" class="font-mono">
+                <SbLink
+                  :to="twitchChannelUrl(row.original.login)"
+                  target="_blank"
+                  class="font-mono"
+                >
                   {{ row.original.login }}
-                </ULink>
+                </SbLink>
               </template>
               <template #actions-cell="{ row }">
                 <SbButton
@@ -201,7 +205,7 @@ const confirmRemove = async () => {
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isAddModalOpen"
       :title="$t('page.streamers.add.title')"
       :dismissible="!isAdding"
@@ -250,9 +254,9 @@ const confirmRemove = async () => {
           @click="isAddModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
 
-    <UModal
+    <SbModal
       v-model:open="isRemoveModalOpen"
       :title="$t('page.streamers.remove.title')"
       :dismissible="!isRemoving"
@@ -281,6 +285,6 @@ const confirmRemove = async () => {
           @click="isRemoveModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
   </NuxtLayout>
 </template>

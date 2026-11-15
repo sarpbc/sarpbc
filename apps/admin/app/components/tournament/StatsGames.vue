@@ -104,14 +104,14 @@ const remove = async (game: TournamentStatsGame): Promise<void> => {
       >
         <h4 v-if="row.heading" class="font-medium text-highlighted">{{ row.heading }}</h4>
         <div class="flex flex-row items-center justify-between gap-2 pb-1">
-          <ULink
+          <SbLink
             :to="row.url"
             target="_blank"
             rel="noopener noreferrer"
             class="min-w-0 truncate tabular-nums"
           >
             {{ row.label }}
-          </ULink>
+          </SbLink>
           <SbButton
             variant="tertiary"
             danger

@@ -80,6 +80,7 @@
       "onThisDay": "Ce jour-là"
     },
     "search": {
+      "title": "Recherche",
       "placeholder": "Rechercher…",
       "inputPlaceholder": "Rechercher des équipes, joueurs et tournois",
       "empty": "Aucune équipe, joueur ou tournoi ne correspond.",

@@ -6,7 +6,7 @@ const localePath = useLocalePath();
   <main class="w-full min-h-svh flex flex-col bg-default">
     <header class="w-full shrink-0 border-b border-separator">
       <div class="w-full max-w-7xl mx-auto px-2 xl:px-0 h-12 flex flex-row items-center">
-        <ULink
+        <SbLink
           :to="localePath('/')"
           class="flex items-center"
           :aria-label="$t('components.header.home')"
@@ -19,7 +19,7 @@ const localePath = useLocalePath();
             decoding="async"
             class="size-10 bg-transparent"
           />
-        </ULink>
+        </SbLink>
         <SettingsLanguageToggle class="ml-auto" />
       </div>
     </header>

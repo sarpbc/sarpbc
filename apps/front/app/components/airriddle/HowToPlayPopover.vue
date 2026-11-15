@@ -9,7 +9,7 @@ const titleId = "airriddle-how-to-play-title";
 </script>
 
 <template>
-  <UPopover v-model:open="open">
+  <SbPopover v-model:open="open">
     <SbButton
       variant="tertiary"
       class="inline-flex size-9 min-h-9 min-w-9 items-center justify-center p-0 text-base font-medium leading-none tabular-nums"
@@ -54,5 +54,5 @@ const titleId = "airriddle-how-to-play-title";
         </ul>
       </div>
     </template>
-  </UPopover>
+  </SbPopover>
 </template>

@@ -101,7 +101,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
 
       <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
-          <UIcon :name="emptyIcon" class="text-3xl text-muted" />
+          <Icon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
             {{ t(`page.${kind}.slug.matches.${tab}.empty`) }}
           </p>

@@ -102,7 +102,7 @@ setPageSeo({
               >
                 <dt class="text-sm text-muted shrink-0">{{ t("page.staff.slug.currentTeam") }}</dt>
                 <dd class="min-w-0 flex justify-end">
-                  <SLink
+                  <SbLink
                     v-if="currentContract"
                     :to="$localePath(teamPath(currentContract.team.slug))"
                     variant="inline"
@@ -114,7 +114,7 @@ setPageSeo({
                       size="xs"
                     />
                     <span class="truncate">{{ currentContract.team.name }}</span>
-                  </SLink>
+                  </SbLink>
                   <span v-else class="text-sm text-muted">
                     {{ t("page.staff.slug.noCurrentTeam") }}
                   </span>
@@ -137,13 +137,13 @@ setPageSeo({
                   {{ t("page.staff.slug.playerCareer") }}
                 </dt>
                 <dd class="min-w-0">
-                  <SLink
+                  <SbLink
                     :to="$localePath(playerPath(person.slug))"
                     variant="inline"
                     class="text-sm font-medium"
                   >
                     {{ t("page.staff.slug.viewPlayerProfile") }}
-                  </SLink>
+                  </SbLink>
                 </dd>
               </div>
             </dl>

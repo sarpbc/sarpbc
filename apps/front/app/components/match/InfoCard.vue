@@ -31,9 +31,9 @@ const facts = computed(() => {
       <SListItem class="justify-between gap-4 text-sm">
         <dt class="shrink-0 text-muted">{{ t("page.match.detail.info.event") }}</dt>
         <dd class="min-w-0">
-          <SLink :to="$localePath(tournamentMatchesPath)" variant="muted" class="block truncate">
+          <SbLink :to="$localePath(tournamentMatchesPath)" variant="muted" class="block truncate">
             {{ tournamentStageLabel(match.tournament) }}
-          </SLink>
+          </SbLink>
         </dd>
       </SListItem>
       <SListItem v-for="fact in facts" :key="fact.label" class="justify-between gap-4 text-sm">

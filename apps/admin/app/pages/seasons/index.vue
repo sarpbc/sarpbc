@@ -91,9 +91,9 @@ const create = async (input: SeasonInput) => {
         <ClientOnly v-else>
           <UTable :data="seasons" :columns="columns" sticky>
             <template #name-cell="{ row }">
-              <ULink :to="localePath(`/seasons/${row.original.id}`)" class="font-medium">
+              <SbLink :to="localePath(`/seasons/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
-              </ULink>
+              </SbLink>
             </template>
             <template #slug-cell="{ row }">
               <span v-if="row.original.slug" class="font-mono text-sm" translate="no">
@@ -116,7 +116,7 @@ const create = async (input: SeasonInput) => {
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateOpen"
       :title="$t('page.seasons.create.title')"
       :dismissible="!isCreating"
@@ -128,7 +128,7 @@ const create = async (input: SeasonInput) => {
           @submit="create"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="seasonToDelete"

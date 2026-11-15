@@ -123,9 +123,9 @@ watch(
         <SbSkeleton v-else class="mx-auto h-5 w-48" />
       </template>
       <template #meta>
-        <SLink :to="$localePath('/circuits')" variant="muted">
+        <SbLink :to="$localePath('/circuits')" variant="muted">
           {{ t("page.circuits.standings.title") }}
-        </SLink>
+        </SbLink>
       </template>
     </SHubPageHeader>
 
@@ -190,13 +190,13 @@ watch(
                   class="min-w-24 max-w-36 px-2 py-2 text-right align-bottom font-normal"
                 >
                   <div class="flex flex-col items-end gap-1">
-                    <SLink
+                    <SbLink
                       :to="$localePath(tournamentEventPath(column.event.slug))"
                       variant="inline"
                       class="line-clamp-2 text-balance"
                     >
                       {{ column.event.name }}
-                    </SLink>
+                    </SbLink>
                     <SbBadge v-if="statusLabel(column.status)">
                       {{ statusLabel(column.status) }}
                     </SbBadge>
@@ -224,13 +224,13 @@ watch(
                 >
                   <div class="flex min-w-0 items-center gap-2">
                     <TeamImg :team-name="entry.row.team.name" :logo="entry.row.team" size="xs" />
-                    <SLink
+                    <SbLink
                       :to="$localePath(teamPath(entry.row.team.slug))"
                       variant="inline"
                       class="min-w-0 truncate font-medium"
                     >
                       {{ entry.row.team.name }}
-                    </SLink>
+                    </SbLink>
                   </div>
                 </th>
                 <td class="px-2 text-right font-medium text-highlighted tabular-nums">
@@ -284,9 +284,9 @@ watch(
                 <span>{{ t("page.circuits.standings.scaleSource") }}</span>
                 <ul class="flex flex-col gap-1">
                   <li v-for="url in standings.sourceUrls" :key="url" class="min-w-0 truncate">
-                    <SLink :to="url" external target="_blank" variant="inline">
+                    <SbLink :to="url" external target="_blank" variant="inline">
                       {{ sourceLabel(url) }}
-                    </SLink>
+                    </SbLink>
                   </li>
                 </ul>
               </div>

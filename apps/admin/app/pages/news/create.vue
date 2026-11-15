@@ -87,7 +87,7 @@ const saveArticle = async () => {
       <UBreadcrumb :items="items" />
     </template>
     <template #action>
-      <UModal
+      <SbModal
         v-model:open="isModalOpen"
         :title="$t('page.news.create.title')"
         :dismissible="!isSaving"
@@ -169,7 +169,7 @@ const saveArticle = async () => {
             @click="isModalOpen = false"
           />
         </template>
-      </UModal>
+      </SbModal>
     </template>
 
     <NewsArticleForm

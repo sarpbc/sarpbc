@@ -96,9 +96,9 @@ const create = async (input: CircuitInput) => {
         <ClientOnly v-else>
           <UTable :data="circuits" :columns="columns" sticky>
             <template #name-cell="{ row }">
-              <ULink :to="localePath(`/circuits/${row.original.id}`)" class="font-medium">
+              <SbLink :to="localePath(`/circuits/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
-              </ULink>
+              </SbLink>
             </template>
             <template #actions-cell="{ row }">
               <SbButton
@@ -115,7 +115,7 @@ const create = async (input: CircuitInput) => {
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateOpen"
       :title="$t('page.circuits.create.title')"
       :dismissible="!isCreating"
@@ -127,7 +127,7 @@ const create = async (input: CircuitInput) => {
           @submit="create"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="circuitToDelete"

@@ -131,7 +131,7 @@ const togglePublish = async () => {
       >
         {{ isDraft ? $t("page.news.edit.publish") : $t("page.news.edit.unpublish") }}
       </SbButton>
-      <UModal
+      <SbModal
         v-model:open="isModalOpen"
         :title="$t('page.news.edit.save')"
         :dismissible="!isSaving"
@@ -213,7 +213,7 @@ const togglePublish = async () => {
             @click="isModalOpen = false"
           />
         </template>
-      </UModal>
+      </SbModal>
     </template>
 
     <LoadError

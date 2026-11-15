@@ -64,9 +64,9 @@ const onSubmit = async (event: Event) => {
         </h1>
         <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-6">
           {{ $t("page.authentication.noAccount") }}&nbsp;
-          <SLink variant="accent" :to="$localePath('/register')">
+          <SbLink variant="accent" :to="$localePath('/register')">
             {{ $t("page.authentication.register") }}
-          </SLink>
+          </SbLink>
           .
         </div>
 

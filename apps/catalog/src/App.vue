@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { AnchorLink, DESIGN_ADAPTERS } from "@sarpbc/design";
+import { AnchorLink, DESIGN_ADAPTERS, DESIGN_MESSAGES } from "@sarpbc/design";
 import { computed, onBeforeUnmount, onMounted, provide, ref } from "vue";
 
 import { CATEGORIES, categoryOf, inventory } from "./catalog.ts";
@@ -30,7 +30,11 @@ onBeforeUnmount(() => {
   removeEventListener("hashchange", syncRoute);
 });
 
-provide(DESIGN_ADAPTERS, { icon: SampleIcon, link: AnchorLink });
+provide(DESIGN_ADAPTERS, {
+  icon: SampleIcon,
+  link: AnchorLink,
+  translate: (message) => DESIGN_MESSAGES[message],
+});
 
 const cycleColorMode = (): void => {
   colorMode.value =

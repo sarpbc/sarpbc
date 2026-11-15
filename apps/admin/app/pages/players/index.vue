@@ -185,7 +185,7 @@ const confirmCreate = async () => {
       </ClientOnly>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateModalOpen"
       :title="$t('page.players.create.title')"
       :dismissible="!isCreating"
@@ -227,7 +227,7 @@ const confirmCreate = async () => {
           @click="isCreateModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="playerToDelete"

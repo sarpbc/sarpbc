@@ -65,13 +65,13 @@ const transferLabel = (transfer: Transfer): string => {
             class="ms-auto flex items-center gap-2"
             :class="{ 'flex-row-reverse': transfer.type === 'departure' }"
           >
-            <UIcon
+            <Icon
               v-if="isTeamMove(transfer)"
               name="i-fluent-person-tentative-24-regular"
               class="size-4 shrink-0"
               aria-hidden="true"
             />
-            <UIcon
+            <Icon
               :name="
                 isTeamMove(transfer)
                   ? 'i-fluent-arrow-right-24-regular'

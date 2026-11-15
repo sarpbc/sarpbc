@@ -51,7 +51,7 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.matchForfeit.title', { match: label })"
     :description="t('page.tournaments.matchForfeit.description')"
@@ -83,5 +83,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

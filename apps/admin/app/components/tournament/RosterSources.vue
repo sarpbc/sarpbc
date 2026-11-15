@@ -79,14 +79,15 @@ const save = async (participant: (typeof teamParticipants.value)[number]) => {
           class="w-full"
         />
         <template v-if="participant.rosterSourceUrl" #help>
-          <ULink
+          <SbLink
+            variant="accent"
             :to="participant.rosterSourceUrl"
             external
             target="_blank"
-            class="break-all text-primary hover:underline"
+            class="break-all"
           >
             {{ t("common.openSource") }}
-          </ULink>
+          </SbLink>
         </template>
       </SbFormField>
       <SbButton

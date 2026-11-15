@@ -318,6 +318,9 @@ importers:
       '@sarpbc/composables':
         specifier: workspace:*
         version: link:../../packages/composables
+      '@sarpbc/design':
+        specifier: workspace:*
+        version: link:../../packages/design
       '@sarpbc/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -612,6 +615,9 @@ importers:
       '@sarpbc/composables':
         specifier: workspace:*
         version: link:../../packages/composables
+      '@sarpbc/design':
+        specifier: workspace:*
+        version: link:../../packages/design
       '@sarpbc/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -691,6 +697,10 @@ importers:
         version: 3.5.45(typescript@6.0.3)
 
   packages/design:
+    dependencies:
+      reka-ui:
+        specifier: ^2.11.0
+        version: 2.11.0(vue@3.5.45(typescript@6.0.3))
     devDependencies:
       typescript:
         specifier: 'catalog:'

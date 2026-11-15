@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { NewsArticleAdmin, NewsType } from "@sarpbc/types";
-import type { DropdownMenuItem, TableColumn, TableRow } from "@nuxt/ui";
+import type { MenuItem } from "@sarpbc/design";
+import type { TableColumn, TableRow } from "@nuxt/ui";
 import { getApiErrorMessage, hasFrenchTranslation } from "@sarpbc/utils";
 
 const { t } = useI18n();
@@ -119,7 +120,7 @@ const togglePublish = async (article: NewsArticleAdmin) => {
   }
 };
 
-const articleActions = (article: NewsArticleAdmin): DropdownMenuItem[][] => [
+const articleActions = (article: NewsArticleAdmin): MenuItem[][] => [
   [
     {
       icon: "i-fluent-edit-24-regular",
@@ -136,7 +137,7 @@ const articleActions = (article: NewsArticleAdmin): DropdownMenuItem[][] => [
   ],
   [
     {
-      color: "error",
+      danger: true,
       icon: "i-fluent-delete-24-regular",
       label: t("page.news.actions.delete"),
       onSelect: () => (articleToDelete.value = article),
@@ -209,14 +210,14 @@ const onDeleted = async () => {
           </template>
           <template #actions-cell="{ row }">
             <div class="flex justify-end" @click.stop @pointerdown.stop>
-              <UDropdownMenu :items="articleActions(row.original)" :content="{ align: 'end' }">
+              <SbDropdownMenu :items="articleActions(row.original)" align="end">
                 <SbButton
                   variant="tertiary"
                   size="sm"
                   icon="i-fluent-more-vertical-24-regular"
                   :aria-label="$t('page.news.actions.menu')"
                 />
-              </UDropdownMenu>
+              </SbDropdownMenu>
             </div>
           </template>
         </UTable>
@@ -233,7 +234,7 @@ const onDeleted = async () => {
         </div>
       </ClientOnly>
 
-      <UModal
+      <SbModal
         v-model:open="isRenameModalOpen"
         :title="$t('page.news.actions.renameTitle')"
         :dismissible="!isRenaming"
@@ -265,7 +266,7 @@ const onDeleted = async () => {
             @click="isRenameModalOpen = false"
           />
         </template>
-      </UModal>
+      </SbModal>
 
       <ConfirmDeleteModal
         v-model:target="articleToDelete"

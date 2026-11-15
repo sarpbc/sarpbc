@@ -62,9 +62,9 @@ const blocks = computed((): ListBlock[] => {
       <SRail v-for="group in block.events" :key="group.key" caption="section">
         <template #caption>
           <h4 class="h-fit min-w-0 truncate text-sm font-medium">
-            <SLink :to="$localePath(group.matchesPath)" variant="muted">
+            <SbLink :to="$localePath(group.matchesPath)" variant="muted">
               {{ group.displayName }}
-            </SLink>
+            </SbLink>
           </h4>
         </template>
 

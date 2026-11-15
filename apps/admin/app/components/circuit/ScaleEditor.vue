@@ -290,7 +290,7 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="$t('page.circuits.scale.title')"
     :description="shown?.label ?? ''"
@@ -491,5 +491,5 @@ const save = async () => {
         @click="open = false"
       />
     </template>
-  </UModal>
+  </SbModal>
 </template>

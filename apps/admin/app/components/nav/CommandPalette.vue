@@ -209,7 +209,7 @@ const groups = computed<CommandPaletteGroup[]>(() => {
 </script>
 
 <template>
-  <UModal v-if="canSearch" v-model:open="open">
+  <SbModal v-if="canSearch" v-model:open="open" :title="$t('page.search.title')">
     <SbButton
       variant="secondary"
       icon="i-lucide-search"
@@ -234,5 +234,5 @@ const groups = computed<CommandPaletteGroup[]>(() => {
         class="h-80"
       />
     </template>
-  </UModal>
+  </SbModal>
 </template>

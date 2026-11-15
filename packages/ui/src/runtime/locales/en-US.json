@@ -12,5 +12,8 @@
     "matchTbd": "TBD",
     "matchDataBy": "Match data provided by",
     "matchesUnavailable": "These matches could not be loaded."
+  },
+  "design": {
+    "close": "Close"
   }
 }

@@ -82,7 +82,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
 
       <SCard v-else-if="eras.length === 0">
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
-          <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
+          <Icon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
             {{ t("page.team.slug.rosterHistory.empty") }}
           </p>
@@ -132,7 +132,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
                 class="flex flex-col gap-1 text-sm text-muted"
               >
                 <p v-if="era.joined.length > 0" class="flex items-start gap-1.5">
-                  <UIcon
+                  <Icon
                     name="i-fluent-arrow-down-24-regular"
                     class="shrink-0 mt-0.5 text-success"
                   />
@@ -144,7 +144,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
                   </span>
                 </p>
                 <p v-if="era.left.length > 0" class="flex items-start gap-1.5">
-                  <UIcon name="i-fluent-arrow-up-24-regular" class="shrink-0 mt-0.5 text-error" />
+                  <Icon name="i-fluent-arrow-up-24-regular" class="shrink-0 mt-0.5 text-error" />
                   <span>
                     <span class="font-medium text-highlighted">
                       {{ t("page.team.slug.rosterHistory.leftLabel") }}:

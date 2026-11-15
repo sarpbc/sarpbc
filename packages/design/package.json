@@ -14,6 +14,9 @@
     "fmt:check": "oxfmt . --check",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json"
   },
+  "dependencies": {
+    "reka-ui": "^2.11.0"
+  },
   "devDependencies": {
     "typescript": "catalog:",
     "vue": "catalog:",

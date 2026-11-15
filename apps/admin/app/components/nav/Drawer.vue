@@ -11,12 +11,11 @@ const items = computed(() =>
 </script>
 
 <template>
-  <USlideover
+  <SbSlideover
     v-model:open="open"
     side="left"
     :title="$t('page.nav.admin')"
     :description="$t('page.nav.drawerDescription')"
-    :ui="{ content: 'max-w-72' }"
   >
     <SbButton
       variant="tertiary"
@@ -36,7 +35,7 @@ const items = computed(() =>
     <template v-if="user" #footer>
       <div class="flex w-full min-w-0 flex-col gap-2">
         <div class="flex min-w-0 items-center gap-2">
-          <UAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
+          <SbAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
           <div class="min-w-0">
             <p class="truncate text-sm" translate="no">{{ user.userName }}</p>
             <p class="truncate text-xs text-muted" translate="no">{{ user.email }}</p>
@@ -54,5 +53,5 @@ const items = computed(() =>
         />
       </div>
     </template>
-  </USlideover>
+  </SbSlideover>
 </template>

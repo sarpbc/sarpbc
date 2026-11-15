@@ -277,14 +277,14 @@ const submit = async () => {
         <ul class="divide-y divide-default border-y border-default">
           <li v-for="row in attention" :key="row.replayId" :class="ROW_CLASS">
             <div class="flex min-w-0 flex-col">
-              <ULink
+              <SbLink
                 :to="replayUrl(row)"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="truncate text-highlighted"
               >
                 {{ row.title }}
-              </ULink>
+              </SbLink>
               <span class="text-muted">{{ itemMeta(row) }}</span>
             </div>
             <div class="flex shrink-0 flex-col gap-1 sm:items-end">

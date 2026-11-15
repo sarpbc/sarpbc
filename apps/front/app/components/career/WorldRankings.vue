@@ -171,12 +171,6 @@ const teamSections = computed(() => {
 const rankingGridClass =
   "grid w-full grid-cols-[2rem_minmax(0,1fr)_minmax(0,1fr)_3rem] items-center gap-2 px-2";
 
-const tooltipContent = {
-  align: "center" as const,
-  side: "top" as const,
-  sideOffset: 4,
-};
-
 const title = computed(() => {
   switch (kind) {
     case "teams": {
@@ -255,28 +249,22 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
             @focusin="setHoveredTeam(entry.team.id)"
             @focusout="onTeamFocusOut($event, entry.team.id)"
           >
-            <UTooltip
-              :text="t('page.game.career.rankings.teamWorldRanking')"
-              :content="tooltipContent"
-            >
+            <SbTooltip :text="t('page.game.career.rankings.teamWorldRanking')">
               <span class="block text-right text-xs text-muted tabular-nums">
                 {{ entry.rank }}
               </span>
-            </UTooltip>
+            </SbTooltip>
             <span class="min-w-0 truncate" :class="entry.isPlayerTeam ? 'text-primary' : ''">
               {{ entry.team.name }}
             </span>
             <span class="block min-w-0 truncate text-muted">
               {{ t(`page.game.career.onboarding.regions.${entry.team.region}`) }}
             </span>
-            <UTooltip
-              :text="t('page.game.career.rankings.circuitPoints')"
-              :content="tooltipContent"
-            >
+            <SbTooltip :text="t('page.game.career.rankings.circuitPoints')">
               <span class="block text-right text-xs tabular-nums">
                 {{ Math.round(entry.points) }}
               </span>
-            </UTooltip>
+            </SbTooltip>
           </li>
         </ol>
       </template>
@@ -300,11 +288,11 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
               {{ entry.name }}
             </span>
             <span class="block min-w-0 truncate text-muted">{{ entry.teamName }}</span>
-            <UTooltip :text="t('page.game.career.rankings.playerRating')" :content="tooltipContent">
+            <SbTooltip :text="t('page.game.career.rankings.playerRating')">
               <span class="block text-right text-xs tabular-nums">
                 {{ Math.round(entry.rating) }}
               </span>
-            </UTooltip>
+            </SbTooltip>
           </li>
         </ol>
         <ol v-if="playerFooterItems.length" class="flex flex-col border-t border-separator">
@@ -331,14 +319,11 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
                 {{ item.entry.name }}
               </span>
               <span class="block min-w-0 truncate text-muted">{{ item.entry.teamName }}</span>
-              <UTooltip
-                :text="t('page.game.career.rankings.playerRating')"
-                :content="tooltipContent"
-              >
+              <SbTooltip :text="t('page.game.career.rankings.playerRating')">
                 <span class="block text-right text-xs tabular-nums">
                   {{ Math.round(item.entry.rating) }}
                 </span>
-              </UTooltip>
+              </SbTooltip>
             </li>
           </template>
         </ol>

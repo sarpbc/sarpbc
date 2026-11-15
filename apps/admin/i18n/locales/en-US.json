@@ -80,6 +80,7 @@
       "onThisDay": "On this day"
     },
     "search": {
+      "title": "Search",
       "placeholder": "Search…",
       "inputPlaceholder": "Search teams, players, and tournaments",
       "empty": "No matching teams, players, or tournaments.",

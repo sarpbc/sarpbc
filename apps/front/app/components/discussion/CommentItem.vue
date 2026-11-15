@@ -125,7 +125,7 @@ const onDelete = async () => {
           />
         </ForumSignInPrompt>
 
-        <UPopover v-model:open="menuOpen">
+        <SbPopover v-model:open="menuOpen">
           <SbButton
             variant="tertiary"
             size="sm"
@@ -194,7 +194,7 @@ const onDelete = async () => {
               />
             </div>
           </template>
-        </UPopover>
+        </SbPopover>
       </div>
     </div>
 

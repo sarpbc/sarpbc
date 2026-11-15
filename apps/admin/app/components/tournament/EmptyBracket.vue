@@ -41,7 +41,7 @@ const create = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.emptyBracket.title')"
     :description="t('page.tournaments.emptyBracket.description')"
@@ -80,5 +80,5 @@ const create = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

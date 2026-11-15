@@ -79,7 +79,7 @@ watch(
       @error="failed = true"
     />
     <div v-else :class="[spec.box, spec.radius, 'flex items-center justify-center bg-muted']">
-      <UIcon name="i-fluent-image-24-regular" :class="[spec.icon, 'text-muted']" />
+      <Icon name="i-fluent-image-24-regular" :class="[spec.icon, 'text-muted']" />
     </div>
   </div>
 </template>

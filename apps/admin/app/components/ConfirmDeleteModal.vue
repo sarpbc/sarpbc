@@ -51,7 +51,7 @@ const confirm = async () => {
 </script>
 
 <template>
-  <UModal v-model:open="open" :title="title" :dismissible="!isDeleting">
+  <SbModal v-model:open="open" :title="title" :dismissible="!isDeleting">
     <template #body>
       <p>{{ shown === null ? "" : message(shown) }}</p>
     </template>
@@ -70,5 +70,5 @@ const confirm = async () => {
         @click="open = false"
       />
     </template>
-  </UModal>
+  </SbModal>
 </template>

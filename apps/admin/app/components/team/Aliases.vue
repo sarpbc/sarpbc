@@ -196,14 +196,14 @@ const submit = async () => {
       <template #empty>{{ t("page.teams.aliases.empty") }}</template>
       <template #period-cell="{ row }">{{ period(row.original) }}</template>
       <template #sourceUrl-cell="{ row }">
-        <ULink
+        <SbLink
           :to="row.original.sourceUrl"
           target="_blank"
           rel="noopener noreferrer"
           class="break-all"
         >
           {{ row.original.sourceUrl }}
-        </ULink>
+        </SbLink>
       </template>
       <template #actions-cell="{ row }">
         <div class="flex flex-row gap-1">
@@ -226,11 +226,11 @@ const submit = async () => {
       </template>
     </UTable>
 
-    <UModal
+    <SbModal
       v-model:open="isOpen"
       :title="editing ? t('page.teams.aliases.edit') : t('page.teams.aliases.add')"
       :dismissible="!saving"
-      :ui="{ content: 'sm:max-w-2xl' }"
+      size="lg"
     >
       <template #body>
         <form
@@ -324,7 +324,7 @@ const submit = async () => {
           @click="isOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="aliasToDelete"

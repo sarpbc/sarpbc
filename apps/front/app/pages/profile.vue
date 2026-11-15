@@ -169,18 +169,18 @@ setPageSeo({
     <div v-if="user" class="w-full flex flex-col">
       <SCard class="min-h-row-double w-full flex flex-row justify-between items-center px-2 gap-2">
         <div class="min-w-0">
-          <UUser
-            :alt="user.userName"
-            :name="user.userName"
-            :description="user.email"
-            :avatar="{
-              src: user.avatarUrl || undefined,
-            }"
-            size="xl"
-          />
+          <div class="flex min-w-0 items-center gap-2">
+            <SbAvatar :src="user.avatarUrl" :alt="user.userName" size="lg" />
+            <div class="min-w-0">
+              <p class="truncate text-base font-medium text-highlighted" translate="no">
+                {{ user.userName }}
+              </p>
+              <p class="truncate text-sm text-muted" translate="no">{{ user.email }}</p>
+            </div>
+          </div>
         </div>
 
-        <UPopover v-model:open="menuOpen">
+        <SbPopover v-model:open="menuOpen">
           <SbButton
             variant="tertiary"
             icon="i-fluent-more-vertical-24-regular"
@@ -237,7 +237,7 @@ setPageSeo({
               />
             </div>
           </template>
-        </UPopover>
+        </SbPopover>
       </SCard>
 
       <SRail v-if="hasNotifications">
@@ -277,7 +277,7 @@ setPageSeo({
       </SRail>
     </div>
 
-    <UModal
+    <SbModal
       v-if="user"
       v-model:open="editOpen"
       :title="$t('page.profile.editProfile')"
@@ -314,6 +314,6 @@ setPageSeo({
           "
         />
       </template>
-    </UModal>
+    </SbModal>
   </div>
 </template>

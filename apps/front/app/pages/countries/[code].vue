@@ -60,9 +60,9 @@ watch(
         </span>
       </template>
       <template #meta>
-        <SLink :to="$localePath('/countries')" variant="muted">
+        <SbLink :to="$localePath('/countries')" variant="muted">
           {{ t("page.countries.detail.allCountries") }}
-        </SLink>
+        </SbLink>
       </template>
     </SHubPageHeader>
 

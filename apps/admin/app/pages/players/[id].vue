@@ -303,7 +303,7 @@ const contractModalTitle = computed(() =>
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isContractModalOpen"
       :title="contractModalTitle"
       :dismissible="!isSavingContract"
@@ -339,7 +339,7 @@ const contractModalTitle = computed(() =>
           @click="isContractModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="contractToDelete"

@@ -59,9 +59,9 @@ watch(
     <SHubPageHeader>
       <template #title>{{ season.name }}</template>
       <template #meta>
-        <SLink :to="$localePath('/seasons')" variant="muted">
+        <SbLink :to="$localePath('/seasons')" variant="muted">
           {{ t("page.seasons.archive.allSeasons") }}
-        </SLink>
+        </SbLink>
       </template>
     </SHubPageHeader>
 
@@ -72,7 +72,7 @@ watch(
         </template>
         <SCard v-if="season.winner">
           <SListItem :to="$localePath(teamPath(season.winner.slug))" class="min-w-0 gap-2">
-            <UIcon
+            <Icon
               name="i-fluent-trophy-24-filled"
               class="size-5 shrink-0 text-primary"
               aria-hidden="true"
@@ -158,7 +158,7 @@ watch(
                     :key="index"
                     class="flex min-w-0 flex-wrap items-baseline gap-x-2"
                   >
-                    <SLink
+                    <SbLink
                       v-if="entry.tournament"
                       :to="
                         $localePath(
@@ -168,7 +168,7 @@ watch(
                       variant="inline"
                     >
                       {{ entry.label }}
-                    </SLink>
+                    </SbLink>
                     <span v-else>{{ entry.label }}</span>
                     <span class="text-muted">{{ entry.result }}</span>
                   </li>
@@ -205,7 +205,7 @@ watch(
             class="min-w-0"
           >
             <div class="flex w-full min-w-0 items-center gap-2">
-              <UIcon
+              <Icon
                 name="i-fluent-star-24-filled"
                 class="size-5 shrink-0 text-primary"
                 aria-hidden="true"
@@ -217,7 +217,7 @@ watch(
                 </p>
                 <p class="truncate text-xs text-muted">{{ awardMeta(award) }}</p>
               </div>
-              <UIcon
+              <Icon
                 name="i-fluent-open-24-regular"
                 class="size-4 shrink-0 text-muted"
                 aria-hidden="true"

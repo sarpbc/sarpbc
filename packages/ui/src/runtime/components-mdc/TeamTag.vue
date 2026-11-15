@@ -58,13 +58,7 @@ watch(open, (isOpen) => {
 </script>
 
 <template>
-  <UPopover
-    v-model:open="open"
-    mode="hover"
-    :open-delay="0"
-    :close-delay="100"
-    :ui="{ content: 'rounded-none border border-default ring-0 shadow-sm overflow-hidden' }"
-  >
+  <SbHoverCard v-model:open="open">
     <NuxtLink
       :to="href"
       v-bind="linkAttrs"
@@ -103,7 +97,7 @@ watch(open, (isOpen) => {
             :class="{ 'bg-elevated': !logoSrc }"
           >
             <img v-if="logoSrc" :src="logoSrc" :alt="team.name" class="size-full object-contain" />
-            <UIcon v-else name="i-fluent-people-team-24-regular" class="size-5 text-muted" />
+            <Icon v-else name="i-fluent-people-team-24-regular" class="size-5 text-muted" />
           </div>
           <p class="truncate font-medium text-highlighted" translate="no">
             {{ team.name }}
@@ -130,7 +124,7 @@ watch(open, (isOpen) => {
                   alt=""
                   class="size-full object-cover"
                 />
-                <UIcon v-else name="i-fluent-person-24-regular" class="size-5 text-muted" />
+                <Icon v-else name="i-fluent-person-24-regular" class="size-5 text-muted" />
               </div>
               <span class="truncate text-center text-xs font-medium" translate="no">
                 {{ rosterPlayer.name }}
@@ -140,5 +134,5 @@ watch(open, (isOpen) => {
         </ul>
       </div>
     </template>
-  </UPopover>
+  </SbHoverCard>
 </template>

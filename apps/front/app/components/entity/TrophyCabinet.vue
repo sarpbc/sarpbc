@@ -65,7 +65,7 @@ const formatEndDate = (value: Date | string | null) => {
           class="min-w-0"
         >
           <div class="flex w-full min-w-0 items-center gap-2">
-            <UIcon name="i-fluent-trophy-24-regular" class="size-5 shrink-0 text-primary" />
+            <Icon name="i-fluent-trophy-24-regular" class="size-5 shrink-0 text-primary" />
             <div class="min-w-0 flex-1">
               <p class="truncate text-sm font-medium text-highlighted">
                 {{ trophy.displayName }}
@@ -87,7 +87,7 @@ const formatEndDate = (value: Date | string | null) => {
 
       <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
-          <UIcon name="i-fluent-trophy-24-regular" class="text-3xl text-muted" />
+          <Icon name="i-fluent-trophy-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
             {{ t(`page.${kind}.slug.trophies.empty`) }}
           </p>

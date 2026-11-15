@@ -186,7 +186,7 @@ const onSyncTeams = async () => {
       </ClientOnly>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateModalOpen"
       :title="$t('page.teams.create.title')"
       :dismissible="!isCreating"
@@ -219,7 +219,7 @@ const onSyncTeams = async () => {
           @click="isCreateModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="teamToDelete"

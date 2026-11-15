@@ -333,7 +333,7 @@ setPageSeo({
                 :excluded-slug="entry.other?.slug ?? null"
                 @select="selectPlayer(entry.side, $event)"
               />
-              <SLink
+              <SbLink
                 v-if="entry.player"
                 :to="$localePath(playerPath(entry.player.slug))"
                 variant="inline"
@@ -348,7 +348,7 @@ setPageSeo({
                 <span v-if="entry.player.team" class="truncate text-xs text-muted">
                   {{ entry.player.team.name }}
                 </span>
-              </SLink>
+              </SbLink>
             </div>
           </div>
         </div>

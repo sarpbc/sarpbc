@@ -191,11 +191,11 @@ const submit = () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="title"
     :description="t('page.tournaments.viewership.description')"
-    :ui="{ content: 'sm:max-w-2xl' }"
+    size="lg"
   >
     <template #body>
       <p v-if="loading" class="text-sm text-muted" aria-live="polite">
@@ -323,5 +323,5 @@ const submit = () => {
         </div>
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

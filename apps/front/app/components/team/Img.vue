@@ -122,7 +122,7 @@ const failedSrcs = ref(new Set<string>());
         >
           {{ initial }}
         </span>
-        <UIcon v-else name="i-fluent-people-team-24-regular" :class="[spec.icon, 'text-muted']" />
+        <Icon v-else name="i-fluent-people-team-24-regular" :class="[spec.icon, 'text-muted']" />
       </div>
     </template>
   </div>

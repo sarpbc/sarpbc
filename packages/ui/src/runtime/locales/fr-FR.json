@@ -12,5 +12,8 @@
     "matchTbd": "À déterminer",
     "matchDataBy": "Données des matchs fournies par",
     "matchesUnavailable": "Impossible de charger ces matchs."
+  },
+  "design": {
+    "close": "Fermer"
   }
 }

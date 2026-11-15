@@ -158,9 +158,9 @@ const formatDates = (stage: CircuitStage): string => {
               class="flex flex-row flex-wrap items-start justify-between gap-3 border border-default p-3"
             >
               <div class="flex min-w-0 flex-col gap-1 text-sm">
-                <ULink :to="localePath(`/tournaments/${stage.tournament.id}`)" class="font-medium">
+                <SbLink :to="localePath(`/tournaments/${stage.tournament.id}`)" class="font-medium">
                   {{ stageLabel(stage) }}
-                </ULink>
+                </SbLink>
                 <span class="text-muted">
                   {{ formatDates(stage) }} ·
                   {{ $t(`page.tournaments.source.${stage.tournament.source}`) }} ·
@@ -186,14 +186,15 @@ const formatDates = (stage: CircuitStage): string => {
                 <span v-if="stage.tournament.source === 'startgg'" class="text-muted">
                   {{ $t("page.circuits.stages.startggNotice") }}
                 </span>
-                <ULink
+                <SbLink
+                  variant="accent"
                   :to="stage.sourceUrl"
                   external
                   target="_blank"
-                  class="break-all text-primary hover:underline"
+                  class="break-all"
                 >
                   {{ stage.sourceUrl }}
-                </ULink>
+                </SbLink>
               </div>
               <div class="flex flex-row items-center gap-1">
                 <SbButton

@@ -166,7 +166,7 @@ const save = async (input: OnThisDayFactInput) => {
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isFormOpen"
       :title="$t(editing ? 'page.onThisDay.edit.title' : 'page.onThisDay.create.title')"
       :description="$t('page.onThisDay.form.description')"
@@ -183,7 +183,7 @@ const save = async (input: OnThisDayFactInput) => {
           @submit="save"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="factToDelete"

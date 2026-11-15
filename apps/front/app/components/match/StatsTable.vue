@@ -118,14 +118,14 @@ const replayLabel = computed(() =>
             class="h-row border-b border-separator"
           >
             <th scope="row" class="max-w-0 px-2 text-left font-normal">
-              <SLink
+              <SbLink
                 v-if="row.player"
                 :to="$localePath(playerPath(row.player.slug))"
                 variant="inline"
                 class="block truncate"
               >
                 {{ playerLabel(row) }}
-              </SLink>
+              </SbLink>
               <span v-else class="block truncate text-muted">{{ playerLabel(row) }}</span>
             </th>
             <td v-for="column in COLUMNS" :key="column" class="px-1 text-right tabular-nums">
@@ -137,7 +137,7 @@ const replayLabel = computed(() =>
     </div>
 
     <p class="flex h-row items-center px-2 text-xs text-muted">
-      <SLink
+      <SbLink
         :to="replayUrl"
         external
         target="_blank"
@@ -146,7 +146,7 @@ const replayLabel = computed(() =>
         :aria-label="replayLabel"
       >
         {{ t("page.match.detail.stats.source") }}
-      </SLink>
+      </SbLink>
     </p>
   </SCard>
 </template>

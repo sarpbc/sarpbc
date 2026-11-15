@@ -88,13 +88,13 @@ const addEntry = async () => {
   <article class="flex flex-col gap-4 border border-default p-3">
     <header class="flex flex-row flex-wrap items-center justify-between gap-2">
       <div class="flex min-w-0 flex-row items-center gap-2">
-        <ULink
+        <SbLink
           :to="localePath(`/teams/${participant.team.id}`)"
           class="truncate font-medium"
           translate="no"
         >
           {{ participant.team.name }}
-        </ULink>
+        </SbLink>
         <SbBadge v-if="isWinner" color="info">
           {{ $t("page.seasons.participants.winner") }}
         </SbBadge>

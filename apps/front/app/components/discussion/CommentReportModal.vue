@@ -80,7 +80,7 @@ const submitReport = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="$t('components.discussion.report.title')"
     :dismissible="!isSubmitting"
@@ -107,5 +107,5 @@ const submitReport = async () => {
         @click="open = false"
       />
     </template>
-  </UModal>
+  </SbModal>
 </template>

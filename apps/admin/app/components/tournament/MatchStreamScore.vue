@@ -151,11 +151,11 @@ const confirm = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.streamScore.title', { match: label })"
     :description="t('page.tournaments.streamScore.description')"
-    :ui="{ content: 'sm:max-w-2xl' }"
+    size="lg"
   >
     <template #body>
       <div class="flex flex-col gap-4">
@@ -291,5 +291,5 @@ const confirm = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

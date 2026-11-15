@@ -30,12 +30,6 @@ const railTitle = computed(() =>
     : t("page.game.career.results.splitTitle", { split: split?.split ?? 1 }),
 );
 
-const tooltipContent = {
-  align: "center" as const,
-  side: "top" as const,
-  sideOffset: 4,
-};
-
 const regionalPlacementPoints = (placement: CareerPlacement): number => {
   const weight = region ? regionalCircuitWeight(region) : 1;
 
@@ -75,14 +69,11 @@ const pointsTooltip = (points: number): string => {
               <p class="min-w-0 font-medium">
                 {{ t("page.game.career.results.regional", { index: index + 1 }) }}
               </p>
-              <UTooltip
-                :text="pointsTooltip(regionalPlacementPoints(placement))"
-                :content="tooltipContent"
-              >
+              <SbTooltip :text="pointsTooltip(regionalPlacementPoints(placement))">
                 <p class="shrink-0 text-right">
                   {{ t(`page.game.career.placements.${placement}`) }}
                 </p>
-              </UTooltip>
+              </SbTooltip>
             </div>
           </li>
           <li
@@ -93,20 +84,19 @@ const pointsTooltip = (points: number): string => {
               <p class="min-w-0 font-medium">
                 {{ t("page.game.career.results.major", { split: split.split }) }}
               </p>
-              <UTooltip
+              <SbTooltip
                 v-if="split.major"
                 :text="pointsTooltip(majorPlacementPoints(split.major))"
-                :content="tooltipContent"
               >
                 <p class="shrink-0 text-right">
                   {{ t(`page.game.career.placements.${split.major}`) }}
                 </p>
-              </UTooltip>
-              <UTooltip v-else :text="pointsTooltip(0)" :content="tooltipContent">
+              </SbTooltip>
+              <SbTooltip v-else :text="pointsTooltip(0)">
                 <p class="shrink-0 text-right text-muted">
                   {{ t("page.game.career.results.majorNotQualified") }}
                 </p>
-              </UTooltip>
+              </SbTooltip>
             </div>
           </li>
         </ul>

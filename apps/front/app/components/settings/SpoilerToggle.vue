@@ -8,7 +8,7 @@ const tooltip = computed(() =>
 </script>
 
 <template>
-  <UTooltip :text="tooltip">
+  <SbTooltip :text="tooltip">
     <SbButton
       :icon="enabled ? 'i-fluent-eye-off-24-regular' : 'i-fluent-eye-24-regular'"
       variant="tertiary"
@@ -17,5 +17,5 @@ const tooltip = computed(() =>
       :aria-label="t('components.spoiler.toggle')"
       @click="setEnabled(!enabled)"
     />
-  </UTooltip>
+  </SbTooltip>
 </template>

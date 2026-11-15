@@ -97,7 +97,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <UPopover v-if="canManage" v-model:open="open">
+  <SbPopover v-if="canManage" v-model:open="open">
     <SbButton
       icon="i-fluent-more-horizontal-24-regular"
       variant="tertiary"
@@ -148,5 +148,5 @@ const submit = async () => {
         />
       </form>
     </template>
-  </UPopover>
+  </SbPopover>
 </template>

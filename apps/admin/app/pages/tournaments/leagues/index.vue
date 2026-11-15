@@ -188,7 +188,7 @@ const uploadedImageUrl = computed({
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isOpen"
       :title="editing ? $t('page.tournaments.leagues.edit') : $t('page.tournaments.leagues.create')"
       :description="isSynced ? $t('page.tournaments.leagues.syncedHint') : undefined"
@@ -259,6 +259,6 @@ const uploadedImageUrl = computed({
           @click="isOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
   </NuxtLayout>
 </template>

@@ -32,9 +32,9 @@ const dayLabel = computed(() =>
             {{ t("components.onThisDay.title") }}
             <span v-if="dayLabel" class="font-normal text-muted">· {{ dayLabel }}</span>
           </h2>
-          <SLink v-if="hasMore" :to="localePath('/on-this-day')" class="text-xs">
+          <SbLink v-if="hasMore" :to="localePath('/on-this-day')" class="text-xs">
             {{ t("components.onThisDay.viewAll", { count: events.length }) }}
-          </SLink>
+          </SbLink>
         </div>
       </template>
 

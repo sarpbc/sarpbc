@@ -196,11 +196,11 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="title"
     :description="t('page.tournaments.streams.description')"
-    :ui="{ content: 'sm:max-w-3xl' }"
+    size="xl"
   >
     <template #body>
       <p v-if="loading" class="text-sm text-muted" aria-live="polite">
@@ -313,5 +313,5 @@ const save = async () => {
         </div>
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

@@ -18,7 +18,7 @@ const signInLabel = computed(() =>
 
 <template>
   <slot v-if="isSignedIn" />
-  <SLink
+  <SbLink
     v-else-if="sessionReady"
     :to="localePath('/login')"
     variant="muted"
@@ -27,5 +27,5 @@ const signInLabel = computed(() =>
     "
   >
     {{ signInLabel }}
-  </SLink>
+  </SbLink>
 </template>

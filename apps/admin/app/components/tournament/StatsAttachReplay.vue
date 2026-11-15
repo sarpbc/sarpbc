@@ -128,7 +128,7 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.statsAttach.title')"
     :description="t('page.tournaments.statsAttach.description', { title: shown?.title ?? '' })"
@@ -201,5 +201,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

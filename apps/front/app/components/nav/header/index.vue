@@ -95,7 +95,7 @@ const menuToggleLabel = computed(() =>
       class="w-full max-w-7xl px-2 xl:px-0 h-header flex flex-row items-center justify-between mx-auto"
     >
       <div class="h-full flex flex-row items-center">
-        <ULink
+        <SbLink
           :to="$localePath('/')"
           class="flex flex-row flex-1 items-center transition-none"
           :aria-label="$t('components.header.home')"
@@ -109,7 +109,7 @@ const menuToggleLabel = computed(() =>
             decoding="async"
             class="size-12 bg-transparent"
           />
-        </ULink>
+        </SbLink>
         <UNavigationMenu
           :items="items"
           color="neutral"

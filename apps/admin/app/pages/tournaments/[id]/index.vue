@@ -302,15 +302,16 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 {{ match.status ?? "unknown" }}
                 · {{ $t("page.tournaments.match.score") }}: {{ matchScore(match) }}
               </p>
-              <ULink
+              <SbLink
+                variant="accent"
                 v-if="matchSourceUrl(match)"
-                :to="matchSourceUrl(match) ?? undefined"
+                :to="matchSourceUrl(match) ?? ''"
                 external
                 target="_blank"
-                class="truncate text-sm text-primary hover:underline"
+                class="truncate text-sm"
               >
                 {{ matchSourceUrl(match) }}
-              </ULink>
+              </SbLink>
             </div>
 
             <div class="flex shrink-0 flex-row flex-wrap gap-1">

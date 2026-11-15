@@ -383,14 +383,15 @@ const save = async () => {
         >
           <SbInput v-model="row.sourceUrl" type="url" autocomplete="off" class="w-full" />
           <template v-if="row.sourceUrl.trim() && !sourceUrlError(row.sourceUrl)" #help>
-            <ULink
+            <SbLink
+              variant="accent"
               :to="row.sourceUrl.trim()"
               external
               target="_blank"
-              class="break-all text-primary hover:underline"
+              class="break-all"
             >
               {{ t("common.openSource") }}
-            </ULink>
+            </SbLink>
           </template>
         </SbFormField>
       </div>
