@@ -154,7 +154,8 @@
       }
     },
     "legal": {
-      "notFound": "Ce document est introuvable."
+      "notFound": "Ce document est introuvable.",
+      "seoTitle": "{title} {'|'} sarpbc.org, l’esport Rocket League"
     },
     "forum": {
       "createPost": "Créer un post",
@@ -381,7 +382,7 @@
       "shortNewsCount": "{n} short | {n} shorts",
       "seo": {
         "title": "Actus & matchs Rocket League {'|'} sarpbc.org",
-        "description": "Réunir l'écosystème de l'esport Rocket League en un seul endroit.",
+        "description": "Suivez l’esport Rocket League sur sarpbc.org : actus RLCS, calendrier des matchs en direct, résultats, équipes, joueurs, transferts et forum communautaire bilingue.",
         "heading": "Actualités, matchs et résultats de l’esport Rocket League"
       },
       "empty": "Aucune actu publiée pour le moment.",
@@ -1211,8 +1212,8 @@
       "week": {
         "title": "Cette semaine",
         "range": "{start} – {end}",
-        "seoTitle": "Actualités esport Rocket League de la semaine {'|'} sarpbc.org",
-        "seoDescription": "Retrouvez les brèves esport Rocket League de la semaine sur sarpbc.org : équipes RLCS, transferts de joueurs, annonces et dernières nouvelles des tournois."
+        "seoTitle": "Actualités esport Rocket League, {range} {'|'} sarpbc.org",
+        "seoDescription": "Les actualités esport Rocket League du {range} sur sarpbc.org : brèves sur les équipes RLCS, les transferts de joueurs et les annonces de tournois."
       }
     },
     "players": {
@@ -1234,7 +1235,7 @@
       "compare": {
         "title": "Comparer des joueurs",
         "intro": "Titres, bilan en séries, gains, distinctions et équipes, côte à côte.",
-        "seoTitle": "Comparer des joueurs - sarpbc.org",
+        "seoTitle": "Comparer des joueurs Rocket League : carrières et titres {'|'} sarpbc.org",
         "seoTitleWithNames": "{a} vs {b} - Comparaison de carrières - sarpbc.org",
         "seoDescription": "Comparez la carrière de deux joueurs de Rocket League : titres, bilan en séries, gains, distinctions et équipes.",
         "firstPlayer": "Premier joueur",
@@ -1278,10 +1279,10 @@
       "slug": {
         "failedToLoadPlayerData": "Échec du chargement des données du joueur",
         "playerNotFound": "Joueur introuvable",
-        "seoTitleWithName": "{name} - sarpbc.org",
-        "seoTitleDefault": "Joueur - sarpbc.org",
-        "seoDescriptionWithName": "Voir le profil, les matchs à venir et les résultats récents de {name}",
-        "seoDescriptionDefault": "Profil du joueur, matchs à venir et résultats récents",
+        "seoTitleWithName": "{name} : profil et résultats du joueur Rocket League {'|'} sarpbc.org",
+        "seoTitleDefault": "Profil de joueur Rocket League {'|'} sarpbc.org",
+        "seoDescriptionWithName": "{name} sur sarpbc.org : profil esport Rocket League avec équipes, matchs à venir, résultats récents et parcours en tournoi.",
+        "seoDescriptionDefault": "Profil de joueur esport Rocket League sur sarpbc.org : équipes, matchs à venir, résultats récents et parcours en tournoi.",
         "currentTeam": "Équipe actuelle",
         "role": "Rôle",
         "age": "Âge",
@@ -1385,7 +1386,8 @@
         "staffCareer": "Carrière staff",
         "viewStaffProfile": "Voir la fiche staff",
         "compare": "Comparer",
-        "compareCareers": "Comparer les carrières"
+        "compareCareers": "Comparer les carrières",
+        "seoDescriptionWithTeam": "{name} ({team}) sur sarpbc.org : profil esport Rocket League avec équipes, matchs à venir, résultats récents et parcours en tournoi."
       }
     },
     "staff": {
@@ -1393,8 +1395,8 @@
         "kicker": "Staff",
         "staffNotFound": "Membre du staff introuvable",
         "failedToLoadStaffData": "Impossible de charger les données du staff",
-        "seoTitleWithName": "{name} - Staff - sarpbc.org",
-        "seoDescriptionWithName": "Suivez la carrière staff de {name} : équipes, rôles et événements.",
+        "seoTitleWithName": "{name} : carrière staff Rocket League {'|'} sarpbc.org",
+        "seoDescriptionWithName": "{name} sur sarpbc.org : carrière staff esport Rocket League avec ses équipes, ses rôles comme coach ou analyste et les événements encadrés.",
         "currentTeam": "Équipe actuelle",
         "noCurrentTeam": "Sans équipe",
         "role": "Rôle",
@@ -1446,10 +1448,10 @@
         "loadingTeam": "Chargement de l'équipe...",
         "failedToLoadTeamData": "Échec du chargement des données de l'équipe",
         "teamNotFound": "Équipe introuvable",
-        "seoTitleWithName": "{name} - sarpbc.org",
-        "seoTitleDefault": "Équipe - sarpbc.org",
-        "seoDescriptionWithName": "Voir l'effectif, les prochains matchs et les derniers résultats de {name}",
-        "seoDescriptionDefault": "Effectif, prochains matchs et derniers résultats de l'équipe",
+        "seoTitleWithName": "{name} : effectif et résultats de l’équipe Rocket League {'|'} sarpbc.org",
+        "seoTitleDefault": "Effectif et résultats d’équipe Rocket League {'|'} sarpbc.org",
+        "seoDescriptionWithName": "Suivez {name} sur sarpbc.org : effectif et historique esport Rocket League, matchs à venir, résultats récents et participations aux tournois.",
+        "seoDescriptionDefault": "Équipe esport Rocket League sur sarpbc.org : effectif et historique, matchs à venir, résultats récents et participations aux tournois.",
         "players": "Joueurs",
         "staff": "Staff",
         "nameHistory": {
@@ -1544,7 +1546,8 @@
             "emptyHint": "Les résultats apparaîtront ici après le premier match de cette équipe."
           }
         },
-        "kicker": "Équipe"
+        "kicker": "Équipe",
+        "seoDescriptionWithRoster": "{name}, effectif Rocket League : {players}. Suivez l’équipe sur sarpbc.org avec ses matchs à venir, résultats récents et tournois."
       }
     },
     "tournaments": {
@@ -1567,6 +1570,10 @@
         "seoTitleDefault": "Bracket de tournoi Rocket League {'|'} sarpbc.org",
         "seoDescription": "Consultez le bracket, le calendrier et les résultats des matchs du tournoi Rocket League {tournamentName} sur sarpbc.org.",
         "seoDescriptionDefault": "Parcourez les brackets, les calendriers et les résultats des tournois Rocket League sur sarpbc.org.",
+        "seoTitleMatches": "{tournamentName} : matchs et résultats {'|'} sarpbc.org",
+        "seoDescriptionMatches": "Tous les matchs du tournoi Rocket League {tournamentName} sur sarpbc.org : calendrier, scores des séries et résultats, tour par tour.",
+        "seoTitleStats": "{tournamentName} : statistiques des joueurs {'|'} sarpbc.org",
+        "seoDescriptionStats": "Statistiques des joueurs du tournoi Rocket League {tournamentName} sur sarpbc.org : buts, passes, arrêts, tirs et scores sur l’ensemble du tournoi.",
         "bracketTitle": "Bracket du tournoi",
         "bracketEmpty": "Le bracket du tournoi n’est pas encore disponible. Revenez lorsque les matchs auront été annoncés.",
         "noMatches": "Aucun match disponible pour ce tournoi.",
@@ -1684,13 +1691,13 @@
     },
     "match": {
       "detail": {
-        "seoTitle": "{teamA} vs {teamB} | {tournament} {'|'} sarpbc.org",
-        "seoTitleDefault": "Match {'|'} sarpbc.org",
-        "seoDescriptionLive": "Match en direct : {teamA} vs {teamB} dans {tournament}.",
-        "seoDescriptionUpcoming": "Match à venir : {teamA} vs {teamB} dans {tournament} le {date}.",
-        "seoDescriptionFinished": "Score final : {teamA} {scoreA} - {scoreB} {teamB} dans {tournament}.",
-        "seoDescriptionSpoilerFree": "{teamA} vs {teamB} dans {tournament}. Rediffusions et détails du match.",
-        "seoDescriptionDefault": "Consultez les détails du match, la forme récente et les rosters sur sarpbc.org.",
+        "seoTitle": "{teamA} vs {teamB} {'|'} {tournament} {'|'} sarpbc.org",
+        "seoTitleDefault": "Match Rocket League {'|'} sarpbc.org",
+        "seoDescriptionLive": "Match Rocket League en direct : {teamA} vs {teamB} dans {tournament}. Suivez le score de la série, les compositions et les détails sur sarpbc.org.",
+        "seoDescriptionUpcoming": "Match Rocket League à venir : {teamA} vs {teamB} dans {tournament} le {date}. Compositions et détails du match sur sarpbc.org.",
+        "seoDescriptionFinished": "Score final : {teamA} {scoreA} - {scoreB} {teamB} dans {tournament}. Résultats des manches, compositions et détails du match sur sarpbc.org.",
+        "seoDescriptionSpoilerFree": "{teamA} vs {teamB} dans {tournament} : compositions, rediffusions et détails du match Rocket League sur sarpbc.org, sans le résultat.",
+        "seoDescriptionDefault": "Détails d’un match Rocket League sur sarpbc.org : score de la série, compositions, forme des équipes et tournoi concerné.",
         "notFound": "Match introuvable",
         "error": "Impossible de charger ce match. Vérifiez votre connexion et réessayez.",
         "unknownTeam": "À déterminer",

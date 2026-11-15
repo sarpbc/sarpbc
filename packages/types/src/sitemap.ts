@@ -5,6 +5,10 @@ export const SITEMAP_KINDS = [
   "players",
   "staff",
   "teams",
+  "circuits",
+  "seasons",
+  "countries",
+  "forum",
 ] as const;
 
 export type SitemapKind = (typeof SITEMAP_KINDS)[number];

@@ -10,10 +10,17 @@ const slug = computed(() => String(route.params.slug));
 
 const { data: staff, error: staffError } = await useAsyncData(
   () => `staff-slug-${slug.value}`,
-  async () => {
+  async (nuxtApp) => {
     const player = await getPlayerFromSlug(slug.value);
 
-    return player ? { contracts: await getPlayerContracts(player.id), player } : null;
+    if (!player) {
+      return null;
+    }
+
+    // The Nuxt context is lost after the first await; apiFetch needs it to read the runtime config.
+    const contracts = await nuxtApp.runWithContext(() => getPlayerContracts(player.id));
+
+    return { contracts, player };
   },
   { watch: [slug] },
 );

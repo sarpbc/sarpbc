@@ -19,3 +19,5 @@ export {
 export { toPlayer, toTeam, toContract, toPhoto, teamNameAt } from "./persistence/roster.mapper";
 
 export { RosterSyncWriter } from "./persistence/roster-sync.writer";
+
+export { PLAYER_NATIONALITY_CODE } from "./persistence/player.store";

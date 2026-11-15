@@ -11,7 +11,7 @@ import { directoryQuery } from "./directory-query";
 
 const playerOptions = { populate: ["team", "photos"] as const };
 
-const NATIONALITY_CODE = "upper(trim(nationality))";
+export const PLAYER_NATIONALITY_CODE = "upper(trim(nationality))";
 
 export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
   constructor(
@@ -79,7 +79,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     const rows: { code: string; players: string }[] = await this.em
       .getConnection()
       .execute(
-        `SELECT ${NATIONALITY_CODE} AS code, count(*) AS players FROM player WHERE merged_into_id IS NULL AND ${NATIONALITY_CODE} ~ '^[A-Z]{2}$' GROUP BY 1 ORDER BY 1`,
+        `SELECT ${PLAYER_NATIONALITY_CODE} AS code, count(*) AS players FROM player WHERE merged_into_id IS NULL AND ${PLAYER_NATIONALITY_CODE} ~ '^[A-Z]{2}$' GROUP BY 1 ORDER BY 1`,
       );
 
     return rows.map(({ code, players }) => ({ code, players: Number(players) }));
@@ -88,9 +88,10 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
   async findByNationality(code: string) {
     const ids: { id: string }[] = await this.em
       .getConnection()
-      .execute(`SELECT id FROM player WHERE merged_into_id IS NULL AND ${NATIONALITY_CODE} = ?`, [
-        code,
-      ]);
+      .execute(
+        `SELECT id FROM player WHERE merged_into_id IS NULL AND ${PLAYER_NATIONALITY_CODE} = ?`,
+        [code],
+      );
 
     if (ids.length === 0) {
       return [];

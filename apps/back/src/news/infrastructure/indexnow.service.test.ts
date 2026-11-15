@@ -8,7 +8,7 @@ const TEST_KEY = "indexnow-nonproduction-test-fixture";
 describe(IndexNowService, () => {
   afterEach(() => vi.restoreAllMocks());
 
-  it("submits deduplicated English and French URLs with a verifiable key location", async () => {
+  it("submits the home page and deduplicated news, in English and French, with a verifiable key location", async () => {
     const fetch = vi
       .spyOn(globalThis, "fetch")
       .mockResolvedValue(new Response(null, { status: 202 }));
@@ -30,7 +30,12 @@ describe(IndexNowService, () => {
       host: "sarpbc.org",
       key: TEST_KEY,
       keyLocation: `https://sarpbc.org/${TEST_KEY}.txt`,
-      urlList: ["https://sarpbc.org/news/rlcs-final", "https://sarpbc.org/fr/news/rlcs-final"],
+      urlList: [
+        "https://sarpbc.org/",
+        "https://sarpbc.org/fr/",
+        "https://sarpbc.org/news/rlcs-final",
+        "https://sarpbc.org/fr/news/rlcs-final",
+      ],
     });
   });
 

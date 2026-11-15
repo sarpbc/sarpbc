@@ -153,6 +153,7 @@ export {
   localizedPath,
   matchPath,
   newsPath,
+  newsWeekPath,
   playerPath,
   stageMatchesPath,
   stageStatsPath,

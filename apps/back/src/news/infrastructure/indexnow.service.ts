@@ -25,11 +25,13 @@ export class IndexNowService implements NewsIndexing {
     try {
       const { origin } = new URL(this.configService.getOrThrow<string>("front_url"));
 
-      const urlList = [...new Set(slugs)].flatMap((slug) => {
-        const path = newsPath(encodeURIComponent(slug));
+      // The home page lists the latest news, so it changes with every article.
+      const paths = ["/", ...new Set(slugs.map((slug) => newsPath(encodeURIComponent(slug))))];
 
-        return [`${origin}${path}`, `${origin}${localizedPath(path, "fr")}`];
-      });
+      const urlList = paths.flatMap((path) => [
+        `${origin}${path}`,
+        `${origin}${localizedPath(path, "fr")}`,
+      ]);
 
       const response = await fetch("https://api.indexnow.org/indexnow", {
         body: JSON.stringify({

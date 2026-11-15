@@ -13,6 +13,8 @@ export const teamPath = (slug: string): string => `/team/${slug}`;
 
 export const newsPath = (slug: string): string => `/news/${slug}`;
 
+export const newsWeekPath = (weekId: string): string => `/news/week/${weekId}`;
+
 export const tournamentEventPath = (eventSlug: string): string => `/tournaments/${eventSlug}`;
 
 export const tournamentStagePath = (eventSlug: string, stageSlug: string): string =>
