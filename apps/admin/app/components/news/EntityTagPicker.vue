@@ -86,7 +86,7 @@ const itemLogoSrc = (item: Player | Team) => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     :open="open"
     :title="title"
     :dismissible="!pending"
@@ -94,7 +94,7 @@ const itemLogoSrc = (item: Player | Team) => {
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <SbInput
+        <SInput
           v-model="query"
           :placeholder="placeholder"
           autofocus
@@ -104,8 +104,8 @@ const itemLogoSrc = (item: Player | Team) => {
 
         <ul v-if="results.length > 0" class="flex max-h-72 flex-col gap-1 overflow-y-auto">
           <li v-for="item in results" :key="item.id">
-            <SbButton variant="tertiary" class="w-full justify-start gap-3" @click="onSelect(item)">
-              <SbAvatar
+            <SButton variant="tertiary" class="w-full justify-start gap-3" @click="onSelect(item)">
+              <SAvatar
                 :src="itemLogoSrc(item)"
                 :alt="item.name"
                 size="sm"
@@ -114,7 +114,7 @@ const itemLogoSrc = (item: Player | Team) => {
                 "
               />
               <span class="truncate" translate="no">{{ item.name }}</span>
-            </SbButton>
+            </SButton>
           </li>
         </ul>
 
@@ -125,7 +125,7 @@ const itemLogoSrc = (item: Player | Team) => {
     </template>
 
     <template #footer>
-      <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
+      <SButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
-  </SbModal>
+  </SModal>
 </template>

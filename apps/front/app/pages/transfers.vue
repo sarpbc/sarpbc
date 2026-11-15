@@ -49,16 +49,16 @@ setPageSeo({
       <HubCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
         <HubListItem v-for="index in 8" :key="index" class="gap-3">
-          <SbSkeleton class="h-3 w-20 shrink-0" />
-          <SbSkeleton class="size-7 shrink-0" />
-          <SbSkeleton class="h-3 max-w-40 flex-1" />
-          <SbSkeleton class="h-3 w-20" />
-          <SbSkeleton class="h-3 w-28" />
+          <SSkeleton class="h-3 w-20 shrink-0" />
+          <SSkeleton class="size-7 shrink-0" />
+          <SSkeleton class="h-3 max-w-40 flex-1" />
+          <SSkeleton class="h-3 w-20" />
+          <SSkeleton class="h-3 w-28" />
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t('page.transfers.error')" @retry="refresh()" />
+        <SErrorState :message="t('page.transfers.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else-if="transfers.length > 0">
@@ -66,7 +66,7 @@ setPageSeo({
       </HubCard>
 
       <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-people-swap-24-regular"
           :title="t('components.transfer.empty.title')"
           :hint="t('components.transfer.empty.hint')"

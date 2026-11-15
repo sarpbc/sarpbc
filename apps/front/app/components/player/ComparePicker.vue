@@ -65,8 +65,8 @@ const select = (slug: string | null) => {
 </script>
 
 <template>
-  <SbFormField :label="label" class="w-full min-w-0">
-    <SbCombobox
+  <SFormField :label="label" class="w-full min-w-0">
+    <SCombobox
       v-model:search-term="searchTerm"
       :model-value="selected?.value ?? null"
       :items="items"
@@ -80,6 +80,6 @@ const select = (slug: string | null) => {
       <template #empty>
         {{ query ? t("components.input.noResult") : t("page.player.compare.searchHint") }}
       </template>
-    </SbCombobox>
-  </SbFormField>
+    </SCombobox>
+  </SFormField>
 </template>

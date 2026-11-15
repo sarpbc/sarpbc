@@ -79,7 +79,7 @@ const addAward = async (input: SeasonAwardInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -87,7 +87,7 @@ const addAward = async (input: SeasonAwardInput) => {
         {{ $t("page.seasons.loading") }}
       </p>
 
-      <SbErrorState
+      <SErrorState
         v-else-if="error || !season"
         :message="getApiErrorMessage(error) ?? $t('page.seasons.loadError')"
         @retry="refresh()"
@@ -99,9 +99,9 @@ const addAward = async (input: SeasonAwardInput) => {
           <p class="text-sm text-muted">
             <template v-if="publicUrl">
               {{ $t("page.seasons.edit.publishedAt") }}
-              <SbLink variant="accent" :to="publicUrl" external target="_blank">
+              <SLink variant="accent" :to="publicUrl" external target="_blank">
                 {{ publicUrl }}
-              </SbLink>
+              </SLink>
             </template>
             <template v-else>{{ $t("page.seasons.edit.unpublished") }}</template>
           </p>
@@ -140,14 +140,14 @@ const addAward = async (input: SeasonAwardInput) => {
               <div class="flex min-w-0 flex-col gap-1 text-sm">
                 <p class="font-medium">
                   {{ awardLabel(award) }}:
-                  <SbLink :to="localePath(`/players/${award.player.id}`)" translate="no">
+                  <SLink :to="localePath(`/players/${award.player.id}`)" translate="no">
                     {{ award.player.name }}
-                  </SbLink>
+                  </SLink>
                 </p>
                 <p v-if="award.presentedBy" class="text-muted">
                   {{ $t("page.seasons.awards.presentedByValue", { name: award.presentedBy }) }}
                 </p>
-                <SbLink
+                <SLink
                   variant="accent"
                   :to="award.sourceUrl"
                   external
@@ -155,9 +155,9 @@ const addAward = async (input: SeasonAwardInput) => {
                   class="break-all"
                 >
                   {{ award.sourceUrl }}
-                </SbLink>
+                </SLink>
               </div>
-              <SbButton
+              <SButton
                 variant="tertiary"
                 danger
                 size="sm"

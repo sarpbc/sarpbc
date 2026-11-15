@@ -7,38 +7,38 @@ const { count: unreadCount } = useUnreadNotificationCount();
 
 <template>
   <ClientOnly>
-    <SbLink
+    <SLink
       v-if="!user"
       :to="$localePath('/login')"
       variant="muted"
       class="text-lg md:text-sm font-medium md:font-normal"
     >
       {{ t("components.header.signin") }}
-    </SbLink>
-    <SbLink
+    </SLink>
+    <SLink
       v-else
       :to="$localePath('/profile')"
       variant="muted"
       class="relative truncate text-lg md:text-sm font-medium md:font-normal"
     >
       {{ `${user.userName}` }}
-      <SbBadge
+      <SBadge
         v-if="unreadCount > 0"
         color="danger"
         class="absolute -top-1 -right-2 min-w-4 justify-center tabular-nums"
         :aria-label="t('components.header.unreadNotifications', { count: unreadCount })"
       >
         {{ unreadCount > 9 ? "9+" : unreadCount }}
-      </SbBadge>
-    </SbLink>
+      </SBadge>
+    </SLink>
     <template #fallback>
-      <SbLink
+      <SLink
         :to="$localePath('/login')"
         variant="muted"
         class="text-lg md:text-sm font-medium md:font-normal"
       >
         {{ t("components.header.signin") }}
-      </SbLink>
+      </SLink>
     </template>
   </ClientOnly>
 </template>

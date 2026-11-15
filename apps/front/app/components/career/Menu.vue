@@ -14,14 +14,14 @@ const { t } = useI18n();
 
 <template>
   <div class="flex flex-col gap-2">
-    <SbButton v-if="canContinue" block @click="emit('continue')">
+    <SButton v-if="canContinue" block @click="emit('continue')">
       {{ t("page.game.career.menu.continue") }}
-    </SbButton>
+    </SButton>
     <p v-if="canContinue && continueName" class="text-center text-xs text-muted">
       {{ continueName }}
     </p>
-    <SbButton block :variant="canContinue ? 'secondary' : 'primary'" @click="emit('newCareer')">
+    <SButton block :variant="canContinue ? 'secondary' : 'primary'" @click="emit('newCareer')">
       {{ t("page.game.career.menu.newCareer") }}
-    </SbButton>
+    </SButton>
   </div>
 </template>

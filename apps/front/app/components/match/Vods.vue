@@ -58,7 +58,7 @@ const linkLabel = (vod: MatchVod): string =>
         </span>
         <ul class="flex min-w-0 flex-wrap gap-x-4 gap-y-1">
           <li v-for="vod in links" :key="vod.url">
-            <SbLink
+            <SLink
               :to="vod.url"
               external
               target="_blank"
@@ -69,7 +69,7 @@ const linkLabel = (vod: MatchVod): string =>
             >
               {{ sourceLabel(vod.source) }} · {{ vod.language.toUpperCase() }}
               <Icon name="i-lucide-arrow-up-right" class="size-4" aria-hidden="true" />
-            </SbLink>
+            </SLink>
           </li>
         </ul>
       </li>

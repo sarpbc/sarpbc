@@ -74,12 +74,12 @@ const copyHex = async (): Promise<void> => {
       </div>
     </div>
     <div class="flex flex-wrap gap-3 mt-4">
-      <SbButton to="/sarpbc.svg" download="sarpbc.svg" external variant="secondary">
+      <SButton to="/sarpbc.svg" download="sarpbc.svg" external variant="secondary">
         {{ $t("page.brand.downloadSvg") }}
-      </SbButton>
-      <SbButton to="/sarpbc.png" download="sarpbc.png" external variant="secondary">
+      </SButton>
+      <SButton to="/sarpbc.png" download="sarpbc.png" external variant="secondary">
         {{ $t("page.brand.downloadPng") }}
-      </SbButton>
+      </SButton>
     </div>
 
     <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
@@ -98,9 +98,9 @@ const copyHex = async (): Promise<void> => {
       />
     </div>
     <div class="mt-4">
-      <SbButton to="/favicon.ico" download="favicon.ico" external variant="secondary">
+      <SButton to="/favicon.ico" download="favicon.ico" external variant="secondary">
         {{ $t("page.brand.downloadIco") }}
-      </SbButton>
+      </SButton>
     </div>
 
     <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
@@ -119,9 +119,9 @@ const copyHex = async (): Promise<void> => {
       />
     </div>
     <div class="mt-4">
-      <SbButton to="/og-image.jpg" download="og-image.jpg" external variant="secondary">
+      <SButton to="/og-image.jpg" download="og-image.jpg" external variant="secondary">
         {{ $t("page.brand.downloadJpg") }}
-      </SbButton>
+      </SButton>
     </div>
 
     <h2 class="text-xl font-medium tracking-tight text-highlighted mt-16 mb-4">
@@ -138,9 +138,9 @@ const copyHex = async (): Promise<void> => {
         </p>
         <div class="flex items-center justify-between gap-3 min-h-10">
           <p class="text-xs text-muted font-mono" translate="no">{{ BRAND_BLUE }}</p>
-          <SbButton variant="tertiary" size="sm" @click="copyHex">
+          <SButton variant="tertiary" size="sm" @click="copyHex">
             {{ $t("page.brand.copyHex") }}
-          </SbButton>
+          </SButton>
         </div>
       </div>
     </div>

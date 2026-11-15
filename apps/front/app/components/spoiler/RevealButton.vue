@@ -16,7 +16,7 @@ const revealAll = () => {
 </script>
 
 <template>
-  <SbButton
+  <SButton
     icon="i-fluent-eye-24-regular"
     variant="secondary"
     :label="label"

@@ -17,7 +17,7 @@ const {
   variant = "list",
 } = defineProps<{
   disabled?: boolean;
-  /** Renders one radio per item; leave it out to place `SbRadio` children yourself. */
+  /** Renders one radio per item; leave it out to place `SRadio` children yourself. */
   items?: readonly SelectOption<T>[] | null;
   orientation?: "vertical" | "horizontal";
   variant?: RadioVariant;

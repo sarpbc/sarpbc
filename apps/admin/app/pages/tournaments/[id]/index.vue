@@ -185,32 +185,32 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div class="flex flex-row gap-2">
-        <SbButton
+        <SButton
           v-if="tournament"
           variant="secondary"
           icon="i-fluent-edit-24-regular"
           :label="$t('page.tournaments.edit.action')"
           :to="localePath(`/tournaments/${tournamentId}/edit`)"
         />
-        <SbButton
+        <SButton
           v-if="tournament"
           variant="secondary"
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.tournamentAction')"
           @click="openStreams(`/tournaments/${tournamentId}/streams`, tournament.name)"
         />
-        <SbButton
+        <SButton
           v-if="tournament"
           variant="secondary"
           icon="i-fluent-live-24-regular"
           :label="$t('page.tournaments.streams.eventAction')"
           @click="openStreams(`/events/${tournament.event.id}/streams`, tournament.event.name)"
         />
-        <SbButton
+        <SButton
           v-if="tournament"
           variant="secondary"
           icon="i-fluent-people-audience-24-regular"
@@ -219,14 +219,14 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
             openViewership(`/events/${tournament.event.id}/viewership`, tournament.event.name)
           "
         />
-        <SbButton
+        <SButton
           v-if="canGenerateBracket"
           variant="secondary"
           icon="i-fluent-organization-horizontal-24-regular"
           :label="$t('page.tournaments.emptyBracket.action')"
           @click="emptyBracketOpen = true"
         />
-        <SbButton
+        <SButton
           v-if="tournament?.source === 'pandascore'"
           :loading="syncingId === tournamentId"
           :icon="iconFor(tournamentId)"
@@ -238,7 +238,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
     </template>
 
     <DashboardContent>
-      <SbErrorState
+      <SErrorState
         v-if="loadError"
         :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
         @retry="reload()"
@@ -302,7 +302,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 {{ match.status ?? "unknown" }}
                 · {{ $t("page.tournaments.match.score") }}: {{ matchScore(match) }}
               </p>
-              <SbLink
+              <SLink
                 variant="accent"
                 v-if="matchSourceUrl(match)"
                 :to="matchSourceUrl(match) ?? ''"
@@ -311,46 +311,46 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 class="truncate text-sm"
               >
                 {{ matchSourceUrl(match) }}
-              </SbLink>
+              </SLink>
             </div>
 
             <div class="flex shrink-0 flex-row flex-wrap gap-1">
-              <SbButton
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-video-clip-24-regular"
                 :label="$t('page.tournaments.vods.action')"
                 @click="openVods(match)"
               />
-              <SbButton
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-link-24-regular"
                 :label="$t('page.tournaments.matchSource.action')"
                 @click="openSource(match)"
               />
-              <SbButton
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-flag-24-regular"
                 :label="$t('page.tournaments.matchForfeit.action')"
                 @click="openForfeit(match)"
               />
-              <SbButton
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-live-24-regular"
                 :label="$t('page.tournaments.streams.matchAction')"
                 @click="openStreams(`/tournaments/matches/${match.id}/streams`, matchLabel(match))"
               />
-              <SbButton
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-people-team-24-regular"
                 :label="$t('page.tournaments.lineups.action')"
                 @click="openLineups(match)"
               />
-              <SbButton
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-people-audience-24-regular"
@@ -359,7 +359,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                   openViewership(`/tournaments/matches/${match.id}/viewership`, matchLabel(match))
                 "
               />
-              <SbButton
+              <SButton
                 v-if="tournament?.source === 'manual'"
                 variant="secondary"
                 size="sm"
@@ -367,7 +367,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 :label="$t('page.tournaments.streamScore.action')"
                 @click="openStreamScore(match)"
               />
-              <SbButton
+              <SButton
                 v-if="editsBracket"
                 variant="secondary"
                 size="sm"
@@ -375,7 +375,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 :label="$t('page.tournaments.bracket.action')"
                 @click="openBracket(match)"
               />
-              <SbButton
+              <SButton
                 v-for="participant in match.participants"
                 :key="participant.id"
                 variant="tertiary"
@@ -384,7 +384,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 :label="`${$t('page.tournaments.match.setWinner')}: ${participantName(participant)}`"
                 @click="handleSetWinner(match, participant.id)"
               />
-              <SbButton
+              <SButton
                 variant="tertiary"
                 danger
                 size="sm"

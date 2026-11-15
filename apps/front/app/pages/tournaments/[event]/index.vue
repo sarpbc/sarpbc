@@ -143,18 +143,18 @@ watch(
       </HubCard>
       <HubRail v-for="index in 2" :key="index" caption="section">
         <template #caption>
-          <SbSkeleton class="h-3 w-40" />
+          <SSkeleton class="h-3 w-40" />
         </template>
         <HubCard class="min-h-row-stack p-2">
           <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">
-            <SbSkeleton v-for="cell in 6" :key="cell" class="h-row" />
+            <SSkeleton v-for="cell in 6" :key="cell" class="h-row" />
           </div>
         </HubCard>
       </HubRail>
     </template>
 
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.tournaments.event.error')" @retry="refresh()" />
+      <SErrorState :message="t('page.tournaments.event.error')" @retry="refresh()" />
     </HubCard>
 
     <template v-else-if="event">
@@ -214,12 +214,12 @@ watch(
             <template #caption>
               <div class="flex w-full min-w-0 items-center gap-2 pr-2">
                 <h2 :id="`tournament-stage-title-${stage.id}`" class="min-w-0 flex-1 truncate">
-                  <SbLink
+                  <SLink
                     :to="localePath(tournamentStagePath(event.slug, stage.slug))"
                     variant="inline"
                   >
                     {{ stage.name }}
-                  </SbLink>
+                  </SLink>
                 </h2>
                 <span
                   v-if="stageMeta(stage)"

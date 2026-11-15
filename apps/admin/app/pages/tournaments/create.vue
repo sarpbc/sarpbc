@@ -79,10 +79,10 @@ const handleSubmit = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         type="button"
         icon="i-fluent-save-24-regular"
         :label="$t('page.tournaments.form.save')"
@@ -103,7 +103,7 @@ const handleSubmit = async () => {
           </p>
         </div>
 
-        <SbErrorState
+        <SErrorState
           v-if="optionsError"
           :message="getApiErrorMessage(optionsError) ?? $t('common.loadFailed')"
           @retry="refreshOptions()"

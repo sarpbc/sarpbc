@@ -84,15 +84,15 @@ const saveArticle = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="items" />
+      <SBreadcrumb :items="items" />
     </template>
     <template #action>
-      <SbModal
+      <SModal
         v-model:open="isModalOpen"
         :title="$t('page.news.create.title')"
         :dismissible="!isSaving"
       >
-        <SbButton
+        <SButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.news.create.save')"
           @click="openSaveModal"
@@ -100,20 +100,20 @@ const saveArticle = async () => {
 
         <template #body>
           <div class="flex flex-col gap-4">
-            <SbFormField :label="$t('page.news.locale.titleEn')" required>
-              <SbInput v-model="title" class="w-full" />
-            </SbFormField>
-            <SbFormField
+            <SFormField :label="$t('page.news.locale.titleEn')" required>
+              <SInput v-model="title" class="w-full" />
+            </SFormField>
+            <SFormField
               :label="$t('page.news.locale.titleFr')"
               :hint="$t('page.news.locale.fallbackHint')"
             >
-              <SbInput v-model="titleFr" class="w-full" />
-            </SbFormField>
-            <SbFormField
+              <SInput v-model="titleFr" class="w-full" />
+            </SFormField>
+            <SFormField
               :label="$t('page.news.create.slugField')"
               :hint="$t('page.news.create.slugHint')"
             >
-              <SbInput
+              <SInput
                 :model-value="articleSlug"
                 class="w-full"
                 :placeholder="$t('page.news.create.slugPlaceholder')"
@@ -122,9 +122,9 @@ const saveArticle = async () => {
                 @update:model-value="onSlugInput"
                 @keydown.enter="saveArticle"
               />
-            </SbFormField>
-            <SbFormField :label="$t('page.news.type.label')">
-              <SbRadioGroup
+            </SFormField>
+            <SFormField :label="$t('page.news.type.label')">
+              <SRadioGroup
                 v-model="articleType"
                 :items="[
                   {
@@ -139,34 +139,34 @@ const saveArticle = async () => {
                   },
                 ]"
               />
-            </SbFormField>
-            <SbFormField :label="$t('page.news.cover.label')">
+            </SFormField>
+            <SFormField :label="$t('page.news.cover.label')">
               <ImageUpload
                 target="news"
                 v-model:image-url="imageUrl"
                 :article-slug="articleSlug"
                 :article-title="title"
               />
-            </SbFormField>
+            </SFormField>
           </div>
         </template>
 
         <template #footer>
-          <SbButton
+          <SButton
             icon="i-fluent-save-24-regular"
             :label="$t('page.news.create.save')"
             :loading="isSaving"
             :disabled="isSaving"
             @click="saveArticle"
           />
-          <SbButton
+          <SButton
             variant="secondary"
             :label="$t('page.news.create.cancel')"
             :disabled="isSaving"
             @click="isModalOpen = false"
           />
         </template>
-      </SbModal>
+      </SModal>
     </template>
 
     <NewsArticleForm

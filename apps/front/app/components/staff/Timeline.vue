@@ -37,22 +37,22 @@ const formatRange = (contract: PlayerContract): string => {
         <li v-for="contract in contracts" :key="contract.id" class="flex items-center gap-3 p-3">
           <TeamImg :team-name="contract.team.name" :logo="contract.team" size="sm" />
           <div class="flex min-w-0 flex-1 flex-col">
-            <SbLink
+            <SLink
               :to="$localePath(teamPath(contract.team.slug))"
               variant="inline"
               class="truncate"
             >
               {{ contract.team.name }}
-            </SbLink>
+            </SLink>
             <span class="text-sm text-muted">
               {{ t(`common.contractRole.${contract.role}`) }}
               <span class="mx-1" aria-hidden="true">·</span>
               <time :datetime="contract.startDate">{{ formatRange(contract) }}</time>
             </span>
           </div>
-          <SbBadge v-if="!contract.endDate" color="info">
+          <SBadge v-if="!contract.endDate" color="info">
             {{ t("page.staff.slug.timeline.current") }}
-          </SbBadge>
+          </SBadge>
         </li>
       </ol>
     </HubRail>

@@ -135,25 +135,25 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
 
 <template>
   <div class="flex max-w-2xl flex-col gap-4">
-    <SbFormField :label="$t('page.tournaments.form.name')" required>
-      <SbInput
+    <SFormField :label="$t('page.tournaments.form.name')" required>
+      <SInput
         :model-value="state.name"
         class="w-full"
         autocomplete="off"
         @update:model-value="onNameInput"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField :label="$t('page.tournaments.form.event')" :help="eventHelp">
-      <SbCombobox v-model="eventId" :items="eventOptions" :loading="eventsPending" class="w-full" />
-    </SbFormField>
+    <SFormField :label="$t('page.tournaments.form.event')" :help="eventHelp">
+      <SCombobox v-model="eventId" :items="eventOptions" :loading="eventsPending" class="w-full" />
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       v-if="showsSlug"
       :label="$t('page.tournaments.form.slug')"
       :hint="$t('page.tournaments.form.slugHint')"
     >
-      <SbInput
+      <SInput
         :model-value="state.slug"
         class="w-full"
         spellcheck="false"
@@ -161,47 +161,47 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
         :placeholder="$t('page.tournaments.form.slugPlaceholder')"
         @update:model-value="onSlugInput"
       />
-    </SbFormField>
+    </SFormField>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <SbFormField :label="$t('page.tournaments.form.tier')">
-        <SbInput
+      <SFormField :label="$t('page.tournaments.form.tier')">
+        <SInput
           :model-value="state.tier"
           class="w-full"
           :placeholder="$t('page.tournaments.form.tierPlaceholder')"
           @update:model-value="updateField('tier', $event)"
         />
-      </SbFormField>
+      </SFormField>
 
-      <SbFormField :label="$t('page.tournaments.form.league')">
-        <SbSelect
+      <SFormField :label="$t('page.tournaments.form.league')">
+        <SSelect
           :model-value="state.leagueId || undefined"
           :items="leagueItems"
           class="w-full"
           :placeholder="$t('page.tournaments.form.leaguePlaceholder')"
           @update:model-value="updateField('leagueId', String($event ?? ''))"
         />
-      </SbFormField>
+      </SFormField>
     </div>
 
     <div class="grid gap-4 sm:grid-cols-2">
-      <SbFormField :label="$t('page.tournaments.form.beginAt')">
-        <SbInput
+      <SFormField :label="$t('page.tournaments.form.beginAt')">
+        <SInput
           :model-value="state.beginAt"
           type="date"
           class="w-full"
           @update:model-value="updateField('beginAt', $event)"
         />
-      </SbFormField>
+      </SFormField>
 
-      <SbFormField :label="$t('page.tournaments.form.endAt')">
-        <SbInput
+      <SFormField :label="$t('page.tournaments.form.endAt')">
+        <SInput
           :model-value="state.endAt"
           type="date"
           class="w-full"
           @update:model-value="updateField('endAt', $event)"
         />
-      </SbFormField>
+      </SFormField>
     </div>
 
     <TournamentImageField
@@ -210,27 +210,27 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
       @update:uploading="emit('update:uploading', $event)"
     />
 
-    <SbFormField
+    <SFormField
       :label="$t('page.tournaments.form.format')"
       :help="$t('page.tournaments.form.formatHelp')"
     >
-      <SbSelect
+      <SSelect
         :model-value="state.format"
         :items="formatItems"
         class="w-full sm:w-40"
         @update:model-value="updateField('format', $event)"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField :help="$t('page.tournaments.form.hasBracketHelp')">
-      <SbSwitch
+    <SFormField :help="$t('page.tournaments.form.hasBracketHelp')">
+      <SSwitch
         :model-value="state.hasBracket"
         :label="$t('page.tournaments.form.hasBracket')"
         @update:model-value="updateField('hasBracket', $event)"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       v-if="state.format !== '3v3'"
       :label="$t('page.tournaments.form.players')"
       :help="$t('page.tournaments.form.playersHelp')"
@@ -240,11 +240,11 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
         :format="state.format"
         @update:model-value="updateField('playerParticipants', $event)"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField v-if="state.format !== '1v1'" :label="$t('page.tournaments.form.teams')">
+    <SFormField v-if="state.format !== '1v1'" :label="$t('page.tournaments.form.teams')">
       <div class="flex flex-col gap-3 border border-default p-4">
-        <SbInput
+        <SInput
           v-model="teamSearch"
           class="w-full"
           :placeholder="$t('page.tournaments.form.teamsSearch')"
@@ -261,7 +261,7 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
             :key="team.id"
             class="flex items-center gap-2 text-sm"
           >
-            <SbCheckbox
+            <SCheckbox
               :model-value="isTeamSelected(team.id)"
               @update:model-value="toggleTeam(team.id, Boolean($event))"
             />
@@ -273,6 +273,6 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
           </p>
         </div>
       </div>
-    </SbFormField>
+    </SFormField>
   </div>
 </template>

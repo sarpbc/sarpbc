@@ -146,12 +146,12 @@ const majorSummary = (season: CareerSeasonRecord, split: number): string => {
     </HubRail>
 
     <div v-if="!shared" class="flex flex-col gap-2 sm:flex-row">
-      <SbButton class="flex-1" variant="secondary" @click="onShare">
+      <SButton class="flex-1" variant="secondary" @click="onShare">
         {{ t("page.game.career.end.share") }}
-      </SbButton>
-      <SbButton class="flex-1" @click="emit('playAgain')">
+      </SButton>
+      <SButton class="flex-1" @click="emit('playAgain')">
         {{ t("page.game.career.end.playAgain") }}
-      </SbButton>
+      </SButton>
     </div>
   </div>
 </template>

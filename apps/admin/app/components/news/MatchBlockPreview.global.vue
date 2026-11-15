@@ -90,8 +90,8 @@ const stateLabel = useMatchStateLabel(t, (beginAt) => dateFormatter.value.format
       class="flex flex-col gap-2 p-3"
       aria-busy="true"
     >
-      <SbSkeleton class="h-4 w-2/3" />
-      <SbSkeleton class="h-4 w-1/2" />
+      <SSkeleton class="h-4 w-2/3" />
+      <SSkeleton class="h-4 w-1/2" />
     </div>
 
     <p v-else-if="!blockKey" class="p-3 text-sm text-error">
@@ -118,7 +118,7 @@ const stateLabel = useMatchStateLabel(t, (beginAt) => dateFormatter.value.format
             <span class="tabular-nums text-muted">{{ score(item, 0) }} – {{ score(item, 1) }}</span>
             {{ teamName(item, 1) }}
           </span>
-          <SbBadge :color="stateColor(item.state)" :label="stateLabel(item)" />
+          <SBadge :color="stateColor(item.state)" :label="stateLabel(item)" />
           <span class="col-span-2 truncate text-xs text-muted" translate="no">
             {{ item.tournament.event.name }} · {{ item.tournament.name }}
           </span>

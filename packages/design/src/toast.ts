@@ -7,7 +7,7 @@ interface QueuedToast extends ToastMessage {
 }
 
 /*
- * One queue for the page, read by <SbToaster>. Toasts come from user actions,
+ * One queue for the page, read by <SToaster>. Toasts come from user actions,
  * so they are only ever added in the browser, never during SSR.
  */
 const queue = ref<QueuedToast[]>([]);

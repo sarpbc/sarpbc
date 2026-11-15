@@ -58,7 +58,7 @@ const eventMeta = (event: EntityEventListItem): string =>
           <h2 :id="headingId">
             {{ t(`page.${kind}.slug.events.sectionTitle`) }}
           </h2>
-          <SbTabs
+          <STabs
             :model-value="tab"
             :items="tabItems"
             :ariaLabel="t(`page.${kind}.slug.events.sectionTitle`)"
@@ -70,17 +70,17 @@ const eventMeta = (event: EntityEventListItem): string =>
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
         <HubCard v-for="index in 3" :key="index">
           <div class="flex items-center gap-3 py-2 px-3">
-            <SbSkeleton class="h-3 w-16 shrink-0" />
+            <SSkeleton class="h-3 w-16 shrink-0" />
             <div class="flex flex-1 flex-col gap-1">
-              <SbSkeleton class="h-3 w-40" />
-              <SbSkeleton class="h-3 w-28" />
+              <SSkeleton class="h-3 w-40" />
+              <SSkeleton class="h-3 w-28" />
             </div>
           </div>
         </HubCard>
       </div>
 
       <HubCard v-else-if="hasError">
-        <SbErrorState :message="t(`page.${kind}.slug.events.error`)" @retry="emit('retry')" />
+        <SErrorState :message="t(`page.${kind}.slug.events.error`)" @retry="emit('retry')" />
       </HubCard>
 
       <div v-else-if="hasEvents" class="flex flex-col gap-4">
@@ -89,7 +89,7 @@ const eventMeta = (event: EntityEventListItem): string =>
             {{ t(`page.${kind}.slug.events.live`) }}
           </h3>
           <div class="flex flex-col border border-separator divide-y divide-separator">
-            <SbLink
+            <SLink
               v-for="event in live"
               :key="event.id"
               :to="$localePath(tournamentStagePath(event.event.slug, event.slug))"
@@ -102,7 +102,7 @@ const eventMeta = (event: EntityEventListItem): string =>
                 </p>
               </div>
               <MatchLiveBadge />
-            </SbLink>
+            </SLink>
           </div>
         </div>
 
@@ -110,7 +110,7 @@ const eventMeta = (event: EntityEventListItem): string =>
           v-if="activeEvents.length > 0"
           class="flex flex-col border border-separator divide-y divide-separator"
         >
-          <SbLink
+          <SLink
             v-for="event in activeEvents"
             :key="event.id"
             :to="$localePath(tournamentStagePath(event.event.slug, event.slug))"
@@ -126,17 +126,17 @@ const eventMeta = (event: EntityEventListItem): string =>
               <span v-if="tab === 'upcoming'" class="text-xs text-muted">
                 {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>
-              <SbBadge
+              <SBadge
                 v-if="tab === 'past' && event.isWinner && !isConcealed({ tournamentId: event.id })"
                 color="info"
               >
                 {{ t(`page.${kind}.slug.events.winner`) }}
-              </SbBadge>
+              </SBadge>
               <span v-else-if="tab === 'past'" class="text-xs text-muted">
                 {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>
             </div>
-          </SbLink>
+          </SLink>
         </div>
       </div>
 

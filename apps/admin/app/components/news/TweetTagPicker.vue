@@ -44,35 +44,35 @@ const confirm = () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     :open="open"
     :title="t('page.news.editor.tweet.title')"
     @update:open="emit('update:open', $event)"
   >
     <template #body>
       <form class="flex flex-col gap-3" @submit.prevent="confirm">
-        <SbFormField
+        <SFormField
           :label="t('page.news.editor.tweet.urlLabel')"
           :error="invalid ? t('page.news.editor.tweet.urlInvalid') : undefined"
         >
-          <SbInput
+          <SInput
             v-model="url"
             :placeholder="t('page.news.editor.tweet.urlPlaceholder')"
             autofocus
             icon="i-ri-twitter-x-fill"
           />
-        </SbFormField>
+        </SFormField>
       </form>
     </template>
 
     <template #footer>
-      <SbButton
+      <SButton
         icon="i-ri-twitter-x-fill"
         :label="t('page.news.editor.tweet.insert')"
         :disabled="!canInsert"
         @click="confirm"
       />
-      <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
+      <SButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
-  </SbModal>
+  </SModal>
 </template>

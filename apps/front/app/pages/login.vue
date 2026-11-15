@@ -64,13 +64,13 @@ const onSubmit = async (event: Event) => {
         </h1>
         <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-6">
           {{ $t("page.authentication.noAccount") }}&nbsp;
-          <SbLink variant="accent" :to="$localePath('/register')">
+          <SLink variant="accent" :to="$localePath('/register')">
             {{ $t("page.authentication.register") }}
-          </SbLink>
+          </SLink>
           .
         </div>
 
-        <SbButton
+        <SButton
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
           variant="secondary"
@@ -78,33 +78,33 @@ const onSubmit = async (event: Event) => {
           @click="googleLogin"
         />
 
-        <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
+        <SSeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <form class="w-full h-fit" method="post" @submit="onSubmit">
-          <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
-            <SbInput
+          <SFormField :label="$t('page.authentication.email')" class="w-full pb-4">
+            <SInput
               v-model="state.email"
               type="email"
               autocomplete="email"
               spellcheck="false"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbFormField :label="$t('page.authentication.password')" class="w-full pb-8">
-            <SbInput
+          <SFormField :label="$t('page.authentication.password')" class="w-full pb-8">
+            <SInput
               v-model="state.password"
               type="password"
               autocomplete="current-password"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
 
           <p v-if="errorMessage" role="alert" class="-mt-4 mb-4 text-sm text-error">
             {{ errorMessage }}
           </p>
 
-          <SbButton
+          <SButton
             :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"
             type="submit"
             :loading="pending"

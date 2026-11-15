@@ -83,7 +83,7 @@ onKeyStroke("Escape", () => {
     @mouseenter="onNavEnter"
     @mouseleave="onNavLeave"
   >
-    <SbLink
+    <SLink
       :to="localePath('/')"
       class="mb-2 flex flex-row items-center gap-2 px-2 py-1"
       :aria-label="$t('page.nav.home')"
@@ -97,31 +97,31 @@ onKeyStroke("Escape", () => {
         class="size-8 bg-transparent"
       />
       <span class="text-sm font-semibold tracking-tight">{{ $t("page.nav.admin") }}</span>
-    </SbLink>
+    </SLink>
 
-    <SbNavigationMenu
+    <SNavigationMenu
       orientation="vertical"
       :items="links"
       class="min-h-0 flex-1 overflow-y-auto data-[orientation=vertical]:w-full"
     />
 
-    <SbPopover v-if="user" v-model:open="userMenuOpen" align="start" side="top">
-      <SbButton
+    <SPopover v-if="user" v-model:open="userMenuOpen" align="start" side="top">
+      <SButton
         variant="tertiary"
         class="mt-2 w-full justify-start gap-2"
         :aria-label="$t('page.home.signedInAs')"
         aria-haspopup="menu"
         :aria-expanded="userMenuOpen"
       >
-        <SbAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
+        <SAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
         <span class="min-w-0 truncate text-sm" translate="no">{{ user.userName }}</span>
-      </SbButton>
+      </SButton>
       <template #content>
         <div class="flex min-w-40 flex-col p-1" role="menu">
           <p class="truncate px-2 py-1.5 text-xs text-muted" translate="no">
             {{ user.email }}
           </p>
-          <SbButton
+          <SButton
             variant="tertiary"
             danger
             icon="i-fluent-sign-out-24-regular"
@@ -134,6 +134,6 @@ onKeyStroke("Escape", () => {
           />
         </div>
       </template>
-    </SbPopover>
+    </SPopover>
   </aside>
 </template>

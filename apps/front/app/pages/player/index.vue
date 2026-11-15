@@ -126,14 +126,14 @@ setPageSeo({
 
       <HubCard v-if="pending" aria-live="polite">
         <HubListItem v-for="index in 8" :key="index" class="gap-3">
-          <SbSkeleton class="size-7 shrink-0" />
-          <SbSkeleton class="h-3 max-w-40 flex-1" />
-          <SbSkeleton class="h-3 w-20" />
+          <SSkeleton class="size-7 shrink-0" />
+          <SSkeleton class="h-3 max-w-40 flex-1" />
+          <SSkeleton class="h-3 w-20" />
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t('page.players.index.error')" @retry="refresh()" />
+        <SErrorState :message="t('page.players.index.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else-if="players.length > 0">
@@ -141,7 +141,7 @@ setPageSeo({
       </HubCard>
 
       <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-person-delete-24-regular"
           :title="t('page.players.index.noPlayersFound')"
           :hint="

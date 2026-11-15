@@ -83,7 +83,7 @@ const remove = (index: number) => {
         <span :class="{ 'text-error': players.length !== size }">
           {{ participantName({ team: null, players }) }}
         </span>
-        <SbButton
+        <SButton
           type="button"
           variant="tertiary"
           size="sm"
@@ -103,7 +103,7 @@ const remove = (index: number) => {
       {{ $t("page.tournaments.form.playersPartner", { name: incomplete[0]?.name ?? "" }) }}
     </p>
 
-    <SbInput
+    <SInput
       v-model="query"
       class="w-full"
       :placeholder="$t('page.tournaments.form.playersSearch')"
@@ -114,7 +114,7 @@ const remove = (index: number) => {
     <div v-if="query.trim() && !pending" class="max-h-56 overflow-y-auto overscroll-contain">
       <ul v-if="available.length" class="space-y-1">
         <li v-for="player in available" :key="player.id">
-          <SbButton
+          <SButton
             type="button"
             variant="tertiary"
             size="sm"

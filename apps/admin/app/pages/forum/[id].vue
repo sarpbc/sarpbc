@@ -83,10 +83,10 @@ const hideReply = async (reply: Reply) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         v-if="post"
         variant="secondary"
         danger
@@ -101,7 +101,7 @@ const hideReply = async (reply: Reply) => {
         {{ $t("page.forum.loading") }}
       </p>
 
-      <SbErrorState
+      <SErrorState
         v-else-if="!post"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
@@ -135,14 +135,14 @@ const hideReply = async (reply: Reply) => {
               <p class="whitespace-pre-wrap">{{ reply.content }}</p>
             </div>
             <div class="flex shrink-0 flex-row items-center gap-1">
-              <SbButton
+              <SButton
                 variant="tertiary"
                 :label="$t('page.forum.hide')"
                 :loading="hidingReplyId === reply.id"
                 :disabled="hidingReplyId !== null"
                 @click="hideReply(reply)"
               />
-              <SbButton
+              <SButton
                 variant="tertiary"
                 danger
                 icon="i-fluent-delete-24-regular"

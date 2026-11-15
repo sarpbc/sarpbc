@@ -81,17 +81,17 @@ const metaParts = (award: PlayerProfileAward): string[] => {
       <HubCard v-if="pending" aria-live="polite">
         <HubListItem v-for="index in 2" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
-            <SbSkeleton class="size-5 shrink-0" />
+            <SSkeleton class="size-5 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
-              <SbSkeleton class="h-3.5 w-3/5 max-w-48" />
-              <SbSkeleton class="h-3 w-2/5 max-w-32" />
+              <SSkeleton class="h-3.5 w-3/5 max-w-48" />
+              <SSkeleton class="h-3 w-2/5 max-w-32" />
             </div>
           </div>
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="hasError">
-        <SbErrorState :message="t('page.player.slug.awards.error')" @retry="emit('retry')" />
+        <SErrorState :message="t('page.player.slug.awards.error')" @retry="emit('retry')" />
       </HubCard>
 
       <HubCard v-else-if="awards.length > 0 || seasonAwards.length > 0">

@@ -92,7 +92,7 @@ personal skills outside this repo. Do not add a skill library, model routing or
 a dependency on a personal plugin to make the project usable.
 
 For frontend work, reuse the affected app's Nuxt 4 conventions and `@sarpbc/design`
-(`Sb*`) components; `pnpm check:native-controls` rejects native `button`, `input`,
+(`S*`) components; `pnpm check:native-controls` rejects native `button`, `input`,
 `select` and `textarea` in app templates. Use SSR-aware data fetching, localized navigation and cookie
 credentials to the NestJS API. Generic components belong in `@sarpbc/design`; the
 public hub grid lives in `apps/front/app/components/hub/`. Inspect

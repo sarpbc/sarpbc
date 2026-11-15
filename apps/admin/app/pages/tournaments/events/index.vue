@@ -45,10 +45,10 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.tournaments.events.create.action')"
         :to="localePath('/tournaments/events/create')"
@@ -59,14 +59,14 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
       <div class="flex flex-col gap-4">
         <p class="max-w-2xl text-sm text-muted">{{ $t("page.tournaments.events.subtitle") }}</p>
 
-        <SbErrorState
+        <SErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.events.loadError')"
           @retry="refresh()"
         />
 
         <ClientOnly v-else>
-          <SbTable
+          <STable
             :data="data"
             :columns="columns"
             :loading="status === 'pending'"
@@ -82,7 +82,7 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
               </span>
               <span v-else>{{ row.original.stages.map((stage) => stage.name).join(", ") }}</span>
             </template>
-          </SbTable>
+          </STable>
         </ClientOnly>
       </div>
     </DashboardContent>

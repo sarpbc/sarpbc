@@ -11,7 +11,7 @@ const { team, formerName = null } = defineProps<Props>();
 </script>
 
 <template>
-  <SbButton
+  <SButton
     class="flex h-auto items-center gap-3 py-1"
     variant="tertiary"
     :to="$localePath(teamPath(team.slug))"
@@ -26,5 +26,5 @@ const { team, formerName = null } = defineProps<Props>();
         </span>
       </div>
     </div>
-  </SbButton>
+  </SButton>
 </template>

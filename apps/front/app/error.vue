@@ -29,7 +29,7 @@ const heading = computed(() => {
     <h1 class="mt-2 text-4xl font-medium text-balance text-highlighted sm:text-5xl">
       {{ heading }}
     </h1>
-    <SbButton
+    <SButton
       class="mt-8"
       :label="t('common.errorPage.backHome')"
       @click="clearError({ redirect: localePath('/') })"

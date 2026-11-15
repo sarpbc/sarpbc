@@ -86,7 +86,7 @@ onMounted(() => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="items" />
+      <SBreadcrumb :items="items" />
     </template>
     <DashboardContent>
       <div class="mx-auto flex w-full max-w-5xl flex-col gap-8 py-4">
@@ -166,7 +166,7 @@ onMounted(() => {
                 >
                   <span class="flex min-w-0 items-center gap-2">
                     <span class="min-w-0 truncate text-sm font-medium">{{ article.title }}</span>
-                    <SbBadge
+                    <SBadge
                       v-if="article.isDraft"
                       color="warning"
                       :label="$t('page.home.articles.draft')"
@@ -212,7 +212,7 @@ onMounted(() => {
         <section v-if="hasAnyTool" class="flex flex-col gap-3">
           <h2 class="text-sm font-semibold">{{ $t("page.home.shortcuts") }}</h2>
           <div class="flex flex-wrap gap-2">
-            <SbButton
+            <SButton
               v-for="link in shortcuts"
               :key="link.to"
               :to="link.to"

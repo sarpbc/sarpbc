@@ -51,24 +51,24 @@ const confirm = async () => {
 </script>
 
 <template>
-  <SbModal v-model:open="open" :title="title" :dismissible="!isDeleting">
+  <SModal v-model:open="open" :title="title" :dismissible="!isDeleting">
     <template #body>
       <p>{{ shown === null ? "" : message(shown) }}</p>
     </template>
     <template #footer>
-      <SbButton
+      <SButton
         icon="i-fluent-delete-24-regular"
         danger
         :label="confirmLabel"
         :loading="isDeleting"
         @click="confirm"
       />
-      <SbButton
+      <SButton
         variant="secondary"
         :label="$t('common.cancel')"
         :disabled="isDeleting"
         @click="open = false"
       />
     </template>
-  </SbModal>
+  </SModal>
 </template>

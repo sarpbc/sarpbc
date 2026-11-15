@@ -4,7 +4,7 @@ const config = useRuntimeConfig();
 
 <template>
   <div class="flex h-svh max-h-svh w-full flex-col bg-default">
-    <SbButton
+    <SButton
       icon="fluent:dismiss-24-regular"
       :to="config.public.publicSiteUrl"
       variant="tertiary"

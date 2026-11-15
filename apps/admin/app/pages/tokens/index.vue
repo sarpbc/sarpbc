@@ -157,10 +157,10 @@ const confirmRevoke = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.tokens.create.button')"
         @click="openCreateModal"
@@ -173,7 +173,7 @@ const confirmRevoke = async () => {
           {{ $t("page.tokens.loading") }}
         </p>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tokens.loadError')"
           @retry="refresh()"
@@ -196,7 +196,7 @@ const confirmRevoke = async () => {
                 {{ $t("page.tokens.empty.description") }}
               </p>
             </div>
-            <SbButton
+            <SButton
               icon="i-fluent-add-24-regular"
               :label="$t('page.tokens.create.button')"
               @click="openCreateModal"
@@ -204,9 +204,9 @@ const confirmRevoke = async () => {
           </div>
 
           <ClientOnly>
-            <SbTable v-if="tokens.length > 0" :data="tokens" :columns="columns" sticky>
+            <STable v-if="tokens.length > 0" :data="tokens" :columns="columns" sticky>
               <template #actions-cell="{ row }">
-                <SbButton
+                <SButton
                   variant="tertiary"
                   danger
                   size="sm"
@@ -215,48 +215,48 @@ const confirmRevoke = async () => {
                   @click="openRevokeModal(row.original)"
                 />
               </template>
-            </SbTable>
+            </STable>
           </ClientOnly>
         </template>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isCreateModalOpen"
       :title="$t('page.tokens.create.title')"
       :dismissible="!isCreating"
     >
       <template #body>
         <form @submit.prevent="confirmCreate">
-          <SbFormField :label="$t('page.tokens.create.nameLabel')" required>
-            <SbInput
+          <SFormField :label="$t('page.tokens.create.nameLabel')" required>
+            <SInput
               v-model="newTokenName"
               :placeholder="$t('page.tokens.create.namePlaceholder')"
               :maxlength="TOKEN_NAME_MAX_LENGTH"
               class="w-full"
               autofocus
             />
-          </SbFormField>
+          </SFormField>
         </form>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-key-24-regular"
           :label="$t('page.tokens.create.submit')"
           :loading="isCreating"
           :disabled="!newTokenName.trim()"
           @click="confirmCreate"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isCreating"
           @click="isCreateModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
 
-    <SbModal
+    <SModal
       v-model:open="isRevealModalOpen"
       :title="$t('page.tokens.reveal.title')"
       :dismissible="false"
@@ -267,14 +267,14 @@ const confirmRevoke = async () => {
             {{ $t("page.tokens.reveal.warning") }}
           </p>
 
-          <SbFormField :label="$t('page.tokens.reveal.tokenLabel')">
+          <SFormField :label="$t('page.tokens.reveal.tokenLabel')">
             <div class="flex flex-row gap-2">
               <code
                 class="min-w-0 flex-1 overflow-x-auto rounded border border-default bg-muted px-3 py-2 font-mono text-sm"
               >
                 {{ revealedToken }}
               </code>
-              <SbButton
+              <SButton
                 :icon="copied === 'token' ? 'i-lucide-copy-check' : 'i-lucide-copy'"
                 :label="
                   copied === 'token'
@@ -286,7 +286,7 @@ const confirmRevoke = async () => {
                 @click="revealedToken && copyText(revealedToken, 'token')"
               />
             </div>
-          </SbFormField>
+          </SFormField>
 
           <div class="flex flex-col gap-2">
             <p class="text-sm font-medium">
@@ -296,7 +296,7 @@ const confirmRevoke = async () => {
               <pre
                 class="overflow-x-auto rounded border border-default bg-muted p-3 font-mono text-sm whitespace-pre-wrap"
                 >{{ mcpConfigSnippet }}</pre>
-              <SbButton
+              <SButton
                 :icon="copied === 'config' ? 'i-lucide-copy-check' : 'i-lucide-copy'"
                 :label="
                   copied === 'config'
@@ -313,11 +313,11 @@ const confirmRevoke = async () => {
         </div>
       </template>
       <template #footer>
-        <SbButton :label="$t('page.tokens.reveal.dismiss')" @click="closeRevealModal" />
+        <SButton :label="$t('page.tokens.reveal.dismiss')" @click="closeRevealModal" />
       </template>
-    </SbModal>
+    </SModal>
 
-    <SbModal
+    <SModal
       v-model:open="isRevokeModalOpen"
       :title="$t('page.tokens.revoke.title')"
       :dismissible="!isRevoking"
@@ -332,20 +332,20 @@ const confirmRevoke = async () => {
         </p>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-delete-24-regular"
           danger
           :label="$t('page.tokens.revoke.confirmButton')"
           :loading="isRevoking"
           @click="confirmRevoke"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isRevoking"
           @click="isRevokeModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
   </NuxtLayout>
 </template>

@@ -53,10 +53,10 @@ const handleSubmit = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-save-24-regular"
         :label="$t('page.tournaments.events.save')"
         :loading="isSaving"

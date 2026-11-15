@@ -6,15 +6,15 @@ const appSources = ["apps/front/app", "apps/admin/app", "packages/ui/src"];
 
 /* Each native control has a @sarpbc/design component that owns its look, focus and states. */
 const REPLACEMENTS: ReadonlyMap<string, string> = new Map([
-  ["button", "SbButton for an action, SbRadioGroup for a choice, SbLink for navigation"],
-  ["input", "SbInput, SbInputNumber, SbCheckbox or SbSwitch"],
-  ["select", "SbSelect or SbCombobox"],
-  ["textarea", "SbTextarea"],
+  ["button", "SButton for an action, SRadioGroup for a choice, SLink for navigation"],
+  ["input", "SInput, SInputNumber, SCheckbox or SSwitch"],
+  ["select", "SSelect or SCombobox"],
+  ["textarea", "STextarea"],
 ]);
 
 /*
  * A deliberate exception names its reason in a comment right before the tag:
- * <!-- native-control: hidden file input behind an SbButton -->
+ * <!-- native-control: hidden file input behind an SButton -->
  */
 const ESCAPE = /<!--\s*native-control:\s*\S[^>]*-->\s*$/u;
 

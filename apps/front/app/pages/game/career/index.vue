@@ -133,8 +133,8 @@ const handleContinue = () => {
 
     <HubCard v-if="!hydrated" class="p-6">
       <div class="flex flex-col items-center gap-4">
-        <SbSkeleton class="h-4 w-48" />
-        <SbSkeleton class="h-24 w-full" />
+        <SSkeleton class="h-4 w-48" />
+        <SSkeleton class="h-24 w-full" />
       </div>
     </HubCard>
 
@@ -161,11 +161,11 @@ const handleContinue = () => {
       @abandon="handleAbandon"
     />
 
-    <SbModal v-model:open="confirmOpen" :title="confirmCopy.title">
+    <SModal v-model:open="confirmOpen" :title="confirmCopy.title">
       <template #footer>
-        <SbButton danger :label="confirmCopy.action" @click="confirmPending" />
-        <SbButton variant="secondary" :label="t('common.cancel')" @click="confirmOpen = false" />
+        <SButton danger :label="confirmCopy.action" @click="confirmPending" />
+        <SButton variant="secondary" :label="t('common.cancel')" @click="confirmOpen = false" />
       </template>
-    </SbModal>
+    </SModal>
   </section>
 </template>

@@ -71,9 +71,9 @@ const phase = computed(() => state.value.phase);
               {{ state.playerName || $t("page.game.career.title") }}
               <span class="text-muted">· {{ currentTeamName }}</span>
             </p>
-            <SbButton variant="tertiary" danger size="sm" @click="emit('abandon')">
+            <SButton variant="tertiary" danger size="sm" @click="emit('abandon')">
               {{ $t("page.game.career.actions.abandon") }}
-            </SbButton>
+            </SButton>
           </div>
         </HubCrossCard>
 

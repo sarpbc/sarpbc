@@ -49,10 +49,10 @@ const create = async (input: SeasonInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.seasons.create.button')"
         @click="isCreateOpen = true"
@@ -67,7 +67,7 @@ const create = async (input: SeasonInput) => {
           {{ $t("page.seasons.loading") }}
         </p>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.seasons.loadError')"
           @retry="refresh()"
@@ -81,7 +81,7 @@ const create = async (input: SeasonInput) => {
             <h2 class="text-lg font-semibold">{{ $t("page.seasons.empty.title") }}</h2>
             <p class="text-sm text-muted">{{ $t("page.seasons.empty.description") }}</p>
           </div>
-          <SbButton
+          <SButton
             icon="i-fluent-add-24-regular"
             :label="$t('page.seasons.create.button')"
             @click="isCreateOpen = true"
@@ -89,11 +89,11 @@ const create = async (input: SeasonInput) => {
         </div>
 
         <ClientOnly v-else>
-          <SbTable :data="seasons" :columns="columns" sticky>
+          <STable :data="seasons" :columns="columns" sticky>
             <template #name-cell="{ row }">
-              <SbLink :to="localePath(`/seasons/${row.original.id}`)" class="font-medium">
+              <SLink :to="localePath(`/seasons/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
-              </SbLink>
+              </SLink>
             </template>
             <template #slug-cell="{ row }">
               <span v-if="row.original.slug" class="font-mono text-sm" translate="no">
@@ -102,7 +102,7 @@ const create = async (input: SeasonInput) => {
               <span v-else class="text-sm text-muted">{{ $t("page.seasons.unpublished") }}</span>
             </template>
             <template #actions-cell="{ row }">
-              <SbButton
+              <SButton
                 variant="tertiary"
                 danger
                 size="sm"
@@ -111,12 +111,12 @@ const create = async (input: SeasonInput) => {
                 @click="seasonToDelete = row.original"
               />
             </template>
-          </SbTable>
+          </STable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isCreateOpen"
       :title="$t('page.seasons.create.title')"
       :dismissible="!isCreating"
@@ -128,7 +128,7 @@ const create = async (input: SeasonInput) => {
           @submit="create"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="seasonToDelete"

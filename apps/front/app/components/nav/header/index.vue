@@ -95,7 +95,7 @@ const menuToggleLabel = computed(() =>
       class="w-full max-w-7xl px-2 xl:px-0 h-header flex flex-row items-center justify-between mx-auto"
     >
       <div class="h-full flex flex-row items-center">
-        <SbLink
+        <SLink
           :to="$localePath('/')"
           class="flex flex-row flex-1 items-center transition-none"
           :aria-label="$t('components.header.home')"
@@ -109,8 +109,8 @@ const menuToggleLabel = computed(() =>
             decoding="async"
             class="size-12 bg-transparent"
           />
-        </SbLink>
-        <SbNavigationMenu :items="items" orientation="horizontal" class="hidden md:flex" />
+        </SLink>
+        <SNavigationMenu :items="items" orientation="horizontal" class="hidden md:flex" />
       </div>
       <div class="h-full flex-row flex-1 justify-end items-center gap-4 hidden md:flex">
         <LazyNavHeaderSearch hydrate-on-visible />
@@ -119,7 +119,7 @@ const menuToggleLabel = computed(() =>
       </div>
       <div class="flex items-center md:hidden">
         <SettingsSpoilerToggle />
-        <SbButton
+        <SButton
           :icon="
             !menuOpen ? 'i-fluent-text-align-justify-24-regular' : 'i-fluent-dismiss-24-regular'
           "
@@ -140,7 +140,7 @@ const menuToggleLabel = computed(() =>
         <div
           class="w-full max-w-7xl px-9 mx-auto flex flex-col items-center justify-start gap-1.5 pt-6 pb-12 min-h-full"
         >
-          <SbNavigationMenu
+          <SNavigationMenu
             :items="items"
             orientation="vertical"
             class="w-full [&_a]:text-lg [&_a]:font-medium [&_a]:py-3 [&_button]:text-lg [&_button]:font-medium [&_button]:py-3"

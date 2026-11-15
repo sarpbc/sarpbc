@@ -83,7 +83,7 @@ const { data: activePickemTournament } = await useLazyAsyncData(
               />
               <NewsRow v-else :key="entry.article.id" :article="entry.article" />
             </template>
-            <SbButton
+            <SButton
               v-if="hasMoreNews"
               variant="tertiary"
               block
@@ -101,8 +101,8 @@ const { data: activePickemTournament } = await useLazyAsyncData(
         :title="activePickemTournament ? undefined : $t('page.home.latest')"
       >
         <HubCard class="flex min-h-row-stack h-row-grid items-center">
-          <SbErrorState v-if="newsError" :message="$t('page.home.error')" @retry="refreshNews()" />
-          <SbEmptyState
+          <SErrorState v-if="newsError" :message="$t('page.home.error')" @retry="refreshNews()" />
+          <SEmptyState
             v-else
             icon="i-fluent-news-24-regular"
             :title="$t('page.home.empty')"

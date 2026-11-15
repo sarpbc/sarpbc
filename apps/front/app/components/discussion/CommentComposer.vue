@@ -137,13 +137,13 @@ const onEnterKey = (event: KeyboardEvent) => {
       novalidate
       @submit.prevent="onSubmit"
     >
-      <SbFormField
+      <SFormField
         :label="$t('components.discussion.inputTitle')"
         :error="errors.content"
         required
         class="w-full"
       >
-        <SbTextarea
+        <STextarea
           ref="contentInput"
           v-model="state.content"
           :placeholder="$t('components.discussion.inputPlaceholder')"
@@ -152,9 +152,9 @@ const onEnterKey = (event: KeyboardEvent) => {
           :disabled="isSubmitting"
           @keydown.enter.exact="onEnterKey"
         />
-      </SbFormField>
+      </SFormField>
 
-      <SbButton
+      <SButton
         type="submit"
         class="w-fit self-end px-4"
         :loading="isSubmitting"
@@ -163,7 +163,7 @@ const onEnterKey = (event: KeyboardEvent) => {
         {{
           isSubmitting ? $t("components.discussion.submitting") : $t("components.discussion.submit")
         }}
-      </SbButton>
+      </SButton>
     </form>
   </div>
 </template>

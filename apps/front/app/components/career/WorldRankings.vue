@@ -249,22 +249,22 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
             @focusin="setHoveredTeam(entry.team.id)"
             @focusout="onTeamFocusOut($event, entry.team.id)"
           >
-            <SbTooltip :text="t('page.game.career.rankings.teamWorldRanking')">
+            <STooltip :text="t('page.game.career.rankings.teamWorldRanking')">
               <span class="block text-right text-xs text-muted tabular-nums">
                 {{ entry.rank }}
               </span>
-            </SbTooltip>
+            </STooltip>
             <span class="min-w-0 truncate" :class="entry.isPlayerTeam ? 'text-primary' : ''">
               {{ entry.team.name }}
             </span>
             <span class="block min-w-0 truncate text-muted">
               {{ t(`page.game.career.onboarding.regions.${entry.team.region}`) }}
             </span>
-            <SbTooltip :text="t('page.game.career.rankings.circuitPoints')">
+            <STooltip :text="t('page.game.career.rankings.circuitPoints')">
               <span class="block text-right text-xs tabular-nums">
                 {{ Math.round(entry.points) }}
               </span>
-            </SbTooltip>
+            </STooltip>
           </li>
         </ol>
       </template>
@@ -288,11 +288,11 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
               {{ entry.name }}
             </span>
             <span class="block min-w-0 truncate text-muted">{{ entry.teamName }}</span>
-            <SbTooltip :text="t('page.game.career.rankings.playerRating')">
+            <STooltip :text="t('page.game.career.rankings.playerRating')">
               <span class="block text-right text-xs tabular-nums">
                 {{ Math.round(entry.rating) }}
               </span>
-            </SbTooltip>
+            </STooltip>
           </li>
         </ol>
         <ol v-if="playerFooterItems.length" class="flex flex-col border-t border-separator">
@@ -319,11 +319,11 @@ const onTeamFocusOut = (event: FocusEvent, teamId: string): void => {
                 {{ item.entry.name }}
               </span>
               <span class="block min-w-0 truncate text-muted">{{ item.entry.teamName }}</span>
-              <SbTooltip :text="t('page.game.career.rankings.playerRating')">
+              <STooltip :text="t('page.game.career.rankings.playerRating')">
                 <span class="block text-right text-xs tabular-nums">
                   {{ Math.round(item.entry.rating) }}
                 </span>
-              </SbTooltip>
+              </STooltip>
             </li>
           </template>
         </ol>

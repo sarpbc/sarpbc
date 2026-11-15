@@ -69,11 +69,11 @@ const pointsTooltip = (points: number): string => {
               <p class="min-w-0 font-medium">
                 {{ t("page.game.career.results.regional", { index: index + 1 }) }}
               </p>
-              <SbTooltip :text="pointsTooltip(regionalPlacementPoints(placement))">
+              <STooltip :text="pointsTooltip(regionalPlacementPoints(placement))">
                 <p class="shrink-0 text-right">
                   {{ t(`page.game.career.placements.${placement}`) }}
                 </p>
-              </SbTooltip>
+              </STooltip>
             </div>
           </li>
           <li
@@ -84,19 +84,16 @@ const pointsTooltip = (points: number): string => {
               <p class="min-w-0 font-medium">
                 {{ t("page.game.career.results.major", { split: split.split }) }}
               </p>
-              <SbTooltip
-                v-if="split.major"
-                :text="pointsTooltip(majorPlacementPoints(split.major))"
-              >
+              <STooltip v-if="split.major" :text="pointsTooltip(majorPlacementPoints(split.major))">
                 <p class="shrink-0 text-right">
                   {{ t(`page.game.career.placements.${split.major}`) }}
                 </p>
-              </SbTooltip>
-              <SbTooltip v-else :text="pointsTooltip(0)">
+              </STooltip>
+              <STooltip v-else :text="pointsTooltip(0)">
                 <p class="shrink-0 text-right text-muted">
                   {{ t("page.game.career.results.majorNotQualified") }}
                 </p>
-              </SbTooltip>
+              </STooltip>
             </div>
           </li>
         </ul>
@@ -127,8 +124,8 @@ const pointsTooltip = (points: number): string => {
       }}
     </div>
 
-    <SbButton block @click="emit('continue')">
+    <SButton block @click="emit('continue')">
       {{ t("page.game.career.results.continue") }}
-    </SbButton>
+    </SButton>
   </div>
 </template>

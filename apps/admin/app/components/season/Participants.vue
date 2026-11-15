@@ -74,7 +74,7 @@ const add = async (team: Team) => {
     </div>
 
     <div class="flex max-w-xl flex-col gap-2">
-      <SbInput
+      <SInput
         v-model="query"
         :loading="searching"
         :disabled="adding"
@@ -87,7 +87,7 @@ const add = async (team: Team) => {
       <div v-if="query.trim() && !searching" class="max-h-56 overflow-y-auto overscroll-contain">
         <ul v-if="candidates.length" class="flex flex-col gap-1">
           <li v-for="team in candidates" :key="team.id">
-            <SbButton
+            <SButton
               type="button"
               variant="tertiary"
               size="sm"

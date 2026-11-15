@@ -333,7 +333,7 @@ setPageSeo({
                 :excluded-slug="entry.other?.slug ?? null"
                 @select="selectPlayer(entry.side, $event)"
               />
-              <SbLink
+              <SLink
                 v-if="entry.player"
                 :to="$localePath(playerPath(entry.player.slug))"
                 variant="inline"
@@ -348,21 +348,21 @@ setPageSeo({
                 <span v-if="entry.player.team" class="truncate text-xs text-muted">
                   {{ entry.player.team.name }}
                 </span>
-              </SbLink>
+              </SLink>
             </div>
           </div>
         </div>
       </HubCrossCard>
 
       <HubCard v-if="playerLoadFailed" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t('page.player.compare.loadFailed')" @retry="retryPlayers()" />
+        <SErrorState :message="t('page.player.compare.loadFailed')" @retry="retryPlayers()" />
       </HubCard>
 
       <HubCard
         v-else-if="unknownSlugs.length > 0"
         class="flex min-h-row-stack h-row-grid items-center"
       >
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-person-question-mark-24-regular"
           :title="t('page.player.compare.notFound', { slug: unknownSlugs.join(', ') })"
           :hint="t('page.player.compare.notFoundHint')"
@@ -370,7 +370,7 @@ setPageSeo({
       </HubCard>
 
       <HubCard v-else-if="samePlayer" class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-people-swap-24-regular"
           :title="t('page.player.compare.samePlayer')"
           :hint="t('page.player.compare.samePlayerHint')"
@@ -378,7 +378,7 @@ setPageSeo({
       </HubCard>
 
       <HubCard v-else-if="!pair" class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-people-24-regular"
           :title="t('page.player.compare.choose')"
           :hint="t('page.player.compare.chooseHint')"
@@ -387,9 +387,9 @@ setPageSeo({
 
       <HubCard v-else-if="comparisonStatus === 'pending'" aria-live="polite">
         <HubListItem v-for="index in 6" :key="index" class="grid grid-cols-[1fr_auto_1fr] gap-4">
-          <SbSkeleton class="h-3.5 w-16 justify-self-end" />
-          <SbSkeleton class="h-3 w-24" />
-          <SbSkeleton class="h-3.5 w-16" />
+          <SSkeleton class="h-3.5 w-16 justify-self-end" />
+          <SSkeleton class="h-3 w-24" />
+          <SSkeleton class="h-3.5 w-16" />
         </HubListItem>
       </HubCard>
 
@@ -397,7 +397,7 @@ setPageSeo({
         v-else-if="comparisonError || !comparison"
         class="flex min-h-row-stack h-row-grid items-center"
       >
-        <SbErrorState :message="t('page.player.compare.error')" @retry="refreshComparison()" />
+        <SErrorState :message="t('page.player.compare.error')" @retry="refreshComparison()" />
       </HubCard>
 
       <template v-else>

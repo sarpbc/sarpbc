@@ -111,12 +111,12 @@ const confirmChange = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
       <div class="flex flex-col gap-4">
-        <SbInput
+        <SInput
           v-model="searchInput"
           icon="i-lucide-search"
           class="w-full max-w-sm"
@@ -124,14 +124,14 @@ const confirmChange = async () => {
           :aria-label="$t('page.users.searchPlaceholder')"
         />
 
-        <SbErrorState
+        <SErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.users.loadError')"
           @retry="refresh()"
         />
 
         <ClientOnly v-else>
-          <SbTable :data="users" :columns="columns" :loading="status === 'pending'" sticky>
+          <STable :data="users" :columns="columns" :loading="status === 'pending'" sticky>
             <template #empty>
               {{ search ? $t("page.users.emptySearch") : $t("page.users.empty") }}
             </template>
@@ -142,7 +142,7 @@ const confirmChange = async () => {
               <span translate="no">{{ row.original.email }}</span>
             </template>
             <template #role-cell="{ row }">
-              <SbSelect
+              <SSelect
                 :model-value="roleOf(row.original)"
                 :items="roleItems"
                 class="w-40"
@@ -152,12 +152,12 @@ const confirmChange = async () => {
                 @update:model-value="requestRoleChange(row.original, $event)"
               />
             </template>
-          </SbTable>
+          </STable>
           <div v-if="total > limit" class="mt-4 flex w-full flex-row justify-between">
             <span class="text-muted">
               {{ $t("page.users.usersCount", { count: total }, total) }}
             </span>
-            <SbPagination
+            <SPagination
               :page="page"
               :total="total"
               :items-per-page="limit"
@@ -168,7 +168,7 @@ const confirmChange = async () => {
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isConfirmOpen"
       :title="$t('page.users.confirm.title')"
       :description="
@@ -182,13 +182,13 @@ const confirmChange = async () => {
       "
     >
       <template #footer>
-        <SbButton
+        <SButton
           variant="tertiary"
           :label="$t('page.users.confirm.cancel')"
           @click="isConfirmOpen = false"
         />
-        <SbButton danger :label="$t('page.users.confirm.confirm')" @click="confirmChange" />
+        <SButton danger :label="$t('page.users.confirm.confirm')" @click="confirmChange" />
       </template>
-    </SbModal>
+    </SModal>
   </NuxtLayout>
 </template>

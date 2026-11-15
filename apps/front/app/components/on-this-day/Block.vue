@@ -32,22 +32,22 @@ const dayLabel = computed(() =>
             {{ t("components.onThisDay.title") }}
             <span v-if="dayLabel" class="font-normal text-muted">· {{ dayLabel }}</span>
           </h2>
-          <SbLink v-if="hasMore" :to="localePath('/on-this-day')" class="text-xs">
+          <SLink v-if="hasMore" :to="localePath('/on-this-day')" class="text-xs">
             {{ t("components.onThisDay.viewAll", { count: events.length }) }}
-          </SbLink>
+          </SLink>
         </div>
       </template>
 
       <HubCard v-if="pending && !events.length" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
         <HubListItem v-for="index in 3" :key="index" class="gap-3">
-          <SbSkeleton class="h-3 w-10 shrink-0" />
-          <SbSkeleton class="h-3 max-w-72 flex-1" />
+          <SSkeleton class="h-3 w-10 shrink-0" />
+          <SSkeleton class="h-3 max-w-72 flex-1" />
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t('components.onThisDay.error')" @retry="refresh()" />
+        <SErrorState :message="t('components.onThisDay.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else-if="shown.length > 0">
@@ -61,7 +61,7 @@ const dayLabel = computed(() =>
       </HubCard>
 
       <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-calendar-star-24-regular"
           :title="t('components.onThisDay.empty.title')"
           :hint="t('components.onThisDay.empty.hint')"

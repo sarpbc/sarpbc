@@ -59,9 +59,9 @@ watch(
     <HubPageHeader>
       <template #title>{{ season.name }}</template>
       <template #meta>
-        <SbLink :to="$localePath('/seasons')" variant="muted">
+        <SLink :to="$localePath('/seasons')" variant="muted">
           {{ t("page.seasons.archive.allSeasons") }}
-        </SbLink>
+        </SLink>
       </template>
     </HubPageHeader>
 
@@ -84,7 +84,7 @@ watch(
           </HubListItem>
         </HubCard>
         <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SbEmptyState
+          <SEmptyState
             icon="i-fluent-trophy-24-regular"
             :title="t('page.seasons.archive.winner.empty')"
           />
@@ -116,7 +116,7 @@ watch(
           </div>
         </HubCard>
         <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SbEmptyState
+          <SEmptyState
             icon="i-fluent-text-bullet-list-24-regular"
             :title="t('page.seasons.archive.format.empty')"
           />
@@ -158,7 +158,7 @@ watch(
                     :key="index"
                     class="flex min-w-0 flex-wrap items-baseline gap-x-2"
                   >
-                    <SbLink
+                    <SLink
                       v-if="entry.tournament"
                       :to="
                         $localePath(
@@ -168,7 +168,7 @@ watch(
                       variant="inline"
                     >
                       {{ entry.label }}
-                    </SbLink>
+                    </SLink>
                     <span v-else>{{ entry.label }}</span>
                     <span class="text-muted">{{ entry.result }}</span>
                   </li>
@@ -181,7 +181,7 @@ watch(
           </ul>
         </HubCard>
         <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SbEmptyState
+          <SEmptyState
             icon="i-fluent-people-team-24-regular"
             :title="t('page.seasons.archive.participants.empty')"
             :hint="t('page.seasons.archive.participants.emptyHint')"

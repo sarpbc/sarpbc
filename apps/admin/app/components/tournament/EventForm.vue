@@ -12,21 +12,21 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
 
 <template>
   <div class="flex max-w-2xl flex-col gap-4">
-    <SbFormField :label="$t('page.tournaments.events.form.name')" required>
-      <SbInput
+    <SFormField :label="$t('page.tournaments.events.form.name')" required>
+      <SInput
         v-model="state.name"
         class="w-full"
         autocomplete="off"
         :disabled="disabled"
         :placeholder="$t('page.tournaments.events.form.namePlaceholder')"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField
+    <SFormField
       :label="$t('page.tournaments.form.slug')"
       :hint="$t('page.tournaments.events.form.slugHint')"
     >
-      <SbInput
+      <SInput
         v-model="state.slug"
         class="w-full"
         spellcheck="false"
@@ -34,18 +34,18 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
         :disabled="disabled"
         :placeholder="$t('page.tournaments.form.slugPlaceholder')"
       />
-    </SbFormField>
+    </SFormField>
 
-    <SbFormField :label="$t('page.tournaments.form.league')">
+    <SFormField :label="$t('page.tournaments.form.league')">
       <div class="flex gap-2">
-        <SbCombobox
+        <SCombobox
           v-model="state.leagueId"
           :items="leagueItems"
           class="w-full"
           :disabled="disabled"
           :placeholder="$t('page.tournaments.form.leaguePlaceholder')"
         />
-        <SbButton
+        <SButton
           v-if="state.leagueId"
           variant="tertiary"
           icon="i-fluent-dismiss-24-regular"
@@ -55,6 +55,6 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
           @click="state.leagueId = ''"
         />
       </div>
-    </SbFormField>
+    </SFormField>
   </div>
 </template>

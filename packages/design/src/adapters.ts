@@ -27,14 +27,14 @@ export interface DesignAdapters {
 }
 
 const PlainIcon = defineComponent({
-  name: "SbPlainIcon",
+  name: "SPlainIcon",
   props: { name: { required: true, type: String } },
   setup: (props) => () => h("span", { "aria-hidden": "true", "data-icon": props.name }),
 });
 
 /** A plain anchor, for apps or demos without a router. */
 export const AnchorLink = defineComponent({
-  name: "SbAnchorLink",
+  name: "SAnchorLink",
   props: { to: { required: true, type: String } },
   setup:
     (props, { slots }) =>

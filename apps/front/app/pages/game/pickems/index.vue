@@ -35,12 +35,12 @@ const stageCount = computed(() =>
 
     <HubCard v-if="pending && !events.length" class="p-4" aria-live="polite">
       <div class="flex flex-col gap-2">
-        <SbSkeleton v-for="i in 4" :key="i" class="h-row w-full" />
+        <SSkeleton v-for="i in 4" :key="i" class="h-row w-full" />
       </div>
     </HubCard>
 
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="$t('page.game.pickems.list.error')" @retry="refresh()" />
+      <SErrorState :message="$t('page.game.pickems.list.error')" @retry="refresh()" />
     </HubCard>
 
     <TournamentListGroup

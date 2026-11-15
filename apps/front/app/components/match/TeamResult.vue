@@ -32,7 +32,7 @@ const nameClass = computed(() => {
 
 <template>
   <div class="flex flex-col items-center justify-center">
-    <SbLink
+    <SLink
       v-if="href"
       :to="$localePath(href)"
       variant="muted"
@@ -41,7 +41,7 @@ const nameClass = computed(() => {
     >
       <TeamImg :team-name="name" :logo="participant?.team" size="md" />
       {{ name }}
-    </SbLink>
+    </SLink>
     <span
       v-else-if="participant && !participant.team && name"
       class="flex max-w-full flex-col items-center justify-center gap-2 text-center text-balance break-words"

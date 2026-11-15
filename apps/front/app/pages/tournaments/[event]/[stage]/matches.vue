@@ -77,7 +77,7 @@ const formatDayHeader = (group: { date: Date | null; dateKey: string }) => {
 <template>
   <div class="w-full flex flex-col gap-4">
     <HubCard v-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.tournaments.id.matchesError')" @retry="refresh()" />
+      <SErrorState :message="t('page.tournaments.id.matchesError')" @retry="refresh()" />
     </HubCard>
     <div v-else-if="hasMatches" class="flex flex-col gap-4">
       <section v-if="displayGroupedMatches.upcoming.length > 0" class="flex flex-col">
@@ -120,7 +120,7 @@ const formatDayHeader = (group: { date: Date | null; dateKey: string }) => {
       </section>
     </div>
     <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-      <SbEmptyState
+      <SEmptyState
         icon="i-fluent-calendar-clock-24-regular"
         :title="t('page.tournaments.id.noMatches')"
       />

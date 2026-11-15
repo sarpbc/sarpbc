@@ -71,9 +71,9 @@ const showCredit = computed(() => startgg && lineups.length > 0);
               <FlagIcon :nationality="player.nationality" class="shrink-0" />
               <span class="truncate text-sm">{{ player.name }}</span>
             </div>
-            <SbBadge v-if="player.standIn" class="shrink-0">
+            <SBadge v-if="player.standIn" class="shrink-0">
               {{ t("page.match.detail.lineups.standIn") }}
-            </SbBadge>
+            </SBadge>
           </HubListItem>
           <HubListItem v-else size="default" class="min-w-0">
             <span v-if="rowIndex === 0" class="self-center truncate text-sm text-muted">
@@ -89,7 +89,7 @@ const showCredit = computed(() => startgg && lineups.length > 0);
     <p v-if="showCredit" class="flex h-row items-center px-2 text-xs text-muted">
       <span>
         {{ t("common.prizes.dataFrom") }}
-        <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
+        <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
       </span>
     </p>
   </div>

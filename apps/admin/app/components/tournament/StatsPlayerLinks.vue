@@ -110,7 +110,7 @@ const ROW_CLASS =
 
     <div v-else-if="error && !accounts" class="flex flex-col items-start gap-2">
       <p class="text-sm text-error">{{ t("page.tournaments.statsLinks.loadError") }}</p>
-      <SbButton
+      <SButton
         variant="secondary"
         size="sm"
         :label="t('page.tournaments.statsLinks.retry')"
@@ -130,7 +130,7 @@ const ROW_CLASS =
             <span class="truncate text-muted">{{ meta(player) }}</span>
           </div>
           <form class="flex items-center gap-2" @submit.prevent="save(player)">
-            <SbSelect
+            <SSelect
               v-model="selected[keyOf(player)]"
               :groups="rosterOptions(player)"
               class="w-48"
@@ -138,7 +138,7 @@ const ROW_CLASS =
               :aria-label="t('page.tournaments.statsLinks.playerFor', { name: player.name })"
               :disabled="savingKey !== null"
             />
-            <SbButton
+            <SButton
               type="submit"
               size="sm"
               :label="t('page.tournaments.statsLinks.save')"
@@ -170,7 +170,7 @@ const ROW_CLASS =
               class="flex items-center gap-2"
               @submit.prevent="save(player)"
             >
-              <SbSelect
+              <SSelect
                 v-model="selected[keyOf(player)]"
                 :groups="rosterOptions(player)"
                 class="w-48"
@@ -178,7 +178,7 @@ const ROW_CLASS =
                 :aria-label="t('page.tournaments.statsLinks.playerFor', { name: player.name })"
                 :disabled="savingKey !== null"
               />
-              <SbButton
+              <SButton
                 type="submit"
                 size="sm"
                 :label="t('page.tournaments.statsLinks.save')"
@@ -189,7 +189,7 @@ const ROW_CLASS =
                   savingKey !== null
                 "
               />
-              <SbButton
+              <SButton
                 variant="tertiary"
                 size="sm"
                 :label="$t('common.cancel')"
@@ -197,7 +197,7 @@ const ROW_CLASS =
                 @click="editing = null"
               />
             </form>
-            <SbButton
+            <SButton
               v-else
               variant="secondary"
               size="sm"

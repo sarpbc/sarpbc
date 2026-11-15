@@ -148,7 +148,7 @@ defineExpose({ refreshAwards });
       <p class="text-sm text-muted">{{ $t("page.tournaments.awards.hint") }}</p>
     </div>
 
-    <SbErrorState
+    <SErrorState
       v-if="error"
       :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
       @retry="refreshAwards()"
@@ -168,7 +168,7 @@ defineExpose({ refreshAwards });
           {{ award.participant.team.name }}
         </p>
       </div>
-      <SbButton
+      <SButton
         variant="secondary"
         danger
         size="sm"
@@ -182,17 +182,17 @@ defineExpose({ refreshAwards });
       v-if="availableAwardTypeOptions.length > 0 && rosterOptions.length > 0"
       class="flex flex-col gap-2 sm:flex-row sm:items-end"
     >
-      <SbFormField :label="$t('page.tournaments.awards.awardType')" class="min-w-0 sm:w-48">
-        <SbSelect v-model="selectedAwardType" :items="availableAwardTypeOptions" />
-      </SbFormField>
-      <SbFormField :label="$t('page.tournaments.awards.selectPlayer')" class="min-w-0 flex-1">
-        <SbSelect
+      <SFormField :label="$t('page.tournaments.awards.awardType')" class="min-w-0 sm:w-48">
+        <SSelect v-model="selectedAwardType" :items="availableAwardTypeOptions" />
+      </SFormField>
+      <SFormField :label="$t('page.tournaments.awards.selectPlayer')" class="min-w-0 flex-1">
+        <SSelect
           v-model="selectedPlayerId"
           :items="rosterOptions"
           :placeholder="$t('page.tournaments.awards.selectPlayer')"
         />
-      </SbFormField>
-      <SbButton
+      </SFormField>
+      <SButton
         :loading="assigning"
         :disabled="!selectedPlayerId || !selectedAwardType"
         :label="$t('page.tournaments.awards.assignAction')"

@@ -116,7 +116,7 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.bracket.title', { match: label })"
     :description="t('page.tournaments.bracket.description')"
@@ -125,13 +125,13 @@ const save = async () => {
     <template #body>
       <div class="flex flex-col gap-4">
         <div class="grid gap-2 sm:grid-cols-2">
-          <SbFormField
+          <SFormField
             v-for="(_, index) in sides"
             :key="index"
             :label="t('page.tournaments.bracket.side', { number: index + 1 })"
           >
-            <SbSelect v-model="sides[index]" :items="participantItems" class="w-full" />
-          </SbFormField>
+            <SSelect v-model="sides[index]" :items="participantItems" class="w-full" />
+          </SFormField>
         </div>
 
         <div class="flex flex-col gap-2">
@@ -146,18 +146,18 @@ const save = async () => {
             :key="link.key"
             class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[minmax(0,1fr)_10rem_auto] sm:items-end"
           >
-            <SbFormField :label="t('page.tournaments.bracket.previousMatch')">
-              <SbSelect
+            <SFormField :label="t('page.tournaments.bracket.previousMatch')">
+              <SSelect
                 v-model="link.previousMatchId"
                 :items="matchItems"
                 class="w-full"
                 :placeholder="t('page.tournaments.bracket.choosePreviousMatch')"
               />
-            </SbFormField>
-            <SbFormField :label="t('page.tournaments.bracket.type')">
-              <SbSelect v-model="link.type" :items="typeItems" class="w-full" />
-            </SbFormField>
-            <SbButton
+            </SFormField>
+            <SFormField :label="t('page.tournaments.bracket.type')">
+              <SSelect v-model="link.type" :items="typeItems" class="w-full" />
+            </SFormField>
+            <SButton
               variant="tertiary"
               danger
               icon="i-fluent-delete-24-regular"
@@ -171,7 +171,7 @@ const save = async () => {
 
     <template #footer>
       <div class="flex w-full flex-row flex-wrap justify-between gap-2">
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.bracket.addFeeder')"
@@ -179,12 +179,12 @@ const save = async () => {
           @click="addLink"
         />
         <div class="flex flex-row gap-2">
-          <SbButton
+          <SButton
             variant="tertiary"
             :label="t('page.tournaments.bracket.cancel')"
             @click="open = false"
           />
-          <SbButton
+          <SButton
             :label="t('page.tournaments.bracket.save')"
             :loading="saving"
             :disabled="!canSave"
@@ -193,5 +193,5 @@ const save = async () => {
         </div>
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

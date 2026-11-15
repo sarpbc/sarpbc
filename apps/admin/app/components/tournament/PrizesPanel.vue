@@ -263,7 +263,7 @@ const save = async () => {
 
     <div v-else-if="error" class="flex flex-col items-start gap-2">
       <p class="text-sm text-error">{{ t("page.tournaments.prizes.loadError") }}</p>
-      <SbButton
+      <SButton
         variant="secondary"
         size="sm"
         :label="t('page.tournaments.prizes.retry')"
@@ -281,15 +281,15 @@ const save = async () => {
       </p>
 
       <div v-if="rows.length > 0" class="flex flex-col gap-2 sm:flex-row sm:items-start">
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.prizes.bulkSource')"
           :hint="t('page.tournaments.prizes.bulkSourceHint')"
           :error="sourceUrlError(bulkSourceUrl)"
           class="min-w-0 flex-1"
         >
-          <SbInput v-model="bulkSourceUrl" type="url" autocomplete="off" class="w-full" />
-        </SbFormField>
-        <SbButton
+          <SInput v-model="bulkSourceUrl" type="url" autocomplete="off" class="w-full" />
+        </SFormField>
+        <SButton
           class="sm:mt-6"
           variant="secondary"
           :label="t('page.tournaments.prizes.applySource')"
@@ -303,16 +303,16 @@ const save = async () => {
         :key="row.key"
         class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[6rem_8rem_6rem_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start"
       >
-        <SbFormField :label="t('page.tournaments.prizes.placement')">
-          <SbInputNumber
+        <SFormField :label="t('page.tournaments.prizes.placement')">
+          <SInputNumber
             v-model="row.placement"
             :min="MIN_PRIZE_PLACEMENT"
             :step="1"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.prizes.amount')"
           :error="
             row.amount !== null && !isValidAmount(row.amount)
@@ -320,40 +320,40 @@ const save = async () => {
               : undefined
           "
         >
-          <SbInputNumber
+          <SInputNumber
             v-model="row.amount"
             :min="MIN_PRIZE_AMOUNT"
             :max="MAX_PRIZE_AMOUNT"
             :step="1"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.prizes.currency')"
           :error="currencyError(row.currency)"
         >
-          <SbInput
+          <SInput
             v-model="row.currency"
             :maxlength="CURRENCY_CODE_LENGTH"
             autocomplete="off"
             spellcheck="false"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField :label="t('page.tournaments.prizes.team')" :error="teamError(row)">
-          <SbSelect
+        <SFormField :label="t('page.tournaments.prizes.team')" :error="teamError(row)">
+          <SSelect
             :model-value="row.teamId"
             :items="teamOptions"
             :placeholder="t('page.tournaments.prizes.selectTeam')"
             class="w-full"
             @update:model-value="selectTeam(row, $event)"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField :label="t('page.tournaments.prizes.players')" :error="playersError(row)">
-          <SbCombobox
+        <SFormField :label="t('page.tournaments.prizes.players')" :error="playersError(row)">
+          <SCombobox
             v-model="row.playerIds"
             multiple
             :items="playerOptions(row.teamId)"
@@ -361,9 +361,9 @@ const save = async () => {
             :placeholder="t('page.tournaments.prizes.selectPlayers')"
             class="w-full"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbButton
+        <SButton
           class="sm:mt-6"
           variant="tertiary"
           danger
@@ -372,14 +372,14 @@ const save = async () => {
           @click="removeRow(row.key)"
         />
 
-        <SbFormField
+        <SFormField
           :label="t('common.sourceUrl')"
           :error="sourceUrlError(row.sourceUrl)"
           class="sm:col-span-full"
         >
-          <SbInput v-model="row.sourceUrl" type="url" autocomplete="off" class="w-full" />
+          <SInput v-model="row.sourceUrl" type="url" autocomplete="off" class="w-full" />
           <template v-if="row.sourceUrl.trim() && !sourceUrlError(row.sourceUrl)" #help>
-            <SbLink
+            <SLink
               variant="accent"
               :to="row.sourceUrl.trim()"
               external
@@ -387,9 +387,9 @@ const save = async () => {
               class="break-all"
             >
               {{ t("common.openSource") }}
-            </SbLink>
+            </SLink>
           </template>
-        </SbFormField>
+        </SFormField>
       </div>
 
       <p v-if="duplicateTeam" class="text-sm text-error">
@@ -397,14 +397,14 @@ const save = async () => {
       </p>
 
       <div class="flex flex-row flex-wrap justify-between gap-2">
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-add-24-regular"
           :label="t('page.tournaments.prizes.add')"
           :disabled="participants.length === 0 || rows.length >= MAX_PRIZE_ENTRIES"
           @click="addRow"
         />
-        <SbButton
+        <SButton
           :label="t('page.tournaments.prizes.save')"
           :loading="saving"
           :disabled="!prizeInputs"

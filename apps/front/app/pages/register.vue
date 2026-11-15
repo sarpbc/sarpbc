@@ -57,13 +57,13 @@ const onSubmit = async (event: Event) => {
         </h1>
         <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-12">
           {{ $t("page.authentication.alreadyHaveAnAccount") }}&nbsp;
-          <SbLink variant="accent" :to="$localePath('/login')">
+          <SLink variant="accent" :to="$localePath('/login')">
             {{ $t("page.authentication.login") }}
-          </SbLink>
+          </SLink>
           .
         </div>
 
-        <SbButton
+        <SButton
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
           variant="secondary"
@@ -71,26 +71,26 @@ const onSubmit = async (event: Event) => {
           @click="googleLogin"
         />
 
-        <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
+        <SSeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <form class="w-full h-fit" method="post" @submit="onSubmit">
-          <SbFormField :label="$t('page.authentication.userName')" class="w-full pb-4">
-            <SbInput v-model="state.userName" type="text" class="w-full" />
-          </SbFormField>
+          <SFormField :label="$t('page.authentication.userName')" class="w-full pb-4">
+            <SInput v-model="state.userName" type="text" class="w-full" />
+          </SFormField>
 
-          <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
-            <SbInput v-model="state.email" type="email" class="w-full" />
-          </SbFormField>
+          <SFormField :label="$t('page.authentication.email')" class="w-full pb-4">
+            <SInput v-model="state.email" type="email" class="w-full" />
+          </SFormField>
 
-          <SbFormField :label="$t('page.authentication.password')" class="w-full pb-8">
-            <SbInput v-model="state.password" type="password" class="w-full" />
-          </SbFormField>
+          <SFormField :label="$t('page.authentication.password')" class="w-full pb-8">
+            <SInput v-model="state.password" type="password" class="w-full" />
+          </SFormField>
 
           <p v-if="errorMessage" role="alert" class="-mt-4 mb-4 text-sm text-error">
             {{ errorMessage }}
           </p>
 
-          <SbButton :label="$t('page.authentication.toRegister')" type="submit" block />
+          <SButton :label="$t('page.authentication.toRegister')" type="submit" block />
         </form>
       </div>
     </HubCrossCard>

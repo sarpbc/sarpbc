@@ -120,33 +120,33 @@ watch(
     <HubPageHeader>
       <template #title>
         <span v-if="standings">{{ standings.name }}</span>
-        <SbSkeleton v-else class="mx-auto h-5 w-48" />
+        <SSkeleton v-else class="mx-auto h-5 w-48" />
       </template>
       <template #meta>
-        <SbLink :to="$localePath('/circuits')" variant="muted">
+        <SLink :to="$localePath('/circuits')" variant="muted">
           {{ t("page.circuits.standings.title") }}
-        </SbLink>
+        </SLink>
       </template>
     </HubPageHeader>
 
     <HubCard v-if="pending" aria-live="polite">
       <span class="sr-only">{{ t("common.loading") }}</span>
       <HubListItem v-for="index in 6" :key="index" class="gap-3">
-        <SbSkeleton class="h-3 w-6 shrink-0" />
-        <SbSkeleton class="size-4 shrink-0" />
-        <SbSkeleton class="h-3 max-w-40 flex-1" />
-        <SbSkeleton class="h-3 w-12" />
-        <SbSkeleton class="h-3 w-12" />
+        <SSkeleton class="h-3 w-6 shrink-0" />
+        <SSkeleton class="size-4 shrink-0" />
+        <SSkeleton class="h-3 max-w-40 flex-1" />
+        <SSkeleton class="h-3 w-12" />
+        <SSkeleton class="h-3 w-12" />
       </HubListItem>
     </HubCard>
 
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.circuits.standings.error')" @retry="refresh()" />
+      <SErrorState :message="t('page.circuits.standings.error')" @retry="refresh()" />
     </HubCard>
 
     <template v-else-if="standings">
       <HubCard v-if="!tableRows.length" class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
+        <SEmptyState
           icon="i-fluent-trophy-24-regular"
           :title="t('page.circuits.standings.empty')"
           :hint="t('page.circuits.standings.emptyHint')"
@@ -190,16 +190,16 @@ watch(
                   class="min-w-24 max-w-36 px-2 py-2 text-right align-bottom font-normal"
                 >
                   <div class="flex flex-col items-end gap-1">
-                    <SbLink
+                    <SLink
                       :to="$localePath(tournamentEventPath(column.event.slug))"
                       variant="inline"
                       class="line-clamp-2 text-balance"
                     >
                       {{ column.event.name }}
-                    </SbLink>
-                    <SbBadge v-if="statusLabel(column.status)">
+                    </SLink>
+                    <SBadge v-if="statusLabel(column.status)">
                       {{ statusLabel(column.status) }}
-                    </SbBadge>
+                    </SBadge>
                   </div>
                 </th>
               </tr>
@@ -224,13 +224,13 @@ watch(
                 >
                   <div class="flex min-w-0 items-center gap-2">
                     <TeamImg :team-name="entry.row.team.name" :logo="entry.row.team" size="xs" />
-                    <SbLink
+                    <SLink
                       :to="$localePath(teamPath(entry.row.team.slug))"
                       variant="inline"
                       class="min-w-0 truncate font-medium"
                     >
                       {{ entry.row.team.name }}
-                    </SbLink>
+                    </SLink>
                   </div>
                 </th>
                 <td class="px-2 text-right font-medium text-highlighted tabular-nums">
@@ -284,9 +284,9 @@ watch(
                 <span>{{ t("page.circuits.standings.scaleSource") }}</span>
                 <ul class="flex flex-col gap-1">
                   <li v-for="url in standings.sourceUrls" :key="url" class="min-w-0 truncate">
-                    <SbLink :to="url" external target="_blank" variant="inline">
+                    <SLink :to="url" external target="_blank" variant="inline">
                       {{ sourceLabel(url) }}
-                    </SbLink>
+                    </SLink>
                   </li>
                 </ul>
               </div>

@@ -122,7 +122,7 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
     </HubCard>
 
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.tournaments.id.error')" @retry="refresh()" />
+      <SErrorState :message="t('page.tournaments.id.error')" @retry="refresh()" />
     </HubCard>
 
     <template v-else-if="tournament">
@@ -142,13 +142,13 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
         :spoiler-tournament-ids="[tournament.id]"
       >
         <template #kicker>
-          <SbLink
+          <SLink
             :to="localePath(tournamentEventPath(tournament.event.slug))"
             variant="muted"
             class="text-sm text-pretty"
           >
             {{ tournament.event.name }}
-          </SbLink>
+          </SLink>
         </template>
         <TournamentHeader
           :event-slug="tournament.event.slug"

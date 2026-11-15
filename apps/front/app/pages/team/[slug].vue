@@ -110,7 +110,7 @@ setPageSeo({
     </div>
 
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.team.slug.failedToLoadTeamData')" @retry="refresh()" />
+      <SErrorState :message="t('page.team.slug.failedToLoadTeamData')" @retry="refresh()" />
     </HubCard>
 
     <div v-else-if="team" class="w-full flex min-w-0 flex-col gap-8">
@@ -135,7 +135,7 @@ setPageSeo({
       <TeamRosterSection :players="activeRoster" />
 
       <div class="flex h-row items-center justify-center px-2">
-        <SbTabs
+        <STabs
           :model-value="tab"
           :items="tabItems"
           :ariaLabel="t('page.team.slug.tabsLabel')"

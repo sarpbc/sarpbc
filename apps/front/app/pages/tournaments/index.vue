@@ -95,9 +95,9 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
     <HubPageHeader>
       <template #title>{{ t("page.tournaments.index.title") }}</template>
       <template v-if="nextEvent" #meta>
-        <SbLink :to="$localePath(tournamentEventPath(nextEvent.slug))" variant="muted">
+        <SLink :to="$localePath(tournamentEventPath(nextEvent.slug))" variant="muted">
           {{ t("page.hub.headers.nextEvent", { name: nextEvent.name }) }}
-        </SbLink>
+        </SLink>
       </template>
     </HubPageHeader>
 
@@ -105,13 +105,13 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
       <div v-if="pending && !events.length" class="w-full flex flex-col" aria-live="polite">
         <HubRail v-for="group in 2" :key="group" caption="section">
           <template #caption>
-            <SbSkeleton class="h-3 w-40" />
+            <SSkeleton class="h-3 w-40" />
           </template>
           <HubCard>
             <HubListItem v-for="row in 3" :key="row" class="gap-3">
-              <SbSkeleton class="h-3 max-w-32 flex-1" />
-              <SbSkeleton class="h-3 w-24 sm:w-32" />
-              <SbSkeleton class="h-3 w-20" />
+              <SSkeleton class="h-3 max-w-32 flex-1" />
+              <SSkeleton class="h-3 w-24 sm:w-32" />
+              <SSkeleton class="h-3 w-20" />
             </HubListItem>
           </HubCard>
         </HubRail>
@@ -133,14 +133,11 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
       </template>
 
       <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SbErrorState :message="t('page.tournaments.index.error')" @retry="refresh()" />
+        <SErrorState :message="t('page.tournaments.index.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SbEmptyState
-          icon="i-fluent-trophy-24-regular"
-          :title="t('page.tournaments.index.empty')"
-        />
+        <SEmptyState icon="i-fluent-trophy-24-regular" :title="t('page.tournaments.index.empty')" />
       </HubCard>
     </div>
   </div>

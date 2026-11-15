@@ -71,6 +71,6 @@ const decisionLabel = computed(() => {
         {{ t(`${eventKey}.description`) }}
       </p>
     </div>
-    <SbActionList :items="choiceItems" @select="emit('choose', $event)" />
+    <SActionList :items="choiceItems" @select="emit('choose', $event)" />
   </div>
 </template>

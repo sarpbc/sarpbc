@@ -54,10 +54,10 @@ const create = async (input: CircuitInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.circuits.create.button')"
         @click="isCreateOpen = true"
@@ -72,7 +72,7 @@ const create = async (input: CircuitInput) => {
           {{ $t("page.circuits.loading") }}
         </p>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.circuits.loadError')"
           @retry="refresh()"
@@ -86,7 +86,7 @@ const create = async (input: CircuitInput) => {
             <h2 class="text-lg font-semibold">{{ $t("page.circuits.empty.title") }}</h2>
             <p class="text-sm text-muted">{{ $t("page.circuits.empty.description") }}</p>
           </div>
-          <SbButton
+          <SButton
             icon="i-fluent-add-24-regular"
             :label="$t('page.circuits.create.button')"
             @click="isCreateOpen = true"
@@ -94,14 +94,14 @@ const create = async (input: CircuitInput) => {
         </div>
 
         <ClientOnly v-else>
-          <SbTable :data="circuits" :columns="columns" sticky>
+          <STable :data="circuits" :columns="columns" sticky>
             <template #name-cell="{ row }">
-              <SbLink :to="localePath(`/circuits/${row.original.id}`)" class="font-medium">
+              <SLink :to="localePath(`/circuits/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
-              </SbLink>
+              </SLink>
             </template>
             <template #actions-cell="{ row }">
-              <SbButton
+              <SButton
                 variant="tertiary"
                 danger
                 size="sm"
@@ -110,12 +110,12 @@ const create = async (input: CircuitInput) => {
                 @click="circuitToDelete = row.original"
               />
             </template>
-          </SbTable>
+          </STable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isCreateOpen"
       :title="$t('page.circuits.create.title')"
       :dismissible="!isCreating"
@@ -127,7 +127,7 @@ const create = async (input: CircuitInput) => {
           @submit="create"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="circuitToDelete"

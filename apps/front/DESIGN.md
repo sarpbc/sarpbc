@@ -66,8 +66,8 @@ Use semantic classes — not raw hex:
 | Image fallbacks   | `bg-muted`                                              |
 | List separators   | `border-separator` / `row-separator` (`--ui-separator`) |
 | Control edges     | `border-default`                                        |
-| Primary action    | `variant="primary"` on `SbButton`                       |
-| Destructive       | `danger` on `SbButton`                                  |
+| Primary action    | `variant="primary"` on `SButton`                        |
+| Destructive       | `danger` on `SButton`                                   |
 
 ### Text hierarchy (black → white)
 
@@ -93,7 +93,7 @@ Radius: `--ui-radius: 0rem` in `app/assets/css/main.css` (sharp corners). Stay c
 
 Input fields keep a subtle 1px inset border (`--ui-border`), strengthened on hover (`--ui-border-accented`). All interactive elements use primary for keyboard focus, which takes precedence over hover. The global rules in `app/assets/css/main.css` cover native controls, links and `@sarpbc/design` components without changing their dimensions. Buttons and inline text links only receive the focus outline. Do not add thicker local focus rings. Forced-colors mode retains its system outline.
 
-Text links in news prose and `SbLink variant="accent"` use `--ui-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-link-hover`; links are never underlined. Article cards connect directly to the discussion composer with a single shared border.
+Text links in news prose and `SLink variant="accent"` use `--ui-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-link-hover`; links are never underlined. Article cards connect directly to the discussion composer with a single shared border.
 
 ---
 
@@ -141,7 +141,7 @@ Card floors (`card-s` / `card-m` / `card-l`) are **even** multiples of `row`, so
 
 **States rule:** use these row primitives — not `h-11.25`, `h-11.5`, `h-8.25`, `py-[2.75px]`, or other arbitrary heights.
 
-**Free-height blocks** (hero cards, profile cards, error/empty cards) that sit in the main column get `h-row-grid`: it rounds the used height, borders included, up to a whole number of `row`s so every block below still lands on the sidebar row lines. Error and empty cards use `flex min-h-row-stack h-row-grid items-center` around `SbErrorState` / `SbEmptyState`.
+**Free-height blocks** (hero cards, profile cards, error/empty cards) that sit in the main column get `h-row-grid`: it rounds the used height, borders included, up to a whole number of `row`s so every block below still lands on the sidebar row lines. Error and empty cards use `flex min-h-row-stack h-row-grid items-center` around `SErrorState` / `SEmptyState`.
 
 Padded content keeps its position at the top when the card snaps taller; extra grid space belongs at the bottom. Discussion composers use a `h-row` label band so the textarea starts on the next match-row boundary. Submit actions align right with `px-4`. Button presses change the background only; do not scale them.
 
@@ -161,7 +161,7 @@ Shared list/rail components (`HubListItem`, `HubRail`, `HubColumn`) encode these
 
 ## Components
 
-Prefer `@sarpbc/design` (`SbButton`, `SbFormField`, `SbLink`, `SbModal`, `SbTable`, …), auto-imported with the `Sb` prefix. Templates never use native `button`, `input`, `select` or `textarea`: `pnpm check:native-controls` rejects them unless a `<!-- native-control: reason -->` comment explains the exception. Generic components (`SbEmptyState`, `SbErrorState`, …) live in the library; layout bound to the hub row grid lives in `app/components/hub/` (`Hub*`). Extend either when a pattern repeats 3+ times.
+Prefer `@sarpbc/design` (`SButton`, `SFormField`, `SLink`, `SModal`, `STable`, …), auto-imported with the `S` prefix. Templates never use native `button`, `input`, `select` or `textarea`: `pnpm check:native-controls` rejects them unless a `<!-- native-control: reason -->` comment explains the exception. Generic components (`SEmptyState`, `SErrorState`, …) live in the library; layout bound to the hub row grid lives in `app/components/hub/` (`Hub*`). Extend either when a pattern repeats 3+ times.
 
 | Primitive         | Role                                                                                                                                              |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -173,17 +173,17 @@ Prefer `@sarpbc/design` (`SbButton`, `SbFormField`, `SbLink`, `SbModal`, `SbTabl
 | `HubColumn`       | Hub grid column wrapper (`variant`: `rail` \| `main`)                                                                                             |
 | `HubPageBody`     | Main-column page shell: `HubRail caption="lead"` + body gap so first content aligns with sidebar lead rails                                       |
 | `HubPageHeader`   | List-page title band (`HubCrossCard` + `h-row-header`) — use for directory/list hubs, not detail bodies                                           |
-| `SbErrorState`    | Failed load: warning icon, message, neutral outline **Retry** (`common.retry`). Never swallow a fetch error into an empty list                    |
-| `SbEmptyState`    | Nothing to show: icon, title, optional hint, actions in the default slot                                                                          |
+| `SErrorState`     | Failed load: warning icon, message, neutral outline **Retry** (`common.retry`). Never swallow a fetch error into an empty list                    |
+| `SEmptyState`     | Nothing to show: icon, title, optional hint, actions in the default slot                                                                          |
 | `HubPagination`   | Previous / page / next bar on one `h-row`                                                                                                         |
 | `HubLetterFilter` | Directory A–Z filter on one `h-row`; scrolls horizontally when the column is too narrow                                                           |
-| `HubTabNav`       | Same look as `SbTabs` for tabs that are routes (`aria-current`), e.g. tournament stage sections                                                   |
+| `HubTabNav`       | Same look as `STabs` for tabs that are routes (`aria-current`), e.g. tournament stage sections                                                    |
 
 #### Actions and interactive states
 
-Use `SbButton` directly. Every button picks one rung of this ladder; its props are closed, so there are no other variants.
+Use `SButton` directly. Every button picks one rung of this ladder; its props are closed, so there are no other variants.
 
-| Rung        | `SbButton` props                                                  | Use                                                                      |
+| Rung        | `SButton` props                                                   | Use                                                                      |
 | ----------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Primary     | `variant="primary"`                                               | The one action the view exists for: submit, sign in, start. One per view |
 | Secondary   | `variant="secondary"`                                             | Alternatives, cancel, retry, rail and promo calls to action, consent     |
@@ -192,11 +192,11 @@ Use `SbButton` directly. Every button picks one rung of this ladder; its props a
 
 - Primary is brand blue in both themes. Do not use inverted neutral solid buttons as the main action.
 - Secondary buttons draw their edge in the same hairline as cards and rows, so a button sitting against a card reads as one surface.
-- Buttons are `sm` (24px) or `md` (28px, default) and share the 13px control text with fields. A single choice among options is an `SbRadioGroup` (`list` or `cards`), not a row of buttons.
+- Buttons are `sm` (24px) or `md` (28px, default) and share the 13px control text with fields. A single choice among options is an `SRadioGroup` (`list` or `cards`), not a row of buttons.
 - Labels inside a clickable row are text (`text-muted`), not badges or buttons. The row hover already signals the target.
 - **Hover:** clickable rows, tiles and cards use the `interactive-surface` utility (`bg-elevated` on hover and press, no transition), matching tertiary buttons. Do not add other hover fills.
 - **Selected:** toggles set `aria-pressed`, and in-page view switches set `aria-current="page"`. Both use the `selectable` utility, which adds `bg-elevated`, `text-highlighted` and a 1px inverted inner outline. Keyboard focus keeps priority. Do not mark a selection with primary color or thicker rings.
-- **Text links:** `SbLink` — `muted` for navigation and meta, `inline` for entity names, `accent` for standalone links in copy (auth switches, policies).
+- **Text links:** `SLink` — `muted` for navigation and meta, `inline` for entity names, `accent` for standalone links in copy (auth switches, policies).
 
 #### `HubListItem` sizes
 
@@ -291,7 +291,7 @@ API messages from NestJS often surface in toasts — keep them actionable (see [
 1. Read this file before changing hub chrome, list density, or `/about`.
 2. **Hub vs marketing:** pick one mode per route; don't add hub sidebars to marketing or marketing heroes to `/`.
 3. **Row heights:** only grid-module utilities — no new arbitrary `h-*` / `py-[…]` for list UI. `scripts/lint-hub-row-heights.ts` (wired into `pnpm lint`) bans a fixed list of literal classes (`h-11.25`, `h-11.5`, `h-8.25`, `h-67`, `mt-11`, `leading-5.5`, `py-[`); other arbitrary heights are caught in review.
-4. **Primitives first:** `@sarpbc/design` (`Sb*`) → existing `Hub*` (`app/components/hub/`) → a new library component or `Hub*` only when reuse is clear.
+4. **Primitives first:** `@sarpbc/design` (`S*`) → existing `Hub*` (`app/components/hub/`) → a new library component or `Hub*` only when reuse is clear.
 5. **i18n:** every user-visible string in en + fr.
 6. **States:** empty, loading (skeleton matching layout), error, success — before shipping.
 7. **Agents:** read the root [AGENTS.md](../../AGENTS.md), this design document and the supporting references relevant to the change. Link the applicable decision in PRs rather than copying the full guide.

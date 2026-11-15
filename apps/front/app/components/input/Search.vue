@@ -31,7 +31,7 @@ defineExpose({
 </script>
 
 <template>
-  <SbInput
+  <SInput
     ref="inputRef"
     :placeholder="t('components.input.search')"
     :aria-label="t('components.input.search')"

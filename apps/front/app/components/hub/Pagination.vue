@@ -41,7 +41,7 @@ const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
       class="flex w-full items-center justify-between gap-2 px-1.5"
       :aria-label="t('common.page')"
     >
-      <SbButton
+      <SButton
         variant="tertiary"
         size="sm"
         :disabled="!hasPrevious"
@@ -50,13 +50,13 @@ const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
         @click="scrollToTopOnNavigate($event, hasPrevious)"
       >
         {{ t("common.previous") }}
-      </SbButton>
+      </SButton>
 
       <div class="text-sm text-muted tabular-nums">
         {{ t("common.page") }} {{ currentPage }} / {{ totalPages }}
       </div>
 
-      <SbButton
+      <SButton
         variant="tertiary"
         size="sm"
         :disabled="!hasNext"
@@ -65,7 +65,7 @@ const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
         @click="scrollToTopOnNavigate($event, hasNext)"
       >
         {{ t("common.next") }}
-      </SbButton>
+      </SButton>
     </nav>
   </HubCard>
 </template>

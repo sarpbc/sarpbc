@@ -113,17 +113,17 @@ const handleSubmit = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div class="flex flex-row gap-2">
-        <SbButton
+        <SButton
           variant="secondary"
           icon="i-fluent-trophy-24-regular"
           :label="$t('page.tournaments.viewMatches')"
           :to="localePath(`/tournaments/${tournamentId}`)"
         />
-        <SbButton
+        <SButton
           v-if="tournament"
           type="button"
           icon="i-fluent-save-24-regular"
@@ -137,7 +137,7 @@ const handleSubmit = async () => {
 
     <DashboardContent>
       <div class="flex flex-col gap-6">
-        <SbErrorState
+        <SErrorState
           v-if="loadError"
           :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
           @retry="reload()"
@@ -153,7 +153,7 @@ const handleSubmit = async () => {
               <h1 class="text-2xl font-semibold tracking-tight">
                 {{ $t("page.tournaments.edit.title") }}
               </h1>
-              <SbBadge
+              <SBadge
                 :color="isManual ? 'info' : 'neutral'"
                 :label="$t(`page.tournaments.source.${tournament.source}`)"
               />

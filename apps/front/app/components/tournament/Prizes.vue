@@ -49,16 +49,16 @@ const showSection = computed(
       <HubCard v-if="pending" aria-live="polite">
         <HubListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
-            <SbSkeleton class="h-3.5 w-8 shrink-0" />
-            <SbSkeleton class="size-5 shrink-0" />
-            <SbSkeleton class="h-3.5 w-2/5 max-w-40" />
-            <SbSkeleton class="ms-auto h-3.5 w-16" />
+            <SSkeleton class="h-3.5 w-8 shrink-0" />
+            <SSkeleton class="size-5 shrink-0" />
+            <SSkeleton class="h-3.5 w-2/5 max-w-40" />
+            <SSkeleton class="ms-auto h-3.5 w-16" />
           </div>
         </HubListItem>
       </HubCard>
 
       <HubCard v-else-if="error">
-        <SbErrorState :message="t('page.tournaments.id.prizes.error')" @retry="refresh()" />
+        <SErrorState :message="t('page.tournaments.id.prizes.error')" @retry="refresh()" />
       </HubCard>
 
       <HubCard v-else>
@@ -95,7 +95,7 @@ const showSection = computed(
         >
           <span>
             {{ t("common.prizes.dataFrom") }}
-            <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
+            <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
           </span>
         </p>
       </HubCard>

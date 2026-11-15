@@ -118,6 +118,6 @@ const textValue = (name: string): string => {
         Reset
       </button>
     </form>
-    <code class="playground__call">{{ callOf(`Sb${component}`, props) }}</code>
+    <code class="playground__call">{{ callOf(`S${component}`, props) }}</code>
   </section>
 </template>

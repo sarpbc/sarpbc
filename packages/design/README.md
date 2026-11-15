@@ -58,6 +58,6 @@ app.provide(DESIGN_ADAPTERS, { icon: Icon, link: NuxtLink });
 
 ## In the Nuxt apps
 
-`@sarpbc/ui` wires the library into `apps/front` and `apps/admin`: it registers the components as `Sb*` (`<SbButton>`), loads the tokens, provides `<Icon>` and `<NuxtLink>` as adapters, and declares the cascade layer order so the `components` layer stays above Tailwind's preflight and below its utilities.
+`@sarpbc/ui` wires the library into `apps/front` and `apps/admin`: it registers the components as `S*` (`<SButton>`), loads the tokens, provides `<Icon>` and `<NuxtLink>` as adapters, and declares the cascade layer order so the `components` layer stays above Tailwind's preflight and below its utilities.
 
 Front and admin share one look: the font, the `ink` scale, the surfaces, links and focus rules live in `packages/ui/src/runtime/theme.css`, and neither app overrides the design tokens.

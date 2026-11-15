@@ -51,7 +51,7 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.matchForfeit.title', { match: label })"
     :description="t('page.tournaments.matchForfeit.description')"
@@ -61,21 +61,21 @@ const save = async () => {
         <p v-if="!canForfeit" class="text-sm text-muted">
           {{ t("page.tournaments.matchForfeit.needsTwoSides") }}
         </p>
-        <SbSwitch
+        <SSwitch
           v-model="forfeited"
           :disabled="!canForfeit"
           :label="t('page.tournaments.matchForfeit.forfeit')"
         />
-        <SbFormField v-if="forfeited" :label="t('page.tournaments.matchForfeit.side')">
-          <SbSelect v-model="forfeitedBy" :items="sides" class="w-full" />
-        </SbFormField>
+        <SFormField v-if="forfeited" :label="t('page.tournaments.matchForfeit.side')">
+          <SSelect v-model="forfeitedBy" :items="sides" class="w-full" />
+        </SFormField>
       </div>
     </template>
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <SbButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
-        <SbButton
+        <SButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
+        <SButton
           :label="t('page.tournaments.matchForfeit.save')"
           :loading="saving"
           :disabled="forfeited && forfeitedBy === undefined"
@@ -83,5 +83,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

@@ -72,8 +72,8 @@ const appendToBody = (): HTMLElement => document.body;
   >
     <template v-for="(group, index) in items" :key="index">
       <span v-if="index > 0" class="editor-toolbar__divider" aria-hidden="true" />
-      <SbTooltip v-for="item in group" :key="item.label" :text="item.label">
-        <SbButton
+      <STooltip v-for="item in group" :key="item.label" :text="item.label">
+        <SButton
           variant="tertiary"
           size="sm"
           :icon="item.icon"
@@ -85,7 +85,7 @@ const appendToBody = (): HTMLElement => document.body;
           @mousedown.prevent
           @click="run(item)"
         />
-      </SbTooltip>
+      </STooltip>
     </template>
   </BubbleMenu>
 </template>

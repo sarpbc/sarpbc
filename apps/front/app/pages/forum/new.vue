@@ -191,21 +191,21 @@ const onSubmit = async () => {
         {{ rateLimitMessage }}
       </p>
       <form v-else class="w-full space-y-4" novalidate @submit.prevent="onSubmit">
-        <SbFormField
+        <SFormField
           :label="$t('page.forum.new.form.title')"
           :error="errors.title"
           required
           class="w-full"
         >
-          <SbInput
+          <SInput
             v-model="state.title"
             :placeholder="$t('page.forum.new.form.titlePlaceholder')"
             class="w-full"
             :disabled="!canSubmit"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="$t('page.forum.new.form.topic')"
           :error="errors.topicId"
           required
@@ -214,7 +214,7 @@ const onSubmit = async () => {
           <p v-if="topicsLoadFailed" role="alert" class="text-sm text-error">
             {{ $t("page.forum.new.topicsLoadError") }}
           </p>
-          <SbRadioGroup
+          <SRadioGroup
             v-else
             v-model="state.topicId"
             :items="topicItems"
@@ -223,26 +223,26 @@ const onSubmit = async () => {
             :disabled="!canSubmit"
             :aria-label="$t('page.forum.new.form.topic')"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="$t('page.forum.new.form.content')"
           :error="errors.content"
           required
           class="w-full"
         >
-          <SbTextarea
+          <STextarea
             v-model="state.content"
             :placeholder="$t('page.forum.new.form.contentPlaceholder')"
             class="w-full"
             autoresize
             :disabled="!canSubmit"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbButton type="submit" :disabled="!canSubmit" :loading="isSubmitting">
+        <SButton type="submit" :disabled="!canSubmit" :loading="isSubmitting">
           {{ $t("page.forum.new.form.submit") }}
-        </SbButton>
+        </SButton>
       </form>
     </HubCard>
   </div>

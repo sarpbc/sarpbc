@@ -107,7 +107,7 @@ const googleLogin = () => {
           {{ $t("page.authentication.staffOnly") }}
         </p>
 
-        <SbButton
+        <SButton
           icon="i-logos-google-icon"
           :label="$t('page.authentication.continueWithGoogle')"
           variant="secondary"
@@ -115,29 +115,29 @@ const googleLogin = () => {
           @click="googleLogin"
         />
 
-        <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
+        <SSeparator :label="$t('page.authentication.or')" class="my-6" />
 
         <form class="h-fit w-80" method="post" @submit="onSubmit">
-          <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
-            <SbInput
+          <SFormField :label="$t('page.authentication.email')" class="w-full pb-4">
+            <SInput
               v-model="state.email"
               type="email"
               autocomplete="email"
               spellcheck="false"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbFormField :label="$t('page.authentication.password')" class="w-full pb-8">
-            <SbInput
+          <SFormField :label="$t('page.authentication.password')" class="w-full pb-8">
+            <SInput
               v-model="state.password"
               type="password"
               autocomplete="current-password"
               class="w-full"
             />
-          </SbFormField>
+          </SFormField>
 
-          <SbButton
+          <SButton
             :label="pending ? $t('page.authentication.loggingIn') : $t('page.authentication.logIn')"
             type="submit"
             :loading="pending"

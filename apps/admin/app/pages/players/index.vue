@@ -133,10 +133,10 @@ const confirmCreate = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.players.create.title')"
         @click="openCreateModal"
@@ -144,13 +144,13 @@ const confirmCreate = async () => {
     </template>
 
     <DashboardContent>
-      <SbErrorState
+      <SErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <SbTable
+        <STable
           :data="players"
           :columns="columns"
           sticky
@@ -161,7 +161,7 @@ const confirmCreate = async () => {
             {{ $t("page.players.empty") }}
           </template>
           <template #actions-cell="{ row }">
-            <SbButton
+            <SButton
               icon="i-fluent-delete-24-regular"
               variant="tertiary"
               danger
@@ -170,12 +170,12 @@ const confirmCreate = async () => {
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>
-        </SbTable>
+        </STable>
         <div v-if="total > limit" class="mt-4 flex w-full flex-row justify-between">
           <span class="text-muted">
             {{ t("page.players.playersCount", { count: total }) }}
           </span>
-          <SbPagination
+          <SPagination
             :page="page"
             :total="total"
             :items-per-page="limit"
@@ -185,49 +185,49 @@ const confirmCreate = async () => {
       </ClientOnly>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isCreateModalOpen"
       :title="$t('page.players.create.title')"
       :dismissible="!isCreating"
     >
       <template #body>
         <div class="flex flex-col gap-3">
-          <SbFormField :label="$t('page.players.fields.name')" required>
-            <SbInput v-model="newPlayer.name" class="w-full" autofocus />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.fields.firstName')">
-            <SbInput v-model="newPlayer.firstName" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.fields.lastName')">
-            <SbInput v-model="newPlayer.lastName" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.fields.nationality')">
-            <SbInput v-model="newPlayer.nationality" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.fields.birthday')">
-            <SbInput v-model="newPlayer.birthday" type="date" class="w-full" />
-          </SbFormField>
-          <SbFormField :label="$t('page.players.fields.imageUrl')">
-            <SbInput v-model="newPlayer.imageUrl" class="w-full" />
-          </SbFormField>
+          <SFormField :label="$t('page.players.fields.name')" required>
+            <SInput v-model="newPlayer.name" class="w-full" autofocus />
+          </SFormField>
+          <SFormField :label="$t('page.players.fields.firstName')">
+            <SInput v-model="newPlayer.firstName" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.players.fields.lastName')">
+            <SInput v-model="newPlayer.lastName" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.players.fields.nationality')">
+            <SInput v-model="newPlayer.nationality" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.players.fields.birthday')">
+            <SInput v-model="newPlayer.birthday" type="date" class="w-full" />
+          </SFormField>
+          <SFormField :label="$t('page.players.fields.imageUrl')">
+            <SInput v-model="newPlayer.imageUrl" class="w-full" />
+          </SFormField>
         </div>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           icon="i-fluent-save-24-regular"
           :label="$t('page.players.create.save')"
           :loading="isCreating"
           :disabled="!newPlayer.name"
           @click="confirmCreate"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isCreating"
           @click="isCreateModalOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
 
     <ConfirmDeleteModal
       v-model:target="playerToDelete"

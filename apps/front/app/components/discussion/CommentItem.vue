@@ -114,7 +114,7 @@ const onDelete = async () => {
 
       <div class="flex flex-row items-center justify-end gap-1 border-t border-separator px-2 py-1">
         <ForumSignInPrompt action="reply">
-          <SbButton
+          <SButton
             variant="tertiary"
             size="sm"
             icon="i-fluent-arrow-reply-24-regular"
@@ -125,8 +125,8 @@ const onDelete = async () => {
           />
         </ForumSignInPrompt>
 
-        <SbPopover v-model:open="menuOpen">
-          <SbButton
+        <SPopover v-model:open="menuOpen">
+          <SButton
             variant="tertiary"
             size="sm"
             icon="i-fluent-more-horizontal-24-regular"
@@ -144,7 +144,7 @@ const onDelete = async () => {
               class="flex min-w-40 flex-col p-1"
               :aria-label="$t('components.discussion.moreActions')"
             >
-              <SbButton
+              <SButton
                 variant="tertiary"
                 size="sm"
                 icon="i-fluent-link-24-regular"
@@ -154,7 +154,7 @@ const onDelete = async () => {
                 :label="$t('components.discussion.permalink')"
                 @click="onPermalinkClick"
               />
-              <SbButton
+              <SButton
                 v-if="canReport"
                 variant="tertiary"
                 size="sm"
@@ -165,7 +165,7 @@ const onDelete = async () => {
                 :label="$t('components.discussion.report.action')"
                 @click="onReportClick"
               />
-              <SbButton
+              <SButton
                 v-if="canModerate"
                 variant="tertiary"
                 size="sm"
@@ -178,7 +178,7 @@ const onDelete = async () => {
                 :disabled="isModerating"
                 @click="onHide"
               />
-              <SbButton
+              <SButton
                 v-if="canModerate"
                 variant="tertiary"
                 danger
@@ -194,7 +194,7 @@ const onDelete = async () => {
               />
             </div>
           </template>
-        </SbPopover>
+        </SPopover>
       </div>
     </div>
 

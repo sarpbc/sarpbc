@@ -127,10 +127,10 @@ const uploadedImageUrl = computed({
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
-      <SbButton
+      <SButton
         icon="i-fluent-add-24-regular"
         :label="$t('page.tournaments.leagues.create')"
         @click="openForm(null)"
@@ -141,14 +141,14 @@ const uploadedImageUrl = computed({
       <div class="flex flex-col gap-4">
         <p class="max-w-2xl text-sm text-muted">{{ $t("page.tournaments.leagues.subtitle") }}</p>
 
-        <SbErrorState
+        <SErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.leagues.loadError')"
           @retry="refresh()"
         />
 
         <ClientOnly v-else>
-          <SbTable :data="data" :columns="columns" :loading="status === 'pending'" sticky>
+          <STable :data="data" :columns="columns" :loading="status === 'pending'" sticky>
             <template #empty>
               {{ $t("page.tournaments.leagues.empty") }}
             </template>
@@ -162,7 +162,7 @@ const uploadedImageUrl = computed({
               <div v-else class="size-8 rounded-sm bg-elevated" />
             </template>
             <template #source-cell="{ row }">
-              <SbBadge
+              <SBadge
                 :color="isPandascore(row.original) ? 'neutral' : 'info'"
                 :label="
                   $t(
@@ -173,7 +173,7 @@ const uploadedImageUrl = computed({
             </template>
             <template #actions-cell="{ row }">
               <div class="flex justify-end">
-                <SbButton
+                <SButton
                   variant="tertiary"
                   size="sm"
                   icon="i-fluent-edit-24-regular"
@@ -183,12 +183,12 @@ const uploadedImageUrl = computed({
                 />
               </div>
             </template>
-          </SbTable>
+          </STable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <SbModal
+    <SModal
       v-model:open="isOpen"
       :title="editing ? $t('page.tournaments.leagues.edit') : $t('page.tournaments.leagues.create')"
       :description="isSynced ? $t('page.tournaments.leagues.syncedHint') : undefined"
@@ -196,23 +196,23 @@ const uploadedImageUrl = computed({
     >
       <template #body>
         <form id="league-form" class="flex flex-col gap-4" @submit.prevent="handleSubmit">
-          <SbFormField :label="$t('page.tournaments.leagues.form.name')" required>
-            <SbInput v-model="form.name" class="w-full" autocomplete="off" :disabled="isSynced" />
-          </SbFormField>
-          <SbFormField
+          <SFormField :label="$t('page.tournaments.leagues.form.name')" required>
+            <SInput v-model="form.name" class="w-full" autocomplete="off" :disabled="isSynced" />
+          </SFormField>
+          <SFormField
             :label="$t('page.tournaments.form.slug')"
             :hint="$t('page.tournaments.leagues.form.slugHint')"
           >
-            <SbInput
+            <SInput
               v-model="form.slug"
               class="w-full"
               spellcheck="false"
               autocomplete="off"
               :disabled="isSynced"
             />
-          </SbFormField>
-          <SbFormField :label="$t('page.tournaments.leagues.form.url')">
-            <SbInput
+          </SFormField>
+          <SFormField :label="$t('page.tournaments.leagues.form.url')">
+            <SInput
               v-model="form.url"
               type="url"
               class="w-full"
@@ -221,17 +221,17 @@ const uploadedImageUrl = computed({
               placeholder="https://…"
               :disabled="isSynced"
             />
-          </SbFormField>
-          <SbFormField :label="$t('page.tournaments.leagues.form.image')">
+          </SFormField>
+          <SFormField :label="$t('page.tournaments.leagues.form.image')">
             <ImageUpload
               v-model:image-url="uploadedImageUrl"
               target="tournament"
               :disabled="isSaving"
               @update:uploading="isUploading = $event"
             />
-          </SbFormField>
-          <SbFormField :label="$t('page.tournaments.form.imageUrl')">
-            <SbInput
+          </SFormField>
+          <SFormField :label="$t('page.tournaments.form.imageUrl')">
+            <SInput
               v-model="form.imageUrl"
               type="url"
               class="w-full"
@@ -240,11 +240,11 @@ const uploadedImageUrl = computed({
               placeholder="https://…"
               :disabled="isSaving || isUploading"
             />
-          </SbFormField>
+          </SFormField>
         </form>
       </template>
       <template #footer>
-        <SbButton
+        <SButton
           type="submit"
           form="league-form"
           icon="i-fluent-save-24-regular"
@@ -252,13 +252,13 @@ const uploadedImageUrl = computed({
           :loading="isSaving"
           :disabled="isUploading"
         />
-        <SbButton
+        <SButton
           variant="secondary"
           :label="$t('common.cancel')"
           :disabled="isSaving"
           @click="isOpen = false"
         />
       </template>
-    </SbModal>
+    </SModal>
   </NuxtLayout>
 </template>

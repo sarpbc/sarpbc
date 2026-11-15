@@ -67,17 +67,17 @@ const memberNames = (members: TeamRosterEra["members"]) =>
 
       <div v-if="pending" class="flex flex-col gap-4" aria-live="polite">
         <div v-for="index in 3" :key="index" class="flex gap-4 pl-1">
-          <SbSkeleton class="w-0.5 shrink-0 self-stretch" />
+          <SSkeleton class="w-0.5 shrink-0 self-stretch" />
           <div class="flex flex-1 flex-col gap-2 pb-4">
-            <SbSkeleton class="h-4 w-40" />
-            <SbSkeleton class="h-10 w-full" />
-            <SbSkeleton class="h-10 w-full" />
+            <SSkeleton class="h-4 w-40" />
+            <SSkeleton class="h-10 w-full" />
+            <SSkeleton class="h-10 w-full" />
           </div>
         </div>
       </div>
 
       <HubCard v-else-if="hasError">
-        <SbErrorState :message="t('page.team.slug.rosterHistory.error')" @retry="emit('retry')" />
+        <SErrorState :message="t('page.team.slug.rosterHistory.error')" @retry="emit('retry')" />
       </HubCard>
 
       <HubCard v-else-if="eras.length === 0">
@@ -110,9 +110,9 @@ const memberNames = (members: TeamRosterEra["members"]) =>
                 >
                   {{ formatEraRange(era) }}
                 </time>
-                <SbBadge v-if="era.isCurrent" color="info">
+                <SBadge v-if="era.isCurrent" color="info">
                   {{ t("page.team.slug.rosterHistory.current") }}
-                </SbBadge>
+                </SBadge>
               </div>
 
               <ul class="flex flex-col gap-2 list-none m-0 p-0">
@@ -157,7 +157,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
           </li>
         </ol>
 
-        <SbButton
+        <SButton
           v-if="hasHiddenEras"
           variant="tertiary"
           class="self-start"
@@ -168,7 +168,7 @@ const memberNames = (members: TeamRosterEra["members"]) =>
               ? t("page.team.slug.rosterHistory.showLess")
               : t("page.team.slug.rosterHistory.showAll", { count: eras.length })
           }}
-        </SbButton>
+        </SButton>
       </div>
     </HubRail>
   </section>

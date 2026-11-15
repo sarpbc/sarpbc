@@ -128,7 +128,7 @@ const save = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.statsAttach.title')"
     :description="t('page.tournaments.statsAttach.description', { title: shown?.title ?? '' })"
@@ -136,51 +136,51 @@ const save = async () => {
   >
     <template #body>
       <form id="stats-attach-replay" class="flex flex-col gap-4" @submit.prevent="save">
-        <SbFormField :label="t('page.tournaments.statsAttach.match')" required>
-          <SbCombobox
+        <SFormField :label="t('page.tournaments.statsAttach.match')" required>
+          <SCombobox
             v-model="matchId"
             :items="matchOptions"
             class="w-full"
             :placeholder="t('page.tournaments.statsAttach.matchPlaceholder')"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.statsAttach.game')"
           :help="matchId ? undefined : t('page.tournaments.statsAttach.chooseMatchFirst')"
           required
         >
-          <SbSelect
+          <SSelect
             v-model="gameNumber"
             :items="gameOptions"
             class="w-full"
             :disabled="!matchId"
             :placeholder="t('page.tournaments.statsAttach.gamePlaceholder')"
           />
-        </SbFormField>
+        </SFormField>
 
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.statsAttach.blue')"
           :help="t('page.tournaments.statsAttach.blueHelp')"
           required
         >
-          <SbRadioGroup v-if="matchId" v-model="blueParticipantId" :items="sideOptions" />
+          <SRadioGroup v-if="matchId" v-model="blueParticipantId" :items="sideOptions" />
           <p v-else class="text-sm text-muted">
             {{ t("page.tournaments.statsAttach.chooseMatchFirst") }}
           </p>
-        </SbFormField>
+        </SFormField>
       </form>
     </template>
 
     <template #footer>
       <div class="flex w-full flex-row justify-end gap-2">
-        <SbButton
+        <SButton
           variant="tertiary"
           :label="$t('common.cancel')"
           :disabled="saving"
           @click="open = false"
         />
-        <SbButton
+        <SButton
           type="submit"
           form="stats-attach-replay"
           icon="i-fluent-link-24-regular"
@@ -190,5 +190,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

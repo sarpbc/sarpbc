@@ -176,14 +176,14 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
   <div class="flex w-full flex-col gap-2">
     <div v-if="hasStats || $slots.filters" class="flex flex-wrap items-center gap-2 px-2">
       <slot name="filters" />
-      <SbSelect
+      <SSelect
         v-if="hasStats && teamOptions.length > 2"
         v-model="team"
         :items="teamOptions"
         :aria-label="t('page.tournaments.stats.team')"
         class="w-48"
       />
-      <SbRadioGroup
+      <SRadioGroup
         v-if="hasStats"
         :model-value="view"
         :items="viewOptions"
@@ -197,16 +197,16 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
 
     <HubCard v-if="pending" class="min-h-row-stack p-2" aria-live="polite">
       <div class="flex w-full flex-col gap-2">
-        <SbSkeleton v-for="index in 6" :key="index" class="h-row" />
+        <SSkeleton v-for="index in 6" :key="index" class="h-row" />
       </div>
     </HubCard>
 
     <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SbErrorState :message="t('page.tournaments.stats.error')" @retry="emit('retry')" />
+      <SErrorState :message="t('page.tournaments.stats.error')" @retry="emit('retry')" />
     </HubCard>
 
     <HubCard v-else-if="!hasStats" class="flex min-h-row-stack h-row-grid items-center">
-      <SbEmptyState
+      <SEmptyState
         icon="i-fluent-data-bar-vertical-24-regular"
         :title="t('page.tournaments.stats.empty')"
         :hint="t('page.tournaments.stats.emptyHint')"
@@ -214,35 +214,35 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
     </HubCard>
 
     <HubCard v-else class="flex flex-col">
-      <SbTable
+      <STable
         v-model:sorting="sort"
         :caption="t('page.tournaments.stats.caption')"
         :columns="columns"
         :data="rows"
       >
         <template #player-cell="{ row }">
-          <SbLink
+          <SLink
             :to="$localePath(playerPath(row.original.player.slug))"
             variant="inline"
             class="block max-w-40 truncate"
           >
             {{ row.original.player.name }}
-          </SbLink>
+          </SLink>
         </template>
         <template #team-cell="{ row }">
-          <SbLink
+          <SLink
             v-if="row.original.team.slug"
             :to="$localePath(teamPath(row.original.team.slug))"
             variant="muted"
             class="block max-w-40 truncate"
           >
             {{ row.original.team.name }}
-          </SbLink>
+          </SLink>
           <span v-else class="block max-w-40 truncate text-muted">{{
             row.original.team.name
           }}</span>
         </template>
-      </SbTable>
+      </STable>
 
       <p class="flex min-h-row flex-wrap items-center gap-x-2 px-2 text-xs text-muted">
         <span>{{ t("page.match.detail.stats.source") }}</span>

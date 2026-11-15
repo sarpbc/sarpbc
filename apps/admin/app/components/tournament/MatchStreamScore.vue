@@ -151,7 +151,7 @@ const confirm = async () => {
 </script>
 
 <template>
-  <SbModal
+  <SModal
     v-model:open="open"
     :title="t('page.tournaments.streamScore.title', { match: label })"
     :description="t('page.tournaments.streamScore.description')"
@@ -159,7 +159,7 @@ const confirm = async () => {
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <SbFormField
+        <SFormField
           :label="t('page.tournaments.streamScore.paste')"
           :help="t('page.tournaments.streamScore.pasteHelp')"
           :error="
@@ -168,25 +168,25 @@ const confirm = async () => {
               : undefined
           "
         >
-          <SbTextarea v-model="text" :rows="5" autoresize :maxrows="12" class="w-full font-mono" />
-        </SbFormField>
+          <STextarea v-model="text" :rows="5" autoresize :maxrows="12" class="w-full font-mono" />
+        </SFormField>
 
         <p v-if="sides.length !== 2" class="text-sm text-error">
           {{ t("page.tournaments.streamScore.needsTwoSides") }}
         </p>
 
         <template v-else-if="proposal">
-          <SbFormField :label="t('page.tournaments.streamScore.blueSide')">
-            <SbSelect
+          <SFormField :label="t('page.tournaments.streamScore.blueSide')">
+            <SSelect
               v-model="blueId"
               :items="sides"
               class="w-full"
               :placeholder="t('page.tournaments.streamScore.chooseBlue')"
             />
-          </SbFormField>
+          </SFormField>
 
           <label v-if="bestOfMismatch" class="flex items-start gap-2 text-sm text-warning">
-            <SbCheckbox v-model="bestOfAcknowledged" />
+            <SCheckbox v-model="bestOfAcknowledged" />
             <span>
               {{
                 t("page.tournaments.streamScore.bestOfMismatch", {
@@ -222,14 +222,14 @@ const confirm = async () => {
                   }}
                 </span>
               </span>
-              <SbBadge v-if="game.winner === null" color="danger">
+              <SBadge v-if="game.winner === null" color="danger">
                 {{ t("page.tournaments.streamScore.unread") }}
-              </SbBadge>
+              </SBadge>
               <label
                 v-else-if="streamScoreGameNeedsCheck(game)"
                 class="flex items-center gap-2 text-warning"
               >
-                <SbCheckbox
+                <SCheckbox
                   :model-value="checkedGames.includes(game.number)"
                   @update:model-value="setGameChecked(game.number, Boolean($event))"
                 />
@@ -270,8 +270,8 @@ const confirm = async () => {
 
     <template #footer>
       <div class="flex w-full justify-end gap-2">
-        <SbButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
-        <SbButton
+        <SButton variant="tertiary" :label="t('common.cancel')" @click="open = false" />
+        <SButton
           :loading="confirming"
           :disabled="!canConfirm"
           icon="i-fluent-trophy-24-regular"
@@ -289,5 +289,5 @@ const confirm = async () => {
         />
       </div>
     </template>
-  </SbModal>
+  </SModal>
 </template>

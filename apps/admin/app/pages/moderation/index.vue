@@ -85,7 +85,7 @@ const onReplyDeleted = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <SbBreadcrumb :items="breadcrumbItems" />
+      <SBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -102,7 +102,7 @@ const onReplyDeleted = async () => {
           </div>
         </div>
 
-        <SbErrorState
+        <SErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.moderation.loadError')"
           @retry="refresh()"
@@ -126,26 +126,26 @@ const onReplyDeleted = async () => {
                 <span class="tabular-nums">{{
                   dateFormatter.format(new Date(reply.createdAt))
                 }}</span>
-                <SbBadge v-if="reply.reportCount > 0" color="danger">
+                <SBadge v-if="reply.reportCount > 0" color="danger">
                   {{
                     $t("page.moderation.reportedBadge", {
                       count: reply.reportCount,
                     })
                   }}
-                </SbBadge>
-                <SbBadge v-if="reply.hiddenAt">
+                </SBadge>
+                <SBadge v-if="reply.hiddenAt">
                   {{ $t("page.moderation.hiddenBadge") }}
-                </SbBadge>
+                </SBadge>
               </div>
               <div class="flex flex-row items-center gap-1">
-                <SbButton
+                <SButton
                   variant="tertiary"
                   :label="$t('page.moderation.hide')"
                   :loading="hidingReplyId === reply.id"
                   :disabled="hidingReplyId !== null || !!reply.hiddenAt"
                   @click="hideReply(reply)"
                 />
-                <SbButton
+                <SButton
                   variant="tertiary"
                   danger
                   icon="i-fluent-delete-24-regular"
@@ -159,15 +159,15 @@ const onReplyDeleted = async () => {
 
             <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
               <span class="text-muted">{{ targetTypeLabel(reply.targetType) }}</span>
-              <SbLink variant="accent" :to="publicTargetUrl(reply)" external target="_blank">
+              <SLink variant="accent" :to="publicTargetUrl(reply)" external target="_blank">
                 {{ reply.targetLabel }}
-              </SbLink>
-              <SbLink
+              </SLink>
+              <SLink
                 v-if="reply.targetType === 'forumPost'"
                 :to="localePath(`/forum/${reply.targetId}`)"
               >
                 {{ $t("page.moderation.openInAdmin") }}
-              </SbLink>
+              </SLink>
             </div>
           </article>
         </div>

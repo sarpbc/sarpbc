@@ -145,7 +145,7 @@ onMounted(() => {
     </div>
 
     <HubCard v-else-if="error">
-      <SbErrorState :message="t('components.discussion.error')" @retry="refresh()" />
+      <SErrorState :message="t('components.discussion.error')" @retry="refresh()" />
     </HubCard>
 
     <template v-else>
@@ -161,7 +161,7 @@ onMounted(() => {
         />
 
         <div v-if="hasMore" class="flex justify-center">
-          <SbButton
+          <SButton
             variant="secondary"
             :loading="loadingMore"
             :disabled="loadingMore"
@@ -172,7 +172,7 @@ onMounted(() => {
                 ? t("components.discussion.loadingMore")
                 : t("components.discussion.loadMore")
             }}
-          </SbButton>
+          </SButton>
         </div>
       </div>
 

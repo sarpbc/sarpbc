@@ -204,15 +204,15 @@ const submit = async () => {
     </div>
 
     <form class="flex flex-col gap-2 sm:flex-row sm:items-end" @submit.prevent="submit">
-      <SbFormField :label="t('page.tournaments.statsImport.group')" class="flex-1">
-        <SbInput
+      <SFormField :label="t('page.tournaments.statsImport.group')" class="flex-1">
+        <SInput
           v-model="group"
           :placeholder="t('page.tournaments.statsImport.groupPlaceholder')"
           :disabled="active"
           class="w-full"
         />
-      </SbFormField>
-      <SbButton
+      </SFormField>
+      <SButton
         type="submit"
         icon="i-fluent-arrow-download-24-regular"
         :loading="submitting"
@@ -227,7 +227,7 @@ const submit = async () => {
 
     <div v-else-if="error && !imports" class="flex flex-col items-start gap-2">
       <p class="text-sm text-error">{{ t("page.tournaments.statsImport.loadError") }}</p>
-      <SbButton
+      <SButton
         variant="secondary"
         size="sm"
         :label="t('page.tournaments.statsImport.retry')"
@@ -241,7 +241,7 @@ const submit = async () => {
 
     <div v-else class="flex flex-col gap-3" aria-live="polite">
       <div class="flex flex-wrap items-center gap-2 text-sm">
-        <SbBadge
+        <SBadge
           :color="statusColor(latest.status)"
           :label="t(`page.tournaments.statsImport.status.${latest.status}`)"
         />
@@ -277,14 +277,14 @@ const submit = async () => {
         <ul class="divide-y divide-default border-y border-default">
           <li v-for="row in attention" :key="row.replayId" :class="ROW_CLASS">
             <div class="flex min-w-0 flex-col">
-              <SbLink
+              <SLink
                 :to="replayUrl(row)"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="truncate text-highlighted"
               >
                 {{ row.title }}
-              </SbLink>
+              </SLink>
               <span class="text-muted">{{ itemMeta(row) }}</span>
             </div>
             <div class="flex shrink-0 flex-col gap-1 sm:items-end">
@@ -299,7 +299,7 @@ const submit = async () => {
                   })
                 }}
               </span>
-              <SbButton
+              <SButton
                 v-else
                 variant="secondary"
                 size="sm"
