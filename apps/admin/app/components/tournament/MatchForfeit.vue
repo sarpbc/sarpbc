@@ -61,13 +61,13 @@ const save = async () => {
         <p v-if="!canForfeit" class="text-sm text-muted">
           {{ t("page.tournaments.matchForfeit.needsTwoSides") }}
         </p>
-        <USwitch
+        <SbSwitch
           v-model="forfeited"
           :disabled="!canForfeit"
           :label="t('page.tournaments.matchForfeit.forfeit')"
         />
         <SbFormField v-if="forfeited" :label="t('page.tournaments.matchForfeit.side')">
-          <USelect v-model="forfeitedBy" :items="sides" class="w-full" />
+          <SbSelect v-model="forfeitedBy" :items="sides" class="w-full" />
         </SbFormField>
       </div>
     </template>

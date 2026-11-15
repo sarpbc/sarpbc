@@ -112,13 +112,7 @@ const submit = async () => {
           {{ t("page.match.detail.vodAdd.title") }}
         </p>
         <SbFormField :label="t('page.match.detail.vodAdd.game')">
-          <USelect
-            v-model="game"
-            :items="gameOptions"
-            value-key="value"
-            label-key="label"
-            class="w-full"
-          />
+          <SbSelect v-model="game" :items="gameOptions" class="w-full" />
         </SbFormField>
         <SbFormField :label="t('page.match.detail.vodAdd.url')" :error="urlError">
           <SbInput

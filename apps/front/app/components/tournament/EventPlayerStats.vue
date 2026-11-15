@@ -42,11 +42,9 @@ const {
     @retry="refresh()"
   >
     <template v-if="stages.length > 1" #filters>
-      <USelect
+      <SbSelect
         v-model="stage"
         :items="stageOptions"
-        value-key="value"
-        label-key="label"
         :aria-label="t('page.tournaments.stats.stage')"
         class="w-48"
       />

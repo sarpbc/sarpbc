@@ -245,13 +245,7 @@ const submit = () => {
         </SbFormField>
 
         <SbFormField :label="t('page.tournaments.viewership.scope')">
-          <USelect
-            v-model="form.scope"
-            :items="scopeOptions"
-            value-key="value"
-            label-key="label"
-            class="w-full"
-          />
+          <SbSelect v-model="form.scope" :items="scopeOptions" class="w-full" />
         </SbFormField>
 
         <SbFormField

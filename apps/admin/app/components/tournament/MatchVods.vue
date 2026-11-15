@@ -191,13 +191,7 @@ const save = async () => {
           class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[8rem_minmax(0,1fr)_12rem_auto] sm:items-start"
         >
           <SbFormField :label="t('page.tournaments.vods.gameLabel')">
-            <USelect
-              v-model="row.game"
-              :items="gameOptions"
-              value-key="value"
-              label-key="label"
-              class="w-full"
-            />
+            <SbSelect v-model="row.game" :items="gameOptions" class="w-full" />
           </SbFormField>
 
           <SbFormField :label="t('page.tournaments.vods.url')" v-bind="urlFeedback(row.url)">

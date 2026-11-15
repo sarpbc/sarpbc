@@ -183,19 +183,12 @@ defineExpose({ refreshAwards });
       class="flex flex-col gap-2 sm:flex-row sm:items-end"
     >
       <SbFormField :label="$t('page.tournaments.awards.awardType')" class="min-w-0 sm:w-48">
-        <USelect
-          v-model="selectedAwardType"
-          :items="availableAwardTypeOptions"
-          value-key="value"
-          label-key="label"
-        />
+        <SbSelect v-model="selectedAwardType" :items="availableAwardTypeOptions" />
       </SbFormField>
       <SbFormField :label="$t('page.tournaments.awards.selectPlayer')" class="min-w-0 flex-1">
-        <USelect
+        <SbSelect
           v-model="selectedPlayerId"
           :items="rosterOptions"
-          value-key="value"
-          label-key="label"
           :placeholder="$t('page.tournaments.awards.selectPlayer')"
         />
       </SbFormField>

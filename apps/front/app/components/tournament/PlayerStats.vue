@@ -165,12 +165,10 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
   <div class="flex w-full flex-col gap-2">
     <div v-if="hasStats || $slots.filters" class="flex flex-wrap items-center gap-2 px-2">
       <slot name="filters" />
-      <USelect
+      <SbSelect
         v-if="hasStats && teamOptions.length > 2"
         v-model="team"
         :items="teamOptions"
-        value-key="value"
-        label-key="label"
         :aria-label="t('page.tournaments.stats.team')"
         class="w-48"
       />

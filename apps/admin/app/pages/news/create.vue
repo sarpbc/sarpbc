@@ -124,9 +124,8 @@ const saveArticle = async () => {
               />
             </SbFormField>
             <SbFormField :label="$t('page.news.type.label')">
-              <URadioGroup
+              <SbRadioGroup
                 v-model="articleType"
-                variant="list"
                 :items="[
                   {
                     value: 'short',
@@ -139,8 +138,6 @@ const saveArticle = async () => {
                     description: $t('page.news.type.articleDescription'),
                   },
                 ]"
-                value-key="value"
-                label-key="label"
               />
             </SbFormField>
             <SbFormField :label="$t('page.news.cover.label')">

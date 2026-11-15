@@ -304,7 +304,7 @@ const save = async () => {
         class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[6rem_8rem_6rem_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start"
       >
         <SbFormField :label="t('page.tournaments.prizes.placement')">
-          <UInputNumber
+          <SbInputNumber
             v-model="row.placement"
             :min="MIN_PRIZE_PLACEMENT"
             :step="1"
@@ -320,7 +320,7 @@ const save = async () => {
               : undefined
           "
         >
-          <UInputNumber
+          <SbInputNumber
             v-model="row.amount"
             :min="MIN_PRIZE_AMOUNT"
             :max="MAX_PRIZE_AMOUNT"
@@ -343,11 +343,9 @@ const save = async () => {
         </SbFormField>
 
         <SbFormField :label="t('page.tournaments.prizes.team')" :error="teamError(row)">
-          <USelect
+          <SbSelect
             :model-value="row.teamId"
             :items="teamOptions"
-            value-key="value"
-            label-key="label"
             :placeholder="t('page.tournaments.prizes.selectTeam')"
             class="w-full"
             @update:model-value="selectTeam(row, $event)"
@@ -355,12 +353,10 @@ const save = async () => {
         </SbFormField>
 
         <SbFormField :label="t('page.tournaments.prizes.players')" :error="playersError(row)">
-          <USelectMenu
+          <SbCombobox
             v-model="row.playerIds"
             multiple
             :items="playerOptions(row.teamId)"
-            value-key="value"
-            label-key="label"
             :disabled="!row.teamId"
             :placeholder="t('page.tournaments.prizes.selectPlayers')"
             class="w-full"

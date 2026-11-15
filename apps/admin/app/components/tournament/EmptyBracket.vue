@@ -49,19 +49,13 @@ const create = async () => {
     <template #body>
       <div class="grid gap-4 sm:grid-cols-2">
         <SbFormField :label="t('page.tournaments.emptyBracket.teams')">
-          <USelect
-            v-model="teams"
-            :items="teamItems"
-            value-key="value"
-            label-key="label"
-            class="w-full"
-          />
+          <SbSelect v-model="teams" :items="teamItems" class="w-full" />
         </SbFormField>
         <SbFormField
           :label="t('page.tournaments.emptyBracket.numberOfGames')"
           :help="t('page.tournaments.emptyBracket.numberOfGamesHelp')"
         >
-          <UInputNumber v-model="numberOfGames" :min="1" :max="9" class="w-full" />
+          <SbInputNumber v-model="numberOfGames" :min="1" :max="9" class="w-full" />
         </SbFormField>
       </div>
     </template>

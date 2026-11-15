@@ -447,6 +447,7 @@
           "pickFailed": "Impossible d'enregistrer le pick. Actualisez et réessayez.",
           "error": "Impossible de charger ce pick'em. Vérifiez votre connexion et réessayez.",
           "emptyMatches": "Aucun match n'est encore disponible pour ce pick'em.",
+          "pickWinner": "Choisir le vainqueur de {teamA} – {teamB}",
           "openMatch": "Voir {teamA} – {teamB}",
           "tabs": {
             "pickem": "Pick'em",

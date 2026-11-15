@@ -223,22 +223,10 @@ const submit = () => {
   <form class="flex flex-col gap-4" @submit.prevent="submit">
     <div class="grid gap-4 sm:grid-cols-3">
       <SbFormField :label="$t('page.onThisDay.form.month')" required>
-        <USelect
-          v-model="month"
-          :items="monthOptions"
-          value-key="value"
-          label-key="label"
-          class="w-full"
-        />
+        <SbSelect v-model="month" :items="monthOptions" class="w-full" />
       </SbFormField>
       <SbFormField :label="$t('page.onThisDay.form.day')" required>
-        <USelect
-          v-model="day"
-          :items="dayOptions"
-          value-key="value"
-          label-key="label"
-          class="w-full"
-        />
+        <SbSelect v-model="day" :items="dayOptions" class="w-full" />
       </SbFormField>
       <SbFormField
         :label="$t('page.onThisDay.form.year')"
@@ -278,13 +266,7 @@ const submit = () => {
       :hint="$t('page.onThisDay.form.link.hint')"
     >
       <div class="flex flex-col gap-2">
-        <USelect
-          v-model="linkKind"
-          :items="linkKindOptions"
-          value-key="value"
-          label-key="label"
-          class="w-full"
-        />
+        <SbSelect v-model="linkKind" :items="linkKindOptions" class="w-full" />
         <div v-if="linked" class="flex flex-row items-center justify-between gap-2 text-sm">
           <span class="font-medium" translate="no">{{ linked.label }}</span>
           <SbButton

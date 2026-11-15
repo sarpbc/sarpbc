@@ -43,3 +43,24 @@ export interface MenuItem {
 
 /** xs: 24px, in nav rows. sm: 28px, in lists. lg: 40px, on a profile header. */
 export type AvatarSize = "xs" | "sm" | "lg";
+
+export type SelectValue = string | number;
+
+/** One choice in a Select, Combobox or RadioGroup; the description explains it under the label. */
+export interface SelectOption<T extends SelectValue = SelectValue> {
+  description?: string;
+  disabled?: boolean;
+  label: string;
+  value: T;
+}
+
+/** list: a dot and a label. cards: the whole option is a tile, for a few short choices. */
+export type RadioVariant = "list" | "cards";
+
+export type RadioStatus = "success" | "danger";
+
+/** Options under a heading, e.g. the players of each team. */
+export interface SelectGroup<T extends SelectValue = SelectValue> {
+  label: string;
+  options: readonly SelectOption<T>[];
+}

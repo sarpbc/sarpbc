@@ -314,7 +314,7 @@ const contractModalTitle = computed(() =>
             <SbInput v-model="contractForm.teamId" class="w-full" />
           </SbFormField>
           <SbFormField :label="$t('page.players.contracts.fields.role')" required>
-            <USelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
+            <SbSelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
           </SbFormField>
           <SbFormField :label="$t('page.players.contracts.fields.startDate')" required>
             <SbInput v-model="contractForm.startDate" type="date" class="w-full" />

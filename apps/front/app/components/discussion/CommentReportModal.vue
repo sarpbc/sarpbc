@@ -90,7 +90,7 @@ const submitReport = async () => {
         {{ $t("components.discussion.report.description") }}
       </p>
       <SbFormField :label="$t('components.discussion.report.reasonLegend')">
-        <URadioGroup v-model="selectedReason" :items="reasonItems" />
+        <SbRadioGroup v-model="selectedReason" :items="reasonItems" />
       </SbFormField>
     </template>
     <template #footer>

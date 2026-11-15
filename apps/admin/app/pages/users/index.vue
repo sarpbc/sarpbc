@@ -142,7 +142,7 @@ const confirmChange = async () => {
               <span translate="no">{{ row.original.email }}</span>
             </template>
             <template #role-cell="{ row }">
-              <USelect
+              <SbSelect
                 :model-value="roleOf(row.original)"
                 :items="roleItems"
                 class="w-40"

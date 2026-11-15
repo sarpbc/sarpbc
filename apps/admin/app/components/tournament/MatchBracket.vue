@@ -130,13 +130,7 @@ const save = async () => {
             :key="index"
             :label="t('page.tournaments.bracket.side', { number: index + 1 })"
           >
-            <USelect
-              v-model="sides[index]"
-              :items="participantItems"
-              value-key="value"
-              label-key="label"
-              class="w-full"
-            />
+            <SbSelect v-model="sides[index]" :items="participantItems" class="w-full" />
           </SbFormField>
         </div>
 
@@ -153,23 +147,15 @@ const save = async () => {
             class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[minmax(0,1fr)_10rem_auto] sm:items-end"
           >
             <SbFormField :label="t('page.tournaments.bracket.previousMatch')">
-              <USelect
+              <SbSelect
                 v-model="link.previousMatchId"
                 :items="matchItems"
-                value-key="value"
-                label-key="label"
                 class="w-full"
                 :placeholder="t('page.tournaments.bracket.choosePreviousMatch')"
               />
             </SbFormField>
             <SbFormField :label="t('page.tournaments.bracket.type')">
-              <USelect
-                v-model="link.type"
-                :items="typeItems"
-                value-key="value"
-                label-key="label"
-                class="w-full"
-              />
+              <SbSelect v-model="link.type" :items="typeItems" class="w-full" />
             </SbFormField>
             <SbButton
               variant="tertiary"

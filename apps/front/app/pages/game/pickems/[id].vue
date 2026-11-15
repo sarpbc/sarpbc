@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
 import { matchPath, tournamentStageLabel } from "@sarpbc/utils";
+import type { RadioStatus } from "@sarpbc/design";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import {
   displayMatchScore,
@@ -238,37 +239,54 @@ const matchCenterPrimary = (match: TournamentDetailMatch): string | null => {
   return pickemTimeDf.value.format(new Date(match.beginAt));
 };
 
+const pickLabel = (match: TournamentDetailMatch): string =>
+  t("page.game.pickems.detail.pickWinner", {
+    teamA: slotName(match.participants, 0) ?? t("components.match.tbd"),
+    teamB: slotName(match.participants, 1) ?? t("components.match.tbd"),
+  });
+
 const openMatchLabel = (match: TournamentDetailMatch): string =>
   t("page.game.pickems.detail.openMatch", {
     teamA: slotName(match.participants, 0) ?? t("components.match.tbd"),
     teamB: slotName(match.participants, 1) ?? t("components.match.tbd"),
   });
 
-const teamButtonColor = (
+const pickedParticipant = (match: TournamentDetailMatch): string | null =>
+  picks.value?.get(match.id)?.pickedParticipant ?? null;
+
+/* Once the match is played, the chosen team shows whether the pick was right. */
+const pickStatus = (
   match: TournamentDetailMatch,
   participantId: string | undefined,
-): "neutral" | "success" | "error" | "primary" => {
-  if (!participantId || !picks.value) {
-    return "neutral";
-  }
+): RadioStatus | null => {
+  const pick = picks.value?.get(match.id);
 
-  const pick = picks.value.get(match.id);
-
-  if (!pick || pick.pickedParticipant !== participantId) {
-    return "neutral";
+  if (!participantId || !pick || pick.pickedParticipant !== participantId) {
+    return null;
   }
 
   const outcome = getPickOutcome(match, pick);
 
-  if (outcome === "correct") {
-    return "success";
-  }
+  switch (outcome) {
+    case "correct": {
+      return "success";
+    }
 
-  if (outcome === "incorrect") {
-    return "error";
-  }
+    case "incorrect": {
+      return "danger";
+    }
 
-  return "primary";
+    case "pending":
+    case "none": {
+      return null;
+    }
+
+    default: {
+      const exhaustive: never = outcome;
+
+      return exhaustive;
+    }
+  }
 };
 
 const pickTeam = async (matchId: string, participantId: string) => {
@@ -478,19 +496,25 @@ watch(
               :key="match.id"
               size="default"
             >
-              <div class="grid w-full grid-cols-3 items-stretch gap-2">
-                <UButton
-                  variant="ghost"
-                  class="w-full justify-center truncate"
-                  :disabled="
-                    isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
-                  "
-                  :loading="submittingMatchId === match.id"
-                  :color="teamButtonColor(match, match.participants?.[0]?.id)"
-                  @click="pickTeam(match.id, match.participants?.[0]?.id || '')"
+              <SbRadioGroup
+                :model-value="pickedParticipant(match)"
+                variant="cards"
+                orientation="horizontal"
+                class="grid w-full grid-cols-3 items-stretch gap-2"
+                :disabled="
+                  isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
+                "
+                :aria-label="pickLabel(match)"
+                @update:model-value="$event !== null && pickTeam(match.id, $event)"
+              >
+                <SbRadio
+                  :value="match.participants?.[0]?.id ?? `${match.id}-slot-0`"
+                  :disabled="!match.participants?.[0]?.id"
+                  :status="pickStatus(match, match.participants?.[0]?.id)"
+                  class="w-full"
                 >
                   {{ slotName(match.participants, 0) }}
-                </UButton>
+                </SbRadio>
                 <NuxtLink
                   :to="localePath(matchPath(match.publicId, match.slug))"
                   class="flex min-w-0 self-stretch flex-col items-center justify-center text-xs text-muted hover:text-default"
@@ -503,19 +527,15 @@ watch(
                     {{ t("page.match.detail.format", { count: match.numberOfGames }) }}
                   </span>
                 </NuxtLink>
-                <UButton
-                  variant="ghost"
-                  class="w-full justify-center truncate"
-                  :disabled="
-                    isMatchLockedForPickem(match) || submittingMatchId === match.id || picksPending
-                  "
-                  :loading="submittingMatchId === match.id"
-                  :color="teamButtonColor(match, match.participants?.[1]?.id)"
-                  @click="pickTeam(match.id, match.participants?.[1]?.id || '')"
+                <SbRadio
+                  :value="match.participants?.[1]?.id ?? `${match.id}-slot-1`"
+                  :disabled="!match.participants?.[1]?.id"
+                  :status="pickStatus(match, match.participants?.[1]?.id)"
+                  class="w-full"
                 >
                   {{ slotName(match.participants, 1) }}
-                </UButton>
-              </div>
+                </SbRadio>
+              </SbRadioGroup>
             </SListItem>
           </SCard>
         </div>

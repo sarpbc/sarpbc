@@ -96,13 +96,7 @@ defineExpose({ reset });
   <form class="flex flex-col gap-4" @submit.prevent="submit">
     <div class="grid gap-4 sm:grid-cols-2">
       <SbFormField :label="$t('page.seasons.awards.awardType')" required>
-        <USelect
-          v-model="awardType"
-          :items="awardTypeOptions"
-          value-key="value"
-          label-key="label"
-          class="w-full"
-        />
+        <SbSelect v-model="awardType" :items="awardTypeOptions" class="w-full" />
       </SbFormField>
       <SbFormField
         v-if="showsRegion"
