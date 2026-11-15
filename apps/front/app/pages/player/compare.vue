@@ -387,9 +387,9 @@ setPageSeo({
 
       <SCard v-else-if="comparisonStatus === 'pending'" aria-live="polite">
         <SListItem v-for="index in 6" :key="index" class="grid grid-cols-[1fr_auto_1fr] gap-4">
-          <USkeleton class="h-3.5 w-16 justify-self-end" />
-          <USkeleton class="h-3 w-24" />
-          <USkeleton class="h-3.5 w-16" />
+          <SbSkeleton class="h-3.5 w-16 justify-self-end" />
+          <SbSkeleton class="h-3 w-24" />
+          <SbSkeleton class="h-3.5 w-16" />
         </SListItem>
       </SCard>
 

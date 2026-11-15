@@ -387,9 +387,9 @@ const scoreboardLabel = computed(() => {
         <SRail v-if="forfeiter" :title="t('page.match.detail.sections.result')">
           <SCard class="flex-1">
             <SListItem class="gap-2">
-              <UBadge color="neutral" variant="soft" class="shrink-0">
+              <SbBadge class="shrink-0">
                 {{ t("components.match.forfeit") }}
-              </UBadge>
+              </SbBadge>
               <span class="min-w-0 text-sm text-default">
                 {{ t("page.match.detail.forfeitNote", { team: participantLabel(forfeiter) }) }}
               </span>

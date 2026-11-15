@@ -106,7 +106,7 @@ const statusColor = (status: StatsImportStatus) => {
     }
 
     case "failed": {
-      return "error" as const;
+      return "danger" as const;
     }
 
     default: {
@@ -241,9 +241,8 @@ const submit = async () => {
 
     <div v-else class="flex flex-col gap-3" aria-live="polite">
       <div class="flex flex-wrap items-center gap-2 text-sm">
-        <UBadge
+        <SbBadge
           :color="statusColor(latest.status)"
-          variant="subtle"
           :label="t(`page.tournaments.statsImport.status.${latest.status}`)"
         />
         <span class="text-muted">

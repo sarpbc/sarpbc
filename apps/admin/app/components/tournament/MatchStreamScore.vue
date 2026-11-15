@@ -224,9 +224,9 @@ const confirm = async () => {
                   }}
                 </span>
               </span>
-              <UBadge v-if="game.winner === null" color="error" variant="subtle" size="sm">
+              <SbBadge v-if="game.winner === null" color="danger">
                 {{ t("page.tournaments.streamScore.unread") }}
-              </UBadge>
+              </SbBadge>
               <label
                 v-else-if="streamScoreGameNeedsCheck(game)"
                 class="flex items-center gap-2 text-warning"

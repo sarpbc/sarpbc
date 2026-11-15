@@ -153,9 +153,8 @@ const handleSubmit = async () => {
               <h1 class="text-2xl font-semibold tracking-tight">
                 {{ $t("page.tournaments.edit.title") }}
               </h1>
-              <UBadge
-                :color="isManual ? 'primary' : 'neutral'"
-                variant="subtle"
+              <SbBadge
+                :color="isManual ? 'info' : 'neutral'"
                 :label="$t(`page.tournaments.source.${tournament.source}`)"
               />
             </div>

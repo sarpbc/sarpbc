@@ -120,7 +120,7 @@ watch(
     <SHubPageHeader>
       <template #title>
         <span v-if="standings">{{ standings.name }}</span>
-        <USkeleton v-else class="mx-auto h-5 w-48" />
+        <SbSkeleton v-else class="mx-auto h-5 w-48" />
       </template>
       <template #meta>
         <SLink :to="$localePath('/circuits')" variant="muted">
@@ -132,11 +132,11 @@ watch(
     <SCard v-if="pending" aria-live="polite">
       <span class="sr-only">{{ t("common.loading") }}</span>
       <SListItem v-for="index in 6" :key="index" class="gap-3">
-        <USkeleton class="h-3 w-6 shrink-0" />
-        <USkeleton class="size-4 shrink-0" />
-        <USkeleton class="h-3 max-w-40 flex-1" />
-        <USkeleton class="h-3 w-12" />
-        <USkeleton class="h-3 w-12" />
+        <SbSkeleton class="h-3 w-6 shrink-0" />
+        <SbSkeleton class="size-4 shrink-0" />
+        <SbSkeleton class="h-3 max-w-40 flex-1" />
+        <SbSkeleton class="h-3 w-12" />
+        <SbSkeleton class="h-3 w-12" />
       </SListItem>
     </SCard>
 
@@ -197,14 +197,9 @@ watch(
                     >
                       {{ column.event.name }}
                     </SLink>
-                    <UBadge
-                      v-if="statusLabel(column.status)"
-                      color="neutral"
-                      variant="outline"
-                      size="sm"
-                    >
+                    <SbBadge v-if="statusLabel(column.status)">
                       {{ statusLabel(column.status) }}
-                    </UBadge>
+                    </SbBadge>
                   </div>
                 </th>
               </tr>

@@ -143,11 +143,11 @@ watch(
       </SCard>
       <SRail v-for="index in 2" :key="index" caption="section">
         <template #caption>
-          <USkeleton class="h-3 w-40" />
+          <SbSkeleton class="h-3 w-40" />
         </template>
         <SCard class="min-h-row-stack p-2">
           <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">
-            <USkeleton v-for="cell in 6" :key="cell" class="h-row" />
+            <SbSkeleton v-for="cell in 6" :key="cell" class="h-row" />
           </div>
         </SCard>
       </SRail>

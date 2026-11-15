@@ -35,7 +35,7 @@ const stageCount = computed(() =>
 
     <SCard v-if="pending && !events.length" class="p-4" aria-live="polite">
       <div class="flex flex-col gap-2">
-        <USkeleton v-for="i in 4" :key="i" class="h-row w-full" />
+        <SbSkeleton v-for="i in 4" :key="i" class="h-row w-full" />
       </div>
     </SCard>
 

@@ -97,10 +97,10 @@ const stateLabel = useMatchStateLabel(t, (beginAt) =>
       <SListItem v-for="index in 2" :key="index">
         <div class="flex w-full items-center justify-between gap-3">
           <span class="flex flex-col gap-1.5">
-            <USkeleton class="h-3 w-28" />
-            <USkeleton class="h-3 w-24" />
+            <SbSkeleton class="h-3 w-28" />
+            <SbSkeleton class="h-3 w-24" />
           </span>
-          <USkeleton class="h-3 w-10" />
+          <SbSkeleton class="h-3 w-10" />
         </div>
       </SListItem>
     </SCard>

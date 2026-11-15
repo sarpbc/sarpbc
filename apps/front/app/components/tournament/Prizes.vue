@@ -49,10 +49,10 @@ const showSection = computed(
       <SCard v-if="pending" aria-live="polite">
         <SListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
-            <USkeleton class="h-3.5 w-8 shrink-0" />
-            <USkeleton class="size-5 shrink-0" />
-            <USkeleton class="h-3.5 w-2/5 max-w-40" />
-            <USkeleton class="ms-auto h-3.5 w-16" />
+            <SbSkeleton class="h-3.5 w-8 shrink-0" />
+            <SbSkeleton class="size-5 shrink-0" />
+            <SbSkeleton class="h-3.5 w-2/5 max-w-40" />
+            <SbSkeleton class="ms-auto h-3.5 w-16" />
           </div>
         </SListItem>
       </SCard>

@@ -56,7 +56,7 @@ watchEffect(() => {
     </SCrossCard>
 
     <SCard v-if="!loaded" class="p-6">
-      <USkeleton class="h-32 w-full" />
+      <SbSkeleton class="h-32 w-full" />
     </SCard>
 
     <SCard v-else-if="result" class="p-4 sm:p-6">

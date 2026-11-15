@@ -138,9 +138,8 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
             {{ $t("page.tournaments.noTournaments") }}
           </template>
           <template #source-cell="{ row }">
-            <UBadge
-              :color="isManualTournament(row.original) ? 'primary' : 'neutral'"
-              variant="subtle"
+            <SbBadge
+              :color="isManualTournament(row.original) ? 'info' : 'neutral'"
               :label="$t(`page.tournaments.source.${row.original.source}`)"
             />
           </template>

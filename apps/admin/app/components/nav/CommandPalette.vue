@@ -218,8 +218,8 @@ const groups = computed<CommandPaletteGroup[]>(() => {
     >
       <template #trailing>
         <div class="hidden items-center gap-0.5 sm:flex">
-          <UKbd value="meta" size="sm" />
-          <UKbd value="k" size="sm" />
+          <SbKbd value="meta" size="sm" />
+          <SbKbd value="k" size="sm" />
         </div>
       </template>
     </SbButton>

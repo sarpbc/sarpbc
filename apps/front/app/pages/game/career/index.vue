@@ -133,8 +133,8 @@ const handleContinue = () => {
 
     <SCard v-if="!hydrated" class="p-6">
       <div class="flex flex-col items-center gap-4">
-        <USkeleton class="h-4 w-48" />
-        <USkeleton class="h-24 w-full" />
+        <SbSkeleton class="h-4 w-48" />
+        <SbSkeleton class="h-24 w-full" />
       </div>
     </SCard>
 

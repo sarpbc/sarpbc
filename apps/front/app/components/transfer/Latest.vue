@@ -40,10 +40,10 @@ const allTransfersPath = computed(() => ({
       <SCard v-if="pending" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
         <SListItem v-for="index in LATEST_TRANSFERS" :key="index" class="gap-3">
-          <USkeleton class="h-3 w-20 shrink-0" />
-          <USkeleton class="size-7 shrink-0" />
-          <USkeleton class="h-3 max-w-40 flex-1" />
-          <USkeleton class="h-3 w-20" />
+          <SbSkeleton class="h-3 w-20 shrink-0" />
+          <SbSkeleton class="size-7 shrink-0" />
+          <SbSkeleton class="h-3 max-w-40 flex-1" />
+          <SbSkeleton class="h-3 w-20" />
         </SListItem>
       </SCard>
 

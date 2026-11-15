@@ -71,15 +71,9 @@ const showCredit = computed(() => startgg && lineups.length > 0);
               <FlagIcon :nationality="player.nationality" class="shrink-0" />
               <span class="truncate text-sm">{{ player.name }}</span>
             </div>
-            <UBadge
-              v-if="player.standIn"
-              color="neutral"
-              variant="outline"
-              size="sm"
-              class="shrink-0"
-            >
+            <SbBadge v-if="player.standIn" class="shrink-0">
               {{ t("page.match.detail.lineups.standIn") }}
-            </UBadge>
+            </SbBadge>
           </SListItem>
           <SListItem v-else size="default" class="min-w-0">
             <span v-if="rowIndex === 0" class="self-center truncate text-sm text-muted">

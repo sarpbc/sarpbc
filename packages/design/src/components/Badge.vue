@@ -20,9 +20,9 @@ const adapters = useDesignAdapters();
 <template>
   <span class="sb-badge" :data-color="color">
     <component :is="adapters.icon" v-if="icon !== null" :name="icon" class="sb-badge__icon" />
-    <span class="sb-badge__label">
-      <slot>{{ label }}</slot>
-    </span>
+    <slot>
+      <span class="sb-badge__label">{{ label }}</span>
+    </slot>
   </span>
 </template>
 

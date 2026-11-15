@@ -313,8 +313,8 @@ const close = () => {
           "
         >
           <div v-if="loadingMatches" class="flex flex-col gap-2" aria-busy="true">
-            <USkeleton class="h-5 w-full" />
-            <USkeleton class="h-5 w-4/5" />
+            <SbSkeleton class="h-5 w-full" />
+            <SbSkeleton class="h-5 w-4/5" />
           </div>
           <ul v-else-if="matches.length > 0" class="flex max-h-72 flex-col gap-2 overflow-y-auto">
             <li v-for="match in matches" :key="match.id">

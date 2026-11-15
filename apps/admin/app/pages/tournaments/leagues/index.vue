@@ -162,9 +162,8 @@ const uploadedImageUrl = computed({
               <div v-else class="size-8 rounded-sm bg-elevated" />
             </template>
             <template #source-cell="{ row }">
-              <UBadge
-                :color="isPandascore(row.original) ? 'neutral' : 'primary'"
-                variant="subtle"
+              <SbBadge
+                :color="isPandascore(row.original) ? 'neutral' : 'info'"
                 :label="
                   $t(
                     `page.tournaments.source.${isPandascore(row.original) ? 'pandascore' : 'manual'}`,

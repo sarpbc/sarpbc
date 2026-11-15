@@ -81,18 +81,18 @@ watch(open, (isOpen) => {
     <template #content>
       <div v-if="pending" class="flex w-72 flex-col" aria-busy="true">
         <div class="flex items-center gap-3 p-3">
-          <USkeleton class="size-16 shrink-0 rounded-none" />
+          <SbSkeleton class="size-16 shrink-0 rounded-none" />
           <div class="flex min-w-0 flex-1 flex-col gap-1.5">
-            <USkeleton class="h-4 w-24" />
-            <USkeleton class="h-3 w-32" />
+            <SbSkeleton class="h-4 w-24" />
+            <SbSkeleton class="h-3 w-32" />
           </div>
         </div>
         <div class="flex h-row items-center gap-2 border-t border-default px-3">
-          <USkeleton class="size-5 shrink-0 rounded-none" />
-          <USkeleton class="h-3 w-28" />
+          <SbSkeleton class="size-5 shrink-0 rounded-none" />
+          <SbSkeleton class="h-3 w-28" />
         </div>
         <div class="flex h-row items-center border-t border-default px-3">
-          <USkeleton class="h-3 w-24" />
+          <SbSkeleton class="h-3 w-24" />
         </div>
       </div>
 

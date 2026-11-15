@@ -28,8 +28,8 @@ setPageSeo({
         <span class="sr-only">{{ t("common.loading") }}</span>
         <SListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 flex-col gap-2">
-            <USkeleton class="h-3 w-40" />
-            <USkeleton class="h-3 w-64 max-w-full" />
+            <SbSkeleton class="h-3 w-40" />
+            <SbSkeleton class="h-3 w-64 max-w-full" />
           </div>
         </SListItem>
       </SCard>

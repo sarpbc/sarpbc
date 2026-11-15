@@ -52,11 +52,9 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
     >
       <div class="flex w-full min-w-0 items-center justify-between gap-3 text-xs font-medium">
         <div class="flex min-w-0 items-center gap-2">
-          <UBadge
+          <SbBadge
             v-if="recentMatch.outcome && !concealed"
-            :color="recentMatch.outcome === 'win' ? 'success' : 'error'"
-            variant="soft"
-            size="sm"
+            :color="recentMatch.outcome === 'win' ? 'success' : 'danger'"
             class="inline-flex size-5 shrink-0 items-center justify-center p-0"
           >
             {{
@@ -64,7 +62,7 @@ const hasRecentMatches = computed(() => (teamForm?.recent.length ?? 0) > 0);
                 ? t("page.match.detail.win")
                 : t("page.match.detail.loss")
             }}
-          </UBadge>
+          </SbBadge>
           <span class="truncate text-muted">
             {{
               t("page.match.detail.formVs", {

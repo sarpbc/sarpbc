@@ -298,17 +298,17 @@ onUnmounted(() => {
         <AirRiddleHowToPlayPopover />
       </div>
       <div class="flex flex-col items-center gap-6">
-        <USkeleton class="h-4 w-40" />
+        <SbSkeleton class="h-4 w-40" />
         <div class="inline-flex flex-col border-l border-t border-separator">
           <div class="inline-grid grid-cols-6 gap-0">
-            <USkeleton
+            <SbSkeleton
               v-for="index in 6"
               :key="index"
               class="size-11 rounded-none border-r border-b border-separator sm:size-14"
             />
           </div>
           <div class="inline-grid grid-cols-6 gap-0">
-            <USkeleton
+            <SbSkeleton
               v-for="index in 6"
               :key="`row-${index}`"
               class="size-11 rounded-none border-r border-b border-separator sm:size-14"

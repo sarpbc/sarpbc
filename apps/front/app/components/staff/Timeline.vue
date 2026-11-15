@@ -50,9 +50,9 @@ const formatRange = (contract: PlayerContract): string => {
               <time :datetime="contract.startDate">{{ formatRange(contract) }}</time>
             </span>
           </div>
-          <UBadge v-if="!contract.endDate" color="primary" variant="subtle" size="sm">
+          <SbBadge v-if="!contract.endDate" color="info">
             {{ t("page.staff.slug.timeline.current") }}
-          </UBadge>
+          </SbBadge>
         </li>
       </ol>
     </SRail>

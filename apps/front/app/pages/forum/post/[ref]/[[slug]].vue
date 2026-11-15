@@ -73,11 +73,11 @@ watch(
   <SHubPageBody>
     <SCard v-if="pending" aria-live="polite">
       <div class="flex h-row items-center justify-between gap-3 border-y border-separator px-3">
-        <USkeleton class="h-3 w-48" />
-        <USkeleton class="h-3 w-32" />
+        <SbSkeleton class="h-3 w-48" />
+        <SbSkeleton class="h-3 w-32" />
       </div>
       <div class="flex min-h-row items-center border-b border-separator px-3">
-        <USkeleton class="h-3 w-2/3" />
+        <SbSkeleton class="h-3 w-2/3" />
       </div>
     </SCard>
 

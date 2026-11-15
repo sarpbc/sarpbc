@@ -70,10 +70,10 @@ const eventMeta = (event: EntityEventListItem): string =>
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
         <SCard v-for="index in 3" :key="index">
           <div class="flex items-center gap-3 py-2 px-3">
-            <USkeleton class="h-3 w-16 shrink-0" />
+            <SbSkeleton class="h-3 w-16 shrink-0" />
             <div class="flex flex-1 flex-col gap-1">
-              <USkeleton class="h-3 w-40" />
-              <USkeleton class="h-3 w-28" />
+              <SbSkeleton class="h-3 w-40" />
+              <SbSkeleton class="h-3 w-28" />
             </div>
           </div>
         </SCard>
@@ -126,14 +126,12 @@ const eventMeta = (event: EntityEventListItem): string =>
               <span v-if="tab === 'upcoming'" class="text-xs text-muted">
                 {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>
-              <UBadge
+              <SbBadge
                 v-if="tab === 'past' && event.isWinner && !isConcealed({ tournamentId: event.id })"
-                color="primary"
-                variant="subtle"
-                size="sm"
+                color="info"
               >
                 {{ t(`page.${kind}.slug.events.winner`) }}
-              </UBadge>
+              </SbBadge>
               <span v-else-if="tab === 'past'" class="text-xs text-muted">
                 {{ t(tournamentStatusLabelKey(event.status)) }}
               </span>

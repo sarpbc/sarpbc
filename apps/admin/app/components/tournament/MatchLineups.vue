@@ -332,15 +332,9 @@ const save = async () => {
               >
                 <span class="flex min-w-0 items-center gap-2">
                   <span class="truncate">{{ pick.name }}</span>
-                  <UBadge
-                    v-if="isStandIn(side.id, pick.id)"
-                    color="warning"
-                    variant="subtle"
-                    size="sm"
-                    class="shrink-0"
-                  >
+                  <SbBadge v-if="isStandIn(side.id, pick.id)" color="warning" class="shrink-0">
                     {{ t("page.tournaments.lineups.standIn") }}
-                  </UBadge>
+                  </SbBadge>
                 </span>
                 <SbButton
                   variant="tertiary"

@@ -185,7 +185,7 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
 
     <SCard v-if="pending" class="min-h-row-stack p-2" aria-live="polite">
       <div class="flex w-full flex-col gap-2">
-        <USkeleton v-for="index in 6" :key="index" class="h-row" />
+        <SbSkeleton v-for="index in 6" :key="index" class="h-row" />
       </div>
     </SCard>
 

@@ -126,16 +126,16 @@ const onReplyDeleted = async () => {
                 <span class="tabular-nums">{{
                   dateFormatter.format(new Date(reply.createdAt))
                 }}</span>
-                <UBadge v-if="reply.reportCount > 0" color="error" variant="soft">
+                <SbBadge v-if="reply.reportCount > 0" color="danger">
                   {{
                     $t("page.moderation.reportedBadge", {
                       count: reply.reportCount,
                     })
                   }}
-                </UBadge>
-                <UBadge v-if="reply.hiddenAt" color="neutral" variant="soft">
+                </SbBadge>
+                <SbBadge v-if="reply.hiddenAt">
                   {{ $t("page.moderation.hiddenBadge") }}
-                </UBadge>
+                </SbBadge>
               </div>
               <div class="flex flex-row items-center gap-1">
                 <SbButton

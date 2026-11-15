@@ -75,18 +75,18 @@ const hasMatches = computed(() => matches.length > 0);
             v-if="kind === 'results'"
             class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1"
           >
-            <USkeleton class="h-3 max-w-32" />
-            <USkeleton class="h-3 w-4 justify-self-end" />
-            <USkeleton class="h-3 max-w-28" />
-            <USkeleton class="h-3 w-4 justify-self-end" />
+            <SbSkeleton class="h-3 max-w-32" />
+            <SbSkeleton class="h-3 w-4 justify-self-end" />
+            <SbSkeleton class="h-3 max-w-28" />
+            <SbSkeleton class="h-3 w-4 justify-self-end" />
           </div>
           <div v-else class="grid w-full grid-cols-3 items-center">
             <div class="col-span-2 flex flex-col gap-0.5">
-              <USkeleton class="h-3 w-24" />
-              <USkeleton class="h-3 w-28" />
+              <SbSkeleton class="h-3 w-24" />
+              <SbSkeleton class="h-3 w-28" />
             </div>
             <div class="col-span-1 flex justify-end">
-              <USkeleton class="h-3 w-10" />
+              <SbSkeleton class="h-3 w-10" />
             </div>
           </div>
         </SListItem>
