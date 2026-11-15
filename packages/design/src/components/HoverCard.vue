@@ -19,7 +19,7 @@ const toggleOnTouch = (event: PointerEvent): void => {
 </script>
 
 <template>
-  <HoverCardRoot v-model:open="open" :open-delay="80" :close-delay="100">
+  <HoverCardRoot v-model:open="open" :open-delay="0" :close-delay="100">
     <HoverCardTrigger as-child @pointerdown="toggleOnTouch">
       <slot />
     </HoverCardTrigger>
@@ -47,7 +47,6 @@ const toggleOnTouch = (event: PointerEvent): void => {
     box-shadow:
       inset 0 0 0 1px var(--sb-border),
       0 1px 3px rgb(0 0 0 / 0.1);
-    animation: sb-fade-in var(--sb-duration-fast) var(--sb-ease-out);
   }
 }
 </style>

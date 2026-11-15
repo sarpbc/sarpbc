@@ -44,7 +44,7 @@ const { ariaLabel, items } = defineProps<{
     display: inline-flex;
     align-items: center;
     height: 100%;
-    padding: 0 0.25rem;
+    padding: 0;
     border: 0;
     background: none;
     color: var(--sb-text-muted);
@@ -54,8 +54,9 @@ const { ariaLabel, items } = defineProps<{
     cursor: pointer;
   }
 
+  /* The slash sits inside the next trigger; equal margins keep it centered between labels. */
   .sb-tabs__trigger + .sb-tabs__trigger {
-    padding-inline-start: 0;
+    margin-inline-start: 0.5rem;
   }
 
   .sb-tabs__trigger + .sb-tabs__trigger::before {

@@ -30,7 +30,8 @@ const emit = defineEmits<{ select: [value: string] }>();
   .sb-action-list {
     display: flex;
     flex-direction: column;
-    box-shadow: inset 0 0 0 1px var(--sb-border);
+    /* A border, not an inset shadow: a hovered row's background would paint over the shadow. */
+    border: 1px solid var(--sb-border);
   }
 
   .sb-action-list__item {
