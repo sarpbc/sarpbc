@@ -109,14 +109,14 @@ const entryMeta = (entry: EarningsEntry): string => {
           <span v-if="owner === 'player'">{{ t("common.prizes.earnings.splitHint") }}</span>
           <span v-if="hasStartgg">
             {{ t("common.prizes.dataFrom") }}
-            <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
+            <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
           </span>
         </p>
       </SCard>
 
       <SCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
-          <UIcon name="i-fluent-money-24-regular" class="text-3xl text-muted" />
+          <Icon name="i-fluent-money-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
             {{ t("common.prizes.earnings.empty") }}
           </p>

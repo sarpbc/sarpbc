@@ -16,7 +16,7 @@ const toast = useToast();
 
 const onShare = () => {
   emit("share");
-  toast.add({ title: t("page.game.career.end.shareCopied") });
+  toast.add({ color: "success", title: t("page.game.career.end.shareCopied") });
 };
 
 const TROPHY_TYPES = ["worlds", "major", "regional"] as const;

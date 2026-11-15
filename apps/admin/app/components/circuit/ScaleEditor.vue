@@ -290,7 +290,7 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="$t('page.circuits.scale.title')"
     :description="shown?.label ?? ''"
@@ -326,7 +326,7 @@ const save = async () => {
           class="grid grid-cols-[1fr_1fr_1fr_auto] items-start gap-2 border border-default p-3"
         >
           <SbFormField :label="$t('page.circuits.scale.from')" :error="rowError(row)">
-            <UInputNumber
+            <SbInputNumber
               v-model="row.from"
               :min="1"
               :max="MAX_CIRCUIT_PLACEMENT"
@@ -335,7 +335,7 @@ const save = async () => {
             />
           </SbFormField>
           <SbFormField :label="$t('page.circuits.scale.to')">
-            <UInputNumber
+            <SbInputNumber
               v-model="row.to"
               :min="1"
               :max="MAX_CIRCUIT_PLACEMENT"
@@ -344,7 +344,7 @@ const save = async () => {
             />
           </SbFormField>
           <SbFormField :label="$t('page.circuits.scale.points')">
-            <UInputNumber
+            <SbInputNumber
               v-model="row.points"
               :min="0"
               :max="MAX_CIRCUIT_POINTS"
@@ -387,7 +387,7 @@ const save = async () => {
           <legend class="px-1 text-sm font-medium">
             {{ $t("page.circuits.scale.region.title") }}
           </legend>
-          <USwitch
+          <SbSwitch
             v-model="worldwide"
             :label="$t('page.circuits.scale.region.worldwide')"
             :description="$t('page.circuits.scale.region.worldwideHint')"
@@ -407,7 +407,7 @@ const save = async () => {
                 {{ $t("page.circuits.scale.noTeams") }}
               </p>
               <div v-else class="grid gap-2 sm:grid-cols-2">
-                <UCheckbox
+                <SbCheckbox
                   v-for="option in teamOptions"
                   :key="option.value"
                   :model-value="regionTeamIds.includes(option.value)"
@@ -433,17 +433,15 @@ const save = async () => {
             class="grid grid-cols-[2fr_1fr_auto] items-start gap-2"
           >
             <SbFormField :label="$t('page.circuits.scale.finishes.team')" :error="finishError(row)">
-              <USelect
+              <SbSelect
                 v-model="row.teamId"
                 :items="teamOptions"
-                value-key="value"
-                label-key="label"
                 :placeholder="$t('page.circuits.scale.finishes.selectTeam')"
                 class="w-full"
               />
             </SbFormField>
             <SbFormField :label="$t('page.circuits.scale.finishes.placement')">
-              <UInputNumber
+              <SbInputNumber
                 v-model="row.placement"
                 :min="1"
                 :max="MAX_CIRCUIT_PLACEMENT"
@@ -491,5 +489,5 @@ const save = async () => {
         @click="open = false"
       />
     </template>
-  </UModal>
+  </SbModal>
 </template>

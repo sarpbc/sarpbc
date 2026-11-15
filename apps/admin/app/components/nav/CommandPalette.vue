@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { watchDebounced } from "@vueuse/core";
-import type { CommandPaletteGroup, CommandPaletteItem } from "@nuxt/ui";
+import { onKeyStroke, watchDebounced } from "@vueuse/core";
+import type { CommandGroup, CommandItem } from "@sarpbc/design";
 import { resolveThemedLogoUrl, tournamentStageLabel } from "@sarpbc/utils";
 import { canAccessSection } from "~/utils/admin-sections";
 import type { Player, Team } from "@sarpbc/types";
@@ -22,18 +22,18 @@ const canTeams = computed(() => canAccessSection(user.value, "/teams"));
 const canTournaments = computed(() => canAccessSection(user.value, "/tournaments"));
 const canSearch = computed(() => canPlayers.value || canTeams.value || canTournaments.value);
 
-defineShortcuts({
-  meta_k: {
-    handler: () => {
-      if (!canSearch.value) {
-        return;
-      }
+/* ⌘K on macOS, Ctrl+K elsewhere, even while typing in a field. */
+onKeyStroke(
+  (event) => (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k",
+  (event) => {
+    if (!canSearch.value) {
+      return;
+    }
 
-      open.value = !open.value;
-    },
-    usingInput: true,
+    event.preventDefault();
+    open.value = !open.value;
   },
-});
+);
 
 const runSearch = async (query: string) => {
   const trimmed = query.trim();
@@ -80,15 +80,15 @@ const closeAndGo = (path: string) => {
   void navigateTo(localePath(path));
 };
 
-const playerItems = (): CommandPaletteItem[] => {
+const playerItems = (): CommandItem[] => {
   if (!canPlayers.value) {
     return [];
   }
 
   return results.value.players.map((player: Player) => ({
-    avatar: player.imageUrl ? { alt: player.name, src: player.imageUrl } : undefined,
     icon: "i-fluent-person-24-regular",
     id: `player-${player.id}`,
+    image: player.imageUrl ?? undefined,
     label: player.name,
     onSelect() {
       closeAndGo(`/players/${player.id}`);
@@ -97,7 +97,7 @@ const playerItems = (): CommandPaletteItem[] => {
   }));
 };
 
-const teamItems = (): CommandPaletteItem[] => {
+const teamItems = (): CommandItem[] => {
   if (!canTeams.value) {
     return [];
   }
@@ -106,9 +106,9 @@ const teamItems = (): CommandPaletteItem[] => {
     const src = resolveThemedLogoUrl(team, colorMode.value);
 
     return {
-      avatar: src ? { alt: team.name, src } : undefined,
       icon: "i-fluent-people-team-24-regular",
       id: `team-${team.id}`,
+      image: src ?? undefined,
       label: team.name,
       onSelect() {
         closeAndGo(`/teams/${team.id}`);
@@ -118,15 +118,15 @@ const teamItems = (): CommandPaletteItem[] => {
   });
 };
 
-const tournamentItems = (): CommandPaletteItem[] => {
+const tournamentItems = (): CommandItem[] => {
   if (!canTournaments.value) {
     return [];
   }
 
   return results.value.tournaments.map((tournament) => ({
-    avatar: tournament.imageUrl ? { alt: tournament.name, src: tournament.imageUrl } : undefined,
     icon: "i-fluent-trophy-24-regular",
     id: `tournament-${tournament.id}`,
+    image: tournament.imageUrl ?? undefined,
     label: tournamentStageLabel(tournament),
     onSelect() {
       closeAndGo(`/tournaments/${tournament.id}`);
@@ -134,9 +134,7 @@ const tournamentItems = (): CommandPaletteItem[] => {
   }));
 };
 
-const refreshEmptyTournaments = async (event?: Event) => {
-  event?.preventDefault();
-
+const refreshEmptyTournaments = async () => {
   if (refreshState.value === "loading" || !canTournaments.value) {
     return;
   }
@@ -155,8 +153,8 @@ const refreshEmptyTournaments = async (event?: Event) => {
   }
 };
 
-const groups = computed<CommandPaletteGroup[]>(() => {
-  const items: CommandPaletteGroup[] = [];
+const groups = computed<CommandGroup[]>(() => {
+  const items: CommandGroup[] = [];
 
   if (canTournaments.value) {
     items.push({
@@ -167,8 +165,8 @@ const groups = computed<CommandPaletteGroup[]>(() => {
           id: "refresh-empty-tournaments",
           label: t("page.search.refreshEmptyTournaments"),
           loading: refreshState.value === "loading",
-          onSelect: (event: Event) => {
-            void refreshEmptyTournaments(event);
+          onSelect: () => {
+            void refreshEmptyTournaments();
           },
           suffix: t("page.search.refreshEmptyTournamentsHint"),
         },
@@ -180,27 +178,27 @@ const groups = computed<CommandPaletteGroup[]>(() => {
   if (canPlayers.value && results.value.players.length > 0) {
     items.push({
       id: "players",
-      ignoreFilter: true,
       items: playerItems(),
       label: t("page.search.players"),
+      remote: true,
     });
   }
 
   if (canTeams.value && results.value.teams.length > 0) {
     items.push({
       id: "teams",
-      ignoreFilter: true,
       items: teamItems(),
       label: t("page.search.teams"),
+      remote: true,
     });
   }
 
   if (canTournaments.value && results.value.tournaments.length > 0) {
     items.push({
       id: "tournaments",
-      ignoreFilter: true,
       items: tournamentItems(),
       label: t("page.search.tournaments"),
+      remote: true,
     });
   }
 
@@ -209,7 +207,7 @@ const groups = computed<CommandPaletteGroup[]>(() => {
 </script>
 
 <template>
-  <UModal v-if="canSearch" v-model:open="open">
+  <SbModal v-if="canSearch" v-model:open="open" :title="$t('page.search.title')">
     <SbButton
       variant="secondary"
       icon="i-lucide-search"
@@ -225,7 +223,7 @@ const groups = computed<CommandPaletteGroup[]>(() => {
     </SbButton>
 
     <template #content>
-      <UCommandPalette
+      <SbCommandPalette
         v-model:search-term="searchTerm"
         :groups="groups"
         :loading="pending"
@@ -234,5 +232,5 @@ const groups = computed<CommandPaletteGroup[]>(() => {
         class="h-80"
       />
     </template>
-  </UModal>
+  </SbModal>
 </template>

@@ -30,7 +30,7 @@ export const useAdminNavLinks = () => {
     {
       icon: "i-fluent-arrow-left-24-regular",
       label: t("page.nav.backToSite"),
-      target: "_blank",
+      target: "_blank" as const,
       to: config.public.publicSiteUrl,
     },
   ]);

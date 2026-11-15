@@ -72,7 +72,7 @@ const submitReport = async () => {
   }
 
   toast.add({
-    color: "error",
+    color: "danger",
     description: result.message ?? t("components.discussion.report.messages.error"),
     title: t("components.discussion.messages.errorTitle"),
   });
@@ -80,7 +80,7 @@ const submitReport = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="$t('components.discussion.report.title')"
     :dismissible="!isSubmitting"
@@ -90,7 +90,7 @@ const submitReport = async () => {
         {{ $t("components.discussion.report.description") }}
       </p>
       <SbFormField :label="$t('components.discussion.report.reasonLegend')">
-        <URadioGroup v-model="selectedReason" :items="reasonItems" />
+        <SbRadioGroup v-model="selectedReason" :items="reasonItems" />
       </SbFormField>
     </template>
     <template #footer>
@@ -107,5 +107,5 @@ const submitReport = async () => {
         @click="open = false"
       />
     </template>
-  </UModal>
+  </SbModal>
 </template>

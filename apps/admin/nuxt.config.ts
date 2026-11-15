@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 import { createRequire } from "node:module";
 import { localizedPath } from "@sarpbc/utils/entity-path";
@@ -43,6 +44,11 @@ export default defineNuxtConfig({
     },
   },
 
+  colorMode: {
+    classSuffix: "",
+    disableTransition: true,
+  },
+
   compatibilityDate: "2026-07-01",
 
   css: ["~/assets/css/main.css"],
@@ -53,13 +59,32 @@ export default defineNuxtConfig({
 
   devtools: { enabled: false },
 
+  fonts: {
+    defaults: {
+      weights: [400, 500, 600, 700],
+    },
+  },
+
   i18n: i18nOptions,
+
+  icon: {
+    // Utilities and component styles must be able to size icons.
+    cssLayer: "base",
+  },
 
   mdc: {
     components: { map: newsMdcComponents },
   },
 
-  modules: ["@sarpbc/composables", "@sarpbc/ui", "@nuxtjs/i18n", "@nuxt/ui", "@nuxtjs/mdc"],
+  modules: [
+    "@sarpbc/composables",
+    "@sarpbc/ui",
+    "@nuxtjs/i18n",
+    "@nuxt/icon",
+    "@nuxt/fonts",
+    "@nuxtjs/color-mode",
+    "@nuxtjs/mdc",
+  ],
 
   nitro: {
     preset: "node-server",
@@ -113,6 +138,7 @@ export default defineNuxtConfig({
         "prosemirror-keymap",
       ],
     },
+    plugins: [tailwindcss()],
     resolve: {
       alias: prosemirrorAliases,
       dedupe: [

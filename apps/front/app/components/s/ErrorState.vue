@@ -15,7 +15,7 @@ const { t } = useI18n();
     role="alert"
     class="flex w-full flex-col items-center justify-center gap-3 px-4 py-8 text-center"
   >
-    <UIcon name="i-fluent-warning-24-regular" class="text-3xl text-muted" aria-hidden="true" />
+    <Icon name="i-fluent-warning-24-regular" class="text-3xl text-muted" aria-hidden="true" />
     <p class="text-sm text-muted text-pretty">{{ message }}</p>
     <SbButton variant="secondary" @click="emit('retry')">
       {{ t("common.retry") }}

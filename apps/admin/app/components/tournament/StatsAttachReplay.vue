@@ -117,7 +117,7 @@ const save = async () => {
     target.value = null;
   } catch (error) {
     toast.add({
-      color: "error",
+      color: "danger",
       description: getApiErrorMessage(error) ?? undefined,
       title: t("page.tournaments.statsAttach.saveError"),
     });
@@ -128,7 +128,7 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.statsAttach.title')"
     :description="t('page.tournaments.statsAttach.description', { title: shown?.title ?? '' })"
@@ -137,14 +137,11 @@ const save = async () => {
     <template #body>
       <form id="stats-attach-replay" class="flex flex-col gap-4" @submit.prevent="save">
         <SbFormField :label="t('page.tournaments.statsAttach.match')" required>
-          <USelectMenu
+          <SbCombobox
             v-model="matchId"
             :items="matchOptions"
-            value-key="value"
-            label-key="label"
             class="w-full"
             :placeholder="t('page.tournaments.statsAttach.matchPlaceholder')"
-            :search-input="{ placeholder: t('page.tournaments.statsAttach.matchSearch') }"
           />
         </SbFormField>
 
@@ -153,11 +150,9 @@ const save = async () => {
           :help="matchId ? undefined : t('page.tournaments.statsAttach.chooseMatchFirst')"
           required
         >
-          <USelect
+          <SbSelect
             v-model="gameNumber"
             :items="gameOptions"
-            value-key="value"
-            label-key="label"
             class="w-full"
             :disabled="!matchId"
             :placeholder="t('page.tournaments.statsAttach.gamePlaceholder')"
@@ -169,13 +164,7 @@ const save = async () => {
           :help="t('page.tournaments.statsAttach.blueHelp')"
           required
         >
-          <URadioGroup
-            v-if="matchId"
-            v-model="blueParticipantId"
-            :items="sideOptions"
-            value-key="value"
-            label-key="label"
-          />
+          <SbRadioGroup v-if="matchId" v-model="blueParticipantId" :items="sideOptions" />
           <p v-else class="text-sm text-muted">
             {{ t("page.tournaments.statsAttach.chooseMatchFirst") }}
           </p>
@@ -201,5 +190,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

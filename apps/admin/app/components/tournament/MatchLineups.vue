@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { watchDebounced } from "@vueuse/core";
-import type { SelectItem } from "@nuxt/ui";
+import type { SelectGroup } from "@sarpbc/design";
 import type {
   MatchLineupInput,
   MatchLineupsResponse,
@@ -91,11 +91,11 @@ const isFull = (participantId: string): boolean =>
 const isStandIn = (participantId: string, playerId: string): boolean =>
   !rosterIds.value.get(participantId)?.has(playerId);
 
-const rosterOptions = (participantId: string): SelectItem[][] => {
+const rosterOptions = (participantId: string): SelectGroup<string>[] => {
   const own = participants.filter((participant) => participant.id === participantId);
   const others = participants.filter((participant) => participant.id !== participantId);
 
-  return [...own, ...others].flatMap((participant): SelectItem[][] => {
+  return [...own, ...others].flatMap((participant): SelectGroup<string>[] => {
     const players = participant.players.filter((player) => !taken.value.has(player.id));
 
     if (players.length === 0) {
@@ -103,10 +103,10 @@ const rosterOptions = (participantId: string): SelectItem[][] => {
     }
 
     return [
-      [
-        { label: participantName(participant), type: "label" },
-        ...players.map((player) => ({ label: player.name, value: player.id })),
-      ],
+      {
+        label: participantName(participant),
+        options: players.map((player) => ({ label: player.name, value: player.id })),
+      },
     ];
   });
 };
@@ -267,11 +267,11 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.lineups.title', { match: label })"
     :description="t('page.tournaments.lineups.description', { max: MAX_LINEUP_PLAYERS })"
-    :ui="{ content: 'sm:max-w-4xl' }"
+    size="2xl"
   >
     <template #body>
       <p v-if="loading" class="text-sm text-muted" aria-live="polite">
@@ -348,11 +348,9 @@ const save = async () => {
             <p v-else class="text-sm text-muted">{{ t("page.tournaments.lineups.empty") }}</p>
 
             <form class="flex items-center gap-2" @submit.prevent="addFromRoster(side.id)">
-              <USelect
+              <SbSelect
                 v-model="selectedPick[side.id]"
-                :items="rosterOptions(side.id)"
-                value-key="value"
-                label-key="label"
+                :groups="rosterOptions(side.id)"
                 class="min-w-0 flex-1"
                 :placeholder="t('page.tournaments.lineups.choose')"
                 :aria-label="t('page.tournaments.lineups.chooseFor', { name: side.name })"
@@ -429,5 +427,5 @@ const save = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

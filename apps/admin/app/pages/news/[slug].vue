@@ -120,7 +120,7 @@ const togglePublish = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="items" />
+      <SbBreadcrumb :items="items" />
     </template>
     <template #action>
       <SbButton
@@ -131,7 +131,7 @@ const togglePublish = async () => {
       >
         {{ isDraft ? $t("page.news.edit.publish") : $t("page.news.edit.unpublish") }}
       </SbButton>
-      <UModal
+      <SbModal
         v-model:open="isModalOpen"
         :title="$t('page.news.edit.save')"
         :dismissible="!isSaving"
@@ -168,9 +168,8 @@ const togglePublish = async () => {
               />
             </SbFormField>
             <SbFormField :label="$t('page.news.type.label')">
-              <URadioGroup
+              <SbRadioGroup
                 v-model="articleType"
-                variant="list"
                 :items="[
                   {
                     value: 'short',
@@ -183,8 +182,6 @@ const togglePublish = async () => {
                     description: $t('page.news.type.articleDescription'),
                   },
                 ]"
-                value-key="value"
-                label-key="label"
               />
             </SbFormField>
             <SbFormField :label="$t('page.news.cover.label')">
@@ -213,7 +210,7 @@ const togglePublish = async () => {
             @click="isModalOpen = false"
           />
         </template>
-      </UModal>
+      </SbModal>
     </template>
 
     <LoadError

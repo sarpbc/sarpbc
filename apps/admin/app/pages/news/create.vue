@@ -84,10 +84,10 @@ const saveArticle = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="items" />
+      <SbBreadcrumb :items="items" />
     </template>
     <template #action>
-      <UModal
+      <SbModal
         v-model:open="isModalOpen"
         :title="$t('page.news.create.title')"
         :dismissible="!isSaving"
@@ -124,9 +124,8 @@ const saveArticle = async () => {
               />
             </SbFormField>
             <SbFormField :label="$t('page.news.type.label')">
-              <URadioGroup
+              <SbRadioGroup
                 v-model="articleType"
-                variant="list"
                 :items="[
                   {
                     value: 'short',
@@ -139,8 +138,6 @@ const saveArticle = async () => {
                     description: $t('page.news.type.articleDescription'),
                   },
                 ]"
-                value-key="value"
-                label-key="label"
               />
             </SbFormField>
             <SbFormField :label="$t('page.news.cover.label')">
@@ -169,7 +166,7 @@ const saveArticle = async () => {
             @click="isModalOpen = false"
           />
         </template>
-      </UModal>
+      </SbModal>
     </template>
 
     <NewsArticleForm

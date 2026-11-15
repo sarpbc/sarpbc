@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import * as z from "zod";
-import type { FormSubmitEvent } from "@nuxt/ui";
 import type { AppNotification } from "@sarpbc/types";
 import { getApiErrorMessage, isStaffUser } from "@sarpbc/utils";
 
@@ -75,12 +74,17 @@ const notificationMessage = (notification: AppNotification): string =>
     user: notification.reply.author.userName,
   });
 
-const saveUserName = async (event: FormSubmitEvent<UsernameSchema>) => {
-  event.preventDefault();
+const { errors: usernameErrors, markSubmitted: markUsernameSubmitted } = useFormErrors(
+  usernameSchema,
+  usernameState,
+);
 
+const saveUserName = async () => {
   if (isSavingUserName.value) {
     return;
   }
+
+  markUsernameSubmitted();
 
   const parsed = usernameSchema.safeParse(usernameState);
 
@@ -101,7 +105,7 @@ const saveUserName = async (event: FormSubmitEvent<UsernameSchema>) => {
     });
   } catch (error) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: getApiErrorMessage(error) ?? t("page.profile.username.updateFailed"),
     });
   } finally {
@@ -146,7 +150,7 @@ const handleLogout = async () => {
     posthog?.capture("user_logged_out");
     await logout();
   } catch {
-    toast.add({ color: "error", title: t("page.profile.logoutFailed") });
+    toast.add({ color: "danger", title: t("page.profile.logoutFailed") });
   } finally {
     isLoggingOut.value = false;
     navigateTo(localePath("/"));
@@ -169,18 +173,18 @@ setPageSeo({
     <div v-if="user" class="w-full flex flex-col">
       <SCard class="min-h-row-double w-full flex flex-row justify-between items-center px-2 gap-2">
         <div class="min-w-0">
-          <UUser
-            :alt="user.userName"
-            :name="user.userName"
-            :description="user.email"
-            :avatar="{
-              src: user.avatarUrl || undefined,
-            }"
-            size="xl"
-          />
+          <div class="flex min-w-0 items-center gap-2">
+            <SbAvatar :src="user.avatarUrl" :alt="user.userName" size="lg" />
+            <div class="min-w-0">
+              <p class="truncate text-base font-medium text-highlighted" translate="no">
+                {{ user.userName }}
+              </p>
+              <p class="truncate text-sm text-muted" translate="no">{{ user.email }}</p>
+            </div>
+          </div>
         </div>
 
-        <UPopover v-model:open="menuOpen">
+        <SbPopover v-model:open="menuOpen">
           <SbButton
             variant="tertiary"
             icon="i-fluent-more-vertical-24-regular"
@@ -237,7 +241,7 @@ setPageSeo({
               />
             </div>
           </template>
-        </UPopover>
+        </SbPopover>
       </SCard>
 
       <SRail v-if="hasNotifications">
@@ -277,21 +281,20 @@ setPageSeo({
       </SRail>
     </div>
 
-    <UModal
+    <SbModal
       v-if="user"
       v-model:open="editOpen"
       :title="$t('page.profile.editProfile')"
       :dismissible="!isSavingUserName"
     >
       <template #body>
-        <UForm
-          id="edit-username-form"
-          :schema="usernameSchema"
-          :state="usernameState"
-          class="w-full"
-          @submit="saveUserName"
-        >
-          <SbFormField :label="$t('page.profile.username.label')" required class="w-full">
+        <form id="edit-username-form" class="w-full" novalidate @submit.prevent="saveUserName">
+          <SbFormField
+            :label="$t('page.profile.username.label')"
+            :error="usernameErrors.userName"
+            required
+            class="w-full"
+          >
             <SbInput
               v-model="usernameState.userName"
               type="text"
@@ -301,7 +304,7 @@ setPageSeo({
               :disabled="isSavingUserName"
             />
           </SbFormField>
-        </UForm>
+        </form>
       </template>
       <template #footer>
         <SbButton
@@ -314,6 +317,6 @@ setPageSeo({
           "
         />
       </template>
-    </UModal>
+    </SbModal>
   </div>
 </template>

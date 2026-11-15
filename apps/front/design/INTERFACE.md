@@ -4,13 +4,13 @@ The current [DESIGN.md](../DESIGN.md) takes precedence when an older example in 
 
 **Version 1.0.0** · Sources: [Geist](https://vercel.com/design), [Design Engineer](https://vercel.com/design/engineer), [Web Interface Guidelines](https://vercel.com/design/guidelines)
 
-> Optimized for AI agents working on **apps/front** (Nuxt + `@nuxt/ui`) and **apps/back** (NestJS). Humans may use it too.
+> Optimized for AI agents working on **apps/front** (Nuxt + `@sarpbc/design`) and **apps/back** (NestJS). Humans may use it too.
 
 ---
 
 ## Abstract
 
-This guide merges Vercel's design system, design-engineering mindset, and interface guidelines into one actionable reference for the sarpbc.org monorepo. It prioritizes usefulness, accessibility, and craft while mapping Geist tokens to the project's Nuxt UI + Tailwind stack.
+This guide merges Vercel's design system, design-engineering mindset, and interface guidelines into one actionable reference for the sarpbc.org monorepo. It prioritizes usefulness, accessibility, and craft while mapping Geist tokens to the project's `@sarpbc/design` + Tailwind stack.
 
 ---
 
@@ -39,7 +39,7 @@ Solve real problems for players, admins, and teammates. Every surface should mak
 
 **Incorrect:** Decorative dashboard widget with no action path.
 
-**Correct:** Empty tournaments list with copy pointing to the first action and a primary `UButton` to create or sync.
+**Correct:** Empty tournaments list with copy pointing to the first action and a primary `SbButton` to create or sync.
 
 ### 1.2 Own the Whole Experience (`de-whole-experience`)
 
@@ -53,7 +53,7 @@ Shape product, interface, and implementation together. Design **all states** bef
 | Success        | Toast names the thing changed (`Player created`)             |
 | Dense / sparse | Layout survives 1 item and 500 items                         |
 
-Use `UError` in `error.vue`; page-level error boundaries for feature areas.
+`error.vue` renders its own markup (status code, heading, an `SbButton` back home); page-level error boundaries for feature areas.
 
 ### 1.3 Understand Constraints (`de-constraints`)
 
@@ -82,18 +82,18 @@ Geist is minimal, high-contrast, developer-focused: whitespace, restrained color
 
 ### 2.1 Tokens (`geist-tokens`)
 
-Use semantic tokens via Nuxt UI / Tailwind—not raw hex in components.
+Use semantic tokens via `@sarpbc/design` / Tailwind—not raw hex in components.
 
-| Geist intent      | sarpbc.org / Nuxt UI                                              |
+| Geist intent      | sarpbc.org                                                        |
 | ----------------- | ----------------------------------------------------------------- |
 | Primary text      | `text-highlighted` or default foreground                          |
 | Secondary text    | `text-muted`                                                      |
 | Disabled          | `text-dimmed` / `disabled` variant                                |
 | Page surface      | `bg-default`                                                      |
 | Subtle separation | `bg-elevated`, `border-default`                                   |
-| Primary action    | `color="primary"` on `UButton`                                    |
-| Destructive       | `color="error"`                                                   |
-| Focus ring        | Built into `@nuxt/ui` focus styles—don't remove                   |
+| Primary action    | `variant="primary"` on `SbButton`                                 |
+| Destructive       | `danger` on `SbButton`                                            |
+| Focus ring        | Built into `@sarpbc/design` focus styles—don't remove             |
 | Radius            | `--ui-radius: 0rem` in `main.css` (sharp corners—stay consistent) |
 
 Full mapping: [references/tokens.md](TOKENS.md)
@@ -128,22 +128,23 @@ Full mapping: [references/tokens.md](TOKENS.md)
 Hierarchy: **borders + tonal surfaces first**, shadows second.
 
 - Cards: `frame` separators (`SCard`) or no frame (`SCrossCard`)
-- Popovers/menus: default Nuxt UI elevation
+- Popovers/menus: default `@sarpbc/design` elevation
 - Avoid heavy shadows on flat dashboard tables
 
 ### 2.4 Components (`geist-components`)
 
-**Prefer `@nuxt/ui` primitives** before custom markup:
+**Prefer `@sarpbc/design` primitives** before custom markup:
 
-| Need       | Use                                        |
-| ---------- | ------------------------------------------ |
-| Button     | `UButton`                                  |
-| Form       | `UForm`, `UFormField`, `UInput`, `USelect` |
-| Table      | `UTable` (dashboard lists)                 |
-| Link       | `ULink` / `NuxtLink`                       |
-| Modal      | `UModal`                                   |
-| Toast      | `useToast()`                               |
-| Error page | `UError`                                   |
+| Need       | Use                                            |
+| ---------- | ---------------------------------------------- |
+| Button     | `SbButton`                                     |
+| Form       | `<form>`, `SbFormField`, `SbInput`, `SbSelect` |
+| One choice | `SbRadioGroup` (`list` or `cards`)             |
+| Table      | `SbTable` (dashboard lists)                    |
+| Link       | `SbLink` / `NuxtLink`                          |
+| Modal      | `SbModal`                                      |
+| Toast      | `useToast()`                                   |
+| Error page | Own markup in `error.vue`                      |
 
 Extend shared patterns in `app/components/s/` when the same layout repeats.
 
@@ -156,7 +157,7 @@ Extend shared patterns in `app/components/s/` when the same layout repeats.
 ### 3.1 Keyboard & Focus (`ui-keyboard`)
 
 - All flows operable via keyboard (WAI-ARIA patterns)
-- Visible focus: rely on `:focus-visible` (Nuxt UI default)—never `outline: none` without replacement
+- Visible focus: rely on `:focus-visible` (`@sarpbc/design` default)—never `outline: none` without replacement
 - Modals: trap focus; restore on close
 - Icon-only buttons: `aria-label` or visually hidden text
 
@@ -171,13 +172,13 @@ Extend shared patterns in `app/components/s/` when the same layout repeats.
 **Incorrect:**
 
 ```vue
-<UButton @click="navigateTo('/player')">Players</UButton>
+<SbButton @click="navigateTo('/player')">Players</SbButton>
 ```
 
 **Correct:**
 
 ```vue
-<ULink :to="$localePath('/player')">{{ $t('nav.players') }}</ULink>
+<SbLink :to="$localePath('/player')">{{ $t('nav.players') }}</SbLink>
 ```
 
 Supports Cmd/Ctrl+click, middle-click, prefetch.
@@ -196,7 +197,7 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 - Loading buttons: show spinner **and** keep original label (`Saving…`)
 - Skeleton show-delay ~150–300ms; min visible ~300–500ms to avoid flicker
 - Optimistic updates where success is likely; rollback + toast on failure
-- Announce async updates: `aria-live="polite"` for toasts (Nuxt UI toaster)
+- Announce async updates: `aria-live="polite"` for toasts (`SbToaster`)
 
 ### 3.6 Other Interaction Rules
 
@@ -205,7 +206,7 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 | Pointer on interactives  | Links, buttons, and clickable inputs use `cursor: pointer` (`main.css`). Text fields (`input` type text/email/password, `textarea`) use `cursor: text`. Do not restore Geist/Linear `cursor: default` on `<a>`. Disabled: `disabled:cursor-not-allowed` or default. |
 | Don't block paste        | Never `@paste.prevent` on inputs                                                                                                                                                                                                                                    |
 | Ellipsis for in-progress | `{{ $t('common.saving') }}` → `"Saving…"` in locale file                                                                                                                                                                                                            |
-| Confirm destructive      | `UModal` confirm or undo window                                                                                                                                                                                                                                     |
+| Confirm destructive      | `SbModal` confirm or undo window                                                                                                                                                                                                                                    |
 | Deep-link everything     | Tabs, expanded panels, filters in query                                                                                                                                                                                                                             |
 | Respect zoom             | Never disable browser zoom                                                                                                                                                                                                                                          |
 | Mobile inputs            | `text-base` (16px) on mobile inputs to avoid iOS zoom                                                                                                                                                                                                               |
@@ -238,13 +239,13 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 **Incorrect:**
 
 ```vue
-<UButton>Save Player</UButton>
+<SbButton>Save Player</SbButton>
 ```
 
 **Correct:**
 
 ```vue
-<UButton>{{ $t('page.players.save') }}</UButton>
+<SbButton>{{ $t('page.players.save') }}</SbButton>
 ```
 
 - Use `$localePath()` for internal links (prefix strategy: `prefix_except_default`)
@@ -269,12 +270,12 @@ Number(route.query.page) || 1, set: (p) => router.push({ query: { ...route.query
 
 ### 5.1 Structure (`form-labels`)
 
-Use `UForm` + `UFormField` (see `apps/admin/app/pages/players/index.vue`).
+Use a native `<form @submit.prevent>` with `SbFormField` and zod. `useFormErrors(schema, state)` (`apps/front/app/composables/use-form-errors.ts`) shows field errors after the first submit through `SbFormField :error`.
 
 ```vue
-<UFormField :label="$t('fields.email')" name="email" required>
-  <UInput v-model="state.email" type="email" autocomplete="email" />
-</UFormField>
+<SbFormField :label="$t('fields.email')" required :error="errors.email">
+  <SbInput v-model="state.email" type="email" autocomplete="email" />
+</SbFormField>
 ```
 
 - Every control has a label (visible or `aria-label`)
@@ -284,9 +285,9 @@ Use `UForm` + `UFormField` (see `apps/admin/app/pages/players/index.vue`).
 ### 5.2 Submission (`form-submit`)
 
 ```vue
-<UButton type="submit" :loading="pending" :disabled="pending">
+<SbButton type="submit" :loading="pending" :disabled="pending">
   {{ pending ? $t('common.saving') : $t('common.save') }}
-</UButton>
+</SbButton>
 ```
 
 - Trim trailing whitespace from text inputs before validate
@@ -368,7 +369,7 @@ Apply Geist motion discipline:
 
 ### 8.3 Lists & Assets (`perf-lists`)
 
-- Paginate dashboard `UTable` data (align with NestJS `PaginationQueryDto`)
+- Paginate dashboard `SbTable` data (align with NestJS `PaginationQueryDto`)
 - Set explicit image dimensions (`Player/Img.vue` patterns)
 - Lazy-load below-fold images
 - `font-variant-numeric: tabular-nums` on stats columns
@@ -411,7 +412,7 @@ throw new BadRequestException({
 });
 ```
 
-Frontend maps `field` errors to `UFormField` error slots.
+Frontend maps `field` errors to the `error` prop of `SbFormField`.
 
 ### 9.2 Validation Messages (`api-validation`)
 
@@ -435,7 +436,7 @@ Use response DTOs / `@Exclude()` so the UI never receives `passwordHash` etc. (`
 When reviewing UI changes:
 
 1. **Mindset** — Useful? All states? Scoped well?
-2. **Visual** — Tokens, typography, consistent radius, Nuxt UI primitives
+2. **Visual** — Tokens, typography, consistent radius, `@sarpbc/design` primitives
 3. **A11y** — Keyboard, focus, labels, live regions
 4. **Copy** — i18n, Title Case actions, actionable errors
 5. **Forms** — Labels, loading, validation placement

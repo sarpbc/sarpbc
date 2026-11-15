@@ -159,11 +159,11 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.vods.title', { match: label })"
     :description="t('page.tournaments.vods.description')"
-    :ui="{ content: 'sm:max-w-3xl' }"
+    size="xl"
   >
     <template #body>
       <p v-if="loading" class="text-sm text-muted" aria-live="polite">
@@ -191,13 +191,7 @@ const save = async () => {
           class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[8rem_minmax(0,1fr)_12rem_auto] sm:items-start"
         >
           <SbFormField :label="t('page.tournaments.vods.gameLabel')">
-            <USelect
-              v-model="row.game"
-              :items="gameOptions"
-              value-key="value"
-              label-key="label"
-              class="w-full"
-            />
+            <SbSelect v-model="row.game" :items="gameOptions" class="w-full" />
           </SbFormField>
 
           <SbFormField :label="t('page.tournaments.vods.url')" v-bind="urlFeedback(row.url)">
@@ -259,5 +253,5 @@ const save = async () => {
         </div>
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

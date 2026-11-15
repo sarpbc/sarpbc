@@ -111,7 +111,7 @@ const headingId = "team-faq-title";
           <summary class="text-sm font-medium text-highlighted marker:content-none">
             <span class="flex items-center justify-between gap-3">
               {{ item.question }}
-              <UIcon
+              <Icon
                 name="i-fluent-add-24-regular"
                 class="size-4 shrink-0 text-muted transition-transform group-open:rotate-45"
               />

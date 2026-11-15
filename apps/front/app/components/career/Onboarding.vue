@@ -84,11 +84,7 @@ const onStart = () => {
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.introBody") }}</p>
       </div>
-      <UForm
-        :state="{ playerName: localName }"
-        class="flex w-full flex-col gap-4"
-        @submit="onIntroNext"
-      >
+      <form class="flex w-full flex-col gap-4" @submit.prevent="onIntroNext">
         <SbFormField class="w-full" :label="t('page.game.career.onboarding.playerNameLabel')">
           <SbInput
             v-model="localName"
@@ -102,7 +98,7 @@ const onStart = () => {
         <SbButton type="submit" block>
           {{ t("page.game.career.onboarding.next") }}
         </SbButton>
-      </UForm>
+      </form>
     </div>
 
     <div v-else-if="step === 'region'" class="flex flex-col gap-4">

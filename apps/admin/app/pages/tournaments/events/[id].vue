@@ -57,7 +57,7 @@ const handleSubmit = async () => {
   }
 
   if (!formState.value.name.trim()) {
-    toast.add({ color: "error", title: t("page.tournaments.events.form.nameRequired") });
+    toast.add({ color: "danger", title: t("page.tournaments.events.form.nameRequired") });
 
     return;
   }
@@ -65,7 +65,7 @@ const handleSubmit = async () => {
   const payload = buildEventPayload(formState.value, event.value);
 
   if (Object.keys(payload).length === 0) {
-    toast.add({ title: t("page.tournaments.events.edit.unchanged") });
+    toast.add({ color: "info", title: t("page.tournaments.events.edit.unchanged") });
 
     return;
   }
@@ -86,7 +86,7 @@ const handleSubmit = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div v-if="event" class="flex flex-row gap-2">

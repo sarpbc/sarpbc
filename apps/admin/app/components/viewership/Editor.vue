@@ -191,11 +191,11 @@ const submit = () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="title"
     :description="t('page.tournaments.viewership.description')"
-    :ui="{ content: 'sm:max-w-2xl' }"
+    size="lg"
   >
     <template #body>
       <p v-if="loading" class="text-sm text-muted" aria-live="polite">
@@ -245,13 +245,7 @@ const submit = () => {
         </SbFormField>
 
         <SbFormField :label="t('page.tournaments.viewership.scope')">
-          <USelect
-            v-model="form.scope"
-            :items="scopeOptions"
-            value-key="value"
-            label-key="label"
-            class="w-full"
-          />
+          <SbSelect v-model="form.scope" :items="scopeOptions" class="w-full" />
         </SbFormField>
 
         <SbFormField
@@ -323,5 +317,5 @@ const submit = () => {
         </div>
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

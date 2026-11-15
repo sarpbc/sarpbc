@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import { watchDebounced } from "@vueuse/core";
 import { getApiErrorMessage } from "@sarpbc/utils";
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { UserListItem } from "@sarpbc/types";
 import { ASSIGNABLE_ROLES } from "~/types/user";
 import type { AssignableRole } from "~/types/user";
@@ -111,7 +111,7 @@ const confirmChange = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -131,7 +131,7 @@ const confirmChange = async () => {
         />
 
         <ClientOnly v-else>
-          <UTable :data="users" :columns="columns" :loading="status === 'pending'" sticky>
+          <SbTable :data="users" :columns="columns" :loading="status === 'pending'" sticky>
             <template #empty>
               {{ search ? $t("page.users.emptySearch") : $t("page.users.empty") }}
             </template>
@@ -142,7 +142,7 @@ const confirmChange = async () => {
               <span translate="no">{{ row.original.email }}</span>
             </template>
             <template #role-cell="{ row }">
-              <USelect
+              <SbSelect
                 :model-value="roleOf(row.original)"
                 :items="roleItems"
                 class="w-40"
@@ -152,12 +152,12 @@ const confirmChange = async () => {
                 @update:model-value="requestRoleChange(row.original, $event)"
               />
             </template>
-          </UTable>
+          </SbTable>
           <div v-if="total > limit" class="mt-4 flex w-full flex-row justify-between">
             <span class="text-muted">
               {{ $t("page.users.usersCount", { count: total }, total) }}
             </span>
-            <UPagination
+            <SbPagination
               :page="page"
               :total="total"
               :items-per-page="limit"
@@ -168,7 +168,7 @@ const confirmChange = async () => {
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isConfirmOpen"
       :title="$t('page.users.confirm.title')"
       :description="
@@ -189,6 +189,6 @@ const confirmChange = async () => {
         />
         <SbButton danger :label="$t('page.users.confirm.confirm')" @click="confirmChange" />
       </template>
-    </UModal>
+    </SbModal>
   </NuxtLayout>
 </template>

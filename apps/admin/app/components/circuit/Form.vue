@@ -81,12 +81,12 @@ const submit = () => {
       :hint="$t('page.circuits.form.seasonHint')"
       required
     >
-      <UInputNumber
+      <SbInputNumber
         v-model="season"
         :min="MIN_CIRCUIT_SEASON"
         :max="MAX_CIRCUIT_SEASON"
         :step="1"
-        :format-options="{ useGrouping: false }"
+        :grouping="false"
         class="w-full"
       />
     </SbFormField>
@@ -123,7 +123,7 @@ const submit = () => {
       :label="$t('page.circuits.form.qualificationSpots')"
       :hint="$t('page.circuits.form.qualificationSpotsHint')"
     >
-      <UInputNumber
+      <SbInputNumber
         v-model="qualificationSpots"
         :min="1"
         :max="MAX_CIRCUIT_QUALIFICATION_SPOTS"

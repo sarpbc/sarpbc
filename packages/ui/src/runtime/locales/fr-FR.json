@@ -12,5 +12,12 @@
     "matchTbd": "À déterminer",
     "matchDataBy": "Données des matchs fournies par",
     "matchesUnavailable": "Impossible de charger ces matchs."
+  },
+  "design": {
+    "breadcrumb": "Fil d’Ariane",
+    "close": "Fermer",
+    "nextPage": "Page suivante",
+    "pagination": "Pagination",
+    "previousPage": "Page précédente"
   }
 }

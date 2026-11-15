@@ -41,9 +41,9 @@ const stageHref = (event: TournamentEvent<TournamentListItem>, stage: Tournament
           />
           <h2 class="min-w-0 flex-1 truncate">
             <span v-if="to">{{ event.name }}</span>
-            <SLink v-else :to="localePath(tournamentEventPath(event.slug))" variant="inline">
+            <SbLink v-else :to="localePath(tournamentEventPath(event.slug))" variant="inline">
               {{ event.name }}
-            </SLink>
+            </SbLink>
           </h2>
           <span
             v-if="eventMeta(event)"

@@ -70,7 +70,7 @@ const choose = (stage: PickedStage) => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="title ?? $t('page.circuits.picker.title')"
     :description="description ?? $t('page.circuits.picker.hint')"
@@ -103,5 +103,5 @@ const choose = (stage: PickedStage) => {
         </ul>
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

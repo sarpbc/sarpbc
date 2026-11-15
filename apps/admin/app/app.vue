@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { uiLocale } from "@sarpbc/utils";
 
-const appConfig = useAppConfig();
 const { locale } = useI18n();
 
 useHead({
@@ -17,9 +16,9 @@ useHead({
 </script>
 
 <template>
-  <UApp :toaster="appConfig.toaster" :scroll-body="false">
+  <SbToaster>
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
-  </UApp>
+  </SbToaster>
 </template>

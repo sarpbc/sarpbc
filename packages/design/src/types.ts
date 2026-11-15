@@ -1,3 +1,5 @@
+import type { ColumnDef, Row } from "@tanstack/vue-table";
+
 /*
  * Closed sets: every value here is a design decision, not an option. The UI is
  * dense by default; `sm` is for tables and toolbars.
@@ -18,3 +20,98 @@ export const BADGE_COLORS = ["neutral", "info", "success", "warning", "danger"] 
 export type BadgeColor = (typeof BADGE_COLORS)[number];
 
 export type KbdSize = "sm" | "md";
+
+/** muted: secondary navigation. inline: links inside running text. accent: a link that must stand out. */
+export const LINK_VARIANTS = ["muted", "inline", "accent"] as const;
+
+export type LinkVariant = (typeof LINK_VARIANTS)[number];
+
+/** Where a tooltip, popover or menu opens relative to its trigger. */
+export type OverlaySide = "top" | "right" | "bottom" | "left";
+
+export type OverlayAlign = "start" | "center" | "end";
+
+/** md fits a form; the larger sizes hold tables and editors. */
+export type ModalSize = "md" | "lg" | "xl" | "2xl";
+
+/** One action in a dropdown menu. */
+export interface MenuItem {
+  danger?: boolean;
+  disabled?: boolean;
+  icon?: string;
+  label: string;
+  onSelect: () => void;
+}
+
+/** xs: 24px, in nav rows. sm: 28px, in lists. lg: 40px, on a profile header. */
+export type AvatarSize = "xs" | "sm" | "lg";
+
+export type SelectValue = string | number;
+
+/** One choice in a Select, Combobox or RadioGroup; the description explains it under the label. */
+export interface SelectOption<T extends SelectValue = SelectValue> {
+  description?: string;
+  disabled?: boolean;
+  label: string;
+  value: T;
+}
+
+/** list: a dot and a label. cards: the whole option is a tile, for a few short choices. */
+export type RadioVariant = "list" | "cards";
+
+export type RadioStatus = "success" | "danger";
+
+/** Options under a heading, e.g. the players of each team. */
+export interface SelectGroup<T extends SelectValue = SelectValue> {
+  label: string;
+  options: readonly SelectOption<T>[];
+}
+
+/** TanStack column definitions: `accessorKey`, `header`, `cell`, or an `id` filled by a `#<id>-cell` slot. */
+export type TableColumn<T> = ColumnDef<T>;
+
+export type TableRow<T> = Row<T>;
+
+export interface BreadcrumbItem {
+  label: string;
+  /** Omitted for a level that has no page of its own. */
+  to?: string;
+}
+
+export interface NavigationItem {
+  /** Set when the router alone cannot tell, e.g. a section spanning several paths. */
+  active?: boolean;
+  icon?: string;
+  label: string;
+  target?: "_blank";
+  to: string;
+}
+
+export type ToastColor = "success" | "info" | "warning" | "danger";
+
+/** A short confirmation or failure after an action; it dismisses itself. */
+export interface ToastMessage {
+  color: ToastColor;
+  description?: string;
+  title: string;
+}
+
+/** One entry of a command palette: a search result or an action. */
+export interface CommandItem {
+  icon?: string;
+  id: string;
+  /** A logo or photo; it replaces the icon. */
+  image?: string;
+  label: string;
+  loading?: boolean;
+  onSelect: () => void;
+  suffix?: string;
+}
+
+export interface CommandGroup {
+  id: string;
+  items: readonly CommandItem[];
+  label: string;
+  /** Items already match the search (server results), so the palette does not filter them. */
+  remote?: boolean;
+}

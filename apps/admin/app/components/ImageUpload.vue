@@ -60,7 +60,7 @@ const onFileChange = async (event: Event) => {
   } catch (error_) {
     const message = error_ instanceof Error ? error_.message : "";
     toast.add({
-      color: "error",
+      color: "danger",
       description: message || t("imageUpload.uploadServerError"),
       title: t("imageUpload.uploadFailed"),
     });

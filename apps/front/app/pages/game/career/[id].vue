@@ -65,7 +65,7 @@ watchEffect(() => {
 
     <SCard v-else class="p-6">
       <div class="flex flex-col items-center gap-4 text-center">
-        <UIcon name="i-fluent-warning-24-regular" class="size-8 text-muted" />
+        <Icon name="i-fluent-warning-24-regular" class="size-8 text-muted" />
         <div class="space-y-2">
           <p class="text-lg font-medium">{{ t("page.game.career.share.notFound") }}</p>
           <p class="text-sm text-muted text-pretty">

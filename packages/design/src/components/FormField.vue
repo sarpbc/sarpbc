@@ -83,6 +83,7 @@ provide(FORM_FIELD, { describedBy, id, invalid: computed(() => error !== null) }
 
   .sb-form-field__label {
     display: block;
+    flex-shrink: 0;
     color: var(--sb-text);
     font-weight: 500;
   }

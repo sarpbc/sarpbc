@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import * as z from "zod";
-import type { FormSubmitEvent } from "@nuxt/ui";
 import type { ForumPostCreationStatus, ForumTopic } from "@sarpbc/types";
 import { forumPostPath } from "@sarpbc/utils";
 
@@ -115,12 +114,18 @@ const createFailureDescription = (
   return failure.message ?? t("page.forum.new.messages.errorDescription");
 };
 
-const onSubmit = async (event: FormSubmitEvent<Schema>) => {
-  event.preventDefault();
+const { errors, markSubmitted } = useFormErrors(schema, state);
 
+const topicItems = computed(() =>
+  topics.value.map((topic) => ({ label: topic.title, value: topic.id })),
+);
+
+const onSubmit = async () => {
   if (!canSubmit.value) {
     return;
   }
+
+  markSubmitted();
 
   const result = schema.safeParse(state);
 
@@ -159,7 +164,7 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
   const description = createFailureDescription(createResult);
 
   toast.add({
-    color: "error",
+    color: "danger",
     description,
     title: t("page.forum.new.messages.errorTitle"),
   });
@@ -185,69 +190,60 @@ const onSubmit = async (event: FormSubmitEvent<Schema>) => {
       <p v-else-if="rateLimitMessage" class="text-sm text-muted">
         {{ rateLimitMessage }}
       </p>
-      <UForm v-else :schema="schema" :state="state" class="w-full space-y-4" @submit="onSubmit">
-        <UFormField
+      <form v-else class="w-full space-y-4" novalidate @submit.prevent="onSubmit">
+        <SbFormField
           :label="$t('page.forum.new.form.title')"
-          name="title"
-          :required="true"
+          :error="errors.title"
+          required
           class="w-full"
         >
-          <UInput
+          <SbInput
             v-model="state.title"
-            variant="soft"
             :placeholder="$t('page.forum.new.form.titlePlaceholder')"
             class="w-full"
             :disabled="!canSubmit"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="$t('page.forum.new.form.topic')"
-          name="topicId"
-          :required="true"
+          :error="errors.topicId"
+          required
           class="w-full"
         >
           <p v-if="topicsLoadFailed" role="alert" class="text-sm text-error">
             {{ $t("page.forum.new.topicsLoadError") }}
           </p>
-          <div v-else class="flex flex-wrap gap-2">
-            <UBadge
-              v-for="topic in topics"
-              :key="topic.id"
-              as="button"
-              type="button"
-              variant="soft"
-              size="lg"
-              :color="state.topicId === topic.id ? 'primary' : 'neutral'"
-              :disabled="!canSubmit"
-              :class="canSubmit ? undefined : 'cursor-not-allowed opacity-60'"
-              @click="canSubmit && (state.topicId = topic.id)"
-            >
-              {{ topic.title }}
-            </UBadge>
-          </div>
-        </UFormField>
+          <SbRadioGroup
+            v-else
+            v-model="state.topicId"
+            :items="topicItems"
+            variant="cards"
+            orientation="horizontal"
+            :disabled="!canSubmit"
+            :aria-label="$t('page.forum.new.form.topic')"
+          />
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="$t('page.forum.new.form.content')"
-          name="content"
-          :required="true"
+          :error="errors.content"
+          required
           class="w-full"
         >
-          <UTextarea
+          <SbTextarea
             v-model="state.content"
-            variant="soft"
             :placeholder="$t('page.forum.new.form.contentPlaceholder')"
             class="w-full"
             autoresize
             :disabled="!canSubmit"
           />
-        </UFormField>
+        </SbFormField>
 
         <SbButton type="submit" :disabled="!canSubmit" :loading="isSubmitting">
           {{ $t("page.forum.new.form.submit") }}
         </SbButton>
-      </UForm>
+      </form>
     </SCard>
   </div>
 </template>

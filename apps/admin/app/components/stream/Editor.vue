@@ -196,11 +196,11 @@ const save = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="title"
     :description="t('page.tournaments.streams.description')"
-    :ui="{ content: 'sm:max-w-3xl' }"
+    size="xl"
   >
     <template #body>
       <p v-if="loading" class="text-sm text-muted" aria-live="polite">
@@ -277,13 +277,7 @@ const save = async () => {
           </SbFormField>
 
           <SbFormField :label="t('page.tournaments.streams.kind')">
-            <USelect
-              v-model="row.kind"
-              :items="kindOptions"
-              value-key="value"
-              label-key="label"
-              class="w-full"
-            />
+            <SbSelect v-model="row.kind" :items="kindOptions" class="w-full" />
           </SbFormField>
         </div>
       </div>
@@ -313,5 +307,5 @@ const save = async () => {
         </div>
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

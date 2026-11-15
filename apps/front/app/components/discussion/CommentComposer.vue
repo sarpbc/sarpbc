@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import * as z from "zod";
-import type { FormSubmitEvent } from "@nuxt/ui";
 import type { ReplyTargetType } from "@sarpbc/types";
 
 const {
@@ -42,6 +41,8 @@ const state = reactive<Partial<Schema>>({
   content: "",
 });
 
+const { errors, markSubmitted } = useFormErrors(schema, state);
+
 const contentInputRef = useTemplateRef("contentInput");
 
 const focusContentInput = () => {
@@ -74,6 +75,8 @@ const submitComment = async () => {
   if (!user.value || isSubmitting.value) {
     return;
   }
+
+  markSubmitted();
 
   const result = schema.safeParse({
     content: state.content?.trim() ?? "",
@@ -109,14 +112,13 @@ const submitComment = async () => {
   const description = createFailureDescription(createResult);
 
   toast.add({
-    color: "error",
+    color: "danger",
     description,
     title: t("components.discussion.messages.errorTitle"),
   });
 };
 
-const onSubmit = async (event: FormSubmitEvent<Schema>) => {
-  event.preventDefault();
+const onSubmit = async () => {
   await submitComment();
 };
 
@@ -129,14 +131,18 @@ const onEnterKey = (event: KeyboardEvent) => {
 <template>
   <div class="w-full">
     <ForumSignInPrompt v-if="sessionReady && !isSignedIn" action="reply" class="inline-flex py-2" />
-    <UForm
+    <form
       v-else-if="isSignedIn"
-      :schema="schema"
-      :state="state"
       class="w-full flex flex-col gap-2"
-      @submit="onSubmit"
+      novalidate
+      @submit.prevent="onSubmit"
     >
-      <SbFormField :label="$t('components.discussion.inputTitle')" required class="w-full">
+      <SbFormField
+        :label="$t('components.discussion.inputTitle')"
+        :error="errors.content"
+        required
+        class="w-full"
+      >
         <SbTextarea
           ref="contentInput"
           v-model="state.content"
@@ -158,6 +164,6 @@ const onEnterKey = (event: KeyboardEvent) => {
           isSubmitting ? $t("components.discussion.submitting") : $t("components.discussion.submit")
         }}
       </SbButton>
-    </UForm>
+    </form>
   </div>
 </template>

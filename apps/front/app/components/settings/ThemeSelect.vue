@@ -74,7 +74,7 @@ const startViewTransition = (event: MouseEvent) => {
       :aria-label="themeAriaLabel"
       @click="startViewTransition"
     >
-      <UIcon
+      <Icon
         :name="
           colorMode.value === 'dark'
             ? 'i-fluent-weather-moon-24-regular'
@@ -87,7 +87,7 @@ const startViewTransition = (event: MouseEvent) => {
 
     <template #fallback>
       <span class="flex text-muted" aria-hidden="true">
-        <UIcon name="i-fluent-weather-moon-24-regular" class="size-4" />
+        <Icon name="i-fluent-weather-moon-24-regular" class="size-4" />
       </span>
     </template>
   </ClientOnly>

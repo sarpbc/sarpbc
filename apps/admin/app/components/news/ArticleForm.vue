@@ -56,7 +56,7 @@ const preview = computed(() =>
           {{ $t("page.news.locale.fr") }}
         </SbButton>
       </div>
-      <UTooltip
+      <SbTooltip
         :text="
           previewing ? $t('page.news.create.preview.hide') : $t('page.news.create.preview.show')
         "
@@ -71,7 +71,7 @@ const preview = computed(() =>
           "
           @click="previewing = !previewing"
         />
-      </UTooltip>
+      </SbTooltip>
     </div>
 
     <DashboardContent v-show="!previewing" class="flex min-h-0 flex-1 flex-col gap-3 p-0 px-0 py-4">

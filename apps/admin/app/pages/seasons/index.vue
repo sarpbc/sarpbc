@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { SeasonInput, SeasonSummary } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -49,7 +49,7 @@ const create = async (input: SeasonInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -89,11 +89,11 @@ const create = async (input: SeasonInput) => {
         </div>
 
         <ClientOnly v-else>
-          <UTable :data="seasons" :columns="columns" sticky>
+          <SbTable :data="seasons" :columns="columns" sticky>
             <template #name-cell="{ row }">
-              <ULink :to="localePath(`/seasons/${row.original.id}`)" class="font-medium">
+              <SbLink :to="localePath(`/seasons/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
-              </ULink>
+              </SbLink>
             </template>
             <template #slug-cell="{ row }">
               <span v-if="row.original.slug" class="font-mono text-sm" translate="no">
@@ -111,12 +111,12 @@ const create = async (input: SeasonInput) => {
                 @click="seasonToDelete = row.original"
               />
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateOpen"
       :title="$t('page.seasons.create.title')"
       :dismissible="!isCreating"
@@ -128,7 +128,7 @@ const create = async (input: SeasonInput) => {
           @submit="create"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="seasonToDelete"

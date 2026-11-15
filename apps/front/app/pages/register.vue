@@ -57,9 +57,9 @@ const onSubmit = async (event: Event) => {
         </h1>
         <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-12">
           {{ $t("page.authentication.alreadyHaveAnAccount") }}&nbsp;
-          <SLink variant="accent" :to="$localePath('/login')">
+          <SbLink variant="accent" :to="$localePath('/login')">
             {{ $t("page.authentication.login") }}
-          </SLink>
+          </SbLink>
           .
         </div>
 
@@ -73,7 +73,7 @@ const onSubmit = async (event: Event) => {
 
         <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
+        <form class="w-full h-fit" method="post" @submit="onSubmit">
           <SbFormField :label="$t('page.authentication.userName')" class="w-full pb-4">
             <SbInput v-model="state.userName" type="text" class="w-full" />
           </SbFormField>
@@ -91,7 +91,7 @@ const onSubmit = async (event: Event) => {
           </p>
 
           <SbButton :label="$t('page.authentication.toRegister')" type="submit" block />
-        </UForm>
+        </form>
       </div>
     </SCrossCard>
   </div>

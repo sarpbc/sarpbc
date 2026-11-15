@@ -18,7 +18,7 @@ const soloPlayer = computed(() =>
 </script>
 
 <template>
-  <SLink
+  <SbLink
     v-if="soloPlayer"
     :to="$localePath(playerPath(soloPlayer.slug))"
     variant="muted"
@@ -26,16 +26,9 @@ const soloPlayer = computed(() =>
   >
     <TeamImg :team-name="entry.name" size="sm" />
     <span class="text-sm font-medium truncate">{{ entry.name }}</span>
-  </SLink>
+  </SbLink>
 
-  <UPopover
-    v-else
-    v-model:open="open"
-    mode="hover"
-    enable-touch
-    :open-delay="80"
-    :close-delay="100"
-  >
+  <SbHoverCard v-else v-model:open="open">
     <button
       type="button"
       class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-separator interactive-surface"
@@ -55,7 +48,7 @@ const soloPlayer = computed(() =>
         role="dialog"
         :aria-labelledby="titleId"
       >
-        <SLink
+        <SbLink
           v-if="entry.team"
           :id="titleId"
           :to="$localePath(teamPath(entry.team.slug))"
@@ -65,11 +58,11 @@ const soloPlayer = computed(() =>
         >
           <TeamImg :team-name="entry.name" :logo="entry.team" size="xs" />
           <span class="truncate">{{ entry.name }}</span>
-        </SLink>
+        </SbLink>
         <p v-else :id="titleId" class="truncate text-sm font-medium">{{ entry.name }}</p>
 
         <div v-if="entry.players.length" class="flex flex-col gap-1">
-          <SLink
+          <SbLink
             v-for="player in entry.players"
             :key="player.id"
             :to="$localePath(playerPath(player.slug))"
@@ -78,12 +71,12 @@ const soloPlayer = computed(() =>
           >
             <FlagIcon :nationality="player.nationality" size="sm" />
             <span class="truncate">{{ player.name }}</span>
-          </SLink>
+          </SbLink>
         </div>
         <p v-else class="text-sm text-muted">
           {{ t("page.tournaments.id.participants.rosterEmpty") }}
         </p>
       </div>
     </template>
-  </UPopover>
+  </SbHoverCard>
 </template>

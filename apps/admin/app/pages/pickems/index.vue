@@ -65,7 +65,7 @@ const handleEnablePickems = async (tournamentId: string) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -144,7 +144,7 @@ const handleEnablePickems = async (tournamentId: string) => {
           {{ $t("page.pickems.noTournaments") }}
         </div>
 
-        <UPagination
+        <SbPagination
           v-if="total > limit"
           :page="page"
           :total="total"

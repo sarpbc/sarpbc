@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { CircuitInput, CircuitSummary } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -54,7 +54,7 @@ const create = async (input: CircuitInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -94,11 +94,11 @@ const create = async (input: CircuitInput) => {
         </div>
 
         <ClientOnly v-else>
-          <UTable :data="circuits" :columns="columns" sticky>
+          <SbTable :data="circuits" :columns="columns" sticky>
             <template #name-cell="{ row }">
-              <ULink :to="localePath(`/circuits/${row.original.id}`)" class="font-medium">
+              <SbLink :to="localePath(`/circuits/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
-              </ULink>
+              </SbLink>
             </template>
             <template #actions-cell="{ row }">
               <SbButton
@@ -110,12 +110,12 @@ const create = async (input: CircuitInput) => {
                 @click="circuitToDelete = row.original"
               />
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateOpen"
       :title="$t('page.circuits.create.title')"
       :dismissible="!isCreating"
@@ -127,7 +127,7 @@ const create = async (input: CircuitInput) => {
           @submit="create"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="circuitToDelete"

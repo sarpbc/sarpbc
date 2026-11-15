@@ -99,7 +99,7 @@ const postedAtLabel = computed(() =>
             </span>
           </span>
         </a>
-        <UIcon name="i-ri-twitter-x-fill" class="size-4 shrink-0 text-muted" />
+        <Icon name="i-ri-twitter-x-fill" class="size-4 shrink-0 text-muted" />
       </span>
 
       <span
@@ -138,7 +138,7 @@ const postedAtLabel = computed(() =>
             class="absolute flex size-10 items-center justify-center border border-default bg-default text-highlighted"
             :aria-label="t('newsTag.viewOnX')"
           >
-            <UIcon name="i-fluent-play-24-filled" class="size-5" />
+            <Icon name="i-fluent-play-24-filled" class="size-5" />
           </span>
         </a>
       </span>
@@ -154,7 +154,7 @@ const postedAtLabel = computed(() =>
           class="flex h-full items-center gap-2 border-l border-default px-3 text-muted transition-none hover:bg-elevated hover:text-highlighted"
         >
           {{ t("newsTag.viewOnX") }}
-          <UIcon name="i-fluent-arrow-up-right-24-regular" class="size-4 shrink-0" />
+          <Icon name="i-fluent-arrow-up-right-24-regular" class="size-4 shrink-0" />
         </a>
       </span>
     </span>
@@ -166,7 +166,7 @@ const postedAtLabel = computed(() =>
       rel="noopener noreferrer"
       class="flex min-h-row items-center gap-2 border border-default bg-default px-3 py-2 text-sm font-medium text-muted transition-none hover:bg-elevated hover:text-highlighted"
     >
-      <UIcon name="i-ri-twitter-x-fill" class="size-4 shrink-0" />
+      <Icon name="i-ri-twitter-x-fill" class="size-4 shrink-0" />
       {{ t("newsTag.tweetUnavailable") }}
     </a>
   </span>

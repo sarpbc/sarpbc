@@ -82,7 +82,7 @@ const handleSubmit = async () => {
 
   if (validationError) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: t(`page.tournaments.form.errors.${validationError}`),
     });
 
@@ -113,7 +113,7 @@ const handleSubmit = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div class="flex flex-row gap-2">

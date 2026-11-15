@@ -1,12 +1,7 @@
 <script lang="ts" setup>
+import type { SelectOption } from "@sarpbc/design";
 import type { Player } from "@sarpbc/types";
 import { refDebounced } from "@vueuse/core";
-
-interface PlayerOption {
-  label: string;
-  description?: string;
-  value: string;
-}
 
 const { player, label, excludedSlug } = defineProps<{
   player: Player | null;
@@ -29,13 +24,13 @@ const query = refDebounced(
   200,
 );
 
-const toOption = (candidate: Player): PlayerOption => ({
+const toOption = (candidate: Player): SelectOption<string> => ({
   description: candidate.team?.name,
   label: candidate.name,
   value: candidate.slug,
 });
 
-const selected = computed(() => (player ? toOption(player) : undefined));
+const selected = computed(() => (player ? toOption(player) : null));
 
 const { data: results, status } = useLazyAsyncData(
   () => `player-compare-search-${query.value}`,
@@ -51,27 +46,31 @@ const { data: results, status } = useLazyAsyncData(
   { default: () => [], server: false },
 );
 
-const items = computed(() =>
-  (results.value ?? [])
-    .filter((candidate) => candidate.slug !== excludedSlug)
-    .map((candidate) => toOption(candidate)),
-);
+/* Before any search, the list holds the current player so the field can name it. */
+const items = computed(() => {
+  if (!query.value) {
+    return selected.value === null ? [] : [selected.value];
+  }
 
-const select = (option: PlayerOption | undefined) => {
-  if (option) {
-    emit("select", option.value);
+  return (results.value ?? [])
+    .filter((candidate) => candidate.slug !== excludedSlug)
+    .map((candidate) => toOption(candidate));
+});
+
+const select = (slug: string | null) => {
+  if (slug !== null) {
+    emit("select", slug);
   }
 };
 </script>
 
 <template>
   <SbFormField :label="label" class="w-full min-w-0">
-    <UInputMenu
+    <SbCombobox
       v-model:search-term="searchTerm"
-      :model-value="selected"
+      :model-value="selected?.value ?? null"
       :items="items"
-      by="value"
-      ignore-filter
+      remote
       :loading="status === 'pending'"
       icon="i-fluent-search-24-regular"
       :placeholder="t('page.player.compare.searchPlaceholder')"
@@ -81,6 +80,6 @@ const select = (option: PlayerOption | undefined) => {
       <template #empty>
         {{ query ? t("components.input.noResult") : t("page.player.compare.searchHint") }}
       </template>
-    </UInputMenu>
+    </SbCombobox>
   </SbFormField>
 </template>

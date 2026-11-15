@@ -62,13 +62,7 @@ watch(open, (isOpen) => {
 </script>
 
 <template>
-  <UPopover
-    v-model:open="open"
-    mode="hover"
-    :open-delay="0"
-    :close-delay="100"
-    :ui="{ content: 'rounded-none border border-default ring-0 shadow-sm overflow-hidden' }"
-  >
+  <SbHoverCard v-model:open="open">
     <NuxtLink
       :to="href"
       v-bind="linkAttrs"
@@ -111,7 +105,7 @@ watch(open, (isOpen) => {
               alt=""
               class="size-full object-cover"
             />
-            <UIcon v-else name="i-fluent-person-24-regular" class="size-6 text-muted" />
+            <Icon v-else name="i-fluent-person-24-regular" class="size-6 text-muted" />
           </div>
           <div class="min-w-0 flex-1">
             <p class="truncate font-medium text-highlighted" translate="no">
@@ -135,7 +129,7 @@ watch(open, (isOpen) => {
             alt=""
             class="size-5 shrink-0 object-contain"
           />
-          <UIcon v-else name="i-fluent-people-team-24-regular" class="size-5 shrink-0" />
+          <Icon v-else name="i-fluent-people-team-24-regular" class="size-5 shrink-0" />
           <span class="truncate text-sm" translate="no">{{ player.team.name }}</span>
         </NuxtLink>
         <p v-else class="flex h-row items-center border-t border-default px-3 text-sm text-muted">
@@ -148,9 +142,9 @@ watch(open, (isOpen) => {
           class="flex h-row items-center justify-between gap-2 border-t border-default px-3 text-sm font-medium text-muted transition-none hover:bg-elevated hover:text-highlighted"
         >
           {{ t("newsTag.viewProfile") }}
-          <UIcon name="i-fluent-chevron-right-24-regular" class="size-4 shrink-0" />
+          <Icon name="i-fluent-chevron-right-24-regular" class="size-4 shrink-0" />
         </NuxtLink>
       </div>
     </template>
-  </UPopover>
+  </SbHoverCard>
 </template>

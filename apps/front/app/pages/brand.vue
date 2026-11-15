@@ -16,7 +16,7 @@ const copyHex = async (): Promise<void> => {
     await navigator.clipboard.writeText(BRAND_BLUE);
     toast.add({ color: "success", title: t("page.brand.hexCopied") });
   } catch {
-    toast.add({ color: "error", title: t("page.brand.hexCopyFailed") });
+    toast.add({ color: "danger", title: t("page.brand.hexCopyFailed") });
   }
 };
 </script>

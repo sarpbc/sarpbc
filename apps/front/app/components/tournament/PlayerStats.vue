@@ -165,12 +165,10 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
   <div class="flex w-full flex-col gap-2">
     <div v-if="hasStats || $slots.filters" class="flex flex-wrap items-center gap-2 px-2">
       <slot name="filters" />
-      <USelect
+      <SbSelect
         v-if="hasStats && teamOptions.length > 2"
         v-model="team"
         :items="teamOptions"
-        value-key="value"
-        label-key="label"
         :aria-label="t('page.tournaments.stats.team')"
         class="w-48"
       />
@@ -256,23 +254,23 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
               class="h-row border-b border-separator"
             >
               <th scope="row" class="max-w-40 px-2 text-left font-normal">
-                <SLink
+                <SbLink
                   :to="$localePath(playerPath(row.player.slug))"
                   variant="inline"
                   class="block truncate"
                 >
                   {{ row.player.name }}
-                </SLink>
+                </SbLink>
               </th>
               <td class="max-w-40 px-2">
-                <SLink
+                <SbLink
                   v-if="row.team.slug"
                   :to="$localePath(teamPath(row.team.slug))"
                   variant="muted"
                   class="block truncate"
                 >
                   {{ row.team.name }}
-                </SLink>
+                </SbLink>
                 <span v-else class="block truncate text-muted">{{ row.team.name }}</span>
               </td>
               <td

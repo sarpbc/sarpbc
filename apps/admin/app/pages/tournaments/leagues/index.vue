@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { League, LeagueInput } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -90,7 +90,7 @@ const handleSubmit = async () => {
   }
 
   if (!isSynced.value && !form.value.name.trim()) {
-    toast.add({ color: "error", title: t("page.tournaments.leagues.form.nameRequired") });
+    toast.add({ color: "danger", title: t("page.tournaments.leagues.form.nameRequired") });
 
     return;
   }
@@ -127,7 +127,7 @@ const uploadedImageUrl = computed({
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -148,7 +148,7 @@ const uploadedImageUrl = computed({
         />
 
         <ClientOnly v-else>
-          <UTable :data="data" :columns="columns" :loading="status === 'pending'" sticky>
+          <SbTable :data="data" :columns="columns" :loading="status === 'pending'" sticky>
             <template #empty>
               {{ $t("page.tournaments.leagues.empty") }}
             </template>
@@ -183,12 +183,12 @@ const uploadedImageUrl = computed({
                 />
               </div>
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isOpen"
       :title="editing ? $t('page.tournaments.leagues.edit') : $t('page.tournaments.leagues.create')"
       :description="isSynced ? $t('page.tournaments.leagues.syncedHint') : undefined"
@@ -259,6 +259,6 @@ const uploadedImageUrl = computed({
           @click="isOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
   </NuxtLayout>
 </template>

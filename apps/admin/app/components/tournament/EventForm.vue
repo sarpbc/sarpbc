@@ -38,11 +38,9 @@ const leagueItems = computed(() => leagueOptions(leagues, t("page.tournaments.so
 
     <SbFormField :label="$t('page.tournaments.form.league')">
       <div class="flex gap-2">
-        <USelectMenu
+        <SbCombobox
           v-model="state.leagueId"
           :items="leagueItems"
-          value-key="value"
-          label-key="label"
           class="w-full"
           :disabled="disabled"
           :placeholder="$t('page.tournaments.form.leaguePlaceholder')"

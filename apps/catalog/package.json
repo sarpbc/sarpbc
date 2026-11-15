@@ -17,13 +17,7 @@
     "vue": "catalog:"
   },
   "devDependencies": {
-    "@tailwindcss/node": "4.3.3",
-    "@types/node": "catalog:",
     "@vitejs/plugin-vue": "^6.0.10",
-    "postcss": "8.5.32",
-    "tailwind-merge": "3.7.0",
-    "tailwind-variants": "3.3.1",
-    "tailwindcss": "4.3.3",
     "typescript": "catalog:",
     "vite": "^8.3.5",
     "vue-tsc": "catalog:",

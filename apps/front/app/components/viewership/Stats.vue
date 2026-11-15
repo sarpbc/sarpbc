@@ -83,7 +83,7 @@ const details = computed(() =>
     <p class="flex min-h-row flex-wrap items-center gap-x-4 px-4 text-xs text-muted">
       <span>
         {{ t("components.viewership.source") }}
-        <SLink
+        <SbLink
           :to="viewership.sourceUrl"
           external
           target="_blank"
@@ -91,11 +91,11 @@ const details = computed(() =>
           variant="inline"
         >
           {{ viewership.sourceName }}
-        </SLink>
+        </SbLink>
       </span>
       <span v-if="startgg">
         {{ t("common.prizes.dataFrom") }}
-        <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
+        <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
       </span>
     </p>
   </SCard>

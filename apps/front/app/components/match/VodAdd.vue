@@ -86,7 +86,7 @@ const submit = async () => {
     open.value = false;
   } catch (error) {
     toast.add({
-      color: "error",
+      color: "danger",
       description: getApiErrorMessage(error) ?? undefined,
       title: t("page.match.detail.vodAdd.saveError"),
     });
@@ -97,7 +97,7 @@ const submit = async () => {
 </script>
 
 <template>
-  <UPopover v-if="canManage" v-model:open="open">
+  <SbPopover v-if="canManage" v-model:open="open">
     <SbButton
       icon="i-fluent-more-horizontal-24-regular"
       variant="tertiary"
@@ -112,13 +112,7 @@ const submit = async () => {
           {{ t("page.match.detail.vodAdd.title") }}
         </p>
         <SbFormField :label="t('page.match.detail.vodAdd.game')">
-          <USelect
-            v-model="game"
-            :items="gameOptions"
-            value-key="value"
-            label-key="label"
-            class="w-full"
-          />
+          <SbSelect v-model="game" :items="gameOptions" class="w-full" />
         </SbFormField>
         <SbFormField :label="t('page.match.detail.vodAdd.url')" :error="urlError">
           <SbInput
@@ -148,5 +142,5 @@ const submit = async () => {
         />
       </form>
     </template>
-  </UPopover>
+  </SbPopover>
 </template>

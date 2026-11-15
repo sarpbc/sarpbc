@@ -151,11 +151,11 @@ const confirm = async () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     v-model:open="open"
     :title="t('page.tournaments.streamScore.title', { match: label })"
     :description="t('page.tournaments.streamScore.description')"
-    :ui="{ content: 'sm:max-w-2xl' }"
+    size="lg"
   >
     <template #body>
       <div class="flex flex-col gap-4">
@@ -177,18 +177,16 @@ const confirm = async () => {
 
         <template v-else-if="proposal">
           <SbFormField :label="t('page.tournaments.streamScore.blueSide')">
-            <USelect
+            <SbSelect
               v-model="blueId"
               :items="sides"
-              value-key="value"
-              label-key="label"
               class="w-full"
               :placeholder="t('page.tournaments.streamScore.chooseBlue')"
             />
           </SbFormField>
 
           <label v-if="bestOfMismatch" class="flex items-start gap-2 text-sm text-warning">
-            <UCheckbox v-model="bestOfAcknowledged" />
+            <SbCheckbox v-model="bestOfAcknowledged" />
             <span>
               {{
                 t("page.tournaments.streamScore.bestOfMismatch", {
@@ -231,7 +229,7 @@ const confirm = async () => {
                 v-else-if="streamScoreGameNeedsCheck(game)"
                 class="flex items-center gap-2 text-warning"
               >
-                <UCheckbox
+                <SbCheckbox
                   :model-value="checkedGames.includes(game.number)"
                   @update:model-value="setGameChecked(game.number, Boolean($event))"
                 />
@@ -291,5 +289,5 @@ const confirm = async () => {
         />
       </div>
     </template>
-  </UModal>
+  </SbModal>
 </template>

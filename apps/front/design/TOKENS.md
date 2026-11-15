@@ -1,24 +1,14 @@
 # Geist → sarpbc.org Token Mapping
 
-Maps [Geist](https://vercel.com/design) tokens to **@nuxt/ui v4** + **Tailwind v4** as used in `apps/front`.
+Maps [Geist](https://vercel.com/design) tokens to **`@sarpbc/design`** (`--sb-*` tokens) + **Tailwind v4** as used in `apps/front`.
 
 ## Colors
 
-Nuxt UI exposes semantic colors via `app.config.ts`:
-
-```ts
-// app/app.config.ts
-ui: {
-  colors: {
-    primary: "blue",   // Geist blue-700 (#006bff) ≈ Tailwind blue-600/700
-    neutral: "ink",    // Custom OKLCH cool charcoal in main.css (@theme static)
-  },
-}
-```
+Component tokens are `--sb-*` custom properties in `packages/design/src/styles/tokens.css`, including the `ink` neutral palette (OKLCH, hue 256, chroma 0.004). The semantic layer the page utilities use (`--ui-*` variables, `text-muted`, `bg-default`, …) lives in `packages/ui/src/runtime/theme.css`, which each app's `main.css` imports with `@import "@sarpbc/ui/theme.css"`. It maps `primary` to blue (Geist blue-700 `#006bff` ≈ Tailwind blue-600/700) and `neutral` to `ink`, and the apps' `--color-ink-*` read the design tokens.
 
 ### Text hierarchy
 
-| Geist token | Tailwind / Nuxt UI class          | Usage                  |
+| Geist token | Tailwind class                    | Usage                  |
 | ----------- | --------------------------------- | ---------------------- |
 | gray-1000   | `text-highlighted`, `font-medium` | Primary text, headings |
 | gray-900    | default foreground                | Body primary           |
@@ -35,18 +25,18 @@ ui: {
 
 ### Accents (state only)
 
-| Meaning                | Geist     | Nuxt UI                           |
-| ---------------------- | --------- | --------------------------------- |
-| Primary / link / focus | blue-700  | `color="primary"`, `text-primary` |
-| Error / destructive    | red-800   | `color="error"`                   |
-| Warning                | amber-700 | `color="warning"`                 |
-| Success                | green-700 | `color="success"`                 |
+| Meaning                | Geist     | sarpbc.org                                            |
+| ---------------------- | --------- | ----------------------------------------------------- |
+| Primary / link / focus | blue-700  | `variant="primary"` on `SbButton`, `text-primary`     |
+| Error / destructive    | red-800   | `danger` on `SbButton`, `color="danger"` on `SbBadge` |
+| Warning                | amber-700 | `color="warning"` on `SbBadge`                        |
+| Success                | green-700 | `color="success"` on `SbBadge`                        |
 
 Don't use accent color for decoration. One primary action per view.
 
 ## Typography
 
-Geist Sans ≈ system / Nuxt UI default sans. Geist Mono ≈ `font-mono`.
+Geist Sans ≈ system sans. Geist Mono ≈ `font-mono`.
 
 | Geist token   | Tailwind approximation                |
 | ------------- | ------------------------------------- |
@@ -99,7 +89,7 @@ Named row heights in `apps/front/app/assets/css/main.css` (`@theme` spacing). Hu
 | Geist | Value  | sarpbc.org                                                          |
 | ----- | ------ | ------------------------------------------------------------------- |
 | sm    | 6px    | `--ui-radius: 0rem` (sharp)—**project uses zero radius; don't mix** |
-| md    | 12px   | Nuxt UI modal/menu default                                          |
+| md    | 12px   | `@sarpbc/design` modal/menu default                                 |
 | full  | 9999px | `rounded-full` avatars, pills                                       |
 
 ## Elevation (light theme)
@@ -110,12 +100,12 @@ Prefer borders first. When needed:
 /* Raised card */
 shadow-sm /* or custom: 0 2px 2px rgba(0,0,0,0.04) */
 
-/* Popover — use Nuxt UI defaults */
+/* Popover — use the `SbPopover` defaults */
 ```
 
 ## Focus ring
 
-Geist: `0 0 0 2px surface, 0 0 0 4px #006bff`. Nuxt UI components include focus styles—don't override unless matching design audit.
+Geist: `0 0 0 2px surface, 0 0 0 4px #006bff`. `@sarpbc/design` components include focus styles—don't override unless matching design audit.
 
 ## Breakpoints
 
@@ -125,4 +115,4 @@ Tailwind v4 defaults differ—use `sm:`, `md:`, `lg:` consistently with existing
 
 ## Dark theme
 
-Geist dark tokens live at [vercel.com/design.dark](https://vercel.com/design.dark). When adding dark mode to sarpbc.org, map the same semantic names (`bg-default`, `text-muted`) via Nuxt UI color mode—don't fork per-component colors.
+Geist dark tokens live at [vercel.com/design.dark](https://vercel.com/design.dark). When adding dark mode to sarpbc.org, map the same semantic names (`bg-default`, `text-muted`) via `@nuxtjs/color-mode` (the `.dark` class on `<html>`)—don't fork per-component colors.

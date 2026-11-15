@@ -80,6 +80,7 @@
       "onThisDay": "Ce jour-là"
     },
     "search": {
+      "title": "Recherche",
       "placeholder": "Rechercher…",
       "inputPlaceholder": "Rechercher des équipes, joueurs et tournois",
       "empty": "Aucune équipe, joueur ou tournoi ne correspond.",
@@ -963,18 +964,22 @@
         "label": "Image de couverture"
       },
       "editor": {
+        "blockquote": "Citation",
+        "blocks": "Blocs",
+        "bold": "Gras",
+        "bulletList": "Liste à puces",
+        "code": "Code",
+        "codeBlock": "Bloc de code",
+        "divider": "Séparateur",
+        "heading": "Titre {level}",
+        "insert": "Insérer",
+        "insertMatches": "Matchs",
         "insertPlayer": "Tag Joueur",
+        "insertTable": "Tableau",
         "insertTeam": "Tag Équipe",
         "insertTweet": "Post X",
-        "insertMatches": "Matchs",
-        "insertTable": "Tableau",
-        "tweet": {
-          "title": "Insérer un post X",
-          "urlLabel": "URL du post",
-          "urlPlaceholder": "https://x.com/user/status/…",
-          "urlInvalid": "Collez l’URL complète d’un post X (x.com/…/status/…).",
-          "insert": "Insérer le post"
-        },
+        "italic": "Italique",
+        "lists": "Listes",
         "matches": {
           "title": "Insérer des matchs",
           "editTitle": "Modifier les matchs",
@@ -997,20 +1002,33 @@
           "edit": "Modifier",
           "remove": "Supprimer"
         },
-        "tableAddRowBefore": "Ajouter une Ligne Avant",
-        "tableAddRowAfter": "Ajouter une Ligne Après",
-        "tableDeleteRow": "Supprimer la Ligne",
-        "tableAddColumnBefore": "Ajouter une Colonne Avant",
-        "tableAddColumnAfter": "Ajouter une Colonne Après",
-        "tableDeleteColumn": "Supprimer la Colonne",
-        "tableDeleteTable": "Supprimer le Tableau",
+        "noBlock": "Aucun bloc ne correspond",
+        "orderedList": "Liste numérotée",
+        "paragraph": "Paragraphe",
         "picker": {
           "titlePlayer": "Insérer un Tag Joueur",
           "titleTeam": "Insérer un Tag Équipe",
           "placeholderPlayer": "Rechercher un joueur par nom…",
           "placeholderTeam": "Rechercher une équipe par nom…",
           "empty": "Aucun résultat. Essayez une autre recherche."
-        }
+        },
+        "strike": "Barré",
+        "tableAddColumnAfter": "Ajouter une Colonne Après",
+        "tableAddColumnBefore": "Ajouter une Colonne Avant",
+        "tableAddRowAfter": "Ajouter une Ligne Après",
+        "tableAddRowBefore": "Ajouter une Ligne Avant",
+        "tableDeleteColumn": "Supprimer la Colonne",
+        "tableDeleteRow": "Supprimer la Ligne",
+        "tableDeleteTable": "Supprimer le Tableau",
+        "text": "Texte",
+        "tweet": {
+          "title": "Insérer un post X",
+          "urlLabel": "URL du post",
+          "urlPlaceholder": "https://x.com/user/status/…",
+          "urlInvalid": "Collez l’URL complète d’un post X (x.com/…/status/…).",
+          "insert": "Insérer le post"
+        },
+        "underline": "Souligné"
       }
     },
     "players": {

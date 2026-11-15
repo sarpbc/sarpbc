@@ -22,6 +22,7 @@
     "close": "Close",
     "loading": "Loading...",
     "errorPage": {
+      "backHome": "Back to home",
       "notFound": "Not Found",
       "serverError": "Server Error"
     },
@@ -447,6 +448,7 @@
           "pickFailed": "Could not save pick. Refresh and try again.",
           "error": "Could not load this pick'em. Check your connection and try again.",
           "emptyMatches": "No matches are available for this pick'em yet.",
+          "pickWinner": "Pick the winner of {teamA} vs {teamB}",
           "openMatch": "View {teamA} vs {teamB}",
           "tabs": {
             "pickem": "Pick'em",

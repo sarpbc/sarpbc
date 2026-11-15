@@ -62,7 +62,7 @@ const onSubmit = async (event: Event) => {
 
       user.value = null;
       toast.add({
-        color: "error",
+        color: "danger",
         title: t("page.authentication.errors.notAdmin"),
       });
 
@@ -70,12 +70,12 @@ const onSubmit = async (event: Event) => {
     }
 
     toast.add({
-      color: "error",
+      color: "danger",
       title: t("page.authentication.errors.loginFailed"),
     });
   } catch (error) {
     toast.add({
-      color: "error",
+      color: "danger",
       title: getApiErrorMessage(error) ?? t("page.authentication.errors.loginFailed"),
     });
   } finally {
@@ -117,7 +117,7 @@ const googleLogin = () => {
 
         <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <UForm :state="state" class="h-fit w-80" method="post" @submit="onSubmit">
+        <form class="h-fit w-80" method="post" @submit="onSubmit">
           <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
             <SbInput
               v-model="state.email"
@@ -144,7 +144,7 @@ const googleLogin = () => {
             :disabled="pending"
             block
           />
-        </UForm>
+        </form>
       </div>
     </SCrossCard>
   </div>

@@ -86,7 +86,7 @@ onMounted(() => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="items" />
+      <SbBreadcrumb :items="items" />
     </template>
     <DashboardContent>
       <div class="mx-auto flex w-full max-w-5xl flex-col gap-8 py-4">

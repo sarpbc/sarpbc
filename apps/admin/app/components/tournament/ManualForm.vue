@@ -145,14 +145,7 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
     </SbFormField>
 
     <SbFormField :label="$t('page.tournaments.form.event')" :help="eventHelp">
-      <USelectMenu
-        v-model="eventId"
-        :items="eventOptions"
-        value-key="value"
-        label-key="label"
-        :loading="eventsPending"
-        class="w-full"
-      />
+      <SbCombobox v-model="eventId" :items="eventOptions" :loading="eventsPending" class="w-full" />
     </SbFormField>
 
     <SbFormField
@@ -181,11 +174,9 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
       </SbFormField>
 
       <SbFormField :label="$t('page.tournaments.form.league')">
-        <USelect
+        <SbSelect
           :model-value="state.leagueId || undefined"
           :items="leagueItems"
-          value-key="value"
-          label-key="label"
           class="w-full"
           :placeholder="$t('page.tournaments.form.leaguePlaceholder')"
           @update:model-value="updateField('leagueId', String($event ?? ''))"
@@ -223,18 +214,16 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
       :label="$t('page.tournaments.form.format')"
       :help="$t('page.tournaments.form.formatHelp')"
     >
-      <USelect
+      <SbSelect
         :model-value="state.format"
         :items="formatItems"
-        value-key="value"
-        label-key="label"
         class="w-full sm:w-40"
         @update:model-value="updateField('format', $event)"
       />
     </SbFormField>
 
     <SbFormField :help="$t('page.tournaments.form.hasBracketHelp')">
-      <USwitch
+      <SbSwitch
         :model-value="state.hasBracket"
         :label="$t('page.tournaments.form.hasBracket')"
         @update:model-value="updateField('hasBracket', $event)"
@@ -272,7 +261,7 @@ const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes
             :key="team.id"
             class="flex items-center gap-2 text-sm"
           >
-            <UCheckbox
+            <SbCheckbox
               :model-value="isTeamSelected(team.id)"
               @update:model-value="toggleTeam(team.id, Boolean($event))"
             />

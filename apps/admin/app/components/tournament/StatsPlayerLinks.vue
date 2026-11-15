@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { SelectItem } from "@nuxt/ui";
+import type { SelectGroup } from "@sarpbc/design";
 import type { StatsPlayerAccount, StatsRoster } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -32,12 +32,12 @@ const savingKey = ref<string | null>(null);
 
 const keyOf = (player: StatsPlayerAccount): string => `${player.platform}:${player.platformId}`;
 
-const rosterGroup = (roster: StatsRoster): SelectItem[] => [
-  { label: roster.teamName, type: "label" },
-  ...roster.players.map((member) => ({ label: member.name, value: member.id })),
-];
+const rosterGroup = (roster: StatsRoster): SelectGroup<string> => ({
+  label: roster.teamName,
+  options: roster.players.map((member) => ({ label: member.name, value: member.id })),
+});
 
-const rosterOptions = (player: StatsPlayerAccount): SelectItem[][] => {
+const rosterOptions = (player: StatsPlayerAccount): SelectGroup<string>[] => {
   const rosters = accounts.value?.rosters ?? [];
   const own = rosters.filter((roster) => roster.participantId === player.team.participantId);
   const others = rosters.filter((roster) => roster.participantId !== player.team.participantId);
@@ -84,7 +84,7 @@ const save = async (player: StatsPlayerAccount) => {
     await refresh();
   } catch (saveError) {
     toast.add({
-      color: "error",
+      color: "danger",
       description: getApiErrorMessage(saveError) ?? undefined,
       title: t("page.tournaments.statsLinks.saveError"),
     });
@@ -130,11 +130,9 @@ const ROW_CLASS =
             <span class="truncate text-muted">{{ meta(player) }}</span>
           </div>
           <form class="flex items-center gap-2" @submit.prevent="save(player)">
-            <USelect
+            <SbSelect
               v-model="selected[keyOf(player)]"
-              :items="rosterOptions(player)"
-              value-key="value"
-              label-key="label"
+              :groups="rosterOptions(player)"
               class="w-48"
               :placeholder="t('page.tournaments.statsLinks.choose')"
               :aria-label="t('page.tournaments.statsLinks.playerFor', { name: player.name })"
@@ -172,11 +170,9 @@ const ROW_CLASS =
               class="flex items-center gap-2"
               @submit.prevent="save(player)"
             >
-              <USelect
+              <SbSelect
                 v-model="selected[keyOf(player)]"
-                :items="rosterOptions(player)"
-                value-key="value"
-                label-key="label"
+                :groups="rosterOptions(player)"
                 class="w-48"
                 :placeholder="t('page.tournaments.statsLinks.choose')"
                 :aria-label="t('page.tournaments.statsLinks.playerFor', { name: player.name })"

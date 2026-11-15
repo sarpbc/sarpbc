@@ -53,7 +53,7 @@ the project's architecture, design or delivery conventions.
 | `@sarpbc/utils`       | Shared utilities (TypeScript only)    |
 | `@sarpbc/composables` | Shared Nuxt composables               |
 | `@sarpbc/ui`          | Shared Vue components                 |
-| `@sarpbc/design`      | Component library replacing Nuxt UI   |
+| `@sarpbc/design`      | Component library and design tokens   |
 
 ## Tools
 
@@ -91,8 +91,8 @@ Project documents take precedence over personal workflow defaults. Keep reusable
 personal skills outside this repo. Do not add a skill library, model routing or
 a dependency on a personal plugin to make the project usable.
 
-For frontend work, reuse the affected app's Nuxt 4 conventions and `@nuxt/ui`
-components. Use SSR-aware data fetching, localized navigation and cookie
+For frontend work, reuse the affected app's Nuxt 4 conventions and `@sarpbc/design`
+(`Sb*`) components. Use SSR-aware data fetching, localized navigation and cookie
 credentials to the NestJS API. Public primitives live in
 `apps/front/app/components/s/`; cross-app UI belongs in `packages/ui`. Inspect
 existing helpers before adding a wrapper. Cover loading, empty, error and

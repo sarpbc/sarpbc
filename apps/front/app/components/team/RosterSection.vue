@@ -18,7 +18,7 @@ const headingId = "team-roster-title";
     </h2>
 
     <div v-if="players.length" class="grid flex-1 grid-cols-3 gap-2">
-      <ULink
+      <SbLink
         v-for="player in players"
         :key="player.id"
         :to="$localePath(playerPath(player.slug))"
@@ -43,14 +43,14 @@ const headingId = "team-roster-title";
             {{ player.name }}
           </span>
         </div>
-      </ULink>
+      </SbLink>
     </div>
 
     <div
       v-else
       class="flex flex-1 flex-col items-center justify-center gap-2 bg-muted py-8 px-4 text-center"
     >
-      <UIcon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
+      <Icon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
       <p class="text-sm text-muted text-pretty">
         {{ t("page.team.slug.roster.empty") }}
       </p>

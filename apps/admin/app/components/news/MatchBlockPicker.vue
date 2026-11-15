@@ -246,7 +246,7 @@ const close = () => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     :open="open"
     :title="
       initialBlock ? t('page.news.editor.matches.editTitle') : t('page.news.editor.matches.title')
@@ -255,7 +255,7 @@ const close = () => {
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <URadioGroup v-model="kind" orientation="horizontal" variant="table" :items="kindItems" />
+        <SbRadioGroup v-model="kind" orientation="horizontal" variant="cards" :items="kindItems" />
 
         <SbFormField
           :label="
@@ -318,7 +318,7 @@ const close = () => {
           </div>
           <ul v-else-if="matches.length > 0" class="flex max-h-72 flex-col gap-2 overflow-y-auto">
             <li v-for="match in matches" :key="match.id">
-              <UCheckbox
+              <SbCheckbox
                 :model-value="matchIds.includes(match.id)"
                 :disabled="!canToggle(match.id)"
                 :label="matchLabel(match)"
@@ -334,7 +334,7 @@ const close = () => {
           :label="t('page.news.editor.matches.limitLabel')"
           :hint="t('page.news.editor.matches.limitHint')"
         >
-          <UInputNumber v-model="limit" :min="1" :max="NEWS_MATCH_BLOCK_MAX_MATCHES" />
+          <SbInputNumber v-model="limit" :min="1" :max="NEWS_MATCH_BLOCK_MAX_MATCHES" />
         </SbFormField>
       </div>
     </template>
@@ -350,5 +350,5 @@ const close = () => {
       />
       <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
-  </UModal>
+  </SbModal>
 </template>

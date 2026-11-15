@@ -142,13 +142,13 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
         :spoiler-tournament-ids="[tournament.id]"
       >
         <template #kicker>
-          <SLink
+          <SbLink
             :to="localePath(tournamentEventPath(tournament.event.slug))"
             variant="muted"
             class="text-sm text-pretty"
           >
             {{ tournament.event.name }}
-          </SLink>
+          </SbLink>
         </template>
         <TournamentHeader
           :event-slug="tournament.event.slug"

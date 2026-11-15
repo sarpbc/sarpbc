@@ -154,13 +154,7 @@ const submit = () => {
       :label="$t('page.seasons.form.winner')"
       :hint="$t('page.seasons.form.winnerHint')"
     >
-      <USelect
-        v-model="winner"
-        :items="winnerOptions"
-        value-key="value"
-        label-key="label"
-        class="w-full"
-      />
+      <SbSelect v-model="winner" :items="winnerOptions" class="w-full" />
     </SbFormField>
 
     <div>

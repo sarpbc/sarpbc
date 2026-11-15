@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { OnThisDayFact, OnThisDayFactInput } from "@sarpbc/types";
 import { getApiErrorMessage, tournamentStageLabel } from "@sarpbc/utils";
 
@@ -83,7 +83,7 @@ const save = async (input: OnThisDayFactInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -123,7 +123,7 @@ const save = async (input: OnThisDayFactInput) => {
         </div>
 
         <ClientOnly v-else>
-          <UTable :data="facts" :columns="columns" sticky>
+          <SbTable :data="facts" :columns="columns" sticky>
             <template #date-cell="{ row }">
               <span class="whitespace-nowrap tabular-nums">{{ dateLabel(row.original) }}</span>
             </template>
@@ -161,12 +161,12 @@ const save = async (input: OnThisDayFactInput) => {
                 />
               </div>
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isFormOpen"
       :title="$t(editing ? 'page.onThisDay.edit.title' : 'page.onThisDay.create.title')"
       :description="$t('page.onThisDay.form.description')"
@@ -183,7 +183,7 @@ const save = async (input: OnThisDayFactInput) => {
           @submit="save"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="factToDelete"

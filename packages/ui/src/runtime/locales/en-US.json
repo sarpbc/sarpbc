@@ -12,5 +12,12 @@
     "matchTbd": "TBD",
     "matchDataBy": "Match data provided by",
     "matchesUnavailable": "These matches could not be loaded."
+  },
+  "design": {
+    "breadcrumb": "Breadcrumb",
+    "close": "Close",
+    "nextPage": "Next page",
+    "pagination": "Pagination",
+    "previousPage": "Previous page"
   }
 }

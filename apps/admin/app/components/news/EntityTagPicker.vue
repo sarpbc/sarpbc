@@ -86,7 +86,7 @@ const itemLogoSrc = (item: Player | Team) => {
 </script>
 
 <template>
-  <UModal
+  <SbModal
     :open="open"
     :title="title"
     :dismissible="!pending"
@@ -105,7 +105,7 @@ const itemLogoSrc = (item: Player | Team) => {
         <ul v-if="results.length > 0" class="flex max-h-72 flex-col gap-1 overflow-y-auto">
           <li v-for="item in results" :key="item.id">
             <SbButton variant="tertiary" class="w-full justify-start gap-3" @click="onSelect(item)">
-              <UAvatar
+              <SbAvatar
                 :src="itemLogoSrc(item)"
                 :alt="item.name"
                 size="sm"
@@ -127,5 +127,5 @@ const itemLogoSrc = (item: Player | Team) => {
     <template #footer>
       <SbButton variant="secondary" :label="t('common.cancel')" @click="close" />
     </template>
-  </UModal>
+  </SbModal>
 </template>

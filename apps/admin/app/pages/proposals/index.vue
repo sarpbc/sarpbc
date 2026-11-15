@@ -465,7 +465,7 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -559,14 +559,9 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
               <template v-if="proposal.sourceUrl">
                 <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
                 <dd class="break-all">
-                  <ULink
-                    :to="proposal.sourceUrl"
-                    external
-                    target="_blank"
-                    class="text-primary hover:underline"
-                  >
+                  <SbLink variant="accent" :to="proposal.sourceUrl" external target="_blank">
                     {{ proposal.sourceUrl }}
-                  </ULink>
+                  </SbLink>
                 </dd>
               </template>
             </dl>

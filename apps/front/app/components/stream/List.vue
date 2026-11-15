@@ -101,7 +101,7 @@ const hasStartgg = computed(() => streams.some((stream) => stream.source === "st
             </span>
             <span class="truncate text-xs text-muted">{{ row.details }}</span>
           </span>
-          <UIcon
+          <Icon
             name="i-lucide-arrow-up-right"
             class="size-4 shrink-0 self-center text-muted"
             aria-hidden="true"
@@ -115,7 +115,7 @@ const hasStartgg = computed(() => streams.some((stream) => stream.source === "st
     <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
       <span>
         {{ t("page.match.detail.watch.dataFrom") }}
-        <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
+        <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
       </span>
     </p>
   </SCard>

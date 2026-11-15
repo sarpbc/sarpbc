@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTimeoutFn } from "@vueuse/core";
+import { onKeyStroke, useTimeoutFn } from "@vueuse/core";
 
 const NAV_CLOSE_DELAY_MS = 120;
 
@@ -48,21 +48,16 @@ watch(userMenuOpen, (open) => {
   scheduleCloseNav();
 });
 
-defineShortcuts({
-  escape: {
-    handler: () => {
-      if (userMenuOpen.value) {
-        userMenuOpen.value = false;
+onKeyStroke("Escape", () => {
+  if (userMenuOpen.value) {
+    userMenuOpen.value = false;
 
-        return;
-      }
+    return;
+  }
 
-      if (navOpen.value) {
-        navOpen.value = false;
-      }
-    },
-    usingInput: true,
-  },
+  if (navOpen.value) {
+    navOpen.value = false;
+  }
 });
 </script>
 
@@ -87,7 +82,7 @@ defineShortcuts({
     @mouseenter="onNavEnter"
     @mouseleave="onNavLeave"
   >
-    <ULink
+    <SbLink
       :to="localePath('/')"
       class="mb-2 flex flex-row items-center gap-2 px-2 py-1"
       :aria-label="$t('page.nav.home')"
@@ -101,15 +96,15 @@ defineShortcuts({
         class="size-8 bg-transparent"
       />
       <span class="text-sm font-semibold tracking-tight">{{ $t("page.nav.admin") }}</span>
-    </ULink>
+    </SbLink>
 
-    <UNavigationMenu
+    <SbNavigationMenu
       orientation="vertical"
       :items="links"
       class="min-h-0 flex-1 overflow-y-auto data-[orientation=vertical]:w-full"
     />
 
-    <UPopover v-if="user" v-model:open="userMenuOpen" :content="{ align: 'start', side: 'top' }">
+    <SbPopover v-if="user" v-model:open="userMenuOpen" align="start" side="top">
       <SbButton
         variant="tertiary"
         class="mt-2 w-full justify-start gap-2"
@@ -117,7 +112,7 @@ defineShortcuts({
         aria-haspopup="menu"
         :aria-expanded="userMenuOpen"
       >
-        <UAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
+        <SbAvatar :src="user.avatarUrl ?? undefined" :alt="user.userName" size="xs" />
         <span class="min-w-0 truncate text-sm" translate="no">{{ user.userName }}</span>
       </SbButton>
       <template #content>
@@ -138,6 +133,6 @@ defineShortcuts({
           />
         </div>
       </template>
-    </UPopover>
+    </SbPopover>
   </aside>
 </template>

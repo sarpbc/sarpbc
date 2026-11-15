@@ -21,7 +21,7 @@ const icon = computed(() =>
       translate="no"
       data-drag-handle
     >
-      <UIcon :name="icon" class="size-3.5 shrink-0" />
+      <Icon :name="icon" class="size-3.5 shrink-0" />
       @{{ label }}
     </span>
   </NodeViewWrapper>

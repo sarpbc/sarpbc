@@ -29,7 +29,7 @@ const typeLabel = computed(() =>
     >
       {{ dateDf.format(new Date(transfer.date)) }}
     </time>
-    <SLink
+    <SbLink
       :to="$localePath(playerPath(transfer.player.slug))"
       variant="inline"
       class="flex min-w-0 flex-1 items-center gap-2"
@@ -46,14 +46,14 @@ const typeLabel = computed(() =>
         size="md"
         class="shrink-0"
       />
-    </SLink>
+    </SbLink>
     <span class="flex shrink-0 items-center gap-1.5 text-xs text-muted sm:w-28">
-      <UIcon :name="transferTypeIcon(transfer.type)" class="size-4 shrink-0" aria-hidden="true" />
+      <Icon :name="transferTypeIcon(transfer.type)" class="size-4 shrink-0" aria-hidden="true" />
       <span class="sr-only truncate sm:not-sr-only">
         {{ typeLabel }}
       </span>
     </span>
-    <SLink
+    <SbLink
       v-if="showTeam"
       :to="$localePath(teamPath(transfer.team.slug))"
       variant="inline"
@@ -61,6 +61,6 @@ const typeLabel = computed(() =>
     >
       <TeamImg :team-name="transfer.team.name" :logo="transfer.team" size="xs" />
       <span class="truncate text-sm">{{ transfer.team.name }}</span>
-    </SLink>
+    </SbLink>
   </SListItem>
 </template>

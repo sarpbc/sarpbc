@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn, TableRow } from "@nuxt/ui";
+import type { TableColumn, TableRow } from "@sarpbc/design";
 import type { Player } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -133,7 +133,7 @@ const confirmCreate = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -150,7 +150,7 @@ const confirmCreate = async () => {
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <UTable
+        <SbTable
           :data="players"
           :columns="columns"
           sticky
@@ -170,12 +170,12 @@ const confirmCreate = async () => {
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>
-        </UTable>
+        </SbTable>
         <div v-if="total > limit" class="mt-4 flex w-full flex-row justify-between">
           <span class="text-muted">
             {{ t("page.players.playersCount", { count: total }) }}
           </span>
-          <UPagination
+          <SbPagination
             :page="page"
             :total="total"
             :items-per-page="limit"
@@ -185,7 +185,7 @@ const confirmCreate = async () => {
       </ClientOnly>
     </DashboardContent>
 
-    <UModal
+    <SbModal
       v-model:open="isCreateModalOpen"
       :title="$t('page.players.create.title')"
       :dismissible="!isCreating"
@@ -227,7 +227,7 @@ const confirmCreate = async () => {
           @click="isCreateModalOpen = false"
         />
       </template>
-    </UModal>
+    </SbModal>
 
     <ConfirmDeleteModal
       v-model:target="playerToDelete"

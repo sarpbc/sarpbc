@@ -85,7 +85,7 @@ const onReplyDeleted = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -159,21 +159,15 @@ const onReplyDeleted = async () => {
 
             <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
               <span class="text-muted">{{ targetTypeLabel(reply.targetType) }}</span>
-              <ULink
-                :to="publicTargetUrl(reply)"
-                external
-                target="_blank"
-                class="text-primary hover:underline"
-              >
+              <SbLink variant="accent" :to="publicTargetUrl(reply)" external target="_blank">
                 {{ reply.targetLabel }}
-              </ULink>
-              <ULink
+              </SbLink>
+              <SbLink
                 v-if="reply.targetType === 'forumPost'"
                 :to="localePath(`/forum/${reply.targetId}`)"
-                class="text-muted hover:text-highlighted"
               >
                 {{ $t("page.moderation.openInAdmin") }}
-              </ULink>
+              </SbLink>
             </div>
           </article>
         </div>

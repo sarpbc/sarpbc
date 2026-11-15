@@ -7,11 +7,11 @@ Repo-specific implementation notes for `apps/front`.
 ```
 apps/front/
 ├── app/
-│   ├── app.vue          # UApp + i18n locale
-│   ├── app.config.ts    # UI theme (primary: blue, neutral: ink)
+│   ├── app.vue          # SbToaster + layout + i18n locale
+│   ├── app.config.ts    # Site title only
 │   ├── assets/css/main.css
 │   ├── components/
-│   │   ├── s/           # Shared primitives (Card, badge, link)
+│   │   ├── s/           # Shared primitives (card, list row, rail)
 │   │   ├── nav/         # Header, footer, bar
 │   │   └── …            # Feature components
 │   ├── composables/     # useUser, useFetch wrappers, domain logic
@@ -24,11 +24,18 @@ apps/front/
 
 ## Stack Modules
 
-| Module          | Role                                          |
-| --------------- | --------------------------------------------- |
-| `@nuxt/ui`      | Components, forms, tables, toaster            |
-| `@nuxtjs/i18n`  | en/fr, `prefix_except_default`, `$localePath` |
-| `@nuxt/content` | News/content pages                            |
+| Module               | Role                                          |
+| -------------------- | --------------------------------------------- |
+| `@sarpbc/ui`         | Registers `@sarpbc/design` as `Sb*`, theme    |
+| `@nuxt/icon`         | Icons                                         |
+| `@nuxt/fonts`        | Fonts                                         |
+| `@nuxtjs/color-mode` | Light and dark mode                           |
+| `@nuxtjs/i18n`       | en/fr, `prefix_except_default`, `$localePath` |
+| `@nuxt/content`      | News/content pages                            |
+
+## Forms
+
+Forms are a native `<form @submit.prevent>` validated with zod. `useFormErrors(schema, state)` (`app/composables/use-form-errors.ts`) returns `errors` and `markSubmitted`: errors stay hidden until the first submit, then follow the input. Pass each one to `SbFormField :error`.
 
 ## Page Meta & SEO
 
@@ -62,7 +69,7 @@ Staff console lives in `apps/admin` (`admin.sarpbc.org`):
 
 - Layout: `default` + `header` (see `apps/admin/app/layouts/`)
 - Middleware: `admin` via `routeRules` in `apps/admin/nuxt.config.ts`
-- Lists: `UTable` + `UButton` actions + `UModal` for create/edit
+- Lists: `SbTable` + `SbButton` actions + `SbModal` for create/edit
 - Reference: `apps/admin/app/pages/players/index.vue`
 
 ## Custom UI Primitives
@@ -74,7 +81,6 @@ Before adding a new primitive, check `app/components/s/`:
 | `SCard`          | Bordered container                                                                         |
 | `SCrossCard`     | Auth/marketing cards, no frame                                                             |
 | `SBadgeLive`     | Live status with redundant text                                                            |
-| `SLink`          | Styled internal links                                                                      |
 | `SListItem`      | Hub list row (`size`: compact/default/header/double; optional `to`)                        |
 | `SRail`          | Caption band + body. `caption="lead"` (72px, first in column) or `section` (44px, default) |
 | `SHubColumn`     | Hub grid column (`rail` \| `main`)                                                         |
@@ -135,21 +141,13 @@ Match layout/middleware when adding new auth or staff pages (including `/fr/...`
 
 ## Toaster
 
-Configured in `app.config.ts`:
-
-```ts
-toaster: {
-  position: 'bottom-right',
-  expand: true,
-  duration: 5000,
-}
-```
+`app.vue` wraps the app in `SbToaster`; raise toasts with `useToast()` from `@sarpbc/design` (auto-imported). Colors are `success`, `info`, `warning` and `danger`.
 
 Toast copy: specific, no period, from i18n where possible.
 
 ## Error Page
 
-`error.vue` delegates to `UError`—ensure status codes and messages remain user-friendly for production.
+`error.vue` renders its own markup (status code, heading and an `SbButton` back home)—ensure status codes and messages remain user-friendly for production.
 
 ## Pair With
 

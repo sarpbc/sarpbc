@@ -64,9 +64,9 @@ const onSubmit = async (event: Event) => {
         </h1>
         <div class="w-fit flex flex-row text-sm text-muted mt-2 mb-6">
           {{ $t("page.authentication.noAccount") }}&nbsp;
-          <SLink variant="accent" :to="$localePath('/register')">
+          <SbLink variant="accent" :to="$localePath('/register')">
             {{ $t("page.authentication.register") }}
-          </SLink>
+          </SbLink>
           .
         </div>
 
@@ -80,7 +80,7 @@ const onSubmit = async (event: Event) => {
 
         <SbSeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <UForm :state="state" class="w-full h-fit" method="post" @submit="onSubmit">
+        <form class="w-full h-fit" method="post" @submit="onSubmit">
           <SbFormField :label="$t('page.authentication.email')" class="w-full pb-4">
             <SbInput
               v-model="state.email"
@@ -111,7 +111,7 @@ const onSubmit = async (event: Event) => {
             :disabled="pending"
             block
           />
-        </UForm>
+        </form>
       </div>
     </SCrossCard>
   </div>

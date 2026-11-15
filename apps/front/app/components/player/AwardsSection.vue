@@ -104,7 +104,7 @@ const metaParts = (award: PlayerProfileAward): string[] => {
           class="min-w-0"
         >
           <div class="flex w-full min-w-0 items-center gap-2">
-            <UIcon name="i-fluent-star-24-filled" class="size-5 shrink-0 text-primary" />
+            <Icon name="i-fluent-star-24-filled" class="size-5 shrink-0 text-primary" />
             <div class="min-w-0 flex-1">
               <p class="truncate text-sm font-medium text-highlighted">
                 {{ seasonAwardTypeLabel(award.awardType) }} · {{ award.season.name }}
@@ -113,7 +113,7 @@ const metaParts = (award: PlayerProfileAward): string[] => {
                 {{ seasonMetaParts(award).join(" · ") }}
               </p>
             </div>
-            <UIcon
+            <Icon
               name="i-fluent-open-24-regular"
               class="size-4 shrink-0 text-muted"
               aria-hidden="true"
@@ -127,7 +127,7 @@ const metaParts = (award: PlayerProfileAward): string[] => {
           class="min-w-0"
         >
           <div class="flex w-full min-w-0 items-center gap-2">
-            <UIcon name="i-fluent-star-24-filled" class="size-5 shrink-0 text-primary" />
+            <Icon name="i-fluent-star-24-filled" class="size-5 shrink-0 text-primary" />
             <div class="min-w-0 flex-1">
               <p class="truncate text-sm font-medium text-highlighted">
                 {{ awardTypeLabel(award.awardType) }} · {{ award.tournament.event.name }}
