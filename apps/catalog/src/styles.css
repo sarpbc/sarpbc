@@ -1,0 +1,660 @@
+/* Catalog chrome in the public site's look. Its neutrals follow @sarpbc/design's ink, so the tuner reshades the whole page. */
+:root {
+  color-scheme: light dark;
+
+  --ink-50: var(--sb-ink-50);
+  --ink-100: var(--sb-ink-100);
+  --ink-200: var(--sb-ink-200);
+  --ink-400: var(--sb-ink-400);
+  --ink-500: var(--sb-ink-500);
+  --ink-600: var(--sb-ink-600);
+  --ink-800: var(--sb-ink-800);
+  --ink-850: var(--sb-ink-850);
+  --ink-900: var(--sb-ink-900);
+  --ink-950: var(--sb-ink-950);
+
+  --background-page: light-dark(white, var(--ink-950));
+  --background-muted: light-dark(var(--ink-50), var(--ink-900));
+  --background-elevated: light-dark(var(--ink-100), var(--ink-850));
+  --border: light-dark(var(--ink-200), var(--ink-800));
+  --separator: light-dark(var(--ink-100), var(--ink-900));
+  --text: light-dark(var(--ink-950), var(--ink-50));
+  --text-muted: light-dark(var(--ink-500), var(--ink-400));
+  --text-dimmed: light-dark(var(--ink-400), var(--ink-600));
+  --link: light-dark(oklch(54.6% 0.245 262.9), oklch(66% 0.18 258));
+
+  --space-xs: 4px;
+  --space-s: 8px;
+  --space-m: 12px;
+  --space-l: 16px;
+  --space-xl: 24px;
+  --space-2xl: 40px;
+
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--background-page);
+  color: var(--text);
+  font: 14px/1.5 var(--font-sans);
+}
+
+a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+}
+
+h1,
+h2 {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 28px;
+}
+
+h2 {
+  margin-bottom: var(--space-m);
+  font-size: 15px;
+}
+
+section {
+  margin-top: var(--space-2xl);
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  padding: var(--space-l);
+  border-right: 1px solid var(--border);
+}
+
+.brand {
+  display: block;
+  margin-bottom: var(--space-l);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.brand span {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.search {
+  width: 100%;
+  padding: var(--space-s) var(--space-m);
+  border: 1px solid var(--border);
+  background: var(--background-page);
+  color: var(--text);
+  font: inherit;
+}
+
+.search:focus-visible,
+a:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 2px;
+}
+
+.nav-group {
+  margin-top: var(--space-xl);
+}
+
+.nav-group h2 {
+  margin-bottom: var(--space-xs);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.nav-group a {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) var(--space-s);
+  color: var(--text);
+}
+
+.nav-group a:hover {
+  background: var(--background-muted);
+  text-decoration: none;
+}
+
+.nav-group a[aria-current="page"] {
+  background: var(--background-elevated);
+  font-weight: 500;
+}
+
+.main {
+  min-width: 0;
+  max-width: 1100px;
+  padding: var(--space-2xl);
+}
+
+.page-header .eyebrow {
+  margin: 0 0 var(--space-xs);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.lede {
+  max-width: 70ch;
+  margin: var(--space-s) 0 0;
+  color: var(--text-muted);
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  margin: var(--space-xl) 0 0;
+  border-block: 1px solid var(--separator);
+}
+
+.stats div {
+  padding: var(--space-m) var(--space-l) var(--space-m) 0;
+}
+
+.stats dt {
+  color: var(--text-muted);
+  font-size: 12px;
+  text-transform: capitalize;
+}
+
+.stats dd {
+  margin: 0;
+  font-size: 22px;
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+
+.table {
+  width: 100%;
+  margin-top: var(--space-xl);
+  border-collapse: collapse;
+}
+
+section .table {
+  margin-top: 0;
+}
+
+.table th,
+.table td {
+  padding: var(--space-s) var(--space-m);
+  border-bottom: 1px solid var(--separator);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table thead th {
+  border-bottom-color: var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.table tbody th {
+  font-weight: 500;
+}
+
+.table tbody tr:not(.group-row):hover {
+  background: var(--background-muted);
+}
+
+.table .group-row th {
+  padding-top: var(--space-xl);
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.numeric {
+  width: 80px;
+  font-variant-numeric: tabular-nums;
+  text-align: right !important;
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.muted,
+.count,
+.more,
+.empty {
+  color: var(--text-dimmed);
+}
+
+.count {
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chips li {
+  display: inline-flex;
+  gap: var(--space-s);
+  align-items: baseline;
+  padding: 2px var(--space-s);
+  background: var(--background-elevated);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--space-2xl);
+}
+
+.symbol-list,
+.file-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.symbol-list summary,
+.file-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-m);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--separator);
+}
+
+.symbol-list summary {
+  cursor: pointer;
+}
+
+.symbol-list .file-list {
+  padding-left: var(--space-l);
+}
+
+.file-list code {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .main {
+    padding: var(--space-l);
+  }
+}
+
+h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+h4 {
+  display: inline;
+  margin: var(--space-xl) 0 var(--space-s);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+h4:not(summary h4) {
+  display: block;
+}
+
+pre {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  white-space: pre-wrap;
+}
+
+.styles-app {
+  margin-top: var(--space-xl);
+  padding-top: var(--space-l);
+  border-top: 1px solid var(--border);
+}
+
+.styles-app__header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-m);
+  align-items: baseline;
+}
+
+.styles-app details {
+  margin-top: var(--space-xl);
+}
+
+.styles-app summary {
+  cursor: pointer;
+}
+
+.looks {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.look {
+  padding: var(--space-m) 0;
+  border-bottom: 1px solid var(--separator);
+}
+
+.look__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);
+  align-items: center;
+}
+
+.chips .derived {
+  background: transparent;
+  outline: 1px dashed var(--border);
+}
+
+.look__slots,
+.rules {
+  display: grid;
+  gap: var(--space-xs);
+  margin: var(--space-s) 0 0;
+}
+
+.look__slots div,
+.rules div {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: var(--space-m);
+}
+
+.rules div {
+  grid-template-columns: 260px minmax(0, 1fr);
+  padding: var(--space-xs) 0;
+  border-bottom: 1px solid var(--separator);
+}
+
+.look__slots dt {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.look__slots dd,
+.rules dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.token-value {
+  display: inline-flex;
+  gap: var(--space-s);
+  align-items: center;
+}
+
+.swatch {
+  flex: none;
+  width: 14px;
+  height: 14px;
+  border: 1px solid var(--border);
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.parity-grid {
+  display: grid;
+  grid-template-columns: minmax(180px, 1fr) minmax(0, 1.4fr) minmax(0, 1.4fr);
+  border-top: 1px solid var(--border);
+}
+
+.parity-grid > * {
+  min-width: 0;
+  border-bottom: 1px solid var(--separator);
+}
+
+.parity-head {
+  padding: var(--space-s) var(--space-m);
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.parity-look {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-s);
+  align-items: center;
+  padding: var(--space-s) var(--space-m);
+}
+
+/* Mirrors the reference frame: same padding, same surface, the app's font. */
+.parity-ours {
+  padding: 12px;
+  background: var(--sb-bg);
+  color: var(--sb-text);
+}
+
+.parity-ours[data-app="admin"] {
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", Arial,
+    sans-serif;
+}
+
+.brand {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand a {
+  color: var(--text);
+}
+
+.mode {
+  padding: 2px var(--space-s);
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.replaced {
+  text-decoration: line-through;
+  text-decoration-color: var(--text-dimmed);
+}
+
+/*
+ * apps/admin keeps Nuxt UI's default dark surfaces (ink 900/800) where the
+ * front uses 950/850. Admin must declare these overrides when it adopts
+ * @sarpbc/design; the parity page applies them so both columns match.
+ */
+.dark .parity-ours[data-app="admin"] {
+  --sb-bg: var(--sb-ink-900);
+  --sb-bg-muted: var(--sb-ink-800);
+  --sb-bg-elevated: var(--sb-ink-800);
+}
+
+.parity-ours {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  align-items: flex-start;
+}
+
+.parity-call {
+  color: var(--text-muted);
+  font-size: 11.5px;
+  text-shadow: none;
+}
+
+.playground {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 240px;
+  margin-top: var(--space-xl);
+  border: 1px solid var(--border);
+}
+
+.playground__stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  padding: var(--space-xl);
+  background: var(--sb-bg);
+  color: var(--sb-text);
+}
+
+.playground__controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  padding: var(--space-l);
+  border-left: 1px solid var(--border);
+  background: var(--background-muted);
+}
+
+.playground__call {
+  grid-column: 1 / -1;
+  padding: var(--space-m) var(--space-l);
+  border-top: 1px solid var(--border);
+  overflow-wrap: anywhere;
+}
+
+.control {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  font-size: 12px;
+}
+
+.control span {
+  color: var(--text-muted);
+}
+
+.control select,
+.control input[type="text"] {
+  padding: var(--space-xs) var(--space-s);
+  border: 1px solid var(--border);
+  background: var(--background-page);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.control--toggle {
+  flex-direction: row;
+  align-items: center;
+}
+
+.control--toggle span {
+  color: var(--text);
+}
+
+.parity-title {
+  margin-top: var(--space-2xl);
+}
+
+@media (max-width: 760px) {
+  .playground {
+    grid-template-columns: 1fr;
+  }
+
+  .playground__controls {
+    border-top: 1px solid var(--border);
+    border-left: 0;
+  }
+}
+
+.tuner {
+  position: fixed;
+  right: var(--space-l);
+  bottom: var(--space-l);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-s);
+  align-items: flex-end;
+}
+
+.tuner__toggle {
+  padding: var(--space-s) var(--space-m);
+  border: 1px solid var(--border);
+  background: var(--background-page);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tuner__panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-m);
+  width: 300px;
+  margin: 0;
+  padding: var(--space-l);
+  border: 1px solid var(--border);
+  background: var(--background-page);
+}
+
+.tuner__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.tuner__swatches {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  height: 28px;
+  border: 1px solid var(--border);
+}
+
+.tuner__snippet {
+  margin: 0;
+  padding: var(--space-s);
+  background: var(--background-muted);
+}

@@ -20,6 +20,7 @@ Run the checks listed in [CONTRIBUTING.md](CONTRIBUTING.md#pull-requests) before
 - `apps/front`: Nuxt 4 frontend (port **4000**)
 - `apps/back`: NestJS backend with MikroORM, PostgreSQL, and Redis (port **4001**)
 - `apps/admin`: Nuxt 4 staff console SPA (port **4002**)
+- `apps/catalog`: Vite + Vue component catalog and Nuxt UI usage inventory (port **4100**)
 
 ### Prerequisites
 

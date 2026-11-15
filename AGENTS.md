@@ -23,6 +23,7 @@ This repository is a pnpm monorepo containing:
 - **apps/front** — Public Nuxt 4 website
 - **apps/back** — NestJS API
 - **apps/admin** — Internal Nuxt 4 staff application
+- **apps/catalog** — Internal component catalog (Vite + Vue)
 - **packages/** — Shared libraries
 
 This file contains only repository-wide guidance.
@@ -37,11 +38,12 @@ the project's architecture, design or delivery conventions.
 
 ## Applications
 
-| Path         | Purpose                 |
-| ------------ | ----------------------- |
-| `apps/front` | Public website          |
-| `apps/back`  | NestJS API              |
-| `apps/admin` | Internal administration |
+| Path           | Purpose                    |
+| -------------- | -------------------------- |
+| `apps/front`   | Public website             |
+| `apps/back`    | NestJS API                 |
+| `apps/admin`   | Internal administration    |
+| `apps/catalog` | Internal component catalog |
 
 ## Shared packages
 
@@ -51,6 +53,7 @@ the project's architecture, design or delivery conventions.
 | `@sarpbc/utils`       | Shared utilities (TypeScript only)    |
 | `@sarpbc/composables` | Shared Nuxt composables               |
 | `@sarpbc/ui`          | Shared Vue components                 |
+| `@sarpbc/design`      | Component library replacing Nuxt UI   |
 
 ## Tools
 

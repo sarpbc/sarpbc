@@ -1,0 +1,92 @@
+/*
+ * sarpbc.org tokens, taken from what production renders today through Nuxt UI
+ * (apps/front app.config + main.css). Names describe a role, never a value.
+ * Dark mode follows the `.dark` class the apps' color mode sets on <html>.
+ */
+:root {
+  /*
+   * One hue, two chromas. Light steps (50-400) mostly draw light-mode surfaces
+   * and borders, where any tint reads strongly against white; dark steps keep
+   * their own chroma. Only lightness moves between steps.
+   */
+  --sb-ink-hue: 256;
+  --sb-ink-chroma-light: 0.004;
+  --sb-ink-chroma-dark: 0.004;
+
+  --sb-ink-50: oklch(98% var(--sb-ink-chroma-light) var(--sb-ink-hue));
+  --sb-ink-100: oklch(95% var(--sb-ink-chroma-light) var(--sb-ink-hue));
+  --sb-ink-200: oklch(91% var(--sb-ink-chroma-light) var(--sb-ink-hue));
+  --sb-ink-300: oklch(82% var(--sb-ink-chroma-light) var(--sb-ink-hue));
+  --sb-ink-400: oklch(68% var(--sb-ink-chroma-light) var(--sb-ink-hue));
+  --sb-ink-500: oklch(50% var(--sb-ink-chroma-dark) var(--sb-ink-hue));
+  --sb-ink-600: oklch(36% var(--sb-ink-chroma-dark) var(--sb-ink-hue));
+  --sb-ink-700: oklch(26% var(--sb-ink-chroma-dark) var(--sb-ink-hue));
+  --sb-ink-800: oklch(22% var(--sb-ink-chroma-dark) var(--sb-ink-hue));
+  --sb-ink-850: oklch(18% var(--sb-ink-chroma-dark) var(--sb-ink-hue));
+  --sb-ink-900: oklch(14% var(--sb-ink-chroma-dark) var(--sb-ink-hue));
+  --sb-ink-950: oklch(10% var(--sb-ink-chroma-dark) var(--sb-ink-hue));
+
+  --sb-bg: #fff;
+  --sb-bg-muted: var(--sb-ink-50);
+  --sb-bg-elevated: var(--sb-ink-100);
+  --sb-bg-accented: var(--sb-ink-200);
+  --sb-bg-inverted: var(--sb-ink-900);
+  --sb-bg-inverted-pressed: color-mix(in oklch, var(--sb-bg-inverted) 90%, var(--sb-ink-950));
+
+  --sb-text: var(--sb-ink-700);
+  --sb-text-toned: var(--sb-ink-600);
+  --sb-text-muted: var(--sb-ink-500);
+  --sb-text-dimmed: var(--sb-ink-400);
+  --sb-text-highlighted: var(--sb-ink-900);
+  --sb-text-inverted: #fff;
+
+  --sb-border: var(--sb-ink-200);
+  --sb-border-accented: var(--sb-ink-300);
+  --sb-border-inverted: var(--sb-ink-900);
+
+  --sb-primary: oklch(62.3% 0.214 259.815);
+  --sb-info: oklch(62.3% 0.214 259.815);
+  --sb-success: oklch(72.3% 0.219 149.579);
+  --sb-warning: oklch(79.5% 0.184 86.047);
+  --sb-error: oklch(63.7% 0.237 25.331);
+
+  --sb-duration-fast: 150ms;
+  --sb-ease-out: cubic-bezier(0, 0, 0.2, 1);
+}
+
+.dark {
+  --sb-bg: var(--sb-ink-950);
+  --sb-bg-muted: var(--sb-ink-900);
+  --sb-bg-elevated: var(--sb-ink-850);
+  --sb-bg-accented: var(--sb-ink-700);
+  --sb-bg-inverted: #fff;
+
+  --sb-text: var(--sb-ink-200);
+  --sb-text-toned: var(--sb-ink-300);
+  --sb-text-muted: var(--sb-ink-400);
+  --sb-text-dimmed: var(--sb-ink-500);
+  --sb-text-highlighted: #fff;
+  --sb-text-inverted: var(--sb-ink-900);
+
+  --sb-border: var(--sb-ink-800);
+  --sb-border-accented: var(--sb-ink-700);
+  --sb-border-inverted: #fff;
+
+  --sb-primary: oklch(70.7% 0.165 254.624);
+  --sb-info: oklch(70.7% 0.165 254.624);
+  --sb-success: oklch(79.2% 0.209 151.711);
+  --sb-warning: oklch(85.2% 0.199 91.936);
+  --sb-error: oklch(70.4% 0.191 22.216);
+}
+
+@keyframes sb-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sb-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
