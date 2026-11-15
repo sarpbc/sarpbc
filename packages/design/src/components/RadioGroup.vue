@@ -40,6 +40,7 @@ provide(RADIO_GROUP, { variant: computed(() => variant) });
         :key="String(item.value)"
         :value="item.value"
         :label="item.label"
+        :aria-label="item.ariaLabel"
         :description="item.description ?? null"
         :disabled="item.disabled"
       />
@@ -60,7 +61,8 @@ provide(RADIO_GROUP, { variant: computed(() => variant) });
     gap: 0.5rem 1rem;
   }
 
-  .sb-radio-group[data-variant="cards"][aria-orientation="horizontal"] {
+  .sb-radio-group[data-variant="cards"][aria-orientation="horizontal"],
+  .sb-radio-group[data-variant="text"] {
     gap: 0;
   }
 }

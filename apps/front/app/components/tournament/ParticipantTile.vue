@@ -29,17 +29,20 @@ const soloPlayer = computed(() =>
   </SbLink>
 
   <SbHoverCard v-else v-model:open="open">
-    <button
-      type="button"
-      class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-separator interactive-surface"
+    <SbButton
+      variant="tertiary"
+      block
+      class="h-row min-h-row justify-start gap-2 border-r border-b border-separator px-2 text-sm"
       :aria-label="t('page.tournaments.id.participants.openRoster', { team: entry.name })"
       aria-haspopup="dialog"
       :aria-expanded="open"
       :aria-controls="dialogId"
     >
-      <TeamImg :team-name="entry.name" :logo="entry.team" size="sm" />
-      <span class="text-sm font-medium truncate">{{ entry.name }}</span>
-    </button>
+      <template #leading>
+        <TeamImg :team-name="entry.name" :logo="entry.team" size="sm" />
+      </template>
+      {{ entry.name }}
+    </SbButton>
 
     <template #content>
       <div

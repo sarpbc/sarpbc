@@ -129,10 +129,11 @@ jobs:
           pnpm --filter @sarpbc/stream-score-ocr typecheck
           pnpm --filter @sarpbc/stream-score-ocr test
 
-      - name: Locale parity and package boundaries
+      - name: Locale parity, package boundaries and native controls
         run: |
           pnpm check:i18n
           pnpm check:packages
+          pnpm check:native-controls
           pnpm test:checks
 
   backend:

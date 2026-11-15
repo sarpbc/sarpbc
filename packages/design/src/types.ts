@@ -1,4 +1,4 @@
-import type { ColumnDef, Row } from "@tanstack/vue-table";
+import type { ColumnDef, Row, RowData } from "@tanstack/vue-table";
 
 /*
  * Closed sets: every value here is a design decision, not an option. The UI is
@@ -50,14 +50,19 @@ export type SelectValue = string | number;
 
 /** One choice in a Select, Combobox or RadioGroup; the description explains it under the label. */
 export interface SelectOption<T extends SelectValue = SelectValue> {
+  /** For screen readers when the label is an abbreviation, e.g. "EN" read as "English". */
+  ariaLabel?: string;
   description?: string;
   disabled?: boolean;
   label: string;
   value: T;
 }
 
-/** list: a dot and a label. cards: the whole option is a tile, for a few short choices. */
-export type RadioVariant = "list" | "cards";
+/**
+ * list: a dot and a label. cards: the whole option is a tile (with a description, a full-width card).
+ * text: inline labels split by a slash, for a compact switch such as the language.
+ */
+export type RadioVariant = "list" | "cards" | "text";
 
 export type RadioStatus = "success" | "danger";
 
@@ -114,4 +119,27 @@ export interface CommandGroup {
   label: string;
   /** Items already match the search (server results), so the palette does not filter them. */
   remote?: boolean;
+}
+
+/** A row of an ActionList: choosing it acts at once. */
+export interface ActionItem {
+  /** Tints the description: the action cannot be undone or ends something. */
+  danger?: boolean;
+  description?: string;
+  label: string;
+  value: string;
+}
+
+/** The column a Table is sorted by; the parent sorts the data. */
+export interface TableSort {
+  desc: boolean;
+  id: string;
+}
+
+declare module "@tanstack/vue-table" {
+  /** Per-column presentation: numbers align at the end; a row header names the row for screen readers. */
+  interface ColumnMeta<TData extends RowData, TValue> {
+    align?: "start" | "end";
+    rowHeader?: boolean;
+  }
 }

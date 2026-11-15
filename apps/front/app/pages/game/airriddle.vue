@@ -326,6 +326,7 @@ onUnmounted(() => {
         <div class="absolute right-3 top-3" @click.stop>
           <AirRiddleHowToPlayPopover />
         </div>
+        <!-- native-control: off-screen field that captures the game keyboard -->
         <input
           v-if="!isMobile"
           ref="hiddenInputRef"

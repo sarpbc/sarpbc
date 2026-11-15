@@ -29,6 +29,22 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 
+const roleItems = computed(() =>
+  CAREER_ROLES.map((value) => ({
+    description: t(`page.game.career.onboarding.roles.${value}.description`),
+    label: t(`page.game.career.onboarding.roles.${value}.label`),
+    value,
+  })),
+);
+
+const backgroundItems = computed(() =>
+  CAREER_BACKGROUNDS.map((value) => ({
+    description: t(`page.game.career.onboarding.backgrounds.${value}.description`),
+    label: t(`page.game.career.onboarding.backgrounds.${value}.label`),
+    value,
+  })),
+);
+
 const localName = computed({
   get: () => playerName,
   set: (value: string) => emit("update:playerName", value),
@@ -156,23 +172,13 @@ const onStart = () => {
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.roleBody") }}</p>
       </div>
-      <div class="flex flex-col gap-2">
-        <button
-          v-for="roleOption in CAREER_ROLES"
-          :key="roleOption"
-          type="button"
-          class="border border-separator p-4 text-left interactive-surface selectable"
-          :aria-pressed="role === roleOption"
-          @click="emit('selectRole', roleOption)"
-        >
-          <p class="font-medium">
-            {{ t(`page.game.career.onboarding.roles.${roleOption}.label`) }}
-          </p>
-          <p class="mt-1 text-sm text-muted">
-            {{ t(`page.game.career.onboarding.roles.${roleOption}.description`) }}
-          </p>
-        </button>
-      </div>
+      <SbRadioGroup
+        :model-value="role"
+        :items="roleItems"
+        variant="cards"
+        :aria-label="t('page.game.career.onboarding.roleTitle')"
+        @update:model-value="$event !== null && emit('selectRole', $event)"
+      />
       <SbButton block :disabled="!role" @click="onRoleNext">
         {{ t("page.game.career.onboarding.next") }}
       </SbButton>
@@ -185,23 +191,13 @@ const onStart = () => {
         </h2>
         <p class="text-sm text-muted">{{ t("page.game.career.onboarding.backgroundBody") }}</p>
       </div>
-      <div class="flex flex-col gap-2">
-        <button
-          v-for="bg in CAREER_BACKGROUNDS"
-          :key="bg"
-          type="button"
-          class="border border-separator p-4 text-left interactive-surface selectable"
-          :aria-pressed="background === bg"
-          @click="emit('selectBackground', bg)"
-        >
-          <p class="font-medium">
-            {{ t(`page.game.career.onboarding.backgrounds.${bg}.label`) }}
-          </p>
-          <p class="mt-1 text-sm text-muted">
-            {{ t(`page.game.career.onboarding.backgrounds.${bg}.description`) }}
-          </p>
-        </button>
-      </div>
+      <SbRadioGroup
+        :model-value="background"
+        :items="backgroundItems"
+        variant="cards"
+        :aria-label="t('page.game.career.onboarding.backgroundTitle')"
+        @update:model-value="$event !== null && emit('selectBackground', $event)"
+      />
       <SbButton block :disabled="!background" @click="onStart">
         {{ t("page.game.career.onboarding.startCareer") }}
       </SbButton>

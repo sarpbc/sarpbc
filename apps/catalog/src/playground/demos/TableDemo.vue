@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Table } from "@sarpbc/design";
+import { computed, ref } from "vue";
 
-import type { TableColumn } from "@sarpbc/design";
+import type { TableColumn, TableSort } from "@sarpbc/design";
 
 interface Row {
   name: string;
@@ -16,12 +17,29 @@ const rows: Row[] = [
 ];
 
 const columns: TableColumn<Row>[] = [
-  { accessorKey: "name", header: "Team" },
-  { accessorKey: "region", header: "Region" },
-  { accessorKey: "titles", header: "Titles" },
+  { accessorKey: "name", header: "Team", meta: { rowHeader: true } },
+  { accessorKey: "region", enableSorting: false, header: "Region" },
+  { accessorKey: "titles", header: "Titles", meta: { align: "end" }, sortDescFirst: true },
 ];
+
+const sort = ref<TableSort>({ desc: true, id: "titles" });
+
+/* The table only reports the sort; the page orders its own data. */
+const sorted = computed(() =>
+  rows.toSorted((a, b) => {
+    const order = sort.value.id === "titles" ? a.titles - b.titles : a.name.localeCompare(b.name);
+
+    return sort.value.desc ? -order : order;
+  }),
+);
 </script>
 
 <template>
-  <Table :columns="columns" :data="rows" style="width: 24rem" />
+  <Table
+    v-model:sorting="sort"
+    caption="Teams by titles"
+    :columns="columns"
+    :data="sorted"
+    style="width: 24rem"
+  />
 </template>

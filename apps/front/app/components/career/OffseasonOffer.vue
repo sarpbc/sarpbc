@@ -43,6 +43,17 @@ const destinyPromptChoices = [
   { endsCareer: false, id: "coach" },
 ] as const;
 
+const destinyItems = computed(() =>
+  destinyPromptChoices.map((choice) => ({
+    danger: choice.endsCareer,
+    description: choice.endsCareer
+      ? t("page.game.career.offseason.prompt.endsCareer")
+      : t("page.game.career.offseason.prompt.playOn"),
+    label: t(`page.game.career.offseason.prompt.${choice.id}`),
+    value: choice.id,
+  })),
+);
+
 const hasOffers = computed(() => offers.length > 0);
 const showCurrentTeamRow = computed(() => renewalOffered);
 
@@ -156,29 +167,7 @@ const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
     </p>
 
     <template v-if="destinyPromptPending">
-      <div class="border border-separator">
-        <button
-          v-for="choice in destinyPromptChoices"
-          :key="choice.id"
-          type="button"
-          class="w-full border-b border-separator px-3 py-3 text-left last:border-b-0 touch-manipulation interactive-surface"
-          @click="emit('destiny', choice.id)"
-        >
-          <span class="block text-sm">
-            {{ t(`page.game.career.offseason.prompt.${choice.id}`) }}
-          </span>
-          <span
-            class="mt-0.5 block text-xs"
-            :class="choice.endsCareer ? 'text-error' : 'text-muted'"
-          >
-            {{
-              choice.endsCareer
-                ? t("page.game.career.offseason.prompt.endsCareer")
-                : t("page.game.career.offseason.prompt.playOn")
-            }}
-          </span>
-        </button>
-      </div>
+      <SbActionList :items="destinyItems" @select="emit('destiny', $event)" />
     </template>
 
     <template v-else>

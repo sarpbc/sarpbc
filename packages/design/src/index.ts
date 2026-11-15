@@ -2,6 +2,8 @@ export { AnchorLink, DESIGN_ADAPTERS, DESIGN_MESSAGES, useDesignAdapters } from 
 
 export type { DesignAdapters, DesignMessage } from "./adapters.ts";
 
+export { default as ActionList } from "./components/ActionList.vue";
+
 export { default as Avatar } from "./components/Avatar.vue";
 
 export { default as Badge } from "./components/Badge.vue";

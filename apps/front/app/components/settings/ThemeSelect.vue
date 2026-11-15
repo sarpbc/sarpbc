@@ -68,22 +68,17 @@ const startViewTransition = (event: MouseEvent) => {
 
 <template>
   <ClientOnly>
-    <button
-      type="button"
-      class="flex text-muted transition-none hover:text-highlighted"
+    <SbButton
+      variant="tertiary"
+      size="sm"
+      :icon="
+        colorMode.value === 'dark'
+          ? 'i-fluent-weather-moon-24-regular'
+          : 'i-fluent-weather-sunny-24-regular'
+      "
       :aria-label="themeAriaLabel"
       @click="startViewTransition"
-    >
-      <Icon
-        :name="
-          colorMode.value === 'dark'
-            ? 'i-fluent-weather-moon-24-regular'
-            : 'i-fluent-weather-sunny-24-regular'
-        "
-        class="size-4"
-        aria-hidden="true"
-      />
-    </button>
+    />
 
     <template #fallback>
       <span class="flex text-muted" aria-hidden="true">

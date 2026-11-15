@@ -16,6 +16,13 @@ const { t } = useI18n();
 
 const eventKey = computed(() => `page.game.career.events.${event.id}`);
 
+const choiceItems = computed(() =>
+  event.choices.map((choice) => ({
+    label: t(`${eventKey.value}.choices.${choice.id}.label`),
+    value: choice.id,
+  })),
+);
+
 const stageLabel = computed(() => {
   switch (stage) {
     case "split1": {
@@ -64,16 +71,6 @@ const decisionLabel = computed(() => {
         {{ t(`${eventKey}.description`) }}
       </p>
     </div>
-    <div class="border border-separator">
-      <button
-        v-for="choice in event.choices"
-        :key="choice.id"
-        type="button"
-        class="w-full border-b border-separator px-3 py-3 text-left text-sm last:border-b-0 touch-manipulation interactive-surface"
-        @click="emit('choose', choice.id)"
-      >
-        {{ t(`${eventKey}.choices.${choice.id}.label`) }}
-      </button>
-    </div>
+    <SbActionList :items="choiceItems" @select="emit('choose', $event)" />
   </div>
 </template>

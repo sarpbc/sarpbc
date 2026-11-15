@@ -20,10 +20,9 @@ const indexOf = (item: SlashItem): number => items.value.indexOf(item);
     <p v-if="items.length === 0" class="slash-menu__empty">{{ t("page.news.editor.noBlock") }}</p>
     <div v-for="group in groups" :key="group.label" role="group" :aria-label="group.label">
       <p class="slash-menu__heading">{{ group.label }}</p>
-      <button
+      <div
         v-for="item in group.items"
         :key="item.label"
-        type="button"
         role="option"
         class="slash-menu__item"
         :aria-selected="indexOf(item) === highlighted"
@@ -31,7 +30,7 @@ const indexOf = (item: SlashItem): number => items.value.indexOf(item);
       >
         <Icon :name="item.icon" class="slash-menu__icon" />
         {{ item.label }}
-      </button>
+      </div>
     </div>
   </div>
 </template>
@@ -65,13 +64,10 @@ const indexOf = (item: SlashItem): number => items.value.indexOf(item);
   width: 100%;
   height: 1.75rem;
   padding: 0 0.375rem;
-  border: 0;
-  background: none;
   color: var(--sb-text);
-  font: inherit;
   font-size: var(--sb-control-text);
-  text-align: start;
   cursor: pointer;
+  user-select: none;
 }
 
 .slash-menu__item[aria-selected="true"] {

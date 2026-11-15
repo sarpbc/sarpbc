@@ -83,21 +83,15 @@ const { data: activePickemTournament } = await useLazyAsyncData(
               />
               <NewsRow v-else :key="entry.article.id" :article="entry.article" />
             </template>
-            <button
+            <SbButton
               v-if="hasMoreNews"
-              type="button"
-              class="interactive-surface row-separator flex h-row w-full items-center gap-2 px-2 text-left text-sm font-normal text-muted hover:text-highlighted disabled:cursor-default"
-              :disabled="newsPending"
+              variant="tertiary"
+              block
+              class="row-separator h-row justify-start px-2"
+              :loading="newsPending"
+              :label="newsPending ? $t('common.loading') : $t('page.home.loadMore')"
               @click="loadMoreNews"
-            >
-              <Icon
-                v-if="newsPending"
-                name="i-fluent-arrow-clockwise-24-regular"
-                class="size-4 motion-safe:animate-spin"
-                aria-hidden="true"
-              />
-              {{ newsPending ? $t("common.loading") : $t("page.home.loadMore") }}
-            </button>
+            />
           </SCard>
         </SRail>
       </template>

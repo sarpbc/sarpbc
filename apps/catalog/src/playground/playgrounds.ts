@@ -1,4 +1,5 @@
 import {
+  ActionList,
   Avatar,
   BADGE_COLORS,
   Badge,
@@ -163,6 +164,18 @@ const ToastDemo = stateful(() => {
 });
 
 export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Playground>([
+  [
+    "ActionList",
+    demo(() =>
+      h(ActionList, {
+        items: [
+          { label: "Sign with the new team", value: "sign" },
+          { danger: true, description: "Your career ends here.", label: "Retire", value: "retire" },
+        ],
+        style: "width:20rem",
+      }),
+    ),
+  ],
   [
     "Avatar",
     {
