@@ -238,24 +238,24 @@ const contractModalTitle = computed(() =>
             {{ $t("page.players.info.title") }}
           </h2>
           <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-            <UFormField :label="$t('page.players.fields.name')" required>
-              <UInput v-model="playerForm.name" class="w-full" />
-            </UFormField>
-            <UFormField :label="$t('page.players.fields.firstName')">
-              <UInput v-model="playerForm.firstName" class="w-full" />
-            </UFormField>
-            <UFormField :label="$t('page.players.fields.lastName')">
-              <UInput v-model="playerForm.lastName" class="w-full" />
-            </UFormField>
-            <UFormField :label="$t('page.players.fields.nationality')">
-              <UInput v-model="playerForm.nationality" class="w-full" />
-            </UFormField>
-            <UFormField :label="$t('page.players.fields.birthday')">
-              <UInput v-model="playerForm.birthday" type="date" class="w-full" />
-            </UFormField>
-            <UFormField :label="$t('page.players.fields.imageUrl')">
-              <UInput v-model="playerForm.imageUrl" class="w-full" />
-            </UFormField>
+            <SbFormField :label="$t('page.players.fields.name')" required>
+              <SbInput v-model="playerForm.name" class="w-full" />
+            </SbFormField>
+            <SbFormField :label="$t('page.players.fields.firstName')">
+              <SbInput v-model="playerForm.firstName" class="w-full" />
+            </SbFormField>
+            <SbFormField :label="$t('page.players.fields.lastName')">
+              <SbInput v-model="playerForm.lastName" class="w-full" />
+            </SbFormField>
+            <SbFormField :label="$t('page.players.fields.nationality')">
+              <SbInput v-model="playerForm.nationality" class="w-full" />
+            </SbFormField>
+            <SbFormField :label="$t('page.players.fields.birthday')">
+              <SbInput v-model="playerForm.birthday" type="date" class="w-full" />
+            </SbFormField>
+            <SbFormField :label="$t('page.players.fields.imageUrl')">
+              <SbInput v-model="playerForm.imageUrl" class="w-full" />
+            </SbFormField>
           </div>
         </div>
 
@@ -310,18 +310,18 @@ const contractModalTitle = computed(() =>
     >
       <template #body>
         <div class="flex flex-col gap-3">
-          <UFormField :label="$t('page.players.contracts.fields.teamId')" required>
-            <UInput v-model="contractForm.teamId" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.players.contracts.fields.role')" required>
+          <SbFormField :label="$t('page.players.contracts.fields.teamId')" required>
+            <SbInput v-model="contractForm.teamId" class="w-full" />
+          </SbFormField>
+          <SbFormField :label="$t('page.players.contracts.fields.role')" required>
             <USelect v-model="contractForm.role" :items="contractRoleOptions" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.players.contracts.fields.startDate')" required>
-            <UInput v-model="contractForm.startDate" type="date" class="w-full" />
-          </UFormField>
-          <UFormField :label="$t('page.players.contracts.fields.endDate')">
-            <UInput v-model="contractForm.endDate" type="date" class="w-full" />
-          </UFormField>
+          </SbFormField>
+          <SbFormField :label="$t('page.players.contracts.fields.startDate')" required>
+            <SbInput v-model="contractForm.startDate" type="date" class="w-full" />
+          </SbFormField>
+          <SbFormField :label="$t('page.players.contracts.fields.endDate')">
+            <SbInput v-model="contractForm.endDate" type="date" class="w-full" />
+          </SbFormField>
         </div>
       </template>
       <template #footer>

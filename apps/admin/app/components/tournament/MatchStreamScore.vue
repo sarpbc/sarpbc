@@ -159,7 +159,7 @@ const confirm = async () => {
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.streamScore.paste')"
           :help="t('page.tournaments.streamScore.pasteHelp')"
           :error="
@@ -168,15 +168,15 @@ const confirm = async () => {
               : undefined
           "
         >
-          <UTextarea v-model="text" :rows="5" autoresize :maxrows="12" class="w-full font-mono" />
-        </UFormField>
+          <SbTextarea v-model="text" :rows="5" autoresize :maxrows="12" class="w-full font-mono" />
+        </SbFormField>
 
         <p v-if="sides.length !== 2" class="text-sm text-error">
           {{ t("page.tournaments.streamScore.needsTwoSides") }}
         </p>
 
         <template v-else-if="proposal">
-          <UFormField :label="t('page.tournaments.streamScore.blueSide')">
+          <SbFormField :label="t('page.tournaments.streamScore.blueSide')">
             <USelect
               v-model="blueId"
               :items="sides"
@@ -185,7 +185,7 @@ const confirm = async () => {
               class="w-full"
               :placeholder="t('page.tournaments.streamScore.chooseBlue')"
             />
-          </UFormField>
+          </SbFormField>
 
           <label v-if="bestOfMismatch" class="flex items-start gap-2 text-sm text-warning">
             <UCheckbox v-model="bestOfAcknowledged" />

@@ -111,7 +111,7 @@ const submit = async () => {
         <p class="text-sm font-medium text-highlighted">
           {{ t("page.match.detail.vodAdd.title") }}
         </p>
-        <UFormField :label="t('page.match.detail.vodAdd.game')">
+        <SbFormField :label="t('page.match.detail.vodAdd.game')">
           <USelect
             v-model="game"
             :items="gameOptions"
@@ -119,9 +119,9 @@ const submit = async () => {
             label-key="label"
             class="w-full"
           />
-        </UFormField>
-        <UFormField :label="t('page.match.detail.vodAdd.url')" :error="urlError">
-          <UInput
+        </SbFormField>
+        <SbFormField :label="t('page.match.detail.vodAdd.url')" :error="urlError">
+          <SbInput
             v-model="url"
             type="url"
             inputmode="url"
@@ -129,16 +129,16 @@ const submit = async () => {
             class="w-full"
             :placeholder="t('page.match.detail.vodAdd.urlPlaceholder')"
           />
-        </UFormField>
-        <UFormField :label="t('page.match.detail.vodAdd.language')" :error="languageError">
-          <UInput
+        </SbFormField>
+        <SbFormField :label="t('page.match.detail.vodAdd.language')" :error="languageError">
+          <SbInput
             v-model="language"
             maxlength="2"
             autocomplete="off"
             spellcheck="false"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
         <SbButton
           type="submit"
           block

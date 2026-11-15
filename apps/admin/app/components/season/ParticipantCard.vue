@@ -110,18 +110,14 @@ const addEntry = async () => {
     </header>
 
     <form class="flex max-w-xl flex-col gap-2" @submit.prevent="saveNote">
-      <UFormField
-        :label="$t('page.seasons.path.note')"
-        :hint="$t('page.seasons.path.noteHint')"
-        :name="`path-note-${participant.id}`"
-      >
-        <UTextarea
+      <SbFormField :label="$t('page.seasons.path.note')" :hint="$t('page.seasons.path.noteHint')">
+        <SbTextarea
           v-model="pathNote"
           :maxlength="SEASON_PATH_NOTE_MAX_LENGTH"
           :rows="2"
           class="w-full"
         />
-      </UFormField>
+      </SbFormField>
       <div>
         <SbButton
           type="submit"
@@ -176,30 +172,22 @@ const addEntry = async () => {
 
     <form class="flex max-w-xl flex-col gap-3" @submit.prevent="addEntry">
       <div class="grid gap-3 sm:grid-cols-2">
-        <UFormField
-          :label="$t('page.seasons.path.label')"
-          :name="`label-${participant.id}`"
-          required
-        >
-          <UInput
+        <SbFormField :label="$t('page.seasons.path.label')" required>
+          <SbInput
             v-model="label"
             :maxlength="SEASON_PATH_LABEL_MAX_LENGTH"
             :placeholder="$t('page.seasons.path.labelPlaceholder')"
             class="w-full"
           />
-        </UFormField>
-        <UFormField
-          :label="$t('page.seasons.path.result')"
-          :name="`result-${participant.id}`"
-          required
-        >
-          <UInput
+        </SbFormField>
+        <SbFormField :label="$t('page.seasons.path.result')" required>
+          <SbInput
             v-model="result"
             :maxlength="SEASON_PATH_RESULT_MAX_LENGTH"
             :placeholder="$t('page.seasons.path.resultPlaceholder')"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
       </div>
       <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
         <template v-if="stage">

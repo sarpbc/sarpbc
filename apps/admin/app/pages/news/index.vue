@@ -240,16 +240,15 @@ const onDeleted = async () => {
       >
         <template #body>
           <div class="flex flex-col gap-4">
-            <UFormField :label="$t('page.news.locale.titleEn')" name="title" required>
-              <UInput v-model="renameTitle" class="w-full" autofocus />
-            </UFormField>
-            <UFormField
+            <SbFormField :label="$t('page.news.locale.titleEn')" required>
+              <SbInput v-model="renameTitle" class="w-full" autofocus />
+            </SbFormField>
+            <SbFormField
               :label="$t('page.news.locale.titleFr')"
-              name="titleFr"
               :hint="$t('page.news.locale.fallbackHint')"
             >
-              <UInput v-model="renameTitleFr" class="w-full" />
-            </UFormField>
+              <SbInput v-model="renameTitleFr" class="w-full" />
+            </SbFormField>
           </div>
         </template>
         <template #footer>

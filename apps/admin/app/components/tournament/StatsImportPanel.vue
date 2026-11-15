@@ -204,14 +204,14 @@ const submit = async () => {
     </div>
 
     <form class="flex flex-col gap-2 sm:flex-row sm:items-end" @submit.prevent="submit">
-      <UFormField :label="t('page.tournaments.statsImport.group')" class="flex-1">
-        <UInput
+      <SbFormField :label="t('page.tournaments.statsImport.group')" class="flex-1">
+        <SbInput
           v-model="group"
           :placeholder="t('page.tournaments.statsImport.groupPlaceholder')"
           :disabled="active"
           class="w-full"
         />
-      </UFormField>
+      </SbFormField>
       <SbButton
         type="submit"
         icon="i-fluent-arrow-download-24-regular"

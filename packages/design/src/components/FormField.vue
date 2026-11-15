@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, provide, useId } from "vue";
+import { computed, provide, useId, useSlots } from "vue";
 
 import { FORM_FIELD } from "../form-field.ts";
 
@@ -24,13 +24,13 @@ const id = useId();
 const descriptionId = `${id}-description`;
 const messageId = `${id}-message`;
 
-const message = computed(() => error ?? help);
+const slots = useSlots();
+
+/* An error replaces the help text, whether it comes from the prop or the slot. */
+const hasMessage = computed(() => error !== null || help !== null || slots.help !== undefined);
 
 const describedBy = computed(() => {
-  const ids = [
-    description === null ? null : descriptionId,
-    message.value === null ? null : messageId,
-  ];
+  const ids = [description === null ? null : descriptionId, hasMessage.value ? messageId : null];
 
   const present = ids.filter((value) => value !== null);
 
@@ -55,12 +55,13 @@ provide(FORM_FIELD, { describedBy, id, invalid: computed(() => error !== null) }
       <slot />
     </div>
     <p
-      v-if="message !== null"
+      v-if="hasMessage"
       :id="messageId"
       class="sb-form-field__message"
       :data-error="error !== null || undefined"
     >
-      {{ message }}
+      <template v-if="error !== null">{{ error }}</template>
+      <slot v-else name="help">{{ help }}</slot>
     </p>
   </div>
 </template>

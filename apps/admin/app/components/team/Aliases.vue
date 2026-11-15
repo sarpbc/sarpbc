@@ -238,74 +238,74 @@ const submit = async () => {
           class="grid grid-cols-1 gap-3 sm:grid-cols-2"
           @submit.prevent="submit"
         >
-          <UFormField
+          <SbFormField
             :label="t('page.teams.aliases.fields.name')"
             required
             class="sm:col-span-2"
             v-bind="feedback('name')"
           >
-            <UInput
+            <SbInput
               v-model="form.name"
               :maxlength="TEAM_ALIAS_NAME_MAX_LENGTH"
               autocomplete="off"
               class="w-full"
             />
-          </UFormField>
-          <UFormField
+          </SbFormField>
+          <SbFormField
             :label="t('page.teams.aliases.fields.from')"
             required
             v-bind="feedback('from')"
           >
-            <UInput v-model="form.from" type="date" class="w-full" />
-          </UFormField>
-          <UFormField
+            <SbInput v-model="form.from" type="date" class="w-full" />
+          </SbFormField>
+          <SbFormField
             :label="t('page.teams.aliases.fields.to')"
             :help="t('page.teams.aliases.fields.toHelp')"
             v-bind="feedback('to')"
           >
-            <UInput v-model="form.to" type="date" class="w-full" />
-          </UFormField>
-          <UFormField
+            <SbInput v-model="form.to" type="date" class="w-full" />
+          </SbFormField>
+          <SbFormField
             :label="t('page.teams.aliases.fields.sourceUrl')"
             :help="t('page.teams.aliases.fields.sourceHelp')"
             required
             class="sm:col-span-2"
             v-bind="feedback('sourceUrl')"
           >
-            <UInput
+            <SbInput
               v-model="form.sourceUrl"
               type="url"
               inputmode="url"
               :maxlength="TEAM_ALIAS_URL_MAX_LENGTH"
               class="w-full"
             />
-          </UFormField>
-          <UFormField
+          </SbFormField>
+          <SbFormField
             :label="t('page.teams.aliases.fields.logoUrl')"
             :hint="t('page.teams.aliases.optional')"
             v-bind="feedback('logoUrl')"
           >
-            <UInput
+            <SbInput
               v-model="form.logoUrl"
               type="url"
               inputmode="url"
               :maxlength="TEAM_ALIAS_URL_MAX_LENGTH"
               class="w-full"
             />
-          </UFormField>
-          <UFormField
+          </SbFormField>
+          <SbFormField
             :label="t('page.teams.aliases.fields.pandascoreId')"
             :hint="t('page.teams.aliases.optional')"
             :help="t('page.teams.aliases.fields.pandascoreHelp')"
             v-bind="feedback('pandascoreId')"
           >
-            <UInput
+            <SbInput
               v-model="form.pandascoreId"
               inputmode="numeric"
               autocomplete="off"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
         </form>
       </template>
       <template #footer>

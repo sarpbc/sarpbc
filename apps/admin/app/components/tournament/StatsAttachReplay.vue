@@ -136,7 +136,7 @@ const save = async () => {
   >
     <template #body>
       <form id="stats-attach-replay" class="flex flex-col gap-4" @submit.prevent="save">
-        <UFormField :label="t('page.tournaments.statsAttach.match')" required>
+        <SbFormField :label="t('page.tournaments.statsAttach.match')" required>
           <USelectMenu
             v-model="matchId"
             :items="matchOptions"
@@ -146,9 +146,9 @@ const save = async () => {
             :placeholder="t('page.tournaments.statsAttach.matchPlaceholder')"
             :search-input="{ placeholder: t('page.tournaments.statsAttach.matchSearch') }"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.statsAttach.game')"
           :help="matchId ? undefined : t('page.tournaments.statsAttach.chooseMatchFirst')"
           required
@@ -162,9 +162,9 @@ const save = async () => {
             :disabled="!matchId"
             :placeholder="t('page.tournaments.statsAttach.gamePlaceholder')"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.statsAttach.blue')"
           :help="t('page.tournaments.statsAttach.blueHelp')"
           required
@@ -179,7 +179,7 @@ const save = async () => {
           <p v-else class="text-sm text-muted">
             {{ t("page.tournaments.statsAttach.chooseMatchFirst") }}
           </p>
-        </UFormField>
+        </SbFormField>
       </form>
     </template>
 

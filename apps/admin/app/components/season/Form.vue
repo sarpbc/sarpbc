@@ -72,35 +72,29 @@ const submit = () => {
 
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
-    <UFormField
+    <SbFormField
       :label="$t('page.seasons.form.name')"
       :hint="$t('page.seasons.form.nameHint')"
-      name="name"
       required
     >
-      <UInput v-model="name" :maxlength="SEASON_NAME_MAX_LENGTH" class="w-full" />
-    </UFormField>
+      <SbInput v-model="name" :maxlength="SEASON_NAME_MAX_LENGTH" class="w-full" />
+    </SbFormField>
 
-    <UFormField
-      :label="$t('page.seasons.form.slug')"
-      :hint="$t('page.seasons.form.slugHint')"
-      name="slug"
-    >
-      <UInput v-model="slug" autocomplete="off" spellcheck="false" class="w-full" />
-    </UFormField>
+    <SbFormField :label="$t('page.seasons.form.slug')" :hint="$t('page.seasons.form.slugHint')">
+      <SbInput v-model="slug" autocomplete="off" spellcheck="false" class="w-full" />
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       :label="$t('page.seasons.form.formatSummary')"
       :hint="$t('page.seasons.form.formatSummaryHint')"
-      name="formatSummary"
     >
-      <UTextarea
+      <SbTextarea
         v-model="summary"
         :maxlength="SEASON_FORMAT_SUMMARY_MAX_LENGTH"
         :rows="3"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
 
     <fieldset class="flex flex-col gap-3">
       <legend class="mb-1 text-sm font-medium">{{ $t("page.seasons.form.phases") }}</legend>
@@ -112,18 +106,17 @@ const submit = () => {
           class="flex flex-col gap-2 border border-default p-3"
         >
           <div class="flex flex-row items-end gap-2">
-            <UFormField
+            <SbFormField
               :label="$t('page.seasons.form.phaseName', { number: index + 1 })"
-              :name="`phase-${index}-name`"
               required
               class="flex-1"
             >
-              <UInput
+              <SbInput
                 v-model="phase.name"
                 :maxlength="SEASON_FORMAT_PHASE_NAME_MAX_LENGTH"
                 class="w-full"
               />
-            </UFormField>
+            </SbFormField>
             <SbButton
               type="button"
               variant="tertiary"
@@ -133,18 +126,15 @@ const submit = () => {
               @click="removePhase(index)"
             />
           </div>
-          <UFormField
-            :label="$t('page.seasons.form.phaseDescription')"
-            :name="`phase-${index}-description`"
-          >
-            <UTextarea
+          <SbFormField :label="$t('page.seasons.form.phaseDescription')">
+            <SbTextarea
               :model-value="phase.description ?? ''"
               :maxlength="SEASON_FORMAT_PHASE_DESCRIPTION_MAX_LENGTH"
               :rows="2"
               class="w-full"
               @update:model-value="phase.description = String($event)"
             />
-          </UFormField>
+          </SbFormField>
         </li>
       </ol>
       <div>
@@ -159,11 +149,10 @@ const submit = () => {
       </div>
     </fieldset>
 
-    <UFormField
+    <SbFormField
       v-if="season"
       :label="$t('page.seasons.form.winner')"
       :hint="$t('page.seasons.form.winnerHint')"
-      name="winner"
     >
       <USelect
         v-model="winner"
@@ -172,7 +161,7 @@ const submit = () => {
         label-key="label"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
 
     <div>
       <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />

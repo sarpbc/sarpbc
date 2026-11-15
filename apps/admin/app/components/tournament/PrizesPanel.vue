@@ -281,14 +281,14 @@ const save = async () => {
       </p>
 
       <div v-if="rows.length > 0" class="flex flex-col gap-2 sm:flex-row sm:items-start">
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.prizes.bulkSource')"
           :hint="t('page.tournaments.prizes.bulkSourceHint')"
           :error="sourceUrlError(bulkSourceUrl)"
           class="min-w-0 flex-1"
         >
-          <UInput v-model="bulkSourceUrl" type="url" autocomplete="off" class="w-full" />
-        </UFormField>
+          <SbInput v-model="bulkSourceUrl" type="url" autocomplete="off" class="w-full" />
+        </SbFormField>
         <SbButton
           class="sm:mt-6"
           variant="secondary"
@@ -303,16 +303,16 @@ const save = async () => {
         :key="row.key"
         class="grid grid-cols-1 gap-2 border border-default p-3 sm:grid-cols-[6rem_8rem_6rem_minmax(0,1fr)_minmax(0,1fr)_auto] sm:items-start"
       >
-        <UFormField :label="t('page.tournaments.prizes.placement')">
+        <SbFormField :label="t('page.tournaments.prizes.placement')">
           <UInputNumber
             v-model="row.placement"
             :min="MIN_PRIZE_PLACEMENT"
             :step="1"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.prizes.amount')"
           :error="
             row.amount !== null && !isValidAmount(row.amount)
@@ -327,22 +327,22 @@ const save = async () => {
             :step="1"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField
+        <SbFormField
           :label="t('page.tournaments.prizes.currency')"
           :error="currencyError(row.currency)"
         >
-          <UInput
+          <SbInput
             v-model="row.currency"
             :maxlength="CURRENCY_CODE_LENGTH"
             autocomplete="off"
             spellcheck="false"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField :label="t('page.tournaments.prizes.team')" :error="teamError(row)">
+        <SbFormField :label="t('page.tournaments.prizes.team')" :error="teamError(row)">
           <USelect
             :model-value="row.teamId"
             :items="teamOptions"
@@ -352,9 +352,9 @@ const save = async () => {
             class="w-full"
             @update:model-value="selectTeam(row, $event)"
           />
-        </UFormField>
+        </SbFormField>
 
-        <UFormField :label="t('page.tournaments.prizes.players')" :error="playersError(row)">
+        <SbFormField :label="t('page.tournaments.prizes.players')" :error="playersError(row)">
           <USelectMenu
             v-model="row.playerIds"
             multiple
@@ -365,7 +365,7 @@ const save = async () => {
             :placeholder="t('page.tournaments.prizes.selectPlayers')"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
         <SbButton
           class="sm:mt-6"
@@ -376,12 +376,12 @@ const save = async () => {
           @click="removeRow(row.key)"
         />
 
-        <UFormField
+        <SbFormField
           :label="t('common.sourceUrl')"
           :error="sourceUrlError(row.sourceUrl)"
           class="sm:col-span-full"
         >
-          <UInput v-model="row.sourceUrl" type="url" autocomplete="off" class="w-full" />
+          <SbInput v-model="row.sourceUrl" type="url" autocomplete="off" class="w-full" />
           <template v-if="row.sourceUrl.trim() && !sourceUrlError(row.sourceUrl)" #help>
             <ULink
               :to="row.sourceUrl.trim()"
@@ -392,7 +392,7 @@ const save = async () => {
               {{ t("common.openSource") }}
             </ULink>
           </template>
-        </UFormField>
+        </SbFormField>
       </div>
 
       <p v-if="duplicateTeam" class="text-sm text-error">

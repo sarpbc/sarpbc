@@ -5,22 +5,30 @@ import { useFormField } from "../form-field.ts";
 
 defineOptions({ inheritAttrs: false });
 
-const model = defineModel<string | null>({ default: null });
+const model = defineModel<string>({ default: "" });
 
 const {
   autoresize = false,
   id = null,
+  maxrows = null,
   rows = 3,
 } = defineProps<{
   /** Grows with its content instead of scrolling. */
   autoresize?: boolean;
   id?: string | null;
+  /** With autoresize, the height stops growing at this many rows and scrolls. */
+  maxrows?: number | null;
   rows?: number;
 }>();
 
 const attrs = useAttrs();
 const field = useFormField();
 const textarea = useTemplateRef("textarea");
+
+defineExpose({
+  blur: (): void => textarea.value?.blur(),
+  focus: (): void => textarea.value?.focus(),
+});
 
 const invalid = computed(() => field?.invalid.value ?? false);
 
@@ -29,6 +37,9 @@ const textareaAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== "class")),
 );
 
+/* Computed lengths always resolve to pixels, e.g. "20px". */
+const pixels = (length: string): number => Number(length.replace("px", ""));
+
 const fitContent = async (): Promise<void> => {
   await nextTick();
 
@@ -36,8 +47,19 @@ const fitContent = async (): Promise<void> => {
     return;
   }
 
-  textarea.value.style.height = "auto";
-  textarea.value.style.height = `${textarea.value.scrollHeight}px`;
+  const element = textarea.value;
+
+  element.style.height = "auto";
+
+  const style = getComputedStyle(element);
+
+  const limit =
+    maxrows === null
+      ? Number.POSITIVE_INFINITY
+      : maxrows * pixels(style.lineHeight) + pixels(style.paddingTop) + pixels(style.paddingBottom);
+
+  element.style.height = `${Math.min(element.scrollHeight, limit)}px`;
+  element.style.overflowY = element.scrollHeight > limit ? "auto" : "hidden";
 };
 
 onMounted(fitContent);

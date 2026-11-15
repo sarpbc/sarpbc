@@ -144,22 +144,21 @@ const togglePublish = async () => {
 
         <template #body>
           <div class="flex flex-col gap-4">
-            <UFormField :label="$t('page.news.locale.titleEn')" name="title" required>
-              <UInput v-model="title" class="w-full" />
-            </UFormField>
-            <UFormField
+            <SbFormField :label="$t('page.news.locale.titleEn')" required>
+              <SbInput v-model="title" class="w-full" />
+            </SbFormField>
+            <SbFormField
               :label="$t('page.news.locale.titleFr')"
-              name="titleFr"
               :hint="$t('page.news.locale.fallbackHint')"
             >
-              <UInput v-model="titleFr" class="w-full" />
-            </UFormField>
-            <UFormField
+              <SbInput v-model="titleFr" class="w-full" />
+            </SbFormField>
+            <SbFormField
               :label="$t('page.news.create.slugField')"
               :hint="$t('page.news.create.slugHint')"
               required
             >
-              <UInput
+              <SbInput
                 v-model="articleSlug"
                 class="w-full"
                 :placeholder="$t('page.news.create.slugPlaceholder')"
@@ -167,8 +166,8 @@ const togglePublish = async () => {
                 autocomplete="off"
                 @keydown.enter="saveArticle"
               />
-            </UFormField>
-            <UFormField :label="$t('page.news.type.label')" name="type">
+            </SbFormField>
+            <SbFormField :label="$t('page.news.type.label')">
               <URadioGroup
                 v-model="articleType"
                 variant="list"
@@ -187,15 +186,15 @@ const togglePublish = async () => {
                 value-key="value"
                 label-key="label"
               />
-            </UFormField>
-            <UFormField :label="$t('page.news.cover.label')">
+            </SbFormField>
+            <SbFormField :label="$t('page.news.cover.label')">
               <ImageUpload
                 target="news"
                 v-model:image-url="imageUrl"
                 :article-slug="articleSlug"
                 :article-title="title"
               />
-            </UFormField>
+            </SbFormField>
           </div>
         </template>
 

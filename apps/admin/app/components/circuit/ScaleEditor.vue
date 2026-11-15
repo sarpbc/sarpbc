@@ -300,14 +300,13 @@ const save = async () => {
       <form class="flex flex-col gap-4" @submit.prevent="save">
         <p class="text-sm text-muted">{{ $t("page.circuits.scale.hint") }}</p>
 
-        <UFormField
+        <SbFormField
           :label="$t('page.circuits.scale.sourceUrl')"
           :hint="$t('page.circuits.scale.sourceUrlHint')"
           :error="sourceUrlError"
-          name="sourceUrl"
           required
         >
-          <UInput
+          <SbInput
             v-model="sourceUrl"
             type="url"
             autocomplete="off"
@@ -315,7 +314,7 @@ const save = async () => {
             placeholder="https://"
             class="w-full"
           />
-        </UFormField>
+        </SbFormField>
 
         <p v-if="rows.length === 0" class="text-sm text-muted">
           {{ $t("page.circuits.scale.empty") }}
@@ -326,7 +325,7 @@ const save = async () => {
           :key="row.key"
           class="grid grid-cols-[1fr_1fr_1fr_auto] items-start gap-2 border border-default p-3"
         >
-          <UFormField :label="$t('page.circuits.scale.from')" :error="rowError(row)">
+          <SbFormField :label="$t('page.circuits.scale.from')" :error="rowError(row)">
             <UInputNumber
               v-model="row.from"
               :min="1"
@@ -334,8 +333,8 @@ const save = async () => {
               :step="1"
               class="w-full"
             />
-          </UFormField>
-          <UFormField :label="$t('page.circuits.scale.to')">
+          </SbFormField>
+          <SbFormField :label="$t('page.circuits.scale.to')">
             <UInputNumber
               v-model="row.to"
               :min="1"
@@ -343,8 +342,8 @@ const save = async () => {
               :step="1"
               class="w-full"
             />
-          </UFormField>
-          <UFormField :label="$t('page.circuits.scale.points')">
+          </SbFormField>
+          <SbFormField :label="$t('page.circuits.scale.points')">
             <UInputNumber
               v-model="row.points"
               :min="0"
@@ -352,7 +351,7 @@ const save = async () => {
               :step="1"
               class="w-full"
             />
-          </UFormField>
+          </SbFormField>
           <SbButton
             class="mt-6"
             variant="tertiary"
@@ -433,7 +432,7 @@ const save = async () => {
             :key="row.key"
             class="grid grid-cols-[2fr_1fr_auto] items-start gap-2"
           >
-            <UFormField :label="$t('page.circuits.scale.finishes.team')" :error="finishError(row)">
+            <SbFormField :label="$t('page.circuits.scale.finishes.team')" :error="finishError(row)">
               <USelect
                 v-model="row.teamId"
                 :items="teamOptions"
@@ -442,8 +441,8 @@ const save = async () => {
                 :placeholder="$t('page.circuits.scale.finishes.selectTeam')"
                 class="w-full"
               />
-            </UFormField>
-            <UFormField :label="$t('page.circuits.scale.finishes.placement')">
+            </SbFormField>
+            <SbFormField :label="$t('page.circuits.scale.finishes.placement')">
               <UInputNumber
                 v-model="row.placement"
                 :min="1"
@@ -451,7 +450,7 @@ const save = async () => {
                 :step="1"
                 class="w-full"
               />
-            </UFormField>
+            </SbFormField>
             <SbButton
               class="mt-6"
               variant="tertiary"

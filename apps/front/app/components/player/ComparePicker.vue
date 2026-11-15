@@ -65,7 +65,7 @@ const select = (option: PlayerOption | undefined) => {
 </script>
 
 <template>
-  <UFormField :label="label" class="w-full min-w-0">
+  <SbFormField :label="label" class="w-full min-w-0">
     <UInputMenu
       v-model:search-term="searchTerm"
       :model-value="selected"
@@ -82,5 +82,5 @@ const select = (option: PlayerOption | undefined) => {
         {{ query ? t("components.input.noResult") : t("page.player.compare.searchHint") }}
       </template>
     </UInputMenu>
-  </UFormField>
+  </SbFormField>
 </template>

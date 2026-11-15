@@ -70,20 +70,15 @@ const submit = () => {
 
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
-    <UFormField :label="$t('page.circuits.form.name')" name="name" required>
-      <UInput v-model="name" :maxlength="CIRCUIT_NAME_MAX_LENGTH" class="w-full" />
-    </UFormField>
-    <UFormField
-      :label="$t('page.circuits.form.slug')"
-      :hint="$t('page.circuits.form.slugHint')"
-      name="slug"
-    >
-      <UInput v-model="slug" autocomplete="off" spellcheck="false" class="w-full" />
-    </UFormField>
-    <UFormField
+    <SbFormField :label="$t('page.circuits.form.name')" required>
+      <SbInput v-model="name" :maxlength="CIRCUIT_NAME_MAX_LENGTH" class="w-full" />
+    </SbFormField>
+    <SbFormField :label="$t('page.circuits.form.slug')" :hint="$t('page.circuits.form.slugHint')">
+      <SbInput v-model="slug" autocomplete="off" spellcheck="false" class="w-full" />
+    </SbFormField>
+    <SbFormField
       :label="$t('page.circuits.form.season')"
       :hint="$t('page.circuits.form.seasonHint')"
-      name="season"
       required
     >
       <UInputNumber
@@ -94,30 +89,28 @@ const submit = () => {
         :format-options="{ useGrouping: false }"
         class="w-full"
       />
-    </UFormField>
-    <UFormField
+    </SbFormField>
+    <SbFormField
       :label="$t('page.circuits.form.region')"
       :hint="$t('page.circuits.form.regionHint')"
-      name="region"
     >
-      <UInput v-model="region" :maxlength="CIRCUIT_REGION_MAX_LENGTH" class="w-full" />
-    </UFormField>
-    <UFormField :label="$t('page.circuits.form.description')" name="description">
-      <UTextarea
+      <SbInput v-model="region" :maxlength="CIRCUIT_REGION_MAX_LENGTH" class="w-full" />
+    </SbFormField>
+    <SbFormField :label="$t('page.circuits.form.description')">
+      <SbTextarea
         v-model="description"
         :maxlength="CIRCUIT_DESCRIPTION_MAX_LENGTH"
         :rows="3"
         class="w-full"
       />
-    </UFormField>
-    <UFormField
+    </SbFormField>
+    <SbFormField
       :label="$t('page.circuits.form.sourceUrl')"
       :hint="$t('page.circuits.form.sourceUrlHint')"
       :error="sourceUrlError"
-      name="sourceUrl"
       required
     >
-      <UInput
+      <SbInput
         v-model="sourceUrl"
         type="url"
         autocomplete="off"
@@ -125,11 +118,10 @@ const submit = () => {
         placeholder="https://"
         class="w-full"
       />
-    </UFormField>
-    <UFormField
+    </SbFormField>
+    <SbFormField
       :label="$t('page.circuits.form.qualificationSpots')"
       :hint="$t('page.circuits.form.qualificationSpotsHint')"
-      name="qualificationSpots"
     >
       <UInputNumber
         v-model="qualificationSpots"
@@ -138,7 +130,7 @@ const submit = () => {
         :step="1"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
     <div>
       <SbButton type="submit" :label="submitLabel" :loading="loading" :disabled="!isValid" />
     </div>

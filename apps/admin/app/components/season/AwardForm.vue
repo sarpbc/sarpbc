@@ -95,7 +95,7 @@ defineExpose({ reset });
 <template>
   <form class="flex flex-col gap-4" @submit.prevent="submit">
     <div class="grid gap-4 sm:grid-cols-2">
-      <UFormField :label="$t('page.seasons.awards.awardType')" name="awardType" required>
+      <SbFormField :label="$t('page.seasons.awards.awardType')" required>
         <USelect
           v-model="awardType"
           :items="awardTypeOptions"
@@ -103,8 +103,8 @@ defineExpose({ reset });
           label-key="label"
           class="w-full"
         />
-      </UFormField>
-      <UFormField
+      </SbFormField>
+      <SbFormField
         v-if="showsRegion"
         :label="$t('page.seasons.awards.region')"
         :hint="
@@ -112,19 +112,18 @@ defineExpose({ reset });
             ? $t('page.seasons.awards.regionRequired')
             : $t('page.seasons.awards.regionOptional')
         "
-        name="region"
         :required="requiresRegion"
       >
-        <UInput
+        <SbInput
           v-model="region"
           :maxlength="SEASON_AWARD_REGION_MAX_LENGTH"
           autocomplete="off"
           class="w-full"
         />
-      </UFormField>
+      </SbFormField>
     </div>
 
-    <UFormField :label="$t('page.seasons.awards.player')" name="player" required>
+    <SbFormField :label="$t('page.seasons.awards.player')" required>
       <div class="flex flex-col gap-2">
         <div v-if="player" class="flex flex-row items-center justify-between gap-2 text-sm">
           <span class="font-medium" translate="no">{{ player.name }}</span>
@@ -138,7 +137,7 @@ defineExpose({ reset });
           />
         </div>
         <template v-else>
-          <UInput
+          <SbInput
             v-model="query"
             :loading="searching"
             :placeholder="$t('page.seasons.awards.searchPlayer')"
@@ -168,28 +167,26 @@ defineExpose({ reset });
           </div>
         </template>
       </div>
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       :label="$t('page.seasons.awards.presentedBy')"
       :hint="$t('page.seasons.awards.presentedByHint')"
-      name="presentedBy"
     >
-      <UInput
+      <SbInput
         v-model="presentedBy"
         :maxlength="SEASON_AWARD_PRESENTER_MAX_LENGTH"
         autocomplete="off"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
 
-    <UFormField
+    <SbFormField
       :label="$t('page.seasons.awards.sourceUrl')"
       :hint="$t('page.seasons.awards.sourceUrlHint')"
-      name="sourceUrl"
       required
     >
-      <UInput
+      <SbInput
         v-model="sourceUrl"
         type="url"
         :maxlength="SEASON_AWARD_SOURCE_URL_MAX_LENGTH"
@@ -198,7 +195,7 @@ defineExpose({ reset });
         placeholder="https://"
         class="w-full"
       />
-    </UFormField>
+    </SbFormField>
 
     <div>
       <SbButton

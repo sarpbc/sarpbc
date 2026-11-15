@@ -228,15 +228,15 @@ const confirmRevoke = async () => {
     >
       <template #body>
         <form @submit.prevent="confirmCreate">
-          <UFormField :label="$t('page.tokens.create.nameLabel')" name="name" required>
-            <UInput
+          <SbFormField :label="$t('page.tokens.create.nameLabel')" required>
+            <SbInput
               v-model="newTokenName"
               :placeholder="$t('page.tokens.create.namePlaceholder')"
               :maxlength="TOKEN_NAME_MAX_LENGTH"
               class="w-full"
               autofocus
             />
-          </UFormField>
+          </SbFormField>
         </form>
       </template>
       <template #footer>
@@ -267,7 +267,7 @@ const confirmRevoke = async () => {
             {{ $t("page.tokens.reveal.warning") }}
           </p>
 
-          <UFormField :label="$t('page.tokens.reveal.tokenLabel')">
+          <SbFormField :label="$t('page.tokens.reveal.tokenLabel')">
             <div class="flex flex-row gap-2">
               <code
                 class="min-w-0 flex-1 overflow-x-auto rounded border border-default bg-muted px-3 py-2 font-mono text-sm"
@@ -286,7 +286,7 @@ const confirmRevoke = async () => {
                 @click="revealedToken && copyText(revealedToken, 'token')"
               />
             </div>
-          </UFormField>
+          </SbFormField>
 
           <div class="flex flex-col gap-2">
             <p class="text-sm font-medium">

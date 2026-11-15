@@ -46,7 +46,7 @@ const contentInputRef = useTemplateRef("contentInput");
 
 const focusContentInput = () => {
   nextTick(() => {
-    contentInputRef.value?.textareaRef?.focus();
+    contentInputRef.value?.focus();
   });
 };
 
@@ -136,24 +136,17 @@ const onEnterKey = (event: KeyboardEvent) => {
       class="w-full flex flex-col gap-2"
       @submit="onSubmit"
     >
-      <UFormField
-        :label="$t('components.discussion.inputTitle')"
-        name="content"
-        required
-        class="w-full"
-        :ui="{ labelWrapper: 'h-row items-end pb-1', container: 'mt-0' }"
-      >
-        <UTextarea
+      <SbFormField :label="$t('components.discussion.inputTitle')" required class="w-full">
+        <SbTextarea
           ref="contentInput"
           v-model="state.content"
-          variant="soft"
           :placeholder="$t('components.discussion.inputPlaceholder')"
           class="w-full text-base"
           autoresize
           :disabled="isSubmitting"
           @keydown.enter.exact="onEnterKey"
         />
-      </UFormField>
+      </SbFormField>
 
       <SbButton
         type="submit"

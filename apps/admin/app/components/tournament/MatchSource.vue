@@ -45,9 +45,9 @@ const save = async () => {
     :description="t('page.tournaments.matchSource.description')"
   >
     <template #body>
-      <UFormField :label="t('common.sourceUrl')" :error="sourceUrlError(value)">
-        <UInput v-model="value" type="url" autocomplete="off" class="w-full" />
-      </UFormField>
+      <SbFormField :label="t('common.sourceUrl')" :error="sourceUrlError(value)">
+        <SbInput v-model="value" type="url" autocomplete="off" class="w-full" />
+      </SbFormField>
     </template>
 
     <template #footer>

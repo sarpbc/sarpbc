@@ -103,7 +103,7 @@ const remove = (index: number) => {
       {{ $t("page.tournaments.form.playersPartner", { name: incomplete[0]?.name ?? "" }) }}
     </p>
 
-    <UInput
+    <SbInput
       v-model="query"
       class="w-full"
       :placeholder="$t('page.tournaments.form.playersSearch')"
