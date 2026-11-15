@@ -31,7 +31,7 @@ const facts = computed(() => {
       <HubListItem class="justify-between gap-4 text-sm">
         <dt class="shrink-0 text-muted">{{ t("page.match.detail.info.event") }}</dt>
         <dd class="min-w-0">
-          <SLink :to="$localePath(tournamentMatchesPath)" variant="muted" class="block truncate">
+          <SLink :to="$localePath(tournamentMatchesPath)" class="block truncate">
             {{ tournamentStageLabel(match.tournament) }}
           </SLink>
         </dd>

@@ -21,8 +21,8 @@ export type BadgeColor = (typeof BADGE_COLORS)[number];
 
 export type KbdSize = "sm" | "md";
 
-/** muted: secondary navigation. inline: links inside running text. accent: a link that must stand out. */
-export const LINK_VARIANTS = ["muted", "inline", "accent"] as const;
+/** primary: the one link a block leads to. secondary: every other link (navigation, names, meta). */
+export const LINK_VARIANTS = ["primary", "secondary"] as const;
 
 export type LinkVariant = (typeof LINK_VARIANTS)[number];
 

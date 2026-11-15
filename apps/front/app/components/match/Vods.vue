@@ -63,7 +63,6 @@ const linkLabel = (vod: MatchVod): string =>
               external
               target="_blank"
               rel="noopener noreferrer"
-              variant="muted"
               :aria-label="linkLabel(vod)"
               class="inline-flex items-center gap-1"
             >

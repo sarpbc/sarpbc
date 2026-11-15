@@ -21,7 +21,6 @@ const soloPlayer = computed(() =>
   <SLink
     v-if="soloPlayer"
     :to="$localePath(playerPath(soloPlayer.slug))"
-    variant="muted"
     class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-separator interactive-surface"
   >
     <TeamImg :team-name="entry.name" size="sm" />
@@ -55,7 +54,6 @@ const soloPlayer = computed(() =>
           v-if="entry.team"
           :id="titleId"
           :to="$localePath(teamPath(entry.team.slug))"
-          variant="muted"
           class="flex items-center gap-2 text-sm font-medium"
           :aria-label="t('page.tournaments.id.participants.viewTeam', { team: entry.name })"
         >
@@ -69,7 +67,6 @@ const soloPlayer = computed(() =>
             v-for="player in entry.players"
             :key="player.id"
             :to="$localePath(playerPath(player.slug))"
-            variant="muted"
             class="flex min-h-row-compact items-center gap-2 px-1 text-sm"
           >
             <FlagIcon :nationality="player.nationality" size="sm" />

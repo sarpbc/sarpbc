@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const { label = null, orientation = "horizontal" } = defineProps<{
-  /** Centered between two lines; horizontal separators only. */
+  /** Centered between two lines, in either orientation. */
   label?: string | null;
   orientation?: "horizontal" | "vertical";
 }>();
@@ -45,6 +45,17 @@ const { label = null, orientation = "horizontal" } = defineProps<{
     content: "";
     flex: 1;
     border-top: 1px solid var(--sb-border);
+  }
+
+  .sb-separator[data-orientation="vertical"][data-labelled] {
+    flex-direction: column;
+    border-inline-start: 0;
+  }
+
+  .sb-separator[data-orientation="vertical"][data-labelled]::before,
+  .sb-separator[data-orientation="vertical"][data-labelled]::after {
+    border-top: 0;
+    border-inline-start: 1px solid var(--sb-border);
   }
 
   .sb-separator__label {

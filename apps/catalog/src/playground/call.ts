@@ -1,10 +1,45 @@
-import type { PlaygroundProps } from "./playgrounds.ts";
+import { listenerOf } from "./model.ts";
 
-/** Formats props as the Vue call a developer would write. */
-export const callOf = (component: string, props: PlaygroundProps): string => {
-  const attributes = props.map(([name, value]) =>
-    value === true ? name : `${name}="${String(value)}"`,
-  );
+import type { Control, ControlValue } from "./model.ts";
 
-  return `<${component}${attributes.length === 0 ? "" : ` ${attributes.join(" ")}`} />`;
+export type TunedProp = readonly [control: Control, value: ControlValue];
+
+const attribute = ([control, value]: TunedProp): string => {
+  switch (control.kind) {
+    case "boolean": {
+      return value === true ? control.name : `:${control.name}="${String(value)}"`;
+    }
+
+    case "number": {
+      return `:${control.name}="${String(value)}"`;
+    }
+
+    case "select":
+    case "text":
+    case "toggle": {
+      return `${control.name}="${String(value)}"`;
+    }
+
+    default: {
+      return control satisfies never;
+    }
+  }
+};
+
+/** Formats the tuned props as the Vue call a developer would write. */
+export const callOf = (
+  component: string,
+  props: readonly TunedProp[],
+  models: readonly string[],
+  events: readonly string[],
+): string => {
+  const parts = [
+    ...models.map((name) =>
+      name === "modelValue" ? `v-model="value"` : `v-model:${name}="${name}"`,
+    ),
+    ...props.map(attribute),
+    ...events.map((name) => `@${name}="${listenerOf(name)}"`),
+  ];
+
+  return `<${component}${parts.length === 0 ? "" : ` ${parts.join(" ")}`} />`;
 };

@@ -559,7 +559,7 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
               <template v-if="proposal.sourceUrl">
                 <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
                 <dd class="break-all">
-                  <SLink variant="accent" :to="proposal.sourceUrl" external target="_blank">
+                  <SLink variant="primary" :to="proposal.sourceUrl" external target="_blank">
                     {{ proposal.sourceUrl }}
                   </SLink>
                 </dd>

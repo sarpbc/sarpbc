@@ -98,6 +98,8 @@ const formatOptions = computed(() => ({ useGrouping: grouping }));
 
   .sb-input-number__field {
     flex: 1;
+    /* Like SInput: without it the field's intrinsic 20ch keeps the control from shrinking. */
+    width: 100%;
     min-width: 0;
     height: 100%;
     padding: 0 0.25rem;

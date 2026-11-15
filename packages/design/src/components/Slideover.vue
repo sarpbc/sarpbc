@@ -107,7 +107,7 @@ const adapters = useDesignAdapters();
     gap: 0.75rem;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--sb-border);
   }
 
@@ -137,7 +137,7 @@ const adapters = useDesignAdapters();
   }
 
   .sb-slideover__footer {
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     border-top: 1px solid var(--sb-border);
   }
 }

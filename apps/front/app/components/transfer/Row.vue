@@ -31,7 +31,6 @@ const typeLabel = computed(() =>
     </time>
     <SLink
       :to="$localePath(playerPath(transfer.player.slug))"
-      variant="inline"
       class="flex min-w-0 flex-1 items-center gap-2"
     >
       <PlayerImg
@@ -56,7 +55,6 @@ const typeLabel = computed(() =>
     <SLink
       v-if="showTeam"
       :to="$localePath(teamPath(transfer.team.slug))"
-      variant="inline"
       class="flex w-28 min-w-0 shrink-0 items-center gap-2 sm:w-40"
     >
       <TeamImg :team-name="transfer.team.name" :logo="transfer.team" size="xs" />

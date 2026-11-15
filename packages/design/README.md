@@ -35,7 +35,7 @@ app.provide(DESIGN_ADAPTERS, { icon: Icon, link: NuxtLink });
 | `Input`          | One look · `icon`, `trailingIcon`, `loading`                                                                                                                                               |
 | `InputNumber`    | `v-model` · `min`, `max`, `step`, `grouping`                                                                                                                                               |
 | `Kbd`            | `size`: sm, md                                                                                                                                                                             |
-| `Link`           | `to` · `variant`: muted, inline, accent                                                                                                                                                    |
+| `Link`           | `to` · `variant`: primary, secondary                                                                                                                                                       |
 | `Modal`          | `title` (required), `description`, `dismissible`, `size`: md, lg, xl, 2xl · slots `body`, `footer`, `content`; default slot is the trigger                                                 |
 | `NavigationMenu` | `items` · `orientation`: horizontal, vertical                                                                                                                                              |
 | `Pagination`     | `v-model:page` · `total`, `itemsPerPage`                                                                                                                                                   |

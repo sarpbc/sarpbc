@@ -115,7 +115,7 @@ const socialLinks = computed<SocialLink[]>(() => [
             </h2>
             <ul class="flex flex-col items-start gap-2">
               <li v-for="link in column.links" :key="link.label">
-                <SLink :to="link.to" variant="muted" class="text-xs">
+                <SLink :to="link.to" class="text-xs">
                   {{ link.label }}
                 </SLink>
               </li>
@@ -146,7 +146,7 @@ const socialLinks = computed<SocialLink[]>(() => [
           class="col-span-2 flex flex-wrap items-start gap-x-4 gap-y-2 bg-default p-4 text-xs text-muted md:col-span-1 md:pr-0"
         >
           <li v-for="link in legalLinks" :key="link.label">
-            <SLink :to="link.to" variant="muted">
+            <SLink :to="link.to">
               {{ link.label }}
             </SLink>
           </li>

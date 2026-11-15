@@ -86,7 +86,7 @@ const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
         <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
           <span>
             {{ t("common.prizes.dataFrom") }}
-            <SLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SLink>
+            <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
           </span>
         </p>
       </HubCard>

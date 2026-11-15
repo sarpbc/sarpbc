@@ -145,7 +145,7 @@ const keepOpen = (event: Event): void => {
     gap: 0.75rem;
     align-items: flex-start;
     justify-content: space-between;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     border-bottom: 1px solid var(--sb-border);
   }
 
@@ -178,7 +178,7 @@ const keepOpen = (event: Event): void => {
     display: flex;
     gap: 0.375rem;
     align-items: center;
-    padding: 1rem;
+    padding: 0.75rem 1rem;
     border-top: 1px solid var(--sb-border);
   }
 

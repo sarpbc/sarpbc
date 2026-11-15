@@ -19,6 +19,7 @@ const {
   disabled?: boolean;
   /** Renders one radio per item; leave it out to place `SRadio` children yourself. */
   items?: readonly SelectOption<T>[] | null;
+  /** Ignored by the `text` variant, which is always one inline row. */
   orientation?: "vertical" | "horizontal";
   variant?: RadioVariant;
 }>();
@@ -31,7 +32,7 @@ provide(RADIO_GROUP, { variant: computed(() => variant) });
     v-model="model"
     class="sb-radio-group"
     :data-variant="variant"
-    :orientation="orientation"
+    :orientation="variant === 'text' ? 'horizontal' : orientation"
     :disabled="disabled"
   >
     <slot>

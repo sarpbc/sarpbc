@@ -187,7 +187,7 @@ const formatDates = (stage: CircuitStage): string => {
                   {{ $t("page.circuits.stages.startggNotice") }}
                 </span>
                 <SLink
-                  variant="accent"
+                  variant="primary"
                   :to="stage.sourceUrl"
                   external
                   target="_blank"

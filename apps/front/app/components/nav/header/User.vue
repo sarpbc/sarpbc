@@ -10,7 +10,6 @@ const { count: unreadCount } = useUnreadNotificationCount();
     <SLink
       v-if="!user"
       :to="$localePath('/login')"
-      variant="muted"
       class="text-lg md:text-sm font-medium md:font-normal"
     >
       {{ t("components.header.signin") }}
@@ -18,7 +17,6 @@ const { count: unreadCount } = useUnreadNotificationCount();
     <SLink
       v-else
       :to="$localePath('/profile')"
-      variant="muted"
       class="relative truncate text-lg md:text-sm font-medium md:font-normal"
     >
       {{ `${user.userName}` }}
@@ -32,11 +30,7 @@ const { count: unreadCount } = useUnreadNotificationCount();
       </SBadge>
     </SLink>
     <template #fallback>
-      <SLink
-        :to="$localePath('/login')"
-        variant="muted"
-        class="text-lg md:text-sm font-medium md:font-normal"
-      >
+      <SLink :to="$localePath('/login')" class="text-lg md:text-sm font-medium md:font-normal">
         {{ t("components.header.signin") }}
       </SLink>
     </template>

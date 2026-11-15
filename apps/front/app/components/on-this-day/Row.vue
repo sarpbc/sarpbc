@@ -114,7 +114,6 @@ const finalScore = computed(() =>
           <SLink
             v-if="sidePath(event.winner)"
             :to="sidePath(event.winner) ?? ''"
-            variant="inline"
             class="font-medium"
             translate="no"
           >
@@ -125,7 +124,7 @@ const finalScore = computed(() =>
           </span>
         </template>
         <template #tournament>
-          <SLink :to="tournamentPath(event.tournament)" variant="inline" translate="no">
+          <SLink :to="tournamentPath(event.tournament)" translate="no">
             {{ tournamentStageLabel(event.tournament) }}
           </SLink>
         </template>
@@ -148,14 +147,13 @@ const finalScore = computed(() =>
         <template #score>
           <SLink
             :to="localePath(matchPath(event.match.publicId, event.match.slug))"
-            variant="inline"
             class="tabular-nums"
           >
             {{ finalScore }}
           </SLink>
         </template>
         <template #tournament>
-          <SLink :to="tournamentPath(event.tournament)" variant="inline" translate="no">
+          <SLink :to="tournamentPath(event.tournament)" translate="no">
             {{ tournamentStageLabel(event.tournament) }}
           </SLink>
         </template>
@@ -168,17 +166,12 @@ const finalScore = computed(() =>
         scope="global"
       >
         <template #player>
-          <SLink
-            :to="localePath(playerPath(event.player.slug))"
-            variant="inline"
-            class="font-medium"
-            translate="no"
-          >
+          <SLink :to="localePath(playerPath(event.player.slug))" class="font-medium" translate="no">
             {{ event.player.name }}
           </SLink>
         </template>
         <template #team>
-          <SLink :to="localePath(teamPath(event.team.slug))" variant="inline" translate="no">
+          <SLink :to="localePath(teamPath(event.team.slug))" translate="no">
             {{ event.team.name }}
           </SLink>
         </template>
