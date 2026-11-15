@@ -1,3 +1,5 @@
+import type { ColumnDef, Row } from "@tanstack/vue-table";
+
 /*
  * Closed sets: every value here is a design decision, not an option. The UI is
  * dense by default; `sm` is for tables and toolbars.
@@ -63,4 +65,24 @@ export type RadioStatus = "success" | "danger";
 export interface SelectGroup<T extends SelectValue = SelectValue> {
   label: string;
   options: readonly SelectOption<T>[];
+}
+
+/** TanStack column definitions: `accessorKey`, `header`, `cell`, or an `id` filled by a `#<id>-cell` slot. */
+export type TableColumn<T> = ColumnDef<T>;
+
+export type TableRow<T> = Row<T>;
+
+export interface BreadcrumbItem {
+  label: string;
+  /** Omitted for a level that has no page of its own. */
+  to?: string;
+}
+
+export interface NavigationItem {
+  /** Set when the router alone cannot tell, e.g. a section spanning several paths. */
+  active?: boolean;
+  icon?: string;
+  label: string;
+  target?: "_blank";
+  to: string;
 }

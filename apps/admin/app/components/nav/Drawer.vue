@@ -5,8 +5,14 @@ const user = useUser();
 const links = useAdminNavLinks();
 const { loggingOut, logout } = useLogout();
 
-const items = computed(() =>
-  links.value.map((link) => ({ ...link, onSelect: () => (open.value = false) })),
+const route = useRoute();
+
+/* Following a link changes the route; the drawer has done its job. */
+watch(
+  () => route.fullPath,
+  () => {
+    open.value = false;
+  },
 );
 </script>
 
@@ -25,9 +31,9 @@ const items = computed(() =>
     />
 
     <template #body>
-      <UNavigationMenu
+      <SbNavigationMenu
         orientation="vertical"
-        :items="items"
+        :items="links"
         class="data-[orientation=vertical]:w-full"
       />
     </template>

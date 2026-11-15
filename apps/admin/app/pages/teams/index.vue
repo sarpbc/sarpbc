@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn, TableRow } from "@nuxt/ui";
+import type { TableColumn, TableRow } from "@sarpbc/design";
 import type { Team } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -123,7 +123,7 @@ const onSyncTeams = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div class="flex flex-row gap-2">
@@ -150,7 +150,7 @@ const onSyncTeams = async () => {
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <UTable
+        <SbTable
           :data="teams"
           :columns="columns"
           :loading="status === 'pending'"
@@ -171,12 +171,12 @@ const onSyncTeams = async () => {
               @click="(e) => openDeleteModal(e, row.original)"
             />
           </template>
-        </UTable>
+        </SbTable>
         <div v-if="total > limit" class="mt-4 flex w-full flex-row justify-between">
           <span class="text-muted">
             {{ t("page.teams.teamsCount", { count: total }) }}
           </span>
-          <UPagination
+          <SbPagination
             :page="page"
             :total="total"
             :items-per-page="limit"

@@ -65,7 +65,7 @@ const listVariant = computed<"upcoming" | "result">(() => {
           <h2 :id="headingId">
             {{ t(`page.${kind}.slug.matches.sectionTitle`) }}
           </h2>
-          <STabs
+          <SbTabs
             :model-value="tab"
             :items="tabItems"
             :ariaLabel="t(`page.${kind}.slug.matches.sectionTitle`)"

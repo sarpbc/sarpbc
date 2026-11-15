@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { CircuitInput, CircuitSummary } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -54,7 +54,7 @@ const create = async (input: CircuitInput) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -94,7 +94,7 @@ const create = async (input: CircuitInput) => {
         </div>
 
         <ClientOnly v-else>
-          <UTable :data="circuits" :columns="columns" sticky>
+          <SbTable :data="circuits" :columns="columns" sticky>
             <template #name-cell="{ row }">
               <SbLink :to="localePath(`/circuits/${row.original.id}`)" class="font-medium">
                 {{ row.original.name }}
@@ -110,7 +110,7 @@ const create = async (input: CircuitInput) => {
                 @click="circuitToDelete = row.original"
               />
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
     </DashboardContent>

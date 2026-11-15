@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { NavigationMenuItem } from "@nuxt/ui";
+import type { NavigationItem } from "@sarpbc/design";
 
 const { t } = useI18n();
 
@@ -56,7 +56,7 @@ watch(
   },
 );
 
-const items = computed<NavigationMenuItem[]>(() => [
+const items = computed<NavigationItem[]>(() => [
   {
     active: isNewsSection(),
     label: t("general.news"),
@@ -110,13 +110,7 @@ const menuToggleLabel = computed(() =>
             class="size-12 bg-transparent"
           />
         </SbLink>
-        <UNavigationMenu
-          :items="items"
-          color="neutral"
-          variant="link"
-          orientation="horizontal"
-          class="hidden md:flex"
-        />
+        <SbNavigationMenu :items="items" orientation="horizontal" class="hidden md:flex" />
       </div>
       <div class="h-full flex-row flex-1 justify-end items-center gap-4 hidden md:flex">
         <LazyNavHeaderSearch hydrate-on-visible />
@@ -146,10 +140,8 @@ const menuToggleLabel = computed(() =>
         <div
           class="w-full max-w-7xl px-9 mx-auto flex flex-col items-center justify-start gap-1.5 pt-6 pb-12 min-h-full"
         >
-          <UNavigationMenu
+          <SbNavigationMenu
             :items="items"
-            color="neutral"
-            variant="link"
             orientation="vertical"
             class="w-full [&_a]:text-lg [&_a]:font-medium [&_a]:py-3 [&_button]:text-lg [&_button]:font-medium [&_button]:py-3"
           />

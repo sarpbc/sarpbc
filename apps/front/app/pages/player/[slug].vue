@@ -256,7 +256,7 @@ setPageSeo({
       </SCrossCard>
 
       <div class="flex h-row items-center justify-center px-2">
-        <STabs
+        <SbTabs
           :model-value="tab"
           :items="tabItems"
           :ariaLabel="t('page.player.slug.tabsLabel')"

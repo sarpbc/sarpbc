@@ -135,7 +135,7 @@ setPageSeo({
       <TeamRosterSection :players="activeRoster" />
 
       <div class="flex h-row items-center justify-center px-2">
-        <STabs
+        <SbTabs
           :model-value="tab"
           :items="tabItems"
           :ariaLabel="t('page.team.slug.tabsLabel')"

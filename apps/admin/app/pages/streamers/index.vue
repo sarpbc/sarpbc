@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import {
   TRACKED_STREAMER_NAME_MAX_LENGTH,
   TWITCH_LOGIN_MAX_LENGTH,
@@ -128,7 +128,7 @@ const confirmRemove = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -179,7 +179,7 @@ const confirmRemove = async () => {
           </div>
 
           <ClientOnly>
-            <UTable v-if="streamers.length > 0" :data="streamers" :columns="columns" sticky>
+            <SbTable v-if="streamers.length > 0" :data="streamers" :columns="columns" sticky>
               <template #login-cell="{ row }">
                 <SbLink
                   :to="twitchChannelUrl(row.original.login)"
@@ -199,7 +199,7 @@ const confirmRemove = async () => {
                   @click="openRemoveModal(row.original)"
                 />
               </template>
-            </UTable>
+            </SbTable>
           </ClientOnly>
         </template>
       </div>

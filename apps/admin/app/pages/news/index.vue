@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { NewsArticleAdmin, NewsType } from "@sarpbc/types";
-import type { MenuItem } from "@sarpbc/design";
-import type { TableColumn, TableRow } from "@nuxt/ui";
+import type { MenuItem, TableColumn, TableRow } from "@sarpbc/design";
 import { getApiErrorMessage, hasFrenchTranslation } from "@sarpbc/utils";
 
 const { t } = useI18n();
@@ -183,7 +182,7 @@ const onDeleted = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="items" />
+      <SbBreadcrumb :items="items" />
     </template>
     <template #action>
       <SbButton
@@ -199,7 +198,7 @@ const onDeleted = async () => {
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <UTable
+        <SbTable
           :data="newsArticles"
           :columns="columns"
           :loading="status === 'pending'"
@@ -220,12 +219,12 @@ const onDeleted = async () => {
               </SbDropdownMenu>
             </div>
           </template>
-        </UTable>
+        </SbTable>
         <div v-if="total > limit" class="flex w-full flex-row justify-between">
           <span class="text-muted">
             {{ t("page.news.articlesCount", { count: total }) }}
           </span>
-          <UPagination
+          <SbPagination
             :page="page"
             :total="total"
             :items-per-page="limit"

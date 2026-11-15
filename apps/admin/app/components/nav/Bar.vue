@@ -103,7 +103,7 @@ defineShortcuts({
       <span class="text-sm font-semibold tracking-tight">{{ $t("page.nav.admin") }}</span>
     </SbLink>
 
-    <UNavigationMenu
+    <SbNavigationMenu
       orientation="vertical"
       :items="links"
       class="min-h-0 flex-1 overflow-y-auto data-[orientation=vertical]:w-full"

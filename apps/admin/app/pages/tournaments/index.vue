@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { getApiErrorMessage, tournamentStageLabel } from "@sarpbc/utils";
-import type { TableColumn, TableRow } from "@nuxt/ui";
+import type { TableColumn, TableRow } from "@sarpbc/design";
 import type { TournamentListItem } from "@sarpbc/types";
 
 const { t } = useI18n();
@@ -89,7 +89,7 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <div class="flex flex-row flex-wrap gap-2">
@@ -127,7 +127,7 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
         @retry="refresh()"
       />
       <ClientOnly v-else>
-        <UTable
+        <SbTable
           :data="tournaments"
           :columns="columns"
           :loading="status === 'pending'"
@@ -165,7 +165,7 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
               />
             </div>
           </template>
-        </UTable>
+        </SbTable>
 
         <div
           v-if="status !== 'pending' && tournaments.length > 0"
@@ -174,7 +174,7 @@ const handleSyncTournament = async (e: Event, tournamentId: string) => {
           <span class="text-muted">
             {{ t("page.tournaments.tournamentsCount", { count: total }) }}
           </span>
-          <UPagination
+          <SbPagination
             v-if="total > limit"
             :page="page"
             :total="total"

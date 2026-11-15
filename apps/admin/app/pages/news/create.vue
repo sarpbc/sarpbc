@@ -84,7 +84,7 @@ const saveArticle = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="items" />
+      <SbBreadcrumb :items="items" />
     </template>
     <template #action>
       <SbModal

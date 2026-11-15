@@ -14,6 +14,10 @@
     "matchesUnavailable": "Impossible de charger ces matchs."
   },
   "design": {
-    "close": "Fermer"
+    "breadcrumb": "Fil d’Ariane",
+    "close": "Fermer",
+    "nextPage": "Page suivante",
+    "pagination": "Pagination",
+    "previousPage": "Page précédente"
   }
 }

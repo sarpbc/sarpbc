@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { ContractRole, PlayerContract } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -212,7 +212,7 @@ const contractModalTitle = computed(() =>
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -277,7 +277,7 @@ const contractModalTitle = computed(() =>
             :message="getApiErrorMessage(contractsError) ?? $t('common.loadFailed')"
             @retry="refreshContracts()"
           />
-          <UTable v-else :data="contracts" :columns="contractColumns">
+          <SbTable v-else :data="contracts" :columns="contractColumns">
             <template #empty>
               {{ $t("page.players.contracts.empty") }}
             </template>
@@ -298,7 +298,7 @@ const contractModalTitle = computed(() =>
                 />
               </div>
             </template>
-          </UTable>
+          </SbTable>
         </div>
       </div>
     </DashboardContent>

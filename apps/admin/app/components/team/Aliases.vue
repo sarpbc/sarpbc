@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { TeamAlias, TeamAliasInput } from "@sarpbc/types";
 import {
   parseTeamAlias,
@@ -192,7 +192,7 @@ const submit = async () => {
     </div>
     <p class="mb-3 text-sm text-muted">{{ t("page.teams.aliases.description") }}</p>
 
-    <UTable :data="aliases" :columns="columns">
+    <SbTable :data="aliases" :columns="columns">
       <template #empty>{{ t("page.teams.aliases.empty") }}</template>
       <template #period-cell="{ row }">{{ period(row.original) }}</template>
       <template #sourceUrl-cell="{ row }">
@@ -224,7 +224,7 @@ const submit = async () => {
           />
         </div>
       </template>
-    </UTable>
+    </SbTable>
 
     <SbModal
       v-model:open="isOpen"

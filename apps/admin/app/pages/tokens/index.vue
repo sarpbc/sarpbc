@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import { TOKEN_NAME_MAX_LENGTH, getApiErrorMessage } from "@sarpbc/utils";
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { PatToken } from "@sarpbc/types";
 
 const { t } = useI18n();
@@ -157,7 +157,7 @@ const confirmRevoke = async () => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -204,7 +204,7 @@ const confirmRevoke = async () => {
           </div>
 
           <ClientOnly>
-            <UTable v-if="tokens.length > 0" :data="tokens" :columns="columns" sticky>
+            <SbTable v-if="tokens.length > 0" :data="tokens" :columns="columns" sticky>
               <template #actions-cell="{ row }">
                 <SbButton
                   variant="tertiary"
@@ -215,7 +215,7 @@ const confirmRevoke = async () => {
                   @click="openRevokeModal(row.original)"
                 />
               </template>
-            </UTable>
+            </SbTable>
           </ClientOnly>
         </template>
       </div>

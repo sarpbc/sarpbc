@@ -4,7 +4,11 @@ import type { Component, InjectionKey } from "vue";
 
 /** Every string the library itself renders; apps translate them. */
 export const DESIGN_MESSAGES = {
+  breadcrumb: "Breadcrumb",
   close: "Close",
+  nextPage: "Next page",
+  pagination: "Pagination",
+  previousPage: "Previous page",
 } as const;
 
 export type DesignMessage = keyof typeof DESIGN_MESSAGES;

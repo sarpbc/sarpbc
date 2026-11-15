@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn } from "@nuxt/ui";
+import type { TableColumn } from "@sarpbc/design";
 import type { League, LeagueInput } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -127,7 +127,7 @@ const uploadedImageUrl = computed({
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -148,7 +148,7 @@ const uploadedImageUrl = computed({
         />
 
         <ClientOnly v-else>
-          <UTable :data="data" :columns="columns" :loading="status === 'pending'" sticky>
+          <SbTable :data="data" :columns="columns" :loading="status === 'pending'" sticky>
             <template #empty>
               {{ $t("page.tournaments.leagues.empty") }}
             </template>
@@ -183,7 +183,7 @@ const uploadedImageUrl = computed({
                 />
               </div>
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
     </DashboardContent>

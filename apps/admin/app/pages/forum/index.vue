@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn, TableRow } from "@nuxt/ui";
+import type { TableColumn, TableRow } from "@sarpbc/design";
 import type { ForumPostListItem } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -64,7 +64,7 @@ const openDeleteModal = (e: Event, post: ForumPostListItem) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>
@@ -84,7 +84,7 @@ const openDeleteModal = (e: Event, post: ForumPostListItem) => {
         </p>
 
         <ClientOnly v-if="status !== 'error'">
-          <UTable
+          <SbTable
             v-if="posts.length > 0 || status === 'pending'"
             :data="posts"
             :columns="columns"
@@ -102,7 +102,7 @@ const openDeleteModal = (e: Event, post: ForumPostListItem) => {
                 @click="(e) => openDeleteModal(e, row.original)"
               />
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
 

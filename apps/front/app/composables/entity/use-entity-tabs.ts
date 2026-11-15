@@ -1,4 +1,4 @@
-import type { TabsItem } from "@nuxt/ui";
+import type { SelectOption } from "@sarpbc/design";
 import type { LocationQuery } from "vue-router";
 import type { EntityKind } from "~/types/entity";
 
@@ -27,7 +27,7 @@ export const useEntityTabs = (kind: EntityKind) => {
 
   const tab = computed(() => parseProfileTab(route.query.tab));
 
-  const tabItems = computed<TabsItem[]>(() =>
+  const tabItems = computed<SelectOption<string>[]>(() =>
     PROFILE_TABS.map((value) => ({ label: t(`page.${kind}.slug.tabs.${value}`), value })),
   );
 

@@ -66,7 +66,7 @@ const replayLabel = computed(() =>
 <template>
   <SCard v-if="game" class="flex flex-col">
     <div v-if="games.length > 1" class="flex h-row items-center justify-center px-2">
-      <STabs v-model="selected" :items="tabs" :ariaLabel="t('page.match.detail.stats.games')" />
+      <SbTabs v-model="selected" :items="tabs" :ariaLabel="t('page.match.detail.stats.games')" />
     </div>
 
     <div class="overflow-x-auto">

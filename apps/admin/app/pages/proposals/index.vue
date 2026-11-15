@@ -465,7 +465,7 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
 
     <DashboardContent>

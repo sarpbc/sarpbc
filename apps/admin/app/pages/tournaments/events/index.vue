@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { TableColumn, TableRow } from "@nuxt/ui";
+import type { TableColumn, TableRow } from "@sarpbc/design";
 import type { ManualEvent } from "@sarpbc/types";
 import { getApiErrorMessage } from "@sarpbc/utils";
 
@@ -45,7 +45,7 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
 <template>
   <NuxtLayout name="header">
     <template #breadcrumb>
-      <UBreadcrumb :items="breadcrumbItems" />
+      <SbBreadcrumb :items="breadcrumbItems" />
     </template>
     <template #action>
       <SbButton
@@ -66,7 +66,7 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
         />
 
         <ClientOnly v-else>
-          <UTable
+          <SbTable
             :data="data"
             :columns="columns"
             :loading="status === 'pending'"
@@ -82,7 +82,7 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
               </span>
               <span v-else>{{ row.original.stages.map((stage) => stage.name).join(", ") }}</span>
             </template>
-          </UTable>
+          </SbTable>
         </ClientOnly>
       </div>
     </DashboardContent>
