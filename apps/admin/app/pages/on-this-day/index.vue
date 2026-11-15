@@ -101,7 +101,7 @@ const save = async (input: OnThisDayFactInput) => {
           {{ $t("page.onThisDay.loading") }}
         </p>
 
-        <LoadError
+        <SbErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.onThisDay.loadError')"
           @retry="refresh()"

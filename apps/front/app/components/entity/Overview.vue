@@ -22,14 +22,14 @@ const recentTrophies = computed(() => trophies.slice(0, OVERVIEW_LIMIT));
     v-if="recentMatches.length > 0 || recentTrophies.length > 0"
     class="grid w-full gap-8 sm:grid-cols-2"
   >
-    <SRail v-if="recentMatches.length > 0" :title="t('components.entity.overview.recentMatches')">
-      <SCard>
+    <HubRail v-if="recentMatches.length > 0" :title="t('components.entity.overview.recentMatches')">
+      <HubCard>
         <MatchRow v-for="match in recentMatches" :key="match.id" :match="match" />
-      </SCard>
-    </SRail>
-    <SRail v-if="recentTrophies.length > 0" :title="t(`page.${kind}.slug.trophies.title`)">
-      <SCard>
-        <SListItem
+      </HubCard>
+    </HubRail>
+    <HubRail v-if="recentTrophies.length > 0" :title="t(`page.${kind}.slug.trophies.title`)">
+      <HubCard>
+        <HubListItem
           v-for="trophy in recentTrophies"
           :key="trophy.id"
           :to="$localePath(trophy.path)"
@@ -45,8 +45,8 @@ const recentTrophies = computed(() => trophies.slice(0, OVERVIEW_LIMIT));
           >
             {{ mediumDate.format(new Date(trophy.endAt)) }}
           </time>
-        </SListItem>
-      </SCard>
-    </SRail>
+        </HubListItem>
+      </HubCard>
+    </HubRail>
   </div>
 </template>

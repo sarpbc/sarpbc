@@ -56,22 +56,22 @@ watch(
 
 <template>
   <div v-if="season" class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ season.name }}</template>
       <template #meta>
         <SbLink :to="$localePath('/seasons')" variant="muted">
           {{ t("page.seasons.archive.allSeasons") }}
         </SbLink>
       </template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <section aria-labelledby="season-winner-title">
-      <SRail>
+      <HubRail>
         <template #caption>
           <h2 id="season-winner-title">{{ t("page.seasons.archive.winner.title") }}</h2>
         </template>
-        <SCard v-if="season.winner">
-          <SListItem :to="$localePath(teamPath(season.winner.slug))" class="min-w-0 gap-2">
+        <HubCard v-if="season.winner">
+          <HubListItem :to="$localePath(teamPath(season.winner.slug))" class="min-w-0 gap-2">
             <Icon
               name="i-fluent-trophy-24-filled"
               class="size-5 shrink-0 text-primary"
@@ -81,23 +81,23 @@ watch(
             <span class="truncate text-sm font-medium text-highlighted" translate="no">
               {{ season.winner.name }}
             </span>
-          </SListItem>
-        </SCard>
-        <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SEmptyState
+          </HubListItem>
+        </HubCard>
+        <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+          <SbEmptyState
             icon="i-fluent-trophy-24-regular"
             :title="t('page.seasons.archive.winner.empty')"
           />
-        </SCard>
-      </SRail>
+        </HubCard>
+      </HubRail>
     </section>
 
     <section aria-labelledby="season-format-title">
-      <SRail>
+      <HubRail>
         <template #caption>
           <h2 id="season-format-title">{{ t("page.seasons.archive.format.title") }}</h2>
         </template>
-        <SCard v-if="season.format.summary || season.format.phases.length" class="h-row-grid">
+        <HubCard v-if="season.format.summary || season.format.phases.length" class="h-row-grid">
           <div class="flex flex-col gap-4 px-2 py-4 text-sm">
             <p v-if="season.format.summary" class="whitespace-pre-line text-pretty">
               {{ season.format.summary }}
@@ -114,31 +114,31 @@ watch(
               </li>
             </ol>
           </div>
-        </SCard>
-        <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SEmptyState
+        </HubCard>
+        <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+          <SbEmptyState
             icon="i-fluent-text-bullet-list-24-regular"
             :title="t('page.seasons.archive.format.empty')"
           />
-        </SCard>
-      </SRail>
+        </HubCard>
+      </HubRail>
     </section>
 
     <section aria-labelledby="season-participants-title">
-      <SRail>
+      <HubRail>
         <template #caption>
           <h2 id="season-participants-title">
             {{ t("page.seasons.archive.participants.title") }}
           </h2>
         </template>
-        <SCard v-if="season.participants.length">
+        <HubCard v-if="season.participants.length">
           <ul>
             <li
               v-for="participant in season.participants"
               :key="participant.team.id"
               class="flex flex-col border-t border-separator first:border-t-0"
             >
-              <SListItem :to="$localePath(teamPath(participant.team.slug))" class="min-w-0 gap-2">
+              <HubListItem :to="$localePath(teamPath(participant.team.slug))" class="min-w-0 gap-2">
                 <TeamImg :team-name="participant.team.name" :logo="participant.team" size="xs" />
                 <span class="truncate text-sm font-medium text-highlighted" translate="no">
                   {{ participant.team.name }}
@@ -149,7 +149,7 @@ watch(
                 >
                   {{ t("page.seasons.archive.participants.winner") }}
                 </span>
-              </SListItem>
+              </HubListItem>
               <div class="flex flex-col gap-2 px-2 pb-4 text-sm">
                 <p v-if="participant.pathNote" class="text-pretty">{{ participant.pathNote }}</p>
                 <ol v-if="participant.path.length" class="flex flex-col gap-1">
@@ -179,24 +179,24 @@ watch(
               </div>
             </li>
           </ul>
-        </SCard>
-        <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-          <SEmptyState
+        </HubCard>
+        <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+          <SbEmptyState
             icon="i-fluent-people-team-24-regular"
             :title="t('page.seasons.archive.participants.empty')"
             :hint="t('page.seasons.archive.participants.emptyHint')"
           />
-        </SCard>
-      </SRail>
+        </HubCard>
+      </HubRail>
     </section>
 
     <section v-if="season.awards.length" aria-labelledby="season-awards-title">
-      <SRail>
+      <HubRail>
         <template #caption>
           <h2 id="season-awards-title">{{ t("page.seasons.archive.awards.title") }}</h2>
         </template>
-        <SCard>
-          <SListItem
+        <HubCard>
+          <HubListItem
             v-for="award in season.awards"
             :key="`${award.awardType}-${award.region ?? ''}`"
             :to="award.sourceUrl"
@@ -223,9 +223,9 @@ watch(
                 aria-hidden="true"
               />
             </div>
-          </SListItem>
-        </SCard>
-      </SRail>
+          </HubListItem>
+        </HubCard>
+      </HubRail>
     </section>
   </div>
 </template>

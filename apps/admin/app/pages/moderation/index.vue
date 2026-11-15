@@ -102,7 +102,7 @@ const onReplyDeleted = async () => {
           </div>
         </div>
 
-        <LoadError
+        <SbErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.moderation.loadError')"
           @retry="refresh()"

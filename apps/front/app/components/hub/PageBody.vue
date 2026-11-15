@@ -15,12 +15,12 @@ defineSlots<{
 </script>
 
 <template>
-  <SRail caption="lead" :caption-align="captionAlign" :class="className">
+  <HubRail caption="lead" :caption-align="captionAlign" :class="className">
     <template v-if="$slots.caption" #caption>
       <slot name="caption" />
     </template>
     <div class="w-full flex flex-col gap-4">
       <slot />
     </div>
-  </SRail>
+  </HubRail>
 </template>

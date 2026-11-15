@@ -68,15 +68,15 @@ setPageSeo({
 
 <template>
   <div v-if="week" class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ title }}</template>
       <template #meta>
         <span>{{ t("page.home.shortNewsCount", week.items.length) }}</span>
         <span v-if="isCurrentWeek && rangeLabel" class="text-muted">{{ rangeLabel }}</span>
       </template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
-    <SCard class="w-full overflow-hidden">
+    <HubCard class="w-full overflow-hidden">
       <article
         v-for="item in week.items"
         :id="item.slug"
@@ -98,6 +98,6 @@ setPageSeo({
           <MDC :value="item.content" :class="NEWS_PROSE_CLASS" />
         </div>
       </article>
-    </SCard>
+    </HubCard>
   </div>
 </template>

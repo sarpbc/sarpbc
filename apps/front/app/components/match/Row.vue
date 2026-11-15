@@ -114,7 +114,7 @@ const liveScoreClass = (score: number | null, other: number | null): string => {
 </script>
 
 <template>
-  <SListItem :size="compact ? 'compact' : 'default'">
+  <HubListItem :size="compact ? 'compact' : 'default'">
     <div
       class="grid w-full min-w-0 grid-cols-[minmax(0,1fr)_auto_auto_auto_minmax(0,1fr)] items-center gap-x-1.5 text-xs"
     >
@@ -162,7 +162,7 @@ const liveScoreClass = (score: number | null, other: number | null): string => {
         {{ shortTeamName(teamBName) }}
       </span>
     </div>
-  </SListItem>
+  </HubListItem>
 </template>
 
 <style scoped>

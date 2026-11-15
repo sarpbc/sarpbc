@@ -10,7 +10,7 @@ const {
 } = defineProps<{
   targetType: ReplyTargetType;
   targetId: string;
-  /** Sits under an `SRail` section caption, which already draws the top hairline. */
+  /** Sits under an `HubRail` section caption, which already draws the top hairline. */
   flushTop?: boolean;
 }>();
 
@@ -144,9 +144,9 @@ onMounted(() => {
       />
     </div>
 
-    <SCard v-else-if="error">
-      <SErrorState :message="t('components.discussion.error')" @retry="refresh()" />
-    </SCard>
+    <HubCard v-else-if="error">
+      <SbErrorState :message="t('components.discussion.error')" @retry="refresh()" />
+    </HubCard>
 
     <template v-else>
       <!-- Boxed comments overlap the caption hairline rather than stacking a second rule. -->
@@ -176,13 +176,13 @@ onMounted(() => {
         </div>
       </div>
 
-      <SCard class="min-h-row h-row-grid px-3" :class="user ? 'pb-3' : 'flex items-center'">
+      <HubCard class="min-h-row h-row-grid px-3" :class="user ? 'pb-3' : 'flex items-center'">
         <DiscussionCommentComposer
           :target-type="targetType"
           :target-id="targetId"
           @comment-created="onChanged"
         />
-      </SCard>
+      </HubCard>
     </template>
   </section>
 </template>

@@ -350,7 +350,7 @@ watch(
 </script>
 
 <template>
-  <SHubPageBody caption-align="start">
+  <HubPageBody caption-align="start">
     <template #caption>
       <div class="flex w-full min-w-0 flex-col gap-1">
         <h1 class="min-w-0 truncate">
@@ -377,17 +377,21 @@ watch(
       </div>
     </template>
 
-    <SCard v-if="tournamentPending && !tournament" class="min-h-row-triple p-4" aria-live="polite">
+    <HubCard
+      v-if="tournamentPending && !tournament"
+      class="min-h-row-triple p-4"
+      aria-live="polite"
+    >
       <div class="flex flex-col gap-3 animate-pulse">
         <SbSkeleton class="h-6 w-48 mx-auto" />
         <SbSkeleton class="h-16 w-full" />
         <SbSkeleton class="h-16 w-full" />
       </div>
-    </SCard>
+    </HubCard>
 
-    <SCard v-else-if="tournamentError" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.game.pickems.detail.error')" @retry="refreshTournament()" />
-    </SCard>
+    <HubCard v-else-if="tournamentError" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.game.pickems.detail.error')" @retry="refreshTournament()" />
+    </HubCard>
 
     <template v-else-if="tournament">
       <section
@@ -398,7 +402,7 @@ watch(
         <h2 id="pickem-leaderboard-title" class="sr-only">
           {{ t("page.game.pickems.detail.tabs.leaderboard") }}
         </h2>
-        <SCard class="flex min-h-row-triple flex-col p-4">
+        <HubCard class="flex min-h-row-triple flex-col p-4">
           <div
             v-if="sessionReady && !isSignedIn"
             class="mb-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
@@ -445,10 +449,10 @@ watch(
           <p v-else class="m-auto text-sm text-muted">
             {{ t("page.game.pickems.detail.leaderboard.empty") }}
           </p>
-        </SCard>
+        </HubCard>
       </section>
 
-      <SCard v-else-if="matchesByDay.length === 0" class="flex min-h-row-triple flex-col">
+      <HubCard v-else-if="matchesByDay.length === 0" class="flex min-h-row-triple flex-col">
         <div
           v-if="sessionReady && !isSignedIn"
           class="flex flex-col gap-3 border-b border-separator p-4 sm:flex-row sm:items-center sm:justify-between"
@@ -465,10 +469,10 @@ watch(
             {{ t("page.game.pickems.detail.emptyMatches") }}
           </p>
         </div>
-      </SCard>
+      </HubCard>
 
       <div v-else class="w-full flex flex-col">
-        <SCard
+        <HubCard
           v-if="sessionReady && !isSignedIn"
           class="border border-primary/30 bg-elevated p-4 md:p-5"
         >
@@ -480,7 +484,7 @@ watch(
               {{ t("page.game.pickems.detail.signInCta") }}
             </SbButton>
           </div>
-        </SCard>
+        </HubCard>
         <div
           v-for="dayGroup in matchesByDay"
           :key="dayGroup.date.toDateString()"
@@ -489,8 +493,8 @@ watch(
           <h2 class="flex h-row min-h-row items-end pb-1 pl-2 text-sm font-medium text-toned">
             {{ formatDayHeaderDate(dayGroup.date, locale) }}
           </h2>
-          <SCard>
-            <SListItem
+          <HubCard>
+            <HubListItem
               v-for="match in dayGroup.matches"
               :id="`pickem-match-${match.id}`"
               :key="match.id"
@@ -536,10 +540,10 @@ watch(
                   {{ slotName(match.participants, 1) }}
                 </SbRadio>
               </SbRadioGroup>
-            </SListItem>
-          </SCard>
+            </HubListItem>
+          </HubCard>
         </div>
       </div>
     </template>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

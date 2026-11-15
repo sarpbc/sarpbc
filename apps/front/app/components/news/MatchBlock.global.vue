@@ -93,8 +93,8 @@ const stateLabel = useMatchStateLabel(t, (beginAt) =>
     role="group"
     :aria-label="t('newsTag.matches')"
   >
-    <SCard v-if="pending" aria-busy="true">
-      <SListItem v-for="index in 2" :key="index">
+    <HubCard v-if="pending" aria-busy="true">
+      <HubListItem v-for="index in 2" :key="index">
         <div class="flex w-full items-center justify-between gap-3">
           <span class="flex flex-col gap-1.5">
             <SbSkeleton class="h-3 w-28" />
@@ -102,8 +102,8 @@ const stateLabel = useMatchStateLabel(t, (beginAt) =>
           </span>
           <SbSkeleton class="h-3 w-10" />
         </div>
-      </SListItem>
-    </SCard>
+      </HubListItem>
+    </HubCard>
 
     <template v-else-if="items?.length">
       <div class="flex w-full flex-col" data-markdown-exclude>

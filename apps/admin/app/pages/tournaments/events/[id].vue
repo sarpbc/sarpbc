@@ -126,7 +126,7 @@ const handleSubmit = async () => {
           {{ $t("page.tournaments.loading") }}
         </p>
 
-        <LoadError
+        <SbErrorState
           v-else-if="status === 'error' || !event"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.events.loadOneError')"
           @retry="refresh()"

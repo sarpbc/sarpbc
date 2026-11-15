@@ -141,7 +141,7 @@ const uploadedImageUrl = computed({
       <div class="flex flex-col gap-4">
         <p class="max-w-2xl text-sm text-muted">{{ $t("page.tournaments.leagues.subtitle") }}</p>
 
-        <LoadError
+        <SbErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.leagues.loadError')"
           @retry="refresh()"

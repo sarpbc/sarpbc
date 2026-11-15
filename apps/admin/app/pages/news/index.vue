@@ -186,7 +186,7 @@ const onDeleted = async () => {
       />
     </template>
     <DashboardContent>
-      <LoadError
+      <SbErrorState
         v-if="status === 'error'"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"

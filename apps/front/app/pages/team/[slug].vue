@@ -94,10 +94,10 @@ setPageSeo({
 </script>
 
 <template>
-  <SHubPageBody>
+  <HubPageBody>
     <div v-if="pending" class="w-full flex min-w-0 flex-col" aria-live="polite">
       <span class="sr-only">{{ t("page.team.slug.loadingTeam") }}</span>
-      <SCard class="flex w-full min-w-0 flex-col">
+      <HubCard class="flex w-full min-w-0 flex-col">
         <div class="flex min-h-row-stack w-full items-center gap-4 p-4 animate-pulse">
           <div class="size-16 shrink-0 bg-elevated" />
           <div class="flex flex-col gap-2">
@@ -106,15 +106,15 @@ setPageSeo({
           </div>
         </div>
         <div class="h-row border-t border-separator" />
-      </SCard>
+      </HubCard>
     </div>
 
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.team.slug.failedToLoadTeamData')" @retry="refresh()" />
-    </SCard>
+    <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.team.slug.failedToLoadTeamData')" @retry="refresh()" />
+    </HubCard>
 
     <div v-else-if="team" class="w-full flex min-w-0 flex-col gap-8">
-      <SCrossCard class="w-full min-w-0">
+      <HubCrossCard class="w-full min-w-0">
         <div class="flex w-full min-w-0 flex-row items-center gap-6 px-6 py-8">
           <TeamImg class="shrink-0" :team-name="team.name" :logo="team" size="lg" priority />
           <div class="flex min-w-0 flex-col items-start gap-1">
@@ -130,7 +130,7 @@ setPageSeo({
             />
           </div>
         </div>
-      </SCrossCard>
+      </HubCrossCard>
 
       <TeamRosterSection :players="activeRoster" />
 
@@ -196,5 +196,5 @@ setPageSeo({
         @retry="refreshTrophies()"
       />
     </div>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

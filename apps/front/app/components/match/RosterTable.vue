@@ -50,17 +50,17 @@ const showCredit = computed(() => startgg && lineups.length > 0);
 <template>
   <div class="flex min-w-0 flex-col">
     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
-      <SCard v-for="column in rows" :key="column.participant.id" class="flex min-w-0 flex-col">
-        <SListItem size="default" class="min-w-0 gap-2">
+      <HubCard v-for="column in rows" :key="column.participant.id" class="flex min-w-0 flex-col">
+        <HubListItem size="default" class="min-w-0 gap-2">
           <TeamImg
             :team-name="participantName(column.participant)"
             :logo="column.participant.team"
             size="xs"
           />
           <h3 class="truncate text-xs text-default">{{ participantName(column.participant) }}</h3>
-        </SListItem>
+        </HubListItem>
         <template v-for="(player, rowIndex) in column.cells" :key="rowIndex">
-          <SListItem
+          <HubListItem
             v-if="player"
             size="default"
             :to="$localePath(playerPath(player.slug))"
@@ -74,14 +74,14 @@ const showCredit = computed(() => startgg && lineups.length > 0);
             <SbBadge v-if="player.standIn" class="shrink-0">
               {{ t("page.match.detail.lineups.standIn") }}
             </SbBadge>
-          </SListItem>
-          <SListItem v-else size="default" class="min-w-0">
+          </HubListItem>
+          <HubListItem v-else size="default" class="min-w-0">
             <span v-if="rowIndex === 0" class="self-center truncate text-sm text-muted">
               {{ t("page.match.detail.noRoster") }}
             </span>
-          </SListItem>
+          </HubListItem>
         </template>
-      </SCard>
+      </HubCard>
     </div>
     <p v-if="hasStandIn" class="flex h-row items-center px-2 text-xs text-muted">
       {{ t("page.match.detail.lineups.standInHint") }}

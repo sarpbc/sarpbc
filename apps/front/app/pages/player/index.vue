@@ -111,46 +111,46 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ pageTitle }}</template>
       <template v-if="totalPlayers > 0" #meta>
         <span>{{ t("page.hub.headers.playersTotal", { count: totalPlayers }) }}</span>
       </template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <div>
-      <SLetterFilter
+      <HubLetterFilter
         :active="start"
         :to="(letter) => ({ path: $localePath('/player'), query: getLetterQuery(letter) })"
       />
 
-      <SCard v-if="pending" aria-live="polite">
-        <SListItem v-for="index in 8" :key="index" class="gap-3">
+      <HubCard v-if="pending" aria-live="polite">
+        <HubListItem v-for="index in 8" :key="index" class="gap-3">
           <SbSkeleton class="size-7 shrink-0" />
           <SbSkeleton class="h-3 max-w-40 flex-1" />
           <SbSkeleton class="h-3 w-20" />
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SErrorState :message="t('page.players.index.error')" @retry="refresh()" />
-      </SCard>
+      <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+        <SbErrorState :message="t('page.players.index.error')" @retry="refresh()" />
+      </HubCard>
 
-      <SCard v-else-if="players.length > 0">
+      <HubCard v-else-if="players.length > 0">
         <PlayerLink v-for="player in players" :key="player.id" :player="player" />
-      </SCard>
+      </HubCard>
 
-      <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SEmptyState
+      <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+        <SbEmptyState
           icon="i-fluent-person-delete-24-regular"
           :title="t('page.players.index.noPlayersFound')"
           :hint="
             start ? t('page.players.letter.noPlayersStartingWith', { letter: start }) : undefined
           "
         />
-      </SCard>
+      </HubCard>
 
-      <SPagination
+      <HubPagination
         v-if="totalPages > 1"
         :current-page="currentPage"
         :total-pages="totalPages"

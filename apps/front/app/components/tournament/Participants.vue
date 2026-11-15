@@ -15,7 +15,7 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
 
 <template>
   <section class="w-full" :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId" class="text-balance">
           {{
@@ -44,7 +44,7 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
         </div>
       </div>
 
-      <SCard v-else>
+      <HubCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <Icon name="i-fluent-people-team-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -60,7 +60,7 @@ const headingId = computed(() => `tournament-participants-title-${tournament.id}
             {{ t("page.tournaments.id.participants.emptyHint") }}
           </p>
         </div>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

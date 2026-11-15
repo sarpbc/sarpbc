@@ -18,6 +18,7 @@
     "close": "Fermer",
     "nextPage": "Page suivante",
     "pagination": "Pagination",
-    "previousPage": "Page précédente"
+    "previousPage": "Page précédente",
+    "retry": "Réessayer"
   }
 }

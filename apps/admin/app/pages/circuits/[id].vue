@@ -116,7 +116,7 @@ const formatDates = (stage: CircuitStage): string => {
         {{ $t("page.circuits.loading") }}
       </p>
 
-      <LoadError
+      <SbErrorState
         v-else-if="error || !circuit"
         :message="getApiErrorMessage(error) ?? $t('page.circuits.loadError')"
         @retry="refresh()"

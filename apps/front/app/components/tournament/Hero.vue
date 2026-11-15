@@ -124,7 +124,7 @@ const showSubscribeCalendar = computed(
 </script>
 
 <template>
-  <SCrossCard class="min-h-row-header">
+  <HubCrossCard class="min-h-row-header">
     <div class="w-full flex flex-col">
       <div class="w-full flex flex-col items-start gap-2 px-6 py-8">
         <div v-if="logoUrl || leagueName || $slots.kicker" class="flex items-center gap-2">
@@ -144,7 +144,7 @@ const showSubscribeCalendar = computed(
           v-if="status || dateRange"
           class="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted text-pretty"
         >
-          <SBadgeLive v-if="status === 'live'" />
+          <MatchLiveBadge v-if="status === 'live'" />
           <span v-else-if="statusLabel">{{ statusLabel }}</span>
           <span v-if="status && dateRange" aria-hidden="true">·</span>
           <span v-if="dateRange" class="tabular-nums">{{ dateRange }}</span>
@@ -193,5 +193,5 @@ const showSubscribeCalendar = computed(
       </div>
       <slot />
     </div>
-  </SCrossCard>
+  </HubCrossCard>
 </template>

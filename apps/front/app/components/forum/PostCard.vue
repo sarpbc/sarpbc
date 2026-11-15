@@ -10,7 +10,7 @@ const { post } = defineProps<Props>();
 </script>
 
 <template>
-  <SListItem
+  <HubListItem
     size="default"
     :to="$localePath(forumPostPath(post.publicId, post.slug))"
     class="min-w-0 gap-3"
@@ -27,5 +27,5 @@ const { post } = defineProps<Props>();
     <span class="w-24 shrink-0 truncate text-end text-xs text-muted tabular-nums sm:w-28">
       {{ formatLocaleTimeAgo(new Date(post.createdAt)) }}
     </span>
-  </SListItem>
+  </HubListItem>
 </template>

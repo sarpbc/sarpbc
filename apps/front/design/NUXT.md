@@ -74,18 +74,18 @@ Staff console lives in `apps/admin` (`admin.sarpbc.org`):
 
 ## Custom UI Primitives
 
-Before adding a new primitive, check `app/components/s/`:
+Before adding a component, check `@sarpbc/design`, then the hub grid in `app/components/hub/`:
 
 | Component        | Use                                                                                        |
 | ---------------- | ------------------------------------------------------------------------------------------ |
-| `SCard`          | Bordered container                                                                         |
-| `SCrossCard`     | Auth/marketing cards, no frame                                                             |
-| `SBadgeLive`     | Live status with redundant text                                                            |
-| `SListItem`      | Hub list row (`size`: compact/default/header/double; optional `to`)                        |
-| `SRail`          | Caption band + body. `caption="lead"` (72px, first in column) or `section` (44px, default) |
-| `SHubColumn`     | Hub grid column (`rail` \| `main`)                                                         |
-| `SHubPageHeader` | List-page title band                                                                       |
-| `SHubPageBody`   | Detail-page shell aligned with both sidebar cards                                          |
+| `HubCard`        | Bordered container                                                                         |
+| `HubCrossCard`   | Auth/marketing cards, no frame                                                             |
+| `HubListItem`    | Hub list row (`size`: compact/default/header/double; optional `to`)                        |
+| `HubRail`        | Caption band + body. `caption="lead"` (72px, first in column) or `section` (44px, default) |
+| `HubColumn`      | Hub grid column (`rail` \| `main`)                                                         |
+| `HubPageHeader`  | List-page title band                                                                       |
+| `HubPageBody`    | Detail-page shell aligned with both sidebar cards                                          |
+| `MatchLiveBadge` | Live status with redundant text                                                            |
 
 Extend here when the same pattern appears 3+ times.
 

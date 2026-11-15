@@ -298,9 +298,9 @@ const scoreboardLabel = computed(() => {
 
 <template>
   <div v-if="pending" aria-live="polite">
-    <SHubPageBody>
+    <HubPageBody>
       <div class="w-full flex min-w-0 flex-col">
-        <SCrossCard class="min-h-row-triple">
+        <HubCrossCard class="min-h-row-triple">
           <div
             class="flex w-full flex-col items-center justify-center gap-3 px-4 py-5 animate-pulse"
           >
@@ -313,30 +313,30 @@ const scoreboardLabel = computed(() => {
               <div class="h-6 w-28 justify-self-start rounded bg-elevated" />
             </div>
           </div>
-        </SCrossCard>
-        <SRail>
-          <SCard class="p-4">
+        </HubCrossCard>
+        <HubRail>
+          <HubCard class="p-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-px animate-pulse">
               <div class="h-24 rounded bg-elevated" />
               <div class="h-24 rounded bg-elevated" />
             </div>
-          </SCard>
-        </SRail>
+          </HubCard>
+        </HubRail>
       </div>
-    </SHubPageBody>
+    </HubPageBody>
   </div>
 
-  <SHubPageBody v-else-if="error">
-    <SCard class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.match.detail.error')" @retry="refresh()" />
-    </SCard>
-  </SHubPageBody>
+  <HubPageBody v-else-if="error">
+    <HubCard class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.match.detail.error')" @retry="refresh()" />
+    </HubCard>
+  </HubPageBody>
 
-  <SHubPageBody v-else-if="match">
+  <HubPageBody v-else-if="match">
     <div class="w-full flex min-w-0 flex-col gap-8">
       <h1 class="sr-only">{{ scoreboardLabel }}</h1>
 
-      <SCrossCard class="min-h-row-triple h-row-grid">
+      <HubCrossCard class="min-h-row-triple h-row-grid">
         <div class="flex w-full flex-col gap-4 px-2 py-4 sm:px-4">
           <div
             class="grid w-full grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_minmax(0,1fr)] items-center gap-x-2 text-base sm:gap-x-6"
@@ -367,7 +367,7 @@ const scoreboardLabel = computed(() => {
                 <span class="text-dimmed">–</span>
                 <span :class="heroScoreClass(teamB?.id)">{{ heroScoreB }}</span>
               </p>
-              <SBadgeLive v-if="matchStatus === 'live'" />
+              <MatchLiveBadge v-if="matchStatus === 'live'" />
               <p v-else class="text-sm text-muted">{{ t("page.match.detail.matchOver") }}</p>
             </div>
 
@@ -378,25 +378,25 @@ const scoreboardLabel = computed(() => {
             />
           </div>
         </div>
-      </SCrossCard>
+      </HubCrossCard>
 
       <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <SRail :title="t('page.match.detail.sections.information')">
+        <HubRail :title="t('page.match.detail.sections.information')">
           <MatchInfoCard :match="match" class="flex-1" />
-        </SRail>
-        <SRail v-if="forfeiter" :title="t('page.match.detail.sections.result')">
-          <SCard class="flex-1">
-            <SListItem class="gap-2">
+        </HubRail>
+        <HubRail v-if="forfeiter" :title="t('page.match.detail.sections.result')">
+          <HubCard class="flex-1">
+            <HubListItem class="gap-2">
               <SbBadge class="shrink-0">
                 {{ t("components.match.forfeit") }}
               </SbBadge>
               <span class="min-w-0 text-sm text-default">
                 {{ t("page.match.detail.forfeitNote", { team: participantLabel(forfeiter) }) }}
               </span>
-            </SListItem>
-          </SCard>
-        </SRail>
-        <SRail v-else-if="matchStatus === 'finished'">
+            </HubListItem>
+          </HubCard>
+        </HubRail>
+        <HubRail v-else-if="matchStatus === 'finished'">
           <template #caption>
             <div class="flex w-full items-center justify-between gap-2">
               {{ t("page.match.detail.sections.replay") }}
@@ -406,31 +406,31 @@ const scoreboardLabel = computed(() => {
             </div>
           </template>
           <MatchVods :vods="match.vods ?? []" class="flex-1" />
-        </SRail>
-        <SRail v-else :title="t('page.match.detail.sections.watch')">
+        </HubRail>
+        <HubRail v-else :title="t('page.match.detail.sections.watch')">
           <StreamList
             :streams="match.watchStreams ?? []"
             :live="matchStatus === 'live'"
             class="flex-1"
           />
-        </SRail>
+        </HubRail>
       </div>
 
-      <SRail v-if="match.viewership" :title="t('components.viewership.title')">
+      <HubRail v-if="match.viewership" :title="t('components.viewership.title')">
         <ViewershipStats
           :viewership="match.viewership"
           :startgg="match.source === 'startgg' || match.tournament.source === 'startgg'"
         />
-      </SRail>
+      </HubRail>
 
       <template v-if="!isBothTeamsTbd">
         <PickemMatchCta :match="match" :match-status="matchStatus" />
 
-        <SRail v-if="games.length > 0 && !concealed" :title="t('page.match.detail.stats.title')">
+        <HubRail v-if="games.length > 0 && !concealed" :title="t('page.match.detail.stats.title')">
           <MatchStatsTable :games="games" :participants="participants" />
-        </SRail>
+        </HubRail>
 
-        <SRail
+        <HubRail
           :title="
             lineups.length > 0
               ? t('page.match.detail.sections.lineups')
@@ -438,9 +438,9 @@ const scoreboardLabel = computed(() => {
           "
         >
           <MatchRosterTable :participants="participants" :lineups="lineups" :startgg="startgg" />
-        </SRail>
+        </HubRail>
 
-        <SRail v-if="matchStatus !== 'finished' && headToHead && teamA && teamB">
+        <HubRail v-if="matchStatus !== 'finished' && headToHead && teamA && teamB">
           <template #caption>
             <div class="flex w-full items-center justify-between gap-2">
               {{ t("page.match.detail.sections.headToHead") }}
@@ -460,9 +460,9 @@ const scoreboardLabel = computed(() => {
             :team-b-name="participantLabel(teamB)"
             :concealed="historyConcealed"
           />
-        </SRail>
+        </HubRail>
 
-        <SRail
+        <HubRail
           v-if="matchStatus !== 'finished' && participants.some((participant) => participant.team)"
         >
           <template #caption>
@@ -478,7 +478,7 @@ const scoreboardLabel = computed(() => {
               />
             </div>
           </template>
-          <SCard>
+          <HubCard>
             <div class="grid grid-cols-1 items-stretch md:grid-cols-2">
               <MatchTeamFormCard
                 v-for="(participant, index) in participants"
@@ -493,13 +493,13 @@ const scoreboardLabel = computed(() => {
                 :concealed="historyConcealed"
               />
             </div>
-          </SCard>
-        </SRail>
+          </HubCard>
+        </HubRail>
       </template>
 
-      <SRail :title="t('components.discussion.heading')">
+      <HubRail :title="t('components.discussion.heading')">
         <DiscussionCommentThread target-type="match" :target-id="match.id" flush-top />
-      </SRail>
+      </HubRail>
     </div>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

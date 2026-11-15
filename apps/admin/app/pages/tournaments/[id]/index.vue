@@ -238,7 +238,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
     </template>
 
     <DashboardContent>
-      <LoadError
+      <SbErrorState
         v-if="loadError"
         :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
         @retry="reload()"

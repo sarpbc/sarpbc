@@ -57,7 +57,7 @@ const onSubmit = async (event: Event) => {
 
 <template>
   <div class="w-full h-full flex flex-col items-center justify-center px-2">
-    <SCrossCard class="w-full max-w-88 p-4">
+    <HubCrossCard class="w-full max-w-88 p-4">
       <div class="w-full flex flex-col items-center justify-center">
         <h1 class="w-fit text-xl font-medium tracking-tight">
           {{ $t("page.authentication.login") }}
@@ -113,6 +113,6 @@ const onSubmit = async (event: Event) => {
           />
         </form>
       </div>
-    </SCrossCard>
+    </HubCrossCard>
   </div>
 </template>

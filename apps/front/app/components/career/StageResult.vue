@@ -57,8 +57,8 @@ const pointsTooltip = (points: number): string => {
       {{ t("page.game.career.results.seasonPoints", { points: seasonPoints }) }}
     </p>
 
-    <SRail v-if="showResultsRail" caption="lead" :title="railTitle">
-      <SCard>
+    <HubRail v-if="showResultsRail" caption="lead" :title="railTitle">
+      <HubCard>
         <ul v-if="!isWorlds && split" class="flex flex-col">
           <li
             v-for="(placement, index) in split.regionals"
@@ -112,8 +112,8 @@ const pointsTooltip = (points: number): string => {
             </div>
           </li>
         </ul>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
 
     <div
       v-if="showQualificationBanner"

@@ -41,8 +41,8 @@ const winnerLabel = (winnerTeamId: string | null) => {
 </script>
 
 <template>
-  <SCard class="flex flex-col">
-    <SListItem v-if="hasMeetings" size="default" class="min-w-0">
+  <HubCard class="flex flex-col">
+    <HubListItem v-if="hasMeetings" size="default" class="min-w-0">
       <span v-if="concealed" class="w-full text-xs font-medium text-muted">
         {{ t("components.spoiler.resultHidden") }}
       </span>
@@ -56,15 +56,15 @@ const winnerLabel = (winnerTeamId: string | null) => {
           })
         }}
       </span>
-    </SListItem>
+    </HubListItem>
 
-    <SListItem v-if="!hasMeetings" size="default">
+    <HubListItem v-if="!hasMeetings" size="default">
       <p class="text-xs text-pretty text-muted">
         {{ t("page.match.detail.h2h.empty") }}
       </p>
-    </SListItem>
+    </HubListItem>
 
-    <SListItem
+    <HubListItem
       v-for="meeting in headToHead.recentMeetings"
       :key="meeting.id"
       size="default"
@@ -93,6 +93,6 @@ const winnerLabel = (winnerTeamId: string | null) => {
           </span>
         </div>
       </div>
-    </SListItem>
-  </SCard>
+    </HubListItem>
+  </HubCard>
 </template>

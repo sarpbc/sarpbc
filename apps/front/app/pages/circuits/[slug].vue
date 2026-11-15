@@ -117,7 +117,7 @@ watch(
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>
         <span v-if="standings">{{ standings.name }}</span>
         <SbSkeleton v-else class="mx-auto h-5 w-48" />
@@ -127,33 +127,33 @@ watch(
           {{ t("page.circuits.standings.title") }}
         </SbLink>
       </template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
-    <SCard v-if="pending" aria-live="polite">
+    <HubCard v-if="pending" aria-live="polite">
       <span class="sr-only">{{ t("common.loading") }}</span>
-      <SListItem v-for="index in 6" :key="index" class="gap-3">
+      <HubListItem v-for="index in 6" :key="index" class="gap-3">
         <SbSkeleton class="h-3 w-6 shrink-0" />
         <SbSkeleton class="size-4 shrink-0" />
         <SbSkeleton class="h-3 max-w-40 flex-1" />
         <SbSkeleton class="h-3 w-12" />
         <SbSkeleton class="h-3 w-12" />
-      </SListItem>
-    </SCard>
+      </HubListItem>
+    </HubCard>
 
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.circuits.standings.error')" @retry="refresh()" />
-    </SCard>
+    <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.circuits.standings.error')" @retry="refresh()" />
+    </HubCard>
 
     <template v-else-if="standings">
-      <SCard v-if="!tableRows.length" class="flex min-h-row-stack h-row-grid items-center">
-        <SEmptyState
+      <HubCard v-if="!tableRows.length" class="flex min-h-row-stack h-row-grid items-center">
+        <SbEmptyState
           icon="i-fluent-trophy-24-regular"
           :title="t('page.circuits.standings.empty')"
           :hint="t('page.circuits.standings.emptyHint')"
         />
-      </SCard>
+      </HubCard>
 
-      <SCard v-else>
+      <HubCard v-else>
         <div
           class="overflow-x-auto"
           role="region"
@@ -262,16 +262,16 @@ watch(
         >
           {{ t("page.circuits.standings.qualification", { count: standings.qualificationSpots }) }}
         </p>
-      </SCard>
+      </HubCard>
 
       <section aria-labelledby="circuit-standings-about-title">
-        <SRail>
+        <HubRail>
           <template #caption>
             <h2 id="circuit-standings-about-title">
               {{ t("page.circuits.standings.aboutTitle") }}
             </h2>
           </template>
-          <SCard class="h-row-grid">
+          <HubCard class="h-row-grid">
             <div class="flex flex-col gap-2 px-2 py-4 text-sm text-muted">
               <p v-if="standings.description" class="text-default text-pretty">
                 {{ standings.description }}
@@ -291,8 +291,8 @@ watch(
                 </ul>
               </div>
             </div>
-          </SCard>
-        </SRail>
+          </HubCard>
+        </HubRail>
       </section>
     </template>
   </div>

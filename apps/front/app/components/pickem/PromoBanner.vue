@@ -49,7 +49,7 @@ const pickemPath = computed(() => localePath(`/game/pickems/${tournament.id}`));
 </script>
 
 <template>
-  <SCrossCard class="h-row-header">
+  <HubCrossCard class="h-row-header">
     <div class="w-full flex items-center justify-between gap-3 px-4">
       <h2 class="min-w-0 truncate text-xl font-medium">
         {{ title }}
@@ -58,5 +58,5 @@ const pickemPath = computed(() => localePath(`/game/pickems/${tournament.id}`));
         {{ ctaLabel }}
       </SbButton>
     </div>
-  </SCrossCard>
+  </HubCrossCard>
 </template>

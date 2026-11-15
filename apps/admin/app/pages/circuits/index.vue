@@ -72,7 +72,7 @@ const create = async (input: CircuitInput) => {
           {{ $t("page.circuits.loading") }}
         </p>
 
-        <LoadError
+        <SbErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.circuits.loadError')"
           @retry="refresh()"

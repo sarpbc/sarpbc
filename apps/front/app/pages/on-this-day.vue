@@ -22,12 +22,12 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ t("page.onThisDay.title") }}</template>
       <template v-if="dayLabel" #meta>
         <span>{{ dayLabel }}</span>
       </template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <OnThisDayBlock standalone />
 

@@ -87,7 +87,7 @@ const addAward = async (input: SeasonAwardInput) => {
         {{ $t("page.seasons.loading") }}
       </p>
 
-      <LoadError
+      <SbErrorState
         v-else-if="error || !season"
         :message="getApiErrorMessage(error) ?? $t('page.seasons.loadError')"
         @retry="refresh()"

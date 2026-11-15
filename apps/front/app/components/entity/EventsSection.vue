@@ -52,7 +52,7 @@ const eventMeta = (event: EntityEventListItem): string =>
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <div class="flex w-full items-end justify-between gap-2">
           <h2 :id="headingId">
@@ -68,7 +68,7 @@ const eventMeta = (event: EntityEventListItem): string =>
       </template>
 
       <div v-if="pending" class="flex flex-col gap-2" aria-live="polite">
-        <SCard v-for="index in 3" :key="index">
+        <HubCard v-for="index in 3" :key="index">
           <div class="flex items-center gap-3 py-2 px-3">
             <SbSkeleton class="h-3 w-16 shrink-0" />
             <div class="flex flex-1 flex-col gap-1">
@@ -76,12 +76,12 @@ const eventMeta = (event: EntityEventListItem): string =>
               <SbSkeleton class="h-3 w-28" />
             </div>
           </div>
-        </SCard>
+        </HubCard>
       </div>
 
-      <SCard v-else-if="hasError">
-        <SErrorState :message="t(`page.${kind}.slug.events.error`)" @retry="emit('retry')" />
-      </SCard>
+      <HubCard v-else-if="hasError">
+        <SbErrorState :message="t(`page.${kind}.slug.events.error`)" @retry="emit('retry')" />
+      </HubCard>
 
       <div v-else-if="hasEvents" class="flex flex-col gap-4">
         <div v-if="live.length > 0" class="flex flex-col gap-2">
@@ -101,7 +101,7 @@ const eventMeta = (event: EntityEventListItem): string =>
                   {{ eventMeta(event) }}
                 </p>
               </div>
-              <SBadgeLive />
+              <MatchLiveBadge />
             </SbLink>
           </div>
         </div>
@@ -140,7 +140,7 @@ const eventMeta = (event: EntityEventListItem): string =>
         </div>
       </div>
 
-      <SCard v-else>
+      <HubCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <Icon :name="emptyIcon" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -150,7 +150,7 @@ const eventMeta = (event: EntityEventListItem): string =>
             {{ t(`page.${kind}.slug.events.${tab}.emptyHint`) }}
           </p>
         </div>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

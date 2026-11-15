@@ -25,7 +25,7 @@ const dayLabel = computed(() =>
 
 <template>
   <section :aria-labelledby="standalone ? undefined : 'on-this-day-title'">
-    <SRail :caption="standalone ? 'none' : 'section'">
+    <HubRail :caption="standalone ? 'none' : 'section'">
       <template v-if="!standalone" #caption>
         <div class="flex w-full items-end justify-between gap-2 pr-2">
           <h2 id="on-this-day-title">
@@ -38,19 +38,19 @@ const dayLabel = computed(() =>
         </div>
       </template>
 
-      <SCard v-if="pending && !events.length" aria-live="polite">
+      <HubCard v-if="pending && !events.length" aria-live="polite">
         <span class="sr-only">{{ t("common.loading") }}</span>
-        <SListItem v-for="index in 3" :key="index" class="gap-3">
+        <HubListItem v-for="index in 3" :key="index" class="gap-3">
           <SbSkeleton class="h-3 w-10 shrink-0" />
           <SbSkeleton class="h-3 max-w-72 flex-1" />
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SErrorState :message="t('components.onThisDay.error')" @retry="refresh()" />
-      </SCard>
+      <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+        <SbErrorState :message="t('components.onThisDay.error')" @retry="refresh()" />
+      </HubCard>
 
-      <SCard v-else-if="shown.length > 0">
+      <HubCard v-else-if="shown.length > 0">
         <ul>
           <OnThisDayRow
             v-for="(event, index) in shown"
@@ -58,15 +58,15 @@ const dayLabel = computed(() =>
             :event="event"
           />
         </ul>
-      </SCard>
+      </HubCard>
 
-      <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SEmptyState
+      <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+        <SbEmptyState
           icon="i-fluent-calendar-star-24-regular"
           :title="t('components.onThisDay.empty.title')"
           :hint="t('components.onThisDay.empty.hint')"
         />
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

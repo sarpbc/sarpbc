@@ -47,23 +47,23 @@ watchEffect(() => {
 
 <template>
   <section class="flex w-full flex-col gap-4">
-    <SCrossCard class="min-h-row-header">
+    <HubCrossCard class="min-h-row-header">
       <div class="flex w-full items-center justify-center py-3 text-center">
         <h1 class="text-xl font-medium tracking-tight">
           {{ t("page.game.career.title") }}
         </h1>
       </div>
-    </SCrossCard>
+    </HubCrossCard>
 
-    <SCard v-if="!loaded" class="p-6">
+    <HubCard v-if="!loaded" class="p-6">
       <SbSkeleton class="h-32 w-full" />
-    </SCard>
+    </HubCard>
 
-    <SCard v-else-if="result" class="p-4 sm:p-6">
+    <HubCard v-else-if="result" class="p-4 sm:p-6">
       <CareerEnd :result="result" shared />
-    </SCard>
+    </HubCard>
 
-    <SCard v-else class="p-6">
+    <HubCard v-else class="p-6">
       <div class="flex flex-col items-center gap-4 text-center">
         <Icon name="i-fluent-warning-24-regular" class="size-8 text-muted" />
         <div class="space-y-2">
@@ -76,6 +76,6 @@ watchEffect(() => {
           {{ t("page.game.career.share.startOwn") }}
         </SbButton>
       </div>
-    </SCard>
+    </HubCard>
   </section>
 </template>

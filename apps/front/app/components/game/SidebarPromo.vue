@@ -6,7 +6,7 @@ const games = computed(() => [
 </script>
 
 <template>
-  <SRail :title="$t('components.game.sidebarPromo.heading')">
+  <HubRail :title="$t('components.game.sidebarPromo.heading')">
     <div class="grid grid-cols-2 gap-2">
       <NuxtLink
         v-for="game in games"
@@ -20,5 +20,5 @@ const games = computed(() => [
         <span class="text-xs text-muted">{{ $t("components.game.sidebarPromo.play") }}</span>
       </NuxtLink>
     </div>
-  </SRail>
+  </HubRail>
 </template>

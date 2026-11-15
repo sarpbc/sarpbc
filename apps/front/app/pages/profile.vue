@@ -166,12 +166,14 @@ setPageSeo({
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ $t("page.profile.title") }}</template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <div v-if="user" class="w-full flex flex-col">
-      <SCard class="min-h-row-double w-full flex flex-row justify-between items-center px-2 gap-2">
+      <HubCard
+        class="min-h-row-double w-full flex flex-row justify-between items-center px-2 gap-2"
+      >
         <div class="min-w-0">
           <div class="flex min-w-0 items-center gap-2">
             <SbAvatar :src="user.avatarUrl" :alt="user.userName" size="lg" />
@@ -242,9 +244,9 @@ setPageSeo({
             </div>
           </template>
         </SbPopover>
-      </SCard>
+      </HubCard>
 
-      <SRail v-if="hasNotifications">
+      <HubRail v-if="hasNotifications">
         <template #caption>
           <div class="flex w-full min-w-0 items-center justify-between gap-2 pr-2">
             <h2>{{ $t("page.profile.notifications.title") }}</h2>
@@ -260,8 +262,8 @@ setPageSeo({
           </div>
         </template>
 
-        <SCard>
-          <SListItem
+        <HubCard>
+          <HubListItem
             v-for="notification in notifications"
             :key="notification.id"
             :to="localePath(notification.targetPath)"
@@ -276,9 +278,9 @@ setPageSeo({
                 {{ longDateTimeFormatter(locale).format(new Date(notification.createdAt)) }}
               </span>
             </div>
-          </SListItem>
-        </SCard>
-      </SRail>
+          </HubListItem>
+        </HubCard>
+      </HubRail>
     </div>
 
     <SbModal

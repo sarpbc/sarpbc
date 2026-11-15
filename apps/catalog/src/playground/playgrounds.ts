@@ -10,6 +10,8 @@ import {
   Checkbox,
   CommandPalette,
   DropdownMenu,
+  EmptyState,
+  ErrorState,
   FormField,
   HoverCard,
   Input,
@@ -251,6 +253,23 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
         () => h(Button, { label: "Actions", variant: "secondary" }),
       ),
     ),
+  ],
+  [
+    "EmptyState",
+    {
+      controls: [
+        { initial: "No transfer this week", kind: "text", name: "title" },
+        { initial: "", kind: "text", name: "hint" },
+      ],
+      render: (props) => h(EmptyState, { icon: SAMPLE_ICON, title: "", ...of(props) }),
+    },
+  ],
+  [
+    "ErrorState",
+    {
+      controls: [{ initial: "The matches could not be loaded.", kind: "text", name: "message" }],
+      render: (props) => h(ErrorState, { message: "", ...of(props) }),
+    },
   ],
   [
     "FormField",

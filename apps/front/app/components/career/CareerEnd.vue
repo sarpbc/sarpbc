@@ -83,8 +83,8 @@ const majorSummary = (season: CareerSeasonRecord, split: number): string => {
       </p>
     </div>
 
-    <SRail caption="lead" :title="t('page.game.career.end.palmarès')">
-      <SCard>
+    <HubRail caption="lead" :title="t('page.game.career.end.palmarès')">
+      <HubCard>
         <ul class="flex flex-col">
           <li
             v-for="line in trophyLines"
@@ -105,11 +105,11 @@ const majorSummary = (season: CareerSeasonRecord, split: number): string => {
             {{ t("page.game.career.end.noTrophies") }}
           </li>
         </ul>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
 
-    <SRail caption="lead" :title="t('page.game.career.end.seasonRecap')">
-      <SCard>
+    <HubRail caption="lead" :title="t('page.game.career.end.seasonRecap')">
+      <HubCard>
         <ul class="flex flex-col">
           <li
             v-for="season in result.seasons"
@@ -142,8 +142,8 @@ const majorSummary = (season: CareerSeasonRecord, split: number): string => {
             </p>
           </li>
         </ul>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
 
     <div v-if="!shared" class="flex flex-col gap-2 sm:flex-row">
       <SbButton class="flex-1" variant="secondary" @click="onShare">

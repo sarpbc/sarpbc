@@ -67,9 +67,9 @@ setPageSeo({
 </script>
 
 <template>
-  <SHubPageBody>
+  <HubPageBody>
     <div class="w-full flex min-w-0 flex-col gap-8">
-      <SCrossCard class="w-full min-w-0">
+      <HubCrossCard class="w-full min-w-0">
         <div class="grid w-full min-w-0 self-stretch sm:grid-cols-[15rem_minmax(0,1fr)]">
           <div class="flex aspect-square items-center justify-center overflow-hidden bg-muted">
             <NuxtImg
@@ -149,7 +149,7 @@ setPageSeo({
             </dl>
           </div>
         </div>
-      </SCrossCard>
+      </HubCrossCard>
 
       <StaffTimeline :contracts="staffContracts" />
 
@@ -163,5 +163,5 @@ setPageSeo({
         @retry="refreshEvents()"
       />
     </div>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

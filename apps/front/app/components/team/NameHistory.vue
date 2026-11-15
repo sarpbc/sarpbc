@@ -21,7 +21,7 @@ const newestFirst = computed(() => aliases.toSorted((a, b) => b.from.localeCompa
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.team.slug.nameHistory.title") }}
@@ -49,6 +49,6 @@ const newestFirst = computed(() => aliases.toSorted((a, b) => b.from.localeCompa
           </span>
         </li>
       </ul>
-    </SRail>
+    </HubRail>
   </section>
 </template>

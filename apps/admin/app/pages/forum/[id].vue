@@ -101,7 +101,7 @@ const hideReply = async (reply: Reply) => {
         {{ $t("page.forum.loading") }}
       </p>
 
-      <LoadError
+      <SbErrorState
         v-else-if="!post"
         :message="getApiErrorMessage(error) ?? $t('common.loadFailed')"
         @retry="refresh()"

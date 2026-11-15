@@ -50,37 +50,37 @@ const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.player.slug.standIns.title") }}
         </h2>
       </template>
 
-      <SCard v-if="pending" aria-live="polite">
-        <SListItem v-for="index in 2" :key="index">
+      <HubCard v-if="pending" aria-live="polite">
+        <HubListItem v-for="index in 2" :key="index">
           <div class="flex w-full min-w-0 flex-col gap-0.5">
             <SbSkeleton class="h-3.5 w-3/5 max-w-48" />
             <SbSkeleton class="h-3 w-2/5 max-w-32" />
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="hasError">
-        <SErrorState :message="t('page.player.slug.standIns.error')" @retry="emit('retry')" />
-      </SCard>
+      <HubCard v-else-if="hasError">
+        <SbErrorState :message="t('page.player.slug.standIns.error')" @retry="emit('retry')" />
+      </HubCard>
 
-      <SCard v-else-if="rows.length > 0">
+      <HubCard v-else-if="rows.length > 0">
         <ul>
           <li v-for="row in rows" :key="row.id">
-            <SListItem :to="$localePath(row.path)" class="min-w-0">
+            <HubListItem :to="$localePath(row.path)" class="min-w-0">
               <div class="min-w-0 flex-1">
                 <p class="truncate text-sm text-default group-hover:text-highlighted">
                   {{ row.title }}
                 </p>
                 <p class="truncate text-xs text-muted">{{ row.meta }}</p>
               </div>
-            </SListItem>
+            </HubListItem>
           </li>
         </ul>
         <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
@@ -89,7 +89,7 @@ const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
             <SbLink :to="STARTGG_URL" external target="_blank" variant="inline">start.gg</SbLink>
           </span>
         </p>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

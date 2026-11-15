@@ -30,14 +30,14 @@ const secondaryLabel = computed(() =>
 </script>
 
 <template>
-  <SCard class="flex min-h-row-stack h-row-grid items-center">
-    <SEmptyState :icon="iconName" :title="message" :hint="hint">
+  <HubCard class="flex min-h-row-stack h-row-grid items-center">
+    <SbEmptyState :icon="iconName" :title="message" :hint="hint">
       <SbButton :to="localePath('/tournaments')">
         {{ t("page.matches.empty.viewTournaments") }}
       </SbButton>
       <SbButton variant="secondary" :to="secondaryTo">
         {{ secondaryLabel }}
       </SbButton>
-    </SEmptyState>
-  </SCard>
+    </SbEmptyState>
+  </HubCard>
 </template>

@@ -18,6 +18,7 @@
     "close": "Close",
     "nextPage": "Next page",
     "pagination": "Pagination",
-    "previousPage": "Previous page"
+    "previousPage": "Previous page",
+    "retry": "Retry"
   }
 }

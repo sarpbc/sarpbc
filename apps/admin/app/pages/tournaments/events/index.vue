@@ -59,7 +59,7 @@ const selectRow = (e: Event, row: TableRow<ManualEvent>) => {
       <div class="flex flex-col gap-4">
         <p class="max-w-2xl text-sm text-muted">{{ $t("page.tournaments.events.subtitle") }}</p>
 
-        <LoadError
+        <SbErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tournaments.events.loadError')"
           @retry="refresh()"

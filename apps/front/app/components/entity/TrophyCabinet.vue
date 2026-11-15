@@ -34,15 +34,15 @@ const formatEndDate = (value: Date | string | null) => {
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t(`page.${kind}.slug.trophies.title`) }}
         </h2>
       </template>
 
-      <SCard v-if="pending" aria-live="polite">
-        <SListItem v-for="index in 3" :key="index">
+      <HubCard v-if="pending" aria-live="polite">
+        <HubListItem v-for="index in 3" :key="index">
           <div class="flex w-full min-w-0 items-center gap-2">
             <SbSkeleton class="size-5 shrink-0" />
             <div class="flex min-w-0 flex-1 flex-col gap-0.5">
@@ -50,15 +50,15 @@ const formatEndDate = (value: Date | string | null) => {
               <SbSkeleton class="h-3 w-24" />
             </div>
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else-if="hasError">
-        <SErrorState :message="t(`page.${kind}.slug.trophies.error`)" @retry="emit('retry')" />
-      </SCard>
+      <HubCard v-else-if="hasError">
+        <SbErrorState :message="t(`page.${kind}.slug.trophies.error`)" @retry="emit('retry')" />
+      </HubCard>
 
-      <SCard v-else-if="trophies.length > 0">
-        <SListItem
+      <HubCard v-else-if="trophies.length > 0">
+        <HubListItem
           v-for="trophy in trophies"
           :key="trophy.id"
           :to="$localePath(trophy.path)"
@@ -82,10 +82,10 @@ const formatEndDate = (value: Date | string | null) => {
               </time>
             </div>
           </div>
-        </SListItem>
-      </SCard>
+        </HubListItem>
+      </HubCard>
 
-      <SCard v-else>
+      <HubCard v-else>
         <div class="flex flex-col items-center gap-2 py-8 px-4 text-center">
           <Icon name="i-fluent-trophy-24-regular" class="text-3xl text-muted" />
           <p class="text-sm text-muted text-pretty">
@@ -95,7 +95,7 @@ const formatEndDate = (value: Date | string | null) => {
             {{ t(`page.${kind}.slug.trophies.emptyHint`) }}
           </p>
         </div>
-      </SCard>
-    </SRail>
+      </HubCard>
+    </HubRail>
   </section>
 </template>

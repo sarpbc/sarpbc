@@ -78,10 +78,10 @@ setJsonLd("ld-json-news-article", () => {
 </script>
 
 <template>
-  <SHubPageBody v-if="article">
+  <HubPageBody v-if="article">
     <div class="flex w-full flex-col gap-8">
       <article v-if="newsType === 'article'" class="flex w-full flex-col gap-6">
-        <SCrossCard v-if="article.imageUrl" class="w-full">
+        <HubCrossCard v-if="article.imageUrl" class="w-full">
           <div
             class="aspect-[2/1] w-full overflow-hidden bg-elevated"
             :style="{ viewTransitionName: newsCoverTransitionName(article.slug) }"
@@ -95,7 +95,7 @@ setJsonLd("ld-json-news-article", () => {
               class="h-full w-full object-cover"
             />
           </div>
-        </SCrossCard>
+        </HubCrossCard>
         <div class="flex w-full max-w-2xl flex-col gap-6">
           <div class="flex w-full flex-col gap-2">
             <h1
@@ -158,5 +158,5 @@ setJsonLd("ld-json-news-article", () => {
         flush-top
       />
     </div>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

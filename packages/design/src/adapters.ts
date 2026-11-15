@@ -9,6 +9,7 @@ export const DESIGN_MESSAGES = {
   nextPage: "Next page",
   pagination: "Pagination",
   previousPage: "Previous page",
+  retry: "Retry",
 } as const;
 
 export type DesignMessage = keyof typeof DESIGN_MESSAGES;

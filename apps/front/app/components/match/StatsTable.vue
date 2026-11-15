@@ -64,7 +64,7 @@ const replayLabel = computed(() =>
 </script>
 
 <template>
-  <SCard v-if="game" class="flex flex-col">
+  <HubCard v-if="game" class="flex flex-col">
     <div v-if="games.length > 1" class="flex h-row items-center justify-center px-2">
       <SbTabs v-model="selected" :items="tabs" :ariaLabel="t('page.match.detail.stats.games')" />
     </div>
@@ -148,5 +148,5 @@ const replayLabel = computed(() =>
         {{ t("page.match.detail.stats.source") }}
       </SbLink>
     </p>
-  </SCard>
+  </HubCard>
 </template>

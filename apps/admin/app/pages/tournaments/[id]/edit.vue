@@ -137,7 +137,7 @@ const handleSubmit = async () => {
 
     <DashboardContent>
       <div class="flex flex-col gap-6">
-        <LoadError
+        <SbErrorState
           v-if="loadError"
           :message="getApiErrorMessage(loadError) ?? $t('common.loadFailed')"
           @retry="reload()"

@@ -20,7 +20,7 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
 
 <template>
   <section :aria-labelledby="headingId">
-    <SRail>
+    <HubRail>
       <template #caption>
         <h2 :id="headingId">
           {{ t("page.player.slug.formerTeams") }}
@@ -49,6 +49,6 @@ const roleLabel = (role: ContractRole) => t(`common.contractRole.${role}`);
           </div>
         </div>
       </div>
-    </SRail>
+    </HubRail>
   </section>
 </template>

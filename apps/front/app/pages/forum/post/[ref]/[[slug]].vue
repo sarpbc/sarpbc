@@ -70,8 +70,8 @@ watch(
 </script>
 
 <template>
-  <SHubPageBody>
-    <SCard v-if="pending" aria-live="polite">
+  <HubPageBody>
+    <HubCard v-if="pending" aria-live="polite">
       <div class="flex h-row items-center justify-between gap-3 border-y border-separator px-3">
         <SbSkeleton class="h-3 w-48" />
         <SbSkeleton class="h-3 w-32" />
@@ -79,14 +79,14 @@ watch(
       <div class="flex min-h-row items-center border-b border-separator px-3">
         <SbSkeleton class="h-3 w-2/3" />
       </div>
-    </SCard>
+    </HubCard>
 
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.forum.post.failedToLoadPostData')" @retry="refresh()" />
-    </SCard>
+    <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.forum.post.failedToLoadPostData')" @retry="refresh()" />
+    </HubCard>
 
     <template v-else-if="post">
-      <SCard class="h-row-grid">
+      <HubCard class="h-row-grid">
         <div class="flex h-row items-center justify-between gap-3 border-y border-separator px-3">
           <h1 class="min-w-0 truncate text-sm font-medium text-default">
             {{ post.title }}
@@ -101,9 +101,9 @@ watch(
         <div class="flex min-h-row items-center border-b border-separator px-3 py-2">
           <p class="whitespace-pre-wrap text-sm leading-6 text-default">{{ post.content }}</p>
         </div>
-      </SCard>
+      </HubCard>
 
       <DiscussionCommentThread target-type="forumPost" :target-id="post.id" />
     </template>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

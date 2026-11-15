@@ -132,30 +132,30 @@ watch(
 </script>
 
 <template>
-  <SHubPageBody>
+  <HubPageBody>
     <template v-if="pending">
-      <SCard class="min-h-row-stack" aria-live="polite">
+      <HubCard class="min-h-row-stack" aria-live="polite">
         <div class="w-full p-4 animate-pulse flex flex-col gap-3 items-center">
           <div class="h-3 w-32 rounded bg-elevated" />
           <div class="h-8 w-full max-w-md rounded bg-elevated" />
           <div class="h-3 w-48 rounded bg-elevated" />
         </div>
-      </SCard>
-      <SRail v-for="index in 2" :key="index" caption="section">
+      </HubCard>
+      <HubRail v-for="index in 2" :key="index" caption="section">
         <template #caption>
           <SbSkeleton class="h-3 w-40" />
         </template>
-        <SCard class="min-h-row-stack p-2">
+        <HubCard class="min-h-row-stack p-2">
           <div class="grid grid-cols-2 gap-2 xl:grid-cols-3">
             <SbSkeleton v-for="cell in 6" :key="cell" class="h-row" />
           </div>
-        </SCard>
-      </SRail>
+        </HubCard>
+      </HubRail>
     </template>
 
-    <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-      <SErrorState :message="t('page.tournaments.event.error')" @retry="refresh()" />
-    </SCard>
+    <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+      <SbErrorState :message="t('page.tournaments.event.error')" @retry="refresh()" />
+    </HubCard>
 
     <template v-else-if="event">
       <TournamentHero
@@ -170,7 +170,7 @@ watch(
         :champion="champion"
         :spoiler-tournament-ids="event.stages.map((stage) => stage.id)"
       >
-        <STabNav
+        <HubTabNav
           v-if="statsStages.length > 0"
           :items="tabItems"
           :ariaLabel="t('page.tournaments.id.sections')"
@@ -181,7 +181,7 @@ watch(
 
       <template v-else>
         <section v-if="event.viewership" aria-labelledby="tournament-event-viewership-title">
-          <SRail>
+          <HubRail>
             <template #caption>
               <h2 id="tournament-event-viewership-title">
                 {{ t("components.viewership.title") }}
@@ -191,18 +191,18 @@ watch(
               :viewership="event.viewership"
               :startgg="event.stages.every((stage) => stage.source === 'startgg')"
             />
-          </SRail>
+          </HubRail>
         </section>
 
         <section v-if="watchStreams.length > 0" aria-labelledby="tournament-event-watch-title">
-          <SRail>
+          <HubRail>
             <template #caption>
               <h2 id="tournament-event-watch-title">
                 {{ t("page.match.detail.sections.watch") }}
               </h2>
             </template>
             <StreamList :streams="watchStreams" />
-          </SRail>
+          </HubRail>
         </section>
 
         <section
@@ -210,7 +210,7 @@ watch(
           :key="stage.id"
           :aria-labelledby="`tournament-stage-title-${stage.id}`"
         >
-          <SRail caption="section">
+          <HubRail caption="section">
             <template #caption>
               <div class="flex w-full min-w-0 items-center gap-2 pr-2">
                 <h2 :id="`tournament-stage-title-${stage.id}`" class="min-w-0 flex-1 truncate">
@@ -229,12 +229,12 @@ watch(
                 </span>
               </div>
             </template>
-            <SCard class="overflow-x-auto p-2">
+            <HubCard class="overflow-x-auto p-2">
               <TournamentBracket :tournament="stage" />
-            </SCard>
-          </SRail>
+            </HubCard>
+          </HubRail>
         </section>
       </template>
     </template>
-  </SHubPageBody>
+  </HubPageBody>
 </template>

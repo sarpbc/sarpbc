@@ -124,7 +124,7 @@ const confirmChange = async () => {
           :aria-label="$t('page.users.searchPlaceholder')"
         />
 
-        <LoadError
+        <SbErrorState
           v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.users.loadError')"
           @retry="refresh()"

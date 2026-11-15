@@ -36,7 +36,7 @@ const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
 </script>
 
 <template>
-  <SCard class="flex h-row items-center">
+  <HubCard class="flex h-row items-center">
     <nav
       class="flex w-full items-center justify-between gap-2 px-1.5"
       :aria-label="t('common.page')"
@@ -67,5 +67,5 @@ const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
         {{ t("common.next") }}
       </SbButton>
     </nav>
-  </SCard>
+  </HubCard>
 </template>

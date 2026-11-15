@@ -173,7 +173,7 @@ const confirmRevoke = async () => {
           {{ $t("page.tokens.loading") }}
         </p>
 
-        <LoadError
+        <SbErrorState
           v-else-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.tokens.loadError')"
           @retry="refresh()"

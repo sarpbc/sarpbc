@@ -92,35 +92,35 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
 
 <template>
   <div class="w-full flex flex-col gap-4">
-    <SHubPageHeader>
+    <HubPageHeader>
       <template #title>{{ t("page.tournaments.index.title") }}</template>
       <template v-if="nextEvent" #meta>
         <SbLink :to="$localePath(tournamentEventPath(nextEvent.slug))" variant="muted">
           {{ t("page.hub.headers.nextEvent", { name: nextEvent.name }) }}
         </SbLink>
       </template>
-    </SHubPageHeader>
+    </HubPageHeader>
 
     <div>
       <div v-if="pending && !events.length" class="w-full flex flex-col" aria-live="polite">
-        <SRail v-for="group in 2" :key="group" caption="section">
+        <HubRail v-for="group in 2" :key="group" caption="section">
           <template #caption>
             <SbSkeleton class="h-3 w-40" />
           </template>
-          <SCard>
-            <SListItem v-for="row in 3" :key="row" class="gap-3">
+          <HubCard>
+            <HubListItem v-for="row in 3" :key="row" class="gap-3">
               <SbSkeleton class="h-3 max-w-32 flex-1" />
               <SbSkeleton class="h-3 w-24 sm:w-32" />
               <SbSkeleton class="h-3 w-20" />
-            </SListItem>
-          </SCard>
-        </SRail>
+            </HubListItem>
+          </HubCard>
+        </HubRail>
       </div>
 
       <template v-else-if="events.length">
         <TournamentListGroup :events="events" />
 
-        <SPagination
+        <HubPagination
           v-if="totalPages > 1"
           :current-page="currentPage"
           :total-pages="totalPages"
@@ -132,13 +132,16 @@ setJsonLd("ld-json-tournaments-index", tournamentsJsonLd);
         />
       </template>
 
-      <SCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
-        <SErrorState :message="t('page.tournaments.index.error')" @retry="refresh()" />
-      </SCard>
+      <HubCard v-else-if="error" class="flex min-h-row-stack h-row-grid items-center">
+        <SbErrorState :message="t('page.tournaments.index.error')" @retry="refresh()" />
+      </HubCard>
 
-      <SCard v-else class="flex min-h-row-stack h-row-grid items-center">
-        <SEmptyState icon="i-fluent-trophy-24-regular" :title="t('page.tournaments.index.empty')" />
-      </SCard>
+      <HubCard v-else class="flex min-h-row-stack h-row-grid items-center">
+        <SbEmptyState
+          icon="i-fluent-trophy-24-regular"
+          :title="t('page.tournaments.index.empty')"
+        />
+      </HubCard>
     </div>
   </div>
 </template>

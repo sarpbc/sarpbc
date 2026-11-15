@@ -50,7 +50,7 @@ const linkLabel = (streamer: LiveStreamer): string =>
     >
       <div class="mx-auto flex max-w-7xl flex-col gap-3">
         <h2 class="flex items-center gap-2 text-xs font-medium text-toned">
-          <SBadgeLiveDot />
+          <MatchLiveDot />
           {{ $t("components.footer.live.title") }}
         </h2>
         <ul class="flex flex-wrap gap-x-6 gap-y-2">
