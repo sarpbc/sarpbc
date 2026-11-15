@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { TableColumn, TableSort } from "@sarpbc/design";
 import { playerPath, teamPath } from "@sarpbc/utils";
 import type {
   PlayerStatCounts,
@@ -40,7 +41,7 @@ const ALL_TEAMS = "all";
 
 const view = ref<View>("totals");
 const team = ref(ALL_TEAMS);
-const sort = ref<{ key: SortKey; descending: boolean }>({ descending: true, key: "goals" });
+const sort = ref<TableSort>({ desc: true, id: "goals" });
 
 const viewOptions = computed(() => [
   { label: t("page.tournaments.stats.totals"), value: "totals" as const },
@@ -100,6 +101,9 @@ const value = (row: TournamentPlayerStats, column: Column): number | null => {
   }
 };
 
+const isSortKey = (id: string): id is SortKey =>
+  id === "player" || id === "team" || COLUMNS.some((column) => column === id);
+
 const compare = (a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKey): number => {
   if (key === "player") {
     return a.player.name.localeCompare(b.player.name);
@@ -113,30 +117,15 @@ const compare = (a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKe
 };
 
 const rows = computed(() => {
-  const { key, descending } = sort.value;
+  const { desc, id } = sort.value;
+  const key: SortKey = isSortKey(id) ? id : "goals";
 
   return (stats?.players ?? [])
     .filter((row) => team.value === ALL_TEAMS || teamKey(row) === team.value)
     .toSorted(
-      (a, b) =>
-        (descending ? -1 : 1) * compare(a, b, key) || a.player.name.localeCompare(b.player.name),
+      (a, b) => (desc ? -1 : 1) * compare(a, b, key) || a.player.name.localeCompare(b.player.name),
     );
 });
-
-const sortBy = (key: SortKey): void => {
-  sort.value =
-    sort.value.key === key
-      ? { descending: !sort.value.descending, key }
-      : { descending: key !== "player" && key !== "team", key };
-};
-
-const ariaSort = (key: SortKey): "ascending" | "descending" | undefined => {
-  if (sort.value.key !== key) {
-    return undefined;
-  }
-
-  return sort.value.descending ? "descending" : "ascending";
-};
 
 const numberFormat = computed(
   () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }),
@@ -159,6 +148,28 @@ const display = (row: TournamentPlayerStats, column: Column): string => {
 };
 
 const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
+
+/* Stat headers are abbreviations; the full name is their title and what screen readers say. */
+const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
+  { header: t("page.tournaments.stats.player"), id: "player", meta: { rowHeader: true } },
+  { header: t("page.tournaments.stats.team"), id: "team" },
+  ...COLUMNS.map((column): TableColumn<TournamentPlayerStats> => ({
+    cell: ({ row }) => display(row.original, column),
+    header: () =>
+      h(
+        "abbr",
+        {
+          "aria-label": t(`page.tournaments.stats.columns.${column}.label`),
+          class: "no-underline",
+          title: t(`page.tournaments.stats.columns.${column}.label`),
+        },
+        t(`page.tournaments.stats.columns.${column}.short`),
+      ),
+    id: column,
+    meta: { align: "end" },
+    sortDescFirst: true,
+  })),
+]);
 </script>
 
 <template>
@@ -203,92 +214,35 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
     </SCard>
 
     <SCard v-else class="flex flex-col">
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <caption class="sr-only">
-            {{ t("page.tournaments.stats.caption") }}
-          </caption>
-          <thead>
-            <tr class="h-row border-b border-separator text-xs text-muted">
-              <th
-                v-for="key in ['player', 'team'] as const"
-                :key="key"
-                scope="col"
-                :aria-sort="ariaSort(key)"
-                class="px-2 text-left font-normal"
-              >
-                <!-- native-control: sorts the column; the header carries aria-sort -->
-                <button
-                  type="button"
-                  class="cursor-pointer hover:text-highlighted"
-                  :class="{ 'text-highlighted': sort.key === key }"
-                  @click="sortBy(key)"
-                >
-                  {{ t(`page.tournaments.stats.${key}`) }}
-                </button>
-              </th>
-              <th
-                v-for="column in COLUMNS"
-                :key="column"
-                scope="col"
-                :aria-sort="ariaSort(column)"
-                class="px-1 text-right font-normal whitespace-nowrap"
-              >
-                <!-- native-control: sorts the column; the header carries aria-sort -->
-                <button
-                  type="button"
-                  class="cursor-pointer hover:text-highlighted"
-                  :class="{ 'text-highlighted': sort.key === column }"
-                  :aria-label="t(`page.tournaments.stats.columns.${column}.label`)"
-                  @click="sortBy(column)"
-                >
-                  <abbr
-                    :title="t(`page.tournaments.stats.columns.${column}.label`)"
-                    class="no-underline"
-                  >
-                    {{ t(`page.tournaments.stats.columns.${column}.short`) }}
-                  </abbr>
-                </button>
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="row in rows"
-              :key="`${row.player.id}-${teamKey(row)}`"
-              class="h-row border-b border-separator"
-            >
-              <th scope="row" class="max-w-40 px-2 text-left font-normal">
-                <SbLink
-                  :to="$localePath(playerPath(row.player.slug))"
-                  variant="inline"
-                  class="block truncate"
-                >
-                  {{ row.player.name }}
-                </SbLink>
-              </th>
-              <td class="max-w-40 px-2">
-                <SbLink
-                  v-if="row.team.slug"
-                  :to="$localePath(teamPath(row.team.slug))"
-                  variant="muted"
-                  class="block truncate"
-                >
-                  {{ row.team.name }}
-                </SbLink>
-                <span v-else class="block truncate text-muted">{{ row.team.name }}</span>
-              </td>
-              <td
-                v-for="column in COLUMNS"
-                :key="column"
-                class="px-1 text-right tabular-nums whitespace-nowrap"
-              >
-                {{ display(row, column) }}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <SbTable
+        v-model:sorting="sort"
+        :caption="t('page.tournaments.stats.caption')"
+        :columns="columns"
+        :data="rows"
+      >
+        <template #player-cell="{ row }">
+          <SbLink
+            :to="$localePath(playerPath(row.original.player.slug))"
+            variant="inline"
+            class="block max-w-40 truncate"
+          >
+            {{ row.original.player.name }}
+          </SbLink>
+        </template>
+        <template #team-cell="{ row }">
+          <SbLink
+            v-if="row.original.team.slug"
+            :to="$localePath(teamPath(row.original.team.slug))"
+            variant="muted"
+            class="block max-w-40 truncate"
+          >
+            {{ row.original.team.name }}
+          </SbLink>
+          <span v-else class="block max-w-40 truncate text-muted">{{
+            row.original.team.name
+          }}</span>
+        </template>
+      </SbTable>
 
       <p class="flex min-h-row flex-wrap items-center gap-x-2 px-2 text-xs text-muted">
         <span>{{ t("page.match.detail.stats.source") }}</span>

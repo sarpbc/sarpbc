@@ -53,12 +53,6 @@ const columns: TableColumn<NewsArticleAdmin>[] = [
   {
     header: "",
     id: "actions",
-    meta: {
-      class: {
-        td: "w-12",
-        th: "w-12",
-      },
-    },
   },
 ];
 

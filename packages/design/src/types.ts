@@ -1,4 +1,4 @@
-import type { ColumnDef, Row } from "@tanstack/vue-table";
+import type { ColumnDef, Row, RowData } from "@tanstack/vue-table";
 
 /*
  * Closed sets: every value here is a design decision, not an option. The UI is
@@ -128,4 +128,18 @@ export interface ActionItem {
   description?: string;
   label: string;
   value: string;
+}
+
+/** The column a Table is sorted by; the parent sorts the data. */
+export interface TableSort {
+  desc: boolean;
+  id: string;
+}
+
+declare module "@tanstack/vue-table" {
+  /** Per-column presentation: numbers align at the end; a row header names the row for screen readers. */
+  interface ColumnMeta<TData extends RowData, TValue> {
+    align?: "start" | "end";
+    rowHeader?: boolean;
+  }
 }

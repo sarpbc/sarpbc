@@ -195,7 +195,7 @@ const uploadedImageUrl = computed({
       :dismissible="!isSaving"
     >
       <template #body>
-        <form class="flex flex-col gap-4" @submit.prevent="handleSubmit">
+        <form id="league-form" class="flex flex-col gap-4" @submit.prevent="handleSubmit">
           <SbFormField :label="$t('page.tournaments.leagues.form.name')" required>
             <SbInput v-model="form.name" class="w-full" autocomplete="off" :disabled="isSynced" />
           </SbFormField>
@@ -241,17 +241,16 @@ const uploadedImageUrl = computed({
               :disabled="isSaving || isUploading"
             />
           </SbFormField>
-          <!-- native-control: hidden submit so Enter submits the form -->
-          <button type="submit" class="hidden" />
         </form>
       </template>
       <template #footer>
         <SbButton
+          type="submit"
+          form="league-form"
           icon="i-fluent-save-24-regular"
           :label="$t('page.tournaments.leagues.save')"
           :loading="isSaving"
           :disabled="isUploading"
-          @click="handleSubmit"
         />
         <SbButton
           variant="secondary"
