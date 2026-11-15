@@ -28,7 +28,8 @@ export default defineNuxtModule({
     // @sarpbc/design: its components as `Sb*`, its tokens, and Nuxt's <Icon> and <NuxtLink> as its adapters.
     const { resolve } = createRequire(import.meta.url);
     // Generated imports need forward slashes, including on Windows.
-    const design = resolve("@sarpbc/design").replaceAll("\\", "/");
+    // Point at single files, not the index: importing the index would bundle every component (and inline its styles) on every page.
+    const design = path.posix.dirname(resolve("@sarpbc/design").replaceAll("\\", "/"));
     nuxt.options.css.unshift(resolve("@sarpbc/design/tokens.css"));
     nuxt.options.css.push(resolver.resolve("./runtime/prose.css"));
     // Overlays render at the end of <body>; isolating the app keeps its z-indexes below them.
@@ -46,13 +47,13 @@ export default defineNuxtModule({
       innerHTML: "@layer theme, base, components, utilities;",
       tagPriority: "critical",
     });
-    addComponentsDir({ path: path.join(path.dirname(design), "components"), prefix: "Sb" });
-    addImports({ from: design, name: "useToast", priority: 1 });
+    addComponentsDir({ path: `${design}/components`, prefix: "Sb" });
+    addImports({ from: `${design}/toast.ts`, name: "useToast", priority: 1 });
     addPluginTemplate({
       filename: "sarpbc-design.mjs",
       getContents: () => `import { defineNuxtPlugin } from "#app";
 import { Icon, NuxtLink } from "#components";
-import { DESIGN_ADAPTERS } from ${JSON.stringify(design)};
+import { DESIGN_ADAPTERS } from ${JSON.stringify(`${design}/adapters.ts`)};
 
 export default defineNuxtPlugin((nuxtApp) => {
   nuxtApp.vueApp.provide(DESIGN_ADAPTERS, {
