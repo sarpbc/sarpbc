@@ -92,7 +92,8 @@ personal skills outside this repo. Do not add a skill library, model routing or
 a dependency on a personal plugin to make the project usable.
 
 For frontend work, reuse the affected app's Nuxt 4 conventions and `@sarpbc/design`
-(`Sb*`) components. Use SSR-aware data fetching, localized navigation and cookie
+(`Sb*`) components; `pnpm check:native-controls` rejects native `button`, `input`,
+`select` and `textarea` in app templates. Use SSR-aware data fetching, localized navigation and cookie
 credentials to the NestJS API. Public primitives live in
 `apps/front/app/components/s/`; cross-app UI belongs in `packages/ui`. Inspect
 existing helpers before adding a wrapper. Cover loading, empty, error and

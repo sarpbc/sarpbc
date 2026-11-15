@@ -62,6 +62,7 @@ onKeyStroke("Escape", () => {
 </script>
 
 <template>
+  <!-- native-control: invisible edge zone that reveals the navigation -->
   <button
     type="button"
     class="fixed inset-y-0 left-0 z-40 hidden w-3 lg:block"

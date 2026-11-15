@@ -32,6 +32,7 @@ const variant = computed(() => group?.variant.value ?? "list");
     class="sb-radio"
     :data-variant="variant"
     :data-status="status ?? undefined"
+    :data-rich="description !== null || undefined"
   >
     <span v-if="variant === 'list'" class="sb-radio__control" aria-hidden="true">
       <RadioGroupIndicator class="sb-radio__dot" />
@@ -149,6 +150,53 @@ const variant = computed(() => group?.variant.value ?? "list");
 
   .sb-radio[data-variant="cards"] + .sb-radio[data-variant="cards"] {
     margin-inline-start: -1px;
+  }
+
+  /* A card with a description reads as a full-width, left-aligned choice. */
+  .sb-radio[data-variant="cards"][data-rich] {
+    justify-content: flex-start;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+  }
+
+  .sb-radio[data-variant="cards"][data-rich] .sb-radio__label {
+    gap: 0.25rem;
+    white-space: normal;
+  }
+
+  .sb-radio[data-variant="cards"][data-rich] + .sb-radio[data-variant="cards"][data-rich] {
+    margin-inline-start: 0;
+  }
+
+  .sb-radio__description {
+    font-weight: 400;
+  }
+
+  .sb-radio[data-variant="text"] {
+    gap: 0;
+    padding: 0.25rem 0.375rem;
+    color: var(--sb-text-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+  }
+
+  .sb-radio[data-variant="text"] + .sb-radio[data-variant="text"]::before {
+    margin-inline: -0.375rem 0.375rem;
+    color: var(--sb-text-dimmed);
+    font-weight: 400;
+    content: "/";
+  }
+
+  @media (hover: hover) {
+    .sb-radio[data-variant="text"]:hover:enabled {
+      color: var(--sb-text-highlighted);
+    }
+  }
+
+  .sb-radio[data-variant="text"][data-state="checked"] {
+    color: var(--sb-text-highlighted);
   }
 }
 </style>

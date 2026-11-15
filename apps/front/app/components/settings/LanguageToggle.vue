@@ -1,11 +1,11 @@
 <script lang="ts" setup>
 import { uiLocale } from "@sarpbc/utils";
 import type { UiLocale } from "@sarpbc/utils";
-import type { TextToggleOption } from "~/components/s/TextToggle.vue";
+import type { SelectOption } from "@sarpbc/design";
 
 const { locale, setLocale, t } = useI18n();
 
-const options = computed<TextToggleOption<UiLocale>[]>(() => [
+const options = computed<SelectOption<UiLocale>[]>(() => [
   { ariaLabel: t("components.header.languageEn"), label: "EN", value: "en" },
   { ariaLabel: t("components.header.languageFr"), label: "FR", value: "fr" },
 ]);
@@ -21,5 +21,12 @@ const current = computed<UiLocale>({
 </script>
 
 <template>
-  <STextToggle v-model="current" :options="options" :ariaLabel="t('components.header.language')" />
+  <SbRadioGroup
+    :model-value="current"
+    :items="options"
+    variant="text"
+    orientation="horizontal"
+    :aria-label="t('components.header.language')"
+    @update:model-value="$event !== null && (current = $event)"
+  />
 </template>

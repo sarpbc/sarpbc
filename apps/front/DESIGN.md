@@ -161,7 +161,7 @@ Shared list/rail components (`SListItem`, `SRail`, `SHubColumn`) encode these si
 
 ## Components
 
-Prefer `@sarpbc/design` (`SbButton`, `SbFormField`, `SbLink`, `SbModal`, `SbTable`, …), auto-imported with the `Sb` prefix. Extend shared primitives under `app/components/s/` when a pattern repeats 3+ times. A later step renames the library prefix from `Sb` to `S` once all of `components/s/` moves into the library.
+Prefer `@sarpbc/design` (`SbButton`, `SbFormField`, `SbLink`, `SbModal`, `SbTable`, …), auto-imported with the `Sb` prefix. Templates never use native `button`, `input`, `select` or `textarea`: `pnpm check:native-controls` rejects them unless a `<!-- native-control: reason -->` comment explains the exception. Extend shared primitives under `app/components/s/` when a pattern repeats 3+ times. A later step renames the library prefix from `Sb` to `S` once all of `components/s/` moves into the library.
 
 | Primitive        | Role                                                                                                                                              |
 | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |

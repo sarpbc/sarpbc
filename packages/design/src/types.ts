@@ -50,14 +50,19 @@ export type SelectValue = string | number;
 
 /** One choice in a Select, Combobox or RadioGroup; the description explains it under the label. */
 export interface SelectOption<T extends SelectValue = SelectValue> {
+  /** For screen readers when the label is an abbreviation, e.g. "EN" read as "English". */
+  ariaLabel?: string;
   description?: string;
   disabled?: boolean;
   label: string;
   value: T;
 }
 
-/** list: a dot and a label. cards: the whole option is a tile, for a few short choices. */
-export type RadioVariant = "list" | "cards";
+/**
+ * list: a dot and a label. cards: the whole option is a tile (with a description, a full-width card).
+ * text: inline labels split by a slash, for a compact switch such as the language.
+ */
+export type RadioVariant = "list" | "cards" | "text";
 
 export type RadioStatus = "success" | "danger";
 
@@ -114,4 +119,13 @@ export interface CommandGroup {
   label: string;
   /** Items already match the search (server results), so the palette does not filter them. */
   remote?: boolean;
+}
+
+/** A row of an ActionList: choosing it acts at once. */
+export interface ActionItem {
+  /** Tints the description: the action cannot be undone or ends something. */
+  danger?: boolean;
+  description?: string;
+  label: string;
+  value: string;
 }

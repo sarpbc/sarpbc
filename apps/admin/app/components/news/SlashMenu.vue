@@ -20,6 +20,7 @@ const indexOf = (item: SlashItem): number => items.value.indexOf(item);
     <p v-if="items.length === 0" class="slash-menu__empty">{{ t("page.news.editor.noBlock") }}</p>
     <div v-for="group in groups" :key="group.label" role="group" :aria-label="group.label">
       <p class="slash-menu__heading">{{ group.label }}</p>
+      <!-- native-control: option of the editor's slash menu (role=option) -->
       <button
         v-for="item in group.items"
         :key="item.label"

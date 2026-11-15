@@ -172,12 +172,15 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
         :aria-label="t('page.tournaments.stats.team')"
         class="w-48"
       />
-      <STextToggle
+      <SbRadioGroup
         v-if="hasStats"
-        v-model="view"
-        :options="viewOptions"
-        :ariaLabel="t('page.tournaments.stats.view')"
+        :model-value="view"
+        :items="viewOptions"
+        variant="text"
+        orientation="horizontal"
+        :aria-label="t('page.tournaments.stats.view')"
         class="ms-auto"
+        @update:model-value="$event !== null && (view = $event)"
       />
     </div>
 
@@ -214,6 +217,7 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
                 :aria-sort="ariaSort(key)"
                 class="px-2 text-left font-normal"
               >
+                <!-- native-control: sorts the column; the header carries aria-sort -->
                 <button
                   type="button"
                   class="cursor-pointer hover:text-highlighted"
@@ -230,6 +234,7 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
                 :aria-sort="ariaSort(column)"
                 class="px-1 text-right font-normal whitespace-nowrap"
               >
+                <!-- native-control: sorts the column; the header carries aria-sort -->
                 <button
                   type="button"
                   class="cursor-pointer hover:text-highlighted"

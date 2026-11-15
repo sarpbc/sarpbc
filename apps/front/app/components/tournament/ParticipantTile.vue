@@ -29,6 +29,7 @@ const soloPlayer = computed(() =>
   </SbLink>
 
   <SbHoverCard v-else v-model:open="open">
+    <!-- native-control: a tile that opens the participant preview -->
     <button
       type="button"
       class="flex w-full items-center gap-2 px-2 h-row min-h-row border-r border-b border-separator interactive-surface"

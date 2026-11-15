@@ -241,6 +241,7 @@ const uploadedImageUrl = computed({
               :disabled="isSaving || isUploading"
             />
           </SbFormField>
+          <!-- native-control: hidden submit so Enter submits the form -->
           <button type="submit" class="hidden" />
         </form>
       </template>

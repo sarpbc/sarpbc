@@ -10,9 +10,10 @@
   "scripts": {
     "preinstall": "npx only-allow pnpm",
     "test:git-names": "node --test scripts/check-git-names.test.ts",
-    "test:checks": "node --test scripts/check-i18n-parity.test.ts scripts/check-package-imports.test.ts",
+    "test:checks": "node --test scripts/check-i18n-parity.test.ts scripts/check-package-imports.test.ts scripts/check-native-controls.test.ts",
     "check:i18n": "node scripts/check-i18n-parity.ts",
     "check:packages": "node scripts/check-package-imports.ts",
+    "check:native-controls": "node scripts/check-native-controls.ts",
     "check:node": "node scripts/check-node-version.ts",
     "dev": "turbo run dev",
     "dev:back": "turbo run dev --filter=back...",

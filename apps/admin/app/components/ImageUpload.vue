@@ -74,6 +74,7 @@ const clearCover = () => {
 
 <template>
   <div class="flex flex-col gap-2">
+    <!-- native-control: hidden file input opened by the upload button -->
     <input
       ref="fileInput"
       type="file"
