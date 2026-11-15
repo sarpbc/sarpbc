@@ -193,7 +193,11 @@ const appStylesheet = (
     .replace('@import "tailwindcss";', `@import ${JSON.stringify(posix(tailwind))};`)
     .replaceAll(SOURCE_DIRECTIVE, "");
 
-  return `${stylesheet}
+  /* The apps load the design tokens first (through @sarpbc/ui); their ink palette reads them. */
+  const tokens = readFileSync(path.join(root, "packages/design/src/styles/tokens.css"), "utf-8");
+
+  return `${tokens}
+${stylesheet}
 ${colorLayer(colors)}`;
 };
 
