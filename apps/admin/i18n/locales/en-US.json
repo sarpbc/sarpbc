@@ -227,6 +227,17 @@
       "empty": "No roster proposals to review.",
       "approve": "Approve",
       "reject": "Reject",
+      "approveSelected": "Approve selected",
+      "rejectSelected": "Reject selected",
+      "select": "Select this proposal",
+      "selectAll": "Select all",
+      "selectedCount": "{count} selected | {count} selected",
+      "columns": {
+        "kind": "Change",
+        "change": "Details",
+        "proposedBy": "Proposed by",
+        "createdAt": "Proposed on"
+      },
       "kinds": {
         "add_player_to_team": "Join team",
         "remove_player_from_team": "Leave team",
@@ -323,8 +334,8 @@
         "noPlayers": "Clear the players"
       },
       "messages": {
-        "approved": "Proposal approved and applied",
-        "rejected": "Proposal rejected",
+        "bulkApproved": "{count} proposal approved and applied | {count} proposals approved and applied",
+        "bulkRejected": "{count} proposal rejected | {count} proposals rejected",
         "reviewError": "Could not review this proposal. Try again."
       },
       "deletionWarning": {

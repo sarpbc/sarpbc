@@ -227,6 +227,17 @@
       "empty": "Aucune proposition de roster à examiner.",
       "approve": "Valider",
       "reject": "Refuser",
+      "approveSelected": "Valider la sélection",
+      "rejectSelected": "Refuser la sélection",
+      "select": "Sélectionner cette proposition",
+      "selectAll": "Tout sélectionner",
+      "selectedCount": "{count} sélectionnée | {count} sélectionnées",
+      "columns": {
+        "kind": "Changement",
+        "change": "Détails",
+        "proposedBy": "Proposé par",
+        "createdAt": "Proposé le"
+      },
       "kinds": {
         "add_player_to_team": "Arrivée",
         "remove_player_from_team": "Départ",
@@ -323,8 +334,8 @@
         "noPlayers": "Retirer les joueurs"
       },
       "messages": {
-        "approved": "Proposition validée et appliquée",
-        "rejected": "Proposition refusée",
+        "bulkApproved": "{count} proposition validée et appliquée | {count} propositions validées et appliquées",
+        "bulkRejected": "{count} proposition refusée | {count} propositions refusées",
         "reviewError": "Impossible d'examiner cette proposition. Réessayez."
       },
       "deletionWarning": {

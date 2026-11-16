@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import type { TableColumn } from "@sarpbc/design";
 import type { RosterProposal, StreamInput, Viewership } from "@sarpbc/types";
 import { getApiErrorMessage, hasPermission, parseLocale, requiredPermission } from "@sarpbc/utils";
 
@@ -11,7 +12,6 @@ const breadcrumbItems = [{ label: t("page.proposals.title") }];
 const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
 const user = useUser();
-const reviewingId = ref<string | null>(null);
 
 const isDeletion = ({ change }: RosterProposal): boolean =>
   change.kind === "delete_match" || change.kind === "delete_team";
@@ -437,27 +437,117 @@ const logoBackgrounds = [
   { class: "bg-neutral-950", key: "dark" },
 ] as const;
 
-const review = async (proposal: RosterProposal, action: "approve" | "reject") => {
-  if (reviewingId.value) {
-    return;
-  }
+const columns: TableColumn<RosterProposal>[] = [
+  { header: "", id: "select" },
+  { header: t("page.proposals.columns.kind"), id: "kind" },
+  { header: t("page.proposals.columns.change"), id: "change" },
+  { header: t("page.proposals.columns.proposedBy"), id: "proposedBy" },
+  { header: t("page.proposals.columns.createdAt"), id: "createdAt" },
+  { header: "", id: "actions", meta: { align: "end" } },
+];
 
-  reviewingId.value = proposal.id;
+type ReviewAction = "approve" | "reject";
+
+const reviewingIds = ref(new Set<string>());
+const selectedIds = ref(new Set<string>());
+
+const isReviewing = (proposal: RosterProposal): boolean => reviewingIds.value.has(proposal.id);
+
+const selectable = computed(() =>
+  proposals.value.filter((proposal) => canReview(proposal) && !isReviewing(proposal)),
+);
+
+const selected = computed(() =>
+  selectable.value.filter((proposal) => selectedIds.value.has(proposal.id)),
+);
+
+const allSelected = computed(
+  () => selectable.value.length > 0 && selected.value.length === selectable.value.length,
+);
+
+const setSelected = (proposal: RosterProposal, value: boolean): void => {
+  if (value) {
+    selectedIds.value.add(proposal.id);
+  } else {
+    selectedIds.value.delete(proposal.id);
+  }
+};
+
+const setAllSelected = (value: boolean): void => {
+  selectedIds.value = new Set(value ? selectable.value.map((proposal) => proposal.id) : []);
+};
+
+const removeProposal = (id: string): void => {
+  selectedIds.value.delete(id);
+
+  if (data.value) {
+    data.value = {
+      ...data.value,
+      proposals: data.value.proposals.filter((proposal) => proposal.id !== id),
+    };
+  }
+};
+
+/* The row leaves the list as soon as the API answers, so the queue never reloads between reviews. */
+const reviewOne = async (proposal: RosterProposal, action: ReviewAction): Promise<boolean> => {
+  reviewingIds.value.add(proposal.id);
+  selectedIds.value.delete(proposal.id);
 
   try {
     await reviewRosterProposal(proposal.id, action);
+    removeProposal(proposal.id);
+
+    return true;
+  } catch (reviewError) {
+    reportError(reviewError, t("page.proposals.messages.reviewError"));
+
+    return false;
+  } finally {
+    reviewingIds.value.delete(proposal.id);
+  }
+};
+
+const review = async (proposal: RosterProposal, action: ReviewAction): Promise<void> => {
+  if (!isReviewing(proposal)) {
+    await reviewOne(proposal, action);
+  }
+};
+
+const bulkAction = ref<ReviewAction | null>(null);
+
+/* Sequential, oldest first: a proposal may depend on an earlier one (a new team, then its contract). */
+const reviewSelected = async (action: ReviewAction): Promise<void> => {
+  if (bulkAction.value !== null) {
+    return;
+  }
+
+  bulkAction.value = action;
+  const batch = selected.value;
+  let reviewed = 0;
+
+  for (const proposal of batch) {
+    reviewingIds.value.add(proposal.id);
+  }
+
+  try {
+    for (const proposal of batch) {
+      // oxlint-disable-next-line no-await-in-loop -- order matters, see above
+      if (await reviewOne(proposal, action)) {
+        reviewed += 1;
+      }
+    }
+  } finally {
+    bulkAction.value = null;
+  }
+
+  if (reviewed > 0) {
     toast.add({
       color: "success",
       title:
         action === "approve"
-          ? t("page.proposals.messages.approved")
-          : t("page.proposals.messages.rejected"),
+          ? t("page.proposals.messages.bulkApproved", { count: reviewed }, reviewed)
+          : t("page.proposals.messages.bulkRejected", { count: reviewed }, reviewed),
     });
-    await refresh();
-  } catch (reviewError) {
-    reportError(reviewError, t("page.proposals.messages.reviewError"));
-  } finally {
-    reviewingId.value = null;
   }
 };
 </script>
@@ -474,102 +564,160 @@ const review = async (proposal: RosterProposal, action: "approve" | "reject") =>
           {{ $t("page.proposals.subtitle") }}
         </p>
 
-        <div v-if="status === 'pending'" class="flex flex-col gap-3">
-          <div v-for="n in 3" :key="n" class="flex flex-col gap-3 border border-default p-4">
-            <div class="h-4 w-1/3 animate-pulse rounded-sm bg-elevated" />
-            <div class="h-16 w-full animate-pulse rounded-sm bg-elevated" />
-          </div>
-        </div>
-
         <SErrorState
-          v-else-if="status === 'error'"
+          v-if="status === 'error'"
           :message="getApiErrorMessage(error) ?? $t('page.proposals.loadError')"
           @retry="refresh()"
         />
 
-        <p v-else-if="proposals.length === 0" class="text-sm text-muted">
-          {{ $t("page.proposals.empty") }}
-        </p>
-
-        <div v-else class="flex flex-col gap-3">
-          <article
-            v-for="proposal in proposals"
-            :key="proposal.id"
-            class="flex flex-col gap-3 border border-default p-4"
+        <ClientOnly v-else>
+          <div
+            v-if="selectable.length > 0"
+            class="flex flex-row flex-wrap items-center justify-between gap-2"
           >
-            <div class="flex flex-row flex-wrap items-center justify-between gap-2">
-              <div class="flex flex-row flex-wrap items-center gap-2 text-sm">
-                <SBadge :color="isDeletion(proposal) ? 'danger' : 'info'">
-                  {{ $t(`page.proposals.kinds.${proposal.change.kind}`) }}
-                </SBadge>
-                <span class="text-muted" translate="no">{{ nameOf(proposal.proposedById) }}</span>
-                <span class="text-muted">·</span>
-                <span class="text-muted tabular-nums">{{
-                  dateFormatter.format(new Date(proposal.createdAt))
-                }}</span>
+            <SCheckbox
+              :model-value="allSelected"
+              :disabled="bulkAction !== null"
+              :label="$t('page.proposals.selectAll')"
+              @update:model-value="setAllSelected"
+            />
+            <div class="flex flex-row flex-wrap items-center gap-2">
+              <span class="text-sm text-muted tabular-nums">
+                {{
+                  $t("page.proposals.selectedCount", { count: selected.length }, selected.length)
+                }}
+              </span>
+              <SButton
+                icon="i-fluent-checkmark-24-regular"
+                size="sm"
+                :label="$t('page.proposals.approveSelected')"
+                :loading="bulkAction === 'approve'"
+                :disabled="selected.length === 0 || bulkAction !== null"
+                @click="reviewSelected('approve')"
+              />
+              <SButton
+                variant="tertiary"
+                size="sm"
+                :label="$t('page.proposals.rejectSelected')"
+                :loading="bulkAction === 'reject'"
+                :disabled="selected.length === 0 || bulkAction !== null"
+                @click="reviewSelected('reject')"
+              />
+            </div>
+          </div>
+
+          <STable
+            :data="proposals"
+            :columns="columns"
+            :caption="$t('page.proposals.title')"
+            :loading="status === 'pending'"
+            sticky
+          >
+            <template #empty>
+              {{ $t("page.proposals.empty") }}
+            </template>
+
+            <template #select-cell="{ row }">
+              <SCheckbox
+                v-if="canReview(row.original)"
+                :model-value="selectedIds.has(row.original.id)"
+                :disabled="isReviewing(row.original)"
+                @update:model-value="setSelected(row.original, $event)"
+              >
+                <span class="sr-only">{{ $t("page.proposals.select") }}</span>
+              </SCheckbox>
+            </template>
+
+            <template #kind-cell="{ row }">
+              <SBadge :color="isDeletion(row.original) ? 'danger' : 'info'">
+                {{ $t(`page.proposals.kinds.${row.original.change.kind}`) }}
+              </SBadge>
+            </template>
+
+            <template #change-cell="{ row }">
+              <div class="flex min-w-80 flex-col gap-2 py-2 whitespace-normal text-default">
+                <dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1">
+                  <template v-for="field in changeRows(row.original)" :key="field.key">
+                    <dt class="text-muted">{{ field.label }}</dt>
+                    <dd class="break-all" translate="no">{{ field.value }}</dd>
+                  </template>
+                  <template v-if="row.original.change.kind === 'upload_team_logo'">
+                    <dt class="sr-only">{{ $t("page.proposals.kinds.upload_team_logo") }}</dt>
+                    <dd class="col-span-2 flex flex-row flex-wrap gap-3 py-1">
+                      <figure
+                        v-for="background in logoBackgrounds"
+                        :key="background.key"
+                        class="flex flex-col items-center gap-1"
+                      >
+                        <div
+                          :class="[
+                            background.class,
+                            'flex size-24 items-center justify-center rounded-md border border-default p-2',
+                          ]"
+                        >
+                          <img
+                            :src="row.original.change.logoUrl"
+                            :alt="$t('page.proposals.logoPreview.alt')"
+                            class="max-h-full max-w-full object-contain"
+                          />
+                        </div>
+                        <figcaption class="text-xs text-muted">
+                          {{ $t(`page.proposals.logoPreview.${background.key}`) }}
+                        </figcaption>
+                      </figure>
+                    </dd>
+                  </template>
+                  <template v-if="row.original.sourceUrl">
+                    <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
+                    <dd class="break-all">
+                      <SLink
+                        variant="primary"
+                        :to="row.original.sourceUrl"
+                        external
+                        target="_blank"
+                      >
+                        {{ row.original.sourceUrl }}
+                      </SLink>
+                    </dd>
+                  </template>
+                </dl>
+                <p v-if="isDeletion(row.original)" class="text-error">
+                  {{ $t(`page.proposals.deletionWarning.${row.original.change.kind}`) }}
+                </p>
               </div>
-              <div v-if="canReview(proposal)" class="flex flex-row items-center gap-1">
+            </template>
+
+            <template #proposedBy-cell="{ row }">
+              <span translate="no">{{ nameOf(row.original.proposedById) }}</span>
+            </template>
+
+            <template #createdAt-cell="{ row }">
+              <span class="tabular-nums">{{
+                dateFormatter.format(new Date(row.original.createdAt))
+              }}</span>
+            </template>
+
+            <template #actions-cell="{ row }">
+              <div v-if="canReview(row.original)" class="flex flex-row justify-end gap-1">
                 <SButton
                   icon="i-fluent-checkmark-24-regular"
+                  size="sm"
                   :label="$t('page.proposals.approve')"
-                  :loading="reviewingId === proposal.id"
-                  :disabled="reviewingId !== null"
-                  @click="review(proposal, 'approve')"
+                  :loading="isReviewing(row.original)"
+                  :disabled="isReviewing(row.original)"
+                  @click="review(row.original, 'approve')"
                 />
                 <SButton
                   variant="tertiary"
+                  size="sm"
                   :label="$t('page.proposals.reject')"
-                  :disabled="reviewingId !== null"
-                  @click="review(proposal, 'reject')"
+                  :disabled="isReviewing(row.original)"
+                  @click="review(row.original, 'reject')"
                 />
               </div>
-            </div>
-
-            <dl class="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-1 text-sm">
-              <template v-for="row in changeRows(proposal)" :key="row.key">
-                <dt class="text-muted">{{ row.label }}</dt>
-                <dd class="break-all" translate="no">{{ row.value }}</dd>
-              </template>
-              <template v-if="proposal.change.kind === 'upload_team_logo'">
-                <dt class="sr-only">{{ $t("page.proposals.kinds.upload_team_logo") }}</dt>
-                <dd class="col-span-2 flex flex-row flex-wrap gap-3 py-2">
-                  <figure
-                    v-for="background in logoBackgrounds"
-                    :key="background.key"
-                    class="flex flex-col items-center gap-1"
-                  >
-                    <div
-                      :class="[
-                        background.class,
-                        'flex size-32 items-center justify-center rounded-md border border-default p-3',
-                      ]"
-                    >
-                      <img
-                        :src="proposal.change.logoUrl"
-                        :alt="$t('page.proposals.logoPreview.alt')"
-                        class="max-h-full max-w-full object-contain"
-                      />
-                    </div>
-                    <figcaption class="text-xs text-muted">
-                      {{ $t(`page.proposals.logoPreview.${background.key}`) }}
-                    </figcaption>
-                  </figure>
-                </dd>
-              </template>
-              <template v-if="proposal.sourceUrl">
-                <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
-                <dd class="break-all">
-                  <SLink variant="primary" :to="proposal.sourceUrl" external target="_blank">
-                    {{ proposal.sourceUrl }}
-                  </SLink>
-                </dd>
-              </template>
-            </dl>
-            <p v-if="isDeletion(proposal)" class="text-sm text-error">
-              {{ $t(`page.proposals.deletionWarning.${proposal.change.kind}`) }}
-            </p>
-          </article>
-        </div>
+            </template>
+          </STable>
+        </ClientOnly>
       </div>
     </DashboardContent>
   </NuxtLayout>
