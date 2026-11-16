@@ -4,9 +4,16 @@ import { useId } from "vue";
 
 import { useDesignAdapters } from "../adapters.ts";
 
-const model = defineModel<boolean>({ default: false });
+/* `indeterminate` shows a partial selection, such as a table header with some rows checked; a click checks it. */
+const model = defineModel<boolean | "indeterminate">({ default: false });
 
-const { disabled = false, label = null } = defineProps<{
+const {
+  ariaLabel = null,
+  disabled = false,
+  label = null,
+} = defineProps<{
+  /** Names a checkbox that has no visible label. */
+  ariaLabel?: string | null;
   disabled?: boolean;
   label?: string | null;
 }>();
@@ -17,9 +24,19 @@ const id = useId();
 
 <template>
   <span class="sb-checkbox">
-    <CheckboxRoot :id="id" v-model="model" :disabled="disabled" class="sb-checkbox__box">
+    <CheckboxRoot
+      :id="id"
+      v-model="model"
+      :disabled="disabled"
+      :aria-label="ariaLabel ?? undefined"
+      class="sb-checkbox__box"
+    >
       <CheckboxIndicator class="sb-checkbox__indicator">
-        <component :is="adapters.icon" name="i-lucide-check" class="sb-checkbox__icon" />
+        <component
+          :is="adapters.icon"
+          :name="model === 'indeterminate' ? 'i-lucide-minus' : 'i-lucide-check'"
+          class="sb-checkbox__icon"
+        />
       </CheckboxIndicator>
     </CheckboxRoot>
     <label v-if="label !== null || $slots.default" :for="id" class="sb-checkbox__label">
@@ -51,7 +68,8 @@ const id = useId();
     cursor: pointer;
   }
 
-  .sb-checkbox__box[data-state="checked"] {
+  .sb-checkbox__box[data-state="checked"],
+  .sb-checkbox__box[data-state="indeterminate"] {
     background: var(--sb-primary);
     box-shadow: none;
   }

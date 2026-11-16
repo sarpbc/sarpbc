@@ -1,23 +1,30 @@
 <script setup lang="ts" generic="T">
-import { FlexRender, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
+import { FlexRender, functionalUpdate, getCoreRowModel, useVueTable } from "@tanstack/vue-table";
+import { computed, h } from "vue";
 
 import { useDesignAdapters } from "../adapters.ts";
 
 import type { TableColumn, TableRow, TableSort } from "../types.ts";
-import type { Column, Header } from "@tanstack/vue-table";
+import type { Column, Header, RowSelectionState, Updater } from "@tanstack/vue-table";
 import type { VNode } from "vue";
 
+import Checkbox from "./Checkbox.vue";
 import Spinner from "./Spinner.vue";
 
 const {
+  canCheck = null,
   caption = null,
   columns,
   data,
   loading = false,
   onSelect = null,
+  rowId = null,
+  selection = null,
   sorting = null,
   sticky = false,
 } = defineProps<{
+  /** Rows it rejects show a disabled checkbox; all rows are checkable by default. */
+  canCheck?: ((row: T) => boolean) | null;
   /** Read by screen readers before the table. */
   caption?: string | null;
   columns: TableColumn<T>[];
@@ -26,6 +33,13 @@ const {
   loading?: boolean;
   /** Makes rows clickable (`@select`). */
   onSelect?: ((event: MouseEvent, row: TableRow<T>) => void) | null;
+  /** Identifies a row in `selection`; the row index otherwise, which shifts when `data` changes. */
+  rowId?: ((row: T) => string) | null;
+  /**
+   * The ids of the checked rows, owned by the parent. Setting it adds a first
+   * column of checkboxes, with one in the header that checks every row.
+   */
+  selection?: string[] | null;
   /**
    * The current sort, owned by the parent, which also sorts `data`. Setting it
    * makes headers sortable (except columns with `enableSorting: false`).
@@ -35,7 +49,10 @@ const {
   sticky?: boolean;
 }>();
 
-const emit = defineEmits<{ "update:sorting": [sort: TableSort] }>();
+const emit = defineEmits<{
+  "update:selection": [ids: string[]];
+  "update:sorting": [sort: TableSort];
+}>();
 
 /* Slots are named after the column id: `#name-cell`, `#actions-cell`. */
 defineSlots<
@@ -81,15 +98,69 @@ const sortBy = (header: Header<T, unknown>): void => {
 const alignOf = (column: Column<T, unknown>): "start" | "end" =>
   column.columnDef.meta?.align ?? "start";
 
+const headerState = (all: boolean, some: boolean): boolean | "indeterminate" => {
+  if (all) {
+    return true;
+  }
+
+  return some ? "indeterminate" : false;
+};
+
+const checkColumn: TableColumn<T> = {
+  cell: ({ row }) =>
+    h(Checkbox, {
+      ariaLabel: adapters.translate("selectRow"),
+      disabled: !row.getCanSelect(),
+      modelValue: row.getIsSelected(),
+      "onUpdate:modelValue": (value: boolean | "indeterminate") => {
+        row.toggleSelected(value === true);
+      },
+    }),
+  enableSorting: false,
+  header: ({ table: instance }) =>
+    h(Checkbox, {
+      ariaLabel: adapters.translate("selectAllRows"),
+      disabled: !instance.getRowModel().rows.some((row) => row.getCanSelect()),
+      modelValue: headerState(instance.getIsAllRowsSelected(), instance.getIsSomeRowsSelected()),
+      "onUpdate:modelValue": (value: boolean | "indeterminate") => {
+        instance.toggleAllRowsSelected(value === true);
+      },
+    }),
+  id: "sb-check",
+};
+
+const visibleColumns = computed(() => (selection === null ? columns : [checkColumn, ...columns]));
+
+const rowSelection = computed<RowSelectionState>(() =>
+  Object.fromEntries((selection ?? []).map((id) => [id, true])),
+);
+
+const updateSelection = (updater: Updater<RowSelectionState>): void => {
+  const next = functionalUpdate(updater, rowSelection.value);
+
+  emit(
+    "update:selection",
+    Object.keys(next).filter((id) => next[id]),
+  );
+};
+
 const table = useVueTable({
   get columns() {
-    return columns;
+    return visibleColumns.value;
   },
   get data() {
     return data;
   },
+  enableRowSelection: (row) => canCheck?.(row.original) ?? true,
   getCoreRowModel: getCoreRowModel(),
+  getRowId: (row, index) => rowId?.(row) ?? String(index),
   manualSorting: true,
+  onRowSelectionChange: updateSelection,
+  state: {
+    get rowSelection() {
+      return rowSelection.value;
+    },
+  },
 });
 </script>
 
@@ -107,6 +178,7 @@ const table = useVueTable({
             scope="col"
             class="sb-table__th"
             :data-align="alignOf(header.column)"
+            :data-check="header.column.id === checkColumn.id || undefined"
             :aria-sort="ariaSort(header)"
           >
             <button
@@ -138,6 +210,7 @@ const table = useVueTable({
           :key="row.id"
           class="sb-table__row"
           :data-selectable="onSelect !== null || undefined"
+          :data-checked="row.getIsSelected() || undefined"
           @click="selectRow($event, row)"
         >
           <component
@@ -147,6 +220,7 @@ const table = useVueTable({
             :scope="cell.column.columnDef.meta?.rowHeader ? 'row' : undefined"
             class="sb-table__td"
             :data-align="alignOf(cell.column)"
+            :data-check="cell.column.id === checkColumn.id || undefined"
           >
             <slot :name="`${cell.column.id}-cell`" :row="row">
               <FlexRender :render="cell.column.columnDef.cell" :props="cell.getContext()" />
@@ -154,7 +228,7 @@ const table = useVueTable({
           </component>
         </tr>
         <tr v-if="table.getRowModel().rows.length === 0">
-          <td :colspan="columns.length" class="sb-table__empty">
+          <td :colspan="visibleColumns.length" class="sb-table__empty">
             <Spinner v-if="loading" class="sb-table__spinner" />
             <slot v-else name="empty" />
           </td>
@@ -236,6 +310,16 @@ const table = useVueTable({
 
   .sb-table__row[data-selectable] {
     cursor: pointer;
+  }
+
+  .sb-table__row[data-checked] {
+    background: color-mix(in oklab, var(--sb-primary) 8%, transparent);
+  }
+
+  .sb-table__th[data-check],
+  .sb-table__td[data-check] {
+    width: 1rem;
+    padding-inline-end: 0;
   }
 
   @media (hover: hover) {

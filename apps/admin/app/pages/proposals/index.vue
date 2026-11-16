@@ -438,7 +438,6 @@ const logoBackgrounds = [
 ] as const;
 
 const columns: TableColumn<RosterProposal>[] = [
-  { header: "", id: "select" },
   { header: t("page.proposals.columns.kind"), id: "kind" },
   { header: t("page.proposals.columns.change"), id: "change" },
   { header: t("page.proposals.columns.proposedBy"), id: "proposedBy" },
@@ -449,36 +448,27 @@ const columns: TableColumn<RosterProposal>[] = [
 type ReviewAction = "approve" | "reject";
 
 const reviewingIds = ref(new Set<string>());
-const selectedIds = ref(new Set<string>());
+const selectedIds = ref<string[]>([]);
 
 const isReviewing = (proposal: RosterProposal): boolean => reviewingIds.value.has(proposal.id);
 
-const selectable = computed(() =>
-  proposals.value.filter((proposal) => canReview(proposal) && !isReviewing(proposal)),
-);
+const isSelectable = (proposal: RosterProposal): boolean =>
+  canReview(proposal) && !isReviewing(proposal);
+
+const proposalId = (proposal: RosterProposal): string => proposal.id;
+
+const selectable = computed(() => proposals.value.filter(isSelectable));
 
 const selected = computed(() =>
-  selectable.value.filter((proposal) => selectedIds.value.has(proposal.id)),
+  selectable.value.filter((proposal) => selectedIds.value.includes(proposal.id)),
 );
 
-const allSelected = computed(
-  () => selectable.value.length > 0 && selected.value.length === selectable.value.length,
-);
-
-const setSelected = (proposal: RosterProposal, value: boolean): void => {
-  if (value) {
-    selectedIds.value.add(proposal.id);
-  } else {
-    selectedIds.value.delete(proposal.id);
-  }
-};
-
-const setAllSelected = (value: boolean): void => {
-  selectedIds.value = new Set(value ? selectable.value.map((proposal) => proposal.id) : []);
+const unselect = (id: string): void => {
+  selectedIds.value = selectedIds.value.filter((selectedId) => selectedId !== id);
 };
 
 const removeProposal = (id: string): void => {
-  selectedIds.value.delete(id);
+  unselect(id);
 
   if (data.value) {
     data.value = {
@@ -491,7 +481,7 @@ const removeProposal = (id: string): void => {
 /* The row leaves the list as soon as the API answers, so the queue never reloads between reviews. */
 const reviewOne = async (proposal: RosterProposal, action: ReviewAction): Promise<boolean> => {
   reviewingIds.value.add(proposal.id);
-  selectedIds.value.delete(proposal.id);
+  unselect(proposal.id);
 
   try {
     await reviewRosterProposal(proposal.id, action);
@@ -573,41 +563,34 @@ const reviewSelected = async (action: ReviewAction): Promise<void> => {
         <ClientOnly v-else>
           <div
             v-if="selectable.length > 0"
-            class="flex flex-row flex-wrap items-center justify-between gap-2"
+            class="flex flex-row flex-wrap items-center justify-end gap-2"
           >
-            <SCheckbox
-              :model-value="allSelected"
-              :disabled="bulkAction !== null"
-              :label="$t('page.proposals.selectAll')"
-              @update:model-value="setAllSelected"
+            <span class="text-sm text-muted tabular-nums">
+              {{ $t("page.proposals.selectedCount", { count: selected.length }, selected.length) }}
+            </span>
+            <SButton
+              icon="i-fluent-checkmark-24-regular"
+              size="sm"
+              :label="$t('page.proposals.approveSelected')"
+              :loading="bulkAction === 'approve'"
+              :disabled="selected.length === 0 || bulkAction !== null"
+              @click="reviewSelected('approve')"
             />
-            <div class="flex flex-row flex-wrap items-center gap-2">
-              <span class="text-sm text-muted tabular-nums">
-                {{
-                  $t("page.proposals.selectedCount", { count: selected.length }, selected.length)
-                }}
-              </span>
-              <SButton
-                icon="i-fluent-checkmark-24-regular"
-                size="sm"
-                :label="$t('page.proposals.approveSelected')"
-                :loading="bulkAction === 'approve'"
-                :disabled="selected.length === 0 || bulkAction !== null"
-                @click="reviewSelected('approve')"
-              />
-              <SButton
-                variant="tertiary"
-                size="sm"
-                :label="$t('page.proposals.rejectSelected')"
-                :loading="bulkAction === 'reject'"
-                :disabled="selected.length === 0 || bulkAction !== null"
-                @click="reviewSelected('reject')"
-              />
-            </div>
+            <SButton
+              variant="tertiary"
+              size="sm"
+              :label="$t('page.proposals.rejectSelected')"
+              :loading="bulkAction === 'reject'"
+              :disabled="selected.length === 0 || bulkAction !== null"
+              @click="reviewSelected('reject')"
+            />
           </div>
 
           <STable
+            v-model:selection="selectedIds"
             :data="proposals"
+            :row-id="proposalId"
+            :can-check="isSelectable"
             :columns="columns"
             :caption="$t('page.proposals.title')"
             :loading="status === 'pending'"
@@ -615,17 +598,6 @@ const reviewSelected = async (action: ReviewAction): Promise<void> => {
           >
             <template #empty>
               {{ $t("page.proposals.empty") }}
-            </template>
-
-            <template #select-cell="{ row }">
-              <SCheckbox
-                v-if="canReview(row.original)"
-                :model-value="selectedIds.has(row.original.id)"
-                :disabled="isReviewing(row.original)"
-                @update:model-value="setSelected(row.original, $event)"
-              >
-                <span class="sr-only">{{ $t("page.proposals.select") }}</span>
-              </SCheckbox>
             </template>
 
             <template #kind-cell="{ row }">

@@ -840,13 +840,25 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
         flag("sticky"),
         demo(flag("sortable", true)),
         demo(flag("selectable")),
+        demo(flag("checkable")),
         demo(number("rows", 3, { max: TEAM_ROWS.length, min: 0 })),
       ],
       description:
-        "Rows of data in columns. Setting `sorting` makes headers sortable, with the parent sorting the data; `@select` makes rows clickable. An empty `data` shows the empty slot.",
+        "Rows of data in columns. Setting `sorting` makes headers sortable, with the parent sorting the data; `@select` makes rows clickable; `v-model:selection` adds checkboxes to check one row or all of them. An empty `data` shows the empty slot.",
       events: ["select"],
-      models: { sorting: { desc: true, id: "titles" } },
-      render: ({ onSelect, sorting, "onUpdate:sorting": onSort, ...bindings }, sample) => {
+      models: { selection: [], sorting: { desc: true, id: "titles" } },
+      render: (
+        {
+          onSelect,
+          selection,
+          sorting,
+          "onUpdate:selection": onCheck,
+          "onUpdate:sorting": onSort,
+          ...bindings
+        },
+        sample,
+      ) => {
+        const checkable = sample.checkable === true;
         const sortable = sample.sortable === true;
         const sort = sortable ? tableSort.parse(sorting) : undefined;
         const rows = TEAM_ROWS.slice(0, z.number().catch(3).parse(sample.rows));
@@ -859,7 +871,10 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
             columns: TEAM_COLUMNS,
             data: sortRows(rows, sort),
             onSelect: sample.selectable === true ? onSelect : undefined,
+            "onUpdate:selection": checkable ? onCheck : undefined,
             "onUpdate:sorting": sortable ? onSort : undefined,
+            rowId: (team: TeamRow) => team.name,
+            selection: checkable ? z.array(z.string()).parse(selection) : undefined,
             sorting: sort,
             style: "width:28rem",
           },

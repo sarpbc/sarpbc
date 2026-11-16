@@ -229,8 +229,6 @@
       "reject": "Reject",
       "approveSelected": "Approve selected",
       "rejectSelected": "Reject selected",
-      "select": "Select this proposal",
-      "selectAll": "Select all",
       "selectedCount": "{count} selected | {count} selected",
       "columns": {
         "kind": "Change",

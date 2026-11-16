@@ -19,6 +19,8 @@
     "nextPage": "Next page",
     "pagination": "Pagination",
     "previousPage": "Previous page",
-    "retry": "Retry"
+    "retry": "Retry",
+    "selectAllRows": "Select all rows",
+    "selectRow": "Select this row"
   }
 }

@@ -229,8 +229,6 @@
       "reject": "Refuser",
       "approveSelected": "Valider la sélection",
       "rejectSelected": "Refuser la sélection",
-      "select": "Sélectionner cette proposition",
-      "selectAll": "Tout sélectionner",
       "selectedCount": "{count} sélectionnée | {count} sélectionnées",
       "columns": {
         "kind": "Changement",
