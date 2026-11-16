@@ -13,7 +13,6 @@ const {
   title: string;
 }>();
 
-/* Actions that lead out of the empty state, such as clearing a filter. */
 defineSlots<{ default?: () => VNode[] }>();
 
 const adapters = useDesignAdapters();

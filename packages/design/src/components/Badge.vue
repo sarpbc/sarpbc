@@ -8,7 +8,6 @@ const {
   icon = null,
   label = null,
 } = defineProps<{
-  /** The status the badge reports. */
   color?: BadgeColor;
   icon?: string | null;
   label?: string | number | null;
@@ -27,7 +26,6 @@ const adapters = useDesignAdapters();
 </template>
 
 <style scoped>
-/* One look: a tinted fill with a hairline in the status color, at dense table size. */
 @layer components {
   .sb-badge {
     --tone: var(--sb-text);

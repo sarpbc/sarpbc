@@ -73,7 +73,6 @@ const inputAttrs = computed(() =>
 </template>
 
 <style scoped>
-/* One look: a hairline field that rings in primary on focus and in error when invalid. */
 @layer components {
   .sb-input {
     position: relative;
@@ -117,7 +116,6 @@ const inputAttrs = computed(() =>
   }
 
   .sb-input__field:focus-visible {
-    /* The border color alone marks focus; no halo. */
     outline: none;
     box-shadow: inset 0 0 0 1px var(--focus-tone);
   }

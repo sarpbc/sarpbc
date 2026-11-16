@@ -13,7 +13,6 @@ const {
   maxrows = null,
   rows = 3,
 } = defineProps<{
-  /** Grows with its content instead of scrolling. */
   autoresize?: boolean;
   id?: string | null;
   /** With autoresize, the height stops growing at this many rows and scrolls. */
@@ -128,7 +127,6 @@ watch(model, fitContent);
   }
 
   .sb-textarea__field:focus-visible {
-    /* The border color alone marks focus; no halo. */
     outline: none;
     box-shadow: inset 0 0 0 1px var(--focus-tone);
   }

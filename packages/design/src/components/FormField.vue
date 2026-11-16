@@ -67,7 +67,6 @@ provide(FORM_FIELD, { describedBy, id, invalid: computed(() => error !== null) }
 </template>
 
 <style scoped>
-/* Mirrors Nuxt UI's form field theme (size md, vertical). */
 @layer components {
   .sb-form-field {
     font-size: 0.875rem;

@@ -1,6 +1,6 @@
 /**
- * Runs `task` over `items` one at a time, in order. Use it only where each step depends on the
- * previous one (shared transaction state, generated slugs); independent work belongs in Promise.all.
+ * Only where each step depends on the previous one (shared transaction state, generated slugs);
+ * independent work belongs in Promise.all.
  */
 export const mapSequentially = async <Item, Result>(
   items: readonly Item[],

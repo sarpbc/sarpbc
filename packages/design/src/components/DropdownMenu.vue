@@ -15,7 +15,6 @@ import type { MenuItem, OverlayAlign } from "../types.ts";
 
 const { align = "start", items } = defineProps<{
   align?: OverlayAlign;
-  /** Groups of actions, drawn with a separator between them. */
   items: readonly (readonly MenuItem[])[];
 }>();
 

@@ -19,7 +19,6 @@ const { label = null, orientation = "horizontal" } = defineProps<{
 </template>
 
 <style scoped>
-/* Mirrors Nuxt UI's separator theme (neutral, solid, xs). */
 @layer components {
   .sb-separator {
     width: 100%;

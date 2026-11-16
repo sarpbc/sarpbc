@@ -90,7 +90,6 @@ const tunedOf = (current: ControlValues, demo: boolean): TunedProp[] =>
 const recordOf = (tuned: readonly TunedProp[]): ControlValues =>
   Object.fromEntries(tuned.map(([control, value]) => [control.name, value]));
 
-/* Props that differ from the component's defaults, as the call shows them. */
 const propsOf = (current: ControlValues): ControlValues => recordOf(tunedOf(current, false));
 
 const sampleOf = (current: ControlValues): ControlValues => recordOf(tunedOf(current, true));

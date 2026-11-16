@@ -20,7 +20,6 @@ export interface SlashGroup {
 
 interface SlashCommandsOptions {
   groups: () => readonly SlashGroup[];
-  /** The list component (`SlashMenu.vue`); it receives `groups`, `highlighted` and `command`. */
   menu: Component;
   run: (editor: Editor, item: SlashItem) => void;
 }
@@ -58,7 +57,6 @@ const STEPS: ReadonlyMap<string, number> = new Map([
   ["ArrowUp", -1],
 ]);
 
-/** Typing "/" opens a menu of blocks and inserts the chosen one in place of the query. */
 export const createSlashCommands = ({ groups, menu, run }: SlashCommandsOptions) =>
   Extension.create({
     addProseMirrorPlugins() {

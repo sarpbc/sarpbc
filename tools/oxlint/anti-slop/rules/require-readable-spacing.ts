@@ -4,7 +4,6 @@ import createPaddingLineRule from "../vendor/eslint-stylistic/padding-line-betwe
 
 import type { NodeTestObject } from "../vendor/eslint-stylistic/padding-line-between-statements.ts";
 
-/** A `const`/`let`/`var`/`using` declaration, optionally exported, written on one line. */
 function isSinglelineBinding(node: ESTree.Node): boolean {
   const declaration = node.type === "ExportNamedDeclaration" ? node.declaration : node;
   return declaration?.type === "VariableDeclaration" && node.loc.start.line === node.loc.end.line;
@@ -71,7 +70,6 @@ const paddingRule = createPaddingLineRule(
   },
 );
 
-/** Restore structural blank lines with whitespace-only fixes; keep single-line binding groups and overloads grouped. */
 export const requireReadableSpacingRule: CreateRule = {
   ...paddingRule,
   meta: {

@@ -25,7 +25,6 @@ export default defineNuxtModule({
 
     const resolver = createResolver(import.meta.url);
 
-    // @sarpbc/design: its components as `S*`, its tokens, and Nuxt's <Icon> and <NuxtLink> as its adapters.
     const { resolve } = createRequire(import.meta.url);
     // Generated imports need forward slashes, including on Windows.
     // Point at single files, not the index: importing the index would bundle every component (and inline its styles) on every page.
@@ -72,12 +71,12 @@ export default defineNuxtPlugin((nuxtApp) => {
       prefix: "Sarp",
     });
 
-    // Host apps that show news tags link to the public site when this is set; empty keeps routes relative.
     addImports({
       from: resolver.resolve("./runtime/composables/use-match-state-label"),
       name: "useMatchStateLabel",
     });
 
+    // Host apps that show news tags link to the public site when this is set; empty keeps routes relative.
     nuxt.options.runtimeConfig.public.publicSiteUrl ??= "";
 
     // @nuxtjs/i18n calls this hook while it sets up, so list this module before it.

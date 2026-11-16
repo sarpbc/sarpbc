@@ -33,7 +33,6 @@ const nav = useTemplateRef("nav");
 const moreAbove = ref(false);
 const moreBelow = ref(false);
 
-/* The fades cover the list only where items are hidden past its edge. */
 const syncFades = (): void => {
   if (nav.value === null) {
     return;
@@ -92,7 +91,6 @@ watch(groups, async () => {
   syncFades();
 });
 
-/* The first component shows when the hash names none. */
 const selected = computed(() => (PLAYGROUNDS.has(route.value) ? route.value : "Button"));
 
 const playground = computed(() => PLAYGROUNDS.get(selected.value));

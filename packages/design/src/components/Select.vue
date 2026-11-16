@@ -49,7 +49,6 @@ const emit = defineEmits<{ "update:modelValue": [value: T] }>();
 const adapters = useDesignAdapters();
 const field = useFormField();
 
-/* Ungrouped items render as one group without a heading. */
 const sections = computed(
   (): readonly SelectGroup<T>[] => groups ?? [{ label: "", options: items ?? [] }],
 );

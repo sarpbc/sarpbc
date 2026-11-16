@@ -29,7 +29,6 @@ const { ariaLabel, items } = defineProps<{
 </template>
 
 <style scoped>
-/* One look: a framed row of slash-separated labels, dense enough for a page header. */
 @layer components {
   .sb-tabs {
     display: inline-flex;
