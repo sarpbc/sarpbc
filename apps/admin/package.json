@@ -14,7 +14,7 @@
   },
   "dependencies": {
     "@floating-ui/dom": "^1.8.0",
-    "@nuxt/fonts": "^0.14.0",
+    "@nuxt/fonts": "^1.2.0",
     "@nuxt/icon": "^2.6.1",
     "@nuxtjs/color-mode": "^4.0.1",
     "@nuxtjs/i18n": "catalog:",
