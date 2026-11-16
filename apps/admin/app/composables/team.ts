@@ -26,7 +26,7 @@ export const getAllTeams = async (query: {
 }): Promise<{ teams: Team[]; total: number }> => {
   const res = await apiFetch<{ teams: Team[]; count: number }>("/team", {
     method: "GET",
-    query,
+    query: { limit: query.limit, offset: query.offset },
   });
 
   return { teams: res.teams, total: res.count };
