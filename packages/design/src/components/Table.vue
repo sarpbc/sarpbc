@@ -45,7 +45,6 @@ const {
    * makes headers sortable (except columns with `enableSorting: false`).
    */
   sorting?: TableSort | null;
-  /** Keeps the header visible while the rows scroll. */
   sticky?: boolean;
 }>();
 

@@ -26,7 +26,6 @@ export const LINK_VARIANTS = ["primary", "secondary"] as const;
 
 export type LinkVariant = (typeof LINK_VARIANTS)[number];
 
-/** Where a tooltip, popover or menu opens relative to its trigger. */
 export type OverlaySide = "top" | "right" | "bottom" | "left";
 
 export type OverlayAlign = "start" | "center" | "end";
@@ -34,7 +33,6 @@ export type OverlayAlign = "start" | "center" | "end";
 /** md fits a form; the larger sizes hold tables and editors. */
 export type ModalSize = "md" | "lg" | "xl" | "2xl";
 
-/** One action in a dropdown menu. */
 export interface MenuItem {
   danger?: boolean;
   disabled?: boolean;
@@ -66,7 +64,6 @@ export type RadioVariant = "list" | "cards" | "text";
 
 export type RadioStatus = "success" | "danger";
 
-/** Options under a heading, e.g. the players of each team. */
 export interface SelectGroup<T extends SelectValue = SelectValue> {
   label: string;
   options: readonly SelectOption<T>[];
@@ -101,7 +98,6 @@ export interface ToastMessage {
   title: string;
 }
 
-/** One entry of a command palette: a search result or an action. */
 export interface CommandItem {
   icon?: string;
   id: string;

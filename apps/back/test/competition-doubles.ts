@@ -15,7 +15,6 @@ import type { CompetitionFeed } from "../src/tournament/application/feed";
 
 const unused = async (): Promise<never> => await Promise.reject(new Error("unused collaborator"));
 
-/** Complete doubles: every method rejects unless the test overrides it. */
 export const tournamentWriter = (overrides: Partial<TournamentWriter> = {}): TournamentWriter => ({
   byPandascoreId: unused,
   league: unused,

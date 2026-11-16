@@ -3,7 +3,7 @@
 </template>
 
 <style scoped>
-/* Mirrors Nuxt UI's skeleton: a pulsing elevated block. Callers size it. */
+/* Callers size it. */
 @layer components {
   .sb-skeleton {
     background: var(--sb-bg-elevated);

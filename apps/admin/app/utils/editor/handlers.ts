@@ -2,7 +2,6 @@ import type { ChainedCommands, Editor } from "@tiptap/core";
 
 export type HeadingLevel = 1 | 2 | 3 | 4;
 
-/** What a toolbar button or slash-menu entry asks the editor to do. */
 export interface EditorCommand {
   kind: string;
   level?: HeadingLevel;
@@ -72,7 +71,6 @@ export const DEFAULT_EDITOR_HANDLERS = {
   },
 } satisfies EditorHandlers;
 
-/** A button in a floating toolbar: a handler command, or a direct action. */
 export interface EditorToolbarItem {
   command?: EditorCommand;
   danger?: boolean;

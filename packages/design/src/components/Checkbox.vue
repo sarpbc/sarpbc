@@ -12,7 +12,6 @@ const {
   disabled = false,
   label = null,
 } = defineProps<{
-  /** Names a checkbox that has no visible label. */
   ariaLabel?: string | null;
   disabled?: boolean;
   label?: string | null;

@@ -26,7 +26,6 @@ const attribute = ([control, value]: TunedProp): string => {
   }
 };
 
-/** Formats the tuned props as the Vue call a developer would write. */
 export const callOf = (
   component: string,
   props: readonly TunedProp[],

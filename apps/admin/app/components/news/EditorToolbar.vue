@@ -14,7 +14,6 @@ const {
 } = defineProps<{
   editor: Editor;
   handlers: EditorHandlers;
-  /** Groups of buttons, separated by a divider. */
   items: readonly (readonly EditorToolbarItem[])[];
   shouldShow?:
     | ((props: { editor: Editor; state: EditorState; view: EditorView }) => boolean)

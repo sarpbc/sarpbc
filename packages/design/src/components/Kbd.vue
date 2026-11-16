@@ -47,7 +47,6 @@ const label = computed(() => {
 </template>
 
 <style scoped>
-/* Mirrors Nuxt UI's kbd theme (outline variant). */
 @layer components {
   .sb-kbd {
     display: inline-flex;

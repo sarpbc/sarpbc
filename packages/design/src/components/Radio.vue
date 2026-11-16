@@ -115,7 +115,6 @@ const variant = computed(() => group?.variant.value ?? "list");
     color: var(--sb-text-muted);
   }
 
-  /* Cards: the whole option is the target, tinted once chosen. */
   .sb-radio[data-variant="cards"] {
     justify-content: center;
     min-height: 1.75rem;
@@ -152,7 +151,6 @@ const variant = computed(() => group?.variant.value ?? "list");
     margin-inline-start: -1px;
   }
 
-  /* A card with a description reads as a full-width, left-aligned choice. */
   .sb-radio[data-variant="cards"][data-rich] {
     justify-content: flex-start;
     width: 100%;

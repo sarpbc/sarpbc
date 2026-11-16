@@ -105,7 +105,6 @@ export default defineNuxtConfig({
     },
   },
 
-  // Staff console is SPA-only
   ssr: false,
 
   typescript: {

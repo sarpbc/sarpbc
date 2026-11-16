@@ -2,7 +2,6 @@ import { inject } from "vue";
 
 import type { ComputedRef, InjectionKey } from "vue";
 
-/** What a FormField hands to the control inside it, like Nuxt UI's form field context. */
 export interface FormFieldContext {
   describedBy: ComputedRef<string | undefined>;
   id: string;

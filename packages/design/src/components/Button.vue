@@ -24,7 +24,6 @@ const {
   /** Destructive action: the only color change a button allows. */
   danger?: boolean;
   disabled?: boolean;
-  /** Leading icon name, rendered by the app's icon adapter. */
   icon?: string | null;
   label?: string | null;
   loading?: boolean;

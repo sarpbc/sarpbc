@@ -231,7 +231,6 @@ onBeforeUnmount(() => {
 </template>
 
 <style scoped>
-/* The article body while editing: the same typography Nuxt UI's editor gave it. */
 .article-editor :deep(.article-editor__base) {
   width: 100%;
   outline: none;

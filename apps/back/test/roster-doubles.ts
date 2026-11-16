@@ -11,7 +11,6 @@ import type {
 
 const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
 
-/** Complete roster ports whose every method rejects, for collaborators a test never reaches. */
 export const unusedPlayerQueries: PlayerQueries = {
   bornOnDay: unused,
   findById: unused,

@@ -61,7 +61,6 @@ const adapters = useDesignAdapters();
     padding: 0.375rem 0.625rem;
   }
 
-  /* An item is active when the app says so, or when the router matches its link. */
   .sb-nav__link[data-active],
   .sb-nav__link.router-link-active {
     color: var(--sb-text-highlighted);
