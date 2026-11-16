@@ -27,7 +27,7 @@ export const getAllTournaments = async (query: {
 }): Promise<{ tournaments: TournamentListItem[]; total: number }> => {
   const res = await apiFetch<{ tournaments: TournamentListItem[]; count: number }>("/tournaments", {
     method: "GET",
-    query,
+    query: { limit: query.limit, offset: query.offset },
   });
 
   return { total: res.count, tournaments: res.tournaments };
