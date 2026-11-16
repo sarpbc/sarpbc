@@ -3,7 +3,6 @@ import { hasPermission } from "@sarpbc/utils";
 
 const STAFF_MODE_COOKIE = "staffMode";
 
-/** Hides staff actions on the public site until a staff member opts in; the API still checks every write. */
 export const useStaffMode = () => {
   const user = useUser();
 
