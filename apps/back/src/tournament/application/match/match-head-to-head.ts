@@ -25,7 +25,7 @@ export interface HeadToHead {
   recentMeetings: HeadToHeadMeeting[];
 }
 
-export const formatTournamentLabel = (match: Match): string => {
+const formatTournamentLabel = (match: Match): string => {
   const league = match.tournament?.league?.name;
   const name = match.tournament?.name;
 

@@ -7,7 +7,7 @@ import type { ReplyTarget } from "../domain/reply";
 import { REPLY_TARGET_LOADERS } from "./persistence/reply.mapper";
 import { MikroReplyStore, replyReports } from "./persistence/reply.store";
 
-export const replyWriteScope = (em: EntityManager): ReplyWriteScope => ({
+const replyWriteScope = (em: EntityManager): ReplyWriteScope => ({
   notifications: directReplyNotifications(em),
   replies: new MikroReplyStore(em),
   reports: replyReports(em),

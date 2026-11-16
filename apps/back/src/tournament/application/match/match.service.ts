@@ -27,24 +27,24 @@ import {
 
 const RECENT_FORM_LIMIT = 5;
 
-export interface TeamFormRecord {
+interface TeamFormRecord {
   wins: number;
   losses: number;
 }
 
-export interface TeamFormOpponent {
+interface TeamFormOpponent {
   id: string;
   name: string;
   slug?: string | null;
   imageUrl?: string | null;
 }
 
-export interface TeamFormMatchScore {
+interface TeamFormMatchScore {
   team: number | null;
   opponent: number | null;
 }
 
-export interface TeamFormMatchEntry {
+interface TeamFormMatchEntry {
   id: string;
   publicId: number;
   slug: string;
@@ -55,7 +55,7 @@ export interface TeamFormMatchEntry {
   outcome: "win" | "loss" | null;
 }
 
-export interface TeamForm {
+interface TeamForm {
   recent: TeamFormMatchEntry[];
   record: TeamFormRecord;
 }

@@ -60,7 +60,3 @@ export interface ReplyWriteScope {
 export interface ReplyTransaction {
   run: <T>(work: (scope: ReplyWriteScope) => Promise<T>) => Promise<T>;
 }
-
-export interface ReplyDeletion {
-  deleteAllForTarget: (type: ReplyTargetType, id: string) => Promise<void>;
-}

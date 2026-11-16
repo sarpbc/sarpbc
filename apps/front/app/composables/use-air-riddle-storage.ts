@@ -2,10 +2,10 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import * as z from "zod";
 import { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
-export const AIR_RIDDLE_STORAGE_KEY = "sarpbc:air-riddle";
-export const AIR_RIDDLE_TIMEZONE = "Europe/Berlin";
+const AIR_RIDDLE_STORAGE_KEY = "sarpbc:air-riddle";
+const AIR_RIDDLE_TIMEZONE = "Europe/Berlin";
 
-export interface AirRiddleStoredAttempt {
+interface AirRiddleStoredAttempt {
   letters: string[];
   results?: AirRiddleResultEnum[];
 }
@@ -42,7 +42,7 @@ const airRiddleStoredStateSchema = z.object({
 export const AIR_RIDDLE_MAX_ATTEMPTS = 6;
 
 /** Calendar date for today's Air Riddle, aligned with the API (Europe/Berlin). */
-export const getAirRiddleDateKey = (now = new Date()): string =>
+const getAirRiddleDateKey = (now = new Date()): string =>
   new Intl.DateTimeFormat("en-CA", {
     day: "2-digit",
     month: "2-digit",
@@ -50,7 +50,7 @@ export const getAirRiddleDateKey = (now = new Date()): string =>
     year: "numeric",
   }).format(now);
 
-export const parseAirRiddleStoredState = (
+const parseAirRiddleStoredState = (
   raw: string | null,
   today: string,
 ): AirRiddleStoredState | null => {

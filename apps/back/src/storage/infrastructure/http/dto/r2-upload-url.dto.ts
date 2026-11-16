@@ -5,11 +5,9 @@ import {
 } from "@sarpbc/utils";
 import { z } from "zod";
 
-export const R2UploadTargetDto = z.strictObject({
+const R2UploadTargetDto = z.strictObject({
   target: z.enum(IMAGE_UPLOAD_TARGETS),
 });
-
-export type R2UploadTargetInput = z.infer<typeof R2UploadTargetDto>;
 
 export const R2UploadDto = R2UploadTargetDto.extend({
   articleSlug: z.string().max(255).optional(),

@@ -11,7 +11,7 @@ export interface TournamentParticipantEntry {
   hasReliableRoster: boolean;
 }
 
-export const hasReliableParticipantRoster = (players: ParticipantPlayer[]): boolean =>
+const hasReliableParticipantRoster = (players: ParticipantPlayer[]): boolean =>
   players.some((player) => Boolean(player.slug));
 
 export const buildTournamentParticipantEntries = (

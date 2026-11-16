@@ -11,7 +11,7 @@ const date = z
   .nullish()
   .transform((v) => v ?? undefined);
 
-export const streamSchema = z.object({
+const streamSchema = z.object({
   embed_url: z.string().default(""),
   language: z.string().default(""),
   main: z.boolean().default(false),

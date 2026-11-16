@@ -18,7 +18,7 @@ interface ToolSpec<Fields extends Record<string, z.ZodType>> {
 }
 
 /** A JSON-serialisable tool payload. */
-export type ToolData = object;
+type ToolData = object;
 
 export interface ToolWrite<Result = object> {
   result: Result;

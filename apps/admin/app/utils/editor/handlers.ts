@@ -9,7 +9,7 @@ export interface EditorCommand {
 }
 
 /** How the editor runs one kind of command; `execute` returns a chain the caller runs. */
-export interface EditorHandler {
+interface EditorHandler {
   canExecute: (editor: Editor, command: EditorCommand) => boolean;
   execute: (editor: Editor, command: EditorCommand) => ChainedCommands;
   isActive: (editor: Editor, command: EditorCommand) => boolean;

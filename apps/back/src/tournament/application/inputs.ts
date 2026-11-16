@@ -1,7 +1,7 @@
 import type { BracketLinkInput, EmptyBracketSize, TournamentFormat } from "@sarpbc/types";
 import type { OfficialMatchStream } from "../domain/official-match-stream";
 
-export interface ManualTournamentFields {
+interface ManualTournamentFields {
   eventId?: string;
   slug?: string;
   tier?: string | null;

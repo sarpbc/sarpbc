@@ -1,4 +1,4 @@
-export const COMMENT_HASH_PREFIX = "comment-";
+const COMMENT_HASH_PREFIX = "comment-";
 
 export const commentAnchorId = (commentId: string): string => `${COMMENT_HASH_PREFIX}${commentId}`;
 

@@ -8,7 +8,7 @@ import { WEEKLY_DIGEST_NEWS_TYPE } from "../../domain/news-type";
 import type { NewsArticleRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
 
-export const newsSnapshot = (row: NewsArticle): NewsArticleRecord => ({
+const newsSnapshot = (row: NewsArticle): NewsArticleRecord => ({
   author: { id: row.author.id, userName: row.author.userName },
   content: row.content,
   contentFr: row.contentFr,

@@ -15,7 +15,7 @@ export const getNotifications = async (limit = 30): Promise<AppNotification[]> =
   }
 };
 
-export const getUnreadNotificationCount = async (): Promise<number> => {
+const getUnreadNotificationCount = async (): Promise<number> => {
   try {
     const res = await apiFetch<{ count: number }>("/notifications/unread-count", {
       method: "GET",

@@ -1,6 +1,6 @@
 const GUESS_PATTERN = /[^A-Z0-9 ]/gu;
 
-export const sanitizeAirRiddleGuess = (value: string, maxLength: number): string =>
+const sanitizeAirRiddleGuess = (value: string, maxLength: number): string =>
   value.toUpperCase().replaceAll(GUESS_PATTERN, "").slice(0, maxLength);
 
 export const useAirRiddleGuess = (maxLength: Ref<number>) => {

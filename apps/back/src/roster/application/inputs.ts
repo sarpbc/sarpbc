@@ -25,7 +25,7 @@ export interface UpdatePlayerInput {
   status?: PlayerStatus;
 }
 
-export interface RosterMoveInput {
+interface RosterMoveInput {
   teamId: string;
   effectiveDate: string;
   sourceUrl: string;

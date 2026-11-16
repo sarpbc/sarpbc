@@ -20,7 +20,7 @@ import type {
   SupportedLocale,
 } from "@sarpbc/types";
 
-export const NEWS_WEEK_SHORTS_LIMIT = 100;
+const NEWS_WEEK_SHORTS_LIMIT = 100;
 
 export interface NewsArticleListItemResponse {
   id: string;

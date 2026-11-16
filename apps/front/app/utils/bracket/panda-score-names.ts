@@ -8,7 +8,7 @@ export interface BracketRoundParse {
 /**
  * PandaScore match names encode section and column when feeder links are omitted.
  */
-export const parseBracketRoundFromName = (name: string | undefined): BracketRoundParse | null => {
+const parseBracketRoundFromName = (name: string | undefined): BracketRoundParse | null => {
   const normalized = name?.trim().toLowerCase() ?? "";
 
   if (!normalized) {

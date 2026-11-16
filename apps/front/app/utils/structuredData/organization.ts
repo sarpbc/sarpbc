@@ -4,7 +4,7 @@ import type { JsonLdNode } from "./json-ld";
 
 export const ORGANIZATION_ID = `${SITE_ORIGIN}/#organization`;
 
-export interface ContactPointLd extends JsonLdNode {
+interface ContactPointLd extends JsonLdNode {
   "@type": "ContactPoint";
   email: string;
   contactType: string;

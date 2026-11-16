@@ -1,6 +1,6 @@
 import { localDayKey, parseMatchDate } from "~/utils/calendar-day";
 
-export const UNKNOWN_DAY_KEY = "__unknown__";
+const UNKNOWN_DAY_KEY = "__unknown__";
 
 export interface DayGroup<T> {
   dateKey: string;

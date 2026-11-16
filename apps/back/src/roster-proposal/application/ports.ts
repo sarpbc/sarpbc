@@ -9,7 +9,7 @@ export interface RosterProposalStore {
   names: (ids: RosterNameIds) => Promise<Record<string, string>>;
 }
 
-export interface RosterNameIds {
+interface RosterNameIds {
   players: string[];
   teams: string[];
   users: string[];

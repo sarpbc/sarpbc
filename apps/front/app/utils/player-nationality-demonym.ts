@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 
 const DEMONYM_KEY_PREFIX = "nationalities.demonym.";
 
-export const playerNationalityDemonymKey = (code: string): string =>
+const playerNationalityDemonymKey = (code: string): string =>
   `${DEMONYM_KEY_PREFIX}${code.trim().toUpperCase()}`;
 
 export const resolvePlayerNationalityDemonym = (

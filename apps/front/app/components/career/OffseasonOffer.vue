@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-export interface OffseasonOfferItem {
+interface OffseasonOfferItem {
   teamId: string;
   name: string;
   rank: number | null;

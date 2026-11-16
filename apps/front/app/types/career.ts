@@ -264,10 +264,10 @@ export interface CareerState {
   result: CareerResult | null;
 }
 
-export const STARTING_AGE = 16;
+const STARTING_AGE = 16;
 
 /** Seasons 1–7 are ages 16–22. The stay-or-retire prompt starts after that. */
-export const PEAK_SEASONS = 7;
+const PEAK_SEASONS = 7;
 export const SPLITS_PER_SEASON = 2;
 export const MAX_EVENTS_BEFORE_SPLIT = 3;
 export const REGIONALS_PER_SPLIT = 3;

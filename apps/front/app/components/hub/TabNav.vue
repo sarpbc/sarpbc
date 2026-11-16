@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { RouteLocationRaw } from "vue-router";
 
-export interface TabNavItem {
+interface TabNavItem {
   to: RouteLocationRaw;
   label: string;
   active: boolean;

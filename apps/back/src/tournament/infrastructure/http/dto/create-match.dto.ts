@@ -64,7 +64,7 @@ export const UpdateMatchResultDto = z
 
 export type UpdateMatchResultInput = z.infer<typeof UpdateMatchResultDto>;
 
-export const MatchVodLinkDto = z.strictObject({
+const MatchVodLinkDto = z.strictObject({
   language: z.string().min(1).max(8),
   source: z.enum(["twitch", "youtube"]).optional(),
   url: z.string().min(1).max(2048),

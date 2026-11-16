@@ -10,7 +10,7 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { nonBlank } from "../../common/domain/text";
 import type { OfficialMatchStream } from "./official-match-stream";
 
-export type StreamOwnerKind = "event" | "tournament" | "match";
+type StreamOwnerKind = "event" | "tournament" | "match";
 
 export interface StreamOwner {
   kind: StreamOwnerKind;

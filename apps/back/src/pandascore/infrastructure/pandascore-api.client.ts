@@ -6,7 +6,7 @@ import { z } from "zod";
 import { PandascoreApiError } from "./pandascore-api.errors";
 import { log } from "evlog";
 
-export interface PandascoreQueryParams {
+interface PandascoreQueryParams {
   [key: string]: string | string[] | undefined;
   page?: string;
   per_page?: string;

@@ -9,7 +9,7 @@ import {
   DATA_SOURCE_URL_MAX_LENGTH,
 } from "@sarpbc/utils";
 
-export const TournamentPrizeEntryDto = z.strictObject({
+const TournamentPrizeEntryDto = z.strictObject({
   amount: z.number().int().min(MIN_PRIZE_AMOUNT).max(MAX_PRIZE_AMOUNT),
   currency: z.string().length(CURRENCY_CODE_LENGTH),
   placement: z.number().int().min(MIN_PRIZE_PLACEMENT),

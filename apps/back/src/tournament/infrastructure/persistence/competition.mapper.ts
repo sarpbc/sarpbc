@@ -52,7 +52,7 @@ export const MATCH_WRITE_POPULATE = [
   "previousMatches.previousMatch",
 ] as const;
 
-export const eventRefOf = (row: TournamentEventRow): TournamentEventRef => {
+const eventRefOf = (row: TournamentEventRow): TournamentEventRef => {
   // An unpopulated reference would silently map to an empty slug and break every public URL.
   if (!wrap(row).isInitialized()) {
     throw new Error(`Tournament event ${row.id} is not populated`);
@@ -100,7 +100,7 @@ export const toParticipant = (
 
 const matchDate = (row: MatchRow): Date | null => row.beginAt ?? stageDate(row.tournament);
 
-export const toTournamentSummary = (row: TournamentRow): TournamentSummary => ({
+const toTournamentSummary = (row: TournamentRow): TournamentSummary => ({
   beginAt: row.beginAt,
   event: eventRefOf(row.event),
   eventStreams: row.event.streams ?? [],

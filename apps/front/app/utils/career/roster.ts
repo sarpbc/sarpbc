@@ -145,7 +145,7 @@ const npcStats = (player: CareerNpcPlayer): CareerStats => ({
   rating: player.rating,
 });
 
-export const getPlayerMatchStrength = (
+const getPlayerMatchStrength = (
   playerId: string,
   world: CareerWorldState,
   user: MatchStrengthUser,

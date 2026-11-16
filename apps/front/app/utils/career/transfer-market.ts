@@ -75,7 +75,7 @@ const shuffleTeams = (teams: RankedTeam[], rng: () => number): RankedTeam[] => {
   return shuffled;
 };
 
-export const getTransferBand = (
+const getTransferBand = (
   seasonPoints: number,
   currentRank: number,
   playerWorldRank: number,
@@ -125,7 +125,7 @@ const rollOfferCount = (rng: () => number, threeChance: number, twoChance: numbe
   return rng() < twoChance ? 2 : 1;
 };
 
-export const pickOffseasonOffers = (
+const pickOffseasonOffers = (
   currentTeamId: string,
   seasonPoints: number,
   rankings: WorldRankings,

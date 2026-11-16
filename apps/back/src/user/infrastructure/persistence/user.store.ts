@@ -4,7 +4,7 @@ import { User as Account } from "../../domain/user";
 import type { UserListQuery, UserQueries, UserWriter } from "../../application/ports/user-store";
 import { User } from "./user.entity";
 
-export const toAccount = (record: User): Account => {
+const toAccount = (record: User): Account => {
   const account = new Account(
     record.email,
     record.userName,

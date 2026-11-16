@@ -1,4 +1,3 @@
-import { EMPTY_BRACKET_SIZES } from "@sarpbc/types";
 import type {
   BracketLinkInput,
   BracketLinkType,
@@ -127,9 +126,6 @@ export interface EmptyBracketMatch {
   name: string;
   previousMatches: { index: number; type: BracketLinkType }[];
 }
-
-export const isEmptyBracketSize = (teams: number): teams is EmptyBracketSize =>
-  EMPTY_BRACKET_SIZES.some((size) => size === teams);
 
 const roundName = (size: number): string => {
   switch (size) {

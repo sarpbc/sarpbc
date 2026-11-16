@@ -134,7 +134,7 @@ export const splitDoubleEliminationMatches = (
   return { lower, upper };
 };
 
-export const buildDoubleEliminationCombinedLayout = (
+const buildDoubleEliminationCombinedLayout = (
   lowerMatches: TournamentDetailMatch[],
   upperIds: Set<string>,
 ): BracketSectionLayout | null => {
