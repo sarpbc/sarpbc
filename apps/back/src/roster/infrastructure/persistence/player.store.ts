@@ -106,6 +106,27 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     return rows.map(toPlayer);
   }
 
+  async bornOnDay(month: number, day: number) {
+    const ids: { id: string }[] = await this.em
+      .getConnection()
+      .execute(
+        "SELECT id FROM player WHERE merged_into_id IS NULL AND extract(month from birthday) = ? AND extract(day from birthday) = ?",
+        [month, day],
+      );
+
+    if (ids.length === 0) {
+      return [];
+    }
+
+    const rows = await this.em.find(
+      PlayerRow,
+      { id: { $in: ids.map(({ id }) => id) } },
+      { orderBy: { name: "asc" }, populate: ["team"] },
+    );
+
+    return rows.map(toPlayer);
+  }
+
   async save(model: Player) {
     const row = model.id
       ? await this.em.findOneOrFail(PlayerRow, { id: model.id })

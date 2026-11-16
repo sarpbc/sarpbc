@@ -65,6 +65,12 @@ const onThisDay = z.object({
         year: z.number(),
       }),
       z.object({
+        age: z.number(),
+        kind: z.literal("birthday"),
+        player: z.object({ name: z.string() }),
+        year: z.number(),
+      }),
+      z.object({
         kind: z.literal("transfer"),
         team: z.object({ name: z.string() }),
         type: z.string(),
@@ -163,6 +169,8 @@ export const verifyOnThisDay = async ({
 
   const { player } = await created(playerBody, "/player", { name: "Anniversary Rookie" });
 
+  await created(playerBody, "/player", { birthday: "2001-02-17", name: "Anniversary Veteran" });
+
   await created(z.unknown(), `/player/${player.id}/contract`, {
     endDate: "2024-02-17",
     startDate: "2023-02-17",
@@ -231,6 +239,10 @@ export const verifyOnThisDay = async ({
         return [event.kind, event.year, event.winner.score, event.loser.team?.name];
       }
 
+      case "birthday": {
+        return [event.kind, event.year, event.age, event.player.name];
+      }
+
       case "transfer": {
         return [event.kind, event.year, event.type, event.team.name];
       }
@@ -253,7 +265,12 @@ export const verifyOnThisDay = async ({
     "titles and finals use the Paris day; start.gg, next-day and current-year titles stay out",
   );
   assert.deepEqual(
-    summary.slice(3).toSorted(byJoined),
+    summary.filter(([kind]) => kind === "birthday"),
+    [["birthday", 2001, 25, "Anniversary Veteran"]],
+    "players born on this day appear with the age they reach",
+  );
+  assert.deepEqual(
+    summary.filter(([kind]) => kind === "transfer").toSorted(byJoined),
     [
       ["transfer", 2023, "arrival", away.name],
       ["transfer", 2024, "arrival", home.name],

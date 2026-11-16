@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   STARTGG_STAGE_ID,
   fact,
+  player,
   grandFinal,
   onThisDaySources,
   stage,
@@ -98,6 +99,26 @@ describe(OnThisDayService, () => {
       },
     ]);
     expect(JSON.stringify(events)).not.toMatch(/"id":/u);
+  });
+
+  it("lists birthdays with the age reached, after titles and before transfers", async () => {
+    const { sources, players } = onThisDaySources({
+      players: [player("2001-12-06"), player("2026-12-06"), player(null)],
+      titles: [stage("worlds-playoffs", "pandascore", "2024-12-06T21:00:00Z")],
+      transfers: [transfer("contract", "arrival", "2022-12-06")],
+    });
+
+    const { events } = await new OnThisDayService(sources).forDay(ON, NOW);
+
+    expect(players.bornOnDay).toHaveBeenCalledWith(12, 6);
+    expect(events.map(({ kind }) => kind)).toStrictEqual(["title", "birthday", "transfer"]);
+    expect(events[1]).toStrictEqual({
+      age: 25,
+      date: "2001-12-06",
+      kind: "birthday",
+      player: { name: "Vatira", slug: "vatira" },
+      year: 2001,
+    });
   });
 
   it("drops start.gg titles, finals and facts linked to start.gg from the public payload", async () => {

@@ -12,6 +12,10 @@ const { events, date, pending, error, refresh } = useOnThisDay();
 const shown = computed(() => (limit ? events.value.slice(0, limit) : events.value));
 const hasMore = computed(() => limit !== null && events.value.length > limit);
 
+const visible = computed(
+  () => standalone || pending.value || Boolean(error.value) || events.value.length > 0,
+);
+
 const dayLabel = computed(() =>
   date.value
     ? new Intl.DateTimeFormat(locale.value, {
@@ -24,7 +28,7 @@ const dayLabel = computed(() =>
 </script>
 
 <template>
-  <section :aria-labelledby="standalone ? undefined : 'on-this-day-title'">
+  <section v-if="visible" :aria-labelledby="standalone ? undefined : 'on-this-day-title'">
     <HubRail :caption="standalone ? 'none' : 'section'">
       <template v-if="!standalone" #caption>
         <div class="flex w-full items-end justify-between gap-2 pr-2">

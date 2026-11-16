@@ -70,6 +70,13 @@ export type OnThisDayEvent =
       team: OnThisDayTeam;
     }
   | {
+      kind: "birthday";
+      year: number;
+      date: string;
+      age: number;
+      player: OnThisDayPlayer;
+    }
+  | {
       kind: "fact";
       year: number | null;
       text: OnThisDayText;

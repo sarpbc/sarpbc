@@ -160,6 +160,22 @@ const finalScore = computed(() =>
       </i18n-t>
 
       <i18n-t
+        v-else-if="event.kind === 'birthday'"
+        keypath="components.onThisDay.line.birthday"
+        tag="span"
+        scope="global"
+      >
+        <template #player>
+          <SLink :to="localePath(playerPath(event.player.slug))" class="font-medium" translate="no">
+            {{ event.player.name }}
+          </SLink>
+        </template>
+        <template #age>
+          <span class="tabular-nums">{{ event.age }}</span>
+        </template>
+      </i18n-t>
+
+      <i18n-t
         v-else
         :keypath="`components.onThisDay.line.transfer.${event.type}`"
         tag="span"

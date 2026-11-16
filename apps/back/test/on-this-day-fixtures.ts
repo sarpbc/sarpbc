@@ -100,6 +100,13 @@ export const transfer = (id: string, type: Transfer["type"], date: string): Tran
   return { contract, date: new Date(date), id: `${id}:join`, sourceUrl: null, type };
 };
 
+export const player = (birthday: string | null): Player =>
+  Object.assign(new Player(), {
+    birthday: birthday === null ? null : new Date(birthday),
+    name: vatira.name,
+    slug: vatira.slug,
+  });
+
 export const fact = (overrides: Partial<OnThisDayFact> = {}): OnThisDayFact => ({
   day: 6,
   id: "fact-id",
@@ -118,6 +125,7 @@ export const onThisDaySources = (
     finals?: Match[];
     transfers?: Transfer[];
     facts?: OnThisDayFact[];
+    players?: Player[];
   } = {},
 ) => {
   const tournaments = {
@@ -132,9 +140,14 @@ export const onThisDaySources = (
   };
 
   const facts = { onDay: vi.fn<OnThisDaySources["facts"]["onDay"]>(async () => data.facts ?? []) };
-  const sources: OnThisDaySources = { facts, tournaments, transfers };
 
-  return { facts, sources, tournaments, transfers };
+  const players = {
+    bornOnDay: vi.fn<OnThisDaySources["players"]["bornOnDay"]>(async () => data.players ?? []),
+  };
+
+  const sources: OnThisDaySources = { facts, players, tournaments, transfers };
+
+  return { facts, players, sources, tournaments, transfers };
 };
 
 type FactLink = NonNullable<OnThisDayFact["link"]>;

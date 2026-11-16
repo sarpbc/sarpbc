@@ -11,6 +11,7 @@ import type {
 import { SITE_TIME_ZONE, calendarDayIn, formatIsoDay } from "@sarpbc/utils";
 import type { CalendarDay } from "@sarpbc/utils";
 import { isRedistributable } from "../../common/domain/data-source";
+import type { PlayerService } from "../../roster/application/player.service";
 import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
 import type { Transfer } from "../../roster/domain/transfer";
@@ -26,6 +27,7 @@ import type { OnThisDayFactStore } from "./ports";
 export interface OnThisDaySources {
   tournaments: Pick<TournamentQueries, "wonOnDay" | "finalsOnDay">;
   transfers: Pick<TransferService, "onDay">;
+  players: Pick<PlayerService, "bornOnDay">;
   facts: Pick<OnThisDayFactStore, "onDay">;
 }
 
@@ -125,6 +127,26 @@ const transfer = ({ type, date, contract }: Transfer): OnThisDayEvent => ({
   year: date.getUTCFullYear(),
 });
 
+const birthday =
+  (on: CalendarDay) =>
+  (player: Player): OnThisDayEvent[] => {
+    const born = player.birthday;
+
+    if (!born || born.getUTCFullYear() >= on.year) {
+      return [];
+    }
+
+    return [
+      {
+        age: on.year - born.getUTCFullYear(),
+        date: born.toISOString().slice(0, 10),
+        kind: "birthday",
+        player: toPlayer(player),
+        year: born.getUTCFullYear(),
+      },
+    ];
+  };
+
 const publicLink = (link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink => {
   switch (link.kind) {
     case "player": {
@@ -183,8 +205,12 @@ const rank = (event: OnThisDayEvent): number => {
       return 1;
     }
 
-    case "transfer": {
+    case "birthday": {
       return 2;
+    }
+
+    case "transfer": {
+      return 3;
     }
 
     default: {
@@ -207,11 +233,12 @@ export class OnThisDayService {
     const on = requested ?? calendarDayIn(now, SITE_TIME_ZONE);
     const day = { beforeYear: on.year, day: on.day, month: on.month, timeZone: SITE_TIME_ZONE };
 
-    const [titles, finals, transfers, facts] = await Promise.all([
+    const [titles, finals, transfers, facts, born] = await Promise.all([
       this.sources.tournaments.wonOnDay(day),
       this.sources.tournaments.finalsOnDay(day),
       this.sources.transfers.onDay(on.month, on.day, now),
       this.sources.facts.onDay(on.month, on.day),
+      this.sources.players.bornOnDay(on.month, on.day),
     ]);
 
     const finalEvents = finals.map((match) => ({
@@ -227,6 +254,7 @@ export class OnThisDayService {
       ...facts.filter((entry) => isFactShownOn(entry, on)).flatMap(fact),
       ...titles.filter(({ id }) => !decidedInFinal.has(id)).flatMap(title),
       ...finalEvents.flatMap(({ events: stageEvents }) => stageEvents),
+      ...born.flatMap(birthday(on)),
       ...transfers.filter(({ date }) => date.getUTCFullYear() < on.year).map(transfer),
     ];
 
