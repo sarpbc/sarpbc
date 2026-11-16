@@ -52,6 +52,7 @@ describe(ManualTournamentService, () => {
     participantReferences: vi.fn<TournamentWriter["participantReferences"]>(),
     participants: vi.fn<TournamentWriter["participants"]>(),
     playersExist: vi.fn<TournamentWriter["playersExist"]>(),
+    remove: vi.fn<TournamentWriter["remove"]>(),
     removeParticipant: vi.fn<TournamentWriter["removeParticipant"]>(),
     save: vi.fn<TournamentWriter["save"]>(),
     saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
@@ -83,7 +84,10 @@ describe(ManualTournamentService, () => {
     ),
   };
 
-  const matchWriter = { bracket: vi.fn<MatchWriter["bracket"]>() };
+  const matchWriter = {
+    bracket: vi.fn<MatchWriter["bracket"]>(),
+    timings: vi.fn<MatchWriter["timings"]>(),
+  };
 
   const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
 
@@ -157,6 +161,7 @@ describe(ManualTournamentService, () => {
     writer.playersExist.mockResolvedValue(true);
     writer.teamPlayers.mockResolvedValue([]);
     matchWriter.bracket.mockResolvedValue({ hasBracket: false, matches: [] });
+    matchWriter.timings.mockResolvedValue([]);
   });
 
   it("snapshots the active players of a team joining a manual tournament", async () => {
@@ -586,5 +591,37 @@ describe(ManualTournamentService, () => {
         InvalidInputError,
       );
     });
+  });
+
+  it("deletes a manual stage without matches and invalidates it after commit", async () => {
+    tournament.source = "manual";
+    writer.remove.mockImplementation(async () => {
+      events.push("remove");
+    });
+    await service.delete("ewc");
+    expect(matchWriter.timings).toHaveBeenCalledWith("ewc");
+    expect(writer.remove).toHaveBeenCalledExactlyOnceWith("ewc");
+    expect(events).toStrictEqual(["remove", "commit", "invalidate"]);
+  });
+
+  it.each(["pandascore", "startgg"] as const)("refuses to delete a %s stage", async (source) => {
+    tournament.source = source;
+    await expect(service.delete("ewc")).rejects.toBeInstanceOf(InvalidInputError);
+    expect(writer.remove).not.toHaveBeenCalled();
+  });
+
+  it("refuses to delete a stage that still has matches", async () => {
+    tournament.source = "manual";
+    matchWriter.timings.mockResolvedValue([{ beginAt: null, endAt: null, status: "not_started" }]);
+    await expect(service.delete("ewc")).rejects.toThrow(
+      new ConflictError("Group A still has 1 match; delete them first"),
+    );
+    expect(writer.remove).not.toHaveBeenCalled();
+    expect(cache.invalidateTournament).not.toHaveBeenCalled();
+  });
+
+  it("reports a missing stage", async () => {
+    writer.load.mockResolvedValue(null);
+    await expect(service.delete("missing")).rejects.toBeInstanceOf(NotFoundError);
   });
 });

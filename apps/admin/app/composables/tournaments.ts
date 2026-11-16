@@ -191,6 +191,10 @@ export const deleteEvent = async (id: string): Promise<void> => {
   await apiFetch(`/events/${id}`, { method: "DELETE" });
 };
 
+export const deleteTournament = async (id: string): Promise<void> => {
+  await apiFetch(`/tournaments/${id}`, { method: "DELETE" });
+};
+
 export const createTournament = async (body: ManualTournamentInput): Promise<TournamentDetail> => {
   const res = await apiFetch<{ tournament: TournamentDetail }>("/tournaments", {
     body,

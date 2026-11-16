@@ -24,6 +24,7 @@ export const tournamentWriter = (overrides: Partial<TournamentWriter> = {}): Tou
   participantReferences: unused,
   participants: unused,
   playersExist: unused,
+  remove: unused,
   removeParticipant: unused,
   save: unused,
   saveLeague: unused,

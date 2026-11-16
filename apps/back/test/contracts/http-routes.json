@@ -1338,6 +1338,14 @@
   {
     "controller": "\"tournaments\"",
     "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
+    "verb": "DELETE",
     "path": "\"matches/:matchId\"",
     "status": "HttpStatus.NO_CONTENT",
     "guards": ["AuthGuard", "PermissionGuard"],

@@ -1,5 +1,9 @@
 <script lang="ts" setup>
-import type { TournamentDetailMatch, TournamentMatchListItem } from "@sarpbc/types";
+import type {
+  TournamentDetail,
+  TournamentDetailMatch,
+  TournamentMatchListItem,
+} from "@sarpbc/types";
 import { getApiErrorMessage, participantName } from "@sarpbc/utils";
 
 const route = useRoute();
@@ -28,6 +32,7 @@ const forfeitMatch = ref<TournamentMatchListItem | null>(null);
 const forfeitOpen = ref(false);
 const emptyBracketOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
+const stageToDelete = ref<TournamentDetail | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
 const { syncingId, failedFor, iconFor, run: runTournamentSync } = useTournamentSyncFeedback();
 
@@ -52,6 +57,11 @@ const {
 );
 
 const loadError = computed(() => tournamentError.value ?? matchesError.value);
+
+const leaveDeletedStage = async () => {
+  const eventId = tournament.value?.event.id;
+  await navigateTo(localePath(eventId ? `/tournaments/events/${eventId}` : "/tournaments"));
+};
 
 const reload = async () => {
   await Promise.all([refreshTournament(), refreshMatches()]);
@@ -234,6 +244,14 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
           :label="$t('page.tournaments.match.syncScores')"
           @click="handleRefresh"
         />
+        <SButton
+          v-if="tournament?.source === 'manual' && matches?.length === 0"
+          icon="i-fluent-delete-24-regular"
+          variant="secondary"
+          danger
+          :label="$t('page.tournaments.delete.title')"
+          @click="stageToDelete = tournament"
+        />
       </div>
     </template>
 
@@ -415,6 +433,15 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
       "
       :remove="(target) => deleteMatch(target.id)"
       @deleted="reload()"
+    />
+
+    <ConfirmDeleteModal
+      v-model:target="stageToDelete"
+      :title="$t('page.tournaments.delete.title')"
+      :confirm-label="$t('page.tournaments.delete.confirmButton')"
+      :message="(target) => $t('page.tournaments.delete.confirm', { name: target.name })"
+      :remove="(target) => deleteTournament(target.id)"
+      @deleted="leaveDeletedStage()"
     />
 
     <TournamentMatchVods

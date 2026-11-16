@@ -1,9 +1,13 @@
 import { SITE_TIME_ZONE, endOfIsoDayIn, stageSlug } from "@sarpbc/utils";
+import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { Tournament } from "../domain/tournament";
 import { toEventRef } from "../domain/tournament-event";
-import { assertTournamentUpdateAllowed } from "../domain/tournament-source";
+import {
+  assertTournamentDeletable,
+  assertTournamentUpdateAllowed,
+} from "../domain/tournament-source";
 import { assertLineupFitsFormat } from "../domain/tournament-format";
 import type { CreateTournamentInput, UpdateTournamentInput } from "./inputs";
 import type { CompetitionAfterCommit } from "./after-commit";
@@ -182,6 +186,27 @@ export class ManualTournamentService {
 
       tournament.pickemsEnabled = enabled;
       await tournaments.save(tournament);
+    });
+    await this.afterCommit.settle({ tournamentIds: [id] });
+  }
+  async delete(id: string): Promise<void> {
+    await this.transaction.run(async ({ tournaments, matches }) => {
+      const tournament = await tournaments.load(id);
+
+      if (!tournament) {
+        throw new NotFoundError(`Tournament with id "${id}" was not found.`);
+      }
+
+      assertTournamentDeletable(tournament.source);
+      const { length } = await matches.timings(id);
+
+      if (length > 0) {
+        throw new ConflictError(
+          `${tournament.name} still has ${length} ${length === 1 ? "match" : "matches"}; delete them first`,
+        );
+      }
+
+      await tournaments.remove(id);
     });
     await this.afterCommit.settle({ tournamentIds: [id] });
   }

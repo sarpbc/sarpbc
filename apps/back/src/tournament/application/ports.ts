@@ -106,6 +106,7 @@ export interface TournamentWriter {
   saveParticipant: (participant: ParticipantSnapshot) => Promise<void>;
   setPlacements: (placements: ReadonlyMap<string, number | null>) => Promise<void>;
   removeParticipant: (id: string) => Promise<void>;
+  remove: (id: string) => Promise<void>;
   participantReferences: (
     tournamentId: string,
     participantId: string,

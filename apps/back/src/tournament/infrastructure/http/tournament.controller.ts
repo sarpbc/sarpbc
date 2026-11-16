@@ -190,6 +190,14 @@ export class TournamentController {
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param("id") id: string) {
+    await this.manualTournamentService.delete(id);
+  }
+
+  @RequirePermissions("tournaments.manage")
+  @UseGuards(AuthGuard, PermissionGuard)
   @Post("sync/additions")
   async syncPandascoreAdditions() {
     const sync = await this.syncNewTournaments.execute();

@@ -395,6 +395,11 @@
         "subtitlePandascore": "Vous pouvez modifier l’image. Les autres informations sont synchronisées depuis PandaScore. Votre image est conservée lors des synchronisations.",
         "saved": "Tournoi enregistré"
       },
+      "delete": {
+        "title": "Supprimer la phase",
+        "confirm": "Supprimer la phase {name} ? Ses participants, ses récompenses et ses gains seront supprimés avec elle. Son événement est conservé. Cette action est irréversible.",
+        "confirmButton": "Supprimer"
+      },
       "form": {
         "name": "Nom",
         "slug": "Slug d’URL",
