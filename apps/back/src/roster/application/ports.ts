@@ -16,6 +16,7 @@ export interface PlayerQueries {
   getRandomPlayer: () => Promise<Player | null>;
   nationalities: () => Promise<NationalityCount[]>;
   findByNationality: (code: string) => Promise<Player[]>;
+  bornOnDay: (month: number, day: number) => Promise<Player[]>;
 }
 
 export interface NationalityCount {

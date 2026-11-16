@@ -261,6 +261,10 @@ export class PlayerService {
     return await this.players.findByNationality(code);
   }
 
+  async bornOnDay(month: number, day: number): Promise<Player[]> {
+    return await this.players.bornOnDay(month, day);
+  }
+
   async getRandomPlayer(): Promise<Player | null> {
     return await this.players.getRandomPlayer();
   }

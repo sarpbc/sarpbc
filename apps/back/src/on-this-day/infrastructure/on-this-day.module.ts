@@ -1,5 +1,6 @@
 import { Module } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
+import { PlayerService } from "../../roster/application/player.service";
 import { TransferService } from "../../roster/application/transfer.service";
 import { RosterModule } from "../../roster/infrastructure/roster.module";
 import type { TournamentQueries } from "../../tournament/application/ports";
@@ -21,11 +22,17 @@ import { OnThisDayFactPersistence } from "./persistence/on-this-day-fact.store";
       useFactory: (em: EntityManager) => new OnThisDayFactService(new OnThisDayFactPersistence(em)),
     },
     {
-      inject: [EntityManager, TOURNAMENT_QUERIES, TransferService],
+      inject: [EntityManager, TOURNAMENT_QUERIES, TransferService, PlayerService],
       provide: OnThisDayService,
-      useFactory: (em: EntityManager, tournaments: TournamentQueries, transfers: TransferService) =>
+      useFactory: (
+        em: EntityManager,
+        tournaments: TournamentQueries,
+        transfers: TransferService,
+        players: PlayerService,
+      ) =>
         new OnThisDayService({
           facts: new OnThisDayFactPersistence(em),
+          players,
           tournaments,
           transfers,
         }),
