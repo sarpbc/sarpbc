@@ -80,7 +80,7 @@ const save = async (participant: (typeof teamParticipants.value)[number]) => {
         />
         <template v-if="participant.rosterSourceUrl" #help>
           <SLink
-            variant="primary"
+            variant="secondary"
             :to="participant.rosterSourceUrl"
             external
             target="_blank"

@@ -82,7 +82,7 @@ const adapters = useDesignAdapters();
   @media (hover: hover) {
     .sb-pagination__step:hover:enabled,
     .sb-pagination__page:hover:not([data-selected]) {
-      background: var(--sb-bg-elevated);
+      background: color-mix(in oklab, var(--sb-bg-elevated) 50%, transparent);
     }
   }
 
@@ -93,8 +93,8 @@ const adapters = useDesignAdapters();
   }
 
   .sb-pagination__page[data-selected] {
-    background: var(--sb-primary);
-    color: var(--sb-text-inverted);
+    background: var(--sb-bg-elevated);
+    color: var(--sb-text-highlighted);
   }
 
   .sb-pagination__step:disabled {

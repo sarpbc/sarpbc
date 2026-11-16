@@ -43,6 +43,12 @@ const view = ref<View>("totals");
 const team = ref(ALL_TEAMS);
 const sort = ref<TableSort>({ desc: true, id: "goals" });
 
+const setView = (value: string) => {
+  if (value === "totals" || value === "perGame") {
+    view.value = value;
+  }
+};
+
 const viewOptions = computed(() => [
   { label: t("page.tournaments.stats.totals"), value: "totals" as const },
   { label: t("page.tournaments.stats.perGame"), value: "perGame" as const },
@@ -183,15 +189,13 @@ const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
         :aria-label="t('page.tournaments.stats.team')"
         class="w-48"
       />
-      <SRadioGroup
+      <STabs
         v-if="hasStats"
         :model-value="view"
         :items="viewOptions"
-        variant="text"
-        orientation="horizontal"
-        :aria-label="t('page.tournaments.stats.view')"
+        :ariaLabel="t('page.tournaments.stats.view')"
         class="ms-auto"
-        @update:model-value="$event !== null && (view = $event)"
+        @update:model-value="setView"
       />
     </div>
 

@@ -643,7 +643,7 @@ const reviewSelected = async (action: ReviewAction): Promise<void> => {
                     <dt class="text-muted">{{ $t("page.proposals.fields.sourceUrl") }}</dt>
                     <dd class="break-all">
                       <SLink
-                        variant="primary"
+                        variant="secondary"
                         :to="row.original.sourceUrl"
                         external
                         target="_blank"

@@ -114,11 +114,9 @@ const menuToggleLabel = computed(() =>
       </div>
       <div class="h-full flex-row flex-1 justify-end items-center gap-4 hidden md:flex">
         <LazyNavHeaderSearch hydrate-on-visible />
-        <SettingsSpoilerToggle />
         <NavHeaderUser />
       </div>
       <div class="flex items-center md:hidden">
-        <SettingsSpoilerToggle />
         <SButton
           :icon="
             !menuOpen ? 'i-fluent-text-align-justify-24-regular' : 'i-fluent-dismiss-24-regular'

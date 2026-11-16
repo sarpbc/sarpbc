@@ -1,10 +1,7 @@
 <script setup lang="ts" generic="T extends SelectValue">
 import { RadioGroupRoot } from "reka-ui";
-import { computed, provide } from "vue";
 
-import { RADIO_GROUP } from "../radio-group.ts";
-
-import type { RadioVariant, SelectOption, SelectValue } from "../types.ts";
+import type { SelectOption, SelectValue } from "../types.ts";
 
 import Radio from "./Radio.vue";
 
@@ -14,25 +11,19 @@ const {
   disabled = false,
   items = null,
   orientation = "vertical",
-  variant = "list",
 } = defineProps<{
   disabled?: boolean;
   /** Renders one radio per item; leave it out to place `SRadio` children yourself. */
   items?: readonly SelectOption<T>[] | null;
-  /** Ignored by the `text` variant, which is always one inline row. */
   orientation?: "vertical" | "horizontal";
-  variant?: RadioVariant;
 }>();
-
-provide(RADIO_GROUP, { variant: computed(() => variant) });
 </script>
 
 <template>
   <RadioGroupRoot
     v-model="model"
     class="sb-radio-group"
-    :data-variant="variant"
-    :orientation="variant === 'text' ? 'horizontal' : orientation"
+    :orientation="orientation"
     :disabled="disabled"
   >
     <slot>
@@ -59,11 +50,6 @@ provide(RADIO_GROUP, { variant: computed(() => variant) });
 
   .sb-radio-group[aria-orientation="horizontal"] {
     flex-flow: row wrap;
-    gap: 0.5rem 1rem;
-  }
-
-  .sb-radio-group[data-variant="cards"][aria-orientation="horizontal"],
-  .sb-radio-group[data-variant="text"] {
     gap: 0;
   }
 }

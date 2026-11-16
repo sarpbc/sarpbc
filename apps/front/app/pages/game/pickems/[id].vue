@@ -502,7 +502,6 @@ watch(
             >
               <SRadioGroup
                 :model-value="pickedParticipant(match)"
-                variant="cards"
                 orientation="horizontal"
                 class="grid w-full grid-cols-3 items-stretch gap-2"
                 :disabled="

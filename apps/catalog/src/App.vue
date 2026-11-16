@@ -141,7 +141,6 @@ const playground = computed(() => PLAYGROUNDS.get(selected.value));
         class="sidebar__foot"
         :items="COLOR_MODES"
         orientation="horizontal"
-        variant="cards"
         aria-label="Color mode"
       />
     </aside>

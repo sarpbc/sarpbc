@@ -21,7 +21,7 @@ export type BadgeColor = (typeof BADGE_COLORS)[number];
 
 export type KbdSize = "sm" | "md";
 
-/** primary: the one link a block leads to. secondary: every other link (navigation, names, meta). */
+/** primary: every link by default (navigation, names, meta). secondary: a link inside running text, with a dashed underline. */
 export const LINK_VARIANTS = ["primary", "secondary"] as const;
 
 export type LinkVariant = (typeof LINK_VARIANTS)[number];
@@ -55,12 +55,6 @@ export interface SelectOption<T extends SelectValue = SelectValue> {
   label: string;
   value: T;
 }
-
-/**
- * list: a dot and a label. cards: the whole option is a tile (with a description, a full-width card).
- * text: inline labels split by a slash, for a compact switch such as the language.
- */
-export type RadioVariant = "list" | "cards" | "text";
 
 export type RadioStatus = "success" | "danger";
 

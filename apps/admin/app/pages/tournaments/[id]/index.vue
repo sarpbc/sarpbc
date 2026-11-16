@@ -321,7 +321,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 · {{ $t("page.tournaments.match.score") }}: {{ matchScore(match) }}
               </p>
               <SLink
-                variant="primary"
+                variant="secondary"
                 v-if="matchSourceUrl(match)"
                 :to="matchSourceUrl(match) ?? ''"
                 external

@@ -59,14 +59,9 @@ watch(open, (isOpen) => {
 
 <template>
   <SHoverCard v-model:open="open">
-    <NuxtLink
-      :to="href"
-      v-bind="linkAttrs"
-      class="rounded-sm font-medium text-primary transition-none hover:text-highlighted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-      translate="no"
-    >
+    <SLink :to="href" v-bind="linkAttrs" variant="secondary" translate="no">
       {{ label }}
-    </NuxtLink>
+    </SLink>
 
     <template #content>
       <div v-if="pending" class="flex w-72 flex-col" aria-busy="true">

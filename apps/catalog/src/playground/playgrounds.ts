@@ -64,7 +64,6 @@ import type {
   ActionItem,
   BreadcrumbItem,
   NavigationItem,
-  RadioVariant,
   SelectValue,
   TableSort,
   TableColumn,
@@ -87,7 +86,7 @@ const card = (content: string) =>
 
 /* A RadioGroup owning its value, so the Radio playground tunes a single radio. */
 const RadioSample = defineComponent(
-  (props: { radio: Bindings; variant: RadioVariant }) => {
+  (props: { radio: Bindings }) => {
     const value = ref<SelectValue | null>("striker");
 
     return () =>
@@ -99,7 +98,6 @@ const RadioSample = defineComponent(
             value.value = next;
           },
           style: "width:20rem",
-          variant: props.variant,
         },
         () => [
           h(Radio, {
@@ -111,7 +109,7 @@ const RadioSample = defineComponent(
         ],
       );
   },
-  { props: ["radio", "variant"] },
+  { props: ["radio"] },
 );
 
 const ToastTrigger = defineComponent(
@@ -581,12 +579,12 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
     {
       category: "Navigation",
       controls: [
-        choice("variant", LINK_VARIANTS, "secondary"),
+        choice("variant", LINK_VARIANTS, "primary"),
         required(text("to", "#/Link")),
         demo(text("text", "View the bracket")),
       ],
       description:
-        "Navigation in lists, tables and copy. secondary for every link by default (navigation, names, meta); primary for the one link a block leads to. NavigationMenu items share these styles.",
+        "Navigation in lists, tables and copy. primary for every link by default (navigation, names, meta); secondary for a link inside running text, with a dashed underline. Both share the muted text color. NavigationMenu items share these styles.",
       render: (bindings, sample) =>
         h(Link, { to: "", ...bindings }, () => z.string().catch("Link").parse(sample.text)),
       variants: { rows: "variant" },
@@ -680,15 +678,10 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
         text("description", "Reads the play and covers rotations."),
         choice("status", ["none", "success", "danger"], "none"),
         flag("disabled"),
-        demo(choice("group variant", ["list", "cards", "text"], "cards")),
       ],
       description:
-        "One choice inside a RadioGroup, for layouts the group's `items` cannot express. Once a prediction is settled, `status` tints the chosen card as right or wrong.",
-      render: (bindings, sample) =>
-        h(RadioSample, {
-          radio: bindings,
-          variant: z.enum(["list", "cards", "text"]).catch("cards").parse(sample["group variant"]),
-        }),
+        "One choice inside a RadioGroup, for layouts the group's `items` cannot express. Once a prediction is settled, `status` tints the chosen option as right or wrong.",
+      render: (bindings) => h(RadioSample, { radio: bindings }),
     },
   ],
   [
@@ -696,13 +689,12 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
     {
       category: "Form",
       controls: [
-        choice("variant", ["list", "cards", "text"], "list"),
         choice("orientation", ["vertical", "horizontal"], "vertical"),
         flag("disabled"),
         demo(flag("descriptions")),
       ],
       description:
-        "One choice among a few visible options. list is a dot and a label; cards make each option a tile; text is a compact inline switch such as the language.",
+        "One choice among a few visible options: plain labels, the chosen one on a neutral background. With descriptions, each option spans the full width. Switching views of the same content is STabs.",
       models: { modelValue: "striker" },
       render: (bindings, sample) =>
         h(RadioGroup, {
@@ -712,7 +704,7 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
               ? ROLES
               : ROLES.map(({ description: _description, ...role }) => role),
         }),
-      variants: { columns: "orientation", rows: "variant" },
+      variants: { rows: "orientation" },
     },
   ],
   [

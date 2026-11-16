@@ -218,7 +218,6 @@ const onSubmit = async () => {
             v-else
             v-model="state.topicId"
             :items="topicItems"
-            variant="cards"
             orientation="horizontal"
             :disabled="!canSubmit"
             :aria-label="$t('page.forum.new.form.topic')"
