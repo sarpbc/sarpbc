@@ -281,9 +281,6 @@
       }
     },
     "spoiler": {
-      "toggle": "Mode sans spoiler",
-      "enable": "Masquer les scores et les résultats",
-      "disable": "Afficher les scores et les résultats",
       "hidden": "Score masqué",
       "resultHidden": "Résultat masqué",
       "revealScore": "Afficher le score",

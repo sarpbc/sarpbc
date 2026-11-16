@@ -23,12 +23,6 @@ export const useSpoilerFree = () => {
     { flush: "sync", immediate: import.meta.client },
   );
 
-  const setEnabled = (value: boolean) => {
-    enabled.value = value;
-    cookie.value = value ? true : null;
-    reveals.value = NO_SPOILER_REVEALS;
-  };
-
   const isConcealed = (scope: SpoilerScope): boolean =>
     isSpoilerConcealed(enabled.value, reveals.value, scope);
 
@@ -36,5 +30,5 @@ export const useSpoilerFree = () => {
     reveals.value = revealSpoilers(reveals.value, target);
   };
 
-  return { enabled: readonly(enabled), isConcealed, reveal, setEnabled };
+  return { enabled: readonly(enabled), isConcealed, reveal };
 };
