@@ -7,7 +7,7 @@
 import { STAFF_PERMISSIONS, STAFF_ROLES } from "@sarpbc/types";
 import type { StaffPermission, StaffRole } from "@sarpbc/types";
 
-export const ROLE_PERMISSIONS = {
+const ROLE_PERMISSIONS = {
   admin: STAFF_PERMISSIONS,
   journalist: ["news.manage", "images.manage"],
   moderator: ["forum.moderate"],

@@ -16,7 +16,7 @@ import type { TournamentStatus } from "~/utils/tournament-status";
 import { compactJsonLd, SCHEMA_ORG } from "./json-ld";
 import type { JsonLdNode } from "./json-ld";
 
-export const ROCKET_LEAGUE_SPORT = "Rocket League";
+const ROCKET_LEAGUE_SPORT = "Rocket League";
 
 const TOURNAMENT_FORMATS = ["online", "offline", "online/offline"] as const;
 
@@ -28,51 +28,51 @@ const FORMAT_LABEL = {
   "online/offline": "Online & LAN",
 } as const satisfies Record<TournamentFormat, string>;
 
-export interface SportsOrganizationLd extends JsonLdNode {
+interface SportsOrganizationLd extends JsonLdNode {
   "@type": "SportsOrganization";
   name: string;
   url?: string;
 }
 
-export interface SportsTeamLd extends JsonLdNode {
+interface SportsTeamLd extends JsonLdNode {
   "@type": "SportsTeam";
   name: string;
   url?: string;
 }
 
-export interface PersonLd extends JsonLdNode {
+interface PersonLd extends JsonLdNode {
   "@type": "Person";
   name: string;
   url?: string;
 }
 
-export type CompetitorLd = SportsTeamLd | PersonLd;
+type CompetitorLd = SportsTeamLd | PersonLd;
 
-export interface VirtualLocationLd extends JsonLdNode {
+interface VirtualLocationLd extends JsonLdNode {
   "@type": "VirtualLocation";
   url: string;
 }
 
-export interface PostalAddressLd extends JsonLdNode {
+interface PostalAddressLd extends JsonLdNode {
   "@type": "PostalAddress";
   addressCountry: string;
 }
 
-export interface PlaceLd extends JsonLdNode {
+interface PlaceLd extends JsonLdNode {
   "@type": "Place";
   name: string;
   address: PostalAddressLd;
 }
 
-export interface PropertyValueLd extends JsonLdNode {
+interface PropertyValueLd extends JsonLdNode {
   "@type": "PropertyValue";
   name: string;
   value: string;
 }
 
-export type SportsEventLocationLd = VirtualLocationLd | PlaceLd | (VirtualLocationLd | PlaceLd)[];
+type SportsEventLocationLd = VirtualLocationLd | PlaceLd | (VirtualLocationLd | PlaceLd)[];
 
-export interface SportsEventVenueLd {
+interface SportsEventVenueLd {
   eventAttendanceMode: string;
   location: SportsEventLocationLd;
 }
@@ -104,7 +104,7 @@ export interface BuildTournamentSportsEventOptions {
 const isTournamentFormat = (value: string): value is TournamentFormat =>
   TOURNAMENT_FORMATS.some((format) => format === value);
 
-export const toIsoDate = (value: Date | string | undefined | null): string | undefined => {
+const toIsoDate = (value: Date | string | undefined | null): string | undefined => {
   if (!isNonEmptyDateInput(value)) {
     return undefined;
   }
@@ -118,7 +118,7 @@ export const toIsoDate = (value: Date | string | undefined | null): string | und
   return date.toISOString();
 };
 
-export const sportsEventStatusUrl = (status: TournamentStatus | null): string | undefined => {
+const sportsEventStatusUrl = (status: TournamentStatus | null): string | undefined => {
   if (status === null) {
     return undefined;
   }
@@ -138,7 +138,7 @@ export const sportsEventStatusUrl = (status: TournamentStatus | null): string | 
   }
 };
 
-export const formatLabel = (type: string | null): string | undefined => {
+const formatLabel = (type: string | null): string | undefined => {
   if (!isNonEmptyString(type) || !isTournamentFormat(type)) {
     return undefined;
   }
@@ -185,7 +185,7 @@ const onlineVenue = (url: string): SportsEventVenueLd => ({
 // VirtualLocation there, and it rejects a Place without an address. So the mode
 // and location are always emitted together, falling back to the online venue
 // (every event is streamed) when no country is known.
-export const eventVenue = (
+const eventVenue = (
   type: string | null,
   country: string | null | undefined,
   url: string,

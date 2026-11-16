@@ -9,7 +9,7 @@ interface AdminSection {
   label: string;
 }
 
-export const ADMIN_SECTIONS = [
+const ADMIN_SECTIONS = [
   {
     icon: "i-fluent-news-24-regular",
     label: "page.nav.articles",

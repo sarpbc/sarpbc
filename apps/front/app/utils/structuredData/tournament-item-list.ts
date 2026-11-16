@@ -4,7 +4,7 @@ import { SITE_ORIGIN } from "@sarpbc/ui/config";
 import { compactJsonLd, SCHEMA_ORG } from "./json-ld";
 import type { JsonLdNode } from "./json-ld";
 
-export interface ListItemLd extends JsonLdNode {
+interface ListItemLd extends JsonLdNode {
   "@type": "ListItem";
   position: number;
   name: string;

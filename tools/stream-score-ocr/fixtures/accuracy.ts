@@ -11,9 +11,9 @@ export const OVERLAY_PATH = fileURLToPath(
   new URL("../overlays/coupe-de-france-slash-2026.json", import.meta.url),
 );
 
-export type SeriesOutcome = "correct" | "undetermined" | "wrong";
+type SeriesOutcome = "correct" | "undetermined" | "wrong";
 
-export interface SeriesResult {
+interface SeriesResult {
   id: string;
   games: number;
   correctGames: number;

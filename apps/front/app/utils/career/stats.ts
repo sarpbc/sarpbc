@@ -2,19 +2,19 @@ import type { CareerBackground, CareerRole, CareerStats } from "~/types/career";
 import { MAX_STAT, MIN_STAT, getSeasonsPastPeak } from "~/types/career";
 
 /** Full +1/+2/+3/+5 below this. Seasons are short; 80+ is where gains shrink. */
-export const SOFT_STAT_CEILING = 80;
+const SOFT_STAT_CEILING = 80;
 
 /**
  * Diminishing returns stop here. 100 is not bought with leftover budget —
  * it needs {@link MYTHIC_STAT_MIN_DELTA} and a {@link MYTHIC_STAT_CHANCE} roll.
  */
-export const ELITE_STAT_CAP = MAX_STAT - 1;
+const ELITE_STAT_CAP = MAX_STAT - 1;
 
 /** Raw positive delta required to attempt 99 → 100. */
-export const MYTHIC_STAT_MIN_DELTA = 4;
+const MYTHIC_STAT_MIN_DELTA = 4;
 
 /** Chance to convert 99 → 100 when the delta is large enough (~1/20 of attempts). */
-export const MYTHIC_STAT_CHANCE = 0.05;
+const MYTHIC_STAT_CHANCE = 0.05;
 
 export type StatRng = () => number;
 

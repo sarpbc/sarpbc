@@ -1,12 +1,12 @@
 export const SCHEMA_ORG = "https://schema.org";
 
-export type JsonLdPrimitive = string | number | boolean;
+type JsonLdPrimitive = string | number | boolean;
 
-export interface JsonLdReference {
+interface JsonLdReference {
   "@id": string;
 }
 
-export type JsonLdValue = JsonLdPrimitive | JsonLdNode | JsonLdReference | JsonLdValue[];
+type JsonLdValue = JsonLdPrimitive | JsonLdNode | JsonLdReference | JsonLdValue[];
 
 export interface JsonLdNode {
   "@context"?: string;

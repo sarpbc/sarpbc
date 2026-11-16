@@ -51,5 +51,3 @@ export const incidentSchema = z.union([
     type: z.enum(["league", "match", "player", "serie", "team", "tournament"]),
   }),
 ]);
-
-export type PandascoreIncidentDto = z.infer<typeof incidentSchema>;

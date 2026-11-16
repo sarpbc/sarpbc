@@ -41,7 +41,7 @@ export const leagueSchema = z.object({
   url: z.string().nullable().optional(),
 });
 
-export const rosterSchema = z.object({
+const rosterSchema = z.object({
   players: z.array(playerSchema).default([]),
   team: teamSchema,
 });

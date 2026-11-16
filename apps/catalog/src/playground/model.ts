@@ -34,14 +34,14 @@ export type ModelValue = ControlValue | readonly SelectValue[] | TableSort;
 /** What a component emits; the panel only formats it for the log. */
 export type Emitted = Event | ModelValue | object | undefined;
 
-export type Listener = (...payload: readonly Emitted[]) => void;
+type Listener = (...payload: readonly Emitted[]) => void;
 
 export type Bindings = Readonly<Record<string, ModelValue | Listener>>;
 
 /** Sidebar groups, in display order, after Nuxt UI's component categories. */
 export const CATEGORIES = ["Element", "Form", "Data", "Navigation", "Overlay", "Feedback"] as const;
 
-export type Category = (typeof CATEGORIES)[number];
+type Category = (typeof CATEGORIES)[number];
 
 export interface Playground {
   category: Category;

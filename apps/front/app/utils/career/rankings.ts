@@ -12,7 +12,7 @@ import { WORLD_TEAMS, getWorldTeamsByRegion } from "~/data/career/world";
 import { computeCircuitPoints } from "~/utils/career/points";
 import { getRosterStrength } from "~/utils/career/roster";
 
-export interface RankedRosterPlayer {
+interface RankedRosterPlayer {
   id: string;
   name: string;
   rating: number;
@@ -44,7 +44,7 @@ export interface WorldRankings {
   players: RankedPlayer[];
 }
 
-export interface PlayerCircuitInput {
+interface PlayerCircuitInput {
   name: string;
   teamId: string | null;
   rating: number;

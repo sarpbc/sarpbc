@@ -1,16 +1,15 @@
 import type { CareerResult, CareerState } from "~/types/career";
 import { parseCareerResultsJson, parseCareerStateJson } from "~/utils/career/career-schema";
 
-export const CAREER_ACTIVE_STORAGE_KEY = "sarpbc:career-active";
-export const CAREER_RESULTS_STORAGE_KEY = "sarpbc:career-results";
+const CAREER_ACTIVE_STORAGE_KEY = "sarpbc:career-active";
+const CAREER_RESULTS_STORAGE_KEY = "sarpbc:career-results";
 
 export {
   decodeCareerResultFromShare,
   encodeCareerResultForShare,
 } from "~/utils/career/career-schema";
 
-export const parseCareerState = (raw: string | null): CareerState | null =>
-  parseCareerStateJson(raw);
+const parseCareerState = (raw: string | null): CareerState | null => parseCareerStateJson(raw);
 
 export const loadActiveCareer = function loadActiveCareer(): CareerState | null {
   if (!import.meta.client) {
@@ -36,7 +35,7 @@ export const clearActiveCareer = function clearActiveCareer(): void {
   localStorage.removeItem(CAREER_ACTIVE_STORAGE_KEY);
 };
 
-export const loadCareerResults = function loadCareerResults(): Map<string, CareerResult> {
+const loadCareerResults = function loadCareerResults(): Map<string, CareerResult> {
   if (!import.meta.client) {
     return new Map();
   }

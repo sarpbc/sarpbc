@@ -81,7 +81,7 @@ export const buildMatchOgSvg = (matchDetail: MatchDetailResponse): string => {
 </svg>`;
 };
 
-export const resolveMatchOgFontFiles = (): string[] => {
+const resolveMatchOgFontFiles = (): string[] => {
   const dirs = [
     path.join(process.cwd(), "public", "fonts", "og"),
     path.join(process.cwd(), "apps", "front", "public", "fonts", "og"),

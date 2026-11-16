@@ -25,7 +25,7 @@ export interface UpsertTournamentParticipantCommand {
   players: UpsertPlayerCommand[];
 }
 
-export interface TournamentStandingCommand {
+interface TournamentStandingCommand {
   teamPandascoreId: number;
   rank: number;
 }
@@ -48,12 +48,12 @@ export interface UpsertTournamentCommand {
   standings?: TournamentStandingCommand[];
 }
 
-export interface UpsertMatchResultCommand {
+interface UpsertMatchResultCommand {
   teamPandascoreId: number;
   score: number;
 }
 
-export interface UpsertMatchPreviousMatchCommand {
+interface UpsertMatchPreviousMatchCommand {
   type: "winner" | "loser";
   matchPandascoreId: number;
 }
@@ -75,7 +75,7 @@ export interface UpsertMatchCommand {
   officialStreams: OfficialMatchStream[];
 }
 
-export type IncidentKind = "league" | "match" | "player" | "serie" | "team" | "tournament";
+type IncidentKind = "league" | "match" | "player" | "serie" | "team" | "tournament";
 
 type IncidentChange =
   | { kind: "tournament"; command: UpsertTournamentCommand }

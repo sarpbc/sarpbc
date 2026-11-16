@@ -3,7 +3,7 @@ import type { MatchLinkTarget } from "~/types/matches";
 
 export const MATCH_DISCOVERY_FROM_QUERY = "from";
 
-export const MATCH_DISCOVERY_SOURCES = [
+const MATCH_DISCOVERY_SOURCES = [
   "matches_list",
   "results_list",
   "home_strip",

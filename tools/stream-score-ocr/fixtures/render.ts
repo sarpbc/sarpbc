@@ -38,7 +38,7 @@ const BLUE_STRIP: Region = { height: 10, width: 100, x: 780, y: 86 };
 const ORANGE_STRIP: Region = { height: 10, width: 100, x: 1040, y: 86 };
 const REPLAY_BANNER: Region = { height: 14, width: 200, x: 860, y: 100 };
 
-export const TEXT_REGIONS = {
+const TEXT_REGIONS = {
   blue: { height: 62, width: 80, x: 790, y: 16 },
   clock: { height: 62, width: 170, x: 875, y: 16 },
   orange: { height: 62, width: 80, x: 1050, y: 16 },
@@ -63,7 +63,7 @@ export const seededRandom = (seed: number): (() => number) => {
   };
 };
 
-export const formatClock = (seconds: number, overtime: boolean): string => {
+const formatClock = (seconds: number, overtime: boolean): string => {
   const minutes = Math.floor(seconds / 60);
 
   return `${overtime ? "+" : ""}${minutes}:${String(seconds % 60).padStart(2, "0")}`;

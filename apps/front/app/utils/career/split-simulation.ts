@@ -79,7 +79,7 @@ const emptySplitSimulation = (): SplitSimulation => ({
 const rawRegionalPoints = (sim: Pick<SplitSimulation, "regionals">): number =>
   sim.regionals.reduce((sum, placement) => sum + REGIONAL_POINTS[placement], 0);
 
-export const circuitPointsForSplit = (
+const circuitPointsForSplit = (
   sim: Pick<SplitSimulation, "regionals" | "major">,
   region: CareerRegion,
 ): number => {

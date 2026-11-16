@@ -70,7 +70,7 @@ const parseRegion = (awardType: SeasonAwardType, value: string | null | undefine
   return region;
 };
 
-export const assertAwardSourceUrl = (value: string): void => {
+const assertAwardSourceUrl = (value: string): void => {
   if (value.length > SEASON_AWARD_SOURCE_URL_MAX_LENGTH) {
     throw new InvalidInputError(
       `The award source has at most ${SEASON_AWARD_SOURCE_URL_MAX_LENGTH} characters.`,

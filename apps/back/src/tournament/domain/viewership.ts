@@ -3,7 +3,7 @@ import { parseViewership, VIEWERSHIP_SOURCE_NAME_MAX_LENGTH } from "@sarpbc/util
 import type { ViewershipError } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
-export type ViewershipOwnerKind = "event" | "match";
+type ViewershipOwnerKind = "event" | "match";
 
 export interface ViewershipOwner {
   kind: ViewershipOwnerKind;

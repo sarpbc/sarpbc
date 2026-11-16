@@ -3,12 +3,12 @@ import type { Size } from "../src/frame.ts";
 import { seededRandom } from "./render.ts";
 import type { Scene, ScorebugScene } from "./render.ts";
 
-export interface Goal {
+interface Goal {
   clock: number;
   side: StreamScoreSide;
 }
 
-export interface GameScript {
+interface GameScript {
   goals: Goal[];
   overtime: { seconds: number; side: StreamScoreSide } | null;
   pauseAt: number | null;

@@ -11,7 +11,7 @@ export const BALLCHASING_API_URL = `https://${BALLCHASING_HOST}/api`;
 type Endpoint = "list" | "group" | "replay";
 
 /** Spacing for the lowest Ballchasing tier: 2 calls/s on every endpoint used. */
-export const DEFAULT_INTERVALS_MS = { group: 500, list: 500, replay: 500 } satisfies Record<
+const DEFAULT_INTERVALS_MS = { group: 500, list: 500, replay: 500 } satisfies Record<
   Endpoint,
   number
 >;

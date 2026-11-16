@@ -11,7 +11,7 @@ export interface TopicRecord {
   posts: PostRecord[];
 }
 
-export interface PostSummary {
+interface PostSummary {
   id: string;
   publicId: number;
   title: string;

@@ -4,7 +4,7 @@ import type { CareerEventChoiceDefinition, CareerState, CareerStats } from "~/ty
 import { getRosterPlayerRating, getRosterStrength } from "~/utils/career/roster";
 import { createRng, hashString } from "~/utils/career/rng";
 
-export const WORLD_STRENGTH_BASELINE = 75;
+const WORLD_STRENGTH_BASELINE = 75;
 
 const MAX_FAILURE_CHANCE = 0.45;
 const MIN_RATING_MALUS = 1;
@@ -39,7 +39,7 @@ const mean = (values: readonly number[]): number => {
 const gapChance = (gap: number, scale: number, cap: number): number =>
   Math.min(cap, Math.max(0, gap) / scale);
 
-export const computeEventFailureChance = (context: EventOutcomeContext): number => {
+const computeEventFailureChance = (context: EventOutcomeContext): number => {
   const pastPeak = getSeasonsPastPeak(context.season);
   let chance = 0.02;
 

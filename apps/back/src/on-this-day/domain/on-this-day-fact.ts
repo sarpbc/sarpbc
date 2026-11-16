@@ -48,7 +48,7 @@ const parseYear = (year: number | null, month: number, day: number): number | nu
   return year;
 };
 
-export const parseFactSourceUrl = (value: string | null): string | null => {
+const parseFactSourceUrl = (value: string | null): string | null => {
   const raw = value?.trim() ?? "";
 
   if (!raw) {

@@ -124,7 +124,7 @@ const withProduction = <T extends { NODE_ENV: string }>(data: T) => ({
 export const validateEnv = (env: RawEnv) =>
   withProduction(parse(envSchema, withSecrets(env, SECRET_FILES)));
 
-export const validateDatabaseEnv = (env: RawEnv) =>
+const validateDatabaseEnv = (env: RawEnv) =>
   withProduction(
     parse(databaseSchema, withSecrets(env, { DB_PASSWORD: SECRET_FILES.DB_PASSWORD })),
   );

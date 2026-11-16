@@ -119,7 +119,7 @@ const careerResultSchema = z.object({
   ),
 });
 
-export const careerStateSchema = z.object({
+const careerStateSchema = z.object({
   background: careerBackgroundSchema.nullable(),
   country: careerCountrySchema.nullable(),
   currentEventId: z.string().nullable(),
@@ -194,7 +194,7 @@ export const parseCareerStateJson = (raw: string | null): CareerState | null => 
   }
 };
 
-export const parseCareerResultJson = (raw: string): CareerResult | null => {
+const parseCareerResultJson = (raw: string): CareerResult | null => {
   try {
     const result = careerResultSchema.safeParse(JSON.parse(raw));
 

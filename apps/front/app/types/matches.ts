@@ -34,24 +34,24 @@ export interface MatchRowItem {
   tournament?: { id: string };
 }
 
-export interface TeamFormRecord {
+interface TeamFormRecord {
   wins: number;
   losses: number;
 }
 
-export interface TeamFormOpponent {
+interface TeamFormOpponent {
   id: string;
   name: string;
   slug?: string;
   imageUrl?: string;
 }
 
-export interface TeamFormMatchScore {
+interface TeamFormMatchScore {
   team: number | null;
   opponent: number | null;
 }
 
-export interface TeamFormMatchEntry {
+interface TeamFormMatchEntry {
   id: string;
   publicId: number;
   slug: string;
@@ -67,9 +67,9 @@ export interface TeamForm {
   record: TeamFormRecord;
 }
 
-export type TeamFormsMap = Record<string, TeamForm>;
+type TeamFormsMap = Record<string, TeamForm>;
 
-export interface HeadToHeadMeeting {
+interface HeadToHeadMeeting {
   id: string;
   publicId: number;
   slug: string;

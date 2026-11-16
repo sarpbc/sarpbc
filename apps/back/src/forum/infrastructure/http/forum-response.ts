@@ -3,7 +3,7 @@ import { forumPostSlug } from "@sarpbc/utils";
 import type { PostType } from "../../domain/post-type.enum";
 import type { PostActivity, PostRecord, TopicRecord } from "../../application/models";
 
-export interface TranslationResponse {
+interface TranslationResponse {
   id: string;
   post: { id: string };
   locale: string;

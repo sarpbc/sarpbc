@@ -758,7 +758,7 @@ export const canContinueCareer = (state: CareerState): boolean => {
   return state.onboardingStep !== "intro" || state.playerName.length > 0 || state.region !== null;
 };
 
-export const isPlayingPhase = (phase: CareerPhase): boolean =>
+const isPlayingPhase = (phase: CareerPhase): boolean =>
   phase !== "menu" && phase !== "onboarding" && phase !== "career_end";
 
 export const showCareerStats = (phase: CareerPhase): boolean => isPlayingPhase(phase);

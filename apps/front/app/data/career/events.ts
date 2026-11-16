@@ -1,6 +1,6 @@
 import type { CareerEventDefinition, CareerEventPool } from "~/types/career";
 
-export const CAREER_EVENTS: CareerEventDefinition[] = [
+const CAREER_EVENTS: CareerEventDefinition[] = [
   {
     choices: [
       { delta: { form: -2, rating: 5 }, id: "a" },
@@ -252,7 +252,7 @@ export const CAREER_EVENTS: CareerEventDefinition[] = [
   },
 ];
 
-export const getEventsForPool = (pool: CareerEventPool): CareerEventDefinition[] =>
+const getEventsForPool = (pool: CareerEventPool): CareerEventDefinition[] =>
   CAREER_EVENTS.filter((event) => event.pool === pool);
 
 const firstNonEmpty = (...lists: CareerEventDefinition[][]): CareerEventDefinition[] =>

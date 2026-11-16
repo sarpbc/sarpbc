@@ -152,7 +152,7 @@ export const mapEvent = ({ event, stages }: EventListing) => {
   };
 };
 
-export const mapTournamentParticipant = (participant: TournamentParticipant) => ({
+const mapTournamentParticipant = (participant: TournamentParticipant) => ({
   id: participant.id,
   name: participantName(participant),
   players: participant.players.map(({ id, name, slug }) => ({ id, name, slug })),
