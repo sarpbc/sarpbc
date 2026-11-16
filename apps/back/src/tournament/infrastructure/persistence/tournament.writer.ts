@@ -7,6 +7,8 @@ import { League as LeagueRow } from "./league.entity";
 import { TournamentEvent as TournamentEventRow } from "./tournament-event.entity";
 import { Match as MatchRow } from "./match.entity";
 import { MatchResult as MatchResultRow } from "./match-result.entity";
+import { PlayerAward as PlayerAwardRow } from "./player-award.entities";
+import { TournamentPrize as TournamentPrizeRow } from "./tournament-prize.entities";
 import type { Tournament } from "../../domain/tournament";
 import type { League } from "../../domain/league";
 import type { ParticipantSnapshot } from "../../domain/tournament-participant";
@@ -188,6 +190,13 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     const row = await this.em.findOneOrFail(TournamentParticipantRow, { id });
     this.em.remove(row);
     this.participantsStaged.delete(id);
+  }
+  async remove(id: string) {
+    await this.em.nativeDelete(PlayerAwardRow, { tournament: id });
+    await this.em.nativeDelete(TournamentPrizeRow, { tournament: id });
+    await this.em.nativeDelete(TournamentParticipantRow, { tournament: id });
+    await this.em.nativeDelete(TournamentRow, { id });
+    this.tournaments.delete(id);
   }
   async teamsExist(ids: string[]) {
     return (await this.em.count(Team, { id: { $in: ids } })) === ids.length;

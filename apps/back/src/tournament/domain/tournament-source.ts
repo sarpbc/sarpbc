@@ -105,3 +105,24 @@ export const assertLeagueUpdateAllowed = (
     "Only the image can be edited on a PandaScore league. Send imageUrl alone.",
   );
 };
+
+export const assertTournamentDeletable = (source: DataSource): void => {
+  switch (source) {
+    case "manual": {
+      return;
+    }
+
+    case "pandascore":
+    case "startgg": {
+      throw new InvalidInputError(
+        `Only manual stages can be deleted; this one is imported from ${source === "pandascore" ? "PandaScore" : "start.gg"}.`,
+      );
+    }
+
+    default: {
+      const exhaustive: never = source;
+
+      return exhaustive;
+    }
+  }
+};

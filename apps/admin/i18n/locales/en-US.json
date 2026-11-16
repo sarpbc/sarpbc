@@ -395,6 +395,11 @@
         "subtitlePandascore": "You can change the image. Other details are synced from PandaScore. Your image is kept when the tournament syncs.",
         "saved": "Tournament saved"
       },
+      "delete": {
+        "title": "Delete Stage",
+        "confirm": "Delete the stage {name}? Its participants, awards and prizes are deleted with it. Its event stays. This cannot be undone.",
+        "confirmButton": "Delete"
+      },
       "form": {
         "name": "Name",
         "slug": "URL Slug",

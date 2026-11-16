@@ -23,6 +23,7 @@ import { verifyMatchStats } from "./scenarios/match-stats.mts";
 import { verifyOnThisDay } from "./scenarios/on-this-day.mts";
 import { verifySeasonArchives, verifySeasonAwards } from "./scenarios/seasons.mts";
 import { verifySitemap } from "./scenarios/sitemap.mts";
+import { verifyStageDeletion } from "./scenarios/stage-deletion.mts";
 import { verifyStreamProposals, verifyStreams } from "./scenarios/streams.mts";
 import { verifyLineupProposals, verifyLineups } from "./scenarios/lineups.mts";
 import { verifyViewership, verifyViewershipProposals } from "./scenarios/viewership.mts";
@@ -2894,6 +2895,20 @@ describe("backend integration", () => {
         "manual stages link their matches into a bracket and keep PandaScore brackets out of reach",
         async () => {
           await verifyManualBrackets({ competition, memberCookie, request, staffCookie });
+        },
+      );
+
+      await check(
+        "staff delete an empty manual stage with its participants, awards and prizes",
+        async () => {
+          await verifyStageDeletion({
+            memberCookie,
+            orm,
+            pandascoreStageId: competition.tournamentId,
+            playerIds: [competition.playerId, player.id],
+            request,
+            staffCookie,
+          });
         },
       );
 
