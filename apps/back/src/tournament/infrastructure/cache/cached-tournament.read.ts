@@ -23,7 +23,14 @@ const participantRef = z.union([
   z.strictObject({ id: z.string(), team }),
   z.strictObject({
     id: z.string(),
-    players: z.array(z.strictObject({ id: z.string(), name: z.string(), slug: z.string() })),
+    players: z.array(
+      z.strictObject({
+        id: z.string(),
+        imageUrl: nullableText,
+        name: z.string(),
+        slug: z.string(),
+      }),
+    ),
     team: z.null(),
   }),
 ]);
@@ -33,6 +40,7 @@ const participant = z.strictObject({
   players: z.array(
     z.strictObject({
       id: z.string(),
+      imageUrl: nullableText,
       name: z.string(),
       nationality: nullableText,
       slug: z.string(),

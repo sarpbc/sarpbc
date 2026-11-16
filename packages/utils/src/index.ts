@@ -192,7 +192,13 @@ export { distinctStageName, tournamentStageLabel } from "./tournament-label";
 
 export { INTERNAL_API_HEADER, INTERNAL_CLIENT_HEADER, resolveApiBase } from "./internal-api";
 
-export { TEAM_SIZE_BY_FORMAT, participantName, type NamedParticipant } from "./tournament-format";
+export {
+  TEAM_SIZE_BY_FORMAT,
+  participantLogo,
+  participantName,
+  type NamedParticipant,
+  type PicturedParticipant,
+} from "./tournament-format";
 
 export {
   NO_SPOILER_REVEALS,

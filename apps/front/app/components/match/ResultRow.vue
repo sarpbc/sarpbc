@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { participantLogo } from "@sarpbc/utils";
 import type { MatchRowItem } from "~/types/matches";
 import { getMatchParticipantScore } from "~/utils/match-score";
 import { shortTeamName } from "~/utils/short-team-name";
@@ -60,7 +61,7 @@ const participantClass = (participantId: string | undefined): string => {
       <span class="truncate text-end" :class="participantClass(teamA.id)" :title="nameA">
         {{ shortTeamName(nameA) || $t("components.match.tbd") }}
       </span>
-      <TeamImg :team-name="nameA" :logo="teamA.team" size="xs" />
+      <TeamImg :team-name="nameA" :logo="participantLogo(teamA)" size="xs" />
       <SpoilerHidden v-if="concealed" />
       <span v-else class="flex items-center justify-center gap-1 tabular-nums">
         <span :class="participantClass(teamA.id)">
@@ -73,7 +74,7 @@ const participantClass = (participantId: string | undefined): string => {
           <template v-else>{{ getMatchParticipantScore(match.results, teamB.id) ?? "–" }}</template>
         </span>
       </span>
-      <TeamImg :team-name="nameB" :logo="teamB.team" size="xs" />
+      <TeamImg :team-name="nameB" :logo="participantLogo(teamB)" size="xs" />
       <span class="truncate" :class="participantClass(teamB.id)" :title="nameB">
         {{ shortTeamName(nameB) || $t("components.match.tbd") }}
       </span>

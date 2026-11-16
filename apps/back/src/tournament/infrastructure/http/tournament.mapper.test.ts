@@ -9,15 +9,19 @@ import { mapTournamentDetail, mapTournamentListItem } from "./tournament.mapper"
 
 const event = { id: "event", name: "Fake Knockout", slug: "fake-knockout" };
 
-const solo = (id: string, name: string) =>
+const solo = (id: string, name: string, imageUrl: string | null = null) =>
   Object.assign(new TournamentParticipant(), {
     id,
-    players: [Object.assign(new Player(), { id: `player-${id}`, name, slug: name.toLowerCase() })],
+    players: [
+      Object.assign(new Player(), { id: `player-${id}`, imageUrl, name, slug: name.toLowerCase() }),
+    ],
     team: null,
   });
 
+const ZEN_PHOTO = "https://cdn.example/zen.png";
+
 const knockout = () => {
-  const zen = solo("zen", "Zen");
+  const zen = solo("zen", "Zen", ZEN_PHOTO);
   const vatira = solo("vatira", "Vatira");
 
   const tournament = Object.assign(new Tournament(), {
@@ -57,10 +61,15 @@ describe("player participants in public responses", () => {
     expect(detail.format).toBe("1v1");
     expect(detail.winner).toStrictEqual({
       id: "zen",
-      players: [{ id: "player-zen", name: "Zen", slug: "zen" }],
+      players: [{ id: "player-zen", imageUrl: ZEN_PHOTO, name: "Zen", slug: "zen" }],
       team: null,
     });
-    expect(detail.participants.map((participant) => participant.team)).toStrictEqual([null, null]);
+    expect(
+      detail.participants.map(({ players, team }) => ({ imageUrl: players[0]?.imageUrl, team })),
+    ).toStrictEqual([
+      { imageUrl: ZEN_PHOTO, team: null },
+      { imageUrl: null, team: null },
+    ]);
     expect(detail.matches[0]).toMatchObject({
       participants: [
         { id: "zen", players: [{ name: "Zen" }], team: null },
@@ -71,7 +80,7 @@ describe("player participants in public responses", () => {
     });
     expect(mapTournamentListItem(tournament).participants[1]).toStrictEqual({
       id: "vatira",
-      players: [{ id: "player-vatira", name: "Vatira", slug: "vatira" }],
+      players: [{ id: "player-vatira", imageUrl: null, name: "Vatira", slug: "vatira" }],
       team: null,
     });
   });
@@ -79,7 +88,10 @@ describe("player participants in public responses", () => {
   it("lists a 1v1 match with its players and scores", () => {
     const { final } = knockout();
     expect(mapMatchListItem(final)).toMatchObject({
-      participants: [{ players: [{ slug: "zen" }], team: null }, { team: null }],
+      participants: [
+        { players: [{ imageUrl: ZEN_PHOTO, slug: "zen" }], team: null },
+        { team: null },
+      ],
       results: [
         { participant: "zen", score: 3 },
         { participant: "vatira", score: 1 },

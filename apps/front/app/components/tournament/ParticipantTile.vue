@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { playerPath, teamPath } from "@sarpbc/utils";
+import { participantLogo, playerPath, teamPath } from "@sarpbc/utils";
 import type { TournamentParticipantEntry } from "~/utils/tournament-participants";
 
 const { entry } = defineProps<{
@@ -38,7 +38,7 @@ const soloPlayer = computed(() =>
       :aria-controls="dialogId"
     >
       <template #leading>
-        <TeamImg :team-name="entry.name" :logo="entry.team" size="sm" />
+        <TeamImg :team-name="entry.name" :logo="participantLogo(entry)" size="sm" />
       </template>
       {{ entry.name }}
     </SButton>
@@ -57,7 +57,7 @@ const soloPlayer = computed(() =>
           class="flex items-center gap-2 text-sm font-medium"
           :aria-label="t('page.tournaments.id.participants.viewTeam', { team: entry.name })"
         >
-          <TeamImg :team-name="entry.name" :logo="entry.team" size="xs" />
+          <TeamImg :team-name="entry.name" :logo="participantLogo(entry)" size="xs" />
           <span class="truncate">{{ entry.name }}</span>
         </SLink>
         <p v-else :id="titleId" class="truncate text-sm font-medium">{{ entry.name }}</p>

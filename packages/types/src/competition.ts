@@ -25,6 +25,7 @@ export interface ParticipantPlayer {
   id: string;
   name: string;
   slug: string;
+  imageUrl: string | null;
 }
 
 export type ParticipantRef<TTeam> =
@@ -74,7 +75,7 @@ export interface TournamentMatchListItem {
 export interface TournamentDetailParticipant {
   id: string;
   team: TeamSummary | null;
-  players: { id: string; name: string; slug: string; nationality: string | null }[];
+  players: (ParticipantPlayer & { nationality: string | null })[];
   rosterSourceUrl: string | null;
 }
 

@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { VNode } from "vue";
-import { participantName, playerPath, teamPath } from "@sarpbc/utils";
+import { participantLogo, participantName, playerPath, teamPath } from "@sarpbc/utils";
 import type { SpoilerRevealTarget } from "@sarpbc/utils";
 import type { ParticipantRef, TeamSummary, TournamentFormat } from "@sarpbc/types";
 import {
@@ -174,7 +174,7 @@ const showSubscribeCalendar = computed(
               :to="$localePath(championPath)"
               class="inline-flex min-h-10 items-center gap-2 text-highlighted"
             >
-              <TeamImg :team-name="championName" :logo="champion.team" size="xs" />
+              <TeamImg :team-name="championName" :logo="participantLogo(champion)" size="xs" />
               {{ championName }}
             </SLink>
             <span v-else class="inline-flex min-h-10 items-center gap-2 text-highlighted">

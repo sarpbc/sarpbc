@@ -53,7 +53,7 @@ const runSearch = async (searchQuery: string) => {
 watchDebounced(query, runSearch, { debounce: SEARCH_DEBOUNCE_MS });
 
 const pick = (player: Player) => {
-  const picked = { id: player.id, name: player.name, slug: player.slug };
+  const picked = { id: player.id, imageUrl: player.imageUrl, name: player.name, slug: player.slug };
   query.value = "";
   results.value = [];
   emit(
