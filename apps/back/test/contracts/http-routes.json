@@ -1473,6 +1473,14 @@
   },
   {
     "controller": "\"tournaments\"",
+    "verb": "PATCH",
+    "path": "\"matches/:matchId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments\"",
     "verb": "POST",
     "path": "\":id/awards\"",
     "status": null,
@@ -1579,14 +1587,6 @@
     "controller": "\"tournaments\"",
     "verb": "PUT",
     "path": "\"matches/:matchId/lineups\"",
-    "status": null,
-    "guards": ["AuthGuard", "PermissionGuard"],
-    "permissions": ["\"tournaments.manage\""]
-  },
-  {
-    "controller": "\"tournaments\"",
-    "verb": "PUT",
-    "path": "\"matches/:matchId/result\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

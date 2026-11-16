@@ -147,13 +147,14 @@ export const verifyOnThisDay = async ({
     finals,
     async ([match, homeScore]) =>
       await request(
-        "PUT",
-        `/tournaments/matches/${match.id}/result`,
+        "PATCH",
+        `/tournaments/matches/${match.id}`,
         {
           results: [
             { participantId: homeSide, score: homeScore },
             { participantId: awaySide, score: 2 },
           ],
+          status: "finished",
         },
         staffCookie,
       ),

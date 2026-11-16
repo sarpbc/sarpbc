@@ -1,12 +1,6 @@
 <script setup lang="ts">
 import type { MatchVod } from "@sarpbc/types";
-import {
-  getApiErrorMessage,
-  hasPermission,
-  isIso6391Code,
-  maxVodGame,
-  parseMatchVodUrl,
-} from "@sarpbc/utils";
+import { getApiErrorMessage, isIso6391Code, maxVodGame, parseMatchVodUrl } from "@sarpbc/utils";
 import type { Match } from "~/types/matches";
 
 const { match } = defineProps<{ match: Match }>();
@@ -16,10 +10,11 @@ const emit = defineEmits<{
 }>();
 
 const { t, locale } = useI18n();
-const user = useUser();
 const toast = useToast();
 
-const canManage = computed(() => hasPermission(user.value, "tournaments.manage"));
+const staffMode = useStaffMode();
+
+const canManage = computed(() => staffMode.can("tournaments.manage"));
 
 const open = ref(false);
 const saving = ref(false);
