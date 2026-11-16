@@ -281,8 +281,11 @@ describe(ManualTournamentService, () => {
   });
 
   it("marks a synced end date as corrected until staff clear it", async () => {
-    const corrected = await service.update("ewc", { endAt: "2025-03-02" });
-    expect(corrected).toMatchObject({ endAt: new Date("2025-03-02"), endAtCorrected: true });
+    const corrected = await service.update("ewc", { endAt: "2025-03-02T20:00:00Z" });
+    expect(corrected).toMatchObject({
+      endAt: new Date("2025-03-02T20:00:00Z"),
+      endAtCorrected: true,
+    });
     const cleared = await service.update("ewc", { endAt: null });
     expect(cleared).toMatchObject({ endAt: null, endAtCorrected: false });
   });
@@ -480,6 +483,17 @@ describe(ManualTournamentService, () => {
       service.update("ewc", { beginAt: "2026-10-20", endAt: "2026-10-19" }),
     ).rejects.toBeInstanceOf(InvalidInputError);
   });
+
+  it.each([
+    { endAt: "2026-11-16", expected: "2026-11-16T22:59:59.999Z" },
+    { endAt: "2026-07-14", expected: "2026-07-14T21:59:59.999Z" },
+    { endAt: "2026-11-16T20:30:00+01:00", expected: "2026-11-16T19:30:00.000Z" },
+  ])("ends a stage dated $endAt at $expected", async ({ endAt, expected }) => {
+    tournament.source = "manual";
+    const updated = await service.update("ewc", { endAt });
+    expect(updated.endAt?.toISOString()).toBe(expected);
+  });
+
   describe("player participants", () => {
     beforeEach(() => {
       writer.save.mockImplementation(async (saved: Tournament) => {
