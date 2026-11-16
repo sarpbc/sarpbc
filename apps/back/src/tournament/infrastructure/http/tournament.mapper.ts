@@ -131,6 +131,7 @@ const mapDetailParticipant = (participant: TournamentParticipant): TournamentDet
   id: participant.id,
   players: participant.players.map((player) => ({
     id: player.id,
+    imageUrl: player.imageUrl,
     name: player.name,
     nationality: player.nationality,
     slug: player.slug,

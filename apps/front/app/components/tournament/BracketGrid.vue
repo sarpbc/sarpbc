@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { participantName } from "@sarpbc/utils";
+import { participantLogo, participantName } from "@sarpbc/utils";
 import type { BracketSectionLayout } from "~/utils/bracket/types";
 import { resolveMatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 import {
@@ -109,8 +109,8 @@ const bracketMatchStatus = (match: (typeof layout.matches)[number]) =>
           :name="match.name"
           :team-a-name="match.participantA && participantName(match.participantA)"
           :team-b-name="match.participantB && participantName(match.participantB)"
-          :team-a-logo="match.participantA?.team"
-          :team-b-logo="match.participantB?.team"
+          :team-a-logo="match.participantA && participantLogo(match.participantA)"
+          :team-b-logo="match.participantB && participantLogo(match.participantB)"
           :participant-a-id="match.participantAId"
           :participant-b-id="match.participantBId"
           :results="match.results"

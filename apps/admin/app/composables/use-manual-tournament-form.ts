@@ -43,7 +43,7 @@ export const tournamentToFormState = (tournament: TournamentDetail): ManualTourn
   leagueId: tournament.league?.id ?? "",
   name: tournament.name ?? "",
   playerParticipants: tournament.participants.flatMap(({ team, players }) =>
-    team ? [] : [players.map(({ id, name, slug }) => ({ id, name, slug }))],
+    team ? [] : [players.map(({ id, imageUrl, name, slug }) => ({ id, imageUrl, name, slug }))],
   ),
   slug: tournament.event.slug,
   teamIds: tournament.participants.flatMap(({ team }) => (team ? [team.id] : [])),

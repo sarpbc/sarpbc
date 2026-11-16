@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { participantName, playerPath, teamPath } from "@sarpbc/utils";
+import { participantLogo, participantName, playerPath, teamPath } from "@sarpbc/utils";
 import type { TournamentParticipant } from "~/types/tournament";
 
 const { t } = useI18n();
@@ -38,7 +38,7 @@ const nameClass = computed(() => {
       class="flex max-w-full flex-col items-center justify-center gap-2 text-center text-balance break-words"
       :class="nameClass"
     >
-      <TeamImg :team-name="name" :logo="participant?.team" size="md" />
+      <TeamImg :team-name="name" :logo="participant && participantLogo(participant)" size="md" />
       {{ name }}
     </SLink>
     <span

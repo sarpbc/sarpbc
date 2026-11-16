@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { MatchLineup, MatchLineupPlayer } from "@sarpbc/types";
-import { participantName, playerPath } from "@sarpbc/utils";
+import { participantLogo, participantName, playerPath } from "@sarpbc/utils";
 import type { TournamentParticipant } from "~/types/tournament";
 import { STARTGG_URL } from "~/composables/prizes";
 
@@ -54,7 +54,7 @@ const showCredit = computed(() => startgg && lineups.length > 0);
         <HubListItem size="default" class="min-w-0 gap-2">
           <TeamImg
             :team-name="participantName(column.participant)"
-            :logo="column.participant.team"
+            :logo="participantLogo(column.participant)"
             size="xs"
           />
           <h3 class="truncate text-xs text-default">{{ participantName(column.participant) }}</h3>
