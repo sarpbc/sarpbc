@@ -1,4 +1,4 @@
-import { stageSlug } from "@sarpbc/utils";
+import { SITE_TIME_ZONE, endOfIsoDayIn, stageSlug } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { Tournament } from "../domain/tournament";
@@ -21,6 +21,12 @@ import { nonBlank } from "../../common/domain/text";
 const optionalDate = (value: string | null | undefined): Date | null =>
   value !== null && value !== undefined && value !== "" ? new Date(value) : null;
 
+/** `new Date("YYYY-MM-DD")` is midnight UTC, which would end the stage before its last day is played. */
+const optionalEndDate = (value: string | null | undefined): Date | null =>
+  value === null || value === undefined
+    ? null
+    : (endOfIsoDayIn(value, SITE_TIME_ZONE) ?? optionalDate(value));
+
 const draftTournament = (input: CreateTournamentInput): Tournament => {
   const tournament = new Tournament();
   tournament.source = input.source ?? "manual";
@@ -35,7 +41,7 @@ const draftTournament = (input: CreateTournamentInput): Tournament => {
   tournament.tier = nonBlank(input.tier) ?? null;
   tournament.imageUrl = nonBlank(input.imageUrl) ?? null;
   tournament.beginAt = optionalDate(input.beginAt);
-  tournament.endAt = optionalDate(input.endAt);
+  tournament.endAt = optionalEndDate(input.endAt);
   tournament.assertDateOrder();
 
   return tournament;
@@ -122,7 +128,7 @@ export class ManualTournamentService {
       }
 
       if (input.endAt !== undefined) {
-        tournament.endAt = input.endAt === null ? null : new Date(input.endAt);
+        tournament.endAt = optionalEndDate(input.endAt);
       }
 
       if (input.imageUrl !== undefined) {

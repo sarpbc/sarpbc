@@ -27,7 +27,7 @@ export {
   twitchChannelUrl,
 } from "./twitch";
 
-export { isoDay } from "./iso-day";
+export { endOfIsoDayIn, isoDay } from "./iso-day";
 
 export { isoWeekIdFromDate, isoWeekUtcRange, parseIsoWeekId } from "./iso-week";
 
