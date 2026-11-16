@@ -10,6 +10,8 @@ export const DESIGN_MESSAGES = {
   pagination: "Pagination",
   previousPage: "Previous page",
   retry: "Retry",
+  selectAllRows: "Select all rows",
+  selectRow: "Select this row",
 } as const;
 
 export type DesignMessage = keyof typeof DESIGN_MESSAGES;
