@@ -70,10 +70,10 @@ catalog:
   "@iconify-json/logos": ^1.2.19
   evlog: ^2.35.1
   fastify: 5.12.8
-  "@nestjs/common": 12.4.2
-  "@nestjs/core": 12.4.2
-  "@nestjs/platform-fastify": 12.4.2
-  "@nestjs/testing": 12.4.2
+  "@nestjs/common": 12.5.0
+  "@nestjs/core": 12.5.0
+  "@nestjs/platform-fastify": 12.5.0
+  "@nestjs/testing": 12.5.0
   "@mikro-orm/cli": ^7.2.8
   "@mikro-orm/core": ^7.2.8
   "@mikro-orm/decorators": ^7.2.8
