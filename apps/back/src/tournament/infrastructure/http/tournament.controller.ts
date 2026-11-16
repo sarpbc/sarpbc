@@ -24,7 +24,7 @@ import {
   CreateMatchDto,
   SetMatchBracketDto,
   SetMatchForfeitDto,
-  SetMatchResultDto,
+  UpdateMatchResultDto,
   SetMatchSourceDto,
   SetMatchVodsDto,
   SetMatchWinnerDto,
@@ -34,7 +34,7 @@ import type {
   CreateMatchInput,
   SetMatchBracketInput,
   SetMatchForfeitInput,
-  SetMatchResultInput,
+  UpdateMatchResultInput,
   SetMatchSourceInput,
   SetMatchVodsInput,
   SetMatchWinnerInput,
@@ -362,15 +362,12 @@ export class TournamentController {
 
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
-  @Put("matches/:matchId/result")
-  async setMatchResult(
+  @Patch("matches/:matchId")
+  async updateMatchResult(
     @Param("matchId") matchId: string,
-    @Body({ schema: SetMatchResultDto }) body: SetMatchResultInput,
+    @Body({ schema: UpdateMatchResultDto }) body: UpdateMatchResultInput,
   ) {
-    const match = await this.matchService.updateMatch(matchId, {
-      results: body.results,
-      status: "finished",
-    });
+    const match = await this.matchService.updateMatch(matchId, body);
 
     return { match: withPublicSlug(match) };
   }

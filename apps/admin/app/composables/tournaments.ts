@@ -87,9 +87,9 @@ export const setMatchResult = async (
   matchId: string,
   results: StreamScoreSeriesResult[],
 ): Promise<void> => {
-  await apiFetch(`/tournaments/matches/${matchId}/result`, {
-    body: { results },
-    method: "PUT",
+  await apiFetch(`/tournaments/matches/${matchId}`, {
+    body: { results, status: "finished" },
+    method: "PATCH",
   });
 };
 

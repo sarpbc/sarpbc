@@ -1719,6 +1719,22 @@
           "format": "Format",
           "round": "Round"
         },
+        "staffEdit": {
+          "open": "Edit Match",
+          "title": "Edit Match",
+          "status": "Status",
+          "statuses": {
+            "not_started": "Upcoming",
+            "running": "Live",
+            "finished": "Finished"
+          },
+          "score": "{team} score",
+          "drawnFinished": "A finished match needs a winner: enter different scores",
+          "save": "Save",
+          "saving": "Saving…",
+          "saved": "Match updated",
+          "saveError": "Could not update the match"
+        },
         "vodAdd": {
           "title": "Add a replay",
           "game": "Game",
@@ -1899,6 +1915,11 @@
       "logout": "Logout",
       "logoutFailed": "Could not log out. Try again.",
       "staff": "Staff",
+      "staffMode": {
+        "title": "Staff Mode",
+        "label": "Edit from the site",
+        "description": "Shows staff actions, such as correcting a match, on public pages in this browser"
+      },
       "editProfile": "Edit Profile",
       "actions": "Profile Actions",
       "username": {

@@ -129,3 +129,12 @@ export const setMatchVods = async (
 
   return response.match.vods;
 };
+
+export type EditableMatchStatus = "not_started" | "running" | "finished";
+
+export const updateMatchResult = async (
+  matchId: string,
+  body: { status: EditableMatchStatus; results?: { participantId: string; score: number }[] },
+): Promise<void> => {
+  await apiFetch(`/tournaments/matches/${matchId}`, { body, method: "PATCH" });
+};

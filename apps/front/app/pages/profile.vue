@@ -55,6 +55,8 @@ const adminHomeUrl = computed(() => config.public.adminUrl.replace(/\/$/u, ""));
 
 const showStaffConsole = computed(() => isStaffUser(user.value));
 
+const staffMode = useStaffMode();
+
 const { data: notifications, refresh: refreshNotifications } = await useLazyAsyncData(
   "profile-notifications",
   () => getNotifications(30),
@@ -216,6 +218,20 @@ setPageSeo({
           />
         </SDropdownMenu>
       </HubCard>
+
+      <HubRail v-if="showStaffConsole" :title="$t('page.profile.staffMode.title')">
+        <HubCard>
+          <HubListItem>
+            <SSwitch
+              id="staff-mode"
+              :model-value="staffMode.enabled.value"
+              :label="$t('page.profile.staffMode.label')"
+              :description="$t('page.profile.staffMode.description')"
+              @update:model-value="staffMode.setEnabled"
+            />
+          </HubListItem>
+        </HubCard>
+      </HubRail>
 
       <HubRail v-if="hasNotifications">
         <template #caption>

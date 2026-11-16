@@ -381,7 +381,15 @@ const scoreboardLabel = computed(() => {
       </HubCrossCard>
 
       <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-        <HubRail :title="t('page.match.detail.sections.information')">
+        <HubRail>
+          <template #caption>
+            <div class="flex w-full items-center justify-between gap-2">
+              {{ t("page.match.detail.sections.information") }}
+              <ClientOnly>
+                <MatchStaffEdit :match="match" @saved="refresh()" />
+              </ClientOnly>
+            </div>
+          </template>
           <MatchInfoCard :match="match" class="flex-1" />
         </HubRail>
         <HubRail v-if="forfeiter" :title="t('page.match.detail.sections.result')">

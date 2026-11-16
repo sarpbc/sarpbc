@@ -1719,6 +1719,22 @@
           "format": "Format",
           "round": "Phase"
         },
+        "staffEdit": {
+          "open": "Modifier le match",
+          "title": "Modifier le match",
+          "status": "Statut",
+          "statuses": {
+            "not_started": "À venir",
+            "running": "En cours",
+            "finished": "Terminé"
+          },
+          "score": "Score de {team}",
+          "drawnFinished": "Un match terminé a besoin d'un vainqueur : saisissez des scores différents",
+          "save": "Enregistrer",
+          "saving": "Enregistrement…",
+          "saved": "Match mis à jour",
+          "saveError": "Impossible de modifier le match"
+        },
         "vodAdd": {
           "title": "Ajouter une rediffusion",
           "game": "Game",
@@ -1899,6 +1915,11 @@
       "logout": "Se déconnecter",
       "logoutFailed": "Déconnexion impossible. Réessayez.",
       "staff": "Staff",
+      "staffMode": {
+        "title": "Mode staff",
+        "label": "Modifier depuis le site",
+        "description": "Affiche les actions du staff, comme la correction d'un match, sur les pages publiques dans ce navigateur"
+      },
       "editProfile": "Modifier le profil",
       "actions": "Actions du profil",
       "username": {
