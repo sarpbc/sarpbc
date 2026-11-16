@@ -57,8 +57,8 @@ const id = useId();
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 1rem;
-    height: 1rem;
+    width: 0.875rem;
+    height: 0.875rem;
     padding: 0;
     border: 0;
     background: var(--sb-bg);
@@ -88,8 +88,8 @@ const id = useId();
   }
 
   .sb-checkbox__icon {
-    width: 0.75rem;
-    height: 0.75rem;
+    width: 0.625rem;
+    height: 0.625rem;
   }
 
   .sb-checkbox__label {

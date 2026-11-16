@@ -49,16 +49,17 @@
   }
 
   .sb-prose :where(p, li, td, th, blockquote) a {
-    border-bottom: 1px solid transparent;
-    color: var(--sb-primary);
-    font-weight: 500;
-    text-decoration: none;
-    transition: border-color var(--sb-duration-fast);
+    color: var(--sb-text-muted);
+    text-decoration: underline dashed var(--sb-text-dimmed);
+    text-underline-offset: 3px;
+    transition-property: color, text-decoration-color;
+    transition-duration: var(--sb-duration-fast);
   }
 
   @media (hover: hover) {
     .sb-prose :where(p, li, td, th, blockquote) a:hover {
-      border-color: var(--sb-primary);
+      color: var(--sb-text-highlighted);
+      text-decoration-color: currentColor;
     }
   }
 

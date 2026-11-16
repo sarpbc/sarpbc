@@ -255,7 +255,7 @@ const close = () => {
   >
     <template #body>
       <div class="flex flex-col gap-4">
-        <SRadioGroup v-model="kind" orientation="horizontal" variant="cards" :items="kindItems" />
+        <SRadioGroup v-model="kind" orientation="horizontal" :items="kindItems" />
 
         <SFormField
           :label="

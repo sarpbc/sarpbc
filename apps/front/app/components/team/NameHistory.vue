@@ -38,14 +38,15 @@ const newestFirst = computed(() => aliases.toSorted((a, b) => b.from.localeCompa
           <span class="font-medium text-highlighted">{{ alias.name }}</span>
           <span class="flex items-baseline gap-3 text-sm text-muted">
             <span>{{ period(alias) }}</span>
-            <a
-              :href="alias.sourceUrl"
+            <SLink
+              :to="alias.sourceUrl"
+              variant="secondary"
+              external
               target="_blank"
               rel="noopener noreferrer nofollow"
-              class="underline underline-offset-2 hover:text-highlighted focus-visible:text-highlighted"
             >
               {{ t("page.team.slug.nameHistory.source") }}
-            </a>
+            </SLink>
           </span>
         </li>
       </ul>

@@ -298,8 +298,6 @@
 :root {
   --ui-radius: 0rem;
   --ui-bg-inverted-pressed: color-mix(in oklch, var(--ui-bg-inverted) 90%, var(--color-ink-950));
-  --ui-link: var(--color-blue-600);
-  --ui-link-hover: var(--color-blue-700);
   --ui-separator: var(--color-ink-100);
 }
 
@@ -311,8 +309,6 @@
   --ui-bg-elevated: var(--color-ink-850);
   --ui-border: var(--color-ink-800);
   --ui-separator: var(--color-ink-900);
-  --ui-link: color-mix(in oklch, var(--color-blue-400) 50%, var(--color-blue-500));
-  --ui-link-hover: var(--color-blue-400);
 }
 
 .light {

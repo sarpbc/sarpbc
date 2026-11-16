@@ -95,7 +95,7 @@ Radius: `--ui-radius: 0rem` in `app/assets/css/main.css` (sharp corners). Stay c
 
 Input fields keep a subtle 1px inset border (`--ui-border`), strengthened on hover (`--ui-border-accented`). All interactive elements use primary for keyboard focus, which takes precedence over hover. The global rules in `app/assets/css/main.css` cover native controls, links and `@sarpbc/design` components without changing their dimensions. Buttons and inline text links only receive the focus outline. Do not add thicker local focus rings. Forced-colors mode retains its system outline.
 
-Text links in news prose and `SLink variant="primary"` use `--ui-link` (the Soutenu direction) with medium weight. Hover changes only the color through `--ui-link-hover`; links are never underlined. Article cards connect directly to the discussion composer with a single shared border.
+Text links in news and legal prose, and player or team mentions, look like `SLink variant="secondary"`: muted text with a dashed underline that takes the text color on hover. Article cards connect directly to the discussion composer with a single shared border.
 
 ---
 
@@ -194,11 +194,11 @@ Use `SButton` directly. Every button picks one rung of this ladder; its props ar
 
 - Primary is brand blue in both themes. Do not use inverted neutral solid buttons as the main action.
 - Secondary buttons draw their edge in the same hairline as cards and rows, so a button sitting against a card reads as one surface.
-- Buttons are `sm` (24px) or `md` (28px, default) and share the 13px control text with fields. A single choice among options is an `SRadioGroup` (`list` or `cards`), not a row of buttons.
+- Buttons are `sm` (24px) or `md` (28px, default) and share the 13px control text with fields. A single choice among options is an `SRadioGroup`, not a row of buttons; switching views of the same content is `STabs`.
 - Labels inside a clickable row are text (`text-muted`), not badges or buttons. The row hover already signals the target.
 - **Hover:** clickable rows, tiles and cards use the `interactive-surface` utility (`bg-elevated` on hover and press, no transition), matching tertiary buttons. Do not add other hover fills.
 - **Selected:** toggles set `aria-pressed`, and in-page view switches set `aria-current="page"`. Both use the `selectable` utility, which adds `bg-elevated`, `text-highlighted` and a 1px inverted inner outline. Keyboard focus keeps priority. Do not mark a selection with primary color or thicker rings.
-- **Text links:** `SLink` — `secondary` (the default) for navigation, entity names and meta; `primary` for standalone links in copy (auth switches, policies). `SNavigationMenu` items use the same link styles.
+- **Text links:** `SLink` — `primary` (the default) for navigation, entity names and meta; `secondary`, underlined with dashes, for links inside running text (auth switches, policies, sources). Both share the muted text color. `SNavigationMenu` items use the same link styles.
 
 #### `HubListItem` sizes
 

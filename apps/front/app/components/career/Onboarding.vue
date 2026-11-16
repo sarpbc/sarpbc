@@ -175,7 +175,6 @@ const onStart = () => {
       <SRadioGroup
         :model-value="role"
         :items="roleItems"
-        variant="cards"
         :aria-label="t('page.game.career.onboarding.roleTitle')"
         @update:model-value="$event !== null && emit('selectRole', $event)"
       />
@@ -194,7 +193,6 @@ const onStart = () => {
       <SRadioGroup
         :model-value="background"
         :items="backgroundItems"
-        variant="cards"
         :aria-label="t('page.game.career.onboarding.backgroundTitle')"
         @update:model-value="$event !== null && emit('selectBackground', $event)"
       />

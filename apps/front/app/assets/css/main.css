@@ -36,17 +36,6 @@
   }
 }
 
-.news-prose :where(p, li, td) a {
-  border-bottom: 0;
-  color: var(--ui-link);
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.news-prose :where(p, li, td) a:hover {
-  color: var(--ui-link-hover);
-}
-
 /* List top edge drawn over the content box: rows keep exact row heights and a hovered row never covers the line. Lists stay open at the bottom. */
 @utility frame {
   position: relative;

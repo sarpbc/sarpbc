@@ -33,7 +33,7 @@ const rejectCookies = () => {
           {{ t("components.cookiePopup.description") }}
         </p>
 
-        <SLink variant="primary" :to="localePath('/cookie-policy')" class="text-sm mb-4 block">
+        <SLink variant="secondary" :to="localePath('/cookie-policy')" class="text-sm mb-4 block">
           {{ t("components.cookiePopup.learnMore") }}
         </SLink>
 

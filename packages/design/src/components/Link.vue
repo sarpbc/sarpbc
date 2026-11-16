@@ -3,7 +3,7 @@ import { useDesignAdapters } from "../adapters.ts";
 
 import type { LinkVariant } from "../types.ts";
 
-const { to, variant = "secondary" } = defineProps<{
+const { to, variant = "primary" } = defineProps<{
   /** A path, a URL or a route location; the app's link adapter resolves it. */
   to: string | object;
   variant?: LinkVariant;
@@ -21,11 +21,10 @@ const adapters = useDesignAdapters();
 <style scoped>
 @layer components {
   .sb-link {
-    --ink: var(--sb-text-muted);
-    --ink-hover: var(--sb-text-highlighted);
-
-    color: var(--ink);
+    color: var(--sb-text-muted);
     text-decoration: none;
+    transition-property: color, text-decoration-color;
+    transition-duration: var(--sb-duration-fast);
   }
 
   .sb-link:focus-visible {
@@ -35,15 +34,19 @@ const adapters = useDesignAdapters();
 
   @media (hover: hover) {
     .sb-link:hover {
-      color: var(--ink-hover);
+      color: var(--sb-text-highlighted);
     }
   }
 
-  .sb-link[data-variant="primary"] {
-    --ink: var(--sb-link);
-    --ink-hover: var(--sb-link-hover);
+  .sb-link[data-variant="secondary"] {
+    text-decoration: underline dashed var(--sb-text-dimmed);
+    text-underline-offset: 3px;
+  }
 
-    font-weight: 500;
+  @media (hover: hover) {
+    .sb-link[data-variant="secondary"]:hover {
+      text-decoration-color: currentColor;
+    }
   }
 }
 </style>

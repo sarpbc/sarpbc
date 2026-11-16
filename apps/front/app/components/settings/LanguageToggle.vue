@@ -24,7 +24,6 @@ const current = computed<UiLocale>({
   <SRadioGroup
     :model-value="current"
     :items="options"
-    variant="text"
     orientation="horizontal"
     :aria-label="t('components.header.language')"
     @update:model-value="$event !== null && (current = $event)"

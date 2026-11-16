@@ -277,11 +277,10 @@ const table = useVueTable({
 
   .sb-table__th,
   .sb-table__td {
-    /* Each app sets its row rhythm: 52px on the public hubs, 44px in the staff console. */
-    height: var(--spacing-row, 2.75rem);
-    padding: 0 0.75rem;
+    height: 2.25rem;
+    padding: 0 0.625rem;
     border-bottom: 1px solid var(--sb-border);
-    font-size: 0.875rem;
+    font-size: var(--sb-control-text);
     font-weight: 400;
     line-height: 1.25rem;
     text-align: start;
@@ -312,17 +311,22 @@ const table = useVueTable({
   }
 
   .sb-table__row[data-checked] {
-    background: color-mix(in oklab, var(--sb-primary) 8%, transparent);
+    background: var(--sb-bg-elevated);
   }
 
   .sb-table__th[data-check],
   .sb-table__td[data-check] {
-    width: 1rem;
+    width: 0.875rem;
     padding-inline-end: 0;
   }
 
+  .sb-table__th[data-check] > .sb-checkbox,
+  .sb-table__td[data-check] > .sb-checkbox {
+    display: flex;
+  }
+
   @media (hover: hover) {
-    .sb-table__row[data-selectable]:hover {
+    .sb-table__row[data-selectable]:hover:not([data-checked]) {
       background: color-mix(in oklab, var(--sb-bg-elevated) 50%, transparent);
     }
   }

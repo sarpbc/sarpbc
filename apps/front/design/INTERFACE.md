@@ -139,7 +139,7 @@ Hierarchy: **borders + tonal surfaces first**, shadows second.
 | ---------- | ------------------------------------------- |
 | Button     | `SButton`                                   |
 | Form       | `<form>`, `SFormField`, `SInput`, `SSelect` |
-| One choice | `SRadioGroup` (`list` or `cards`)           |
+| One choice | `SRadioGroup`                               |
 | Table      | `STable` (dashboard lists)                  |
 | Link       | `SLink` / `NuxtLink`                        |
 | Modal      | `SModal`                                    |

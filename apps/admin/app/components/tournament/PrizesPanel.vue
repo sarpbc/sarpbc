@@ -380,7 +380,7 @@ const save = async () => {
           <SInput v-model="row.sourceUrl" type="url" autocomplete="off" class="w-full" />
           <template v-if="row.sourceUrl.trim() && !sourceUrlError(row.sourceUrl)" #help>
             <SLink
-              variant="primary"
+              variant="secondary"
               :to="row.sourceUrl.trim()"
               external
               target="_blank"

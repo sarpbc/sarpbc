@@ -64,7 +64,7 @@ const linkLabel = (streamer: LiveStreamer): string =>
               class="group flex min-w-0 items-baseline gap-2 text-xs"
             >
               <span
-                class="shrink-0 font-medium text-highlighted group-hover:text-(--ui-link-hover)"
+                class="shrink-0 font-medium text-highlighted decoration-dashed underline-offset-3 group-hover:underline"
               >
                 {{ streamer.displayName }}
               </span>
