@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import * as z from "zod";
+import type { MenuItem } from "@sarpbc/design";
 import type { AppNotification } from "@sarpbc/types";
 import { getApiErrorMessage, isStaffUser } from "@sarpbc/utils";
 
@@ -19,9 +20,7 @@ if (!user.value) {
 const isLoggingOut = ref(false);
 const isMarkingRead = ref(false);
 const isSavingUserName = ref(false);
-const menuOpen = ref(false);
 const editOpen = ref(false);
-const menuId = "profile-actions-menu";
 
 const usernameSchema = z.object({
   userName: z
@@ -137,13 +136,7 @@ const onNotificationClick = async (notification: AppNotification) => {
   await Promise.all([refreshNotifications(), refreshUnreadCount()]);
 };
 
-const openEditProfile = () => {
-  menuOpen.value = false;
-  editOpen.value = true;
-};
-
 const handleLogout = async () => {
-  menuOpen.value = false;
   isLoggingOut.value = true;
 
   try {
@@ -156,6 +149,34 @@ const handleLogout = async () => {
     navigateTo(localePath("/"));
   }
 };
+
+const profileActions = computed<MenuItem[][]>(() => [
+  [
+    {
+      icon: "i-fluent-edit-24-regular",
+      label: t("page.profile.editProfile"),
+      onSelect: () => (editOpen.value = true),
+    },
+    ...(showStaffConsole.value
+      ? [
+          {
+            icon: "i-fluent-shield-24-regular",
+            label: t("page.profile.staff"),
+            onSelect: () => window.open(adminHomeUrl.value, "_blank", "noopener"),
+          },
+        ]
+      : []),
+  ],
+  [
+    {
+      danger: true,
+      disabled: isLoggingOut.value,
+      icon: "i-fluent-sign-out-24-regular",
+      label: t("page.profile.logout"),
+      onSelect: handleLogout,
+    },
+  ],
+]);
 
 setPageSeo({
   description: t("page.profile.description"),
@@ -186,64 +207,14 @@ setPageSeo({
           </div>
         </div>
 
-        <SPopover v-model:open="menuOpen">
+        <SDropdownMenu :items="profileActions" align="end">
           <SButton
             variant="tertiary"
             icon="i-fluent-more-vertical-24-regular"
-            class="size-row p-0 justify-center"
             sound="press"
             :aria-label="$t('page.profile.actions')"
-            aria-haspopup="menu"
-            :aria-expanded="menuOpen"
-            :aria-controls="menuId"
           />
-          <template #content>
-            <div
-              :id="menuId"
-              role="menu"
-              class="flex min-w-40 flex-col p-1"
-              :aria-label="$t('page.profile.actions')"
-            >
-              <SButton
-                variant="tertiary"
-                size="sm"
-                icon="i-fluent-edit-24-regular"
-                class="justify-start"
-                sound="press"
-                role="menuitem"
-                :label="$t('page.profile.editProfile')"
-                @click="openEditProfile"
-              />
-              <SButton
-                v-if="showStaffConsole"
-                variant="tertiary"
-                size="sm"
-                icon="i-fluent-shield-24-regular"
-                class="justify-start"
-                sound="press"
-                role="menuitem"
-                :to="adminHomeUrl"
-                external
-                target="_blank"
-                :label="$t('page.profile.staff')"
-                @click="menuOpen = false"
-              />
-              <SButton
-                variant="tertiary"
-                danger
-                size="sm"
-                icon="i-fluent-sign-out-24-regular"
-                class="justify-start"
-                sound="press"
-                role="menuitem"
-                :label="$t('page.profile.logout')"
-                :loading="isLoggingOut"
-                :disabled="isLoggingOut"
-                @click="handleLogout"
-              />
-            </div>
-          </template>
-        </SPopover>
+        </SDropdownMenu>
       </HubCard>
 
       <HubRail v-if="hasNotifications">
