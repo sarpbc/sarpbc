@@ -1,3 +1,4 @@
+import type { User } from "@sarpbc/types";
 import type { AutocaptureConfig, PostHog } from "posthog-js";
 import { sanitizePostHogEvent, sanitizePostHogUrl } from "~/utils/posthog-privacy";
 
@@ -6,14 +7,37 @@ interface PostHogPublicConfig {
   host: string;
 }
 
+type PostHogUser = Pick<User, "id" | "userName">;
+
 let client: PostHog | null = null;
 let loading: Promise<PostHog | null> | null = null;
 let consentGranted = false;
 let tracingHost = "";
 
+// `undefined` means the session is not hydrated yet, so the current identity is kept.
+let currentUser: PostHogUser | null | undefined;
+
 const autocapture: AutocaptureConfig = {
   capture_copied_text: false,
   dom_event_allowlist: ["click", "change", "submit"],
+};
+
+const applyIdentity = (): void => {
+  if (!client || !consentGranted || currentUser === undefined) {
+    return;
+  }
+
+  if (currentUser) {
+    client.identify(currentUser.id, { username: currentUser.userName });
+
+    return;
+  }
+
+  if (client.get_property("$user_state") === "identified") {
+    // reset() restores the default opted-out consent state.
+    client.reset();
+    client.opt_in_capturing({ captureEventName: false });
+  }
 };
 
 const applyConsent = (): void => {
@@ -36,6 +60,7 @@ const applyConsent = (): void => {
       sampling: true,
       url_trigger: true,
     });
+    applyIdentity();
 
     return;
   }
@@ -56,6 +81,11 @@ export const setPostHogConsent = (accepted: boolean, apiBase: string): void => {
   consentGranted = accepted;
   tracingHost = new URL(apiBase).hostname;
   applyConsent();
+};
+
+export const setPostHogUser = (user: PostHogUser | null | undefined): void => {
+  currentUser = user && { id: user.id, userName: user.userName };
+  applyIdentity();
 };
 
 export const loadPostHogClient = async function loadPostHogClient(
@@ -90,7 +120,8 @@ export const loadPostHogClient = async function loadPostHogClient(
       capture_heatmaps: false,
       capture_pageleave: false,
       capture_pageview: false,
-      capture_performance: false,
+      // Web vitals observers can only start at init, which already requires consent.
+      capture_performance: { network_timing: false, web_vitals: true },
       defaults: "2026-08-30",
       disable_capture_url_hashes: true,
       disable_session_recording: true,
@@ -104,7 +135,7 @@ export const loadPostHogClient = async function loadPostHogClient(
       opt_out_persistence_by_default: true,
       persistence: "sessionStorage",
       persistence_name: "visit",
-      person_profiles: "never",
+      person_profiles: "identified_only",
       session_recording: {
         captureCanvas: { recordCanvas: false },
         inlineStylesheet: true,

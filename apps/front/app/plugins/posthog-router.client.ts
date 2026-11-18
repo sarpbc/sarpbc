@@ -2,12 +2,14 @@ import {
   getLoadedPostHogClient,
   loadPostHogClient,
   setPostHogConsent,
+  setPostHogUser,
 } from "~/utils/posthog-client";
 
 export default defineNuxtPlugin(() => {
   const router = useRouter();
   const { choice } = useCookieConsent();
   const config = useRuntimeConfig();
+  const user = useUser();
   let lastPageview: string | null = null;
 
   const capturePageview = (fullPath = router.currentRoute.value.fullPath) => {
@@ -28,6 +30,8 @@ export default defineNuxtPlugin(() => {
       page_path: path,
     });
   };
+
+  watch(user, setPostHogUser, { flush: "sync", immediate: true });
 
   watch(
     choice,

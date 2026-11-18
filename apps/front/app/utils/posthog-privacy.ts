@@ -4,6 +4,14 @@ import * as z from "zod/mini";
 const urlPropertySchema = z.string();
 const heatmapSchema = z.record(z.string(), z.array(z.looseObject({})));
 
+const webVitalSchema = z.looseObject({
+  $current_url: z.optional(z.string()),
+  attribution: z.optional(z.looseObject({ url: z.optional(z.string()) })),
+  navigationURL: z.optional(z.string()),
+});
+
+const personPropertiesSchema = z.object({ username: z.optional(z.string()) });
+
 export const sanitizePostHogUrl = (value: string): string => {
   try {
     const url = new URL(value);
@@ -57,11 +65,47 @@ export const sanitizePostHogEvent = (event: CaptureResult): CaptureResult => {
     Reflect.deleteProperty(properties, "$heatmap_data");
   }
 
-  for (const key of ["$title", "$set", "$set_once", "email", "userName", "userId", "user_id"]) {
+  for (const [key, value] of Object.entries(properties)) {
+    if (!/^\$web_vitals_[A-Z]+_event$/u.test(key)) {
+      continue;
+    }
+
+    const vital = webVitalSchema.safeParse(value);
+
+    if (!vital.success) {
+      Reflect.deleteProperty(properties, key);
+      continue;
+    }
+
+    const { attribution, navigationURL } = vital.data;
+    vital.data.$current_url = sanitizePostHogUrl(vital.data.$current_url ?? "");
+
+    if (navigationURL !== undefined) {
+      vital.data.navigationURL = sanitizePostHogUrl(navigationURL);
+    }
+
+    if (attribution?.url !== undefined) {
+      attribution.url = sanitizePostHogUrl(attribution.url);
+    }
+
+    properties[key] = vital.data;
+  }
+
+  for (const key of ["$title", "$set_once", "email", "userName", "userId", "user_id"]) {
     Reflect.deleteProperty(properties, key);
   }
 
-  Reflect.deleteProperty(event, "$set");
+  // Only the public username may reach the person profile of a signed-in visitor.
+  for (const target of [properties, event]) {
+    const personProperties = personPropertiesSchema.safeParse(target.$set);
+
+    if (personProperties.success) {
+      target.$set = personProperties.data;
+    } else {
+      Reflect.deleteProperty(target, "$set");
+    }
+  }
+
   Reflect.deleteProperty(event, "$set_once");
 
   return event;
