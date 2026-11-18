@@ -1,7 +1,7 @@
 export type CookieChoice = "accepted" | "rejected";
 
-// Previous cookie consent did not cover session replay.
-const COOKIE_NAME = "analyticsConsent";
+// Previous consents did not cover linking tracking to signed-in accounts.
+const COOKIE_NAME = "trackingConsent";
 
 export const useCookieConsent = () => {
   const choiceCookie = useCookie<CookieChoice | null>(COOKIE_NAME, {

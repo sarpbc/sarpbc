@@ -1,10 +1,10 @@
 ---
 title: "Cookie Policy"
 description: "Understand how sarpbc.org uses essential cookies and optional analytics, what each category does, and how to manage your consent while browsing the platform."
-lastUpdated: "October 18, 2026"
+lastUpdated: "November 18, 2026"
 ---
 
-_Last updated: October 18, 2026_
+_Last updated: November 18, 2026_
 
 ## What Are Cookies?
 
@@ -24,8 +24,8 @@ These cookies are necessary for the website to function properly. They enable ba
 
 We use analytics cookies to understand how visitors interact with our website. These cookies help us analyze website traffic, measure the effectiveness of our content, and improve our services.
 
-- With your prior consent, we use PostHog (EU) to measure page views, clicks, feature usage and scrolling, and to record and replay your session, including mouse movements and touch interactions. These measurements help us understand how the site is used and improve its usability.
-- Tracking uses a random identifier kept in your browser's session storage. We do not associate it with your account, username or email address. A random identifier provides pseudonymization, not absolute anonymity.
+- With your prior consent, we use PostHog (EU) to measure page views, clicks, feature usage, scrolling and page performance (loading speed, responsiveness and layout stability), and to record and replay your session, including mouse movements and touch interactions. These measurements help us understand how the site is used and improve its usability.
+- Tracking uses a random identifier kept in your browser's session storage. When you are signed in, we link tracking to your account identifier and username so we can understand how members use the site. We never send your email address. Signing out starts a new random identifier.
 - Page text and styles are visible in recordings. Input values and editable text areas are masked. URL query parameters and fragments are removed from tracking. Network request and response bodies and console logs are not recorded.
 - If you decline or have not yet given consent, PostHog tracking and session recording do not start. Withdrawing consent stops tracking and recording for the remainder of your visit; it does not automatically delete data already sent.
 
