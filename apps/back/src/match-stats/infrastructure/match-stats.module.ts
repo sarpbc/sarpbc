@@ -10,6 +10,9 @@ import { StatsPlayerLinkService } from "../application/stats-player-link.service
 import { TournamentPlayerStatsService } from "../application/tournament-player-stats.service";
 import { BallchasingClient } from "./ballchasing/ballchasing-client";
 import { GAME_STATS_STORE } from "./game-stats.tokens";
+import { RedisModule } from "../../infrastructure/redis/redis.module";
+import { RedisService } from "../../infrastructure/redis/redis.service";
+import { CachedOverallPlayerStatsRead } from "./cache/cached-overall-player-stats.read";
 import { InterruptedImportsSweeper } from "./interrupted-imports.sweeper";
 import { PlayerStatsController } from "./http/player-stats.controller";
 import { StatsGameController } from "./http/stats-game.controller";
@@ -44,6 +47,7 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
     TournamentPlayerStatsService,
   ],
   imports: [
+    RedisModule,
     MikroOrmModule.forFeature([
       MatchGame,
       MatchGameExclusion,
@@ -76,6 +80,12 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
       inject: [GAME_STATS_STORE],
       provide: TournamentPlayerStatsService,
       useFactory: (games: GameStatsStore) => new TournamentPlayerStatsService(games),
+    },
+    {
+      inject: [TournamentPlayerStatsService, RedisService],
+      provide: CachedOverallPlayerStatsRead,
+      useFactory: (stats: TournamentPlayerStatsService, redis: RedisService) =>
+        new CachedOverallPlayerStatsRead(stats, redis),
     },
     {
       inject: [EntityManager, STATS_CANDIDATES],

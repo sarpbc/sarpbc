@@ -19,7 +19,9 @@ export interface PlayerStatsSummary {
   tallies: readonly PlayerTally[];
 }
 
-export type StatsScope = { kind: "tournaments"; ids: string[] } | { kind: "redistributable" };
+export type StatsScope =
+  | { kind: "tournaments"; ids: string[] }
+  | { kind: "redistributable"; minGames: number };
 
 const COUNTS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 

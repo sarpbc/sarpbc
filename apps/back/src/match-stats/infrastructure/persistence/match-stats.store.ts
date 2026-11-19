@@ -30,12 +30,13 @@ const scopeFilter = (scope: StatsScope) => {
     case "tournaments": {
       return {
         filter: `m.tournament_id in (${scope.ids.map(() => "?").join(", ")})`,
+        minGames: 1,
         params: scope.ids,
       };
     }
 
     case "redistributable": {
-      return { filter: "t.source <> 'startgg'", params: [] };
+      return { filter: "t.source <> 'startgg'", minGames: scope.minGames, params: [] };
     }
 
     default: {
@@ -245,7 +246,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   }
 
   async playerStats(scope: StatsScope) {
-    const { filter, params } = scopeFilter(scope);
+    const { filter, minGames, params } = scopeFilter(scope);
     const connection = this.em.getConnection();
 
     const [summary] = summaryRows.parse(
@@ -271,8 +272,9 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         join player pl on pl.id = p.player_id
         left join team tm on tm.id = part.team_id
         where ${filter}
-        group by pl.id, tm.id, lineup_id`,
-        params,
+        group by pl.id, tm.id, lineup_id
+        having count(distinct p.game_id) >= ?`,
+        [...params, minGames],
       ),
     );
 

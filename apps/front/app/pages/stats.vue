@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import { OVERALL_STATS_MIN_GAMES } from "@sarpbc/types";
+
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 
@@ -23,6 +25,7 @@ setPageSeo({
       <template #title>{{ t("page.stats.title") }}</template>
       <template v-if="stats && stats.games > 0" #meta>
         <span>{{ t("page.stats.games", { count: stats.games }) }}</span>
+        <span>{{ t("page.stats.minGames", { count: OVERALL_STATS_MIN_GAMES }) }}</span>
       </template>
     </HubPageHeader>
 

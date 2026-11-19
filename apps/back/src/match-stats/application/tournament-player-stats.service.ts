@@ -1,3 +1,4 @@
+import { OVERALL_STATS_MIN_GAMES } from "@sarpbc/types";
 import type { DataSource, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
 import { playerStatsResponse } from "../domain/player-stats";
@@ -23,7 +24,7 @@ export class TournamentPlayerStatsService {
 
   async overall() {
     return playerStatsResponse(
-      await this.games.playerStats({ kind: "redistributable" }),
+      await this.games.playerStats({ kind: "redistributable", minGames: OVERALL_STATS_MIN_GAMES }),
     ) satisfies TournamentPlayerStatsResponse;
   }
 }

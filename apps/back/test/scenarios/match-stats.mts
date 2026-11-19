@@ -318,12 +318,12 @@ export const verifyMatchStats = async ({
   );
   await request("GET", `/events/${randomUUID()}/player-stats`, undefined, undefined, 404);
 
-  const response8 = await request("GET", "/stats/players");
-  const overall = response8.json(playerStats);
-  assert.deepEqual(
-    overall.players.find((row) => row.player.id === playerId),
-    veteran,
-    "the overall leaderboard counts the stage games of a player",
+  const overallResponse = await request("GET", "/stats/players");
+  const overall = overallResponse.json(playerStats);
+  assert.equal(
+    overall.players.some((row) => row.player.id === playerId),
+    false,
+    "the overall leaderboard leaves out a player under the minimum games",
   );
   assert.ok(overall.games >= stageStats.games, "the overall leaderboard counts every stage game");
 

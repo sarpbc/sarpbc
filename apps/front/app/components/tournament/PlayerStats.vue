@@ -136,6 +136,17 @@ const rows = computed(() => {
     );
 });
 
+const ROWS_PER_PAGE = 50;
+const page = ref(1);
+
+watch([rows, view], () => {
+  page.value = 1;
+});
+
+const pageRows = computed(() =>
+  rows.value.slice((page.value - 1) * ROWS_PER_PAGE, page.value * ROWS_PER_PAGE),
+);
+
 const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
 
 const averageFormat = computed(
@@ -226,7 +237,7 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
     </HubCard>
 
     <HubCard v-else class="flex flex-col">
-      <STable v-model:sorting="sort" :caption="caption" :columns="columns" :data="rows">
+      <STable v-model:sorting="sort" :caption="caption" :columns="columns" :data="pageRows">
         <template #player-cell="{ row }">
           <SLink
             :to="$localePath(playerPath(row.original.player.slug))"
@@ -248,6 +259,10 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
           }}</span>
         </template>
       </STable>
+
+      <div v-if="rows.length > ROWS_PER_PAGE" class="flex min-h-row items-center justify-center">
+        <SPagination v-model:page="page" :total="rows.length" :items-per-page="ROWS_PER_PAGE" />
+      </div>
 
       <p
         v-if="stats && stats.unlinkedAccounts > 0"

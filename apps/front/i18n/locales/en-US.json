@@ -1976,6 +1976,7 @@
     "stats": {
       "title": "Player Stats",
       "games": "{count} game | {count} games",
+      "minGames": "Players with {count} games or more",
       "caption": "Player stats over every tournament game with imported replays",
       "empty": "No player stats yet.",
       "seo": {

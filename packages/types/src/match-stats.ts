@@ -163,3 +163,5 @@ export interface TournamentPlayerStatsResponse {
   players: TournamentPlayerStats[];
   unlinkedAccounts: number;
 }
+
+export const OVERALL_STATS_MIN_GAMES = 10;

@@ -1976,6 +1976,7 @@
     "stats": {
       "title": "Stats des joueurs",
       "games": "{count} partie | {count} parties",
+      "minGames": "Joueurs avec {count} parties ou plus",
       "caption": "Stats des joueurs sur toutes les parties de tournoi dont les replays sont importés",
       "empty": "Aucune stat de joueur pour le moment.",
       "seo": {

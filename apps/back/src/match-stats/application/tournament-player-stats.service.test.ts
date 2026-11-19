@@ -51,6 +51,6 @@ describe(TournamentPlayerStatsService, () => {
     scopes.length = 0;
 
     await expect(service.overall()).resolves.toMatchObject({ games: 2, players: [{ games: 2 }] });
-    expect(scopes).toStrictEqual([{ kind: "redistributable" }]);
+    expect(scopes).toStrictEqual([{ kind: "redistributable", minGames: 10 }]);
   });
 });
