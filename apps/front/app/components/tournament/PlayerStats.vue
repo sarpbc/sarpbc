@@ -136,8 +136,10 @@ const rows = computed(() => {
     );
 });
 
-const numberFormat = computed(
-  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }),
+const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
+
+const averageFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2, minimumFractionDigits: 2 }),
 );
 
 const percentFormat = computed(
@@ -151,8 +153,12 @@ const display = (row: TournamentPlayerStats, column: Column) => {
     return "–";
   }
 
-  return PERCENTAGES.has(column)
-    ? percentFormat.value.format(current / 100)
+  if (PERCENTAGES.has(column)) {
+    return percentFormat.value.format(current / 100);
+  }
+
+  return view.value === "perGame" && column !== "games"
+    ? averageFormat.value.format(current)
     : numberFormat.value.format(current);
 };
 
