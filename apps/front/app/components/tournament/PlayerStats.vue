@@ -243,11 +243,11 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
         </template>
       </STable>
 
-      <p class="flex min-h-row flex-wrap items-center gap-x-2 px-2 text-xs text-muted">
-        <span>{{ t("page.match.detail.stats.source") }}</span>
-        <span v-if="stats && stats.unlinkedAccounts > 0">
-          {{ t("page.tournaments.stats.unlinked", stats.unlinkedAccounts) }}
-        </span>
+      <p
+        v-if="stats && stats.unlinkedAccounts > 0"
+        class="flex min-h-row items-center px-2 text-xs text-muted"
+      >
+        {{ t("page.tournaments.stats.unlinked", stats.unlinkedAccounts) }}
       </p>
     </HubCard>
   </div>
