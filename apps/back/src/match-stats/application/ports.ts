@@ -85,7 +85,6 @@ export interface GameStatsStore {
   byMatch: (matchId: string) => Promise<MatchGameStats[]>;
   inTournament: (tournamentId: string) => Promise<TournamentStatsGame[]>;
   playerLines: (tournamentIds: string[]) => Promise<PlayerGameLine[]>;
-  /** Lines of every tournament whose source may be redistributed. */
   redistributablePlayerLines: () => Promise<PlayerGameLine[]>;
   /** Deletes the game with its player rows and excludes its replay atomically. */
   remove: (tournamentId: string, location: GameLocation) => Promise<TournamentStatsGame | null>;
