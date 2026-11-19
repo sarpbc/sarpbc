@@ -1080,6 +1080,14 @@
     "permissions": []
   },
   {
+    "controller": "\"stats\"",
+    "verb": "GET",
+    "path": "\"players\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"storage/r2\"",
     "verb": "POST",
     "path": "\"upload-url\"",
