@@ -26,16 +26,14 @@ const {
   title,
 } = defineProps<{
   description?: string | null;
-  /** False keeps it open on outside clicks and Escape, e.g. while saving. */
   dismissible?: boolean;
   size?: ModalSize;
-  /** Always set: screen readers announce it, even when `content` replaces the header. */
   title: string;
 }>();
 
 const adapters = useDesignAdapters();
 
-const keepOpen = (event: Event): void => {
+const keepOpen = (event: Event) => {
   if (!dismissible) {
     event.preventDefault();
   }

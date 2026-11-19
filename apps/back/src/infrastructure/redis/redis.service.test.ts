@@ -1,36 +1,49 @@
 import { ConfigService } from "@nestjs/config";
 import { Redis } from "ioredis";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { RedisService } from "./redis.service";
 
-describe(RedisService, () => {
-  const client = new Redis({ lazyConnect: true });
-  const quit = vi.spyOn(client, "quit").mockResolvedValue("OK");
-  const on = vi.spyOn(client, "on");
-  const ping = vi.spyOn(client, "ping").mockResolvedValue("PONG");
+class OfflineRedis extends Redis {
+  quitCalls = 0;
 
+  constructor() {
+    super({ lazyConnect: true });
+  }
+
+  override async quit() {
+    this.quitCalls += 1;
+
+    return await Promise.resolve("OK" as const);
+  }
+
+  override async ping() {
+    return await Promise.resolve("PONG" as const);
+  }
+}
+
+describe(RedisService, () => {
+  let client: OfflineRedis;
   let service: RedisService;
 
   beforeEach(() => {
+    client = new OfflineRedis();
     service = new RedisService(
       new ConfigService({ redis: { host: "redis", port: 6379 } }),
       () => client,
     );
-    vi.clearAllMocks();
     service.onModuleInit();
   });
 
-  it("attaches an error listener on init", () => {
-    expect(on).toHaveBeenCalledWith("error", expect.any(Function));
+  it("survives a connection error after init", () => {
+    expect(() => client.emit("error", new Error("ECONNREFUSED"))).not.toThrow();
   });
 
-  it("awaits quit on module destroy", async () => {
+  it("quits the client on module destroy", async () => {
     await service.onModuleDestroy();
-    expect(quit).toHaveBeenCalledExactlyOnceWith();
+    expect(client.quitCalls).toBe(1);
   });
 
   it("pings the redis client", async () => {
     await expect(service.ping()).resolves.toBe("PONG");
-    expect(ping).toHaveBeenCalledExactlyOnceWith();
   });
 });

@@ -7,10 +7,10 @@ interface Timed {
   endAt?: Date | string | null;
 }
 
-const timeOf = (value: Date | string | null | undefined): number =>
+const timeOf = (value: Date | string | null | undefined) =>
   isNonEmptyDateInput(value) ? new Date(value).getTime() : 0;
 
-export const byBeginAtAsc = (a: Timed, b: Timed): number => timeOf(a.beginAt) - timeOf(b.beginAt);
+export const byBeginAtAsc = (a: Timed, b: Timed) => timeOf(a.beginAt) - timeOf(b.beginAt);
 
-export const byEndAtDesc = (a: Timed, b: Timed): number =>
+export const byEndAtDesc = (a: Timed, b: Timed) =>
   (timeOf(b.endAt) || timeOf(b.beginAt)) - (timeOf(a.endAt) || timeOf(a.beginAt));

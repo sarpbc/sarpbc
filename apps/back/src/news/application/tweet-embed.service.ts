@@ -8,7 +8,7 @@ export interface TweetEmbedGateway {
 
 export class TweetEmbedService {
   constructor(private readonly gateway: TweetEmbedGateway) {}
-  async embed(url: string): Promise<TweetEmbed> {
+  async embed(url: string) {
     const parsed = parseTweetUrl(url);
 
     if (!parsed) {

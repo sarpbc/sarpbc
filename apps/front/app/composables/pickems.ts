@@ -1,6 +1,5 @@
 import { getAllTournaments } from "~/composables/tournaments";
 import { isPickemTournamentActive } from "~/utils/pickems";
-import type { TournamentListItem } from "@sarpbc/types";
 import { getApiErrorMessage, isNonEmptyString } from "@sarpbc/utils";
 
 export interface UserPickemPick {
@@ -22,7 +21,7 @@ export interface PickemPersonalRanking {
   points: number;
 }
 
-export const getActivePickemTournaments = async (limit = 1): Promise<TournamentListItem[]> => {
+export const getActivePickemTournaments = async (limit = 1) => {
   const { tournaments } = await getAllTournaments({
     activeOnly: true,
     limit: Math.max(limit, 1),
@@ -32,9 +31,7 @@ export const getActivePickemTournaments = async (limit = 1): Promise<TournamentL
   return tournaments.filter(isPickemTournamentActive).slice(0, limit);
 };
 
-export const getUserPickemsForTournament = async (
-  tournamentId: string,
-): Promise<UserPickemPick[]> => {
+export const getUserPickemsForTournament = async (tournamentId: string) => {
   const res = await apiFetch<{
     picks?: UserPickemPick[];
   }>(`/pickem/tournament/${tournamentId}/user/picks`, {
@@ -49,10 +46,7 @@ export const getUserPickemsForTournament = async (
   }));
 };
 
-export const updatePickemForMatch = async (
-  matchId: string,
-  pickedParticipantId: string,
-): Promise<void> => {
+export const updatePickemForMatch = async (matchId: string, pickedParticipantId: string) => {
   const res = await apiFetch<{ success?: boolean; error?: string }>(
     `/pickem/match/${matchId}/pick`,
     {
@@ -68,9 +62,7 @@ export const updatePickemForMatch = async (
   }
 };
 
-export const getPickemLeaderboard = async (
-  tournamentId: string,
-): Promise<PickemLeaderboardEntry[]> => {
+export const getPickemLeaderboard = async (tournamentId: string) => {
   const res = await apiFetch<{ leaderboard?: PickemLeaderboardEntry[] }>(
     `/pickem/tournament/${tournamentId}/leaderboard`,
     {
@@ -81,12 +73,10 @@ export const getPickemLeaderboard = async (
   return res.leaderboard ?? [];
 };
 
-export const getPickemPersonalRanking = async (
-  tournamentId: string,
-): Promise<PickemPersonalRanking> =>
+export const getPickemPersonalRanking = async (tournamentId: string) =>
   await apiFetch<PickemPersonalRanking>(`/pickem/tournament/${tournamentId}/me`, {
     method: "GET",
   });
 
-export const pickemApiErrorMessage = (cause: unknown, fallback: string): string =>
+export const pickemApiErrorMessage = (cause: unknown, fallback: string) =>
   getApiErrorMessage(cause) ?? fallback;

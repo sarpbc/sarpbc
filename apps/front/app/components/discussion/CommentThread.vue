@@ -10,7 +10,6 @@ const {
 } = defineProps<{
   targetType: ReplyTargetType;
   targetId: string;
-  /** Sits under an `HubRail` section caption, which already draws the top hairline. */
   flushTop?: boolean;
 }>();
 
@@ -85,10 +84,9 @@ const onChanged = async () => {
   resetExtraPages();
 };
 
-const isCommentLoaded = (commentId: string): boolean =>
-  findCommentInTree(comments.value, commentId);
+const isCommentLoaded = (commentId: string) => findCommentInTree(comments.value, commentId);
 
-const loadUntilCommentLoaded = async (commentId: string): Promise<boolean> => {
+const loadUntilCommentLoaded = async (commentId: string) => {
   if (isCommentLoaded(commentId)) {
     return true;
   }

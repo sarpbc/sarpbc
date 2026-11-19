@@ -45,19 +45,19 @@ interface CurrentGame {
 
 const CLOCK_REWIND_SECONDS = 5;
 
-const isKickoff = (current: CurrentGame, reading: ScoreReading): boolean =>
+const isKickoff = (current: CurrentGame, reading: ScoreReading) =>
   reading.blue === 0 &&
   reading.orange === 0 &&
   !reading.overtime &&
   current.lastClock >= 0 &&
   (current.overtime || reading.clock > current.lastClock + CLOCK_REWIND_SECONDS);
 
-const isNextGoal = (current: CurrentGame, candidate: Candidate): boolean =>
+const isNextGoal = (current: CurrentGame, candidate: Candidate) =>
   candidate.blue >= current.blue &&
   candidate.orange >= current.orange &&
   candidate.blue + candidate.orange === current.blue + current.orange + 1;
 
-const adoptUnconfirmed = (current: CurrentGame): void => {
+const adoptUnconfirmed = (current: CurrentGame) => {
   const { unconfirmed } = current;
 
   if (current.blue !== current.orange || unconfirmed === null) {
@@ -88,15 +88,15 @@ export class SeriesTracker {
     this.#settings = settings;
   }
 
-  get games(): readonly StreamScoreGame[] {
+  get games() {
     return this.#games;
   }
 
-  get decided(): boolean {
+  get decided() {
     return this.#winner() !== null;
   }
 
-  push(t: number, reading: ScoreboardReading): void {
+  push(t: number, reading: ScoreboardReading) {
     this.#frames.read += 1;
 
     if (this.decided) {
@@ -130,7 +130,7 @@ export class SeriesTracker {
     }
   }
 
-  finish(): void {
+  finish() {
     const current = this.#current;
 
     if (current === null || this.decided) {
@@ -145,21 +145,21 @@ export class SeriesTracker {
     this.#close("stream_end", current.lastSeen);
   }
 
-  proposal(source: ProposalSource): StreamScoreProposal {
+  proposal(source: ProposalSource) {
     return {
       ...source,
       bestOf: this.#settings.bestOf,
       frames: { ...this.#frames },
       games: [...this.#games],
       series: { blue: this.#wins("blue"), orange: this.#wins("orange"), winner: this.#winner() },
-    };
+    } satisfies StreamScoreProposal;
   }
 
-  #wins(side: StreamScoreSide): number {
+  #wins(side: StreamScoreSide) {
     return this.#games.filter((game) => game.winner === side).length;
   }
 
-  #winner(): StreamScoreSide | null {
+  #winner() {
     const needed = winsNeeded(this.#settings.bestOf);
 
     if (this.#wins("blue") >= needed) {
@@ -173,7 +173,7 @@ export class SeriesTracker {
     return null;
   }
 
-  #score(t: number, reading: ScoreReading): void {
+  #score(t: number, reading: ScoreReading) {
     const previous = this.#candidate;
 
     const candidate: Candidate =
@@ -224,7 +224,7 @@ export class SeriesTracker {
     this.#advance(current, t, reading);
   }
 
-  #advance(current: CurrentGame, t: number, reading: ScoreReading): void {
+  #advance(current: CurrentGame, t: number, reading: ScoreReading) {
     const stable = this.#settings.stableReadings;
     current.agreeing += 1;
     current.lastSeen = t;
@@ -248,7 +248,7 @@ export class SeriesTracker {
     }
   }
 
-  #commit(candidate: Candidate): void {
+  #commit(candidate: Candidate) {
     const current = this.#current;
 
     if (current === null) {
@@ -275,7 +275,7 @@ export class SeriesTracker {
     current.unconfirmed = null;
   }
 
-  #restart(current: CurrentGame, kickoff: Candidate): void {
+  #restart(current: CurrentGame, kickoff: Candidate) {
     adoptUnconfirmed(current);
     this.#close("reset", current.lastSeen);
 
@@ -284,7 +284,7 @@ export class SeriesTracker {
     }
   }
 
-  #start(candidate: Candidate): void {
+  #start(candidate: Candidate) {
     this.#current = {
       agreeing: candidate.count,
       blue: candidate.blue,
@@ -302,7 +302,7 @@ export class SeriesTracker {
     this.#awaitingKickoff = false;
   }
 
-  #close(endedBy: StreamScoreGameEnding, endedAt: number): void {
+  #close(endedBy: StreamScoreGameEnding, endedAt: number) {
     const current = this.#current;
 
     if (current === null) {

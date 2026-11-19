@@ -2,9 +2,8 @@ import type { ToolArguments } from "../define-tool";
 import { describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
-import { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
 import { jsonOf } from "../../../../test/mcp-result";
-import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
+import { FakeRosterProposals, proposed } from "./roster-proposals.test-utils";
 import { rosterTools } from "./roster-tools";
 
 const TEAM_ID = "0f8fad5b-d9cb-469f-a165-70867728950e";
@@ -21,19 +20,7 @@ const input = {
 const setup = (role: "admin" | "journalist") => {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
 
-  const rosterProposalService = {
-    list: vi.fn<RosterProposalService["list"]>(),
-    propose: vi.fn<RosterProposalService["propose"]>(async (change, sourceUrl) =>
-      Object.assign(new RosterProposal(), { change, id: "proposal-1", sourceUrl }),
-    ),
-    proposeTeamLogo: vi.fn<RosterProposalService["proposeTeamLogo"]>(async (logo, sourceUrl) =>
-      Object.assign(new RosterProposal(), {
-        change: { kind: "upload_team_logo", ...logo, logoUrl: LOGO_URL },
-        id: "proposal-1",
-        sourceUrl,
-      }),
-    ),
-  };
+  const rosterProposalService = new FakeRosterProposals();
 
   const tools = rosterTools({ rosterProposalService });
 
@@ -53,7 +40,7 @@ const setup = (role: "admin" | "journalist") => {
   return { call, rosterProposalService, tool };
 };
 
-const textOf = (result: { content: { type: string; text?: string }[] }): string =>
+const textOf = (result: { content: { type: string; text?: string }[] }) =>
   result.content[0]?.text ?? "";
 
 describe("upload_team_logo", () => {
@@ -62,11 +49,13 @@ describe("upload_team_logo", () => {
 
     const result = await call("upload_team_logo", input);
 
-    expect(rosterProposalService.proposeTeamLogo).toHaveBeenCalledWith(
-      { imageUrl: input.imageUrl, teamId: TEAM_ID, variant: "light" },
-      input.sourceUrl,
-      "u1",
-    );
+    expect(rosterProposalService.logos).toStrictEqual([
+      {
+        logo: { imageUrl: input.imageUrl, teamId: TEAM_ID, variant: "light" },
+        proposedById: "u1",
+        sourceUrl: input.sourceUrl,
+      },
+    ]);
     expect(jsonOf(result)).toMatchObject({
       change: { logoUrl: LOGO_URL, variant: "light" },
       kind: "upload_team_logo",
@@ -95,7 +84,7 @@ describe("upload_team_logo", () => {
 
   it("returns validation failures as tool errors", async () => {
     const { rosterProposalService, call } = setup("admin");
-    rosterProposalService.proposeTeamLogo.mockRejectedValueOnce(
+    rosterProposalService.failNext(
       new InvalidInputError("The logo is 64x64 pixels; it must be at least 128x128."),
     );
 
@@ -112,7 +101,7 @@ describe("upload_team_logo", () => {
 
     const callResult = await call("upload_team_logo", input);
     expect(callResult.isError).toBe(true);
-    expect(rosterProposalService.proposeTeamLogo).not.toHaveBeenCalled();
+    expect(rosterProposalService.logos).toStrictEqual([]);
     expect(tool("upload_team_logo").description).toContain("Requires teams.manage.");
   });
 });
@@ -131,16 +120,27 @@ describe("roster proposals", () => {
     await call("remove_player_from_team", move);
     await call("create_player", { name: "Zen", sourceUrl: input.sourceUrl });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: "remove_player_from_team", status: "free_agent" }),
-      input.sourceUrl,
-      "u1",
-    );
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: "create_player", status: "free_agent" }),
-      input.sourceUrl,
-      "u1",
-    );
+    const expected1: unknown = expect.objectContaining({
+      kind: "remove_player_from_team",
+      status: "free_agent",
+    });
+
+    expect(rosterProposalService.changes).toContainEqual({
+      change: expected1,
+      proposedById: "u1",
+      sourceUrl: input.sourceUrl,
+    });
+
+    const expected2: unknown = expect.objectContaining({
+      kind: "create_player",
+      status: "free_agent",
+    });
+
+    expect(rosterProposalService.changes).toContainEqual({
+      change: expected2,
+      proposedById: "u1",
+      sourceUrl: input.sourceUrl,
+    });
   });
 
   it("maps role to contractRole and country to nationality", async () => {
@@ -155,16 +155,27 @@ describe("roster proposals", () => {
     });
     await call("update_player", { country: "FR", playerId: PLAYER_ID, sourceUrl: input.sourceUrl });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      expect.objectContaining({ contractRole: "coach", kind: "add_player_to_team" }),
-      input.sourceUrl,
-      "u1",
-    );
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      expect.objectContaining({ kind: "update_player", nationality: "FR" }),
-      input.sourceUrl,
-      "u1",
-    );
+    const expected3: unknown = expect.objectContaining({
+      contractRole: "coach",
+      kind: "add_player_to_team",
+    });
+
+    expect(rosterProposalService.changes).toContainEqual({
+      change: expected3,
+      proposedById: "u1",
+      sourceUrl: input.sourceUrl,
+    });
+
+    const expected4: unknown = expect.objectContaining({
+      kind: "update_player",
+      nationality: "FR",
+    });
+
+    expect(rosterProposalService.changes).toContainEqual({
+      change: expected4,
+      proposedById: "u1",
+      sourceUrl: input.sourceUrl,
+    });
   });
 
   it("rejects a contract that ends before it starts and an update without fields", async () => {
@@ -182,16 +193,15 @@ describe("roster proposals", () => {
 
     expect(textOf(reversed)).toBe("endDate must not precede startDate.");
     expect(empty.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 
   it("lists pending proposals by default", async () => {
     const { rosterProposalService, call } = setup("admin");
-    rosterProposalService.list.mockResolvedValue({ names: {}, proposals: [] });
 
     await call("list_roster_proposals", {});
 
-    expect(rosterProposalService.list).toHaveBeenCalledWith("pending");
+    expect(rosterProposalService.listings).toStrictEqual(["pending"]);
   });
 });
 
@@ -213,18 +223,17 @@ describe("delete proposals", () => {
       sourceUrl: input.sourceUrl,
     });
 
-    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
-      1,
-      { kind: "delete_match", matchId: MATCH_ID, reason: "Series imported twice" },
-      "",
-      "u1",
+    expect(rosterProposalService.changes[0]).toStrictEqual(
+      proposed({ kind: "delete_match", matchId: MATCH_ID, reason: "Series imported twice" }),
     );
-    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({ kind: "delete_match" }),
-      input.sourceUrl,
-      "u1",
-    );
+
+    const expected5: unknown = expect.objectContaining({ kind: "delete_match" });
+
+    expect(rosterProposalService.changes[1]).toStrictEqual({
+      change: expected5,
+      proposedById: "u1",
+      sourceUrl: input.sourceUrl,
+    });
     const nothingChanged: unknown = expect.stringContaining("Nothing changed yet");
 
     expect(jsonOf(unsourced)).toMatchObject({
@@ -246,22 +255,21 @@ describe("delete proposals", () => {
       teamId: TEAM_ID,
     });
 
-    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
-      1,
-      { kind: "delete_team", reason: "Empty duplicate", teamId: TEAM_ID },
-      "",
-      "u1",
+    expect(rosterProposalService.changes[0]).toStrictEqual(
+      proposed({
+        kind: "delete_team",
+        mergeIntoTeamId: undefined,
+        reason: "Empty duplicate",
+        teamId: TEAM_ID,
+      }),
     );
-    expect(rosterProposalService.propose).toHaveBeenNthCalledWith(
-      2,
-      {
+    expect(rosterProposalService.changes[1]).toStrictEqual(
+      proposed({
         kind: "delete_team",
         mergeIntoTeamId: KEPT_TEAM_ID,
         reason: "Empty duplicate",
         teamId: TEAM_ID,
-      },
-      "",
-      "u1",
+      }),
     );
   });
 
@@ -293,7 +301,7 @@ describe("delete proposals", () => {
 
   it("returns a refused proposal as a tool error", async () => {
     const { rosterProposalService, call } = setup("admin");
-    rosterProposalService.propose.mockRejectedValueOnce(
+    rosterProposalService.failNext(
       new InvalidInputError("Group A is synced from PandaScore and cannot be deleted"),
     );
 
@@ -316,7 +324,7 @@ describe("delete proposals", () => {
     expect(callResult2.isError).toBe(true);
     const callResult3 = await call("propose_delete_team", { reason: "Duplicate", teamId: TEAM_ID });
     expect(callResult3.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
     expect(tool("propose_delete_match").description).toContain("Requires tournaments.manage.");
     expect(tool("propose_delete_team").description).toContain("Requires teams.manage.");
   });

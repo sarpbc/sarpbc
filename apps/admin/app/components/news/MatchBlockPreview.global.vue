@@ -26,7 +26,7 @@ const blockKey = computed(() => {
 
 const { data, status } = useLazyAsyncData(
   () => `match-block-preview-${blockKey.value ?? "invalid"}`,
-  async (): Promise<MatchBlockItem[] | null> => {
+  async () => {
     if (!blockKey.value) {
       return null;
     }
@@ -45,20 +45,20 @@ const dateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-const teamName = (item: MatchBlockItem, index: number): string => {
+const teamName = (item: MatchBlockItem, index: number) => {
   const participant = item.participants[index];
 
   return (participant && participantName(participant)) || t("newsTag.matchTbd");
 };
 
-const score = (item: MatchBlockItem, index: number): string => {
+const score = (item: MatchBlockItem, index: number) => {
   const participant = item.participants[index];
   const result = item.results.find((entry) => entry.participant === participant?.id);
 
   return result ? String(result.score) : "–";
 };
 
-const stateColor = (state: MatchBlockState): "danger" | "info" | "neutral" => {
+const stateColor = (state: MatchBlockState) => {
   switch (state) {
     case "live": {
       return "danger";

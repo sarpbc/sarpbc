@@ -24,7 +24,6 @@ defineOptions({ inheritAttrs: false });
 
 const model = defineModel<(M extends true ? T[] : T) | null>({ default: null });
 
-/** What the user typed; bind it to search on the server and pass `remote`. */
 const searchTerm = defineModel<string>("searchTerm", { default: "" });
 
 const {
@@ -44,18 +43,17 @@ const {
   loading?: boolean;
   multiple?: M | null;
   placeholder?: string | null;
-  /** Items already match the search (fetched for it), so the list is not filtered again. */
   remote?: boolean;
 }>();
 
 const adapters = useDesignAdapters();
 const field = useFormField();
 
-const labelOf = (value: T): string => items.find((item) => item.value === value)?.label ?? "";
+const labelOf = (value: T) => items.find((item) => item.value === value)?.label ?? "";
 
 const isList = (value: T | readonly T[]): value is readonly T[] => Array.isArray(value);
 
-const displayValue = (value: T | readonly T[] | null): string => {
+const displayValue = (value: T | readonly T[] | null) => {
   if (value === null) {
     return "";
   }

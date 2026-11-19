@@ -1,6 +1,6 @@
 import type { AirRiddleResultEnum } from "~/enums/airriddle-result.enum";
 
-export const getTodayAirRiddleLength = async (): Promise<number> => {
+export const getTodayAirRiddleLength = async () => {
   try {
     const res = await apiFetch<{ length?: number }>(`/air-riddle/today`, {
       method: "GET",
@@ -14,10 +14,7 @@ export const getTodayAirRiddleLength = async (): Promise<number> => {
   }
 };
 
-export const guessAirRiddle = async (
-  guess: string,
-  last?: boolean,
-): Promise<{ result: AirRiddleResultEnum[]; error?: string; answer?: string }> => {
+export const guessAirRiddle = async (guess: string, last?: boolean) => {
   try {
     const res = await apiFetch<{
       results: AirRiddleResultEnum[];

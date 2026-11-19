@@ -26,7 +26,7 @@ export interface BuildOrganizationOptions {
   contactPagePath?: string;
 }
 
-export const buildOrganization = (options: BuildOrganizationOptions = {}): OrganizationLd => {
+export const buildOrganization = (options: BuildOrganizationOptions = {}) => {
   const contactPagePath = options.contactPagePath ?? "/contact";
 
   return compactJsonLd({

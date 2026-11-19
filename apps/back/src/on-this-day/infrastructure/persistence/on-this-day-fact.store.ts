@@ -21,10 +21,10 @@ const FACT_POPULATE = [
   "match.participants.players",
 ] as const;
 
-const matchSource = (match: Match): DataSource =>
-  isRedistributable(match.source) ? match.tournament.source : match.source;
+const matchSource = (match: Match) =>
+  isRedistributable(match.source) ? match.tournament.source : (match.source satisfies DataSource);
 
-const matchName = (match: Match): string => {
+const matchName = (match: Match) => {
   const sides = match.participants
     .getItems()
     .map((participant) =>
@@ -34,7 +34,7 @@ const matchName = (match: Match): string => {
   return sides.length === 2 ? sides.join(" vs ") : match.name;
 };
 
-const toLink = ({ player, team, tournament, match }: OnThisDayFact): StaffFact["link"] => {
+const toLink = (({ player, team, tournament, match }: OnThisDayFact) => {
   if (player) {
     return { id: player.id, kind: "player", name: player.name, slug: player.slug, source: null };
   }
@@ -66,9 +66,9 @@ const toLink = ({ player, team, tournament, match }: OnThisDayFact): StaffFact["
   }
 
   return null;
-};
+}) satisfies (row: OnThisDayFact) => StaffFact["link"];
 
-const toFact = (row: OnThisDayFact): StaffFact => ({
+const toFact = (row: OnThisDayFact) => ({
   day: row.day,
   id: row.id,
   link: toLink(row),

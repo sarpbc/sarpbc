@@ -1,6 +1,6 @@
 import type { TransferType } from "@sarpbc/types";
 
-export const transferTypeIcon = (type: TransferType): string => {
+export const transferTypeIcon = (type: TransferType) => {
   switch (type) {
     case "arrival": {
       return "i-fluent-arrow-down-24-regular";

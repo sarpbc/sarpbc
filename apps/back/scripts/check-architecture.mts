@@ -16,23 +16,27 @@ const parsed = ts.parseJsonConfigFileContent(config.config, ts.sys, project);
 const files = parsed.fileNames
   .map((file) => path.resolve(file))
   .filter(
-    (file) => file.startsWith(sourceRoot) && !file.endsWith(".test.ts") && !file.endsWith(".d.ts"),
+    (file) =>
+      file.startsWith(sourceRoot) &&
+      !file.endsWith(".test.ts") &&
+      !file.endsWith(".test-utils.ts") &&
+      !file.endsWith(".d.ts"),
   );
 
-const normalized = (file: string, root: string): string =>
+const normalized = (file: string, root: string) =>
   path.relative(root, file).split(path.sep).join("/");
 
-const layer = (file: string, root: string): string =>
+const layer = (file: string, root: string) =>
   normalized(file, root)
     .split("/")
     .find((part) => ["domain", "application", "infrastructure"].includes(part)) ?? "";
 
 const innerLayerPackage = /^(?:@sarpbc\/(?:types|utils)|uuid|node:crypto)(?:$|\/)/u;
 
-const importsOf = (source: ts.SourceFile): string[] => {
+const importsOf = (source: ts.SourceFile) => {
   const imports: string[] = [];
 
-  const visit = function visit(node: ts.Node): void {
+  const visit = function visit(node: ts.Node) {
     if (
       (ts.isImportDeclaration(node) || ts.isExportDeclaration(node)) &&
       node.moduleSpecifier &&
@@ -65,13 +69,13 @@ const importsOf = (source: ts.SourceFile): string[] => {
 
 const persistenceFacade = /^[^/]+\/infrastructure\/[^/]+-persistence\.ts$/u;
 
-const isInner = (file: string, root: string): boolean =>
+const isInner = (file: string, root: string) =>
   ["domain", "application"].includes(layer(file, root));
 
-const featureOf = (file: string, root: string): string => normalized(file, root).split("/")[0];
+const featureOf = (file: string, root: string) => normalized(file, root).split("/")[0];
 
-const defined = <T,>(value: T | undefined): T => {
-  if (value === undefined) {
+const defined = <T,>(value: T | null | undefined) => {
+  if (value === undefined || value === null) {
     throw new Error("Expected a value in the feature graph.");
   }
 
@@ -82,7 +86,7 @@ type FeatureEdge = [from: string, target: string, via: string];
 
 type FeatureGraph = Map<string, Map<string, string[]>>;
 
-const stronglyConnected = (graph: FeatureGraph): string[][] => {
+const stronglyConnected = (graph: FeatureGraph) => {
   const index = new Map<string, number>();
   const low = new Map<string, number>();
   const stack: string[] = [];
@@ -90,7 +94,7 @@ const stronglyConnected = (graph: FeatureGraph): string[][] => {
   const components: string[][] = [];
   let counter = 0;
 
-  const visit = (node: string): void => {
+  const visit = (node: string) => {
     index.set(node, counter);
     low.set(node, counter);
     counter += 1;
@@ -129,13 +133,13 @@ const stronglyConnected = (graph: FeatureGraph): string[][] => {
   return components;
 };
 
-const cyclePath = (component: string[], graph: FeatureGraph): string[] | undefined => {
+const cyclePath = (component: string[], graph: FeatureGraph) => {
   const members = new Set(component);
   const [start] = component;
   const trail = [start];
   const seen = new Set([start]);
 
-  const walk = (node: string): string[] | undefined => {
+  const walk: (node: string) => string[] | null = (node) => {
     for (const next of [...defined(graph.get(node)).keys()].toSorted()) {
       if (!members.has(next)) {
         continue;
@@ -160,13 +164,13 @@ const cyclePath = (component: string[], graph: FeatureGraph): string[] | undefin
       trail.pop();
     }
 
-    return undefined;
+    return null;
   };
 
   return walk(start);
 };
 
-const featureCycles = (edges: FeatureEdge[]): string[] => {
+const featureCycles = (edges: FeatureEdge[]) => {
   const graph: FeatureGraph = new Map();
 
   for (const [from, target, via] of edges) {
@@ -208,11 +212,7 @@ interface ImportSite {
   resolved: string | undefined;
 }
 
-const innerLayerViolations = (
-  site: ImportSite,
-  root: string,
-  featureEdges: FeatureEdge[],
-): string[] => {
+const innerLayerViolations = (site: ImportSite, root: string, featureEdges: FeatureEdge[]) => {
   const { file, origin, originLayer, specifier, resolved } = site;
   const external = !specifier.startsWith(".") && !specifier.startsWith("src/");
 
@@ -242,7 +242,7 @@ const innerLayerViolations = (
   return violations;
 };
 
-const crossFeatureViolations = (site: ImportSite, root: string): string[] => {
+const crossFeatureViolations = (site: ImportSite, root: string) => {
   const { origin, resolved } = site;
 
   if (resolved === undefined || !resolved.startsWith(root)) {
@@ -274,11 +274,7 @@ const crossFeatureViolations = (site: ImportSite, root: string): string[] => {
   return violations;
 };
 
-const importViolations = (
-  site: ImportSite,
-  root: string,
-  featureEdges: FeatureEdge[],
-): string[] => {
+const importViolations = (site: ImportSite, root: string, featureEdges: FeatureEdge[]) => {
   const violations: string[] = [];
 
   if (site.specifier.startsWith("src/")) {
@@ -294,7 +290,7 @@ const importViolations = (
   return [...violations, ...crossFeatureViolations(site, root)];
 };
 
-export const architectureViolations = (sourceFiles = files, root = sourceRoot): string[] => {
+export const architectureViolations = (sourceFiles = files, root = sourceRoot) => {
   const violations: string[] = [];
   const featureEdges: FeatureEdge[] = [];
 

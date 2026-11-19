@@ -1,14 +1,13 @@
 import { z } from "zod";
 import type { SeasonService } from "../../../season/application/season.service";
 import { defineTool } from "../define-tool";
-import type { McpTool } from "../define-tool";
 import { playerUrl } from "../urls";
 
 export interface SeasonToolServices {
   seasonService: Pick<SeasonService, "list" | "detail">;
 }
 
-export const seasonTools = ({ seasonService }: SeasonToolServices): McpTool[] => [
+export const seasonTools = ({ seasonService }: SeasonToolServices) => [
   defineTool({
     description:
       "List the seasons and leagues staff created on sarpbc.org to hold awards that no single tournament stage holds, such as a Season MVP or a Regional MVP. Use get_season for the awards already recorded.",

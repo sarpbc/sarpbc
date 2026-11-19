@@ -2,11 +2,8 @@ import type { TournamentDetailMatch } from "@sarpbc/types";
 import { computeChronologicalColumns } from "./columns";
 import { finalizeSectionLayout, toLayoutMatch } from "./connectors";
 import { assignMatchRows } from "./rows";
-import type { BracketSectionLayout } from "./types";
 
-export const buildBracketSectionLayout = (
-  matches: TournamentDetailMatch[],
-): BracketSectionLayout | null => {
+export const buildBracketSectionLayout = (matches: TournamentDetailMatch[]) => {
   if (matches.length === 0) {
     return null;
   }

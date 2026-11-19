@@ -61,7 +61,6 @@ const eventId = computed({
   set: (value: string) => updateField("eventId", value === NEW_EVENT ? "" : value),
 });
 
-/** Mirrors the API: only an event of its own (one stage, same name) follows the tournament's slug. */
 const sharesEvent = computed(() => {
   if (!original) {
     return false;
@@ -104,7 +103,7 @@ const filteredTeams = computed(() => {
   return teams.filter((team) => team.name.toLowerCase().includes(query));
 });
 
-// One emit: modelValue stays stale until the parent re-renders, so a second emit would drop the name.
+// WARNING: emit once: modelValue stays stale until the parent re-renders, so a second emit would drop the name.
 const onNameInput = (value: string) => {
   emit("update:modelValue", {
     ...modelValue,
@@ -130,7 +129,7 @@ const toggleTeam = (teamId: string, checked: boolean) => {
   updateField("teamIds", [...next]);
 };
 
-const isTeamSelected = (teamId: string): boolean => state.value.teamIds.includes(teamId);
+const isTeamSelected = (teamId: string) => state.value.teamIds.includes(teamId);
 </script>
 
 <template>

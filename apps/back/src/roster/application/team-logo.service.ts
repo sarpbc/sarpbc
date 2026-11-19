@@ -11,7 +11,7 @@ import {
   requireTeamLogoUrl,
   TEAM_LOGO_PIXELS,
 } from "../domain/team-logo";
-import type { StoredTeamLogo, TeamLogoImages, TeamLogoSource, TeamLogoStorage } from "./ports";
+import type { TeamLogoImages, TeamLogoSource, TeamLogoStorage } from "./ports";
 
 export class TeamLogoService {
   constructor(
@@ -20,11 +20,7 @@ export class TeamLogoService {
     private readonly storage: TeamLogoStorage,
   ) {}
 
-  async upload(
-    teamId: string,
-    variant: TeamLogoVariant,
-    imageUrl: string,
-  ): Promise<StoredTeamLogo> {
+  async upload(teamId: string, variant: TeamLogoVariant, imageUrl: string) {
     const bytes = await this.source.download(requireTeamLogoUrl(imageUrl), MAX_TEAM_LOGO_BYTES);
     const format = detectTeamLogoFormat(bytes);
 
@@ -45,14 +41,14 @@ export class TeamLogoService {
     );
   }
 
-  async publish(pendingKey: string): Promise<StoredTeamLogo> {
+  async publish(pendingKey: string) {
     const published = await this.storage.copy(pendingKey, publishedTeamLogoKey(pendingKey));
     await this.storage.delete(pendingKey);
 
     return published;
   }
 
-  async discard(pendingKey: string): Promise<void> {
+  async discard(pendingKey: string) {
     requirePendingTeamLogoKey(pendingKey);
     await this.storage.delete(pendingKey);
   }

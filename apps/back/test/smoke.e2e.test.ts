@@ -48,15 +48,15 @@ describe("API smoke (e2e)", () => {
   const userService = {
     create: vi.fn<UserService["create"]>(),
     createGoogleUser: vi.fn<UserService["createGoogleUser"]>(),
-    findById: vi.fn<UserService["findById"]>().mockResolvedValue(user),
+    findById: async () => user,
     findOneByEmail: vi.fn<UserService["findOneByEmail"]>(),
     findOneByGoogleId: vi.fn<UserService["findOneByGoogleId"]>(),
     linkGoogleAccount: vi.fn<UserService["linkGoogleAccount"]>(),
-    signIn: vi.fn<UserService["signIn"]>().mockResolvedValue(user),
+    signIn: async () => user,
   };
 
   const newsService = {
-    findAllPublishedArticle: vi.fn<NewsService["findAllPublishedArticle"]>().mockResolvedValue({
+    findAllPublishedArticle: async () => ({
       data: [
         {
           commentCount: 0,
@@ -73,7 +73,7 @@ describe("API smoke (e2e)", () => {
       page: 0,
       total: 1,
     }),
-    findPublishedShortsByWeek: vi.fn<NewsService["findPublishedShortsByWeek"]>(async (week) => {
+    findPublishedShortsByWeek: async (week: string) => {
       if (week === "2026-W99") {
         throw new BadRequestException("Week must be an ISO week id (e.g. 2026-W36).");
       }
@@ -84,11 +84,11 @@ describe("API smoke (e2e)", () => {
         start: new Date("2026-08-31T00:00:00.000Z"),
         week,
       };
-    }),
+    },
   };
 
-  const tweetImages = {
-    load: vi.fn<TweetImageGateway["load"]>(async (url) => {
+  const tweetImages: TweetImageGateway = {
+    load: async (url) => {
       if (url.endsWith("/removed.jpg")) {
         throw new NotFoundError("This image is no longer available on X.");
       }
@@ -98,8 +98,10 @@ describe("API smoke (e2e)", () => {
       }
 
       return { body: Buffer.from("png"), contentType: "image/png" };
-    }),
+    },
   };
+
+  vi.spyOn(tweetImages, "load");
 
   const MISSING_MATCH_ID = "11111111-1111-4111-8111-111111111111";
 
@@ -120,15 +122,29 @@ describe("API smoke (e2e)", () => {
     },
   });
 
-  const matchService = {
-    findBlocks: vi.fn<MatchService["findBlocks"]>(async (blocks) => blocks.map(() => [grandFinal])),
-    findDetail: vi.fn<MatchService["findDetail"]>(async (ref) => {
-      if (ref.kind === "id" && ref.value === MISSING_MATCH_ID) {
+  const BLOCK_TEAM_ID = "c9e1a3b5-7d9f-4b1d-a3c5-e7f9b1d3f544";
+
+  const matchService: Pick<MatchService, "findBlocks" | "findDetail"> = {
+    findBlocks: async (blocks) =>
+      blocks.map((block) => {
+        if (block.kind === "match") {
+          return block.id === grandFinal.id ? [grandFinal] : [];
+        }
+
+        return block.kind === "team" && block.id === BLOCK_TEAM_ID
+          ? Array.from({ length: block.limit }, () => grandFinal)
+          : [];
+      }),
+    findDetail: async (ref) => {
+      const found =
+        ref.kind === "publicId" ? ref.value === grandFinal.publicId : ref.value === grandFinal.id;
+
+      if (!found) {
         throw new NotFoundError("This match could not be found.");
       }
 
       return { headToHead: null, match: grandFinal, teamForms: {} };
-    }),
+    },
   };
 
   const games: MatchGameStats[] = [
@@ -156,11 +172,15 @@ describe("API smoke (e2e)", () => {
     },
   ];
 
-  const matchGames = { byMatch: vi.fn<GameStatsStore["byMatch"]>(async () => games) };
-
-  const transferService = {
-    findAndCount: vi.fn<TransferService["findAndCount"]>().mockResolvedValue([[], 0]),
+  const matchGames: Pick<GameStatsStore, "byMatch"> = {
+    byMatch: async (matchId) => (matchId === grandFinal.id ? games : []),
   };
+
+  const transferService: Pick<TransferService, "findAndCount"> = {
+    findAndCount: async () => [[], 0],
+  };
+
+  vi.spyOn(transferService, "findAndCount");
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -191,7 +211,7 @@ describe("API smoke (e2e)", () => {
           provide: PostHogService,
           useValue: {
             capture: vi.fn<PostHogService["capture"]>(),
-            flush: vi.fn<PostHogService["flush"]>().mockResolvedValue(undefined),
+            flush: async () => {},
           },
         },
         { provide: NewsService, useValue: newsService },
@@ -200,15 +220,13 @@ describe("API smoke (e2e)", () => {
         {
           provide: ReplyService,
           useValue: {
-            countByTargetIds: vi.fn<ReplyService["countByTargetIds"]>(
-              async () => new Map([[grandFinal.id, 2]]),
-            ),
+            countByTargetIds: async () => new Map([[grandFinal.id, 2]]),
           },
         },
         { provide: MatchService, useValue: matchService },
         {
           provide: MatchLineupService,
-          useValue: { forMatch: vi.fn<MatchLineupService["forMatch"]>(async () => []) },
+          useValue: { forMatch: async () => [] },
         },
         { provide: GAME_STATS_STORE, useValue: matchGames },
         { provide: TransferService, useValue: transferService },
@@ -299,14 +317,12 @@ describe("API smoke (e2e)", () => {
 
   it("serves a match by public id with its computed slug", async () => {
     const response = await request(app.getHttpServer()).get("/matches/7250").expect(200);
-    expect(matchService.findDetail).toHaveBeenLastCalledWith({ kind: "publicId", value: 7250 });
     expect(response.body).toMatchObject({
       match: {
         publicId: 7250,
         slug: "karmine-corp-vs-team-falcons-rlcs-major-paris-2026-playoffs",
       },
     });
-    expect(matchGames.byMatch).toHaveBeenLastCalledWith(grandFinal.id);
     expect(response.body).toHaveProperty("games", games);
   });
 
@@ -314,7 +330,7 @@ describe("API smoke (e2e)", () => {
     const response = await request(app.getHttpServer()).get(`/matches/${grandFinal.id}`);
 
     expect(response.status).toBe(200);
-    expect(matchService.findDetail).toHaveBeenLastCalledWith({ kind: "id", value: grandFinal.id });
+    expect(response.body).toHaveProperty("match.publicId", 7250);
   });
 
   it.each([MISSING_MATCH_ID, "missing", "0", "-4"])(
@@ -326,28 +342,24 @@ describe("API smoke (e2e)", () => {
     },
   );
 
-  it("resolves article match blocks in one batched call", async () => {
-    const team = "c9e1a3b5-7d9f-4b1d-a3c5-e7f9b1d3f544";
-
+  it("resolves each article match block under its key", async () => {
     const response = await request(app.getHttpServer())
-      .get(`/matches/blocks?block=match:${grandFinal.id}&block=team:${team}:5`)
+      .get(`/matches/blocks?block=match:${grandFinal.id}&block=team:${BLOCK_TEAM_ID}:5`)
       .expect(200);
 
-    expect(matchService.findBlocks).toHaveBeenLastCalledWith(
-      [
-        { id: grandFinal.id, kind: "match" },
-        { id: team, kind: "team", limit: 5 },
-      ],
-      expect.any(Date),
-    );
     expect(response.headers["cache-control"]).toBe("public, max-age=10");
 
     const { blocks } = z
       .object({ blocks: z.record(z.string(), z.array(z.unknown())) })
       .parse(response.body);
 
-    expect(Object.keys(blocks)).toStrictEqual([`match:${grandFinal.id}`, `team:${team}:5`]);
-    expect(blocks[`team:${team}:5`]?.[0]).toMatchObject({
+    expect(Object.keys(blocks)).toStrictEqual([
+      `match:${grandFinal.id}`,
+      `team:${BLOCK_TEAM_ID}:5`,
+    ]);
+    expect(blocks[`match:${grandFinal.id}`]).toHaveLength(1);
+    expect(blocks[`team:${BLOCK_TEAM_ID}:5`]).toHaveLength(5);
+    expect(blocks[`team:${BLOCK_TEAM_ID}:5`]?.[0]).toMatchObject({
       commentCount: 2,
       publicId: 7250,
       state: "upcoming",

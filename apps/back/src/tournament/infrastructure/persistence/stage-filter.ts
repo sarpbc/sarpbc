@@ -11,7 +11,7 @@ export const stageFilter = ({
   pickems,
   activeOnly = false,
   redistributableOnly = false,
-}: Pick<TournamentListOptions, "pickems" | "activeOnly" | "redistributableOnly">): StageFilter => {
+}: Pick<TournamentListOptions, "pickems" | "activeOnly" | "redistributableOnly">) => {
   const where: StageFilter = {};
 
   if (pickems !== undefined) {

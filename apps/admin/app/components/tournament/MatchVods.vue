@@ -48,9 +48,9 @@ const languageNames = computed(
   () => new Intl.DisplayNames([locale.value], { fallback: "none", type: "language" }),
 );
 
-const normalizeLanguage = (language: string): string => language.trim().toLowerCase();
+const normalizeLanguage = (language: string) => language.trim().toLowerCase();
 
-const languageFeedback = (language: string): FieldFeedback => {
+const languageFeedback = (language: string) => {
   const code = normalizeLanguage(language);
 
   return isIso6391Code(code)
@@ -58,7 +58,7 @@ const languageFeedback = (language: string): FieldFeedback => {
     : { error: t("page.tournaments.vods.errors.invalid-language") };
 };
 
-const sourceLabel = (source: MatchVodSource): string => {
+const sourceLabel = (source: MatchVodSource) => {
   switch (source) {
     case "twitch": {
       return t("page.tournaments.vods.sources.twitch");
@@ -76,7 +76,7 @@ const sourceLabel = (source: MatchVodSource): string => {
   }
 };
 
-const urlFeedback = (url: string): FieldFeedback => {
+const urlFeedback = (url: string) => {
   if (!url.trim()) {
     return {};
   }
@@ -94,7 +94,7 @@ const canSave = computed(() =>
   ),
 );
 
-const toRows = (vods: MatchVod[]): VodRow[] =>
+const toRows = (vods: MatchVod[]) =>
   vods.map(({ game, url, language }) => ({ game, key: (nextKey += 1), language, url }));
 
 const load = async () => {

@@ -1,3 +1,4 @@
+import type { MatchLineupsResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import {
   Controller,
   Get,
@@ -16,7 +17,6 @@ import {
   NotFoundException,
   Inject,
 } from "@nestjs/common";
-import type { MatchLineupsResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { CachedTournamentPrizesRead } from "../cache/cached-tournament-prizes.read";
 import {
@@ -253,14 +253,16 @@ export class TournamentController {
   }
 
   @Get(":id/player-stats")
-  async getPlayerStats(@Param("id") id: string): Promise<TournamentPlayerStatsResponse> {
+  async getPlayerStats(@Param("id") id: string) {
     const tournament = await this.tournamentRead.findById(id);
 
     if (!tournament || !isRedistributable(tournament.source)) {
       throw new NotFoundException(`Tournament with id "${id}" not found`);
     }
 
-    return await this.playerStatsService.forStages([tournament]);
+    return (await this.playerStatsService.forStages([
+      tournament,
+    ])) satisfies TournamentPlayerStatsResponse;
   }
 
   @Get(":id/awards")
@@ -436,8 +438,11 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Get("matches/:matchId/lineups")
-  async getMatchLineups(@Param("matchId") matchId: string): Promise<MatchLineupsResponse> {
-    return await this.lineupsResponse(matchId, this.lineupService.find(matchId));
+  async getMatchLineups(@Param("matchId") matchId: string) {
+    return (await this.lineupsResponse(
+      matchId,
+      this.lineupService.find(matchId),
+    )) satisfies MatchLineupsResponse;
   }
 
   @RequirePermissions("tournaments.manage")
@@ -453,8 +458,11 @@ export class TournamentController {
   async setMatchLineups(
     @Param("matchId") matchId: string,
     @Body({ schema: SetMatchLineupsDto }) body: SetMatchLineupsInput,
-  ): Promise<MatchLineupsResponse> {
-    return await this.lineupsResponse(matchId, this.lineupService.set(matchId, body.lineups));
+  ) {
+    return (await this.lineupsResponse(
+      matchId,
+      this.lineupService.set(matchId, body.lineups),
+    )) satisfies MatchLineupsResponse;
   }
 
   @RequirePermissions("tournaments.manage")
@@ -506,12 +514,12 @@ export class TournamentController {
     return { matches: matches.map(mapProfileMatchListItem) };
   }
 
-  private async lineupsResponse(
-    matchId: string,
-    pending: Promise<MatchLineups>,
-  ): Promise<MatchLineupsResponse> {
+  private async lineupsResponse(matchId: string, pending: Promise<MatchLineups>) {
     const lineups = await pending;
 
-    return { ...lineups, suggested: lineupsFromGames(await this.gameStats.byMatch(matchId)) };
+    return {
+      ...lineups,
+      suggested: lineupsFromGames(await this.gameStats.byMatch(matchId)),
+    } satisfies MatchLineupsResponse;
   }
 }

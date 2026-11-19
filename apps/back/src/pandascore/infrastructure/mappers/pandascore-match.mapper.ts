@@ -1,8 +1,7 @@
-import { UpsertMatchCommand } from "../../../tournament/application/feed";
 import { MatchDto } from "../dto/match.dto";
 import { mapOfficialMatchStreams } from "./official-match-streams";
 
-export const toUpsertMatchCommand = (dto: MatchDto): UpsertMatchCommand => {
+export const toUpsertMatchCommand = (dto: MatchDto) => {
   const opponentSlugs: string[] = [];
 
   for (const opponentWrapper of dto.opponents) {

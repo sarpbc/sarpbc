@@ -34,33 +34,22 @@ interface PageSeoMeta {
   robots: "noindex, nofollow" | "index, follow";
 }
 
-const resolveImageUrl = (image?: string | null): string =>
+const resolveImageUrl = (image?: string | null) =>
   resolveSiteUrl(image) ?? `${SITE_ORIGIN}${DEFAULT_IMAGE_PATH}`;
 
-const resolveImageType = (imageUrl: string): OgImageMime | undefined => {
+const IMAGE_TYPE_BY_SUFFIX = [
+  [".png", "image/png"],
+  [".jpg", "image/jpeg"],
+  [".jpeg", "image/jpeg"],
+  [".webp", "image/webp"],
+  [".gif", "image/gif"],
+  [".avif", "image/avif"],
+] as const satisfies readonly (readonly [string, OgImageMime])[];
+
+const resolveImageType = (imageUrl: string) => {
   const path = imageUrl.split("?")[0]?.toLowerCase() ?? "";
 
-  if (path.endsWith(".png")) {
-    return "image/png";
-  }
-
-  if (path.endsWith(".jpg") || path.endsWith(".jpeg")) {
-    return "image/jpeg";
-  }
-
-  if (path.endsWith(".webp")) {
-    return "image/webp";
-  }
-
-  if (path.endsWith(".gif")) {
-    return "image/gif";
-  }
-
-  if (path.endsWith(".avif")) {
-    return "image/avif";
-  }
-
-  return undefined;
+  return IMAGE_TYPE_BY_SUFFIX.find(([suffix]) => path.endsWith(suffix))?.[1];
 };
 
 export const useSarpbcSeo = () => {

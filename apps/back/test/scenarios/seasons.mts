@@ -76,7 +76,7 @@ export const verifySeasonAwards = async ({
   callTool,
   review,
   player,
-}: SeasonAwardsContext): Promise<void> => {
+}: SeasonAwardsContext) => {
   const response = await request(
     "POST",
     "/player",
@@ -230,7 +230,7 @@ export const verifySeasonArchives = async ({
   otherTeam,
   tournament,
   startggCupId,
-}: SeasonArchivesContext): Promise<void> => {
+}: SeasonArchivesContext) => {
   const slug = "fake-archive-2026";
   await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, memberCookie, 403);
 

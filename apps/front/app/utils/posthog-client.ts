@@ -14,7 +14,7 @@ let loading: Promise<PostHog | null> | null = null;
 let consentGranted = false;
 let tracingHost = "";
 
-// `undefined` means the session is not hydrated yet, so the current identity is kept.
+// WARNING: `undefined` means the session is not hydrated yet, so the current identity is kept.
 let currentUser: PostHogUser | null | undefined;
 
 const autocapture: AutocaptureConfig = {
@@ -22,7 +22,7 @@ const autocapture: AutocaptureConfig = {
   dom_event_allowlist: ["click", "change", "submit"],
 };
 
-const applyIdentity = (): void => {
+const applyIdentity = () => {
   if (!client || !consentGranted || currentUser === undefined) {
     return;
   }
@@ -34,13 +34,13 @@ const applyIdentity = (): void => {
   }
 
   if (client.get_property("$user_state") === "identified") {
-    // reset() restores the default opted-out consent state.
+    // WARNING: reset() restores the default opted-out consent state.
     client.reset();
     client.opt_in_capturing({ captureEventName: false });
   }
 };
 
-const applyConsent = (): void => {
+const applyConsent = () => {
   if (!client) {
     return;
   }
@@ -77,20 +77,18 @@ const applyConsent = (): void => {
   client.reset(true);
 };
 
-export const setPostHogConsent = (accepted: boolean, apiBase: string): void => {
+export const setPostHogConsent = (accepted: boolean, apiBase: string) => {
   consentGranted = accepted;
   tracingHost = new URL(apiBase).hostname;
   applyConsent();
 };
 
-export const setPostHogUser = (user: PostHogUser | null | undefined): void => {
+export const setPostHogUser = (user: PostHogUser | null | undefined) => {
   currentUser = user && { id: user.id, userName: user.userName };
   applyIdentity();
 };
 
-export const loadPostHogClient = async function loadPostHogClient(
-  config: PostHogPublicConfig,
-): Promise<PostHog | null> {
+export const loadPostHogClient = async function loadPostHogClient(config: PostHogPublicConfig) {
   if (import.meta.server || import.meta.dev || !config.publicKey || !consentGranted) {
     return null;
   }
@@ -115,12 +113,12 @@ export const loadPostHogClient = async function loadPostHogClient(
       autocapture: false,
       before_send: (event) => (consentGranted ? sanitizePostHogEvent(event) : null),
       capture_dead_clicks: false,
-      // Exception messages can contain form values.
+      // WARNING: exception messages can contain form values.
       capture_exceptions: false,
       capture_heatmaps: false,
       capture_pageleave: false,
       capture_pageview: false,
-      // Web vitals observers can only start at init, which already requires consent.
+      // WARNING: web vitals observers can only start at init, which already requires consent.
       capture_performance: { network_timing: false, web_vitals: true },
       defaults: "2026-08-30",
       disable_capture_url_hashes: true,
@@ -170,4 +168,4 @@ export const loadPostHogClient = async function loadPostHogClient(
   return await loading;
 };
 
-export const getLoadedPostHogClient = (): PostHog | null => client;
+export const getLoadedPostHogClient = () => client;

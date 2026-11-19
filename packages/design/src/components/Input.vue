@@ -30,14 +30,13 @@ const field = useFormField();
 const input = useTemplateRef("input");
 
 defineExpose({
-  blur: (): void => input.value?.blur(),
-  focus: (): void => input.value?.focus(),
+  blur: () => input.value?.blur(),
+  focus: () => input.value?.focus(),
 });
 
 const invalid = computed(() => field?.invalid.value ?? false);
 const leading = computed(() => loading || icon !== null);
 
-/* Layout classes size the wrapper; every other attribute belongs to the native input. */
 const inputAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== "class")),
 );

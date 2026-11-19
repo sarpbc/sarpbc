@@ -23,14 +23,14 @@ export class AuthController {
     private readonly posthog: PostHogService,
   ) {}
 
-  private authCookie(): AuthCookieConfig | undefined {
+  private authCookie() {
     return this.configService.get<AuthCookieConfig>("authCookie");
   }
 
   private async captureAuthEvent(
     req: FastifyRequest,
     event: "server_user_logged_in" | "server_user_signed_up",
-  ): Promise<void> {
+  ) {
     await captureRequestEvent(this.posthog, req.headers, event);
   }
 

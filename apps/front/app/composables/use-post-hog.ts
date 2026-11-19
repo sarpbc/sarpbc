@@ -1,9 +1,7 @@
 import type { PostHog } from "posthog-js";
 import { loadPostHogClient } from "~/utils/posthog-client";
 
-type PostHogClient = Pick<PostHog, "capture">;
-
-export const usePostHog = function usePostHog(): PostHogClient {
+export const usePostHog = function usePostHog() {
   const { choice } = useCookieConsent();
   const config = useRuntimeConfig();
 
@@ -22,10 +20,10 @@ export const usePostHog = function usePostHog(): PostHogClient {
   };
 
   return {
-    capture: (event, properties) => {
+    capture: (event, properties?) => {
       run((client) => {
         client.capture(event, properties);
       });
     },
-  };
+  } satisfies Pick<PostHog, "capture">;
 };

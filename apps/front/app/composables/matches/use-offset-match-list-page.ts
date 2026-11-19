@@ -7,7 +7,7 @@ export interface OffsetPageQuery {
 
 export const MATCH_LIST_PAGE_SIZE = 20;
 
-export const parseRouteOffset = (value: string | null | (string | null)[] | undefined): number => {
+export const parseRouteOffset = (value: string | null | (string | null)[] | undefined) => {
   const raw = Array.isArray(value) ? value[0] : value;
 
   if (!isNonEmptyString(raw)) {
@@ -23,7 +23,7 @@ export const parseRouteOffset = (value: string | null | (string | null)[] | unde
   return parsed;
 };
 
-export const offsetPageQuery = (offset: number): OffsetPageQuery => {
+export const offsetPageQuery = (offset: number) => {
   if (offset <= 0) {
     return {};
   }
@@ -31,8 +31,7 @@ export const offsetPageQuery = (offset: number): OffsetPageQuery => {
   return { offset: String(offset) };
 };
 
-const getPageQuery = (nextOffset: number): OffsetPageQuery =>
-  offsetPageQuery(Math.max(0, nextOffset));
+const getPageQuery = (nextOffset: number) => offsetPageQuery(Math.max(0, nextOffset));
 
 export const useOffsetMatchListPage = <TData extends { total: number }>(config: {
   keyPrefix: string;

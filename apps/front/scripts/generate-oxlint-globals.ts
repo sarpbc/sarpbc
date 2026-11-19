@@ -23,7 +23,7 @@ const VUE_MACROS = [
   "withDefaults",
 ];
 
-const readAutoImportNames = (): string[] =>
+const readAutoImportNames = () =>
   IMPORTS_TYPES.flatMap((file) => {
     let source: string;
 

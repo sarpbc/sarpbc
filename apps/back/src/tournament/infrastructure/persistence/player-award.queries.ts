@@ -14,23 +14,24 @@ export const AWARD_LABELS = {
   offensive_mvp: "Offensive MVP",
 } as const satisfies Record<PlayerAwardType, string>;
 
-export const toTournamentItem = (row: PlayerAward): TournamentAwardListItem => ({
-  awardType: row.awardType,
-  id: row.id,
-  participant: {
-    id: row.participant.id,
-    team: row.participant.team
-      ? { id: row.participant.team.id, name: row.participant.team.name }
-      : undefined,
-  },
-  player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
-});
+export const toTournamentItem = (row: PlayerAward) =>
+  ({
+    awardType: row.awardType,
+    id: row.id,
+    participant: {
+      id: row.participant.id,
+      team: row.participant.team
+        ? { id: row.participant.team.id, name: row.participant.team.name }
+        : undefined,
+    },
+    player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
+  }) satisfies TournamentAwardListItem;
 
 export class CompetitionAwardQueries implements AwardQueries {
   constructor(private readonly em: EntityManager) {}
-  async byPlayer(id: string): Promise<PlayerProfileAward[] | null> {
+  async byPlayer(id: string) {
     if (!(await this.em.findOne(Player, { id }))) {
-      return null;
+      return null satisfies PlayerProfileAward[] | null;
     }
 
     const rows = await this.em.find(
@@ -50,11 +51,11 @@ export class CompetitionAwardQueries implements AwardQueries {
         slug: row.tournament.slug,
         source: row.tournament.source,
       },
-    }));
+    })) satisfies PlayerProfileAward[] | null;
   }
-  async byTournament(id: string): Promise<TournamentAwardListItem[] | null> {
+  async byTournament(id: string) {
     if (!(await this.em.findOne(Tournament, { id }))) {
-      return null;
+      return null satisfies TournamentAwardListItem[] | null;
     }
 
     const rows = await this.em.find(
@@ -63,6 +64,6 @@ export class CompetitionAwardQueries implements AwardQueries {
       { orderBy: { createdAt: "ASC" }, populate: ["player", "participant.team"] },
     );
 
-    return rows.map(toTournamentItem);
+    return rows.map(toTournamentItem) satisfies TournamentAwardListItem[] | null;
   }
 }

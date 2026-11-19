@@ -11,7 +11,7 @@ type ScopedMatchBlock = Extract<MatchBlockSelector, { kind: "tournament" | "team
 
 export type MatchBlockReads = Pick<MatchQueries, "byIds" | "page">;
 
-export const isMatchBlockLive = (match: Match, now: Date): boolean => {
+export const isMatchBlockLive = (match: Match, now: Date) => {
   const { beginAt } = match;
 
   return (
@@ -24,14 +24,14 @@ export const isMatchBlockLive = (match: Match, now: Date): boolean => {
 const isScoped = (block: MatchBlockSelector): block is ScopedMatchBlock =>
   block.kind === "tournament" || block.kind === "team";
 
-const scopeKey = (block: ScopedMatchBlock): string => `${block.kind}:${block.id}`;
+const scopeKey = (block: ScopedMatchBlock) => `${block.kind}:${block.id}`;
 
 const findScope = async (
   reads: MatchBlockReads,
   block: ScopedMatchBlock,
   limit: number,
   now: Date,
-): Promise<Match[]> => {
+) => {
   const scope: MatchListQueryOptions =
     block.kind === "tournament" ? { limit, tournamentId: block.id } : { limit, teamId: block.id };
 
@@ -47,7 +47,7 @@ const findScope = async (
   return [...live, ...upcoming, ...results];
 };
 
-const referencedMatchIds = (block: MatchBlockSelector): readonly string[] => {
+const referencedMatchIds = (block: MatchBlockSelector) => {
   switch (block.kind) {
     case "match": {
       return [block.id];
@@ -74,14 +74,14 @@ export const findMatchBlocks = async (
   reads: MatchBlockReads,
   blocks: readonly MatchBlockSelector[],
   now: Date,
-): Promise<Match[][]> => {
+) => {
   const ids = [...new Set(blocks.flatMap(referencedMatchIds))];
 
   const byId = new Map(
     (ids.length > 0 ? await reads.byIds(ids) : []).map((match) => [match.id, match]),
   );
 
-  const pick = (id: string): Match[] => {
+  const pick = (id: string) => {
     const match = byId.get(id);
 
     return match ? [match] : [];
@@ -96,10 +96,8 @@ export const findMatchBlocks = async (
 
   const scopedEntries = await mapSequentially(
     [...limits],
-    async ([key, { block, limit }]): Promise<[string, Match[]]> => [
-      key,
-      await findScope(reads, block, limit, now),
-    ],
+    async ([key, { block, limit }]) =>
+      [key, await findScope(reads, block, limit, now)] satisfies [string, Match[]],
   );
 
   const scoped = new Map(scopedEntries);

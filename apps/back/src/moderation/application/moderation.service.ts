@@ -4,11 +4,7 @@ import type { ModerationReplyDto } from "./moderation-reply.view";
 import { resolveReplyTargetLink } from "../../reply/domain/reply";
 import type { ReplyTargetLink } from "../../reply/domain/reply";
 
-const toModerationDto = (
-  reply: ReplyRecord,
-  reportCount: number,
-  target: ReplyTargetLink,
-): ModerationReplyDto => ({
+const toModerationDto = (reply: ReplyRecord, reportCount: number, target: ReplyTargetLink) => ({
   author: {
     id: reply.author.id,
     userName: reply.author.userName,
@@ -27,7 +23,7 @@ const toModerationDto = (
 export class ModerationService {
   constructor(private readonly replies: ModerationReplies) {}
 
-  async listRecentReplies(limit: number): Promise<ModerationReplyDto[]> {
+  async listRecentReplies(limit: number) {
     const rows = await this.replies.recentForModeration(limit);
 
     return rows

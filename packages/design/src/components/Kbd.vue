@@ -5,11 +5,10 @@ import type { KbdSize } from "../types.ts";
 
 const { size = "md", value = null } = defineProps<{
   size?: KbdSize;
-  /** A character, or a key name such as `meta`, `enter` or `escape`. */
   value?: string | null;
 }>();
 
-/* Modifier glyphs depend on the platform, known only in the browser. */
+// WARNING: modifier glyphs depend on the platform, known only in the browser, so render after mount.
 const isMac = ref(false);
 
 onMounted(() => {

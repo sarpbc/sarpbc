@@ -9,10 +9,10 @@ const localePath = useLocalePath();
 
 const { transfers, pending, error, refresh } = useLatestTransfers(undefined, RAIL_TRANSFERS);
 
-const isTeamMove = (transfer: Transfer): boolean =>
+const isTeamMove = (transfer: Transfer) =>
   transfer.type === "arrival" || transfer.type === "departure";
 
-const transferLabel = (transfer: Transfer): string => {
+const transferLabel = (transfer: Transfer) => {
   const type =
     transfer.type === "staff"
       ? t(`common.contractRole.${transfer.role}`)

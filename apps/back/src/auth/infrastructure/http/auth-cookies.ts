@@ -11,10 +11,7 @@ export interface AuthCookieConfig {
   domain: string | undefined;
 }
 
-const cookieOptions = (
-  config: AuthCookieConfig | undefined,
-  maxAge?: number,
-): CookieSerializeOptions => {
+const cookieOptions = (config: AuthCookieConfig | undefined, maxAge?: number) => {
   const options: CookieSerializeOptions = {
     httpOnly: true,
     path: "/",
@@ -37,7 +34,7 @@ export const setAuthCookies = (
   reply: FastifyReply,
   tokens: AuthTokenPair,
   config: AuthCookieConfig | undefined,
-): void => {
+) => {
   reply.setCookie(
     ACCESS_TOKEN_COOKIE,
     tokens.accessToken,
@@ -50,10 +47,7 @@ export const setAuthCookies = (
   );
 };
 
-export const clearAuthCookies = (
-  reply: FastifyReply,
-  config: AuthCookieConfig | undefined,
-): void => {
+export const clearAuthCookies = (reply: FastifyReply, config: AuthCookieConfig | undefined) => {
   const options = cookieOptions(config);
   reply.clearCookie(ACCESS_TOKEN_COOKIE, options);
   reply.clearCookie(REFRESH_TOKEN_COOKIE, options);

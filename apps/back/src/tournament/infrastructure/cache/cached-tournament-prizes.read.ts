@@ -29,9 +29,9 @@ const distribution = z.object({
   source: z.enum(DATA_SOURCES),
 }) satisfies z.ZodType<TournamentPrizes>;
 
-export const tournamentPrizesCacheKey = (id: string): string => `tournament-prizes:${id}`;
+export const tournamentPrizesCacheKey = (id: string) => `tournament-prizes:${id}`;
 
-const diagnose = (key: string, operation: string, error: Error): void => {
+const diagnose = (key: string, operation: string, error: Error) => {
   log.warn({
     component: "CachedTournamentPrizesRead",
     error,
@@ -47,12 +47,12 @@ export class CachedTournamentPrizesRead {
     private readonly redis: Pick<RedisService, "get" | "set">,
   ) {}
 
-  async findByTournamentId(id: string): Promise<TournamentPrizes> {
+  async findByTournamentId(id: string) {
     const key = tournamentPrizesCacheKey(id);
     const cached = await this.readCached(key);
 
     if (cached) {
-      return cached;
+      return cached satisfies TournamentPrizes;
     }
 
     const prizes = await this.prizes.findByTournamentId(id);
@@ -63,15 +63,15 @@ export class CachedTournamentPrizesRead {
       diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
     }
 
-    return prizes;
+    return prizes satisfies TournamentPrizes;
   }
 
-  private async readCached(key: string): Promise<TournamentPrizes | null> {
+  private async readCached(key: string) {
     try {
       const cached = await this.redis.get(key);
 
       if (cached === null) {
-        return null;
+        return null satisfies TournamentPrizes | null;
       }
 
       const decoded: unknown = JSON.parse(cached);
@@ -80,14 +80,14 @@ export class CachedTournamentPrizesRead {
       if (!result.success) {
         diagnose(key, "decode", result.error);
 
-        return null;
+        return null satisfies TournamentPrizes | null;
       }
 
-      return result.data;
+      return result.data satisfies TournamentPrizes | null;
     } catch (error) {
       diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
 
-      return null;
+      return null satisfies TournamentPrizes | null;
     }
   }
 }

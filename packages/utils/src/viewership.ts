@@ -20,58 +20,58 @@ export type ParsedViewership =
   | { ok: true; viewership: Viewership }
   | { ok: false; error: ViewershipError };
 
-export const isForbiddenViewershipSource = (hostname: string): boolean => {
+export const isForbiddenViewershipSource = (hostname: string) => {
   const host = hostname.toLowerCase().replace(/\.$/u, "");
 
   return isForbiddenSourceHost(host) || host === "start.gg" || host.endsWith(".start.gg");
 };
 
-const isViewerCount = (value: number): boolean =>
+const isViewerCount = (value: number) =>
   Number.isInteger(value) && value >= 0 && value <= MAX_VIEWERS;
 
-export const parseViewership = (input: Viewership): ParsedViewership => {
+export const parseViewership = (input: Viewership) => {
   if (!isViewerCount(input.peakViewers)) {
-    return { error: "invalid-peak", ok: false };
+    return { error: "invalid-peak", ok: false } satisfies ParsedViewership;
   }
 
   if (input.averageViewers !== null) {
     if (!isViewerCount(input.averageViewers)) {
-      return { error: "invalid-average", ok: false };
+      return { error: "invalid-average", ok: false } satisfies ParsedViewership;
     }
 
     if (input.averageViewers > input.peakViewers) {
-      return { error: "average-above-peak", ok: false };
+      return { error: "average-above-peak", ok: false } satisfies ParsedViewership;
     }
   }
 
   const sourceName = input.sourceName.trim();
 
   if (!sourceName) {
-    return { error: "missing-source-name", ok: false };
+    return { error: "missing-source-name", ok: false } satisfies ParsedViewership;
   }
 
   if (sourceName.length > VIEWERSHIP_SOURCE_NAME_MAX_LENGTH) {
-    return { error: "source-name-too-long", ok: false };
+    return { error: "source-name-too-long", ok: false } satisfies ParsedViewership;
   }
 
   const rawUrl = input.sourceUrl.trim();
 
   if (rawUrl.length > VIEWERSHIP_SOURCE_URL_MAX_LENGTH || !URL.canParse(rawUrl)) {
-    return { error: "invalid-source-url", ok: false };
+    return { error: "invalid-source-url", ok: false } satisfies ParsedViewership;
   }
 
   const url = new URL(rawUrl);
 
   if (url.protocol !== "https:") {
-    return { error: "source-url-not-https", ok: false };
+    return { error: "source-url-not-https", ok: false } satisfies ParsedViewership;
   }
 
   if (url.username || url.password) {
-    return { error: "invalid-source-url", ok: false };
+    return { error: "invalid-source-url", ok: false } satisfies ParsedViewership;
   }
 
   if (isForbiddenViewershipSource(url.hostname)) {
-    return { error: "forbidden-source", ok: false };
+    return { error: "forbidden-source", ok: false } satisfies ParsedViewership;
   }
 
   let measuredAt: string | null = null;
@@ -80,7 +80,7 @@ export const parseViewership = (input: Viewership): ParsedViewership => {
     const time = Date.parse(input.measuredAt);
 
     if (Number.isNaN(time)) {
-      return { error: "invalid-measured-at", ok: false };
+      return { error: "invalid-measured-at", ok: false } satisfies ParsedViewership;
     }
 
     measuredAt = new Date(time).toISOString();
@@ -96,5 +96,5 @@ export const parseViewership = (input: Viewership): ParsedViewership => {
       sourceName,
       sourceUrl: url.href,
     },
-  };
+  } satisfies ParsedViewership;
 };

@@ -48,7 +48,7 @@ const breadcrumbItems = computed(() => [
   { label: event.value?.name ?? eventId.value },
 ]);
 
-const formatDate = (date: Date | string | null): string =>
+const formatDate = (date: Date | string | null) =>
   date ? new Date(date).toLocaleDateString() : "-";
 
 const handleSubmit = async () => {

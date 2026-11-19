@@ -3,18 +3,18 @@ import { MikroORM, RequestContext } from "@mikro-orm/core";
 import { log } from "evlog";
 import type { StatsImportScheduler } from "../application/ports";
 
-/** The repository has no job queue, so an import runs in this process after the request returns. */
+// WARNING: no job queue; an import runs in this process after the request returns.
 @Injectable()
 export class StatsImportRunner implements StatsImportScheduler {
   constructor(private readonly orm: MikroORM) {}
 
-  schedule(task: () => Promise<void>): void {
+  schedule(task: () => Promise<void>) {
     setImmediate(() => {
       void this.run(task);
     });
   }
 
-  private async run(task: () => Promise<void>): Promise<void> {
+  private async run(task: () => Promise<void>) {
     try {
       await RequestContext.create(this.orm.em, task);
     } catch (error) {

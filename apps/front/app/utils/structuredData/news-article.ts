@@ -32,7 +32,7 @@ export interface BuildNewsArticleJsonLdInput {
   locale?: UiLocale;
 }
 
-export const buildNewsArticleJsonLd = (article: BuildNewsArticleJsonLdInput): NewsArticleLd => {
+export const buildNewsArticleJsonLd = (article: BuildNewsArticleJsonLdInput) => {
   const url = `${SITE_ORIGIN}${localizedPath(newsPath(article.slug), article.locale ?? "en")}`;
 
   const description =

@@ -24,7 +24,7 @@ interface SlashCommandsOptions {
   run: (editor: Editor, item: SlashItem) => void;
 }
 
-const matching = (groups: readonly SlashGroup[], query: string): SlashGroup[] => {
+const matching = (groups: readonly SlashGroup[], query: string) => {
   const needle = query.trim().toLowerCase();
 
   return groups.flatMap((group) => {
@@ -84,13 +84,13 @@ export const createSlashCommands = ({ groups, menu, run }: SlashCommandsOptions)
             let highlighted = 0;
             let choose: ((item: SlashItem) => void) | null = null;
 
-            const close = (): void => {
+            const close = () => {
               renderer?.destroy();
               renderer?.element?.remove();
               renderer = null;
             };
 
-            const refresh = (): void => {
+            const refresh = () => {
               renderer?.updateProps({ command: choose, groups: shown, highlighted });
             };
 

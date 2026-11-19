@@ -1,11 +1,11 @@
 import { isNonEmptyDateInput } from "@sarpbc/utils";
 
-const startOfLocalDay = (date: Date): Date =>
+const startOfLocalDay = (date: Date) =>
   new Date(date.getFullYear(), date.getMonth(), date.getDate());
 
-export const localDayKey = (date: Date): string => startOfLocalDay(date).toDateString();
+export const localDayKey = (date: Date) => startOfLocalDay(date).toDateString();
 
-export const parseMatchDate = (value: Date | string | null | undefined): Date | null => {
+export const parseMatchDate = (value: Date | string | null | undefined) => {
   if (!isNonEmptyDateInput(value)) {
     return null;
   }
@@ -15,14 +15,14 @@ export const parseMatchDate = (value: Date | string | null | undefined): Date | 
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-export const daysFromToday = (date: Date, now: Date = new Date()): number => {
+export const daysFromToday = (date: Date, now: Date = new Date()) => {
   const today = startOfLocalDay(now).getTime();
   const target = startOfLocalDay(date).getTime();
 
   return Math.round((target - today) / 86_400_000);
 };
 
-const isTodayOrTomorrow = (date: Date, now: Date = new Date()): boolean => {
+const isTodayOrTomorrow = (date: Date, now: Date = new Date()) => {
   const offset = daysFromToday(date, now);
 
   return offset >= 0 && offset <= 1;
@@ -35,7 +35,7 @@ interface MatchWithBeginAt {
 export const filterMatchesTodayOrTomorrow = <T extends MatchWithBeginAt>(
   matches: T[],
   now: Date = new Date(),
-): T[] =>
+) =>
   matches.filter((match) => {
     const beginAt = parseMatchDate(match.beginAt);
 

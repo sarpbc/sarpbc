@@ -13,7 +13,7 @@ export class CompetitionAfterCommit {
     private readonly events: CompetitionEvents,
     private readonly diagnostics: Pick<CompetitionDiagnostics, "error">,
   ) {}
-  async settle({ tournamentIds = [], decidedMatchIds = [] }: CompetitionSettlement): Promise<void> {
+  async settle({ tournamentIds = [], decidedMatchIds = [] }: CompetitionSettlement) {
     await Promise.all(
       [...new Set(tournamentIds)].map(async (id) => {
         try {

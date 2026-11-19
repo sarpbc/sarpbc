@@ -35,9 +35,9 @@ const keepsFields = <Fields extends Record<string, z.ZodType>>(
 export const describeFields = <Fields extends Record<string, z.ZodType>>(
   fields: Fields,
   descriptions: { [Field in keyof Fields]?: string },
-): Fields => {
+) => {
   const described = Object.fromEntries(
-    Object.entries<z.ZodType>(fields).map(([field, schema]): [string, z.ZodType] => {
+    Object.entries<z.ZodType>(fields).map(([field, schema]) => {
       const description = descriptions[field];
 
       return [
@@ -55,7 +55,7 @@ export const describeFields = <Fields extends Record<string, z.ZodType>>(
 };
 
 /** PATCH semantics: undefined leaves the date untouched, null clears it. */
-export const toPatchedDate = (value: string | null | undefined): Date | null | undefined =>
+export const toPatchedDate = (value: string | null | undefined) =>
   value === undefined || value === null ? value : new Date(value);
 
 /** The one source URL rule of every MCP write: http(s), no credentials, never Liquipedia or BLAST.tv. */

@@ -9,9 +9,9 @@ export {
   encodeCareerResultForShare,
 } from "~/utils/career/career-schema";
 
-const parseCareerState = (raw: string | null): CareerState | null => parseCareerStateJson(raw);
+const parseCareerState = (raw: string | null) => parseCareerStateJson(raw);
 
-export const loadActiveCareer = function loadActiveCareer(): CareerState | null {
+export const loadActiveCareer = function loadActiveCareer() {
   if (!import.meta.client) {
     return null;
   }
@@ -19,7 +19,7 @@ export const loadActiveCareer = function loadActiveCareer(): CareerState | null 
   return parseCareerState(localStorage.getItem(CAREER_ACTIVE_STORAGE_KEY));
 };
 
-export const saveActiveCareer = function saveActiveCareer(state: CareerState): void {
+export const saveActiveCareer = function saveActiveCareer(state: CareerState) {
   if (!import.meta.client) {
     return;
   }
@@ -27,7 +27,7 @@ export const saveActiveCareer = function saveActiveCareer(state: CareerState): v
   localStorage.setItem(CAREER_ACTIVE_STORAGE_KEY, JSON.stringify(state));
 };
 
-export const clearActiveCareer = function clearActiveCareer(): void {
+export const clearActiveCareer = function clearActiveCareer() {
   if (!import.meta.client) {
     return;
   }
@@ -35,15 +35,15 @@ export const clearActiveCareer = function clearActiveCareer(): void {
   localStorage.removeItem(CAREER_ACTIVE_STORAGE_KEY);
 };
 
-const loadCareerResults = function loadCareerResults(): Map<string, CareerResult> {
+const loadCareerResults = function loadCareerResults() {
   if (!import.meta.client) {
-    return new Map();
+    return new Map<string, CareerResult>();
   }
 
   return parseCareerResultsJson(localStorage.getItem(CAREER_RESULTS_STORAGE_KEY));
 };
 
-export const saveCareerResult = function saveCareerResult(result: CareerResult): void {
+export const saveCareerResult = function saveCareerResult(result: CareerResult) {
   if (!import.meta.client) {
     return;
   }
@@ -53,5 +53,4 @@ export const saveCareerResult = function saveCareerResult(result: CareerResult):
   localStorage.setItem(CAREER_RESULTS_STORAGE_KEY, JSON.stringify(Object.fromEntries(existing)));
 };
 
-export const loadCareerResult = (id: string): CareerResult | null =>
-  loadCareerResults().get(id) ?? null;
+export const loadCareerResult = (id: string) => loadCareerResults().get(id) ?? null;

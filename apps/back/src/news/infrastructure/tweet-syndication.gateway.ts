@@ -45,7 +45,7 @@ interface CacheEntry {
 export class TweetSyndicationGateway implements TweetEmbedGateway {
   private readonly cache = new Map<string, CacheEntry>();
 
-  async load(parsed: ParsedTweetUrl): Promise<TweetEmbed> {
+  async load(parsed: ParsedTweetUrl) {
     const cached = this.cache.get(parsed.id);
 
     if (cached && cached.expiresAt > Date.now()) {
@@ -58,11 +58,11 @@ export class TweetSyndicationGateway implements TweetEmbedGateway {
     return embed;
   }
 
-  private async fetchTweet(parsed: ParsedTweetUrl): Promise<TweetEmbed> {
+  private async fetchTweet(parsed: ParsedTweetUrl) {
     const url = new URL("https://cdn.syndication.twimg.com/tweet-result");
     url.searchParams.set("id", parsed.id);
     url.searchParams.set("lang", "en");
-    // X's syndication endpoint requires this token, also used by vercel/react-tweet.
+    // WARNING: the X syndication endpoint requires this token, also used by vercel/react-tweet.
     url.searchParams.set(
       "token",
       ((Number(parsed.id) / 1e15) * Math.PI).toString(36).replaceAll(/(?:0+|\.)/gu, ""),

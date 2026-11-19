@@ -11,7 +11,6 @@ import { z } from "zod";
 import { isRedistributable } from "../../../common/domain/data-source";
 import type { CircuitService } from "../../../circuit/application/circuit.service";
 import { defineTool } from "../define-tool";
-import type { McpTool, ToolWrite } from "../define-tool";
 import { circuitUrl, tournamentUrl } from "../urls";
 import { dataSourceUrlField, idOrSlugField } from "./tool-input";
 import { requireUpdateFields } from "./update-fields";
@@ -22,7 +21,7 @@ export interface CircuitToolServices {
 
 const withUrl = (circuit: CircuitSummary) => ({ ...circuit, url: circuitUrl(circuit.slug) });
 
-const written = (circuit: CircuitSummary): ToolWrite => ({
+const written = (circuit: CircuitSummary) => ({
   entityId: circuit.id,
   result: withUrl(circuit),
   sourceUrl: circuit.sourceUrl ?? undefined,
@@ -73,7 +72,7 @@ const qualificationSpotsSchema = z
   .max(MAX_CIRCUIT_QUALIFICATION_SPOTS)
   .describe("Number of teams that qualify from the standings, when the rules state it.");
 
-export const circuitTools = ({ circuitService }: CircuitToolServices): McpTool[] => [
+export const circuitTools = ({ circuitService }: CircuitToolServices) => [
   defineTool({
     description:
       "List the points circuits on sarpbc.org (a season circuit, worldwide or limited to one region, whose official points scales staff entered). Use get_circuit for the stages, scales and standings.",

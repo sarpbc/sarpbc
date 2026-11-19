@@ -183,7 +183,7 @@ export class RosterModule implements OnModuleInit {
     }
   }
 
-  private async seedTeams(): Promise<void> {
+  private async seedTeams() {
     try {
       await this.syncPandascoreTeams.seed();
     } catch (error) {

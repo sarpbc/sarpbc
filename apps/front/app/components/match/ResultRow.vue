@@ -6,7 +6,6 @@ import { shortTeamName } from "~/utils/short-team-name";
 
 const { match, compact = false } = defineProps<{
   match: MatchRowItem;
-  /** Dense rail rows: three of them span two default rows. */
   compact?: boolean;
 }>();
 
@@ -43,7 +42,7 @@ const winnerParticipantId = computed(() => {
   return null;
 });
 
-const participantClass = (participantId: string | undefined): string => {
+const participantClass = (participantId: string | undefined) => {
   if (participantId && winnerParticipantId.value === participantId) {
     return "font-medium text-highlighted";
   }

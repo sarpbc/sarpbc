@@ -1,16 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
-import type { DataSource, PrizeEntry } from "@sarpbc/types";
+import { describe, expect, it } from "vitest";
+import type { DataSource, PrizeEntry, TournamentPrizes } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type {
-  CompetitionCache,
-  CompetitionDiagnostics,
-  CompetitionEvents,
-  PrizeParticipant,
-  PrizeQueries,
-  PrizeTransaction,
-  PrizeWriter,
-} from "./ports";
+import type { PrizeParticipant, PrizeTransaction } from "./ports";
+import { recordingCache, recordingDiagnostics, recordingEvents } from "./ports.test-utils";
 import { CompetitionAfterCommit } from "./after-commit";
 import { TournamentPrizeService } from "./tournament-prize.service";
 
@@ -27,108 +20,112 @@ const RULES = "https://www.rocketleague.com/en/news/rlcs-official-rules";
 
 const rosterA: PrizeParticipant = { playerIds: ["player-a", "player-b"], teamId: "team-a" };
 
+const EMPTY_PRIZES: TournamentPrizes = { prizepool: null, prizes: [], source: "manual" };
+
 const setup = ({
   exists = true,
   participants = [rosterA],
+  prizes = EMPTY_PRIZES,
   source = "manual",
-}: { exists?: boolean; participants?: PrizeParticipant[]; source?: DataSource | null } = {}) => {
+}: {
+  exists?: boolean;
+  participants?: PrizeParticipant[];
+  prizes?: TournamentPrizes | null;
+  source?: DataSource | null;
+} = {}) => {
+  const stored = { entries: [entry] };
+  const replaced: { tournamentId: string; entries: PrizeEntry[] }[] = [];
+
   const writer = {
-    entries: vi.fn<PrizeWriter["entries"]>().mockResolvedValue([entry]),
-    participants: vi.fn<PrizeWriter["participants"]>().mockResolvedValue(participants),
-    replace: vi.fn<PrizeWriter["replace"]>(),
-    tournamentExists: vi.fn<PrizeWriter["tournamentExists"]>().mockResolvedValue(exists),
+    entries: async () => stored.entries,
+    participants: async () => participants,
+    replace: async (tournamentId: string, entries: PrizeEntry[]) => {
+      replaced.push({ entries, tournamentId });
+    },
+    tournamentExists: async () => exists,
   };
 
   const reads = {
-    byPlayer: vi.fn<PrizeQueries["byPlayer"]>().mockResolvedValue([]),
-    byTeam: vi.fn<PrizeQueries["byTeam"]>().mockResolvedValue([]),
-    byTournament: vi
-      .fn<PrizeQueries["byTournament"]>()
-      .mockResolvedValue({ prizepool: null, prizes: [], source: "manual" }),
-    tournamentSource: vi.fn<PrizeQueries["tournamentSource"]>().mockResolvedValue(source),
+    byPlayer: async () => [],
+    byTeam: async () => [],
+    byTournament: async () => prizes,
+    tournamentSource: async () => source,
   };
 
   const transaction: PrizeTransaction = { run: async (work) => await work({ prizes: writer }) };
-  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
-  const diagnostics = { error: vi.fn<CompetitionDiagnostics["error"]>() };
+
+  const cache = recordingCache();
+  const diagnostics = recordingDiagnostics();
 
   const service = new TournamentPrizeService(
     reads,
     transaction,
-    new CompetitionAfterCommit(
-      cache,
-      { publish: vi.fn<CompetitionEvents["publish"]>() },
-      diagnostics,
-    ),
+    new CompetitionAfterCommit(cache, recordingEvents(), diagnostics),
   );
 
-  return { cache, diagnostics, reads, service, writer };
+  return { cache, diagnostics, replaced, service, stored };
 };
 
 describe(TournamentPrizeService, () => {
-  it("replaces the distribution inside the competition transaction", async () => {
-    const { service, writer, reads } = setup();
+  it("replaces the distribution", async () => {
+    const { service, replaced, cache } = setup();
 
-    await service.setDistribution("cup", [entry]);
+    await expect(service.setDistribution("cup", [entry])).resolves.toStrictEqual(EMPTY_PRIZES);
 
-    expect(writer.participants).toHaveBeenCalledWith("cup");
-    expect(writer.replace).toHaveBeenCalledWith("cup", [entry]);
-    expect(reads.byTournament).toHaveBeenCalledWith("cup");
+    expect(replaced).toStrictEqual([{ entries: [entry], tournamentId: "cup" }]);
+    expect(cache.invalidated).toStrictEqual(["cup"]);
   });
 
   it("invalidates the cached tournament and keeps the saved distribution when Redis fails", async () => {
     const { service, cache, diagnostics } = setup();
-    cache.invalidateTournament.mockRejectedValue(new Error("Redis down"));
+    cache.failWith(new Error("Redis down"));
 
     await expect(service.setDistribution("cup", [entry])).resolves.toMatchObject({ prizes: [] });
 
-    expect(cache.invalidateTournament).toHaveBeenCalledWith("cup");
-    expect(diagnostics.error).toHaveBeenCalledWith(
-      "Tournament cache invalidation failed",
-      expect.any(Error),
-    );
+    expect(diagnostics.errors).toStrictEqual([
+      { cause: new Error("Redis down"), message: "Tournament cache invalidation failed" },
+    ]);
   });
 
   it("rejects an unknown tournament before writing", async () => {
-    const { service, writer } = setup({ exists: false });
+    const { service, replaced } = setup({ exists: false });
     await expect(service.setDistribution("cup", [entry])).rejects.toThrow(NotFoundError);
-    expect(writer.replace).not.toHaveBeenCalled();
+    expect(replaced).toStrictEqual([]);
   });
 
   it("rejects a team that does not take part in the tournament", async () => {
-    const { service, writer } = setup({ participants: [] });
+    const { service, replaced } = setup({ participants: [] });
     await expect(service.setDistribution("cup", [entry])).rejects.toThrow(InvalidInputError);
-    expect(writer.replace).not.toHaveBeenCalled();
+    expect(replaced).toStrictEqual([]);
   });
 
   it("rejects a player outside the tournament roster of the team", async () => {
-    const { service, writer } = setup({
+    const { service, replaced } = setup({
       participants: [rosterA, { playerIds: ["player-c"], teamId: "team-b" }],
     });
 
     await expect(
       service.setDistribution("cup", [{ ...entry, playerIds: ["player-a", "player-c"] }]),
     ).rejects.toThrow(/player-c/u);
-    expect(writer.replace).not.toHaveBeenCalled();
+    expect(replaced).toStrictEqual([]);
   });
 
   it("clears a distribution even when the tournament has no participants", async () => {
-    const { service, writer } = setup({ participants: [] });
+    const { service, replaced } = setup({ participants: [] });
     await service.setDistribution("cup", []);
-    expect(writer.replace).toHaveBeenCalledWith("cup", []);
+    expect(replaced).toStrictEqual([{ entries: [], tournamentId: "cup" }]);
   });
 
-  it("rejects an invalid distribution without opening a transaction", async () => {
-    const { service, writer } = setup();
+  it("rejects an invalid distribution before writing", async () => {
+    const { service, replaced } = setup();
     await expect(service.setDistribution("cup", [{ ...entry, currency: "ABC" }])).rejects.toThrow(
       InvalidInputError,
     );
-    expect(writer.tournamentExists).not.toHaveBeenCalled();
+    expect(replaced).toStrictEqual([]);
   });
 
   it("returns 404 for an unknown tournament distribution", async () => {
-    const { service, reads } = setup();
-    reads.byTournament.mockResolvedValue(null);
+    const { service } = setup({ prizes: null });
     await expect(service.findByTournamentId("missing")).rejects.toThrow(NotFoundError);
   });
 
@@ -143,7 +140,7 @@ describe(TournamentPrizeService, () => {
   });
 
   it("corrects one row and re-sources it without touching the other rows", async () => {
-    const { service, writer } = setup({
+    const { service, replaced, stored } = setup({
       participants: [rosterA, { playerIds: [], teamId: "team-b" }],
     });
 
@@ -155,32 +152,37 @@ describe(TournamentPrizeService, () => {
       teamId: "team-b",
     };
 
-    writer.entries.mockResolvedValue([entry, other]);
+    stored.entries = [entry, other];
 
     await service.updateEntry("cup", "team-a", { amount: 1800 }, RULES);
 
-    expect(writer.replace).toHaveBeenCalledWith("cup", [
-      { ...entry, amount: 1800, sourceUrl: RULES },
-      other,
+    expect(replaced).toStrictEqual([
+      {
+        entries: [{ ...entry, amount: 1800, sourceUrl: RULES }, other],
+        tournamentId: "cup",
+      },
     ]);
   });
 
   it("re-sources a row alone when the patch is empty", async () => {
-    const { service, writer } = setup();
+    const { service, replaced, cache } = setup();
 
     await service.updateEntry("cup", "team-a", {}, RULES);
 
-    expect(writer.replace).toHaveBeenCalledWith("cup", [{ ...entry, sourceUrl: RULES }]);
+    expect(replaced).toStrictEqual([
+      { entries: [{ ...entry, sourceUrl: RULES }], tournamentId: "cup" },
+    ]);
+    expect(cache.invalidated).toStrictEqual(["cup"]);
   });
 
   it("refuses a correction for a team without a prize row", async () => {
-    const { service, writer } = setup();
+    const { service, replaced } = setup();
     await expect(service.updateEntry("cup", "team-z", {}, RULES)).rejects.toThrow(NotFoundError);
-    expect(writer.replace).not.toHaveBeenCalled();
+    expect(replaced).toStrictEqual([]);
   });
 
   it("corrects a row while another row of the stage still cites a refused source", async () => {
-    const { service, writer } = setup({
+    const { service, replaced, stored } = setup({
       participants: [rosterA, { playerIds: [], teamId: "team-b" }],
     });
 
@@ -192,18 +194,20 @@ describe(TournamentPrizeService, () => {
       teamId: "team-b",
     };
 
-    writer.entries.mockResolvedValue([entry, legacy]);
+    stored.entries = [entry, legacy];
 
     await service.updateEntry("cup", "team-a", {}, RULES);
 
-    expect(writer.replace).toHaveBeenCalledWith("cup", [{ ...entry, sourceUrl: RULES }, legacy]);
+    expect(replaced).toStrictEqual([
+      { entries: [{ ...entry, sourceUrl: RULES }, legacy], tournamentId: "cup" },
+    ]);
   });
 
   it("refuses a BLAST.tv source", async () => {
-    const { service, writer } = setup();
+    const { service, replaced } = setup();
     await expect(
       service.updateEntry("cup", "team-a", {}, "https://blast.tv/rl/open"),
     ).rejects.toThrow(InvalidInputError);
-    expect(writer.replace).not.toHaveBeenCalled();
+    expect(replaced).toStrictEqual([]);
   });
 });

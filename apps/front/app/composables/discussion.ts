@@ -25,7 +25,7 @@ export const getCommentsByTarget = async (
   targetId: string,
   page = 0,
   limit?: number,
-): Promise<PaginatedReplies> => {
+) => {
   try {
     const query: GetCommentsQuery = {
       page,
@@ -47,7 +47,7 @@ export const getCommentsByTarget = async (
   }
 };
 
-export const refetchLimitForLoadedPages = (loadedPages: number, pageSize: number): number =>
+export const refetchLimitForLoadedPages = (loadedPages: number, pageSize: number) =>
   Math.min(loadedPages * pageSize, MAX_REFETCH_LIMIT);
 
 export const createComment = async (data: {
@@ -55,7 +55,7 @@ export const createComment = async (data: {
   targetType: ReplyTargetType;
   targetId: string;
   replyToId?: string;
-}): Promise<CreateCommentResult> => {
+}) => {
   const body: CreateReplyBody = {
     content: data.content,
   };
@@ -79,7 +79,11 @@ export const createComment = async (data: {
     default: {
       const _exhaustive: never = data.targetType;
 
-      return { message: String(_exhaustive), ok: false, reason: "unknown" };
+      return {
+        message: String(_exhaustive),
+        ok: false,
+        reason: "unknown",
+      } satisfies CreateCommentResult;
     }
   }
 
@@ -93,7 +97,7 @@ export const createComment = async (data: {
       method: "POST",
     });
 
-    return { comment: res.reply, ok: true };
+    return { comment: res.reply, ok: true } satisfies CreateCommentResult;
   } catch (error) {
     return apiFailure(error, "creating comment", {
       codes: { [FORUM_ERROR_CODES.REPLY_RATE_LIMITED]: "rate_limited" },
@@ -101,7 +105,7 @@ export const createComment = async (data: {
   }
 };
 
-export const hideComment = async (commentId: string): Promise<boolean> => {
+export const hideComment = async (commentId: string) => {
   try {
     await apiFetch(`/replies/${commentId}/hide`, { body: {}, method: "PATCH" });
 
@@ -113,7 +117,7 @@ export const hideComment = async (commentId: string): Promise<boolean> => {
   }
 };
 
-export const deleteComment = async (commentId: string): Promise<boolean> => {
+export const deleteComment = async (commentId: string) => {
   try {
     await apiFetch(`/replies/${commentId}`, { method: "DELETE" });
 
@@ -125,17 +129,14 @@ export const deleteComment = async (commentId: string): Promise<boolean> => {
   }
 };
 
-export const reportComment = async (
-  commentId: string,
-  reason: ReplyReportReason,
-): Promise<ReportCommentResult> => {
+export const reportComment = async (commentId: string, reason: ReplyReportReason) => {
   try {
     await apiFetch(`/replies/${commentId}/report`, {
       body: { reason },
       method: "POST",
     });
 
-    return { ok: true };
+    return { ok: true } satisfies ReportCommentResult;
   } catch (error) {
     return apiFailure(error, "reporting comment", {
       codes: { [FORUM_ERROR_CODES.REPLY_ALREADY_REPORTED]: "already_reported" },

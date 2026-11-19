@@ -21,13 +21,13 @@ export class ManualGameService {
     private readonly games: GameStatsStore,
   ) {}
 
-  async list(tournamentId: string): Promise<TournamentStatsGame[]> {
+  async list(tournamentId: string) {
     await requireTournament(this.candidates, tournamentId);
 
-    return await this.games.inTournament(tournamentId);
+    return (await this.games.inTournament(tournamentId)) satisfies TournamentStatsGame[];
   }
 
-  async attach(tournamentId: string, input: AttachReplayInput): Promise<TournamentStatsGame> {
+  async attach(tournamentId: string, input: AttachReplayInput) {
     const source = requireBallchasing(this.source);
     const replayId = parseBallchasingRef("replay", input.replay);
     await requireTournament(this.candidates, tournamentId);
@@ -119,14 +119,10 @@ export class ManualGameService {
       await this.games.links(platformAccounts(stats)),
     );
 
-    return await this.games.save(record);
+    return (await this.games.save(record)) satisfies TournamentStatsGame;
   }
 
-  async remove(
-    tournamentId: string,
-    matchId: string,
-    number: number,
-  ): Promise<TournamentStatsGame> {
+  async remove(tournamentId: string, matchId: string, number: number) {
     await requireTournament(this.candidates, tournamentId);
     const removed = await this.games.remove(tournamentId, { matchId, number });
 
@@ -137,6 +133,6 @@ export class ManualGameService {
       });
     }
 
-    return removed;
+    return removed satisfies TournamentStatsGame;
   }
 }

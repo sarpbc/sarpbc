@@ -3,7 +3,7 @@ import { allocateSlug, eventSlug, stageSlug, toSlug } from "@sarpbc/utils";
 import { v4 } from "uuid";
 import { z } from "zod";
 
-// Keep this file free of app imports: it is a frozen copy of the domain rules.
+// WARNING: frozen copy of the domain rules; keep this file free of app imports.
 const GENERIC_STAGE_NAMES = new Set([
   "playoffs",
   "group stage",
@@ -17,7 +17,7 @@ const GENERIC_STAGE_NAMES = new Set([
   "finals",
 ]);
 
-const nonBlank = (value: string | null | undefined): string | undefined => {
+const nonBlank = (value: string | null | undefined) => {
   const trimmed = value?.trim();
 
   return trimmed === undefined || trimmed === "" ? undefined : trimmed;
@@ -27,7 +27,7 @@ const eventDisplayName = (input: {
   leagueName: string | null;
   serieName: string | null;
   stageName: string;
-}): string => {
+}) => {
   const league = nonBlank(input.leagueName);
   const serie = nonBlank(input.serieName);
   const stage = input.stageName.trim();
@@ -53,12 +53,12 @@ const eventDisplayName = (input: {
   return stage || (league ?? "");
 };
 
-const utcDay = (date: Date | null): string => (date ? date.toISOString().slice(0, 10) : "");
+const utcDay = (date: Date | null) => (date ? date.toISOString().slice(0, 10) : "");
 
 const compareStages = (
   a: { beginAt: Date | null; name: string },
   b: { beginAt: Date | null; name: string },
-): number => utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);
+) => utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);
 
 const stageRow = z
   .object({
@@ -98,11 +98,8 @@ const chronology = (
   return at < bt ? -1 : 1;
 };
 
-const inOrder = async <Item>(
-  items: readonly Item[],
-  task: (item: Item) => Promise<void>,
-): Promise<void> => {
-  const step = async (index: number): Promise<void> => {
+const inOrder = async <Item>(items: readonly Item[], task: (item: Item) => Promise<void>) => {
+  const step = async (index: number) => {
     if (index === items.length) {
       return;
     }
@@ -114,7 +111,7 @@ const inOrder = async <Item>(
   await step(0);
 };
 
-const groupKey = (stage: StageRow): string => {
+const groupKey = (stage: StageRow) => {
   const serie = nonBlank(stage.serie);
 
   return serie === undefined ? `stage::${stage.id}` : `${stage.leagueId ?? ""}::${serie}`;
@@ -123,7 +120,7 @@ const groupKey = (stage: StageRow): string => {
 export class Migration20261022120000_addTournamentEvents extends Migration {
   override name = "Migration20261022120000_addTournamentEvents";
 
-  override async up(): Promise<void> {
+  override async up() {
     const stages = z
       .array(stageRow)
       .parse(
@@ -219,7 +216,7 @@ export class Migration20261022120000_addTournamentEvents extends Migration {
     await this.execute(`alter table "tournament" drop column "serie";`);
   }
 
-  override down(): void {
+  override down() {
     this.addSql(`alter table "tournament" add "serie" varchar(255) null;`);
     this.addSql(
       `update "tournament" set "serie" = e."name" from "tournament_event" e where e."id" = "tournament"."event_id";`,

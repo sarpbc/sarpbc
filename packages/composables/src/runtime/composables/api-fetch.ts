@@ -21,7 +21,6 @@ declare module "nuxt/schema" {
   }
 }
 
-// Nuxt and Nitro both auto-import useRuntimeConfig, so it stays a global here.
 declare const useRuntimeConfig: typeof NuxtUseRuntimeConfig;
 declare const useRequestEvent: typeof NuxtUseRequestEvent;
 
@@ -37,7 +36,7 @@ interface ServerRequest {
 const hasNodeRequest = (event: NuxtRequestEvent): event is NuxtRequestEvent & ServerRequest =>
   "node" in event;
 
-const apiBase = function apiBase(): string {
+const apiBase = function apiBase() {
   const config = useRuntimeConfig();
 
   return resolveApiBase(config.public.apiBase, config.apiBaseServer, import.meta.server);
@@ -56,8 +55,7 @@ export const createApiClient = () =>
       let event: ServerRequest | undefined;
 
       try {
-        // Nitro routes call apiFetch with no Nuxt context: Nitro has no useRequestEvent,
-        // so the call throws a ReferenceError.
+        // WARNING: Nitro routes call apiFetch without a Nuxt context and have no useRequestEvent, so the call throws a ReferenceError.
         const requestEvent = useRequestEvent();
         event =
           requestEvent !== undefined && hasNodeRequest(requestEvent) ? requestEvent : undefined;
@@ -97,7 +95,5 @@ export const createApiClient = () =>
     },
   });
 
-export const apiFetch = async <T>(
-  url: string,
-  opts: Parameters<typeof $fetch>[1] = {},
-): Promise<T> => await createApiClient()<T, string>(url, opts);
+export const apiFetch = async <T>(url: string, opts: Parameters<typeof $fetch>[1] = {}) =>
+  await createApiClient()<T, string>(url, opts);

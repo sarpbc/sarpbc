@@ -20,23 +20,23 @@ export class TeamService {
     private readonly usage: TeamCompetitionUsage,
   ) {}
 
-  async find(options: Partial<DirectorySearchProps>): Promise<Team[]> {
+  async find(options: Partial<DirectorySearchProps>) {
     return await this.teams.search(options);
   }
 
-  async findAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]> {
+  async findAndCount(options: Partial<DirectorySearchProps>) {
     return await this.teams.searchAndCount(options);
   }
 
-  async findById(id: string): Promise<Team | null> {
+  async findById(id: string) {
     return await this.resolveMerged(await this.teams.findById(id));
   }
 
-  async findBySlug(slug: string): Promise<Team | null> {
+  async findBySlug(slug: string) {
     return await this.resolveMerged(await this.teams.findBySlug(slug));
   }
 
-  private async resolveMerged(team: Team | null): Promise<Team | null> {
+  private async resolveMerged(team: Team | null) {
     return team?.mergedIntoId !== null &&
       team?.mergedIntoId !== undefined &&
       team.mergedIntoId !== ""
@@ -44,7 +44,7 @@ export class TeamService {
       : team;
   }
 
-  async create(dto: CreateTeamInput): Promise<Team> {
+  async create(dto: CreateTeamInput) {
     return await this.transaction.run(async ({ teams }) => {
       const team = new Team();
       team.name = dto.name;
@@ -67,7 +67,7 @@ export class TeamService {
     });
   }
 
-  async update(id: string, dto: UpdateTeamInput): Promise<Team> {
+  async update(id: string, dto: UpdateTeamInput) {
     return await this.transaction.run(async ({ teams }) => {
       const team = await teams.findById(id);
 
@@ -125,17 +125,17 @@ export class TeamService {
     });
   }
 
-  async requireDeletable(id: string): Promise<void> {
+  async requireDeletable(id: string) {
     await this.transaction.run(async (scope) => await this.deletable(scope, id));
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     await this.transaction.run(async (scope) => {
       await scope.teams.delete(await this.deletable(scope, id));
     });
   }
 
-  private async deletable({ teams, contracts }: RosterWriteScope, id: string): Promise<Team> {
+  private async deletable({ teams, contracts }: RosterWriteScope, id: string) {
     const team = await teams.findById(id);
 
     if (!team) {

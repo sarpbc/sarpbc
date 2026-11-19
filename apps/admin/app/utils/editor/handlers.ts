@@ -18,11 +18,10 @@ interface EditorHandler {
 
 export type EditorHandlers = Readonly<Record<string, EditorHandler>>;
 
-const levelOf = (command: EditorCommand): HeadingLevel => command.level ?? 1;
+const levelOf = (command: EditorCommand) => command.level ?? 1;
 
-const markOf = (command: EditorCommand): string => command.mark ?? "bold";
+const markOf = (command: EditorCommand) => command.mark ?? "bold";
 
-/* Core commands only, so these stay typed without each extension's command augmentation. */
 export const DEFAULT_EDITOR_HANDLERS = {
   blockquote: {
     canExecute: (editor) => editor.can().toggleWrap("blockquote"),

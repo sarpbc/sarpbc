@@ -3,7 +3,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { Match } from "../domain/match";
-import type { TournamentSummary } from "../domain/match";
 import { TournamentEvent } from "../domain/tournament-event";
 import type { EventStage } from "./ports";
 import { ViewershipService } from "./viewership.service";
@@ -18,7 +17,7 @@ const VIEWERSHIP: Viewership = {
   sourceUrl: "https://escharts.com/tournaments/rl/fake-open",
 };
 
-const stage = (source: DataSource): TournamentSummary => ({
+const stage = (source: DataSource) => ({
   beginAt: null,
   event: { id: "event", name: "Fake Open", slug: "fake-open" },
   eventStreams: [],

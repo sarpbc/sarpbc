@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PickemService } from "./pickem.service";
-import type { NamedPick, Pick, PickMatch } from "../domain/pickem";
+import type { Pick, PickMatch } from "../domain/pickem";
 import type { PickemWrites } from "./ports";
 
 describe(PickemService, () => {
@@ -38,7 +38,7 @@ describe(PickemService, () => {
     service = new PickemService(
       {
         list: async () =>
-          picks.map((pick): NamedPick => ({
+          picks.map((pick) => ({
             ...pick,
             user: { ...pick.user, userName: pick.user.id },
           })),

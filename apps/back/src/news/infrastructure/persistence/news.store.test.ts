@@ -5,7 +5,7 @@ import {
   UniqueConstraintViolationException,
 } from "@mikro-orm/core";
 import type { EntityName } from "@mikro-orm/core";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import type { NewsArticleRecord } from "../../application/models";
 import { MikroNewsStore } from "./news.store";
@@ -25,14 +25,14 @@ const article: NewsArticleRecord = {
   updatedAt: null,
 };
 
-const storeFailingWith = (error: Error) => {
+const storeFailingWith = (failure: Error) => {
+  const flushing = { flush: async () => await Promise.reject(failure) };
+
   const em = {
-    findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
-    flush: vi.fn<EntityManager["flush"]>().mockRejectedValue(error),
-    getReference: vi.fn<(entity: EntityName<object>, id: string) => { id: string }>(
-      (_entity, id) => ({ id }),
-    ),
-    persist: vi.fn<() => void>(),
+    findOne: async () => await Promise.resolve(null),
+    flush: flushing.flush,
+    getReference: (_entity: EntityName<object>, id: string) => ({ id }),
+    persist: () => flushing,
   };
 
   return new MikroNewsStore(Object.assign(unconstructed(EntityManager), em));

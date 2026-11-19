@@ -3,9 +3,9 @@ import { StreamerService } from "../../application/streamer.service";
 import type { StreamerFailureReporter } from "../../application/streamer.service";
 import { TOKEN_REQUEST_TIMEOUT_MS } from "../twitch/twitch-app-token";
 import { STREAMS_REQUEST_TIMEOUT_MS } from "../twitch/twitch-helix-source";
-import type { RedisService } from "../../../infrastructure/redis/redis.service";
-import type { LiveStreamSource } from "../../application/ports/live-stream-source";
-import type { TrackedStreamerStore } from "../../application/ports/tracked-streamer-store";
+import { MemoryRedis } from "../../../infrastructure/redis/memory-redis.test-utils";
+import { MemoryLiveStreamSource } from "../../application/ports/live-stream-source.test-utils";
+import { MemoryTrackedStreamerStore } from "../../application/ports/tracked-streamer-store.test-utils";
 import {
   LIVE_STREAMS_KEY,
   LIVE_STREAMS_LOCK_KEY,
@@ -23,37 +23,11 @@ const stream = {
 };
 
 describe(RedisLiveStreamCache, () => {
-  let store = new Map<string, string>();
-
-  const createRedis = () => ({
-    delete: vi.fn<RedisService["delete"]>(async (key) => (store.delete(key) ? 1 : 0)),
-    get: vi.fn<RedisService["get"]>(async (key) => store.get(key) ?? null),
-    setIfAbsent: vi.fn<RedisService["setIfAbsent"]>(async (key, value) => {
-      if (store.has(key)) {
-        return false;
-      }
-
-      store.set(key, value);
-
-      return true;
-    }),
-    setWhileHeld: vi.fn<RedisService["setWhileHeld"]>(async (lockKey, lockValue, key, value) => {
-      if (store.get(lockKey) !== lockValue) {
-        return false;
-      }
-
-      store.set(key, value);
-
-      return true;
-    }),
-  });
-
-  let redis = createRedis();
+  let redis = new MemoryRedis();
   let cache = new RedisLiveStreamCache(redis);
 
   beforeEach(() => {
-    store = new Map();
-    redis = createRedis();
+    redis = new MemoryRedis();
     cache = new RedisLiveStreamCache(redis);
   });
 
@@ -68,17 +42,11 @@ describe(RedisLiveStreamCache, () => {
     await expect(cache.write({ fetchedAt, streams: [stream] }, claim)).resolves.toBe(true);
 
     await expect(cache.read()).resolves.toStrictEqual({ fetchedAt, streams: [stream] });
-    expect(redis.setWhileHeld).toHaveBeenCalledWith(
-      LIVE_STREAMS_LOCK_KEY,
-      claim,
-      LIVE_STREAMS_KEY,
-      expect.any(String),
-      SNAPSHOT_TTL_SECONDS,
-    );
+    expect(redis.ttls.get(LIVE_STREAMS_KEY)).toBe(SNAPSHOT_TTL_SECONDS);
   });
 
   it("ignores an invalid cached value", async () => {
-    store.set(LIVE_STREAMS_KEY, JSON.stringify({ streams: "nope" }));
+    redis.values.set(LIVE_STREAMS_KEY, JSON.stringify({ streams: "nope" }));
 
     await expect(cache.read()).resolves.toBeNull();
   });
@@ -86,7 +54,7 @@ describe(RedisLiveStreamCache, () => {
   it.each(["{not json", "", "undefined"])(
     "ignores the corrupted cached value %j",
     async (value) => {
-      store.set(LIVE_STREAMS_KEY, value);
+      redis.values.set(LIVE_STREAMS_KEY, value);
 
       await expect(cache.read()).resolves.toBeNull();
     },
@@ -94,43 +62,31 @@ describe(RedisLiveStreamCache, () => {
 
   it("refreshes and rewrites the snapshot when the cached value is corrupted", async () => {
     const now = new Date("2026-10-31T20:00:00Z");
-    store.set(LIVE_STREAMS_KEY, "{not json");
+    redis.values.set(LIVE_STREAMS_KEY, "{not json");
 
-    const findLiveRocketLeague = vi
-      .fn<LiveStreamSource["findLiveRocketLeague"]>()
-      .mockResolvedValue([
-        { displayName: "Zen", login: "zenrll", title: "ranked", viewerCount: 900 },
-      ]);
+    const source = new MemoryLiveStreamSource([
+      { displayName: "Zen", login: "zenrll", title: "ranked", viewerCount: 900 },
+    ]);
 
     const service = new StreamerService(
-      {
-        add: vi.fn<TrackedStreamerStore["add"]>(),
-        list: vi
-          .fn<TrackedStreamerStore["list"]>()
-          .mockResolvedValue([
-            { createdAt: now, displayName: "Zen", id: "zenrll-id", login: "zenrll" },
-          ]),
-        remove: vi.fn<TrackedStreamerStore["remove"]>(),
-      },
-      { findLiveRocketLeague },
+      new MemoryTrackedStreamerStore([
+        { createdAt: now, displayName: "Zen", id: "zenrll-id", login: "zenrll" },
+      ]),
+      source,
       cache,
       vi.fn<StreamerFailureReporter>(),
       () => now,
     );
 
     await expect(service.listLive()).resolves.toStrictEqual([stream]);
-    expect(findLiveRocketLeague).toHaveBeenCalledOnce();
+    expect(source.requests).toHaveLength(1);
     await expect(cache.read()).resolves.toStrictEqual({ fetchedAt: now, streams: [stream] });
   });
 
   it("lets a single caller claim the refresh", async () => {
     await expect(cache.claimRefresh()).resolves.toStrictEqual(expect.any(String));
     await expect(cache.claimRefresh()).resolves.toBeNull();
-    expect(redis.setIfAbsent).toHaveBeenCalledWith(
-      LIVE_STREAMS_LOCK_KEY,
-      expect.any(String),
-      LOCK_TTL_SECONDS,
-    );
+    expect(redis.ttls.get(LIVE_STREAMS_LOCK_KEY)).toBe(LOCK_TTL_SECONDS);
   });
 
   it("holds the refresh claim longer than a worst-case refresh", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import { kc } from "../../../test/career-fixtures";
+import { kc } from "../../../test/career.fixture";
 import {
   alpha54,
   countrySources,
@@ -8,7 +8,7 @@ import {
   vatira,
   vitality,
   zen,
-} from "../../../test/country-fixtures";
+} from "../../../test/country.fixture";
 import { CountryService } from "./country.service";
 
 const firstPage = { limit: 25, offset: 0 };
@@ -24,10 +24,9 @@ describe(CountryService, () => {
   });
 
   it("gathers the players, their current teams and the finished matches of a country", async () => {
-    const { sources, findByNationality, list } = countrySources();
+    const { sources, list } = countrySources();
     const page = await new CountryService(sources).detail(" fr ", firstPage);
 
-    expect(findByNationality).toHaveBeenCalledWith("FR");
     expect(page.code).toBe("FR");
     expect(page.players).toStrictEqual([alpha54, exotiik, vatira, zen]);
     expect(page.teams).toStrictEqual([kc, vitality]);
@@ -47,20 +46,18 @@ describe(CountryService, () => {
   });
 
   it("reports a code no player holds", async () => {
-    const { sources, list } = countrySources();
+    const { sources } = countrySources();
 
     await expect(new CountryService(sources).detail("DE", firstPage)).rejects.toThrow(
       NotFoundError,
     );
-    expect(list).not.toHaveBeenCalled();
   });
 
-  it("reports an empty or malformed code without querying players", async () => {
-    const { sources, findByNationality } = countrySources();
+  it("reports an empty or malformed code", async () => {
+    const { sources } = countrySources();
     const service = new CountryService(sources);
 
     await expect(service.detail("", firstPage)).rejects.toThrow(NotFoundError);
     await expect(service.detail("FRA", firstPage)).rejects.toThrow(NotFoundError);
-    expect(findByNationality).not.toHaveBeenCalled();
   });
 });

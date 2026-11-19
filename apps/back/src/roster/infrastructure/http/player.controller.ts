@@ -1,3 +1,4 @@
+import type { PlayerStandIn } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -14,7 +15,6 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import type { PlayerStandIn } from "@sarpbc/types";
 import { PlayerService } from "../../application/player.service";
 import { ContractService } from "../../application/contract.service";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -219,9 +219,7 @@ export class PlayerController {
   }
 
   @Get(":id/stand-ins")
-  async getStandIns(
-    @Param("id", ParseUUIDPipe) id: string,
-  ): Promise<{ standIns: PlayerStandIn[] }> {
+  async getStandIns(@Param("id", ParseUUIDPipe) id: string) {
     const player = await this.playerService.findById(id);
 
     if (!player) {
@@ -236,7 +234,7 @@ export class PlayerController {
         participantId,
         startgg: !isRedistributable(lineupSource(match)),
       })),
-    };
+    } satisfies { standIns: PlayerStandIn[] };
   }
 
   @Get(":id/tournaments")

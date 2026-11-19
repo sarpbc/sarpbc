@@ -22,7 +22,7 @@ export const assertManualBracketMatch = (match: {
   source: DataSource;
   pandascoreId: number | null;
   tournament: { source: DataSource };
-}): void => {
+}) => {
   if (
     match.source === "pandascore" ||
     match.pandascoreId !== null ||
@@ -34,11 +34,7 @@ export const assertManualBracketMatch = (match: {
   }
 };
 
-const feeds = (
-  ancestorId: string,
-  id: string,
-  byId: ReadonlyMap<string, BracketMatch>,
-): boolean => {
+const feeds = (ancestorId: string, id: string, byId: ReadonlyMap<string, BracketMatch>) => {
   const seen = new Set<string>();
   const pending = [id];
 
@@ -65,7 +61,7 @@ export const assertBracketLinks = (
   matchId: string,
   links: readonly BracketLinkInput[],
   stage: StageBracket,
-): void => {
+) => {
   if (links.length === 0) {
     return;
   }
@@ -127,7 +123,7 @@ export interface EmptyBracketMatch {
   previousMatches: { index: number; type: BracketLinkType }[];
 }
 
-const roundName = (size: number): string => {
+const roundName = (size: number) => {
   switch (size) {
     case 4: {
       return "Semifinal";
@@ -143,7 +139,7 @@ const roundName = (size: number): string => {
   }
 };
 
-export const emptySingleEliminationBracket = (teams: EmptyBracketSize): EmptyBracketMatch[] => {
+export const emptySingleEliminationBracket = (teams: EmptyBracketSize) => {
   const matches: EmptyBracketMatch[] = [];
   let previousRound: number[] = [];
 

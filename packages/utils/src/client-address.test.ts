@@ -107,7 +107,7 @@ void describe("client address", () => {
     assert.equal(forwarded("100.80.0.4"), undefined);
   });
 
-  void it("accepts the internal token with a constant-time compare and ignores a wrong length", () => {
+  void it("accepts only the configured internal token", () => {
     assert.equal(internalApiTokenMatches(withToken(TOKEN), TOKEN), true);
     assert.equal(internalApiTokenMatches(withToken("nope"), TOKEN), false);
     assert.equal(internalApiTokenMatches(withToken(TOKEN), undefined), false);

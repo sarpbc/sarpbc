@@ -1,6 +1,6 @@
 export type SyncState = "idle" | "success" | "error";
 
-export const syncIcon = (state: SyncState): string => {
+export const syncIcon = (state: SyncState) => {
   switch (state) {
     case "success": {
       return "i-fluent-checkmark-24-regular";
@@ -26,7 +26,7 @@ export const useTournamentSyncFeedback = () => {
   const syncingId = ref<string | null>(null);
   const states = ref(new Map<string, SyncState>());
 
-  const stateOf = (id: string): SyncState => states.value.get(id) ?? "idle";
+  const stateOf = (id: string) => states.value.get(id) ?? "idle";
 
   const setState = (id: string, state: SyncState) => {
     states.value = new Map(states.value).set(id, state);

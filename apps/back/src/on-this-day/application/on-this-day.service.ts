@@ -31,36 +31,42 @@ export interface OnThisDaySources {
   facts: Pick<OnThisDayFactStore, "onDay">;
 }
 
-const toTeam = (team: Team): OnThisDayTeam => ({
-  darkModeImageUrl: team.darkModeImageUrl,
-  imageUrl: team.imageUrl,
-  logoDarkUrl: team.logoDarkUrl,
-  logoLightUrl: team.logoLightUrl,
-  name: team.name,
-  slug: team.slug,
-});
+type EventOf<K extends OnThisDayEvent["kind"]> = Extract<OnThisDayEvent, { kind: K }>;
 
-const toPlayer = (player: Pick<Player, "name" | "slug">): OnThisDayPlayer => ({
-  name: player.name,
-  slug: player.slug,
-});
+const toTeam = (team: Team) =>
+  ({
+    darkModeImageUrl: team.darkModeImageUrl,
+    imageUrl: team.imageUrl,
+    logoDarkUrl: team.logoDarkUrl,
+    logoLightUrl: team.logoLightUrl,
+    name: team.name,
+    slug: team.slug,
+  }) satisfies OnThisDayTeam;
 
-const toTournament = (
-  tournament: Pick<TournamentSummary, "name" | "slug" | "event">,
-): OnThisDayTournament => {
+const toPlayer = (player: Pick<Player, "name" | "slug">) =>
+  ({
+    name: player.name,
+    slug: player.slug,
+  }) satisfies OnThisDayPlayer;
+
+const toTournament = (tournament: Pick<TournamentSummary, "name" | "slug" | "event">) => {
   const { name, slug, event } = tournament;
 
-  return { event: { name: event.name, slug: event.slug }, name, slug };
+  return {
+    event: { name: event.name, slug: event.slug },
+    name,
+    slug,
+  } satisfies OnThisDayTournament;
 };
 
-const toSide = (participant: TournamentParticipant, match: Match): OnThisDaySide => {
+const toSide = (participant: TournamentParticipant, match: Match) => {
   const result = match.results.find((entry) => entry.participant.id === participant.id);
 
   return {
     players: participant.players.map(toPlayer),
     score: result?.score ?? null,
     team: participant.team ? toTeam(participant.team) : null,
-  };
+  } satisfies OnThisDaySide;
 };
 
 const dated = (at: Date) => {
@@ -69,11 +75,11 @@ const dated = (at: Date) => {
   return { date: formatIsoDay(day), year: day.year };
 };
 
-const title = (tournament: Tournament): OnThisDayEvent[] => {
+const title = (tournament: Tournament) => {
   const { winner, endAt } = tournament;
 
   if (!winner || !endAt || !isRedistributable(tournament.source)) {
-    return [];
+    return [] satisfies OnThisDayEvent[];
   }
 
   return [
@@ -85,25 +91,25 @@ const title = (tournament: Tournament): OnThisDayEvent[] => {
         players: winner.players.map(toPlayer),
         team: winner.team ? toTeam(winner.team) : null,
       },
-    },
+    } satisfies EventOf<"title">,
   ];
 };
 
-const final = (match: Match): OnThisDayEvent[] => {
+const final = (match: Match) => {
   const { winner, endAt, tournament } = match;
 
   if (!winner || !endAt) {
-    return [];
+    return [] satisfies OnThisDayEvent[];
   }
 
   if (!isRedistributable(match.source) || !isRedistributable(tournament.source)) {
-    return [];
+    return [] satisfies OnThisDayEvent[];
   }
 
   const loser = match.participants.find((participant) => participant.id !== winner.id);
 
   if (match.participants.length !== 2 || !loser) {
-    return [];
+    return [] satisfies OnThisDayEvent[];
   }
 
   return [
@@ -114,47 +120,46 @@ const final = (match: Match): OnThisDayEvent[] => {
       match: { publicId: match.publicId, slug: matchPublicSlug(match) },
       tournament: toTournament(tournament),
       winner: toSide(winner, match),
-    },
+    } satisfies EventOf<"final">,
   ];
 };
 
-const transfer = ({ type, date, contract }: Transfer): OnThisDayEvent => ({
-  date: date.toISOString().slice(0, 10),
-  kind: "transfer",
-  player: toPlayer(contract.player),
-  team: toTeam(contract.team),
-  type,
-  year: date.getUTCFullYear(),
-});
+const transfer = ({ type, date, contract }: Transfer) =>
+  ({
+    date: date.toISOString().slice(0, 10),
+    kind: "transfer",
+    player: toPlayer(contract.player),
+    team: toTeam(contract.team),
+    type,
+    year: date.getUTCFullYear(),
+  }) satisfies EventOf<"transfer">;
 
-const birthday =
-  (on: CalendarDay) =>
-  (player: Player): OnThisDayEvent[] => {
-    const born = player.birthday;
+const birthday = (on: CalendarDay) => (player: Player) => {
+  const born = player.birthday;
 
-    if (!born || born.getUTCFullYear() >= on.year) {
-      return [];
-    }
+  if (!born || born.getUTCFullYear() >= on.year) {
+    return [];
+  }
 
-    return [
-      {
-        age: on.year - born.getUTCFullYear(),
-        date: born.toISOString().slice(0, 10),
-        kind: "birthday",
-        player: toPlayer(player),
-        year: born.getUTCFullYear(),
-      },
-    ];
-  };
+  return [
+    {
+      age: on.year - born.getUTCFullYear(),
+      date: born.toISOString().slice(0, 10),
+      kind: "birthday",
+      player: toPlayer(player),
+      year: born.getUTCFullYear(),
+    } satisfies EventOf<"birthday">,
+  ];
+};
 
-const publicLink = (link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink => {
+const publicLink = (link: NonNullable<OnThisDayFact["link"]>) => {
   switch (link.kind) {
     case "player": {
-      return { kind: "player", name: link.name, slug: link.slug };
+      return { kind: "player", name: link.name, slug: link.slug } satisfies OnThisDayLink;
     }
 
     case "team": {
-      return { kind: "team", name: link.name, slug: link.slug };
+      return { kind: "team", name: link.name, slug: link.slug } satisfies OnThisDayLink;
     }
 
     case "tournament": {
@@ -163,24 +168,29 @@ const publicLink = (link: NonNullable<OnThisDayFact["link"]>): OnThisDayLink => 
         kind: "tournament",
         name: link.name,
         slug: link.slug,
-      };
+      } satisfies OnThisDayLink;
     }
 
     case "match": {
-      return { kind: "match", name: link.name, publicId: link.publicId, slug: link.slug };
+      return {
+        kind: "match",
+        name: link.name,
+        publicId: link.publicId,
+        slug: link.slug,
+      } satisfies OnThisDayLink;
     }
 
     default: {
       const exhaustive: never = link;
 
-      return exhaustive;
+      return exhaustive satisfies OnThisDayLink;
     }
   }
 };
 
-const fact = ({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisDayEvent[] => {
+const fact = ({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact) => {
   if (link?.source && !isRedistributable(link.source)) {
-    return [];
+    return [] satisfies OnThisDayEvent[];
   }
 
   return [
@@ -190,11 +200,11 @@ const fact = ({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact): OnThisD
       sourceUrl,
       text: { en: textEn, fr: textFr },
       year,
-    },
+    } satisfies EventOf<"fact">,
   ];
 };
 
-const rank = (event: OnThisDayEvent): number => {
+const rank = (event: OnThisDayEvent) => {
   switch (event.kind) {
     case "fact": {
       return 0;
@@ -223,13 +233,13 @@ const rank = (event: OnThisDayEvent): number => {
 
 const yearOf = ({ year }: OnThisDayEvent) => year ?? Number.MAX_SAFE_INTEGER;
 
-const byInterest = (a: OnThisDayEvent, b: OnThisDayEvent): number =>
+const byInterest = (a: OnThisDayEvent, b: OnThisDayEvent) =>
   rank(a) - rank(b) || yearOf(b) - yearOf(a);
 
 export class OnThisDayService {
   constructor(private readonly sources: OnThisDaySources) {}
 
-  async forDay(requested: CalendarDay | null, now = new Date()): Promise<OnThisDay> {
+  async forDay(requested: CalendarDay | null, now = new Date()) {
     const on = requested ?? calendarDayIn(now, SITE_TIME_ZONE);
     const day = { beforeYear: on.year, day: on.day, month: on.month, timeZone: SITE_TIME_ZONE };
 
@@ -258,6 +268,6 @@ export class OnThisDayService {
       ...transfers.filter(({ date }) => date.getUTCFullYear() < on.year).map(transfer),
     ];
 
-    return { date: formatIsoDay(on), events: events.toSorted(byInterest) };
+    return { date: formatIsoDay(on), events: events.toSorted(byInterest) } satisfies OnThisDay;
   }
 }

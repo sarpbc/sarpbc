@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
@@ -14,7 +14,6 @@ describe(PatService, () => {
   let savedHash: string | null;
   let lastUsedAt: Date | null;
   let service: PatService;
-  const touch = vi.fn<(at: Date) => void>();
 
   beforeEach(() => {
     owner = new User("staff@test.com", "staff", "hash");
@@ -23,7 +22,6 @@ describe(PatService, () => {
     revoked = false;
     savedHash = null;
     lastUsedAt = null;
-    touch.mockReset();
 
     const store: TokenStore = {
       create: async (_ownerId, name, hash) => {
@@ -44,7 +42,6 @@ describe(PatService, () => {
         return true;
       },
       touch: async (_id, at) => {
-        touch(at);
         lastUsedAt = at;
       },
     };
@@ -84,9 +81,10 @@ describe(PatService, () => {
 
   it("limits usage writes to once a minute", async () => {
     const token = await service.createToken(owner.id, "CI");
-    lastUsedAt = new Date(now.getTime() - 10_000);
+    const recentUse = new Date(now.getTime() - 10_000);
+    lastUsedAt = recentUse;
     await expect(service.resolveUser(token.token)).resolves.not.toBeNull();
-    expect(touch).not.toHaveBeenCalled();
+    expect(lastUsedAt).toBe(recentUse);
   });
 
   it("rejects unknown tokens", async () => {
@@ -97,7 +95,7 @@ describe(PatService, () => {
     const token = await service.createToken(owner.id, "CI");
     owner.role = null;
     await expect(service.resolveUser(token.token)).resolves.toBeNull();
-    expect(touch).not.toHaveBeenCalled();
+    expect(lastUsedAt).toBeNull();
   });
 
   it("revokes an owned token", async () => {

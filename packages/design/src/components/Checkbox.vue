@@ -4,7 +4,6 @@ import { useId } from "vue";
 
 import { useDesignAdapters } from "../adapters.ts";
 
-/* `indeterminate` shows a partial selection, such as a table header with some rows checked; a click checks it. */
 const model = defineModel<boolean | "indeterminate">({ default: false });
 
 const {

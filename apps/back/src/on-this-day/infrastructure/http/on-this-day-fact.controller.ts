@@ -1,3 +1,4 @@
+import type { OnThisDayFact } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -11,7 +12,6 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import type { OnThisDayFact } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -26,29 +26,27 @@ export class OnThisDayFactController {
   constructor(private readonly facts: OnThisDayFactService) {}
 
   @Get()
-  async list(): Promise<{ facts: OnThisDayFact[] }> {
-    return { facts: await this.facts.list() };
+  async list() {
+    return { facts: await this.facts.list() } satisfies { facts: OnThisDayFact[] };
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Body({ schema: OnThisDayFactDto }) dto: OnThisDayFactInput,
-  ): Promise<{ fact: OnThisDayFact }> {
-    return { fact: await this.facts.create(dto) };
+  async create(@Body({ schema: OnThisDayFactDto }) dto: OnThisDayFactInput) {
+    return { fact: await this.facts.create(dto) } satisfies { fact: OnThisDayFact };
   }
 
   @Patch(":id")
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body({ schema: OnThisDayFactDto }) dto: OnThisDayFactInput,
-  ): Promise<{ fact: OnThisDayFact }> {
-    return { fact: await this.facts.update(id, dto) };
+  ) {
+    return { fact: await this.facts.update(id, dto) } satisfies { fact: OnThisDayFact };
   }
 
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param("id", ParseUUIDPipe) id: string): Promise<void> {
+  async remove(@Param("id", ParseUUIDPipe) id: string) {
     await this.facts.remove(id);
   }
 }

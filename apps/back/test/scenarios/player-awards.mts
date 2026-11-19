@@ -30,7 +30,7 @@ export const verifyPlayerAwards = async ({
   memberCookie,
   competition,
   outsiderPlayerId,
-}: PlayerAwardsContext): Promise<void> => {
+}: PlayerAwardsContext) => {
   const { tournamentId, participantId, playerId } = competition;
   const url = `/tournaments/${tournamentId}/awards`;
   const input = { awardType: "mvp", participantId, playerId };

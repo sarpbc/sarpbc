@@ -12,7 +12,7 @@ export interface CalendarDay {
   day: number;
 }
 
-export const isMonthDay = (month: number, day: number): boolean => {
+export const isMonthDay = (month: number, day: number) => {
   if (!Number.isInteger(month) || !Number.isInteger(day) || month < 1 || month > 12) {
     return false;
   }
@@ -20,7 +20,7 @@ export const isMonthDay = (month: number, day: number): boolean => {
   return day >= 1 && day <= (DAYS_IN_MONTH[month - 1] ?? 0);
 };
 
-export const calendarDayIn = (date: Date, timeZone: string): CalendarDay => {
+export const calendarDayIn = (date: Date, timeZone: string) => {
   const parts = new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     month: "numeric",
@@ -34,7 +34,7 @@ export const calendarDayIn = (date: Date, timeZone: string): CalendarDay => {
   return { day: part("day"), month: part("month"), year: part("year") };
 };
 
-export const parseIsoDay = (value: string): CalendarDay | null => {
+export const parseIsoDay = (value: string) => {
   const match = ISO_DAY.exec(value);
 
   if (!match) {
@@ -49,5 +49,5 @@ export const parseIsoDay = (value: string): CalendarDay | null => {
     : null;
 };
 
-export const formatIsoDay = ({ year, month, day }: CalendarDay): string =>
+export const formatIsoDay = ({ year, month, day }: CalendarDay) =>
   `${String(year).padStart(4, "0")}-${String(month).padStart(2, "0")}-${String(day).padStart(2, "0")}`;

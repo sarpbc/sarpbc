@@ -4,7 +4,6 @@ import { MikroORM, RequestContext } from "@mikro-orm/core";
 import { log } from "evlog";
 import { StatsImportService } from "../application/stats-import.service";
 
-/** Status lives in PostgreSQL; an import cut short by a restart is marked failed at boot. */
 @Injectable()
 export class InterruptedImportsSweeper implements OnApplicationBootstrap {
   constructor(
@@ -12,7 +11,7 @@ export class InterruptedImportsSweeper implements OnApplicationBootstrap {
     private readonly imports: StatsImportService,
   ) {}
 
-  async onApplicationBootstrap(): Promise<void> {
+  async onApplicationBootstrap() {
     const interrupted = await RequestContext.create(
       this.orm.em,
       async () => await this.imports.failInterrupted(),

@@ -41,7 +41,7 @@ const RESOLUTIONS: readonly Size[] = [
   { height: 540, width: 960 },
 ];
 
-export const finalScores = (script: SeriesScript): FinalScore[] =>
+export const finalScores = (script: SeriesScript) =>
   script.games.map((game) => {
     const goals = game.overtime === null ? game.goals : [...game.goals, game.overtime];
 
@@ -51,7 +51,7 @@ export const finalScores = (script: SeriesScript): FinalScore[] =>
     };
   });
 
-const scriptedGame = (random: () => number, winner: StreamScoreSide): GameScript => {
+const scriptedGame = (random: () => number, winner: StreamScoreSide) => {
   const loser: StreamScoreSide = winner === "blue" ? "orange" : "blue";
   const overtime = random() < 0.2;
   const loserGoals = Math.floor(random() * 4);
@@ -82,7 +82,7 @@ const scriptedGame = (random: () => number, winner: StreamScoreSide): GameScript
   };
 };
 
-export const generateSeries = (count: number, seed: number): SeriesScript[] => {
+export const generateSeries = (count: number, seed: number) => {
   const random = seededRandom(seed);
 
   return Array.from({ length: count }, (_, index) => {
@@ -108,21 +108,22 @@ export const generateSeries = (count: number, seed: number): SeriesScript[] => {
   });
 };
 
-const scorebug = (score: FinalScore, clock: number, overtime: boolean): ScorebugScene => ({
-  kind: "scorebug",
-  ...score,
-  clock,
-  fade: 1,
-  glitch: false,
-  overtime,
-  replay: false,
-});
+const scorebug = (score: FinalScore, clock: number, overtime: boolean) =>
+  ({
+    kind: "scorebug",
+    ...score,
+    clock,
+    fade: 1,
+    glitch: false,
+    overtime,
+    replay: false,
+  }) satisfies ScorebugScene;
 
-export const broadcast = function* broadcast(script: SeriesScript): Generator<TimedScene> {
+export const broadcast = function* broadcast(script: SeriesScript) {
   const random = seededRandom(script.seed);
   let t = 0;
 
-  const hold = function* hold(scene: Scene, seconds: number): Generator<TimedScene> {
+  const hold = function* hold(scene: Scene, seconds: number) {
     for (let second = 0; second < seconds; second += 1) {
       const glitch = scene.kind === "scorebug" && random() < 0.02;
       const cut = scene.kind === "scorebug" && random() < 0.01;

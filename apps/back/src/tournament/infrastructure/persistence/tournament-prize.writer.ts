@@ -32,7 +32,7 @@ export class CompetitionPrizeWriter implements PrizeWriter {
     );
   }
 
-  async entries(tournamentId: string): Promise<PrizeEntry[]> {
+  async entries(tournamentId: string) {
     const rows = await this.em.find(
       TournamentPrize,
       { tournament: tournamentId },
@@ -46,7 +46,7 @@ export class CompetitionPrizeWriter implements PrizeWriter {
       playerIds: row.players.getItems().map(({ id }) => id),
       sourceUrl: row.sourceUrl,
       teamId: row.team.id,
-    }));
+    })) satisfies PrizeEntry[];
   }
 
   async replace(tournamentId: string, entries: PrizeEntry[]) {

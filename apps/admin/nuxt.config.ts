@@ -69,7 +69,6 @@ export default defineNuxtConfig({
   i18n: i18nOptions,
 
   icon: {
-    // Utilities and component styles must be able to size icons.
     cssLayer: "base",
   },
 

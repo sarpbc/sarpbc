@@ -37,7 +37,7 @@ const onLetterPress = (letter: string) => {
   emit("letter", letter);
 };
 
-const keyLabel = (letter: string): string => {
+const keyLabel = (letter: string) => {
   const status = letterStatuses[letter.toUpperCase()];
 
   switch (status) {
@@ -66,7 +66,7 @@ const keyLabel = (letter: string): string => {
   }
 };
 
-const keyClass = (letter: string): string => {
+const keyClass = (letter: string) => {
   const status = letterStatuses[letter.toUpperCase()];
 
   switch (status) {

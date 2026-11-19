@@ -8,40 +8,43 @@ import { SyncPandascoreTeamsUseCase } from "../../application/sync-pandascore-te
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
 import { unconstructed } from "../../../../test/doubles";
-import { unusedTournamentQueries } from "../../../../test/unused-tournament-queries";
+import { tournamentQueries } from "../../../../test/competition-doubles";
 
 describe(TeamController, () => {
   const kept = Object.assign(new Team(), { id: "kept", name: "Kept" });
-  const findById = vi.fn<TeamService["findById"]>();
-  const getFormerPlayersByTeam = vi.fn<ContractService["getFormerPlayersByTeam"]>();
-  const getContractsByTeam = vi.fn<ContractService["getContractsByTeam"]>();
-  const getTournamentsWonByTeam = vi.fn<TournamentQueries["getTournamentsWonByTeam"]>();
-  const getTournamentsByTeam = vi.fn<TournamentQueries["getTournamentsByTeam"]>();
-  const teamEarnings = vi.fn<TournamentPrizeService["teamEarnings"]>();
+  const teamQueries: Pick<TeamService, "findById"> = { findById: async () => kept };
 
-  const tournaments: TournamentQueries = {
-    ...unusedTournamentQueries,
-    getTournamentsByTeam,
-    getTournamentsWonByTeam,
+  const contractQueries: Pick<ContractService, "getContractsByTeam" | "getFormerPlayersByTeam"> = {
+    getContractsByTeam: async () => [],
+    getFormerPlayersByTeam: async () => [],
   };
 
+  const tournaments: TournamentQueries = tournamentQueries({
+    getTournamentsByTeam: async () => [],
+    getTournamentsWonByTeam: async () => [],
+  });
+
+  const prizeQueries: Pick<TournamentPrizeService, "teamEarnings"> = {
+    teamEarnings: async () => ({ totals: [], years: [] }),
+  };
+
+  const getFormerPlayersByTeam = vi.spyOn(contractQueries, "getFormerPlayersByTeam");
+  const getContractsByTeam = vi.spyOn(contractQueries, "getContractsByTeam");
+  const getTournamentsWonByTeam = vi.spyOn(tournaments, "getTournamentsWonByTeam");
+  const getTournamentsByTeam = vi.spyOn(tournaments, "getTournamentsByTeam");
+  const teamEarnings = vi.spyOn(prizeQueries, "teamEarnings");
+
   const controller = new TeamController(
-    Object.assign(unconstructed(TeamService), { findById }),
+    Object.assign(unconstructed(TeamService), teamQueries),
     new TeamAliasService({ run: async () => await Promise.reject(new Error("unused")) }),
-    Object.assign(unconstructed(ContractService), { getContractsByTeam, getFormerPlayersByTeam }),
+    Object.assign(unconstructed(ContractService), contractQueries),
     tournaments,
-    Object.assign(unconstructed(TournamentPrizeService), { teamEarnings }),
+    Object.assign(unconstructed(TournamentPrizeService), prizeQueries),
     unconstructed(SyncPandascoreTeamsUseCase),
   );
 
   beforeEach(() => {
-    vi.resetAllMocks();
-    findById.mockResolvedValue(kept);
-    getFormerPlayersByTeam.mockResolvedValue([]);
-    getContractsByTeam.mockResolvedValue([]);
-    getTournamentsWonByTeam.mockResolvedValue([]);
-    getTournamentsByTeam.mockResolvedValue([]);
-    teamEarnings.mockResolvedValue({ totals: [], years: [] });
+    vi.clearAllMocks();
   });
 
   it("reads the sub-resources of the team a merged id resolves to", async () => {

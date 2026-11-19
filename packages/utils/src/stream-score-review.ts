@@ -26,15 +26,15 @@ export interface StreamScoreSeriesResult {
   score: number;
 }
 
-export const streamScoreGameNeedsCheck = (game: StreamScoreGame): boolean =>
+export const streamScoreGameNeedsCheck = (game: StreamScoreGame) =>
   game.confidence < LOW_CONFIDENCE || game.endedBy === "reset" || game.endedBy === "stream_end";
 
 export const streamScoreBestOfMismatch = (
   proposal: StreamScoreProposal,
   numberOfGames: number | null,
-): boolean => numberOfGames !== null && numberOfGames !== proposal.bestOf;
+) => numberOfGames !== null && numberOfGames !== proposal.bestOf;
 
-export const isForbiddenStreamScoreSource = (source: string): boolean => {
+export const isForbiddenStreamScoreSource = (source: string) => {
   let url: URL;
 
   try {
@@ -51,7 +51,7 @@ export const isForbiddenStreamScoreSource = (source: string): boolean => {
 export const streamScoreConfirmBlockers = (
   proposal: StreamScoreProposal,
   review: StreamScoreReview,
-): StreamScoreConfirmBlocker[] => {
+) => {
   const blockers: StreamScoreConfirmBlocker[] = [];
 
   if (proposal.series.winner === null) {
@@ -87,7 +87,7 @@ export const streamScoreConfirmBlockers = (
 export const streamScoreSeriesResults = (
   series: StreamScoreSeries,
   participants: Record<StreamScoreSide, string>,
-): StreamScoreSeriesResult[] => [
+) => [
   { participantId: participants.blue, score: series.blue },
   { participantId: participants.orange, score: series.orange },
 ];

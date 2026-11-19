@@ -23,24 +23,25 @@ interface Tally {
 
 const COUNTS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
-const round = (value: number, digits: number): number => {
+const round = (value: number, digits: number) => {
   const factor = 10 ** digits;
 
   return Math.round(value * factor) / factor;
 };
 
-const percentage = (part: number, whole: number): number | null =>
+const percentage = (part: number, whole: number) =>
   whole === 0 ? null : round((part * 100) / whole, 1);
 
-const emptyCounts = (): PlayerStatCounts => ({
-  assists: 0,
-  demolitions: 0,
-  goals: 0,
-  saves: 0,
-  shots: 0,
-});
+const emptyCounts = () =>
+  ({
+    assists: 0,
+    demolitions: 0,
+    goals: 0,
+    saves: 0,
+    shots: 0,
+  }) satisfies PlayerStatCounts;
 
-const toStats = ({ player, team, games, totals, teamGoals }: Tally): TournamentPlayerStats => {
+const toStats = ({ player, team, games, totals, teamGoals }: Tally) => {
   const perGame = emptyCounts();
 
   for (const count of COUNTS) {
@@ -55,12 +56,10 @@ const toStats = ({ player, team, games, totals, teamGoals }: Tally): TournamentP
     shootingPercentage: percentage(totals.goals, totals.shots),
     team,
     totals,
-  };
+  } satisfies TournamentPlayerStats;
 };
 
-export const aggregatePlayerStats = (
-  lines: readonly PlayerGameLine[],
-): TournamentPlayerStatsResponse => {
+export const aggregatePlayerStats = (lines: readonly PlayerGameLine[]) => {
   const games = new Set<string>();
   const unlinked = new Set<string>();
   const tallies = new Map<string, Tally>();
@@ -105,5 +104,5 @@ export const aggregatePlayerStats = (
           a.team.name.localeCompare(b.team.name) || a.player.name.localeCompare(b.player.name),
       ),
     unlinkedAccounts: unlinked.size,
-  };
+  } satisfies TournamentPlayerStatsResponse;
 };

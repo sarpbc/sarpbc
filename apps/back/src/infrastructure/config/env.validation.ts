@@ -73,7 +73,7 @@ const SECRET_FILES = {
   R2_SECRET_ACCESS_KEY: "sarpbc_r2_secret_access_key",
 } as const;
 
-export const readSecret = (env: RawEnv, name: string, file: string): string | undefined => {
+export const readSecret = (env: RawEnv, name: string, file: string) => {
   const value = env[name];
 
   if (value !== undefined) {
@@ -84,7 +84,7 @@ export const readSecret = (env: RawEnv, name: string, file: string): string | un
     return readFileSync(`/run/secrets/${file}`, "utf-8").trim();
   } catch (error) {
     if (error instanceof Error && "code" in error && error.code === "ENOENT") {
-      return undefined;
+      return value;
     }
 
     throw error;
@@ -93,16 +93,13 @@ export const readSecret = (env: RawEnv, name: string, file: string): string | un
 
 const withSecrets = (env: RawEnv, files: Readonly<Record<string, string>>) => {
   const secrets = Object.fromEntries(
-    Object.entries(files).map(([name, file]): [string, string | undefined] => [
-      name,
-      readSecret(env, name, file),
-    ]),
+    Object.entries(files).map(([name, file]) => [name, readSecret(env, name, file)]),
   );
 
   return { ...env, ...secrets };
 };
 
-const parse = <T extends z.ZodType>(schema: T, env: RawEnv): z.infer<T> => {
+const parse = <T extends z.ZodType>(schema: T, env: RawEnv) => {
   const parsed = schema.safeParse(env);
 
   if (!parsed.success) {
@@ -133,11 +130,10 @@ export const loadEnv = () => validateEnv(process.env);
 
 export const loadDatabaseEnv = () => validateDatabaseEnv(process.env);
 
-export const nodeEnvironment = (): z.infer<typeof nodeEnvSchema> =>
-  nodeEnvSchema.parse(process.env.NODE_ENV);
+export const nodeEnvironment = () => nodeEnvSchema.parse(process.env.NODE_ENV);
 
-export const frontUrl = (): string => urlSchema.parse(process.env.FRONT_URL);
+export const frontUrl = () => urlSchema.parse(process.env.FRONT_URL);
 
-export const adminUrl = (): string => urlSchema.parse(process.env.ADMIN_URL);
+export const adminUrl = () => urlSchema.parse(process.env.ADMIN_URL);
 
 export type Env = ReturnType<typeof validateEnv>;

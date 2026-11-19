@@ -3,7 +3,7 @@ import { ROSTER_PROPOSAL_PERMISSIONS, hasPermission } from "@sarpbc/utils";
 
 interface AdminSection {
   path: string;
-  /** Any one of these grants access; omitted means every staff member. */
+  // WARNING: omitting permissions grants every staff member; a list grants any one of them.
   permissions?: readonly StaffPermission[];
   icon: string;
   label: string;
@@ -97,26 +97,22 @@ const ADMIN_SECTIONS = [
 
 export type AdminSectionPath = (typeof ADMIN_SECTIONS)[number]["path"];
 
-const meetsSection = (user: User | null | undefined, section: AdminSection): boolean =>
+const meetsSection = (user: User | null | undefined, section: AdminSection) =>
   !section.permissions || section.permissions.some((permission) => hasPermission(user, permission));
 
-export const visibleAdminSections = (user: User | null | undefined): readonly AdminSection[] =>
+export const visibleAdminSections = (user: User | null | undefined) =>
   ADMIN_SECTIONS.filter((section) => meetsSection(user, section));
 
-export const canAccessSection = (user: User | null | undefined, path: AdminSectionPath): boolean =>
+export const canAccessSection = (user: User | null | undefined, path: AdminSectionPath) =>
   visibleAdminSections(user).some((section) => section.path === path);
 
-/** Pages are named after their path, so `news-slug` belongs to `/news`. Unknown routes are open to staff. */
-const adminSectionForRoute = (baseName: string | undefined): AdminSection | undefined => {
+const adminSectionForRoute = (baseName: string | undefined) => {
   const root = baseName?.split("-")[0];
 
   return ADMIN_SECTIONS.find((section) => section.path === `/${root}`);
 };
 
-export const canAccessRoute = (
-  user: User | null | undefined,
-  baseName: string | undefined,
-): boolean => {
+export const canAccessRoute = (user: User | null | undefined, baseName: string | undefined) => {
   const section = adminSectionForRoute(baseName);
 
   return !section || meetsSection(user, section);

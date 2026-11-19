@@ -18,7 +18,7 @@ export interface FaqPageLd extends JsonLdNode {
   }[];
 }
 
-export const buildFaqPage = (items: FaqPageItem[]): FaqPageLd =>
+export const buildFaqPage = (items: FaqPageItem[]) =>
   compactJsonLd({
     "@context": SCHEMA_ORG,
     "@type": "FAQPage",

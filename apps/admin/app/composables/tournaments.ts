@@ -21,10 +21,7 @@ import type {
 } from "@sarpbc/types";
 import type { StreamScoreSeriesResult } from "@sarpbc/utils";
 
-export const getAllTournaments = async (query: {
-  limit: number;
-  offset: number;
-}): Promise<{ tournaments: TournamentListItem[]; total: number }> => {
+export const getAllTournaments = async (query: { limit: number; offset: number }) => {
   const res = await apiFetch<{ tournaments: TournamentListItem[]; count: number }>("/tournaments", {
     method: "GET",
     query: { limit: query.limit, offset: query.offset },
@@ -33,7 +30,7 @@ export const getAllTournaments = async (query: {
   return { total: res.count, tournaments: res.tournaments };
 };
 
-export const getTournamentById = async (id: string): Promise<TournamentDetail> => {
+export const getTournamentById = async (id: string) => {
   const res = await apiFetch<{ tournament: TournamentDetail }>(`/tournaments/${id}`, {
     method: "GET",
   });
@@ -41,13 +38,11 @@ export const getTournamentById = async (id: string): Promise<TournamentDetail> =
   return res.tournament;
 };
 
-export const syncTournament = async (tournamentId: string): Promise<void> => {
+export const syncTournament = async (tournamentId: string) => {
   await apiFetch(`/tournaments/${tournamentId}/sync`, { method: "POST" });
 };
 
-export const getTournamentMatches = async (
-  tournamentId: string,
-): Promise<TournamentMatchListItem[]> => {
+export const getTournamentMatches = async (tournamentId: string) => {
   const res = await apiFetch<{ matches: TournamentMatchListItem[] }>(
     `/tournaments/${tournamentId}/matches`,
     { method: "GET" },
@@ -56,18 +51,18 @@ export const getTournamentMatches = async (
   return res.matches;
 };
 
-export const enableTournamentPickems = async (tournamentId: string): Promise<void> => {
+export const enableTournamentPickems = async (tournamentId: string) => {
   await apiFetch(`/tournaments/${tournamentId}/enable-pickems`, {
     body: { enabled: true },
     method: "POST",
   });
 };
 
-export const syncTournamentAdditions = async (): Promise<void> => {
+export const syncTournamentAdditions = async () => {
   await apiFetch("/tournaments/sync/additions", { method: "POST" });
 };
 
-export const getTournamentsWithoutMatches = async (): Promise<{ id: string; name: string }[]> => {
+export const getTournamentsWithoutMatches = async () => {
   const res = await apiFetch<{ tournaments: { id: string; name: string }[] }>(
     "/tournaments/without-matches",
     { method: "GET" },
@@ -76,39 +71,33 @@ export const getTournamentsWithoutMatches = async (): Promise<{ id: string; name
   return res.tournaments;
 };
 
-export const setMatchWinner = async (matchId: string, winnerId: string): Promise<void> => {
+export const setMatchWinner = async (matchId: string, winnerId: string) => {
   await apiFetch(`/tournaments/matches/${matchId}/winner`, {
     body: { winnerId },
     method: "PUT",
   });
 };
 
-export const setMatchResult = async (
-  matchId: string,
-  results: StreamScoreSeriesResult[],
-): Promise<void> => {
+export const setMatchResult = async (matchId: string, results: StreamScoreSeriesResult[]) => {
   await apiFetch(`/tournaments/matches/${matchId}`, {
     body: { results, status: "finished" },
     method: "PATCH",
   });
 };
 
-export const setMatchSource = async (matchId: string, sourceUrl: string | null): Promise<void> => {
+export const setMatchSource = async (matchId: string, sourceUrl: string | null) => {
   await apiFetch(`/tournaments/matches/${matchId}/source`, {
     body: { sourceUrl },
     method: "PUT",
   });
 };
 
-export const getMatchLineups = async (matchId: string): Promise<MatchLineupsResponse> =>
+export const getMatchLineups = async (matchId: string) =>
   await apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
     method: "GET",
   });
 
-export const setMatchLineups = async (
-  matchId: string,
-  lineups: MatchLineupInput[],
-): Promise<MatchLineupsResponse> =>
+export const setMatchLineups = async (matchId: string, lineups: MatchLineupInput[]) =>
   await apiFetch<MatchLineupsResponse>(`/tournaments/matches/${matchId}/lineups`, {
     body: { lineups },
     method: "PUT",
@@ -137,7 +126,7 @@ export interface ManualTournamentInput {
   hasBracket?: boolean;
 }
 
-export const getTournamentLeagues = async (): Promise<League[]> => {
+export const getTournamentLeagues = async () => {
   const res = await apiFetch<{ leagues: League[] }>("/tournaments/leagues", {
     method: "GET",
   });
@@ -145,7 +134,7 @@ export const getTournamentLeagues = async (): Promise<League[]> => {
   return res.leagues;
 };
 
-export const createLeague = async (body: LeagueInput): Promise<League> => {
+export const createLeague = async (body: LeagueInput) => {
   const res = await apiFetch<{ league: League }>("/tournaments/leagues", {
     body,
     method: "POST",
@@ -154,7 +143,7 @@ export const createLeague = async (body: LeagueInput): Promise<League> => {
   return res.league;
 };
 
-export const updateLeague = async (id: string, body: LeagueInput): Promise<League> => {
+export const updateLeague = async (id: string, body: LeagueInput) => {
   const res = await apiFetch<{ league: League }>(`/tournaments/leagues/${id}`, {
     body,
     method: "PATCH",
@@ -163,39 +152,39 @@ export const updateLeague = async (id: string, body: LeagueInput): Promise<Leagu
   return res.league;
 };
 
-export const getManualEvents = async (): Promise<ManualEvent[]> => {
+export const getManualEvents = async () => {
   const res = await apiFetch<{ events: ManualEvent[] }>("/events/manual", { method: "GET" });
 
   return res.events;
 };
 
-export const getManualEvent = async (id: string): Promise<ManualEvent> => {
+export const getManualEvent = async (id: string) => {
   const res = await apiFetch<{ event: ManualEvent }>(`/events/manual/${id}`, { method: "GET" });
 
   return res.event;
 };
 
-export const createEvent = async (body: EventInput): Promise<ManualEvent> => {
+export const createEvent = async (body: EventInput) => {
   const res = await apiFetch<{ event: ManualEvent }>("/events", { body, method: "POST" });
 
   return res.event;
 };
 
-export const updateEvent = async (id: string, body: EventInput): Promise<ManualEvent> => {
+export const updateEvent = async (id: string, body: EventInput) => {
   const res = await apiFetch<{ event: ManualEvent }>(`/events/${id}`, { body, method: "PATCH" });
 
   return res.event;
 };
 
-export const deleteEvent = async (id: string): Promise<void> => {
+export const deleteEvent = async (id: string) => {
   await apiFetch(`/events/${id}`, { method: "DELETE" });
 };
 
-export const deleteTournament = async (id: string): Promise<void> => {
+export const deleteTournament = async (id: string) => {
   await apiFetch(`/tournaments/${id}`, { method: "DELETE" });
 };
 
-export const createTournament = async (body: ManualTournamentInput): Promise<TournamentDetail> => {
+export const createTournament = async (body: ManualTournamentInput) => {
   const res = await apiFetch<{ tournament: TournamentDetail }>("/tournaments", {
     body,
     method: "POST",
@@ -204,10 +193,7 @@ export const createTournament = async (body: ManualTournamentInput): Promise<Tou
   return res.tournament;
 };
 
-export const updateTournament = async (
-  id: string,
-  body: Partial<ManualTournamentInput>,
-): Promise<TournamentDetail> => {
+export const updateTournament = async (id: string, body: Partial<ManualTournamentInput>) => {
   const res = await apiFetch<{ tournament: TournamentDetail }>(`/tournaments/${id}`, {
     body,
     method: "PATCH",
@@ -216,9 +202,7 @@ export const updateTournament = async (
   return res.tournament;
 };
 
-export const getTournamentAwards = async (
-  tournamentId: string,
-): Promise<TournamentAwardListItem[]> => {
+export const getTournamentAwards = async (tournamentId: string) => {
   const res = await apiFetch<{ awards: TournamentAwardListItem[] }>(
     `/tournaments/${tournamentId}/awards`,
     { method: "GET" },
@@ -230,7 +214,7 @@ export const getTournamentAwards = async (
 export const createTournamentAward = async (
   tournamentId: string,
   payload: { participantId: string; playerId: string; awardType: PlayerAwardType },
-): Promise<TournamentAwardListItem> => {
+) => {
   const res = await apiFetch<{ award: TournamentAwardListItem }>(
     `/tournaments/${tournamentId}/awards`,
     { body: payload, method: "POST" },
@@ -239,10 +223,7 @@ export const createTournamentAward = async (
   return res.award;
 };
 
-export const deleteTournamentAward = async (
-  tournamentId: string,
-  awardId: string,
-): Promise<void> => {
+export const deleteTournamentAward = async (tournamentId: string, awardId: string) => {
   await apiFetch(`/tournaments/${tournamentId}/awards/${awardId}`, { method: "DELETE" });
 };
 
@@ -255,19 +236,16 @@ export interface TournamentPrizeInput {
   sourceUrl: string | null;
 }
 
-export const getTournamentPrizes = async (tournamentId: string): Promise<TournamentPrizes> =>
+export const getTournamentPrizes = async (tournamentId: string) =>
   await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
 
-export const setTournamentPrizes = async (
-  tournamentId: string,
-  prizes: TournamentPrizeInput[],
-): Promise<TournamentPrizes> =>
+export const setTournamentPrizes = async (tournamentId: string, prizes: TournamentPrizeInput[]) =>
   await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, {
     body: { prizes },
     method: "PUT",
   });
 
-export const getStatsImports = async (tournamentId: string): Promise<StatsImport[]> => {
+export const getStatsImports = async (tournamentId: string) => {
   const res = await apiFetch<{ imports: StatsImport[] }>(
     `/tournaments/${tournamentId}/stats-imports`,
     { method: "GET" },
@@ -276,23 +254,18 @@ export const getStatsImports = async (tournamentId: string): Promise<StatsImport
   return res.imports;
 };
 
-export const requestStatsImport = async (
-  tournamentId: string,
-  group: string,
-): Promise<StatsImport> =>
+export const requestStatsImport = async (tournamentId: string, group: string) =>
   await apiFetch<StatsImport>(`/tournaments/${tournamentId}/stats-imports`, {
     body: { group },
     method: "POST",
   });
 
-export const getStatsPlayerAccounts = async (tournamentId: string): Promise<StatsPlayerAccounts> =>
+export const getStatsPlayerAccounts = async (tournamentId: string) =>
   await apiFetch<StatsPlayerAccounts>(`/tournaments/${tournamentId}/stats-players`, {
     method: "GET",
   });
 
-export const getTournamentStatsGames = async (
-  tournamentId: string,
-): Promise<TournamentStatsGame[]> => {
+export const getTournamentStatsGames = async (tournamentId: string) => {
   const res = await apiFetch<{ games: TournamentStatsGame[] }>(
     `/tournaments/${tournamentId}/stats-games`,
     { method: "GET" },
@@ -301,29 +274,19 @@ export const getTournamentStatsGames = async (
   return res.games;
 };
 
-export const attachStatsReplay = async (
-  tournamentId: string,
-  body: AttachReplayInput,
-): Promise<TournamentStatsGame> =>
+export const attachStatsReplay = async (tournamentId: string, body: AttachReplayInput) =>
   await apiFetch<TournamentStatsGame>(`/tournaments/${tournamentId}/stats-games`, {
     body,
     method: "POST",
   });
 
-export const removeStatsGame = async (
-  tournamentId: string,
-  matchId: string,
-  number: number,
-): Promise<TournamentStatsGame> =>
+export const removeStatsGame = async (tournamentId: string, matchId: string, number: number) =>
   await apiFetch<TournamentStatsGame>(
     `/tournaments/${tournamentId}/stats-games/${matchId}/${number}`,
     { method: "DELETE" },
   );
 
-export const linkStatsPlayer = async (
-  tournamentId: string,
-  body: StatsPlayerLinkInput,
-): Promise<StatsPlayerLinkResult> =>
+export const linkStatsPlayer = async (tournamentId: string, body: StatsPlayerLinkInput) =>
   await apiFetch<StatsPlayerLinkResult>(`/tournaments/${tournamentId}/stats-players/link`, {
     body,
     method: "PUT",

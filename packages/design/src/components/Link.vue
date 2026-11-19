@@ -4,7 +4,6 @@ import { useDesignAdapters } from "../adapters.ts";
 import type { LinkVariant } from "../types.ts";
 
 const { to, variant = "primary" } = defineProps<{
-  /** A path, a URL or a route location; the app's link adapter resolves it. */
   to: string | object;
   variant?: LinkVariant;
 }>();

@@ -17,7 +17,7 @@ const dayHeaderFormatter = (locale: string) =>
     year: "numeric",
   });
 
-export const formatDayHeaderDate = (date: Date, locale: string): string => {
+export const formatDayHeaderDate = (date: Date, locale: string) => {
   const formatted = dayHeaderFormatter(locale).format(date);
 
   return formatted.charAt(0).toLocaleUpperCase(locale) + formatted.slice(1);

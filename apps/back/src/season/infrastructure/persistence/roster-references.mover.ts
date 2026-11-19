@@ -12,7 +12,7 @@ const awardKey = ({ season, awardType, region }: SeasonAward) =>
 export class SeasonRosterReferences implements RosterReferenceMover {
   constructor(private readonly em: EntityManager) {}
 
-  async movePlayer(from: string, to: string): Promise<void> {
+  async movePlayer(from: string, to: string) {
     const awards = await this.em.find(
       SeasonAward,
       { player: { $in: [from, to] } },
@@ -32,7 +32,7 @@ export class SeasonRosterReferences implements RosterReferenceMover {
     await this.em.nativeUpdate(SeasonAward, { player: from }, { player: to });
   }
 
-  async moveTeam(from: string, to: string): Promise<void> {
+  async moveTeam(from: string, to: string) {
     await this.em.nativeUpdate(Season, { winnerTeam: from }, { winnerTeam: to });
 
     const participants = await this.em.find(

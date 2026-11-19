@@ -14,8 +14,6 @@ export interface PlayerTournamentsContext {
 
 const playerRef = z.object({ id: z.string(), name: z.string(), slug: z.string() });
 
-type PlayerRef = z.infer<typeof playerRef>;
-
 const playerBody = z.object({ player: playerRef });
 
 const soloTournamentBody = z.object({
@@ -76,7 +74,7 @@ export const verifyPlayerTournaments = async ({
   staffCookie,
   memberCookie,
   RequestContext,
-}: PlayerTournamentsContext): Promise<void> => {
+}: PlayerTournamentsContext) => {
   const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
 
   const { RosterMergeService } =
@@ -93,7 +91,7 @@ export const verifyPlayerTournaments = async ({
 
   const { assignReplays } = await import("../../src/match-stats/domain/replay-matching.ts");
 
-  const createPlayer = async (name: string): Promise<PlayerRef> => {
+  const createPlayer = async (name: string) => {
     const response = await request("POST", "/player", { name }, staffCookie, 201);
 
     return response.json(playerBody).player;
@@ -138,7 +136,7 @@ export const verifyPlayerTournaments = async ({
   );
   assert.equal(await orm.em.fork().count(Team, {}), teamsBefore, "no team is created for players");
 
-  const participantOf = (playerId: string): string => {
+  const participantOf = (playerId: string) => {
     const participant = tournament.participants.find((entry) => entry.players[0].id === playerId);
     assert.ok(participant, "the tournament has the player");
 

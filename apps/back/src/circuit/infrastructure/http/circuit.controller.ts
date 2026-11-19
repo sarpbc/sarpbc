@@ -1,3 +1,9 @@
+import type {
+  CircuitDetail,
+  CircuitEventTeam,
+  CircuitStandings,
+  CircuitSummary,
+} from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -13,12 +19,6 @@ import {
   Put,
   UseGuards,
 } from "@nestjs/common";
-import type {
-  CircuitDetail,
-  CircuitEventTeam,
-  CircuitStandings,
-  CircuitSummary,
-} from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -36,31 +36,29 @@ export class CircuitController {
 
   @Get()
   @Header("Cache-Control", "public, max-age=60")
-  async list(): Promise<{ circuits: CircuitSummary[] }> {
-    return { circuits: await this.circuits.list() };
+  async list() {
+    return { circuits: await this.circuits.list() } satisfies { circuits: CircuitSummary[] };
   }
 
   @Get(":ref/standings")
   @Header("Cache-Control", "public, max-age=60")
-  async standings(@Param("ref") ref: string): Promise<CircuitStandings> {
-    return await this.circuits.standings(ref);
+  async standings(@Param("ref") ref: string) {
+    return (await this.circuits.standings(ref)) satisfies CircuitStandings;
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("tournaments.manage")
   @Get(":ref")
-  async detail(@Param("ref") ref: string): Promise<CircuitDetail> {
-    return await this.circuits.detail(ref);
+  async detail(@Param("ref") ref: string) {
+    return (await this.circuits.detail(ref)) satisfies CircuitDetail;
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("tournaments.manage")
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Body({ schema: CreateCircuitDto }) dto: CreateCircuitInput,
-  ): Promise<CircuitSummary> {
-    return await this.circuits.create(dto);
+  async create(@Body({ schema: CreateCircuitDto }) dto: CreateCircuitInput) {
+    return (await this.circuits.create(dto)) satisfies CircuitSummary;
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -69,15 +67,15 @@ export class CircuitController {
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body({ schema: UpdateCircuitDto }) dto: UpdateCircuitInput,
-  ): Promise<CircuitSummary> {
-    return await this.circuits.update(id, dto);
+  ) {
+    return (await this.circuits.update(id, dto)) satisfies CircuitSummary;
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("tournaments.manage")
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param("id", ParseUUIDPipe) id: string): Promise<void> {
+  async remove(@Param("id", ParseUUIDPipe) id: string) {
     await this.circuits.remove(id);
   }
 
@@ -88,10 +86,10 @@ export class CircuitController {
     @Param("id", ParseUUIDPipe) id: string,
     @Param("tournamentId", ParseUUIDPipe) tournamentId: string,
     @Body({ schema: SetCircuitStageDto }) dto: SetCircuitStageInput,
-  ): Promise<CircuitDetail> {
+  ) {
     await this.circuits.setStageScale(id, tournamentId, dto);
 
-    return await this.circuits.detail(id);
+    return (await this.circuits.detail(id)) satisfies CircuitDetail;
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -100,8 +98,10 @@ export class CircuitController {
   async stageTeams(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("tournamentId", ParseUUIDPipe) tournamentId: string,
-  ): Promise<{ teams: CircuitEventTeam[] }> {
-    return { teams: await this.circuits.stageTeams(id, tournamentId) };
+  ) {
+    return { teams: await this.circuits.stageTeams(id, tournamentId) } satisfies {
+      teams: CircuitEventTeam[];
+    };
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
@@ -111,7 +111,7 @@ export class CircuitController {
   async removeStage(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("tournamentId", ParseUUIDPipe) tournamentId: string,
-  ): Promise<void> {
+  ) {
     await this.circuits.removeStage(id, tournamentId);
   }
 }

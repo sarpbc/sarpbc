@@ -21,7 +21,7 @@ const { data, status, error } = useAsyncData(
   },
 );
 
-const imageSrc = (source: string): string => {
+const imageSrc = (source: string) => {
   const path = tweetImageProxyPath(source);
 
   return path ? `${config.public.apiBase}${path}` : source;

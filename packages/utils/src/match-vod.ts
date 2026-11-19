@@ -4,7 +4,7 @@ export const LANGUAGE_CODE_LENGTH = 2;
 const LANGUAGE_CODE_PATTERN = new RegExp(`^[a-z]{${LANGUAGE_CODE_LENGTH}}$`, "u");
 const LANGUAGE_NAMES = new Intl.DisplayNames(["en"], { fallback: "none", type: "language" });
 
-export const isIso6391Code = (value: string): boolean =>
+export const isIso6391Code = (value: string) =>
   LANGUAGE_CODE_PATTERN.test(value) && LANGUAGE_NAMES.of(value) !== undefined;
 
 const VOD_HOSTS: ReadonlyMap<string, MatchVodSource> = new Map([
@@ -29,36 +29,36 @@ export type ParsedMatchVodUrl =
   | { ok: true; url: string; source: MatchVodSource }
   | { ok: false; error: MatchVodUrlError };
 
-export const parseMatchVodUrl = (input: string): ParsedMatchVodUrl => {
+export const parseMatchVodUrl = (input: string) => {
   let url: URL;
 
   try {
     url = new URL(input.trim());
   } catch {
-    return { error: "invalid-url", ok: false };
+    return { error: "invalid-url", ok: false } satisfies ParsedMatchVodUrl;
   }
 
   if (url.protocol !== "https:") {
-    return { error: "not-https", ok: false };
+    return { error: "not-https", ok: false } satisfies ParsedMatchVodUrl;
   }
 
   const source = VOD_HOSTS.get(url.hostname);
 
   if (!source || url.port || url.username || url.password) {
-    return { error: "unsupported-host", ok: false };
+    return { error: "unsupported-host", ok: false } satisfies ParsedMatchVodUrl;
   }
 
   if (url.searchParams.getAll("t").some((timestamp) => !TIMESTAMP_PATTERN.test(timestamp))) {
-    return { error: "invalid-timestamp", ok: false };
+    return { error: "invalid-timestamp", ok: false } satisfies ParsedMatchVodUrl;
   }
 
-  return { ok: true, source, url: url.href };
+  return { ok: true, source, url: url.href } satisfies ParsedMatchVodUrl;
 };
 
 export const MAX_VODS_PER_GAME = 10;
 const MAX_VOD_GAME = 9;
 
-export const maxVodGame = (numberOfGames: number | null | undefined): number =>
+export const maxVodGame = (numberOfGames: number | null | undefined) =>
   numberOfGames !== null && numberOfGames !== undefined && numberOfGames > 0
     ? numberOfGames
     : MAX_VOD_GAME;

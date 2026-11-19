@@ -34,12 +34,10 @@ const {
   placeholder = null,
 } = defineProps<{
   disabled?: boolean;
-  /** Options under headings; pass either `items` or `groups`. */
   groups?: readonly SelectGroup<T>[] | null;
   id?: string | null;
   items?: readonly SelectOption<T>[] | null;
   loading?: boolean;
-  /** Null shows the placeholder; once chosen, a select never goes back to empty. */
   modelValue?: T | null;
   placeholder?: string | null;
 }>();
@@ -49,9 +47,7 @@ const emit = defineEmits<{ "update:modelValue": [value: T] }>();
 const adapters = useDesignAdapters();
 const field = useFormField();
 
-const sections = computed(
-  (): readonly SelectGroup<T>[] => groups ?? [{ label: "", options: items ?? [] }],
-);
+const sections = computed(() => groups ?? [{ label: "", options: items ?? [] }]);
 
 const selectedLabel = computed(
   () =>

@@ -21,17 +21,12 @@ const {
   variant = "primary",
 } = defineProps<{
   block?: boolean;
-  /** Destructive action: the only color change a button allows. */
   danger?: boolean;
   disabled?: boolean;
   icon?: string | null;
   label?: string | null;
   loading?: boolean;
   size?: ButtonSize;
-  /**
-   * Renders the app's link adapter instead of a <button>. Objects are route
-   * locations, which only the app's router understands.
-   */
   to?: string | object | null;
   trailingIcon?: string | null;
   type?: "button" | "submit" | "reset";
@@ -48,8 +43,7 @@ const isLink = computed(() => to !== null);
 const hasLeading = computed(() => loading || icon !== null || slots.leading !== undefined);
 const hasTrailing = computed(() => trailingIcon !== null || slots.trailing !== undefined);
 
-/* A link cannot be disabled natively, so a disabled one swallows the click. */
-const onClick = (event: MouseEvent): void => {
+const onClick = (event: MouseEvent) => {
   if (isLink.value && disabled) {
     event.preventDefault();
 

@@ -21,7 +21,7 @@ export type ParsedStreamUrl =
   | { ok: true; url: string; platform: StreamPlatform; channel: string | null }
   | { ok: false; error: StreamUrlError };
 
-const channelOf = (url: URL, platform: StreamPlatform): string | null => {
+const channelOf = (url: URL, platform: StreamPlatform) => {
   const first = url.pathname.split("/").find(Boolean) ?? "";
 
   switch (platform) {
@@ -46,32 +46,37 @@ const channelOf = (url: URL, platform: StreamPlatform): string | null => {
   }
 };
 
-export const parseStreamUrl = (input: string): ParsedStreamUrl => {
+export const parseStreamUrl = (input: string) => {
   let url: URL;
 
   try {
     url = new URL(input.trim());
   } catch {
-    return { error: "invalid-url", ok: false };
+    return { error: "invalid-url", ok: false } satisfies ParsedStreamUrl;
   }
 
   if (url.protocol !== "https:") {
-    return { error: "not-https", ok: false };
+    return { error: "not-https", ok: false } satisfies ParsedStreamUrl;
   }
 
   if (url.port || url.username || url.password) {
-    return { error: "invalid-url", ok: false };
+    return { error: "invalid-url", ok: false } satisfies ParsedStreamUrl;
   }
 
   const platform = STREAM_HOSTS.get(url.hostname) ?? "other";
 
-  return { channel: channelOf(url, platform), ok: true, platform, url: url.href };
+  return {
+    channel: channelOf(url, platform),
+    ok: true,
+    platform,
+    url: url.href,
+  } satisfies ParsedStreamUrl;
 };
 
 export const orderStreams = <T extends { language: string; kind: StreamKind }>(
   streams: readonly T[],
   language: string,
-): T[] => {
+) => {
   const rank = (stream: T) =>
     (stream.language === language ? 0 : 2) + (stream.kind === "official" ? 0 : 1);
 

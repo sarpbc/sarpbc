@@ -1,10 +1,8 @@
 import type { TournamentTab } from "@sarpbc/types";
 import { stageMatchesPath, stageStatsPath, tournamentStagePath } from "@sarpbc/utils";
 
-// Detected by route name, not path: a stage may itself be slugged `matches`.
-export const getTournamentTabFromRouteName = (
-  routeBaseName: PropertyKey | undefined,
-): TournamentTab => {
+/** Detected by route name, not path: a stage may itself be slugged `matches`. */
+export const getTournamentTabFromRouteName = (routeBaseName: PropertyKey | undefined) => {
   if (routeBaseName === "tournaments-event-stage-matches") {
     return "matches";
   }

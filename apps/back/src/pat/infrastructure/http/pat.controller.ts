@@ -1,3 +1,4 @@
+import type { CreatedPatToken, PatToken } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -9,7 +10,6 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import type { CreatedPatToken, PatToken } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreateTokenDto } from "./dto/create-token.dto";
@@ -22,7 +22,7 @@ export class PatController {
 
   @UseGuards(AuthGuard)
   @Get("tokens")
-  async listTokens(@CurrentUserId() userId: string): Promise<{ tokens: PatToken[] }> {
+  async listTokens(@CurrentUserId() userId: string) {
     const tokens = await this.patService.listTokens(userId);
 
     return {
@@ -32,7 +32,7 @@ export class PatController {
         lastUsedAt: token.lastUsedAt?.toISOString() ?? null,
         name: token.name,
       })),
-    };
+    } satisfies { tokens: PatToken[] };
   }
 
   @UseGuards(AuthGuard)
@@ -41,7 +41,7 @@ export class PatController {
   async createToken(
     @CurrentUserId() userId: string,
     @Body({ schema: CreateTokenDto }) dto: CreateTokenInput,
-  ): Promise<CreatedPatToken> {
+  ) {
     const created = await this.patService.createToken(userId, dto.name);
 
     return {
@@ -49,7 +49,7 @@ export class PatController {
       id: created.id,
       name: created.name,
       token: created.token,
-    };
+    } satisfies CreatedPatToken;
   }
 
   @UseGuards(AuthGuard)

@@ -1,29 +1,22 @@
 import type { CareerBackground, CareerRole, CareerStats } from "~/types/career";
 import { MAX_STAT, MIN_STAT, getSeasonsPastPeak } from "~/types/career";
 
-/** Full +1/+2/+3/+5 below this. Seasons are short; 80+ is where gains shrink. */
 const SOFT_STAT_CEILING = 80;
 
-/**
- * Diminishing returns stop here. 100 is not bought with leftover budget —
- * it needs {@link MYTHIC_STAT_MIN_DELTA} and a {@link MYTHIC_STAT_CHANCE} roll.
- */
 const ELITE_STAT_CAP = MAX_STAT - 1;
 
-/** Raw positive delta required to attempt 99 → 100. */
 const MYTHIC_STAT_MIN_DELTA = 4;
 
-/** Chance to convert 99 → 100 when the delta is large enough (~1/20 of attempts). */
 const MYTHIC_STAT_CHANCE = 0.05;
 
 export type StatRng = () => number;
 
-const denyMythicRoll = (): number => 1;
+const denyMythicRoll = () => 1;
 
-export const clampStat = (value: number): number =>
+export const clampStat = (value: number) =>
   Math.max(MIN_STAT, Math.min(MAX_STAT, Math.round(value)));
 
-const gainCost = (current: number): number => {
+const gainCost = (current: number) => {
   if (current < SOFT_STAT_CEILING) {
     return 1;
   }
@@ -33,11 +26,7 @@ const gainCost = (current: number): number => {
   return Math.min(5, 1 + (over * over) / 50);
 };
 
-export const applyStatChange = (
-  current: number,
-  delta: number,
-  rng: StatRng = denyMythicRoll,
-): number => {
+export const applyStatChange = (current: number, delta: number, rng: StatRng = denyMythicRoll) => {
   if (delta === 0) {
     return clampStat(current);
   }
@@ -71,13 +60,13 @@ export const applyStatDelta = (
   stats: CareerStats,
   delta: Partial<CareerStats>,
   rng: StatRng = denyMythicRoll,
-): CareerStats => ({
+) => ({
   form: applyStatChange(stats.form, delta.form ?? 0, rng),
   morale: applyStatChange(stats.morale, delta.morale ?? 0, rng),
   rating: applyStatChange(stats.rating, delta.rating ?? 0, rng),
 });
 
-const getBackgroundBaseStats = (background: CareerBackground): CareerStats => {
+const getBackgroundBaseStats = (background: CareerBackground) => {
   switch (background) {
     case "prodigy": {
       return { form: 55, morale: 60, rating: 72 };
@@ -103,7 +92,7 @@ const getBackgroundBaseStats = (background: CareerBackground): CareerStats => {
   }
 };
 
-const getRoleDelta = (role: CareerRole): Partial<CareerStats> => {
+const getRoleDelta = (role: CareerRole) => {
   switch (role) {
     case "offense": {
       return { form: -2, rating: 3 };
@@ -125,10 +114,10 @@ const getRoleDelta = (role: CareerRole): Partial<CareerStats> => {
   }
 };
 
-export const getStartingStats = (background: CareerBackground, role: CareerRole): CareerStats =>
+export const getStartingStats = (background: CareerBackground, role: CareerRole) =>
   applyStatDelta(getBackgroundBaseStats(background), getRoleDelta(role));
 
-export const getAgeDecline = (season: number): Partial<CareerStats> => {
+export const getAgeDecline = (season: number) => {
   const pastPeak = getSeasonsPastPeak(season);
 
   if (pastPeak <= 0) {
@@ -142,7 +131,7 @@ export const getAgeDecline = (season: number): Partial<CareerStats> => {
   };
 };
 
-export const computeComposite = (stats: CareerStats, role: CareerRole): number => {
+export const computeComposite = (stats: CareerStats, role: CareerRole) => {
   switch (role) {
     case "offense": {
       return stats.rating * 0.55 + stats.form * 0.3 + stats.morale * 0.15;
@@ -164,7 +153,7 @@ export const computeComposite = (stats: CareerStats, role: CareerRole): number =
   }
 };
 
-export const computePerformance = (stats: CareerStats, role?: CareerRole | null): number => {
+export const computePerformance = (stats: CareerStats, role?: CareerRole | null) => {
   if (role) {
     return computeComposite(stats, role);
   }

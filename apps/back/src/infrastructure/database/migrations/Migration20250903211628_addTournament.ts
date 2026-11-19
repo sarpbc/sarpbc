@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20250903211628_addTournament extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(
       `create table "league" ("id" varchar(255) not null, "pandascore_id" int not null, "name" varchar(255) not null, "slug" varchar(255) null, "url" varchar(255) null, "image_url" varchar(255) null, "modified_at" date null, "created_at" date not null, "updated_at" date not null, constraint "league_pkey" primary key ("id"));`,
     );
@@ -71,7 +71,7 @@ export class Migration20250903211628_addTournament extends Migration {
     );
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`alter table "tournament" drop constraint "tournament_league_id_foreign";`);
 
     this.addSql(

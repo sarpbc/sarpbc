@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { present } from "../../../../test/doubles";
 import { CompetitionAfterCommit } from "../after-commit";
 import { CompetitionSyncService } from "./competition-sync.service";
@@ -6,18 +6,11 @@ import { League } from "../../domain/league";
 import type { Match } from "../../domain/match";
 import { Tournament } from "../../domain/tournament";
 import { TournamentParticipant } from "../../domain/tournament-participant";
+import type { ParticipantSnapshot } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
 import { Team } from "../../../roster/domain/team";
-import type {
-  CompetitionCache,
-  CompetitionDiagnostics,
-  CompetitionEvents,
-  CompetitionTransaction,
-  EventWriter,
-  RosterIdentityWriter,
-  TournamentWriter,
-} from "../ports";
+import type { CompetitionTransaction, EventWriter } from "../ports";
 import type {
   CompetitionIncident,
   ProviderDeletion,
@@ -30,9 +23,10 @@ import {
   rosterIdentityWriter,
   tournamentWriter as tournamentWriterDouble,
 } from "../../../../test/competition-doubles";
+import { recordingDiagnostics, recordingEvents } from "../ports.test-utils";
 import type { MatchTiming } from "../../domain/tournament-end";
 
-const copy = <T extends object>(type: new () => T, value: T): T => Object.assign(new type(), value);
+const copy = <T extends object>(type: new () => T, value: T) => Object.assign(new type(), value);
 
 const memoryStore = () => {
   const tournaments = new Map<string, Tournament>();
@@ -40,33 +34,42 @@ const memoryStore = () => {
   const leagues = new Map<number, League>();
   const timings = new Map<string, MatchTiming[]>();
   const all = () => [...tournaments.values()];
+  const tournamentParticipants: TournamentParticipant[] = [];
+  const matchParticipants: TournamentParticipant[] = [];
+  const savedTournamentIds: string[] = [];
+  const savedParticipants: ParticipantSnapshot[] = [];
+  const placements: ReadonlyMap<string, number | null>[] = [];
+  const savedMatches: Match[] = [];
 
   const tournamentWriter = {
-    byPandascoreId: vi.fn<TournamentWriter["byPandascoreId"]>(async (id) => {
+    byPandascoreId: async (id: number) => {
       const found = all().find((t) => t.pandascoreId === id);
 
       return found ? copy(Tournament, found) : null;
-    }),
-    leagueByPandascoreId: vi.fn<TournamentWriter["leagueByPandascoreId"]>(
-      async (id) => leagues.get(id) ?? null,
-    ),
-    load: vi.fn<TournamentWriter["load"]>(async (id) => {
+    },
+    leagueByPandascoreId: async (id: number) => leagues.get(id) ?? null,
+    load: async (id: string) => {
       const found = tournaments.get(id);
 
       return found ? copy(Tournament, found) : null;
-    }),
-    manualCandidates: vi.fn<TournamentWriter["manualCandidates"]>(async () => []),
-    participants: vi.fn<TournamentWriter["participants"]>(async () => []),
-    save: vi.fn<TournamentWriter["save"]>(async (tournament) => {
+    },
+    manualCandidates: async () => [],
+    participants: async () => tournamentParticipants,
+    save: async (tournament: Tournament) => {
+      savedTournamentIds.push(tournament.id);
       tournaments.set(tournament.id, copy(Tournament, tournament));
-    }),
-    saveLeague: vi.fn<TournamentWriter["saveLeague"]>(async (league) => {
+    },
+    saveLeague: async (league: League) => {
       if (league.pandascoreId !== null) {
         leagues.set(league.pandascoreId, copy(League, league));
       }
-    }),
-    saveParticipant: vi.fn<TournamentWriter["saveParticipant"]>(),
-    setPlacements: vi.fn<TournamentWriter["setPlacements"]>(),
+    },
+    saveParticipant: async (participant: ParticipantSnapshot) => {
+      savedParticipants.push(participant);
+    },
+    setPlacements: async (next: ReadonlyMap<string, number | null>) => {
+      placements.push(next);
+    },
   };
 
   const eventWriter: EventWriter = {
@@ -119,8 +122,10 @@ const memoryStore = () => {
 
   const matchWriter = {
     byPandascoreId: async () => null,
-    participants: async (): Promise<TournamentParticipant[]> => [],
-    save: async ({ tournament, status, beginAt, endAt }: Match) => {
+    participants: async () => matchParticipants,
+    save: async (match: Match) => {
+      const { tournament, status, beginAt, endAt } = match;
+      savedMatches.push(match);
       timings.set(tournament.id, [
         ...(timings.get(tournament.id) ?? []),
         { beginAt, endAt, status },
@@ -134,10 +139,16 @@ const memoryStore = () => {
     eventOf,
     eventWriter,
     events,
+    matchParticipants,
     matchWriter,
+    placements,
+    savedMatches,
+    savedParticipants,
+    savedTournamentIds,
     seedEvent,
     seedStage,
     timings,
+    tournamentParticipants,
     tournamentWriter,
     tournaments,
   };
@@ -147,12 +158,12 @@ const serieIncident = (
   change:
     | { changeType: "creation" | "update"; command: UpsertSerieCommand }
     | { changeType: "deletion"; deletion: ProviderDeletion },
-): CompetitionIncident =>
+) =>
   change.changeType === "deletion"
-    ? { id: 100, kind: "serie", modifiedAt: new Date(), ...change }
-    : { id: 100, kind: "serie", modifiedAt: new Date(), ...change };
+    ? ({ id: 100, kind: "serie", modifiedAt: new Date(), ...change } satisfies CompetitionIncident)
+    : ({ id: 100, kind: "serie", modifiedAt: new Date(), ...change } satisfies CompetitionIncident);
 
-const finished = (endAt: string): MatchTiming => ({
+const finished = (endAt: string) => ({
   beginAt: new Date(endAt),
   endAt: new Date(endAt),
   status: "finished",
@@ -177,20 +188,34 @@ const matchCommand = (pandascoreId: number, status: string) => ({
 });
 
 describe("Competition synchronization", () => {
-  const rosters = {
-    upsertPlayer: vi.fn<RosterIdentityWriter["upsertPlayer"]>(),
-    upsertTeam: vi.fn<RosterIdentityWriter["upsertTeam"]>(),
-  };
-
-  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
-  const published = { publish: vi.fn<CompetitionEvents["publish"]>() };
-
-  const diagnostics = {
-    error: vi.fn<CompetitionDiagnostics["error"]>(),
-    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
-  };
-
   const log: string[] = [];
+  const upsertedPlayers: { pandascoreId: number }[] = [];
+  const invalidated: string[] = [];
+  let cacheFailure: Error | null = null;
+
+  const rosters = {
+    upsertPlayer: async (player: { pandascoreId: number }) => {
+      upsertedPlayers.push(player);
+
+      return { id: String(player.pandascoreId) };
+    },
+    upsertTeam: async () => ({ id: "team" }),
+  };
+
+  const cache = {
+    invalidateTournament: async (id: string) => {
+      if (cacheFailure) {
+        throw cacheFailure;
+      }
+
+      invalidated.push(id);
+      log.push(`invalidate ${id}`);
+    },
+  };
+
+  let events: ReturnType<typeof recordingEvents>;
+  let diagnostics: ReturnType<typeof recordingDiagnostics>;
+  let service: CompetitionSyncService;
   let store: ReturnType<typeof memoryStore>;
 
   const seedManual = (id: string, name = "RLCS Major Paris 2026 Playoffs") =>
@@ -221,16 +246,10 @@ describe("Competition synchronization", () => {
     },
   };
 
-  const service = new CompetitionSyncService(
-    tx,
-    new CompetitionAfterCommit(cache, published, diagnostics),
-    diagnostics,
-  );
-
   const rlcsMajor = { name: "RLCS Major", pandascoreId: 7, slug: "rlcs-major" };
   const parisSerie = { fullName: "Paris 2026", pandascoreId: 100, year: 2026 };
 
-  const stageCommand = (fields: Partial<UpsertTournamentCommand>): UpsertTournamentCommand => ({
+  const stageCommand = (fields: Partial<UpsertTournamentCommand>) => ({
     league: rlcsMajor,
     name: "Playoffs",
     pandascoreId: 1,
@@ -239,16 +258,18 @@ describe("Competition synchronization", () => {
   });
 
   beforeEach(() => {
-    vi.clearAllMocks();
     log.length = 0;
+    upsertedPlayers.length = 0;
+    invalidated.length = 0;
+    cacheFailure = null;
     store = memoryStore();
-    rosters.upsertTeam.mockResolvedValue({ id: "team" });
-    rosters.upsertPlayer.mockImplementation(async (p: { pandascoreId: number }) => ({
-      id: String(p.pandascoreId),
-    }));
-    cache.invalidateTournament.mockImplementation(async (id: string) => {
-      log.push(`invalidate ${id}`);
-    });
+    events = recordingEvents();
+    diagnostics = recordingDiagnostics();
+    service = new CompetitionSyncService(
+      tx,
+      new CompetitionAfterCommit(cache, events, diagnostics),
+      diagnostics,
+    );
   });
 
   it("rejects corrupt manual identities", async () => {
@@ -260,7 +281,7 @@ describe("Competition synchronization", () => {
     await expect(service.upsertTournament({ name: "Provider", pandascoreId: 99 })).rejects.toThrow(
       /source=manual/u,
     );
-    expect(store.tournamentWriter.save).not.toHaveBeenCalled();
+    expect(store.savedTournamentIds).toStrictEqual([]);
   });
 
   it("creates the event of a new serie with a frozen slug and commits before invalidating", async () => {
@@ -373,7 +394,7 @@ describe("Competition synchronization", () => {
       serieIncident({ changeType: "creation", command: { fullName: "Paris", pandascoreId: 100 } }),
     );
     expect(store.events.size).toBe(0);
-    expect(cache.invalidateTournament).not.toHaveBeenCalled();
+    expect(invalidated).toStrictEqual([]);
   });
 
   it("re-keys a merged serie event when the target serie has no event", async () => {
@@ -439,12 +460,12 @@ describe("Competition synchronization", () => {
     it("registers the players without updating current membership", async () => {
       await upsertPastCup();
 
-      expect(rosters.upsertPlayer).toHaveBeenCalledWith({
+      expect(upsertedPlayers).toContainEqual({
         name: "Player",
         pandascoreId: 1,
         slug: "player",
       });
-      expect(rosters.upsertPlayer).toHaveBeenCalledWith({
+      expect(upsertedPlayers).toContainEqual({
         name: "Sub",
         pandascoreId: 3,
         slug: "sub",
@@ -454,35 +475,35 @@ describe("Competition synchronization", () => {
     it("saves the participant with its players", async () => {
       await upsertPastCup();
 
-      expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
+      expect(store.savedParticipants).toContainEqual(
         expect.objectContaining({ playerIds: ["1", "3"], teamId: "team" }),
       );
     });
 
     it("updates the participant the tournament already has", async () => {
-      store.tournamentWriter.participants.mockResolvedValue([
+      store.tournamentParticipants.push(
         Object.assign(new TournamentParticipant(), {
           id: "participant",
           team: Object.assign(new Team(), { id: "team" }),
         }),
-      ]);
+      );
 
       await upsertPastCup();
 
-      expect(store.tournamentWriter.saveParticipant).toHaveBeenCalledWith(
+      expect(store.savedParticipants).toContainEqual(
         expect.objectContaining({ id: "participant", playerIds: ["1", "3"], teamId: "team" }),
       );
     });
   });
 
   it("stores PandaScore final ranks as participant placements and clears missing ones", async () => {
-    store.tournamentWriter.participants.mockResolvedValue([
+    store.tournamentParticipants.push(
       Object.assign(new TournamentParticipant(), {
         id: "dropped",
         team: Object.assign(new Team(), { id: "old", pandascoreId: 7 }),
       }),
       Object.assign(new TournamentParticipant(), { id: "unknown-team", team: null }),
-    ]);
+    );
     await service.upsertTournament({
       expectedRoster: [{ players: [], team: { name: "Winner", pandascoreId: 8, slug: "winner" } }],
       name: "Playoffs",
@@ -493,7 +514,7 @@ describe("Competition synchronization", () => {
       ],
     });
 
-    const [placements] = store.tournamentWriter.setPlacements.mock.calls[0] ?? [];
+    const [placements] = store.placements;
     expect(placements?.get("dropped")).toBeNull();
     expect(placements?.has("unknown-team")).toBe(false);
     expect(
@@ -503,18 +524,18 @@ describe("Competition synchronization", () => {
 
   it("leaves placements untouched when the feed carries no standings", async () => {
     await service.upsertTournament({ name: "Playoffs", pandascoreId: 42 });
-    expect(store.tournamentWriter.setPlacements).not.toHaveBeenCalled();
+    expect(store.placements).toStrictEqual([]);
   });
 
   it("preserves success after a committed write when Redis fails", async () => {
-    cache.invalidateTournament.mockRejectedValue(new Error("offline"));
+    const offline = new Error("offline");
+    cacheFailure = offline;
     await expect(
       service.upsertTournament({ name: "Cup", pandascoreId: 42 }),
     ).resolves.toMatchObject({ name: "Cup" });
-    expect(diagnostics.error).toHaveBeenCalledExactlyOnceWith(
-      "Tournament cache invalidation failed",
-      expect.any(Error),
-    );
+    expect(diagnostics.errors).toStrictEqual([
+      { cause: offline, message: "Tournament cache invalidation failed" },
+    ]);
   });
 
   describe("end date", () => {
@@ -620,16 +641,9 @@ describe("Competition synchronization", () => {
       }),
     );
 
-    const saved: Match[] = [];
     beforeEach(() => {
-      saved.length = 0;
-      store.tournamentWriter.participants.mockResolvedValue(teams);
-      store.matchWriter.participants = async () => teams;
-      const { save } = store.matchWriter;
-      store.matchWriter.save = async (match: Match) => {
-        saved.push(match);
-        await save(match);
-      };
+      store.tournamentParticipants.push(...teams);
+      store.matchParticipants.push(...teams);
     });
 
     it("publishes MatchDecided for decided matches only", async () => {
@@ -637,19 +651,20 @@ describe("Competition synchronization", () => {
         matchCommand(10, "finished"),
         matchCommand(11, "running"),
       ]);
-      const decided = saved.find((match) => match.pandascoreId === 10);
-      expect(published.publish).toHaveBeenCalledExactlyOnceWith(matchDecided(present(decided).id));
+      const decided = store.savedMatches.find((match) => match.pandascoreId === 10);
+      expect(events.published).toStrictEqual([matchDecided(present(decided).id)]);
     });
 
     it("keeps the write when publication fails", async () => {
-      published.publish.mockRejectedValue(new Error("listener"));
+      const listener = new Error("listener");
+      events.failWith(listener);
       await expect(
         service.upsertTournament(stageCommand({}), [matchCommand(10, "finished")]),
       ).resolves.toMatchObject({ name: "Playoffs" });
-      expect(diagnostics.error).toHaveBeenCalledWith(
-        "MatchDecided publication failed",
-        expect.any(Error),
-      );
+      expect(diagnostics.errors).toContainEqual({
+        cause: listener,
+        message: "MatchDecided publication failed",
+      });
     });
   });
 });

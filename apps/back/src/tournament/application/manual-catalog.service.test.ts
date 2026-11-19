@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { present } from "../../../test/doubles";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
@@ -8,102 +8,54 @@ import { Tournament } from "../domain/tournament";
 import { TournamentEvent } from "../domain/tournament-event";
 import { CompetitionAfterCommit } from "./after-commit";
 import { ManualCatalogService } from "./manual-catalog.service";
-import type {
-  CompetitionCache,
-  CompetitionDiagnostics,
-  CompetitionEvents,
-  CompetitionTransaction,
-  EventQueries,
-  EventStage,
-  EventWriter,
-  TournamentWriter,
-} from "./ports";
+import type { EventListing, EventStage } from "./ports";
 import {
-  competitionScope,
-  eventQueries,
-  eventWriter as eventWriterDouble,
-  tournamentQueries,
-  tournamentWriter as tournamentWriterDouble,
-} from "../../../test/competition-doubles";
+  memoryEventWriter,
+  memoryTournamentWriter,
+  recordingCache,
+  recordingDiagnostics,
+  recordingEvents,
+  transactionOver,
+} from "./ports.test-utils";
+import { eventQueries, tournamentQueries } from "../../../test/competition-doubles";
 
 const event = (id: string, pandascoreSerieId: number | null = null) =>
   Object.assign(new TournamentEvent(), { id, name: id, pandascoreSerieId, slug: id });
 
 describe(ManualCatalogService, () => {
-  const events = new Map<string, TournamentEvent>();
-  const leagues = new Map<string, League>();
+  const eventStore = memoryEventWriter();
+  const tournamentStore = memoryTournamentWriter();
+  const { events } = eventStore;
+  const { leagues } = tournamentStore;
+  const cache = recordingCache();
   let stages: EventStage[] = [];
+  let unsynced: EventListing[] = [];
 
-  const eventWriter = {
-    load: vi.fn<EventWriter["load"]>(async (id) => {
-      const known = events.get(id);
-
-      return known ? Object.assign(new TournamentEvent(), known) : null;
-    }),
-    save: vi.fn<EventWriter["save"]>(async (saved) => {
-      events.set(saved.id, Object.assign(new TournamentEvent(), saved));
-    }),
-    slugTaken: vi.fn<EventWriter["slugTaken"]>(async (slug, except) =>
-      [...events.values()].some((candidate) => candidate.slug === slug && candidate.id !== except),
-    ),
-    stages: vi.fn<EventWriter["stages"]>(async () => stages),
-  };
-
-  const tournamentWriter = {
-    league: vi.fn<TournamentWriter["league"]>(async (id) => {
-      const league = leagues.get(id);
-
-      return league ? Object.assign(new League(), league) : null;
-    }),
-    saveLeague: vi.fn<TournamentWriter["saveLeague"]>(async (league) => {
-      leagues.set(league.id, Object.assign(new League(), league));
-    }),
-  };
-
-  const tx: CompetitionTransaction = {
-    run: async (work) =>
-      await work(
-        competitionScope({
-          events: eventWriterDouble(eventWriter),
-          tournaments: tournamentWriterDouble(tournamentWriter),
-        }),
-      ),
-  };
-
-  const queries = {
-    find: vi.fn<EventQueries["find"]>(async (idOrSlug) => {
-      const found = events.get(idOrSlug);
-
-      return found ? { event: found, stages: [] } : null;
-    }),
-    list: vi.fn<EventQueries["list"]>(),
-    stageId: vi.fn<EventQueries["stageId"]>(),
-    unsynced: vi.fn<EventQueries["unsynced"]>(),
-  };
-
-  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
-
-  const diagnostics = {
-    error: vi.fn<CompetitionDiagnostics["error"]>(),
-    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
-  };
+  const tx = transactionOver({
+    events: { ...eventStore, stages: async () => stages },
+    tournaments: tournamentStore,
+  });
 
   const service = new ManualCatalogService(
     tournamentQueries(),
-    eventQueries(queries),
+    eventQueries({
+      find: async (idOrSlug: string) => {
+        const found = events.get(idOrSlug);
+
+        return found ? { event: found, stages: [] } : null;
+      },
+      unsynced: async () => unsynced,
+    }),
     tx,
-    new CompetitionAfterCommit(
-      cache,
-      { publish: vi.fn<CompetitionEvents["publish"]>() },
-      diagnostics,
-    ),
+    new CompetitionAfterCommit(cache, recordingEvents(), recordingDiagnostics()),
   );
 
   beforeEach(() => {
-    vi.clearAllMocks();
     events.clear();
     leagues.clear();
+    cache.invalidated.length = 0;
     stages = [];
+    unsynced = [];
     events.set(
       "cdf",
       Object.assign(new TournamentEvent(), {
@@ -155,7 +107,7 @@ describe(ManualCatalogService, () => {
       name: "Coupe de France Slash 2026",
       slug: "coupe-de-france-slash-2026",
     });
-    expect(cache.invalidateTournament.mock.calls).toStrictEqual([["pool"], ["finals"]]);
+    expect(cache.invalidated).toStrictEqual(["pool", "finals"]);
   });
 
   it.each([
@@ -167,11 +119,11 @@ describe(ManualCatalogService, () => {
     await expect(service.updateEvent("cdf", { name: "Renamed" })).rejects.toBeInstanceOf(
       InvalidInputError,
     );
-    expect(eventWriter.save).not.toHaveBeenCalled();
+    expect(events.get("cdf")?.name).toBe("CDF");
   });
 
   it("lists only events the staff can edit, empty ones included", async () => {
-    queries.unsynced.mockResolvedValue([
+    unsynced = [
       { event: event("empty"), stages: [] },
       {
         event: event("manual"),
@@ -182,7 +134,7 @@ describe(ManualCatalogService, () => {
         stages: [Object.assign(new Tournament(), { id: "swiss", source: "pandascore" })],
       },
       { event: event("serie", 3), stages: [] },
-    ]);
+    ];
     const manualEventsResult = await service.manualEvents();
     expect(manualEventsResult.map((listed) => listed.event.id)).toStrictEqual(["empty", "manual"]);
   });

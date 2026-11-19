@@ -58,7 +58,7 @@ const {
   refresh,
   error,
 } = await useLazyAsyncData("admin-streamers", () => getTrackedStreamers(), {
-  default: (): TrackedStreamer[] => [],
+  default: () => [],
   server: false,
 });
 

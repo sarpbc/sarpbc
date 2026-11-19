@@ -25,7 +25,7 @@ export interface DatedTeamName {
   to: string | null;
 }
 
-const isIsoDay = (value: string): boolean => {
+const isIsoDay = (value: string) => {
   if (!/^\d{4}-\d{2}-\d{2}$/u.test(value)) {
     return false;
   }
@@ -35,7 +35,7 @@ const isIsoDay = (value: string): boolean => {
   return !Number.isNaN(time) && new Date(time).toISOString().startsWith(value);
 };
 
-const parseUrl = (value: string, protocols: readonly string[]): URL | null => {
+const parseUrl = (value: string, protocols: readonly string[]) => {
   if (value.length > TEAM_ALIAS_URL_MAX_LENGTH || !URL.canParse(value)) {
     return null;
   }
@@ -49,37 +49,37 @@ const parseUrl = (value: string, protocols: readonly string[]): URL | null => {
   return url;
 };
 
-export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
+export const parseTeamAlias = (input: TeamAliasInput) => {
   const name = input.name.trim();
 
   if (!name) {
-    return { error: "missing-name", ok: false };
+    return { error: "missing-name", ok: false } satisfies ParsedTeamAlias;
   }
 
   if (name.length > TEAM_ALIAS_NAME_MAX_LENGTH) {
-    return { error: "name-too-long", ok: false };
+    return { error: "name-too-long", ok: false } satisfies ParsedTeamAlias;
   }
 
   if (!isIsoDay(input.from)) {
-    return { error: "invalid-from", ok: false };
+    return { error: "invalid-from", ok: false } satisfies ParsedTeamAlias;
   }
 
   if (input.to !== null && !isIsoDay(input.to)) {
-    return { error: "invalid-to", ok: false };
+    return { error: "invalid-to", ok: false } satisfies ParsedTeamAlias;
   }
 
   if (input.to !== null && input.to <= input.from) {
-    return { error: "to-not-after-from", ok: false };
+    return { error: "to-not-after-from", ok: false } satisfies ParsedTeamAlias;
   }
 
   const source = parseUrl(input.sourceUrl.trim(), ["https:", "http:"]);
 
   if (!source) {
-    return { error: "invalid-source-url", ok: false };
+    return { error: "invalid-source-url", ok: false } satisfies ParsedTeamAlias;
   }
 
   if (isForbiddenSourceHost(source.hostname)) {
-    return { error: "forbidden-source", ok: false };
+    return { error: "forbidden-source", ok: false } satisfies ParsedTeamAlias;
   }
 
   let logoUrl: string | null = null;
@@ -88,11 +88,11 @@ export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
     const logo = parseUrl(input.logoUrl.trim(), ["https:"]);
 
     if (!logo) {
-      return { error: "invalid-logo-url", ok: false };
+      return { error: "invalid-logo-url", ok: false } satisfies ParsedTeamAlias;
     }
 
     if (isLiquipediaSourceHost(logo.hostname)) {
-      return { error: "forbidden-logo-source", ok: false };
+      return { error: "forbidden-logo-source", ok: false } satisfies ParsedTeamAlias;
     }
 
     logoUrl = logo.href;
@@ -102,7 +102,7 @@ export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
     input.pandascoreId !== null &&
     (!Number.isSafeInteger(input.pandascoreId) || input.pandascoreId <= 0)
   ) {
-    return { error: "invalid-pandascore-id", ok: false };
+    return { error: "invalid-pandascore-id", ok: false } satisfies ParsedTeamAlias;
   }
 
   return {
@@ -115,13 +115,10 @@ export const parseTeamAlias = (input: TeamAliasInput): ParsedTeamAlias => {
       to: input.to,
     },
     ok: true,
-  };
+  } satisfies ParsedTeamAlias;
 };
 
-export const teamAliasInForce = <T extends DatedTeamName>(
-  aliases: readonly T[],
-  day: string,
-): T | null => {
+export const teamAliasInForce = <T extends DatedTeamName>(aliases: readonly T[], day: string) => {
   let found: T | null = null;
 
   for (const alias of aliases) {
@@ -137,5 +134,5 @@ export const teamAliasInForce = <T extends DatedTeamName>(
   return found;
 };
 
-export const teamAliasesOverlap = (first: DatedTeamName, second: DatedTeamName): boolean =>
+export const teamAliasesOverlap = (first: DatedTeamName, second: DatedTeamName) =>
   (second.to === null || first.from < second.to) && (first.to === null || second.from < first.to);

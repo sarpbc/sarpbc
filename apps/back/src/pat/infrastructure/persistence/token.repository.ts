@@ -1,11 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import type { TokenStore } from "../../application/ports/token-store";
-import type { StoredToken, TokenSummary } from "../../domain/token";
 import { User } from "../../../user/infrastructure/user-persistence";
 import { PersonalAccessToken } from "./personal-access-token.entity";
 
-const summary = (token: PersonalAccessToken): TokenSummary => ({
+const summary = (token: PersonalAccessToken) => ({
   createdAt: token.createdAt,
   id: token.id,
   lastUsedAt: token.lastUsedAt,
@@ -16,7 +15,7 @@ const summary = (token: PersonalAccessToken): TokenSummary => ({
 export class TokenRepository implements TokenStore {
   constructor(private readonly em: EntityManager) {}
 
-  async create(ownerId: string, name: string, hash: string): Promise<TokenSummary> {
+  async create(ownerId: string, name: string, hash: string) {
     const token = new PersonalAccessToken();
     token.owner = this.em.getReference(User, ownerId);
     token.name = name;
@@ -26,7 +25,7 @@ export class TokenRepository implements TokenStore {
     return summary(token);
   }
 
-  async listActive(ownerId: string): Promise<TokenSummary[]> {
+  async listActive(ownerId: string) {
     const tokens = await this.em.find(
       PersonalAccessToken,
       { owner: ownerId, revokedAt: null },
@@ -36,7 +35,7 @@ export class TokenRepository implements TokenStore {
     return tokens.map(summary);
   }
 
-  async findActive(hash: string): Promise<StoredToken | null> {
+  async findActive(hash: string) {
     const token = await this.em.findOne(
       PersonalAccessToken,
       { revokedAt: null, tokenHash: hash },
@@ -52,7 +51,7 @@ export class TokenRepository implements TokenStore {
       : null;
   }
 
-  async revokeOwned(ownerId: string, tokenId: string, at: Date): Promise<boolean> {
+  async revokeOwned(ownerId: string, tokenId: string, at: Date) {
     return (
       (await this.em.nativeUpdate(
         PersonalAccessToken,
@@ -62,7 +61,7 @@ export class TokenRepository implements TokenStore {
     );
   }
 
-  async touch(tokenId: string, at: Date): Promise<void> {
+  async touch(tokenId: string, at: Date) {
     await this.em.nativeUpdate(
       PersonalAccessToken,
       { id: tokenId, revokedAt: null },

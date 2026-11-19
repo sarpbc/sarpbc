@@ -17,7 +17,7 @@ interface ProfileTabQuery {
   [key: string]: string | undefined;
 }
 
-const parseProfileTab = (value: LocationQuery[string] | number | undefined): EntityProfileTab =>
+const parseProfileTab = (value: LocationQuery[string] | number | undefined) =>
   PROFILE_TABS.find((tab) => tab === value) ?? "info";
 
 export const useEntityTabs = (kind: EntityKind) => {

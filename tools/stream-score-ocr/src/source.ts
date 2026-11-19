@@ -18,7 +18,7 @@ export interface TimedFrame {
   frame: Frame;
 }
 
-export const checkInput = (input: string, live: boolean): void => {
+export const checkInput = (input: string, live: boolean) => {
   if (!URL_INPUT.test(input)) {
     if (live) {
       throw new Error("A live source must be a stream URL.");
@@ -38,19 +38,15 @@ export const checkInput = (input: string, live: boolean): void => {
   }
 };
 
-const stopOnExit =
-  (processes: readonly ChildProcess[]): (() => void) =>
-  () => {
-    for (const child of processes) {
-      if (child.exitCode === null) {
-        child.kill();
-      }
+const stopOnExit = (processes: readonly ChildProcess[]) => () => {
+  for (const child of processes) {
+    if (child.exitCode === null) {
+      child.kill();
     }
-  };
+  }
+};
 
-export const streamFrames = async function* streamFrames(
-  settings: SourceSettings,
-): AsyncGenerator<TimedFrame> {
+export const streamFrames = async function* streamFrames(settings: SourceSettings) {
   checkInput(settings.input, settings.live);
   const decoderInput = settings.live ? "pipe:0" : settings.input;
 

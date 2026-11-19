@@ -13,7 +13,6 @@ import { assertPandascoreUpsertAllowed, claimForPandascore } from "../../domain/
 import { placeStage } from "../event-placement";
 import type { UpsertTournamentCommand } from "../feed";
 import type { CompetitionDiagnostics, CompetitionWriteScope, EventWriter } from "../ports";
-import type { AppliedTournament } from "./sync-applied";
 import { applyLeague } from "./sync-catalog";
 
 const manualCounterpart = async (
@@ -21,7 +20,7 @@ const manualCounterpart = async (
   diagnostics: CompetitionDiagnostics,
   command: UpsertTournamentCommand,
   league: League | null,
-): Promise<string | null> => {
+) => {
   const eventName = eventDisplayName({
     leagueName: league?.name ?? null,
     serieName: command.serie?.fullName ?? null,
@@ -77,7 +76,7 @@ const syncTarget = async (
   command: UpsertTournamentCommand,
   league: League | null,
   linkTournamentId: string | undefined,
-): Promise<Tournament | null> => {
+) => {
   const synced = await scope.tournaments.byPandascoreId(command.pandascoreId);
 
   if (synced) {
@@ -112,10 +111,7 @@ const syncTarget = async (
   return manual;
 };
 
-export const settleEndAt = async (
-  scope: CompetitionWriteScope,
-  tournament: Tournament,
-): Promise<void> => {
+export const settleEndAt = async (scope: CompetitionWriteScope, tournament: Tournament) => {
   if (tournament.endAt || tournament.endAtCorrected) {
     return;
   }
@@ -137,7 +133,7 @@ const findExistingEvent = async (
   currentEventId: string | null,
   league: League | null,
   name: string,
-): Promise<TournamentEvent | null> => {
+) => {
   const { serie } = command;
 
   const current =
@@ -156,13 +152,13 @@ const findExistingEvent = async (
   );
 };
 
-/** Backfilled events claim their serie on first sync instead of duplicating under a `-2` slug. */
+// WARNING: backfilled events must claim their serie on first sync or they duplicate under a `-2` slug.
 const resolveEvent = async (
   events: EventWriter,
   currentEventId: string | null,
   command: UpsertTournamentCommand,
   league: League | null,
-): Promise<{ event: TournamentEvent; renamed: boolean }> => {
+) => {
   const { serie } = command;
 
   const name = eventDisplayName({
@@ -195,7 +191,7 @@ const copyTournamentFields = (
   tournament: Tournament,
   command: UpsertTournamentCommand,
   league: League | null,
-): void => {
+) => {
   tournament.source = "pandascore";
   tournament.name = command.name;
   tournament.tier = command.tier ?? null;
@@ -217,7 +213,7 @@ const dropEmptyPreviousEvent = async (
   events: EventWriter,
   previousEventId: string,
   event: TournamentEvent,
-): Promise<void> => {
+) => {
   const remaining = await events.stages(previousEventId);
 
   if (remaining.length) {
@@ -238,7 +234,7 @@ const importExpectedRoster = async (
   scope: CompetitionWriteScope,
   tournament: Tournament,
   command: UpsertTournamentCommand,
-): Promise<void> => {
+) => {
   const participants = await scope.tournaments.participants(tournament.id);
 
   const pandascoreTeams = new Map(
@@ -251,7 +247,7 @@ const importExpectedRoster = async (
     ),
   );
 
-  // Rosters are written in provider order: team and player upserts share unique slugs and ids.
+  // WARNING: rosters are written in provider order; team and player upserts share unique slugs and ids.
   await mapSequentially(command.expectedRoster ?? [], async (roster) => {
     const team = await scope.rosters.upsertTeam(roster.team);
     const existingParticipant = participants.find((p) => p.team?.id === team.id);
@@ -278,7 +274,6 @@ const importExpectedRoster = async (
     });
 
     if (roster.team.pandascoreId === command.winnerPandascoreTeamId) {
-      // Winner identity is sufficient for persistence; full roster views are reloaded after commit.
       tournament.winner = {
         createdAt: existingParticipant?.createdAt ?? new Date(),
         id: participantId,
@@ -305,7 +300,7 @@ export const applyTournament = async (
   diagnostics: CompetitionDiagnostics,
   command: UpsertTournamentCommand,
   linkTournamentId?: string,
-): Promise<AppliedTournament> => {
+) => {
   const league = command.league ? await applyLeague(scope, command.league) : null;
   const existing = await syncTarget(scope, diagnostics, command, league, linkTournamentId);
 

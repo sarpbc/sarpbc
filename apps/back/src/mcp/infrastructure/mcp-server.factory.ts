@@ -18,7 +18,7 @@ import { writeTools } from "./tools/write-tools";
 export class McpServerFactory {
   constructor(@Inject(MCP_SERVICES) private readonly services: McpServices) {}
 
-  createServer(user: PatUser): McpServer {
+  createServer(user: PatUser) {
     const server = new McpServer(
       {
         name: "sarpbc-staff-mcp",

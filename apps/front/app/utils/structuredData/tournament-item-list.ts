@@ -26,7 +26,7 @@ export interface BuildTournamentItemListOptions {
   name?: string;
 }
 
-export const buildTournamentItemList = (options: BuildTournamentItemListOptions): ItemListLd => {
+export const buildTournamentItemList = (options: BuildTournamentItemListOptions) => {
   const url = `${SITE_ORIGIN}/tournaments`;
   const positionOffset = options.positionOffset ?? 0;
 

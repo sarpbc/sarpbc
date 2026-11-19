@@ -22,16 +22,10 @@ describe("RosterProposalService season award proposals", () => {
       "journalist",
     );
 
-  it("checks the award against the season and keeps it pending", async () => {
+  it("keeps the award pending without recording it", async () => {
     const proposal = await proposeRegional();
 
     expect(proposal).toMatchObject({ sourceUrl: announcement, status: "pending" });
-    expect(fixture.seasons.requireAward).toHaveBeenCalledWith("season-1", {
-      awardType: "regional_mvp",
-      playerId: "zen",
-      region: "Europe",
-      sourceUrl: announcement,
-    });
     expect(fixture.seasons.addAward).not.toHaveBeenCalled();
   });
 

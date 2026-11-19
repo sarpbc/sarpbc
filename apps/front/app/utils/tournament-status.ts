@@ -5,7 +5,7 @@ export type TournamentStatus = "live" | "upcoming" | "finished";
 export const getTournamentStatus = (
   tournament: { beginAt?: Date | string | null; endAt?: Date | string | null },
   now = Date.now(),
-): TournamentStatus | null => {
+) => {
   const beginAt = isNonEmptyDateInput(tournament.beginAt)
     ? new Date(tournament.beginAt).getTime()
     : null;
@@ -27,7 +27,7 @@ export const getTournamentStatus = (
   return "upcoming";
 };
 
-export const tournamentStatusLabelKey = (status: TournamentStatus): string => {
+export const tournamentStatusLabelKey = (status: TournamentStatus) => {
   switch (status) {
     case "live": {
       return "page.tournaments.id.status.live";
@@ -53,7 +53,7 @@ export const formatTournamentShortDateRange = (
   beginAt: Date | string | null | undefined,
   endAt: Date | string | null | undefined,
   locale: string,
-): string | null => {
+) => {
   const begin = isNonEmptyDateInput(beginAt) ? new Date(beginAt) : null;
 
   if (!begin || Number.isNaN(begin.getTime())) {
@@ -74,7 +74,7 @@ export const formatTournamentDateRange = (
   beginAt: Date | string | null | undefined,
   endAt: Date | string | null | undefined,
   locale: string,
-): string | null => {
+) => {
   if (!isNonEmptyDateInput(beginAt) && !isNonEmptyDateInput(endAt)) {
     return null;
   }

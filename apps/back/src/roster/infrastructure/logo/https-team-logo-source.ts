@@ -6,7 +6,7 @@ import { isLiquipediaSourceHost } from "@sarpbc/utils";
 export class HttpsTeamLogoSource implements TeamLogoSource {
   constructor(private readonly transport: PublicHttpsTransport) {}
 
-  async download(url: URL, maxBytes: number): Promise<Uint8Array> {
+  async download(url: URL, maxBytes: number) {
     return await downloadPublicHttps(
       url,
       {

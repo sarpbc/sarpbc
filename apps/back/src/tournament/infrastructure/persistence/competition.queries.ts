@@ -23,10 +23,10 @@ import type {
   MatchListQueryOptions,
 } from "../../application/match/match-list-filters";
 
-const onDay = (column: string): string =>
+const onDay = (column: string) =>
   `extract(month from ${column} at time zone ?) = ? AND extract(day from ${column} at time zone ?) = ? AND extract(year from ${column} at time zone ?) < ?`;
 
-const terminalBracketMatch = (alias: string): string =>
+const terminalBracketMatch = (alias: string) =>
   `EXISTS (SELECT 1 FROM bracket_link fed WHERE fed.match_id = ${alias}.id) AND NOT EXISTS (SELECT 1 FROM bracket_link feeds WHERE feeds.previous_match_id = ${alias}.id)`;
 
 const TOURNAMENT_DETAIL_POPULATE = [
@@ -45,11 +45,7 @@ const TOURNAMENT_DETAIL_POPULATE = [
 
 export class CompetitionQueries implements TournamentQueries, MatchQueries {
   constructor(private readonly em: EntityManager) {}
-  async find({
-    limit,
-    offset = 0,
-    ...filters
-  }: TournamentListOptions): Promise<[ReturnType<typeof toTournament>[], number]> {
+  async find({ limit, offset = 0, ...filters }: TournamentListOptions) {
     const [rows, count] = await this.em.findAndCount(Tournament, stageFilter(filters), {
       limit,
       offset,
@@ -64,7 +60,7 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
       ],
     });
 
-    return [rows.map(toTournament), count];
+    return [rows.map(toTournament), count] satisfies [ReturnType<typeof toTournament>[], number];
   }
   async searchByName(options: { name: string; limit?: number; offset?: number }) {
     const rows = await this.em
@@ -232,15 +228,12 @@ export class CompetitionQueries implements TournamentQueries, MatchQueries {
 
     return rows.map(({ id }) => id);
   }
-  async list(
-    kind: MatchListKind,
-    options: MatchListQueryOptions,
-  ): Promise<[ReturnType<typeof toMatch>[], number]> {
+  async list(kind: MatchListKind, options: MatchListQueryOptions) {
     const [rows, count] = await this.em
       .getRepository<Match, MatchRepository>(Match)
       .listAndCount(kind, options);
 
-    return [rows.map(toMatch), count];
+    return [rows.map(toMatch), count] satisfies [ReturnType<typeof toMatch>[], number];
   }
   async page(kind: MatchListKind, options: MatchListQueryOptions) {
     const rows = await this.em.getRepository<Match, MatchRepository>(Match).list(kind, options);

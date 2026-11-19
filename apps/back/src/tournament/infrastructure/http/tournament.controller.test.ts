@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { NotFoundException } from "@nestjs/common";
 import { TournamentController } from "./tournament.controller";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
@@ -10,14 +10,15 @@ import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
 import { MatchLineupService } from "../../application/match/match-lineup.service";
 import { ViewershipService } from "../../application/viewership.service";
-import { tournamentQueries } from "../../../../test/competition-doubles";
+import { eventQueries, tournamentQueries } from "../../../../test/competition-doubles";
+import { transactionOver } from "../../application/ports.test-utils";
 import { unconstructed } from "../../../../test/doubles";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { ManualTournamentService } from "../../application/manual-tournament.service";
 import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
-import type { PrizeQueries, TournamentQueries } from "../../application/ports";
-import type { RedisService } from "../../../infrastructure/redis/redis.service";
+import type { TournamentQueries } from "../../application/ports";
+import { memoryRedis } from "../cache/memory-redis.test-utils";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
@@ -44,7 +45,7 @@ const unusedViewerships = new ViewershipService({
   run: async () => await Promise.reject(new Error("unused")),
 });
 
-const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
+const playerLines = async (ids: Parameters<GameStatsStore["playerLines"]>[0]) =>
   ids.map((id) => ({
     account: "steam:1",
     assists: 0,
@@ -56,8 +57,7 @@ const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
     shots: 3,
     team: { id: "team-vit", name: "Vitality", slug: "vitality" },
     teamGoals: 2,
-  })),
-);
+  }));
 
 const playerStats = new TournamentPlayerStatsService({ playerLines });
 
@@ -67,7 +67,7 @@ const controllerWith = (
   prizeService: TournamentPrizeService,
   prizesRead: CachedTournamentPrizesRead,
   catalog: ManualCatalogService,
-): TournamentController =>
+) =>
   new TournamentController(
     tournaments,
     unconstructed(SyncNewTournamentsUseCase),
@@ -87,25 +87,26 @@ const controllerWith = (
   );
 
 describe("TournamentController stage reads", () => {
-  const redis = {
-    get: vi.fn<RedisService["get"]>(),
-    set: vi.fn<RedisService["set"]>(),
-  };
-
-  const tournaments = { findById: vi.fn<TournamentQueries["findById"]>() };
+  const redis = memoryRedis();
+  const stored = new Map<string, Tournament>();
+  let known = (id: string) => stored.get(id) ?? null;
+  const tournaments = { findById: async (id: string) => known(id) };
   let controller: TournamentController;
 
   beforeEach(() => {
-    vi.resetAllMocks();
+    redis.entries.clear();
+    redis.writes.length = 0;
+    stored.clear();
+    known = (id) => stored.get(id) ?? null;
     controller = controllerWith(
       tournamentQueries(),
       new CachedTournamentRead(tournaments, redis),
       new TournamentPrizeService(
         {
-          byPlayer: vi.fn<PrizeQueries["byPlayer"]>(),
-          byTeam: vi.fn<PrizeQueries["byTeam"]>(),
-          byTournament: vi.fn<PrizeQueries["byTournament"]>(),
-          tournamentSource: vi.fn<PrizeQueries["tournamentSource"]>(),
+          byPlayer: async () => [],
+          byTeam: async () => [],
+          byTournament: async () => null,
+          tournamentSource: async () => null,
         },
         { run: async () => await Promise.reject(new Error("unused")) },
         new CompetitionAfterCommit(
@@ -115,22 +116,21 @@ describe("TournamentController stage reads", () => {
         ),
       ),
       new CachedTournamentPrizesRead(
-        { findByTournamentId: vi.fn<TournamentPrizeService["findByTournamentId"]>() },
+        { findByTournamentId: async () => await Promise.reject(new Error("unused")) },
         redis,
       ),
       unconstructed(ManualCatalogService),
     );
-    redis.get.mockResolvedValue(null);
   });
 
   it("does not cache misses and returns 404", async () => {
-    tournaments.findById.mockResolvedValue(null);
     await expect(controller.findOne("missing")).rejects.toBeInstanceOf(NotFoundException);
-    expect(redis.set).not.toHaveBeenCalled();
+    expect(redis.writes).toHaveLength(0);
   });
 
   it("returns the tournament response through the read adapter", async () => {
-    tournaments.findById.mockResolvedValue(
+    stored.set(
+      "t1",
       Object.assign(new Tournament(), {
         event: { id: "e1", name: "RLCS 2026", slug: "rlcs-2026" },
         id: "t1",
@@ -142,7 +142,7 @@ describe("TournamentController stage reads", () => {
   });
 
   it("aggregates the player stats of a stage, 404 for start.gg or unknown stages", async () => {
-    tournaments.findById.mockImplementation(async (id) =>
+    known = (id) =>
       id === "missing"
         ? null
         : Object.assign(new Tournament(), {
@@ -150,8 +150,7 @@ describe("TournamentController stage reads", () => {
             id,
             slug: id,
             source: id === "open-qualifier" ? "startgg" : "manual",
-          }),
-    );
+          });
 
     await expect(controller.getPlayerStats("group-stage")).resolves.toMatchObject({
       games: 1,
@@ -161,22 +160,10 @@ describe("TournamentController stage reads", () => {
       NotFoundException,
     );
     await expect(controller.getPlayerStats("missing")).rejects.toBeInstanceOf(NotFoundException);
-    expect(playerLines).toHaveBeenCalledExactlyOnceWith(["group-stage"]);
   });
 });
 
 describe("TournamentController leagues", () => {
-  const catalog = unconstructed(ManualCatalogService);
-  const leagues = vi.spyOn(catalog, "leagues");
-
-  const controller = controllerWith(
-    tournamentQueries(),
-    unconstructed(CachedTournamentRead),
-    unconstructed(TournamentPrizeService),
-    unconstructed(CachedTournamentPrizesRead),
-    catalog,
-  );
-
   const manual = Object.assign(new League(), {
     id: "l1",
     name: "Coupe de France",
@@ -189,10 +176,26 @@ describe("TournamentController leagues", () => {
     pandascoreId: 4,
   });
 
-  beforeEach(() => vi.resetAllMocks());
+  const catalog = new ManualCatalogService(
+    tournamentQueries({ leagues: async () => [manual, synced] }),
+    eventQueries(),
+    transactionOver({}),
+    new CompetitionAfterCommit(
+      { invalidateTournament: async () => {} },
+      { publish: async () => {} },
+      { error: () => {} },
+    ),
+  );
+
+  const controller = controllerWith(
+    tournamentQueries(),
+    unconstructed(CachedTournamentRead),
+    unconstructed(TournamentPrizeService),
+    unconstructed(CachedTournamentPrizesRead),
+    catalog,
+  );
 
   it("lists leagues with the fields staff edit and their PandaScore id", async () => {
-    leagues.mockResolvedValue([manual, synced]);
     await expect(controller.findLeagues()).resolves.toStrictEqual({
       leagues: [
         {

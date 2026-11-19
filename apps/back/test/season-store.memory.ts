@@ -1,9 +1,4 @@
-import type {
-  SeasonAward,
-  SeasonParticipant,
-  SeasonPathTournament,
-  SeasonTeam,
-} from "@sarpbc/types";
+import type { SeasonAward, SeasonParticipant, SeasonPathTournament } from "@sarpbc/types";
 import type {
   SeasonAwardPlayer,
   SeasonParticipantTeam,
@@ -19,7 +14,7 @@ interface StoredParticipant extends SeasonParticipant {
   seasonId: string;
 }
 
-const team = (id: string, name: string): SeasonTeam => ({
+const team = (id: string, name: string) => ({
   darkModeImageUrl: null,
   id,
   imageUrl: null,
@@ -32,7 +27,7 @@ export const SEASON_TEAMS = {
   vitality: team("vitality", "Team Vitality"),
 } as const;
 
-export const SEASON_TOURNAMENTS = {
+const SEASON_TOURNAMENTS = {
   major: {
     event: { id: "major-event", name: "RLCS Major", slug: "rlcs-major" },
     id: "major",
@@ -49,10 +44,10 @@ export const SEASON_TOURNAMENTS = {
   },
 } satisfies Record<string, SeasonPathTournament>;
 
-const tournamentOf = (id: string): SeasonPathTournament | null =>
+const tournamentOf = (id: string) =>
   Object.values(SEASON_TOURNAMENTS).find((tournament) => tournament.id === id) ?? null;
 
-const teamOf = (id: string): SeasonTeam =>
+const teamOf = (id: string) =>
   Object.values(SEASON_TEAMS).find((candidate) => candidate.id === id) ?? team(id, id);
 
 export const memorySeasonStore = () => {
@@ -80,12 +75,12 @@ export const memorySeasonStore = () => {
     return `${prefix}-${sequence}`;
   };
 
-  const stripAward = ({ seasonId: _seasonId, ...award }: StoredAward): SeasonAward => award;
+  const stripAward = ({ seasonId: _seasonId, ...award }: StoredAward) => award;
 
-  const stripParticipant = ({
-    seasonId: _seasonId,
-    ...participant
-  }: StoredParticipant): SeasonParticipant => ({ ...participant, path: [...participant.path] });
+  const stripParticipant = ({ seasonId: _seasonId, ...participant }: StoredParticipant) => ({
+    ...participant,
+    path: [...participant.path],
+  });
 
   const store: SeasonStore = {
     awardTaken: async (seasonId, { awardType, region }) =>

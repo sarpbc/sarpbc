@@ -1,6 +1,11 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HttpResponse, http } from "msw";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { TwitchAppToken } from "./twitch-app-token";
 import { ROCKET_LEAGUE_GAME_ID, TwitchHelixSource } from "./twitch-helix-source";
+
+const TOKEN_URL = "https://id.twitch.tv/oauth2/token";
+const STREAMS_URL = "https://api.twitch.tv/helix/streams";
 
 const helixStream = (login: string, gameId = ROCKET_LEAGUE_GAME_ID) => ({
   game_id: gameId,
@@ -11,71 +16,81 @@ const helixStream = (login: string, gameId = ROCKET_LEAGUE_GAME_ID) => ({
   viewer_count: 42,
 });
 
-const streamsResponse = (data: unknown[], status = 200) => Response.json({ data }, { status });
+const streamsResponse = (data: unknown[], status = 200) => HttpResponse.json({ data }, { status });
 
-const requestedUrl = (call: Parameters<typeof fetch>): URL => {
-  const [input] = call;
-
-  if (!(input instanceof URL)) {
-    throw new TypeError("Expected a URL request");
-  }
-
-  return input;
-};
-
-const requestedLogins = (call: Parameters<typeof fetch>): string[] =>
-  requestedUrl(call).searchParams.getAll("user_login");
+const requestedLogins = (request: Request) =>
+  new URL(request.url).searchParams.getAll("user_login");
 
 describe(TwitchHelixSource, () => {
-  const fetchMock = vi.fn<typeof fetch>();
-  let token = new TwitchAppToken({ clientId: "client", clientSecret: "secret" });
-  let source = new TwitchHelixSource("client", token);
-  let tokenGet = vi.spyOn(token, "get");
-  let tokenInvalidate = vi.spyOn(token, "invalidate");
+  const server = setupServer();
+  let source: TwitchHelixSource;
+  let issuedTokens: string[];
+  let streamRequests: Request[];
+
+  const serveTokens = (...tokens: string[]) => {
+    issuedTokens = [...tokens];
+  };
+
+  const serveStreams = (...responses: Response[]) => {
+    server.use(
+      http.get(STREAMS_URL, ({ request }) => {
+        streamRequests.push(request.clone());
+
+        return responses.shift() ?? streamsResponse([]);
+      }),
+    );
+  };
+
+  beforeAll(() => {
+    server.listen({ onUnhandledFrame: "error" });
+  });
 
   beforeEach(() => {
-    fetchMock.mockReset();
-    vi.stubGlobal("fetch", fetchMock);
-    token = new TwitchAppToken({ clientId: "client", clientSecret: "secret" });
-    tokenGet = vi.spyOn(token, "get").mockResolvedValue("app-token");
-    tokenInvalidate = vi.spyOn(token, "invalidate");
-    source = new TwitchHelixSource("client", token);
+    streamRequests = [];
+    serveTokens("app-token");
+    server.use(
+      http.post(TOKEN_URL, () =>
+        HttpResponse.json({ access_token: issuedTokens.shift() ?? "unexpected", expires_in: 3600 }),
+      ),
+    );
+    source = new TwitchHelixSource(
+      "client",
+      new TwitchAppToken({ clientId: "client", clientSecret: "secret" }),
+    );
   });
 
   afterEach(() => {
-    vi.restoreAllMocks();
-    vi.unstubAllGlobals();
+    server.resetHandlers();
+  });
+
+  afterAll(() => {
+    server.close();
   });
 
   it("sends the client id and app token", async () => {
-    fetchMock.mockResolvedValueOnce(streamsResponse([]));
+    serveStreams(streamsResponse([]));
 
     await source.findLiveRocketLeague(["zenrll"]);
 
-    const [, init] = fetchMock.mock.calls[0] ?? [];
-    const url = requestedUrl(fetchMock.mock.calls[0] ?? []);
-    expect(`${url.origin}${url.pathname}`).toBe("https://api.twitch.tv/helix/streams");
-    expect(init?.headers).toStrictEqual({
-      Authorization: "Bearer app-token",
-      "Client-Id": "client",
-    });
+    const [request] = streamRequests;
+    expect(request?.headers.get("Authorization")).toBe("Bearer app-token");
+    expect(request?.headers.get("Client-Id")).toBe("client");
   });
 
   it("queries logins in batches of 100", async () => {
     const logins = Array.from({ length: 250 }, (_, index) => `player_${index}`);
-    fetchMock.mockImplementation(async () => streamsResponse([]));
+    serveStreams();
 
     await source.findLiveRocketLeague(logins);
 
-    const { calls } = fetchMock.mock;
-    expect(calls.map((call) => requestedLogins(call).length)).toStrictEqual([100, 100, 50]);
-    expect(calls.flatMap(requestedLogins)).toStrictEqual(logins);
+    expect(streamRequests.map((request) => requestedLogins(request).length)).toStrictEqual([
+      100, 100, 50,
+    ]);
+    expect(streamRequests.flatMap(requestedLogins)).toStrictEqual(logins);
   });
 
   it("keeps only Rocket League streams", async () => {
-    fetchMock.mockResolvedValueOnce(
-      streamsResponse([helixStream("zenrll"), helixStream("kaydop", "509658")]),
-    );
+    serveStreams(streamsResponse([helixStream("zenrll"), helixStream("kaydop", "509658")]));
 
     await expect(source.findLiveRocketLeague(["zenrll", "kaydop"])).resolves.toStrictEqual([
       {
@@ -88,24 +103,24 @@ describe(TwitchHelixSource, () => {
   });
 
   it("refreshes the token once and retries after a 401", async () => {
-    tokenGet.mockResolvedValueOnce("expired").mockResolvedValueOnce("fresh");
-    fetchMock
-      .mockResolvedValueOnce(streamsResponse([], 401))
-      .mockResolvedValueOnce(streamsResponse([helixStream("zenrll")]));
+    serveTokens("expired", "fresh");
+    serveStreams(streamsResponse([], 401), streamsResponse([helixStream("zenrll")]));
 
     await expect(source.findLiveRocketLeague(["zenrll"])).resolves.toHaveLength(1);
-    expect(tokenInvalidate).toHaveBeenCalledWith("expired");
-    expect(fetchMock.mock.calls[1]?.[1]?.headers).toMatchObject({ Authorization: "Bearer fresh" });
+    expect(streamRequests.map((request) => request.headers.get("Authorization"))).toStrictEqual([
+      "Bearer expired",
+      "Bearer fresh",
+    ]);
   });
 
   it("fails when Helix returns an error", async () => {
-    fetchMock.mockResolvedValueOnce(streamsResponse([], 503));
+    serveStreams(streamsResponse([], 503));
 
     await expect(source.findLiveRocketLeague(["zenrll"])).rejects.toThrow("status 503");
   });
 
   it("rejects a malformed Helix response", async () => {
-    fetchMock.mockResolvedValueOnce(streamsResponse([{ user_login: "zenrll" }]));
+    serveStreams(streamsResponse([{ user_login: "zenrll" }]));
 
     await expect(source.findLiveRocketLeague(["zenrll"])).rejects.toThrow(/user_name/u);
   });

@@ -252,10 +252,10 @@ const CAREER_EVENTS: CareerEventDefinition[] = [
   },
 ];
 
-const getEventsForPool = (pool: CareerEventPool): CareerEventDefinition[] =>
+const getEventsForPool = (pool: CareerEventPool) =>
   CAREER_EVENTS.filter((event) => event.pool === pool);
 
-const firstNonEmpty = (...lists: CareerEventDefinition[][]): CareerEventDefinition[] =>
+const firstNonEmpty = (...lists: CareerEventDefinition[][]) =>
   lists.find((list) => list.length > 0) ?? [];
 
 export const pickRandomEvent = (
@@ -263,7 +263,7 @@ export const pickRandomEvent = (
   usedIds: string[],
   seed: number,
   season = 1,
-): CareerEventDefinition => {
+) => {
   const eligible = getEventsForPool(pool).filter((event) => (event.minSeason ?? 1) <= season);
   const unused = eligible.filter((event) => !usedIds.includes(event.id));
   const lateUnused = unused.filter((event) => (event.minSeason ?? 1) >= 5);
@@ -277,5 +277,4 @@ export const pickRandomEvent = (
   return picked;
 };
 
-export const getEventById = (id: string): CareerEventDefinition | undefined =>
-  CAREER_EVENTS.find((event) => event.id === id);
+export const getEventById = (id: string) => CAREER_EVENTS.find((event) => event.id === id);

@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20250922104101_addMatchScore extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(
       `create table "match_result" ("id" varchar(255) not null, "match_id" varchar(255) not null, "participant_id" varchar(255) not null, "score" int not null, constraint "match_result_pkey" primary key ("id"));`,
     );
@@ -19,7 +19,7 @@ export class Migration20250922104101_addMatchScore extends Migration {
     this.addSql(`alter table "match" drop column "results";`);
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`drop table if exists "match_result" cascade;`);
 
     this.addSql(`alter table "match" add column "results" jsonb null;`);

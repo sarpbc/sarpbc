@@ -17,8 +17,7 @@ const breadcrumbItems = computed(() => [
   { label: t("page.tournaments.events.title") },
 ]);
 
-const formatDate = (date: string | null): string =>
-  date ? new Date(date).toLocaleDateString() : "-";
+const formatDate = (date: string | null) => (date ? new Date(date).toLocaleDateString() : "-");
 
 const columns: TableColumn<ManualEvent>[] = [
   { accessorKey: "name", header: t("page.tournaments.events.columns.name") },

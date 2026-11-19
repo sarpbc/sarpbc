@@ -24,7 +24,7 @@ const TEAM_REFERENCE_NOUNS = referenceNouns<keyof TeamReferences>()([
   ["prizes", "prize", "prizes"],
 ]);
 
-export const assertTeamDeletable = (team: Team, references: TeamReferences): void => {
+export const assertTeamDeletable = (team: Team, references: TeamReferences) => {
   if (team.mergedIntoId !== null && team.mergedIntoId !== "") {
     throw new InvalidInputError(
       `${team.name} was merged into team "${team.mergedIntoId}" and is kept as its redirect`,

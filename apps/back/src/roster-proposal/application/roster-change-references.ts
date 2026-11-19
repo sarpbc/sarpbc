@@ -6,7 +6,7 @@ type ChangeMap = { [K in Kind]: Extract<RosterChange, { kind: K }> };
 
 type ReferenceTable = { [K in Kind]: (change: ChangeMap[K]) => string[] };
 
-const none = (): string[] => [];
+const none = () => [];
 
 const playerReferences: ReferenceTable = {
   add_player_to_team: (change) => [change.playerId],
@@ -75,14 +75,11 @@ const teamReferences: ReferenceTable = {
   upload_team_logo: (change) => [change.teamId],
 };
 
-const referencesOf = <K extends Kind>(
-  table: ReferenceTable,
-  kind: K,
-  change: ChangeMap[K],
-): string[] => table[kind](change);
+const referencesOf = <K extends Kind>(table: ReferenceTable, kind: K, change: ChangeMap[K]) =>
+  table[kind](change);
 
-export const referencedPlayerIds = (change: RosterChange): string[] =>
+export const referencedPlayerIds = (change: RosterChange) =>
   referencesOf(playerReferences, change.kind, change);
 
-export const referencedTeamIds = (change: RosterChange): string[] =>
+export const referencedTeamIds = (change: RosterChange) =>
   referencesOf(teamReferences, change.kind, change);

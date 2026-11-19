@@ -10,7 +10,6 @@ import type {
   PlayerLineupRow,
   TournamentQueries,
 } from "../../../tournament/application/ports";
-import type { SeasonStore } from "../../../season/application/ports";
 import { SeasonService } from "../../../season/application/season.service";
 import { PlayerController } from "./player.controller";
 import { PlayerService } from "../../application/player.service";
@@ -19,7 +18,8 @@ import { MatchService } from "../../../tournament/application/match/match.servic
 import { PlayerAwardService } from "../../../tournament/application/player-award.service";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
 import { unconstructed } from "../../../../test/doubles";
-import { unusedTournamentQueries } from "../../../../test/unused-tournament-queries";
+import { memorySeasonStore } from "../../../../test/season-store.memory";
+import { tournamentQueries } from "../../../../test/competition-doubles";
 
 const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
   Object.assign(new Match(), {
@@ -55,53 +55,51 @@ const staffContract = (teamId: string, startDate: Date, endDate: Date | null) =>
 
 describe(PlayerController, () => {
   const kept = Object.assign(new Player(), { id: "kept", name: "Kept" });
-  const findPlayerById = vi.fn<PlayerService["findById"]>();
-  const getContractsByPlayer = vi.fn<ContractService["getContractsByPlayer"]>();
-  const getOldTeamsByPlayer = vi.fn<ContractService["getOldTeamsByPlayer"]>();
-  const getStaffContractsByPlayer = vi.fn<ContractService["getStaffContractsByPlayer"]>();
-  const getMatchesByPlayer = vi.fn<MatchService["getMatchesByPlayer"]>();
-  const getTournamentsWonByPlayer = vi.fn<TournamentQueries["getTournamentsWonByPlayer"]>();
-  const getTournamentsByPlayer = vi.fn<TournamentQueries["getTournamentsByPlayer"]>();
-  const getTournamentsByTeamTenures = vi.fn<TournamentQueries["getTournamentsByTeamTenures"]>();
-  const findByPlayerId = vi.fn<PlayerAwardService["findByPlayerId"]>();
-  const awardsOfPlayer = vi.fn<SeasonStore["awardsOfPlayer"]>();
+  let staffContracts: Contract[] = [];
 
-  const tournaments: TournamentQueries = {
-    ...unusedTournamentQueries,
-    getTournamentsByPlayer,
-    getTournamentsByTeamTenures,
-    getTournamentsWonByPlayer,
+  const playerQueries: Pick<PlayerService, "findById"> = { findById: async () => kept };
+
+  const contractQueries: Pick<
+    ContractService,
+    "getContractsByPlayer" | "getOldTeamsByPlayer" | "getStaffContractsByPlayer"
+  > = {
+    getContractsByPlayer: async () => [],
+    getOldTeamsByPlayer: async () => [],
+    getStaffContractsByPlayer: async () => staffContracts,
   };
 
-  const seasonStore: SeasonStore = {
-    awardTaken: vi.fn<SeasonStore["awardTaken"]>(),
-    awards: vi.fn<SeasonStore["awards"]>(),
-    awardsOfPlayer,
-    find: vi.fn<SeasonStore["find"]>(),
-    findBySlug: vi.fn<SeasonStore["findBySlug"]>(),
-    list: vi.fn<SeasonStore["list"]>(),
-    nameTaken: vi.fn<SeasonStore["nameTaken"]>(),
-    participant: vi.fn<SeasonStore["participant"]>(),
-    participantTaken: vi.fn<SeasonStore["participantTaken"]>(),
-    participants: vi.fn<SeasonStore["participants"]>(),
-    player: vi.fn<SeasonStore["player"]>(),
-    published: vi.fn<SeasonStore["published"]>(),
-    remove: vi.fn<SeasonStore["remove"]>(),
-    removeAward: vi.fn<SeasonStore["removeAward"]>(),
-    removeParticipant: vi.fn<SeasonStore["removeParticipant"]>(),
-    removePathEntry: vi.fn<SeasonStore["removePathEntry"]>(),
-    save: vi.fn<SeasonStore["save"]>(),
-    saveAward: vi.fn<SeasonStore["saveAward"]>(),
-    saveParticipant: vi.fn<SeasonStore["saveParticipant"]>(),
-    savePathEntry: vi.fn<SeasonStore["savePathEntry"]>(),
-    slugTaken: vi.fn<SeasonStore["slugTaken"]>(),
-    team: vi.fn<SeasonStore["team"]>(),
-    tournamentExists: vi.fn<SeasonStore["tournamentExists"]>(),
-    updatePathNote: vi.fn<SeasonStore["updatePathNote"]>(),
+  const matchQueries: Pick<MatchService, "getMatchesByPlayer"> = {
+    getMatchesByPlayer: async () => [],
   };
 
-  const playerEarnings = vi.fn<TournamentPrizeService["playerEarnings"]>();
-  const prizes = Object.assign(unconstructed(TournamentPrizeService), { playerEarnings });
+  const awardQueries: Pick<PlayerAwardService, "findByPlayerId"> = {
+    findByPlayerId: async () => [],
+  };
+
+  const prizeQueries: Pick<TournamentPrizeService, "playerEarnings"> = {
+    playerEarnings: async () => ({ totals: [], years: [] }),
+  };
+
+  const tournaments: TournamentQueries = tournamentQueries({
+    getTournamentsByPlayer: async () => [],
+    getTournamentsByTeamTenures: async () => [],
+    getTournamentsWonByPlayer: async () => [],
+  });
+
+  const { store: seasonStore } = memorySeasonStore();
+
+  const getContractsByPlayer = vi.spyOn(contractQueries, "getContractsByPlayer");
+  const getOldTeamsByPlayer = vi.spyOn(contractQueries, "getOldTeamsByPlayer");
+  const getStaffContractsByPlayer = vi.spyOn(contractQueries, "getStaffContractsByPlayer");
+  const getMatchesByPlayer = vi.spyOn(matchQueries, "getMatchesByPlayer");
+  const getTournamentsWonByPlayer = vi.spyOn(tournaments, "getTournamentsWonByPlayer");
+  const getTournamentsByPlayer = vi.spyOn(tournaments, "getTournamentsByPlayer");
+  const getTournamentsByTeamTenures = vi.spyOn(tournaments, "getTournamentsByTeamTenures");
+  const findByPlayerId = vi.spyOn(awardQueries, "findByPlayerId");
+  const awardsOfPlayer = vi.spyOn(seasonStore, "awardsOfPlayer");
+  const playerEarnings = vi.spyOn(prizeQueries, "playerEarnings");
+
+  const prizes = Object.assign(unconstructed(TournamentPrizeService), prizeQueries);
 
   const standInMatches = [
     standInMatch("startgg-final", "startgg", 7),
@@ -113,41 +111,33 @@ describe(PlayerController, () => {
     { matchId: "cup-final", participantId: "cup-final-b", rosterIds: ["kept"] },
   ];
 
-  const byPlayer = vi.fn<LineupQueries["byPlayer"]>(async () => lineupRows);
+  const lineupQueries: LineupQueries = {
+    byMatch: async () => [],
+    byPlayer: async () => lineupRows,
+  };
+
+  const byPlayer = vi.spyOn(lineupQueries, "byPlayer");
 
   const lineups = new MatchLineupService(
-    { byMatch: async () => [], byPlayer },
+    lineupQueries,
     { byIds: async () => standInMatches },
     { run: async () => await Promise.reject(new Error("unused")) },
   );
 
   const controller = new PlayerController(
-    Object.assign(unconstructed(PlayerService), { findById: findPlayerById }),
-    Object.assign(unconstructed(ContractService), {
-      getContractsByPlayer,
-      getOldTeamsByPlayer,
-      getStaffContractsByPlayer,
-    }),
-    Object.assign(unconstructed(MatchService), { getMatchesByPlayer }),
+    Object.assign(unconstructed(PlayerService), playerQueries),
+    Object.assign(unconstructed(ContractService), contractQueries),
+    Object.assign(unconstructed(MatchService), matchQueries),
     tournaments,
-    Object.assign(unconstructed(PlayerAwardService), { findByPlayerId }),
+    Object.assign(unconstructed(PlayerAwardService), awardQueries),
     new SeasonService(seasonStore),
     prizes,
     lineups,
   );
 
   beforeEach(() => {
-    vi.resetAllMocks();
-    findPlayerById.mockResolvedValue(kept);
-    getContractsByPlayer.mockResolvedValue([]);
-    getOldTeamsByPlayer.mockResolvedValue([]);
-    getStaffContractsByPlayer.mockResolvedValue([]);
-    getMatchesByPlayer.mockResolvedValue([]);
-    getTournamentsWonByPlayer.mockResolvedValue([]);
-    getTournamentsByPlayer.mockResolvedValue([]);
-    getTournamentsByTeamTenures.mockResolvedValue([]);
-    findByPlayerId.mockResolvedValue([]);
-    playerEarnings.mockResolvedValue({ totals: [], years: [] });
+    vi.clearAllMocks();
+    staffContracts = [];
   });
 
   describe("with a merged player id", () => {
@@ -221,10 +211,7 @@ describe(PlayerController, () => {
   it("looks up tournaments over each staff tenure", async () => {
     const from = new Date("2024-01-01");
     const to = new Date("2024-12-31");
-    getStaffContractsByPlayer.mockResolvedValue([
-      staffContract("kc", from, to),
-      staffContract("vit", to, null),
-    ]);
+    staffContracts = [staffContract("kc", from, to), staffContract("vit", to, null)];
 
     await controller.getStaffTournaments("kept");
 

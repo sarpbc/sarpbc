@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261031160000_addTwitchStreamer extends Migration {
   override name = "Migration20261031160000_addTwitchStreamer";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(
       `create table "twitch_streamer" ("id" uuid not null default gen_random_uuid(), "login" varchar(255) not null, "display_name" varchar(255) null, "created_at" timestamptz not null default now(), primary key ("id"));`,
     );
@@ -12,7 +12,7 @@ export class Migration20261031160000_addTwitchStreamer extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(`drop table if exists "twitch_streamer" cascade;`);
   }
 }

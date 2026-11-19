@@ -1,7 +1,7 @@
 import type { DataSource, OnThisDayFact, OnThisDayFactLinkInput } from "@sarpbc/types";
 import { vi } from "vitest";
-import type { OnThisDaySources } from "../src/on-this-day/application/on-this-day.service";
 import type { OnThisDayFactStore } from "../src/on-this-day/application/ports";
+import type { OnThisDaySources } from "../src/on-this-day/application/on-this-day.service";
 import type { OnThisDayFactFields } from "../src/on-this-day/domain/on-this-day-fact";
 import { Contract } from "../src/roster/domain/contract";
 import { Player } from "../src/roster/domain/player";
@@ -33,7 +33,7 @@ const worlds = {
   slug: "rlcs-worlds-2024",
 };
 
-const side = (id: string, team: Team): TournamentParticipant =>
+const side = (id: string, team: Team) =>
   Object.assign(new TournamentParticipant(), { id, players: [vatira], team });
 
 export const stage = (
@@ -89,7 +89,7 @@ export const grandFinal = (
   });
 };
 
-export const transfer = (id: string, type: Transfer["type"], date: string): Transfer => {
+export const transfer = (id: string, type: Transfer["type"], date: string) => {
   const contract = Object.assign(new Contract(), {
     id,
     player: vatira,
@@ -100,14 +100,14 @@ export const transfer = (id: string, type: Transfer["type"], date: string): Tran
   return { contract, date: new Date(date), id: `${id}:join`, sourceUrl: null, type };
 };
 
-export const player = (birthday: string | null): Player =>
+export const player = (birthday: string | null) =>
   Object.assign(new Player(), {
     birthday: birthday === null ? null : new Date(birthday),
     name: vatira.name,
     slug: vatira.slug,
   });
 
-export const fact = (overrides: Partial<OnThisDayFact> = {}): OnThisDayFact => ({
+export const fact = (overrides: Partial<OnThisDayFact> = {}) => ({
   day: 6,
   id: "fact-id",
   link: null,
@@ -128,22 +128,20 @@ export const onThisDaySources = (
     players?: Player[];
   } = {},
 ) => {
-  const tournaments = {
-    finalsOnDay: vi.fn<OnThisDaySources["tournaments"]["finalsOnDay"]>(
-      async () => data.finals ?? [],
-    ),
-    wonOnDay: vi.fn<OnThisDaySources["tournaments"]["wonOnDay"]>(async () => data.titles ?? []),
+  const tournaments: OnThisDaySources["tournaments"] = {
+    finalsOnDay: async () => data.finals ?? [],
+    wonOnDay: async () => data.titles ?? [],
   };
 
-  const transfers = {
-    onDay: vi.fn<OnThisDaySources["transfers"]["onDay"]>(async () => data.transfers ?? []),
-  };
+  const transfers: OnThisDaySources["transfers"] = { onDay: async () => data.transfers ?? [] };
+  const facts: OnThisDaySources["facts"] = { onDay: async () => data.facts ?? [] };
+  const players: OnThisDaySources["players"] = { bornOnDay: async () => data.players ?? [] };
 
-  const facts = { onDay: vi.fn<OnThisDaySources["facts"]["onDay"]>(async () => data.facts ?? []) };
-
-  const players = {
-    bornOnDay: vi.fn<OnThisDaySources["players"]["bornOnDay"]>(async () => data.players ?? []),
-  };
+  vi.spyOn(tournaments, "finalsOnDay");
+  vi.spyOn(tournaments, "wonOnDay");
+  vi.spyOn(transfers, "onDay");
+  vi.spyOn(facts, "onDay");
+  vi.spyOn(players, "bornOnDay");
 
   const sources: OnThisDaySources = { facts, players, tournaments, transfers };
 
@@ -177,7 +175,7 @@ const LINKABLE = [
 const target = ({ kind, id }: OnThisDayFactLinkInput) =>
   LINKABLE.find((link) => link.kind === kind && link.id === id) ?? null;
 
-export const memoryFactStore = (): OnThisDayFactStore => {
+export const memoryFactStore = () => {
   const rows = new Map<string, OnThisDayFact>();
 
   return {
@@ -190,5 +188,5 @@ export const memoryFactStore = (): OnThisDayFactStore => {
     save: async (id, { link, ...fields }: OnThisDayFactFields) => {
       rows.set(id, { id, ...fields, link: link ? target(link) : null });
     },
-  };
+  } satisfies OnThisDayFactStore;
 };

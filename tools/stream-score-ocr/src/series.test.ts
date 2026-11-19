@@ -5,14 +5,17 @@ import { SeriesTracker } from "./series.ts";
 
 const SOURCE = { overlay: "test", source: "vod.mp4", sourceStartedAt: null };
 
-const score = (
-  blue: number,
-  orange: number,
-  clock: number,
-  overtime = false,
-): ScoreboardReading => ({ blue, clock, confidence: 0.9, kind: "score", orange, overtime });
+const score = (blue: number, orange: number, clock: number, overtime = false) =>
+  ({
+    blue,
+    clock,
+    confidence: 0.9,
+    kind: "score",
+    orange,
+    overtime,
+  }) satisfies ScoreboardReading;
 
-const feed = (tracker: SeriesTracker, readings: readonly ScoreboardReading[], from = 0): number => {
+const feed = (tracker: SeriesTracker, readings: readonly ScoreboardReading[], from = 0) => {
   for (const [index, reading] of readings.entries()) {
     tracker.push(from + index, reading);
   }
@@ -20,7 +23,7 @@ const feed = (tracker: SeriesTracker, readings: readonly ScoreboardReading[], fr
   return from + readings.length;
 };
 
-const regulationGame = (blue: number, orange: number): ScoreboardReading[] => {
+const regulationGame = (blue: number, orange: number) => {
   const readings: ScoreboardReading[] = [score(0, 0, 300), score(0, 0, 299)];
   let current = { blue: 0, orange: 0 };
   let clock = 250;

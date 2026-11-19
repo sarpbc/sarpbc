@@ -17,7 +17,7 @@ export class Contract {
   joinSourceUrl: string | null = null;
   leaveSourceUrl: string | null = null;
   createdAt = new Date();
-  close(endDate: Date, sourceUrl: string): void {
+  close(endDate: Date, sourceUrl: string) {
     if (endDate < this.startDate) {
       throw new InvalidInputError(
         `The departure date precedes the contract start (${isoDay(this.startDate)}).`,
@@ -28,7 +28,7 @@ export class Contract {
     this.leaveSourceUrl = sourceUrl;
   }
   /** An open contract stands for the current team, which only roster moves change. */
-  assertFitsCareer(others: Contract[], currentTeamId: string | null): void {
+  assertFitsCareer(others: Contract[], currentTeamId: string | null) {
     if (this.endDate && this.endDate < this.startDate) {
       throw new InvalidInputError(
         `The contract ends (${isoDay(this.endDate)}) before it starts (${isoDay(this.startDate)}).`,

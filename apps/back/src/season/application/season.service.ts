@@ -15,7 +15,7 @@ import { EMPTY_SEASON_FORMAT, parseSeasonFormat, parseSeasonSlug } from "../doma
 import { SEASON_AWARD_LABELS, parseSeasonAward } from "../domain/season-award";
 import type { SeasonRecord, SeasonStore } from "./ports";
 
-const cleanName = (name: string): string => {
+const cleanName = (name: string) => {
   const trimmed = name.trim();
 
   if (!trimmed || trimmed.length > SEASON_NAME_MAX_LENGTH) {
@@ -30,18 +30,22 @@ const cleanName = (name: string): string => {
 export class SeasonService {
   constructor(private readonly store: SeasonStore) {}
 
-  async list(): Promise<SeasonSummary[]> {
-    return await this.store.list();
+  async list() {
+    return (await this.store.list()) satisfies SeasonSummary[];
   }
 
-  async detail(id: string): Promise<SeasonDetail> {
+  async detail(id: string) {
     const season = await this.require(id);
     const participants = await this.store.participants(season.id);
 
-    return { ...season, awards: await this.store.awards(season.id), participants };
+    return {
+      ...season,
+      awards: await this.store.awards(season.id),
+      participants,
+    } satisfies SeasonDetail;
   }
 
-  async create(input: SeasonInput): Promise<SeasonDetail> {
+  async create(input: SeasonInput) {
     if (
       input.winnerTeamId !== null &&
       input.winnerTeamId !== undefined &&
@@ -60,10 +64,10 @@ export class SeasonService {
 
     await this.store.save(season);
 
-    return await this.detail(season.id);
+    return (await this.detail(season.id)) satisfies SeasonDetail;
   }
 
-  async update(id: string, input: SeasonInput): Promise<SeasonDetail> {
+  async update(id: string, input: SeasonInput) {
     const current = await this.require(id);
 
     const season: SeasonRecord = {
@@ -79,17 +83,17 @@ export class SeasonService {
 
     await this.store.save(season);
 
-    return await this.detail(id);
+    return (await this.detail(id)) satisfies SeasonDetail;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string) {
     if (!(await this.store.remove(id))) {
       throw new NotFoundError("Season not found");
     }
   }
 
-  async awardsOfPlayer(playerId: string): Promise<PlayerSeasonAward[]> {
-    return await this.store.awardsOfPlayer(playerId);
+  async awardsOfPlayer(playerId: string) {
+    return (await this.store.awardsOfPlayer(playerId)) satisfies PlayerSeasonAward[];
   }
 
   async requireAward(seasonId: string, input: SeasonAwardInput) {
@@ -118,19 +122,19 @@ export class SeasonService {
     return award;
   }
 
-  async addAward(seasonId: string, input: SeasonAwardInput): Promise<SeasonAward> {
+  async addAward(seasonId: string, input: SeasonAwardInput) {
     const award = await this.requireAward(seasonId, input);
 
-    return await this.store.saveAward(seasonId, input.playerId, award);
+    return (await this.store.saveAward(seasonId, input.playerId, award)) satisfies SeasonAward;
   }
 
-  async removeAward(seasonId: string, awardId: string): Promise<void> {
+  async removeAward(seasonId: string, awardId: string) {
     if (!(await this.store.removeAward(seasonId, awardId))) {
       throw new NotFoundError(`Award with id "${awardId}" was not found for season "${seasonId}"`);
     }
   }
 
-  private async require(id: string): Promise<SeasonRecord> {
+  private async require(id: string) {
     const season = await this.store.find(id);
 
     if (!season) {
@@ -140,7 +144,7 @@ export class SeasonService {
     return season;
   }
 
-  private async freeName(raw: string, exceptId: string | null): Promise<string> {
+  private async freeName(raw: string, exceptId: string | null) {
     const name = cleanName(raw);
 
     if (await this.store.nameTaken(name, exceptId)) {
@@ -150,7 +154,7 @@ export class SeasonService {
     return name;
   }
 
-  private async freeSlug(raw: string | null, exceptId: string | null): Promise<string | null> {
+  private async freeSlug(raw: string | null, exceptId: string | null) {
     const slug = parseSeasonSlug(raw);
 
     if (slug !== null && (await this.store.slugTaken(slug, exceptId))) {
@@ -160,7 +164,7 @@ export class SeasonService {
     return slug;
   }
 
-  private async participantTeam(seasonId: string, teamId: string | null): Promise<string | null> {
+  private async participantTeam(seasonId: string, teamId: string | null) {
     if (teamId === null) {
       return null;
     }

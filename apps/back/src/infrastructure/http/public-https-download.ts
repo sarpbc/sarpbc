@@ -62,7 +62,7 @@ for (const [network, prefix, family] of BLOCKED_SUBNETS) {
   blocked.addSubnet(network, prefix, family);
 }
 
-export const isPublicAddress = (address: string): boolean => {
+export const isPublicAddress = (address: string) => {
   const family = isIP(address);
 
   if (family === 0) {
@@ -72,13 +72,13 @@ export const isPublicAddress = (address: string): boolean => {
   return !blocked.check(address, family === 4 ? "ipv4" : "ipv6");
 };
 
-const privateAddressError = (): InvalidInputError =>
+const privateAddressError = () =>
   new InvalidInputError("The image URL resolves to a private, loopback or link-local address.");
 
-const tooLargeError = (maxBytes: number): InvalidInputError =>
+const tooLargeError = (maxBytes: number) =>
   new InvalidInputError(`The image is larger than ${maxBytes / (1024 * 1024)} MB.`);
 
-const downloadError = (error: Error, signal: AbortSignal): Error => {
+const downloadError = (error: Error, signal: AbortSignal) => {
   if (error instanceof InvalidInputError) {
     return error;
   }
@@ -94,7 +94,7 @@ const resolvePublicAddresses = async (
   lookup: PublicHttpsTransport["lookup"],
   hostname: string,
   family: LookupOptions["family"],
-): Promise<LookupAddress[] | Error> => {
+) => {
   try {
     const resolved = await lookup(hostname, { all: true, family });
 
@@ -108,10 +108,9 @@ const resolvePublicAddresses = async (
   }
 };
 
-const createPublicOnlyLookup =
-  (lookup: PublicHttpsTransport["lookup"]): LookupFunction =>
-  (hostname, options, respond) => {
-    const answer = async (): Promise<void> => {
+const createPublicOnlyLookup = (lookup: PublicHttpsTransport["lookup"]) =>
+  ((hostname, options, respond) => {
+    const answer = async () => {
       const resolved = await resolvePublicAddresses(lookup, hostname, options.family);
 
       if (resolved instanceof Error) {
@@ -138,9 +137,9 @@ const createPublicOnlyLookup =
     };
 
     void answer();
-  };
+  }) satisfies LookupFunction;
 
-const requirePublicHttpsUrl = (url: URL, isAllowedHost: (hostname: string) => boolean): void => {
+const requirePublicHttpsUrl = (url: URL, isAllowedHost: (hostname: string) => boolean) => {
   if (url.protocol !== "https:") {
     throw new InvalidInputError("The image URL and its redirects must use https.");
   }
@@ -168,11 +167,7 @@ const requirePublicHttpsUrl = (url: URL, isAllowedHost: (hostname: string) => bo
   }
 };
 
-const get = async (
-  url: URL,
-  signal: AbortSignal,
-  transport: PublicHttpsTransport,
-): Promise<IncomingMessage> => {
+const get = async (url: URL, signal: AbortSignal, transport: PublicHttpsTransport) => {
   const req = transport.request(url, {
     agent: false,
     headers: { accept: "image/png,image/webp,image/svg+xml", "user-agent": "sarpbc.org" },
@@ -191,11 +186,7 @@ const get = async (
   return await promise;
 };
 
-const readBody = async (
-  response: IncomingMessage,
-  maxBytes: number,
-  signal: AbortSignal,
-): Promise<Uint8Array> => {
+const readBody = async (response: IncomingMessage, maxBytes: number, signal: AbortSignal) => {
   const declared = Number(response.headers["content-length"]);
 
   if (Number.isFinite(declared) && declared > maxBytes) {
@@ -233,7 +224,7 @@ const followRedirects = async (
   options: PublicDownloadOptions,
   transport: PublicHttpsTransport,
   signal: AbortSignal,
-): Promise<Uint8Array> => {
+) => {
   requirePublicHttpsUrl(current, options.isAllowedHost);
   const response = await get(current, signal, transport);
   const status = response.statusCode ?? 0;
@@ -275,5 +266,4 @@ export const downloadPublicHttps = async (
   url: URL,
   options: PublicDownloadOptions,
   transport: PublicHttpsTransport,
-): Promise<Uint8Array> =>
-  await followRedirects(url, 0, options, transport, AbortSignal.timeout(options.timeoutMs));
+) => await followRedirects(url, 0, options, transport, AbortSignal.timeout(options.timeoutMs));

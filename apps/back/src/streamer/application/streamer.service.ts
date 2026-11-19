@@ -3,7 +3,6 @@ import { twitchChannelUrl } from "@sarpbc/utils";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { byViewerCount } from "../domain/live-stream";
-import type { TrackedStreamer } from "../domain/tracked-streamer";
 import type { LiveStreamCache, LiveStreamSnapshot } from "./ports/live-stream-cache";
 import type { LiveStreamSource } from "./ports/live-stream-source";
 import type { TrackedStreamerStore } from "./ports/tracked-streamer-store";
@@ -21,11 +20,11 @@ export class StreamerService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async list(): Promise<TrackedStreamer[]> {
+  async list() {
     return await this.streamers.list();
   }
 
-  async add(login: string, displayName: string | null): Promise<TrackedStreamer> {
+  async add(login: string, displayName: string | null) {
     const created = await this.streamers.add(login, displayName);
 
     if (!created) {
@@ -37,7 +36,7 @@ export class StreamerService {
     return created;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string) {
     if (!(await this.streamers.remove(id))) {
       throw new NotFoundError("Streamer not found. It may already have been removed.");
     }
@@ -45,9 +44,9 @@ export class StreamerService {
     await this.invalidate();
   }
 
-  async listLive(): Promise<LiveStreamer[]> {
+  async listLive() {
     if (!this.source) {
-      return [];
+      return [] satisfies LiveStreamer[];
     }
 
     let snapshot: LiveStreamSnapshot | null;
@@ -57,18 +56,18 @@ export class StreamerService {
       snapshot = await this.cache.read();
 
       if (snapshot && this.isFresh(snapshot)) {
-        return snapshot.streams;
+        return snapshot.streams satisfies LiveStreamer[];
       }
 
       claim = await this.cache.claimRefresh();
     } catch (error) {
       this.reportFailure("cache", error);
 
-      return [];
+      return [] satisfies LiveStreamer[];
     }
 
     if (claim === null) {
-      return snapshot?.streams ?? [];
+      return snapshot?.streams ?? ([] satisfies LiveStreamer[]);
     }
 
     let streams: LiveStreamer[];
@@ -78,7 +77,7 @@ export class StreamerService {
     } catch (error) {
       this.reportFailure("fetch", error);
 
-      return snapshot?.streams ?? [];
+      return snapshot?.streams ?? ([] satisfies LiveStreamer[]);
     }
 
     try {
@@ -87,14 +86,14 @@ export class StreamerService {
       this.reportFailure("cache", error);
     }
 
-    return streams;
+    return streams satisfies LiveStreamer[];
   }
 
-  private async fetchLive(source: LiveStreamSource): Promise<LiveStreamer[]> {
+  private async fetchLive(source: LiveStreamSource) {
     const tracked = await this.streamers.list();
 
     if (tracked.length === 0) {
-      return [];
+      return [] satisfies LiveStreamer[];
     }
 
     const names = new Map(tracked.map((streamer) => [streamer.login, streamer.displayName]));
@@ -108,14 +107,14 @@ export class StreamerService {
         url: twitchChannelUrl(stream.login),
         viewerCount: stream.viewerCount,
       })),
-    );
+    ) satisfies LiveStreamer[];
   }
 
-  private isFresh(snapshot: LiveStreamSnapshot): boolean {
+  private isFresh(snapshot: LiveStreamSnapshot) {
     return this.now().getTime() - snapshot.fetchedAt.getTime() < LIVE_STREAMS_FRESH_MS;
   }
 
-  private async invalidate(): Promise<void> {
+  private async invalidate() {
     try {
       await this.cache.clear();
     } catch (error) {

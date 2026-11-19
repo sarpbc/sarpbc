@@ -23,27 +23,15 @@ const {
   sorting = null,
   sticky = false,
 } = defineProps<{
-  /** Rows it rejects show a disabled checkbox; all rows are checkable by default. */
   canCheck?: ((row: T) => boolean) | null;
-  /** Read by screen readers before the table. */
   caption?: string | null;
   columns: TableColumn<T>[];
-  /** Passed by reference: TanStack recomputes rows whenever this identity changes. */
+  // WARNING: pass data by reference: TanStack recomputes rows whenever its identity changes.
   data: T[];
   loading?: boolean;
-  /** Makes rows clickable (`@select`). */
   onSelect?: ((event: MouseEvent, row: TableRow<T>) => void) | null;
-  /** Identifies a row in `selection`; the row index otherwise, which shifts when `data` changes. */
   rowId?: ((row: T) => string) | null;
-  /**
-   * The ids of the checked rows, owned by the parent. Setting it adds a first
-   * column of checkboxes, with one in the header that checks every row.
-   */
   selection?: string[] | null;
-  /**
-   * The current sort, owned by the parent, which also sorts `data`. Setting it
-   * makes headers sortable (except columns with `enableSorting: false`).
-   */
   sorting?: TableSort | null;
   sticky?: boolean;
 }>();
@@ -53,7 +41,6 @@ const emit = defineEmits<{
   "update:sorting": [sort: TableSort];
 }>();
 
-/* Slots are named after the column id: `#name-cell`, `#actions-cell`. */
 defineSlots<
   Record<`${string}-cell`, (props: { row: TableRow<T> }) => VNode[]> & {
     empty?: () => VNode[];
@@ -62,10 +49,9 @@ defineSlots<
 
 const adapters = useDesignAdapters();
 
-/* A button, link or field inside a row acts on its own; only the rest of the row selects it. */
 const INTERACTIVE = "a, button, input, select, textarea, label, [role='menuitem']";
 
-const selectRow = (event: MouseEvent, row: TableRow<T>): void => {
+const selectRow = (event: MouseEvent, row: TableRow<T>) => {
   if (event.target instanceof Element && event.target.closest(INTERACTIVE) !== null) {
     return;
   }
@@ -73,19 +59,16 @@ const selectRow = (event: MouseEvent, row: TableRow<T>): void => {
   onSelect?.(event, row);
 };
 
-const isSortable = (header: Header<T, unknown>): boolean =>
+const isSortable = (header: Header<T, unknown>) =>
   sorting !== null && header.column.columnDef.enableSorting !== false;
 
-const ariaSort = (header: Header<T, unknown>): "ascending" | "descending" | undefined => {
-  if (sorting?.id !== header.column.id) {
-    return undefined;
-  }
+const ariaSort = (header: Header<T, unknown>) => {
+  const direction = sorting?.desc === true ? "descending" : "ascending";
 
-  return sorting.desc ? "descending" : "ascending";
+  return sorting?.id === header.column.id ? direction : undefined;
 };
 
-/* A new column starts in its natural direction (numbers high to low); the same column flips. */
-const sortBy = (header: Header<T, unknown>): void => {
+const sortBy = (header: Header<T, unknown>) => {
   const { id } = header.column;
 
   const desc =
@@ -94,10 +77,9 @@ const sortBy = (header: Header<T, unknown>): void => {
   emit("update:sorting", { desc, id });
 };
 
-const alignOf = (column: Column<T, unknown>): "start" | "end" =>
-  column.columnDef.meta?.align ?? "start";
+const alignOf = (column: Column<T, unknown>) => column.columnDef.meta?.align ?? "start";
 
-const headerState = (all: boolean, some: boolean): boolean | "indeterminate" => {
+const headerState = (all: boolean, some: boolean) => {
   if (all) {
     return true;
   }
@@ -134,7 +116,7 @@ const rowSelection = computed<RowSelectionState>(() =>
   Object.fromEntries((selection ?? []).map((id) => [id, true])),
 );
 
-const updateSelection = (updater: Updater<RowSelectionState>): void => {
+const updateSelection = (updater: Updater<RowSelectionState>) => {
   const next = functionalUpdate(updater, rowSelection.value);
 
   emit(

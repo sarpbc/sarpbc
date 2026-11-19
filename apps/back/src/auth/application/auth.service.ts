@@ -4,14 +4,12 @@ import type { UserService } from "../../user/application/user.service";
 import type { CreateAccountInput, SignInInput } from "../../user/application/models/account-input";
 import type {
   AuthDestinations,
-  AuthSession,
-  AuthTokenPair,
   GoogleIdentity,
   OAuthReturnTo,
   SessionTokens,
 } from "./ports/authentication";
 
-export const parseOAuthReturnTo = (state: string | undefined): OAuthReturnTo =>
+export const parseOAuthReturnTo = (state: string | undefined) =>
   state === "admin" ? "admin" : "front";
 
 export class AuthService {
@@ -22,27 +20,27 @@ export class AuthService {
     private readonly destinations: AuthDestinations,
   ) {}
 
-  async signTokenPair(user: AuthenticatedUser): Promise<AuthTokenPair> {
+  async signTokenPair(user: AuthenticatedUser) {
     return await this.tokens.sign({ email: user.email, id: user.id });
   }
 
-  async authenticate(accessToken: string): Promise<AuthenticatedUser | null> {
+  async authenticate(accessToken: string) {
     return await this.currentUser(await this.tokens.verify(accessToken, "access"));
   }
 
-  async refreshSession(refreshToken: string): Promise<AuthSession | null> {
+  async refreshSession(refreshToken: string) {
     const user = await this.currentUser(await this.tokens.verify(refreshToken, "refresh"));
 
     return user ? { tokens: await this.signTokenPair(user), user } : null;
   }
 
-  private async currentUser(payload: AuthenticatedUser | null): Promise<AuthenticatedUser | null> {
+  private async currentUser(payload: AuthenticatedUser | null) {
     const user = payload ? await this.userService.findById(payload.id) : null;
 
     return user ? { email: user.email, id: user.id } : null;
   }
 
-  async signIn(input: SignInInput): Promise<AuthTokenPair> {
+  async signIn(input: SignInInput) {
     const user = await this.userService.signIn(input);
 
     if (!user) {
@@ -54,11 +52,11 @@ export class AuthService {
     return await this.signTokenPair(user);
   }
 
-  async signUp(input: CreateAccountInput): Promise<AuthTokenPair> {
+  async signUp(input: CreateAccountInput) {
     return await this.signTokenPair(await this.userService.create(input));
   }
 
-  async handleGoogleCallback(code: string): Promise<AuthTokenPair> {
+  async handleGoogleCallback(code: string) {
     const profile = await this.google.profile(code);
     let user = await this.userService.findOneByGoogleId(profile.id);
 
@@ -77,11 +75,11 @@ export class AuthService {
     return await this.signTokenPair(user);
   }
 
-  resolveOAuthReturnUrl(returnTo: string | undefined): string {
+  resolveOAuthReturnUrl(returnTo: string | undefined) {
     return returnTo === "admin" ? this.destinations.adminUrl : this.destinations.frontUrl;
   }
 
-  getGoogleAuthUrl(returnTo: OAuthReturnTo = "front"): string {
+  getGoogleAuthUrl(returnTo: OAuthReturnTo = "front") {
     return this.google.authorizationUrl(returnTo);
   }
 }

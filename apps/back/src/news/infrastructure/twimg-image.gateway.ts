@@ -7,18 +7,17 @@ import {
 import { ApplicationError } from "../../common/domain/errors/application-error";
 import { IntegrationError } from "../../common/domain/errors/integration-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type { TweetImage, TweetImageGateway } from "../application/tweet-image.service";
+import type { TweetImageGateway } from "../application/tweet-image.service";
 
 const FETCH_TIMEOUT_MS = 5000;
 const MAX_REDIRECTS = 2;
 
-// X also serves AVIF, which the cover upload does not accept.
 const TWIMG_CONTENT_TYPES = new Set<string>([...IMAGE_CONTENT_TYPES, "image/avif"]);
 
-const unavailable = (): IntegrationError =>
+const unavailable = () =>
   new IntegrationError("Could not load this image from X. Try again in a moment.");
 
-const twimgUrl = (input: string, base?: string): string | null => {
+const twimgUrl = (input: string, base?: string) => {
   let url: URL;
 
   try {
@@ -31,11 +30,11 @@ const twimgUrl = (input: string, base?: string): string | null => {
     return null;
   }
 
-  // A literal host prefix keeps every request on pbs.twimg.com, whatever path the input carries.
+  // WARNING: a literal host prefix keeps every request on pbs.twimg.com, whatever path the input carries.
   return `https://pbs.twimg.com/${url.pathname.slice(1)}${url.search}`;
 };
 
-const readImage = async (response: Response): Promise<TweetImage> => {
+const readImage = async (response: Response) => {
   if (response.status === 404 || response.status === 410) {
     await response.body?.cancel();
     throw new NotFoundError("This image is no longer available on X.");
@@ -56,7 +55,6 @@ const readImage = async (response: Response): Promise<TweetImage> => {
   const chunks: Uint8Array[] = [];
   let size = 0;
 
-  // Leaving the loop early cancels the stream.
   for await (const chunk of response.body) {
     const value: unknown = chunk;
 
@@ -76,11 +74,7 @@ const readImage = async (response: Response): Promise<TweetImage> => {
   return { body: Buffer.concat(chunks), contentType };
 };
 
-const fetchImage = async (
-  target: string | null,
-  redirects: number,
-  signal: AbortSignal,
-): Promise<TweetImage> => {
+const fetchImage = async (target: string | null, redirects: number, signal: AbortSignal) => {
   if (target === null || target === "") {
     throw unavailable();
   }
@@ -106,7 +100,7 @@ const fetchImage = async (
 };
 
 export class TwimgImageGateway implements TweetImageGateway {
-  async load(url: string): Promise<TweetImage> {
+  async load(url: string) {
     try {
       return await fetchImage(twimgUrl(url), 0, AbortSignal.timeout(FETCH_TIMEOUT_MS));
     } catch (error) {

@@ -49,15 +49,15 @@ const applyChange = async <K extends Kind>(
   kind: K,
   change: ChangeMap[K],
   sourceUrl: string,
-): Promise<string> => await handlers[kind](change, sourceUrl);
+) => await handlers[kind](change, sourceUrl);
 
-const idOf = async (created: Promise<{ id: string }>): Promise<string> => {
+const idOf = async (created: Promise<{ id: string }>) => {
   const { id } = await created;
 
   return id;
 };
 
-const keptIdOf = async (merged: Promise<{ kept: { id: string } }>): Promise<string> => {
+const keptIdOf = async (merged: Promise<{ kept: { id: string } }>) => {
   const { kept } = await merged;
 
   return kept.id;
@@ -130,11 +130,7 @@ export class RosterProposalService {
     private readonly seasons: Seasons,
   ) {}
 
-  async propose(
-    change: RosterChange,
-    sourceUrl: string,
-    proposedById: string,
-  ): Promise<RosterProposal> {
+  async propose(change: RosterChange, sourceUrl: string, proposedById: string) {
     if (sourceUrl !== "" && !isAcceptedDataSourceUrl(sourceUrl)) {
       throw new InvalidInputError(REFUSED_DATA_SOURCE_MESSAGE);
     }
@@ -228,7 +224,7 @@ export class RosterProposalService {
     { teamId, variant, imageUrl }: TeamLogoProposal,
     sourceUrl: string,
     proposedById: string,
-  ): Promise<RosterProposal> {
+  ) {
     await this.requireTeam(teamId);
     const logo = await this.logos.upload(teamId, variant, imageUrl);
 
@@ -251,7 +247,7 @@ export class RosterProposalService {
     }
   }
 
-  async list(status: RosterProposalStatus): Promise<RosterProposalList> {
+  async list(status: RosterProposalStatus) {
     const proposals = await this.store.list(status, LIST_LIMIT);
 
     const names = await this.store.names({
@@ -311,10 +307,10 @@ export class RosterProposalService {
     return { names, proposals };
   }
 
-  async approve(id: string, reviewerId: string): Promise<RosterProposal> {
+  async approve(id: string, reviewerId: string) {
     return await this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);
-      // A merge approved since the proposal would leave the change on a redirect record.
+      // WARNING: a merge approved since the proposal would leave the change on a redirect record.
       await this.requireReferences(proposal.change);
       proposal.approve(reviewerId, new Date());
 
@@ -330,7 +326,7 @@ export class RosterProposalService {
     });
   }
 
-  async reject(id: string, reviewerId: string): Promise<RosterProposal> {
+  async reject(id: string, reviewerId: string) {
     return await this.transaction.run(async (proposals) => {
       const proposal = await this.reviewable(proposals, id, reviewerId);
       proposal.reject(reviewerId, new Date());
@@ -345,11 +341,7 @@ export class RosterProposalService {
     });
   }
 
-  private async reviewable(
-    proposals: RosterProposalStore,
-    id: string,
-    reviewerId: string,
-  ): Promise<RosterProposal> {
+  private async reviewable(proposals: RosterProposalStore, id: string, reviewerId: string) {
     const proposal = await proposals.findById(id);
 
     if (!proposal) {
@@ -365,11 +357,11 @@ export class RosterProposalService {
     return proposal;
   }
 
-  private async apply(change: RosterChange, sourceUrl: string): Promise<string> {
+  private async apply(change: RosterChange, sourceUrl: string) {
     return await applyChange(this.applyHandlers(), change.kind, change, sourceUrl);
   }
 
-  private applyHandlers(): ApplyHandlers {
+  private applyHandlers() {
     return {
       add_player_to_team: async ({ playerId, teamId, effectiveDate, contractRole }, sourceUrl) => {
         await this.players.joinTeam(playerId, {
@@ -507,13 +499,10 @@ export class RosterProposalService {
       },
       upload_team_logo: async ({ teamId, variant, logoUrl }) =>
         await idOf(this.teams.update(teamId, { [teamLogoField(variant)]: logoUrl })),
-    };
+    } satisfies ApplyHandlers;
   }
 
-  private async setStreams(
-    change: Parameters<typeof streamChangeFor>[0],
-    sourceUrl: string,
-  ): Promise<string> {
+  private async setStreams(change: Parameters<typeof streamChangeFor>[0], sourceUrl: string) {
     const { owner, streams } = streamChangeFor(change);
     await this.streams.set(owner, streams, sourceFromUrl(sourceUrl));
 
@@ -532,7 +521,7 @@ export class RosterProposalService {
     }
   }
 
-  private async requirePlayer(id: string): Promise<void> {
+  private async requirePlayer(id: string) {
     const player = await this.players.findById(id);
 
     if (!player) {
@@ -544,7 +533,7 @@ export class RosterProposalService {
     }
   }
 
-  private async requireReferences(change: RosterChange): Promise<void> {
+  private async requireReferences(change: RosterChange) {
     await mapSequentially(referencedPlayerIds(change), async (id) => {
       await this.requirePlayer(id);
     });
@@ -553,7 +542,7 @@ export class RosterProposalService {
     });
   }
 
-  private async requireContract(playerId: string, contractId: string): Promise<void> {
+  private async requireContract(playerId: string, contractId: string) {
     const career = await this.contracts.getContractsByPlayer(playerId);
 
     if (!career.some((contract) => contract.id === contractId)) {
@@ -561,7 +550,7 @@ export class RosterProposalService {
     }
   }
 
-  private async requireTeam(id: string): Promise<void> {
+  private async requireTeam(id: string) {
     const team = await this.teams.findById(id);
 
     if (!team) {

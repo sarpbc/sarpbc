@@ -20,7 +20,7 @@ import {
   STARTGG_STAGE_ID,
   memoryFactStore,
   onThisDaySources,
-} from "./on-this-day-fixtures";
+} from "./on-this-day.fixture";
 
 const STAFF = "access_token=staff";
 const MEMBER = "access_token=member";

@@ -6,7 +6,7 @@ import { MatchGamePlayer } from "./match-game-player.entity";
 import { PlayerPlatformLink } from "./player-platform-link.entity";
 import { nameOf } from "./participant-name";
 
-export const toLink = (row: PlayerPlatformLink): PlayerLink => ({
+export const toLink = (row: PlayerPlatformLink) => ({
   platform: row.platform,
   platformId: row.platformId,
   playerId: row.player.id,
@@ -15,7 +15,7 @@ export const toLink = (row: PlayerPlatformLink): PlayerLink => ({
 export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
   constructor(private readonly em: EntityManager) {}
 
-  async accounts(tournamentId: string): Promise<StatsPlayerAccount[]> {
+  async accounts(tournamentId: string) {
     const rows = await this.em.find(
       MatchGamePlayer,
       { game: { match: { tournament: tournamentId } }, platformId: { $ne: null } },
@@ -63,10 +63,10 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
 
     return [...accounts.values()].toSorted(
       (a, b) => a.team.name.localeCompare(b.team.name) || a.name.localeCompare(b.name),
-    );
+    ) satisfies StatsPlayerAccount[];
   }
 
-  async rosters(tournamentId: string): Promise<StatsRoster[]> {
+  async rosters(tournamentId: string) {
     const participants = await this.em.find(
       TournamentParticipant,
       { tournament: tournamentId },
@@ -82,10 +82,10 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
           .toSorted((a, b) => a.name.localeCompare(b.name)),
         teamName: nameOf(participant),
       }))
-      .toSorted((a, b) => a.teamName.localeCompare(b.teamName));
+      .toSorted((a, b) => a.teamName.localeCompare(b.teamName)) satisfies StatsRoster[];
   }
 
-  async onTournamentRoster(tournamentId: string, playerId: string): Promise<boolean> {
+  async onTournamentRoster(tournamentId: string, playerId: string) {
     return (
       (await this.em.count(TournamentParticipant, {
         players: playerId,
@@ -94,7 +94,7 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
     );
   }
 
-  async link({ playerId, ...account }: PlayerLink): Promise<number> {
+  async link({ playerId, ...account }: PlayerLink) {
     return await this.em.transactional(async (em) => {
       await em.upsert(
         PlayerPlatformLink,

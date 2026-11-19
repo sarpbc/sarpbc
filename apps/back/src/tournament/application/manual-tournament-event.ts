@@ -6,7 +6,7 @@ import { explicitEventSlug, placeStage, requireEvent } from "./event-placement";
 import type { UpdateTournamentInput } from "./inputs";
 import type { EventWriter } from "./ports";
 
-export const sharedEventSlugError = (): InvalidInputError =>
+export const sharedEventSlugError = () =>
   new InvalidInputError(
     "This tournament is a stage of a shared event, so it has no slug of its own. Change the slug on the event instead.",
   );
@@ -15,7 +15,7 @@ export const createOwnEvent = async (
   events: EventWriter,
   tournament: Tournament,
   slug: string | undefined,
-): Promise<TournamentEvent> => {
+) => {
   const event = Object.assign(new TournamentEvent(), {
     league: tournament.league,
     name: tournament.name,
@@ -38,7 +38,7 @@ export const updateEvent = async (
   tournament: Tournament,
   previousName: string,
   input: UpdateTournamentInput,
-): Promise<void> => {
+) => {
   if (input.eventId !== undefined && input.eventId !== tournament.event.id) {
     if (input.slug !== undefined) {
       throw sharedEventSlugError();

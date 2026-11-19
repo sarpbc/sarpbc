@@ -18,7 +18,7 @@ const faqItems = computed(() => {
   const teamName = player.team?.name;
   const demonym = resolvePlayerNationalityDemonym(player.nationality, te, t);
 
-  const whoAnswerText = (): string => {
+  const whoAnswerText = () => {
     if (teamName && demonym) {
       return t("page.player.slug.faq.who.answerWithTeam", {
         name,

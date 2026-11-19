@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261113223712_circuitRegionalStages extends Migration {
   override name = "Migration20261113223712_circuitRegionalStages";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(
       `create table "circuit_stage_team" ("id" uuid not null default gen_random_uuid(), "stage_id" uuid not null, "team_id" uuid not null, "placement" int null, "region_member" boolean not null default false, primary key ("id"));`,
     );
@@ -24,7 +24,7 @@ export class Migration20261113223712_circuitRegionalStages extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(`drop table if exists "circuit_stage_team" cascade;`);
 
     this.addSql(`alter table "circuit_stage" drop column "worldwide";`);

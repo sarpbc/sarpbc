@@ -17,7 +17,7 @@ const { data: staff, error: staffError } = await useAsyncData(
       return null;
     }
 
-    // The Nuxt context is lost after the first await; apiFetch needs it to read the runtime config.
+    // WARNING: the Nuxt context is lost after the first await, and apiFetch needs it to read the runtime config.
     const contracts = await nuxtApp.runWithContext(() => getPlayerContracts(player.id));
 
     return { contracts, player };
@@ -38,7 +38,6 @@ if (!staff.value || staffContracts.value.length === 0) {
   });
 }
 
-// A merged duplicate's slug resolves to the kept person.
 if (staff.value && staff.value.player.slug !== slug.value) {
   await redirectToCanonical(route, localePath(staffPath(staff.value.player.slug)));
 }

@@ -26,14 +26,14 @@ const viewerFormatter = computed(
 
 const viewerPlurals = computed(() => new Intl.PluralRules(locale.value));
 
-const viewers = (streamer: LiveStreamer): string =>
+const viewers = (streamer: LiveStreamer) =>
   t(
     "components.footer.live.viewers",
     { count: viewerFormatter.value.format(streamer.viewerCount) },
     viewerPlurals.value.select(streamer.viewerCount) === "one" ? 1 : 2,
   );
 
-const linkLabel = (streamer: LiveStreamer): string =>
+const linkLabel = (streamer: LiveStreamer) =>
   t("components.footer.live.linkLabel", {
     name: streamer.displayName,
     title: streamer.title,

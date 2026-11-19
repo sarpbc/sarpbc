@@ -1,7 +1,7 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { PostService } from "./post.service";
-import type { ForumWriteScope, ForumTransaction, PostStore, TopicStore } from "./ports";
-import type { NewPostRecord, PostRecord, TopicRecord, TranslationRecord } from "./models";
+import { InMemoryForumScope } from "./forum-store.test-utils";
+import type { PostRecord, TopicRecord } from "./models";
 import type { Author } from "../../common/domain/author";
 import { PostType } from "../domain/post-type.enum";
 
@@ -17,71 +17,34 @@ const setup = (role: Author["role"] = "admin") => {
     updatedAt: null,
   };
 
-  const saved: NewPostRecord[] = [];
-  const translations: TranslationRecord[] = [];
-
-  const posts = {
-    delete: vi.fn<PostStore["delete"]>(),
-    deleteTranslations: vi.fn<PostStore["deleteTranslations"]>(),
-    findById: vi.fn<PostStore["findById"]>(async (id) => {
-      const post = saved.find((candidate) => candidate.id === id);
-
-      return post ? { ...post, publicId: 41 } : null;
-    }),
-    findByTopicId: vi.fn<PostStore["findByTopicId"]>().mockResolvedValue([]),
-    findLatestByUser: vi.fn<PostStore["findLatestByUser"]>().mockResolvedValue(null),
-    findPaginated: vi.fn<PostStore["findPaginated"]>().mockResolvedValue([]),
-    findRecentActivity: vi.fn<PostStore["findRecentActivity"]>().mockResolvedValue([]),
-    findWithDetails: vi.fn<PostStore["findWithDetails"]>().mockResolvedValue(null),
-    save: vi.fn<PostStore["save"]>(async (model) => {
-      saved.push(model);
-    }),
-    saveTranslation: vi.fn<PostStore["saveTranslation"]>(async (model) => {
-      translations.push(model);
-    }),
-  };
-
-  const scope: ForumWriteScope = {
-    posts,
-    replies: { deleteAllForPost: vi.fn<ForumWriteScope["replies"]["deleteAllForPost"]>() },
-    topics: {
-      findAllTopics: vi.fn<TopicStore["findAllTopics"]>().mockResolvedValue([]),
-      findById: vi.fn<TopicStore["findById"]>().mockResolvedValue(topic),
-      findByTitle: vi.fn<TopicStore["findByTitle"]>().mockResolvedValue(topic),
-      save: vi.fn<TopicStore["save"]>(),
-    },
-    users: {
-      findById: vi
-        .fn<ForumWriteScope["users"]["findById"]>()
-        .mockResolvedValue({ id: "user", role, userName: "Fan" }),
-    },
-  };
-
-  let commits = 0;
-
-  const transaction: ForumTransaction = {
-    async run(work) {
-      const result = await work(scope);
-      commits += 1;
-
-      return result;
-    },
-  };
+  const scope = new InMemoryForumScope();
+  scope.topics.add(topic);
+  scope.addUser({ id: "user", role, userName: "Fan" });
 
   return {
-    commits: () => commits,
-    posts,
-    saved,
     scope,
     service: new PostService(
-      posts,
-      transaction,
+      scope.posts,
+      scope,
       () => now,
       () => "translation",
     ),
-    translations,
   };
 };
+
+const latestPost = (createdAt: Date) =>
+  ({
+    author: { id: "user", userName: "Fan" },
+    content: "Body",
+    createdAt,
+    id: "latest",
+    postType: PostType.DISCUSSION,
+    publicId: 1,
+    title: "Post",
+    topic: { id: "topic", title: "Topic" },
+    translations: [],
+    updatedAt: null,
+  }) satisfies PostRecord;
 
 const input = {
   content: "<script>bad()</script>Body",
@@ -98,43 +61,30 @@ describe("post transaction and policies", () => {
       publicId: 41,
       slug: "title",
     });
-    expect(f.saved[0]?.title).toBe("Title");
-    expect(f.translations[0]?.title).toBe("Titre");
-    expect(f.translations[0]?.post.id).toBe("post");
-    expect(f.commits()).toBe(1);
+    expect(f.scope.posts.saved[0]?.title).toBe("Title");
+    expect(f.scope.posts.translations[0]?.title).toBe("Titre");
+    expect(f.scope.posts.translations[0]?.post.id).toBe("post");
+    expect(f.scope.commits).toBe(1);
   });
 
   it("ignores translations from non-admin authors", async () => {
     const f = setup(null);
     await f.service.create("user", input);
-    expect(f.saved).toHaveLength(1);
-    expect(f.translations).toStrictEqual([]);
+    expect(f.scope.posts.saved).toHaveLength(1);
+    expect(f.scope.posts.translations).toStrictEqual([]);
   });
 
   it("does not commit a post if a translation fails", async () => {
     const f = setup();
-    f.scope.posts.saveTranslation = async () => {
-      throw new Error("translation failed");
-    };
+    f.scope.posts.failTranslationsWith(new Error("translation failed"));
 
     await expect(f.service.create("user", input)).rejects.toThrow("translation failed");
-    expect(f.commits()).toBe(0);
+    expect(f.scope.commits).toBe(0);
   });
 
   it("reports the next available time until the one-hour boundary", async () => {
     const f = setup();
-    f.scope.posts.findLatestByUser = async () => ({
-      author: { id: "user", userName: "Fan" },
-      content: "Body",
-      createdAt: new Date(now.getTime() - 3_599_999),
-      id: "latest",
-      postType: PostType.DISCUSSION,
-      publicId: 1,
-      title: "Post",
-      topic: { id: "topic", title: "Topic" },
-      translations: [],
-      updatedAt: null,
-    });
+    f.scope.posts.add(latestPost(new Date(now.getTime() - 3_599_999)));
     await expect(f.service.getCreationStatus("user")).resolves.toStrictEqual({
       canCreate: false,
       cooldownHours: 1,
@@ -145,35 +95,21 @@ describe("post transaction and policies", () => {
 
   it("allows creation exactly at the one-hour boundary", async () => {
     const f = setup();
-    f.scope.posts.findLatestByUser = async () => ({
-      author: { id: "user", userName: "Fan" },
-      content: "Body",
-      createdAt: new Date(now.getTime() - 3_600_000),
-      id: "latest",
-      postType: PostType.DISCUSSION,
-      publicId: 1,
-      title: "Post",
-      topic: { id: "topic", title: "Topic" },
-      translations: [],
-      updatedAt: null,
-    });
+    f.scope.posts.add(latestPost(new Date(now.getTime() - 3_600_000)));
     await f.service.create("user", input);
-    expect(f.saved).toHaveLength(1);
+    expect(f.scope.posts.saved).toHaveLength(1);
   });
 
   it("does not delete the post or commit when dependent deletion fails", async () => {
     const f = setup();
     await f.service.create("user", input);
-    const [post] = f.saved;
-    f.scope.posts.findWithDetails = async () => ({ ...post, publicId: 41 });
-    f.scope.replies.deleteAllForPost = async () => {
-      throw new Error("reply deletion failed");
-    };
+    const [post] = f.scope.posts.saved;
+    f.scope.replyDeletionFailure = new Error("reply deletion failed");
 
     await expect(f.service.delete(post.id)).rejects.toThrow("reply deletion failed");
-    expect(f.posts.deleteTranslations).not.toHaveBeenCalled();
-    expect(f.posts.delete).not.toHaveBeenCalled();
-    expect(f.commits()).toBe(1);
+    expect(f.scope.posts.translationsDeletedFor).toStrictEqual([]);
+    expect(f.scope.posts.deleted).toStrictEqual([]);
+    expect(f.scope.commits).toBe(1);
   });
 });
 
@@ -203,7 +139,7 @@ describe("post lookup", () => {
 
   it("exposes the public id and a slug derived from the base title", async () => {
     const f = setup();
-    vi.spyOn(f.scope.posts, "findWithDetails").mockResolvedValue(stored);
+    f.scope.posts.add(stored);
     const ref = { kind: "publicId", value: 88 } as const;
     await expect(f.service.findByIdDto(ref, "fr-FR")).resolves.toMatchObject({
       id: stored.id,
@@ -215,7 +151,7 @@ describe("post lookup", () => {
 
   it("applies the requested translation from the single lookup and keeps the base slug", async () => {
     const f = setup();
-    vi.spyOn(f.scope.posts, "findWithDetails").mockResolvedValue(stored);
+    f.scope.posts.add(stored);
     await expect(
       f.service.findByIdDto({ kind: "publicId", value: 88 }, "en-US"),
     ).resolves.toMatchObject({
@@ -234,8 +170,8 @@ describe("post lookup", () => {
 
   it("deletes by legacy id", async () => {
     const f = setup();
-    vi.spyOn(f.scope.posts, "findWithDetails").mockResolvedValue(stored);
+    f.scope.posts.add(stored);
     await f.service.delete(stored.id);
-    expect(f.posts.delete).toHaveBeenCalledExactlyOnceWith(stored);
+    expect(f.scope.posts.deleted).toStrictEqual([stored]);
   });
 });

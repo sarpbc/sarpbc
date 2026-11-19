@@ -7,7 +7,6 @@ import type { TeamRosterEra, TeamRosterEraMember } from "~/types/roster";
 
 interface TeamRosterHistoryPayload {
   contracts: TeamContract[];
-  /** Captured with the fetch so server and client build eras identically on hydration. */
   fetchedAt: number;
 }
 
@@ -17,7 +16,7 @@ interface NormalizedContract {
   endMs: number | null;
 }
 
-const toMember = (contract: TeamContract): TeamRosterEraMember => ({
+const toMember = (contract: TeamContract) => ({
   contractId: contract.id,
   imageUrl: contract.player.imageUrl,
   name: contract.player.name,
@@ -26,7 +25,7 @@ const toMember = (contract: TeamContract): TeamRosterEraMember => ({
   slug: contract.player.slug,
 });
 
-const sortMembers = (members: TeamRosterEraMember[]): TeamRosterEraMember[] =>
+const sortMembers = (members: TeamRosterEraMember[]) =>
   members.toSorted((a, b) => {
     const roleDiff = CONTRACT_ROLES.indexOf(a.role) - CONTRACT_ROLES.indexOf(b.role);
 
@@ -37,7 +36,7 @@ const sortMembers = (members: TeamRosterEraMember[]): TeamRosterEraMember[] =>
     return a.name.localeCompare(b.name, "en");
   });
 
-const normalizeContracts = (contracts: TeamContract[], now: number): NormalizedContract[] => {
+const normalizeContracts = (contracts: TeamContract[], now: number) => {
   const result: NormalizedContract[] = [];
 
   for (const contract of contracts) {
@@ -65,7 +64,7 @@ const normalizeContracts = (contracts: TeamContract[], now: number): NormalizedC
   return result;
 };
 
-const getMembersAt = (normalized: NormalizedContract[], timeMs: number): TeamRosterEraMember[] => {
+const getMembersAt = (normalized: NormalizedContract[], timeMs: number) => {
   const members: TeamRosterEraMember[] = [];
   const seen = new Set<string>();
 
@@ -95,10 +94,10 @@ const getMembersAt = (normalized: NormalizedContract[], timeMs: number): TeamRos
   return members;
 };
 
-const sortByPlayerId = (members: TeamRosterEraMember[]): TeamRosterEraMember[] =>
+const sortByPlayerId = (members: TeamRosterEraMember[]) =>
   members.toSorted((left, right) => left.playerId.localeCompare(right.playerId));
 
-const sameRoster = (a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean => {
+const sameRoster = (a: TeamRosterEraMember[], b: TeamRosterEraMember[]) => {
   if (a.length !== b.length) {
     return false;
   }
@@ -112,15 +111,7 @@ const sameRoster = (a: TeamRosterEraMember[], b: TeamRosterEraMember[]): boolean
   );
 };
 
-interface RosterMemberDiff {
-  joined: TeamRosterEraMember[];
-  left: TeamRosterEraMember[];
-}
-
-const diffMembers = (
-  previous: TeamRosterEraMember[] | null,
-  current: TeamRosterEraMember[],
-): RosterMemberDiff => {
+const diffMembers = (previous: TeamRosterEraMember[] | null, current: TeamRosterEraMember[]) => {
   if (!previous) {
     return { joined: current, left: [] };
   }
@@ -141,7 +132,7 @@ const mergeAdjacentEras = (
     isCurrent: boolean;
     members: TeamRosterEraMember[];
   }[],
-): typeof eras => {
+) => {
   if (eras.length <= 1) {
     return eras;
   }
@@ -163,7 +154,7 @@ const mergeAdjacentEras = (
   return merged;
 };
 
-const buildTeamRosterEras = (contracts: TeamContract[], now: number): TeamRosterEra[] => {
+const buildTeamRosterEras = (contracts: TeamContract[], now: number) => {
   const normalized = normalizeContracts(contracts, now);
 
   if (normalized.length === 0) {

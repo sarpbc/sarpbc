@@ -7,7 +7,7 @@ export interface DailyRiddle {
   createdAt: Date;
 }
 
-export const evaluateGuess = (guess: string, answer: string): AirRiddleResultEnum[] => {
+export const evaluateGuess = (guess: string, answer: string) => {
   const results: AirRiddleResultEnum[] = Array.from({ length: guess.length });
   const letters: (string | null)[] = answer.split("");
 

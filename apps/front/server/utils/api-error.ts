@@ -5,7 +5,7 @@ interface ApiErrorMessages {
   badGateway: string;
 }
 
-// Control flow treats a call as terminating only through an explicitly annotated binding.
+// WARNING: keep the explicit type annotation; control flow treats a call as terminating only through an annotated binding.
 export const rethrowApiError: (cause: unknown, messages: ApiErrorMessages) => never = (
   cause,
   messages,

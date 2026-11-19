@@ -11,7 +11,7 @@ interface EntityLoadErrorMessages {
   failed: string;
 }
 
-// Control flow treats a call as terminating only through an explicitly annotated binding.
+// WARNING: keep the explicit type annotation; control flow treats a call as terminating only through an annotated binding.
 export const throwEntityLoadError: (cause: unknown, messages: EntityLoadErrorMessages) => never = (
   cause,
   messages,

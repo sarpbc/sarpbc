@@ -23,7 +23,7 @@ export class TwitchAppToken {
     private readonly now: () => number = Date.now,
   ) {}
 
-  async get(): Promise<string> {
+  async get() {
     if (this.cached && this.now() < this.cached.refreshAt) {
       return this.cached.value;
     }
@@ -35,13 +35,13 @@ export class TwitchAppToken {
     return await this.pending;
   }
 
-  invalidate(rejected: string): void {
+  invalidate(rejected: string) {
     if (this.cached?.value === rejected) {
       this.cached = null;
     }
   }
 
-  private async request(): Promise<string> {
+  private async request() {
     const response = await fetch(TOKEN_URL, {
       body: new URLSearchParams({
         client_id: this.credentials.clientId,

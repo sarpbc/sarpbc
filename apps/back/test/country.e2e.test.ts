@@ -9,7 +9,7 @@ import { AllExceptionsFilter } from "../src/common/infrastructure/http/filters/a
 import { configureApp } from "../src/configure-app";
 import { CountryService } from "../src/country/application/country.service";
 import { CountryController } from "../src/country/infrastructure/http/country.controller";
-import { countrySources } from "./country-fixtures";
+import { countrySources } from "./country.fixture";
 
 const countryBody = z.object({
   country: z.looseObject({

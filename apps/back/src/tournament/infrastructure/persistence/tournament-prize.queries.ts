@@ -1,33 +1,33 @@
+import type { TournamentPrize as TournamentPrizeItem } from "@sarpbc/types";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder } from "@mikro-orm/core";
 import type { FilterQuery } from "@mikro-orm/core";
-import type { TournamentPrize as TournamentPrizeItem } from "@sarpbc/types";
-import type { EarningsLine } from "../../application/earnings";
 import type { EarningsScope, PrizeQueries } from "../../application/ports";
 import { toEventRef } from "../../domain/tournament-event";
 import { Tournament } from "./tournament.entity";
 import { TournamentPrize } from "./tournament-prize.entities";
 
-const toPrizeItem = (row: TournamentPrize): TournamentPrizeItem => ({
-  amount: row.amount,
-  currency: row.currency,
-  id: row.id,
-  placement: row.placement,
-  players: row.players
-    .getItems()
-    .map(({ id, name, slug }) => ({ id, name, slug }))
-    .toSorted((a, b) => a.name.localeCompare(b.name)),
-  sourceUrl: row.sourceUrl,
-  team: {
-    darkModeImageUrl: row.team.darkModeImageUrl,
-    id: row.team.id,
-    imageUrl: row.team.imageUrl,
-    name: row.team.name,
-    slug: row.team.slug,
-  },
-});
+const toPrizeItem = (row: TournamentPrize) =>
+  ({
+    amount: row.amount,
+    currency: row.currency,
+    id: row.id,
+    placement: row.placement,
+    players: row.players
+      .getItems()
+      .map(({ id, name, slug }) => ({ id, name, slug }))
+      .toSorted((a, b) => a.name.localeCompare(b.name)),
+    sourceUrl: row.sourceUrl,
+    team: {
+      darkModeImageUrl: row.team.darkModeImageUrl,
+      id: row.team.id,
+      imageUrl: row.team.imageUrl,
+      name: row.team.name,
+      slug: row.team.slug,
+    },
+  }) satisfies TournamentPrizeItem;
 
-const toEarningsLine = (row: TournamentPrize, shares: number): EarningsLine => {
+const toEarningsLine = (row: TournamentPrize, shares: number) => {
   const { tournament } = row;
 
   return {

@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20260817193416 extends Migration {
   override name = "Migration20260817193416";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(`alter table "reply_report" drop constraint "reply_report_reply_id_foreign";`);
 
     this.addSql(
@@ -19,7 +19,7 @@ export class Migration20260817193416 extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(
       `alter table "reply_notification" drop constraint "reply_notification_reply_id_foreign";`,
     );

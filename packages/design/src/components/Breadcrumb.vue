@@ -4,7 +4,6 @@ import { useDesignAdapters } from "../adapters.ts";
 import type { BreadcrumbItem } from "../types.ts";
 
 const { items } = defineProps<{
-  /** From the root to the current page; the last item is the current page. */
   items: readonly BreadcrumbItem[];
 }>();
 

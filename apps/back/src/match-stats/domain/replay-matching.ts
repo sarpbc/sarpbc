@@ -76,18 +76,18 @@ const LATE_END_MS = HOUR_MS;
 const OPEN_MATCH_DURATION_MS = 6 * HOUR_MS;
 const UNKNOWN_TIMEZONE_MS = 14 * HOUR_MS;
 
-const majority = (size: number): number => Math.floor(size / 2) + 1;
+const majority = (size: number) => Math.floor(size / 2) + 1;
 
-const rosterOverlap = (team: ReplayTeam, participant: CandidateParticipant): number =>
+const rosterOverlap = (team: ReplayTeam, participant: CandidateParticipant) =>
   team.playerNames.filter((name) =>
     participant.players.some((player) => playerNameMatches(name, player.name)),
   ).length;
 
-const rosterIdentifies = (team: ReplayTeam, participant: CandidateParticipant): boolean =>
+const rosterIdentifies = (team: ReplayTeam, participant: CandidateParticipant) =>
   team.playerNames.length > 0 &&
   rosterOverlap(team, participant) >= majority(team.playerNames.length);
 
-const identifies = (team: ReplayTeam, participant: CandidateParticipant): boolean => {
+const identifies = (team: ReplayTeam, participant: CandidateParticipant) => {
   if (rosterIdentifies(team, participant)) {
     return true;
   }
@@ -101,10 +101,7 @@ const identifies = (team: ReplayTeam, participant: CandidateParticipant): boolea
   return named && (rosterOverlap(team, participant) >= 1 || participant.players.length === 0);
 };
 
-const orient = (
-  replay: ReplaySummary,
-  match: CandidateMatch,
-): SideAssignment | "ambiguous" | null => {
+const orient = (replay: ReplaySummary, match: CandidateMatch) => {
   if (match.participants.length !== 2) {
     return null;
   }
@@ -140,7 +137,7 @@ const windowContains = (
   played: number,
   begin: number,
   end: number | null,
-): boolean => {
+) => {
   const slack = replay.playedAtHasTimezone ? 0 : UNKNOWN_TIMEZONE_MS;
 
   return (
@@ -153,7 +150,7 @@ type Placement =
   | { kind: "placed"; matchId: string; sides: SideAssignment }
   | { kind: "unmatched"; reason: UnmatchedReason };
 
-const place = (replay: ReplaySummary, matches: readonly CandidateMatch[]): Placement => {
+const place = ((replay, matches) => {
   const compatible: { match: CandidateMatch; sides: SideAssignment }[] = [];
 
   for (const match of matches) {
@@ -197,8 +194,6 @@ const place = (replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
     return { kind: "unmatched", reason: "ambiguous_match" };
   }
 
-  // Overlapping windows (a same-day rematch): the replay belongs to the latest match already begun.
-  // Every windowed match qualifies for the early-start slack, so when none has begun it cannot decide.
   const started = windowed
     .filter(({ begin }) => begin <= played)
     .toSorted((a, b) => b.begin - a.begin);
@@ -208,7 +203,7 @@ const place = (replay: ReplaySummary, matches: readonly CandidateMatch[]): Place
   }
 
   return { kind: "placed", matchId: started[0].matchId, sides: started[0].sides };
-};
+}) satisfies (replay: ReplaySummary, matches: readonly CandidateMatch[]) => Placement;
 
 interface SeriesGame {
   replay: ReplaySummary;
@@ -216,23 +211,20 @@ interface SeriesGame {
   storedNumber: number | null;
 }
 
-const seriesProblem = (
-  match: CandidateMatch,
-  games: readonly SeriesGame[],
-): UnmatchedReason | null => {
+const seriesProblem = (match: CandidateMatch, games: readonly SeriesGame[]) => {
   if (match.storedReplayIds.some((id) => !games.some((game) => game.replay.id === id))) {
-    return "match_has_other_stats";
+    return "match_has_other_stats" satisfies UnmatchedReason | null;
   }
 
   if (match.numberOfGames !== null && games.length > match.numberOfGames) {
-    return "inconsistent_series";
+    return "inconsistent_series" satisfies UnmatchedReason | null;
   }
 
   const wins = new Map<string, number>();
 
   for (const { replay, sides } of games) {
     if (replay.blue.goals === replay.orange.goals) {
-      return "inconsistent_series";
+      return "inconsistent_series" satisfies UnmatchedReason | null;
     }
 
     const winner = replay.blue.goals > replay.orange.goals ? sides.blue : sides.orange;
@@ -242,34 +234,33 @@ const seriesProblem = (
   const played = [...match.scores.values()].reduce((sum, score) => sum + score, 0);
 
   if (!match.finished || played === 0) {
-    return "match_not_finished";
+    return "match_not_finished" satisfies UnmatchedReason | null;
   }
 
   for (const [participantId, won] of wins) {
     if (won > (match.scores.get(participantId) ?? 0)) {
-      return "inconsistent_series";
+      return "inconsistent_series" satisfies UnmatchedReason | null;
     }
   }
 
   if (games.length < played) {
-    return "incomplete_series";
+    return "incomplete_series" satisfies UnmatchedReason | null;
   }
 
-  // Staff may have attached a game under another number, and the import never renumbers one.
   if (games.some((game, index) => game.storedNumber !== null && game.storedNumber !== index + 1)) {
-    return "match_has_other_stats";
+    return "match_has_other_stats" satisfies UnmatchedReason | null;
   }
 
-  return null;
+  return null satisfies UnmatchedReason | null;
 };
 
-export const byPlayedAt = (a: ReplaySummary, b: ReplaySummary): number =>
+export const byPlayedAt = (a: ReplaySummary, b: ReplaySummary) =>
   (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
 
 const seriesAssignments = (
   matches: readonly CandidateMatch[],
   series: ReadonlyMap<string, readonly SeriesGame[]>,
-): ReplayAssignment[] => {
+) => {
   const assignments: ReplayAssignment[] = [];
 
   for (const match of matches) {
@@ -306,11 +297,10 @@ export const assignReplays = (
   matches: readonly CandidateMatch[],
   stored: ReadonlyMap<string, GameLocation> = new Map(),
   excluded: ReadonlySet<string> = new Set(),
-): ReplayAssignment[] => {
+) => {
   const assignments: ReplayAssignment[] = [];
   const series = new Map<string, SeriesGame[]>();
 
-  // Another upload of a stored or removed game must not come back under a new replay id.
   const taken = new Set(
     replays.flatMap((replay) =>
       replay.rocketLeagueId !== null &&
@@ -375,7 +365,6 @@ export const assignReplays = (
       continue;
     }
 
-    // A game staff attached to another match is absent from the series it would fit.
     if (location && location.matchId !== placement.matchId) {
       continue;
     }
@@ -388,10 +377,7 @@ export const assignReplays = (
   return [...assignments, ...seriesAssignments(matches, series)];
 };
 
-export const resolvePlayerId = (
-  inGameName: string,
-  roster: readonly RosterPlayer[],
-): string | null => {
+export const resolvePlayerId = (inGameName: string, roster: readonly RosterPlayer[]) => {
   const found = roster.filter((player) => playerNameMatches(inGameName, player.name));
 
   return found.length === 1 ? found[0].id : null;

@@ -2,7 +2,7 @@ import { stageMatchesPath, tournamentStageLabel } from "@sarpbc/utils";
 import type { MatchListItem } from "@sarpbc/types";
 import type { MatchEventGroup } from "~/types/matches";
 
-export const groupMatchesByEvent = (matches: MatchListItem[]): MatchEventGroup[] => {
+export const groupMatchesByEvent = (matches: MatchListItem[]) => {
   const byStage = new Map<string, MatchEventGroup>();
 
   for (const match of matches) {

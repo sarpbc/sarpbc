@@ -10,23 +10,23 @@ export interface AdminSearchResult {
   tournaments: (TournamentSearchResult & Pick<TournamentListItem, "imageUrl">)[];
 }
 
-export const searchAdminEntities = async (query: string): Promise<AdminSearchResult> =>
+export const searchAdminEntities = async (query: string) =>
   await apiFetch<AdminSearchResult>("/search", {
     method: "GET",
     query: { limit: 15, q: query, type: "all" },
   });
 
-export const searchPlayers = async (query: string): Promise<Player[]> =>
+export const searchPlayers = async (query: string) =>
   await apiFetch<Player[]>("/search/players", {
     query: { limit: PICKER_RESULT_LIMIT, q: query },
   });
 
-export const searchTeams = async (query: string): Promise<Team[]> =>
+export const searchTeams = async (query: string) =>
   await apiFetch<Team[]>("/search/teams", {
     query: { limit: PICKER_RESULT_LIMIT, q: query },
   });
 
-export const searchTournaments = async (query: string): Promise<TournamentSearchResult[]> =>
+export const searchTournaments = async (query: string) =>
   await apiFetch<TournamentSearchResult[]>("/search/tournaments", {
     query: { limit: PICKER_RESULT_LIMIT, q: query },
   });

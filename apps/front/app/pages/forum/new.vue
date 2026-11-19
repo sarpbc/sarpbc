@@ -100,9 +100,7 @@ onMounted(async () => {
 
 type CreateForumPostResult = Awaited<ReturnType<typeof createForumPost>>;
 
-const createFailureDescription = (
-  failure: Exclude<CreateForumPostResult, { ok: true }>,
-): string => {
+const createFailureDescription = (failure: Exclude<CreateForumPostResult, { ok: true }>) => {
   if (failure.reason === "rate_limited") {
     return failure.message ?? t("page.forum.new.messages.rateLimitDescription");
   }

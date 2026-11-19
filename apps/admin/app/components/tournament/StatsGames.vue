@@ -18,13 +18,13 @@ const toast = useToast();
 
 const toRemove = ref<TournamentStatsGame | null>(null);
 
-const teamName = (match: TournamentMatchListItem, participantId: string): string => {
+const teamName = (match: TournamentMatchListItem, participantId: string) => {
   const participant = match.participants.find((candidate) => candidate.id === participantId);
 
   return participant ? participantName(participant) : t("page.tournaments.statsGames.unknownTeam");
 };
 
-const gameLabel = (match: TournamentMatchListItem, game: TournamentStatsGame): string =>
+const gameLabel = (match: TournamentMatchListItem, game: TournamentStatsGame) =>
   t("page.tournaments.statsGames.score", {
     blue: teamName(match, game.blueParticipantId),
     blueGoals: game.blueGoals,
@@ -53,7 +53,7 @@ const rows = computed(() => {
   );
 });
 
-const confirmMessage = (game: TournamentStatsGame): string => {
+const confirmMessage = (game: TournamentStatsGame) => {
   const match = matches.find((candidate) => candidate.id === game.matchId);
 
   return t("page.tournaments.statsGames.confirm", {
@@ -62,7 +62,7 @@ const confirmMessage = (game: TournamentStatsGame): string => {
   });
 };
 
-const remove = async (game: TournamentStatsGame): Promise<void> => {
+const remove = async (game: TournamentStatsGame) => {
   await removeStatsGame(tournamentId, game.matchId, game.number);
   toast.add({
     color: "success",

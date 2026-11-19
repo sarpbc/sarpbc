@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from "vitest";
 import type { CircuitDetail, CircuitStandings, CircuitSummary, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
-import type { CircuitService } from "../../../circuit/application/circuit.service";
+import { FakeCircuitService } from "./circuit-service.test-utils";
 import { circuitTools } from "./circuit-tools";
 import { rosterTools } from "./roster-tools";
-import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
+import { jsonOf } from "../../../../test/mcp-result";
+import { FakeRosterProposals, proposed } from "./roster-proposals.test-utils";
 
 const CIRCUIT_ID = "5d1f2a3b-4c5d-4e6f-8a7b-9c0d1e2f3a4b";
 const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -19,7 +20,7 @@ const SCALE = [
 const user = (role: StaffRole) => ({ email: "staff@test.com", id: "u1", role });
 
 const scaleTool = () => {
-  const rosterProposalService = pendingProposalService();
+  const rosterProposalService = new FakeRosterProposals();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === "set_circuit_stage_scale",
@@ -53,16 +54,20 @@ describe("set_circuit_stage_scale", () => {
 
     const result = await tool.run(user("admin"), input);
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      {
-        circuitId: CIRCUIT_ID,
-        kind: "set_circuit_stage_scale",
-        scale: SCALE,
-        tournamentId: TOURNAMENT_ID,
-      },
-      SOURCE,
-      "u1",
-    );
+    expect(rosterProposalService.changes).toStrictEqual([
+      proposed(
+        {
+          circuitId: CIRCUIT_ID,
+          finishes: undefined,
+          kind: "set_circuit_stage_scale",
+          regionTeamIds: undefined,
+          scale: SCALE,
+          tournamentId: TOURNAMENT_ID,
+          worldwide: undefined,
+        },
+        SOURCE,
+      ),
+    ]);
     expect(jsonOf(result)).toMatchObject({ kind: "set_circuit_stage_scale", status: "pending" });
   });
 
@@ -77,17 +82,18 @@ describe("set_circuit_stage_scale", () => {
 
     await tool.run(user("admin"), { ...input, ...regional });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      {
-        circuitId: CIRCUIT_ID,
-        kind: "set_circuit_stage_scale",
-        scale: SCALE,
-        tournamentId: TOURNAMENT_ID,
-        ...regional,
-      },
-      SOURCE,
-      "u1",
-    );
+    expect(rosterProposalService.changes).toStrictEqual([
+      proposed(
+        {
+          circuitId: CIRCUIT_ID,
+          kind: "set_circuit_stage_scale",
+          scale: SCALE,
+          tournamentId: TOURNAMENT_ID,
+          ...regional,
+        },
+        SOURCE,
+      ),
+    ]);
   });
 
   it.each<[string, Partial<ScaleInputOverrides>, boolean]>([
@@ -111,7 +117,7 @@ describe("set_circuit_stage_scale", () => {
     const result = await tool.run(user("journalist"), input);
 
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 });
 
@@ -163,13 +169,7 @@ describe("get_circuit", () => {
     const standings: CircuitStandings = { ...summary, events: [], rows: [], sourceUrls: [] };
 
     const tool = circuitTools({
-      circuitService: {
-        create: vi.fn<CircuitService["create"]>(),
-        detail: vi.fn<CircuitService["detail"]>(async () => detail),
-        list: vi.fn<CircuitService["list"]>(),
-        standings: vi.fn<CircuitService["standings"]>(async () => standings),
-        update: vi.fn<CircuitService["update"]>(),
-      },
+      circuitService: new FakeCircuitService(summary, detail, standings),
     }).find((candidate) => candidate.name === "get_circuit");
 
     if (!tool) {
@@ -200,13 +200,7 @@ describe("create_circuit and update_circuit", () => {
   const tools = () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
-    const circuitService = {
-      create: vi.fn<CircuitService["create"]>(async () => circuit),
-      detail: vi.fn<CircuitService["detail"]>(),
-      list: vi.fn<CircuitService["list"]>(),
-      standings: vi.fn<CircuitService["standings"]>(),
-      update: vi.fn<CircuitService["update"]>(async () => circuit),
-    };
+    const circuitService = new FakeCircuitService(circuit);
 
     const all = circuitTools({ circuitService });
 
@@ -236,7 +230,7 @@ describe("create_circuit and update_circuit", () => {
 
     const body = jsonOf(await create.run(user("admin"), input));
 
-    expect(circuitService.create).toHaveBeenCalledExactlyOnceWith(input);
+    expect(circuitService.created).toStrictEqual([input]);
     expect(body).toMatchObject({
       id: CIRCUIT_ID,
       slug: "season-2026",
@@ -272,13 +266,13 @@ describe("create_circuit and update_circuit", () => {
     const { update, circuitService } = tools();
 
     await update.run(user("admin"), { idOrSlug: "season-2026", region: null });
-    expect(circuitService.update).toHaveBeenCalledExactlyOnceWith("season-2026", {
-      region: null,
-    });
+    expect(circuitService.updated).toStrictEqual([
+      { idOrSlug: "season-2026", input: { region: null } },
+    ]);
 
     const empty = await update.run(user("admin"), { idOrSlug: "season-2026" });
     expect(empty.isError).toBe(true);
-    expect(circuitService.update).toHaveBeenCalledOnce();
+    expect(circuitService.updated).toHaveLength(1);
   });
 
   it("requires tournaments.manage", async () => {
@@ -288,7 +282,7 @@ describe("create_circuit and update_circuit", () => {
     expect(runResult.isError).toBe(true);
     const runResult2 = await update.run(user("journalist"), { idOrSlug: "x", name: "y" });
     expect(runResult2.isError).toBe(true);
-    expect(circuitService.create).not.toHaveBeenCalled();
-    expect(circuitService.update).not.toHaveBeenCalled();
+    expect(circuitService.created).toStrictEqual([]);
+    expect(circuitService.updated).toStrictEqual([]);
   });
 });

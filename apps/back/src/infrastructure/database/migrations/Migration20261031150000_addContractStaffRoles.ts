@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261031150000_addContractStaffRoles extends Migration {
   override name = "Migration20261031150000_addContractStaffRoles";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(`alter table "contract" drop constraint if exists "contract_role_check";`);
     this.addSql(
       `alter table "contract" add constraint "contract_role_check" check ("role" in ('active', 'benched', 'loaned', 'coach', 'assistant_coach', 'analyst', 'manager'));`,
@@ -48,7 +48,7 @@ export class Migration20261031150000_addContractStaffRoles extends Migration {
     `);
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(
       `update "contract" set "role" = 'active' where "role" in ('coach', 'assistant_coach', 'analyst', 'manager');`,
     );

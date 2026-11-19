@@ -17,7 +17,7 @@ export interface BuildWebSiteOptions {
   inLanguage?: string[];
 }
 
-export const buildWebSite = (options: BuildWebSiteOptions): WebSiteLd =>
+export const buildWebSite = (options: BuildWebSiteOptions) =>
   compactJsonLd<WebSiteLd>({
     "@context": SCHEMA_ORG,
     "@type": "WebSite",

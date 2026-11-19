@@ -11,11 +11,7 @@ import { randomUUID } from "node:crypto";
 import { nodeEnvironment } from "../../infrastructure/config/env.validation";
 import { IMAGE_FILE_EXTENSIONS } from "@sarpbc/utils";
 import type { ImageContentType, ImageUploadTarget } from "@sarpbc/utils";
-import type {
-  ObjectStorage,
-  ObjectUploadUrl,
-  StoredObject,
-} from "../application/ports/object-storage";
+import type { ObjectStorage } from "../application/ports/object-storage";
 import { IMAGE_PREFIXES } from "../domain/image-target";
 
 interface R2Connection {
@@ -33,7 +29,7 @@ export type ObjectOperationLoggerFactory = (
   context: Record<string, string | number | undefined>,
 ) => ObjectOperationLogger;
 
-const imageKey = (target: ImageUploadTarget, contentType: ImageContentType): string =>
+const imageKey = (target: ImageUploadTarget, contentType: ImageContentType) =>
   `${IMAGE_PREFIXES[target]}/${randomUUID()}.${IMAGE_FILE_EXTENSIONS[contentType]}`;
 
 export class R2Service implements ObjectStorage {
@@ -44,7 +40,7 @@ export class R2Service implements ObjectStorage {
     private readonly createLogger: ObjectOperationLoggerFactory,
   ) {}
 
-  private connect(): R2Connection {
+  private connect() {
     if (this.connection) {
       return this.connection;
     }
@@ -88,14 +84,11 @@ export class R2Service implements ObjectStorage {
     return this.connection;
   }
 
-  private get bucket(): string {
+  private get bucket() {
     return this.configService.getOrThrow<string>("r2_bucket");
   }
 
-  async createImageUploadUrl(
-    contentType: ImageContentType,
-    target: ImageUploadTarget,
-  ): Promise<ObjectUploadUrl> {
+  async createImageUploadUrl(contentType: ImageContentType, target: ImageUploadTarget) {
     const { client, publicUrl } = this.connect();
     const key = imageKey(target, contentType);
 
@@ -110,11 +103,7 @@ export class R2Service implements ObjectStorage {
     return { key, publicUrl: publicUrl(key), uploadUrl };
   }
 
-  async uploadImage(
-    buffer: Uint8Array,
-    contentType: ImageContentType,
-    target: ImageUploadTarget,
-  ): Promise<StoredObject> {
+  async uploadImage(buffer: Uint8Array, contentType: ImageContentType, target: ImageUploadTarget) {
     const key = imageKey(target, contentType);
 
     return await this.objectOperation(
@@ -136,7 +125,7 @@ export class R2Service implements ObjectStorage {
     );
   }
 
-  async putObject(key: string, bytes: Uint8Array, contentType: string): Promise<StoredObject> {
+  async putObject(key: string, bytes: Uint8Array, contentType: string) {
     return await this.objectOperation(
       "putObject",
       { imageContentType: contentType, imageSize: bytes.byteLength, key },
@@ -156,7 +145,7 @@ export class R2Service implements ObjectStorage {
     );
   }
 
-  async copyObject(sourceKey: string, key: string): Promise<StoredObject> {
+  async copyObject(sourceKey: string, key: string) {
     return await this.objectOperation(
       "copyObject",
       { key, sourceKey },
@@ -174,7 +163,7 @@ export class R2Service implements ObjectStorage {
     );
   }
 
-  async deleteObject(key: string): Promise<void> {
+  async deleteObject(key: string) {
     await this.objectOperation("deleteObject", { key }, async ({ client }) => {
       await client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
     });
@@ -185,7 +174,7 @@ export class R2Service implements ObjectStorage {
     fields: Record<string, string | number | undefined>,
     work: (connection: R2Connection) => Promise<T>,
     failureMessage = "The image could not be stored. Try again.",
-  ): Promise<T> {
+  ) {
     const connection = this.connect();
 
     const log = this.createLogger({

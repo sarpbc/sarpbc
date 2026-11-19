@@ -2,7 +2,7 @@ import { Migrator } from "@mikro-orm/migrations";
 import { MikroORM } from "@mikro-orm/postgresql";
 import config from "./mikro-orm.config";
 
-const migrate = async (): Promise<void> => {
+const migrate = async () => {
   const orm = new MikroORM({ ...config, extensions: [Migrator] });
 
   try {

@@ -1,13 +1,7 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ShutdownStateService } from "./shutdown-state.service";
 
 describe(ShutdownStateService, () => {
-  const service = new ShutdownStateService();
-
-  afterEach(() => {
-    service.onModuleDestroy();
-  });
-
   it("is not shutting down until the module is destroyed", () => {
     const fresh = new ShutdownStateService();
 

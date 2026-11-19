@@ -6,7 +6,6 @@ import type { ContractService } from "../../../roster/application/contract.servi
 import type { PlayerService } from "../../../roster/application/player.service";
 import type { TeamService } from "../../../roster/application/team.service";
 import { defineTool } from "../define-tool";
-import type { McpTool } from "../define-tool";
 import {
   mapCareer,
   mapMatchListResponse,
@@ -37,7 +36,7 @@ export const readTools = ({
   contractService,
   newsService,
   competition,
-}: ReadToolServices): McpTool[] => [
+}: ReadToolServices) => [
   defineTool({
     description: `Search Rocket League players by name. Returns matching players with id, slug, team, and public profile URL. When drafting news, use the slug in \`${PLAYER_TAG}\`.`,
     handler: async ({ query }) => {

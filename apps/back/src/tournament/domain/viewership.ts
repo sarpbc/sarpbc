@@ -22,12 +22,12 @@ const ERRORS = {
   "source-url-not-https": "The viewership source URL must use https.",
 } satisfies Record<ViewershipError, string>;
 
-export const requireViewership = (input: Viewership): Viewership => {
+export const requireViewership = (input: Viewership) => {
   const parsed = parseViewership(input);
 
   if (!parsed.ok) {
     throw new InvalidInputError(ERRORS[parsed.error]);
   }
 
-  return parsed.viewership;
+  return parsed.viewership satisfies Viewership;
 };

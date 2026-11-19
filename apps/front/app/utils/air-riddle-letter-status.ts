@@ -15,7 +15,7 @@ interface AirRiddleAttemptLike {
   results?: AirRiddleResultEnum[];
 }
 
-const resultToStatus = (result: AirRiddleResultEnum): AirRiddleLetterStatus => {
+const resultToStatus = (result: AirRiddleResultEnum) => {
   switch (result) {
     case AirRiddleResultEnum.CORRECT: {
       return "correct";

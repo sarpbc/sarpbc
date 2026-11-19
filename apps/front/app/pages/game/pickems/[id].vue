@@ -201,7 +201,7 @@ const loginRedirectPath = () => ({
   query: { redirect: localePath(`/game/pickems/${tournamentId.value}`) },
 });
 
-const matchScoreLabel = (match: TournamentDetailMatch): string | null => {
+const matchScoreLabel = (match: TournamentDetailMatch) => {
   const status = resolveMatchDiscoveryStatus(match);
 
   if (!shouldShowMatchScores(status)) {
@@ -225,7 +225,7 @@ const matchScoreLabel = (match: TournamentDetailMatch): string | null => {
   return `${scoreA ?? "–"}–${scoreB ?? "–"}`;
 };
 
-const matchCenterPrimary = (match: TournamentDetailMatch): string | null => {
+const matchCenterPrimary = (match: TournamentDetailMatch) => {
   const score = matchScoreLabel(match);
 
   if (score) {
@@ -239,26 +239,22 @@ const matchCenterPrimary = (match: TournamentDetailMatch): string | null => {
   return pickemTimeDf.value.format(new Date(match.beginAt));
 };
 
-const pickLabel = (match: TournamentDetailMatch): string =>
+const pickLabel = (match: TournamentDetailMatch) =>
   t("page.game.pickems.detail.pickWinner", {
     teamA: slotName(match.participants, 0) ?? t("components.match.tbd"),
     teamB: slotName(match.participants, 1) ?? t("components.match.tbd"),
   });
 
-const openMatchLabel = (match: TournamentDetailMatch): string =>
+const openMatchLabel = (match: TournamentDetailMatch) =>
   t("page.game.pickems.detail.openMatch", {
     teamA: slotName(match.participants, 0) ?? t("components.match.tbd"),
     teamB: slotName(match.participants, 1) ?? t("components.match.tbd"),
   });
 
-const pickedParticipant = (match: TournamentDetailMatch): string | null =>
+const pickedParticipant = (match: TournamentDetailMatch) =>
   picks.value?.get(match.id)?.pickedParticipant ?? null;
 
-/* Once the match is played, the chosen team shows whether the pick was right. */
-const pickStatus = (
-  match: TournamentDetailMatch,
-  participantId: string | undefined,
-): RadioStatus | null => {
+const pickStatus = (match: TournamentDetailMatch, participantId: string | undefined) => {
   const pick = picks.value?.get(match.id);
 
   if (!participantId || !pick || pick.pickedParticipant !== participantId) {

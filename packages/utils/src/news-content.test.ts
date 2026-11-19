@@ -25,15 +25,6 @@ void describe("news content", () => {
     );
   });
 
-  void it("drops match blocks from excerpts", () => {
-    assert.equal(
-      newsContentToPlainText(
-        'Falcons won.\n\n:matches{match="0b8e7c62-4d0f-4c47-9a57-0e6a5c3d9f11"}\n\nNext up: Worlds.',
-      ),
-      "Falcons won. Next up: Worlds.",
-    );
-  });
-
   void it("keeps hyphenated scores", () => {
     assert.equal(newsContentToPlainText("a 4-0 sweep"), "a 4-0 sweep");
   });

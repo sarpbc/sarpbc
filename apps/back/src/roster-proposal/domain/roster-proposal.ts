@@ -12,17 +12,17 @@ export class RosterProposal {
   entityId: string | null = null;
   createdAt = new Date();
 
-  approve(reviewerId: string, at: Date): void {
+  approve(reviewerId: string, at: Date) {
     this.review(reviewerId, at);
     this.status = "applied";
   }
 
-  reject(reviewerId: string, at: Date): void {
+  reject(reviewerId: string, at: Date) {
     this.review(reviewerId, at);
     this.status = "rejected";
   }
 
-  private review(reviewerId: string, at: Date): void {
+  private review(reviewerId: string, at: Date) {
     if (this.status !== "pending") {
       throw new InvalidInputError(`This proposal was already ${this.status}`);
     }

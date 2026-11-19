@@ -54,7 +54,7 @@ const {
   { server: false, watch: [() => tournamentId] },
 );
 
-const toRows = (value: TournamentPrizes | null | undefined): PrizeRow[] =>
+const toRows = (value: TournamentPrizes | null | undefined) =>
   (value?.prizes ?? []).map((prize) => ({
     amount: prize.amount,
     currency: prize.currency,
@@ -71,10 +71,10 @@ const rosters = computed(
   () => new Map(participants.flatMap(({ team, players }) => (team ? [[team.id, players]] : []))),
 );
 
-const isParticipant = (teamId: string | undefined): boolean =>
+const isParticipant = (teamId: string | undefined) =>
   teamId !== undefined && rosters.value.has(teamId);
 
-const isOnRoster = (teamId: string | undefined, playerId: string): boolean =>
+const isOnRoster = (teamId: string | undefined, playerId: string) =>
   (rosters.value.get(teamId ?? "") ?? []).some(({ id }) => id === playerId);
 
 const teamOptions = computed<Option[]>(() => {
@@ -92,7 +92,7 @@ const teamOptions = computed<Option[]>(() => {
   return [...participantOptions, ...outsiders].toSorted((a, b) => a.label.localeCompare(b.label));
 });
 
-const playerOptions = (teamId: string | undefined): Option[] => {
+const playerOptions = (teamId: string | undefined) => {
   const roster = (rosters.value.get(teamId ?? "") ?? []).map(({ id, name }) => ({
     label: name,
     value: id,
@@ -110,12 +110,12 @@ const playerOptions = (teamId: string | undefined): Option[] => {
   return [...roster, ...outsiders];
 };
 
-const teamError = (row: PrizeRow): string | undefined =>
+const teamError = (row: PrizeRow) =>
   row.teamId && !isParticipant(row.teamId)
     ? t("page.tournaments.prizes.errors.notParticipant")
     : undefined;
 
-const playersError = (row: PrizeRow): string | undefined => {
+const playersError = (row: PrizeRow) => {
   if (row.playerIds.length > MAX_PRIZE_PLAYERS) {
     return t("page.tournaments.prizes.errors.tooManyPlayers", { max: MAX_PRIZE_PLAYERS });
   }
@@ -126,7 +126,7 @@ const playersError = (row: PrizeRow): string | undefined => {
     : undefined;
 };
 
-const normalizeCurrency = (currency: string): string => currency.trim().toUpperCase();
+const normalizeCurrency = (currency: string) => currency.trim().toUpperCase();
 
 const isValidAmount = (amount: number | null): amount is number =>
   amount !== null &&
@@ -134,7 +134,7 @@ const isValidAmount = (amount: number | null): amount is number =>
   amount >= MIN_PRIZE_AMOUNT &&
   amount <= MAX_PRIZE_AMOUNT;
 
-const currencyError = (currency: string): string | undefined =>
+const currencyError = (currency: string) =>
   isIso4217Code(normalizeCurrency(currency))
     ? undefined
     : t("page.tournaments.prizes.errors.currency");
@@ -145,7 +145,7 @@ const duplicateTeam = computed(() => {
   return new Set(teamIds).size !== teamIds.length;
 });
 
-const toInput = (row: PrizeRow): TournamentPrizeInput | null => {
+const toInput = (row: PrizeRow) => {
   const { teamId, amount } = row;
 
   if (

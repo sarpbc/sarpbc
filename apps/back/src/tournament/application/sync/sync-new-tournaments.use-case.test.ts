@@ -1,49 +1,64 @@
-import { describe, expect, it, vi } from "vitest";
-import { unconstructed } from "../../../../test/doubles";
-import type { CompetitionDiagnostics } from "../ports";
+import { describe, expect, it } from "vitest";
+import { Tournament } from "../../domain/tournament";
+import type { CompetitionIncident } from "../feed";
+import { memoryFeed } from "../feed.test-utils";
+import { recordingDiagnostics } from "../ports.test-utils";
+import { RecordingCompetitionSync } from "./competition-sync.test-utils";
 import { SyncAllTournamentsUseCase } from "./sync-all-tournaments.use-case";
 import { SyncNewTournamentsUseCase } from "./sync-new-tournaments.use-case";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
 import { SyncPandascoreTournamentUseCase } from "./sync-pandascore-tournament.use-case";
 
+const deletion: CompetitionIncident = {
+  changeType: "deletion",
+  deletion: { kind: "deleted" },
+  id: 9,
+  kind: "team",
+  modifiedAt: new Date("2026-10-15T10:00:00Z"),
+};
+
 const run = async () => {
-  const steps: string[] = [];
+  const feed = memoryFeed();
+  const sync = new RecordingCompetitionSync();
+  const diagnostics = recordingDiagnostics();
+  sync.idPrefix = "t";
+  sync.outcomes = [null, null, null, null, new Error("boom"), null];
 
-  const additions = {
-    execute: vi.fn<SyncAllTournamentsUseCase["execute"]>().mockResolvedValue(["t1", "t2", "t3"]),
-  };
+  for (const pandascoreId of [1, 2, 3]) {
+    const command = { name: `Cup ${pandascoreId}`, pandascoreId };
+    feed.tournaments.push(command);
+    feed.tournamentsById.set(pandascoreId, command);
+  }
 
-  const details = {
-    execute: vi.fn<SyncPandascoreTournamentUseCase["execute"]>(async (id) => {
-      steps.push(`details:${id}`);
+  feed.incidents.push(deletion);
 
-      if (id === "t2") {
-        throw new Error("boom");
-      }
-    }),
-  };
-
-  const incidents = {
-    execute: vi.fn<SyncPandascoreIncidentsUseCase["execute"]>(async () => {
-      steps.push("incidents");
-    }),
-  };
-
-  const diagnostics = {
-    error: vi.fn<CompetitionDiagnostics["error"]>(),
-    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
+  const reads = {
+    findById: async (id: string) =>
+      Object.assign(new Tournament(), {
+        id,
+        pandascoreId: Number(id.slice(1)),
+        source: "pandascore",
+      }),
+    findByPandascoreId: async () => null,
+    knownPandascoreIds: async () => new Set<number>(),
   };
 
   const service = new SyncNewTournamentsUseCase(
-    Object.assign(unconstructed(SyncAllTournamentsUseCase), additions),
-    Object.assign(unconstructed(SyncPandascoreTournamentUseCase), details),
-    Object.assign(unconstructed(SyncPandascoreIncidentsUseCase), incidents),
+    new SyncAllTournamentsUseCase(feed, reads, sync),
+    new SyncPandascoreTournamentUseCase(feed, reads, sync),
+    new SyncPandascoreIncidentsUseCase(
+      feed,
+      { getLastSyncAt: async () => new Date(0), setLastSyncAt: async () => {} },
+      reads,
+      sync,
+      diagnostics,
+    ),
     diagnostics,
   );
 
   const result = await service.execute();
 
-  return { diagnostics, result, steps };
+  return { applied: sync.applied, diagnostics, result };
 };
 
 describe(SyncNewTournamentsUseCase, () => {
@@ -53,18 +68,17 @@ describe(SyncNewTournamentsUseCase, () => {
     expect(result).toStrictEqual({ detailsFailed: 1, detailsSynced: 2, discovered: 3 });
   });
 
-  it("syncs every discovered tournament despite a failure, then reconciles incidents", async () => {
-    const { steps } = await run();
+  it("reconciles provider incidents after a failed detail sync", async () => {
+    const { applied } = await run();
 
-    expect(steps).toStrictEqual(["details:t1", "details:t2", "details:t3", "incidents"]);
+    expect(applied).toStrictEqual([{ backfill: undefined, incident: deletion }]);
   });
 
   it("reports the failed tournament detail sync", async () => {
     const { diagnostics } = await run();
 
-    expect(diagnostics.error).toHaveBeenCalledExactlyOnceWith(
-      "Tournament detail sync failed: t2",
-      new Error("boom"),
-    );
+    expect(diagnostics.errors).toStrictEqual([
+      { cause: new Error("boom"), message: "Tournament detail sync failed: t2" },
+    ]);
   });
 });

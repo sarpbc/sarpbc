@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { Team } from "./team";
 import { TeamAlias, assertTeamAliasFits, teamAt } from "./team-alias";
 
-const alias = (fields: Partial<TeamAlias>): TeamAlias =>
+const alias = (fields: Partial<TeamAlias>) =>
   Object.assign(new TeamAlias(), { sourceUrl: "https://x.com/fixture/status/1" }, fields);
 
-const fixtureTeam = (): Team =>
+const fixtureTeam = () =>
   Object.assign(new Team(), {
     aliases: [
       alias({ from: "2020-01-01", id: "a1", name: "Fixture Origins", to: "2022-06-01" }),

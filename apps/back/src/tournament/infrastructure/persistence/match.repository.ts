@@ -52,7 +52,7 @@ const FINISHED_POPULATE = [
   ...MATCH_TOURNAMENT_POPULATE,
 ] as const;
 
-const buildUpcomingQuery = (todayOnly: boolean): MatchListFilter => {
+const buildUpcomingQuery = (todayOnly: boolean) => {
   const now = new Date();
   const endOfDay = new Date(now);
   endOfDay.setHours(23, 59, 59, 999);
@@ -60,7 +60,7 @@ const buildUpcomingQuery = (todayOnly: boolean): MatchListFilter => {
   return todayOnly ? { beginAt: { $gte: now, $lte: endOfDay } } : { beginAt: { $gte: now } };
 };
 
-const buildLiveQuery = (todayOnly: boolean, liveSince?: Date): MatchListFilter => {
+const buildLiveQuery = (todayOnly: boolean, liveSince?: Date) => {
   const now = new Date();
   const startOfDay = new Date(now);
   startOfDay.setHours(0, 0, 0, 0);
@@ -75,19 +75,8 @@ const buildLiveQuery = (todayOnly: boolean, liveSince?: Date): MatchListFilter =
     : { beginAt: { $lte: now }, endAt: null };
 };
 
-const buildTournamentFilter = (
-  scope: MatchListScopeFilters,
-): MatchTournamentScopeFilter | undefined => {
+const buildTournamentFilter = (scope: MatchListScopeFilters) => {
   const { tournamentId, leagueId, redistributableOnly } = scope;
-
-  if (
-    (tournamentId === undefined || tournamentId === "") &&
-    (leagueId === undefined || leagueId === "") &&
-    redistributableOnly !== true
-  ) {
-    return undefined;
-  }
-
   const filter: MatchTournamentScopeFilter = {};
 
   if (tournamentId !== undefined && tournamentId !== "") {
@@ -102,13 +91,10 @@ const buildTournamentFilter = (
     filter.source = { $ne: "startgg" };
   }
 
-  return filter;
+  return Object.keys(filter).length > 0 ? filter : undefined;
 };
 
-const mergeScopeFilters = (
-  base: MatchListFilter,
-  scope: MatchListScopeFilters,
-): MatchListFilter => {
+const mergeScopeFilters = (base: MatchListFilter, scope: MatchListScopeFilters) => {
   const query: MatchListFilter = { ...base };
   const tournamentFilter = buildTournamentFilter(scope);
 
@@ -171,26 +157,23 @@ const listQuery = (
 };
 
 export class MatchRepository extends EntityRepository<Match> {
-  async list(kind: MatchListKind, options: MatchListQueryOptions): Promise<Match[]> {
+  async list(kind: MatchListKind, options: MatchListQueryOptions) {
     const { where, orderBy, limit, offset } = listQuery(kind, options);
 
     return await this.findAll({ limit, offset, orderBy, populate: [...LIST_POPULATE], where });
   }
 
-  async listAndCount(
-    kind: MatchListKind,
-    options: MatchListQueryOptions,
-  ): Promise<[Match[], number]> {
+  async listAndCount(kind: MatchListKind, options: MatchListQueryOptions) {
     const { where, orderBy, limit, offset } = listQuery(kind, options);
 
     return await this.findAndCount(where, { limit, offset, orderBy, populate: [...LIST_POPULATE] });
   }
 
-  async findByIds(ids: string[]): Promise<Match[]> {
+  async findByIds(ids: string[]) {
     return await this.findAll({ populate: [...LIST_POPULATE], where: { id: { $in: ids } } });
   }
 
-  async findDetail(ref: EntityRef): Promise<Match | null> {
+  async findDetail(ref: EntityRef) {
     const where = ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value };
 
     return await this.findOne(where, { populate: [...DETAIL_POPULATE] });
@@ -204,7 +187,7 @@ export class MatchRepository extends EntityRepository<Match> {
     teamId: string;
     excludeMatchId: string;
     limit?: number;
-  }): Promise<Match[]> {
+  }) {
     return await this.findAll({
       limit,
       orderBy: { endAt: "DESC" },
@@ -229,7 +212,7 @@ export class MatchRepository extends EntityRepository<Match> {
     teamBId: string;
     excludeMatchId: string;
     limit?: number;
-  }): Promise<Match[]> {
+  }) {
     return await this.findAll({
       limit,
       orderBy: { endAt: "DESC" },
@@ -245,13 +228,7 @@ export class MatchRepository extends EntityRepository<Match> {
     });
   }
 
-  async findRecentlyEnded({
-    limit,
-    minutesAgo,
-  }: {
-    limit: number;
-    minutesAgo: number;
-  }): Promise<Match[]> {
+  async findRecentlyEnded({ limit, minutesAgo }: { limit: number; minutesAgo: number }) {
     const now = new Date();
     const cutoffTime = new Date(now.getTime() - minutesAgo * 60 * 1000);
 

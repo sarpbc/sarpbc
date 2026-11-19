@@ -1,7 +1,7 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import { commentAnchorId, commentPermalinkHash, parseCommentHash } from "~/utils/comment-permalink";
 
-const focusCommentElement = (commentId: string): HTMLElement | null => {
+const focusCommentElement = (commentId: string) => {
   const element = document.querySelector<HTMLElement>(`#${CSS.escape(commentAnchorId(commentId))}`);
 
   if (!element) {
@@ -14,7 +14,7 @@ const focusCommentElement = (commentId: string): HTMLElement | null => {
   return element;
 };
 
-const scrollToComment = (commentId: string): boolean => {
+const scrollToComment = (commentId: string) => {
   const element = document.querySelector<HTMLElement>(`#${CSS.escape(commentAnchorId(commentId))}`);
 
   if (!element) {

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
 import { Match } from "../../../tournament/domain/match";
 import type { TournamentSummary } from "../../../tournament/domain/match";
@@ -9,7 +9,6 @@ import { MatchService } from "../../../tournament/application/match/match.servic
 import type {
   CompetitionEvents,
   CompetitionTransaction,
-  MatchWriter,
 } from "../../../tournament/application/ports";
 import { competitionScope, matchQueries, matchWriter } from "../../../../test/competition-doubles";
 import { PickemService } from "../application/pickem.service";
@@ -44,9 +43,15 @@ const arrange = () => {
     } satisfies TournamentSummary,
   });
 
-  const save = vi.fn<MatchWriter["save"]>(async () => {});
-  const writer = matchWriter({ load: async () => stored, save });
-  const publish = vi.fn<CompetitionEvents["publish"]>(async () => {});
+  const saved: Match[] = [];
+  const published: Parameters<CompetitionEvents["publish"]>[0][] = [];
+
+  const writer = matchWriter({
+    load: async () => stored,
+    save: async (match) => {
+      saved.push(match);
+    },
+  });
 
   const competition = new MatchService(
     matchQueries({ detail: async () => stored }),
@@ -55,7 +60,11 @@ const arrange = () => {
     } satisfies CompetitionTransaction,
     new CompetitionAfterCommit(
       { invalidateTournament: async () => {} },
-      { publish },
+      {
+        publish: async (event) => {
+          published.push(event);
+        },
+      },
       { error: () => {} },
     ),
   );
@@ -76,7 +85,7 @@ const arrange = () => {
     { id: () => "id", now: () => new Date("2026-01-01T12:00:00Z"), warn: () => {} },
   );
 
-  return { pickems, publish, save, stored };
+  return { pickems, published, saved, stored };
 };
 
 describe("deciding a match from pick'ems", () => {
@@ -93,7 +102,7 @@ describe("deciding a match from pick'ems", () => {
     });
 
     it("saves the decided match", () => {
-      expect(fixture.save).toHaveBeenCalledExactlyOnceWith(fixture.stored);
+      expect(fixture.saved).toStrictEqual([fixture.stored]);
     });
 
     it("stamps the winner and the end", () => {
@@ -107,7 +116,7 @@ describe("deciding a match from pick'ems", () => {
     });
 
     it("publishes MatchDecided", () => {
-      expect(fixture.publish).toHaveBeenCalledExactlyOnceWith(matchDecided("m"));
+      expect(fixture.published).toStrictEqual([matchDecided("m")]);
     });
   });
 });

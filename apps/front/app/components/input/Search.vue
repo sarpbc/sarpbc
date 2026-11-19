@@ -13,15 +13,15 @@ const emit = defineEmits<{
 
 const inputRef = useTemplateRef("inputRef");
 
-const updateSearch = (payload: string | null): void => {
+const updateSearch = (payload: string | null) => {
   emit("update:search", payload);
 };
 
-const handleFocus = (): void => {
+const handleFocus = () => {
   emit("focus");
 };
 
-const handleBlur = (): void => {
+const handleBlur = () => {
   emit("blur");
 };
 

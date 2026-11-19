@@ -16,7 +16,7 @@ export interface Size {
 const PPM_HEADER = /^P6\s+(?<width>\d+)\s+(?<height>\d+)\s+255\s/u;
 const MAX_PPM_HEADER = 64;
 
-export const scaleRegion = (region: Region, reference: Size, frame: Frame): Region => {
+export const scaleRegion = (region: Region, reference: Size, frame: Frame) => {
   const sx = frame.width / reference.width;
   const sy = frame.height / reference.height;
   const x = Math.round(region.x * sx);
@@ -30,7 +30,7 @@ export const scaleRegion = (region: Region, reference: Size, frame: Frame): Regi
   };
 };
 
-export const meanColor = (frame: Frame, region: Region): Rgb => {
+export const meanColor = (frame: Frame, region: Region) => {
   let red = 0;
   let green = 0;
   let blue = 0;
@@ -46,15 +46,12 @@ export const meanColor = (frame: Frame, region: Region): Rgb => {
 
   const pixels = region.width * region.height;
 
-  return [red / pixels, green / pixels, blue / pixels];
+  return [red / pixels, green / pixels, blue / pixels] satisfies Rgb;
 };
 
-export const colorDistance = (a: Rgb, b: Rgb): number =>
-  Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+export const colorDistance = (a: Rgb, b: Rgb) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
 
-const parsePpmHeader = (
-  bytes: Uint8Array,
-): { width: number; height: number; size: number } | null => {
+const parsePpmHeader = (bytes: Uint8Array) => {
   const text = Buffer.from(bytes.subarray(0, MAX_PPM_HEADER)).toString("latin1");
   const match = PPM_HEADER.exec(text);
 
@@ -76,9 +73,7 @@ const parsePpmHeader = (
   return { height, size: match[0].length, width };
 };
 
-export const readPpmFrames = async function* readPpmFrames(
-  chunks: AsyncIterable<Uint8Array>,
-): AsyncGenerator<Frame> {
+export const readPpmFrames = async function* readPpmFrames(chunks: AsyncIterable<Uint8Array>) {
   let header = new Uint8Array(0);
   let target: Frame | null = null;
   let filled = 0;

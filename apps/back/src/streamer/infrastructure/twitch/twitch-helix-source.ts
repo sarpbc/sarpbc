@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { LiveStreamSource, SourceStream } from "../../application/ports/live-stream-source";
+import type { LiveStreamSource } from "../../application/ports/live-stream-source";
 import type { TwitchAppToken } from "./twitch-app-token";
 
 export const ROCKET_LEAGUE_GAME_ID = "30921";
@@ -21,15 +21,13 @@ const streamsResponse = z.object({
   ),
 });
 
-type HelixStream = z.infer<typeof streamsResponse>["data"][number];
-
 export class TwitchHelixSource implements LiveStreamSource {
   constructor(
     private readonly clientId: string,
     private readonly token: TwitchAppToken,
   ) {}
 
-  async findLiveRocketLeague(logins: readonly string[]): Promise<SourceStream[]> {
+  async findLiveRocketLeague(logins: readonly string[]) {
     const batches: string[][] = [];
 
     for (let start = 0; start < logins.length; start += HELIX_LOGINS_PER_REQUEST) {
@@ -49,7 +47,7 @@ export class TwitchHelixSource implements LiveStreamSource {
       }));
   }
 
-  private async fetchStreams(logins: string[]): Promise<HelixStream[]> {
+  private async fetchStreams(logins: string[]) {
     const url = new URL(STREAMS_URL);
 
     for (const login of logins) {
@@ -74,7 +72,7 @@ export class TwitchHelixSource implements LiveStreamSource {
     return streamsResponse.parse(await response.json()).data;
   }
 
-  private async request(url: URL, token: string): Promise<Response> {
+  private async request(url: URL, token: string) {
     return await fetch(url, {
       headers: { Authorization: `Bearer ${token}`, "Client-Id": this.clientId },
       signal: AbortSignal.timeout(STREAMS_REQUEST_TIMEOUT_MS),

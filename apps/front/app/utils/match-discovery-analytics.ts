@@ -33,19 +33,13 @@ const isMatchDiscoverySource = (value: MatchDiscoveryQueryValue): value is Match
   return SOURCE_SET.has(value);
 };
 
-export const parseMatchDiscoverySource = (
-  value: MatchDiscoveryQueryValue,
-): MatchDiscoverySource | null => {
-  if (Array.isArray(value)) {
-    return parseMatchDiscoverySource(value[0]);
-  }
+export const parseMatchDiscoverySource = (value: MatchDiscoveryQueryValue) => {
+  const candidate = Array.isArray(value) ? value[0] : value;
 
-  return isMatchDiscoverySource(value) ? value : null;
+  return isMatchDiscoverySource(candidate) ? candidate : null;
 };
 
-export const listVariantToDiscoveryStatus = (
-  variant: "live" | "upcoming" | "result",
-): MatchDiscoveryStatus => {
+export const listVariantToDiscoveryStatus = (variant: "live" | "upcoming" | "result") => {
   switch (variant) {
     case "live": {
       return "live";
@@ -72,7 +66,7 @@ export const resolveMatchDiscoveryStatus = (input: {
   beginAt?: Date | string | null;
   status?: string | null;
   now?: number;
-}): MatchDiscoveryStatus => {
+}) => {
   if (isMatchFinished(input)) {
     return "finished";
   }
@@ -84,7 +78,7 @@ export const buildMatchDetailTo = (
   localePath: (path: string) => string,
   match: MatchLinkTarget,
   source: MatchDiscoverySource,
-): MatchDiscoveryDetailTo => ({
+) => ({
   path: localePath(matchPath(match.publicId, match.slug)),
   query: { [MATCH_DISCOVERY_FROM_QUERY]: source },
 });

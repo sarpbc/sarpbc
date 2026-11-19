@@ -26,21 +26,15 @@ export default defineNuxtModule({
     const resolver = createResolver(import.meta.url);
 
     const { resolve } = createRequire(import.meta.url);
-    // Generated imports need forward slashes, including on Windows.
-    // Point at single files, not the index: importing the index would bundle every component (and inline its styles) on every page.
+    // WARNING: point at single files, not the index: importing the index would bundle every component and inline its styles on every page.
     const design = path.posix.dirname(resolve("@sarpbc/design").replaceAll("\\", "/"));
     nuxt.options.css.unshift(resolve("@sarpbc/design/tokens.css"));
     nuxt.options.css.push(resolver.resolve("./runtime/prose.css"));
-    // Overlays render at the end of <body>; isolating the app keeps its z-indexes below them.
+    // WARNING: overlays render at the end of <body>; isolating the app keeps its z-indexes below them.
     nuxt.options.app.rootAttrs.class = [nuxt.options.app.rootAttrs.class, "isolate"]
       .filter(Boolean)
       .join(" ");
-    /*
-     * Design styles sit in the `components` layer, so Tailwind utilities passed by
-     * the apps still win. Nuxt inlines component styles and Nuxt UI's colors
-     * before the entry stylesheet, which would declare `components` before `base`
-     * and let preflight override them: fix the order first thing in <head>.
-     */
+    // WARNING: design styles sit in the `components` layer so app utilities win; declare the layer order first in <head> or preflight overrides them.
     nuxt.options.app.head.style ??= [];
     nuxt.options.app.head.style.unshift({
       innerHTML: "@layer theme, base, components, utilities;",
@@ -76,10 +70,9 @@ export default defineNuxtPlugin((nuxtApp) => {
       name: "useMatchStateLabel",
     });
 
-    // Host apps that show news tags link to the public site when this is set; empty keeps routes relative.
     nuxt.options.runtimeConfig.public.publicSiteUrl ??= "";
 
-    // @nuxtjs/i18n calls this hook while it sets up, so list this module before it.
+    // WARNING: @nuxtjs/i18n calls this hook while it sets up, so list this module before it.
     nuxt.hook("i18n:registerModule", (register) => {
       register({
         langDir: resolver.resolve("./runtime/locales"),

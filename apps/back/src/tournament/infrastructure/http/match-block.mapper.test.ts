@@ -7,13 +7,13 @@ import { mapMatchBlockItem } from "./match-list.mapper";
 
 const NOW = new Date("2026-10-31T18:00:00Z");
 
-const participant = (name: string): TournamentParticipant =>
+const participant = (name: string) =>
   Object.assign(new TournamentParticipant(), {
     id: `participant-${name}`,
     team: Object.assign(new Team(), { id: `team-${name}`, name, slug: name.toLowerCase() }),
   });
 
-const tournament = (source: TournamentSummary["source"]): TournamentSummary => ({
+const tournament = (source: TournamentSummary["source"]) => ({
   beginAt: null,
   event: { id: "event", name: "RLCS Worlds 2026", slug: "rlcs-worlds-2026" },
   eventStreams: [],
@@ -27,7 +27,7 @@ const tournament = (source: TournamentSummary["source"]): TournamentSummary => (
   streams: [],
 });
 
-const match = (overrides: Partial<Match>): Match =>
+const match = (overrides: Partial<Match>) =>
   Object.assign(new Match(), {
     id: "match",
     name: "Grand final",

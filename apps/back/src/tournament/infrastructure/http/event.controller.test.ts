@@ -5,15 +5,23 @@ import { Tournament } from "../../domain/tournament";
 import { TournamentEvent } from "../../domain/tournament-event";
 import { CachedTournamentRead } from "../cache/cached-tournament.read";
 import { EventController } from "./event.controller";
-import { eventQueries } from "../../../../test/competition-doubles";
-import { unconstructed } from "../../../../test/doubles";
+import { tournamentQueries } from "../../../../test/competition-doubles";
+import { present } from "../../../../test/doubles";
 import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
 import { ViewershipService } from "../../application/viewership.service";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
-import type { RedisService } from "../../../infrastructure/redis/redis.service";
-import type { TournamentQueries } from "../../application/ports";
+import { memoryEventQueries } from "../../application/event-queries.test-utils";
+import {
+  memoryEventWriter,
+  memoryTournamentWriter,
+  recordingCache,
+  recordingDiagnostics,
+  recordingEvents,
+  transactionOver,
+} from "../../application/ports.test-utils";
+import { memoryRedis } from "../cache/memory-redis.test-utils";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 
 const unusedStreams = new StreamService(
@@ -46,7 +54,7 @@ const event = Object.assign(new TournamentEvent(), {
 
 const ref = { id: event.id, name: event.name, slug: event.slug };
 
-const stage = (fields: Partial<Tournament>): Tournament =>
+const stage = (fields: Partial<Tournament>) =>
   Object.assign(new Tournament(), { event: ref, league, ...fields });
 
 const stages = new Map(
@@ -72,19 +80,27 @@ const stages = new Map(
 );
 
 describe(EventController, () => {
-  const playerLines = vi.fn<GameStatsStore["playerLines"]>(async () => []);
-  const events = eventQueries();
-  const listEvents = vi.spyOn(events, "list");
-  const findEvent = vi.spyOn(events, "find");
-  const stageId = vi.spyOn(events, "stageId");
-  const redis = { get: vi.fn<RedisService["get"]>(), set: vi.fn<RedisService["set"]>() };
-  const tournaments = { findById: vi.fn<TournamentQueries["findById"]>() };
+  const requestedStages: Parameters<GameStatsStore["playerLines"]>[0][] = [];
 
-  const catalog = unconstructed(ManualCatalogService);
-  const manualEvents = vi.spyOn(catalog, "manualEvents");
-  const findManualEvent = vi.spyOn(catalog, "findEvent");
-  const createEvent = vi.spyOn(catalog, "createEvent");
-  const updateEvent = vi.spyOn(catalog, "updateEvent");
+  const playerLines = async (ids: Parameters<GameStatsStore["playerLines"]>[0]) => {
+    requestedStages.push(ids);
+
+    return [];
+  };
+
+  const eventWriter = memoryEventWriter();
+  const events = memoryEventQueries(eventWriter);
+  const listEvents = vi.spyOn(events, "list");
+  const redis = memoryRedis();
+  const stored = new Map<string, Tournament>();
+  const tournaments = { findById: async (id: string) => stored.get(id) ?? null };
+
+  const catalog = new ManualCatalogService(
+    tournamentQueries(),
+    events,
+    transactionOver({ events: eventWriter, tournaments: memoryTournamentWriter() }),
+    new CompetitionAfterCommit(recordingCache(), recordingEvents(), recordingDiagnostics()),
+  );
 
   const controller = new EventController(
     events,
@@ -96,20 +112,23 @@ describe(EventController, () => {
   );
 
   beforeEach(() => {
-    vi.resetAllMocks();
-    redis.get.mockResolvedValue(null);
-    tournaments.findById.mockImplementation(async (id: string) => stages.get(id) ?? null);
-    findEvent.mockImplementation(async (slug: string) =>
-      slug === event.slug ? { event, stages: [...stages.values()] } : null,
-    );
-    stageId.mockImplementation(async (eventSlug: string, stageSlug: string) =>
-      eventSlug === event.slug && stageSlug === "playoffs" ? "playoffs" : null,
-    );
+    listEvents.mockClear();
+    requestedStages.length = 0;
+    redis.entries.clear();
+    stored.clear();
+
+    for (const [id, found] of stages) {
+      stored.set(id, found);
+    }
+
+    eventWriter.events.clear();
+    eventWriter.events.set(event.id, Object.assign(new TournamentEvent(), event));
+    events.listings.length = 0;
+    events.listings.push({ event, stages: [...stages.values()] });
   });
 
   it("resolves an event with its stages newest first and event-level facts", async () => {
     const resolved = await controller.resolveEvent("RLCS-Major-Paris-2026");
-    expect(findEvent).toHaveBeenCalledWith("rlcs-major-paris-2026");
     expect(resolved).toMatchObject({
       event: {
         beginAt: "2026-05-01T10:00:00.000Z",
@@ -129,12 +148,14 @@ describe(EventController, () => {
       throw new Error("expected an event");
     }
 
-    expect(resolved.event.stages.map((s) => s.slug)).toStrictEqual(["playoffs", "group-a"]);
-    expect(resolved.event.stages[0]).toMatchObject({ event: ref, matches: [] });
+    const resolvedEvent = present(resolved.event);
+
+    expect(resolvedEvent.stages.map((s) => s.slug)).toStrictEqual(["playoffs", "group-a"]);
+    expect(resolvedEvent.stages[0]).toMatchObject({ event: ref, matches: [] });
   });
 
   it("aggregates player stats over the redistributable stages of an event", async () => {
-    findEvent.mockResolvedValueOnce({
+    events.listings.splice(0, events.listings.length, {
       event,
       stages: [
         stage({ id: "group-stage", source: "manual" }),
@@ -148,12 +169,12 @@ describe(EventController, () => {
       players: [],
       unlinkedAccounts: 0,
     });
-    expect(playerLines).toHaveBeenCalledWith(["group-stage", "finals"]);
+    expect(requestedStages).toStrictEqual([["group-stage", "finals"]]);
     await expect(controller.playerStats("unknown-event")).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it("hides the player stats of an event whose stages all come from start.gg", async () => {
-    findEvent.mockResolvedValueOnce({
+    events.listings.splice(0, events.listings.length, {
       event,
       stages: [
         stage({ id: "open-qualifier", source: "startgg" }),
@@ -162,7 +183,6 @@ describe(EventController, () => {
     });
 
     await expect(controller.playerStats(event.slug)).rejects.toBeInstanceOf(NotFoundError);
-    expect(playerLines).not.toHaveBeenCalled();
   });
 
   it("resolves a stage by event and stage slugs", async () => {
@@ -200,12 +220,11 @@ describe(EventController, () => {
   });
 
   it("answers 404 for an event whose stages all moved to another event", async () => {
-    findEvent.mockResolvedValue({ event, stages: [] });
+    events.listings.splice(0, events.listings.length, { event, stages: [] });
     await expect(controller.resolveEvent(event.slug)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it("lists events with their stages and the total event count", async () => {
-    listEvents.mockResolvedValue([[{ event, stages: [...stages.values()] }], 1]);
     const listed = await controller.list({ activeOnly: true, limit: 20, offset: 0 });
     expect(listEvents).toHaveBeenCalledWith({
       activeOnly: true,
@@ -229,10 +248,12 @@ describe(EventController, () => {
       Object.assign(new Tournament(), s, { source: "manual" }),
     );
 
-    manualEvents.mockResolvedValue([
+    events.listings.splice(
+      0,
+      events.listings.length,
       { event, stages: manualStages },
       { event: empty, stages: [] },
-    ]);
+    );
     const listed = await controller.listManual();
     expect(listed.events.map((e) => [e.id, e.editable, e.stages.length])).toStrictEqual([
       ["event", true, 2],
@@ -247,7 +268,7 @@ describe(EventController, () => {
   it("marks an event followed by the PandaScore sync as not editable", async () => {
     const synced = Object.assign(new TournamentEvent(), event, { pandascoreSerieId: 7 });
 
-    findManualEvent.mockResolvedValue({ event: synced, stages: [] });
+    events.listings.splice(0, events.listings.length, { event: synced, stages: [] });
     const findManualResult = await controller.findManual("event");
     expect(findManualResult.event).toMatchObject({
       editable: false,
@@ -256,14 +277,11 @@ describe(EventController, () => {
   });
 
   it("creates and updates events through the catalog", async () => {
-    createEvent.mockResolvedValue({ event, stages: [] });
-    updateEvent.mockResolvedValue({ event, stages: [] });
-    await expect(controller.create({ name: event.name })).resolves.toMatchObject({
-      event: { id: "event", slug: event.slug, stages: [] },
-    });
+    const created = await controller.create({ name: "Spring Open" });
+
+    expect(created).toMatchObject({ event: { name: "Spring Open", stages: [] } });
+    expect(eventWriter.events.has(created.event.id)).toBe(true);
     await controller.update("event", { leagueId: null });
-    expect(updateEvent).toHaveBeenCalledWith("event", {
-      leagueId: null,
-    });
+    expect(eventWriter.events.get("event")?.league).toBeNull();
   });
 });

@@ -25,7 +25,7 @@ const UNSAFE_SVG_PATTERNS: [RegExp, string][] = [
   [/@import/iu, "a stylesheet import"],
 ];
 
-export const teamLogoField = (variant: TeamLogoVariant): "logoLightUrl" | "logoDarkUrl" => {
+export const teamLogoField = (variant: TeamLogoVariant) => {
   switch (variant) {
     case "light": {
       return "logoLightUrl";
@@ -45,25 +45,22 @@ export const teamLogoField = (variant: TeamLogoVariant): "logoLightUrl" | "logoD
 
 const PENDING_TEAM_LOGO_PREFIX = "pending/";
 
-export const pendingTeamLogoKey = (
-  teamId: string,
-  variant: TeamLogoVariant,
-  hash: string,
-): string => `${PENDING_TEAM_LOGO_PREFIX}teams/${teamId}/logo-${variant}-${hash}.webp`;
+export const pendingTeamLogoKey = (teamId: string, variant: TeamLogoVariant, hash: string) =>
+  `${PENDING_TEAM_LOGO_PREFIX}teams/${teamId}/logo-${variant}-${hash}.webp`;
 
-export const requirePendingTeamLogoKey = (key: string): void => {
+export const requirePendingTeamLogoKey = (key: string) => {
   if (!key.startsWith(`${PENDING_TEAM_LOGO_PREFIX}teams/`)) {
     throw new InvalidInputError(`"${key}" is not a pending team logo.`);
   }
 };
 
-export const publishedTeamLogoKey = (pendingKey: string): string => {
+export const publishedTeamLogoKey = (pendingKey: string) => {
   requirePendingTeamLogoKey(pendingKey);
 
   return pendingKey.slice(PENDING_TEAM_LOGO_PREFIX.length);
 };
 
-export const requireTeamLogoUrl = (value: string): URL => {
+export const requireTeamLogoUrl = (value: string) => {
   if (!URL.canParse(value)) {
     throw new InvalidInputError("The logo imageUrl is not a valid URL.");
   }
@@ -83,7 +80,7 @@ export const requireTeamLogoUrl = (value: string): URL => {
   return url;
 };
 
-const skipSvgPrologue = (head: string): string => {
+const skipSvgPrologue = (head: string) => {
   let rest = head.trimStart();
 
   if (rest.startsWith("<?xml")) {
@@ -109,10 +106,10 @@ const skipSvgPrologue = (head: string): string => {
   return rest;
 };
 
-const ascii = (bytes: Uint8Array, start: number, end: number): string =>
+const ascii = (bytes: Uint8Array, start: number, end: number) =>
   String.fromCodePoint(...bytes.subarray(start, end));
 
-export const detectTeamLogoFormat = (bytes: Uint8Array): TeamLogoFormat => {
+export const detectTeamLogoFormat = (bytes: Uint8Array) => {
   if (PNG_SIGNATURE.every((byte, index) => bytes[index] === byte)) {
     return "png";
   }
@@ -130,7 +127,7 @@ export const detectTeamLogoFormat = (bytes: Uint8Array): TeamLogoFormat => {
   throw new InvalidInputError("The logo must be a PNG, WebP or SVG image.");
 };
 
-export const requireSafeSvg = (bytes: Uint8Array): void => {
+export const requireSafeSvg = (bytes: Uint8Array) => {
   const text = new TextDecoder().decode(bytes);
 
   for (const [pattern, reason] of UNSAFE_SVG_PATTERNS) {
@@ -140,7 +137,7 @@ export const requireSafeSvg = (bytes: Uint8Array): void => {
   }
 };
 
-export const requireTeamLogoDimensions = (width: number, height: number): void => {
+export const requireTeamLogoDimensions = (width: number, height: number) => {
   if (Math.min(width, height) < MIN_TEAM_LOGO_PIXELS) {
     throw new InvalidInputError(
       `The logo is ${width}x${height} pixels; it must be at least ${MIN_TEAM_LOGO_PIXELS}x${MIN_TEAM_LOGO_PIXELS}.`,

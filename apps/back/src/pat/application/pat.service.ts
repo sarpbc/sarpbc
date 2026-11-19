@@ -4,7 +4,6 @@ import type { AuthenticatedUser } from "../../common/application/models/authenti
 import type { StaffRole } from "@sarpbc/types";
 import { isStaffRole } from "../../user/domain/staff-access";
 import type { UserService } from "../../user/application/user.service";
-import type { TokenSummary } from "../domain/token";
 import type { TokenSecrets, TokenStore } from "./ports/token-store";
 
 export interface PatUser extends AuthenticatedUser {
@@ -28,7 +27,7 @@ export class PatService {
     private readonly now: () => Date = () => new Date(),
   ) {}
 
-  async createToken(userId: string, name: string): Promise<PatTokenCreated> {
+  async createToken(userId: string, name: string) {
     const user = await this.users.findById(userId);
 
     if (!user || !isStaffRole(user.role)) {
@@ -43,17 +42,17 @@ export class PatService {
     return { createdAt: token.createdAt, id: token.id, name: token.name, token: raw };
   }
 
-  async listTokens(userId: string): Promise<TokenSummary[]> {
+  async listTokens(userId: string) {
     return await this.tokens.listActive(userId);
   }
 
-  async revokeToken(userId: string, tokenId: string): Promise<void> {
+  async revokeToken(userId: string, tokenId: string) {
     if (!(await this.tokens.revokeOwned(userId, tokenId, this.now()))) {
       throw new NotFoundError("Token not found. It may already have been revoked.");
     }
   }
 
-  async resolveUser(rawToken: string): Promise<PatUser | null> {
+  async resolveUser(rawToken: string) {
     const token = await this.tokens.findActive(this.secrets.hash(rawToken));
 
     if (!token || !isStaffRole(token.owner.role)) {

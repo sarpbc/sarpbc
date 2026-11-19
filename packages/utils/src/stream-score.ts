@@ -55,11 +55,9 @@ const proposalSchema = z.object({
   sourceStartedAt: z.iso.datetime({ offset: true }).nullable(),
 });
 
-export const winsNeeded = (bestOf: number): number => Math.floor(bestOf / 2) + 1;
+export const winsNeeded = (bestOf: number) => Math.floor(bestOf / 2) + 1;
 
-export const gameWinner = (
-  game: Pick<StreamScoreGame, "blue" | "orange">,
-): StreamScoreSide | null => {
+export const gameWinner = (game: Pick<StreamScoreGame, "blue" | "orange">) => {
   if (game.blue === game.orange) {
     return null;
   }
@@ -67,7 +65,7 @@ export const gameWinner = (
   return game.blue > game.orange ? "blue" : "orange";
 };
 
-const leadingSide = (blue: number, orange: number, needed: number): StreamScoreSide | null => {
+const leadingSide = (blue: number, orange: number, needed: number) => {
   if (blue >= needed) {
     return "blue";
   }
@@ -75,7 +73,7 @@ const leadingSide = (blue: number, orange: number, needed: number): StreamScoreS
   return orange >= needed ? "orange" : null;
 };
 
-const isConsistent = (proposal: StreamScoreProposal): boolean => {
+const isConsistent = (proposal: StreamScoreProposal) => {
   const needed = winsNeeded(proposal.bestOf);
   const blue = proposal.games.filter((game) => game.winner === "blue").length;
   const orange = proposal.games.filter((game) => game.winner === "orange").length;
@@ -96,24 +94,24 @@ const isConsistent = (proposal: StreamScoreProposal): boolean => {
   );
 };
 
-export const parseStreamScoreProposal = (text: string): ParsedStreamScoreProposal => {
+export const parseStreamScoreProposal = (text: string) => {
   let json: unknown;
 
   try {
     json = JSON.parse(text);
   } catch {
-    return { error: "invalid-json", ok: false };
+    return { error: "invalid-json", ok: false } satisfies ParsedStreamScoreProposal;
   }
 
   const parsed = proposalSchema.safeParse(json);
 
   if (!parsed.success) {
-    return { error: "invalid-proposal", ok: false };
+    return { error: "invalid-proposal", ok: false } satisfies ParsedStreamScoreProposal;
   }
 
   if (!isConsistent(parsed.data)) {
-    return { error: "inconsistent-series", ok: false };
+    return { error: "inconsistent-series", ok: false } satisfies ParsedStreamScoreProposal;
   }
 
-  return { ok: true, proposal: parsed.data };
+  return { ok: true, proposal: parsed.data } satisfies ParsedStreamScoreProposal;
 };

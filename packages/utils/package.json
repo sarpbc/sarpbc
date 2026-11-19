@@ -11,10 +11,30 @@
       "require": "./dist/index.js",
       "default": "./src/index.ts"
     },
-    "./*": {
-      "types": "./src/*.ts",
-      "require": "./dist/*.js",
-      "default": "./src/*.ts"
+    "./client-address": {
+      "types": "./src/client-address.ts",
+      "require": "./dist/client-address.js",
+      "default": "./src/client-address.ts"
+    },
+    "./entity-path": {
+      "types": "./src/entity-path.ts",
+      "require": "./dist/entity-path.js",
+      "default": "./src/entity-path.ts"
+    },
+    "./source-host": {
+      "types": "./src/source-host.ts",
+      "require": "./dist/source-host.js",
+      "default": "./src/source-host.ts"
+    },
+    "./stream-score": {
+      "types": "./src/stream-score.ts",
+      "require": "./dist/stream-score.js",
+      "default": "./src/stream-score.ts"
+    },
+    "./text": {
+      "types": "./src/text.ts",
+      "require": "./dist/text.js",
+      "default": "./src/text.ts"
     }
   },
   "scripts": {

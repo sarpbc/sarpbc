@@ -3,7 +3,7 @@ import type { Player, Team } from "@sarpbc/types";
 const createEntityTagCache = <T>() => {
   const cache = new Map<string, Promise<T>>();
 
-  return async (slug: string, fetcher: () => Promise<T>): Promise<T> => {
+  return async (slug: string, fetcher: () => Promise<T>) => {
     const existing = cache.get(slug);
 
     if (existing !== undefined) {

@@ -41,8 +41,8 @@ const airRiddleStoredStateSchema = z.object({
 
 export const AIR_RIDDLE_MAX_ATTEMPTS = 6;
 
-/** Calendar date for today's Air Riddle, aligned with the API (Europe/Berlin). */
-const getAirRiddleDateKey = (now = new Date()): string =>
+// WARNING: the date key must match the API calendar day (Europe/Berlin).
+const getAirRiddleDateKey = (now = new Date()) =>
   new Intl.DateTimeFormat("en-CA", {
     day: "2-digit",
     month: "2-digit",
@@ -50,10 +50,7 @@ const getAirRiddleDateKey = (now = new Date()): string =>
     year: "numeric",
   }).format(now);
 
-const parseAirRiddleStoredState = (
-  raw: string | null,
-  today: string,
-): AirRiddleStoredState | null => {
+const parseAirRiddleStoredState = (raw: string | null, today: string) => {
   if (!isNonEmptyString(raw)) {
     return null;
   }
@@ -95,7 +92,7 @@ const parseAirRiddleStoredState = (
 
 export const loadAirRiddleStoredState = function loadAirRiddleStoredState(
   today = getAirRiddleDateKey(),
-): AirRiddleStoredState | null {
+) {
   if (!import.meta.client) {
     return null;
   }
@@ -111,7 +108,7 @@ export const loadAirRiddleStoredState = function loadAirRiddleStoredState(
 
 export const saveAirRiddleStoredState = function saveAirRiddleStoredState(
   state: Omit<AirRiddleStoredState, "date">,
-): void {
+) {
   if (!import.meta.client) {
     return;
   }

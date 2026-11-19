@@ -24,7 +24,7 @@ export const resolveMatchParticipantIds = async (
   tournament: Tournament,
   input: MatchParticipantsInput,
   lookups: MatchParticipantLookups,
-): Promise<TournamentParticipant[]> => {
+) => {
   const byParticipantId = new Map(
     tournament.participants.map((participant) => [participant.id, participant]),
   );

@@ -8,11 +8,11 @@ import type { CurrentRosterWriter } from "../../application/ports";
 export class MikroCurrentRosterWriter implements CurrentRosterWriter {
   constructor(private readonly em: EntityManager) {}
 
-  async hasTeams(): Promise<boolean> {
+  async hasTeams() {
     return (await this.em.fork().count(Team, {})) > 0;
   }
 
-  async syncCurrentTeams(roster: ImportedPlayer[]): Promise<void> {
+  async syncCurrentTeams(roster: ImportedPlayer[]) {
     await this.em.fork().transactional(async (tx) => {
       const writer = new RosterSyncWriter(tx);
 
@@ -25,7 +25,7 @@ export class MikroCurrentRosterWriter implements CurrentRosterWriter {
       );
 
       const teamIds = new Map(
-        await mapSequentially(firstBySlug, async (team): Promise<[string, string]> => {
+        await mapSequentially(firstBySlug, async (team) => {
           const { id } = await writer.upsertTeam(team);
 
           return [team.slug, id];

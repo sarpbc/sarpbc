@@ -20,7 +20,7 @@ const { setJsonLd } = useStructuredData();
 
 const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
-const opponentName = (match: MatchListItem): string => {
+const opponentName = (match: MatchListItem) => {
   const opponent = (match.participants ?? [])
     .map((participant) => participantName(participant))
     .find((name) => name.length > 0 && name !== team.name);
@@ -28,7 +28,7 @@ const opponentName = (match: MatchListItem): string => {
   return opponent ?? t("page.team.slug.faq.upcoming.unknownOpponent");
 };
 
-const formatMatchLine = (match: MatchListItem, live: boolean): string => {
+const formatMatchLine = (match: MatchListItem, live: boolean) => {
   const opponent = opponentName(match);
   const event = match.tournament.event.name;
 

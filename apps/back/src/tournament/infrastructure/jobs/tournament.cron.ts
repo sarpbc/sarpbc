@@ -13,13 +13,13 @@ export class TournamentCron {
 
   @Cron(CronExpression.EVERY_5_MINUTES)
   @CreateRequestContext()
-  async syncActiveTournaments(): Promise<void> {
+  async syncActiveTournaments() {
     await this.runner.syncActiveTournaments();
   }
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   @CreateRequestContext()
-  async syncPandascoreAdditionsDaily(): Promise<void> {
+  async syncPandascoreAdditionsDaily() {
     await this.runner.syncPandascoreAdditionsDaily();
   }
 }

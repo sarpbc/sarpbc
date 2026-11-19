@@ -9,7 +9,7 @@ const BEARER_PREFIX = /^bearer\s+/iu;
 export class PatAuthGuard implements CanActivate {
   constructor(private readonly patService: PatService) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest<FastifyRequest>();
 
     const authHeader = request.headers.authorization;

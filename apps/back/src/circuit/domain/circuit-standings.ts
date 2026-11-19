@@ -3,8 +3,8 @@ import type {
   CircuitScaleTier,
   CircuitStandingCell,
   CircuitStandingRow,
-  CircuitStandingsEvent,
   CircuitStandingTeam,
+  CircuitStandingsEvent,
   TournamentEventRef,
 } from "@sarpbc/types";
 import { isWorldwideCircuitRegion } from "@sarpbc/utils";
@@ -39,35 +39,35 @@ interface TeamTally {
   cells: Map<string, CircuitStandingCell>;
 }
 
-const hasEnded = (stage: CircuitStageResult, now: Date): boolean =>
+const hasEnded = (stage: CircuitStageResult, now: Date) =>
   stage.endAt !== null && stage.endAt <= now;
 
-const hasBegun = (stage: CircuitStageResult, now: Date): boolean =>
+const hasBegun = (stage: CircuitStageResult, now: Date) =>
   stage.beginAt !== null && stage.beginAt <= now;
 
-const eventStatus = (stages: readonly CircuitStageResult[], now: Date): CircuitEventStatus => {
+const eventStatus = (stages: readonly CircuitStageResult[], now: Date) => {
   const scaled = stages.filter((stage) => stage.scale.length > 0);
 
   if (!scaled.length) {
-    return "scale_missing";
+    return "scale_missing" as const satisfies CircuitEventStatus;
   }
 
   if (scaled.every((stage) => !hasBegun(stage, now) && !hasEnded(stage, now))) {
-    return "upcoming";
+    return "upcoming" as const satisfies CircuitEventStatus;
   }
 
   if (scaled.some((stage) => !hasEnded(stage, now))) {
-    return "in_progress";
+    return "in_progress" as const satisfies CircuitEventStatus;
   }
 
   if (scaled.every((stage) => stage.placements.length === 0 && stage.finishes.length === 0)) {
-    return "awaiting_results";
+    return "awaiting_results" as const satisfies CircuitEventStatus;
   }
 
-  return "counted";
+  return "counted" as const satisfies CircuitEventStatus;
 };
 
-const creditedPlacements = (stage: CircuitStageResult, regional: boolean): StagePlacement[] => {
+const creditedPlacements = (stage: CircuitStageResult, regional: boolean) => {
   const finished = new Set(stage.finishes.map(({ team }) => team.id));
 
   const placements = [
@@ -84,7 +84,7 @@ const creditedPlacements = (stage: CircuitStageResult, regional: boolean): Stage
   return placements.filter(({ team }) => region.has(team.id));
 };
 
-const bound = (dates: readonly (Date | null)[], pick: "earliest" | "latest"): string | null => {
+const bound = (dates: readonly (Date | null)[], pick: "earliest" | "latest") => {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
 
   if (!times.length) {
@@ -94,7 +94,7 @@ const bound = (dates: readonly (Date | null)[], pick: "earliest" | "latest"): st
   return new Date(pick === "earliest" ? Math.min(...times) : Math.max(...times)).toISOString();
 };
 
-const compareEvents = (a: CircuitStandingsEvent, b: CircuitStandingsEvent): number => {
+const compareEvents = (a: CircuitStandingsEvent, b: CircuitStandingsEvent) => {
   if (a.beginAt !== b.beginAt) {
     if (a.beginAt === null) {
       return 1;
@@ -114,7 +114,7 @@ export const computeCircuitStandings = (
   stages: readonly CircuitStageResult[],
   region: string | null,
   now: Date,
-): ComputedStandings => {
+) => {
   const regional = !isWorldwideCircuitRegion(region);
   const groups = new Map<string, { event: TournamentEventRef; stages: CircuitStageResult[] }>();
 
@@ -176,7 +176,7 @@ export const computeCircuitStandings = (
     (a, b) => b.points - a.points || a.team.name.localeCompare(b.team.name),
   );
 
-  const rows = sorted.map((tally): CircuitStandingRow => ({
+  const rows = sorted.map((tally) => ({
     events: [...tally.cells.values()].toSorted(
       (a, b) => (order.get(a.eventId) ?? 0) - (order.get(b.eventId) ?? 0),
     ),

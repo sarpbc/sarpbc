@@ -14,7 +14,7 @@ interface NewsMatchBlocks {
 
 const NEWS_MATCH_BLOCKS: InjectionKey<NewsMatchBlocks> = Symbol("news-match-blocks");
 
-const chunk = <T>(values: readonly T[], size: number): T[][] =>
+const chunk = <T>(values: readonly T[], size: number) =>
   Array.from({ length: Math.ceil(values.length / size) }, (_, index) =>
     values.slice(index * size, (index + 1) * size),
   );
@@ -28,7 +28,7 @@ export const provideNewsMatchBlocks = (key: MaybeRefOrGetter<string>, contents: 
 
   const { data, status } = useAsyncData(
     () => toValue(key),
-    async (): Promise<Record<string, MatchBlockItem[]>> => {
+    async () => {
       const responses = await Promise.all(
         chunk(blockKeys.value, NEWS_MATCH_BLOCKS_PER_REQUEST).map(
           async (block) =>
@@ -51,4 +51,4 @@ export const provideNewsMatchBlocks = (key: MaybeRefOrGetter<string>, contents: 
   );
 };
 
-export const useNewsMatchBlocks = (): NewsMatchBlocks | null => inject(NEWS_MATCH_BLOCKS, null);
+export const useNewsMatchBlocks = () => inject(NEWS_MATCH_BLOCKS, null);

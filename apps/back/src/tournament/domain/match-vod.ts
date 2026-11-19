@@ -20,16 +20,16 @@ const URL_ERRORS = {
   "unsupported-host": "must be a twitch.tv, youtube.com or youtu.be link",
 } satisfies Record<MatchVodUrlError, string>;
 
-const invalid = (index: number, reason: string): InvalidInputError =>
+const invalid = (index: number, reason: string) =>
   new InvalidInputError(`VOD link ${index + 1} ${reason}.`);
 
-const isGameInRange = (game: number, maxGame: number): boolean =>
+const isGameInRange = (game: number, maxGame: number) =>
   Number.isInteger(game) && game >= 1 && game <= maxGame;
 
 export const normalizeMatchVods = (
   inputs: readonly MatchVodInput[],
   numberOfGames: number | null,
-): MatchVod[] => {
+) => {
   const maxGame = maxVodGame(numberOfGames);
   const vods: MatchVod[] = [];
   const seen = new Set<string>();
@@ -71,7 +71,7 @@ export const normalizeMatchVods = (
     }
   }
 
-  return vods.toSorted((a, b) => a.game - b.game);
+  return vods.toSorted((a, b) => a.game - b.game) satisfies MatchVod[];
 };
 
 export const replaceGameVods = (
@@ -79,7 +79,7 @@ export const replaceGameVods = (
   game: number,
   links: readonly MatchVodLink[],
   numberOfGames: number | null,
-): MatchVod[] => {
+) => {
   const maxGame = maxVodGame(numberOfGames);
 
   if (!isGameInRange(game, maxGame)) {
@@ -93,5 +93,5 @@ export const replaceGameVods = (
 
   return [...current.filter((vod) => vod.game !== game), ...replaced].toSorted(
     (a, b) => a.game - b.game,
-  );
+  ) satisfies MatchVod[];
 };

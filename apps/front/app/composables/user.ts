@@ -8,13 +8,13 @@ export const useAuthHydrated = () => useState<boolean>("auth-hydrated", () => fa
 type ApiClient = ReturnType<typeof createApiClient>;
 
 /** Throws on request failure. Pass a client created in setup when called outside the Nuxt context. */
-export const fetchProfile = async (api: ApiClient = createApiClient()): Promise<User | null> => {
+export const fetchProfile = async (api: ApiClient = createApiClient()) => {
   const res = await api<{ user?: User }>("/user/profile", { method: "GET" });
 
   return res.user ?? null;
 };
 
-export const getProfile = async (): Promise<User | null> => {
+export const getProfile = async () => {
   try {
     return await fetchProfile();
   } catch {
@@ -22,7 +22,7 @@ export const getProfile = async (): Promise<User | null> => {
   }
 };
 
-export const updateUserName = async (userName: string): Promise<User> => {
+export const updateUserName = async (userName: string) => {
   const res = await apiFetch<{ user: User }>("/user/profile", {
     body: { userName },
     method: "PATCH",
@@ -31,7 +31,7 @@ export const updateUserName = async (userName: string): Promise<User> => {
   return res.user;
 };
 
-export const logout = async (): Promise<void> => {
+export const logout = async () => {
   const user = useUser();
 
   let confirmed = false;

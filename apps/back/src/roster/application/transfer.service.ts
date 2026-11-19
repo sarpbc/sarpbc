@@ -18,7 +18,7 @@ export class TransferService {
   async findAndCount(
     { type, from, to, limit, offset, ...filter }: TransferSearchProps,
     now = new Date(),
-  ): Promise<[Transfer[], number]> {
+  ) {
     const contracts = await this.contracts.findMovements(filter);
 
     const transfers = deriveTransfers(contracts, now).filter(
@@ -28,10 +28,13 @@ export class TransferService {
         (!to || transfer.date <= to),
     );
 
-    return [transfers.slice(offset, offset + limit), transfers.length];
+    return [transfers.slice(offset, offset + limit), transfers.length] satisfies [
+      Transfer[],
+      number,
+    ];
   }
 
-  async onDay(month: number, day: number, now = new Date()): Promise<Transfer[]> {
+  async onDay(month: number, day: number, now = new Date()) {
     const contracts = await this.contracts.findMovementsOnDay(month, day);
 
     return deriveTransfers(contracts, now).filter(

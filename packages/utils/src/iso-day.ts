@@ -1,8 +1,8 @@
 import { parseIsoDay } from "./on-this-day";
 
-export const isoDay = (date: Date): string => date.toISOString().slice(0, 10);
+export const isoDay = (date: Date) => date.toISOString().slice(0, 10);
 
-const zoneOffsetMs = (at: number, timeZone: string): number => {
+const zoneOffsetMs = (at: number, timeZone: string) => {
   const parts = new Intl.DateTimeFormat("en-US", {
     day: "numeric",
     hour: "numeric",
@@ -30,7 +30,7 @@ const zoneOffsetMs = (at: number, timeZone: string): number => {
 };
 
 /** The offset is read twice because the next midnight may sit on the other side of a DST change. */
-export const endOfIsoDayIn = (value: string, timeZone: string): Date | null => {
+export const endOfIsoDayIn = (value: string, timeZone: string) => {
   const day = parseIsoDay(value);
 
   if (!day) {

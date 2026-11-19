@@ -8,7 +8,7 @@ interface DeletionObject {
   videogame_id?: number;
 }
 
-const deletionReason = (object: DeletionObject | null): string | null => {
+const deletionReason = (object: DeletionObject | null) => {
   const incident = incidentSchema.parse({
     change_type: "deletion",
     id: 1,

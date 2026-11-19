@@ -31,7 +31,7 @@ export const assertPickAllowed = (
   participantId: string,
   now: Date,
   scored: boolean,
-): void => {
+) => {
   if (!match.pickemsEnabled) {
     throw new InvalidInputError(
       "Pick'ems are not enabled for this tournament. Choose another tournament.",
@@ -59,7 +59,7 @@ export const assertPickAllowed = (
   }
 };
 
-export const derivePickWinner = (match: PickMatch): string | null => {
+export const derivePickWinner = (match: PickMatch) => {
   if (match.winnerId !== null && match.winnerId !== "") {
     return match.winnerId;
   }
@@ -69,7 +69,7 @@ export const derivePickWinner = (match: PickMatch): string | null => {
   return leader !== null && leader !== "" && match.participantIds.includes(leader) ? leader : null;
 };
 
-export const scorePick = (pick: Pick, winnerId: string): void => {
+export const scorePick = (pick: Pick, winnerId: string) => {
   if (pick.scored) {
     return;
   }

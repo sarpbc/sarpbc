@@ -17,16 +17,13 @@ export class TournamentEvent {
   updatedAt = new Date();
 }
 
-export const isEventSynced = (
-  event: TournamentEvent,
-  stages: readonly { source: DataSource }[],
-): boolean =>
+export const isEventSynced = (event: TournamentEvent, stages: readonly { source: DataSource }[]) =>
   event.pandascoreSerieId !== null || stages.some((stage) => stage.source === "pandascore");
 
 export const assertEventEditable = (
   event: TournamentEvent,
   stages: readonly { source: DataSource }[],
-): void => {
+) => {
   if (isEventSynced(event, stages)) {
     throw new InvalidInputError(
       "This event is managed by the PandaScore sync. Only manual events can be edited.",
@@ -42,14 +39,14 @@ export const ownsEvent = (
   event: TournamentEvent,
   stageIds: readonly string[],
   tournament: { id: string; name: string },
-): boolean =>
-  stageIds.length === 1 && stageIds[0] === tournament.id && event.name === tournament.name;
+) => stageIds.length === 1 && stageIds[0] === tournament.id && event.name === tournament.name;
 
-export const toEventRef = (event: TournamentEventRef): TournamentEventRef => ({
-  id: event.id,
-  name: event.name,
-  slug: event.slug,
-});
+export const toEventRef = (event: TournamentEventRef) =>
+  ({
+    id: event.id,
+    name: event.name,
+    slug: event.slug,
+  }) satisfies TournamentEventRef;
 
 const GENERIC_STAGE_NAMES = new Set([
   "playoffs",
@@ -64,10 +61,9 @@ const GENERIC_STAGE_NAMES = new Set([
   "finals",
 ]);
 
-const isGenericStageName = (name: string): boolean => GENERIC_STAGE_NAMES.has(name.toLowerCase());
+const isGenericStageName = (name: string) => GENERIC_STAGE_NAMES.has(name.toLowerCase());
 
-/** "RLCS NA Season" + "season 8 2019" reads "RLCS NA Season 8 2019", not "Season season". */
-const prefixLeague = (league: string, serie: string): string => {
+const prefixLeague = (league: string, serie: string) => {
   if (serie.toLowerCase().startsWith(league.toLowerCase())) {
     return serie;
   }
@@ -91,7 +87,7 @@ export const eventDisplayName = (input: {
   leagueName: string | null;
   serieName: string | null;
   stageName: string;
-}): string => {
+}) => {
   const league = nonBlank(input.leagueName);
   const serie = nonBlank(input.serieName);
   const stage = input.stageName.trim();
@@ -115,10 +111,10 @@ export const eventDisplayName = (input: {
   return stage || (league ?? "");
 };
 
-const utcDay = (date: Date | null): string => (date ? isoDay(date) : "");
+const utcDay = (date: Date | null) => (date ? isoDay(date) : "");
 
 /** Same-day stages start at staggered times (Group B before Group A), so order by day, then name. */
 export const compareStages = (
   a: { beginAt: Date | null; name: string },
   b: { beginAt: Date | null; name: string },
-): number => utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);
+) => utcDay(b.beginAt).localeCompare(utcDay(a.beginAt)) || a.name.localeCompare(b.name);

@@ -69,7 +69,7 @@ const unreadNotifications = computed(
   () => notifications.value?.filter((notification) => !notification.readAt) ?? [],
 );
 
-const notificationMessage = (notification: AppNotification): string =>
+const notificationMessage = (notification: AppNotification) =>
   t("page.profile.notifications.replied", {
     target: notification.targetLabel,
     user: notification.reply.author.userName,

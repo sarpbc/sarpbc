@@ -1,5 +1,4 @@
 import { evaluateGuess } from "../domain/airriddle";
-import type { DailyRiddle } from "../domain/airriddle";
 import { AirRiddleResultEnum } from "../domain/airriddle-result.enum";
 import type { DailyRiddles, RiddlePlayers, RiddleRuntime } from "./ports";
 
@@ -9,16 +8,13 @@ export class AirRiddleService {
     private readonly players: RiddlePlayers,
     private readonly runtime: RiddleRuntime,
   ) {}
-  async getTodaysRiddle(): Promise<DailyRiddle | null> {
+  async getTodaysRiddle() {
     return (
       (await this.riddles.findTodaysRiddle(this.runtime.dayStart())) ??
       (await this.createAirRiddle())
     );
   }
-  async guess(
-    guess: string,
-    last?: boolean,
-  ): Promise<{ results: AirRiddleResultEnum[]; error?: string; answer?: string }> {
+  async guess(guess: string, last?: boolean) {
     const players = await this.players.find({ name: guess });
 
     if (!players.some((p) => p.name.toUpperCase() === guess.toUpperCase())) {
@@ -41,7 +37,7 @@ export class AirRiddleService {
       results,
     };
   }
-  async createAirRiddle(): Promise<DailyRiddle | null> {
+  async createAirRiddle() {
     try {
       if (await this.riddles.findTodaysRiddle(this.runtime.dayStart())) {
         return null;

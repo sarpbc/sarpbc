@@ -12,7 +12,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
     name: string;
     limit?: number;
     offset?: number;
-  }): Promise<Tournament[]> {
+  }) {
     const where: FilterQuery<Tournament> = name
       ? {
           $or: [{ name: { $ilike: `%${name}%` } }, { league: { name: { $ilike: `%${name}%` } } }],
@@ -28,7 +28,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
     });
   }
 
-  async findPandascoreWithoutMatches(): Promise<Pick<Tournament, "id" | "name">[]> {
+  async findPandascoreWithoutMatches() {
     return await this.findAll({
       fields: ["id", "name"],
       orderBy: { beginAt: "DESC" },
@@ -48,7 +48,7 @@ export class TournamentRepository extends EntityRepository<Tournament> {
     beginsBefore: Date;
     beganAfter: Date;
     endsAfter: Date;
-  }): Promise<Pick<Tournament, "id">[]> {
+  }) {
     return await this.findAll({
       fields: ["id"],
       where: {

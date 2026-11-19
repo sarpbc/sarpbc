@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20250821141114_addForum extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(
       `create table "topic" ("id" uuid not null default gen_random_uuid(), "title" varchar(255) not null, "description" text null, "created_at" timestamptz not null, "updated_at" timestamptz null, constraint "topic_pkey" primary key ("id"));`,
     );
@@ -32,7 +32,7 @@ export class Migration20250821141114_addForum extends Migration {
     );
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`alter table "post" drop constraint "post_topic_id_foreign";`);
 
     this.addSql(`alter table "reply" drop constraint "reply_post_id_foreign";`);

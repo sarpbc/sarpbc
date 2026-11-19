@@ -17,10 +17,7 @@ export interface RosterMergeParticipants extends SharedTournaments {
   movers: readonly RosterReferenceMover[];
 }
 
-const rosterReferences = (
-  em: EntityManager,
-  others: RosterMergeParticipants,
-): RosterReferenceMover & SharedTournaments => {
+const rosterReferences = (em: EntityManager, others: RosterMergeParticipants) => {
   const mergeOpenContracts = async (owner: "player" | "team", from: string, to: string) => {
     const shared = owner === "player" ? "team" : "player";
 
@@ -58,7 +55,7 @@ const rosterReferences = (
 
   return {
     movePlayer: async (from, to) => {
-      // Frees the unique PandaScore id before the kept player takes it in the same flush.
+      // WARNING: free the unique PandaScore id before the kept player takes it in the same flush.
       await em.nativeUpdate(PlayerRow, { id: from }, { pandascoreId: null });
       await em.nativeUpdate(PlayerRow, { mergedInto: from }, { mergedInto: to });
       await mergeOpenContracts("player", from, to);
@@ -82,7 +79,7 @@ const rosterReferences = (
     },
     sharedTournamentIds: async (teamId, otherTeamId) =>
       await others.sharedTournamentIds(teamId, otherTeamId),
-  };
+  } satisfies RosterReferenceMover & SharedTournaments;
 };
 
 export class MikroRosterMergeTransaction implements RosterMergeTransaction {
@@ -90,7 +87,7 @@ export class MikroRosterMergeTransaction implements RosterMergeTransaction {
     private readonly em: EntityManager,
     private readonly participantsFor: (tx: EntityManager) => RosterMergeParticipants,
   ) {}
-  async run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>): Promise<T> {
+  async run<T>(work: (scope: RosterMergeWriteScope) => Promise<T>) {
     return await this.em.transactional(async (tx) => {
       const result = await work({
         ...writeScope(tx),

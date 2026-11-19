@@ -19,17 +19,12 @@ const routeSchema = z.strictObject({
 
 type Route = z.infer<typeof routeSchema>;
 
-interface Decorator {
-  name: string;
-  args: string[];
-}
-
 interface SourceText {
   file: string;
   text: string;
 }
 
-const filesIn = (dir: string): string[] =>
+const filesIn: (dir: string) => string[] = (dir) =>
   fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(dir, entry.name);
 
@@ -42,7 +37,7 @@ const filesIn = (dir: string): string[] =>
 
 const packagesRoot = path.resolve(project, "../../packages");
 
-const stringConstants = (): Map<string, string[]> => {
+const stringConstants = () => {
   const constants = new Map<string, string[]>();
 
   for (const pkg of fs.readdirSync(packagesRoot)) {
@@ -96,7 +91,7 @@ const constants = stringConstants();
 const decoratorArguments = function decoratorArguments(
   expression: ts.CallExpression,
   source: ts.SourceFile,
-): string[] {
+) {
   return expression.arguments.flatMap((argument) => {
     if (!ts.isSpreadElement(argument)) {
       return [argument.getText(source)];
@@ -112,7 +107,7 @@ const decoratorArguments = function decoratorArguments(
   });
 };
 
-const decorators = (node: ts.Node, source: ts.SourceFile): Decorator[] =>
+const decorators = (node: ts.Node, source: ts.SourceFile) =>
   (ts.canHaveDecorators(node) ? (ts.getDecorators(node) ?? []) : []).flatMap((decorator) => {
     const { expression } = decorator;
 
@@ -126,9 +121,7 @@ const decorators = (node: ts.Node, source: ts.SourceFile): Decorator[] =>
       : [];
   });
 
-// The snapshot's order is controller, verb, path, then the rest; spelling it out keeps it
-// independent of the route object's key order.
-const sortKey = (route: Route): string =>
+const sortKey = (route: Route) =>
   JSON.stringify([
     route.controller,
     route.verb,
@@ -138,7 +131,7 @@ const sortKey = (route: Route): string =>
     route.permissions,
   ]);
 
-const collectRoutes = (sources: SourceText[]): Route[] => {
+const collectRoutes = (sources: SourceText[]) => {
   const routes: Route[] = [];
 
   for (const { file, text } of sources) {

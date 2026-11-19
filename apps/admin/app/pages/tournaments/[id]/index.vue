@@ -89,7 +89,7 @@ const canGenerateBracket = computed(
   () => editsBracket.value && tournament.value?.hasBracket === true && matches.value?.length === 0,
 );
 
-const matchLabel = (match: TournamentMatchListItem): string => {
+const matchLabel = (match: TournamentMatchListItem) => {
   const [teamA, teamB] = match.participants;
   const sides = `${teamA ? participantName(teamA) : "TBD"} vs ${teamB ? participantName(teamB) : "TBD"}`;
   const name = detailMatches.value.get(match.id)?.name;
@@ -108,7 +108,7 @@ const openBracket = (match: TournamentMatchListItem) => {
   bracketOpen.value = true;
 };
 
-const matchSourceUrl = (match: TournamentMatchListItem): string | null =>
+const matchSourceUrl = (match: TournamentMatchListItem) =>
   detailMatches.value.get(match.id)?.sourceUrl ?? null;
 
 const openSource = (match: TournamentMatchListItem) => {
@@ -121,7 +121,7 @@ const openForfeit = (match: TournamentMatchListItem) => {
   forfeitOpen.value = true;
 };
 
-const matchScore = (match: TournamentMatchListItem): string => {
+const matchScore = (match: TournamentMatchListItem) => {
   if (!match.participants?.length) {
     return "-";
   }

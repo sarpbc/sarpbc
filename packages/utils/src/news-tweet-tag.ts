@@ -40,7 +40,7 @@ const WHITESPACE = /\s/u;
 const TWEET_BLOCK_OPENER = "::tweet{";
 const TWEET_INLINE_OPENER = ":tweet{";
 
-export const parseTweetUrl = (input: string): ParsedTweetUrl | null => {
+export const parseTweetUrl = (input: string) => {
   const trimmed = input.trim();
   const match = TWEET_STATUS_PATTERN.exec(trimmed);
 
@@ -60,7 +60,7 @@ export const parseTweetUrl = (input: string): ParsedTweetUrl | null => {
   };
 };
 
-export const parseNewsTweetTag = (raw: string): NewsTweetTag | null => {
+export const parseNewsTweetTag = (raw: string) => {
   const match = TWEET_TAG_PATTERN.exec(raw);
 
   if (!match) {
@@ -88,20 +88,20 @@ export const parseNewsTweetTag = (raw: string): NewsTweetTag | null => {
   };
 };
 
-export const serializeNewsTweetTag = (url: string): string => {
+export const serializeNewsTweetTag = (url: string) => {
   const parsed = parseTweetUrl(url);
   const canonical = parsed?.url ?? url.trim();
 
   return `:tweet{url="${escapeNewsTagAttrValue(canonical)}"}`;
 };
 
-export const newsTweetTagStart = (content: string): number => {
+export const newsTweetTagStart = (content: string) => {
   const block = content.indexOf(TWEET_BLOCK_OPENER);
 
   return block === -1 ? content.indexOf(TWEET_INLINE_OPENER) : block;
 };
 
-const blockTagEnd = (content: string, afterBrace: number): number => {
+const blockTagEnd = (content: string, afterBrace: number) => {
   let index = afterBrace;
 
   while (index < content.length && WHITESPACE.test(content.charAt(index))) {
@@ -115,7 +115,7 @@ const replaceTweetTags = (
   content: string,
   opener: string,
   tagEnd: (afterBrace: number) => number,
-): string => {
+) => {
   let result = "";
   let copiedUntil = 0;
   let searchFrom = 0;
@@ -148,14 +148,14 @@ const replaceTweetTags = (
   return result + content.slice(copiedUntil);
 };
 
-export const stripNewsTweetTags = (content: string): string =>
+export const stripNewsTweetTags = (content: string) =>
   replaceTweetTags(
     replaceTweetTags(content, TWEET_BLOCK_OPENER, (afterBrace) => blockTagEnd(content, afterBrace)),
     TWEET_INLINE_OPENER,
     (afterBrace) => afterBrace,
   );
 
-export const isTweetImageUrl = (input: string): boolean => {
+export const isTweetImageUrl = (input: string) => {
   let url: URL;
 
   try {
@@ -173,5 +173,5 @@ export const isTweetImageUrl = (input: string): boolean => {
   );
 };
 
-export const tweetImageProxyPath = (url: string): string | null =>
+export const tweetImageProxyPath = (url: string) =>
   isTweetImageUrl(url) ? `/news/embed/tweet/image?url=${encodeURIComponent(url)}` : null;

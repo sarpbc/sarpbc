@@ -15,7 +15,7 @@ const requiredEnv = {
 const validateEnv = (overrides: Record<string, string | undefined> = {}) =>
   validate({ ...requiredEnv, ...overrides });
 
-const failureOf = (overrides: Record<string, string | undefined>): string => {
+const failureOf = (overrides: Record<string, string | undefined>) => {
   try {
     validateEnv(overrides);
   } catch (error) {

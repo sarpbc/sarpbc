@@ -161,7 +161,7 @@ export class CompetitionMatchWriter implements MatchWriter {
       endAt: model.endAt,
       name: model.name,
       numberOfGames: model.numberOfGames,
-      // jsonb reorders keys, so the ORM would see an equal value as a change and bump updatedAt.
+      // WARNING: jsonb reorders keys, so the ORM would see an equal value as a change and bump updatedAt.
       officialStreams: unchangedJson(row.officialStreams, model.officialStreams),
       pandascoreId: model.pandascoreId,
       source: model.source,

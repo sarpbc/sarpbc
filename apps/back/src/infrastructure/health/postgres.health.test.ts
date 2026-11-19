@@ -1,36 +1,38 @@
 import { EntityManager } from "@mikro-orm/postgresql";
 import { HealthIndicatorService } from "@nestjs/terminus";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { unconstructed } from "../../../test/doubles";
 import { PostgresHealthIndicator } from "./postgres.health";
 
+class ScriptedConnection {
+  constructor(private readonly failure: Error | null) {}
+
+  async execute() {
+    if (this.failure) {
+      throw this.failure;
+    }
+
+    return await Promise.resolve([{ "?column?": 1 }]);
+  }
+}
+
+const indicatorOver = (connection: ScriptedConnection) =>
+  new PostgresHealthIndicator(
+    Object.assign(unconstructed(EntityManager), { getConnection: () => connection }),
+    new HealthIndicatorService(),
+  );
+
 describe(PostgresHealthIndicator, () => {
-  const execute = vi.fn<(sql: string) => Promise<Record<string, number>[]>>();
-
-  const em = Object.assign(unconstructed(EntityManager), {
-    getConnection: () => ({ execute }),
-  });
-
-  let indicator: PostgresHealthIndicator;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    indicator = new PostgresHealthIndicator(em, new HealthIndicatorService());
-  });
-
-  it("is up when SELECT 1 succeeds", async () => {
-    execute.mockResolvedValue([{ "?column?": 1 }]);
-
-    await expect(indicator.pingCheck("postgres")).resolves.toStrictEqual({
-      postgres: { status: "up" },
-    });
-    expect(execute).toHaveBeenCalledExactlyOnceWith("SELECT 1");
+  it("is up when the query succeeds", async () => {
+    await expect(
+      indicatorOver(new ScriptedConnection(null)).pingCheck("postgres"),
+    ).resolves.toStrictEqual({ postgres: { status: "up" } });
   });
 
   it("is down when the query fails", async () => {
-    execute.mockRejectedValue(new Error("connection refused"));
+    const connection = new ScriptedConnection(new Error("connection refused"));
 
-    await expect(indicator.pingCheck("postgres")).resolves.toStrictEqual({
+    await expect(indicatorOver(connection).pingCheck("postgres")).resolves.toStrictEqual({
       postgres: { message: "connection refused", status: "down" },
     });
   });

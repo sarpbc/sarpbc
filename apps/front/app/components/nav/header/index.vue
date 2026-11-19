@@ -12,14 +12,14 @@ const homePath = computed(() => localePath("/"));
 const matchesPath = computed(() => localePath("/matches"));
 const resultsPath = computed(() => localePath("/results"));
 
-const isExactPath = (path: string): boolean => {
+const isExactPath = (path: string) => {
   const current = route.path.replace(/\/$/u, "");
   const target = path.replace(/\/$/u, "");
 
   return current === target;
 };
 
-const isNewsSection = (): boolean => {
+const isNewsSection = () => {
   if (isExactPath(homePath.value)) {
     return true;
   }

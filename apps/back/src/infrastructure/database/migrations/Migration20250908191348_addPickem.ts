@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20250908191348_addPickem extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(
       `create table "pickem_choice" ("id" varchar(255) not null, "user_id" uuid not null, "match_id" varchar(255) not null, "picked_participant_id" varchar(255) not null, "points" int null, "scored" boolean not null default 'false', "created_at" date not null, constraint "pickem_choice_pkey" primary key ("id"));`,
     );
@@ -30,7 +30,7 @@ export class Migration20250908191348_addPickem extends Migration {
     );
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`drop table if exists "pickem_choice" cascade;`);
 
     this.addSql(`alter table "match" alter column "begin_at" type date using ("begin_at"::date);`);

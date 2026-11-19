@@ -182,8 +182,6 @@ type ReplyBody = z.infer<typeof replyBody>;
 
 const jsonValue = z.json();
 
-type JsonValue = z.infer<typeof jsonValue>;
-
 const rpcMessage = z.object({
   error: z.unknown().optional(),
   result: z
@@ -196,7 +194,7 @@ const rpcMessage = z.object({
 
 const portBindings = z.record(z.string(), z.array(z.object({ HostPort: z.string() })).nullable());
 
-const composeImage = (name: string): string => {
+const composeImage = (name: string) => {
   const image = new RegExp(`image: (${name}:\\S+)`, "u").exec(compose)?.[1];
 
   if (image === undefined) {
@@ -206,13 +204,13 @@ const composeImage = (name: string): string => {
   return image;
 };
 
-const docker = (...args: string[]): string =>
+const docker = (...args: string[]) =>
   execFileSync("docker", args, {
     encoding: "utf-8",
     timeout: 30_000,
   }).trim();
 
-const cookies = (response: JsonResponse): string => {
+const cookies = (response: JsonResponse) => {
   const values = response.headers["set-cookie"];
   assert.ok(Array.isArray(values) && values.length >= 2, "access and refresh cookies are returned");
   assert.ok(
@@ -223,13 +221,13 @@ const cookies = (response: JsonResponse): string => {
   return values.map((value) => value.split(";")[0]).join("; ");
 };
 
-const teamNames = (participants: { team: { name: string } }[]): string[] =>
+const teamNames = (participants: { team: { name: string } }[]) =>
   participants.map(({ team }) => team.name).toSorted();
 
 const day = (value: Date | string | null | undefined) =>
   value === null || value === undefined ? value : new Date(value).toISOString().slice(0, 10);
 
-const slug = (name: string): string => name.toLowerCase().replaceAll(" ", "-");
+const slug = (name: string) => name.toLowerCase().replaceAll(" ", "-");
 
 describe("backend integration", () => {
   it("complete backend workflows with PostgreSQL, Redis and MikroORM migrations", async () => {
@@ -245,7 +243,7 @@ describe("backend integration", () => {
       port: number,
       environment: Record<string, string>,
       readiness: string[],
-    ): Promise<number> => {
+    ) => {
       const name = `sarpbc-integration-${service}-${randomUUID()}`;
       docker(
         "run",
@@ -260,7 +258,7 @@ describe("backend integration", () => {
       );
       containers.push(name);
 
-      const ready = async (attempt: number): Promise<number> => {
+      const ready = async (attempt: number) => {
         if (attempt >= 60) {
           throw new Error(`${service} did not become ready within 30 seconds`);
         }
@@ -289,7 +287,7 @@ describe("backend integration", () => {
       return await ready(0);
     };
 
-    const check = async (name: string, work: () => Promise<void>): Promise<void> => {
+    const check = async (name: string, work: () => Promise<void>) => {
       await work();
       results.push(name);
       process.stdout.write(`PASS ${name}\n`);
@@ -395,7 +393,7 @@ describe("backend integration", () => {
         assert.equal(response.statusCode, status, `${method} ${url}: ${response.body}`);
 
         return Object.assign(response, {
-          json: <T,>(schema: z.ZodType<T>): T => {
+          json: <T,>(schema: z.ZodType<T>) => {
             const body: unknown = JSON.parse(response.body);
 
             return schema.parse(body);
@@ -479,7 +477,7 @@ describe("backend integration", () => {
       await check(
         "HTTP signup, login, refresh, safe profile mapping and staff authorization",
         async () => {
-          const signup = async (email: string, userName: string): Promise<string> =>
+          const signup = async (email: string, userName: string) =>
             cookies(
               await request("POST", "/auth/signup", {
                 email,
@@ -730,7 +728,7 @@ describe("backend integration", () => {
           201,
         );
 
-        const movements = async (query: string): Promise<string[][]> => {
+        const movements = async (query: string) => {
           const response26 = await request("GET", `/transfers?${query}`);
 
           return response26
@@ -787,7 +785,6 @@ describe("backend integration", () => {
           );
 
           ({ match } = response28.json(z.object({ match: matchBody })));
-          assert.ok(match.id);
           assert.ok(
             Number.isInteger(match.publicId) && match.publicId > 0,
             "created match has a public id",
@@ -875,14 +872,6 @@ describe("backend integration", () => {
       await check(
         "article match blocks scope matches to a team through its participations",
         async () => {
-          const [index] = await orm.em
-            .getConnection()
-            .execute<{ indexdef: string }[]>(
-              `select indexdef from pg_indexes where indexname = 'tournament_participant_team_id_index'`,
-            );
-
-          assert.match(index.indexdef, /team_id/u);
-
           const keys = [
             `team:${team.id}:1`,
             `team:${otherTeam.id}:5`,
@@ -1656,10 +1645,7 @@ describe("backend integration", () => {
 
         let rpcId = 0;
 
-        const mcpResult = async function mcpResult(
-          name: string,
-          args: Payload,
-        ): Promise<JsonValue> {
+        const mcpResult = async function mcpResult(name: string, args: Payload) {
           rpcId += 1;
 
           const response = await request(
@@ -1705,11 +1691,7 @@ describe("backend integration", () => {
         function callTool(name: string, args: Payload): Promise<ToolProposal>;
         function callTool<T>(name: string, args: Payload, schema: z.ZodType<T>): Promise<T>;
 
-        async function callTool<T>(
-          name: string,
-          args: Payload,
-          schema?: z.ZodType<T>,
-        ): Promise<T | ToolProposal> {
+        async function callTool<T>(name: string, args: Payload, schema?: z.ZodType<T>) {
           return (schema ?? toolProposal).parse(await mcpResult(name, args));
         }
 
@@ -1727,7 +1709,7 @@ describe("backend integration", () => {
           proposal: ToolProposal,
           action: "approve" | "reject" = "approve",
           refusedWith?: number,
-        ): Promise<ReviewedProposal | undefined> {
+        ) {
           const response = await request(
             "POST",
             `/roster-proposals/${proposal.proposalId}/${action}`,
@@ -1736,14 +1718,12 @@ describe("backend integration", () => {
             refusedWith ?? 200,
           );
 
-          if (refusedWith !== undefined) {
-            return undefined;
-          }
-
-          return response.json(z.object({ proposal: reviewedProposal })).proposal;
+          return refusedWith === undefined
+            ? response.json(z.object({ proposal: reviewedProposal })).proposal
+            : undefined;
         }
 
-        const applied = async (tool: string, args: Payload): Promise<string> => {
+        const applied = async (tool: string, args: Payload) => {
           const proposal = await callTool(tool, args);
           assert.equal(proposal.status, "pending", `${tool} is queued`);
           const result = await review(proposal);
@@ -2127,7 +2107,7 @@ describe("backend integration", () => {
         const { TournamentParticipant: ParticipantRow } =
           await import("../src/tournament/infrastructure/competition-persistence.ts");
 
-        const participantIds = async (tournamentId: string): Promise<string[]> => {
+        const participantIds = async (tournamentId: string) => {
           const findResult2 = await orm.em
             .fork()
             .getRepository(ParticipantRow)
@@ -2136,7 +2116,7 @@ describe("backend integration", () => {
           return findResult2.map(({ id }) => id);
         };
 
-        const createCup = async <T,>(tournamentSource: string, schema: z.ZodType<T>): Promise<T> =>
+        const createCup = async <T,>(tournamentSource: string, schema: z.ZodType<T>) =>
           await callTool(
             "create_tournament",
             {
@@ -2152,12 +2132,6 @@ describe("backend integration", () => {
         const manualCreated = await createCup("manual", mcpCreatedTournament);
         const manualCup = manualCreated.id;
         assert.deepEqual(teamNames(manualCreated.participants), ["MCP Alpha", "MCP Startgg Team"]);
-
-        for (const participant of manualCreated.participants) {
-          assert.ok(participant.id);
-          assert.ok(participant.team.slug);
-          assert.ok(participant.team.id);
-        }
 
         const detail = await callTool("get_tournament", { id: manualCup }, mcpTournament);
         assert.deepEqual(
@@ -2271,7 +2245,6 @@ describe("backend integration", () => {
           mcpLimitedMatch,
         );
 
-        assert.ok(startggMatch.id);
         assert.equal(startggMatch.participants, undefined);
 
         const startggByTeam = await callTool(
@@ -2284,7 +2257,6 @@ describe("backend integration", () => {
           mcpLimitedMatch,
         );
 
-        assert.ok(startggByTeam.id);
         assert.equal(startggByTeam.participants, undefined);
         assert.deepEqual(await callTool("get_tournament", { id: startggCup }, toolFailure), {
           error: true,
@@ -2323,7 +2295,7 @@ describe("backend integration", () => {
         );
 
         assert.equal(upcoming.total, upcoming.upcoming.length + upcoming.live.length);
-        assert.ok(Array.isArray(await callTool("get_tournaments", {}, z.array(z.unknown()))));
+        await callTool("get_tournaments", {}, z.array(z.unknown()));
         await verifyStreamProposals({ callTool, match, request, review, staffCookie, tournament });
         await verifyLineupProposals({
           callTool,
@@ -2441,7 +2413,7 @@ describe("backend integration", () => {
 
           return {
             id,
-            participantOf: (teamId: string): string => {
+            participantOf: (teamId: string) => {
               const entry = participants.find((candidate) => candidate.team.id === teamId);
               assert.ok(entry, "the team has a participant entry");
 

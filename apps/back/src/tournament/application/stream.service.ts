@@ -19,10 +19,7 @@ interface LoadedOwner extends OwnedStreams {
   save: (streams: Stream[]) => Promise<void>;
 }
 
-const loadOwner = async (
-  scope: CompetitionWriteScope,
-  owner: StreamOwner,
-): Promise<LoadedOwner> => {
+const loadOwner = (async (scope, owner) => {
   switch (owner.kind) {
     case "event": {
       const event = await requireEvent(scope.events, owner.id);
@@ -86,7 +83,7 @@ const loadOwner = async (
       return exhaustive;
     }
   }
-};
+}) satisfies (scope: CompetitionWriteScope, owner: StreamOwner) => Promise<LoadedOwner>;
 
 export class StreamService {
   constructor(
@@ -94,7 +91,7 @@ export class StreamService {
     private readonly afterCommit: CompetitionAfterCommit,
   ) {}
 
-  async find(owner: StreamOwner): Promise<OwnedStreams> {
+  async find(owner: StreamOwner) {
     return await this.transaction.run(async (scope) => {
       const { streams, inherited } = await loadOwner(scope, owner);
 
@@ -102,11 +99,7 @@ export class StreamService {
     });
   }
 
-  async set(
-    owner: StreamOwner,
-    inputs: readonly StreamInput[],
-    source: StreamEditSource,
-  ): Promise<OwnedStreams> {
+  async set(owner: StreamOwner, inputs: readonly StreamInput[], source: StreamEditSource) {
     const { tournamentIds, ...owned } = await this.transaction.run(async (scope) => {
       const loaded = await loadOwner(scope, owner);
 
@@ -126,7 +119,7 @@ export class StreamService {
     return owned;
   }
 
-  async requireProposable(owner: StreamOwner, inputs: readonly StreamInput[]): Promise<void> {
+  async requireProposable(owner: StreamOwner, inputs: readonly StreamInput[]) {
     await this.transaction.run(async (scope) => {
       const loaded = await loadOwner(scope, owner);
 

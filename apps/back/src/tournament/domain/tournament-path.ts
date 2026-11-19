@@ -6,7 +6,7 @@ export type TournamentPath =
   | { kind: "event"; eventSlug: string }
   | { kind: "stage"; eventSlug: string; stageSlug: string };
 
-export const parseTournamentPath = (segments: readonly string[]): TournamentPath | null => {
+export const parseTournamentPath = ((segments) => {
   const [first, second, ...rest] = segments.map((segment) => segment.toLowerCase());
 
   if (!first || rest.length > 0) {
@@ -26,4 +26,4 @@ export const parseTournamentPath = (segments: readonly string[]): TournamentPath
   }
 
   return second ? { eventSlug: first, kind: "stage", stageSlug: second } : null;
-};
+}) satisfies (segments: readonly string[]) => TournamentPath | null;

@@ -46,7 +46,7 @@ const saving = ref(false);
 const editing = ref<TeamAlias | null>(null);
 const aliasToDelete = ref<TeamAlias | null>(null);
 
-const emptyForm = (): AliasForm => ({
+const emptyForm = () => ({
   from: "",
   logoUrl: "",
   name: "",
@@ -57,9 +57,9 @@ const emptyForm = (): AliasForm => ({
 
 const form = ref<AliasForm>(emptyForm());
 
-const formatDay = (day: string): string => dateFormatter.value.format(new Date(`${day}T00:00:00Z`));
+const formatDay = (day: string) => dateFormatter.value.format(new Date(`${day}T00:00:00Z`));
 
-const period = (alias: TeamAlias): string =>
+const period = (alias: TeamAlias) =>
   t("page.teams.aliases.period", {
     from: formatDay(alias.from),
     to: alias.to ? formatDay(alias.to) : t("page.teams.aliases.ongoing"),
@@ -72,7 +72,7 @@ const columns: TableColumn<TeamAlias>[] = [
   { header: "", id: "actions" },
 ];
 
-const toInput = (values: AliasForm): TeamAliasInput => {
+const toInput = (values: AliasForm) => {
   const pandascoreId = values.pandascoreId.trim();
 
   return {
@@ -85,7 +85,7 @@ const toInput = (values: AliasForm): TeamAliasInput => {
   };
 };
 
-const fieldOf = (error: TeamAliasError): AliasField => {
+const fieldOf = (error: TeamAliasError) => {
   switch (error) {
     case "missing-name":
     case "name-too-long": {
@@ -125,7 +125,7 @@ const fieldOf = (error: TeamAliasError): AliasField => {
 
 const parsed = computed(() => parseTeamAlias(toInput(form.value)));
 
-const feedback = (field: AliasField): FieldFeedback => {
+const feedback = (field: AliasField) => {
   const result = parsed.value;
 
   if (result.ok || fieldOf(result.error) !== field) {

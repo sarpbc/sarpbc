@@ -5,10 +5,7 @@ export interface BracketRoundParse {
   column: number | null;
 }
 
-/**
- * PandaScore match names encode section and column when feeder links are omitted.
- */
-const parseBracketRoundFromName = (name: string | undefined): BracketRoundParse | null => {
+const parseBracketRoundFromName = (name: string | undefined) => {
   const normalized = name?.trim().toLowerCase() ?? "";
 
   if (!normalized) {
@@ -60,10 +57,10 @@ const parseBracketRoundFromName = (name: string | undefined): BracketRoundParse 
   return null;
 };
 
-export const getBracketSectionFromName = (name: string | undefined): BracketSection | null =>
+export const getBracketSectionFromName = (name: string | undefined) =>
   parseBracketRoundFromName(name)?.section ?? null;
 
-export const getCombinedColumnFromName = (name: string | undefined): number | null => {
+export const getCombinedColumnFromName = (name: string | undefined) => {
   const parsed = parseBracketRoundFromName(name);
 
   if (!parsed || parsed.section === "upper") {
@@ -73,7 +70,7 @@ export const getCombinedColumnFromName = (name: string | undefined): number | nu
   return parsed.column;
 };
 
-export const getUpperColumnFromName = (name: string | undefined): number | null => {
+export const getUpperColumnFromName = (name: string | undefined) => {
   const parsed = parseBracketRoundFromName(name);
 
   if (!parsed || parsed.section !== "upper") {

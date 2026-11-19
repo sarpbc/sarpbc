@@ -10,7 +10,7 @@ const stage = {
   stageName: "Open Qualifier 4 Group B",
 };
 
-const candidate = (overrides: Partial<ManualCandidate>): ManualCandidate => ({
+const candidate = (overrides: Partial<ManualCandidate>) => ({
   beginAt: new Date("2025-03-01T00:00Z"),
   endAt: new Date("2025-03-02T00:00Z"),
   id: "manual-1",

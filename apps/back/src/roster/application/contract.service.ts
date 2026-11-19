@@ -16,7 +16,7 @@ const removeContract = async (
   { contracts }: RosterWriteScope,
   playerId: string,
   contractId: string,
-): Promise<void> => {
+) => {
   const contract = await contracts.findById(contractId);
 
   if (!contract || contract.player.id !== playerId) {
@@ -30,7 +30,7 @@ const buildContract = async (
   { players, teams }: RosterWriteScope,
   playerId: string,
   dto: CreateContractInput,
-): Promise<Contract> => {
+) => {
   const player = await players.findById(playerId);
 
   if (!player) {
@@ -52,7 +52,7 @@ const editContract = async (
   playerId: string,
   contractId: string,
   dto: UpdateContractInput,
-): Promise<Contract> => {
+) => {
   const contract = await contracts.findById(contractId);
 
   if (!contract || contract.player.id !== playerId) {
@@ -81,7 +81,7 @@ const editContract = async (
 const saveContractInCareer = async (
   { players, contracts }: RosterWriteScope,
   contract: Contract,
-): Promise<void> => {
+) => {
   const player = await players.findById(contract.player.id);
   const career = await contracts.findByPlayer(contract.player.id);
   contract.assertFitsCareer(career, player?.team?.id ?? null);
@@ -93,7 +93,7 @@ const applyContractUpdate = async (
   playerId: string,
   contractId: string,
   dto: UpdateContractInput,
-): Promise<Contract> => {
+) => {
   const contract = await editContract(scope, playerId, contractId, dto);
   await saveContractInCareer(scope, contract);
 
@@ -107,25 +107,25 @@ export class ContractService {
     private readonly transaction: RosterTransaction,
   ) {}
 
-  async getContractsByPlayer(playerId: string): Promise<Contract[]> {
+  async getContractsByPlayer(playerId: string) {
     return await this.contracts.findByPlayer(playerId);
   }
 
-  async getStaffContractsByPlayer(playerId: string): Promise<Contract[]> {
+  async getStaffContractsByPlayer(playerId: string) {
     const contracts = await this.contracts.findByPlayer(playerId);
 
     return contracts.filter((contract) => isStaffContractRole(contract.role));
   }
 
-  async getOldTeamsByPlayer(playerId: string): Promise<Contract[]> {
+  async getOldTeamsByPlayer(playerId: string) {
     return await this.contracts.findPastContractsByPlayer(playerId);
   }
 
-  async getFormerPlayersByTeam(teamId: string): Promise<Contract[]> {
+  async getFormerPlayersByTeam(teamId: string) {
     return await this.contracts.findFormerPlayersByTeam(teamId);
   }
 
-  async getContractsByTeam(teamId: string): Promise<Contract[]> {
+  async getContractsByTeam(teamId: string) {
     const team = await this.teams.findById(teamId);
 
     if (!team) {
@@ -135,7 +135,7 @@ export class ContractService {
     return await this.contracts.findByTeam(teamId);
   }
 
-  async createForTeam(teamId: string, dto: CreateTeamContractInput): Promise<Contract> {
+  async createForTeam(teamId: string, dto: CreateTeamContractInput) {
     return await this.create(dto.playerId, {
       endDate: dto.endDate,
       role: dto.role,
@@ -144,11 +144,7 @@ export class ContractService {
     });
   }
 
-  async updateForTeam(
-    teamId: string,
-    contractId: string,
-    dto: UpdateTeamContractInput,
-  ): Promise<Contract> {
+  async updateForTeam(teamId: string, contractId: string, dto: UpdateTeamContractInput) {
     return await this.transaction.run(async (scope) => {
       const contract = await scope.contracts.findById(contractId);
 
@@ -174,7 +170,7 @@ export class ContractService {
     });
   }
 
-  async deleteForTeam(teamId: string, contractId: string): Promise<void> {
+  async deleteForTeam(teamId: string, contractId: string) {
     await this.transaction.run(async (scope) => {
       const contract = await scope.contracts.findById(contractId);
 
@@ -186,7 +182,7 @@ export class ContractService {
     });
   }
 
-  async create(playerId: string, dto: CreateContractInput): Promise<Contract> {
+  async create(playerId: string, dto: CreateContractInput) {
     return await this.transaction.run(async (scope) => {
       const contract = await buildContract(scope, playerId, dto);
       await saveContractInCareer(scope, contract);
@@ -195,10 +191,7 @@ export class ContractService {
     });
   }
 
-  async recordPeriod(
-    playerId: string,
-    { sourceUrl, ...dto }: SourcedContractInput,
-  ): Promise<Contract> {
+  async recordPeriod(playerId: string, { sourceUrl, ...dto }: SourcedContractInput) {
     return await this.transaction.run(async (scope) => {
       const contract = await buildContract(scope, playerId, dto);
       contract.joinSourceUrl = sourceUrl;
@@ -213,7 +206,7 @@ export class ContractService {
     });
   }
 
-  async update(playerId: string, contractId: string, dto: UpdateContractInput): Promise<Contract> {
+  async update(playerId: string, contractId: string, dto: UpdateContractInput) {
     return await this.transaction.run(
       async (scope) => await applyContractUpdate(scope, playerId, contractId, dto),
     );
@@ -223,7 +216,7 @@ export class ContractService {
     playerId: string,
     contractId: string,
     { sourceUrl, ...dto }: SourcedContractUpdate,
-  ): Promise<Contract> {
+  ) {
     return await this.transaction.run(async (scope) => {
       const contract = await editContract(scope, playerId, contractId, dto);
 
@@ -241,7 +234,7 @@ export class ContractService {
     });
   }
 
-  async delete(playerId: string, contractId: string): Promise<void> {
+  async delete(playerId: string, contractId: string) {
     await this.transaction.run(async (scope) => {
       await removeContract(scope, playerId, contractId);
     });

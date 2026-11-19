@@ -4,7 +4,7 @@ import { getPlayerStaffTournaments } from "~/composables/player/api";
 import type { Tournament } from "~/types/tournament";
 import { splitTournaments } from "~/composables/entity/use-entity-tournaments";
 
-const coversTournament = (contract: PlayerContract, tournament: Tournament): boolean => {
+const coversTournament = (contract: PlayerContract, tournament: Tournament) => {
   if (!tournament.beginAt) {
     return false;
   }
@@ -17,7 +17,7 @@ const coversTournament = (contract: PlayerContract, tournament: Tournament): boo
   );
 };
 
-const wonDuringTenure = (tournament: Tournament, contracts: PlayerContract[]): boolean => {
+const wonDuringTenure = (tournament: Tournament, contracts: PlayerContract[]) => {
   const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
   const winnerTeamId = winner?.team instanceof Object ? winner.team.id : undefined;
 
@@ -36,7 +36,7 @@ export const useStaffTournaments = (
   const { data, pending, error, refresh } = useAsyncData(
     () => `staff-tournaments-${idRef.value}`,
     async () => ({
-      /** Captured with the fetch so the server and client split events identically on hydration. */
+      // WARNING: fetchedAt is captured with the fetch so server and client build identical results on hydration.
       fetchedAt: Date.now(),
       tournaments: idRef.value ? await getPlayerStaffTournaments(idRef.value) : [],
     }),

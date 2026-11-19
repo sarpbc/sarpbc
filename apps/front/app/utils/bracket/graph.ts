@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getMatchParticipantScore } from "~/utils/match-score";
 
-export const getMatchWinnerParticipantId = (match: TournamentDetailMatch): string | null => {
+export const getMatchWinnerParticipantId = (match: TournamentDetailMatch) => {
   if (isNonEmptyString(match.winnerId)) {
     return match.winnerId;
   }
@@ -27,21 +27,21 @@ export const getMatchWinnerParticipantId = (match: TournamentDetailMatch): strin
   return null;
 };
 
-export const getParentIds = (match: TournamentDetailMatch, matchIds: Set<string>): string[] =>
+export const getParentIds = (match: TournamentDetailMatch, matchIds: Set<string>) =>
   (match.previousMatches ?? []).map((link) => link.previousMatch).filter((id) => matchIds.has(id));
 
-export const getWinnerParentIds = (match: TournamentDetailMatch, matchIds: Set<string>): string[] =>
+export const getWinnerParentIds = (match: TournamentDetailMatch, matchIds: Set<string>) =>
   (match.previousMatches ?? [])
     .filter((link) => link.type === "winner")
     .map((link) => link.previousMatch)
     .filter((id) => matchIds.has(id));
 
-export const getWinnerParentIdsFromLinks = (match: TournamentDetailMatch): string[] =>
+export const getWinnerParentIdsFromLinks = (match: TournamentDetailMatch) =>
   (match.previousMatches ?? [])
     .filter((link) => link.type === "winner")
     .map((link) => link.previousMatch);
 
-export const hasUpperWinnerFeed = (match: TournamentDetailMatch, upperIds: Set<string>): boolean =>
+export const hasUpperWinnerFeed = (match: TournamentDetailMatch, upperIds: Set<string>) =>
   (match.previousMatches ?? []).some(
     (link) => link.type === "winner" && upperIds.has(link.previousMatch),
   );

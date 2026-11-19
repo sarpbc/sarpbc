@@ -23,7 +23,7 @@ export const useSpoilerFree = () => {
     { flush: "sync", immediate: import.meta.client },
   );
 
-  const isConcealed = (scope: SpoilerScope): boolean =>
+  const isConcealed = (scope: SpoilerScope) =>
     isSpoilerConcealed(enabled.value, reveals.value, scope);
 
   const reveal = (target: SpoilerRevealTarget) => {

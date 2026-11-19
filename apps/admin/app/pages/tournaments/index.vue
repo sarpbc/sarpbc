@@ -53,8 +53,7 @@ const columns: TableColumn<TournamentListItem>[] = [
   },
 ];
 
-const isManualTournament = (tournament: TournamentListItem): boolean =>
-  tournament.source !== "pandascore";
+const isManualTournament = (tournament: TournamentListItem) => tournament.source !== "pandascore";
 
 const selectRow = (e: Event, row: TableRow<TournamentListItem>) => {
   e.preventDefault();

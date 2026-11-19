@@ -10,18 +10,19 @@ import { REPLY_CREATION_COOLDOWN_MS } from "../domain/reply-limits";
 import type { ReplyRecord, CreateReplyInput } from "./models";
 import type { ReplyQueries, ReplyTransaction, ReplyWriteScope, ReplyReportRecord } from "./ports";
 
-const toReplyDto = (reply: ReplyRecord, nested: Reply[]): Reply => ({
-  author: {
-    id: reply.author.id,
-    userName: reply.author.userName,
-  },
-  content: reply.content,
-  createdAt: reply.createdAt.toISOString(),
-  id: reply.id,
-  replies: nested,
-});
+const toReplyDto = (reply: ReplyRecord, nested: Reply[]) =>
+  ({
+    author: {
+      id: reply.author.id,
+      userName: reply.author.userName,
+    },
+    content: reply.content,
+    createdAt: reply.createdAt.toISOString(),
+    id: reply.id,
+    replies: nested,
+  }) satisfies Reply;
 
-const toThreadedDtos = (replies: ReplyRecord[]): Reply[] => {
+const toThreadedDtos = (replies: ReplyRecord[]) => {
   const dtos = replies.map((reply) => ({ dto: toReplyDto(reply, []), reply }));
   const byId = new Map(dtos.map(({ reply, dto }) => [reply.id, dto]));
   const roots: Reply[] = [];
@@ -36,7 +37,7 @@ const toThreadedDtos = (replies: ReplyRecord[]): Reply[] => {
     }
   }
 
-  return roots;
+  return roots satisfies Reply[];
 };
 
 export class ReplyService {
@@ -52,7 +53,7 @@ export class ReplyService {
     targetId: string,
     page: number,
     limit: number,
-  ): Promise<PaginatedReplies> {
+  ) {
     const offset = page * limit;
 
     const [total, roots] = await Promise.all([
@@ -77,22 +78,19 @@ export class ReplyService {
       page,
       replies: toThreadedDtos([...roots, ...descendants]),
       total,
-    };
+    } satisfies PaginatedReplies;
   }
 
   async recentForModeration(limit: number) {
     return await this.replyRepository.findRecentForModeration(limit);
   }
 
-  async countByTargetIds(
-    targetType: ReplyTargetType,
-    targetIds: string[],
-  ): Promise<Map<string, number>> {
+  async countByTargetIds(targetType: ReplyTargetType, targetIds: string[]) {
     return await this.replyRepository.countByTargetIds(targetType, targetIds);
   }
 
-  async create(userId: string, createReplyDto: CreateReplyInput): Promise<Reply> {
-    return await this.transaction.run(async (scope) => {
+  async create(userId: string, createReplyDto: CreateReplyInput) {
+    return (await this.transaction.run(async (scope) => {
       const target = replyTarget(createReplyDto);
       const cooldownStart = new Date(this.now().getTime() - REPLY_CREATION_COOLDOWN_MS);
       const latestReply = await scope.replies.findLatestByUser(userId);
@@ -160,10 +158,10 @@ export class ReplyService {
       }
 
       return toReplyDto(newReply, []);
-    });
+    })) satisfies Reply;
   }
 
-  async hide(id: string): Promise<void> {
+  async hide(id: string) {
     await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
 
@@ -180,7 +178,7 @@ export class ReplyService {
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(id);
 
@@ -192,12 +190,8 @@ export class ReplyService {
     });
   }
 
-  async report(
-    userId: string,
-    replyId: string,
-    reason: ReplyReportReason,
-  ): Promise<{ id: string; reason: ReplyReportReason; createdAt: Date }> {
-    return await this.transaction.run(async (scope) => {
+  async report(userId: string, replyId: string, reason: ReplyReportReason) {
+    return (await this.transaction.run(async (scope) => {
       const reply = await scope.replies.findById(replyId);
 
       if (!reply || reply.hiddenAt) {
@@ -235,10 +229,10 @@ export class ReplyService {
         id: report.id,
         reason: report.reason,
       };
-    });
+    })) satisfies { id: string; reason: ReplyReportReason; createdAt: Date };
   }
 
-  async deleteAllForTarget(targetType: ReplyTargetType, targetId: string): Promise<void> {
+  async deleteAllForTarget(targetType: ReplyTargetType, targetId: string) {
     await this.transaction.run(async (scope) => {
       const replies = await scope.replies.findByTarget(targetType, targetId, {
         includeHidden: true,
@@ -252,7 +246,7 @@ export class ReplyService {
     });
   }
 
-  private async deleteWithChildren(scope: ReplyWriteScope, replyId: string): Promise<void> {
+  private async deleteWithChildren(scope: ReplyWriteScope, replyId: string) {
     const children = await scope.replies.findChildren(replyId);
 
     await mapSequentially(children, async (child) => {

@@ -15,8 +15,8 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { parsePathEntry, parsePathNote } from "../domain/season-archive";
 import type { SeasonRecord, SeasonStore } from "./ports";
 
-const publicPath = (path: SeasonPathEntry[]): SeasonArchivePathEntry[] =>
-  path.flatMap(({ label, result, tournament }): SeasonArchivePathEntry[] => {
+const publicPath = (path: SeasonPathEntry[]) =>
+  path.flatMap<SeasonArchivePathEntry>(({ label, result, tournament }) => {
     if (!tournament) {
       return [{ label, result, tournament: null }];
     }
@@ -28,7 +28,7 @@ const publicPath = (path: SeasonPathEntry[]): SeasonArchivePathEntry[] =>
     const { id, name, slug, event } = tournament;
 
     return [{ label, result, tournament: { event, id, name, slug } }];
-  });
+  }) satisfies SeasonArchivePathEntry[];
 
 const publicAward = ({ awardType, region, presentedBy, sourceUrl, player }: SeasonAward) => ({
   awardType,
@@ -43,27 +43,28 @@ const toSeasonArchive = (
   season: SeasonRecord,
   participants: SeasonParticipant[],
   awards: SeasonAward[],
-): SeasonArchive => ({
-  awards: awards.map(publicAward),
-  format: season.format,
-  name: season.name,
-  participants: participants.map(({ team, pathNote, path }) => ({
-    path: publicPath(path),
-    pathNote,
-    team,
-  })),
-  slug,
-  winner: participants.find(({ team }) => team.id === season.winnerTeamId)?.team ?? null,
-});
+) =>
+  ({
+    awards: awards.map(publicAward),
+    format: season.format,
+    name: season.name,
+    participants: participants.map(({ team, pathNote, path }) => ({
+      path: publicPath(path),
+      pathNote,
+      team,
+    })),
+    slug,
+    winner: participants.find(({ team }) => team.id === season.winnerTeamId)?.team ?? null,
+  }) satisfies SeasonArchive;
 
 export class SeasonArchiveService {
   constructor(private readonly store: SeasonStore) {}
 
-  async published(): Promise<SeasonArchiveSummary[]> {
-    return await this.store.published();
+  async published() {
+    return (await this.store.published()) satisfies SeasonArchiveSummary[];
   }
 
-  async archive(slug: string): Promise<SeasonArchive> {
+  async archive(slug: string) {
     const season = await this.store.findBySlug(slug);
 
     if (season?.slug === null || season?.slug === undefined || season?.slug === "") {
@@ -73,13 +74,10 @@ export class SeasonArchiveService {
     const participants = await this.store.participants(season.id);
     const awards = await this.store.awards(season.id);
 
-    return toSeasonArchive(season.slug, season, participants, awards);
+    return toSeasonArchive(season.slug, season, participants, awards) satisfies SeasonArchive;
   }
 
-  async addParticipant(
-    seasonId: string,
-    input: SeasonParticipantInput,
-  ): Promise<SeasonParticipant> {
+  async addParticipant(seasonId: string, input: SeasonParticipantInput) {
     const season = await this.requireSeason(seasonId);
     const team = await this.store.team(input.teamId);
 
@@ -97,22 +95,22 @@ export class SeasonArchiveService {
       throw new ConflictError(`${team.name} already takes part in ${season.name}.`);
     }
 
-    return await this.store.saveParticipant(season.id, team.id, parsePathNote(input.pathNote));
+    return (await this.store.saveParticipant(
+      season.id,
+      team.id,
+      parsePathNote(input.pathNote),
+    )) satisfies SeasonParticipant;
   }
 
-  async updatePathNote(
-    seasonId: string,
-    participantId: string,
-    pathNote: string | null,
-  ): Promise<SeasonParticipant> {
+  async updatePathNote(seasonId: string, participantId: string, pathNote: string | null) {
     const { participant } = await this.requireParticipant(seasonId, participantId);
     const note = parsePathNote(pathNote);
     await this.store.updatePathNote(participant.id, note);
 
-    return { ...participant, pathNote: note };
+    return { ...participant, pathNote: note } satisfies SeasonParticipant;
   }
 
-  async removeParticipant(seasonId: string, participantId: string): Promise<void> {
+  async removeParticipant(seasonId: string, participantId: string) {
     const { season, participant } = await this.requireParticipant(seasonId, participantId);
 
     if (season.winnerTeamId === participant.team.id) {
@@ -124,11 +122,7 @@ export class SeasonArchiveService {
     await this.store.removeParticipant(seasonId, participantId);
   }
 
-  async addPathEntry(
-    seasonId: string,
-    participantId: string,
-    input: SeasonPathEntryInput,
-  ): Promise<SeasonPathEntry> {
+  async addPathEntry(seasonId: string, participantId: string, input: SeasonPathEntryInput) {
     const { participant } = await this.requireParticipant(seasonId, participantId);
     const entry = parsePathEntry(input);
 
@@ -140,10 +134,10 @@ export class SeasonArchiveService {
       throw new NotFoundError(`Tournament with id "${entry.tournamentId}" was not found.`);
     }
 
-    return await this.store.savePathEntry(participant.id, entry);
+    return (await this.store.savePathEntry(participant.id, entry)) satisfies SeasonPathEntry;
   }
 
-  async removePathEntry(seasonId: string, participantId: string, entryId: string): Promise<void> {
+  async removePathEntry(seasonId: string, participantId: string, entryId: string) {
     const { participant } = await this.requireParticipant(seasonId, participantId);
 
     if (!(await this.store.removePathEntry(participant.id, entryId))) {
@@ -151,7 +145,7 @@ export class SeasonArchiveService {
     }
   }
 
-  private async requireSeason(id: string): Promise<SeasonRecord> {
+  private async requireSeason(id: string) {
     const season = await this.store.find(id);
 
     if (!season) {
@@ -161,10 +155,7 @@ export class SeasonArchiveService {
     return season;
   }
 
-  private async requireParticipant(
-    seasonId: string,
-    participantId: string,
-  ): Promise<{ season: SeasonRecord; participant: SeasonParticipant }> {
+  private async requireParticipant(seasonId: string, participantId: string) {
     const season = await this.requireSeason(seasonId);
     const participant = await this.store.participant(season.id, participantId);
 
@@ -174,6 +165,9 @@ export class SeasonArchiveService {
       );
     }
 
-    return { participant, season };
+    return { participant, season } satisfies {
+      season: SeasonRecord;
+      participant: SeasonParticipant;
+    };
   }
 }

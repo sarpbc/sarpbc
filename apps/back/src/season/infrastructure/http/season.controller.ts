@@ -1,3 +1,10 @@
+import type {
+  SeasonAward,
+  SeasonDetail,
+  SeasonParticipant,
+  SeasonPathEntry,
+  SeasonSummary,
+} from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -11,13 +18,6 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import type {
-  SeasonAward,
-  SeasonDetail,
-  SeasonParticipant,
-  SeasonPathEntry,
-  SeasonSummary,
-} from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -48,32 +48,32 @@ export class SeasonController {
   ) {}
 
   @Get()
-  async list(): Promise<{ seasons: SeasonSummary[] }> {
-    return { seasons: await this.seasons.list() };
+  async list() {
+    return { seasons: await this.seasons.list() } satisfies { seasons: SeasonSummary[] };
   }
 
   @Get(":id")
-  async detail(@Param("id", ParseUUIDPipe) id: string): Promise<SeasonDetail> {
-    return await this.seasons.detail(id);
+  async detail(@Param("id", ParseUUIDPipe) id: string) {
+    return (await this.seasons.detail(id)) satisfies SeasonDetail;
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body({ schema: SeasonDto }) dto: SeasonInput): Promise<SeasonDetail> {
-    return await this.seasons.create(dto);
+  async create(@Body({ schema: SeasonDto }) dto: SeasonInput) {
+    return (await this.seasons.create(dto)) satisfies SeasonDetail;
   }
 
   @Patch(":id")
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body({ schema: SeasonDto }) dto: SeasonInput,
-  ): Promise<SeasonDetail> {
-    return await this.seasons.update(id, dto);
+  ) {
+    return (await this.seasons.update(id, dto)) satisfies SeasonDetail;
   }
 
   @Delete(":id")
   @HttpCode(HttpStatus.NO_CONTENT)
-  async remove(@Param("id", ParseUUIDPipe) id: string): Promise<void> {
+  async remove(@Param("id", ParseUUIDPipe) id: string) {
     await this.seasons.remove(id);
   }
 
@@ -82,8 +82,8 @@ export class SeasonController {
   async addAward(
     @Param("id", ParseUUIDPipe) id: string,
     @Body({ schema: CreateSeasonAwardDto }) dto: CreateSeasonAwardInput,
-  ): Promise<{ award: SeasonAward }> {
-    return { award: await this.seasons.addAward(id, dto) };
+  ) {
+    return { award: await this.seasons.addAward(id, dto) } satisfies { award: SeasonAward };
   }
 
   @Delete(":id/awards/:awardId")
@@ -91,7 +91,7 @@ export class SeasonController {
   async removeAward(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("awardId", ParseUUIDPipe) awardId: string,
-  ): Promise<void> {
+  ) {
     await this.seasons.removeAward(id, awardId);
   }
 
@@ -100,8 +100,10 @@ export class SeasonController {
   async addParticipant(
     @Param("id", ParseUUIDPipe) id: string,
     @Body({ schema: CreateSeasonParticipantDto }) dto: CreateSeasonParticipantInput,
-  ): Promise<{ participant: SeasonParticipant }> {
-    return { participant: await this.archives.addParticipant(id, dto) };
+  ) {
+    return { participant: await this.archives.addParticipant(id, dto) } satisfies {
+      participant: SeasonParticipant;
+    };
   }
 
   @Patch(":id/participants/:participantId")
@@ -109,10 +111,10 @@ export class SeasonController {
     @Param("id", ParseUUIDPipe) id: string,
     @Param("participantId", ParseUUIDPipe) participantId: string,
     @Body({ schema: UpdateSeasonParticipantDto }) dto: UpdateSeasonParticipantInput,
-  ): Promise<{ participant: SeasonParticipant }> {
+  ) {
     return {
       participant: await this.archives.updatePathNote(id, participantId, dto.pathNote),
-    };
+    } satisfies { participant: SeasonParticipant };
   }
 
   @Delete(":id/participants/:participantId")
@@ -120,7 +122,7 @@ export class SeasonController {
   async removeParticipant(
     @Param("id", ParseUUIDPipe) id: string,
     @Param("participantId", ParseUUIDPipe) participantId: string,
-  ): Promise<void> {
+  ) {
     await this.archives.removeParticipant(id, participantId);
   }
 
@@ -130,8 +132,10 @@ export class SeasonController {
     @Param("id", ParseUUIDPipe) id: string,
     @Param("participantId", ParseUUIDPipe) participantId: string,
     @Body({ schema: CreateSeasonPathEntryDto }) dto: CreateSeasonPathEntryInput,
-  ): Promise<{ entry: SeasonPathEntry }> {
-    return { entry: await this.archives.addPathEntry(id, participantId, dto) };
+  ) {
+    return { entry: await this.archives.addPathEntry(id, participantId, dto) } satisfies {
+      entry: SeasonPathEntry;
+    };
   }
 
   @Delete(":id/participants/:participantId/path/:entryId")
@@ -140,7 +144,7 @@ export class SeasonController {
     @Param("id", ParseUUIDPipe) id: string,
     @Param("participantId", ParseUUIDPipe) participantId: string,
     @Param("entryId", ParseUUIDPipe) entryId: string,
-  ): Promise<void> {
+  ) {
     await this.archives.removePathEntry(id, participantId, entryId);
   }
 }

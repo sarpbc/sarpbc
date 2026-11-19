@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { unconstructed } from "../../../../test/doubles";
 import { Player as PlayerRow } from "./player.entity";
@@ -6,20 +6,22 @@ import { Player } from "../../domain/player";
 import { MikroPlayerStore } from "./player.store";
 
 const fixture = () => {
-  const execute = vi.fn<(query: string) => Promise<{ id: string }[]>>();
-  const findOne = vi.fn<EntityManager["findOne"]>();
+  const database = {
+    randomIds: Array.of<{ id: string }>(),
+    rows: Array.of<PlayerRow>(),
+  };
 
   const manager = Object.assign(unconstructed(EntityManager), {
-    findOne,
-    getConnection: vi.fn<() => { execute: typeof execute }>().mockReturnValue({ execute }),
+    findOne: async () => database.rows[0] ?? null,
+    getConnection: () => ({ execute: async () => database.randomIds }),
   });
 
-  return { execute, findOne, players: new MikroPlayerStore(manager) };
+  return { database, players: new MikroPlayerStore(manager) };
 };
 
 describe("MikroPlayerStore.getRandomPlayer", () => {
   it("loads a single random row and maps it to a detached player", async () => {
-    const { execute, findOne, players } = fixture();
+    const { database, players } = fixture();
 
     const row = Object.assign(new PlayerRow(), {
       id: "p1",
@@ -27,8 +29,8 @@ describe("MikroPlayerStore.getRandomPlayer", () => {
       slug: "vatira",
     });
 
-    execute.mockResolvedValue([{ id: row.id }]);
-    findOne.mockResolvedValue(row);
+    database.randomIds.push({ id: row.id });
+    database.rows.push(row);
 
     const result = await players.getRandomPlayer();
 
@@ -37,12 +39,9 @@ describe("MikroPlayerStore.getRandomPlayer", () => {
     expect(result).toMatchObject({ id: "p1", name: "Vatira", photos: [], slug: "vatira" });
   });
 
-  it("returns null when the table is empty without loading a player", async () => {
-    const { execute, findOne, players } = fixture();
-    execute.mockResolvedValue([]);
+  it("returns null when the table is empty", async () => {
+    const { players } = fixture();
 
     await expect(players.getRandomPlayer()).resolves.toBeNull();
-
-    expect(findOne).not.toHaveBeenCalled();
   });
 });

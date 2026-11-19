@@ -24,7 +24,7 @@ import { PLAYGROUNDS } from "./playground/playgrounds.ts";
 import CatalogIcon from "./CatalogIcon.vue";
 import PlaygroundPanel from "./views/PlaygroundPanel.vue";
 
-const readHash = (): string => decodeURIComponent(location.hash.replace(/^#\/?/u, ""));
+const readHash = () => decodeURIComponent(location.hash.replace(/^#\/?/u, ""));
 
 const route = ref(readHash());
 const query = ref("");
@@ -33,7 +33,7 @@ const nav = useTemplateRef("nav");
 const moreAbove = ref(false);
 const moreBelow = ref(false);
 
-const syncFades = (): void => {
+const syncFades = () => {
   if (nav.value === null) {
     return;
   }
@@ -44,11 +44,11 @@ const syncFades = (): void => {
   moreBelow.value = scrollTop + clientHeight < scrollHeight - 1;
 };
 
-const syncRoute = (): void => {
+const syncRoute = () => {
   route.value = readHash();
 };
 
-const focusSearch = (event: KeyboardEvent): void => {
+const focusSearch = (event: KeyboardEvent) => {
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
     search.value?.focus();

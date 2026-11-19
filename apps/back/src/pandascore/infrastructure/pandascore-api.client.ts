@@ -51,17 +51,14 @@ export class PandascoreApiClient {
     this.apiToken = apiToken;
   }
 
-  async listIncidents({
-    since,
-    perPage = 100,
-  }: ListIncidentsClientParams): Promise<PandascoreJson[]> {
+  async listIncidents({ since, perPage = 100 }: ListIncidentsClientParams) {
     return await this.paginateAll("/incidents", {
       params: { since: since.toISOString(), sort: "modified_at", videogame: [VIDEOGAME] },
       perPage,
     });
   }
 
-  async getTournaments(): Promise<PandascoreJson[]> {
+  async getTournaments() {
     const pastTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/past`);
     const upcomingTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/upcoming`);
     const runningTournaments = await this.paginateAll(`/${VIDEOGAME}/tournaments/running`);
@@ -79,7 +76,7 @@ export class PandascoreApiClient {
     return [...byId.values()];
   }
 
-  async getTournamentById(tournamentId: number): Promise<PandascoreJson | null> {
+  async getTournamentById(tournamentId: number) {
     try {
       return await this.request(`/tournaments/${tournamentId}`);
     } catch (error) {
@@ -91,15 +88,15 @@ export class PandascoreApiClient {
     }
   }
 
-  async getTournamentBrackets(tournamentId: number): Promise<PandascoreJson[]> {
+  async getTournamentBrackets(tournamentId: number) {
     return await this.paginateAll(`/tournaments/${tournamentId}/brackets`);
   }
 
-  async getTournamentMatches(tournamentId: number): Promise<PandascoreJson[]> {
+  async getTournamentMatches(tournamentId: number) {
     return await this.paginateAll(`/tournaments/${tournamentId}/matches`);
   }
 
-  async getTournamentStandings(tournamentId: number): Promise<PandascoreJson[] | null> {
+  async getTournamentStandings(tournamentId: number) {
     try {
       return await this.paginateAll(`/tournaments/${tournamentId}/standings`);
     } catch (error) {
@@ -125,21 +122,18 @@ export class PandascoreApiClient {
     }
   }
 
-  async getRocketLeaguePlayers(): Promise<PandascoreJson[]> {
+  async getRocketLeaguePlayers() {
     return await this.paginateAll(`/${VIDEOGAME}/players`, {
       params: { sort: "name" },
       rateLimitMs: 200,
     });
   }
 
-  private async paginateAll(
-    path: string,
-    options: PandascoreRequestOptions = {},
-  ): Promise<PandascoreJson[]> {
+  private async paginateAll(path: string, options: PandascoreRequestOptions = {}) {
     const perPage = options.perPage ?? 100;
     const rateLimitMs = options.rateLimitMs ?? 100;
 
-    const fetchFrom = async (page: number): Promise<PandascoreJson[]> => {
+    const fetchFrom: (page: number) => Promise<PandascoreJson[]> = async (page) => {
       const items = z.array(jsonSchema).parse(
         await this.request(path, {
           ...options,
@@ -163,10 +157,7 @@ export class PandascoreApiClient {
     return await fetchFrom(1);
   }
 
-  private async request(
-    path: string,
-    options: PandascoreRequestOptions = {},
-  ): Promise<PandascoreJson> {
+  private async request(path: string, options: PandascoreRequestOptions = {}) {
     const url = new URL(`${this.baseUrl}${path}`);
 
     if (options.params) {
@@ -176,7 +167,7 @@ export class PandascoreApiClient {
         }
 
         if (Array.isArray(value)) {
-          // PandaScore rejects `key[]=` (HTTP 500). Use repeated keys instead.
+          // WARNING: PandaScore rejects `key[]=` with HTTP 500; use repeated keys.
           for (const item of value) {
             url.searchParams.append(key, item);
           }

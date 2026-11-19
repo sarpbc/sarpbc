@@ -30,12 +30,12 @@ export const verifyStageDeletion = async ({
   memberCookie,
   playerIds,
   pandascoreStageId,
-}: StageDeletionContext): Promise<void> => {
-  const sql = async (query: string, params: unknown[]): Promise<void> => {
+}: StageDeletionContext) => {
+  const sql = async (query: string, params: unknown[]) => {
     await orm.em.fork().getConnection().execute(query, params);
   };
 
-  const count = async (table: string, stageId: string): Promise<number> => {
+  const count = async (table: string, stageId: string) => {
     const [row] = countRow.parse(
       await orm.em
         .fork()

@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 const { isLast = false } = defineProps<{
-  /** Last sibling draws an L. Earlier siblings keep a spine through the rest of the row. */
   isLast?: boolean;
 }>();
 </script>

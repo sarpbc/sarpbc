@@ -59,7 +59,7 @@ export const verifyViewership = async ({
   memberCookie,
   tournament,
   match,
-}: ViewershipContext): Promise<void> => {
+}: ViewershipContext) => {
   const matchPath = `/tournaments/matches/${match.id}/viewership`;
   const eventPath = `/events/${tournament.event.id}/viewership`;
 
@@ -150,7 +150,7 @@ export const verifyViewershipProposals = async ({
   match,
   startggCupId,
   startggMatchId,
-}: ViewershipProposalsContext): Promise<void> => {
+}: ViewershipProposalsContext) => {
   const sourceUrl = "https://escharts.com/tournaments/rl/integration-cup/final";
 
   const proposal = {

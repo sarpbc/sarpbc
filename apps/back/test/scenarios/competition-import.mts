@@ -50,10 +50,6 @@ const matchDetail = z.object({
   teamForms: z.record(z.string(), z.looseObject({ record: z.looseObject({ wins: z.number() }) })),
 });
 
-type TournamentView = z.infer<typeof tournamentRecord>;
-
-type PlayerView = z.infer<typeof playerRecord>;
-
 export interface CompetitionImportContext {
   app: Application;
   orm: Orm;
@@ -76,7 +72,7 @@ export const verifyCompetitionImport = async ({
   request,
   staffCookie,
   RequestContext,
-}: CompetitionImportContext): Promise<CompetitionImportResult> => {
+}: CompetitionImportContext) => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
@@ -88,7 +84,7 @@ export const verifyCompetitionImport = async ({
   const sync = app.get(CompetitionSyncService);
   const tournaments = app.get<symbol, TournamentQueries>(TOURNAMENT_QUERIES);
 
-  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
+  const run = <T,>(work: () => T) => RequestContext.create(orm.em.fork(), work);
 
   const veteran = {
     name: "Imported Veteran",
@@ -190,19 +186,19 @@ export const verifyCompetitionImport = async ({
     async () => await sync.upsertTournament(tournamentCommand, [final, semifinal]),
   );
 
-  const read = async <T,>(path: string, schema: z.ZodType<T>): Promise<T> => {
+  const read = async <T,>(path: string, schema: z.ZodType<T>) => {
     const response = await request("GET", path);
 
     return response.json(schema);
   };
 
-  const playerView = async (): Promise<PlayerView> => {
+  const playerView = async () => {
     const readResult = await read(`/player/${player.id}`, z.object({ player: playerRecord }));
 
     return readResult.player;
   };
 
-  const tournamentView = async (id: string): Promise<TournamentView> => {
+  const tournamentView = async (id: string) => {
     const response2 = await request("GET", `/tournaments/${id}`);
 
     return response2.json(z.object({ tournament: tournamentRecord })).tournament;

@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import type { ToolArguments } from "../define-tool";
-import { pendingProposalService } from "../../../../test/mcp-result";
+import { FakeRosterProposals, proposed } from "./roster-proposals.test-utils";
 import { rosterTools } from "./roster-tools";
 
 const TEAM_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -11,7 +11,7 @@ const SOURCE = "https://www.rlesports.com/news/fixture-rebrand";
 const INPUT = { from: "2020-01-01", name: "Fixture Origins", sourceUrl: SOURCE, teamId: TEAM_ID };
 
 const setup = (toolName: string, role: StaffRole = "admin") => {
-  const rosterProposalService = pendingProposalService();
+  const rosterProposalService = new FakeRosterProposals();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
@@ -34,21 +34,22 @@ describe("team alias tools", () => {
 
     await call({ ...INPUT, pandascoreId: 1234, to: "2022-06-01" });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      {
-        alias: {
-          from: "2020-01-01",
-          logoUrl: null,
-          name: "Fixture Origins",
-          pandascoreId: 1234,
-          to: "2022-06-01",
+    expect(rosterProposalService.changes).toStrictEqual([
+      proposed(
+        {
+          alias: {
+            from: "2020-01-01",
+            logoUrl: null,
+            name: "Fixture Origins",
+            pandascoreId: 1234,
+            to: "2022-06-01",
+          },
+          kind: "add_team_alias",
+          teamId: TEAM_ID,
         },
-        kind: "add_team_alias",
-        teamId: TEAM_ID,
-      },
-      SOURCE,
-      "u1",
-    );
+        SOURCE,
+      ),
+    ]);
   });
 
   it("update_team_alias replaces every field of the named alias", async () => {
@@ -57,22 +58,23 @@ describe("team alias tools", () => {
 
     await call({ ...INPUT, aliasId: ALIAS_ID });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      {
-        alias: {
-          from: "2020-01-01",
-          logoUrl: null,
-          name: "Fixture Origins",
-          pandascoreId: null,
-          to: null,
+    expect(rosterProposalService.changes).toStrictEqual([
+      proposed(
+        {
+          alias: {
+            from: "2020-01-01",
+            logoUrl: null,
+            name: "Fixture Origins",
+            pandascoreId: null,
+            to: null,
+          },
+          aliasId: ALIAS_ID,
+          kind: "update_team_alias",
+          teamId: TEAM_ID,
         },
-        aliasId: ALIAS_ID,
-        kind: "update_team_alias",
-        teamId: TEAM_ID,
-      },
-      SOURCE,
-      "u1",
-    );
+        SOURCE,
+      ),
+    ]);
   });
 
   it("requires an official sourceUrl outside Liquipedia and its mirrors", () => {
@@ -96,6 +98,6 @@ describe("team alias tools", () => {
     const { call, rosterProposalService } = setup("add_team_alias", "journalist");
     const result = await call(INPUT);
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 });

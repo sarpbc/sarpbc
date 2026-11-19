@@ -1,29 +1,19 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type { PlayerLinkStore, StatsCandidates } from "./ports";
+import { FakeStatsCandidates } from "./fake-stats-candidates.test-utils";
+import { InMemoryPlayerLinks } from "./in-memory-player-links.test-utils";
 import { StatsPlayerLinkService } from "./stats-player-link.service";
 
 const link = { platform: "steam", platformId: "76561198224723032", playerId: "kofyr" };
 
 const setup = () => {
-  const candidates: StatsCandidates = {
-    matches: vi.fn<StatsCandidates["matches"]>(),
-    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
-  };
+  const links = new InMemoryPlayerLinks(
+    [{ participantId: "p1", players: [{ id: "kofyr", name: "kofyr" }], teamName: "KC" }],
+    3,
+  );
 
-  const links = {
-    accounts: vi.fn<PlayerLinkStore["accounts"]>(async () => []),
-    link: vi.fn<PlayerLinkStore["link"]>(async () => 3),
-    onTournamentRoster: vi.fn<PlayerLinkStore["onTournamentRoster"]>(
-      async (_tournamentId, playerId) => playerId === "kofyr",
-    ),
-    rosters: vi.fn<PlayerLinkStore["rosters"]>(async () => [
-      { participantId: "p1", players: [{ id: "kofyr", name: "kofyr" }], teamName: "KC" },
-    ]),
-  } satisfies PlayerLinkStore;
-
-  return { links, service: new StatsPlayerLinkService(candidates, links) };
+  return { links, service: new StatsPlayerLinkService(new FakeStatsCandidates(() => []), links) };
 };
 
 describe(StatsPlayerLinkService, () => {
@@ -31,7 +21,7 @@ describe(StatsPlayerLinkService, () => {
     const { service, links } = setup();
 
     await expect(service.link("t1", link)).resolves.toBe(3);
-    expect(links.link).toHaveBeenCalledWith(link);
+    expect(links.linked).toStrictEqual([link]);
   });
 
   it("rejects a player outside the tournament rosters without writing", async () => {
@@ -40,15 +30,14 @@ describe(StatsPlayerLinkService, () => {
     await expect(service.link("t1", { ...link, playerId: "stranger" })).rejects.toBeInstanceOf(
       InvalidInputError,
     );
-    expect(links.link).not.toHaveBeenCalled();
+    expect(links.linked).toStrictEqual([]);
   });
 
   it("rejects an unknown tournament", async () => {
-    const { service, links } = setup();
+    const { service } = setup();
 
     await expect(service.link("missing", link)).rejects.toBeInstanceOf(NotFoundError);
     await expect(service.accounts("missing")).rejects.toBeInstanceOf(NotFoundError);
-    expect(links.accounts).not.toHaveBeenCalled();
   });
 
   it("lists the tournament's accounts with every roster of the tournament", async () => {

@@ -1,6 +1,6 @@
 import type { CareerSeasonRecord, CareerTrophy } from "~/types/career";
 
-export const deriveTrophies = (seasons: CareerSeasonRecord[]): CareerTrophy[] => {
+export const deriveTrophies = (seasons: CareerSeasonRecord[]) => {
   const trophies: CareerTrophy[] = [];
 
   for (const season of seasons) {

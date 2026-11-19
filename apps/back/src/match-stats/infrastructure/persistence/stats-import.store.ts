@@ -4,7 +4,7 @@ import { ACTIVE_IMPORT_STATUSES } from "../../domain/stats-import";
 import type { StatsImport } from "../../domain/stats-import";
 import { MatchStatsImport } from "./match-stats-import.entity";
 
-const toImport = (row: MatchStatsImport): StatsImport => ({
+const toImport = (row: MatchStatsImport) => ({
   createdAt: row.createdAt,
   error: row.error,
   finishedAt: row.finishedAt,
@@ -21,18 +21,18 @@ const toImport = (row: MatchStatsImport): StatsImport => ({
 export class MikroOrmStatsImportStore implements StatsImportStore {
   constructor(private readonly em: EntityManager) {}
 
-  async create({ tournamentId, ...statsImport }: StatsImport): Promise<void> {
+  async create({ tournamentId, ...statsImport }: StatsImport) {
     this.em.create(MatchStatsImport, { ...statsImport, tournament: tournamentId });
     await this.em.flush();
   }
 
-  async load(id: string): Promise<StatsImport | null> {
+  async load(id: string) {
     const row = await this.em.findOne(MatchStatsImport, id, { refresh: true });
 
     return row ? toImport(row) : null;
   }
 
-  async save(statsImport: StatsImport): Promise<void> {
+  async save(statsImport: StatsImport) {
     const row = await this.em.findOneOrFail(MatchStatsImport, statsImport.id);
     this.em.assign(row, {
       error: statsImport.error,
@@ -46,7 +46,7 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
     await this.em.flush();
   }
 
-  async latest(tournamentId: string, limit: number): Promise<StatsImport[]> {
+  async latest(tournamentId: string, limit: number) {
     const rows = await this.em.find(
       MatchStatsImport,
       { tournament: tournamentId },
@@ -56,7 +56,7 @@ export class MikroOrmStatsImportStore implements StatsImportStore {
     return rows.map(toImport);
   }
 
-  async failUnfinished(error: string): Promise<number> {
+  async failUnfinished(error: string) {
     return await this.em.nativeUpdate(
       MatchStatsImport,
       { status: { $in: [...ACTIVE_IMPORT_STATUSES] } },

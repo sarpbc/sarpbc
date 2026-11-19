@@ -3,7 +3,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import { prizeTools } from "./prize-tools";
-import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
+import { jsonOf } from "../../../../test/mcp-result";
+import { FakeRosterProposals, proposed } from "./roster-proposals.test-utils";
 import { rosterTools } from "./roster-tools";
 
 const TOURNAMENT_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -13,7 +14,7 @@ const SOURCE = "https://example.com/fake-cup/prizes";
 const setup = (role: StaffRole = "admin", toolName = "propose_tournament_prizes") => {
   vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
 
-  const rosterProposalService = pendingProposalService();
+  const rosterProposalService = new FakeRosterProposals();
 
   const tool = [
     ...rosterTools({ rosterProposalService }),
@@ -38,14 +39,15 @@ describe("propose_tournament_prizes", () => {
     const { call, rosterProposalService } = setup();
     const result = await call(input);
 
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      {
-        kind: "set_tournament_prizes",
-        prizes: [{ ...prizes[0], playerIds: [] }],
-        tournamentId: TOURNAMENT_ID,
-      },
-      SOURCE,
-      "u1",
+    expect(rosterProposalService.changes).toContainEqual(
+      proposed(
+        {
+          kind: "set_tournament_prizes",
+          prizes: [{ ...prizes[0], playerIds: [] }],
+          tournamentId: TOURNAMENT_ID,
+        },
+        SOURCE,
+      ),
     );
     expect(jsonOf(result)).toMatchObject({
       kind: "set_tournament_prizes",
@@ -57,7 +59,7 @@ describe("propose_tournament_prizes", () => {
     const { call, rosterProposalService } = setup("journalist");
     const result = await call(input);
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 
   it("requires a non-Liquipedia source and ISO 4217 currencies", () => {
@@ -80,21 +82,29 @@ describe("propose_tournament_prize_update", () => {
   it("queues a source-only correction with an empty patch", async () => {
     const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
     await call({ sourceUrl: RULES, teamId: TEAM_ID, tournamentId: TOURNAMENT_ID });
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      { kind: "update_tournament_prize", patch: {}, teamId: TEAM_ID, tournamentId: TOURNAMENT_ID },
-      RULES,
-      "u1",
+    expect(rosterProposalService.changes).toContainEqual(
+      proposed(
+        {
+          kind: "update_tournament_prize",
+          patch: {},
+          teamId: TEAM_ID,
+          tournamentId: TOURNAMENT_ID,
+        },
+        RULES,
+      ),
     );
   });
 
   it("queues only the corrected fields", async () => {
     const { call, rosterProposalService } = setup("admin", "propose_tournament_prize_update");
     await call({ amount: 1800, sourceUrl: RULES, teamId: TEAM_ID, tournamentId: TOURNAMENT_ID });
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      expect.objectContaining({ patch: { amount: 1800 } }),
-      RULES,
-      "u1",
-    );
+    const expected1: unknown = expect.objectContaining({ patch: { amount: 1800 } });
+
+    expect(rosterProposalService.changes).toContainEqual({
+      change: expected1,
+      proposedById: "u1",
+      sourceUrl: RULES,
+    });
   });
 });
 
@@ -115,16 +125,17 @@ describe("propose_player_award", () => {
     const { call, rosterProposalService } = setupAward();
     const result = await call(input);
 
-    expect(rosterProposalService.propose).toHaveBeenCalledWith(
-      {
-        awardType: "mvp",
-        kind: "award_player",
-        playerId: PLAYER_ID,
-        teamId: TEAM_ID,
-        tournamentId: TOURNAMENT_ID,
-      },
-      SOURCE,
-      "u1",
+    expect(rosterProposalService.changes).toContainEqual(
+      proposed(
+        {
+          awardType: "mvp",
+          kind: "award_player",
+          playerId: PLAYER_ID,
+          teamId: TEAM_ID,
+          tournamentId: TOURNAMENT_ID,
+        },
+        SOURCE,
+      ),
     );
     expect(jsonOf(result)).toMatchObject({
       kind: "award_player",
@@ -136,7 +147,7 @@ describe("propose_player_award", () => {
     const { call, rosterProposalService } = setupAward("journalist");
     const result = await call(input);
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 
   it("queues a Grand Finals MVP proposal next to the stage MVP", async () => {
@@ -144,7 +155,7 @@ describe("propose_player_award", () => {
     await call(input);
     await call({ ...input, awardType: "grand_finals_mvp" });
 
-    expect(rosterProposalService.propose.mock.calls.map(([change]) => change)).toStrictEqual([
+    expect(rosterProposalService.changes.map(({ change }) => change)).toStrictEqual([
       expect.objectContaining({ awardType: "mvp", kind: "award_player" }),
       expect.objectContaining({ awardType: "grand_finals_mvp", kind: "award_player" }),
     ]);

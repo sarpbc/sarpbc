@@ -18,7 +18,7 @@ export const useStaffMode = () => {
     cookie.value = value ? true : null;
   };
 
-  const can = (permission: StaffPermission): boolean =>
+  const can = (permission: StaffPermission) =>
     enabled.value && hasPermission(user.value, permission);
 
   return { can, enabled: readonly(enabled), setEnabled };

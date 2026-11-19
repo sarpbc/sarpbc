@@ -50,9 +50,9 @@ export interface TournamentResponse {
   participants: TournamentParticipantResponse[];
 }
 
-export const mapLeague = (league: League | null | undefined): LeagueResponse | null => {
+export const mapLeague = (league: League | null | undefined) => {
   if (league?.id === undefined || league?.id === "") {
-    return null;
+    return null satisfies LeagueResponse | null;
   }
 
   return {
@@ -62,10 +62,10 @@ export const mapLeague = (league: League | null | undefined): LeagueResponse | n
     pandascoreId: league.pandascoreId,
     slug: league.slug,
     url: league.url,
-  };
+  } satisfies LeagueResponse | null;
 };
 
-const mapParticipant = (participant: TournamentParticipant): TournamentParticipantResponse => ({
+const mapParticipant = (participant: TournamentParticipant) => ({
   createdAt: participant.createdAt,
   id: participant.id,
   players: participant.players.map((player) => mapPlayer(player)),
@@ -73,35 +73,34 @@ const mapParticipant = (participant: TournamentParticipant): TournamentParticipa
   updatedAt: participant.updatedAt,
 });
 
-export const mapTournamentListItem = (
-  tournament: Tournament,
-): TournamentListItem & Pick<TournamentResponse, "beginAt" | "endAt"> => ({
-  beginAt: tournament.beginAt,
-  endAt: tournament.endAt,
-  event: toEventRef(tournament.event),
-  format: tournament.format,
-  id: tournament.id,
-  imageUrl: tournament.imageUrl,
-  league: tournament.league
-    ? {
-        id: tournament.league.id,
-        imageUrl: tournament.league.imageUrl,
-        name: tournament.league.name,
-      }
-    : null,
-  name: tournament.name,
-  participants: tournament.participants.map((participant) =>
-    mapParticipantRef(participant, mapTeamSummary),
-  ),
-  pickemsEnabled: tournament.pickemsEnabled,
-  prizepool: tournament.prizepool,
-  slug: tournament.slug,
-  source: tournament.source,
-  type: tournament.type,
-  winnerId: tournament.winner?.id ?? null,
-});
+export const mapTournamentListItem = (tournament: Tournament) =>
+  ({
+    beginAt: tournament.beginAt,
+    endAt: tournament.endAt,
+    event: toEventRef(tournament.event),
+    format: tournament.format,
+    id: tournament.id,
+    imageUrl: tournament.imageUrl,
+    league: tournament.league
+      ? {
+          id: tournament.league.id,
+          imageUrl: tournament.league.imageUrl,
+          name: tournament.league.name,
+        }
+      : null,
+    name: tournament.name,
+    participants: tournament.participants.map((participant) =>
+      mapParticipantRef(participant, mapTeamSummary),
+    ),
+    pickemsEnabled: tournament.pickemsEnabled,
+    prizepool: tournament.prizepool,
+    slug: tournament.slug,
+    source: tournament.source,
+    type: tournament.type,
+    winnerId: tournament.winner?.id ?? null,
+  }) satisfies TournamentListItem & Pick<TournamentResponse, "beginAt" | "endAt">;
 
-export const mapTournament = (tournament: Tournament): TournamentResponse => ({
+export const mapTournament = (tournament: Tournament) => ({
   beginAt: tournament.beginAt,
   country: tournament.country,
   createdAt: tournament.createdAt,
@@ -127,23 +126,24 @@ export const mapTournament = (tournament: Tournament): TournamentResponse => ({
   winnerType: tournament.winnerType,
 });
 
-const mapDetailParticipant = (participant: TournamentParticipant): TournamentDetailParticipant => ({
-  id: participant.id,
-  players: participant.players.map((player) => ({
-    id: player.id,
-    imageUrl: player.imageUrl,
-    name: player.name,
-    nationality: player.nationality,
-    slug: player.slug,
-  })),
-  rosterSourceUrl: participant.rosterSourceUrl,
-  team: participant.team ? mapTeamSummary(participant.team) : null,
-});
+const mapDetailParticipant = (participant: TournamentParticipant) =>
+  ({
+    id: participant.id,
+    players: participant.players.map((player) => ({
+      id: player.id,
+      imageUrl: player.imageUrl,
+      name: player.name,
+      nationality: player.nationality,
+      slug: player.slug,
+    })),
+    rosterSourceUrl: participant.rosterSourceUrl,
+    team: participant.team ? mapTeamSummary(participant.team) : null,
+  }) satisfies TournamentDetailParticipant;
 
 export type TournamentDetailResponse = TournamentDetail &
   Pick<TournamentResponse, "beginAt" | "endAt">;
 
-export const mapTournamentDetail = (tournament: Tournament): TournamentDetailResponse => ({
+export const mapTournamentDetail = (tournament: Tournament) => ({
   beginAt: tournament.beginAt,
   country: tournament.country,
   endAt: tournament.endAt,

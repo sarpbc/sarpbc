@@ -54,7 +54,7 @@ export type Orm = InstanceType<typeof MikroORM>;
 export type RequestContextType = typeof RequestContext;
 
 /** UTF-16 code unit order, the order `Array.prototype.sort` uses by default. */
-export const byText = (a: string, b: string): number => {
+export const byText = (a: string, b: string) => {
   if (a < b) {
     return -1;
   }
@@ -62,4 +62,4 @@ export const byText = (a: string, b: string): number => {
   return a > b ? 1 : 0;
 };
 
-export const byJoined = (a: unknown[], b: unknown[]): number => byText(a.join(","), b.join(","));
+export const byJoined = (a: unknown[], b: unknown[]) => byText(a.join(","), b.join(","));

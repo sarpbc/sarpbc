@@ -35,26 +35,26 @@ export const verifyCompetitionSyncLookups = async ({
   request,
   staffCookie,
   RequestContext,
-}: CompetitionSyncContext): Promise<void> => {
+}: CompetitionSyncContext) => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
   const sync = app.get(CompetitionSyncService);
 
-  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
+  const run = <T,>(work: () => T) => RequestContext.create(orm.em.fork(), work);
 
   const league = { name: "Lookup League", pandascoreId: 9701, slug: "lookup-league" };
 
   const upsert = async (command: Omit<UpsertTournamentCommand, "league">) =>
     await run(async () => await sync.upsertTournament({ league, ...command }));
 
-  const view = async (id: string): Promise<StageView> => {
+  const view = async (id: string) => {
     const response2 = await request("GET", `/tournaments/${id}`);
 
     return response2.json(stageBody).tournament;
   };
 
-  const eventSlugOf = async (tournament: IdRef): Promise<string> => {
+  const eventSlugOf = async (tournament: IdRef) => {
     const viewResult = await view(tournament.id);
 
     return viewResult.event.slug;
@@ -205,7 +205,7 @@ export const verifyPandascoreAdoption = async ({
   request,
   staffCookie,
   RequestContext,
-}: CompetitionSyncContext): Promise<void> => {
+}: CompetitionSyncContext) => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
@@ -213,9 +213,9 @@ export const verifyPandascoreAdoption = async ({
   const { randomUUID } = await import("node:crypto");
   const sync = app.get(CompetitionSyncService);
 
-  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
+  const run = <T,>(work: () => T) => RequestContext.create(orm.em.fork(), work);
 
-  const importPlayer = async (pandascoreId: number, slug: string): Promise<void> => {
+  const importPlayer = async (pandascoreId: number, slug: string) => {
     await run(async () => {
       await sync.applyIncident({
         changeType: "creation",
@@ -274,7 +274,7 @@ export const verifyRedistributableScope = async ({
   request,
   staffCookie,
   RequestContext,
-}: CompetitionSyncContext): Promise<void> => {
+}: CompetitionSyncContext) => {
   const { MatchService } = await import("../../src/tournament/application/match/match.service.ts");
 
   const { TournamentPrizeService } =
@@ -283,9 +283,9 @@ export const verifyRedistributableScope = async ({
   const matches = app.get(MatchService);
   const prizes = app.get(TournamentPrizeService);
 
-  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
+  const run = <T,>(work: () => T) => RequestContext.create(orm.em.fork(), work);
 
-  const created = async <T,>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> => {
+  const created = async <T,>(path: string, body: Payload, schema: z.ZodType<T>) => {
     const response6 = await request("POST", path, body, staffCookie, 201);
 
     return response6.json(schema);
@@ -297,7 +297,7 @@ export const verifyRedistributableScope = async ({
   const response8 = await created("/team", { name: "Scope Beta" }, teamBody);
   const beta = response8.team.id;
 
-  const finishedMatchOf = async (source: string): Promise<string> => {
+  const finishedMatchOf = async (source: string) => {
     const { tournament } = await created(
       "/tournaments",
       {
@@ -344,7 +344,7 @@ export const verifyRedistributableScope = async ({
   const manualCup = await finishedMatchOf("manual");
   const startggCup = await finishedMatchOf("startgg");
 
-  const finishedCups = async (options: { redistributableOnly: boolean }): Promise<string[]> => {
+  const finishedCups = async (options: { redistributableOnly: boolean }) => {
     const [rows, total] = await run(
       async () => await matches.list("results", { teamId: alpha, ...options }),
     );

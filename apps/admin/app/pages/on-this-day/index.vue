@@ -22,7 +22,7 @@ const {
   refresh,
   error,
 } = await useLazyAsyncData("admin-on-this-day-facts", () => getOnThisDayFacts(), {
-  default: (): OnThisDayFact[] => [],
+  default: () => [],
   server: false,
 });
 
@@ -30,13 +30,13 @@ const dayFormat = computed(
   () => new Intl.DateTimeFormat(locale.value, { day: "numeric", month: "long", timeZone: "UTC" }),
 );
 
-const dateLabel = (fact: OnThisDayFact): string => {
+const dateLabel = (fact: OnThisDayFact) => {
   const day = dayFormat.value.format(new Date(Date.UTC(2024, fact.month - 1, fact.day)));
 
   return fact.year ? `${day} ${fact.year}` : day;
 };
 
-const linkLabel = (link: NonNullable<OnThisDayFact["link"]>): string => {
+const linkLabel = (link: NonNullable<OnThisDayFact["link"]>) => {
   const name = link.kind === "tournament" ? tournamentStageLabel(link) : link.name;
 
   return `${t(`page.onThisDay.form.link.kinds.${link.kind}`)} · ${name}`;

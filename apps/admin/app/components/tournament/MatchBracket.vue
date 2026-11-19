@@ -61,7 +61,7 @@ const participantItems = computed(() => [
   })),
 ]);
 
-const stageMatchLabel = (candidate: TournamentDetailMatch): string => {
+const stageMatchLabel = (candidate: TournamentDetailMatch) => {
   const [first, second] = candidate.participants;
   const tbd = t("page.tournaments.bracket.tbd");
 

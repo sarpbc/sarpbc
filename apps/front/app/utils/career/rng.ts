@@ -1,9 +1,9 @@
 const UINT32_MODULUS = 2 ** 32;
 const UINT31_MODULUS = 2 ** 31;
 
-const wrap = (value: number, modulus: number): number => ((value % modulus) + modulus) % modulus;
+const wrap = (value: number, modulus: number) => ((value % modulus) + modulus) % modulus;
 
-const xorUint32 = (left: number, right: number): number => {
+const xorUint32 = (left: number, right: number) => {
   let result = 0;
 
   for (let bit = 1; bit < UINT32_MODULUS; bit *= 2) {
@@ -15,7 +15,7 @@ const xorUint32 = (left: number, right: number): number => {
   return result;
 };
 
-export const hashString = (input: string): number => {
+export const hashString = (input: string) => {
   let hash = 2_166_136_261;
 
   for (const unit of input.split("")) {
@@ -25,7 +25,7 @@ export const hashString = (input: string): number => {
   return hash;
 };
 
-export const createRng = (seed: number): (() => number) => {
+export const createRng = (seed: number) => {
   let localSeed = wrap(seed, UINT32_MODULUS) || 1;
 
   return () => {

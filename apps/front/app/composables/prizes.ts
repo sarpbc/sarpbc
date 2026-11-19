@@ -3,7 +3,7 @@ import { formatPrizeAmount } from "~/utils/currency-formatter";
 
 export const STARTGG_URL = "https://www.start.gg";
 
-export const getTournamentPrizes = async (tournamentId: string): Promise<TournamentPrizes> =>
+export const getTournamentPrizes = async (tournamentId: string) =>
   await apiFetch<TournamentPrizes>(`/tournaments/${tournamentId}/prizes`, { method: "GET" });
 
 export const usePrizeFormat = () => {
@@ -11,13 +11,13 @@ export const usePrizeFormat = () => {
 
   const ordinalRules = computed(() => new Intl.PluralRules(locale.value, { type: "ordinal" }));
 
-  const formatAmount = (amount: number, currency: string): string =>
+  const formatAmount = (amount: number, currency: string) =>
     formatPrizeAmount(amount, currency, locale.value);
 
-  const formatTotals = (totals: PrizeAmount[]): string =>
+  const formatTotals = (totals: PrizeAmount[]) =>
     totals.map(({ amount, currency }) => formatAmount(amount, currency)).join(" · ");
 
-  const formatPlacement = (placement: number): string =>
+  const formatPlacement = (placement: number) =>
     t(`common.placement.${ordinalRules.value.select(placement)}`, { n: placement });
 
   return { formatAmount, formatPlacement, formatTotals };

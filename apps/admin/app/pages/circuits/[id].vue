@@ -68,7 +68,7 @@ const startStage = (stage: PickedStage) => {
   };
 };
 
-const stageLabel = (stage: CircuitStage): string => tournamentStageLabel(stage.tournament);
+const stageLabel = (stage: CircuitStage) => tournamentStageLabel(stage.tournament);
 
 const editStage = (stage: CircuitStage) => {
   scaleTarget.value = {
@@ -82,7 +82,7 @@ const editStage = (stage: CircuitStage) => {
   };
 };
 
-const regionSummary = (stage: CircuitStage): string | null => {
+const regionSummary = (stage: CircuitStage) => {
   if (!stage.worldwide) {
     return null;
   }
@@ -96,7 +96,7 @@ const regionSummary = (stage: CircuitStage): string | null => {
   return t("page.circuits.stages.regionTeams", { count }, count);
 };
 
-const formatDates = (stage: CircuitStage): string => {
+const formatDates = (stage: CircuitStage) => {
   const { beginAt, endAt } = stage.tournament;
   const begin = beginAt ? dateFormatter.value.format(new Date(beginAt)) : null;
   const end = endAt ? dateFormatter.value.format(new Date(endAt)) : null;

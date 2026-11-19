@@ -17,10 +17,10 @@ export class SyncNewTournamentsUseCase {
     private readonly incidents: SyncPandascoreIncidentsUseCase,
     private readonly diagnostics: CompetitionDiagnostics,
   ) {}
-  async execute(): Promise<SyncNewTournamentsResult> {
+  async execute() {
     const ids = await this.additions.execute();
 
-    // One tournament at a time: the provider API is rate limited.
+    // WARNING: one tournament at a time; the provider API is rate limited.
     const synced = await mapSequentially(ids, async (id) => {
       try {
         await this.details.execute(id);

@@ -2,7 +2,7 @@ import { isNonEmptyDateInput } from "@sarpbc/utils";
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getParentIds } from "./graph";
 
-const getMatchBeginAtTime = (match: TournamentDetailMatch): number | null => {
+const getMatchBeginAtTime = (match: TournamentDetailMatch) => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }
@@ -12,7 +12,7 @@ const getMatchBeginAtTime = (match: TournamentDetailMatch): number | null => {
   return Number.isNaN(time) ? null : time;
 };
 
-const getMatchDayKey = (match: TournamentDetailMatch): string | null => {
+const getMatchDayKey = (match: TournamentDetailMatch) => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }
@@ -22,7 +22,7 @@ const getMatchDayKey = (match: TournamentDetailMatch): string | null => {
   return Number.isNaN(date.getTime()) ? null : date.toDateString();
 };
 
-export const compressColumnIndices = (columns: Map<string, number>): Map<string, number> => {
+export const compressColumnIndices = (columns: Map<string, number>) => {
   const usedColumns = [...new Set(columns.values())].toSorted((a, b) => a - b);
   const columnRemap = new Map(usedColumns.map((column, index) => [column, index]));
   const compressed = new Map<string, number>();
@@ -38,9 +38,7 @@ export const compressColumnIndices = (columns: Map<string, number>): Map<string,
  * Columns follow match calendar order (beginAt day buckets), then are pushed right
  * so a match never appears before any of its feeder matches.
  */
-export const computeChronologicalColumns = (
-  matches: TournamentDetailMatch[],
-): Map<string, number> => {
+export const computeChronologicalColumns = (matches: TournamentDetailMatch[]) => {
   const matchIds = new Set(matches.map((match) => match.id));
   const columns = new Map<string, number>();
   const dayOrder = new Map<string, number>();
@@ -145,7 +143,7 @@ export const computeChronologicalColumns = (
 export const computeLowerProgressionDepths = (
   matches: TournamentDetailMatch[],
   crossBracketFinalIds: Set<string>,
-): Map<string, number> => {
+) => {
   const matchIds = new Set(matches.map((match) => match.id));
   const depths = new Map<string, number>();
   const progressionMatches = matches.filter((match) => !crossBracketFinalIds.has(match.id));
@@ -202,12 +200,9 @@ export const computeLowerProgressionDepths = (
   return depths;
 };
 
-export const remapDepthsToColumnRange = (
-  depths: Map<string, number>,
-  targetMaxColumn: number,
-): Map<string, number> => {
+export const remapDepthsToColumnRange = (depths: Map<string, number>, targetMaxColumn: number) => {
   if (depths.size === 0) {
-    return new Map();
+    return new Map<string, number>();
   }
 
   const usedDepths = [...new Set(depths.values())].toSorted((a, b) => a - b);

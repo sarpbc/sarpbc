@@ -24,7 +24,7 @@ const containerWidth = computed(
   () => layout.columnCount * BRACKET_MATCH_WIDTH + (layout.columnCount - 1) * BRACKET_COLUMN_GAP,
 );
 
-const matchTop = (row: number): number => bracketMatchTop(row);
+const matchTop = (row: number) => bracketMatchTop(row);
 
 const connectorPaths = computed(() => {
   const matchMap = new Map(layout.matches.map((match) => [match.matchId, match]));

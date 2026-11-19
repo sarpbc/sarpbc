@@ -34,7 +34,7 @@ const entryToRemove = ref<SeasonPathEntry | null>(null);
 
 const canAddEntry = computed(() => label.value.trim().length > 0 && result.value.trim().length > 0);
 
-const entryTournamentLabel = (entry: SeasonPathEntry): string | null =>
+const entryTournamentLabel = (entry: SeasonPathEntry) =>
   entry.tournament ? tournamentStageLabel(entry.tournament) : null;
 
 const saveNote = async () => {

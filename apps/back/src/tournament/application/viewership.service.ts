@@ -21,7 +21,7 @@ interface LoadedOwner {
   save: (viewership: Viewership | null) => Promise<void>;
 }
 
-const loadOwner = async (scope: ViewershipScope, owner: ViewershipOwner): Promise<LoadedOwner> => {
+const loadOwner = (async (scope, owner) => {
   switch (owner.kind) {
     case "event": {
       const event = await scope.events.load(owner.id);
@@ -67,31 +67,31 @@ const loadOwner = async (scope: ViewershipScope, owner: ViewershipOwner): Promis
       return exhaustive;
     }
   }
-};
+}) satisfies (scope: ViewershipScope, owner: ViewershipOwner) => Promise<LoadedOwner>;
 
 export class ViewershipService {
   constructor(private readonly transaction: ViewershipTransaction) {}
 
-  async find(owner: ViewershipOwner): Promise<ViewershipResponse> {
-    return await this.transaction.run(async (scope) => {
+  async find(owner: ViewershipOwner) {
+    return (await this.transaction.run(async (scope) => {
       const loaded = await loadOwner(scope, owner);
 
       return { viewership: loaded.viewership };
-    });
+    })) satisfies ViewershipResponse;
   }
 
-  async set(owner: ViewershipOwner, input: Viewership | null): Promise<ViewershipResponse> {
+  async set(owner: ViewershipOwner, input: Viewership | null) {
     const viewership = input && requireViewership(input);
 
-    return await this.transaction.run(async (scope) => {
+    return (await this.transaction.run(async (scope) => {
       const loaded = await loadOwner(scope, owner);
       await loaded.save(viewership);
 
       return { viewership };
-    });
+    })) satisfies ViewershipResponse;
   }
 
-  async requireProposable(owner: ViewershipOwner, input: Viewership): Promise<void> {
+  async requireProposable(owner: ViewershipOwner, input: Viewership) {
     requireViewership(input);
     await this.transaction.run(async (scope) => {
       const loaded = await loadOwner(scope, owner);

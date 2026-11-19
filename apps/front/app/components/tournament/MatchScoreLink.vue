@@ -44,7 +44,6 @@ const {
   compact?: boolean;
   bracket?: boolean;
   matchStatus: MatchStatus;
-  /** When set with discoveryStatus, CTR instrumentation is enabled. */
   discoverySource?: MatchDiscoverySource | null;
   discoveryStatus?: MatchDiscoveryStatus | null;
 }>();
@@ -78,7 +77,7 @@ const showScores = computed(
   () => forfeitedBy !== null || displayScoreA.value !== null || displayScoreB.value !== null,
 );
 
-const isForfeiter = (participantId: string | null): boolean =>
+const isForfeiter = (participantId: string | null) =>
   forfeitedBy !== null && participantId === forfeitedBy;
 
 const onMatchClick = () => {
@@ -109,7 +108,7 @@ const displayTeamB = computed(() => {
   return bracket ? shortTeamName(teamBName) : teamBName;
 });
 
-const participantRowClass = (participantId: string | null): string => {
+const participantRowClass = (participantId: string | null) => {
   if (concealed.value || !winnerParticipantId || !participantId) {
     return "";
   }

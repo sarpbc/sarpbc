@@ -40,7 +40,7 @@ const live = computed(() => (tab.value === "upcoming" ? liveEvents : []));
 
 const hasEvents = computed(() => live.value.length > 0 || activeEvents.value.length > 0);
 
-const eventMeta = (event: EntityEventListItem): string =>
+const eventMeta = (event: EntityEventListItem) =>
   [
     distinctStageName(event),
     event.formatLabel,

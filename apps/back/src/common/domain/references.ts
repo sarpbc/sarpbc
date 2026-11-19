@@ -10,13 +10,13 @@ export const referenceNouns =
   <const Nouns extends ReferenceNouns<K>>(
     nouns: Nouns,
     ..._exhaustive: [MissingKeys<K, Nouns>] extends [never] ? [] : [missing: MissingKeys<K, Nouns>]
-  ): Nouns =>
+  ) =>
     nouns;
 
 export const describeReferences = <K extends string>(
   counts: Record<K, number>,
   nouns: ReferenceNouns<K>,
-): string | null => {
+) => {
   const described = nouns.flatMap(([key, singular, plural]) =>
     counts[key] > 0 ? [`${counts[key]} ${counts[key] === 1 ? singular : plural}`] : [],
   );

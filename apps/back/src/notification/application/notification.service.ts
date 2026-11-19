@@ -3,16 +3,14 @@ import type { NotificationDto } from "./notification.view";
 import { resolveReplyTargetLink } from "../../reply/domain/reply";
 import type { ReplyTargetLink } from "../../reply/domain/reply";
 
-const targetFields = (
-  target: ReplyTargetLink,
-): Pick<NotificationDto, "targetType" | "targetId" | "targetLabel" | "targetPath"> => ({
+const targetFields = (target: ReplyTargetLink) => ({
   targetId: target.targetId,
   targetLabel: target.targetLabel,
   targetPath: target.targetPath,
   targetType: target.targetType,
 });
 
-const toNotificationDto = (notification: NotificationRecord): NotificationDto | null => {
+const toNotificationDto = (notification: NotificationRecord) => {
   const target = resolveReplyTargetLink(notification.reply);
 
   if (!target) {
@@ -37,7 +35,7 @@ const toNotificationDto = (notification: NotificationRecord): NotificationDto | 
 export class NotificationService {
   constructor(private readonly notificationRepository: NotificationStore) {}
 
-  async listForUser(userId: string, limit: number): Promise<NotificationDto[]> {
+  async listForUser(userId: string, limit: number) {
     const notifications = await this.notificationRepository.findForRecipient(userId, limit);
 
     return notifications
@@ -45,11 +43,11 @@ export class NotificationService {
       .filter((item): item is NotificationDto => item !== null);
   }
 
-  async getUnreadCount(userId: string): Promise<number> {
+  async getUnreadCount(userId: string) {
     return await this.notificationRepository.countUnread(userId);
   }
 
-  async markRead(userId: string, ids?: string[]): Promise<{ marked: number }> {
+  async markRead(userId: string, ids?: string[]) {
     const marked = await this.notificationRepository.markRead(userId, ids);
 
     return { marked };

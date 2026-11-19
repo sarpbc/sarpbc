@@ -34,7 +34,6 @@ import { InvalidInputError } from "../../../common/domain/errors/invalid-input-e
 import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
 import { defineTool } from "../define-tool";
-import type { McpTool } from "../define-tool";
 import { proposalSourceUrlSchema as sourceUrlSchema, proposed, proposer } from "./proposals";
 import { requireUpdateFields } from "./update-fields";
 
@@ -239,19 +238,21 @@ export interface RosterToolServices {
   rosterProposalService: Pick<RosterProposalService, "propose" | "proposeTeamLogo" | "list">;
 }
 
-const redistributableChange = (change: RosterChange, sourceUrl: string): RosterChange => {
+const redistributableChange = (change: RosterChange, sourceUrl: string) => {
   if (
     change.kind === "set_event_streams" ||
     change.kind === "set_tournament_streams" ||
     change.kind === "set_match_streams"
   ) {
-    return isRedistributable(sourceFromUrl(sourceUrl)) ? change : { ...change, streams: [] };
+    return isRedistributable(sourceFromUrl(sourceUrl))
+      ? change
+      : ({ ...change, streams: [] } satisfies RosterChange);
   }
 
-  return change;
+  return change satisfies RosterChange;
 };
 
-export const rosterTools = ({ rosterProposalService }: RosterToolServices): McpTool[] => {
+export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
   const propose = proposer(rosterProposalService);
 
   return [

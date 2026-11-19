@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261024150000_addRosterProposals extends Migration {
   override name = "Migration20261024150000_addRosterProposals";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(
       `create table "roster_proposal" ("id" uuid not null default gen_random_uuid(), "kind" varchar(255) not null, "change" jsonb not null, "source_url" text not null, "status" varchar(255) not null default 'pending', "proposed_by_id" uuid not null, "reviewed_by_id" uuid null, "reviewed_at" timestamptz null, "entity_id" uuid null, "created_at" timestamptz not null default now(), primary key ("id"));`,
     );
@@ -18,7 +18,7 @@ export class Migration20261024150000_addRosterProposals extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(`drop table if exists "roster_proposal" cascade;`);
   }
 }

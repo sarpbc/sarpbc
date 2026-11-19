@@ -1,4 +1,6 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HttpResponse, http } from "msw";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { IntegrationError } from "../../common/domain/errors/integration-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
@@ -6,36 +8,53 @@ import { TwimgImageGateway } from "../infrastructure/twimg-image.gateway";
 import { TweetImageService } from "./tweet-image.service";
 
 const image = (body: ConstructorParameters<typeof Response>[0], init: ResponseInit = {}) =>
-  new Response(body, { headers: { "content-type": "image/jpeg" }, status: 200, ...init });
+  new HttpResponse(body, { headers: { "content-type": "image/jpeg" }, status: 200, ...init });
+
+const redirect = (location: string | null, status = 302) =>
+  new HttpResponse(null, { headers: location === null ? {} : { location }, status });
 
 describe(TweetImageService, () => {
-  const fetchMock = vi.fn<typeof fetch>();
+  const server = setupServer();
   const imageUrl = "https://pbs.twimg.com/media/photo.jpg?name=small";
   const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
   let service: TweetImageService;
+  let requested: Request[];
+
+  const serve = (respond: (index: number) => Response) => {
+    server.use(
+      http.get(/^https:\/\/pbs\.twimg\.com\//u, ({ request }) => {
+        requested.push(request.clone());
+
+        return respond(requested.length - 1);
+      }),
+    );
+  };
+
+  beforeAll(() => {
+    server.listen({ onUnhandledFrame: "error" });
+  });
 
   beforeEach(() => {
     service = new TweetImageService(new TwimgImageGateway());
-    fetchMock.mockReset();
-    vi.stubGlobal("fetch", fetchMock);
+    requested = [];
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
-    vi.restoreAllMocks();
+    server.resetHandlers();
+  });
+
+  afterAll(() => {
+    server.close();
   });
 
   it("loads an allowlisted image without a Referer and without following other hosts", async () => {
-    fetchMock.mockResolvedValue(image(jpeg));
+    serve(() => image(jpeg));
 
     const result = await service.load(imageUrl);
 
     expect(result).toStrictEqual({ body: Buffer.from(jpeg), contentType: "image/jpeg" });
-    expect(fetchMock).toHaveBeenCalledOnce();
-    const [url, init] = fetchMock.mock.calls[0] ?? [];
-    expect(url).toBe(imageUrl);
-    expect(init?.redirect).toBe("manual");
-    expect(new Headers(init?.headers).has("referer")).toBe(false);
+    expect(requested.map(({ url }) => url)).toStrictEqual([imageUrl]);
+    expect(requested[0]?.headers.has("referer")).toBe(false);
   });
 
   it.each([
@@ -52,36 +71,30 @@ describe(TweetImageService, () => {
     "not a url",
   ])("rejects %s before fetching", async (url) => {
     await expect(service.load(url)).rejects.toBeInstanceOf(InvalidInputError);
-    expect(fetchMock).not.toHaveBeenCalled();
+    expect(requested).toHaveLength(0);
   });
 
   it("follows a redirect that stays on the allowlisted host", async () => {
     const next = "https://pbs.twimg.com/media/photo.jpg?name=orig";
-    fetchMock
-      .mockResolvedValueOnce(new Response(null, { headers: { location: next }, status: 302 }))
-      .mockResolvedValueOnce(image(jpeg));
+    serve((index) => (index === 0 ? redirect(next) : image(jpeg)));
 
     await expect(service.load(imageUrl)).resolves.toMatchObject({ contentType: "image/jpeg" });
-    expect(fetchMock.mock.calls[1]?.[0]).toBe(next);
+    expect(requested[1]?.url).toBe(next);
   });
 
   it("keeps a protocol-relative looking path on the allowlisted host", async () => {
-    fetchMock.mockResolvedValue(image(jpeg));
+    serve(() => image(jpeg));
 
     await service.load("https://pbs.twimg.com//evil.example/photo.jpg#frag");
 
-    expect(fetchMock.mock.calls[0]?.[0]).toBe("https://pbs.twimg.com//evil.example/photo.jpg");
+    expect(requested[0]?.url).toBe("https://pbs.twimg.com//evil.example/photo.jpg");
   });
 
   it("resolves a relative redirect against the allowlisted host", async () => {
-    fetchMock
-      .mockResolvedValueOnce(
-        new Response(null, { headers: { location: "/media/photo.jpg?name=orig" }, status: 302 }),
-      )
-      .mockResolvedValueOnce(image(jpeg));
+    serve((index) => (index === 0 ? redirect("/media/photo.jpg?name=orig") : image(jpeg)));
 
     await expect(service.load(imageUrl)).resolves.toMatchObject({ contentType: "image/jpeg" });
-    expect(fetchMock.mock.calls[1]?.[0]).toBe("https://pbs.twimg.com/media/photo.jpg?name=orig");
+    expect(requested[1]?.url).toBe("https://pbs.twimg.com/media/photo.jpg?name=orig");
   });
 
   it.each([
@@ -91,27 +104,23 @@ describe(TweetImageService, () => {
     "https://pbs.twimg.com@evil.example/photo.jpg",
     "",
   ])("rejects a redirect to %j", async (location) => {
-    fetchMock.mockResolvedValue(
-      new Response(null, { headers: location === "" ? {} : { location }, status: 301 }),
-    );
+    serve(() => redirect(location === "" ? null : location, 301));
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
-    expect(fetchMock).toHaveBeenCalledOnce();
+    expect(requested).toHaveLength(1);
   });
 
   it("stops after too many redirects", async () => {
-    fetchMock.mockImplementation(
-      async () => new Response(null, { headers: { location: imageUrl }, status: 302 }),
-    );
+    serve(() => redirect(imageUrl));
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(requested).toHaveLength(3);
   });
 
   it.each(["text/html", "image/svg+xml", "application/octet-stream", ""])(
     "rejects a %j response",
     async (contentType) => {
-      fetchMock.mockResolvedValue(image("<svg/>", { headers: { "content-type": contentType } }));
+      serve(() => image("<svg/>", { headers: { "content-type": contentType } }));
 
       await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
     },
@@ -119,30 +128,30 @@ describe(TweetImageService, () => {
 
   it("rejects images over the size limit, declared or streamed", async () => {
     const tooLarge = new Uint8Array(5 * 1024 * 1024 + 1);
-    fetchMock
-      .mockResolvedValueOnce(
-        image(jpeg, { headers: { "content-length": "6000000", "content-type": "image/jpeg" } }),
-      )
-      .mockResolvedValueOnce(image(tooLarge));
+    serve((index) =>
+      index === 0
+        ? image(jpeg, { headers: { "content-length": "6000000", "content-type": "image/jpeg" } })
+        : image(tooLarge),
+    );
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
   });
 
   it.each([404, 410])("reports an image removed from X (%i) as not found", async (status) => {
-    fetchMock.mockResolvedValue(image(null, { status }));
+    serve(() => image(null, { status }));
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(NotFoundError);
   });
 
   it.each([403, 500, 503])("reports an upstream %i as an integration failure", async (status) => {
-    fetchMock.mockResolvedValue(image(null, { status }));
+    serve(() => image(null, { status }));
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
   });
 
-  it("reports network failures and timeouts as integration failures", async () => {
-    fetchMock.mockRejectedValue(new DOMException("timed out", "TimeoutError"));
+  it("reports network failures as integration failures", async () => {
+    serve(() => HttpResponse.error());
 
     await expect(service.load(imageUrl)).rejects.toBeInstanceOf(IntegrationError);
   });

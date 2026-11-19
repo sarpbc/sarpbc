@@ -12,7 +12,7 @@ const official: StreamInput = {
 
 const costream: StreamInput = { kind: "costream", language: "fr", url: "https://kick.com/kameto" };
 
-const stream = (url: string, source: Stream["source"] = "manual"): Stream => {
+const stream = (url: string, source: Stream["source"] = "manual") => {
   const streamUrl = replaceStreams([], [{ kind: "official", language: "en", url }], "manual").at(0);
 
   if (streamUrl === undefined) {
@@ -22,7 +22,7 @@ const stream = (url: string, source: Stream["source"] = "manual"): Stream => {
   return { ...streamUrl, source };
 };
 
-const matchIn = (tournament: { streams: Stream[]; eventStreams: Stream[] }): Match =>
+const matchIn = (tournament: { streams: Stream[]; eventStreams: Stream[] }) =>
   Object.assign(new Match(), {
     tournament: {
       beginAt: null,

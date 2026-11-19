@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20260308173446_addPlayerContractAndPhotos extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(
       `create table "player_photo" ("id" uuid not null default gen_random_uuid(), "player_id" uuid not null, "url" varchar(255) not null, "created_at" timestamptz not null default now(), constraint "player_photo_pkey" primary key ("id"));`,
     );
@@ -22,7 +22,7 @@ export class Migration20260308173446_addPlayerContractAndPhotos extends Migratio
     );
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`drop table if exists "player_photo" cascade;`);
 
     this.addSql(`drop table if exists "contract" cascade;`);

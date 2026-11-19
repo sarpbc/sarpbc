@@ -11,12 +11,11 @@ const {
   side = "bottom",
 } = defineProps<{
   align?: OverlayAlign;
-  /** False keeps it open on outside clicks and Escape; the owner closes it. */
   dismissible?: boolean;
   side?: OverlaySide;
 }>();
 
-const keepOpen = (event: Event): void => {
+const keepOpen = (event: Event) => {
   if (!dismissible) {
     event.preventDefault();
   }

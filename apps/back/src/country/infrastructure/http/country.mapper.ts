@@ -4,15 +4,17 @@ import { mapPlayer, mapTeamSummary } from "../../../roster/infrastructure/http/p
 import { mapMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import type { CountryPage } from "../../application/country.service";
 
-export const mapCountrySummary = ({ code, players }: NationalityCount): CountrySummary => ({
-  code,
-  playerCount: players,
-});
+export const mapCountrySummary = ({ code, players }: NationalityCount) =>
+  ({
+    code,
+    playerCount: players,
+  }) satisfies CountrySummary;
 
-export const mapCountry = (page: CountryPage): CountryDetail => ({
-  code: page.code,
-  matchTotal: page.matchTotal,
-  matches: page.matches.map(mapMatchListItem),
-  players: page.players.map((player) => mapPlayer(player)),
-  teams: page.teams.map(mapTeamSummary),
-});
+export const mapCountry = (page: CountryPage) =>
+  ({
+    code: page.code,
+    matchTotal: page.matchTotal,
+    matches: page.matches.map(mapMatchListItem),
+    players: page.players.map((player) => mapPlayer(player)),
+    teams: page.teams.map(mapTeamSummary),
+  }) satisfies CountryDetail;

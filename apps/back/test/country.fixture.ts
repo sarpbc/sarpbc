@@ -3,12 +3,8 @@ import { isRedistributable } from "../src/common/domain/data-source";
 import type { CountrySources } from "../src/country/application/country.service";
 import { Player } from "../src/roster/domain/player";
 import { Team } from "../src/roster/domain/team";
-import type {
-  MatchListKind,
-  MatchListQueryOptions,
-} from "../src/tournament/application/match/match-list-filters";
 import type { Match } from "../src/tournament/domain/match";
-import { careerMatch, kc } from "./career-fixtures";
+import { careerMatch, kc } from "./career.fixture";
 
 export const vitality = Object.assign(new Team(), {
   id: "vitality",
@@ -16,7 +12,7 @@ export const vitality = Object.assign(new Team(), {
   slug: "team-vitality",
 });
 
-const countryPlayer = (id: string, name: string, team: Team | null): Player =>
+const countryPlayer = (id: string, name: string, team: Team | null) =>
   Object.assign(new Player(), { id, name, nationality: "fr", slug: id, team });
 
 export const alpha54 = countryPlayer("alpha54", "Alpha54", vitality);
@@ -25,7 +21,7 @@ export const vatira = countryPlayer("vatira", "Vatira", kc);
 export const exotiik = countryPlayer("exotiik", "ExoTiiK", null);
 const french = [alpha54, exotiik, vatira, zen];
 
-export const countryMatches: Match[] = [
+const countryMatches: Match[] = [
   careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 }),
   careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], source: "startgg", winner: 0 }),
   careerMatch({
@@ -36,38 +32,31 @@ export const countryMatches: Match[] = [
   }),
 ];
 
-const redistributable = (match: Match): boolean =>
+const redistributable = (match: Match) =>
   isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
 export const countrySources = () => {
-  const findByNationality = vi.fn<CountrySources["players"]["findByNationality"]>(
-    async (code: string) => (code === "FR" ? french : []),
-  );
-
-  const list = vi.fn<CountrySources["matches"]["list"]>(
-    async (
-      kind: MatchListKind,
-      options: MatchListQueryOptions = {},
-    ): Promise<[Match[], number]> => {
+  const matches: CountrySources["matches"] = {
+    list: async (kind, options) => {
       const rows = countryMatches.filter(
         (match) =>
-          kind === "results" && (options.redistributableOnly !== true || redistributable(match)),
+          kind === "results" && (options?.redistributableOnly !== true || redistributable(match)),
       );
 
       return [rows, rows.length];
     },
-  );
-
-  const sources: CountrySources = {
-    matches: { list },
-    players: {
-      findByNationality,
-      nationalities: async () => [
-        { code: "FR", players: 4 },
-        { code: "US", players: 1 },
-      ],
-    },
   };
 
-  return { findByNationality, list, sources };
+  const players: CountrySources["players"] = {
+    findByNationality: async (code: string) => (code === "FR" ? french : []),
+    nationalities: async () => [
+      { code: "FR", players: 4 },
+      { code: "US", players: 1 },
+    ],
+  };
+
+  const list = vi.spyOn(matches, "list");
+  const sources: CountrySources = { matches, players };
+
+  return { list, sources };
 };

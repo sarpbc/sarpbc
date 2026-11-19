@@ -15,13 +15,13 @@ export const apiFailure = <Reason extends string>(
   cause: unknown,
   action: string,
   reasons: { codes?: Record<string, Reason>; statuses?: Record<number, Reason> } = {},
-): ApiFailure<Reason> => {
+) => {
   const status = getApiErrorStatus(cause);
   const code = getApiErrorCode(cause);
   const message = getApiErrorMessage(cause);
 
   if (status === 401) {
-    return { message, ok: false, reason: "unauthorized" };
+    return { message, ok: false, reason: "unauthorized" } satisfies ApiFailure<Reason>;
   }
 
   const reason =
@@ -29,10 +29,10 @@ export const apiFailure = <Reason extends string>(
     (status === undefined ? undefined : reasons.statuses?.[status]);
 
   if (reason !== undefined) {
-    return { message, ok: false, reason };
+    return { message, ok: false, reason } satisfies ApiFailure<Reason>;
   }
 
   console.error(`Error ${action}:`, cause);
 
-  return { message, ok: false, reason: "unknown" };
+  return { message, ok: false, reason: "unknown" } satisfies ApiFailure<Reason>;
 };

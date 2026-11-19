@@ -7,7 +7,7 @@ export interface IsoWeekId {
 
 const MS_PER_DAY = 86_400_000;
 
-export const parseIsoWeekId = (weekId: string): IsoWeekId | null => {
+export const parseIsoWeekId = (weekId: string) => {
   const match = ISO_WEEK_ID_PATTERN.exec(weekId);
 
   if (!match) {
@@ -17,10 +17,10 @@ export const parseIsoWeekId = (weekId: string): IsoWeekId | null => {
   return { week: Number(match[2]), year: Number(match[1]) };
 };
 
-export const formatIsoWeekId = (year: number, week: number): string =>
+export const formatIsoWeekId = (year: number, week: number) =>
   `${year}-W${String(week).padStart(2, "0")}`;
 
-export const isoWeekIdFromDate = (date: Date): string => {
+export const isoWeekIdFromDate = (date: Date) => {
   const utc = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
   const day = utc.getUTCDay() || 7;
   utc.setUTCDate(utc.getUTCDate() + 4 - day);
@@ -31,7 +31,7 @@ export const isoWeekIdFromDate = (date: Date): string => {
   return formatIsoWeekId(isoYear, week);
 };
 
-export const isoWeekUtcRange = (weekId: string): { start: Date; end: Date } | null => {
+export const isoWeekUtcRange = (weekId: string) => {
   const parsed = parseIsoWeekId(weekId);
 
   if (!parsed) {

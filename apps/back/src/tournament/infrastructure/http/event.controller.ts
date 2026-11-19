@@ -1,3 +1,4 @@
+import type { TournamentPathResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -13,7 +14,6 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import type { TournamentPathResponse, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { isRedistributable } from "../../../common/domain/data-source";
@@ -37,7 +37,6 @@ import { CreateEventDto, UpdateEventDto } from "./dto/manual-catalog.dto";
 import type { CreateEventInput, UpdateEventInput } from "./dto/manual-catalog.dto";
 import { mapEvent, mapStaffEvent } from "./event.mapper";
 import { mapTournamentListItem } from "./tournament.mapper";
-import type { TournamentDetailResponse } from "./tournament.mapper";
 
 const MISSING = "This tournament page does not exist. Check the address or browse all tournaments.";
 
@@ -142,30 +141,29 @@ export class EventController {
   }
 
   @Get(":event/player-stats")
-  async playerStats(@Param("event") event: string): Promise<TournamentPlayerStatsResponse> {
+  async playerStats(@Param("event") event: string) {
     const found = await this.events.find(event);
 
     if (found?.stages.some((stage) => isRedistributable(stage.source)) !== true) {
       throw new NotFoundError(MISSING);
     }
 
-    return await this.playerStatsService.forStages(found.stages);
+    return (await this.playerStatsService.forStages(
+      found.stages,
+    )) satisfies TournamentPlayerStatsResponse;
   }
 
   @Get("resolve/:event")
-  async resolveEvent(@Param("event") event: string): Promise<TournamentPathResponse> {
-    return await this.resolve([event]);
+  async resolveEvent(@Param("event") event: string) {
+    return (await this.resolve([event])) satisfies TournamentPathResponse;
   }
 
   @Get("resolve/:event/:stage")
-  async resolveStage(
-    @Param("event") event: string,
-    @Param("stage") stage: string,
-  ): Promise<TournamentPathResponse> {
-    return await this.resolve([event, stage]);
+  async resolveStage(@Param("event") event: string, @Param("stage") stage: string) {
+    return (await this.resolve([event, stage])) satisfies TournamentPathResponse;
   }
 
-  private async resolve(segments: string[]): Promise<TournamentPathResponse> {
+  private async resolve(segments: string[]) {
     const path = parseTournamentPath(segments);
 
     if (!path) {
@@ -174,7 +172,11 @@ export class EventController {
 
     switch (path.kind) {
       case "legacyStage": {
-        return { kind: "stage", tab: path.tab, tournament: await this.stage(path.id) };
+        return {
+          kind: "stage",
+          tab: path.tab,
+          tournament: await this.stage(path.id),
+        } satisfies TournamentPathResponse;
       }
 
       case "stage": {
@@ -184,13 +186,16 @@ export class EventController {
           throw new NotFoundError(MISSING);
         }
 
-        return { kind: "stage", tab: "overview", tournament: await this.stage(id) };
+        return {
+          kind: "stage",
+          tab: "overview",
+          tournament: await this.stage(id),
+        } satisfies TournamentPathResponse;
       }
 
       case "event": {
         const found = await this.events.find(path.eventSlug);
 
-        // An event left empty by moving its stages elsewhere stays stored but is not public.
         if (found?.stages.length === undefined || found?.stages.length === 0) {
           throw new NotFoundError(MISSING);
         }
@@ -200,18 +205,18 @@ export class EventController {
         return {
           event: { ...mapEvent(found.event, stages), viewership: found.event.viewership },
           kind: "event",
-        };
+        } satisfies TournamentPathResponse;
       }
 
       default: {
         const unreachable: never = path;
 
-        return unreachable;
+        return unreachable satisfies TournamentPathResponse;
       }
     }
   }
 
-  private async stage(id: string): Promise<TournamentDetailResponse> {
+  private async stage(id: string) {
     const tournament = await this.tournamentRead.findById(id);
 
     if (!tournament) {

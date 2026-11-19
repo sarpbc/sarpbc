@@ -14,14 +14,9 @@ import type {
 } from "./inputs";
 import type { CompetitionAfterCommit } from "./after-commit";
 import { nonBlank } from "../../common/domain/text";
-import type {
-  CompetitionTransaction,
-  EventListing,
-  EventQueries,
-  TournamentQueries,
-} from "./ports";
+import type { CompetitionTransaction, EventQueries, TournamentQueries } from "./ports";
 
-const leagueSlug = (raw: string): string => {
+const leagueSlug = (raw: string) => {
   const slug = toSlug(raw);
 
   if (!slug) {
@@ -40,10 +35,10 @@ export class ManualCatalogService {
     private readonly transaction: CompetitionTransaction,
     private readonly afterCommit: CompetitionAfterCommit,
   ) {}
-  async leagues(): Promise<League[]> {
+  async leagues() {
     return await this.reads.leagues({ limit: 200 });
   }
-  async createLeague(input: CreateLeagueInput): Promise<League> {
+  async createLeague(input: CreateLeagueInput) {
     const league = Object.assign(new League(), {
       imageUrl: nonBlank(input.imageUrl) ?? null,
       name: input.name,
@@ -57,7 +52,7 @@ export class ManualCatalogService {
 
     return league;
   }
-  async updateLeague(id: string, input: UpdateLeagueInput): Promise<League> {
+  async updateLeague(id: string, input: UpdateLeagueInput) {
     return await this.transaction.run(async ({ tournaments }) => {
       const league = await requireLeague(tournaments, id);
 
@@ -88,12 +83,12 @@ export class ManualCatalogService {
       return league;
     });
   }
-  async manualEvents(): Promise<EventListing[]> {
+  async manualEvents() {
     const unsynced = await this.events.unsynced();
 
     return unsynced.filter(({ event, stages }) => !isEventSynced(event, stages));
   }
-  async findEvent(idOrSlug: string): Promise<EventListing> {
+  async findEvent(idOrSlug: string) {
     const found = await this.events.find(idOrSlug);
 
     if (!found) {
@@ -102,7 +97,7 @@ export class ManualCatalogService {
 
     return found;
   }
-  async createEvent(input: CreateEventInput): Promise<EventListing> {
+  async createEvent(input: CreateEventInput) {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
       const event = Object.assign(new TournamentEvent(), {
         league: await requireLeague(tournaments, input.leagueId),
@@ -123,7 +118,7 @@ export class ManualCatalogService {
 
     return await this.findEvent(id);
   }
-  async updateEvent(id: string, input: UpdateEventInput): Promise<EventListing> {
+  async updateEvent(id: string, input: UpdateEventInput) {
     const stageIds = await this.transaction.run(async ({ tournaments, events }) => {
       const event = await requireEvent(events, id);
       const stages = await events.stages(event.id);
@@ -150,7 +145,7 @@ export class ManualCatalogService {
 
     return await this.findEvent(id);
   }
-  async deleteEvent(id: string): Promise<void> {
+  async deleteEvent(id: string) {
     await this.transaction.run(async ({ events }) => {
       const event = await requireEvent(events, id);
       const stages = await events.stages(event.id);

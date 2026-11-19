@@ -1,165 +1,138 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NewsService } from "./news.service";
 import type { NewsArticleRecord } from "./models";
-import type {
-  NewsComments,
-  NewsIndexing,
-  NewsQueries,
-  NewsTransaction,
-  NewsWriteScope,
-} from "./ports";
+import type { NewsComments, NewsIndexing } from "./ports";
+import { MemoryNewsStore } from "./news-store.test-utils";
 
-const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
+const comments: NewsComments = {
+  countByTargetIds: async () => await Promise.resolve(new Map<string, number>()),
+};
 
-describe("NewsService findPublishedShortsByWeek", () => {
-  let service: NewsService;
+const draftArticle = (overrides: Partial<NewsArticleRecord>) => {
+  const base = {
+    author: { id: "editor", userName: "Editor" },
+    content: "Final results",
+    contentFr: null,
+    createdAt: new Date("2026-10-17T12:00:00Z"),
+    id: "news-1",
+    imageUrl: null,
+    isDraft: false,
+    slug: "old-slug",
+    title: "RLCS final",
+    titleFr: null,
+    type: "article",
+    updatedAt: null,
+  } satisfies NewsArticleRecord;
 
-  const newsRepository = {
-    findById: unused,
-    findBySlug: unused,
-    listAdmin: unused,
-    listPublished: unused,
-    listWeek: vi.fn<NewsQueries["listWeek"]>(),
-  } satisfies NewsQueries;
+  return { ...base, ...overrides };
+};
 
-  beforeEach(() => {
-    service = new NewsService(
-      newsRepository,
-      { run: unused },
-      { countByTargetIds: unused },
-      { submitNewsSlugs: unused },
-    );
-    vi.clearAllMocks();
+const short = (title: string, createdAt: string, isDraft = false) =>
+  draftArticle({
+    createdAt: new Date(createdAt),
+    id: title,
+    isDraft,
+    slug: title,
+    title,
+    type: "short",
   });
 
+const noIndexing: NewsIndexing = {
+  submitNewsSlugs: async () => {
+    await Promise.resolve();
+  },
+};
+
+const serviceOver = (store: MemoryNewsStore) =>
+  new NewsService(store, store.transaction, comments, noIndexing);
+
+describe("NewsService findPublishedShortsByWeek", () => {
   it("rejects an invalid ISO week id", async () => {
+    const service = serviceOver(new MemoryNewsStore());
+
     await expect(service.findPublishedShortsByWeek("2026-W99")).rejects.toBeInstanceOf(
       InvalidInputError,
     );
-    expect(newsRepository.listWeek).not.toHaveBeenCalled();
   });
 
   it("loads published shorts in that UTC week newest first", async () => {
-    newsRepository.listWeek.mockResolvedValue([]);
-
-    await service.findPublishedShortsByWeek("2026-W36", "en-US");
-
-    expect(newsRepository.listWeek).toHaveBeenCalledExactlyOnceWith(
-      new Date("2026-08-31T00:00:00.000Z"),
-      new Date("2026-09-07T00:00:00.000Z"),
-      expect.any(Number),
+    const service = serviceOver(
+      new MemoryNewsStore([
+        short("before", "2026-08-30T23:59:59.000Z"),
+        short("monday", "2026-08-31T00:00:00.000Z"),
+        short("sunday", "2026-09-06T23:59:59.000Z"),
+        short("draft", "2026-09-02T10:00:00.000Z", true),
+        short("after", "2026-09-07T00:00:00.000Z"),
+      ]),
     );
+
+    const week = await service.findPublishedShortsByWeek("2026-W36", "en-US");
+
+    expect(week.start).toStrictEqual(new Date("2026-08-31T00:00:00.000Z"));
+    expect(week.end).toStrictEqual(new Date("2026-09-07T00:00:00.000Z"));
+    expect(week.items.map(({ title }) => title)).toStrictEqual(["sunday", "monday"]);
   });
 });
 
 describe("news publication notifications", () => {
+  let store: MemoryNewsStore;
   let article: NewsArticleRecord;
-  let committed = false;
-
-  let committedAtSubmission: boolean[] = [];
-
-  const commit = vi.fn<() => Promise<void>>(async () => {
-    committed = true;
-  });
-
-  const articles = {
-    delete: vi.fn<NewsWriteScope["articles"]["delete"]>(),
-    findById: vi.fn<NewsWriteScope["articles"]["findById"]>(),
-    findBySlug: vi.fn<NewsWriteScope["articles"]["findBySlug"]>(),
-    listAdmin: vi.fn<NewsWriteScope["articles"]["listAdmin"]>(),
-    listPublished: vi.fn<NewsWriteScope["articles"]["listPublished"]>(),
-    listWeek: vi.fn<NewsWriteScope["articles"]["listWeek"]>(),
-    save: vi.fn<NewsWriteScope["articles"]["save"]>(),
-  };
-
-  const scope: NewsWriteScope = {
-    articles,
-    replies: {
-      deleteAllForTarget: vi.fn<NewsWriteScope["replies"]["deleteAllForTarget"]>(),
-    },
-    users: { findById: vi.fn<NewsWriteScope["users"]["findById"]>() },
-  };
-
-  const transaction: NewsTransaction = {
-    async run(work) {
-      const result = await work(scope);
-      await commit();
-
-      return result;
-    },
-  };
-
-  const indexing = {
-    submitNewsSlugs: vi.fn<NewsIndexing["submitNewsSlugs"]>(async () => {
-      committedAtSubmission.push(committed);
-    }),
-  };
-
-  const service = new NewsService(
-    articles,
-    transaction,
-    { countByTargetIds: vi.fn<NewsComments["countByTargetIds"]>() },
-    indexing,
-  );
+  let committedAtSubmission: boolean[];
+  let submissions: string[][];
+  let service: NewsService;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    committed = false;
+    article = draftArticle({});
+    store = new MemoryNewsStore([article]);
     committedAtSubmission = [];
-    article = {
-      author: { id: "editor", userName: "Editor" },
-      content: "Final results",
-      contentFr: null,
-      createdAt: new Date("2026-10-17T12:00:00Z"),
-      id: "news-1",
-      imageUrl: null,
-      isDraft: false,
-      slug: "old-slug",
-      title: "RLCS final",
-      titleFr: null,
-      type: "article",
-      updatedAt: null,
+    submissions = [];
+
+    const indexing: NewsIndexing = {
+      submitNewsSlugs: async (slugs) => {
+        submissions.push(slugs);
+        committedAtSubmission.push(store.commits > 0);
+        await Promise.resolve();
+      },
     };
-    articles.findBySlug.mockImplementation(async (slug) =>
-      slug === article.slug ? article : null,
-    );
+
+    service = new NewsService(store, store.transaction, comments, indexing);
   });
 
   it("notifies both the old and new URLs only after the article transaction commits", async () => {
     await service.update("old-slug", { slug: "new-slug" });
-    expect(indexing.submitNewsSlugs).toHaveBeenCalledExactlyOnceWith(["old-slug", "new-slug"]);
+    expect(submissions).toStrictEqual([["old-slug", "new-slug"]]);
     expect(committedAtSubmission).toStrictEqual([true]);
   });
 
   it("does not expose changes to unpublished drafts", async () => {
     article.isDraft = true;
     await service.update("old-slug", { title: "Unpublished changes" });
-    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
+    expect(submissions).toStrictEqual([]);
   });
 
   it.each([true, false])("notifies when draft status changes to %s", async (draft) => {
     article.isDraft = !draft;
     await service.setDraftStatus("old-slug", draft);
-    expect(indexing.submitNewsSlugs).toHaveBeenCalledExactlyOnceWith(["old-slug"]);
+    expect(submissions).toStrictEqual([["old-slug"]]);
     expect(committedAtSubmission).toStrictEqual([true]);
   });
 
   it("does not notify when publishing an already published article", async () => {
     await service.setDraftStatus("old-slug", false);
-    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
+    expect(submissions).toStrictEqual([]);
   });
 
   it("notifies after a published article is deleted", async () => {
     await service.delete("old-slug");
-    expect(indexing.submitNewsSlugs).toHaveBeenCalledExactlyOnceWith(["old-slug"]);
+    expect(submissions).toStrictEqual([["old-slug"]]);
     expect(committedAtSubmission).toStrictEqual([true]);
   });
 
   it("does not notify when deleting a draft", async () => {
     article.isDraft = true;
     await service.delete("old-slug");
-    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
+    expect(submissions).toStrictEqual([]);
   });
 
   it("stores match blocks in English and French bodies", async () => {
@@ -177,14 +150,13 @@ describe("news publication notifications", () => {
       service.update("old-slug", { contentFr: 'Tableau\n\n:matches{team="falcons"}' }),
     ).rejects.toBeInstanceOf(InvalidInputError);
     expect(article.contentFr).toBeNull();
-    expect(articles.save).not.toHaveBeenCalled();
   });
 
   it("does not notify when committing fails", async () => {
-    commit.mockRejectedValueOnce(new Error("Database unavailable"));
+    store.commitFailure = new Error("Database unavailable");
     await expect(service.update("old-slug", { title: "New title" })).rejects.toThrow(
       "Database unavailable",
     );
-    expect(indexing.submitNewsSlugs).not.toHaveBeenCalled();
+    expect(submissions).toStrictEqual([]);
   });
 });

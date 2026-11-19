@@ -2,12 +2,12 @@ import type { EntityManager } from "@mikro-orm/postgresql";
 import { authorReader } from "../../user/infrastructure/user-persistence";
 import { directReplyNotifications } from "../../notification/infrastructure/composition";
 import { ReplyService } from "../application/reply.service";
-import type { ReplyTransaction, ReplyWriteScope } from "../application/ports";
+import type { ReplyTransaction } from "../application/ports";
 import type { ReplyTarget } from "../domain/reply";
 import { REPLY_TARGET_LOADERS } from "./persistence/reply.mapper";
 import { MikroReplyStore, replyReports } from "./persistence/reply.store";
 
-const replyWriteScope = (em: EntityManager): ReplyWriteScope => ({
+const replyWriteScope = (em: EntityManager) => ({
   notifications: directReplyNotifications(em),
   replies: new MikroReplyStore(em),
   reports: replyReports(em),
@@ -21,17 +21,18 @@ const replyWriteScope = (em: EntityManager): ReplyWriteScope => ({
   users: authorReader(em),
 });
 
-export const transactionalReplies = (em: EntityManager): ReplyTransaction => ({
-  run: async (work) =>
-    await em.transactional(async (tx) => {
-      const result = await work(replyWriteScope(tx));
-      await tx.flush();
+export const transactionalReplies = (em: EntityManager) =>
+  ({
+    run: async (work) =>
+      await em.transactional(async (tx) => {
+        const result = await work(replyWriteScope(tx));
+        await tx.flush();
 
-      return result;
-    }),
-});
+        return result;
+      }),
+  }) satisfies ReplyTransaction;
 
-// The caller already owns the transaction; never open an independent unit of work.
+/** Runs inside the caller's transaction and never opens an independent unit of work. */
 export const replyDeletion = (em: EntityManager) => {
   const scope = replyWriteScope(em);
   const service = new ReplyService(scope.replies, { run: async (work) => await work(scope) });

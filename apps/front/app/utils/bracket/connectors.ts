@@ -1,16 +1,8 @@
 import type { TournamentDetailMatch } from "@sarpbc/types";
 import { getMatchWinnerParticipantId } from "./graph";
-import type {
-  BracketConnector,
-  BracketLayoutMatch,
-  BracketSectionLayout,
-  BracketZone,
-} from "./types";
+import type { BracketConnector, BracketLayoutMatch, BracketZone } from "./types";
 
-export const buildConnectors = (
-  matches: TournamentDetailMatch[],
-  matchIds: Set<string>,
-): BracketConnector[] => {
+export const buildConnectors = (matches: TournamentDetailMatch[], matchIds: Set<string>) => {
   const connectors: BracketConnector[] = [];
 
   for (const match of matches) {
@@ -34,7 +26,7 @@ export const toLayoutMatch = (
   column: number,
   row: number,
   zone?: BracketZone,
-): BracketLayoutMatch => ({
+) => ({
   beginAt: match.beginAt,
   column,
   endAt: match.endAt,
@@ -58,7 +50,7 @@ export const finalizeSectionLayout = (
   matches: TournamentDetailMatch[],
   layoutMatches: BracketLayoutMatch[],
   maxColumn: number,
-): BracketSectionLayout => {
+) => {
   const matchIds = new Set(matches.map((match) => match.id));
   const maxRow = Math.max(...layoutMatches.map((match) => match.row), 0);
 

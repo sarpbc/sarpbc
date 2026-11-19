@@ -17,7 +17,7 @@ const {
   () => `forum-post-${postRef.value}`,
   () => getPostById(postRef.value),
   {
-    // Nuxt's `pick` throws on a null result, which would turn a missing post into a 500.
+    // WARNING: Nuxt's `pick` throws on a null result, which would turn a missing post into a 500.
     transform: (result) =>
       result && {
         author: result.author,

@@ -10,7 +10,6 @@ const {
   letter?: string;
   result?: AirRiddleResultEnum | null;
   variant?: "empty" | "current" | "filled";
-  /** Flip-in delay (ms) for a row that was just submitted; omit for restored rows. */
   revealDelay?: number | null;
 }>();
 

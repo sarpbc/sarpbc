@@ -1,35 +1,56 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { HttpResponse, http } from "msw";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
-import { requestUrl } from "../../../test/fetch-mock";
 import { PandascoreApiClient } from "./pandascore-api.client";
 import { PandascoreApiError } from "./pandascore-api.errors";
 
+const BASE_URL = "https://api.pandascore.co";
+
 describe(PandascoreApiClient, () => {
-  const fetchMock = vi.fn<typeof fetch>();
+  const server = setupServer();
+  let requested: URL[];
   let client: PandascoreApiClient;
 
+  const serve = (path: string, respond: (url: URL) => Response) => {
+    server.use(
+      http.get(`${BASE_URL}${path}`, ({ request }) => {
+        const url = new URL(request.url);
+        requested.push(url);
+
+        return respond(url);
+      }),
+    );
+  };
+
+  beforeAll(() => {
+    server.listen({ onUnhandledFrame: "error" });
+  });
+
   beforeEach(async () => {
+    requested = [];
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PandascoreApiClient,
         {
           provide: ConfigService,
-          useValue: {
-            get: vi.fn<(key: string) => string | undefined>().mockReturnValue("test-token"),
-          },
+          useValue: new ConfigService({ pandascore_api_token: "test-token" }),
         },
       ],
     }).compile();
 
     client = module.get(PandascoreApiClient);
-    vi.stubGlobal("fetch", fetchMock);
   });
 
   afterEach(() => {
-    vi.resetAllMocks();
-    vi.unstubAllGlobals();
+    server.resetHandlers();
+  });
+
+  afterAll(() => {
+    server.close();
   });
 
   it("throws when API token is missing", async () => {
@@ -37,12 +58,7 @@ describe(PandascoreApiClient, () => {
       Test.createTestingModule({
         providers: [
           PandascoreApiClient,
-          {
-            provide: ConfigService,
-            useValue: {
-              get: vi.fn<(key: string) => string | undefined>().mockReturnValue(undefined),
-            },
-          },
+          { provide: ConfigService, useValue: new ConfigService({}) },
         ],
       }).compile(),
     ).rejects.toThrow("PandaScore API token not configured");
@@ -52,11 +68,13 @@ describe(PandascoreApiClient, () => {
     let incidents: Awaited<ReturnType<PandascoreApiClient["listIncidents"]>>;
 
     beforeEach(async () => {
-      fetchMock
-        .mockResolvedValueOnce(
-          Response.json([{ id: 1, modified_at: "2025-01-01T00:00:00Z", type: "match" }]),
-        )
-        .mockResolvedValueOnce(Response.json([]));
+      serve("/incidents", (url) =>
+        HttpResponse.json(
+          url.searchParams.get("page") === "1"
+            ? [{ id: 1, modified_at: "2025-01-01T00:00:00Z", type: "match" }]
+            : [],
+        ),
+      );
 
       incidents = await client.listIncidents({
         perPage: 1,
@@ -66,29 +84,28 @@ describe(PandascoreApiClient, () => {
 
     it("paginates until an empty page", () => {
       expect(incidents).toHaveLength(1);
-      expect(fetchMock).toHaveBeenCalledTimes(2);
+      expect(requested).toHaveLength(2);
     });
 
     it("builds the query params", () => {
-      const firstCallUrl = requestUrl(fetchMock.mock.calls[0]?.[0]);
+      const [firstCall] = requested;
 
-      expect(firstCallUrl).toContain("/incidents");
-      expect(firstCallUrl).toContain("since=2025-01-01T00%3A00%3A00.000Z");
-      expect(firstCallUrl).toContain("videogame=rl");
-      expect(firstCallUrl).not.toContain("videogame%5B%5D=");
+      expect(firstCall?.pathname).toBe("/incidents");
+      expect(firstCall?.searchParams.get("since")).toBe("2025-01-01T00:00:00.000Z");
+      expect(firstCall?.searchParams.getAll("videogame")).toStrictEqual(["rl"]);
+      expect(firstCall?.search).not.toContain("videogame%5B%5D=");
     });
   });
 
   it("getTournaments merges past, upcoming, and running", async () => {
-    fetchMock
-      .mockResolvedValueOnce(Response.json([{ id: 1, name: "Past" }]))
-      .mockResolvedValueOnce(Response.json([{ id: 2, name: "Upcoming" }]))
-      .mockResolvedValueOnce(
-        Response.json([
-          { id: 2, name: "Upcoming duplicate" },
-          { id: 3, name: "Running" },
-        ]),
-      );
+    serve("/rl/tournaments/past", () => HttpResponse.json([{ id: 1, name: "Past" }]));
+    serve("/rl/tournaments/upcoming", () => HttpResponse.json([{ id: 2, name: "Upcoming" }]));
+    serve("/rl/tournaments/running", () =>
+      HttpResponse.json([
+        { id: 2, name: "Upcoming duplicate" },
+        { id: 3, name: "Running" },
+      ]),
+    );
 
     const tournaments = await client.getTournaments();
 
@@ -97,30 +114,32 @@ describe(PandascoreApiClient, () => {
       { id: 2, name: "Upcoming" },
       { id: 3, name: "Running" },
     ]);
-
-    const urls = fetchMock.mock.calls.map(([input]) => requestUrl(input));
-    expect(urls[0]).toContain("/rl/tournaments/past");
-    expect(urls[1]).toContain("/rl/tournaments/upcoming");
-    expect(urls[2]).toContain("/rl/tournaments/running");
   });
 
   it("getTournamentById returns null on 404", async () => {
-    fetchMock.mockResolvedValue(new Response(null, { status: 404, statusText: "Not Found" }));
+    serve(
+      "/tournaments/999",
+      () => new HttpResponse(null, { status: 404, statusText: "Not Found" }),
+    );
 
     const result = await client.getTournamentById(999);
     expect(result).toBeNull();
   });
 
   it("getTournamentById rethrows failures other than 404 instead of reporting not found", async () => {
-    fetchMock.mockResolvedValue(
-      new Response(null, { status: 429, statusText: "Too Many Requests" }),
+    serve(
+      "/tournaments/999",
+      () => new HttpResponse(null, { status: 429, statusText: "Too Many Requests" }),
     );
 
     await expect(client.getTournamentById(999)).rejects.toMatchObject({ status: 429 });
   });
 
   it("request throws PandascoreApiError on failure", async () => {
-    fetchMock.mockResolvedValue(new Response(null, { status: 401, statusText: "Unauthorized" }));
+    serve(
+      "/tournaments/1/brackets",
+      () => new HttpResponse(null, { status: 401, statusText: "Unauthorized" }),
+    );
 
     await expect(client.getTournamentBrackets(1)).rejects.toBeInstanceOf(PandascoreApiError);
   });

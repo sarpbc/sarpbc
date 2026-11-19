@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { careerMatch, mawkzy, vatira, zen } from "../../../test/career-fixtures";
+import { careerMatch, mawkzy, vatira, zen } from "../../../test/career.fixture";
 import { headToHead, seriesRecord } from "./series-record";
 
 describe(seriesRecord, () => {

@@ -10,19 +10,22 @@ const defaultDirectory = path.resolve(
 const migrationPattern = /^Migration(?<timestamp>\d{14})(?:_[A-Za-z0-9]+)?\.ts$/u;
 const snapshotPattern = /^\.snapshot-[^/]+\.json$/u;
 
-const timestampOf = (name: string): string | undefined =>
-  migrationPattern.exec(name)?.groups?.timestamp;
+const timestampOf = (name: string) => migrationPattern.exec(name)?.groups?.timestamp;
 
-const baseMigrationNames = (directory: string, baseRef: string): string[] | undefined => {
+const baseRefExists = (directory: string, baseRef: string) => {
   try {
     execFileSync("git", ["rev-parse", "--verify", "--quiet", `${baseRef}^{commit}`], {
       cwd: directory,
       stdio: "ignore",
     });
   } catch {
-    return undefined;
+    return false;
   }
 
+  return true;
+};
+
+const migrationNamesAt = (directory: string, baseRef: string) => {
   const output = execFileSync("git", ["ls-tree", "--name-only", baseRef, "--", "."], {
     cwd: directory,
     encoding: "utf-8",
@@ -34,7 +37,10 @@ const baseMigrationNames = (directory: string, baseRef: string): string[] | unde
     .filter((name) => timestampOf(name) !== undefined);
 };
 
-export const migrationViolations = (directory = defaultDirectory, baseRef = ""): string[] => {
+const baseMigrationNames = (directory: string, baseRef: string) =>
+  baseRefExists(directory, baseRef) ? migrationNamesAt(directory, baseRef) : undefined;
+
+export const migrationViolations = (directory = defaultDirectory, baseRef = "") => {
   const files = readdirSync(directory).toSorted();
   const names = files.filter((name) => timestampOf(name) !== undefined);
 

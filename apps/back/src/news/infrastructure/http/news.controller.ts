@@ -72,7 +72,7 @@ export class NewsController {
   async tweetImage(
     @Query({ schema: TweetEmbedQueryDto }) { url }: TweetEmbedQueryInput,
     @Res() reply: FastifyReply,
-  ): Promise<void> {
+  ) {
     const image = await this.tweetImageService.load(url);
     await reply
       .header("Content-Type", image.contentType)

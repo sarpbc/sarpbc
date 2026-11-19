@@ -27,7 +27,7 @@ export class PostHogService implements OnModuleDestroy {
     event: string;
     properties?: PostHogProperties;
     sessionId?: string | undefined;
-  }): void {
+  }) {
     if (!this.client || params.distinctId === undefined || params.distinctId === "") {
       return;
     }
@@ -49,11 +49,11 @@ export class PostHogService implements OnModuleDestroy {
     });
   }
 
-  async flush(): Promise<void> {
+  async flush() {
     await this.client?.flush();
   }
 
-  async onModuleDestroy(): Promise<void> {
+  async onModuleDestroy() {
     await this.client?.shutdown();
   }
 }

@@ -2,13 +2,7 @@ import type { Transfer as TransferResponse } from "@sarpbc/types";
 import { isoDay } from "@sarpbc/utils";
 import type { Transfer } from "../../domain/transfer";
 
-export const mapTransfer = ({
-  id,
-  type,
-  date,
-  sourceUrl,
-  contract,
-}: Transfer): TransferResponse => {
+export const mapTransfer = ({ id, type, date, sourceUrl, contract }: Transfer) => {
   const { player, team } = contract;
 
   return {
@@ -33,5 +27,5 @@ export const mapTransfer = ({
       slug: team.slug,
     },
     type,
-  };
+  } satisfies TransferResponse;
 };

@@ -15,11 +15,11 @@ export class UserService {
     private readonly passwords: PasswordHasher,
   ) {}
 
-  async list(query: UserListQuery): Promise<{ users: User[]; total: number }> {
+  async list(query: UserListQuery) {
     return await this.users.list(query);
   }
 
-  async changeRole(actorId: string, targetId: string, role: StaffRole | null): Promise<User> {
+  async changeRole(actorId: string, targetId: string, role: StaffRole | null) {
     if (actorId === targetId) {
       throw new ForbiddenError("You cannot change your own role. Ask another admin.");
     }
@@ -38,19 +38,19 @@ export class UserService {
     });
   }
 
-  async findOneByEmail(email: string): Promise<User | null> {
+  async findOneByEmail(email: string) {
     return await this.users.findByEmail(email);
   }
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string) {
     return await this.users.findById(id);
   }
 
-  async findOneByGoogleId(googleId: string): Promise<User | null> {
+  async findOneByGoogleId(googleId: string) {
     return await this.users.findByGoogleId(googleId);
   }
 
-  async signIn(dto: SignInInput): Promise<User | null> {
+  async signIn(dto: SignInInput) {
     const user = await this.users.findByEmailWithPassword(dto.email);
 
     if (!user || user.password === null) {
@@ -64,7 +64,7 @@ export class UserService {
     return user;
   }
 
-  async create(dto: CreateAccountInput): Promise<User> {
+  async create(dto: CreateAccountInput) {
     return await this.transaction.run(async ({ users }) => {
       if (await users.existsByEmail(dto.email)) {
         throw new ConflictError(
@@ -80,7 +80,7 @@ export class UserService {
     });
   }
 
-  async hasAnyPermission(id: string, permissions: StaffPermission[]): Promise<boolean> {
+  async hasAnyPermission(id: string, permissions: StaffPermission[]) {
     const user = await this.users.findById(id);
 
     if (!user) {
@@ -95,7 +95,7 @@ export class UserService {
     userName: string,
     googleId: string,
     avatarUrl: string | null | undefined,
-  ): Promise<User> {
+  ) {
     return await this.transaction.run(async ({ users }) => {
       if (await users.existsByEmail(email)) {
         throw new ConflictError(
@@ -110,7 +110,7 @@ export class UserService {
     });
   }
 
-  async updateUserName(userId: string, userName: string): Promise<User> {
+  async updateUserName(userId: string, userName: string) {
     return await this.transaction.run(async ({ users }) => {
       const user = await users.findById(userId);
 
@@ -131,7 +131,7 @@ export class UserService {
     });
   }
 
-  async linkGoogleAccount(user: User, googleId: string, avatarUrl: string | null): Promise<User> {
+  async linkGoogleAccount(user: User, googleId: string, avatarUrl: string | null) {
     user.googleId = googleId;
 
     if (

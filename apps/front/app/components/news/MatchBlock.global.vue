@@ -29,7 +29,7 @@ const { isConcealed } = useSpoilerFree();
 
 const block = computed(() => newsMatchBlockFromAttrs({ ids, limit, match, team, tournament }));
 
-const items = computed((): MatchBlockItem[] | undefined =>
+const items = computed(() =>
   block.value ? blocks?.items.value[newsMatchBlockKey(block.value)] : undefined,
 );
 
@@ -37,7 +37,7 @@ const pending = computed(
   () => items.value === undefined && block.value !== null && blocks?.status.value === "pending",
 );
 
-const withState = (state: MatchBlockState): MatchBlockItem[] =>
+const withState = (state: MatchBlockState) =>
   items.value?.filter((item) => item.state === state) ?? [];
 
 const live = computed(() => withState("live"));
@@ -54,10 +54,10 @@ const dateFormatter = computed(
     }),
 );
 
-const teamName = (item: MatchBlockItem, index: number): string =>
+const teamName = (item: MatchBlockItem, index: number) =>
   slotName(item.participants, index) ?? t("components.match.tbd");
 
-const summary = (item: MatchBlockItem): string => {
+const summary = (item: MatchBlockItem) => {
   if (
     item.state === "upcoming" ||
     isConcealed({ matchId: item.id, tournamentId: item.tournament.id })

@@ -35,19 +35,21 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     });
   }
 
-  async onModuleDestroy(): Promise<void> {
+  async onModuleDestroy() {
     await this.client.quit();
   }
 
-  async ping(): Promise<string> {
-    return await this.client.ping();
+  async ping() {
+    const reply: string = await this.client.ping();
+
+    return reply;
   }
 
-  async set(key: string, value: string, ttlInSeconds: number): Promise<void> {
+  async set(key: string, value: string, ttlInSeconds: number) {
     await this.client.set(key, value, "EX", ttlInSeconds);
   }
 
-  async setIfAbsent(key: string, value: string, ttlInSeconds: number): Promise<boolean> {
+  async setIfAbsent(key: string, value: string, ttlInSeconds: number) {
     return (await this.client.set(key, value, "EX", ttlInSeconds, "NX")) === "OK";
   }
 
@@ -57,7 +59,7 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     key: string,
     value: string,
     ttlInSeconds: number,
-  ): Promise<boolean> {
+  ) {
     const written = await this.client.eval(
       SET_WHILE_HELD_SCRIPT,
       2,
@@ -71,16 +73,16 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
     return written === 1;
   }
 
-  async get(key: string): Promise<string | null> {
+  async get(key: string) {
     return await this.client.get(key);
   }
 
-  async delete(key: string): Promise<number> {
+  async delete(key: string) {
     return await this.client.del(key);
   }
 
-  async deleteByPrefix(prefix: string): Promise<number> {
-    const deleteFrom = async (cursor: string): Promise<number> => {
+  async deleteByPrefix(prefix: string) {
+    const deleteFrom: (cursor: string) => Promise<number> = async (cursor) => {
       const [nextCursor, keys] = await this.client.scan(
         cursor,
         "MATCH",

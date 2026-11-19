@@ -23,7 +23,7 @@ const dateFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-const formatDate = (value: Date | string | null): string =>
+const formatDate = (value: Date | string | null) =>
   value ? dateFormatter.value.format(new Date(value)) : "—";
 
 const group = ref("");
@@ -60,7 +60,7 @@ const {
 const attachTarget = ref<StatsImportItem | null>(null);
 const linksVersion = ref(0);
 
-const attachedGame = (item: StatsImportItem): TournamentStatsGame | undefined =>
+const attachedGame = (item: StatsImportItem) =>
   games.value?.find((game) => game.ballchasingId === item.replayId);
 
 const onGamesChanged = async () => {
@@ -117,14 +117,14 @@ const statusColor = (status: StatsImportStatus) => {
   }
 };
 
-const labelOf = (match: TournamentMatchListItem): string => {
+const labelOf = (match: TournamentMatchListItem) => {
   const [a, b] = match.participants ?? [];
   const teams = `${a ? participantName(a) : "TBD"} vs ${b ? participantName(b) : "TBD"}`;
 
   return match.beginAt ? `${teams} · ${formatDate(match.beginAt)}` : teams;
 };
 
-const matchLabel = (matchId: string | null): string | null => {
+const matchLabel = (matchId: string | null) => {
   const match = matches.find((candidate) => candidate.id === matchId);
 
   return match ? labelOf(match) : null;
@@ -133,15 +133,14 @@ const matchLabel = (matchId: string | null): string | null => {
 const ROW_CLASS =
   "flex flex-col gap-0.5 py-2 text-sm sm:flex-row sm:items-center sm:justify-between sm:gap-4";
 
-const replayUrl = (item: StatsImportItem): string =>
-  `https://ballchasing.com/replay/${item.replayId}`;
+const replayUrl = (item: StatsImportItem) => `https://ballchasing.com/replay/${item.replayId}`;
 
-const itemTarget = (item: StatsImportItem, label: string): string =>
+const itemTarget = (item: StatsImportItem, label: string) =>
   item.status === "unmatched"
     ? label
     : t("page.tournaments.statsImport.game", { match: label, number: item.gameNumber });
 
-const itemMeta = (item: StatsImportItem): string => {
+const itemMeta = (item: StatsImportItem) => {
   const label = matchLabel(item.matchId);
 
   const target = label ? itemTarget(item, label) : "—";
@@ -149,7 +148,7 @@ const itemMeta = (item: StatsImportItem): string => {
   return `${formatDate(item.playedAt)} · ${target}`;
 };
 
-const itemReason = (item: StatsImportItem): string => {
+const itemReason = (item: StatsImportItem) => {
   switch (item.status) {
     case "unmatched": {
       return t(`page.tournaments.statsImport.unmatched.${item.reason}`);

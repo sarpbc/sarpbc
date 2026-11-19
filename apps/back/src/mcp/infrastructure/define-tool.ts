@@ -46,11 +46,10 @@ export interface McpTool {
   run: (user: PatUser, input: ToolArguments) => Promise<CallToolResult>;
 }
 
-const listOr = (items: readonly string[]): string =>
+const listOr = (items: readonly string[]) =>
   items.length > 1 ? `${items.slice(0, -1).join(", ")} or ${items.at(-1)}` : items.join("");
 
-const asError = (cause: unknown): Error =>
-  cause instanceof Error ? cause : new Error(String(cause));
+const asError = (cause: unknown) => (cause instanceof Error ? cause : new Error(String(cause)));
 
 /**
  * The one way to declare an MCP tool: it owns the permission gate, the logging and the
@@ -58,7 +57,7 @@ const asError = (cause: unknown): Error =>
  */
 export const defineTool = <Fields extends Record<string, z.ZodType>>(
   spec: ReadToolSpec<Fields> | WriteToolSpec<Fields>,
-): McpTool => {
+) => {
   const permissions = [spec.permission ?? []].flat();
 
   return {
@@ -115,14 +114,10 @@ export const defineTool = <Fields extends Record<string, z.ZodType>>(
         return toolErrorResult(extractErrorMessage(error));
       }
     },
-  };
+  } satisfies McpTool;
 };
 
-export const registerTools = (
-  server: McpServer,
-  user: PatUser,
-  tools: readonly McpTool[],
-): void => {
+export const registerTools = (server: McpServer, user: PatUser, tools: readonly McpTool[]) => {
   for (const tool of tools) {
     server.registerTool(
       tool.name,

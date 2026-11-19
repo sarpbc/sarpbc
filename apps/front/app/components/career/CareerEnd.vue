@@ -33,7 +33,7 @@ const trophyLines = computed(() => {
 
 const nickname = computed(() => t(`page.game.career.end.nicknames.${result.nicknameKey}`));
 
-const majorSummary = (season: CareerSeasonRecord, split: number): string => {
+const majorSummary = (season: CareerSeasonRecord, split: number) => {
   const record = season.splits.find((entry) => entry.split === split);
 
   if (!record) {

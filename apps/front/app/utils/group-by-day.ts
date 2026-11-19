@@ -13,7 +13,7 @@ export const groupByDay = <T>(
   items: T[],
   getDate: (item: T) => Date | string | null | undefined,
   order: "asc" | "desc",
-): DayGroup<T>[] => {
+) => {
   const sign = order === "desc" ? -1 : 1;
   const timeOf = (item: T) => parseMatchDate(getDate(item))?.getTime() ?? 0;
   const unknown: T[] = [];

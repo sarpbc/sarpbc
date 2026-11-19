@@ -1,16 +1,13 @@
 import type { CountryDetail, CountrySummary } from "@sarpbc/types";
 import { getApiErrorStatus } from "@sarpbc/utils";
 
-export const getCountries = async (): Promise<CountrySummary[]> => {
+export const getCountries = async () => {
   const res = await apiFetch<{ countries: CountrySummary[] }>("/countries", { method: "GET" });
 
   return res.countries;
 };
 
-export const getCountry = async (
-  code: string,
-  query: { limit: number; offset: number },
-): Promise<CountryDetail | null> => {
+export const getCountry = async (code: string, query: { limit: number; offset: number }) => {
   try {
     const res = await apiFetch<{ country: CountryDetail }>(
       `/countries/${encodeURIComponent(code)}`,
@@ -34,5 +31,5 @@ export const useCountryName = () => {
     () => new Intl.DisplayNames([locale.value], { fallback: "code", type: "region" }),
   );
 
-  return (code: string): string => names.value.of(code) ?? code;
+  return (code: string) => names.value.of(code) ?? code;
 };

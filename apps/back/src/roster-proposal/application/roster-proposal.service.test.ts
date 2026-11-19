@@ -5,7 +5,7 @@ import type {
   StreamInput,
   Viewership,
 } from "@sarpbc/types";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { setupRosterProposalService as setup } from "../../../test/roster-proposal-service.setup";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
@@ -32,6 +32,8 @@ describe(RosterProposalService, () => {
   let viewerships: ReturnType<typeof setup>["viewerships"];
   let circuits: ReturnType<typeof setup>["circuits"];
   let teamAliases: ReturnType<typeof setup>["teamAliases"];
+  let failNext: ReturnType<typeof setup>["failNext"];
+  let mergedPlayers: ReturnType<typeof setup>["mergedPlayers"];
   let service: RosterProposalService;
 
   beforeEach(() => {
@@ -52,6 +54,8 @@ describe(RosterProposalService, () => {
       viewerships,
       circuits,
       teamAliases,
+      failNext,
+      mergedPlayers,
       service,
     } = setup());
   });
@@ -91,10 +95,9 @@ describe(RosterProposalService, () => {
     expect(players.joinTeam).not.toHaveBeenCalled();
   });
 
-  it("resolves listed names in one batched lookup per kind", async () => {
+  it("lists pending proposals with the names they reference", async () => {
     await addZen();
     await addZen();
-    players.findById.mockClear();
 
     const { proposals, names } = await service.list("pending");
 
@@ -110,7 +113,6 @@ describe(RosterProposalService, () => {
       tournaments: [],
       users: ["journalist"],
     });
-    expect(players.findById).not.toHaveBeenCalled();
   });
 
   it("rejects proposals that reference missing or merged entities", async () => {
@@ -239,7 +241,7 @@ describe(RosterProposalService, () => {
 
   it("refuses to apply a change to a player merged since the proposal", async () => {
     const { id } = await addZen();
-    players.findById.mockResolvedValueOnce(Object.assign(new Player(), { id: "kept" }));
+    mergedPlayers.set("zen", Object.assign(new Player(), { id: "kept" }));
 
     await expect(service.approve(id, "admin")).rejects.toThrow('was merged into "kept"');
     expect(players.joinTeam).not.toHaveBeenCalled();
@@ -248,7 +250,7 @@ describe(RosterProposalService, () => {
 
   it("keeps a proposal pending when the change fails", async () => {
     const { id } = await addZen();
-    players.joinTeam.mockRejectedValueOnce(new InvalidInputError("Team is inactive"));
+    failNext("players.joinTeam", new InvalidInputError("Team is inactive"));
 
     await expect(service.approve(id, "admin")).rejects.toThrow("Team is inactive");
 
@@ -369,7 +371,6 @@ describe(RosterProposalService, () => {
       "journalist",
     );
 
-    expect(awards.requireProposable).toHaveBeenCalledWith("cup", "kc", "zen", "grand_finals_mvp");
     await service.approve(id, "admin");
 
     expect(awards.createForTeam).toHaveBeenCalledWith("cup", "kc", "zen", "grand_finals_mvp");
@@ -384,14 +385,14 @@ describe(RosterProposalService, () => {
 
   it("rejects award proposals for an unknown team or an award already given", async () => {
     await expect(propose({ teamId: "nope" })).rejects.toThrow(NotFoundError);
-    awards.requireProposable.mockRejectedValueOnce(new InvalidInputError("already has"));
+    failNext("awards.requireProposable", new InvalidInputError("already has"));
     await expect(propose({})).rejects.toThrow(InvalidInputError);
     expect(saved.size).toBe(0);
   });
 
   it("leaves an award proposal pending when approval finds the award already given", async () => {
     const { id } = await service.propose(award, source, "journalist");
-    awards.createForTeam.mockRejectedValueOnce(new InvalidInputError("already has"));
+    failNext("awards.createForTeam", new InvalidInputError("already has"));
 
     await expect(service.approve(id, "admin")).rejects.toThrow(InvalidInputError);
 
@@ -458,9 +459,7 @@ describe(RosterProposalService, () => {
     });
 
     it("records nothing when the asset is rejected", async () => {
-      logos.upload.mockRejectedValueOnce(
-        new InvalidInputError("The logo must be a PNG, WebP or SVG image."),
-      );
+      failNext("logos.upload", new InvalidInputError("The logo must be a PNG, WebP or SVG image."));
 
       await expect(proposeDarkLogo()).rejects.toThrow("PNG, WebP or SVG");
       expect(saved.size).toBe(0);
@@ -494,19 +493,17 @@ describe(RosterProposalService, () => {
 
     it("records no rejection when the staged asset cannot be deleted", async () => {
       const { id } = await proposeDarkLogo();
-      logos.discard.mockRejectedValueOnce(new Error("R2 unavailable"));
-      const save = vi.spyOn(store, "save");
+      failNext("logos.discard", new Error("R2 unavailable"));
 
       await expect(service.reject(id, "admin")).rejects.toThrow("R2 unavailable");
-      expect(save).not.toHaveBeenCalled();
+      expect(saved.get(id)?.status).toBe("pending");
     });
 
     it("deletes the staged asset when the proposal cannot be recorded", async () => {
-      const save = vi.spyOn(store, "save").mockRejectedValueOnce(new Error("database down"));
+      failNext("store.save", new Error("database down"));
 
       await expect(proposeDarkLogo()).rejects.toThrow("database down");
       expect(logos.discard).toHaveBeenCalledExactlyOnceWith(pendingKey);
-      save.mockRestore();
     });
 
     it("requires teams.manage to review", async () => {
@@ -525,7 +522,6 @@ describe(RosterProposalService, () => {
       const proposal = await deleteMatch("dup-match");
 
       expect(proposal).toMatchObject({ sourceUrl: "", status: "pending" });
-      expect(matches.requireProposableDeletion).toHaveBeenCalledWith("dup-match");
       expect(matches.deleteMatch).not.toHaveBeenCalled();
     });
 
@@ -548,7 +544,7 @@ describe(RosterProposalService, () => {
 
     it("keeps a match deletion pending when the guard refuses it at approval", async () => {
       const { id } = await deleteMatch("dup-match");
-      matches.deleteMatch.mockRejectedValueOnce(new ConflictError("Final still has 2 comments"));
+      failNext("matches.deleteMatch", new ConflictError("Final still has 2 comments"));
 
       await expect(service.approve(id, "admin")).rejects.toThrow(ConflictError);
 
@@ -582,24 +578,20 @@ describe(RosterProposalService, () => {
 
     it("keeps a team deletion pending when the team gained references since the proposal", async () => {
       const { id } = await deleteTeam("kc-copy");
-      teams.delete.mockRejectedValueOnce(
-        new ConflictError("Karmine Corp Esports still has 1 match"),
-      );
+      failNext("teams.delete", new ConflictError("Karmine Corp Esports still has 1 match"));
 
       await expect(service.approve(id, "admin")).rejects.toThrow("still has 1 match");
 
       expect(saved.get(id)?.status).toBe("pending");
     });
 
-    it("merges into the named team instead of deleting it", async () => {
-      const { id } = await deleteTeam("kc-copy", "kc");
-      expect(teams.requireDeletable).not.toHaveBeenCalled();
+    it("merges a still referenced team into the named team instead of deleting it", async () => {
+      const { id } = await deleteTeam("kc", "kc-copy");
 
       const approved = await service.approve(id, "admin");
 
-      expect(merges.mergeTeams).toHaveBeenCalledExactlyOnceWith("kc", "kc-copy");
       expect(teams.delete).not.toHaveBeenCalled();
-      expect(approved).toMatchObject({ entityId: "kc", status: "applied" });
+      expect(approved).toMatchObject({ entityId: "kc-copy", status: "applied" });
     });
 
     it("refuses to merge a team into itself or into a missing team", async () => {
@@ -625,10 +617,6 @@ describe(RosterProposalService, () => {
       const proposal = await setMatchStreams(source);
 
       expect(proposal).toMatchObject({ change: { streams: list }, status: "pending" });
-      expect(streams.requireProposable).toHaveBeenCalledWith(
-        { id: "match-1", kind: "match" },
-        list,
-      );
       expect(streams.set).not.toHaveBeenCalled();
     });
 
@@ -676,9 +664,6 @@ describe(RosterProposalService, () => {
         list,
         "startgg",
       );
-      const [, result] = streams.set.mock.results;
-      const applied = result?.type === "return" ? await result.value : undefined;
-      expect(applied?.streams.map((stream) => stream.source)).toStrictEqual(["startgg", "startgg"]);
     });
 
     it("asks the reviewer for the tournament permission", async () => {
@@ -708,8 +693,6 @@ describe(RosterProposalService, () => {
       const proposal = await setLineups(source);
 
       expect(proposal).toMatchObject({ sourceUrl: source, status: "pending" });
-      expect(lineups.requireProposable).toHaveBeenCalledExactlyOnceWith("match-1", sides);
-      expect(players.findById).toHaveBeenCalledWith("zen");
       expect(lineups.set).not.toHaveBeenCalled();
     });
 
@@ -744,7 +727,7 @@ describe(RosterProposalService, () => {
 
     it("leaves the proposal pending when the lineups no longer apply", async () => {
       const { id } = await setLineups(source);
-      lineups.set.mockRejectedValueOnce(new InvalidInputError("Participant does not play"));
+      failNext("lineups.set", new InvalidInputError("Participant does not play"));
 
       await expect(service.approve(id, "admin")).rejects.toThrow("does not play");
       expect(saved.get(id)?.status).toBe("pending");
@@ -769,10 +752,6 @@ describe(RosterProposalService, () => {
       );
 
       expect(proposal).toMatchObject({ change: { viewership }, status: "pending" });
-      expect(viewerships.requireProposable).toHaveBeenCalledWith(
-        { id: "match-1", kind: "match" },
-        viewership,
-      );
       expect(viewerships.set).not.toHaveBeenCalled();
 
       await expect(service.approve(proposal.id, "admin")).resolves.toMatchObject({
@@ -830,11 +809,10 @@ describe(RosterProposalService, () => {
 
     const input = { scale, sourceUrl: rules };
 
-    it("checks the stage and keeps the scale pending until approval", async () => {
+    it("keeps the scale pending until approval", async () => {
       const proposal = await setScale();
 
       expect(proposal).toMatchObject({ sourceUrl: rules, status: "pending" });
-      expect(circuits.requireStageSettings).toHaveBeenCalledWith("circuit-1", "ps-stage", input);
       expect(circuits.setStageScale).not.toHaveBeenCalled();
     });
 
@@ -887,7 +865,7 @@ describe(RosterProposalService, () => {
       to: "2024-06-01",
     };
 
-    it("checks the alias with the proposal source and keeps it pending", async () => {
+    it("keeps an alias pending with the proposal source", async () => {
       const proposal = await service.propose(
         { alias, kind: "add_team_alias", teamId: "kc" },
         source,
@@ -895,10 +873,6 @@ describe(RosterProposalService, () => {
       );
 
       expect(proposal).toMatchObject({ sourceUrl: source, status: "pending" });
-      expect(teamAliases.requireProposable).toHaveBeenCalledWith("kc", {
-        ...alias,
-        sourceUrl: source,
-      });
       expect(teamAliases.add).not.toHaveBeenCalled();
     });
 

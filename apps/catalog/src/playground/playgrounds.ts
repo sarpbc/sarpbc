@@ -74,7 +74,7 @@ const selectValue = z.union([z.string(), z.number()]);
 
 const tableSort = z.object({ desc: z.boolean(), id: z.string() });
 
-const state = (label: string, values: VariantState["values"] = {}): VariantState => ({
+const state = (label: string, values: VariantState["values"] = {}) => ({
   label,
   values,
 });
@@ -84,7 +84,6 @@ const OVERLAY_TRIGGER = () => h(Button, { label: "Open", variant: "secondary" })
 const card = (content: string) =>
   h("p", { style: "margin:0;padding:0.75rem;max-width:16rem" }, content);
 
-/* A RadioGroup owning its value, so the Radio playground tunes a single radio. */
 const RadioSample = defineComponent(
   (props: { radio: Bindings }) => {
     const value = ref<SelectValue | null>("striker");
@@ -148,8 +147,7 @@ const TEAM_COLUMNS: TableColumn<TeamRow>[] = [
   { accessorKey: "titles", header: "Titles", meta: { align: "end" }, sortDescFirst: true },
 ];
 
-/* The table only reports the sort; the page orders its own data. */
-const sortRows = (rows: TeamRow[], sort: TableSort | undefined): TeamRow[] =>
+const sortRows = (rows: TeamRow[], sort: TableSort | undefined) =>
   sort === undefined
     ? rows
     : rows.toSorted((a, b) => {
@@ -856,7 +854,7 @@ export const PLAYGROUNDS: ReadonlyMap<string, Playground> = new Map<string, Play
         const rows = TEAM_ROWS.slice(0, z.number().catch(3).parse(sample.rows));
 
         return h(
-          /* SAFETY: vue-tsc types a generic SFC as a function the h() overloads reject; the props below match Table. */
+          // SAFETY: vue-tsc types a generic SFC as a function the h() overloads reject; the props below match Table.
           Table as Component,
           {
             ...bindings,

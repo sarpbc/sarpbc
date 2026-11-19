@@ -2,23 +2,16 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { MAX_IMAGE_BYTES, MAX_IMAGE_MEGABYTES } from "@sarpbc/utils";
 import type { ImageUploadTarget } from "@sarpbc/utils";
 import { imageContentType } from "../domain/image-upload";
-import type { ObjectStorage, ObjectUploadUrl, StoredObject } from "./ports/object-storage";
+import type { ObjectStorage } from "./ports/object-storage";
 
 export class StorageService {
   constructor(private readonly storage: ObjectStorage) {}
 
-  async createImageUploadUrl(
-    contentType: string,
-    target: ImageUploadTarget,
-  ): Promise<ObjectUploadUrl> {
+  async createImageUploadUrl(contentType: string, target: ImageUploadTarget) {
     return await this.storage.createImageUploadUrl(imageContentType(contentType), target);
   }
 
-  async uploadImage(
-    bytes: Uint8Array,
-    contentType: string,
-    target: ImageUploadTarget,
-  ): Promise<StoredObject> {
+  async uploadImage(bytes: Uint8Array, contentType: string, target: ImageUploadTarget) {
     const type = imageContentType(contentType);
 
     if (bytes.byteLength > MAX_IMAGE_BYTES) {

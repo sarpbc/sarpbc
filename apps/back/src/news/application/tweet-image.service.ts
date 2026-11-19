@@ -12,7 +12,7 @@ export interface TweetImageGateway {
 
 export class TweetImageService {
   constructor(private readonly gateway: TweetImageGateway) {}
-  async load(url: string): Promise<TweetImage> {
+  async load(url: string) {
     if (!isTweetImageUrl(url)) {
       throw new InvalidInputError("Only https://pbs.twimg.com images from X posts can be loaded.");
     }

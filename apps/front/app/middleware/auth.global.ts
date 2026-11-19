@@ -30,9 +30,7 @@ export default defineNuxtRouteMiddleware(async () => {
     return;
   }
 
-  // Client-only routes / SPA entry with no SSR user in the payload.
-  // Initial SSR payloads (including SWR `null`) are left untouched until
-  // `session-revalidate.client` runs after hydration.
+  // WARNING: client-only routes and SPA entry have no SSR user; initial SSR payloads (including SWR `null`) stay untouched until `session-revalidate.client` runs after hydration.
   if (import.meta.client) {
     user.value = await getProfile();
     authHydrated.value = true;

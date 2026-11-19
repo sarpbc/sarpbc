@@ -1,4 +1,4 @@
-import type { ParticipantRef, TeamSummary, TournamentDetail } from "@sarpbc/types";
+import type { TournamentDetail } from "@sarpbc/types";
 import {
   participantName,
   playerPath,
@@ -72,11 +72,6 @@ interface PropertyValueLd extends JsonLdNode {
 
 type SportsEventLocationLd = VirtualLocationLd | PlaceLd | (VirtualLocationLd | PlaceLd)[];
 
-interface SportsEventVenueLd {
-  eventAttendanceMode: string;
-  location: SportsEventLocationLd;
-}
-
 export interface SportsEventLd extends JsonLdNode {
   "@type": "SportsEvent";
   url: string;
@@ -104,25 +99,13 @@ export interface BuildTournamentSportsEventOptions {
 const isTournamentFormat = (value: string): value is TournamentFormat =>
   TOURNAMENT_FORMATS.some((format) => format === value);
 
-const toIsoDate = (value: Date | string | undefined | null): string | undefined => {
-  if (!isNonEmptyDateInput(value)) {
-    return undefined;
-  }
+const toIsoDate = (value: Date | string | undefined | null) => {
+  const date = isNonEmptyDateInput(value) ? new Date(value) : undefined;
 
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return undefined;
-  }
-
-  return date.toISOString();
+  return date === undefined || Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 };
 
-const sportsEventStatusUrl = (status: TournamentStatus | null): string | undefined => {
-  if (status === null) {
-    return undefined;
-  }
-
+const sportsEventStatusUrl = (status: TournamentStatus) => {
   switch (status) {
     case "upcoming":
     case "live":
@@ -138,58 +121,33 @@ const sportsEventStatusUrl = (status: TournamentStatus | null): string | undefin
   }
 };
 
-const formatLabel = (type: string | null): string | undefined => {
-  if (!isNonEmptyString(type) || !isTournamentFormat(type)) {
-    return undefined;
-  }
+const formatLabel = (type: string | null) =>
+  isNonEmptyString(type) && isTournamentFormat(type) ? FORMAT_LABEL[type] : undefined;
 
-  switch (type) {
-    case "online":
-    case "offline":
-    case "online/offline": {
-      return FORMAT_LABEL[type];
-    }
-
-    default: {
-      const _exhaustive: never = type;
-
-      return _exhaustive;
-    }
-  }
-};
-
-const virtualLocation = (url: string): VirtualLocationLd => ({ "@type": "VirtualLocation", url });
+const virtualLocation = (url: string) =>
+  ({ "@type": "VirtualLocation", url }) satisfies VirtualLocationLd;
 
 const COUNTRY_NAMES = new Intl.DisplayNames(["en"], { type: "region" });
 
-const countryPlace = (country: string | null | undefined): PlaceLd | undefined => {
+const countryPlace = (country: string | null | undefined) => {
   const code = country?.trim().toUpperCase();
 
-  if (!isNonEmptyString(code) || !/^[A-Z]{2}$/u.test(code)) {
-    return undefined;
-  }
-
-  return {
-    "@type": "Place",
-    address: { "@type": "PostalAddress", addressCountry: code },
-    name: COUNTRY_NAMES.of(code) ?? code,
-  };
+  return isNonEmptyString(code) && /^[A-Z]{2}$/u.test(code)
+    ? ({
+        "@type": "Place",
+        address: { "@type": "PostalAddress", addressCountry: code },
+        name: COUNTRY_NAMES.of(code) ?? code,
+      } satisfies PlaceLd)
+    : undefined;
 };
 
-const onlineVenue = (url: string): SportsEventVenueLd => ({
+const onlineVenue = (url: string) => ({
   eventAttendanceMode: `${SCHEMA_ORG}/OnlineEventAttendanceMode`,
   location: virtualLocation(url),
 });
 
-// Google treats an event without eventAttendanceMode as offline and rejects a
-// VirtualLocation there, and it rejects a Place without an address. So the mode
-// and location are always emitted together, falling back to the online venue
-// (every event is streamed) when no country is known.
-const eventVenue = (
-  type: string | null,
-  country: string | null | undefined,
-  url: string,
-): SportsEventVenueLd => {
+// WARNING: Google rejects a VirtualLocation without eventAttendanceMode and a Place without an address, so emit mode and location together.
+const eventVenue = (type: string | null, country: string | null | undefined, url: string) => {
   const place = countryPlace(country);
 
   if (!isNonEmptyString(type) || !isTournamentFormat(type) || !place) {
@@ -223,9 +181,7 @@ const eventVenue = (
   }
 };
 
-export const getTournamentChampion = (
-  tournament: Pick<TournamentDetail, "winner">,
-): ParticipantRef<TeamSummary> | null => {
+export const getTournamentChampion = (tournament: Pick<TournamentDetail, "winner">) => {
   const { winner } = tournament;
 
   if (!winner) {
@@ -237,9 +193,7 @@ export const getTournamentChampion = (
   return listed ? winner : null;
 };
 
-const competitorFromTournament = (
-  tournament: Pick<TournamentDetail, "participants">,
-): CompetitorLd[] | undefined => {
+const competitorFromTournament = (tournament: Pick<TournamentDetail, "participants">) => {
   const competitors = new Map<string, CompetitorLd>();
 
   for (const participant of tournament.participants) {
@@ -276,17 +230,12 @@ const competitorFromTournament = (
     );
   }
 
-  if (competitors.size === 0) {
-    return undefined;
-  }
-
-  return [...competitors.values()].toSorted((a, b) => a.name.localeCompare(b.name));
+  return competitors.size === 0
+    ? undefined
+    : [...competitors.values()].toSorted((a, b) => a.name.localeCompare(b.name));
 };
 
-const additionalProperties = (
-  prizepool: string | undefined,
-  format: string | undefined,
-): PropertyValueLd[] | undefined => {
+const additionalProperties = (prizepool: string | undefined, format: string | undefined) => {
   const properties: PropertyValueLd[] = [];
 
   if (isNonEmptyString(prizepool)) {
@@ -314,7 +263,7 @@ const buildDescription = (parts: {
   prizepool?: string;
   championName?: string;
   status: TournamentStatus | null;
-}): string => {
+}) => {
   const sentences: string[] = [];
   const leagueSuffix = isNonEmptyString(parts.leagueName) ? ` (${parts.leagueName})` : "";
   sentences.push(`Rocket League tournament${leagueSuffix}`);
@@ -343,7 +292,7 @@ const buildDescription = (parts: {
 export const buildTournamentSportsEvent = (
   tournament: TournamentDetail,
   options: BuildTournamentSportsEventOptions = {},
-): SportsEventLd => {
+) => {
   const url = `${SITE_ORIGIN}${tournamentStagePath(tournament.event.slug, tournament.slug)}`;
   const status = getTournamentStatus(tournament, options.now);
   const prizepool = formatPrizepool(tournament.prizepool) || undefined;
@@ -369,7 +318,7 @@ export const buildTournamentSportsEvent = (
     }),
     endDate: toIsoDate(tournament.endAt),
     eventAttendanceMode: venue.eventAttendanceMode,
-    eventStatus: sportsEventStatusUrl(status),
+    eventStatus: status === null ? undefined : sportsEventStatusUrl(status),
     image,
     location: venue.location,
     name: tournamentStageLabel(tournament),

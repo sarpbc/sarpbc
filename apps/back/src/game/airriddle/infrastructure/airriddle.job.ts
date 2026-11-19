@@ -13,7 +13,7 @@ export class AirRiddleJob {
   ) {}
   @Cron("0 0 * * *", { timeZone: RIDDLE_TIME_ZONE })
   @CreateRequestContext()
-  async createAirRiddle(): Promise<void> {
+  async createAirRiddle() {
     await this.service.createAirRiddle();
   }
 }

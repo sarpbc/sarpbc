@@ -7,15 +7,14 @@ const BRACKET_VERTICAL_GAP = 6;
 /** Half a match block so stacked rows share a midpoint with connectors. */
 export const BRACKET_ROW_STEP = (BRACKET_MATCH_HEIGHT + BRACKET_VERTICAL_GAP) / 2;
 
-export const bracketMatchLeft = (column: number): number =>
+export const bracketMatchLeft = (column: number) =>
   column * (BRACKET_MATCH_WIDTH + BRACKET_COLUMN_GAP);
 
-export const bracketMatchTop = (row: number): number => row * BRACKET_ROW_STEP;
+export const bracketMatchTop = (row: number) => row * BRACKET_ROW_STEP;
 
-export const bracketMatchCenterY = (row: number): number =>
-  bracketMatchTop(row) + BRACKET_MATCH_HEIGHT / 2;
+export const bracketMatchCenterY = (row: number) => bracketMatchTop(row) + BRACKET_MATCH_HEIGHT / 2;
 
-export const bracketTeamRowCenterY = (row: number, slot: "a" | "b"): number => {
+export const bracketTeamRowCenterY = (row: number, slot: "a" | "b") => {
   const top = bracketMatchTop(row);
 
   if (slot === "a") {

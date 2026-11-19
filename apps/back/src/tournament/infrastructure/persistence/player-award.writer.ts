@@ -49,7 +49,7 @@ export class CompetitionAwardWriter implements AwardWriter {
     participantId: string;
     playerId: string;
     awardType: PlayerAwardType;
-  }): Promise<TournamentAwardListItem> {
+  }) {
     const row = new PlayerAward();
     row.id = crypto.randomUUID();
     row.tournament = this.em.getReference(Tournament, input.tournamentId);
@@ -76,7 +76,7 @@ export class CompetitionAwardWriter implements AwardWriter {
       throw error;
     }
 
-    return toTournamentItem(row);
+    return toTournamentItem(row) satisfies TournamentAwardListItem;
   }
   async remove(tournamentId: string, id: string) {
     const row = await this.em.findOne(PlayerAward, { id, tournament: { id: tournamentId } });

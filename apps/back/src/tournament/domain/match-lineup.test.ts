@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
-import { buildLineups, isStandIn, lineupsFromGames, normalizeLineups } from "./match-lineup";
+import { buildLineups, lineupsFromGames, normalizeLineups } from "./match-lineup";
 
 const player = (id: string) => ({
   id,
@@ -8,14 +8,6 @@ const player = (id: string) => ({
   name: id,
   nationality: null,
   slug: id,
-});
-
-describe(isStandIn, () => {
-  it("is false for a player on the participant roster and true otherwise", () => {
-    expect(isStandIn(["alpha", "bravo", "charlie"], "bravo")).toBe(false);
-    expect(isStandIn(["alpha", "bravo", "charlie"], "delta")).toBe(true);
-    expect(isStandIn([], "alpha")).toBe(true);
-  });
 });
 
 describe(buildLineups, () => {

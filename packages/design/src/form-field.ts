@@ -10,4 +10,4 @@ export interface FormFieldContext {
 
 export const FORM_FIELD: InjectionKey<FormFieldContext> = Symbol("sarpbc-form-field");
 
-export const useFormField = (): FormFieldContext | null => inject(FORM_FIELD, null);
+export const useFormField = () => inject(FORM_FIELD, null);

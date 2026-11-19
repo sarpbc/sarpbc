@@ -2,7 +2,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import { getPlayerTournaments } from "~/composables/player/api";
 import { getTeamTournaments } from "~/composables/team/api";
-import type { EntityEventListItem, EntityKind, EntitySections } from "~/types/entity";
+import type { EntityEventListItem, EntityKind } from "~/types/entity";
 import type { Tournament } from "~/types/tournament";
 import { getTournamentStatus } from "~/utils/tournament-status";
 import { byBeginAtAsc, byEndAtDesc, PAST_ENTRIES_LIMIT } from "./entity-sort";
@@ -12,7 +12,7 @@ const FETCH_TOURNAMENTS = {
   team: getTeamTournaments,
 } satisfies Record<EntityKind, (id: string) => Promise<Tournament[]>>;
 
-const wonBy = (kind: EntityKind, tournament: Tournament, entityId: string): boolean => {
+const wonBy = (kind: EntityKind, tournament: Tournament, entityId: string) => {
   const winner = tournament.winner instanceof Object ? tournament.winner : undefined;
 
   switch (kind) {
@@ -38,7 +38,7 @@ export const splitTournaments = (
   tournaments: Tournament[],
   isWinner: (tournament: Tournament) => boolean,
   now: number,
-): EntitySections<EntityEventListItem> => {
+) => {
   const live: Tournament[] = [];
   const upcoming: Tournament[] = [];
   const past: Tournament[] = [];
@@ -78,17 +78,18 @@ export const splitTournaments = (
   upcoming.sort(byBeginAtAsc);
   past.sort(byEndAtDesc);
 
-  const toItem = (tournament: Tournament): EntityEventListItem => ({
-    beginAt: tournament.beginAt ?? null,
-    endAt: tournament.endAt ?? null,
-    event: tournament.event,
-    formatLabel: nonDefaultFormatLabel(tournament.format),
-    id: tournament.id,
-    isWinner: isWinner(tournament),
-    name: tournament.name,
-    slug: tournament.slug,
-    status: getTournamentStatus(tournament, now) ?? "finished",
-  });
+  const toItem = (tournament: Tournament) =>
+    ({
+      beginAt: tournament.beginAt ?? null,
+      endAt: tournament.endAt ?? null,
+      event: tournament.event,
+      formatLabel: nonDefaultFormatLabel(tournament.format),
+      id: tournament.id,
+      isWinner: isWinner(tournament),
+      name: tournament.name,
+      slug: tournament.slug,
+      status: getTournamentStatus(tournament, now) ?? "finished",
+    }) satisfies EntityEventListItem;
 
   return {
     live: live.map(toItem),
@@ -103,7 +104,7 @@ export const useEntityTournaments = (kind: EntityKind, entityId: MaybeRef<string
   const { data, pending, error, refresh } = useAsyncData(
     () => `${kind}-tournaments-${idRef.value ?? "unknown"}`,
     async () => ({
-      /** Captured with the fetch so the server and client split events identically on hydration. */
+      // WARNING: fetchedAt is captured with the fetch so server and client build identical results on hydration.
       fetchedAt: Date.now(),
       tournaments: isNonEmptyString(idRef.value) ? await FETCH_TOURNAMENTS[kind](idRef.value) : [],
     }),

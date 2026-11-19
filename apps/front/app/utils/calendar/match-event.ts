@@ -5,7 +5,6 @@ import type { NamedParticipant } from "@sarpbc/utils";
 import { slotName } from "~/utils/participant-slot";
 import { TBD_LABEL } from "~/utils/tbd-label";
 import { matchEndAt, matchEventUid, matchPageUrl } from "./ics";
-import type { CalendarEvent } from "./ics";
 
 interface CalendarMatch extends MatchLinkTarget {
   beginAt?: Date | string | null;
@@ -14,7 +13,7 @@ interface CalendarMatch extends MatchLinkTarget {
   participants?: NamedParticipant[];
 }
 
-const slotLabel = (match: CalendarMatch, index: 0 | 1): string => {
+const slotLabel = (match: CalendarMatch, index: 0 | 1) => {
   const name = slotName(match.participants, index)?.trim();
 
   return isNonEmptyString(name) ? name : TBD_LABEL;
@@ -23,7 +22,7 @@ const slotLabel = (match: CalendarMatch, index: 0 | 1): string => {
 export const isMatchOnCalendar = (match: {
   beginAt?: Date | string | null;
   status?: string | null;
-}): boolean => {
+}) => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return false;
   }
@@ -35,7 +34,7 @@ export const matchToCalendarEvent = (
   match: CalendarMatch,
   stage: { name: string; event: TournamentEventRef },
   dtStamp: Date,
-): CalendarEvent | null => {
+) => {
   if (!isNonEmptyDateInput(match.beginAt)) {
     return null;
   }

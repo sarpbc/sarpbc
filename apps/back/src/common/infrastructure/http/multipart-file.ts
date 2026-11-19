@@ -9,7 +9,7 @@ export interface MultipartOptions {
   fileType?: string | RegExp;
 }
 
-export const getFileFromPart = async (part: MultipartFile): Promise<Storage.MultipartFile> => {
+export const getFileFromPart = async (part: MultipartFile) => {
   const buffer = await part.toBuffer();
 
   return {
@@ -21,10 +21,7 @@ export const getFileFromPart = async (part: MultipartFile): Promise<Storage.Mult
   };
 };
 
-export const validateFile = async (
-  file: Storage.MultipartFile,
-  options: MultipartOptions,
-): Promise<string | undefined> => {
+export const validateFile = async (file: Storage.MultipartFile, options: MultipartOptions) => {
   const validators: FileValidator[] = [];
 
   if (options.maxFileSize !== undefined && options.maxFileSize !== 0) {

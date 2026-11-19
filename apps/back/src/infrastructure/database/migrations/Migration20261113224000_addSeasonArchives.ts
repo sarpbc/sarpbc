@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261113224000_addSeasonArchives extends Migration {
   override name = "Migration20261113224000_addSeasonArchives";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(
       `create table "season_participant" ("id" uuid not null default gen_random_uuid(), "season_id" uuid not null, "team_id" uuid not null, "path_note" text null, "created_at" timestamptz not null default now(), primary key ("id"));`,
     );
@@ -47,7 +47,7 @@ export class Migration20261113224000_addSeasonArchives extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(
       `alter table "season_path_entry" drop constraint "season_path_entry_participant_id_foreign";`,
     );

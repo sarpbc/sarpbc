@@ -1,8 +1,7 @@
 import type { Post } from "./post.entity";
 import type { Topic } from "./topic.entity";
-import type { PostRecord, TopicRecord } from "../../application/models";
 
-export const postSnapshot = (row: Post): PostRecord => ({
+export const postSnapshot = (row: Post) => ({
   author: { id: row.author.id, userName: row.author.userName },
   content: row.content,
   createdAt: new Date(row.createdAt),
@@ -25,7 +24,7 @@ export const postSnapshot = (row: Post): PostRecord => ({
   updatedAt: row.updatedAt ? new Date(row.updatedAt) : null,
 });
 
-export const topicSnapshot = (row: Topic): TopicRecord => ({
+export const topicSnapshot = (row: Topic) => ({
   createdAt: new Date(row.createdAt),
   description: row.description,
   id: row.id,

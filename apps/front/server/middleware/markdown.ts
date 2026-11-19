@@ -14,7 +14,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 const INTERNAL_HEADER = "x-sarpbc-markdown-internal";
 const LLMS_TXT_LINK = `<${SITE_ORIGIN}/llms.txt>; rel="describedby"`;
 
-const sendMarkdown = async (event: H3Event, htmlPath: string, search: string): Promise<void> => {
+const sendMarkdown = async (event: H3Event, htmlPath: string, search: string) => {
   const response = await useNitroApp().localFetch(`${htmlPath}${search}`, {
     headers: {
       [INTERNAL_HEADER]: "1",

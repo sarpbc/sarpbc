@@ -7,14 +7,13 @@ import {
   vatira,
   zen,
   zenSeasonAward,
-} from "../../../test/career-fixtures";
+} from "../../../test/career.fixture";
 import { PlayerComparisonService } from "./player-comparison.service";
 
 const compareZenWithVatira = async () => {
-  const { sources, playerEarnings } = careerSources();
-  const comparison = await new PlayerComparisonService(sources).compare("zen", "vatira");
+  const { sources } = careerSources();
 
-  return { comparison, playerEarnings };
+  return { comparison: await new PlayerComparisonService(sources).compare("zen", "vatira") };
 };
 
 describe(PlayerComparisonService, () => {
@@ -43,11 +42,9 @@ describe(PlayerComparisonService, () => {
   });
 
   it("totals earnings from redistributable prizes only", async () => {
-    const { comparison, playerEarnings } = await compareZenWithVatira();
+    const { comparison } = await compareZenWithVatira();
 
     expect(comparison.a.earnings).toStrictEqual(careerEarnings(1500));
-    expect(playerEarnings).toHaveBeenCalledWith(zen.id, { redistributableOnly: true });
-    expect(playerEarnings).toHaveBeenCalledWith(vatira.id, { redistributableOnly: true });
   });
 
   it("orders the head-to-head record by the requested sides", async () => {

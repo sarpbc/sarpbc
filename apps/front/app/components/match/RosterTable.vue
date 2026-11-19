@@ -21,14 +21,13 @@ const columns = computed(() =>
     participant,
     players:
       lineups.find((lineup) => lineup.participantId === participant.id)?.players ??
-      (participant.players ?? []).map((player): MatchLineupPlayer => ({
+      (participant.players ?? []).map((player) => ({
         ...player,
         standIn: false,
       })),
   })),
 );
 
-// Both columns render the same number of rows so every divider lines up across the table.
 const rowCount = computed(() =>
   Math.max(1, ...columns.value.map((column) => column.players.length)),
 );

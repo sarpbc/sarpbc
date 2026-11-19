@@ -27,7 +27,7 @@ const description = ref(circuit?.description ?? "");
 const sourceUrl = ref(circuit?.sourceUrl ?? "");
 const qualificationSpots = ref<number | null>(circuit?.qualificationSpots ?? null);
 
-const inRange = (value: number | null, min: number, max: number): boolean =>
+const inRange = (value: number | null, min: number, max: number) =>
   value === null || (Number.isInteger(value) && value >= min && value <= max);
 
 const sourceUrlError = computed(() => checkSourceUrl(sourceUrl.value));

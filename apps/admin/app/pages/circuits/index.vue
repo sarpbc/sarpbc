@@ -27,7 +27,7 @@ const {
   refresh,
   error,
 } = await useLazyAsyncData("admin-circuits", () => getCircuits(), {
-  default: (): CircuitSummary[] => [],
+  default: () => [],
   server: false,
 });
 

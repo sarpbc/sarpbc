@@ -3,7 +3,7 @@ import type { BracketLinkInput } from "@sarpbc/types";
 import { z } from "zod";
 import { mapSequentially } from "../../src/common/application/sequentially.ts";
 import { byJoined } from "./support.mts";
-import type { JsonResponse, Payload, Request } from "./support.mts";
+import type { Payload, Request } from "./support.mts";
 
 const identified = z.looseObject({ id: z.string() });
 
@@ -57,7 +57,7 @@ export const verifyManualBrackets = async ({
   staffCookie,
   memberCookie,
   competition,
-}: ManualBracketsContext): Promise<void> => {
+}: ManualBracketsContext) => {
   const players: Identified[] = await mapSequentially(
     ["Fake Seed One", "Fake Seed Two", "Fake Seed Three", "Fake Seed Four"],
     async (name) => {
@@ -67,7 +67,7 @@ export const verifyManualBrackets = async ({
     },
   );
 
-  const createStage = async (name: string): Promise<TournamentDetail> => {
+  const createStage = async (name: string) => {
     const response = await request(
       "POST",
       "/tournaments",
@@ -82,7 +82,7 @@ export const verifyManualBrackets = async ({
   const stage = await createStage("Fake Bracket Finals");
   assert.equal(stage.hasBracket, false);
 
-  const participantsOf = (tournament: TournamentDetail): string[] =>
+  const participantsOf = (tournament: TournamentDetail) =>
     players.map((player) => {
       const entry = tournament.participants.find(
         (participant) => participant.players[0].id === player.id,
@@ -95,7 +95,7 @@ export const verifyManualBrackets = async ({
 
   const [p1, p2, p3, p4] = participantsOf(stage);
 
-  const createMatch = async (body: Payload): Promise<Identified> => {
+  const createMatch = async (body: Payload) => {
     const response2 = await request(
       "POST",
       `/tournaments/${stage.id}/matches`,
@@ -155,7 +155,7 @@ export const verifyManualBrackets = async ({
     "the public stage carries the links the bracket tree is drawn from",
   );
 
-  const setBracket = async (matchId: string, body: Payload, status = 200): Promise<JsonResponse> =>
+  const setBracket = async (matchId: string, body: Payload, status = 200) =>
     await request("PUT", `/tournaments/matches/${matchId}/bracket`, body, staffCookie, status);
 
   await setBracket(

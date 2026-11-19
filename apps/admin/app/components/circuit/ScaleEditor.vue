@@ -128,7 +128,7 @@ const toggleRegionTeam = (teamId: string, selected: boolean) => {
     : regionTeamIds.value.filter((id) => id !== teamId);
 };
 
-const toFinish = (row: FinishRow): CircuitStageFinishInput | null => {
+const toFinish = (row: FinishRow) => {
   const { teamId, placement } = row;
 
   if (
@@ -156,9 +156,9 @@ const hasRepeatedFinish = computed(() => {
   return new Set(teamIds).size !== teamIds.length;
 });
 
-const finishError = (row: FinishRow): string | undefined => {
+const finishError = (row: FinishRow) => {
   if (toFinish(row) !== null) {
-    return undefined;
+    return;
   }
 
   if (row.teamId === undefined || row.placement === null) {
@@ -178,7 +178,7 @@ const removeFinish = (key: number) => {
   finishRows.value = finishRows.value.filter((row) => row.key !== key);
 };
 
-const toTier = (row: TierRow): ValidTier | null => {
+const toTier = (row: TierRow) => {
   const { from, to, points } = row;
 
   if (
@@ -200,9 +200,9 @@ const toTier = (row: TierRow): ValidTier | null => {
   return { from, points, to };
 };
 
-const rowError = (row: TierRow): string | undefined => {
+const rowError = (row: TierRow) => {
   if (toTier(row) !== null) {
-    return undefined;
+    return;
   }
 
   if (row.from === null || row.to === null || row.points === null) {

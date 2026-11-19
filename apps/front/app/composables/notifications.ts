@@ -1,6 +1,6 @@
 import type { AppNotification } from "@sarpbc/types";
 
-export const getNotifications = async (limit = 30): Promise<AppNotification[]> => {
+export const getNotifications = async (limit = 30) => {
   try {
     const res = await apiFetch<{ notifications: AppNotification[] }>("/notifications", {
       method: "GET",
@@ -15,7 +15,7 @@ export const getNotifications = async (limit = 30): Promise<AppNotification[]> =
   }
 };
 
-const getUnreadNotificationCount = async (): Promise<number> => {
+const getUnreadNotificationCount = async () => {
   try {
     const res = await apiFetch<{ count: number }>("/notifications/unread-count", {
       method: "GET",
@@ -29,7 +29,7 @@ const getUnreadNotificationCount = async (): Promise<number> => {
   }
 };
 
-export const markNotificationsRead = async (ids?: string[]): Promise<number> => {
+export const markNotificationsRead = async (ids?: string[]) => {
   try {
     const res = await apiFetch<{ marked: number }>("/notifications/read", {
       body: ids !== undefined && ids.length > 0 ? { ids } : {},

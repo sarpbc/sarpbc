@@ -11,7 +11,7 @@ import { participantName, tournamentStageLabel } from "@sarpbc/utils";
 const MATCH_OG_FONT_FAMILY = "Inter";
 const MATCH_OG_FONT_FILES = ["Inter-Regular.ttf", "Inter-Bold.ttf"] as const;
 
-const escapeXml = (value: string): string =>
+const escapeXml = (value: string) =>
   value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -19,7 +19,7 @@ const escapeXml = (value: string): string =>
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&apos;");
 
-const truncate = (value: string, maxLength: number): string => {
+const truncate = (value: string, maxLength: number) => {
   if (value.length <= maxLength) {
     return value;
   }
@@ -27,12 +27,10 @@ const truncate = (value: string, maxLength: number): string => {
   return `${value.slice(0, maxLength - 1)}…`;
 };
 
-const getParticipantScore = (
-  match: MatchDetailResponse["match"],
-  participantId: string,
-): number | null => getMatchParticipantScore(match.results, participantId);
+const getParticipantScore = (match: MatchDetailResponse["match"], participantId: string) =>
+  getMatchParticipantScore(match.results, participantId);
 
-export const buildMatchOgSvg = (matchDetail: MatchDetailResponse): string => {
+export const buildMatchOgSvg = (matchDetail: MatchDetailResponse) => {
   const { match } = matchDetail;
   const participants = match.participants ?? [];
   const [teamA, teamB] = participants;
@@ -81,7 +79,7 @@ export const buildMatchOgSvg = (matchDetail: MatchDetailResponse): string => {
 </svg>`;
 };
 
-const resolveMatchOgFontFiles = (): string[] => {
+const resolveMatchOgFontFiles = () => {
   const dirs = [
     path.join(process.cwd(), "public", "fonts", "og"),
     path.join(process.cwd(), "apps", "front", "public", "fonts", "og"),
@@ -101,11 +99,11 @@ const resolveMatchOgFontFiles = (): string[] => {
 export const getMatchOgResvgFontOptions = () => ({
   defaultFontFamily: MATCH_OG_FONT_FAMILY,
   fontFiles: resolveMatchOgFontFiles(),
-  // Alpine runtime images have no system fonts; Resvg drops <text> when none resolve.
+  // WARNING: Alpine runtime images have no system fonts, and Resvg drops <text> when none resolve.
   loadSystemFonts: false,
 });
 
-export const fetchMatchDetailForOg = async (id: string): Promise<MatchDetailResponse> => {
+export const fetchMatchDetailForOg = async (id: string) => {
   try {
     return await getMatchById(id);
   } catch (error) {

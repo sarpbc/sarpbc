@@ -78,12 +78,12 @@ const teamB = computed(() => participants.value[1]);
 const participantLabel = (participant?: TournamentParticipant) =>
   (participant && participantName(participant)) || t("page.match.detail.unknownTeam");
 
-const isTbdTeam = (participant?: TournamentParticipant): boolean =>
+const isTbdTeam = (participant?: TournamentParticipant) =>
   !participant || !participantName(participant).trim();
 
 const isBothTeamsTbd = computed(() => isTbdTeam(teamA.value) && isTbdTeam(teamB.value));
 
-const getParticipantScore = (currentMatch: Match, participantId: string): number | null =>
+const getParticipantScore = (currentMatch: Match, participantId: string) =>
   getMatchParticipantScore(currentMatch.results, participantId);
 
 const matchStatus = computed(() => {
@@ -129,7 +129,7 @@ const forfeiter = computed(() =>
     : participants.value.find((participant) => participant.id === match.value?.forfeitedBy),
 );
 
-const heroScore = (participant: TournamentParticipant | undefined): string | null => {
+const heroScore = (participant: TournamentParticipant | undefined) => {
   if (!match.value || !participant) {
     return "–";
   }
@@ -152,7 +152,7 @@ const onVodsSaved = (vods: MatchVod[]) => {
   matchDetail.value = { ...matchDetail.value, match: { ...matchDetail.value.match, vods } };
 };
 
-const heroScoreClass = (participantId: string | undefined): string => {
+const heroScoreClass = (participantId: string | undefined) => {
   if (!winnerParticipantId.value) {
     return "font-medium text-highlighted";
   }
@@ -256,7 +256,7 @@ const seoDescription = computed(() => {
   }
 });
 
-const getMatchOgImageUrl = (id: string): string => {
+const getMatchOgImageUrl = (id: string) => {
   const { origin } = new URL(getCanonicalUrl());
 
   return `${origin}/og/match/${id}.png?v=2`;

@@ -50,7 +50,7 @@ const picksMatches = computed(() => kind.value === "match" || kind.value === "ma
 
 const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short" });
 
-const block = computed((): MatchBlockSelector | null => {
+const block = computed<MatchBlockSelector | null>(() => {
   if (!source.value) {
     return null;
   }
@@ -80,7 +80,7 @@ const block = computed((): MatchBlockSelector | null => {
   }
 });
 
-const matchLabel = (match: TournamentMatchListItem): string => {
+const matchLabel = (match: TournamentMatchListItem) => {
   const [teamA, teamB] = match.participants;
   const tbd = t("newsTag.matchTbd");
   const teams = `${teamA ? participantName(teamA) : tbd} – ${teamB ? participantName(teamB) : tbd}`;
@@ -90,7 +90,7 @@ const matchLabel = (match: TournamentMatchListItem): string => {
     : teams;
 };
 
-const resolveSource = async (initial: MatchBlockSelector): Promise<Selection | null> => {
+const resolveSource = async (initial: MatchBlockSelector) => {
   if (initial.kind === "team") {
     const team = await getTeamById(initial.id);
 
@@ -108,7 +108,7 @@ const resolveSource = async (initial: MatchBlockSelector): Promise<Selection | n
   return initial.kind === "tournament" ? { id: initial.id, label: initial.id } : null;
 };
 
-const initialMatchIds = (initial: MatchBlockSelector | null): string[] => {
+const initialMatchIds = (initial: MatchBlockSelector | null) => {
   if (initial?.kind === "match") {
     return [initial.id];
   }
@@ -229,7 +229,7 @@ const toggleMatch = (id: string, checked: boolean | "indeterminate") => {
       : matchIds.value.filter((existing) => existing !== id);
 };
 
-const canToggle = (id: string): boolean =>
+const canToggle = (id: string) =>
   kind.value === "match" ||
   matchIds.value.includes(id) ||
   matchIds.value.length < NEWS_MATCH_BLOCK_MAX_MATCHES;

@@ -1,12 +1,12 @@
-import type { TournamentStatsGame } from "@sarpbc/types";
 import type {
+  GameAttachment,
   GameRecord,
   GameStatsStore,
   PlatformAccount,
   PlayerLink,
 } from "../src/match-stats/application/ports";
 
-const toTournamentGame = (game: GameRecord): TournamentStatsGame => ({
+const toTournamentGame = (game: GameRecord) => ({
   ballchasingId: game.ballchasingId,
   blueGoals: game.blueGoals,
   blueParticipantId: game.blueParticipantId,
@@ -14,13 +14,14 @@ const toTournamentGame = (game: GameRecord): TournamentStatsGame => ({
   number: game.number,
   orangeGoals: game.orangeGoals,
   orangeParticipantId: game.orangeParticipantId,
-  playedAt: null,
+  playedAt: game.playedAt?.toISOString() ?? null,
 });
 
 export class MemoryGames implements GameStatsStore {
   saved: GameRecord[] = [];
   linked: PlayerLink[] = [];
   exclusions = new Set<string>();
+  attachments = new Map<string, GameAttachment>();
   async locations(ids: string[]) {
     return new Map(
       this.saved
@@ -31,8 +32,8 @@ export class MemoryGames implements GameStatsStore {
   async excluded(ids: string[]) {
     return new Set(ids.filter((id) => this.exclusions.has(id)));
   }
-  async attachment() {
-    return null;
+  async attachment(replayId: string) {
+    return this.attachments.get(replayId) ?? null;
   }
   async links(accounts: PlatformAccount[]) {
     return this.linked.filter((link) =>
@@ -55,7 +56,7 @@ export class MemoryGames implements GameStatsStore {
     return [];
   }
   async inTournament() {
-    return [];
+    return this.saved.toSorted((a, b) => a.number - b.number).map(toTournamentGame);
   }
   async playerLines() {
     return [];

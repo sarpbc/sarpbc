@@ -52,23 +52,23 @@ export interface NewsWeekResponse {
   items: NewsArticleResponse[];
 }
 
-const newsContent = (value: string): string => {
+const newsContent = (value: string) => {
   assertValidMatchBlocks(value);
 
   return sanitizeNewsHtml(value);
 };
 
-const firstFreeSlug = async (base: string, articles: NewsQueries, suffix = 0): Promise<string> => {
+const firstFreeSlug: (
+  base: string,
+  articles: NewsQueries,
+  suffix?: number,
+) => Promise<string> = async (base, articles, suffix = 0) => {
   const slug = suffix === 0 ? base : `${base}-${suffix}`;
 
   return (await articles.findBySlug(slug)) ? await firstFreeSlug(base, articles, suffix + 1) : slug;
 };
 
-const mapListArticle = (
-  article: NewsArticleRecord,
-  locale: SupportedLocale,
-  commentCount = 0,
-): NewsArticleListItemResponse => {
+const mapListArticle = (article: NewsArticleRecord, locale: SupportedLocale, commentCount = 0) => {
   const { title, content } = localizedNewsFields(article, locale);
 
   return {
@@ -83,7 +83,7 @@ const mapListArticle = (
   };
 };
 
-const mapArticle = (article: NewsArticleRecord, locale: SupportedLocale): NewsArticleResponse => {
+const mapArticle = (article: NewsArticleRecord, locale: SupportedLocale) => {
   const { title, content } = localizedNewsFields(article, locale);
 
   return {
@@ -99,15 +99,16 @@ const mapArticle = (article: NewsArticleRecord, locale: SupportedLocale): NewsAr
   };
 };
 
-const mapAdminArticle = (article: NewsArticleRecord): NewsArticleAdmin => ({
-  ...mapArticle(article, "en-US"),
-  contentFr: article.contentFr,
-  createdAt: article.createdAt.toISOString(),
-  hasFrench: hasFrenchTranslation(article),
-  titleFr: article.titleFr,
-});
+const mapAdminArticle = (article: NewsArticleRecord) =>
+  ({
+    ...mapArticle(article, "en-US"),
+    contentFr: article.contentFr,
+    createdAt: article.createdAt.toISOString(),
+    hasFrench: hasFrenchTranslation(article),
+    titleFr: article.titleFr,
+  }) satisfies NewsArticleAdmin;
 
-const generateUniqueSlug = async (source: string, articles: NewsQueries): Promise<string> => {
+const generateUniqueSlug = async (source: string, articles: NewsQueries) => {
   const base = toSlug(source);
 
   if (!base) {
@@ -123,7 +124,7 @@ const assertSlugAvailable = async (
   articles: NewsQueries,
   slug: string,
   excludeArticleId?: string,
-): Promise<void> => {
+) => {
   const existing = await articles.findBySlug(slug);
 
   if (existing && existing.id !== excludeArticleId) {
@@ -141,8 +142,8 @@ export class NewsService {
     private readonly indexing: NewsIndexing,
   ) {}
 
-  async create(dto: CreateNewsArticleInput, userId: string): Promise<NewsArticleAdmin> {
-    return await this.transaction.run(async (scope) => {
+  async create(dto: CreateNewsArticleInput, userId: string) {
+    return (await this.transaction.run(async (scope) => {
       const author = await scope.users.findById(userId);
 
       if (!author) {
@@ -185,7 +186,7 @@ export class NewsService {
       await scope.articles.save(article);
 
       return mapAdminArticle(article);
-    });
+    })) satisfies NewsArticleAdmin;
   }
 
   async findAllPublishedArticle(
@@ -193,12 +194,7 @@ export class NewsService {
     limit: number,
     locale: SupportedLocale = "en-US",
     type?: NewsType,
-  ): Promise<{
-    data: NewsArticleListItemResponse[];
-    total: number;
-    page: number;
-    limit: number;
-  }> {
+  ) {
     const [articles, total] = await this.newsRepository.listPublished(page, limit, type);
 
     const commentCounts = await this.replyService.countByTargetIds(
@@ -216,10 +212,7 @@ export class NewsService {
     };
   }
 
-  async findPublishedShortsByWeek(
-    week: string,
-    locale: SupportedLocale = "en-US",
-  ): Promise<NewsWeekResponse> {
+  async findPublishedShortsByWeek(week: string, locale: SupportedLocale = "en-US") {
     const range = isoWeekUtcRange(week);
 
     if (!range) {
@@ -240,7 +233,7 @@ export class NewsService {
     };
   }
 
-  async findAll(page: number, limit: number): Promise<PaginatedNewsArticles> {
+  async findAll(page: number, limit: number) {
     const [articles, total] = await this.newsRepository.listAdmin(page, limit);
 
     return {
@@ -248,13 +241,10 @@ export class NewsService {
       limit,
       page,
       total,
-    };
+    } satisfies PaginatedNewsArticles;
   }
 
-  async findOneBySlug(
-    slug: string,
-    locale: SupportedLocale = "en-US",
-  ): Promise<NewsArticleResponse> {
+  async findOneBySlug(slug: string, locale: SupportedLocale = "en-US") {
     const article = await this.newsRepository.findBySlug(slug);
 
     if (!article) {
@@ -268,27 +258,27 @@ export class NewsService {
     return mapArticle(article, locale);
   }
 
-  async findOneAdminBySlug(slug: string): Promise<NewsArticleAdmin> {
+  async findOneAdminBySlug(slug: string) {
     const article = await this.newsRepository.findBySlug(slug);
 
     if (!article) {
       throw new NotFoundError(`NewsArticle with slug "${slug}" not found`);
     }
 
-    return mapAdminArticle(article);
+    return mapAdminArticle(article) satisfies NewsArticleAdmin;
   }
 
-  async findOneAdminByIdOrSlug(idOrSlug: string): Promise<NewsArticleAdmin> {
+  async findOneAdminByIdOrSlug(idOrSlug: string) {
     const bySlug = await this.newsRepository.findBySlug(idOrSlug);
 
     if (bySlug) {
-      return mapAdminArticle(bySlug);
+      return mapAdminArticle(bySlug) satisfies NewsArticleAdmin;
     }
 
     const byId = await this.newsRepository.findById(idOrSlug);
 
     if (byId) {
-      return mapAdminArticle(byId);
+      return mapAdminArticle(byId) satisfies NewsArticleAdmin;
     }
 
     throw new NotFoundError(
@@ -296,7 +286,7 @@ export class NewsService {
     );
   }
 
-  async findArticleIdBySlug(slug: string): Promise<string> {
+  async findArticleIdBySlug(slug: string) {
     const article = await this.newsRepository.findBySlug(slug);
 
     if (!article) {
@@ -306,7 +296,7 @@ export class NewsService {
     return article.id;
   }
 
-  async update(slug: string, dto: UpdateNewsArticleInput): Promise<NewsArticleAdmin> {
+  async update(slug: string, dto: UpdateNewsArticleInput) {
     const result = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
 
@@ -362,7 +352,7 @@ export class NewsService {
       await this.indexing.submitNewsSlugs([slug, result.slug]);
     }
 
-    return result;
+    return result satisfies NewsArticleAdmin;
   }
 
   async setDraftStatus(slug: string, isDraft: boolean) {
@@ -385,7 +375,7 @@ export class NewsService {
     }
   }
 
-  async delete(slug: string): Promise<void> {
+  async delete(slug: string) {
     const wasPublished = await this.transaction.run(async (scope) => {
       const article = await scope.articles.findBySlug(slug);
 

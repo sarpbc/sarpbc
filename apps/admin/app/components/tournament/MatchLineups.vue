@@ -83,19 +83,18 @@ const unnamedSuggestedCount = computed(
     usableSuggestion.value.reduce((total, suggestion) => total + suggestion.picks.length, 0),
 );
 
-const sideOf = (participantId: string): LineupPick[] => lineups.value[participantId] ?? [];
+const sideOf = (participantId: string) => lineups.value[participantId] ?? [];
 
-const isFull = (participantId: string): boolean =>
-  sideOf(participantId).length >= MAX_LINEUP_PLAYERS;
+const isFull = (participantId: string) => sideOf(participantId).length >= MAX_LINEUP_PLAYERS;
 
-const isStandIn = (participantId: string, playerId: string): boolean =>
+const isStandIn = (participantId: string, playerId: string) =>
   !rosterIds.value.get(participantId)?.has(playerId);
 
-const rosterOptions = (participantId: string): SelectGroup<string>[] => {
+const rosterOptions = (participantId: string) => {
   const own = participants.filter((participant) => participant.id === participantId);
   const others = participants.filter((participant) => participant.id !== participantId);
 
-  return [...own, ...others].flatMap((participant): SelectGroup<string>[] => {
+  return [...own, ...others].flatMap((participant) => {
     const players = participant.players.filter((player) => !taken.value.has(player.id));
 
     if (players.length === 0) {
@@ -231,8 +230,7 @@ const fillFromRoster = (participantId: string) => {
   };
 };
 
-const hasRoster = (participantId: string): boolean =>
-  (rosterIds.value.get(participantId)?.size ?? 0) > 0;
+const hasRoster = (participantId: string) => (rosterIds.value.get(participantId)?.size ?? 0) > 0;
 
 const fillFromSuggestion = () => {
   lineups.value = Object.fromEntries(

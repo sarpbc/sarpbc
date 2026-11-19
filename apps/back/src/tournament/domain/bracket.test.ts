@@ -5,16 +5,17 @@ import {
   assertManualBracketMatch,
   emptySingleEliminationBracket,
 } from "./bracket";
-import type { StageBracket } from "./bracket";
+import type { BracketLinkInput } from "@sarpbc/types";
 
-const stage = (): StageBracket => ({
+const unlinked = (id: string) => {
+  const previousMatches: BracketLinkInput[] = [];
+
+  return { id, previousMatches };
+};
+
+const stage = () => ({
   hasBracket: true,
-  matches: [
-    { id: "semi-1", previousMatches: [] },
-    { id: "semi-2", previousMatches: [] },
-    { id: "final", previousMatches: [] },
-    { id: "third", previousMatches: [] },
-  ],
+  matches: ["semi-1", "semi-2", "final", "third"].map(unlinked),
 });
 
 describe("bracket links", () => {

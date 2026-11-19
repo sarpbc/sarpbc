@@ -37,7 +37,7 @@ interface LoggedEvent {
 
 const LOG_SIZE = 30;
 
-const initialValues = (): Record<string, ControlValue> =>
+const initialValues = () =>
   Object.fromEntries(playground.controls.map((control) => [control.name, control.initial]));
 
 const values = reactive(initialValues());
@@ -53,12 +53,12 @@ const tab = ref("playground");
 
 let nextId = 0;
 
-const reset = (): void => {
+const reset = () => {
   Object.assign(values, initialValues());
   Object.assign(models, playground.models);
 };
 
-const formatOne = (payload: Emitted): string => {
+const formatOne = (payload: Emitted) => {
   if (payload instanceof Event) {
     return `${payload.constructor.name} (${payload.type})`;
   }
@@ -66,13 +66,13 @@ const formatOne = (payload: Emitted): string => {
   return JSON.stringify(payload) ?? "";
 };
 
-const format = (payload: readonly Emitted[]): string => {
+const format = (payload: readonly Emitted[]) => {
   const text = payload.map(formatOne).join(", ");
 
   return text.length > 100 ? `${text.slice(0, 99)}…` : text;
 };
 
-const record = (name: string, payload: readonly Emitted[]): void => {
+const record = (name: string, payload: readonly Emitted[]) => {
   nextId += 1;
   log.value = [{ id: nextId, name, payload: format(payload) }, ...log.value].slice(0, LOG_SIZE);
 };
@@ -80,21 +80,21 @@ const record = (name: string, payload: readonly Emitted[]): void => {
 const modelNames = Object.keys(playground.models ?? {});
 const events = playground.events ?? [];
 
-const tunedOf = (current: ControlValues, demo: boolean): TunedProp[] =>
-  playground.controls.flatMap((control): TunedProp[] => {
+const tunedOf = (current: ControlValues, demo: boolean) =>
+  playground.controls.flatMap<TunedProp>((control) => {
     const value = propValue(control, current[control.name] ?? null);
 
     return value === null || (control.demo === true) !== demo ? [] : [[control, value]];
   });
 
-const recordOf = (tuned: readonly TunedProp[]): ControlValues =>
+const recordOf = (tuned: readonly TunedProp[]) =>
   Object.fromEntries(tuned.map(([control, value]) => [control.name, value]));
 
-const propsOf = (current: ControlValues): ControlValues => recordOf(tunedOf(current, false));
+const propsOf = (current: ControlValues) => recordOf(tunedOf(current, false));
 
-const sampleOf = (current: ControlValues): ControlValues => recordOf(tunedOf(current, true));
+const sampleOf = (current: ControlValues) => recordOf(tunedOf(current, true));
 
-const bindingsOf = (current: ControlValues): Bindings => ({
+const bindingsOf = (current: ControlValues) => ({
   ...propsOf(current),
   ...Object.fromEntries(
     modelNames.flatMap((name) => [
@@ -126,7 +126,7 @@ const call = computed(() =>
     : playground.call({ ...propsOf(values), ...sampleOf(values) }),
 );
 
-const statesFor = (axis: VariantAxis | undefined): readonly VariantState[] => {
+const statesFor = (axis: VariantAxis | undefined) => {
   if (axis === undefined) {
     return [{ label: "", values: {} }];
   }
@@ -149,10 +149,9 @@ const cell = (row: VariantState, column: VariantState) => {
   return playground.render(bindingsOf(current), sampleOf(current));
 };
 
-const numberValue = (name: string): number | null =>
-  z.number().nullable().catch(null).parse(values[name]);
+const numberValue = (name: string) => z.number().nullable().catch(null).parse(values[name]);
 
-const textValue = (name: string): string => z.string().catch("").parse(values[name]);
+const textValue = (name: string) => z.string().catch("").parse(values[name]);
 </script>
 
 <template>

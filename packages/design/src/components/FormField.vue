@@ -12,7 +12,6 @@ const {
   required = false,
 } = defineProps<{
   description?: string | null;
-  /** Shown under the control and marks it invalid. */
   error?: string | null;
   help?: string | null;
   hint?: string | null;
@@ -26,7 +25,6 @@ const messageId = `${id}-message`;
 
 const slots = useSlots();
 
-/* An error replaces the help text, whether it comes from the prop or the slot. */
 const hasMessage = computed(() => error !== null || help !== null || slots.help !== undefined);
 
 const describedBy = computed(() => {
