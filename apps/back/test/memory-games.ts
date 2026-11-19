@@ -58,11 +58,8 @@ export class MemoryGames implements GameStatsStore {
   async inTournament() {
     return this.saved.toSorted((a, b) => a.number - b.number).map(toTournamentGame);
   }
-  async playerLines() {
-    return [];
-  }
-  async redistributablePlayerLines() {
-    return [];
+  async playerStats() {
+    return { games: 0, tallies: [], unlinkedAccounts: 0 };
   }
   async remove(_tournamentId: string, { matchId, number }: { matchId: string; number: number }) {
     const game = this.saved.find((saved) => saved.matchId === matchId && saved.number === number);

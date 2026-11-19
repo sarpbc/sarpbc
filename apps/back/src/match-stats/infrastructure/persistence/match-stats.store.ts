@@ -1,8 +1,9 @@
 import type { MatchGameStats, MatchGameTeamStats, TournamentStatsGame } from "@sarpbc/types";
 import { EntityManager } from "@mikro-orm/postgresql";
-import type { FilterQuery } from "@mikro-orm/postgresql";
+import { z } from "zod";
 import { mapSequentially } from "../../../common/application/sequentially";
-import type { Tournament } from "../../../tournament/infrastructure/competition-persistence";
+import { TournamentParticipant } from "../../../tournament/infrastructure/competition-persistence";
+import type { PlayerStatsSummary, StatsScope } from "../../domain/player-stats";
 import type {
   GameAttachment,
   GameRecord,
@@ -16,6 +17,57 @@ import { MatchGamePlayer } from "./match-game-player.entity";
 import { PlayerPlatformLink } from "./player-platform-link.entity";
 import { nameOf } from "./participant-name";
 import { toLink } from "./player-link.store";
+
+const STATS_FROM = `from match_game_player p
+  join match_game g on g.id = p.game_id
+  join match m on m.id = g.match_id
+  join tournament t on t.id = m.tournament_id
+  join tournament_participant part on part.id =
+    case when p.side = 'blue' then g.blue_participant_id else g.orange_participant_id end`;
+
+const scopeFilter = (scope: StatsScope) => {
+  switch (scope.kind) {
+    case "tournaments": {
+      return {
+        filter: `m.tournament_id in (${scope.ids.map(() => "?").join(", ")})`,
+        params: scope.ids,
+      };
+    }
+
+    case "redistributable": {
+      return { filter: "t.source <> 'startgg'", params: [] };
+    }
+
+    default: {
+      const exhaustive: never = scope;
+
+      return exhaustive;
+    }
+  }
+};
+
+const count = z.coerce.number().int().nonnegative();
+
+const summaryRows = z.array(z.object({ games: count, unlinked_accounts: count }));
+
+const tallyRows = z.array(
+  z.object({
+    assists: count,
+    demolitions: count,
+    games: count,
+    goals: count,
+    lineup_id: z.string().nullable(),
+    player_id: z.string(),
+    player_name: z.string(),
+    player_slug: z.string(),
+    saves: count,
+    shots: count,
+    team_goals: count,
+    team_id: z.string().nullable(),
+    team_name: z.string().nullable(),
+    team_slug: z.string().nullable(),
+  }),
+);
 
 const toTeam = (game: MatchGame, side: Side) =>
   ({
@@ -192,52 +244,76 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     return games.map(toTournamentGame) satisfies TournamentStatsGame[];
   }
 
-  async playerLines(tournamentIds: string[]) {
-    return await this.findPlayerLines({ $in: tournamentIds });
-  }
+  async playerStats(scope: StatsScope) {
+    const { filter, params } = scopeFilter(scope);
+    const connection = this.em.getConnection();
 
-  async redistributablePlayerLines() {
-    return await this.findPlayerLines({ source: { $ne: "startgg" } });
-  }
-
-  private async findPlayerLines(tournament: FilterQuery<Tournament>) {
-    const rows = await this.em.find(
-      MatchGamePlayer,
-      { game: { match: { tournament } } },
-      {
-        populate: [
-          "player",
-          "game.blueParticipant.team",
-          "game.blueParticipant.players",
-          "game.orangeParticipant.team",
-          "game.orangeParticipant.players",
-        ],
-      },
+    const [summary] = summaryRows.parse(
+      await connection.execute(
+        `select count(distinct p.game_id) as games,
+          count(distinct case when p.player_id is null
+            then p.platform || ':' || coalesce(p.platform_id, p.name) end) as unlinked_accounts
+        ${STATS_FROM} where ${filter}`,
+        params,
+      ),
     );
 
-    return rows.map((row) => {
-      const participant =
-        row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
+    const rows = tallyRows.parse(
+      await connection.execute(
+        `select pl.id as player_id, pl.name as player_name, pl.slug as player_slug,
+          tm.id as team_id, tm.name as team_name, tm.slug as team_slug,
+          case when tm.id is null then part.id end as lineup_id,
+          count(distinct p.game_id) as games,
+          sum(p.goals) as goals, sum(p.assists) as assists, sum(p.saves) as saves,
+          sum(p.shots) as shots, sum(p.demolitions) as demolitions,
+          sum(case when p.side = 'blue' then g.blue_goals else g.orange_goals end) as team_goals
+        ${STATS_FROM}
+        join player pl on pl.id = p.player_id
+        left join team tm on tm.id = part.team_id
+        where ${filter}
+        group by pl.id, tm.id, lineup_id`,
+        params,
+      ),
+    );
 
-      return {
-        account: JSON.stringify([row.platform, row.platformId ?? row.name]),
-        assists: row.assists,
-        demolitions: row.demolitions,
-        gameId: row.game.id,
-        goals: row.goals,
-        player: row.player
-          ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
-          : null,
-        saves: row.saves,
-        shots: row.shots,
+    const lineups = await this.lineupNames(
+      rows.flatMap(({ lineup_id }) => (lineup_id === null ? [] : [lineup_id])),
+    );
+
+    return {
+      games: summary?.games ?? 0,
+      tallies: rows.map((row) => ({
+        games: row.games,
+        player: { id: row.player_id, name: row.player_name, slug: row.player_slug },
         team: {
-          id: participant.team?.id ?? null,
-          name: nameOf(participant),
-          slug: participant.team?.slug ?? null,
+          id: row.team_id,
+          name: row.team_name ?? lineups.get(row.lineup_id ?? "") ?? "",
+          slug: row.team_slug,
         },
-        teamGoals: row.side === "blue" ? row.game.blueGoals : row.game.orangeGoals,
-      };
-    });
+        teamGoals: row.team_goals,
+        totals: {
+          assists: row.assists,
+          demolitions: row.demolitions,
+          goals: row.goals,
+          saves: row.saves,
+          shots: row.shots,
+        },
+      })),
+      unlinkedAccounts: summary?.unlinked_accounts ?? 0,
+    } satisfies PlayerStatsSummary;
+  }
+
+  private async lineupNames(ids: string[]) {
+    const lineups =
+      ids.length === 0
+        ? []
+        : await this.em.find(
+            TournamentParticipant,
+            { id: { $in: ids } },
+            { populate: ["players", "team"] },
+          );
+
+    return new Map(lineups.map((participant) => [participant.id, nameOf(participant)]));
   }
 
   async remove(tournamentId: string, location: GameLocation) {

@@ -318,6 +318,15 @@ export const verifyMatchStats = async ({
   );
   await request("GET", `/events/${randomUUID()}/player-stats`, undefined, undefined, 404);
 
+  const response8 = await request("GET", "/stats/players");
+  const overall = response8.json(playerStats);
+  assert.deepEqual(
+    overall.players.find((row) => row.player.id === playerId),
+    veteran,
+    "the overall leaderboard counts the stage games of a player",
+  );
+  assert.ok(overall.games >= stageStats.games, "the overall leaderboard counts every stage game");
+
   const linksUrl = `/tournaments/${tournamentId}/stats-players`;
   await request("GET", linksUrl, undefined, undefined, 401);
   await request("GET", linksUrl, undefined, memberCookie, 403);

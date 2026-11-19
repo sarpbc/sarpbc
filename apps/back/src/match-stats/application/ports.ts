@@ -4,7 +4,7 @@ import type {
   StatsRoster,
   TournamentStatsGame,
 } from "@sarpbc/types";
-import type { PlayerGameLine } from "../domain/player-stats";
+import type { PlayerStatsSummary, StatsScope } from "../domain/player-stats";
 import type { CandidateMatch, GameLocation, ReplaySummary, Side } from "../domain/replay-matching";
 import type { StatsImport } from "../domain/stats-import";
 
@@ -84,8 +84,7 @@ export interface GameStatsStore {
   save: (game: GameRecord) => Promise<TournamentStatsGame>;
   byMatch: (matchId: string) => Promise<MatchGameStats[]>;
   inTournament: (tournamentId: string) => Promise<TournamentStatsGame[]>;
-  playerLines: (tournamentIds: string[]) => Promise<PlayerGameLine[]>;
-  redistributablePlayerLines: () => Promise<PlayerGameLine[]>;
+  playerStats: (scope: StatsScope) => Promise<PlayerStatsSummary>;
   /** Deletes the game with its player rows and excludes its replay atomically. */
   remove: (tournamentId: string, location: GameLocation) => Promise<TournamentStatsGame | null>;
 }
