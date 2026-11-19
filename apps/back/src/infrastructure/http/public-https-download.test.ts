@@ -13,7 +13,7 @@ interface RecordedRequest {
 }
 
 const limits = {
-  isAllowedHost: (hostname: string) => !/(?:^|.)liquipedia.net$/iu.test(hostname),
+  isAllowedHost: (hostname: string) => !/(?:^|\.)liquipedia\.net$/iu.test(hostname),
   maxBytes: 16,
   maxRedirects: 2,
   timeoutMs: 1000,
