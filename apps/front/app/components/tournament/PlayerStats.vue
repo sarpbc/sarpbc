@@ -7,12 +7,13 @@ import type {
   TournamentPlayerStatsResponse,
 } from "@sarpbc/types";
 
-const { stats, pending, error, caption, emptyTitle } = defineProps<{
+const { stats, pending, error, caption, emptyTitle, teamFilter } = defineProps<{
   stats: TournamentPlayerStatsResponse | null;
   pending: boolean;
   error: boolean;
   caption: string;
   emptyTitle: string;
+  teamFilter?: boolean;
 }>();
 
 const emit = defineEmits<{ retry: [] }>();
@@ -184,7 +185,7 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
     <div v-if="hasStats || $slots.filters" class="flex flex-wrap items-center gap-2 px-2">
       <slot name="filters" />
       <SSelect
-        v-if="hasStats && teamOptions.length > 2"
+        v-if="teamFilter && hasStats && teamOptions.length > 2"
         v-model="team"
         :items="teamOptions"
         :aria-label="t('page.tournaments.stats.team')"
