@@ -114,6 +114,7 @@
     "results": "Résultats",
     "transfers": "Transferts",
     "circuits": "Circuits",
+    "stats": "Stats",
     "seasons": "Saisons",
     "countries": "Pays",
     "formerly": "Anciennement {name}"
@@ -1971,6 +1972,16 @@
         "description": "Suivez les mouvements d'effectifs de l'esport Rocket League sur sarpbc.org : arrivées, départs, mises sur le banc et prêts, avec leurs sources."
       },
       "error": "Impossible de charger les transferts. Vérifiez votre connexion et réessayez."
+    },
+    "stats": {
+      "title": "Stats des joueurs",
+      "games": "{count} partie | {count} parties",
+      "caption": "Stats des joueurs sur toutes les parties de tournoi dont les replays sont importés",
+      "empty": "Aucune stat de joueur pour le moment.",
+      "seo": {
+        "title": "Classement des stats joueurs Rocket League {'|'} sarpbc.org",
+        "description": "Comparez les joueurs de l'esport Rocket League sur sarpbc.org : buts, passes décisives, arrêts, tirs, démolitions et pourcentage de réussite sur les parties de tournoi."
+      }
     },
     "circuits": {
       "index": {

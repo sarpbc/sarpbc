@@ -1,20 +1,24 @@
 import { describe, expect, it } from "vitest";
+import type { PlayerGameLine } from "../domain/player-stats";
 import { TournamentPlayerStatsService } from "./tournament-player-stats.service";
 
+const line = (gameId: string) =>
+  ({
+    account: "steam:1",
+    assists: 1,
+    demolitions: 0,
+    gameId,
+    goals: 1,
+    player: { id: "zen", name: "zen", slug: "zen" },
+    saves: 1,
+    shots: 2,
+    team: { id: "team-vit", name: "Vitality", slug: "vitality" },
+    teamGoals: 3,
+  }) satisfies PlayerGameLine;
+
 const service = new TournamentPlayerStatsService({
-  playerLines: async (ids: string[]) =>
-    ids.map((id) => ({
-      account: "steam:1",
-      assists: 1,
-      demolitions: 0,
-      gameId: `game-${id}`,
-      goals: 1,
-      player: { id: "zen", name: "zen", slug: "zen" },
-      saves: 1,
-      shots: 2,
-      team: { id: "team-vit", name: "Vitality", slug: "vitality" },
-      teamGoals: 3,
-    })),
+  playerLines: async (ids: string[]) => ids.map((id) => line(`game-${id}`)),
+  redistributablePlayerLines: async () => [line("game-a"), line("game-b"), line("game-c")],
 });
 
 describe(TournamentPlayerStatsService, () => {
@@ -35,6 +39,13 @@ describe(TournamentPlayerStatsService, () => {
       games: 0,
       players: [],
       unlinkedAccounts: 0,
+    });
+  });
+
+  it("aggregates every redistributable tournament into the overall leaderboard", async () => {
+    await expect(service.overall()).resolves.toMatchObject({
+      games: 3,
+      players: [{ games: 3, totals: { goals: 3 } }],
     });
   });
 });

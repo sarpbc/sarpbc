@@ -108,7 +108,7 @@ describe(EventController, () => {
     catalog,
     unusedStreams,
     unusedViewerships,
-    new TournamentPlayerStatsService({ playerLines }),
+    new TournamentPlayerStatsService({ playerLines, redistributablePlayerLines: async () => [] }),
   );
 
   beforeEach(() => {

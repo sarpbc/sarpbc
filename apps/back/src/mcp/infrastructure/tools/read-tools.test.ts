@@ -199,7 +199,10 @@ const setup = () => {
       matchLineupService,
       matchService,
       playerAwardService,
-      tournamentPlayerStatsService: new TournamentPlayerStatsService({ playerLines }),
+      tournamentPlayerStatsService: new TournamentPlayerStatsService({
+        playerLines,
+        redistributablePlayerLines: async () => [],
+      }),
       tournamentPrizeService,
       tournaments,
     }),

@@ -9,13 +9,21 @@ export interface StatsStage {
 }
 
 export class TournamentPlayerStatsService {
-  constructor(private readonly games: Pick<GameStatsStore, "playerLines">) {}
+  constructor(
+    private readonly games: Pick<GameStatsStore, "playerLines" | "redistributablePlayerLines">,
+  ) {}
 
   async forStages(stages: readonly StatsStage[]) {
     const ids = stages.flatMap(({ id, source }) => (isRedistributable(source) ? [id] : []));
 
     return aggregatePlayerStats(
       ids.length === 0 ? [] : await this.games.playerLines(ids),
+    ) satisfies TournamentPlayerStatsResponse;
+  }
+
+  async overall() {
+    return aggregatePlayerStats(
+      await this.games.redistributablePlayerLines(),
     ) satisfies TournamentPlayerStatsResponse;
   }
 }

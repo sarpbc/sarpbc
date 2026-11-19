@@ -59,7 +59,10 @@ const playerLines = async (ids: Parameters<GameStatsStore["playerLines"]>[0]) =>
     teamGoals: 2,
   }));
 
-const playerStats = new TournamentPlayerStatsService({ playerLines });
+const playerStats = new TournamentPlayerStatsService({
+  playerLines,
+  redistributablePlayerLines: async () => [],
+});
 
 const controllerWith = (
   tournaments: TournamentQueries,

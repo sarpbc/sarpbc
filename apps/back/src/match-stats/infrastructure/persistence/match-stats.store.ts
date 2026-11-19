@@ -1,6 +1,8 @@
 import type { MatchGameStats, MatchGameTeamStats, TournamentStatsGame } from "@sarpbc/types";
 import { EntityManager } from "@mikro-orm/postgresql";
+import type { FilterQuery } from "@mikro-orm/postgresql";
 import { mapSequentially } from "../../../common/application/sequentially";
+import type { Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import type {
   GameAttachment,
   GameRecord,
@@ -191,9 +193,17 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   }
 
   async playerLines(tournamentIds: string[]) {
+    return await this.findPlayerLines({ $in: tournamentIds });
+  }
+
+  async redistributablePlayerLines() {
+    return await this.findPlayerLines({ source: { $ne: "startgg" } });
+  }
+
+  private async findPlayerLines(tournament: FilterQuery<Tournament>) {
     const rows = await this.em.find(
       MatchGamePlayer,
-      { game: { match: { tournament: { $in: tournamentIds } } } },
+      { game: { match: { tournament } } },
       {
         populate: [
           "player",

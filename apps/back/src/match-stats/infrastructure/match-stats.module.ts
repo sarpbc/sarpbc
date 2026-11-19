@@ -11,6 +11,7 @@ import { TournamentPlayerStatsService } from "../application/tournament-player-s
 import { BallchasingClient } from "./ballchasing/ballchasing-client";
 import { GAME_STATS_STORE } from "./game-stats.tokens";
 import { InterruptedImportsSweeper } from "./interrupted-imports.sweeper";
+import { PlayerStatsController } from "./http/player-stats.controller";
 import { StatsGameController } from "./http/stats-game.controller";
 import { StatsImportController } from "./http/stats-import.controller";
 import { StatsPlayerLinkController } from "./http/stats-player-link.controller";
@@ -29,7 +30,12 @@ const BALLCHASING_SOURCE = Symbol("BallchasingSource");
 const STATS_CANDIDATES = Symbol("StatsCandidates");
 
 @Module({
-  controllers: [StatsImportController, StatsPlayerLinkController, StatsGameController],
+  controllers: [
+    StatsImportController,
+    StatsPlayerLinkController,
+    StatsGameController,
+    PlayerStatsController,
+  ],
   exports: [
     GAME_STATS_STORE,
     StatsImportService,

@@ -7,10 +7,12 @@ import type {
   TournamentPlayerStatsResponse,
 } from "@sarpbc/types";
 
-const { stats, pending, error } = defineProps<{
+const { stats, pending, error, caption, emptyTitle } = defineProps<{
   stats: TournamentPlayerStatsResponse | null;
   pending: boolean;
   error: boolean;
+  caption: string;
+  emptyTitle: string;
 }>();
 
 const emit = defineEmits<{ retry: [] }>();
@@ -211,18 +213,13 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
     <HubCard v-else-if="!hasStats" class="flex min-h-row-stack h-row-grid items-center">
       <SEmptyState
         icon="i-fluent-data-bar-vertical-24-regular"
-        :title="t('page.tournaments.stats.empty')"
+        :title="emptyTitle"
         :hint="t('page.tournaments.stats.emptyHint')"
       />
     </HubCard>
 
     <HubCard v-else class="flex flex-col">
-      <STable
-        v-model:sorting="sort"
-        :caption="t('page.tournaments.stats.caption')"
-        :columns="columns"
-        :data="rows"
-      >
+      <STable v-model:sorting="sort" :caption="caption" :columns="columns" :data="rows">
         <template #player-cell="{ row }">
           <SLink
             :to="$localePath(playerPath(row.original.player.slug))"
