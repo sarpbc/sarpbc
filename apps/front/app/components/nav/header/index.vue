@@ -80,6 +80,10 @@ const items = computed<NavigationItem[]>(() => [
     label: t("general.circuits"),
     to: localePath("/circuits"),
   },
+  {
+    label: t("general.stats"),
+    to: localePath("/stats"),
+  },
 ]);
 
 const menuToggleLabel = computed(() =>

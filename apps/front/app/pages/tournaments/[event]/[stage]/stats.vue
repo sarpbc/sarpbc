@@ -27,6 +27,9 @@ const {
     :stats="stats"
     :pending="pending"
     :error="Boolean(error)"
+    :caption="$t('page.tournaments.stats.caption')"
+    :empty-title="$t('page.tournaments.stats.empty')"
+    team-filter
     @retry="refresh()"
   />
 </template>

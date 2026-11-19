@@ -5,21 +5,23 @@ import type {
   TournamentPlayerStatsTeam,
 } from "@sarpbc/types";
 
-export interface PlayerGameLine extends PlayerStatCounts {
-  gameId: string;
-  account: string;
-  player: TournamentPlayerStats["player"] | null;
-  team: TournamentPlayerStatsTeam;
-  teamGoals: number;
-}
-
-interface Tally {
+export interface PlayerTally {
   player: TournamentPlayerStats["player"];
   team: TournamentPlayerStatsTeam;
-  games: Set<string>;
+  games: number;
   totals: PlayerStatCounts;
   teamGoals: number;
 }
+
+export interface PlayerStatsSummary {
+  games: number;
+  unlinkedAccounts: number;
+  tallies: readonly PlayerTally[];
+}
+
+export type StatsScope =
+  | { kind: "tournaments"; ids: string[] }
+  | { kind: "redistributable"; minGames: number };
 
 const COUNTS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
@@ -41,15 +43,15 @@ const emptyCounts = () =>
     shots: 0,
   }) satisfies PlayerStatCounts;
 
-const toStats = ({ player, team, games, totals, teamGoals }: Tally) => {
+const toStats = ({ player, team, games, totals, teamGoals }: PlayerTally) => {
   const perGame = emptyCounts();
 
   for (const count of COUNTS) {
-    perGame[count] = round(totals[count] / games.size, 2);
+    perGame[count] = round(totals[count] / games, 2);
   }
 
   return {
-    games: games.size,
+    games,
     goalParticipation: percentage(totals.goals + totals.assists, teamGoals),
     perGame,
     player,
@@ -59,50 +61,37 @@ const toStats = ({ player, team, games, totals, teamGoals }: Tally) => {
   } satisfies TournamentPlayerStats;
 };
 
-export const aggregatePlayerStats = (lines: readonly PlayerGameLine[]) => {
-  const games = new Set<string>();
-  const unlinked = new Set<string>();
-  const tallies = new Map<string, Tally>();
+const merge = (into: PlayerTally, tally: PlayerTally) => {
+  into.games += tally.games;
+  into.teamGoals += tally.teamGoals;
 
-  for (const line of lines) {
-    games.add(line.gameId);
+  for (const count of COUNTS) {
+    into.totals[count] += tally.totals[count];
+  }
+};
 
-    if (!line.player) {
-      unlinked.add(line.account);
-      continue;
-    }
+export const playerStatsResponse = ({ games, unlinkedAccounts, tallies }: PlayerStatsSummary) => {
+  const merged = new Map<string, PlayerTally>();
 
-    const key = JSON.stringify([line.player.id, line.team.id ?? line.team.name]);
+  for (const tally of tallies) {
+    const key = JSON.stringify([tally.player.id, tally.team.id ?? tally.team.name]);
+    const existing = merged.get(key);
 
-    const tally = tallies.get(key) ?? {
-      games: new Set<string>(),
-      player: line.player,
-      team: line.team,
-      teamGoals: 0,
-      totals: emptyCounts(),
-    };
-
-    tallies.set(key, tally);
-
-    if (!tally.games.has(line.gameId)) {
-      tally.teamGoals += line.teamGoals;
-    }
-
-    tally.games.add(line.gameId);
-
-    for (const count of COUNTS) {
-      tally.totals[count] += line[count];
+    if (existing) {
+      merge(existing, tally);
+    } else {
+      merged.set(key, { ...tally, totals: { ...tally.totals } });
     }
   }
 
   return {
-    games: games.size,
-    players: [...tallies.values()]
+    games,
+    players: [...merged.values()]
       .map(toStats)
       .toSorted(
         (a, b) =>
           a.team.name.localeCompare(b.team.name) || a.player.name.localeCompare(b.player.name),
       ),
-    unlinkedAccounts: unlinked.size,
+    unlinkedAccounts,
   } satisfies TournamentPlayerStatsResponse;
 };

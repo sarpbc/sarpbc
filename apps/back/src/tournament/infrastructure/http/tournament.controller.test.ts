@@ -19,7 +19,7 @@ import { MatchService } from "../../application/match/match.service";
 import { PlayerAwardService } from "../../application/player-award.service";
 import type { TournamentQueries } from "../../application/ports";
 import { memoryRedis } from "../cache/memory-redis.test-utils";
-import type { GameStatsStore } from "../../../match-stats/application/ports";
+import { fakePlayerStats } from "../../../match-stats/application/fake-player-stats.test-utils";
 import { SyncNewTournamentsUseCase } from "../../application/sync/sync-new-tournaments.use-case";
 import { SyncPandascoreTournamentUseCase } from "../../application/sync/sync-pandascore-tournament.use-case";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
@@ -45,21 +45,14 @@ const unusedViewerships = new ViewershipService({
   run: async () => await Promise.reject(new Error("unused")),
 });
 
-const playerLines = async (ids: Parameters<GameStatsStore["playerLines"]>[0]) =>
-  ids.map((id) => ({
-    account: "steam:1",
-    assists: 0,
-    demolitions: 1,
-    gameId: `game-${id}`,
-    goals: 1,
-    player: { id: "zen", name: "zen", slug: "zen" },
-    saves: 2,
-    shots: 3,
-    team: { id: "team-vit", name: "Vitality", slug: "vitality" },
-    teamGoals: 2,
-  }));
+const fakeStats = fakePlayerStats({
+  player: { id: "zen", name: "zen", slug: "zen" },
+  team: { id: "team-vit", name: "Vitality", slug: "vitality" },
+  teamGoals: 2,
+  totals: { assists: 0, demolitions: 1, goals: 1, saves: 2, shots: 3 },
+});
 
-const playerStats = new TournamentPlayerStatsService({ playerLines });
+const playerStats = new TournamentPlayerStatsService(fakeStats);
 
 const controllerWith = (
   tournaments: TournamentQueries,

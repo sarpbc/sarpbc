@@ -9,7 +9,7 @@ import { TournamentPlayerStatsService } from "../../../match-stats/application/t
 import { redistributableCompetition } from "../redistributable-competition";
 import { jsonOf } from "../../../../test/mcp-result";
 import { readTools } from "./read-tools";
-import type { GameStatsStore } from "../../../match-stats/application/ports";
+import { fakePlayerStats } from "../../../match-stats/application/fake-player-stats.test-utils";
 import type { NewsService } from "../../../news/application/news.service";
 import type { ContractService } from "../../../roster/application/contract.service";
 import type { PlayerService } from "../../../roster/application/player.service";
@@ -29,19 +29,12 @@ interface PrizeState {
   distribution: PrizeDistribution;
 }
 
-const playerLines: GameStatsStore["playerLines"] = async (ids) =>
-  ids.map((id) => ({
-    account: "steam:1",
-    assists: 1,
-    demolitions: 1,
-    gameId: `game-${id}`,
-    goals: 2,
-    player: { id: "p1", name: "Scout", slug: "scout" },
-    saves: 0,
-    shots: 4,
-    team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
-    teamGoals: 4,
-  }));
+const { playerStats } = fakePlayerStats({
+  player: { id: "p1", name: "Scout", slug: "scout" },
+  team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
+  teamGoals: 4,
+  totals: { assists: 1, demolitions: 1, goals: 2, saves: 0, shots: 4 },
+});
 
 const setup = () => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
@@ -199,7 +192,7 @@ const setup = () => {
       matchLineupService,
       matchService,
       playerAwardService,
-      tournamentPlayerStatsService: new TournamentPlayerStatsService({ playerLines }),
+      tournamentPlayerStatsService: new TournamentPlayerStatsService({ playerStats }),
       tournamentPrizeService,
       tournaments,
     }),

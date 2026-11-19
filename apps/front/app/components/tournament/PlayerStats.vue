@@ -7,10 +7,13 @@ import type {
   TournamentPlayerStatsResponse,
 } from "@sarpbc/types";
 
-const { stats, pending, error } = defineProps<{
+const { stats, pending, error, caption, emptyTitle, teamFilter } = defineProps<{
   stats: TournamentPlayerStatsResponse | null;
   pending: boolean;
   error: boolean;
+  caption: string;
+  emptyTitle: string;
+  teamFilter?: boolean;
 }>();
 
 const emit = defineEmits<{ retry: [] }>();
@@ -133,8 +136,21 @@ const rows = computed(() => {
     );
 });
 
-const numberFormat = computed(
-  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2 }),
+const ROWS_PER_PAGE = 50;
+const page = ref(1);
+
+watch([rows, view], () => {
+  page.value = 1;
+});
+
+const pageRows = computed(() =>
+  rows.value.slice((page.value - 1) * ROWS_PER_PAGE, page.value * ROWS_PER_PAGE),
+);
+
+const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
+
+const averageFormat = computed(
+  () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 2, minimumFractionDigits: 2 }),
 );
 
 const percentFormat = computed(
@@ -148,8 +164,12 @@ const display = (row: TournamentPlayerStats, column: Column) => {
     return "–";
   }
 
-  return PERCENTAGES.has(column)
-    ? percentFormat.value.format(current / 100)
+  if (PERCENTAGES.has(column)) {
+    return percentFormat.value.format(current / 100);
+  }
+
+  return view.value === "perGame" && column !== "games"
+    ? averageFormat.value.format(current)
     : numberFormat.value.format(current);
 };
 
@@ -182,7 +202,7 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
     <div v-if="hasStats || $slots.filters" class="flex flex-wrap items-center gap-2 px-2">
       <slot name="filters" />
       <SSelect
-        v-if="hasStats && teamOptions.length > 2"
+        v-if="teamFilter && hasStats && teamOptions.length > 2"
         v-model="team"
         :items="teamOptions"
         :aria-label="t('page.tournaments.stats.team')"
@@ -211,18 +231,13 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
     <HubCard v-else-if="!hasStats" class="flex min-h-row-stack h-row-grid items-center">
       <SEmptyState
         icon="i-fluent-data-bar-vertical-24-regular"
-        :title="t('page.tournaments.stats.empty')"
+        :title="emptyTitle"
         :hint="t('page.tournaments.stats.emptyHint')"
       />
     </HubCard>
 
     <HubCard v-else class="flex flex-col">
-      <STable
-        v-model:sorting="sort"
-        :caption="t('page.tournaments.stats.caption')"
-        :columns="columns"
-        :data="rows"
-      >
+      <STable v-model:sorting="sort" :caption="caption" :columns="columns" :data="pageRows">
         <template #player-cell="{ row }">
           <SLink
             :to="$localePath(playerPath(row.original.player.slug))"
@@ -245,11 +260,15 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
         </template>
       </STable>
 
-      <p class="flex min-h-row flex-wrap items-center gap-x-2 px-2 text-xs text-muted">
-        <span>{{ t("page.match.detail.stats.source") }}</span>
-        <span v-if="stats && stats.unlinkedAccounts > 0">
-          {{ t("page.tournaments.stats.unlinked", stats.unlinkedAccounts) }}
-        </span>
+      <div v-if="rows.length > ROWS_PER_PAGE" class="flex min-h-row items-center justify-center">
+        <SPagination v-model:page="page" :total="rows.length" :items-per-page="ROWS_PER_PAGE" />
+      </div>
+
+      <p
+        v-if="stats && stats.unlinkedAccounts > 0"
+        class="flex min-h-row items-center px-2 text-xs text-muted"
+      >
+        {{ t("page.tournaments.stats.unlinked", stats.unlinkedAccounts) }}
       </p>
     </HubCard>
   </div>

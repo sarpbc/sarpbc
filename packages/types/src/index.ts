@@ -108,6 +108,8 @@ export type {
   TournamentPlayerStatsTeam,
 } from "./match-stats";
 
+export { OVERALL_STATS_MIN_GAMES } from "./match-stats";
+
 export type { CreatedPatToken, ModerationReply, PatToken, TrackedStreamer } from "./staff-console";
 
 export { FORUM_ERROR_CODES } from "./forum";

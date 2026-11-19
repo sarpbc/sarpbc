@@ -11,7 +11,7 @@ import { ManualCatalogService } from "../../application/manual-catalog.service";
 import { CompetitionAfterCommit } from "../../application/after-commit";
 import { StreamService } from "../../application/stream.service";
 import { ViewershipService } from "../../application/viewership.service";
-import type { GameStatsStore } from "../../../match-stats/application/ports";
+import { fakePlayerStats } from "../../../match-stats/application/fake-player-stats.test-utils";
 import { memoryEventQueries } from "../../application/event-queries.test-utils";
 import {
   memoryEventWriter,
@@ -80,13 +80,12 @@ const stages = new Map(
 );
 
 describe(EventController, () => {
-  const requestedStages: Parameters<GameStatsStore["playerLines"]>[0][] = [];
-
-  const playerLines = async (ids: Parameters<GameStatsStore["playerLines"]>[0]) => {
-    requestedStages.push(ids);
-
-    return [];
-  };
+  const stats = fakePlayerStats({
+    player: { id: "zen", name: "zen", slug: "zen" },
+    team: { id: "team-vit", name: "Vitality", slug: "vitality" },
+    teamGoals: 0,
+    totals: { assists: 0, demolitions: 0, goals: 0, saves: 0, shots: 0 },
+  });
 
   const eventWriter = memoryEventWriter();
   const events = memoryEventQueries(eventWriter);
@@ -108,12 +107,12 @@ describe(EventController, () => {
     catalog,
     unusedStreams,
     unusedViewerships,
-    new TournamentPlayerStatsService({ playerLines }),
+    new TournamentPlayerStatsService(stats),
   );
 
   beforeEach(() => {
     listEvents.mockClear();
-    requestedStages.length = 0;
+    stats.scopes.length = 0;
     redis.entries.clear();
     stored.clear();
 
@@ -164,12 +163,11 @@ describe(EventController, () => {
       ],
     });
 
-    await expect(controller.playerStats(event.slug)).resolves.toStrictEqual({
-      games: 0,
-      players: [],
-      unlinkedAccounts: 0,
+    await expect(controller.playerStats(event.slug)).resolves.toMatchObject({
+      games: 2,
+      players: [{ games: 2 }],
     });
-    expect(requestedStages).toStrictEqual([["group-stage", "finals"]]);
+    expect(stats.scopes).toStrictEqual([{ ids: ["group-stage", "finals"], kind: "tournaments" }]);
     await expect(controller.playerStats("unknown-event")).rejects.toBeInstanceOf(NotFoundError);
   });
 

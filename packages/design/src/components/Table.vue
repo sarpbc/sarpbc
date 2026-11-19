@@ -317,6 +317,7 @@ const table = useVueTable({
     display: inline-flex;
     gap: 0.25rem;
     align-items: center;
+    vertical-align: top;
     padding: 0;
     border: 0;
     background: none;
