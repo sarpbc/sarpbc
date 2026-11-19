@@ -47,10 +47,10 @@ export class PandascoreCompetitionFeed implements CompetitionFeed {
       return team ? [{ rank, teamPandascoreId: team.id }] : [];
     });
   }
-  async listIncidents(params: { since: Date }): Promise<CompetitionIncident[]> {
+  async listIncidents(params: { since: Date }) {
     const incidents = await this.apiClient.listIncidents(params);
 
-    return incidents.map((v) => {
+    return incidents.map<CompetitionIncident>((v) => {
       const i = incidentSchema.parse(v);
       const base = { id: i.id, modifiedAt: new Date(i.modified_at) };
 

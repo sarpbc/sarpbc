@@ -6,7 +6,7 @@ import { readPpmFrames, scaleRegion } from "./frame.ts";
 import type { Frame } from "./frame.ts";
 import { glyphGrids, templateFromGrid } from "./glyph.ts";
 import { loadOverlay, overlayWithTemplates, parseOverlay } from "./overlay.ts";
-import type { GlyphTemplate, Overlay, Region } from "./overlay.ts";
+import type { Overlay, Region } from "./overlay.ts";
 import { readScoreboard } from "./scoreboard.ts";
 import { SeriesTracker } from "./series.ts";
 import { streamFrames } from "./source.ts";
@@ -17,7 +17,7 @@ const USAGE = `Usage:
   node src/cli.ts calibrate --overlay <file> --frame <frame.ppm>
                        --blue <score> --orange <score> --clock <m:ss|+m:ss>`;
 
-const positiveInteger = (value: string | undefined, fallback: number, name: string): number => {
+const positiveInteger = (value: string | undefined, fallback: number, name: string) => {
   if (value === undefined) {
     return fallback;
   }
@@ -31,7 +31,7 @@ const positiveInteger = (value: string | undefined, fallback: number, name: stri
   return parsed;
 };
 
-const required = (value: string | undefined, name: string): string => {
+const required = (value: string | undefined, name: string) => {
   if (value === undefined || value === "") {
     throw new Error(`--${name} is required.\n${USAGE}`);
   }
@@ -39,10 +39,7 @@ const required = (value: string | undefined, name: string): string => {
   return value;
 };
 
-const writeProposal = async (
-  proposal: StreamScoreProposal,
-  out: string | undefined,
-): Promise<void> => {
+const writeProposal = async (proposal: StreamScoreProposal, out: string | undefined) => {
   const json = `${JSON.stringify(proposal, null, 2)}\n`;
 
   if (out === undefined) {
@@ -52,7 +49,7 @@ const writeProposal = async (
   }
 };
 
-const read = async (args: readonly string[]): Promise<void> => {
+const read = async (args: readonly string[]) => {
   const { values } = parseArgs({
     args: [...args],
     options: {
@@ -127,7 +124,7 @@ const read = async (args: readonly string[]): Promise<void> => {
   await writeProposal(proposal, values.out);
 };
 
-const readSingleFrame = async (path: string): Promise<Frame> => {
+const readSingleFrame = async (path: string) => {
   const frames = readPpmFrames(createReadStream(path));
   const first = await frames.next();
   await frames.return(undefined);
@@ -139,12 +136,7 @@ const readSingleFrame = async (path: string): Promise<Frame> => {
   return first.value;
 };
 
-const labelledTemplates = (
-  frame: Frame,
-  overlay: Overlay,
-  region: Region,
-  text: string,
-): GlyphTemplate[] => {
+const labelledTemplates = (frame: Frame, overlay: Overlay, region: Region, text: string) => {
   const grids = glyphGrids(frame, scaleRegion(region, overlay.reference, frame), {
     size: overlay.glyph,
     threshold: overlay.text.threshold,
@@ -157,7 +149,7 @@ const labelledTemplates = (
   return grids.map((grid, index) => templateFromGrid(text.charAt(index), grid, overlay.glyph));
 };
 
-const calibrate = async (args: readonly string[]): Promise<void> => {
+const calibrate = async (args: readonly string[]) => {
   const { values } = parseArgs({
     args: [...args],
     options: {
@@ -189,7 +181,7 @@ const calibrate = async (args: readonly string[]): Promise<void> => {
   process.stdout.write(overlayWithTemplates(stored, templates));
 };
 
-const main = async (argv: readonly string[]): Promise<void> => {
+const main = async (argv: readonly string[]) => {
   const [command, ...args] = argv;
 
   switch (command) {

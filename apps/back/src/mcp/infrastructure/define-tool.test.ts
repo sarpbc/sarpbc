@@ -9,7 +9,7 @@ import { defineTool } from "./define-tool";
 const logInfo = vi.spyOn(log, "info");
 const logError = vi.spyOn(log, "error");
 
-const textContent = (result: CallToolResult): string => {
+const textContent = (result: CallToolResult) => {
   const [block] = result.content;
 
   return block?.type === "text" ? block.text : "";
@@ -27,8 +27,6 @@ const write = (handler: () => Promise<{ result: object; entityId?: string }>) =>
     permission: "tournaments.manage",
     write: true,
   });
-
-type WriteHandler = Parameters<typeof write>[0];
 
 const read = (permission?: "news.manage" | readonly ["players.manage", "teams.manage"]) =>
   defineTool({
@@ -52,12 +50,17 @@ const failing = (cause: Error) =>
 describe(defineTool, () => {
   describe("write tools", () => {
     it("denies a role without the permission and never runs the handler", async () => {
-      const handler = vi.fn<WriteHandler>(async () => ({ result: { ok: true } }));
-      const result = await write(handler).run(journalist, { matchId: "m1" });
+      let calls = 0;
+
+      const result = await write(async () => {
+        calls += 1;
+
+        return { result: { ok: true } };
+      }).run(journalist, { matchId: "m1" });
 
       expect(result.isError).toBe(true);
       expect(textContent(result)).toContain("tournaments.manage");
-      expect(handler).not.toHaveBeenCalled();
+      expect(calls).toBe(0);
     });
 
     it("returns the result as JSON and logs the entity", async () => {

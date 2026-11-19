@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import type { ToolArguments } from "../define-tool";
-import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
+import { jsonOf } from "../../../../test/mcp-result";
+import { FakeRosterProposals } from "./roster-proposals.test-utils";
 import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -16,7 +17,7 @@ const INPUT = {
 };
 
 const setup = (toolName: string, role: StaffRole = "admin") => {
-  const rosterProposalService = pendingProposalService();
+  const rosterProposalService = new FakeRosterProposals();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
@@ -42,22 +43,24 @@ describe("viewership tools", () => {
 
     const result = await call({ [idField]: MATCH_ID, ...INPUT, averageViewers: 30_000 });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
+    expect(rosterProposalService.changes).toStrictEqual([
       {
-        [idField]: MATCH_ID,
-        kind,
-        viewership: {
-          averageViewers: 30_000,
-          measuredAt: null,
-          peakViewers: 48_000,
-          scope: "official",
-          sourceName: "Esports Charts",
-          sourceUrl: SOURCE,
+        change: {
+          [idField]: MATCH_ID,
+          kind,
+          viewership: {
+            averageViewers: 30_000,
+            measuredAt: null,
+            peakViewers: 48_000,
+            scope: "official",
+            sourceName: "Esports Charts",
+            sourceUrl: SOURCE,
+          },
         },
+        proposedById: "u1",
+        sourceUrl: SOURCE,
       },
-      SOURCE,
-      "u1",
-    );
+    ]);
     expect(jsonOf(result)).toMatchObject({
       kind,
       status: "pending",
@@ -88,6 +91,6 @@ describe("viewership tools", () => {
     const { call, rosterProposalService } = setup("set_match_viewership", "journalist");
     const result = await call({ matchId: MATCH_ID, ...INPUT });
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 });

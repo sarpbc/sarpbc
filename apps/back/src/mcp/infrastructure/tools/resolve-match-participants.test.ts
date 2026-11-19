@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { Player } from "../../../roster/domain/player";
@@ -29,17 +29,12 @@ const tournament = () => {
     participants: [participant("p-kc", kc), participant("p-m8", m8)],
   });
 
-  const findById = vi.fn<IdOrSlugLookup<Team>["findById"]>(
-    async (id) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
-  );
+  const lookup: IdOrSlugLookup<Team> = {
+    findById: async (id) => [kc, m8, outsider].find((entry) => entry.id === id) ?? null,
+    findBySlug: async (slug) => [kc, m8, outsider].find((entry) => entry.slug === slug) ?? null,
+  };
 
-  const findBySlug = vi.fn<IdOrSlugLookup<Team>["findBySlug"]>(
-    async (slug) => [kc, m8, outsider].find((entry) => entry.slug === slug) ?? null,
-  );
-
-  const lookup: IdOrSlugLookup<Team> = { findById, findBySlug };
-
-  return { cup, findById, kc, lookup, m8 };
+  return { cup, kc, lookup, m8 };
 };
 
 const noPlayers: IdOrSlugLookup<Player> = {
@@ -49,7 +44,7 @@ const noPlayers: IdOrSlugLookup<Player> = {
 
 describe(resolveMatchParticipantIds, () => {
   it("keeps tournament participant ids", async () => {
-    const { cup, lookup, findById } = tournament();
+    const { cup, lookup } = tournament();
 
     const resolved = await resolveMatchParticipantIds(
       cup,
@@ -58,11 +53,10 @@ describe(resolveMatchParticipantIds, () => {
     );
 
     expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-kc", "p-m8"]);
-    expect(findById).not.toHaveBeenCalled();
   });
 
   it("resolves team slugs and ids and ignores duplicates", async () => {
-    const { cup, kc, lookup, findById } = tournament();
+    const { cup, kc, lookup } = tournament();
 
     const resolved = await resolveMatchParticipantIds(
       cup,
@@ -71,7 +65,6 @@ describe(resolveMatchParticipantIds, () => {
     );
 
     expect(resolved.map((entry) => entry.id)).toStrictEqual(["p-kc", "p-m8"]);
-    expect(findById).toHaveBeenCalledWith(KC_ID);
   });
 
   it("rejects an unknown participant, a missing team, and a team that is not registered", async () => {

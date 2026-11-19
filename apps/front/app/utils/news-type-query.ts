@@ -12,5 +12,5 @@ const isNewsType = (value: string): value is NewsType => {
   return false;
 };
 
-export const resolveNewsType = (value: string | null | undefined): NewsType =>
+export const resolveNewsType = (value: string | null | undefined) =>
   isNonEmptyString(value) && isNewsType(value) ? value : "short";

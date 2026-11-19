@@ -1,9 +1,8 @@
-import { ImportedPlayer, UpsertPlayerCommand } from "../../../roster/application/imports";
 import { CurrentPlayerDto } from "../dto/incident.dto";
 import { PlayerDto } from "../dto/tournament.dto";
 import { toUpsertTeamCommand } from "./pandascore-team.mapper";
 
-export const toUpsertPlayerCommand = (dto: PlayerDto): UpsertPlayerCommand => ({
+export const toUpsertPlayerCommand = (dto: PlayerDto) => ({
   birthday: dto.birthday !== undefined && dto.birthday !== "" ? new Date(dto.birthday) : undefined,
   firstName: dto.first_name,
   imageUrl: dto.image_url ?? undefined,
@@ -15,7 +14,7 @@ export const toUpsertPlayerCommand = (dto: PlayerDto): UpsertPlayerCommand => ({
   slug: dto.slug,
 });
 
-export const toImportedPlayer = (dto: CurrentPlayerDto): ImportedPlayer => ({
+export const toImportedPlayer = (dto: CurrentPlayerDto) => ({
   currentTeam: dto.current_team ? toUpsertTeamCommand(dto.current_team) : null,
   player: toUpsertPlayerCommand(dto),
 });

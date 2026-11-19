@@ -103,9 +103,9 @@ const tournament = z.strictObject({
   winner: participantRef.nullable(),
 }) satisfies z.ZodType<TournamentDetailResponse>;
 
-export const tournamentCacheKey = (id: string): string => `tournament:${id}`;
+export const tournamentCacheKey = (id: string) => `tournament:${id}`;
 
-const diagnose = (key: string, operation: string, error: Error): void => {
+const diagnose = (key: string, operation: string, error: Error) => {
   log.warn({
     component: "CachedTournamentRead",
     error,
@@ -121,7 +121,7 @@ export class CachedTournamentRead {
     private readonly redis: Pick<RedisService, "get" | "set">,
   ) {}
 
-  async findById(id: string): Promise<TournamentDetailResponse | null> {
+  async findById(id: string) {
     const key = tournamentCacheKey(id);
     const cached = await this.readCached(key, id);
 
@@ -146,7 +146,7 @@ export class CachedTournamentRead {
     return mapped;
   }
 
-  private async readCached(key: string, id: string): Promise<TournamentDetailResponse | null> {
+  private async readCached(key: string, id: string) {
     try {
       const cached = await this.redis.get(key);
 

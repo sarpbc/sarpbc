@@ -59,17 +59,17 @@ export class Match {
   createdAt = new Date();
   updatedAt = new Date();
   tournament!: TournamentSummary;
-  hasEnded(): boolean {
+  hasEnded() {
     return isMatchFinished(this);
   }
   /** Match lists read `endAt` as the end marker, so a finished match must carry one. */
-  stampEnd(at: Date): void {
+  stampEnd(at: Date) {
     if (this.status === "finished") {
       this.endAt ??= at;
     }
   }
   /** The opponent wins by the series default score; an unknown series length keeps the score. */
-  declareForfeit(forfeiter: TournamentParticipant): void {
+  declareForfeit(forfeiter: TournamentParticipant) {
     if (this.participants.length !== 2) {
       throw new InvalidInputError("Only a match between two participants can be forfeited");
     }
@@ -98,11 +98,11 @@ export class Match {
       }));
     }
   }
-  clearForfeit(): void {
+  clearForfeit() {
     this.forfeitedBy = null;
   }
   /** Called before every save: a forfeit only stands in a finished two-sided match the other side won. */
-  dropBrokenForfeit(): void {
+  dropBrokenForfeit() {
     const forfeiter = this.forfeitedBy;
 
     if (forfeiter === null) {
@@ -123,18 +123,18 @@ export class Match {
       this.forfeitedBy = null;
     }
   }
-  isDecided(): boolean {
+  isDecided() {
     return this.winner !== null && this.hasEnded();
   }
-  inheritedStreams(): Stream[] {
+  inheritedStreams() {
     return effectiveStreams(
       pandascoreStreams(this.officialStreams),
       this.tournament.streams,
       this.tournament.eventStreams,
-    );
+    ) satisfies Stream[];
   }
-  watchStreams(): Stream[] {
-    return effectiveStreams(this.streams, this.inheritedStreams());
+  watchStreams() {
+    return effectiveStreams(this.streams, this.inheritedStreams()) satisfies Stream[];
   }
 }
 
@@ -144,7 +144,7 @@ export interface MatchSlugSource {
   tournament: { slug: string; event: { slug: string } };
 }
 
-export const matchPublicSlug = ({ name, participants, tournament }: MatchSlugSource): string => {
+export const matchPublicSlug = ({ name, participants, tournament }: MatchSlugSource) => {
   const first: NamedParticipant | undefined = participants[0];
   const second: NamedParticipant | undefined = participants[1];
 

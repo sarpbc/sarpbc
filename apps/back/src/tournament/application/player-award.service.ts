@@ -1,23 +1,14 @@
 import type { PlayerAwardType } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type {
-  AwardContext,
-  AwardParticipantRef,
-  AwardQueries,
-  AwardTransaction,
-  AwardWriter,
-} from "./ports";
+import type { AwardParticipantRef, AwardQueries, AwardTransaction, AwardWriter } from "./ports";
 
 const requireEligibleAward = async (
   awards: AwardWriter,
   tournamentId: string,
   participantRef: AwardParticipantRef,
   playerId: string,
-): Promise<{
-  tournament: NonNullable<AwardContext["tournament"]>;
-  participant: NonNullable<AwardContext["participant"]>;
-}> => {
+) => {
   const { tournament, participant, player } = await awards.context(
     tournamentId,
     participantRef,
@@ -59,7 +50,7 @@ const requireProposableAward = async (
   teamId: string,
   playerId: string,
   awardType: PlayerAwardType,
-): Promise<string> => {
+) => {
   const { tournament, participant } = await requireEligibleAward(
     awards,
     tournamentId,
@@ -123,7 +114,7 @@ export class PlayerAwardService {
     teamId: string,
     playerId: string,
     awardType: PlayerAwardType,
-  ): Promise<void> {
+  ) {
     await this.transaction.run(
       async ({ awards }) =>
         await requireProposableAward(awards, tournamentId, teamId, playerId, awardType),

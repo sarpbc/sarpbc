@@ -115,7 +115,7 @@ natural French. Human staff review and publish drafts in admin.
 
 ## TypeScript
 
-- Prefer explicit typing.
+- Let TypeScript infer function return types. Keep explicit types on parameters, interfaces and ports, and pin a return contract with `satisfies` or a typed variable at the return site. Backend code that returns a `@sarpbc/types` shape always pins it, because the front trusts that type.
 - Use exhaustive `switch` statements with `never`.
 - Match the existing code style.
 
@@ -139,7 +139,7 @@ natural French. Human staff review and publish drafts in admin.
 - Avoid unrelated refactors.
 - Remove dead code instead of leaving unused paths.
 - Keep implementations simple.
-- Comments explain edge cases only (traps, invariants, third-party quirks). Code already says what it does; if a comment is required to understand the code, rename or simplify instead.
+- Comments are limited to functional directives, single-line `// WARNING:` notes for recurring traps, `// SAFETY:` justifications on type assertions, and TSDoc on exported public API. Code already says what it does; if a comment is required to understand the code, rename or simplify instead.
 
 ---
 

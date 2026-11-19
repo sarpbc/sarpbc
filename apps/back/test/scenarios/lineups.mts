@@ -39,8 +39,6 @@ const startggCupBody = z.object({
 
 const lineupsTool = z.looseObject({ lineups: z.array(matchLineup) });
 
-type SideRow = [participantId: string, players: [id: string, standIn: boolean][]];
-
 type Identified = z.infer<typeof identified>;
 
 interface Tournament {
@@ -71,14 +69,16 @@ interface LineupProposalsContext extends LineupFixtures {
   player: Identified;
 }
 
-const sides = (lineups: MatchLineup[]): SideRow[] =>
-  lineups.map(({ participantId, players }) => [
-    participantId,
-    players.map(({ id, standIn }): [string, boolean] => [id, standIn]),
-  ]);
+const sides = (lineups: MatchLineup[]) =>
+  lineups.map(
+    ({ participantId, players }) =>
+      [
+        participantId,
+        players.map(({ id, standIn }) => [id, standIn] satisfies [string, boolean]),
+      ] satisfies [string, [string, boolean][]],
+  );
 
-const bySide = (lineups: MatchLineup[]): Partial<Record<string, SideRow[1]>> =>
-  Object.fromEntries(sides(lineups));
+const bySide = (lineups: MatchLineup[]) => Object.fromEntries(sides(lineups));
 
 export const verifyLineups = async ({
   request,
@@ -87,11 +87,11 @@ export const verifyLineups = async ({
   tournament,
   match,
   player,
-}: LineupsContext): Promise<LineupFixtures> => {
+}: LineupsContext) => {
   const lineupPath = `/tournaments/matches/${match.id}/lineups`;
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
 
-  const detailLineups = async (matchId: string): Promise<MatchLineup[]> => {
+  const detailLineups = async (matchId: string) => {
     const response = await request("GET", `/matches/${matchId}`);
 
     return response.json(matchDetail).lineups;
@@ -279,7 +279,7 @@ export const verifyLineupProposals = async ({
   player,
   standIn,
   startggMatch,
-}: LineupProposalsContext): Promise<void> => {
+}: LineupProposalsContext) => {
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
   const sourceUrl = "https://x.com/integration/status/lineups";
 
@@ -288,7 +288,7 @@ export const verifyLineupProposals = async ({
     { participantId: beta, playerIds: [standIn.id] },
   ];
 
-  const detail = async (): Promise<MatchLineup[]> => {
+  const detail = async () => {
     const response10 = await request("GET", `/matches/${match.id}`);
 
     return response10.json(matchDetail).lineups;

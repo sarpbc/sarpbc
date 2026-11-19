@@ -64,7 +64,7 @@ const submit = async () => {
   saving.value = true;
 
   try {
-    // The API replaces the whole list: start from the latest one so another staff member's VODs survive.
+    // WARNING: the API replaces the whole list, so start from the latest one to keep another staff member's VODs.
     const { match: latest } = await getMatchById(match.id);
 
     const vods = await setMatchVods(match.id, [

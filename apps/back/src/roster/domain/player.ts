@@ -5,7 +5,7 @@ import type { Contract } from "./contract";
 import type { PlayerPhoto } from "./player-photo";
 import type { Team } from "./team";
 
-const roleFromPandascore = (role: string | null): ContractRole => {
+const roleFromPandascore = (role: string | null) => {
   switch (
     role
       ?.trim()
@@ -15,25 +15,25 @@ const roleFromPandascore = (role: string | null): ContractRole => {
   ) {
     case "coach":
     case "head_coach": {
-      return "coach";
+      return "coach" satisfies ContractRole;
     }
 
     case "assistant_coach":
     case "co_coach": {
-      return "assistant_coach";
+      return "assistant_coach" satisfies ContractRole;
     }
 
     case "analyst": {
-      return "analyst";
+      return "analyst" satisfies ContractRole;
     }
 
     case "manager":
     case "staff": {
-      return "manager";
+      return "manager" satisfies ContractRole;
     }
 
     default: {
-      return "active";
+      return "active" satisfies ContractRole;
     }
   }
 };
@@ -56,10 +56,10 @@ export class Player {
   mergedIntoId: string | null = null;
   contracts: Contract[] = [];
   photos: PlayerPhoto[] = [];
-  linkPandascore(pandascoreId: number): void {
+  linkPandascore(pandascoreId: number) {
     linkPandascore(this, pandascoreId);
   }
-  synchronizeProfile(input: ImportedPlayerProfile): void {
+  synchronizeProfile(input: ImportedPlayerProfile) {
     this.linkPandascore(input.pandascoreId);
     this.name = input.name;
     this.firstName = input.firstName ?? null;
@@ -79,14 +79,14 @@ export class Player {
       this.role = input.role;
     }
   }
-  currentRole(): ContractRole | null {
+  currentRole() {
     if (!this.team) {
-      return null;
+      return null satisfies ContractRole | null;
     }
 
-    return this.contractRole ?? roleFromPandascore(this.role);
+    return this.contractRole ?? (roleFromPandascore(this.role) satisfies ContractRole | null);
   }
-  replaceProfilePhoto(url: string | null): string | null {
+  replaceProfilePhoto(url: string | null) {
     const archived =
       this.imageUrl !== null && this.imageUrl !== "" && this.imageUrl !== url
         ? this.imageUrl

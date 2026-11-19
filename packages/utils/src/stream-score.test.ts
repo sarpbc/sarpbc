@@ -54,7 +54,7 @@ const PROPOSAL: StreamScoreProposal = {
   sourceStartedAt: null,
 };
 
-const error = (proposal: StreamScoreProposal): string | null => {
+const error = (proposal: StreamScoreProposal) => {
   const parsed = parseStreamScoreProposal(JSON.stringify(proposal));
 
   return parsed.ok ? null : parsed.error;

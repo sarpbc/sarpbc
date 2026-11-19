@@ -1,82 +1,81 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { AirRiddleService } from "./application/airriddle.service";
-import type { DailyRiddles, RiddlePlayers, RiddleRuntime } from "./application/ports";
+import { InMemoryDailyRiddles } from "./application/in-memory-daily-riddles.test-utils";
+import { InMemoryRiddlePlayers } from "./application/in-memory-riddle-players.test-utils";
+import { RecordingRiddleRuntime } from "./application/recording-riddle-runtime.test-utils";
 import { evaluateGuess } from "./domain/airriddle";
-import type { DailyRiddle } from "./domain/airriddle";
 import { AirRiddleResultEnum as Result } from "./domain/airriddle-result.enum";
 
 describe(AirRiddleService, () => {
-  const repository = {
-    findTodaysRiddle: vi.fn<DailyRiddles["findTodaysRiddle"]>(),
-    save: vi.fn<DailyRiddles["save"]>(),
-  };
+  const today = new RecordingRiddleRuntime().now();
 
-  const players = {
-    find: vi.fn<RiddlePlayers["find"]>(),
-    getRandomPlayer: vi.fn<RiddlePlayers["getRandomPlayer"]>(),
-  };
-
-  const runtime = {
-    dayStart: () => new Date("2026-10-14T22:00:00Z"),
-    error: vi.fn<RiddleRuntime["error"]>(),
-    id: () => "riddle-1",
-    now: () => new Date("2026-10-15T12:00:00Z"),
-    skipped: vi.fn<RiddleRuntime["skipped"]>(),
-  };
-
-  const riddle = (id: string): DailyRiddle => ({
-    createdAt: runtime.now(),
+  const riddle = (id: string) => ({
+    createdAt: today,
     id,
     playerId: "player-1",
     playerName: "Kaydop",
   });
 
-  let service: AirRiddleService;
-  beforeEach(() => {
-    vi.clearAllMocks();
-    service = new AirRiddleService(repository, players, runtime);
-  });
-
   it("creates a riddle with a randomly selected player", async () => {
-    repository.findTodaysRiddle.mockResolvedValue(null);
-    players.getRandomPlayer.mockResolvedValue({ id: "player-1", name: "Kaydop" });
-    repository.save.mockResolvedValue(undefined);
+    const riddles = new InMemoryDailyRiddles();
+
+    const service = new AirRiddleService(
+      riddles,
+      new InMemoryRiddlePlayers([{ id: "player-1", name: "Kaydop" }]),
+      new RecordingRiddleRuntime(),
+    );
+
     await expect(service.createAirRiddle()).resolves.toStrictEqual({
-      createdAt: runtime.now(),
+      createdAt: today,
       id: "riddle-1",
       playerId: "player-1",
       playerName: "Kaydop",
     });
-    expect(repository.save).toHaveBeenCalledExactlyOnceWith({
-      createdAt: runtime.now(),
-      id: "riddle-1",
-      playerId: "player-1",
-      playerName: "Kaydop",
-    });
-    expect(runtime.error).not.toHaveBeenCalled();
+    expect(riddles.saved).toStrictEqual([
+      {
+        createdAt: today,
+        id: "riddle-1",
+        playerId: "player-1",
+        playerName: "Kaydop",
+      },
+    ]);
   });
 
   it("returns null when no player exists", async () => {
-    repository.findTodaysRiddle.mockResolvedValue(null);
-    players.getRandomPlayer.mockResolvedValue(null);
+    const riddles = new InMemoryDailyRiddles();
+    const runtime = new RecordingRiddleRuntime();
+    const service = new AirRiddleService(riddles, new InMemoryRiddlePlayers([]), runtime);
+
     await expect(service.createAirRiddle()).resolves.toBeNull();
-    expect(repository.save).not.toHaveBeenCalled();
-    expect(runtime.skipped).toHaveBeenCalledOnce();
+    expect(riddles.saved).toStrictEqual([]);
+    expect(runtime.skippedCount).toBe(1);
   });
 
   it("reports persistence failure without rethrowing", async () => {
     const failure = new Error("db down");
-    repository.findTodaysRiddle.mockResolvedValue(null);
-    players.getRandomPlayer.mockResolvedValue({ id: "p", name: "Kaydop" });
-    repository.save.mockRejectedValue(failure);
+    const runtime = new RecordingRiddleRuntime();
+
+    const service = new AirRiddleService(
+      new InMemoryDailyRiddles(null, failure),
+      new InMemoryRiddlePlayers([{ id: "p", name: "Kaydop" }]),
+      runtime,
+    );
+
     await expect(service.createAirRiddle()).resolves.toBeNull();
-    expect(runtime.error).toHaveBeenCalledWith(failure);
+    expect(runtime.errors).toStrictEqual([failure]);
   });
 
   it("does not replace an existing daily riddle", async () => {
-    repository.findTodaysRiddle.mockResolvedValue(riddle("existing"));
+    const riddles = new InMemoryDailyRiddles(riddle("existing"));
+
+    const service = new AirRiddleService(
+      riddles,
+      new InMemoryRiddlePlayers([{ id: "player-2", name: "Zen" }]),
+      new RecordingRiddleRuntime(),
+    );
+
     await expect(service.createAirRiddle()).resolves.toBeNull();
-    expect(players.getRandomPlayer).not.toHaveBeenCalled();
+    expect(riddles.saved).toStrictEqual([]);
   });
 
   it("consumes repeated letters only once after exact matches", () => {
@@ -93,13 +92,19 @@ describe(AirRiddleService, () => {
   });
 
   it("reveals the answer only after success or the final guess", async () => {
-    repository.findTodaysRiddle.mockResolvedValue(riddle("today"));
-    players.find.mockResolvedValue([{ name: "Zen" }]);
+    const service = new AirRiddleService(
+      new InMemoryDailyRiddles(riddle("today")),
+      new InMemoryRiddlePlayers([
+        { id: "player-2", name: "Zen" },
+        { id: "player-1", name: "Kaydop" },
+      ]),
+      new RecordingRiddleRuntime(),
+    );
+
     const guessResult = await service.guess("Zen");
     expect(guessResult.answer).toBeUndefined();
     const guessResult2 = await service.guess("Zen", true);
     expect(guessResult2.answer).toBe("Kaydop");
-    players.find.mockResolvedValue([{ name: "Kaydop" }]);
     const guessResult3 = await service.guess("kaydop");
     expect(guessResult3.answer).toBe("Kaydop");
   });

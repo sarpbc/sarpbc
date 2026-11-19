@@ -4,7 +4,7 @@ import { User as Account } from "../../domain/user";
 import type { UserListQuery, UserQueries, UserWriter } from "../../application/ports/user-store";
 import { User } from "./user.entity";
 
-const toAccount = (record: User): Account => {
+const toAccount = (record: User) => {
   const account = new Account(
     record.email,
     record.userName,
@@ -23,17 +23,13 @@ const toAccount = (record: User): Account => {
 export class MikroUserStore implements UserQueries, UserWriter {
   constructor(private readonly em: EntityManager) {}
 
-  private async find(where: FilterQuery<User>): Promise<Account | null> {
+  private async find(where: FilterQuery<User>) {
     const record = await this.em.findOne(User, where);
 
     return record ? toAccount(record) : null;
   }
 
-  async list({
-    search,
-    limit,
-    offset,
-  }: UserListQuery): Promise<{ users: Account[]; total: number }> {
+  async list({ search, limit, offset }: UserListQuery) {
     const [records, total] = await this.em.findAndCount(
       User,
       search !== undefined && search !== ""
@@ -45,27 +41,27 @@ export class MikroUserStore implements UserQueries, UserWriter {
     return { total, users: records.map(toAccount) };
   }
 
-  async findByEmail(email: string): Promise<Account | null> {
+  async findByEmail(email: string) {
     return await this.find({ email });
   }
 
-  async findById(id: string): Promise<Account | null> {
+  async findById(id: string) {
     return await this.find({ id });
   }
 
-  async findByGoogleId(googleId: string): Promise<Account | null> {
+  async findByGoogleId(googleId: string) {
     return await this.find({ googleId });
   }
 
-  async findByEmailWithPassword(email: string): Promise<Account | null> {
+  async findByEmailWithPassword(email: string) {
     return await this.find({ email, password: { $ne: null } });
   }
 
-  async existsByEmail(email: string): Promise<boolean> {
+  async existsByEmail(email: string) {
     return (await this.em.count(User, { email })) > 0;
   }
 
-  async existsByUserName(userName: string, excludeUserId?: string): Promise<boolean> {
+  async existsByUserName(userName: string, excludeUserId?: string) {
     return (
       (await this.em.count(
         User,
@@ -76,7 +72,7 @@ export class MikroUserStore implements UserQueries, UserWriter {
     );
   }
 
-  async save(account: Account): Promise<void> {
+  async save(account: Account) {
     const record = account.id
       ? await this.em.findOneOrFail(User, { id: account.id })
       : new User(

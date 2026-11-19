@@ -10,11 +10,6 @@ const {
   class: className = null,
 } = defineProps<{
   title?: string | null;
-  /**
-   * `lead` — first rail in a hub column (72px from `md`); aligns with `HubPageHeader` + gap.
-   * `section` — stacked rails / mid-page blocks (44px / `h-row`).
-   * `none` — no caption band; use after a `h-row-header` + `gap-4` page header.
-   */
   caption?: RailCaption;
   captionAlign?: CaptionAlign;
   class?: string | null;
@@ -22,7 +17,6 @@ const {
 
 const slots = useSlots();
 
-// Single-column mobile has no sidebar to align with: an empty lead band is dead space.
 const hideEmptyLeadOnMobile = computed(
   () => caption === "lead" && !title && !slots.caption && !slots.title,
 );

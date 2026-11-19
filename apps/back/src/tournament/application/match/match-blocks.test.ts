@@ -1,24 +1,38 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { Match } from "../../domain/match";
-import type { MatchQueries } from "../ports";
+import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks, isMatchBlockLive, MATCH_BLOCK_LIVE_WINDOW_MS } from "./match-blocks";
 
 const NOW = new Date("2026-10-31T18:00:00Z");
 
 const stored = (id: string) => Object.assign(new Match(), { id });
 
-describe(findMatchBlocks, () => {
-  const reads = {
-    byIds: vi.fn<MatchQueries["byIds"]>(),
-    page: vi.fn<MatchQueries["page"]>(),
+const memoryReads = (
+  options: { known?: Match[]; pages?: (kind: MatchListKind) => Match[] } = {},
+) => {
+  const { known = [], pages = () => [] } = options;
+  const idLookups: string[][] = [];
+  const pageQueries: [MatchListKind, MatchListQueryOptions][] = [];
+
+  return {
+    byIds: async (ids: string[]) => {
+      idLookups.push(ids);
+
+      return known.filter((match) => ids.includes(match.id));
+    },
+    idLookups,
+    page: async (kind: MatchListKind, query: MatchListQueryOptions) => {
+      pageQueries.push([kind, query]);
+
+      return pages(kind);
+    },
+    pageQueries,
   };
+};
 
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
+describe(findMatchBlocks, () => {
   it("loads every picked match in one query and keeps each block's order", async () => {
-    reads.byIds.mockResolvedValue([stored("b"), stored("a")]);
+    const reads = memoryReads({ known: [stored("b"), stored("a")] });
 
     const [single, manual] = await findMatchBlocks(
       reads,
@@ -29,23 +43,24 @@ describe(findMatchBlocks, () => {
       NOW,
     );
 
-    expect(reads.byIds).toHaveBeenCalledExactlyOnceWith(["a", "b", "missing"]);
-    expect(reads.page).not.toHaveBeenCalled();
+    expect(reads.idLookups).toStrictEqual([["a", "b", "missing"]]);
     expect(single?.map((match) => match.id)).toStrictEqual(["a"]);
     expect(manual?.map((match) => match.id)).toStrictEqual(["b", "a"]);
   });
 
   it("puts live, then upcoming, then recent results of a scope up to its limit", async () => {
-    reads.page.mockImplementation(async (kind) => {
-      if (kind === "live") {
-        return [stored("live")];
-      }
+    const reads = memoryReads({
+      pages: (kind) => {
+        if (kind === "live") {
+          return [stored("live")];
+        }
 
-      if (kind === "upcoming") {
-        return [stored("next"), stored("later")];
-      }
+        if (kind === "upcoming") {
+          return [stored("next"), stored("later")];
+        }
 
-      return [stored("result")];
+        return [stored("result")];
+      },
     });
 
     const [tournament, team] = await findMatchBlocks(
@@ -57,21 +72,23 @@ describe(findMatchBlocks, () => {
       NOW,
     );
 
-    expect(reads.byIds).not.toHaveBeenCalled();
-    expect(reads.page).toHaveBeenCalledWith("live", {
-      limit: 3,
-      liveSince: new Date(NOW.getTime() - MATCH_BLOCK_LIVE_WINDOW_MS),
-      tournamentId: "cup",
-    });
-    expect(reads.page).toHaveBeenCalledWith("results", { limit: 10, teamId: "falcons" });
+    expect(reads.pageQueries).toContainEqual([
+      "live",
+      {
+        limit: 3,
+        liveSince: new Date(NOW.getTime() - MATCH_BLOCK_LIVE_WINDOW_MS),
+        tournamentId: "cup",
+      },
+    ]);
+    expect(reads.pageQueries).toContainEqual(["results", { limit: 10, teamId: "falcons" }]);
     expect(tournament?.map((match) => match.id)).toStrictEqual(["live", "next", "later"]);
     expect(team?.map((match) => match.id)).toStrictEqual(["live", "next", "later", "result"]);
   });
 
   it("queries a tournament or team once for blocks with different limits", async () => {
-    reads.page.mockImplementation(async (kind) =>
-      kind === "upcoming" ? ["a", "b", "c", "d"].map(stored) : [],
-    );
+    const reads = memoryReads({
+      pages: (kind) => (kind === "upcoming" ? ["a", "b", "c", "d"].map(stored) : []),
+    });
 
     const [short, long] = await findMatchBlocks(
       reads,
@@ -82,7 +99,7 @@ describe(findMatchBlocks, () => {
       NOW,
     );
 
-    expect(reads.page.mock.calls.filter(([kind]) => kind === "upcoming")).toStrictEqual([
+    expect(reads.pageQueries.filter(([kind]) => kind === "upcoming")).toStrictEqual([
       ["upcoming", { limit: 4, teamId: "falcons" }],
     ]);
     expect(short?.map((match) => match.id)).toStrictEqual(["a", "b"]);

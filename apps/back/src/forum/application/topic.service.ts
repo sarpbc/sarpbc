@@ -27,7 +27,7 @@ export class TopicService {
     private readonly transaction: ForumTransaction,
   ) {}
 
-  async initializeTopics(): Promise<void> {
+  async initializeTopics() {
     await this.transaction.run(async (scope) => {
       await mapSequentially(predefinedTopics, async (topicData) => {
         const exists = await scope.topics.findByTitle(topicData.title);
@@ -48,11 +48,11 @@ export class TopicService {
     });
   }
 
-  async find(): Promise<TopicRecord[]> {
+  async find() {
     return await this.topicRepository.findAllTopics();
   }
 
-  async findById(id: string): Promise<TopicRecord | null> {
+  async findById(id: string) {
     return await this.topicRepository.findById(id);
   }
 }

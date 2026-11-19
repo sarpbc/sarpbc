@@ -24,7 +24,7 @@ const toast = useToast();
 const isSubmitting = ref(false);
 const posthog = usePostHog();
 
-/** Wait until session is known so SSR guest HTML can hydrate before auth upgrades. */
+// WARNING: wait for the session to resolve so SSR guest HTML hydrates before auth upgrades it.
 const sessionReady = computed(() => user.value !== undefined);
 const isSignedIn = computed(() => !!user.value);
 
@@ -59,7 +59,7 @@ onMounted(() => {
 
 type CreateCommentResult = Awaited<ReturnType<typeof createComment>>;
 
-const createFailureDescription = (failure: Exclude<CreateCommentResult, { ok: true }>): string => {
+const createFailureDescription = (failure: Exclude<CreateCommentResult, { ok: true }>) => {
   if (failure.reason === "unauthorized") {
     return t("components.discussion.messages.signInRequired");
   }

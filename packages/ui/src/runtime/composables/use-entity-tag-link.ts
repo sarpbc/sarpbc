@@ -12,12 +12,12 @@ export const useEntityTagLink = () => {
   const localePath = useLocalePath();
   const { publicSiteUrl } = useRuntimeConfig().public;
 
-  const href = (path: string): string =>
+  const href = (path: string) =>
     publicSiteUrl === "" ? localePath(path) : `${publicSiteUrl}${path}`;
 
-  const playerHref = (slug: string): string => href(playerPath(slug));
+  const playerHref = (slug: string) => href(playerPath(slug));
 
-  const teamHref = (slug: string): string => href(teamPath(slug));
+  const teamHref = (slug: string) => href(teamPath(slug));
 
   const linkAttrs = publicSiteUrl === "" ? {} : { rel: "noopener noreferrer", target: "_blank" };
 

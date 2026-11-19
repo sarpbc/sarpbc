@@ -16,9 +16,7 @@ const {
 } = defineProps<{
   matches: MatchRowItem[];
   variant: "live" | "upcoming" | "result";
-  /** When set, links carry `?from=` and emit `match_row_clicked`. */
   source?: MatchDiscoverySource | null;
-  /** Match ids treated as live when mixed into an upcoming schedule list. */
   liveMatchIds?: ReadonlySet<string> | null;
   showDate?: boolean;
 }>();
@@ -26,10 +24,9 @@ const {
 const localePath = useLocalePath();
 const { trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
-const isLive = (matchId: string): boolean =>
-  variant === "live" || Boolean(liveMatchIds?.has(matchId));
+const isLive = (matchId: string) => variant === "live" || Boolean(liveMatchIds?.has(matchId));
 
-const statusFor = (matchId: string): MatchDiscoveryStatus => {
+const statusFor = (matchId: string) => {
   if (variant === "result") {
     return listVariantToDiscoveryStatus(variant);
   }
@@ -37,7 +34,7 @@ const statusFor = (matchId: string): MatchDiscoveryStatus => {
   return isLive(matchId) ? "live" : "upcoming";
 };
 
-const href = (match: MatchRowItem): string => {
+const href = (match: MatchRowItem) => {
   const path = localePath(matchPath(match.publicId, match.slug));
 
   return source ? `${path}?${MATCH_DISCOVERY_FROM_QUERY}=${source}` : path;

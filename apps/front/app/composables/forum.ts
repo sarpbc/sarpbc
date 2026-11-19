@@ -9,7 +9,7 @@ import type {
 import { getApiErrorStatus } from "@sarpbc/utils";
 import type { CreateForumPostResult } from "~/types/forum";
 
-export const getRecentForumActivities = async (): Promise<PostPreview[]> => {
+export const getRecentForumActivities = async () => {
   const res = await apiFetch<{ recentPosts: PostPreview[] }>(`/forum/preview`, {
     method: "GET",
   });
@@ -17,7 +17,7 @@ export const getRecentForumActivities = async (): Promise<PostPreview[]> => {
   return res.recentPosts;
 };
 
-export const getTopics = async (): Promise<ForumTopic[]> => {
+export const getTopics = async () => {
   const res = await apiFetch<{ topics: ForumTopic[] }>(`/forum/topics`, {
     method: "GET",
   });
@@ -25,7 +25,7 @@ export const getTopics = async (): Promise<ForumTopic[]> => {
   return res.topics;
 };
 
-export const getPosts = async (): Promise<ForumPostListItem[]> => {
+export const getPosts = async () => {
   const res = await apiFetch<{ posts: ForumPostListItem[] }>(`/posts`, {
     method: "GET",
   });
@@ -33,7 +33,7 @@ export const getPosts = async (): Promise<ForumPostListItem[]> => {
   return res.posts;
 };
 
-export const getPostById = async (id: string): Promise<ForumPost | null> => {
+export const getPostById = async (id: string) => {
   try {
     const res = await apiFetch<{ post: ForumPost }>(`/posts/${id}`, {
       method: "GET",
@@ -49,7 +49,7 @@ export const getPostById = async (id: string): Promise<ForumPost | null> => {
   }
 };
 
-export const getForumPostCreationStatus = async (): Promise<ForumPostCreationStatus | null> => {
+export const getForumPostCreationStatus = async () => {
   try {
     return await apiFetch<ForumPostCreationStatus>("/posts/creation-status", {
       method: "GET",
@@ -66,14 +66,14 @@ export const createForumPost = async (data: {
   title: string;
   content: string;
   topicId: string;
-}): Promise<CreateForumPostResult> => {
+}) => {
   try {
     const post = await apiFetch<{ publicId: number; slug: string }>("/posts", {
       body: data,
       method: "POST",
     });
 
-    return { ok: true, post };
+    return { ok: true, post } satisfies CreateForumPostResult;
   } catch (error) {
     return apiFailure(error, "creating forum post", {
       codes: { [FORUM_ERROR_CODES.POST_RATE_LIMITED]: "rate_limited" },

@@ -29,15 +29,19 @@ export interface Measure {
   results: SeriesResult[];
 }
 
-const seriesOutcome = (winner: string | null, expectedWinner: string): SeriesOutcome => {
+const seriesOutcome = (winner: string | null, expectedWinner: string) => {
   if (winner === null) {
-    return "undetermined";
+    const undetermined: SeriesOutcome = "undetermined";
+
+    return undetermined;
   }
 
-  return winner === expectedWinner ? "correct" : "wrong";
+  const decided: SeriesOutcome = winner === expectedWinner ? "correct" : "wrong";
+
+  return decided;
 };
 
-const replay = async (script: SeriesScript, intervalSeconds: number): Promise<SeriesResult> => {
+const replay = async (script: SeriesScript, intervalSeconds: number) => {
   const overlay = await loadOverlay(OVERLAY_PATH);
   const renderer = new FixtureRenderer(script.size, script.seed);
   const tracker = new SeriesTracker({ bestOf: script.bestOf, stableReadings: 2 });
@@ -87,7 +91,7 @@ const replay = async (script: SeriesScript, intervalSeconds: number): Promise<Se
   };
 };
 
-export const measureFixtures = async (intervalSeconds: number): Promise<Measure> => {
+export const measureFixtures = async (intervalSeconds: number) => {
   const results = await Promise.all(
     generateSeries(12, 20_261_102).map(async (script) => await replay(script, intervalSeconds)),
   );
@@ -99,7 +103,7 @@ export const measureFixtures = async (intervalSeconds: number): Promise<Measure>
   return { correctGames, games, rate: correctGames / games, results, undecidedGames };
 };
 
-export const describeMeasure = (measure: Measure): string[] => {
+export const describeMeasure = (measure: Measure) => {
   const wrongGames = measure.games - measure.correctGames - measure.undecidedGames;
 
   return [

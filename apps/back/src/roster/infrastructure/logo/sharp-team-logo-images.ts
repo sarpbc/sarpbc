@@ -11,7 +11,7 @@ type SharpFactory = (input: Uint8Array, options: SharpOptions) => Sharp;
 
 let sharpFactory: Promise<SharpFactory> | undefined;
 
-const loadSharp = async (): Promise<SharpFactory> => {
+const loadSharp = async () => {
   sharpFactory ??= import("sharp").then(({ default: sharp }) => {
     sharp.cache(false);
     sharp.concurrency(1);
@@ -23,14 +23,14 @@ const loadSharp = async (): Promise<SharpFactory> => {
 };
 
 export class SharpTeamLogoImages implements TeamLogoImages {
-  async dimensions(bytes: Uint8Array): Promise<{ width: number; height: number }> {
+  async dimensions(bytes: Uint8Array) {
     const image = await this.open(bytes);
     const { width, height } = await this.decode(async () => await image.metadata());
 
     return { height, width };
   }
 
-  async normalize(bytes: Uint8Array, format: TeamLogoFormat, pixels: number): Promise<Uint8Array> {
+  async normalize(bytes: Uint8Array, format: TeamLogoFormat, pixels: number) {
     const density = format === "svg" ? await this.svgDensity(bytes, pixels) : undefined;
     const image = await this.open(bytes, { density });
 
@@ -47,7 +47,7 @@ export class SharpTeamLogoImages implements TeamLogoImages {
     return new Uint8Array(output);
   }
 
-  private async svgDensity(bytes: Uint8Array, pixels: number): Promise<number> {
+  private async svgDensity(bytes: Uint8Array, pixels: number) {
     const image = await this.open(bytes, { limitInputPixels: false });
     const { width, height } = await this.decode(async () => await image.metadata());
     const longest = Math.max(width, height, 1);
@@ -55,13 +55,13 @@ export class SharpTeamLogoImages implements TeamLogoImages {
     return Math.min(MAX_SVG_DENSITY, Math.max(1, Math.ceil((72 * pixels) / longest)));
   }
 
-  private async open(bytes: Uint8Array, options: SharpOptions = {}): Promise<Sharp> {
+  private async open(bytes: Uint8Array, options: SharpOptions = {}) {
     const sharp = await loadSharp();
 
     return sharp(bytes, { animated: false, limitInputPixels: MAX_INPUT_PIXELS, ...options });
   }
 
-  private async decode<T>(work: () => Promise<T>): Promise<T> {
+  private async decode<T>(work: () => Promise<T>) {
     try {
       return await work();
     } catch {

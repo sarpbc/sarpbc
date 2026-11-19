@@ -1,3 +1,4 @@
+import type { R2UploadResponse } from "@sarpbc/types";
 import {
   BadRequestException,
   Body,
@@ -9,7 +10,6 @@ import {
   UseGuards,
   UseInterceptors,
 } from "@nestjs/common";
-import type { R2UploadResponse } from "@sarpbc/types";
 import { IMAGE_CONTENT_TYPES, MAX_IMAGE_BYTES, MAX_IMAGE_MEGABYTES } from "@sarpbc/utils";
 import { useLogger } from "evlog/nestjs";
 import type { FastifyRequest } from "fastify";
@@ -51,7 +51,7 @@ export class StorageController {
     @Files() files: Record<string, Storage.MultipartFile[]> | null,
     @Req() request: FastifyRequest,
     @Body({ schema: R2UploadDto }) dto: R2UploadInput,
-  ): Promise<R2UploadResponse> {
+  ) {
     const file = files?.file?.[0];
 
     if (!file) {
@@ -70,6 +70,10 @@ export class StorageController {
       },
     });
 
-    return await this.r2Service.uploadImage(file.buffer, file.mimetype, dto.target);
+    return (await this.r2Service.uploadImage(
+      file.buffer,
+      file.mimetype,
+      dto.target,
+    )) satisfies R2UploadResponse;
   }
 }

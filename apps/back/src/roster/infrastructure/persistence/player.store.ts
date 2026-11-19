@@ -5,7 +5,7 @@ import { Team as TeamRow } from "./team.entity";
 import { LockMode } from "@mikro-orm/core";
 import { playerColumns, toPlayer } from "./roster.mapper";
 import type { Player } from "../../domain/player";
-import type { NationalityCount, PlayerQueries, PlayerWriter } from "../../application/ports";
+import type { PlayerQueries, PlayerWriter } from "../../application/ports";
 import type { DirectorySearchProps } from "../../application/search-props";
 import { directoryQuery } from "./directory-query";
 
@@ -27,7 +27,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     return rows.map(toPlayer);
   }
 
-  async searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Player[], number]> {
+  async searchAndCount(options: Partial<DirectorySearchProps>) {
     const { where, page } = directoryQuery(options);
 
     const [rows, count] = await this.em.findAndCount(PlayerRow, where, {
@@ -35,7 +35,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
       ...page,
     });
 
-    return [rows.map(toPlayer), count];
+    return [rows.map(toPlayer), count] satisfies [Player[], number];
   }
 
   async findById(id: string) {
@@ -75,7 +75,7 @@ export class MikroPlayerStore implements PlayerQueries, PlayerWriter {
     return row ? toPlayer(row) : null;
   }
 
-  async nationalities(): Promise<NationalityCount[]> {
+  async nationalities() {
     const rows: { code: string; players: string }[] = await this.em
       .getConnection()
       .execute(

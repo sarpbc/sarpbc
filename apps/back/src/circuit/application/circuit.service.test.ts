@@ -1,11 +1,11 @@
-import type { CircuitEventTeam, CircuitScaleTier, CircuitSummary } from "@sarpbc/types";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { CircuitEventTeam, CircuitScaleTier } from "@sarpbc/types";
+import { beforeEach, describe, expect, it } from "vitest";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type { CircuitStageSettings } from "../domain/circuit-scale";
 import { CircuitService } from "./circuit.service";
-import type { CircuitStore, StoredStageResult } from "./ports";
+import { MemoryCircuitStore } from "./circuit-store.test-utils";
+import type { StoredStageResult } from "./ports";
 import { mapSequentially } from "../../common/application/sequentially";
 
 const SOURCE = "https://example.org/official-rules";
@@ -20,8 +20,6 @@ const team = (id: string) => ({
 });
 
 const setup = () => {
-  const circuits = new Map<string, CircuitSummary>();
-
   const eventTeams = new Map<string, CircuitEventTeam[]>(
     ["ps-stage", "startgg-stage", "manual-stage"].map((id) => [
       id,
@@ -32,54 +30,28 @@ const setup = () => {
     ]),
   );
 
-  const saved = new Map<string, CircuitStageSettings>();
-  const results: StoredStageResult[] = [];
-
-  const store: CircuitStore = {
-    eventTeams: vi.fn<CircuitStore["eventTeams"]>(async (id) => eventTeams.get(id) ?? null),
-    find: vi.fn<CircuitStore["find"]>(
-      async (ref) =>
-        [...circuits.values()].find(({ id, slug }) => id === ref || slug === ref) ?? null,
-    ),
-    list: vi.fn<CircuitStore["list"]>(async () => [...circuits.values()]),
-    remove: vi.fn<CircuitStore["remove"]>(async (id) => circuits.delete(id)),
-    removeStage: vi.fn<CircuitStore["removeStage"]>(async (circuitId, tournamentId) =>
-      saved.delete(`${circuitId}:${tournamentId}`),
-    ),
-    save: vi.fn<CircuitStore["save"]>(async (circuit) => {
-      circuits.set(circuit.id, circuit);
-    }),
-    saveStage: vi.fn<CircuitStore["saveStage"]>(async (circuitId, tournamentId, stage) => {
-      saved.set(`${circuitId}:${tournamentId}`, stage);
-    }),
-    slugTaken: vi.fn<CircuitStore["slugTaken"]>(async (slug, exceptId) =>
-      [...circuits.values()].some((c) => c.slug === slug && c.id !== exceptId),
-    ),
-    stageResults: vi.fn<CircuitStore["stageResults"]>(async () => results),
-    stages: vi.fn<CircuitStore["stages"]>(async () => []),
-    withSeason: vi.fn<CircuitStore["withSeason"]>(async (season) =>
-      [...circuits.values()].filter((c) => c.season === season),
-    ),
-  };
-
+  const store = new MemoryCircuitStore(eventTeams);
   const service = new CircuitService(store, () => new Date("2026-06-01T00:00:00Z"));
 
-  return { results, saved, service };
+  return { results: store.results, saved: store.saved, service };
 };
 
-const result = (overrides: Partial<StoredStageResult>): StoredStageResult => ({
-  beginAt: new Date("2026-01-01T00:00:00Z"),
-  endAt: new Date("2026-01-05T00:00:00Z"),
-  event: { id: "e1", name: "Event 1", slug: "e1" },
-  finishes: [],
-  placements: [{ placement: 1, team: team("t1") }],
-  regionTeamIds: [],
-  scale,
-  source: "pandascore",
-  sourceUrl: SOURCE,
-  worldwide: false,
-  ...overrides,
-});
+const result = (overrides: Partial<StoredStageResult>) => {
+  const base = {
+    beginAt: new Date("2026-01-01T00:00:00Z"),
+    endAt: new Date("2026-01-05T00:00:00Z"),
+    event: { id: "e1", name: "Event 1", slug: "e1" },
+    finishes: [],
+    placements: [{ placement: 1, team: team("t1") }],
+    regionTeamIds: [],
+    scale,
+    source: "pandascore",
+    sourceUrl: SOURCE,
+    worldwide: false,
+  } satisfies StoredStageResult;
+
+  return { ...base, ...overrides };
+};
 
 describe(CircuitService, () => {
   let service: CircuitService;

@@ -12,7 +12,7 @@ export interface NamedParticipant {
   players?: readonly { name: string }[];
 }
 
-export const participantName = (participant: NamedParticipant): string =>
+export const participantName = (participant: NamedParticipant) =>
   participant.team?.name ?? (participant.players ?? []).map(({ name }) => name).join(" / ");
 
 export interface PicturedParticipant {
@@ -21,7 +21,7 @@ export interface PicturedParticipant {
 }
 
 /** A duo without a team has no single picture, so only a lone player stands in for the logo. */
-export const participantLogo = (participant: PicturedParticipant): ThemedLogo | null => {
+export const participantLogo = (participant: PicturedParticipant) => {
   if (participant.team !== null) {
     return participant.team;
   }

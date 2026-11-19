@@ -32,11 +32,11 @@ interface FakeBody {
 
 type Send = (body: FakeBody) => void;
 
-const hostWith = (send: Mock<Send>, sent = false, request = NEWS_REQUEST): ExecutionContextHost =>
-  new ExecutionContextHost([
-    request,
-    { send, sent, status: vi.fn<(code: number) => void>().mockReturnThis() },
-  ]);
+const hostWith = (send: Mock<Send>, sent = false, request = NEWS_REQUEST) => {
+  const response = { send, sent, status: () => response };
+
+  return new ExecutionContextHost([request, response]);
+};
 
 describe(AllExceptionsFilter, () => {
   const filter = new AllExceptionsFilter();

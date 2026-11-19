@@ -42,7 +42,7 @@ export interface StreamProposalsContext {
   match: { id: string };
 }
 
-const urls = (streams: { url: string }[]): string[] => streams.map((entry) => entry.url);
+const urls = (streams: { url: string }[]) => streams.map((entry) => entry.url);
 
 export const verifyStreams = async ({
   request,
@@ -50,7 +50,7 @@ export const verifyStreams = async ({
   memberCookie,
   tournament,
   match,
-}: StreamsContext): Promise<void> => {
+}: StreamsContext) => {
   const eventPath = `/events/${tournament.event.id}/streams`;
   const tournamentPath = `/tournaments/${tournament.id}/streams`;
   const matchPath = `/tournaments/matches/${match.id}/streams`;
@@ -223,7 +223,7 @@ export const verifyStreamProposals = async ({
   review,
   tournament,
   match,
-}: StreamProposalsContext): Promise<void> => {
+}: StreamProposalsContext) => {
   const proposed = {
     kind: "official",
     language: "en",

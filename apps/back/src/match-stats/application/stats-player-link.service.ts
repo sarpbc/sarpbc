@@ -9,7 +9,7 @@ export class StatsPlayerLinkService {
     private readonly links: PlayerLinkStore,
   ) {}
 
-  async accounts(tournamentId: string): Promise<StatsPlayerAccounts> {
+  async accounts(tournamentId: string) {
     await requireTournament(this.candidates, tournamentId);
 
     const [players, rosters] = await Promise.all([
@@ -17,10 +17,10 @@ export class StatsPlayerLinkService {
       this.links.rosters(tournamentId),
     ]);
 
-    return { players, rosters };
+    return { players, rosters } satisfies StatsPlayerAccounts;
   }
 
-  async link(tournamentId: string, link: PlayerLink): Promise<number> {
+  async link(tournamentId: string, link: PlayerLink) {
     await requireTournament(this.candidates, tournamentId);
 
     if (!(await this.links.onTournamentRoster(tournamentId, link.playerId))) {

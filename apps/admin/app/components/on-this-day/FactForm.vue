@@ -30,7 +30,7 @@ const { t, locale } = useI18n();
 const { sourceUrlError: checkSourceUrl } = useSourceUrl();
 const reportError = useReportError();
 
-const linkLabel = (link: NonNullable<OnThisDayFact["link"]>): string =>
+const linkLabel = (link: NonNullable<OnThisDayFact["link"]>) =>
   link.kind === "tournament" ? tournamentStageLabel(link) : link.name;
 
 const month = ref(fact?.month ?? 1);
@@ -106,7 +106,7 @@ const isValid = computed(
     (linkKind.value === NO_LINK || linked.value !== null),
 );
 
-const search = async (kind: OnThisDayLinkKind, value: string): Promise<Candidate[]> => {
+const search = async (kind: OnThisDayLinkKind, value: string) => {
   switch (kind) {
     case "player": {
       const players = await searchPlayers(value);

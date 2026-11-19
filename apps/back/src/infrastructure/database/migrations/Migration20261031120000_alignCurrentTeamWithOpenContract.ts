@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261031120000_alignCurrentTeamWithOpenContract extends Migration {
   override name = "Migration20261031120000_alignCurrentTeamWithOpenContract";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(`
       update "player" p
       set "team_id" = open."team_id"

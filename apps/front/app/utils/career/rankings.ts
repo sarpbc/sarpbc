@@ -1,7 +1,6 @@
 import type {
   CareerPlacement,
   CareerState,
-  CareerRankSnapshotEntry,
   CareerRegion,
   CareerSplitRecord,
   CareerWorldState,
@@ -55,14 +54,14 @@ interface PlayerCircuitInput {
   previousPoints: number | null;
 }
 
-export const snapshotWorldRanking = (rankings: WorldRankings): CareerRankSnapshotEntry[] =>
+export const snapshotWorldRanking = (rankings: WorldRankings) =>
   rankings.teams.map((entry) => ({ points: entry.points, teamId: entry.team.id }));
 
 const rosterPlayerFromId = (
   playerId: string,
   world: CareerWorldState,
   player: PlayerCircuitInput,
-): RankedRosterPlayer => {
+) => {
   if (playerId === USER_ROSTER_ID) {
     return { id: playerId, isUser: true, name: player.name, rating: player.rating };
   }
@@ -77,35 +76,28 @@ const rosterPlayerFromId = (
   };
 };
 
-const storedSplitPoints = (
-  world: CareerWorldState,
-  season: number,
-  split: number,
-): Record<string, number> | null => {
+const storedSplitPoints = (world: CareerWorldState, season: number, split: number) => {
   const field = world.splitFields.find((entry) => entry.season === season && entry.split === split);
 
   return field?.points ?? null;
 };
 
-/** Rankings read path must not simulate — aggregate splitFields only. */
+// WARNING: the rankings read path must not simulate; aggregate splitFields only.
 const npcSplitPointsByTeam = (
   player: PlayerCircuitInput,
   world: CareerWorldState,
   split: number,
-): Map<string, number> => {
+) => {
   const stored = storedSplitPoints(world, player.season, split);
 
   if (stored) {
     return new Map(Object.entries(stored));
   }
 
-  return new Map();
+  return new Map<string, number>();
 };
 
-const computeWorldRankings = (
-  player: PlayerCircuitInput,
-  world: CareerWorldState,
-): WorldRankings => {
+const computeWorldRankings = (player: PlayerCircuitInput, world: CareerWorldState) => {
   const completedSplits = player.splits.length;
 
   const freezeToSnapshot = completedSplits === 0 && (world.rankSnapshot?.length ?? 0) > 0;
@@ -203,10 +195,10 @@ const computeWorldRankings = (
   return { players, teams };
 };
 
-export const getTeamRank = (rankings: WorldRankings, teamId: string): number | null =>
+export const getTeamRank = (rankings: WorldRankings, teamId: string) =>
   rankings.teams.find((entry) => entry.team.id === teamId)?.rank ?? null;
 
-export const pickStartingTeam = (region: CareerRegion): string => {
+export const pickStartingTeam = (region: CareerRegion) => {
   const teams = getWorldTeamsByRegion(region);
   const [weakest] = teams.toSorted((a, b) => a.baseStrength - b.baseStrength);
 
@@ -217,7 +209,7 @@ export const pickStartingTeam = (region: CareerRegion): string => {
   return weakest.id;
 };
 
-export const computeStateRankings = (state: CareerState): WorldRankings =>
+export const computeStateRankings = (state: CareerState) =>
   computeWorldRankings(
     {
       name: state.playerName || DEFAULT_PLAYER_NAME,

@@ -1,15 +1,8 @@
-import type { EntityName, FindOptions } from "@mikro-orm/core";
 import { EntityManager } from "@mikro-orm/postgresql";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { unconstructed } from "../../../../test/doubles";
 import { CompetitionPrizeQueries } from "./tournament-prize.queries";
 import { CompetitionPrizeWriter } from "./tournament-prize.writer";
-
-type Find = (
-  entity: EntityName<object>,
-  where: Parameters<EntityManager["find"]>[1],
-  options?: FindOptions<object>,
-) => Promise<unknown[]>;
 
 const prizeRow = (playerCount: number) => ({
   amount: 900,
@@ -31,13 +24,8 @@ const prizeRow = (playerCount: number) => ({
 
 describe(CompetitionPrizeQueries, () => {
   it("reports an earnings line with its share count, amount and tournament source", async () => {
-    const find = vi.fn<Find>().mockResolvedValue([prizeRow(3)]);
-
     const queries = new CompetitionPrizeQueries(
-      Object.assign(unconstructed(EntityManager), {
-        find,
-        findOne: vi.fn<() => Promise<null>>(),
-      }),
+      Object.assign(unconstructed(EntityManager), { find: async () => [prizeRow(3)] }),
     );
 
     const [line] = await queries.byPlayer("player-a", { redistributableOnly: false });
@@ -52,21 +40,15 @@ describe(CompetitionPrizeQueries, () => {
 
 describe(CompetitionPrizeWriter, () => {
   it("lists each participant with its tournament roster", async () => {
-    const find = vi.fn<Find>().mockResolvedValue([
+    const rows = [
       {
         players: { getItems: () => [{ id: "player-a" }, { id: "player-b" }] },
         team: { id: "team-a" },
       },
-    ]);
+    ];
 
     const writer = new CompetitionPrizeWriter(
-      Object.assign(unconstructed(EntityManager), {
-        count: vi.fn<() => Promise<number>>(),
-        find,
-        getReference: vi.fn<() => object>(),
-        nativeDelete: vi.fn<() => Promise<number>>(),
-        persist: vi.fn<() => void>(),
-      }),
+      Object.assign(unconstructed(EntityManager), { find: async () => rows }),
     );
 
     await expect(writer.participants("cup")).resolves.toStrictEqual([

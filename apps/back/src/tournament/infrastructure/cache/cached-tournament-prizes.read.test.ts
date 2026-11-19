@@ -1,9 +1,8 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { TournamentPrizes } from "@sarpbc/types";
-import type { RedisService } from "../../../infrastructure/redis/redis.service";
-import type { TournamentPrizeService } from "../../application/tournament-prize.service";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { CachedTournamentPrizesRead } from "./cached-tournament-prizes.read";
+import { memoryRedis } from "./memory-redis.test-utils";
 
 const distribution: TournamentPrizes = {
   prizepool: "10000 United States Dollar",
@@ -28,50 +27,54 @@ const distribution: TournamentPrizes = {
 };
 
 describe(CachedTournamentPrizesRead, () => {
-  const redis = {
-    get: vi.fn<RedisService["get"]>(),
-    set: vi.fn<RedisService["set"]>(),
-  };
+  let redis = memoryRedis();
+  let failure: Error | null = null;
 
   const prizes = {
-    findByTournamentId: vi.fn<TournamentPrizeService["findByTournamentId"]>(),
+    findByTournamentId: async () => {
+      if (failure) {
+        throw failure;
+      }
+
+      return distribution;
+    },
   };
 
-  const read = new CachedTournamentPrizesRead(prizes, redis);
+  const findByTournamentId = vi.spyOn(prizes, "findByTournamentId");
+  let read = new CachedTournamentPrizesRead(prizes, redis);
 
   beforeEach(() => {
-    vi.resetAllMocks();
-    redis.get.mockResolvedValue(null);
-    prizes.findByTournamentId.mockResolvedValue(distribution);
+    findByTournamentId.mockClear();
+    redis = memoryRedis();
+    read = new CachedTournamentPrizesRead(prizes, redis);
+    failure = null;
   });
 
   it("stores the distribution for 60 seconds on a miss", async () => {
     await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
-    expect(redis.set).toHaveBeenCalledExactlyOnceWith(
-      "tournament-prizes:cup",
-      JSON.stringify(distribution),
-      60,
-    );
+    expect(redis.writes).toStrictEqual([
+      { key: "tournament-prizes:cup", ttl: 60, value: JSON.stringify(distribution) },
+    ]);
   });
 
   it("serves a cached distribution without reading the database", async () => {
-    redis.get.mockResolvedValue(JSON.stringify(distribution));
+    redis.entries.set("tournament-prizes:cup", JSON.stringify(distribution));
     await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
-    expect(prizes.findByTournamentId).not.toHaveBeenCalled();
+    expect(findByTournamentId).not.toHaveBeenCalled();
   });
 
   it("ignores an undecodable cache entry and an unavailable cache", async () => {
-    redis.get.mockResolvedValueOnce(JSON.stringify({ prizes: "broken" }));
+    redis.entries.set("tournament-prizes:cup", JSON.stringify({ prizes: "broken" }));
     await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
 
-    redis.get.mockRejectedValueOnce(new Error("down"));
-    redis.set.mockRejectedValueOnce(new Error("down"));
+    redis.failReads(new Error("down"));
+    redis.failWrites(new Error("down"));
     await expect(read.findByTournamentId("cup")).resolves.toStrictEqual(distribution);
   });
 
   it("does not cache unknown tournaments", async () => {
-    prizes.findByTournamentId.mockRejectedValue(new NotFoundError("missing"));
+    failure = new NotFoundError("missing");
     await expect(read.findByTournamentId("missing")).rejects.toThrow(NotFoundError);
-    expect(redis.set).not.toHaveBeenCalled();
+    expect(redis.writes).toHaveLength(0);
   });
 });

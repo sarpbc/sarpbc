@@ -59,11 +59,10 @@ export type GlyphTemplate = z.infer<typeof templateSchema>;
 
 export type Overlay = z.infer<typeof overlaySchema>;
 
-export const parseOverlay = (text: string): Overlay => overlaySchema.parse(JSON.parse(text));
+export const parseOverlay = (text: string) => overlaySchema.parse(JSON.parse(text));
 
-export const loadOverlay = async (path: string): Promise<Overlay> =>
-  parseOverlay(await readFile(path, "utf-8"));
+export const loadOverlay = async (path: string) => parseOverlay(await readFile(path, "utf-8"));
 
 /** Swaps the templates in the stored file's own key order, which the schema's sorted shape would lose. */
-export const overlayWithTemplates = (text: string, templates: readonly GlyphTemplate[]): string =>
+export const overlayWithTemplates = (text: string, templates: readonly GlyphTemplate[]) =>
   `${JSON.stringify({ ...z.record(z.string(), z.unknown()).parse(JSON.parse(text)), templates }, null, 2)}\n`;

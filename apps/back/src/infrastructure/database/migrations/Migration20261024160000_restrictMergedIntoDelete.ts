@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261024160000_restrictMergedIntoDelete extends Migration {
   override name = "Migration20261024160000_restrictMergedIntoDelete";
 
-  override up(): void | Promise<void> {
+  override up() {
     for (const table of ["player", "team"]) {
       this.addSql(`alter table "${table}" drop constraint "${table}_merged_into_id_foreign";`);
       this.addSql(
@@ -12,7 +12,7 @@ export class Migration20261024160000_restrictMergedIntoDelete extends Migration 
     }
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     for (const table of ["player", "team"]) {
       this.addSql(`alter table "${table}" drop constraint "${table}_merged_into_id_foreign";`);
       this.addSql(

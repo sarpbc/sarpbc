@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Patch, Query, UseGuards } from "@nestjs/common";
 import type { AppNotification } from "@sarpbc/types";
+import { Body, Controller, Get, Patch, Query, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { ListNotificationsQueryDto } from "./dto/list-notifications-query.dto";
@@ -17,7 +17,7 @@ export class NotificationController {
   async list(
     @CurrentUserId() userId: string,
     @Query({ schema: ListNotificationsQueryDto }) query: ListNotificationsQueryInput,
-  ): Promise<{ notifications: AppNotification[] }> {
+  ) {
     const notifications = await this.notificationService.listForUser(userId, query.limit);
 
     return {
@@ -26,7 +26,7 @@ export class NotificationController {
         createdAt: notification.createdAt.toISOString(),
         readAt: notification.readAt?.toISOString() ?? null,
       })),
-    };
+    } satisfies { notifications: AppNotification[] };
   }
 
   @Get("unread-count")

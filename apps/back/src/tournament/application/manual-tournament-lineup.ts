@@ -8,16 +8,15 @@ import type { TournamentParticipant } from "../domain/tournament-participant";
 import type { ParticipantRosterInput, UpdateTournamentInput } from "./inputs";
 import type { TournamentWriter } from "./ports";
 
-const playersNotFound = (): InvalidInputError =>
+const playersNotFound = () =>
   new InvalidInputError(
     "One or more players were not found. Refresh the player list and try again.",
   );
 
-const participantPlayerKey = (participant: TournamentParticipant): string =>
+const participantPlayerKey = (participant: TournamentParticipant) =>
   playerGroupKey(participant.players.map((player) => player.id));
 
-/** Copied once when the team joins, so later transfers do not rewrite the history of the tournament. */
-const activeRoster = async (writer: TournamentWriter, teamId: string): Promise<string[]> => {
+const activeRoster = async (writer: TournamentWriter, teamId: string) => {
   const players = await writer.teamPlayers(teamId);
 
   return players.filter((player) => player.currentRole() === "active").map((player) => player.id);
@@ -27,7 +26,7 @@ const removeParticipants = async (
   writer: TournamentWriter,
   tournamentId: string,
   participants: TournamentParticipant[],
-): Promise<void> => {
+) => {
   const references = await mapSequentially(
     participants,
     async (p) => await writer.participantReferences(tournamentId, p.id),
@@ -46,7 +45,7 @@ export const syncParticipants = async (
   writer: TournamentWriter,
   tournament: Tournament,
   teamIds: string[],
-): Promise<void> => {
+) => {
   if (new Set(teamIds).size !== teamIds.length || !(await writer.teamsExist(teamIds))) {
     throw new InvalidInputError(
       "One or more teams were not found. Refresh the team list and try again.",
@@ -81,7 +80,7 @@ export const syncPlayerParticipants = async (
   writer: TournamentWriter,
   tournament: Tournament,
   groups: string[][],
-): Promise<void> => {
+) => {
   const playerIds = [...new Set(groups.flat())];
 
   if (playerIds.length && !(await writer.playersExist(playerIds))) {
@@ -117,7 +116,7 @@ export const assertUpdatedLineup = async (
   writer: TournamentWriter,
   tournament: Tournament,
   input: UpdateTournamentInput,
-): Promise<void> => {
+) => {
   if (input.format !== undefined) {
     tournament.format = input.format;
   }
@@ -143,7 +142,7 @@ export const setRosters = async (
   writer: TournamentWriter,
   tournament: Tournament,
   rosters: ParticipantRosterInput[],
-): Promise<void> => {
+) => {
   const playerIds = [...new Set(rosters.flatMap((roster) => roster.playerIds))];
 
   if (playerIds.length && !(await writer.playersExist(playerIds))) {
@@ -152,7 +151,6 @@ export const setRosters = async (
 
   const participants = await writer.participants(tournament.id);
 
-  // A team listed twice keeps its last roster, as when the rosters were saved one after another.
   const latestByParticipant = new Map<
     string,
     { participant: TournamentParticipant; roster: ParticipantRosterInput }

@@ -23,18 +23,14 @@ export class McpController {
   constructor(private readonly mcpServerFactory: McpServerFactory) {}
 
   @Post()
-  async handlePost(
-    @Req() request: FastifyRequest & { user: PatUser },
-    @Res() reply: FastifyReply,
-  ): Promise<void> {
+  async handlePost(@Req() request: FastifyRequest & { user: PatUser }, @Res() reply: FastifyReply) {
     const server = this.mcpServerFactory.createServer(request.user);
 
     const transport = new StreamableHTTPServerTransport({
       sessionIdGenerator: undefined,
     });
 
-    // Attach before handleRequest: for the stateless JSON path the response
-    // usually ends inside handleRequest, and cleanup must still run.
+    // WARNING: attach before handleRequest; on the stateless JSON path the response usually ends inside it.
     reply.raw.on("close", () => {
       void transport.close();
       void server.close();
@@ -68,13 +64,13 @@ export class McpController {
 
   @Get()
   @HttpCode(405)
-  handleGet(): typeof METHOD_NOT_ALLOWED_BODY {
+  handleGet() {
     return METHOD_NOT_ALLOWED_BODY;
   }
 
   @Delete()
   @HttpCode(405)
-  handleDelete(): typeof METHOD_NOT_ALLOWED_BODY {
+  handleDelete() {
     return METHOD_NOT_ALLOWED_BODY;
   }
 }

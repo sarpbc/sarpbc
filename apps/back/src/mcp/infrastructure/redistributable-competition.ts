@@ -1,7 +1,6 @@
 import { isRedistributable } from "../../common/domain/data-source";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { TournamentPlayerStatsService } from "../../match-stats/application/tournament-player-stats.service";
-import type { Tournament } from "../../tournament/domain/tournament";
 import type { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import type { MatchService } from "../../tournament/application/match/match.service";
 import type { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
@@ -28,14 +27,11 @@ export interface RedistributableCompetitionServices {
   tournamentPlayerStatsService: Pick<TournamentPlayerStatsService, "forStages">;
 }
 
-/**
- * An event whose stages all come from start.gg may not be redistributed, so it is hidden.
- * An event without stages stays visible: staff reuse it once its stages have moved elsewhere.
- */
-const isHiddenEvent = ({ stages }: EventListing): boolean =>
+// WARNING: an event whose stages all come from start.gg is hidden, but one without stages stays visible for staff to reuse.
+const isHiddenEvent = ({ stages }: EventListing) =>
   stages.length > 0 && !stages.some((stage) => isRedistributable(stage.source));
 
-export const tournamentNotFound = (id: string): NotFoundError =>
+export const tournamentNotFound = (id: string) =>
   new NotFoundError(
     `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
   );
@@ -53,7 +49,7 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
     tournamentPlayerStatsService,
   } = services;
 
-  const tournament = async (id: string): Promise<Tournament> => {
+  const tournament = async (id: string) => {
     const found = await tournamentQueries.findById(id);
 
     if (!found || !isRedistributable(found.source)) {
@@ -63,7 +59,7 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
     return found;
   };
 
-  const event = async (idOrSlug: string): Promise<EventListing> => {
+  const event = async (idOrSlug: string) => {
     const listing = await catalogService.findEvent(idOrSlug);
 
     if (isHiddenEvent(listing)) {
@@ -130,7 +126,7 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
       return await tournamentPlayerStatsService.forStages([await tournament(tournamentId)]);
     },
 
-    async tournaments(options: { activeOnly: boolean; limit: number }): Promise<Tournament[]> {
+    async tournaments(options: { activeOnly: boolean; limit: number }) {
       const [found] = await tournamentQueries.find({
         ...options,
         offset: 0,

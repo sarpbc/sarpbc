@@ -9,7 +9,6 @@ import { assertMatchDeletable } from "../../domain/match-deletion";
 import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead } from "./match-head-to-head";
-import type { HeadToHead } from "./match-head-to-head";
 import type { CompetitionAfterCommit } from "../after-commit";
 import type { CompetitionTransaction, MatchQueries, MatchWriter } from "../ports";
 import type { EmptyBracketInput, ManualMatchInput, UpdateMatchInput } from "../inputs";
@@ -62,7 +61,7 @@ interface TeamForm {
 
 export type TeamFormsMap = Record<string, TeamForm>;
 
-const teamMatchOutcome = (match: Match, teamId: string): "win" | "loss" | null => {
+const teamMatchOutcome = (match: Match, teamId: string) => {
   if (match.winner?.team?.id !== undefined && match.winner?.team?.id !== "") {
     return match.winner.team.id === teamId ? "win" : "loss";
   }
@@ -96,7 +95,7 @@ const teamMatchOutcome = (match: Match, teamId: string): "win" | "loss" | null =
   return winnerParticipantId === teamParticipant.id ? "win" : "loss";
 };
 
-const toTeamFormEntry = (match: Match, teamId: string): TeamFormMatchEntry | null => {
+const toTeamFormEntry = (match: Match, teamId: string) => {
   const { participants } = match;
   const teamParticipant = participants.find((p) => p.team?.id === teamId);
   const opponentParticipant = participants.find((p) => p.team?.id !== teamId);
@@ -112,7 +111,7 @@ const toTeamFormEntry = (match: Match, teamId: string): TeamFormMatchEntry | nul
   const opponentScore =
     results.find((r) => r.participant.id === opponentParticipant.id)?.score ?? null;
 
-  return {
+  const entry: TeamFormMatchEntry = {
     beginAt: match.beginAt,
     endAt: match.endAt,
     id: match.id,
@@ -127,9 +126,11 @@ const toTeamFormEntry = (match: Match, teamId: string): TeamFormMatchEntry | nul
     score: { opponent: opponentScore, team: teamScore },
     slug: matchPublicSlug(match),
   };
+
+  return entry;
 };
 
-const assertDeletable = async (matches: MatchWriter, match: Match): Promise<void> => {
+const assertDeletable = async (matches: MatchWriter, match: Match) => {
   assertMatchDeletable(match, await matches.references(match.id));
 };
 
@@ -143,11 +144,11 @@ export class MatchService {
   async list(
     kind: MatchListKind,
     { limit = DEFAULT_PAGE_SIZE, ...options }: MatchListQueryOptions = {},
-  ): Promise<[Match[], number]> {
+  ) {
     return await this.reads.list(kind, { ...options, limit: Math.min(limit, MAX_PAGE_SIZE) });
   }
 
-  async findBlocks(blocks: readonly MatchBlockSelector[], now: Date): Promise<Match[][]> {
+  async findBlocks(blocks: readonly MatchBlockSelector[], now: Date) {
     return await findMatchBlocks(this.reads, blocks, now);
   }
 
@@ -157,13 +158,11 @@ export class MatchService {
   }: {
     limit?: number;
     minutesAgo?: number;
-  } = {}): Promise<Match[]> {
+  } = {}) {
     return await this.reads.recentlyEnded({ limit, minutesAgo });
   }
 
-  async findDetail(
-    ref: EntityRef,
-  ): Promise<{ match: Match; teamForms: TeamFormsMap; headToHead: HeadToHead | null }> {
+  async findDetail(ref: EntityRef) {
     const match = await this.reads.detail(ref);
 
     if (!match) {
@@ -180,7 +179,7 @@ export class MatchService {
     return { headToHead, match, teamForms };
   }
 
-  private async buildHeadToHead(match: Match): Promise<HeadToHead | null> {
+  private async buildHeadToHead(match: Match) {
     const [teamA, teamB] = match.participants.map((participant) => participant.team);
 
     if (match.participants.length !== 2 || !teamA || !teamB) {
@@ -200,7 +199,7 @@ export class MatchService {
     return buildHeadToHead(historicalMatches, teamAId, teamBId);
   }
 
-  private async buildTeamForms(match: Match): Promise<TeamFormsMap> {
+  private async buildTeamForms(match: Match) {
     const { participants } = match;
     const teamForms: TeamFormsMap = {};
 
@@ -234,14 +233,14 @@ export class MatchService {
     return teamForms;
   }
 
-  async createMatch(tournamentId: string, input: ManualMatchInput): Promise<Match> {
+  async createMatch(tournamentId: string, input: ManualMatchInput) {
     const written = await this.transaction.run(
       async ({ matches }) => await createMatchInTransaction(matches, tournamentId, input),
     );
 
     return await this.settled(written.id);
   }
-  async createEmptyBracket(tournamentId: string, input: EmptyBracketInput): Promise<Match[]> {
+  async createEmptyBracket(tournamentId: string, input: EmptyBracketInput) {
     const written = await this.transaction.run(
       async ({ matches }) => await createEmptyBracketInTransaction(matches, tournamentId, input),
     );
@@ -250,28 +249,28 @@ export class MatchService {
 
     return await this.reads.byIds(written.map((match) => match.id));
   }
-  async setMatchWinner(matchId: string, winnerId: string): Promise<Match> {
+  async setMatchWinner(matchId: string, winnerId: string) {
     const written = await this.transaction.run(
       async ({ matches }) => await setWinnerInTransaction(matches, matchId, winnerId),
     );
 
     return await this.settled(written.id);
   }
-  async updateMatch(matchId: string, input: UpdateMatchInput): Promise<Match> {
+  async updateMatch(matchId: string, input: UpdateMatchInput) {
     const written = await this.transaction.run(
       async ({ matches }) => await updateMatchInTransaction(matches, matchId, input),
     );
 
     return await this.settled(written.id);
   }
-  async setVods(matchId: string, vods: readonly MatchVodInput[]): Promise<Match> {
+  async setVods(matchId: string, vods: readonly MatchVodInput[]) {
     const written = await this.transaction.run(
       async ({ matches }) => await setVodsInTransaction(matches, matchId, vods),
     );
 
     return await this.committed(written.id);
   }
-  async setSource(matchId: string, sourceUrl: string | null): Promise<Match> {
+  async setSource(matchId: string, sourceUrl: string | null) {
     const written = await this.transaction.run(
       async ({ matches }) => await setSourceInTransaction(matches, matchId, sourceUrl),
     );
@@ -282,11 +281,7 @@ export class MatchService {
     return match;
   }
   /** A forfeit is staff data, so it applies to PandaScore matches too. */
-  async setForfeit(
-    matchId: string,
-    forfeitedById: string | null,
-    sourceUrl?: string | null,
-  ): Promise<Match> {
+  async setForfeit(matchId: string, forfeitedById: string | null, sourceUrl?: string | null) {
     const written = await this.transaction.run(
       async ({ matches }) =>
         await setForfeitInTransaction(matches, matchId, forfeitedById, sourceUrl),
@@ -294,14 +289,14 @@ export class MatchService {
 
     return await this.settled(written.id);
   }
-  async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]): Promise<Match> {
+  async setGameVods(matchId: string, game: number, links: readonly MatchVodLink[]) {
     const written = await this.transaction.run(
       async ({ matches }) => await setGameVodsInTransaction(matches, matchId, game, links),
     );
 
     return await this.committed(written.id);
   }
-  async requireProposableDeletion(id: string): Promise<void> {
+  async requireProposableDeletion(id: string) {
     await this.transaction.run(async ({ matches }) => {
       const match = await matches.load(id);
 
@@ -316,7 +311,7 @@ export class MatchService {
       await assertDeletable(matches, match);
     });
   }
-  async deleteMatch(id: string): Promise<void> {
+  async deleteMatch(id: string) {
     const tournamentId = await this.transaction.run(async ({ matches }) => {
       const match = await matches.load(id);
 
@@ -332,10 +327,10 @@ export class MatchService {
 
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
   }
-  async find(id: string): Promise<Match | null> {
+  async find(id: string) {
     return await this.reads.detail({ kind: "id", value: id });
   }
-  private async committed(id: string): Promise<Match> {
+  private async committed(id: string) {
     const match = await this.find(id);
 
     if (!match) {
@@ -344,7 +339,7 @@ export class MatchService {
 
     return match;
   }
-  private async settled(id: string): Promise<Match> {
+  private async settled(id: string) {
     const match = await this.committed(id);
     await this.afterCommit.settle({
       decidedMatchIds: match.isDecided() ? [match.id] : [],

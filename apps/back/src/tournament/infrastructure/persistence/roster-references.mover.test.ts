@@ -1,34 +1,52 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { unconstructed } from "../../../../test/doubles";
 import { TournamentRosterReferences } from "./roster-references.mover";
 import { TournamentPrize } from "./tournament-prize.entities";
 
-const prize = (id: string, teamId: string, tournamentId: string, playerIds: string[]) => ({
-  id,
-  players: {
-    add: vi.fn<(items: { id: string }[]) => void>(),
-    getItems: () => playerIds.map((playerId) => ({ id: playerId })),
-  },
-  team: { id: teamId },
-  tournament: { id: tournamentId },
-});
+type Entity = Parameters<EntityManager["nativeDelete"]>[0];
+
+type Where = Parameters<EntityManager["nativeDelete"]>[1];
+
+type Data = Parameters<EntityManager["nativeUpdate"]>[2];
+
+const prize = (id: string, teamId: string, tournamentId: string, playerIds: string[]) => {
+  const added: { id: string }[][] = [];
+
+  return {
+    added,
+    id,
+    players: {
+      add: (items: { id: string }[]) => {
+        added.push(items);
+      },
+      getItems: () => playerIds.map((playerId) => ({ id: playerId })),
+    },
+    team: { id: teamId },
+    tournament: { id: tournamentId },
+  };
+};
 
 const mover = (prizes: ReturnType<typeof prize>[]) => {
-  const find = vi.fn<EntityManager["find"]>().mockResolvedValue(prizes);
-  const nativeDelete = vi.fn<EntityManager["nativeDelete"]>();
-  const nativeUpdate = vi.fn<EntityManager["nativeUpdate"]>();
+  const writes: { entity: Entity; kind: "delete" | "update"; where: Where; data?: Data }[] = [];
 
   const references = new TournamentRosterReferences(
-    Object.assign(unconstructed(EntityManager), { find, nativeDelete, nativeUpdate }),
+    Object.assign(unconstructed(EntityManager), {
+      find: async () => prizes,
+      nativeDelete: async (entity: Entity, where: Where) => {
+        writes.push({ entity, kind: "delete", where });
+
+        return 0;
+      },
+      nativeUpdate: async (entity: Entity, where: Where, data: Data) => {
+        writes.push({ data, entity, kind: "update", where });
+
+        return 0;
+      },
+    }),
   );
 
-  const prizeUpdateOrder = () =>
-    nativeUpdate.mock.invocationCallOrder[
-      nativeUpdate.mock.calls.findIndex(([entity]) => entity === TournamentPrize)
-    ] ?? 0;
-
-  return { nativeDelete, nativeUpdate, prizeUpdateOrder, references };
+  return { references, writes };
 };
 
 describe("TournamentRosterReferences.moveTeam prizes", () => {
@@ -37,28 +55,35 @@ describe("TournamentRosterReferences.moveTeam prizes", () => {
     const duplicate = prize("dup-cup", "kc-dup", "cup", ["vatira"]);
     const moved = prize("dup-open", "kc-dup", "open", ["atow"]);
 
-    const { references, nativeDelete, nativeUpdate, prizeUpdateOrder } = mover([
-      kept,
-      duplicate,
-      moved,
-    ]);
+    const { references, writes } = mover([kept, duplicate, moved]);
 
     await references.moveTeam("kc-dup", "kc");
 
-    expect(kept.players.add).toHaveBeenCalledWith([{ id: "vatira" }]);
-    expect(nativeDelete).toHaveBeenCalledWith(TournamentPrize, { id: { $in: ["dup-cup"] } });
-    expect(nativeUpdate).toHaveBeenCalledWith(TournamentPrize, { team: "kc-dup" }, { team: "kc" });
-    expect(nativeDelete.mock.invocationCallOrder[0]).toBeLessThan(prizeUpdateOrder());
+    const prizeWrites = writes.filter(({ entity }) => entity === TournamentPrize);
+
+    expect(kept.added).toStrictEqual([[{ id: "vatira" }]]);
+    expect(prizeWrites).toStrictEqual([
+      { entity: TournamentPrize, kind: "delete", where: { id: { $in: ["dup-cup"] } } },
+      {
+        data: { team: "kc" },
+        entity: TournamentPrize,
+        kind: "update",
+        where: { team: "kc-dup" },
+      },
+    ]);
   });
 
   it("moves prizes without deleting when the teams never shared a tournament", async () => {
-    const { references, nativeDelete, nativeUpdate } = mover([
-      prize("dup-open", "kc-dup", "open", []),
-    ]);
+    const { references, writes } = mover([prize("dup-open", "kc-dup", "open", [])]);
 
     await references.moveTeam("kc-dup", "kc");
 
-    expect(nativeDelete).not.toHaveBeenCalled();
-    expect(nativeUpdate).toHaveBeenCalledWith(TournamentPrize, { team: "kc-dup" }, { team: "kc" });
+    expect(writes.filter(({ kind }) => kind === "delete")).toStrictEqual([]);
+    expect(writes).toContainEqual({
+      data: { team: "kc" },
+      entity: TournamentPrize,
+      kind: "update",
+      where: { team: "kc-dup" },
+    });
   });
 });

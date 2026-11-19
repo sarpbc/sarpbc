@@ -1,8 +1,4 @@
 #!/usr/bin/env node
-/**
- * CI guardrail: ban arbitrary hub row heights in apps/front.
- * See apps/front/DESIGN.md — Grid module / Contributing rules.
- */
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 
@@ -31,11 +27,11 @@ interface Violation {
 
 const SKIPPED_DIRECTORIES = new Set(["node_modules", ".nuxt", "dist"]);
 
-const collectFiles = async (dir: string): Promise<string[]> => {
+const collectFiles = async (dir: string) => {
   const entries = await readdir(dir, { withFileTypes: true });
 
-  const nested = await Promise.all(
-    entries.map(async (entry): Promise<string[]> => {
+  const nested: string[][] = await Promise.all(
+    entries.map(async (entry) => {
       const fullPath = path.join(dir, entry.name);
 
       if (entry.isDirectory()) {
@@ -49,7 +45,7 @@ const collectFiles = async (dir: string): Promise<string[]> => {
   return nested.flat();
 };
 
-const scanFile = (filePath: string, content: string): Violation[] => {
+const scanFile = (filePath: string, content: string) => {
   const violations: Violation[] = [];
   const lines = content.split("\n");
 
@@ -71,7 +67,7 @@ const scanFile = (filePath: string, content: string): Violation[] => {
   return violations;
 };
 
-const main = async (): Promise<void> => {
+const main = async () => {
   const rootFiles = await Promise.all(SCAN_ROOTS.map(async (root) => await collectFiles(root)));
 
   const fileViolations = await Promise.all(

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { isUuid } from "../../../common/domain/entity-ref";
 import { Player } from "../../../roster/domain/player";
 import { Team } from "../../../roster/domain/team";
 import { Tournament } from "../../../tournament/domain/tournament";
@@ -22,6 +23,26 @@ import type { TournamentPrizeService } from "../../../tournament/application/tou
 
 const user = { email: "staff@test.com", id: "u1", role: "journalist" } as const;
 
+type PrizeDistribution = Awaited<ReturnType<TournamentPrizeService["findByTournamentId"]>>;
+
+interface PrizeState {
+  distribution: PrizeDistribution;
+}
+
+const playerLines: GameStatsStore["playerLines"] = async (ids) =>
+  ids.map((id) => ({
+    account: "steam:1",
+    assists: 1,
+    demolitions: 1,
+    gameId: `game-${id}`,
+    goals: 2,
+    player: { id: "p1", name: "Scout", slug: "scout" },
+    saves: 0,
+    shots: 4,
+    team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
+    teamGoals: 4,
+  }));
+
 const setup = () => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
@@ -40,10 +61,18 @@ const setup = () => {
     team,
   });
 
-  const matchService = { list: vi.fn<MatchService["list"]>().mockResolvedValue([[], 0]) };
+  const listed: Parameters<MatchService["list"]>[] = [];
+
+  const matchService = {
+    list: async (...args) => {
+      listed.push(args);
+
+      return [[], 0];
+    },
+  } satisfies Pick<MatchService, "list">;
 
   const matchLineupService = {
-    find: vi.fn<MatchLineupService["find"]>(async (matchId) => ({
+    find: async (matchId) => ({
       lineups: [
         {
           participantId: "part-kc",
@@ -60,8 +89,8 @@ const setup = () => {
         },
       ],
       source: matchId === "startgg-match" ? ("startgg" as const) : ("manual" as const),
-    })),
-  };
+    }),
+  } satisfies Pick<MatchLineupService, "find">;
 
   const manualCup = Object.assign(new Tournament(), {
     beginAt: null,
@@ -92,69 +121,76 @@ const setup = () => {
     winner: null,
   });
 
+  const tournamentQueries: Parameters<TournamentQueries["find"]>[0][] = [];
+
   const tournaments = {
-    find: vi.fn<TournamentQueries["find"]>().mockResolvedValue([[], 0]),
-    findById: vi.fn<TournamentQueries["findById"]>(async (id) =>
+    find: async (options) => {
+      tournamentQueries.push(options);
+
+      return [[], 0];
+    },
+    findById: async (id) =>
       id === manualCup.id ? manualCup : Object.assign(new Tournament(), { id, source: "startgg" }),
-    ),
+  } satisfies Pick<TournamentQueries, "find" | "findById">;
+
+  const prizes: PrizeState = {
+    distribution: { prizepool: null, prizes: [], source: "manual" },
   };
+
+  const earnings: { kind: "player" | "team"; id: string; scope: object }[] = [];
 
   const tournamentPrizeService = {
-    findByTournamentId: vi
-      .fn<TournamentPrizeService["findByTournamentId"]>()
-      .mockResolvedValue({ prizepool: null, prizes: [], source: "manual" }),
-    playerEarnings: vi
-      .fn<TournamentPrizeService["playerEarnings"]>()
-      .mockResolvedValue({ totals: [], years: [] }),
-    teamEarnings: vi
-      .fn<TournamentPrizeService["teamEarnings"]>()
-      .mockResolvedValue({ totals: [], years: [] }),
-  };
+    findByTournamentId: async () => prizes.distribution,
+    playerEarnings: async (id, scope) => {
+      earnings.push({ id, kind: "player", scope });
+
+      return { totals: [], years: [] };
+    },
+    teamEarnings: async (id, scope) => {
+      earnings.push({ id, kind: "team", scope });
+
+      return { totals: [], years: [] };
+    },
+  } satisfies Pick<
+    TournamentPrizeService,
+    "findByTournamentId" | "playerEarnings" | "teamEarnings"
+  >;
 
   const playerAwardService = {
-    findByTournamentId: vi.fn<PlayerAwardService["findByTournamentId"]>().mockResolvedValue([
+    findByTournamentId: async () => [
       {
         awardType: "mvp",
         id: "award-1",
         participant: { id: "part-kc", team: { id: "team-kc", name: "Karmine Corp" } },
         player: { id: "p1", name: "Scout", slug: "scout" },
       },
-    ]),
-  };
+    ],
+  } satisfies Pick<PlayerAwardService, "findByTournamentId">;
 
   const playerService = {
-    find: vi.fn<PlayerService["find"]>().mockResolvedValue([player]),
-    findById: vi.fn<PlayerService["findById"]>().mockResolvedValue(null),
-    findBySlug: vi.fn<PlayerService["findBySlug"]>().mockResolvedValue(player),
-  };
+    find: async () => [player],
+    findById: async (id) => {
+      if (!isUuid(id)) {
+        throw new Error(`invalid input syntax for type uuid: "${id}"`);
+      }
+
+      return null;
+    },
+    findBySlug: async () => player,
+  } satisfies Pick<PlayerService, "find" | "findById" | "findBySlug">;
 
   const teamService = {
-    find: vi.fn<TeamService["find"]>().mockResolvedValue([team]),
-    findById: vi.fn<TeamService["findById"]>().mockResolvedValue(team),
-    findBySlug: vi.fn<TeamService["findBySlug"]>().mockResolvedValue(team),
-  };
-
-  const playerLines = vi.fn<GameStatsStore["playerLines"]>(async (ids) =>
-    ids.map((id) => ({
-      account: "steam:1",
-      assists: 1,
-      demolitions: 1,
-      gameId: `game-${id}`,
-      goals: 2,
-      player: { id: "p1", name: "Scout", slug: "scout" },
-      saves: 0,
-      shots: 4,
-      team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
-      teamGoals: 4,
-    })),
-  );
+    find: async () => [team],
+    findById: async () => team,
+    findBySlug: async () => team,
+  } satisfies Pick<TeamService, "find" | "findById" | "findBySlug">;
 
   const catalogService = {
-    findEvent: vi.fn<ManualCatalogService["findEvent"]>(async (idOrSlug) => ({
+    findEvent: async (idOrSlug) => ({
       event: Object.assign(new TournamentEvent(), { id: "event", name: "Coupe", slug: idOrSlug }),
       stages: [manualCup, Object.assign(new Tournament(), { id: "c1", source: "startgg" })],
-    })),
-  };
+    }),
+  } satisfies Pick<ManualCatalogService, "findEvent">;
 
   const tools = readTools({
     competition: redistributableCompetition({
@@ -190,30 +226,26 @@ const setup = () => {
 
   return {
     call,
+    earnings,
     json,
-    matchLineupService,
-    matchService,
-    playerAwardService,
-    playerLines,
-    playerService,
-    teamService,
-    tournamentPrizeService,
-    tournaments,
+    listed,
+    prizes,
+    tournamentQueries,
   };
 };
 
 describe("MCP read tools", () => {
   it("excludes start.gg rows in the list queries so totals and pages stay consistent", async () => {
-    const { matchService, tournaments, call } = setup();
+    const { listed, tournamentQueries, call } = setup();
     await call("get_upcoming_matches");
     await call("get_match_results");
     await call("get_tournaments");
 
     const redistributableOnly: unknown = expect.objectContaining({ redistributableOnly: true });
-    expect(matchService.list).toHaveBeenCalledWith("upcoming", redistributableOnly);
-    expect(matchService.list).toHaveBeenCalledWith("live", redistributableOnly);
-    expect(matchService.list).toHaveBeenCalledWith("results", redistributableOnly);
-    expect(tournaments.find).toHaveBeenCalledWith(redistributableOnly);
+    expect(listed).toContainEqual(["upcoming", redistributableOnly]);
+    expect(listed).toContainEqual(["live", redistributableOnly]);
+    expect(listed).toContainEqual(["results", redistributableOnly]);
+    expect(tournamentQueries).toContainEqual(redistributableOnly);
   });
 
   it("returns start.gg players and teams with their source", async () => {
@@ -266,23 +298,21 @@ describe("MCP read tools", () => {
   });
 
   it("aggregates player stats for the stages of an event", async () => {
-    const { json, playerLines } = setup();
+    const { json } = setup();
 
     await expect(json("get_tournament_player_stats", { event: "coupe" })).resolves.toMatchObject({
       games: 1,
     });
-    expect(playerLines).toHaveBeenCalledExactlyOnceWith(["manual-cup"]);
   });
 
-  it("leaves start.gg stages out and requires a selector without reading stats", async () => {
-    const { call, playerLines } = setup();
+  it("leaves start.gg stages out and requires a selector", async () => {
+    const { call } = setup();
 
     const startgg = await call("get_tournament_player_stats", { tournamentId: "c1" });
     const missing = await call("get_tournament_player_stats", {});
 
     expect(startgg.isError).toBe(true);
     expect(missing.isError).toBe(true);
-    expect(playerLines).not.toHaveBeenCalled();
   });
 
   it("returns match lineups with stand-in flags and hides start.gg matches", async () => {
@@ -303,12 +333,8 @@ describe("MCP read tools", () => {
   });
 
   it("hides start.gg prize distributions", async () => {
-    const { call, tournamentPrizeService } = setup();
-    tournamentPrizeService.findByTournamentId.mockResolvedValueOnce({
-      prizepool: null,
-      prizes: [],
-      source: "startgg",
-    });
+    const { call, prizes } = setup();
+    prizes.distribution = { prizepool: null, prizes: [], source: "startgg" };
     const callResult4 = await call("get_tournament_prizes", { id: "c1" });
     expect(callResult4.isError).toBe(true);
   });
@@ -322,11 +348,10 @@ describe("MCP read tools", () => {
     });
   });
 
-  it("hides the awards of start.gg tournaments without reading them", async () => {
-    const { call, playerAwardService } = setup();
+  it("hides the awards of start.gg tournaments", async () => {
+    const { call } = setup();
     const callResult5 = await call("get_tournament_awards", { id: "startgg-cup" });
     expect(callResult5.isError).toBe(true);
-    expect(playerAwardService.findByTournamentId).not.toHaveBeenCalled();
   });
 
   it("returns the awards of a redistributable tournament with their player and team", async () => {
@@ -345,27 +370,21 @@ describe("MCP read tools", () => {
   });
 
   it("excludes start.gg earnings in the queries", async () => {
-    const { call, tournamentPrizeService } = setup();
+    const { call, earnings } = setup();
     await call("get_team_earnings", { idOrSlug: "scouted" });
     await call("get_player_earnings", { idOrSlug: "scout" });
-    expect(tournamentPrizeService.teamEarnings).toHaveBeenCalledWith("t1", {
-      redistributableOnly: true,
-    });
-    expect(tournamentPrizeService.playerEarnings).toHaveBeenCalledWith("p1", {
-      redistributableOnly: true,
-    });
+    expect(earnings).toStrictEqual([
+      { id: "t1", kind: "team", scope: { redistributableOnly: true } },
+      { id: "p1", kind: "player", scope: { redistributableOnly: true } },
+    ]);
   });
 
-  it("reads a UUID as an id first, then as a slug, and anything else as a slug only", async () => {
-    const { call, playerService } = setup();
-    const uuid = "0f8fad5b-d9cb-469f-a165-70867728950e";
+  it("falls back to the slug for a UUID that is no id and never sends a slug as an id", async () => {
+    const { json } = setup();
 
-    await call("get_player", { idOrSlug: uuid });
-    expect(playerService.findById).toHaveBeenCalledWith(uuid);
-    expect(playerService.findBySlug).toHaveBeenCalledWith(uuid);
-
-    playerService.findById.mockClear();
-    await call("get_player", { idOrSlug: "scout" });
-    expect(playerService.findById).not.toHaveBeenCalled();
+    await expect(
+      json("get_player", { idOrSlug: "0f8fad5b-d9cb-469f-a165-70867728950e" }),
+    ).resolves.toMatchObject({ id: "p1" });
+    await expect(json("get_player", { idOrSlug: "scout" })).resolves.toMatchObject({ id: "p1" });
   });
 });

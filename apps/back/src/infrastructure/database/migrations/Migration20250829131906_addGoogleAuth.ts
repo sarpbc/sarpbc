@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20250829131906_addGoogleAuth extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(`alter table "user" drop column "first_name", drop column "last_name";`);
 
     this.addSql(
@@ -9,7 +9,7 @@ export class Migration20250829131906_addGoogleAuth extends Migration {
     );
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`alter table "user" drop column "google_id";`);
 
     this.addSql(`alter table "user" add column "last_name" varchar(255) not null;`);

@@ -1,10 +1,4 @@
-import type {
-  DataSource,
-  PlayerProfileAward,
-  PlayerSeasonAward,
-  ProfileEarnings,
-} from "@sarpbc/types";
-import { vi } from "vitest";
+import type { DataSource, PlayerSeasonAward } from "@sarpbc/types";
 import type { PlayerComparisonSources } from "../src/career/application/player-comparison.service";
 import { Contract } from "../src/roster/domain/contract";
 import { Player } from "../src/roster/domain/player";
@@ -33,7 +27,7 @@ export const vatira = Object.assign(new Player(), {
 
 export const mawkzy = Object.assign(new Player(), { id: "mawkzy", name: "M0nkey", slug: "m0nkey" });
 
-const side = (id: string, team: Team, players: Player[]): TournamentParticipant =>
+const side = (id: string, team: Team, players: Player[]) =>
   Object.assign(new TournamentParticipant(), { id, players, team });
 
 interface MatchSpec {
@@ -45,7 +39,7 @@ interface MatchSpec {
   finished?: boolean;
 }
 
-export const careerMatch = (spec: MatchSpec): Match => {
+export const careerMatch = (spec: MatchSpec) => {
   const participants = [
     side(`${spec.id}-kc`, kc, spec.sides[0]),
     side(`${spec.id}-bds`, bds, spec.sides[1]),
@@ -73,7 +67,7 @@ export const careerMatch = (spec: MatchSpec): Match => {
   });
 };
 
-export const careerTitle = (id: string, source: DataSource): Tournament =>
+const careerTitle = (id: string, source: DataSource) =>
   Object.assign(new Tournament(), {
     endAt: new Date("2026-05-01T00:00:00.000Z"),
     event: cup,
@@ -83,8 +77,8 @@ export const careerTitle = (id: string, source: DataSource): Tournament =>
     source,
   });
 
-export const careerAward = (id: string, source: DataSource): PlayerProfileAward => ({
-  awardType: "mvp",
+const careerAward = (id: string, source: DataSource) => ({
+  awardType: "mvp" as const,
   id,
   tournament: {
     endAt: null,
@@ -105,12 +99,12 @@ export const zenSeasonAward: PlayerSeasonAward = {
   sourceUrl: "https://rocketleague.com/news/season-mvp",
 };
 
-export const careerEarnings = (amount: number): ProfileEarnings => ({
+export const careerEarnings = (amount: number) => ({
   totals: [{ amount, currency: "USD" }],
   years: [],
 });
 
-export const careerMatches: Match[] = [
+const careerMatches: Match[] = [
   careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 }),
   careerMatch({ id: "rematch", sides: [[zen], [vatira]], source: "pandascore", winner: 1 }),
   careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], source: "startgg", winner: 0 }),
@@ -136,10 +130,10 @@ export const careerSources = () => {
     team: kc,
   });
 
-  const playerEarnings = vi.fn<PlayerComparisonSources["prizes"]["playerEarnings"]>(
-    async (playerId, scope) =>
+  const prizes: PlayerComparisonSources["prizes"] = {
+    playerEarnings: async (playerId, scope) =>
       careerEarnings(scope.redistributableOnly && playerId === zen.id ? 1500 : 0),
-  );
+  };
 
   const sources = {
     awards: {
@@ -160,7 +154,7 @@ export const careerSources = () => {
     players: {
       findBySlug: async (slug: string) => players.find((player) => player.slug === slug) ?? null,
     },
-    prizes: { playerEarnings },
+    prizes,
     seasons: {
       awardsOfPlayer: async (playerId: string) => (playerId === zen.id ? [zenSeasonAward] : []),
     },
@@ -172,5 +166,5 @@ export const careerSources = () => {
     },
   } satisfies PlayerComparisonSources;
 
-  return { playerEarnings, sources };
+  return { sources };
 };

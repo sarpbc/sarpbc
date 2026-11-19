@@ -6,7 +6,7 @@ import type { Team } from "../domain/team";
 import { TeamAlias, assertTeamAliasFits, requireTeamAliasInput } from "../domain/team-alias";
 import type { TeamAliasTransaction, TeamAliasWriteScope } from "./ports";
 
-const requireTeamForAlias = async ({ teams }: TeamAliasWriteScope, id: string): Promise<Team> => {
+const requireTeamForAlias = async ({ teams }: TeamAliasWriteScope, id: string) => {
   const team = await teams.findById(id);
 
   if (!team) {
@@ -22,7 +22,7 @@ const requireTeamForAlias = async ({ teams }: TeamAliasWriteScope, id: string): 
   return team;
 };
 
-const requireTeamAlias = (team: Team, aliasId: string): TeamAlias => {
+const requireTeamAlias = (team: Team, aliasId: string) => {
   const alias = team.aliases.find(({ id }) => id === aliasId);
 
   if (!alias) {
@@ -37,7 +37,7 @@ const prepareAlias = async (
   teamId: string,
   input: TeamAliasInput,
   aliasId?: string,
-): Promise<TeamAlias> => {
+) => {
   const team = await requireTeamForAlias(scope, teamId);
   const id = aliasId === undefined ? "" : requireTeamAlias(team, aliasId).id;
   const alias = Object.assign(new TeamAlias(), requireTeamAliasInput(input), { id });
@@ -59,11 +59,11 @@ const prepareAlias = async (
 export class TeamAliasService {
   constructor(private readonly transaction: TeamAliasTransaction) {}
 
-  async requireProposable(teamId: string, input: TeamAliasInput, aliasId?: string): Promise<void> {
+  async requireProposable(teamId: string, input: TeamAliasInput, aliasId?: string) {
     await this.transaction.run(async (scope) => await prepareAlias(scope, teamId, input, aliasId));
   }
 
-  async add(teamId: string, input: TeamAliasInput): Promise<TeamAlias> {
+  async add(teamId: string, input: TeamAliasInput) {
     return await this.transaction.run(async (scope) => {
       const alias = await prepareAlias(scope, teamId, input);
       await scope.aliases.save(teamId, alias);
@@ -72,7 +72,7 @@ export class TeamAliasService {
     });
   }
 
-  async update(teamId: string, aliasId: string, input: TeamAliasInput): Promise<TeamAlias> {
+  async update(teamId: string, aliasId: string, input: TeamAliasInput) {
     return await this.transaction.run(async (scope) => {
       const alias = await prepareAlias(scope, teamId, input, aliasId);
       await scope.aliases.save(teamId, alias);
@@ -81,7 +81,7 @@ export class TeamAliasService {
     });
   }
 
-  async delete(teamId: string, aliasId: string): Promise<void> {
+  async delete(teamId: string, aliasId: string) {
     await this.transaction.run(async (scope) => {
       const team = await requireTeamForAlias(scope, teamId);
       await scope.aliases.delete(requireTeamAlias(team, aliasId));

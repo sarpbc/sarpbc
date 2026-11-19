@@ -22,7 +22,7 @@ const {
   refresh,
   error,
 } = await useLazyAsyncData("admin-seasons", () => getSeasons(), {
-  default: (): SeasonSummary[] => [],
+  default: () => [],
   server: false,
 });
 

@@ -1,5 +1,5 @@
-import { Controller, Get, Header, Query } from "@nestjs/common";
 import type { OnThisDay } from "@sarpbc/types";
+import { Controller, Get, Header, Query } from "@nestjs/common";
 import { parseIsoDay } from "@sarpbc/utils";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { OnThisDayService } from "../../application/on-this-day.service";
@@ -12,11 +12,9 @@ export class OnThisDayController {
 
   @Get()
   @Header("Cache-Control", "public, max-age=300")
-  async forDay(
-    @Query({ schema: OnThisDayQueryDto }) { date }: OnThisDayQueryInput,
-  ): Promise<OnThisDay> {
+  async forDay(@Query({ schema: OnThisDayQueryDto }) { date }: OnThisDayQueryInput) {
     if (date === undefined) {
-      return await this.onThisDay.forDay(null);
+      return (await this.onThisDay.forDay(null)) satisfies OnThisDay;
     }
 
     const day = parseIsoDay(date);
@@ -25,6 +23,6 @@ export class OnThisDayController {
       throw new InvalidInputError("The date is not a calendar date.");
     }
 
-    return await this.onThisDay.forDay(day);
+    return (await this.onThisDay.forDay(day)) satisfies OnThisDay;
   }
 }

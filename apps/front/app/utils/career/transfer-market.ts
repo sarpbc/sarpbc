@@ -8,12 +8,7 @@ const STRONG_PLAYER_RANK = 16;
 const TRANSFER_UPGRADE_MARGIN = 2;
 const OFFER_SHORTLIST = 8;
 
-interface UserStanding {
-  rating: number;
-  rank: number;
-}
-
-const getUserStanding = (rankings: WorldRankings): UserStanding => {
+const getUserStanding = (rankings: WorldRankings) => {
   const user = rankings.players.find((player) => player.isUser);
 
   return {
@@ -22,12 +17,7 @@ const getUserStanding = (rankings: WorldRankings): UserStanding => {
   };
 };
 
-/** Matching the 8th-best rating counts as elite, even when listed just outside the cut. */
-const marketPlayerRank = (
-  rankings: WorldRankings,
-  playerRating: number,
-  playerRank: number,
-): number => {
+const marketPlayerRank = (rankings: WorldRankings, playerRating: number, playerRank: number) => {
   const eighthRating = rankings.players[7]?.rating;
 
   if (eighthRating !== undefined && playerRating >= eighthRating) {
@@ -43,7 +33,7 @@ const marketPlayerRank = (
   return playerRank;
 };
 
-const weakestRosterRating = (team: RankedTeam): number => {
+const weakestRosterRating = (team: RankedTeam) => {
   let min = Infinity;
 
   for (const member of team.roster) {
@@ -55,10 +45,10 @@ const weakestRosterRating = (team: RankedTeam): number => {
   return min;
 };
 
-const teamWantsPlayer = (team: RankedTeam, playerRating: number): boolean =>
+const teamWantsPlayer = (team: RankedTeam, playerRating: number) =>
   playerRating >= weakestRosterRating(team) - TRANSFER_UPGRADE_MARGIN;
 
-const shuffleTeams = (teams: RankedTeam[], rng: () => number): RankedTeam[] => {
+const shuffleTeams = (teams: RankedTeam[], rng: () => number) => {
   const shuffled = [...teams];
 
   for (let i = shuffled.length - 1; i > 0; i -= 1) {
@@ -75,11 +65,7 @@ const shuffleTeams = (teams: RankedTeam[], rng: () => number): RankedTeam[] => {
   return shuffled;
 };
 
-const getTransferBand = (
-  seasonPoints: number,
-  currentRank: number,
-  playerWorldRank: number,
-): { minRank: number; maxRank: number; maxOffers: number } | null => {
+const getTransferBand = (seasonPoints: number, currentRank: number, playerWorldRank: number) => {
   const betterMax = Math.max(1, currentRank - 1);
 
   if (playerWorldRank <= ELITE_PLAYER_RANK) {
@@ -117,7 +103,7 @@ const getTransferBand = (
   return { maxOffers: 3, maxRank: Math.max(6, currentRank), minRank: 1 };
 };
 
-const rollOfferCount = (rng: () => number, threeChance: number, twoChance: number): number => {
+const rollOfferCount = (rng: () => number, threeChance: number, twoChance: number) => {
   if (rng() < threeChance) {
     return 3;
   }
@@ -130,7 +116,7 @@ const pickOffseasonOffers = (
   seasonPoints: number,
   rankings: WorldRankings,
   seed: number,
-): string[] => {
+) => {
   const currentRank = getTeamRank(rankings, currentTeamId) ?? rankings.teams.length;
   const { rating: playerRating, rank: listedRank } = getUserStanding(rankings);
   const playerWorldRank = marketPlayerRank(rankings, playerRating, listedRank);
@@ -140,7 +126,7 @@ const pickOffseasonOffers = (
     return [];
   }
 
-  const inBand = (entry: RankedTeam): boolean =>
+  const inBand = (entry: RankedTeam) =>
     entry.team.id !== currentTeamId && entry.rank >= band.minRank && entry.rank <= band.maxRank;
 
   let pool = rankings.teams.filter(
@@ -185,7 +171,7 @@ const pickOffseasonOffers = (
     .map((entry) => entry.team.id);
 };
 
-const renewalPerformanceModifier = (seasonPoints: number): number => {
+const renewalPerformanceModifier = (seasonPoints: number) => {
   if (seasonPoints >= 42) {
     return 0.15;
   }
@@ -197,7 +183,7 @@ const renewalPerformanceModifier = (seasonPoints: number): number => {
   return seasonPoints < 10 ? -0.15 : 0;
 };
 
-const pickWeakestOtherTeam = (currentTeamId: string, rankings: WorldRankings): string => {
+const pickWeakestOtherTeam = (currentTeamId: string, rankings: WorldRankings) => {
   const others = rankings.teams.filter((entry) => entry.team.id !== currentTeamId);
   const [weakest] = others.toSorted((a, b) => b.rank - a.rank);
 
@@ -220,7 +206,7 @@ export const resolveOffseasonContracts = (
   currentTeamId: string,
   rankings: WorldRankings,
   seed: number,
-): OffseasonResolution => {
+) => {
   const rng = createRng(seed);
   const pastPeak = getSeasonsPastPeak(seasonJustFinished + 1);
   const transferTeamIds = pickOffseasonOffers(currentTeamId, seasonPoints, rankings, seed);

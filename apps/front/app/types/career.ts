@@ -51,7 +51,7 @@ export type CareerStage = (typeof CAREER_STAGES)[number];
 
 export const DEFAULT_PLAYER_NAME = "Rookie";
 
-export const getSplitNumber = (stage: CareerStage): number | null => {
+export const getSplitNumber = (stage: CareerStage) => {
   switch (stage) {
     case "split1": {
       return 1;
@@ -73,7 +73,7 @@ export const getSplitNumber = (stage: CareerStage): number | null => {
   }
 };
 
-export const getSplitStage = (split: number): CareerStage => {
+export const getSplitStage = (split: number) => {
   switch (split) {
     case 1: {
       return "split1";
@@ -266,7 +266,6 @@ export interface CareerState {
 
 const STARTING_AGE = 16;
 
-/** Seasons 1–7 are ages 16–22. The stay-or-retire prompt starts after that. */
 const PEAK_SEASONS = 7;
 export const SPLITS_PER_SEASON = 2;
 export const MAX_EVENTS_BEFORE_SPLIT = 3;
@@ -278,13 +277,13 @@ export const MIN_STAT = 0;
 /** Hard ceiling. 100 is reachable but gated to roughly 1 career in 1000. */
 export const MAX_STAT = 100;
 
-export const getPlayerAge = (season: number): number => STARTING_AGE + season - 1;
+export const getPlayerAge = (season: number) => STARTING_AGE + season - 1;
 
-export const getSeasonsPastPeak = (season: number): number => Math.max(0, season - PEAK_SEASONS);
+export const getSeasonsPastPeak = (season: number) => Math.max(0, season - PEAK_SEASONS);
 
-export const getRetiredAge = (seasonsPlayed: number): number => STARTING_AGE + seasonsPlayed;
+export const getRetiredAge = (seasonsPlayed: number) => STARTING_AGE + seasonsPlayed;
 
-export const emptyDestinyLeanings = (): CareerDestinyLeanings => ({
+export const emptyDestinyLeanings = () => ({
   coach: 0,
   quit: 0,
   streamer: 0,
@@ -293,13 +292,13 @@ export const emptyDestinyLeanings = (): CareerDestinyLeanings => ({
 export const applyDestinyLeanings = (
   current: CareerDestinyLeanings,
   delta: Partial<CareerDestinyLeanings>,
-): CareerDestinyLeanings => ({
+) => ({
   coach: current.coach + (delta.coach ?? 0),
   quit: current.quit + (delta.quit ?? 0),
   streamer: current.streamer + (delta.streamer ?? 0),
 });
 
-export const getRecommendedDestiny = (leanings: CareerDestinyLeanings): CareerDestiny => {
+export const getRecommendedDestiny = (leanings: CareerDestinyLeanings) => {
   const order: CareerDestiny[] = ["quit", "streamer", "coach"];
   let best: CareerDestiny = "quit";
   let bestScore = Number.NEGATIVE_INFINITY;

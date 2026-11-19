@@ -5,7 +5,7 @@ import { stripNewsTweetTags } from "./news-tweet-tag";
 export const NEWS_EXCERPT_MAX_LENGTH = 120;
 export const NEWS_SEO_DESCRIPTION_MAX_LENGTH = 160;
 
-export const newsContentToPlainText = (content: string): string => {
+export const newsContentToPlainText = (content: string) => {
   const withLabels = replaceNewsEntityTagsWithLabels(
     stripNewsMatchTags(stripNewsTweetTags(content)),
   );
@@ -25,10 +25,7 @@ export const newsContentToPlainText = (content: string): string => {
     .trim();
 };
 
-export const excerptFromNewsContent = (
-  content: string,
-  maxLength = NEWS_EXCERPT_MAX_LENGTH,
-): string => {
+export const excerptFromNewsContent = (content: string, maxLength = NEWS_EXCERPT_MAX_LENGTH) => {
   const plain = newsContentToPlainText(content);
 
   if (plain.length <= maxLength) {

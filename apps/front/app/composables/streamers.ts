@@ -1,6 +1,6 @@
 import type { LiveStreamer } from "@sarpbc/types";
 
-const getLiveStreamers = async (): Promise<LiveStreamer[]> => {
+const getLiveStreamers = async () => {
   const res = await apiFetch<{ streamers?: LiveStreamer[] }>("/streamers/live", {
     method: "GET",
   });
@@ -13,7 +13,7 @@ export const useLiveStreamers = () => {
     "live-streamers",
     async () => await getLiveStreamers(),
     {
-      default: (): LiveStreamer[] => [],
+      default: () => [],
       immediate: false,
       server: false,
     },

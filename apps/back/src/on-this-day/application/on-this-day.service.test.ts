@@ -7,7 +7,7 @@ import {
   onThisDaySources,
   stage,
   transfer,
-} from "../../../test/on-this-day-fixtures";
+} from "../../../test/on-this-day.fixture";
 import { OnThisDayService } from "./on-this-day.service";
 
 const NOW = new Date("2026-12-06T09:00:00Z");
@@ -195,12 +195,12 @@ describe(OnThisDayService, () => {
       year: 2015,
     });
     expect(events).toHaveLength(2);
-    expect(Object.keys(events[1] ?? {})).toStrictEqual([
-      "kind",
+    expect(Object.keys(events[1] ?? {}).toSorted()).toStrictEqual([
       "date",
-      "year",
+      "kind",
       "tournament",
       "winner",
+      "year",
     ]);
   });
 });

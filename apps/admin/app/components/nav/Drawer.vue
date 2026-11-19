@@ -7,7 +7,6 @@ const { loggingOut, logout } = useLogout();
 
 const route = useRoute();
 
-/* Following a link changes the route; the drawer has done its job. */
 watch(
   () => route.fullPath,
   () => {

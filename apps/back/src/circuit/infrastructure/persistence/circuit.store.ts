@@ -14,46 +14,49 @@ import {
   Tournament,
   TournamentParticipant,
 } from "../../../tournament/infrastructure/competition-persistence";
-import type { CircuitStore, StoredStageResult } from "../../application/ports";
+import type { CircuitStore } from "../../application/ports";
 import type { CircuitStageSettings } from "../../domain/circuit-scale";
 import type { StagePlacement } from "../../domain/circuit-standings";
 import { Circuit } from "./circuit.entity";
 import { CircuitStage } from "./circuit-stage.entity";
 import { CircuitStageTeam } from "./circuit-stage-team.entity";
 
-const toSummary = (row: Circuit): CircuitSummary => ({
-  description: row.description,
-  id: row.id,
-  name: row.name,
-  qualificationSpots: row.qualificationSpots,
-  region: row.region,
-  season: row.season,
-  slug: row.slug,
-  sourceUrl: row.sourceUrl,
-});
+const toSummary = (row: Circuit) =>
+  ({
+    description: row.description,
+    id: row.id,
+    name: row.name,
+    qualificationSpots: row.qualificationSpots,
+    region: row.region,
+    season: row.season,
+    slug: row.slug,
+    sourceUrl: row.sourceUrl,
+  }) satisfies CircuitSummary;
 
-const eventRef = ({ event }: Tournament): TournamentEventRef => ({
-  id: event.id,
-  name: event.name,
-  slug: event.slug,
-});
+const eventRef = ({ event }: Tournament) =>
+  ({
+    id: event.id,
+    name: event.name,
+    slug: event.slug,
+  }) satisfies TournamentEventRef;
 
-const toTeam = (team: Team): CircuitStandingTeam => ({
-  darkModeImageUrl: team.darkModeImageUrl,
-  id: team.id,
-  imageUrl: team.imageUrl,
-  name: team.name,
-  slug: team.slug,
-});
+const toTeam = (team: Team) =>
+  ({
+    darkModeImageUrl: team.darkModeImageUrl,
+    id: team.id,
+    imageUrl: team.imageUrl,
+    name: team.name,
+    slug: team.slug,
+  }) satisfies CircuitStandingTeam;
 
-const regionTeams = (stage: CircuitStage): Team[] =>
+const regionTeams = (stage: CircuitStage) =>
   stage.teams
     .getItems()
     .filter(({ regionMember }) => regionMember)
     .map(({ team }) => team)
     .toSorted((a, b) => a.name.localeCompare(b.name));
 
-const finishes = (stage: CircuitStage): StagePlacement[] =>
+const finishes = (stage: CircuitStage) =>
   stage.teams
     .getItems()
     .flatMap(({ team, placement }) =>
@@ -61,7 +64,7 @@ const finishes = (stage: CircuitStage): StagePlacement[] =>
     )
     .toSorted((a, b) => a.placement - b.placement || a.team.name.localeCompare(b.team.name));
 
-const toStageItem = (stage: CircuitStage): CircuitDetail["stages"][number] => {
+const toStageItem = (stage: CircuitStage) => {
   const { tournament, scale, sourceUrl, worldwide } = stage;
 
   return {
@@ -79,10 +82,10 @@ const toStageItem = (stage: CircuitStage): CircuitDetail["stages"][number] => {
       source: tournament.source,
     },
     worldwide,
-  };
+  } satisfies CircuitDetail["stages"][number];
 };
 
-const toPlacement = ({ team, placement }: TournamentParticipant): StagePlacement[] =>
+const toPlacement = ({ team, placement }: TournamentParticipant) =>
   team && placement !== null ? [{ placement, team: toTeam(team) }] : [];
 
 export class CircuitPersistence implements CircuitStore {
@@ -150,7 +153,7 @@ export class CircuitPersistence implements CircuitStore {
     return rows.map(toStageItem);
   }
 
-  async stageResults(circuitId: string): Promise<StoredStageResult[]> {
+  async stageResults(circuitId: string) {
     const rows = await this.em.find(
       CircuitStage,
       { circuit: { id: circuitId } },
@@ -190,7 +193,7 @@ export class CircuitPersistence implements CircuitStore {
     }));
   }
 
-  async eventTeams(tournamentId: string): Promise<CircuitEventTeam[] | null> {
+  async eventTeams(tournamentId: string) {
     const tournament = await this.em.findOne(
       Tournament,
       { id: tournamentId },
@@ -198,7 +201,7 @@ export class CircuitPersistence implements CircuitStore {
     );
 
     if (!tournament) {
-      return null;
+      return null satisfies CircuitEventTeam[] | null;
     }
 
     const participants = await this.em.find(
@@ -223,7 +226,7 @@ export class CircuitPersistence implements CircuitStore {
       (a, b) =>
         (a.placement ?? Number.MAX_SAFE_INTEGER) - (b.placement ?? Number.MAX_SAFE_INTEGER) ||
         a.team.name.localeCompare(b.team.name),
-    );
+    ) satisfies CircuitEventTeam[] | null;
   }
 
   async saveStage(circuitId: string, tournamentId: string, settings: CircuitStageSettings) {

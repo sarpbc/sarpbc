@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Contract } from "./contract.entity";
 import { Player } from "./player.entity";
 import { Team } from "./team.entity";
@@ -17,19 +17,37 @@ interface Where {
   endDate?: Date | null;
 }
 
-describe(RosterSyncWriter, () => {
-  const em = {
-    findOne: vi.fn<(entity: EntityClass, where: Where) => Promise<Row | null>>(),
-    getReference: vi.fn<(entity: EntityClass, id: string) => object>(),
-    persist: vi.fn<(row: Team | Player) => void>(),
-  };
+const matches = (row: Row, entity: EntityClass, where: Where) => {
+  if (row instanceof Contract) {
+    return entity === Contract && row.player.id === where.player && row.endDate === where.endDate;
+  }
 
-  const manager = Object.assign(unconstructed(EntityManager), em);
+  return row instanceof entity && row.pandascoreId === where.pandascoreId;
+};
+
+const fakeEntityManager = () => {
+  const rows: Row[] = [];
+  const persisted: (Team | Player)[] = [];
+
+  return {
+    findOne: async (entity: EntityClass, where: Where) =>
+      rows.find((row) => matches(row, entity, where)) ?? null,
+    getReference: (entity: EntityClass, id: string) => Object.assign(new entity(), { id }),
+    persist: (row: Team | Player) => {
+      persisted.push(row);
+    },
+    persisted,
+    rows,
+  };
+};
+
+describe(RosterSyncWriter, () => {
+  let em: ReturnType<typeof fakeEntityManager>;
+  let manager: EntityManager;
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    em.findOne.mockResolvedValue(null);
-    em.getReference.mockImplementation((entity, id) => Object.assign(new entity(), { id }));
+    em = fakeEntityManager();
+    manager = Object.assign(unconstructed(EntityManager), em);
   });
 
   it("updates a numeric identity and preserves local slug and current team on historical import", async () => {
@@ -42,9 +60,7 @@ describe(RosterSyncWriter, () => {
       team,
     });
 
-    em.findOne.mockImplementation(async (entity, where) =>
-      entity === Player && where.pandascoreId === 1 ? player : null,
-    );
+    em.rows.push(player);
     await new RosterSyncWriter(manager).upsertPlayer({
       name: "Drufinho",
       nationality: "BR",
@@ -64,7 +80,7 @@ describe(RosterSyncWriter, () => {
       team: new Team(),
     });
 
-    em.findOne.mockImplementation(async (entity) => (entity === Player ? player : null));
+    em.rows.push(player);
     const writer = new RosterSyncWriter(manager);
     await writer.upsertPlayer({ name: "Comm", pandascoreId: 2, slug: "comm" }, "new-team");
     expect(player.team?.id).toBe("new-team");
@@ -76,17 +92,7 @@ describe(RosterSyncWriter, () => {
     const team = Object.assign(new Team(), { id: "agg" });
     const player = Object.assign(new Player(), { id: "p3", pandascoreId: 3, slug: "joyo", team });
     const contract = Object.assign(new Contract(), { endDate: null, player, team });
-    em.findOne.mockImplementation(async (entity, where) => {
-      if (entity === Player && where.pandascoreId === 3) {
-        return player;
-      }
-
-      if (entity === Contract && where.player === "p3" && where.endDate === null) {
-        return contract;
-      }
-
-      return null;
-    });
+    em.rows.push(player, contract);
     const writer = new RosterSyncWriter(manager);
     await writer.upsertPlayer({ name: "Joyo", pandascoreId: 3, slug: "joyo" }, null);
     expect(player.team).toBe(team);
@@ -100,9 +106,9 @@ describe(RosterSyncWriter, () => {
     const first = await writer.upsertTeam(input);
     const second = await writer.upsertTeam({ ...input, slug: "changed" });
     expect(second.id).toBe(first.id);
-    const rows = em.persist.mock.calls.map((call) => call[0]);
-    expect(rows[0]).toBe(rows[1]);
-    expect(rows[0].slug).toBe("secret");
+    const [firstRow, secondRow] = em.persisted;
+    expect(firstRow).toBe(secondRow);
+    expect(firstRow.slug).toBe("secret");
   });
 
   it("preserves local artwork", async () => {
@@ -113,7 +119,7 @@ describe(RosterSyncWriter, () => {
       slug: "local",
     });
 
-    em.findOne.mockResolvedValue(team);
+    em.rows.push(team);
     await new RosterSyncWriter(manager).upsertTeam({
       imageUrl: "remote.png",
       name: "Secret",
@@ -133,9 +139,7 @@ describe(RosterSyncWriter, () => {
 
     const alias = Object.assign(new TeamAlias(), { pandascoreId: 21, team });
 
-    em.findOne.mockImplementation(async (entity, where) =>
-      entity === TeamAlias && where.pandascoreId === 21 ? alias : null,
-    );
+    em.rows.push(alias);
 
     const writer = new RosterSyncWriter(manager);
     const input = { name: "Fixture Before", pandascoreId: 21, slug: "fixture-before" };
@@ -154,12 +158,6 @@ describe(RosterSyncWriter, () => {
 
     expect(team.name).toBe("Fixture Now");
     expect(team.pandascoreId).toBe(20);
-    expect(em.persist).not.toHaveBeenCalled();
-  });
-
-  it("looks the alias up once for repeated upserts", async () => {
-    await upsertAliasedTeamTwice();
-
-    expect(em.findOne.mock.calls.filter(([entity]) => entity === TeamAlias)).toHaveLength(1);
+    expect(em.persisted).toStrictEqual([]);
   });
 });

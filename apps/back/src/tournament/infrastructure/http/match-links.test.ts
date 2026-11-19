@@ -7,13 +7,13 @@ import { TournamentParticipant } from "../../domain/tournament-participant";
 import { mapMatchListItem } from "./match-list.mapper";
 import { mapTournamentDetail } from "./tournament.mapper";
 
-const participant = (name: string): TournamentParticipant =>
+const participant = (name: string) =>
   Object.assign(new TournamentParticipant(), {
     id: `participant-${name}`,
     team: Object.assign(new Team(), { id: `team-${name}`, name, slug: name.toLowerCase() }),
   });
 
-const tournament = (): Tournament =>
+const tournament = () =>
   Object.assign(new Tournament(), {
     beginAt: new Date("2026-03-01T00:00:00Z"),
     event: { id: "event", name: "RLCS Major Paris 2026", slug: "rlcs-major-paris-2026" },
@@ -23,7 +23,7 @@ const tournament = (): Tournament =>
     slug: "playoffs",
   });
 
-const match = (overrides: Partial<Match>): Match =>
+const match = (overrides: Partial<Match>) =>
   Object.assign(new Match(), {
     id: "match",
     name: "Upper bracket final: Karmine Corp vs Team Falcons",

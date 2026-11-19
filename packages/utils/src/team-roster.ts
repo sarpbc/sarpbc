@@ -7,13 +7,13 @@ export const isStaffContractRole = (
   role: ContractRole | null | undefined,
 ): role is StaffContractRole => STAFF_CONTRACT_ROLES.some((staffRole) => staffRole === role);
 
-export const isActiveRosterPlayer = (player: { role?: ContractRole | null }): boolean =>
+export const isActiveRosterPlayer = (player: { role?: ContractRole | null }) =>
   player.role === "active" || player.role === null || player.role === undefined;
 
 export const selectActiveRosterPlayers = <T extends { role?: ContractRole | null }>(
   players: T[],
   limit: number = ACTIVE_ROSTER_LIMIT,
-): T[] => players.filter(isActiveRosterPlayer).slice(0, limit);
+) => players.filter(isActiveRosterPlayer).slice(0, limit);
 
-export const selectTeamStaff = <T extends { role?: ContractRole | null }>(players: T[]): T[] =>
+export const selectTeamStaff = <T extends { role?: ContractRole | null }>(players: T[]) =>
   players.filter((player) => isStaffContractRole(player.role));

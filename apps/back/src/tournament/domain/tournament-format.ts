@@ -7,13 +7,9 @@ export interface ParticipantLineup {
   playerGroups: readonly (readonly string[])[];
 }
 
-export const playerGroupKey = (playerIds: readonly string[]): string =>
-  playerIds.toSorted().join(",");
+export const playerGroupKey = (playerIds: readonly string[]) => playerIds.toSorted().join(",");
 
-export const assertLineupFitsFormat = (
-  format: TournamentFormat,
-  lineup: ParticipantLineup,
-): void => {
+export const assertLineupFitsFormat = (format: TournamentFormat, lineup: ParticipantLineup) => {
   switch (format) {
     case "1v1": {
       if (lineup.teamIds.length) {
@@ -42,7 +38,7 @@ export const assertLineupFitsFormat = (
     default: {
       const exhaustive: never = format;
 
-      return exhaustive;
+      throw new Error(`Unhandled format: ${String(exhaustive)}`);
     }
   }
 

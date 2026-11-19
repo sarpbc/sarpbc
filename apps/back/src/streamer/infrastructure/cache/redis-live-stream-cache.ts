@@ -30,7 +30,7 @@ export class RedisLiveStreamCache implements LiveStreamCache {
     private readonly redis: Pick<RedisService, "get" | "setIfAbsent" | "setWhileHeld" | "delete">,
   ) {}
 
-  async read(): Promise<LiveStreamSnapshot | null> {
+  async read() {
     const cached = await this.redis.get(LIVE_STREAMS_KEY);
 
     if (cached === null) {
@@ -46,7 +46,7 @@ export class RedisLiveStreamCache implements LiveStreamCache {
     }
   }
 
-  async claimRefresh(): Promise<string | null> {
+  async claimRefresh() {
     const claim = randomUUID();
 
     return (await this.redis.setIfAbsent(LIVE_STREAMS_LOCK_KEY, claim, LOCK_TTL_SECONDS))
@@ -54,7 +54,7 @@ export class RedisLiveStreamCache implements LiveStreamCache {
       : null;
   }
 
-  async write(value: LiveStreamSnapshot, claim: string): Promise<boolean> {
+  async write(value: LiveStreamSnapshot, claim: string) {
     return await this.redis.setWhileHeld(
       LIVE_STREAMS_LOCK_KEY,
       claim,
@@ -64,7 +64,7 @@ export class RedisLiveStreamCache implements LiveStreamCache {
     );
   }
 
-  async clear(): Promise<void> {
+  async clear() {
     await this.redis.delete(LIVE_STREAMS_KEY);
     await this.redis.delete(LIVE_STREAMS_LOCK_KEY);
   }

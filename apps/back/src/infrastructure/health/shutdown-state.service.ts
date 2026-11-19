@@ -6,17 +6,17 @@ const SHUTDOWN_SIGNALS = ["SIGTERM", "SIGINT"] as const;
 export class ShutdownStateService implements OnModuleInit, OnModuleDestroy {
   private shuttingDown = false;
 
-  private readonly onSignal = (): void => {
+  private readonly onSignal = () => {
     this.shuttingDown = true;
   };
 
-  onModuleInit(): void {
+  onModuleInit() {
     for (const signal of SHUTDOWN_SIGNALS) {
       process.once(signal, this.onSignal);
     }
   }
 
-  onModuleDestroy(): void {
+  onModuleDestroy() {
     this.shuttingDown = true;
 
     for (const signal of SHUTDOWN_SIGNALS) {
@@ -24,7 +24,7 @@ export class ShutdownStateService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
-  isShuttingDown(): boolean {
+  isShuttingDown() {
     return this.shuttingDown;
   }
 }

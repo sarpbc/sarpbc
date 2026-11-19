@@ -4,7 +4,7 @@ import type { Control, ControlValue } from "./model.ts";
 
 export type TunedProp = readonly [control: Control, value: ControlValue];
 
-const attribute = ([control, value]: TunedProp): string => {
+const attribute = ([control, value]: TunedProp) => {
   switch (control.kind) {
     case "boolean": {
       return value === true ? control.name : `:${control.name}="${String(value)}"`;
@@ -31,7 +31,7 @@ export const callOf = (
   props: readonly TunedProp[],
   models: readonly string[],
   events: readonly string[],
-): string => {
+) => {
   const parts = [
     ...models.map((name) =>
       name === "modelValue" ? `v-model="value"` : `v-model:${name}="${name}"`,

@@ -45,7 +45,7 @@ const handlers: EditorHandlers = {
 
 const HEADING_LEVELS: readonly HeadingLevel[] = [1, 2, 3, 4];
 
-const toolbarItems = computed((): EditorToolbarItem[][] => [
+const toolbarItems = computed(() => [
   HEADING_LEVELS.map((level) => ({
     command: { kind: "heading", level },
     icon: `i-lucide-heading-${level}`,
@@ -80,7 +80,7 @@ const toolbarItems = computed((): EditorToolbarItem[][] => [
   ],
 ]);
 
-const slashGroups = (): SlashGroup[] => [
+const slashGroups = () => [
   {
     items: [
       { icon: "i-lucide-type", kind: "paragraph", label: t("page.news.editor.paragraph") },
@@ -135,7 +135,7 @@ const slashGroups = (): SlashGroup[] => [
   },
 ];
 
-const runSlashItem = (editor: Editor, item: SlashItem): void => {
+const runSlashItem = (editor: Editor, item: SlashItem) => {
   handlers[item.kind]?.execute(editor, item).run();
 };
 
@@ -159,7 +159,6 @@ const editor = useEditor({
       link: { openOnClick: false },
     }),
     Code.extend({ excludes: "code" }),
-    // Wrapping the rule gives it room to be selected and dragged.
     HorizontalRule.extend({
       renderHTML() {
         return [
@@ -188,7 +187,6 @@ const editor = useEditor({
   },
 });
 
-/* Outside changes (a loaded draft, a language switch) replace the document; typing does not. */
 watch(content, (value) => {
   const current = editor.value;
 

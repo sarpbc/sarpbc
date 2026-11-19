@@ -113,7 +113,7 @@ const togglePublish = async (article: NewsArticleAdmin) => {
   }
 };
 
-const articleActions = (article: NewsArticleAdmin): MenuItem[][] => [
+const articleActions = (article: NewsArticleAdmin) => [
   [
     {
       icon: "i-fluent-edit-24-regular",

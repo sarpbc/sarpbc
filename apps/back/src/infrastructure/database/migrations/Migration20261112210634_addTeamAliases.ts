@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261112210634_addTeamAliases extends Migration {
   override name = "Migration20261112210634_addTeamAliases";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(
       `create table "team_alias" ("id" uuid not null default gen_random_uuid(), "team_id" uuid not null, "name" varchar(255) not null, "valid_from" date not null, "valid_to" date null, "source_url" text not null, "logo_url" text null, "pandascore_id" int null, "created_at" timestamptz not null default now(), primary key ("id"));`,
     );
@@ -18,7 +18,7 @@ export class Migration20261112210634_addTeamAliases extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(`drop table if exists "team_alias" cascade;`);
   }
 }

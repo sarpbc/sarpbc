@@ -1,7 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { jsonOf as json } from "../../../../test/mcp-result";
 import type { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
-import type { ManualCatalogService } from "../../../tournament/application/manual-catalog.service";
 import type { MatchService } from "../../../tournament/application/match/match.service";
 import type { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
 import type { PlayerAwardService } from "../../../tournament/application/player-award.service";
@@ -13,6 +12,8 @@ import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import type { DataSource } from "@sarpbc/types";
 import { redistributableCompetition } from "../redistributable-competition";
 import { eventTools } from "./event-tools";
+import { FakeCatalog } from "./fake-catalog.test-utils";
+import type { Listing } from "./fake-catalog.test-utils";
 
 const EVENT_ID = "0b6f2d3e-6c1a-4b8e-9a51-2f7c3d4e5a6b";
 
@@ -35,6 +36,19 @@ interface ToolInput extends Record<string, unknown> {
   name?: string;
 }
 
+const recordingEventQueries = (listing: Listing) => {
+  const requests: Parameters<EventQueries["list"]>[0][] = [];
+
+  return {
+    list: async (query: Parameters<EventQueries["list"]>[0]) => {
+      requests.push(query);
+
+      return [[listing], 1] satisfies Awaited<ReturnType<EventQueries["list"]>>;
+    },
+    requests,
+  } satisfies Pick<EventQueries, "list"> & { requests: unknown[] };
+};
+
 const setup = (role: "admin" | "journalist" = "admin") => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
@@ -53,20 +67,8 @@ const setup = (role: "admin" | "journalist" = "admin") => {
     ],
   };
 
-  const catalogService = {
-    createEvent: vi
-      .fn<ManualCatalogService["createEvent"]>()
-      .mockResolvedValue({ event, stages: [] }),
-    createLeague: vi.fn<ManualCatalogService["createLeague"]>(),
-    findEvent: vi.fn<ManualCatalogService["findEvent"]>().mockResolvedValue(listing),
-    leagues: vi.fn<ManualCatalogService["leagues"]>(),
-    updateEvent: vi.fn<ManualCatalogService["updateEvent"]>().mockResolvedValue(listing),
-    updateLeague: vi.fn<ManualCatalogService["updateLeague"]>(),
-  };
-
-  const eventQueries = {
-    list: vi.fn<EventQueries["list"]>().mockResolvedValue([[listing], 1]),
-  };
+  const catalogService = new FakeCatalog(listing);
+  const eventQueries = recordingEventQueries(listing);
 
   const tools = eventTools({
     catalogService,
@@ -125,54 +127,56 @@ describe("event tools", () => {
 
   it("hides an event made only of start.gg stages but returns an empty one", async () => {
     const { tool, catalogService, listing } = setup();
-    catalogService.findEvent.mockResolvedValueOnce({
+    catalogService.listing = {
       event: listing.event,
       stages: [stage("qualifier", "startgg", null)],
-    });
+    };
     const awaited = await tool("get_event")({ idOrSlug: "cdf" });
     expect(awaited.isError).toBe(true);
-    catalogService.findEvent.mockResolvedValueOnce({ event: listing.event, stages: [] });
+    catalogService.listing = { event: listing.event, stages: [] };
     expect(json(await tool("get_event")({ idOrSlug: "cdf" }))).toMatchObject({ stages: [] });
   });
 
   it("excludes start.gg events in the list query", async () => {
     const { tool, eventQueries } = setup();
     await tool("list_events")({});
-    expect(eventQueries.list).toHaveBeenCalledExactlyOnceWith({
-      activeOnly: false,
-      limit: 20,
-      offset: 0,
-      redistributableOnly: true,
-    });
+    expect(eventQueries.requests).toStrictEqual([
+      {
+        activeOnly: false,
+        limit: 20,
+        offset: 0,
+        redistributableOnly: true,
+      },
+    ]);
   });
 
   it("reports synced events as not editable", async () => {
     const { tool, catalogService, listing } = setup();
-    catalogService.findEvent.mockResolvedValueOnce({
+    catalogService.listing = {
       event: listing.event,
       stages: [stage("swiss", "pandascore", null)],
-    });
+    };
     expect(json(await tool("get_event")({ idOrSlug: "cdf" }))).toMatchObject({ editable: false });
   });
 
   it("creates and updates events through the catalog service", async () => {
     const { tool, catalogService } = setup();
     await tool("create_event")({ name: "CDF 2026" });
-    expect(catalogService.createEvent).toHaveBeenCalledExactlyOnceWith({ name: "CDF 2026" });
+    expect(catalogService.createdEvents).toStrictEqual([{ name: "CDF 2026" }]);
     await tool("update_event")({ eventId: EVENT_ID, name: "Coupe de France Slash 2026" });
-    expect(catalogService.updateEvent).toHaveBeenCalledExactlyOnceWith(EVENT_ID, {
-      name: "Coupe de France Slash 2026",
-    });
+    expect(catalogService.updatedEvents).toStrictEqual([
+      { id: EVENT_ID, input: { name: "Coupe de France Slash 2026" } },
+    ]);
     const awaited2 = await tool("update_event")({ eventId: EVENT_ID });
     expect(awaited2.isError).toBe(true);
   });
 
   it("maps leagues with their source", async () => {
     const { tool, catalogService } = setup();
-    catalogService.leagues.mockResolvedValue([
+    catalogService.leagueList = [
       Object.assign(new League(), { id: "l1", name: "RLCS", pandascoreId: 1 }),
       Object.assign(new League(), { id: "l2", name: "Coupe de France" }),
-    ]);
+    ];
     expect(json(await tool("list_leagues")({}))).toMatchObject([
       { id: "l1", source: "pandascore" },
       { id: "l2", source: "manual" },
@@ -185,10 +189,10 @@ describe("event tools", () => {
       const { tool, catalogService } = setup("journalist");
       const result = await tool(name)({ eventId: "cdf", leagueId: "l1", name: "x" });
       expect(result.isError).toBe(true);
-      expect(catalogService.createEvent).not.toHaveBeenCalled();
-      expect(catalogService.updateEvent).not.toHaveBeenCalled();
-      expect(catalogService.createLeague).not.toHaveBeenCalled();
-      expect(catalogService.updateLeague).not.toHaveBeenCalled();
+      expect(catalogService.createdEvents).toStrictEqual([]);
+      expect(catalogService.updatedEvents).toStrictEqual([]);
+      expect(catalogService.createdLeagues).toStrictEqual([]);
+      expect(catalogService.updatedLeagues).toStrictEqual([]);
     },
   );
 });

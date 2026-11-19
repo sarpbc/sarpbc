@@ -3,7 +3,7 @@
  * would use is undefined, so a test that unexpectedly reaches it fails loudly.
  * `instanceof` narrows the value, so no type assertion is involved.
  */
-export const unconstructed = <T extends object>(type: abstract new (...args: never[]) => T): T => {
+export const unconstructed = <T extends object>(type: abstract new (...args: never[]) => T) => {
   const instance: unknown = Reflect.construct(Object, [], type);
 
   if (!(instance instanceof type)) {
@@ -13,7 +13,7 @@ export const unconstructed = <T extends object>(type: abstract new (...args: nev
   return instance;
 };
 
-export const present = <T>(value: T | null | undefined, what = "value"): T => {
+export const present = <T>(value: T | null | undefined, what = "value") => {
   if (value === null || value === undefined) {
     throw new TypeError(`Expected ${what} to be present`);
   }

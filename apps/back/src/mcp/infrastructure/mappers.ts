@@ -22,17 +22,17 @@ import {
   tournamentUrl,
 } from "./urls";
 
-const days = (dates: (Date | null)[]): number[] =>
+const days = (dates: (Date | null)[]) =>
   dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
 
-const timeOf = (date: Date | null): number => date?.getTime() ?? Number.POSITIVE_INFINITY;
+const timeOf = (date: Date | null) => date?.getTime() ?? Number.POSITIVE_INFINITY;
 
 /** start.gg teams may play in a redistributable match; only the match and tournament source count. */
-export const isRedistributableMatch = (match: Match): boolean =>
+export const isRedistributableMatch = (match: Match) =>
   isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
-export const redistributableStreams = (streams: readonly Stream[]): Stream[] =>
-  streams.filter((stream) => isRedistributable(stream.source));
+export const redistributableStreams = (streams: readonly Stream[]) =>
+  streams.filter((stream) => isRedistributable(stream.source)) satisfies Stream[];
 
 export const mapPlayerSummary = (player: Player) => ({
   id: player.id,
@@ -177,7 +177,7 @@ export const mapListedParticipants = (
 export const mapMatchListResponse = (match: Match) => {
   const item = mapMatchListItem(match);
   const winnerId = match.winner?.id ?? null;
-  // List queries do not populate the winner relation; participants carry the team names.
+  // WARNING: list queries do not populate the winner relation; participants carry the team names.
   const winner = match.participants.find((participant) => participant.id === winnerId);
 
   return {

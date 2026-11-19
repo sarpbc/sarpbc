@@ -7,9 +7,7 @@ export interface TransferQuery {
   offset?: number;
 }
 
-export const getTransfers = async (
-  query: TransferQuery,
-): Promise<{ transfers: Transfer[]; total: number }> => {
+export const getTransfers = async (query: TransferQuery) => {
   const res = await apiFetch<{ transfers?: Transfer[]; count?: number }>(`/transfers`, {
     method: "GET",
     query,

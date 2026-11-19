@@ -11,7 +11,7 @@ import { parseOverlay } from "./overlay.ts";
 
 const CLI = fileURLToPath(new URL("cli.ts", import.meta.url));
 
-const cli = async (args: readonly string[]): Promise<{ stdout: string }> => {
+const cli = async (args: readonly string[]) => {
   const stdout = execFileSync(
     process.execPath,
     ["--disable-warning=MODULE_TYPELESS_PACKAGE_JSON", CLI, ...args],

@@ -2,7 +2,6 @@ import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import type { CompetitionFeed, UpsertTournamentCommand } from "../feed";
 import type { TournamentQueries } from "../ports";
 import { assertPandascoreSyncAllowed } from "../../domain/tournament-source";
-import type { Tournament } from "../../domain/tournament";
 import { CompetitionSyncService } from "./competition-sync.service";
 
 export class SyncPandascoreTournamentUseCase {
@@ -11,7 +10,7 @@ export class SyncPandascoreTournamentUseCase {
     private readonly reads: Pick<TournamentQueries, "findById">,
     private readonly synchronization: CompetitionSyncService,
   ) {}
-  async execute(id: string): Promise<void> {
+  async execute(id: string) {
     const tournament = await this.reads.findById(id);
 
     if (!tournament) {
@@ -30,7 +29,7 @@ export class SyncPandascoreTournamentUseCase {
       await this.import(command);
     }
   }
-  async executeByPandascoreId(id: number, linkTournamentId?: string): Promise<Tournament> {
+  async executeByPandascoreId(id: number, linkTournamentId?: string) {
     const command = await this.feed.getTournamentById(id);
 
     if (!command) {
@@ -39,10 +38,7 @@ export class SyncPandascoreTournamentUseCase {
 
     return await this.import(command, linkTournamentId);
   }
-  private async import(
-    command: UpsertTournamentCommand,
-    linkTournamentId?: string,
-  ): Promise<Tournament> {
+  private async import(command: UpsertTournamentCommand, linkTournamentId?: string) {
     const matches =
       command.hasBracket === true
         ? await this.feed.getTournamentBrackets(command.pandascoreId)

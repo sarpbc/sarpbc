@@ -22,46 +22,32 @@ const apiErrorSchema = z.object({
   statusCode: z.optional(z.number()),
 });
 
-export const getApiErrorStatus = (cause: unknown): number | undefined => {
+export const getApiErrorStatus = (cause: unknown) => {
   const parsed = apiErrorSchema.safeParse(cause);
 
-  if (!parsed.success) {
-    return undefined;
-  }
-
-  return parsed.data.statusCode ?? parsed.data.status;
+  return parsed.success ? (parsed.data.statusCode ?? parsed.data.status) : undefined;
 };
 
-export const getApiErrorBody = (cause: unknown): ApiErrorBody | undefined => {
+export const getApiErrorBody = (cause: unknown) => {
   const parsed = apiErrorSchema.safeParse(cause);
 
-  if (!parsed.success) {
-    return undefined;
-  }
-
-  if (parsed.data.data) {
-    return parsed.data.data;
-  }
-
-  return {
-    code: parsed.data.code,
-    message: parsed.data.message,
-    statusCode: parsed.data.statusCode,
-  };
+  return parsed.success
+    ? (parsed.data.data ?? {
+        code: parsed.data.code,
+        message: parsed.data.message,
+        statusCode: parsed.data.statusCode,
+      })
+    : undefined;
 };
 
-export const getApiErrorMessage = (cause: unknown): string | undefined => {
-  const body = getApiErrorBody(cause);
+export const getApiErrorMessage = (cause: unknown) => {
+  const message = getApiErrorBody(cause)?.message;
 
-  if (body?.message === undefined || body.message === "") {
-    return undefined;
+  if (Array.isArray(message)) {
+    return message[0];
   }
 
-  if (Array.isArray(body.message)) {
-    return body.message[0];
-  }
-
-  return body.message;
+  return message === "" ? undefined : message;
 };
 
-export const getApiErrorCode = (cause: unknown): string | undefined => getApiErrorBody(cause)?.code;
+export const getApiErrorCode = (cause: unknown) => getApiErrorBody(cause)?.code;

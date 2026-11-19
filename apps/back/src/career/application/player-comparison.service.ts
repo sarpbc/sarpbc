@@ -47,13 +47,13 @@ export interface Comparison {
   headToHead: HeadToHead;
 }
 
-const isRedistributableMatch = (match: Match): boolean =>
+const isRedistributableMatch = (match: Match) =>
   isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
 export class PlayerComparisonService {
   constructor(private readonly sources: PlayerComparisonSources) {}
 
-  async compare(slugA: string, slugB: string): Promise<Comparison> {
+  async compare(slugA: string, slugB: string) {
     const [playerA, playerB] = await Promise.all([this.player(slugA), this.player(slugB)]);
 
     if (playerA.id === playerB.id) {
@@ -65,7 +65,7 @@ export class PlayerComparisonService {
     return { a: a.career, b: b.career, headToHead: headToHead(a.matches, playerA.id, playerB.id) };
   }
 
-  private async player(slug: string): Promise<Player> {
+  private async player(slug: string) {
     const player = await this.sources.players.findBySlug(slug);
 
     if (!player) {
@@ -75,7 +75,7 @@ export class PlayerComparisonService {
     return player;
   }
 
-  private async career(player: Player): Promise<{ career: Career; matches: Match[] }> {
+  private async career(player: Player) {
     const { contracts, tournaments, matches, prizes, awards, seasons } = this.sources;
 
     const [contractList, titles, matchList, earnings, awardList, seasonAwards] = await Promise.all([

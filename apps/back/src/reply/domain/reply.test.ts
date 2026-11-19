@@ -3,7 +3,7 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { replySortOrder, replyTarget, resolveReplyTargetLink, sameReplyTarget } from "./reply";
 import type { ReplyTargetFields } from "./reply";
 
-const makeReply = (partial: Partial<ReplyTargetFields>): ReplyTargetFields => ({
+const makeReply = (partial: Partial<ReplyTargetFields>) => ({
   match: null,
   newsArticle: null,
   post: null,

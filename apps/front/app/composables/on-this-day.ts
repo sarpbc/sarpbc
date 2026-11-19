@@ -1,7 +1,6 @@
 import type { OnThisDay } from "@sarpbc/types";
 
-const getOnThisDay = async (): Promise<OnThisDay> =>
-  await apiFetch<OnThisDay>("/on-this-day", { method: "GET" });
+const getOnThisDay = async () => await apiFetch<OnThisDay>("/on-this-day", { method: "GET" });
 
 export const useOnThisDay = () => {
   const { data, pending, error, refresh } = useLazyAsyncData(

@@ -1,5 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { ExecutionContext } from "@nestjs/common";
+import { beforeEach, describe, expect, it } from "vitest";
 import { ExecutionContextHost } from "@nestjs/core/helpers/execution-context-host";
 import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
@@ -7,6 +6,8 @@ import { AuthenticationError } from "../../../common/domain/errors/authenticatio
 import { PatAuthGuard } from "./pat.guard";
 import type { PatUser } from "../../application/pat.service";
 import { PatService } from "../../application/pat.service";
+import type { TokenStore } from "../../application/ports/token-store";
+import { tokenSecrets } from "../token-secrets";
 
 interface PatGuardTestHeaders {
   authorization?: string;
@@ -17,7 +18,7 @@ interface PatGuardTestRequest {
   user?: PatUser;
 }
 
-const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
+const createContext = (headers: PatGuardTestHeaders = {}) => {
   const request: PatGuardTestRequest = { headers };
 
   return new ExecutionContextHost([request]);
@@ -26,9 +27,21 @@ const createContext = (headers: PatGuardTestHeaders = {}): ExecutionContext => {
 describe(PatAuthGuard, () => {
   let guard: PatAuthGuard;
 
-  const patService = {
-    resolveUser: vi.fn<PatService["resolveUser"]>(),
+  const RAW_TOKEN = "sarpbc_pat_valid";
+  const owner = { email: "a@b.com", id: "user-1", role: "admin" } as const;
+
+  const store: TokenStore = {
+    create: async () => {
+      throw new Error("unused");
+    },
+    findActive: async (hash) =>
+      hash === tokenSecrets.hash(RAW_TOKEN) ? { id: "token-1", lastUsedAt: null, owner } : null,
+    listActive: async () => [],
+    revokeOwned: async () => false,
+    touch: async () => {},
   };
+
+  const patService = new PatService(store, { findById: async () => null }, tokenSecrets);
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -36,7 +49,6 @@ describe(PatAuthGuard, () => {
     }).compile();
 
     guard = module.get(PatAuthGuard);
-    vi.clearAllMocks();
   });
 
   it("throws when the authorization header is missing", async () => {
@@ -44,16 +56,13 @@ describe(PatAuthGuard, () => {
   });
 
   it("attaches the resolved user for a valid bearer token", async () => {
-    patService.resolveUser.mockResolvedValue({ email: "a@b.com", id: "user-1", role: "admin" });
-
     const request: PatGuardTestRequest = {
-      headers: { authorization: "Bearer sarpbc_pat_valid" },
+      headers: { authorization: `Bearer ${RAW_TOKEN}` },
     };
 
     const context = new ExecutionContextHost([request]);
 
     await expect(guard.canActivate(context)).resolves.toBe(true);
     expect(request.user).toStrictEqual({ email: "a@b.com", id: "user-1", role: "admin" });
-    expect(patService.resolveUser).toHaveBeenCalledExactlyOnceWith("sarpbc_pat_valid");
   });
 });

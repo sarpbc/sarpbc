@@ -17,7 +17,7 @@ const failureResponses = {
 
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter<Error | HttpException> {
-  catch(exception: Error | HttpException, host: ArgumentsHost): void {
+  catch(exception: Error | HttpException, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<FastifyReply>();
     const request = ctx.getRequest<FastifyRequest>();

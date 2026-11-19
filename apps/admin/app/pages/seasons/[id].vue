@@ -38,7 +38,7 @@ const isAdding = ref(false);
 const awardToRemove = ref<SeasonAward | null>(null);
 const awardForm = useTemplateRef("awardForm");
 
-const awardLabel = (award: SeasonAward): string => {
+const awardLabel = (award: SeasonAward) => {
   const type = t(`page.seasons.awards.types.${award.awardType}`);
 
   return award.region ? `${type} · ${award.region}` : type;

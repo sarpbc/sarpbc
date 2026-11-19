@@ -22,10 +22,12 @@ export interface StandInMatch {
   match: Match;
 }
 
-export const lineupSource = (match: Pick<Match, "source" | "tournament">): DataSource =>
-  isRedistributable(match.tournament.source) ? match.source : match.tournament.source;
+export const lineupSource = (match: Pick<Match, "source" | "tournament">) =>
+  isRedistributable(match.tournament.source)
+    ? match.source
+    : (match.tournament.source satisfies DataSource);
 
-const requireMatch = async (matches: MatchWriter, id: string): Promise<Match> => {
+const requireMatch = async (matches: MatchWriter, id: string) => {
   const match = await matches.load(id);
 
   if (!match) {
@@ -39,7 +41,7 @@ const validLineups = async (
   match: Match,
   lineups: LineupWriter,
   inputs: readonly MatchLineupInput[],
-): Promise<MatchLineupInput[]> => {
+) => {
   const normalized = normalizeLineups(
     match.participants.map(({ id }) => id),
     inputs,
@@ -51,7 +53,7 @@ const validLineups = async (
     throw new InvalidInputError("Every lineup player must exist and not be a merged duplicate");
   }
 
-  return normalized;
+  return normalized satisfies MatchLineupInput[];
 };
 
 export class MatchLineupService {
@@ -61,16 +63,16 @@ export class MatchLineupService {
     private readonly transaction: CompetitionTransaction,
   ) {}
 
-  async forMatch(match: Match): Promise<MatchLineup[]> {
+  async forMatch(match: Match) {
     const sides = match.participants.map(({ id, players }) => ({
       participantId: id,
       rosterIds: players.map((player) => player.id),
     }));
 
-    return buildLineups(sides, await this.reads.byMatch(match.id));
+    return buildLineups(sides, await this.reads.byMatch(match.id)) satisfies MatchLineup[];
   }
 
-  async find(matchId: string): Promise<MatchLineups> {
+  async find(matchId: string) {
     const match = await this.transaction.run(
       async ({ matches }) => await requireMatch(matches, matchId),
     );
@@ -78,7 +80,7 @@ export class MatchLineupService {
     return { lineups: await this.forMatch(match), source: lineupSource(match) };
   }
 
-  async set(matchId: string, inputs: readonly MatchLineupInput[]): Promise<MatchLineups> {
+  async set(matchId: string, inputs: readonly MatchLineupInput[]) {
     await this.transaction.run(async ({ matches, lineups }) => {
       const match = await requireMatch(matches, matchId);
       await lineups.replace(matchId, await validLineups(match, lineups, inputs));
@@ -87,7 +89,7 @@ export class MatchLineupService {
     return await this.find(matchId);
   }
 
-  async requireProposable(matchId: string, inputs: readonly MatchLineupInput[]): Promise<void> {
+  async requireProposable(matchId: string, inputs: readonly MatchLineupInput[]) {
     await this.transaction.run(async ({ matches, lineups }) => {
       const match = await requireMatch(matches, matchId);
 
@@ -99,7 +101,7 @@ export class MatchLineupService {
     });
   }
 
-  async standIns(playerId: string): Promise<StandInMatch[]> {
+  async standIns(playerId: string) {
     const playerRows = await this.reads.byPlayer(playerId);
     const rows = playerRows.filter(({ rosterIds }) => isStandIn(rosterIds, playerId));
 

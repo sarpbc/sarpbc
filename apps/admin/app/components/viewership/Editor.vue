@@ -34,14 +34,18 @@ const { t } = useI18n();
 const toast = useToast();
 const reportError = useReportError();
 
-const emptyForm = (): ViewershipForm => ({
-  averageViewers: "",
-  measuredAt: "",
-  peakViewers: "",
-  scope: "official",
-  sourceName: "",
-  sourceUrl: "",
-});
+const emptyForm = () => {
+  const empty: ViewershipForm = {
+    averageViewers: "",
+    measuredAt: "",
+    peakViewers: "",
+    scope: "official",
+    sourceName: "",
+    sourceUrl: "",
+  };
+
+  return empty;
+};
 
 const form = ref<ViewershipForm>(emptyForm());
 const stored = ref(false);
@@ -56,9 +60,9 @@ const scopeOptions = computed(() =>
   })),
 );
 
-const pad = (value: number): string => String(value).padStart(2, "0");
+const pad = (value: number) => String(value).padStart(2, "0");
 
-const toLocalInput = (iso: string | null): string => {
+const toLocalInput = (iso: string | null) => {
   if (!iso) {
     return "";
   }
@@ -69,9 +73,9 @@ const toLocalInput = (iso: string | null): string => {
   return `${day}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 };
 
-const toCount = (value: string): number => (value.trim() === "" ? Number.NaN : Number(value));
+const toCount = (value: string) => (value.trim() === "" ? Number.NaN : Number(value));
 
-const toViewership = (values: ViewershipForm): Viewership => ({
+const toViewership = (values: ViewershipForm) => ({
   averageViewers: values.averageViewers.trim() === "" ? null : toCount(values.averageViewers),
   measuredAt: values.measuredAt ? new Date(values.measuredAt).toISOString() : null,
   peakViewers: toCount(values.peakViewers),
@@ -80,7 +84,7 @@ const toViewership = (values: ViewershipForm): Viewership => ({
   sourceUrl: values.sourceUrl,
 });
 
-const fieldOf = (error: ViewershipError): ViewershipField => {
+const fieldOf = (error: ViewershipError) => {
   switch (error) {
     case "invalid-peak": {
       return "peakViewers";
@@ -116,7 +120,7 @@ const fieldOf = (error: ViewershipError): ViewershipField => {
 
 const parsed = computed(() => parseViewership(toViewership(form.value)));
 
-const feedback = (field: ViewershipField): FieldFeedback => {
+const feedback = (field: ViewershipField) => {
   const result = parsed.value;
 
   if (result.ok || fieldOf(result.error) !== field) {

@@ -22,8 +22,6 @@ const aliasedTeam = z.object({
   slug: z.string(),
 });
 
-type AliasedTeam = z.infer<typeof aliasedTeam>;
-
 const teamBody = z.object({ team: aliasedTeam });
 
 const aliasBody = z.object({ alias: teamAlias });
@@ -78,7 +76,7 @@ export interface TeamAliasProposalsContext extends TeamAliasFixtures {
   review: Review;
 }
 
-const teamOf = async (request: Request, id: string): Promise<AliasedTeam> => {
+const teamOf = async (request: Request, id: string) => {
   const response = await request("GET", `/team/${id}`);
 
   return response.json(teamBody).team;
@@ -99,8 +97,8 @@ export const verifyTeamAliases = async ({
   request,
   staffCookie,
   memberCookie,
-}: TeamAliasesContext): Promise<TeamAliasFixtures> => {
-  const create = async (name: string): Promise<AliasedTeam> => {
+}: TeamAliasesContext) => {
+  const create = async (name: string) => {
     const response2 = await request("POST", "/team", { name }, staffCookie, 201);
 
     return response2.json(teamBody).team;
@@ -248,7 +246,7 @@ export const verifyTeamAliasProposals = async ({
   review,
   team,
   origins,
-}: TeamAliasProposalsContext): Promise<void> => {
+}: TeamAliasProposalsContext) => {
   const proposal = {
     from: "2018-03-01",
     name: "Integration Founders",

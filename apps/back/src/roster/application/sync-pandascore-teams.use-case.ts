@@ -5,14 +5,14 @@ export class SyncPandascoreTeamsUseCase {
     private readonly writer: CurrentRosterWriter,
     private readonly source: CurrentRosterSource,
   ) {}
-  async seed(): Promise<void> {
+  async seed() {
     if (await this.writer.hasTeams()) {
       return;
     }
 
     await this.sync();
   }
-  async sync(): Promise<void> {
+  async sync() {
     await this.writer.syncCurrentTeams(await this.source.load());
   }
 }

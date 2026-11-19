@@ -5,14 +5,7 @@ import path from "node:path";
 import test from "node:test";
 import { architectureViolations } from "./check-architecture.mts";
 
-interface Fixture {
-  root: string;
-  write: (relative: string, content: string) => string;
-  violations: (files: string[]) => string[];
-  cleanup: () => void;
-}
-
-const fixture = (): Fixture => {
+const fixture = () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "architecture-"));
 
   return {
@@ -20,8 +13,8 @@ const fixture = (): Fixture => {
       fs.rmSync(root, { force: true, recursive: true });
     },
     root,
-    violations: (files: string[]): string[] => architectureViolations(files, root),
-    write(relative: string, content: string): string {
+    violations: (files: string[]) => architectureViolations(files, root),
+    write: (relative: string, content: string) => {
       const file = path.join(root, relative);
       fs.mkdirSync(path.dirname(file), { recursive: true });
       fs.writeFileSync(file, content);

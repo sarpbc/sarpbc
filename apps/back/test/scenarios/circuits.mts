@@ -2,7 +2,6 @@ import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import type { CircuitScaleTier } from "@sarpbc/types";
 import { z } from "zod";
-import type { UpsertTournamentCommand } from "../../src/tournament/application/feed.ts";
 import { mapSequentially } from "../../src/common/application/sequentially.ts";
 import { toolFailure } from "./support.mts";
 import type {
@@ -103,13 +102,7 @@ export interface CircuitsContext {
 const DAY = 86_400_000;
 const RULES = "https://example.test/fake-circuit/rules";
 
-const pandascoreStage = ({
-  pandascoreId,
-  serieId,
-  name,
-  teams,
-  endAt,
-}: StageInput): UpsertTournamentCommand => ({
+const pandascoreStage = ({ pandascoreId, serieId, name, teams, endAt }: StageInput) => ({
   beginAt: new Date(endAt.getTime() - 3 * DAY),
   endAt,
   expectedRoster: teams.map((team) => ({ players: [], team })),
@@ -128,13 +121,13 @@ export const verifyCircuits = async ({
   callTool,
   review,
   tournament,
-}: CircuitsContext): Promise<void> => {
+}: CircuitsContext) => {
   const { CompetitionSyncService } =
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
   const sync = app.get(CompetitionSyncService);
 
-  const run = <T,>(work: () => T): T => RequestContext.create(orm.em.fork(), work);
+  const run = <T,>(work: () => T) => RequestContext.create(orm.em.fork(), work);
 
   const teams = [9801, 9802, 9803].map((pandascoreId) => ({
     name: `Circuit Team ${pandascoreId}`,
@@ -231,7 +224,7 @@ export const verifyCircuits = async ({
 
   const { ConflictError } = await import("../../src/common/domain/errors/conflict-error.ts");
 
-  const saveDirectly = async (fields: CircuitFields): Promise<void> => {
+  const saveDirectly = async (fields: CircuitFields) => {
     await new CircuitPersistence(orm.em.fork()).save({
       description: null,
       id: randomUUID(),
@@ -307,7 +300,7 @@ export const verifyCircuits = async ({
     { from: 1, points: 10, to: 1 },
   ];
 
-  const stagePath = (id: string): string => `/circuits/${circuit.id}/stages/${id}`;
+  const stagePath = (id: string) => `/circuits/${circuit.id}/stages/${id}`;
   await request("PUT", stagePath(counted.id), { scale }, staffCookie, 400);
   await request(
     "PUT",
@@ -331,7 +324,7 @@ export const verifyCircuits = async ({
   );
   await request("PUT", stagePath(counted.id), { scale, sourceUrl: RULES }, memberCookie, 403);
 
-  const standings = async (): Promise<z.infer<typeof circuitStandings>> => {
+  const standings = async () => {
     const response5 = await request("GET", `/circuits/${circuit.slug}/standings`);
 
     return response5.json(circuitStandings);
@@ -440,7 +433,7 @@ export const verifyCircuits = async ({
   );
   await request("GET", `${stagePath(counted.id)}/teams`, undefined, memberCookie, 403);
 
-  const teamId = (slug: string): string => {
+  const teamId = (slug: string) => {
     const found = teamsOfEvent.find(({ team }) => team.slug === slug);
     assert.ok(found, `${slug} is listed among the event teams`);
 

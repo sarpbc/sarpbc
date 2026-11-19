@@ -2,14 +2,7 @@ import { IntegrationError } from "../../common/domain/errors/integration-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { resolvePlayerId } from "../domain/replay-matching";
 import type { RosterPlayer, SideAssignment } from "../domain/replay-matching";
-import type {
-  BallchasingSource,
-  GameRecord,
-  PlatformAccount,
-  PlayerLink,
-  ReplayStats,
-  StatsCandidates,
-} from "./ports";
+import type { BallchasingSource, PlayerLink, ReplayStats, StatsCandidates } from "./ports";
 
 export interface GameTarget {
   matchId: string;
@@ -20,7 +13,7 @@ export interface GameTarget {
   sides: SideAssignment;
 }
 
-export const requireBallchasing = (source: BallchasingSource | null): BallchasingSource => {
+export const requireBallchasing = (source: BallchasingSource | null) => {
   if (!source) {
     throw new IntegrationError({
       code: "ballchasing_not_configured",
@@ -31,21 +24,18 @@ export const requireBallchasing = (source: BallchasingSource | null): Ballchasin
   return source;
 };
 
-export const requireTournament = async (
-  candidates: StatsCandidates,
-  tournamentId: string,
-): Promise<void> => {
+export const requireTournament = async (candidates: StatsCandidates, tournamentId: string) => {
   if (!(await candidates.tournamentExists(tournamentId))) {
     throw new NotFoundError("This tournament no longer exists. Reload the tournament list.");
   }
 };
 
-export const hasBothTeams = (stats: ReplayStats): boolean =>
+export const hasBothTeams = (stats: ReplayStats) =>
   (["blue", "orange"] as const).every((side) =>
     stats.players.some((player) => player.side === side),
   );
 
-export const platformAccounts = (stats: ReplayStats): PlatformAccount[] =>
+export const platformAccounts = (stats: ReplayStats) =>
   stats.players.flatMap(({ platform, platformId }) =>
     platformId !== null && platformId !== "" ? [{ platform, platformId }] : [],
   );
@@ -55,7 +45,7 @@ export const buildGameRecord = (
   stats: ReplayStats,
   rosters: ReadonlyMap<string, RosterPlayer[]>,
   links: PlayerLink[],
-): GameRecord => {
+) => {
   const learnedLinks: PlayerLink[] = [];
 
   const players = stats.players.map((player) => {

@@ -5,11 +5,11 @@ import { OnThisDayFact } from "./on-this-day-fact.entities";
 export class OnThisDayRosterReferences implements RosterReferenceMover {
   constructor(private readonly em: EntityManager) {}
 
-  async movePlayer(from: string, to: string): Promise<void> {
+  async movePlayer(from: string, to: string) {
     await this.em.nativeUpdate(OnThisDayFact, { player: from }, { player: to });
   }
 
-  async moveTeam(from: string, to: string): Promise<void> {
+  async moveTeam(from: string, to: string) {
     await this.em.nativeUpdate(OnThisDayFact, { team: from }, { team: to });
   }
 }

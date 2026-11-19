@@ -15,7 +15,7 @@ export interface JsonLdNode {
   [key: string]: JsonLdValue | undefined;
 }
 
-export const compactJsonLd = <T extends JsonLdNode>(node: T): T => {
+export const compactJsonLd = <T extends JsonLdNode>(node: T) => {
   const result = { ...node };
 
   for (const [key, value] of Object.entries(node)) {
@@ -27,5 +27,5 @@ export const compactJsonLd = <T extends JsonLdNode>(node: T): T => {
   return result;
 };
 
-export const serializeJsonLd = (data: JsonLdNode): string =>
+export const serializeJsonLd = (data: JsonLdNode) =>
   JSON.stringify(data).replaceAll("<", "\\u003c");

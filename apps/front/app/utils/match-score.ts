@@ -4,7 +4,7 @@ import type { MatchResult, MatchStatus } from "~/types/matches";
 export const getMatchParticipantScore = (
   results: MatchResult[] | undefined,
   participantId: string | undefined,
-): number | null => {
+) => {
   if (!results || !isNonEmptyString(participantId) || results.length === 0) {
     return null;
   }
@@ -14,10 +14,10 @@ export const getMatchParticipantScore = (
   return result?.score ?? null;
 };
 
-export const shouldShowMatchScores = (status: MatchStatus): boolean =>
+export const shouldShowMatchScores = (status: MatchStatus) =>
   status === "live" || status === "finished";
 
-export const displayMatchScore = (score: number | null, status: MatchStatus): string | null => {
+export const displayMatchScore = (score: number | null, status: MatchStatus) => {
   if (!shouldShowMatchScores(status)) {
     return null;
   }

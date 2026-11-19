@@ -15,7 +15,7 @@ interface TournamentListQuery {
   activeOnly?: boolean;
 }
 
-const listPath = (path: string, query: TournamentListQuery): string => {
+const listPath = (path: string, query: TournamentListQuery) => {
   const { limit, offset, pickems, activeOnly } = query;
   const params = new URLSearchParams();
 
@@ -40,9 +40,7 @@ const listPath = (path: string, query: TournamentListQuery): string => {
   return search ? `${path}?${search}` : path;
 };
 
-export const getAllTournaments = async (
-  query: TournamentListQuery = {},
-): Promise<{ tournaments: TournamentListItem[]; total: number }> => {
+export const getAllTournaments = async (query: TournamentListQuery = {}) => {
   const res = await apiFetch<{ tournaments?: TournamentListItem[]; count?: number }>(
     listPath("/tournaments", query),
     { method: "GET" },
@@ -53,9 +51,7 @@ export const getAllTournaments = async (
   return { total: res.count ?? tournaments.length, tournaments };
 };
 
-export const getEvents = async (
-  query: TournamentListQuery,
-): Promise<{ events: TournamentEvent<TournamentListItem>[]; total: number }> => {
+export const getEvents = async (query: TournamentListQuery) => {
   const res = await apiFetch<{ events: TournamentEvent<TournamentListItem>[]; count: number }>(
     listPath("/events", query),
     { method: "GET" },
@@ -65,9 +61,7 @@ export const getEvents = async (
 };
 
 /** Resolves `/tournaments/{segments}`, legacy stage ids included. A 404 resolves to null. */
-export const resolveTournamentPath = async (
-  segments: readonly string[],
-): Promise<TournamentPathResponse | null> => {
+export const resolveTournamentPath = async (segments: readonly string[]) => {
   const path = segments.map((segment) => encodeURIComponent(segment)).join("/");
 
   try {
@@ -83,7 +77,7 @@ export const resolveTournamentPath = async (
   }
 };
 
-export const getTournamentById = async (id: string): Promise<TournamentDetail | null> => {
+export const getTournamentById = async (id: string) => {
   try {
     const res = await apiFetch<{ tournament?: TournamentDetail }>(`/tournaments/${id}`, {
       method: "GET",
@@ -99,9 +93,7 @@ export const getTournamentById = async (id: string): Promise<TournamentDetail | 
   }
 };
 
-export const getTournamentMatches = async (
-  tournamentId: string,
-): Promise<TournamentMatchListItem[]> => {
+export const getTournamentMatches = async (tournamentId: string) => {
   const res = await apiFetch<{ matches?: TournamentMatchListItem[] }>(
     `/tournaments/${tournamentId}/matches`,
     { method: "GET" },
@@ -110,16 +102,12 @@ export const getTournamentMatches = async (
   return res.matches ?? [];
 };
 
-export const getTournamentPlayerStats = async (
-  tournamentId: string,
-): Promise<TournamentPlayerStatsResponse> =>
+export const getTournamentPlayerStats = async (tournamentId: string) =>
   await apiFetch<TournamentPlayerStatsResponse>(`/tournaments/${tournamentId}/player-stats`, {
     method: "GET",
   });
 
-export const getEventPlayerStats = async (
-  eventSlug: string,
-): Promise<TournamentPlayerStatsResponse> =>
+export const getEventPlayerStats = async (eventSlug: string) =>
   await apiFetch<TournamentPlayerStatsResponse>(
     `/events/${encodeURIComponent(eventSlug)}/player-stats`,
     { method: "GET" },

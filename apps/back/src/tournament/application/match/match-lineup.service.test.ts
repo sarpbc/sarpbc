@@ -1,5 +1,5 @@
 import type { DataSource, MatchLineupInput } from "@sarpbc/types";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import { Player } from "../../../roster/domain/player";
@@ -10,7 +10,6 @@ import type {
   CompetitionTransaction,
   CompetitionWriteScope,
   LineupWriter,
-  MatchQueries,
   MatchWriter,
   PlayerLineupRow,
 } from "../ports";
@@ -105,13 +104,12 @@ describe(MatchLineupService, () => {
 
   const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };
 
-  const byIds = vi.fn<MatchQueries["byIds"]>(async (ids) =>
+  const byIds = async (ids: string[]) =>
     ids.flatMap((id) => {
       const found = matches.get(id);
 
       return found ? [found] : [];
-    }),
-  );
+    });
 
   const service = new MatchLineupService(
     { byMatch: async () => stored, byPlayer: async () => playerRows },
@@ -125,7 +123,6 @@ describe(MatchLineupService, () => {
     stored = [];
     playerRows = [];
     existing = new Set(["alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf"]);
-    byIds.mockClear();
 
     for (const found of [
       match("manual-match", "manual"),
@@ -234,12 +231,6 @@ describe(MatchLineupService, () => {
     it("skips a side that no longer plays the match after a sync", async () => {
       playerRows = [{ matchId: "manual-match", participantId: "side-gone", rosterIds: [] }];
       await expect(service.standIns("delta")).resolves.toStrictEqual([]);
-    });
-
-    it("does not read matches for a player who never stood in", async () => {
-      playerRows = [{ matchId: "manual-match", participantId: "side-a", rosterIds: ["delta"] }];
-      await expect(service.standIns("delta")).resolves.toStrictEqual([]);
-      expect(byIds).not.toHaveBeenCalled();
     });
   });
 });

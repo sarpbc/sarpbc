@@ -23,7 +23,6 @@ const {
   step = 1,
 } = defineProps<{
   disabled?: boolean;
-  /** Thousands separators; turn them off for years and identifiers. */
   grouping?: boolean;
   id?: string | null;
   max?: number | null;

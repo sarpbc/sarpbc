@@ -33,7 +33,7 @@ const formatEndDate = (value: Date | string | null) => {
   return mediumDate.value.format(new Date(value));
 };
 
-const seasonMetaParts = (award: PlayerSeasonAward): string[] => {
+const seasonMetaParts = (award: PlayerSeasonAward) => {
   const parts: string[] = [];
 
   if (award.region) {
@@ -49,7 +49,7 @@ const seasonMetaParts = (award: PlayerSeasonAward): string[] => {
   return parts;
 };
 
-const metaParts = (award: PlayerProfileAward): string[] => {
+const metaParts = (award: PlayerProfileAward) => {
   const parts: string[] = [];
   const stageName = distinctStageName(award.tournament);
 

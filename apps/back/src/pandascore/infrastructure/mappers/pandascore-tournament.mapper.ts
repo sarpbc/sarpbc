@@ -1,19 +1,15 @@
-import {
-  UpsertTournamentParticipantCommand,
-  UpsertTournamentCommand,
-} from "../../../tournament/application/feed";
 import { ExpectedRosterDto, TournamentDto } from "../dto/tournament.dto";
 import { toUpsertLeagueCommand } from "./pandascore-league.mapper";
 import { toUpsertPlayerCommand } from "./pandascore-player.mapper";
 import { toUpsertSerieCommand } from "./pandascore-serie.mapper";
 import { toUpsertTeamCommand } from "./pandascore-team.mapper";
 
-const toParticipantCommand = (dto: ExpectedRosterDto): UpsertTournamentParticipantCommand => ({
+const toParticipantCommand = (dto: ExpectedRosterDto) => ({
   players: dto.players.map((player) => toUpsertPlayerCommand(player)),
   team: toUpsertTeamCommand(dto.team),
 });
 
-export const toUpsertTournamentCommand = (dto: TournamentDto): UpsertTournamentCommand => ({
+export const toUpsertTournamentCommand = (dto: TournamentDto) => ({
   beginAt: dto.begin_at !== undefined && dto.begin_at !== "" ? new Date(dto.begin_at) : undefined,
   country: dto.country ?? undefined,
   endAt: dto.end_at !== undefined && dto.end_at !== "" ? new Date(dto.end_at) : undefined,

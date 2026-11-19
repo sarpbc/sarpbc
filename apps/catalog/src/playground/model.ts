@@ -3,7 +3,7 @@ import type { VNode } from "vue";
 
 export type ControlValue = string | number | boolean | null;
 
-/*
+/**
  * A control's initial value is the component's own default, so a prop is left
  * out of the preview and of the call whenever its control sits at the initial
  * value; a `required` prop is always passed. `toggle` passes `value` while on
@@ -62,47 +62,50 @@ export const SAMPLE_ICON = "i-lucide-circle-dot";
 
 export const SAMPLE_IMAGE = "/sample-avatar.svg";
 
-export const icon = (name: string): Control => ({
-  initial: false,
-  kind: "toggle",
-  name,
-  value: SAMPLE_ICON,
-});
+export const icon = (name: string) =>
+  ({
+    initial: false,
+    kind: "toggle",
+    name,
+    value: SAMPLE_ICON,
+  }) satisfies Control;
 
-export const flag = (name: string, initial = false): Control => ({
-  initial,
-  kind: "boolean",
-  name,
-});
+export const flag = (name: string, initial = false) =>
+  ({
+    initial,
+    kind: "boolean",
+    name,
+  }) satisfies Control;
 
-export const text = (name: string, initial = ""): Control => ({ initial, kind: "text", name });
+export const text = (name: string, initial = "") =>
+  ({ initial, kind: "text", name }) satisfies Control;
 
-export const choice = (name: string, options: readonly string[], initial: string): Control => ({
-  initial,
-  kind: "select",
-  name,
-  options,
-});
+export const choice = (name: string, options: readonly string[], initial: string) =>
+  ({
+    initial,
+    kind: "select",
+    name,
+    options,
+  }) satisfies Control;
 
 export const number = (
   name: string,
   initial: number | null,
   bounds: { max?: number; min?: number } = {},
-): Control => ({ initial, kind: "number", name, ...bounds });
+) => ({ initial, kind: "number", name, ...bounds }) satisfies Control;
 
-export const listenerOf = (event: string): string =>
-  `on${event.charAt(0).toUpperCase()}${event.slice(1)}`;
+export const listenerOf = (event: string) => `on${event.charAt(0).toUpperCase()}${event.slice(1)}`;
 
-export const required = (control: Control): Control => ({ ...control, required: true });
+export const required = (control: Control) => ({ ...control, required: true }) satisfies Control;
 
-export const demo = (control: Control): Control => ({ ...control, demo: true });
+export const demo = (control: Control) => ({ ...control, demo: true }) satisfies Control;
 
 export const OVERLAY_SIDES = ["top", "right", "bottom", "left"] as const;
 
 export const OVERLAY_ALIGNS = ["start", "center", "end"] as const;
 
 /** The value a control passes to the component, or null when the prop is left out. */
-export const propValue = (control: Control, value: ControlValue): ControlValue => {
+export const propValue = (control: Control, value: ControlValue) => {
   if (control.required === true || control.demo === true) {
     return value === "" ? null : value;
   }
@@ -131,7 +134,7 @@ export const propValue = (control: Control, value: ControlValue): ControlValue =
   }
 };
 
-export const statesOf = (control: Control): VariantState[] => {
+export const statesOf = (control: Control) => {
   switch (control.kind) {
     case "boolean":
     case "toggle": {

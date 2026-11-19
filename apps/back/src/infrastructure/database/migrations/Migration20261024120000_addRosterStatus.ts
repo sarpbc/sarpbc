@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261024120000_addRosterStatus extends Migration {
   override name = "Migration20261024120000_addRosterStatus";
 
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(
       `alter table "player" add "status" text check ("status" in ('active', 'free_agent', 'retired')) not null default 'active';`,
     );
@@ -13,7 +13,7 @@ export class Migration20261024120000_addRosterStatus extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(
       `alter table "contract" drop column "join_source_url", drop column "leave_source_url";`,
     );

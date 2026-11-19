@@ -23,11 +23,8 @@ export interface CountriesContext {
   staffCookie: string;
 }
 
-export const verifyCountries = async ({
-  request,
-  staffCookie,
-}: CountriesContext): Promise<void> => {
-  const created = async <T,>(path: string, body: Payload, schema: z.ZodType<T>): Promise<T> => {
+export const verifyCountries = async ({ request, staffCookie }: CountriesContext) => {
+  const created = async <T,>(path: string, body: Payload, schema: z.ZodType<T>) => {
     const response = await request("POST", path, body, staffCookie, 201);
 
     return response.json(schema);
@@ -53,7 +50,7 @@ export const verifyCountries = async ({
     playerBody,
   );
 
-  const finishedMatchOf = async (source: string): Promise<string> => {
+  const finishedMatchOf = async (source: string) => {
     const { tournament } = await created(
       "/tournaments",
       {

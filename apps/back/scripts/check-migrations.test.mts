@@ -6,14 +6,7 @@ import path from "node:path";
 import { test } from "node:test";
 import { migrationViolations } from "./check-migrations.mts";
 
-interface Repository {
-  directory: string;
-  add: (name: string) => void;
-  delete: (name: string) => void;
-  remove: () => void;
-}
-
-const repository = (baseMigrations: string[]): Repository => {
+const repository = (baseMigrations: string[]) => {
   const root = mkdtempSync(path.join(tmpdir(), "check-migrations-"));
   const directory = path.join(root, "migrations");
   mkdirSync(directory);

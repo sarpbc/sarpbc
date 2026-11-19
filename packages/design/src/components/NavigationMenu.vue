@@ -6,7 +6,6 @@ import type { NavigationItem } from "../types.ts";
 
 const { items, orientation = "horizontal" } = defineProps<{
   items: readonly NavigationItem[];
-  /** horizontal: a header bar of text links. vertical: a sidebar of rows with icons. */
   orientation?: "horizontal" | "vertical";
 }>();
 

@@ -1,7 +1,7 @@
 import { NEWS_MATCH_BLOCK_MAX_MATCHES, findInvalidNewsMatchTags } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
-export const assertValidMatchBlocks = (content: string): void => {
+export const assertValidMatchBlocks = (content: string) => {
   const [invalid] = findInvalidNewsMatchTags(content);
 
   if (invalid !== undefined) {

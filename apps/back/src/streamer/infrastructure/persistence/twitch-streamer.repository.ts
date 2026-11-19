@@ -2,10 +2,9 @@ import { Injectable } from "@nestjs/common";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import type { TrackedStreamerStore } from "../../application/ports/tracked-streamer-store";
-import type { TrackedStreamer } from "../../domain/tracked-streamer";
 import { TwitchStreamer } from "./twitch-streamer.entity";
 
-const detached = (streamer: TwitchStreamer): TrackedStreamer => ({
+const detached = (streamer: TwitchStreamer) => ({
   createdAt: streamer.createdAt,
   displayName: streamer.displayName,
   id: streamer.id,
@@ -16,13 +15,13 @@ const detached = (streamer: TwitchStreamer): TrackedStreamer => ({
 export class TwitchStreamerRepository implements TrackedStreamerStore {
   constructor(private readonly em: EntityManager) {}
 
-  async list(): Promise<TrackedStreamer[]> {
+  async list() {
     const streamers = await this.em.find(TwitchStreamer, {}, { orderBy: { login: "ASC" } });
 
     return streamers.map(detached);
   }
 
-  async add(login: string, displayName: string | null): Promise<TrackedStreamer | null> {
+  async add(login: string, displayName: string | null) {
     const streamer = new TwitchStreamer();
     streamer.login = login;
     streamer.displayName = displayName;
@@ -42,7 +41,7 @@ export class TwitchStreamerRepository implements TrackedStreamerStore {
     return detached(streamer);
   }
 
-  async remove(id: string): Promise<boolean> {
+  async remove(id: string) {
     return (await this.em.nativeDelete(TwitchStreamer, { id })) > 0;
   }
 }

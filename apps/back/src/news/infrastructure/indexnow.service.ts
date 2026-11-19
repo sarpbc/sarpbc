@@ -8,7 +8,7 @@ import type { NewsIndexing } from "../application/ports";
 export class IndexNowService implements NewsIndexing {
   constructor(private readonly configService: ConfigService) {}
 
-  async submitNewsSlugs(slugs: string[]): Promise<void> {
+  async submitNewsSlugs(slugs: string[]) {
     const key = this.configService.get<string>("indexnow.key");
 
     if (
@@ -25,7 +25,6 @@ export class IndexNowService implements NewsIndexing {
     try {
       const { origin } = new URL(this.configService.getOrThrow<string>("front_url"));
 
-      // The home page lists the latest news, so it changes with every article.
       const paths = ["/", ...new Set(slugs.map((slug) => newsPath(encodeURIComponent(slug))))];
 
       const urlList = paths.flatMap((path) => [

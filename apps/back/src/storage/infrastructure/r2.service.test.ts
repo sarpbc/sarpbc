@@ -1,8 +1,8 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import type { MockInstance } from "vitest";
+import { HttpResponse, http } from "msw";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { InternalServerErrorException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { S3Client } from "@aws-sdk/client-s3";
 import { R2Service } from "./r2.service";
 import type { ObjectOperationLogger } from "./r2.service";
 import { StorageService } from "../application/storage.service";
@@ -18,27 +18,67 @@ describe(R2Service, () => {
     r2_secret_access_key: "secret",
   } as const;
 
-  const logError = vi.fn<ObjectOperationLogger["error"]>();
+  const BUCKET_ORIGIN = "https://sarpbc-org.acct.r2.cloudflarestorage.com";
+  const server = setupServer();
 
-  const operationLogger: ObjectOperationLogger = {
-    emit: () => {},
-    error: logError,
-    set: () => {},
-  };
+  interface ObjectRequest {
+    method: string;
+    path: string;
+    headers: Headers;
+    body: Uint8Array;
+  }
 
-  let sendSpy: MockInstance;
+  let requests: ObjectRequest[];
+  let logged: Error[];
   let r2: R2Service;
   let service: StorageService;
 
+  const operationLogger: ObjectOperationLogger = {
+    emit: () => {},
+    error: (error) => {
+      logged.push(error);
+    },
+    set: () => {},
+  };
+
+  const serve = (status = 200) => {
+    server.use(
+      http.all(`${BUCKET_ORIGIN}/*`, async ({ request }) => {
+        requests.push({
+          body: new Uint8Array(await request.arrayBuffer()),
+          headers: request.headers,
+          method: request.method,
+          path: decodeURIComponent(new URL(request.url).pathname),
+        });
+
+        return new HttpResponse(
+          status === 200
+            ? "<CopyObjectResult><ETag>etag</ETag></CopyObjectResult>"
+            : "<Error><Code>AccessDenied</Code></Error>",
+          { headers: { "Content-Type": "application/xml" }, status },
+        );
+      }),
+    );
+  };
+
+  beforeAll(() => {
+    server.listen({ onUnhandledFrame: "error" });
+  });
+
   beforeEach(() => {
-    sendSpy = vi.spyOn(S3Client.prototype, "send").mockImplementation(() => {});
+    requests = [];
+    logged = [];
+    serve();
     r2 = new R2Service(new ConfigService(configuredValues), () => operationLogger);
     service = new StorageService(r2);
-    vi.clearAllMocks();
   });
 
   afterEach(() => {
-    sendSpy.mockRestore();
+    server.resetHandlers();
+  });
+
+  afterAll(() => {
+    server.close();
   });
 
   it("stores a jpg declared as image/jpg", async () => {
@@ -46,28 +86,28 @@ describe(R2Service, () => {
 
     expect(result.key).toMatch(/^news\/covers\/.+\.jpg$/u);
     expect(result.publicUrl).toContain(result.key);
-    const input: unknown = expect.objectContaining({ ContentType: "image/jpeg", Key: result.key });
+    const [request] = requests;
 
-    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ input }));
+    expect(request?.method).toBe("PUT");
+    expect(request?.path).toBe(`/${result.key}`);
+    expect(request?.headers.get("content-type")).toBe("image/jpeg");
   });
 
   it("rejects unsupported types before calling R2", async () => {
     await expect(
       service.uploadImage(Buffer.from("x"), "application/pdf", "tournament"),
     ).rejects.toBeInstanceOf(InvalidInputError);
-    expect(sendSpy).not.toHaveBeenCalled();
+    expect(requests).toStrictEqual([]);
   });
 
   it("logs R2 failures with image context and returns a safe 500", async () => {
-    const failure = new Error("AccessDenied");
-
-    sendSpy.mockRejectedValue(failure);
+    serve(403);
 
     await expect(
       service.uploadImage(Buffer.from("jpeg"), "image/jpeg", "news"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
 
-    expect(logError).toHaveBeenCalledExactlyOnceWith(failure);
+    expect(logged.map((error) => error.name)).toStrictEqual(["AccessDenied"]);
   });
 
   it("stores tournament artwork separately from news covers", async () => {
@@ -77,13 +117,11 @@ describe(R2Service, () => {
     expect(result.key).toMatch(/^tournaments\/images\/.+\.png$/u);
     expect(result.publicUrl).toBe(`https://cdn.example/${result.key}`);
 
-    const input: unknown = expect.objectContaining({
-      Body: buffer,
-      ContentType: "image/png",
-      Key: result.key,
-    });
+    const [request] = requests;
 
-    expect(sendSpy).toHaveBeenCalledWith(expect.objectContaining({ input }));
+    expect(request?.path).toBe(`/${result.key}`);
+    expect(request?.headers.get("content-type")).toBe("image/png");
+    expect(request?.body).toStrictEqual(new Uint8Array(buffer));
   });
 
   it("stores an object under its exact key with immutable caching", async () => {
@@ -94,28 +132,30 @@ describe(R2Service, () => {
       key,
       publicUrl: `https://cdn.example/${key}`,
     });
-    expect(sendSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: {
-          Body: bytes,
-          Bucket: "sarpbc-org",
-          CacheControl: "public, max-age=31536000, immutable",
-          ContentType: "image/webp",
-          Key: key,
-        },
-      }),
-    );
+    const [request] = requests;
+
+    expect({
+      body: request?.body,
+      cacheControl: request?.headers.get("cache-control"),
+      contentType: request?.headers.get("content-type"),
+      method: request?.method,
+      path: request?.path,
+    }).toStrictEqual({
+      body: bytes,
+      cacheControl: "public, max-age=31536000, immutable",
+      contentType: "image/webp",
+      method: "PUT",
+      path: `/${key}`,
+    });
   });
 
   it("hides R2 failures behind a safe 500 when storing an object", async () => {
-    const failure = new Error("AccessDenied");
-
-    sendSpy.mockRejectedValue(failure);
+    serve(403);
 
     await expect(
       r2.putObject("teams/kc/logo-dark-a.webp", new Uint8Array([1]), "image/webp"),
     ).rejects.toBeInstanceOf(InternalServerErrorException);
-    expect(logError).toHaveBeenCalledExactlyOnceWith(failure);
+    expect(logged.map((error) => error.name)).toStrictEqual(["AccessDenied"]);
   });
 
   it("publishes a pending object by copying it under its final key", async () => {
@@ -128,21 +168,17 @@ describe(R2Service, () => {
       key: "teams/kc/logo-dark-0123456789abcdef.webp",
       publicUrl: "https://cdn.example/teams/kc/logo-dark-0123456789abcdef.webp",
     });
-    expect(sendSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: {
-          Bucket: "sarpbc-org",
-          CopySource: "sarpbc-org/pending/teams/kc/logo-dark-0123456789abcdef.webp",
-          Key: "teams/kc/logo-dark-0123456789abcdef.webp",
-        },
-      }),
+    const [request] = requests;
+
+    expect(request?.method).toBe("PUT");
+    expect(request?.path).toBe("/teams/kc/logo-dark-0123456789abcdef.webp");
+    expect(decodeURIComponent(request?.headers.get("x-amz-copy-source") ?? "")).toBe(
+      "sarpbc-org/pending/teams/kc/logo-dark-0123456789abcdef.webp",
     );
   });
 
   it("hides R2 failures behind a safe 500 when copying an object", async () => {
-    const failure = new Error("AccessDenied");
-
-    sendSpy.mockRejectedValue(failure);
+    serve(403);
 
     await expect(
       r2.copyObject("pending/teams/kc/a.webp", "teams/kc/a.webp"),
@@ -152,14 +188,9 @@ describe(R2Service, () => {
   it("deletes an object by key", async () => {
     await r2.deleteObject("pending/teams/kc/logo-dark-0123456789abcdef.webp");
 
-    expect(sendSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        input: {
-          Bucket: "sarpbc-org",
-          Key: "pending/teams/kc/logo-dark-0123456789abcdef.webp",
-        },
-      }),
-    );
+    expect(requests.map(({ method, path }) => ({ method, path }))).toStrictEqual([
+      { method: "DELETE", path: "/pending/teams/kc/logo-dark-0123456789abcdef.webp" },
+    ]);
   });
 
   it("fails with a clear error when R2 is not configured", async () => {
@@ -171,6 +202,6 @@ describe(R2Service, () => {
     await expect(unconfigured.deleteObject("teams/kc/logo.webp")).rejects.toThrow(
       /R2 storage is not configured/u,
     );
-    expect(sendSpy).not.toHaveBeenCalled();
+    expect(requests).toStrictEqual([]);
   });
 });

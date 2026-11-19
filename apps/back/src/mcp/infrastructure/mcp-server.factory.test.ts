@@ -105,7 +105,7 @@ const TOOL_NAMES = [
   "update_circuit",
 ];
 
-const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
+const unused = async () => await Promise.reject(new Error("unused"));
 
 const services: McpServices = {
   catalogService: unconstructed(ManualCatalogService),

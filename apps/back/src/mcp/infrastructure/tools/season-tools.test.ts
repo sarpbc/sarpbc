@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import type { SeasonDetail, StaffRole } from "@sarpbc/types";
 import { z } from "zod";
-import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
-import type { SeasonService } from "../../../season/application/season.service";
+import { jsonOf } from "../../../../test/mcp-result";
+import { FakeRosterProposals, proposed } from "./roster-proposals.test-utils";
 import { rosterTools } from "./roster-tools";
 import { seasonTools } from "./season-tools";
 
@@ -12,7 +12,7 @@ const ANNOUNCEMENT = "https://x.com/RLEsports/status/1";
 const user = (role: StaffRole) => ({ email: "staff@test.com", id: "u1", role });
 
 const awardTool = () => {
-  const rosterProposalService = pendingProposalService();
+  const rosterProposalService = new FakeRosterProposals();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === "propose_season_award",
@@ -40,18 +40,19 @@ describe("propose_season_award", () => {
 
     const result = await tool.run(user("admin"), input);
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      {
-        awardType: "regional_mvp",
-        kind: "award_season_player",
-        playerId: PLAYER_ID,
-        presentedBy: undefined,
-        region: "Europe",
-        seasonId: SEASON_ID,
-      },
-      ANNOUNCEMENT,
-      "u1",
-    );
+    expect(rosterProposalService.changes).toStrictEqual([
+      proposed(
+        {
+          awardType: "regional_mvp",
+          kind: "award_season_player",
+          playerId: PLAYER_ID,
+          presentedBy: undefined,
+          region: "Europe",
+          seasonId: SEASON_ID,
+        },
+        ANNOUNCEMENT,
+      ),
+    ]);
     expect(jsonOf(result)).toMatchObject({ kind: "award_season_player", status: "pending" });
   });
 
@@ -73,7 +74,7 @@ describe("propose_season_award", () => {
     const result = await tool.run(user("journalist"), input);
 
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 });
 
@@ -121,10 +122,7 @@ describe("get_season", () => {
     };
 
     const tool = seasonTools({
-      seasonService: {
-        detail: vi.fn<SeasonService["detail"]>(async () => detail),
-        list: vi.fn<SeasonService["list"]>(),
-      },
+      seasonService: { detail: async () => detail, list: async () => [] },
     }).find((candidate) => candidate.name === "get_season");
 
     if (!tool) {

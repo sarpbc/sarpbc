@@ -1,20 +1,16 @@
 import type { NuxtI18nOptions } from "@nuxtjs/i18n";
 
-type PreconnectLink =
-  | { rel: "preconnect"; href: string; crossorigin: "anonymous" }
-  | { rel: "dns-prefetch"; href: string };
-
 export const DEFAULT_API_BASE = "https://api.sarpbc.org";
 
 export const SITE_ORIGIN = "https://sarpbc.org";
 
-export const apiPreconnectLinks = (apiBase: string): PreconnectLink[] => {
+export const apiPreconnectLinks = (apiBase: string) => {
   try {
     const { origin } = new URL(apiBase);
 
     return [
-      { crossorigin: "anonymous", href: origin, rel: "preconnect" },
-      { href: origin, rel: "dns-prefetch" },
+      { crossorigin: "anonymous", href: origin, rel: "preconnect" } as const,
+      { href: origin, rel: "dns-prefetch" } as const,
     ];
   } catch {
     return [];

@@ -11,20 +11,16 @@ type EventStage = Pick<
   "name" | "beginAt" | "endAt" | "imageUrl" | "prizepool" | "type"
 >;
 
-const bound = (dates: (Date | null)[], pick: (...times: number[]) => number): string | null => {
+const bound = (dates: (Date | null)[], pick: (...times: number[]) => number) => {
   const times = dates.flatMap((date) => (date ? [date.getTime()] : []));
 
   return times.length ? new Date(pick(...times)).toISOString() : null;
 };
 
-export const mapEvent = <Stage extends EventStage>(
-  event: TournamentEvent,
-  stages: Stage[],
-): TournamentEventResponse<Stage> => {
+export const mapEvent = <Stage extends EventStage>(event: TournamentEvent, stages: Stage[]) => {
   const ordered = stages.toSorted(compareStages);
   const [newest] = ordered;
 
-  // Only the main stage carries the prize pool; its type wins over qualifier stages.
   const main =
     ordered.find((stage) => stage.prizepool !== null && stage.prizepool !== "") ?? newest;
 
@@ -45,10 +41,11 @@ export const mapEvent = <Stage extends EventStage>(
     slug: event.slug,
     stages: ordered,
     type: main?.type ?? null,
-  };
+  } satisfies TournamentEventResponse<Stage>;
 };
 
-export const mapStaffEvent = ({ event, stages }: EventListing): ManualEvent => ({
-  ...mapEvent(event, stages.map(mapTournamentListItem)),
-  editable: !isEventSynced(event, stages),
-});
+export const mapStaffEvent = ({ event, stages }: EventListing) =>
+  ({
+    ...mapEvent(event, stages.map(mapTournamentListItem)),
+    editable: !isEventSynced(event, stages),
+  }) satisfies ManualEvent;

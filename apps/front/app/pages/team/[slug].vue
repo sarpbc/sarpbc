@@ -15,7 +15,6 @@ if (!team.value) {
   });
 }
 
-// A merged duplicate's slug resolves to the kept team.
 if (team.value && team.value.slug !== slug.value) {
   await redirectToCanonical(route, localePath(teamPath(team.value.slug)));
 }

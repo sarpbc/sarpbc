@@ -1,6 +1,5 @@
 import type {
   CareerDestiny,
-  CareerNicknameKey,
   CareerPlacement,
   CareerRole,
   CareerSeasonRecord,
@@ -14,17 +13,13 @@ export interface CareerNicknameInput {
   seasons: readonly Pick<CareerSeasonRecord, "worlds">[];
 }
 
-type NicknameTier = "goat" | "champion" | "majors" | "nearly" | "journeyman" | "bust";
+const countTrophies = (trophies: CareerNicknameInput["trophies"], type: CareerTrophy["type"]) =>
+  trophies.filter((trophy) => trophy.type === type).length;
 
-const countTrophies = (
-  trophies: CareerNicknameInput["trophies"],
-  type: CareerTrophy["type"],
-): number => trophies.filter((trophy) => trophy.type === type).length;
-
-const isWorldsPodium = (placement: CareerPlacement | null): boolean =>
+const isWorldsPodium = (placement: CareerPlacement | null) =>
   placement === "finalist" || placement === "top4";
 
-const classifyNickname = (input: CareerNicknameInput): NicknameTier => {
+const classifyNickname = (input: CareerNicknameInput) => {
   const worldsWins = countTrophies(input.trophies, "worlds");
   const majorWins = countTrophies(input.trophies, "major");
   const worldsPodiums = input.seasons.filter((season) => isWorldsPodium(season.worlds)).length;
@@ -52,7 +47,7 @@ const classifyNickname = (input: CareerNicknameInput): NicknameTier => {
   return "journeyman";
 };
 
-const nicknameForChampion = (role: CareerRole): CareerNicknameKey => {
+const nicknameForChampion = (role: CareerRole) => {
   switch (role) {
     case "offense": {
       return "closer";
@@ -74,7 +69,7 @@ const nicknameForChampion = (role: CareerRole): CareerNicknameKey => {
   }
 };
 
-const nicknameForNearly = (role: CareerRole): CareerNicknameKey => {
+const nicknameForNearly = (role: CareerRole) => {
   switch (role) {
     case "offense": {
       return "surfaceFox";
@@ -96,7 +91,7 @@ const nicknameForNearly = (role: CareerRole): CareerNicknameKey => {
   }
 };
 
-const nicknameForJourneyman = (destiny: CareerDestiny): CareerNicknameKey => {
+const nicknameForJourneyman = (destiny: CareerDestiny) => {
   switch (destiny) {
     case "streamer": {
       return "theMic";
@@ -118,7 +113,7 @@ const nicknameForJourneyman = (destiny: CareerDestiny): CareerNicknameKey => {
   }
 };
 
-export const pickCareerNickname = (input: CareerNicknameInput): CareerNicknameKey => {
+export const pickCareerNickname = (input: CareerNicknameInput) => {
   const tier = classifyNickname(input);
 
   switch (tier) {

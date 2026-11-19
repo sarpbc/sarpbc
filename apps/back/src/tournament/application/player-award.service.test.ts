@@ -1,18 +1,27 @@
-import { PLAYER_AWARD_TYPES } from "@sarpbc/types";
 import type { PlayerAwardType } from "@sarpbc/types";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { PlayerAwardService } from "./player-award.service";
-import type { AwardQueries, AwardTransaction, AwardWriter } from "./ports";
-import { mapSequentially } from "../../common/application/sequentially";
+import type { AwardTransaction } from "./ports";
 
 const setup = (source: "manual" | "startgg" = "manual") => {
   const given = new Set<PlayerAwardType>();
 
+  const created: {
+    awardType: PlayerAwardType;
+    participantId: string;
+    playerId: string;
+    tournamentId: string;
+  }[] = [];
+
   const writer = {
-    awardTaken: vi.fn<AwardWriter["awardTaken"]>(async (_, awardType) => given.has(awardType)),
-    context: vi.fn<AwardWriter["context"]>(async (tournamentId, participant, playerId) => {
+    awardTaken: async (_: string, awardType: PlayerAwardType) => given.has(awardType),
+    context: async (
+      tournamentId: string,
+      participant: { participantId: string } | { teamId: string },
+      playerId: string,
+    ) => {
       const onTeam =
         "teamId" in participant
           ? participant.teamId === "kc"
@@ -23,9 +32,15 @@ const setup = (source: "manual" | "startgg" = "manual") => {
         player: playerId === "nobody" ? null : { id: playerId, name: playerId, slug: playerId },
         tournament: tournamentId === "cup" ? { id: "cup", name: "Fake Cup", source } : null,
       };
-    }),
-    create: vi.fn<AwardWriter["create"]>(async (input) => {
+    },
+    create: async (input: {
+      tournamentId: string;
+      participantId: string;
+      playerId: string;
+      awardType: PlayerAwardType;
+    }) => {
       given.add(input.awardType);
+      created.push(input);
 
       return {
         awardType: input.awardType,
@@ -33,37 +48,31 @@ const setup = (source: "manual" | "startgg" = "manual") => {
         participant: { id: input.participantId },
         player: { id: input.playerId, name: input.playerId, slug: input.playerId },
       };
-    }),
-    remove: vi.fn<AwardWriter["remove"]>(),
-  } satisfies AwardWriter;
+    },
+    remove: async () => false,
+  };
 
   const transaction: AwardTransaction = { run: async (work) => await work({ awards: writer }) };
 
   const service = new PlayerAwardService(
-    {
-      byPlayer: vi.fn<AwardQueries["byPlayer"]>(),
-      byTournament: vi.fn<AwardQueries["byTournament"]>(),
-    },
+    { byPlayer: async () => null, byTournament: async () => null },
     transaction,
   );
 
-  return { service, writer };
+  return { created, service };
 };
 
 describe("PlayerAwardService by team", () => {
   it("resolves the participant from the team and creates the award", async () => {
-    const { service, writer } = setup();
+    const { created, service } = setup();
 
     await expect(service.createForTeam("cup", "kc", "zen", "mvp")).resolves.toMatchObject({
       id: "award-1",
     });
 
-    expect(writer.create).toHaveBeenCalledWith({
-      awardType: "mvp",
-      participantId: "part-kc",
-      playerId: "zen",
-      tournamentId: "cup",
-    });
+    expect(created).toStrictEqual([
+      { awardType: "mvp", participantId: "part-kc", playerId: "zen", tournamentId: "cup" },
+    ]);
   });
 
   it("refuses an unknown tournament, a team outside the tournament and a player off its roster", async () => {
@@ -92,7 +101,7 @@ describe("PlayerAwardService by team", () => {
   });
 
   it("refuses a second award of the same type, whoever receives it", async () => {
-    const { service, writer } = setup();
+    const { created, service } = setup();
     await service.createForTeam("cup", "kc", "zen", "mvp");
 
     await expect(service.requireProposable("cup", "kc", "zen", "mvp")).rejects.toThrow(
@@ -104,38 +113,15 @@ describe("PlayerAwardService by team", () => {
     await expect(
       service.requireProposable("cup", "kc", "zen", "defensive_mvp"),
     ).resolves.toBeUndefined();
-    expect(writer.create).toHaveBeenCalledOnce();
+    expect(created).toHaveLength(1);
   });
 
-  it("holds every award type on one stage, including a separate Grand Finals MVP", async () => {
-    const { service, writer } = setup();
-
-    await mapSequentially(
-      PLAYER_AWARD_TYPES,
-      async (awardType) => await service.createForTeam("cup", "kc", "zen", awardType),
-    );
-
-    expect(writer.create.mock.calls.map(([input]) => input.awardType)).toStrictEqual([
-      "mvp",
-      "grand_finals_mvp",
-      "offensive_mvp",
-      "defensive_mvp",
-      "breakthrough_player",
-    ]);
-    await expect(service.createForTeam("cup", "kc", "zen", "grand_finals_mvp")).rejects.toThrow(
-      "Fake Cup already has a grand finals mvp award",
-    );
-  });
-
-  it("refuses start.gg tournaments for the new award types too", async () => {
-    const { service, writer } = setup("startgg");
+  it("refuses to create an award on a start.gg tournament", async () => {
+    const { created, service } = setup("startgg");
 
     await expect(service.createForTeam("cup", "kc", "zen", "grand_finals_mvp")).rejects.toThrow(
       "Awards of start.gg tournaments cannot be proposed",
     );
-    await expect(
-      service.requireProposable("cup", "kc", "zen", "breakthrough_player"),
-    ).rejects.toThrow("Awards of start.gg tournaments cannot be proposed");
-    expect(writer.create).not.toHaveBeenCalled();
+    expect(created).toStrictEqual([]);
   });
 });

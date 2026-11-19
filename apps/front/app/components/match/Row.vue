@@ -27,12 +27,10 @@ const {
   match,
   live = false,
   compact = false,
-  /** When false, always show time only (day headers already provide the date). */
   showDate = true,
 } = defineProps<{
   match: MatchRowItem;
   live?: boolean;
-  /** Dense rail rows: three of them span two default rows. */
   compact?: boolean;
   showDate?: boolean;
 }>();
@@ -42,7 +40,7 @@ type ScheduleDisplay =
   | { kind: "tomorrow"; label: string; time: string }
   | { kind: "date"; date: string };
 
-const schedule = computed((): ScheduleDisplay | null => {
+const schedule = computed(() => {
   const beginAt = parseMatchDate(match.beginAt);
 
   if (!beginAt) {
@@ -105,7 +103,7 @@ watch([scoreA, scoreB], () => {
 
 onBeforeUnmount(() => clearTimeout(flashTimer));
 
-const liveScoreClass = (score: number | null, other: number | null): string => {
+const liveScoreClass = (score: number | null, other: number | null) => {
   if (score === null || other === null || score === other) {
     return "text-highlighted";
   }

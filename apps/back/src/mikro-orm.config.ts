@@ -32,7 +32,6 @@ export default defineConfig({
   },
   namingStrategy: SarpbcNamingStrategy,
   password: env.DB_PASSWORD,
-  // MikroORM v7 PoolConfig: min, max, idleTimeoutMillis only (pg reap/acquire timeouts removed from API).
   pool: {
     idleTimeoutMillis: 30_000,
     max: 10,

@@ -18,8 +18,8 @@ const packageManifest = z.object({
 const specifierPattern =
   /(?:\bfrom\s*|\bimport\s*\(\s*|\brequire\s*\(\s*|\bimport\s+)["'](?<specifier>[^"']+)["']/gu;
 
-const sourceFiles = (directory: string): string[] =>
-  readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+const sourceFiles = (directory: string) => {
+  const files: string[] = readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
     const file = path.join(directory, entry.name);
 
     if (entry.isDirectory()) {
@@ -29,7 +29,10 @@ const sourceFiles = (directory: string): string[] =>
     return /\.(?:ts|mts|mjs|js|vue)$/u.test(entry.name) ? [file] : [];
   });
 
-export const frameworkViolations = (directory: string, root = directory): string[] => {
+  return files;
+};
+
+export const frameworkViolations = (directory: string, root = directory) => {
   const violations: string[] = [];
 
   for (const file of sourceFiles(directory)) {

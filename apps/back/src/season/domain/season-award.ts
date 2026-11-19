@@ -20,9 +20,7 @@ export const SEASON_AWARD_LABELS = {
   season_mvp: "Season MVP",
 } as const satisfies Record<SeasonAwardType, string>;
 
-type RegionRule = "required" | "optional" | "forbidden";
-
-const regionRule = (awardType: SeasonAwardType): RegionRule => {
+const regionRule = (awardType: SeasonAwardType) => {
   switch (awardType) {
     case "season_mvp": {
       return "forbidden";
@@ -70,7 +68,7 @@ const parseRegion = (awardType: SeasonAwardType, value: string | null | undefine
   return region;
 };
 
-const assertAwardSourceUrl = (value: string): void => {
+const assertAwardSourceUrl = (value: string) => {
   if (value.length > SEASON_AWARD_SOURCE_URL_MAX_LENGTH) {
     throw new InvalidInputError(
       `The award source has at most ${SEASON_AWARD_SOURCE_URL_MAX_LENGTH} characters.`,
@@ -93,7 +91,7 @@ export const parseSeasonAward = (input: {
   region?: string | null;
   presentedBy?: string | null;
   sourceUrl: string;
-}): SeasonAwardFields => {
+}) => {
   const sourceUrl = input.sourceUrl.trim();
   assertAwardSourceUrl(sourceUrl);
 

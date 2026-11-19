@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { SlashGroup, SlashItem } from "~/utils/editor/slash-commands";
 
-/* Keyboard state lives in the slash-commands extension; this list only draws it. */
 const { command, groups, highlighted } = defineProps<{
   command: (item: SlashItem) => void;
   groups: readonly SlashGroup[];
@@ -12,7 +11,7 @@ const { t } = useI18n();
 
 const items = computed(() => groups.flatMap((group) => group.items));
 
-const indexOf = (item: SlashItem): number => items.value.indexOf(item);
+const indexOf = (item: SlashItem) => items.value.indexOf(item);
 </script>
 
 <template>

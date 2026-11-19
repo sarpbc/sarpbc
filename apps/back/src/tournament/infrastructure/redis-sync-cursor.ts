@@ -7,7 +7,7 @@ const CURSOR_TTL_SECONDS = 60 * 60 * 24 * 365;
 export class RedisSyncCursor implements SyncCursor {
   constructor(private readonly redisService: RedisService) {}
 
-  async getLastSyncAt(): Promise<Date | null> {
+  async getLastSyncAt() {
     const value = await this.redisService.get(CURSOR_KEY);
 
     if (value === null || value === "") {
@@ -19,7 +19,7 @@ export class RedisSyncCursor implements SyncCursor {
     return Number.isNaN(parsed.getTime()) ? null : parsed;
   }
 
-  async setLastSyncAt(date: Date): Promise<void> {
+  async setLastSyncAt(date: Date) {
     await this.redisService.set(CURSOR_KEY, date.toISOString(), CURSOR_TTL_SECONDS);
   }
 }

@@ -30,7 +30,7 @@ const tabs = computed(() =>
   })),
 );
 
-const playerLabel = (row: MatchGamePlayerStats): string => row.player?.name ?? row.name;
+const playerLabel = (row: MatchGamePlayerStats) => row.player?.name ?? row.name;
 
 const teams = computed(() => {
   const current = game.value;

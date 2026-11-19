@@ -1,10 +1,5 @@
 import type { ColumnDef, Row, RowData } from "@tanstack/vue-table";
 
-/*
- * Closed sets: every value here is a design decision, not an option. The UI is
- * dense by default; `sm` is for tables and toolbars.
- */
-
 /** primary: the screen's main action. secondary: other actions. tertiary: quiet ones (row icons, toolbars). */
 export const BUTTON_VARIANTS = ["primary", "secondary", "tertiary"] as const;
 

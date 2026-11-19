@@ -5,7 +5,6 @@ import {
 } from "../../../../tournament/infrastructure/competition-persistence";
 import { User } from "../../../../user/infrastructure/user-persistence";
 import { PickemChoice } from "./pickem.entity";
-import type { NamedPick, Pick } from "../../domain/pickem";
 import type {
   PickFilter,
   PickemReads,
@@ -13,7 +12,7 @@ import type {
   PickemWrites,
 } from "../../application/ports";
 
-const toPick = (row: PickemChoice): Pick => ({
+const toPick = (row: PickemChoice) => ({
   createdAt: new Date(row.createdAt),
   id: row.id,
   match: { id: row.match.id },
@@ -23,13 +22,13 @@ const toPick = (row: PickemChoice): Pick => ({
   user: { id: row.user.id },
 });
 
-const toNamedPick = (row: PickemChoice): NamedPick => ({
+const toNamedPick = (row: PickemChoice) => ({
   ...toPick(row),
   user: { id: row.user.id, userName: row.user.userName },
 });
 
-/** Serializes picks and scoring of one match, so a pick is never read as unscored while it is being scored. */
-const lockMatchPicks = async (tx: EntityManager, matchId: string): Promise<void> => {
+// WARNING: serialize picks and scoring of one match, so a pick is never read as unscored while it is being scored.
+const lockMatchPicks = async (tx: EntityManager, matchId: string) => {
   await tx.execute("select pg_advisory_xact_lock(hashtextextended(?, 0))", [
     `pickem:match:${matchId}`,
   ]);
@@ -43,7 +42,7 @@ interface TournamentPickFilter {
 
 export class MikroPickemStore implements PickemReads, PickemTransaction {
   constructor(private readonly em: EntityManager) {}
-  async list(tournamentId: string, { userId, scoredOnly }: PickFilter = {}): Promise<NamedPick[]> {
+  async list(tournamentId: string, { userId, scoredOnly }: PickFilter = {}) {
     const where: TournamentPickFilter = { match: { tournament: { id: tournamentId } } };
 
     if (userId !== undefined && userId !== "") {
@@ -60,7 +59,7 @@ export class MikroPickemStore implements PickemReads, PickemTransaction {
 
     return rows.map(toNamedPick);
   }
-  async run<T>(work: (scope: PickemWrites) => Promise<T>): Promise<T> {
+  async run<T>(work: (scope: PickemWrites) => Promise<T>) {
     return await this.em.transactional(async (tx) => {
       const scope: PickemWrites = {
         participantExists: async (id) => !!(await tx.findOne(TournamentParticipant, { id })),

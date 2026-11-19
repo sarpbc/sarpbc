@@ -152,8 +152,7 @@ const careerStateSchema = z.object({
   world: worldStateSchema,
 });
 
-/** Legacy saves may omit menu/resumePhase/splitFields — normalize without casting. */
-const normalizeLoadedCareerState = (state: CareerState): CareerState => {
+const normalizeLoadedCareerState = (state: CareerState) => {
   const withDefaults: CareerState = {
     ...state,
     resumePhase: state.resumePhase ?? null,
@@ -169,13 +168,13 @@ const normalizeLoadedCareerState = (state: CareerState): CareerState => {
       ...withDefaults,
       phase: "menu",
       resumePhase: withDefaults.resumePhase ?? withDefaults.phase,
-    };
+    } satisfies CareerState;
   }
 
   return withDefaults;
 };
 
-export const parseCareerStateJson = (raw: string | null): CareerState | null => {
+export const parseCareerStateJson = (raw: string | null) => {
   if (!isNonEmptyString(raw)) {
     return null;
   }
@@ -194,7 +193,7 @@ export const parseCareerStateJson = (raw: string | null): CareerState | null => 
   }
 };
 
-const parseCareerResultJson = (raw: string): CareerResult | null => {
+const parseCareerResultJson = (raw: string) => {
   try {
     const result = careerResultSchema.safeParse(JSON.parse(raw));
 
@@ -206,7 +205,7 @@ const parseCareerResultJson = (raw: string): CareerResult | null => {
 
 const careerResultsSchema = z.record(z.string(), careerResultSchema.nullable().catch(null));
 
-export const parseCareerResultsJson = (raw: string | null): Map<string, CareerResult> => {
+export const parseCareerResultsJson = (raw: string | null) => {
   const results = new Map<string, CareerResult>();
 
   if (!isNonEmptyString(raw)) {
@@ -226,19 +225,19 @@ export const parseCareerResultsJson = (raw: string | null): Map<string, CareerRe
       }
     }
   } catch {
-    return new Map();
+    return new Map<string, CareerResult>();
   }
 
   return results;
 };
 
-export const encodeCareerResultForShare = (result: CareerResult): string =>
+export const encodeCareerResultForShare = (result: CareerResult) =>
   btoa(encodeURIComponent(JSON.stringify(result)))
     .replaceAll("+", "-")
     .replaceAll("/", "_")
     .replace(/[=]+$/u, "");
 
-export const decodeCareerResultFromShare = (encoded: string): CareerResult | null => {
+export const decodeCareerResultFromShare = (encoded: string) => {
   try {
     const padded = encoded.replaceAll("-", "+").replaceAll("_", "/");
     const json = decodeURIComponent(atob(padded));

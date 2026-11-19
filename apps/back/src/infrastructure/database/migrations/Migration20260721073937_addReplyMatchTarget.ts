@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20260721073937_addReplyMatchTarget extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(`alter table "reply" add column "match_id" varchar(255) null;`);
     this.addSql(`alter table "reply" add column "hidden_at" timestamptz null;`);
 
@@ -13,7 +13,7 @@ export class Migration20260721073937_addReplyMatchTarget extends Migration {
     this.addSql(`create index "reply_hidden_at_index" on "reply" ("hidden_at");`);
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`alter table "reply" drop constraint "reply_match_id_foreign";`);
     this.addSql(`drop index "reply_match_id_index";`);
     this.addSql(`drop index "reply_hidden_at_index";`);

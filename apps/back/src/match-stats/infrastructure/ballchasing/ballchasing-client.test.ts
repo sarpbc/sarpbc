@@ -1,9 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
-import { requestUrl } from "../../../../test/fetch-mock";
+import { HttpResponse, http } from "msw";
+import { setupServer } from "msw/node";
+import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { IntegrationError } from "../../../common/domain/errors/integration-error";
 import { BALLCHASING_API_URL, BallchasingClient } from "./ballchasing-client";
 
-// Shapes follow the examples of https://ballchasing.com/doc/api (GET /groups/{id}, GET /replays, GET /groups).
 const listedReplay = (id: string, overrides: { date?: string; date_has_tz?: boolean } = {}) => ({
   blue: {
     goals: 3,
@@ -49,32 +49,54 @@ const listedReplay = (id: string, overrides: { date?: string; date_has_tz?: bool
 
 type Json = string | number | boolean | null | Json[] | { [key: string]: Json };
 
-const json = (
-  body: Record<string, Json>,
-  status = 200,
-  headers: Record<string, string> = {},
-): Response => Response.json(body, { headers, status });
+const json = (body: Record<string, Json>, status = 200, headers: Record<string, string> = {}) =>
+  Response.json(body, { headers, status });
 
-const client = (routes: (url: string) => Response) => {
-  const fetch = vi.fn<typeof globalThis.fetch>(async (input) => routes(requestUrl(input)));
-  let clock = 0;
-
-  const sleep = vi.fn<(ms: number) => Promise<void>>(async (ms) => {
-    clock += ms;
+const useBallchasingServer = () => {
+  const server = setupServer();
+  beforeAll(() => {
+    server.listen({ onUnhandledFrame: "error" });
   });
 
-  const instance = new BallchasingClient("secret-key", {
-    fetch,
-    now: () => clock,
-    sleep,
+  afterEach(() => {
+    server.resetHandlers();
   });
 
-  return { advance: (ms: number) => (clock += ms), fetch, instance, sleep };
+  afterAll(() => {
+    server.close();
+  });
+
+  return (routes: (url: string) => Response) => {
+    const key = "secret-key";
+    const requests: Request[] = [];
+    const sleeps: number[] = [];
+    let clock = 0;
+
+    server.use(
+      http.all(/.*/u, ({ request }) => {
+        requests.push(request.clone());
+
+        return routes(request.url);
+      }),
+    );
+
+    const instance = new BallchasingClient(key, {
+      now: () => clock,
+      sleep: async (ms) => {
+        clock += ms;
+        sleeps.push(ms);
+      },
+    });
+
+    return { advance: (ms: number) => (clock += ms), instance, key, requests, sleeps };
+  };
 };
 
 describe("BallchasingClient.groupReplays", () => {
+  const client = useBallchasingServer();
+
   it("walks nested child groups and every page, with the raw key in Authorization", async () => {
-    const { instance, fetch } = client((url) => {
+    const { instance, key, requests } = client((url) => {
       const parsed = new URL(url);
       const group = parsed.searchParams.get("group");
 
@@ -136,11 +158,11 @@ describe("BallchasingClient.groupReplays", () => {
       playedAtHasTimezone: false,
     });
 
-    for (const [, init] of fetch.mock.calls) {
-      expect(init?.headers).toStrictEqual({ Authorization: "secret-key" });
+    for (const request of requests) {
+      expect(request.headers.get("authorization")).toBe(key);
     }
 
-    expect(new URL(requestUrl(fetch.mock.calls[1][0])).searchParams.get("count")).toBe("200");
+    expect(new URL(requests[1]?.url ?? "").searchParams.get("count")).toBe("200");
   });
 
   it("explains a missing group, a rejected key and an unexpected body", async () => {
@@ -158,33 +180,25 @@ describe("BallchasingClient.groupReplays", () => {
   });
 
   it("refuses to follow a pagination link off the API host", async () => {
-    const { instance, fetch } = client((url) =>
+    const { instance, requests } = client((url) =>
       url.includes("/groups/")
         ? json({})
         : json({ list: [], next: "https://evil.example/api/replays?after=x" }),
     );
 
     await expect(instance.groupReplays("pilot")).rejects.toThrow(IntegrationError);
-    expect(fetch.mock.calls.map(([url]) => requestUrl(url))).not.toContain(
+    expect(requests.map(({ url }) => url)).not.toContain(
       "https://evil.example/api/replays?after=x",
     );
   });
 
   it("reports an unreachable API", async () => {
-    const fetch = vi.fn<typeof globalThis.fetch>(async () => {
-      throw new TypeError("fetch failed");
-    });
-
-    const instance = new BallchasingClient("k", {
-      fetch,
-      sleep: async () => {},
-    });
+    const { instance } = client(() => HttpResponse.error());
 
     await expect(instance.groupReplays("pilot")).rejects.toThrow(/could not be reached/u);
   });
 });
 
-// Excerpt of a live GET /api/replays/{id} response.
 const replayDetail = () => ({
   blue: {
     name: "REBELLION",
@@ -231,8 +245,10 @@ const replayDetail = () => ({
 });
 
 describe("BallchasingClient.replayStats", () => {
+  const client = useBallchasingServer();
+
   it("maps the date, team goals and each player's five stats", async () => {
-    const { instance, fetch } = client(() => json(replayDetail()));
+    const { instance, requests } = client(() => json(replayDetail()));
 
     await expect(instance.replayStats("r1")).resolves.toStrictEqual({
       blueGoals: 2,
@@ -275,7 +291,7 @@ describe("BallchasingClient.replayStats", () => {
       ],
       rocketLeagueId: "RL-r1",
     });
-    expect(requestUrl(fetch.mock.calls[0][0])).toBe(`${BALLCHASING_API_URL}/replays/r1`);
+    expect(requests.map(({ url }) => url)).toStrictEqual([`${BALLCHASING_API_URL}/replays/r1`]);
   });
 
   it("counts a number omitted inside a stats object as zero", async () => {
@@ -321,11 +337,11 @@ describe("BallchasingClient.replayStats", () => {
       { ...detail, orange: { name: detail.orange.name, players: detail.orange.players } },
     ];
 
+    const { instance } = client((url) => json(bodies[Number(url.split("/r").pop())] ?? {}));
+
     await Promise.all(
-      bodies.map(async (body) => {
-        await expect(client(() => json(body)).instance.replayStats("r1")).rejects.toThrow(
-          IntegrationError,
-        );
+      bodies.map(async (_body, index) => {
+        await expect(instance.replayStats(`r${index}`)).rejects.toThrow(IntegrationError);
       }),
     );
   });
@@ -343,22 +359,24 @@ describe("BallchasingClient.replayStats", () => {
   });
 
   it("spaces replay calls 500 ms apart", async () => {
-    const { instance, sleep, advance } = client(() => json(replayDetail()));
+    const { instance, sleeps, advance } = client(() => json(replayDetail()));
 
     await instance.replayStats("a");
     await instance.replayStats("b");
     advance(300);
     await instance.replayStats("c");
 
-    expect(sleep.mock.calls).toStrictEqual([[500], [200]]);
+    expect(sleeps).toStrictEqual([500, 200]);
   });
 });
 
 describe("BallchasingClient rate limiting", () => {
+  const client = useBallchasingServer();
+
   it("honours a positive Retry-After", async () => {
     let calls = 0;
 
-    const { instance, sleep } = client(() => {
+    const { instance, sleeps } = client(() => {
       calls += 1;
 
       return calls === 1
@@ -368,13 +386,13 @@ describe("BallchasingClient rate limiting", () => {
 
     await instance.replayStats("r1");
 
-    expect(sleep.mock.calls).toStrictEqual([[7000]]);
+    expect(sleeps).toStrictEqual([7000]);
   });
 
   it("backs off from one second, doubling, when Retry-After is missing or 0", async () => {
     let calls = 0;
 
-    const { instance, sleep } = client(() => {
+    const { instance, sleeps } = client(() => {
       calls += 1;
 
       if (calls === 1) {
@@ -390,14 +408,14 @@ describe("BallchasingClient rate limiting", () => {
 
     await instance.replayStats("r1");
 
-    expect(sleep.mock.calls).toStrictEqual([[1000], [2000], [4000]]);
+    expect(sleeps).toStrictEqual([1000, 2000, 4000]);
   });
 
   it("fails clearly once the retries are exhausted", async () => {
-    const { instance, fetch, sleep } = client(() => json({ error: "rate limited" }, 429));
+    const { instance, requests, sleeps } = client(() => json({ error: "rate limited" }, 429));
 
     await expect(instance.replayStats("r1")).rejects.toThrow(/rate limit reached/u);
-    expect(fetch).toHaveBeenCalledTimes(6);
-    expect(sleep.mock.calls).toStrictEqual([[1000], [2000], [4000], [8000], [16_000]]);
+    expect(requests).toHaveLength(6);
+    expect(sleeps).toStrictEqual([1000, 2000, 4000, 8000, 16_000]);
   });
 });

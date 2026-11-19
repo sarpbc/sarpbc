@@ -94,10 +94,10 @@ const assertNever = (value: never): never => {
   throw new Error(`Unexpected value: ${String(value)}`);
 };
 
-export const createInitialCareerState = (): CareerState => {
+export const createInitialCareerState = () => {
   const id = crypto.randomUUID();
 
-  return {
+  const state: CareerState = {
     background: null,
     country: null,
     currentEventId: null,
@@ -129,9 +129,11 @@ export const createInitialCareerState = (): CareerState => {
     usedEventIds: [],
     world: createCareerWorld(id),
   };
+
+  return state;
 };
 
-const currentTeamName = (state: CareerState): string =>
+const currentTeamName = (state: CareerState) =>
   getWorldTeamById(state.currentTeamId)?.name ?? state.currentTeamId;
 
 const fieldPlayer = (state: CareerState, skip: { skipRegionals: number; skipMajor: boolean }) => {
@@ -149,7 +151,7 @@ const fieldPlayer = (state: CareerState, skip: { skipRegionals: number; skipMajo
   };
 };
 
-const pickNextEvent = (state: CareerState): CareerState => {
+const pickNextEvent = (state: CareerState) => {
   const pool = state.currentStage === "worlds" ? "worlds" : "split";
 
   const seed = hashString(
@@ -164,10 +166,10 @@ const pickNextEvent = (state: CareerState): CareerState => {
     lastEventOutcome: null,
     phase: "event",
     usedEventIds: [...state.usedEventIds, event.id],
-  };
+  } satisfies CareerState;
 };
 
-const startStageEvents = (state: CareerState): CareerState => {
+const startStageEvents = (state: CareerState) => {
   const next = {
     ...state,
     eventsQueuedForStage: getEventsBeforeStage(state.id, state.currentSeason, state.currentStage),
@@ -182,7 +184,7 @@ const startStageEvents = (state: CareerState): CareerState => {
 const runStageSimulation = (
   state: CareerState,
   skip: { skipRegionals: number; skipMajor: boolean },
-): CareerState => {
+) => {
   const stage = state.currentStage;
   let next = { ...state };
 
@@ -256,13 +258,10 @@ const runStageSimulation = (
     ...next,
     phase: "stage_result",
     world: tickNpcRatings(next.world, next.id, next.currentSeason, stage),
-  };
+  } satisfies CareerState;
 };
 
-const pendingOfferTeamIds = (
-  transferTeamIds: string[],
-  lastChanceTeamId: string | null,
-): string[] => {
+const pendingOfferTeamIds = (transferTeamIds: string[], lastChanceTeamId: string | null) => {
   if (transferTeamIds.length > 0) {
     return transferTeamIds;
   }
@@ -270,7 +269,7 @@ const pendingOfferTeamIds = (
   return isNonEmptyString(lastChanceTeamId) ? [lastChanceTeamId] : [];
 };
 
-const endSeason = (state: CareerState): CareerState => {
+const endSeason = (state: CareerState) => {
   const worlds = state.currentWorlds;
 
   const record: CareerSeasonRecord = {
@@ -314,10 +313,10 @@ const endSeason = (state: CareerState): CareerState => {
       ...state.world,
       rankSnapshot: snapshotWorldRanking(rankings),
     },
-  };
+  } satisfies CareerState;
 };
 
-const goToWorldsOrEndSeason = (state: CareerState): CareerState => {
+const goToWorldsOrEndSeason = (state: CareerState) => {
   const ranking = computeStateRankings(state);
   const rank = getTeamRank(ranking, state.currentTeamId);
 
@@ -334,24 +333,25 @@ const goToWorldsOrEndSeason = (state: CareerState): CareerState => {
   return endSeason(state);
 };
 
-const advanceToNextSeason = (state: CareerState): CareerState => ({
-  ...state,
-  currentSeason: state.currentSeason + 1,
-  currentSplits: [],
-  currentStage: "split1",
-  currentWorlds: null,
-  isLastChanceOffer: false,
-  lastEventOutcome: null,
-  offseasonDestinyPending: false,
-  pendingOfferTeamIds: [],
-  phase: "season_intro",
-  renewalOffered: false,
-  resumePhase: "season_intro",
-  stats: applyStatDelta(state.stats, getAgeDecline(state.currentSeason + 1)),
-  world: tickNpcRatings(state.world, state.id, state.currentSeason + 1, "season"),
-});
+const advanceToNextSeason = (state: CareerState) =>
+  ({
+    ...state,
+    currentSeason: state.currentSeason + 1,
+    currentSplits: [],
+    currentStage: "split1",
+    currentWorlds: null,
+    isLastChanceOffer: false,
+    lastEventOutcome: null,
+    offseasonDestinyPending: false,
+    pendingOfferTeamIds: [],
+    phase: "season_intro",
+    renewalOffered: false,
+    resumePhase: "season_intro",
+    stats: applyStatDelta(state.stats, getAgeDecline(state.currentSeason + 1)),
+    world: tickNpcRatings(state.world, state.id, state.currentSeason + 1, "season"),
+  }) satisfies CareerState;
 
-const finishCareer = (state: CareerState, destiny: CareerDestiny): CareerReduceResult => {
+const finishCareer = (state: CareerState, destiny: CareerDestiny) => {
   if (!state.region || !state.country || !state.role || !state.background) {
     throw new Error("Cannot finish career before onboarding is complete");
   }
@@ -389,16 +389,16 @@ const finishCareer = (state: CareerState, destiny: CareerDestiny): CareerReduceR
       result,
       resumePhase: null,
     },
-  };
+  } satisfies CareerReduceResult;
 };
 
-const unchanged = (state: CareerState): CareerReduceResult => ({ finishedResult: null, state });
+const reduced = (state: CareerState) => ({ finishedResult: null, state });
 
-const completeOnboarding = (state: CareerState): CareerReduceResult => {
+const completeOnboarding = (state: CareerState) => {
   const { region, country, role, background } = state;
 
   if (!region || !country || !role || !background) {
-    return unchanged(state);
+    return reduced(state);
   }
 
   const stats = getStartingStats(background, role);
@@ -412,44 +412,35 @@ const completeOnboarding = (state: CareerState): CareerReduceResult => {
     hashString(`${state.id}:start`),
   );
 
-  return {
-    finishedResult: null,
-    state: {
-      ...state,
-      currentTeamId: teamId,
-      onboardingStep: "intro",
-      phase: "season_intro",
-      resumePhase: "season_intro",
-      stats,
-      world,
-    },
-  };
+  return reduced({
+    ...state,
+    currentTeamId: teamId,
+    onboardingStep: "intro",
+    phase: "season_intro",
+    resumePhase: "season_intro",
+    stats,
+    world,
+  });
 };
 
-const continueFromMenu = (state: CareerState): CareerReduceResult => {
+const continueFromMenu = (state: CareerState) => {
   if (state.resumePhase && state.resumePhase !== "menu") {
-    return {
-      finishedResult: null,
-      state: { ...state, phase: state.resumePhase, resumePhase: null },
-    };
+    return reduced({ ...state, phase: state.resumePhase, resumePhase: null });
   }
 
   if (state.phase === "onboarding") {
-    return { finishedResult: null, state: { ...state, resumePhase: null } };
+    return reduced({ ...state, resumePhase: null });
   }
 
-  return unchanged(state);
+  return reduced(state);
 };
 
-const reduceOnboarding = (state: CareerState, action: OnboardingAction): CareerReduceResult => {
+const reduceOnboarding = (state: CareerState, action: OnboardingAction) => {
   switch (action.type) {
     case "START_ONBOARDING": {
       const fresh = createInitialCareerState();
 
-      return {
-        finishedResult: null,
-        state: { ...fresh, phase: "onboarding", resumePhase: null },
-      };
+      return reduced({ ...fresh, phase: "onboarding", resumePhase: null });
     }
 
     case "CONTINUE_FROM_MENU": {
@@ -457,51 +448,39 @@ const reduceOnboarding = (state: CareerState, action: OnboardingAction): CareerR
     }
 
     case "RETURN_TO_MENU": {
-      return {
-        finishedResult: null,
-        state: {
-          ...createInitialCareerState(),
-          phase: "menu",
-          resumePhase: null,
-        },
-      };
+      return reduced({
+        ...createInitialCareerState(),
+        phase: "menu",
+        resumePhase: null,
+      });
     }
 
     case "SET_ONBOARDING_STEP": {
-      return {
-        finishedResult: null,
-        state: { ...state, onboardingStep: action.step },
-      };
+      return reduced({ ...state, onboardingStep: action.step });
     }
 
     case "SET_PLAYER_NAME": {
-      return {
-        finishedResult: null,
-        state: { ...state, playerName: action.name.trim() },
-      };
+      return reduced({ ...state, playerName: action.name.trim() });
     }
 
     case "SET_REGION": {
-      return {
-        finishedResult: null,
-        state: {
-          ...state,
-          country: state.region === action.region ? state.country : null,
-          region: action.region,
-        },
-      };
+      return reduced({
+        ...state,
+        country: state.region === action.region ? state.country : null,
+        region: action.region,
+      });
     }
 
     case "SET_COUNTRY": {
-      return { finishedResult: null, state: { ...state, country: action.country } };
+      return reduced({ ...state, country: action.country });
     }
 
     case "SET_ROLE": {
-      return { finishedResult: null, state: { ...state, role: action.role } };
+      return reduced({ ...state, role: action.role });
     }
 
     case "SET_BACKGROUND": {
-      return { finishedResult: null, state: { ...state, background: action.background } };
+      return reduced({ ...state, background: action.background });
     }
 
     case "COMPLETE_ONBOARDING": {
@@ -514,18 +493,18 @@ const reduceOnboarding = (state: CareerState, action: OnboardingAction): CareerR
   }
 };
 
-const resolveEventChoice = (state: CareerState, choiceId: string): CareerReduceResult => {
+const resolveEventChoice = (state: CareerState, choiceId: string) => {
   const eventId = state.currentEventId;
 
   if (!isNonEmptyString(eventId)) {
-    return unchanged(state);
+    return reduced(state);
   }
 
   const event = getEventById(eventId);
   const choice = event?.choices.find((entry) => entry.id === choiceId);
 
   if (!choice) {
-    return unchanged(state);
+    return reduced(state);
   }
 
   const before = state.stats;
@@ -554,19 +533,16 @@ const resolveEventChoice = (state: CareerState, choiceId: string): CareerReduceR
     lastEventOutcome.failed = true;
   }
 
-  return {
-    finishedResult: null,
-    state: {
-      ...state,
-      destinyLeanings: applyDestinyLeanings(state.destinyLeanings, destiny),
-      lastEventOutcome,
-      phase: "event_result",
-      stats: nextStats,
-    },
-  };
+  return reduced({
+    ...state,
+    destinyLeanings: applyDestinyLeanings(state.destinyLeanings, destiny),
+    lastEventOutcome,
+    phase: "event_result",
+    stats: nextStats,
+  });
 };
 
-const continueAfterEventOutcome = (state: CareerState): CareerReduceResult => {
+const continueAfterEventOutcome = (state: CareerState) => {
   const outcome = state.lastEventOutcome;
   const event = outcome ? getEventById(outcome.eventId) : undefined;
   const choice = event?.choices.find((entry) => entry.id === outcome?.choiceId);
@@ -590,26 +566,23 @@ const continueAfterEventOutcome = (state: CareerState): CareerReduceResult => {
     next = { ...next, pendingSkipMajor: false, pendingSkipRegionals: 0 };
   }
 
-  return { finishedResult: null, state: next };
+  return reduced(next);
 };
 
-const continueAfterStageResult = (state: CareerState): CareerReduceResult => {
+const continueAfterStageResult = (state: CareerState) => {
   const stage = state.currentStage;
 
   switch (stage) {
     case "split1": {
-      return {
-        finishedResult: null,
-        state: startStageEvents({ ...state, currentStage: "split2" }),
-      };
+      return reduced(startStageEvents({ ...state, currentStage: "split2" }));
     }
 
     case "split2": {
-      return { finishedResult: null, state: goToWorldsOrEndSeason(state) };
+      return reduced(goToWorldsOrEndSeason(state));
     }
 
     case "worlds": {
-      return { finishedResult: null, state: endSeason(state) };
+      return reduced(endSeason(state));
     }
 
     default: {
@@ -618,9 +591,9 @@ const continueAfterStageResult = (state: CareerState): CareerReduceResult => {
   }
 };
 
-const resolveOffseasonDestiny = (state: CareerState, id: string): CareerReduceResult => {
+const resolveOffseasonDestiny = (state: CareerState, id: string) => {
   if (!isOffseasonDestinyChoiceId(id)) {
-    return unchanged(state);
+    return reduced(state);
   }
 
   const next = {
@@ -636,7 +609,7 @@ const resolveOffseasonDestiny = (state: CareerState, id: string): CareerReduceRe
     }
 
     case "coach": {
-      return { finishedResult: null, state: next };
+      return reduced(next);
     }
 
     default: {
@@ -645,9 +618,9 @@ const resolveOffseasonDestiny = (state: CareerState, id: string): CareerReduceRe
   }
 };
 
-const acceptOffer = (state: CareerState, teamId: string): CareerReduceResult => {
+const acceptOffer = (state: CareerState, teamId: string) => {
   if (!state.pendingOfferTeamIds.includes(teamId)) {
-    return unchanged(state);
+    return reduced(state);
   }
 
   const world = moveUserToTeam(
@@ -658,24 +631,20 @@ const acceptOffer = (state: CareerState, teamId: string): CareerReduceResult => 
     hashString(`${state.id}:transfer:${state.currentSeason}:${teamId}`),
   );
 
-  return {
-    finishedResult: null,
-    state: advanceToNextSeason({ ...state, currentTeamId: teamId, world }),
-  };
+  return reduced(advanceToNextSeason({ ...state, currentTeamId: teamId, world }));
 };
 
-const reduceSeason = (state: CareerState, action: SeasonAction): CareerReduceResult => {
+const reduceSeason = (state: CareerState, action: SeasonAction) => {
   switch (action.type) {
     case "START_SEASON": {
-      return {
-        finishedResult: null,
-        state: startStageEvents({
+      return reduced(
+        startStageEvents({
           ...state,
           currentSplits: [],
           currentStage: "split1",
           currentWorlds: null,
         }),
-      };
+      );
     }
 
     case "RESOLVE_EVENT_CHOICE": {
@@ -699,9 +668,7 @@ const reduceSeason = (state: CareerState, action: SeasonAction): CareerReduceRes
     }
 
     case "STAY_WITH_TEAM": {
-      return state.renewalOffered
-        ? { finishedResult: null, state: advanceToNextSeason(state) }
-        : unchanged(state);
+      return state.renewalOffered ? reduced(advanceToNextSeason(state)) : reduced(state);
     }
 
     case "RETIRE_CAREER": {
@@ -714,7 +681,7 @@ const reduceSeason = (state: CareerState, action: SeasonAction): CareerReduceRes
   }
 };
 
-export const reduceCareerState = (state: CareerState, action: CareerAction): CareerReduceResult => {
+export const reduceCareerState = (state: CareerState, action: CareerAction) => {
   switch (action.type) {
     case "START_ONBOARDING":
     case "CONTINUE_FROM_MENU":
@@ -746,7 +713,7 @@ export const reduceCareerState = (state: CareerState, action: CareerAction): Car
   }
 };
 
-export const canContinueCareer = (state: CareerState): boolean => {
+export const canContinueCareer = (state: CareerState) => {
   if (state.resumePhase && state.resumePhase !== "menu" && state.resumePhase !== "career_end") {
     return true;
   }
@@ -758,7 +725,7 @@ export const canContinueCareer = (state: CareerState): boolean => {
   return state.onboardingStep !== "intro" || state.playerName.length > 0 || state.region !== null;
 };
 
-const isPlayingPhase = (phase: CareerPhase): boolean =>
+const isPlayingPhase = (phase: CareerPhase) =>
   phase !== "menu" && phase !== "onboarding" && phase !== "career_end";
 
-export const showCareerStats = (phase: CareerPhase): boolean => isPlayingPhase(phase);
+export const showCareerStats = (phase: CareerPhase) => isPlayingPhase(phase);

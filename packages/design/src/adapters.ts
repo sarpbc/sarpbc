@@ -16,7 +16,7 @@ export const DESIGN_MESSAGES = {
 
 export type DesignMessage = keyof typeof DESIGN_MESSAGES;
 
-/*
+/**
  * The library renders no icon set, knows no router and ships no translations.
  * Each app provides the components that do (Nuxt's <Icon> and <NuxtLink>) and
  * its i18n; the catalog provides stand-ins. Icon components receive `name`;
@@ -46,7 +46,7 @@ export const AnchorLink = defineComponent({
 
 export const DESIGN_ADAPTERS: InjectionKey<DesignAdapters> = Symbol("sarpbc-design-adapters");
 
-export const useDesignAdapters = (): DesignAdapters =>
+export const useDesignAdapters = () =>
   inject(DESIGN_ADAPTERS, {
     icon: PlainIcon,
     link: AnchorLink,

@@ -11,7 +11,7 @@ import { isRedistributable } from "../../../common/domain/data-source";
 import { isMatchBlockLive } from "../../application/match/match-blocks";
 import { mapParticipantRef } from "./participant-ref.mapper";
 
-export const mapMatchListItem = (match: Match): MatchListItem => {
+export const mapMatchListItem = (match: Match) => {
   const { participants } = match;
   const { results } = match;
   const { tournament } = match;
@@ -47,76 +47,61 @@ export const mapMatchListItem = (match: Match): MatchListItem => {
       name: tournament.name,
       slug: tournament.slug,
     },
-  };
+  } satisfies MatchListItem;
 };
 
-const matchBlockState = (match: Match, now: Date): MatchBlockState => {
+const matchBlockState = (match: Match, now: Date) => {
   if (isMatchBlockLive(match, now)) {
-    return "live";
+    return "live" satisfies MatchBlockState;
   }
 
-  return isMatchFinished(match) || isMatchLive(match, now) ? "finished" : "upcoming";
+  return isMatchFinished(match) || isMatchLive(match, now)
+    ? "finished"
+    : ("upcoming" satisfies MatchBlockState);
 };
 
-export const mapMatchBlockItem = (
-  match: Match,
-  now: Date,
-  commentCount: number,
-): MatchBlockItem => ({
-  ...mapMatchListItem(match),
-  commentCount,
-  startgg: !isRedistributable(match.source) || !isRedistributable(match.tournament.source),
-  state: matchBlockState(match, now),
-});
+export const mapMatchBlockItem = (match: Match, now: Date, commentCount: number) =>
+  ({
+    ...mapMatchListItem(match),
+    commentCount,
+    startgg: !isRedistributable(match.source) || !isRedistributable(match.tournament.source),
+    state: matchBlockState(match, now),
+  }) satisfies MatchBlockItem;
 
-export const mapProfileMatchListItem = (match: Match): ProfileMatchListItem => ({
-  ...mapMatchListItem(match),
-  endAt: match.endAt,
-  status: match.status,
-});
+export const mapProfileMatchListItem = (match: Match) =>
+  ({
+    ...mapMatchListItem(match),
+    endAt: match.endAt,
+    status: match.status,
+  }) satisfies ProfileMatchListItem;
 
-export const mapTournamentMatchListItem = (match: Match): TournamentMatchListItem => ({
-  beginAt: match.beginAt,
-  endAt: match.endAt,
-  forfeitedBy: match.forfeitedBy?.id ?? null,
-  id: match.id,
-  numberOfGames: match.numberOfGames,
-  participants: match.participants.map((participant) =>
-    mapParticipantRef(participant, (team) => ({
-      darkModeImageUrl: team.darkModeImageUrl,
-      id: team.id,
-      imageUrl: team.imageUrl,
-      logoDarkUrl: team.logoDarkUrl,
-      logoLightUrl: team.logoLightUrl,
-      name: team.name,
+export const mapTournamentMatchListItem = (match: Match) =>
+  ({
+    beginAt: match.beginAt,
+    endAt: match.endAt,
+    forfeitedBy: match.forfeitedBy?.id ?? null,
+    id: match.id,
+    numberOfGames: match.numberOfGames,
+    participants: match.participants.map((participant) =>
+      mapParticipantRef(participant, (team) => ({
+        darkModeImageUrl: team.darkModeImageUrl,
+        id: team.id,
+        imageUrl: team.imageUrl,
+        logoDarkUrl: team.logoDarkUrl,
+        logoLightUrl: team.logoLightUrl,
+        name: team.name,
+      })),
+    ),
+    publicId: match.publicId,
+    results: match.results.map((result) => ({
+      participant: result.participant.id,
+      score: result.score,
     })),
-  ),
-  publicId: match.publicId,
-  results: match.results.map((result) => ({
-    participant: result.participant.id,
-    score: result.score,
-  })),
-  slug: matchPublicSlug(match),
-  status: match.status,
-});
+    slug: matchPublicSlug(match),
+    status: match.status,
+  }) satisfies TournamentMatchListItem;
 
-export const withPublicSlug = (
-  match: Match,
-): Omit<
-  Match,
-  | "hasEnded"
-  | "isDecided"
-  | "stampEnd"
-  | "inheritedStreams"
-  | "watchStreams"
-  | "declareForfeit"
-  | "clearForfeit"
-  | "dropBrokenForfeit"
-  | "forfeitedBy"
-> & {
-  slug: string;
-  forfeitedBy: string | null;
-} => ({
+export const withPublicSlug = (match: Match) => ({
   beginAt: match.beginAt,
   createdAt: match.createdAt,
   endAt: match.endAt,

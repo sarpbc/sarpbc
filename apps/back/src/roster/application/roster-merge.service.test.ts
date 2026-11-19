@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { Mock } from "vitest";
+import type { MockInstance } from "vitest";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { Player } from "../domain/player";
@@ -15,12 +15,11 @@ describe(RosterMergeService, () => {
   let stores: RosterMergeWriteScope;
   let service: RosterMergeService;
   let shared: string[];
-  let savePlayer: Mock<RosterMergeWriteScope["players"]["save"]>;
-  let deletePlayer: Mock<RosterMergeWriteScope["players"]["delete"]>;
-  let saveTeam: Mock<RosterMergeWriteScope["teams"]["save"]>;
-  let deleteTeam: Mock<RosterMergeWriteScope["teams"]["delete"]>;
-  let movePlayer: Mock<RosterMergeWriteScope["references"]["movePlayer"]>;
-  let moveTeam: Mock<RosterMergeWriteScope["references"]["moveTeam"]>;
+  let savePlayer: MockInstance<RosterMergeWriteScope["players"]["save"]>;
+  let deletePlayer: MockInstance<RosterMergeWriteScope["players"]["delete"]>;
+  let deleteTeam: MockInstance<RosterMergeWriteScope["teams"]["delete"]>;
+  let movePlayer: MockInstance<RosterMergeWriteScope["references"]["movePlayer"]>;
+  let moveTeam: MockInstance<RosterMergeWriteScope["references"]["moveTeam"]>;
 
   beforeEach(() => {
     const vitality = Object.assign(new Team(), { id: "vitality", name: "Vitality" });
@@ -50,34 +49,33 @@ describe(RosterMergeService, () => {
       ].map((team) => [team.id, team]),
     );
     shared = [];
-    savePlayer = vi.fn<RosterMergeWriteScope["players"]["save"]>(async () => {});
-    deletePlayer = vi.fn<RosterMergeWriteScope["players"]["delete"]>();
-    saveTeam = vi.fn<RosterMergeWriteScope["teams"]["save"]>(async () => {});
-    deleteTeam = vi.fn<RosterMergeWriteScope["teams"]["delete"]>();
-    movePlayer = vi.fn<RosterMergeWriteScope["references"]["movePlayer"]>(async () => {});
-    moveTeam = vi.fn<RosterMergeWriteScope["references"]["moveTeam"]>(async () => {});
     stores = {
       contracts: unusedContractWriter,
       photos: unusedPhotoWriter,
       players: {
-        delete: deletePlayer,
+        delete: async () => {},
         findById: async (id) => players.get(id) ?? null,
         findBySlug: async () => null,
-        save: savePlayer,
+        save: async () => {},
       },
       references: {
-        movePlayer,
-        moveTeam,
+        movePlayer: async () => {},
+        moveTeam: async () => {},
         sharedTournamentIds: async () => shared,
       },
       teams: {
-        delete: deleteTeam,
+        delete: async () => {},
         findById: async (id) => teams.get(id) ?? null,
         findBySlug: async () => null,
         redirectCount: async () => 0,
-        save: saveTeam,
+        save: async () => {},
       },
     };
+    savePlayer = vi.spyOn(stores.players, "save");
+    deletePlayer = vi.spyOn(stores.players, "delete");
+    deleteTeam = vi.spyOn(stores.teams, "delete");
+    movePlayer = vi.spyOn(stores.references, "movePlayer");
+    moveTeam = vi.spyOn(stores.references, "moveTeam");
     service = new RosterMergeService({ run: async (work) => await work(stores) });
   });
 

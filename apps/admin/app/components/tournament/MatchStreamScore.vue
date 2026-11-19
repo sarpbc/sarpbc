@@ -46,7 +46,7 @@ const orangeId = computed(() =>
     : undefined,
 );
 
-const sideId = (side: StreamScoreSide): string | undefined => {
+const sideId = (side: StreamScoreSide) => {
   switch (side) {
     case "blue": {
       return blueId.value;
@@ -64,7 +64,7 @@ const sideId = (side: StreamScoreSide): string | undefined => {
   }
 };
 
-const sideName = (side: StreamScoreSide): string => {
+const sideName = (side: StreamScoreSide) => {
   const id = sideId(side);
 
   return (
@@ -100,7 +100,7 @@ const results = computed(() => {
 
 const canConfirm = computed(() => results.value !== null && blockers.value.length === 0);
 
-const formatOffset = (seconds: number): string => {
+const formatOffset = (seconds: number) => {
   const hours = Math.floor(seconds / 3600);
   const minutes = Math.floor((seconds % 3600) / 60);
   const rest = String(Math.floor(seconds % 60)).padStart(2, "0");

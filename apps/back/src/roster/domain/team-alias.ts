@@ -35,17 +35,17 @@ const ERRORS = {
   "to-not-after-from": "The alias end date must come after its start date.",
 } satisfies Record<TeamAliasError, string>;
 
-export const requireTeamAliasInput = (input: TeamAliasInput): TeamAliasInput => {
+export const requireTeamAliasInput = (input: TeamAliasInput) => {
   const parsed = parseTeamAlias(input);
 
   if (!parsed.ok) {
     throw new InvalidInputError(ERRORS[parsed.error]);
   }
 
-  return parsed.alias;
+  return parsed.alias satisfies TeamAliasInput;
 };
 
-export const assertTeamAliasFits = (alias: TeamAlias, team: Team): void => {
+export const assertTeamAliasFits = (alias: TeamAlias, team: Team) => {
   const overlap = team.aliases.find(
     (other) => other.id !== alias.id && teamAliasesOverlap(alias, other),
   );
@@ -63,7 +63,7 @@ export const assertTeamAliasFits = (alias: TeamAlias, team: Team): void => {
   }
 };
 
-export const teamAt = (team: Team, at: Date | null): Team => {
+export const teamAt = (team: Team, at: Date | null) => {
   if (!at || team.aliases.length === 0) {
     return team;
   }

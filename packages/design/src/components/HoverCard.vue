@@ -10,8 +10,7 @@ const { align = "center", side = "bottom" } = defineProps<{
   side?: OverlaySide;
 }>();
 
-/* Hover never happens on touch screens, so a tap toggles the preview instead. */
-const toggleOnTouch = (event: PointerEvent): void => {
+const toggleOnTouch = (event: PointerEvent) => {
   if (event.pointerType === "touch") {
     open.value = !open.value;
   }

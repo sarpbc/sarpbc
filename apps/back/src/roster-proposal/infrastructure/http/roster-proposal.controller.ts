@@ -1,3 +1,4 @@
+import type { RosterProposal as RosterProposalResponse } from "@sarpbc/types";
 import {
   Controller,
   Get,
@@ -9,7 +10,6 @@ import {
   Query,
   UseGuards,
 } from "@nestjs/common";
-import type { RosterProposal as RosterProposalResponse } from "@sarpbc/types";
 import { ROSTER_PROPOSAL_PERMISSIONS } from "@sarpbc/utils";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
@@ -20,17 +20,18 @@ import type { RosterProposal } from "../../domain/roster-proposal";
 import { ListRosterProposalsQueryDto } from "./dto/list-roster-proposals-query.dto";
 import type { ListRosterProposalsQueryInput } from "./dto/list-roster-proposals-query.dto";
 
-const mapProposal = (proposal: RosterProposal): RosterProposalResponse => ({
-  change: proposal.change,
-  createdAt: proposal.createdAt.toISOString(),
-  entityId: proposal.entityId,
-  id: proposal.id,
-  proposedById: proposal.proposedById,
-  reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
-  reviewedById: proposal.reviewedById,
-  sourceUrl: proposal.sourceUrl,
-  status: proposal.status,
-});
+const mapProposal = (proposal: RosterProposal) =>
+  ({
+    change: proposal.change,
+    createdAt: proposal.createdAt.toISOString(),
+    entityId: proposal.entityId,
+    id: proposal.id,
+    proposedById: proposal.proposedById,
+    reviewedAt: proposal.reviewedAt?.toISOString() ?? null,
+    reviewedById: proposal.reviewedById,
+    sourceUrl: proposal.sourceUrl,
+    status: proposal.status,
+  }) satisfies RosterProposalResponse;
 
 @Controller("roster-proposals")
 export class RosterProposalController {

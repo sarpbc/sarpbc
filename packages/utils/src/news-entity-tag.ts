@@ -19,7 +19,7 @@ const ENTITY_TAG_SOURCE = String.raw`:(player|team)\{([^}]*)\}`;
 const NEWS_ENTITY_TAG_PATTERN = new RegExp(`^${ENTITY_TAG_SOURCE}`, "u");
 const NEWS_ENTITY_TAG_GLOBAL_PATTERN = new RegExp(ENTITY_TAG_SOURCE, "gu");
 
-const parseAttrs = (rawAttrs: string): NewsEntityTagAttrs => {
+const parseAttrs = (rawAttrs: string) => {
   const attrs: NewsEntityTagAttrs = {};
 
   for (const { name, value } of parseNewsTagAttrs(rawAttrs)) {
@@ -33,7 +33,7 @@ const parseAttrs = (rawAttrs: string): NewsEntityTagAttrs => {
   return attrs;
 };
 
-export const parseNewsEntityTag = (raw: string): NewsEntityTag | null => {
+export const parseNewsEntityTag = (raw: string) => {
   const match = raw.match(NEWS_ENTITY_TAG_PATTERN);
 
   if (!match) {
@@ -65,15 +65,15 @@ export const serializeNewsEntityTag = (input: {
   kind: NewsEntityTagKind;
   slug: string;
   label: string;
-}): string => {
+}) => {
   const slug = escapeNewsTagAttrValue(input.slug.trim());
   const label = escapeNewsTagAttrValue(input.label.trim());
 
   return `:${input.kind}{slug="${slug}" label="${label}"}`;
 };
 
-export const newsEntityTagStart = (content: string, kind: NewsEntityTagKind): number =>
+export const newsEntityTagStart = (content: string, kind: NewsEntityTagKind) =>
   content.indexOf(`:${kind}{`);
 
-export const replaceNewsEntityTagsWithLabels = (content: string): string =>
+export const replaceNewsEntityTagsWithLabels = (content: string) =>
   content.replaceAll(NEWS_ENTITY_TAG_GLOBAL_PATTERN, (raw) => parseNewsEntityTag(raw)?.label ?? "");

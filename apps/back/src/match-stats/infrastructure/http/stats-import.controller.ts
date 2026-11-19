@@ -1,3 +1,4 @@
+import type { StatsImport as StatsImportResponse } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -8,7 +9,6 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import type { StatsImport as StatsImportResponse } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -17,12 +17,13 @@ import type { StatsImport } from "../../domain/stats-import";
 import { RequestStatsImportDto } from "./dto/request-stats-import.dto";
 import type { RequestStatsImportInput } from "./dto/request-stats-import.dto";
 
-const present = (statsImport: StatsImport): StatsImportResponse => ({
-  ...statsImport,
-  createdAt: statsImport.createdAt.toISOString(),
-  finishedAt: statsImport.finishedAt?.toISOString() ?? null,
-  startedAt: statsImport.startedAt?.toISOString() ?? null,
-});
+const present = (statsImport: StatsImport) =>
+  ({
+    ...statsImport,
+    createdAt: statsImport.createdAt.toISOString(),
+    finishedAt: statsImport.finishedAt?.toISOString() ?? null,
+    startedAt: statsImport.startedAt?.toISOString() ?? null,
+  }) satisfies StatsImportResponse;
 
 @Controller("tournaments/:id/stats-imports")
 @UseGuards(AuthGuard, PermissionGuard)

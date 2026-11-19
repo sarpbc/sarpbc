@@ -2,7 +2,7 @@ import type { User as UserResponse, UserListItem } from "@sarpbc/types";
 import type { User } from "../../domain/user";
 import { isStaffRole, permissionsForRole } from "../../domain/staff-access";
 
-export const toUserResponse = (user: User): UserResponse => {
+export const toUserResponse = (user: User) => {
   const dto: UserResponse = {
     avatarUrl: user.avatarUrl ?? undefined,
     email: user.email,
@@ -15,14 +15,15 @@ export const toUserResponse = (user: User): UserResponse => {
     dto.permissions = [...permissionsForRole(user.role)];
   }
 
-  return dto;
+  return dto satisfies UserResponse;
 };
 
-export const toUserListItem = (user: User): UserListItem => ({
-  avatarUrl: user.avatarUrl,
-  createdAt: user.createdAt.toISOString(),
-  email: user.email,
-  id: user.id,
-  role: isStaffRole(user.role) ? user.role : null,
-  userName: user.userName,
-});
+export const toUserListItem = (user: User) =>
+  ({
+    avatarUrl: user.avatarUrl,
+    createdAt: user.createdAt.toISOString(),
+    email: user.email,
+    id: user.id,
+    role: isStaffRole(user.role) ? user.role : null,
+    userName: user.userName,
+  }) satisfies UserListItem;

@@ -6,7 +6,7 @@ import type { EntityRef } from "../../domain/entity-ref";
 
 @Injectable()
 export class EntityRefPipe implements PipeTransform<string, EntityRef> {
-  transform(value: string): EntityRef {
+  transform(value: string) {
     const ref = parseEntityRef(value);
 
     if (!ref) {

@@ -17,7 +17,7 @@ export class TournamentRosterReferences
 {
   constructor(private readonly em: EntityManager) {}
 
-  async movePlayer(from: string, to: string): Promise<void> {
+  async movePlayer(from: string, to: string) {
     const { em } = this;
 
     const clashes = await em.count(TournamentParticipant, {
@@ -59,12 +59,12 @@ export class TournamentRosterReferences
     }
   }
 
-  async moveTeam(from: string, to: string): Promise<void> {
+  async moveTeam(from: string, to: string) {
     await this.em.nativeUpdate(TournamentParticipant, { team: from }, { team: to });
     await this.foldPrizes(from, to);
   }
 
-  async sharedTournamentIds(teamId: string, otherTeamId: string): Promise<string[]> {
+  async sharedTournamentIds(teamId: string, otherTeamId: string) {
     const participants = await this.em.find(
       TournamentParticipant,
       { team: teamId, tournament: { participants: { team: otherTeamId } } },
@@ -84,7 +84,7 @@ export class TournamentRosterReferences
     return { matches, participations, prizes };
   }
 
-  private async foldPrizes(from: string, to: string): Promise<void> {
+  private async foldPrizes(from: string, to: string) {
     const { em } = this;
 
     const prizes = await em.find(

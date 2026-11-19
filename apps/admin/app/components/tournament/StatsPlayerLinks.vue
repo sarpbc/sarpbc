@@ -5,7 +5,6 @@ import { getApiErrorMessage } from "@sarpbc/utils";
 
 const { tournamentId, refreshKey } = defineProps<{
   tournamentId: string;
-  /** Changes when games are imported, attached or removed, which can add or link rows. */
   refreshKey: string;
 }>();
 
@@ -30,14 +29,14 @@ const selected = ref<Record<string, string | undefined>>({});
 const editing = ref<string | null>(null);
 const savingKey = ref<string | null>(null);
 
-const keyOf = (player: StatsPlayerAccount): string => `${player.platform}:${player.platformId}`;
+const keyOf = (player: StatsPlayerAccount) => `${player.platform}:${player.platformId}`;
 
-const rosterGroup = (roster: StatsRoster): SelectGroup<string> => ({
+const rosterGroup = (roster: StatsRoster) => ({
   label: roster.teamName,
   options: roster.players.map((member) => ({ label: member.name, value: member.id })),
 });
 
-const rosterOptions = (player: StatsPlayerAccount): SelectGroup<string>[] => {
+const rosterOptions = (player: StatsPlayerAccount) => {
   const rosters = accounts.value?.rosters ?? [];
   const own = rosters.filter((roster) => roster.participantId === player.team.participantId);
   const others = rosters.filter((roster) => roster.participantId !== player.team.participantId);
@@ -47,7 +46,7 @@ const rosterOptions = (player: StatsPlayerAccount): SelectGroup<string>[] => {
   );
 };
 
-const meta = (player: StatsPlayerAccount): string =>
+const meta = (player: StatsPlayerAccount) =>
   t(
     "page.tournaments.statsLinks.meta",
     {

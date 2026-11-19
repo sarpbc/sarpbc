@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ActionItem } from "../types.ts";
 
-/* Each row acts at once (a game decision, a reply); for a choice to confirm later, use RadioGroup. */
 const { items } = defineProps<{ items: readonly ActionItem[] }>();
 
 const emit = defineEmits<{ select: [value: string] }>();

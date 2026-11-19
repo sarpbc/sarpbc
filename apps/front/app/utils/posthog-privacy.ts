@@ -12,7 +12,7 @@ const webVitalSchema = z.looseObject({
 
 const personPropertiesSchema = z.object({ username: z.optional(z.string()) });
 
-export const sanitizePostHogUrl = (value: string): string => {
+export const sanitizePostHogUrl = (value: string) => {
   try {
     const url = new URL(value);
 
@@ -26,7 +26,7 @@ export const sanitizePostHogUrl = (value: string): string => {
   }
 };
 
-export const sanitizePostHogEvent = (event: CaptureResult): CaptureResult => {
+export const sanitizePostHogEvent = (event: CaptureResult) => {
   const { properties } = event;
 
   for (const key of [
@@ -95,7 +95,7 @@ export const sanitizePostHogEvent = (event: CaptureResult): CaptureResult => {
     Reflect.deleteProperty(properties, key);
   }
 
-  // Only the public username may reach the person profile of a signed-in visitor.
+  // WARNING: only the public username may reach the person profile of a signed-in visitor.
   for (const target of [properties, event]) {
     const personProperties = personPropertiesSchema.safeParse(target.$set);
 

@@ -18,43 +18,48 @@ export interface ManualTournamentFormState {
   hasBracket: boolean;
 }
 
-export const createEmptyTournamentFormState = (): ManualTournamentFormState => ({
-  beginAt: "",
-  endAt: "",
-  eventId: "",
-  format: "3v3",
-  hasBracket: false,
-  imageUrl: "",
-  leagueId: "",
-  name: "",
-  playerParticipants: [],
-  slug: "",
-  teamIds: [],
-  tier: "",
-});
+export const createEmptyTournamentFormState = () => {
+  const state: ManualTournamentFormState = {
+    beginAt: "",
+    endAt: "",
+    eventId: "",
+    format: "3v3",
+    hasBracket: false,
+    imageUrl: "",
+    leagueId: "",
+    name: "",
+    playerParticipants: [],
+    slug: "",
+    teamIds: [],
+    tier: "",
+  };
 
-export const tournamentToFormState = (tournament: TournamentDetail): ManualTournamentFormState => ({
-  beginAt: formatDateForInput(tournament.beginAt),
-  endAt: formatDateForInput(tournament.endAt),
-  eventId: tournament.event.id,
-  format: tournament.format,
-  hasBracket: tournament.hasBracket,
-  imageUrl: tournament.imageUrl ?? "",
-  leagueId: tournament.league?.id ?? "",
-  name: tournament.name ?? "",
-  playerParticipants: tournament.participants.flatMap(({ team, players }) =>
-    team ? [] : [players.map(({ id, imageUrl, name, slug }) => ({ id, imageUrl, name, slug }))],
-  ),
-  slug: tournament.event.slug,
-  teamIds: tournament.participants.flatMap(({ team }) => (team ? [team.id] : [])),
-  tier: tournament.tier ?? "",
-});
+  return state;
+};
+
+export const tournamentToFormState = (tournament: TournamentDetail) =>
+  ({
+    beginAt: formatDateForInput(tournament.beginAt),
+    endAt: formatDateForInput(tournament.endAt),
+    eventId: tournament.event.id,
+    format: tournament.format,
+    hasBracket: tournament.hasBracket,
+    imageUrl: tournament.imageUrl ?? "",
+    leagueId: tournament.league?.id ?? "",
+    name: tournament.name ?? "",
+    playerParticipants: tournament.participants.flatMap(({ team, players }) =>
+      team ? [] : [players.map(({ id, imageUrl, name, slug }) => ({ id, imageUrl, name, slug }))],
+    ),
+    slug: tournament.event.slug,
+    teamIds: tournament.participants.flatMap(({ team }) => (team ? [team.id] : [])),
+    tier: tournament.tier ?? "",
+  }) satisfies ManualTournamentFormState;
 
 /** The slug belongs to the event, so it only applies while the tournament keeps its event. */
 export const editsEventSlug = (
   state: ManualTournamentFormState,
   original: TournamentDetail | null,
-): boolean => (original ? state.eventId === original.event.id : !state.eventId);
+) => (original ? state.eventId === original.event.id : !state.eventId);
 
 export const buildManualTournamentPayload = (
   state: ManualTournamentFormState,
@@ -97,7 +102,7 @@ export const buildManualTournamentPayload = (
   return payload;
 };
 
-export const validateManualTournamentForm = (state: ManualTournamentFormState): string | null => {
+export const validateManualTournamentForm = (state: ManualTournamentFormState) => {
   if (!state.name.trim()) {
     return "nameRequired";
   }

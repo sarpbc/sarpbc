@@ -3,7 +3,7 @@ import type { Env } from "./env.validation";
 
 const DEV_ORIGINS = ["http://localhost:4000", "http://localhost:4001", "http://localhost:4002"];
 
-const sharedParentDomain = (urls: string[]): string | undefined => {
+const sharedParentDomain = (urls: string[]) => {
   const reversed = urls.map((url) => new URL(url).hostname.split(".").toReversed());
   const shared: string[] = [];
 
@@ -18,7 +18,7 @@ const sharedParentDomain = (urls: string[]): string | undefined => {
   return shared.length >= 2 ? `.${shared.toReversed().join(".")}` : undefined;
 };
 
-const originWithWww = (url: string): string[] => {
+const originWithWww = (url: string) => {
   const origin = new URL(url);
 
   if (origin.hostname.startsWith("www.")) {

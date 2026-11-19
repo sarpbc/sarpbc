@@ -24,27 +24,27 @@ export interface CalendarFeed {
   dtStamp: Date;
 }
 
-export const tournamentCalendarPath = (id: string): string => `/calendar/tournament/${id}.ics`;
+export const tournamentCalendarPath = (id: string) => `/calendar/tournament/${id}.ics`;
 
-export const matchPageUrl = (match: MatchLinkTarget): string =>
+export const matchPageUrl = (match: MatchLinkTarget) =>
   `${SITE_ORIGIN}${matchPath(match.publicId, match.slug)}`;
 
-export const matchEventUid = (id: string): string => `match-${id}@sarpbc.org`;
+export const matchEventUid = (id: string) => `match-${id}@sarpbc.org`;
 
-const formatIcsUtc = (date: Date): string =>
+const formatIcsUtc = (date: Date) =>
   date
     .toISOString()
     .replaceAll(/[-:]/gu, "")
     .replace(/\.\d{3}/u, "");
 
-const escapeIcsText = (value: string): string =>
+const escapeIcsText = (value: string) =>
   value
     .replaceAll("\\", "\\\\")
     .replaceAll("\n", "\\n")
     .replaceAll(";", "\\;")
     .replaceAll(",", "\\,");
 
-const foldIcsLine = (line: string): string => {
+const foldIcsLine = (line: string) => {
   const encoder = new TextEncoder();
 
   if (encoder.encode(line).length <= FOLD_OCTETS) {
@@ -76,7 +76,7 @@ export const matchEndAt = (
   beginAt: Date,
   endAt: Date | undefined,
   numberOfGames: number | undefined,
-): Date => {
+) => {
   if (endAt && endAt.getTime() > beginAt.getTime()) {
     return endAt;
   }
@@ -89,7 +89,7 @@ export const matchEndAt = (
   return new Date(beginAt.getTime() + minutes * 60 * 1000);
 };
 
-const eventLines = (event: CalendarEvent): string[] => {
+const eventLines = (event: CalendarEvent) => {
   const lines = [
     "BEGIN:VEVENT",
     `UID:${event.uid}`,
@@ -112,7 +112,7 @@ const eventLines = (event: CalendarEvent): string[] => {
   return lines;
 };
 
-export const buildIcs = (feed: CalendarFeed): string => {
+export const buildIcs = (feed: CalendarFeed) => {
   const lines = [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",

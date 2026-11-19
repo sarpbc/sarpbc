@@ -1,16 +1,15 @@
 import { setTimeout as delay } from "node:timers/promises";
 import { z } from "zod";
 import { IntegrationError } from "../../../common/domain/errors/integration-error";
-import type { BallchasingSource, ReplayPlayerStats, ReplayStats } from "../../application/ports";
+import type { BallchasingSource } from "../../application/ports";
 import { BALLCHASING_HOST } from "../../domain/ballchasing-ref";
 import { nonBlank } from "../../../common/domain/text";
-import type { ReplaySummary, ReplayTeam, Side } from "../../domain/replay-matching";
+import type { ReplaySummary, Side } from "../../domain/replay-matching";
 
 export const BALLCHASING_API_URL = `https://${BALLCHASING_HOST}/api`;
 
 type Endpoint = "list" | "group" | "replay";
 
-/** Spacing for the lowest Ballchasing tier: 2 calls/s on every endpoint used. */
 const DEFAULT_INTERVALS_MS = { group: 500, list: 500, replay: 500 } satisfies Record<
   Endpoint,
   number
@@ -50,7 +49,7 @@ const groupList = z.object({
 
 const replayStatus = z.object({ status: z.string() });
 
-// Ballchasing omits zero counts inside a stats object, but a missing stats object must not become zeros.
+// WARNING: Ballchasing omits zero counts inside a stats object, but a missing stats object must not become zeros.
 const count = z.number().int().nonnegative().default(0);
 
 const detailSide = z.object({
@@ -79,25 +78,25 @@ const replayDetail = z.object({
 
 type ListedReplay = z.infer<typeof replayList>["list"][number];
 
-const toTeam = (side: z.infer<typeof team> | undefined): ReplayTeam => ({
+const toTeam = (side: z.infer<typeof team> | undefined) => ({
   goals: side?.goals ?? 0,
   name: nonBlank(side?.name) ?? null,
   playerNames: (side?.players ?? []).map((player) => player.name),
 });
 
-const playedAt = (raw: string | undefined, hasTimezone: boolean | undefined): Date | null => {
+const playedAt = (raw: string | undefined, hasTimezone: boolean | undefined) => {
   if (raw === undefined || raw === "") {
     return null;
   }
 
-  // Without a timezone Ballchasing gives the uploader's wall clock; reading it as UTC keeps the order.
+  // WARNING: without a timezone Ballchasing gives the uploader wall clock; reading it as UTC keeps the order.
   const value = hasTimezone === true ? raw : `${raw.replace(/(?:Z|[+-]\d\d:\d\d)$/u, "")}Z`;
   const date = new Date(value);
 
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
-const toSummary = (replay: ListedReplay): ReplaySummary => ({
+const toSummary = (replay: ListedReplay) => ({
   blue: toTeam(replay.blue),
   id: replay.id,
   orange: toTeam(replay.orange),
@@ -107,7 +106,7 @@ const toSummary = (replay: ListedReplay): ReplaySummary => ({
   title: replay.replay_title ?? replay.id,
 });
 
-const toPlayers = (side: Side, detail: z.infer<typeof detailSide>): ReplayPlayerStats[] =>
+const toPlayers = (side: Side, detail: z.infer<typeof detailSide>) =>
   detail.players.map(({ name, id, stats }) => ({
     assists: stats.core.assists,
     demolitions: stats.demo.inflicted,
@@ -148,13 +147,13 @@ export class BallchasingClient implements BallchasingSource {
     this.intervalsMs = options.intervalsMs ?? DEFAULT_INTERVALS_MS;
   }
 
-  async groupReplays(groupId: string): Promise<ReplaySummary[]> {
+  async groupReplays(groupId: string) {
     await this.request("group", `${BALLCHASING_API_URL}/groups/${encodeURIComponent(groupId)}`);
     const replays = new Map<string, ReplaySummary>();
     const visited = new Set<string>();
 
-    // Breadth-first and one group at a time: every call spends the endpoint's rate-limit slot.
-    const crawl = async (queue: readonly string[]): Promise<void> => {
+    // WARNING: one group at a time; every call spends the endpoint rate-limit slot.
+    const crawl: (queue: readonly string[]) => Promise<void> = async (queue) => {
       const [group, ...rest] = queue;
 
       if (group === undefined) {
@@ -182,7 +181,7 @@ export class BallchasingClient implements BallchasingSource {
     return [...replays.values()];
   }
 
-  async replayStats(replayId: string): Promise<ReplayStats | null> {
+  async replayStats(replayId: string) {
     const response = await this.request(
       "replay",
       `${BALLCHASING_API_URL}/replays/${encodeURIComponent(replayId)}`,
@@ -214,12 +213,12 @@ export class BallchasingClient implements BallchasingSource {
     schema: T,
     resource: "replays" | "groups",
     group: string,
-  ): Promise<z.infer<T>["list"]> {
+  ) {
     const first = new URL(`${BALLCHASING_API_URL}/${resource}`);
     first.searchParams.set("group", group);
     first.searchParams.set("count", String(PAGE_SIZE));
 
-    const readFrom = async (url: string): Promise<z.infer<T>["list"]> => {
+    const readFrom: (url: string) => Promise<z.infer<T>["list"]> = async (url) => {
       const response = await this.request("list", url);
       const page = schema.safeParse(await response.json());
 
@@ -233,7 +232,7 @@ export class BallchasingClient implements BallchasingSource {
         return page.data.list;
       }
 
-      // The key travels with every request, so never follow a link off the API host.
+      // WARNING: the API key travels with every request, so never follow a link off the API host.
       if (!next.startsWith(`${BALLCHASING_API_URL}/`)) {
         throw new IntegrationError("Ballchasing returned an unexpected response. Try again later.");
       }
@@ -244,7 +243,7 @@ export class BallchasingClient implements BallchasingSource {
     return await readFrom(first.toString());
   }
 
-  private async request(endpoint: Endpoint, url: string, attempt = 0): Promise<Response> {
+  private async request(endpoint: Endpoint, url: string, attempt = 0) {
     await this.waitForSlot(endpoint);
     let response: Response;
 
@@ -258,7 +257,7 @@ export class BallchasingClient implements BallchasingSource {
     }
 
     if (response.status === 429 && attempt < MAX_RATE_LIMIT_RETRIES) {
-      // Ballchasing has answered 429 with `retry-after: 0`, so 0 cannot mean "retry now".
+      // WARNING: Ballchasing has answered 429 with `retry-after: 0`, so 0 cannot mean retry now.
       const retryAfter = Number(response.headers.get("retry-after"));
       await this.sleep(
         Number.isFinite(retryAfter) && retryAfter > 0
@@ -266,7 +265,9 @@ export class BallchasingClient implements BallchasingSource {
           : Math.min(FIRST_BACKOFF_MS * 2 ** attempt, MAX_BACKOFF_MS),
       );
 
-      return await this.request(endpoint, url, attempt + 1);
+      const retried: Response = await this.request(endpoint, url, attempt + 1);
+
+      return retried;
     }
 
     if (response.ok) {
@@ -276,7 +277,7 @@ export class BallchasingClient implements BallchasingSource {
     throw this.failure(response.status, url);
   }
 
-  private async waitForSlot(endpoint: Endpoint): Promise<void> {
+  private async waitForSlot(endpoint: Endpoint) {
     const now = this.now();
     const slot = Math.max(now, this.nextSlot.get(endpoint) ?? 0);
     this.nextSlot.set(endpoint, slot + this.intervalsMs[endpoint]);
@@ -286,7 +287,7 @@ export class BallchasingClient implements BallchasingSource {
     }
   }
 
-  private failure(status: number, url: string): IntegrationError {
+  private failure(status: number, url: string) {
     if (status === 401 || status === 403) {
       return new IntegrationError("Ballchasing rejected the API key. Check BALLCHASING_API_KEY.");
     }

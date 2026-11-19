@@ -3,10 +3,7 @@ import { Player } from "./player.entity";
 import { Team } from "./team.entity";
 import { TeamAlias } from "./team-alias.entity";
 
-/**
- * The slug lookup only adopts rows stored before the PandaScore id was recorded, never start.gg
- * rows: adopting one would relabel it as PandaScore data and drop the start.gg credit.
- */
+// WARNING: adopt only rows stored before the PandaScore id was recorded, never start.gg rows, or their start.gg credit is lost.
 const adoptable = (slug: string) => ({
   mergedInto: null,
   pandascoreId: null,
@@ -22,7 +19,7 @@ export const findPandascorePlayer = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number,
   slug: string,
-): Promise<Player | null> => {
+) => {
   const byId = await em.findOne(Player, { pandascoreId });
 
   if (byId) {
@@ -36,7 +33,7 @@ export const findPandascoreTeam = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number | undefined,
   slug: string,
-): Promise<Team | null> => {
+) => {
   const byId = pandascoreId === undefined ? null : await em.findOne(Team, { pandascoreId });
 
   return await (byId ?? em.findOne(Team, adoptable(slug)));
@@ -45,7 +42,7 @@ export const findPandascoreTeam = async (
 export const findAliasedPandascoreTeam = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number | undefined,
-): Promise<string | null> => {
+) => {
   if (pandascoreId === undefined || (await em.findOne(Team, { pandascoreId }))) {
     return null;
   }
@@ -59,7 +56,7 @@ export const availablePlayerSlug = async (
   em: Pick<EntityManager, "findOne">,
   pandascoreId: number,
   slug: string,
-): Promise<string> => {
+) => {
   const taken = await em.findOne(Player, { slug });
 
   return taken ? `${slug}-${pandascoreId}` : slug;

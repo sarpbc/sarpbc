@@ -1,12 +1,9 @@
 import { isNonEmptyDateInput } from "@sarpbc/utils";
 import type { TournamentDetail, TournamentDetailMatch } from "@sarpbc/types";
-import type { TournamentBracketFormat, TournamentBracketRoundGroup } from "./types";
 import { TBD_LABEL } from "~/utils/tbd-label";
 import { sortMatchesByBeginAt } from "./rows";
 
-export const classifyTournamentBracket = (
-  tournament: TournamentDetail,
-): TournamentBracketFormat => {
+export const classifyTournamentBracket = (tournament: TournamentDetail) => {
   const matches = tournament.matches ?? [];
 
   if (matches.length === 0) {
@@ -36,9 +33,7 @@ export const classifyTournamentBracket = (
   return "flat-stage";
 };
 
-export const groupMatchesByRound = (
-  matches: TournamentDetailMatch[],
-): TournamentBracketRoundGroup[] => {
+export const groupMatchesByRound = (matches: TournamentDetailMatch[]) => {
   const groups = new Map<string, TournamentDetailMatch[]>();
 
   for (const match of matches) {

@@ -3,7 +3,7 @@ import { isNonEmptyString } from "@sarpbc/utils";
 
 export const useMatchStateLabel =
   (t: (key: string) => string, formatBeginAt: (beginAt: Date) => string) =>
-  (item: MatchBlockItem): string => {
+  (item: MatchBlockItem) => {
     switch (item.state) {
       case "live": {
         return t("newsTag.matchLive");

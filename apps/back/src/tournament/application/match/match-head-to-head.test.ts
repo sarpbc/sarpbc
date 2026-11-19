@@ -4,9 +4,9 @@ import { Match } from "../../domain/match";
 import { Tournament } from "../../domain/tournament";
 import { TournamentParticipant } from "../../domain/tournament-participant";
 import { Team } from "../../../roster/domain/team";
-import { buildHeadToHead, getWinnerTeamId, mapHeadToHeadMeeting } from "./match-head-to-head";
+import { buildHeadToHead } from "./match-head-to-head";
 
-const createTeam = (id: string, name: string): Team => {
+const createTeam = (id: string, name: string) => {
   const team = new Team();
   team.id = id;
   team.name = name;
@@ -15,7 +15,7 @@ const createTeam = (id: string, name: string): Team => {
   return team;
 };
 
-const createParticipant = (id: string, team: Team): TournamentParticipant => {
+const createParticipant = (id: string, team: Team) => {
   const participant = new TournamentParticipant();
   participant.id = id;
   participant.team = team;
@@ -42,7 +42,7 @@ const createFinishedMatch = ({
   tournamentName?: string;
   eventSlug?: string;
   endAt?: Date;
-}): Match => {
+}) => {
   const tournament = new Tournament();
   tournament.id = `tournament-${id}`;
   tournament.name = tournamentName;
@@ -109,13 +109,18 @@ describe("match-head-to-head", () => {
     expect(headToHead.recentMeetings).toHaveLength(2);
   });
 
-  it("lists the latest meeting first with its score and winner", () => {
-    const [latest] = twoMeetings().recentMeetings;
-
-    expect(latest?.id).toBe("match-1");
-    expect(latest?.scoreA).toBe(4);
-    expect(latest?.scoreB).toBe(2);
-    expect(latest?.winnerTeamId).toBe(teamVitality.id);
+  it("scores each meeting from the first team's side whatever the participant order", () => {
+    expect(
+      twoMeetings().recentMeetings.map(({ id, scoreA, scoreB, winnerTeamId }) => ({
+        id,
+        scoreA,
+        scoreB,
+        winnerTeamId,
+      })),
+    ).toStrictEqual([
+      { id: "match-1", scoreA: 4, scoreB: 2, winnerTeamId: teamVitality.id },
+      { id: "match-2", scoreA: 1, scoreB: 3, winnerTeamId: teamKarmine.id },
+    ]);
   });
 
   it("links each meeting to its canonical match page", () => {
@@ -176,28 +181,9 @@ describe("match-head-to-head", () => {
 
     match.winner = null;
 
-    expect(getWinnerTeamId(match, teamVitality.id, teamKarmine.id)).toBe(teamVitality.id);
-  });
+    const headToHead = buildHeadToHead([match], teamVitality.id, teamKarmine.id);
 
-  it("maps meetings regardless of participant order", () => {
-    const match = createFinishedMatch({
-      id: "match-order",
-      scoreA: 2,
-      scoreB: 4,
-      teamA: teamKarmine,
-      teamB: teamVitality,
-    });
-
-    const meeting = mapHeadToHeadMeeting(match, teamVitality.id, teamKarmine.id);
-
-    expect(meeting).toStrictEqual(
-      expect.objectContaining({
-        scoreA: 4,
-        scoreB: 2,
-        teamAId: teamVitality.id,
-        teamBId: teamKarmine.id,
-        winnerTeamId: teamVitality.id,
-      }),
-    );
+    expect(headToHead.teamAWins).toBe(1);
+    expect(headToHead.recentMeetings[0]?.winnerTeamId).toBe(teamVitality.id);
   });
 });

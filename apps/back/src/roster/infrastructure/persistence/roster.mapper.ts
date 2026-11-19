@@ -37,9 +37,7 @@ type PlayerColumn =
   | "source";
 
 /** The scalar columns a team row stores; the merge redirect is a relation the store sets itself. */
-export const teamColumns = <S extends Pick<TeamRow, TeamColumn>>(
-  model: S,
-): Pick<S, TeamColumn> => ({
+export const teamColumns = (model: Pick<TeamRow, TeamColumn>) => ({
   active: model.active,
   darkModeImageUrl: model.darkModeImageUrl,
   id: model.id,
@@ -54,9 +52,7 @@ export const teamColumns = <S extends Pick<TeamRow, TeamColumn>>(
 });
 
 /** `contractRole` is a read-only formula column and is never written. */
-export const playerColumns = <S extends Pick<PlayerRow, PlayerColumn>>(
-  model: S,
-): Pick<S, PlayerColumn> => ({
+export const playerColumns = (model: Pick<PlayerRow, PlayerColumn>) => ({
   birthday: model.birthday,
   firstName: model.firstName,
   id: model.id,
@@ -71,7 +67,7 @@ export const playerColumns = <S extends Pick<PlayerRow, PlayerColumn>>(
   status: model.status,
 });
 
-export const toPhoto = (row: PlayerPhotoRow): PlayerPhoto =>
+export const toPhoto = (row: PlayerPhotoRow) =>
   Object.assign(new PlayerPhoto(), {
     createdAt: new Date(row.createdAt),
     id: row.id,
@@ -79,13 +75,13 @@ export const toPhoto = (row: PlayerPhotoRow): PlayerPhoto =>
     url: row.url,
   });
 
-const toBareTeam = (row: TeamRow): Team =>
+const toBareTeam = (row: TeamRow) =>
   Object.assign(new Team(), teamColumns(row), {
     aliases: (row.aliases ?? []).map((alias) => Object.assign(new TeamAlias(), alias)),
     mergedIntoId: row.mergedInto?.id ?? null,
   });
 
-export const toPlayer = (row: PlayerRow): Player => {
+export const toPlayer = (row: PlayerRow) => {
   const player = Object.assign(new Player(), playerColumns(row), {
     birthday: row.birthday ? new Date(row.birthday) : null,
     contractRole: row.contractRole,
@@ -100,7 +96,7 @@ export const toPlayer = (row: PlayerRow): Player => {
   return player;
 };
 
-export const toTeam = (row: TeamRow, includePlayers = true): Team => {
+export const toTeam = (row: TeamRow, includePlayers = true) => {
   const team = toBareTeam(row);
 
   if (includePlayers && row.players.isInitialized()) {
@@ -110,7 +106,7 @@ export const toTeam = (row: TeamRow, includePlayers = true): Team => {
   return team;
 };
 
-export const toContract = (row: ContractRow): Contract =>
+export const toContract = (row: ContractRow) =>
   Object.assign(new Contract(), {
     createdAt: new Date(row.createdAt),
     endDate: row.endDate ? new Date(row.endDate) : null,
@@ -123,7 +119,7 @@ export const toContract = (row: ContractRow): Contract =>
     team: toBareTeam(row.team),
   });
 
-export const teamNameAt = (row: Pick<TeamRow, "name" | "aliases">, at: Date | null): string => {
+export const teamNameAt = (row: Pick<TeamRow, "name" | "aliases">, at: Date | null) => {
   if (!at) {
     return row.name;
   }

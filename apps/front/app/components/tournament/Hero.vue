@@ -106,8 +106,8 @@ const concealed = computed(() =>
   spoilerTournamentIds.some((tournamentId) => isConcealed({ tournamentId })),
 );
 
-const revealTargets = computed((): SpoilerRevealTarget[] =>
-  spoilerTournamentIds.map((id) => ({ id, kind: "tournament" })),
+const revealTargets = computed(() =>
+  spoilerTournamentIds.map<SpoilerRevealTarget>((id) => ({ id, kind: "tournament" })),
 );
 
 const showReveal = computed(

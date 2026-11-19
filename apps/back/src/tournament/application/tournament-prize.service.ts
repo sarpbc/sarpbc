@@ -13,7 +13,7 @@ import type {
   PrizeWriter,
 } from "./ports";
 
-const assertParticipants = (entries: PrizeEntry[], participants: PrizeParticipant[]): void => {
+const assertParticipants = (entries: PrizeEntry[], participants: PrizeParticipant[]) => {
   const rosters = new Map(participants.map(({ teamId, playerIds }) => [teamId, playerIds]));
 
   for (const { teamId, playerIds } of entries) {
@@ -42,17 +42,17 @@ export class TournamentPrizeService {
     private readonly afterCommit: CompetitionAfterCommit,
   ) {}
 
-  async findByTournamentId(id: string): Promise<TournamentPrizes> {
+  async findByTournamentId(id: string) {
     const prizes = await this.reads.byTournament(id);
 
     if (!prizes) {
       throw new NotFoundError(`Tournament with id "${id}" not found`);
     }
 
-    return prizes;
+    return prizes satisfies TournamentPrizes;
   }
 
-  async requireProposableTournament(id: string): Promise<void> {
+  async requireProposableTournament(id: string) {
     const source = await this.reads.tournamentSource(id);
 
     if (!source) {
@@ -64,11 +64,7 @@ export class TournamentPrizeService {
     }
   }
 
-  async requireProposablePrize(
-    tournamentId: string,
-    teamId: string,
-    patch: PrizeEntryPatch,
-  ): Promise<void> {
+  async requireProposablePrize(tournamentId: string, teamId: string, patch: PrizeEntryPatch) {
     await this.requireProposableTournament(tournamentId);
     await this.transaction.run(async ({ prizes }) => {
       const entries = patchPrizeEntry(await prizes.entries(tournamentId), teamId, patch, null);
@@ -77,15 +73,15 @@ export class TournamentPrizeService {
     });
   }
 
-  async teamEarnings(teamId: string, scope: EarningsScope): Promise<ProfileEarnings> {
-    return summarizeEarnings(await this.reads.byTeam(teamId, scope));
+  async teamEarnings(teamId: string, scope: EarningsScope) {
+    return summarizeEarnings(await this.reads.byTeam(teamId, scope)) satisfies ProfileEarnings;
   }
 
-  async playerEarnings(playerId: string, scope: EarningsScope): Promise<ProfileEarnings> {
-    return summarizeEarnings(await this.reads.byPlayer(playerId, scope));
+  async playerEarnings(playerId: string, scope: EarningsScope) {
+    return summarizeEarnings(await this.reads.byPlayer(playerId, scope)) satisfies ProfileEarnings;
   }
 
-  async setDistribution(tournamentId: string, entries: PrizeEntry[]): Promise<TournamentPrizes> {
+  async setDistribution(tournamentId: string, entries: PrizeEntry[]) {
     const sourced = entries.map((entry) => ({
       ...entry,
       sourceUrl: parseDataSourceUrl(entry.sourceUrl),
@@ -93,7 +89,7 @@ export class TournamentPrizeService {
 
     assertPrizeDistribution(sourced);
 
-    return await this.write(tournamentId, async () => sourced);
+    return (await this.write(tournamentId, async () => sourced)) satisfies TournamentPrizes;
   }
 
   async updateEntry(
@@ -101,18 +97,18 @@ export class TournamentPrizeService {
     teamId: string,
     patch: PrizeEntryPatch,
     sourceUrl: string,
-  ): Promise<TournamentPrizes> {
+  ) {
     const source = parseDataSourceUrl(sourceUrl);
 
-    return await this.write(tournamentId, async (prizes) =>
+    return (await this.write(tournamentId, async (prizes) =>
       patchPrizeEntry(await prizes.entries(tournamentId), teamId, patch, source),
-    );
+    )) satisfies TournamentPrizes;
   }
 
   private async write(
     tournamentId: string,
     buildEntries: (prizes: PrizeWriter) => Promise<PrizeEntry[]>,
-  ): Promise<TournamentPrizes> {
+  ) {
     await this.transaction.run(async ({ prizes }) => {
       if (!(await prizes.tournamentExists(tournamentId))) {
         throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
@@ -125,6 +121,6 @@ export class TournamentPrizeService {
     });
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
 
-    return await this.findByTournamentId(tournamentId);
+    return (await this.findByTournamentId(tournamentId)) satisfies TournamentPrizes;
   }
 }

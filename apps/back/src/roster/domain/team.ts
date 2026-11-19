@@ -19,10 +19,10 @@ export class Team {
   source: DataSource = "manual";
   mergedIntoId: string | null = null;
   aliases: TeamAlias[] = [];
-  linkPandascore(pandascoreId: number): void {
+  linkPandascore(pandascoreId: number) {
     linkPandascore(this, pandascoreId);
   }
-  synchronizeProfile(input: ImportedTeamProfile): void {
+  synchronizeProfile(input: ImportedTeamProfile) {
     this.name = input.name;
 
     if (input.pandascoreId !== undefined) {

@@ -12,13 +12,13 @@ export interface LineupRow {
   player: Omit<MatchLineupPlayer, "standIn">;
 }
 
-export const isStandIn = (rosterIds: readonly string[], playerId: string): boolean =>
+export const isStandIn = (rosterIds: readonly string[], playerId: string) =>
   !rosterIds.includes(playerId);
 
 export const normalizeLineups = (
   participantIds: readonly string[],
   inputs: readonly MatchLineupInput[],
-): MatchLineupInput[] => {
+) => {
   const byParticipant = new Map<string, string[]>();
   const players = new Set<string>();
 
@@ -50,13 +50,10 @@ export const normalizeLineups = (
     const playerIds = byParticipant.get(participantId) ?? [];
 
     return playerIds.length > 0 ? [{ participantId, playerIds }] : [];
-  });
+  }) satisfies MatchLineupInput[];
 };
 
-export const buildLineups = (
-  sides: readonly LineupSide[],
-  rows: readonly LineupRow[],
-): MatchLineup[] =>
+export const buildLineups = (sides: readonly LineupSide[], rows: readonly LineupRow[]) =>
   sides.flatMap(({ participantId, rosterIds }) => {
     const players = rows.flatMap((row) =>
       row.participantId === participantId
@@ -65,7 +62,7 @@ export const buildLineups = (
     );
 
     return players.length > 0 ? [{ participantId, players }] : [];
-  });
+  }) satisfies MatchLineup[];
 
 export interface GameLineupSource {
   teams: readonly {
@@ -74,7 +71,7 @@ export interface GameLineupSource {
   }[];
 }
 
-export const lineupsFromGames = (games: readonly GameLineupSource[]): MatchLineupInput[] => {
+export const lineupsFromGames = (games: readonly GameLineupSource[]) => {
   const byParticipant = new Map<string, string[]>();
   const seen = new Set<string>();
 
@@ -99,5 +96,5 @@ export const lineupsFromGames = (games: readonly GameLineupSource[]): MatchLineu
     playerIds.length > 0
       ? [{ participantId, playerIds: playerIds.slice(0, MAX_LINEUP_PLAYERS) }]
       : [],
-  );
+  ) satisfies MatchLineupInput[];
 };

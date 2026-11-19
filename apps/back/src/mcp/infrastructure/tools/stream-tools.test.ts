@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import type { ToolArguments } from "../define-tool";
-import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
+import { jsonOf } from "../../../../test/mcp-result";
+import { FakeRosterProposals } from "./roster-proposals.test-utils";
 import { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
 import { rosterTools } from "./roster-tools";
 
@@ -15,7 +16,7 @@ const STREAMS = [
 ];
 
 const setup = (toolName: string, role: StaffRole = "admin") => {
-  const rosterProposalService = pendingProposalService();
+  const rosterProposalService = new FakeRosterProposals();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === toolName,
@@ -42,11 +43,13 @@ describe("stream tools", () => {
 
     const result = await call({ [idField]: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      { [idField]: MATCH_ID, kind, streams: STREAMS },
-      SOURCE,
-      "u1",
-    );
+    expect(rosterProposalService.changes).toStrictEqual([
+      {
+        change: { [idField]: MATCH_ID, kind, streams: STREAMS },
+        proposedById: "u1",
+        sourceUrl: SOURCE,
+      },
+    ]);
     expect(jsonOf(result)).toMatchObject({
       kind,
       status: "pending",
@@ -72,7 +75,7 @@ describe("stream tools", () => {
     const { call, rosterProposalService } = setup("set_match_streams", "journalist");
     const result = await call({ matchId: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS });
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 
   it("hides start.gg sourced stream lists from list_roster_proposals", async () => {
@@ -86,10 +89,10 @@ describe("stream tools", () => {
         sourceUrl,
       });
 
-    rosterProposalService.list.mockResolvedValue({
+    rosterProposalService.proposals = {
       names: {},
       proposals: [proposal("https://www.start.gg/tournament/fake"), proposal(SOURCE)],
-    });
+    };
 
     const list = rosterTools({ rosterProposalService }).find(
       (candidate) => candidate.name === "list_roster_proposals",

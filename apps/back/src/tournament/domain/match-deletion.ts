@@ -15,7 +15,7 @@ const MATCH_REFERENCE_NOUNS = referenceNouns<keyof MatchReferences>()([
   ["nextMatches", "bracket match fed by it", "bracket matches fed by it"],
 ]);
 
-export const assertMatchDeletable = (match: Match, references: MatchReferences): void => {
+export const assertMatchDeletable = (match: Match, references: MatchReferences) => {
   if (match.source === "pandascore" || match.pandascoreId !== null) {
     throw new InvalidInputError(
       `${match.name} is synced from PandaScore and would be imported again; it cannot be deleted`,

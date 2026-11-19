@@ -15,7 +15,7 @@ import {
   redistributableStreams,
 } from "./mappers";
 
-const match = (source: DataSource, tournamentSource: DataSource, teamSource: DataSource): Match =>
+const match = (source: DataSource, tournamentSource: DataSource, teamSource: DataSource) =>
   Object.assign(new Match(), {
     participants: [{ team: { source: teamSource } }],
     source,
@@ -91,14 +91,15 @@ describe("mapTournamentDetail participants", () => {
   });
 });
 
-const listed = (url: string, source: DataSource): Stream => ({
-  channel: url,
-  kind: "official",
-  language: "en",
-  platform: "twitch",
-  source,
-  url,
-});
+const listed = (url: string, source: DataSource) =>
+  ({
+    channel: url,
+    kind: "official",
+    language: "en",
+    platform: "twitch",
+    source,
+    url,
+  }) satisfies Stream;
 
 describe("MCP streams", () => {
   const manual = listed("https://twitch.tv/manual", "manual");

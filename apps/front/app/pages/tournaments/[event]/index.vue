@@ -103,7 +103,7 @@ const watchStreams = computed(() =>
   event.value?.stages.length === 1 ? (event.value.stages[0]?.watchStreams ?? []) : [],
 );
 
-const stageMeta = (stage: TournamentDetail): string => {
+const stageMeta = (stage: TournamentDetail) => {
   const status = getTournamentStatus(stage);
 
   return [

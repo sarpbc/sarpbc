@@ -32,8 +32,7 @@ const { awardTypeLabel, seasonAwardTypeLabel } = usePlayerAwardLabels();
 const slugA = routeQueryString(route.query.a);
 const slugB = routeQueryString(route.query.b);
 
-const loadPlayer = async (slug: string): Promise<Player | null> =>
-  slug ? getPlayerFromSlug(slug) : null;
+const loadPlayer = async (slug: string) => (slug ? getPlayerFromSlug(slug) : null);
 
 const [
   { data: playerA, error: playerAError, refresh: refreshPlayerA },
@@ -96,21 +95,15 @@ const retryPlayers = () => {
 const numberFormat = computed(() => new Intl.NumberFormat(locale.value));
 const yearFormat = computed(() => new Intl.DateTimeFormat(locale.value, { year: "numeric" }));
 
-const leaderOf = (a: number, b: number): Side | "tie" => {
+const leaderOf = (a: number, b: number) => {
   if (a === b) {
-    return "tie";
+    return "tie" as const;
   }
 
-  return a > b ? "a" : "b";
+  return a > b ? ("a" as const) : ("b" as const);
 };
 
-const countRow = (
-  key: string,
-  label: string,
-  a: number,
-  b: number,
-  compared: boolean,
-): SummaryRow => ({
+const countRow = (key: string, label: string, a: number, b: number, compared: boolean) => ({
   a: numberFormat.value.format(a),
   b: numberFormat.value.format(b),
   key,
@@ -118,13 +111,11 @@ const countRow = (
   leader: compared ? leaderOf(a, b) : null,
 });
 
-const awardCount = (career: PlayerCareer): number =>
-  career.awards.length + career.seasonAwards.length;
+const awardCount = (career: PlayerCareer) => career.awards.length + career.seasonAwards.length;
 
-const teamCount = (career: PlayerCareer): number =>
-  new Set(career.teams.map(({ team }) => team.id)).size;
+const teamCount = (career: PlayerCareer) => new Set(career.teams.map(({ team }) => team.id)).size;
 
-const earningsRows = (a: PlayerCareer, b: PlayerCareer): SummaryRow[] => {
+const earningsRows = (a: PlayerCareer, b: PlayerCareer) => {
   const currencies = [
     ...new Set([...a.earnings.totals, ...b.earnings.totals].map(({ currency }) => currency)),
   ].toSorted();
@@ -202,7 +193,7 @@ const summaryRows = computed<SummaryRow[]>(() => {
   ];
 });
 
-const valueClass = (row: SummaryRow, side: Side): string => {
+const valueClass = (row: SummaryRow, side: Side) => {
   if (row.leader === null) {
     return "text-default";
   }
@@ -214,17 +205,16 @@ const valueClass = (row: SummaryRow, side: Side): string => {
   return row.leader === side ? "font-medium text-highlighted" : "text-muted";
 };
 
-const yearOf = (value: string | null): string | null =>
-  value ? yearFormat.value.format(new Date(value)) : null;
+const yearOf = (value: string | null) => (value ? yearFormat.value.format(new Date(value)) : null);
 
-const stintRange = (stint: CareerStint): string => {
+const stintRange = (stint: CareerStint) => {
   const start = yearOf(stint.startDate) ?? "";
   const end = yearOf(stint.endDate) ?? t("page.player.compare.present");
 
   return start === end ? start : `${start} – ${end}`;
 };
 
-const titleItems = (career: PlayerCareer): CareerItem[] =>
+const titleItems = (career: PlayerCareer) =>
   career.titles.map((title) => ({
     key: title.id,
     label: title.event.name,
@@ -232,13 +222,13 @@ const titleItems = (career: PlayerCareer): CareerItem[] =>
     to: localePath(tournamentStagePath(title.event.slug, title.slug)),
   }));
 
-const awardItems = (career: PlayerCareer): CareerItem[] => [
-  ...career.seasonAwards.map((award) => ({
+const awardItems = (career: PlayerCareer) => [
+  ...career.seasonAwards.map<CareerItem>((award) => ({
     key: award.id,
     label: seasonAwardTypeLabel(award.awardType),
     meta: [award.season.name, award.region].filter(Boolean).join(" · "),
   })),
-  ...career.awards.map((award) => ({
+  ...career.awards.map<CareerItem>((award) => ({
     key: award.id,
     label: awardTypeLabel(award.awardType),
     meta: award.tournament.event.name,
@@ -246,7 +236,7 @@ const awardItems = (career: PlayerCareer): CareerItem[] => [
   })),
 ];
 
-const teamItems = (career: PlayerCareer): CareerItem[] =>
+const teamItems = (career: PlayerCareer) =>
   career.teams.map((stint) => ({
     key: `${stint.team.id}-${stint.startDate}`,
     label: stint.team.name,

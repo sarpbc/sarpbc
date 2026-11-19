@@ -11,9 +11,11 @@ export interface StatsStage {
 export class TournamentPlayerStatsService {
   constructor(private readonly games: Pick<GameStatsStore, "playerLines">) {}
 
-  async forStages(stages: readonly StatsStage[]): Promise<TournamentPlayerStatsResponse> {
+  async forStages(stages: readonly StatsStage[]) {
     const ids = stages.flatMap(({ id, source }) => (isRedistributable(source) ? [id] : []));
 
-    return aggregatePlayerStats(ids.length === 0 ? [] : await this.games.playerLines(ids));
+    return aggregatePlayerStats(
+      ids.length === 0 ? [] : await this.games.playerLines(ids),
+    ) satisfies TournamentPlayerStatsResponse;
   }
 }

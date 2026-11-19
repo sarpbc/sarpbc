@@ -34,7 +34,7 @@ export interface TopicResponse extends ForumTopic {
 
 export type PostWithSlugResponse = PostResponseFields & { slug: string };
 
-const postResponse = (post: PostRecord): PostResponseFields => ({
+const postResponse = (post: PostRecord) => ({
   author: { id: post.author.id, userName: post.author.userName },
   content: post.content,
   createdAt: post.createdAt,
@@ -55,21 +55,22 @@ const postResponse = (post: PostRecord): PostResponseFields => ({
   updatedAt: post.updatedAt,
 });
 
-export const postWithSlugResponse = (post: PostRecord): PostWithSlugResponse => ({
+export const postWithSlugResponse = (post: PostRecord) => ({
   ...postResponse(post),
   slug: forumPostSlug(post.title),
 });
 
-export const postActivityResponse = (activity: PostActivity): PostPreview => ({
-  id: activity.id,
-  lastActivity: activity.lastActivity.toISOString(),
-  messageCount: activity.messageCount,
-  publicId: activity.publicId,
-  slug: forumPostSlug(activity.title),
-  title: activity.title,
-});
+export const postActivityResponse = (activity: PostActivity) =>
+  ({
+    id: activity.id,
+    lastActivity: activity.lastActivity.toISOString(),
+    messageCount: activity.messageCount,
+    publicId: activity.publicId,
+    slug: forumPostSlug(activity.title),
+    title: activity.title,
+  }) satisfies PostPreview;
 
-export const topicResponse = (topic: TopicRecord): TopicResponse => ({
+export const topicResponse = (topic: TopicRecord) => ({
   createdAt: topic.createdAt,
   description: topic.description,
   id: topic.id,

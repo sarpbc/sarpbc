@@ -6,17 +6,14 @@ export interface EventFormState {
   leagueId: string;
 }
 
-export const eventToFormState = (event: ManualEvent | null): EventFormState => ({
+export const eventToFormState = (event: ManualEvent | null) => ({
   leagueId: event?.league?.id ?? "",
   name: event?.name ?? "",
   slug: event?.slug ?? "",
 });
 
 /** Sends only what changed so an update never trips the backend's "change at least one field". */
-export const buildEventPayload = (
-  state: EventFormState,
-  original: ManualEvent | null,
-): EventInput => {
+export const buildEventPayload = (state: EventFormState, original: ManualEvent | null) => {
   const before = eventToFormState(original);
   const payload: EventInput = {};
   const name = state.name.trim();

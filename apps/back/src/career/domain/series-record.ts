@@ -2,12 +2,12 @@ import type { HeadToHead, SeriesRecord } from "@sarpbc/types";
 import type { Match } from "../../tournament/domain/match";
 import type { TournamentParticipant } from "../../tournament/domain/tournament-participant";
 
-const sideOf = (match: Match, playerId: string): TournamentParticipant | undefined =>
+const sideOf = (match: Match, playerId: string) =>
   match.participants.find(({ players }) => players.some(({ id }) => id === playerId));
 
-const wonBy = (match: Match, side: TournamentParticipant): boolean => match.winner?.id === side.id;
+const wonBy = (match: Match, side: TournamentParticipant) => match.winner?.id === side.id;
 
-export const seriesRecord = (matches: Match[], playerId: string): SeriesRecord => {
+export const seriesRecord = (matches: Match[], playerId: string) => {
   const record: SeriesRecord = { losses: 0, wins: 0 };
 
   for (const match of matches) {
@@ -24,10 +24,10 @@ export const seriesRecord = (matches: Match[], playerId: string): SeriesRecord =
     }
   }
 
-  return record;
+  return record satisfies SeriesRecord;
 };
 
-export const headToHead = (matches: Match[], playerId: string, opponentId: string): HeadToHead => {
+export const headToHead = (matches: Match[], playerId: string, opponentId: string) => {
   const record: HeadToHead = { a: 0, b: 0 };
 
   for (const match of matches) {
@@ -45,5 +45,5 @@ export const headToHead = (matches: Match[], playerId: string, opponentId: strin
     }
   }
 
-  return record;
+  return record satisfies HeadToHead;
 };

@@ -97,7 +97,7 @@ export class MikroReplyStore implements ReplyWrites {
 }
 
 export const replyReports = (em: EntityManager) => ({
-  async findByReplyAndReporter(replyId: string, userId: string): Promise<ReplyReportRecord | null> {
+  async findByReplyAndReporter(replyId: string, userId: string) {
     const row = await em.findOne(ReplyReport, {
       reply: { id: replyId },
       reporter: { id: userId },

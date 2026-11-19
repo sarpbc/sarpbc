@@ -8,7 +8,7 @@ import { WEEKLY_DIGEST_NEWS_TYPE } from "../../domain/news-type";
 import type { NewsArticleRecord } from "../../application/models";
 import type { NewsWriteScope } from "../../application/ports";
 
-const newsSnapshot = (row: NewsArticle): NewsArticleRecord => ({
+const newsSnapshot = (row: NewsArticle) => ({
   author: { id: row.author.id, userName: row.author.userName },
   content: row.content,
   contentFr: row.contentFr,
@@ -37,18 +37,14 @@ export class MikroNewsStore implements NewsStore {
 
     return row ? newsSnapshot(row) : null;
   }
-  async listPublished(
-    page: number,
-    limit: number,
-    type?: NewsType,
-  ): Promise<[NewsArticleRecord[], number]> {
+  async listPublished(page: number, limit: number, type?: NewsType) {
     const [rows, total] = await this.em.findAndCount(
       NewsArticle,
       type ? { isDraft: false, type } : { isDraft: false },
       { limit, offset: page * limit, orderBy: { createdAt: "DESC" }, populate: ["author"] },
     );
 
-    return [rows.map(newsSnapshot), total];
+    return [rows.map(newsSnapshot), total] satisfies [NewsArticleRecord[], number];
   }
   async listWeek(start: Date, end: Date, limit: number) {
     const rows = await this.em.find(
@@ -59,14 +55,14 @@ export class MikroNewsStore implements NewsStore {
 
     return rows.map(newsSnapshot);
   }
-  async listAdmin(page: number, limit: number): Promise<[NewsArticleRecord[], number]> {
+  async listAdmin(page: number, limit: number) {
     const [rows, total] = await this.em.findAndCount(
       NewsArticle,
       {},
       { limit, offset: page * limit, orderBy: { createdAt: "DESC" }, populate: ["author"] },
     );
 
-    return [rows.map(newsSnapshot), total];
+    return [rows.map(newsSnapshot), total] satisfies [NewsArticleRecord[], number];
   }
   async save(model: NewsArticleRecord) {
     const row = (await this.em.findOne(NewsArticle, { id: model.id })) ?? new NewsArticle();

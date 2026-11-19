@@ -8,7 +8,7 @@ import { frameworkViolations } from "./check-package-imports.ts";
 const packageWith = (
   files: Record<string, string>,
   manifest: { dependencies?: Record<string, string> } = {},
-): string => {
+) => {
   const directory = mkdtempSync(path.join(tmpdir(), "package-imports-"));
   mkdirSync(path.join(directory, "src"));
   writeFileSync(path.join(directory, "package.json"), JSON.stringify(manifest));

@@ -1,6 +1,5 @@
 <script setup lang="ts">
 const { label = null, orientation = "horizontal" } = defineProps<{
-  /** Centered between two lines, in either orientation. */
   label?: string | null;
   orientation?: "horizontal" | "vertical";
 }>();

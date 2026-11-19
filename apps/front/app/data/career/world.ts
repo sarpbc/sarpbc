@@ -180,8 +180,7 @@ export const WORLD_TEAMS: readonly CareerWorldTeam[] = [
   },
 ] as const;
 
-export const getWorldTeamById = (id: string): CareerWorldTeam | undefined =>
-  WORLD_TEAMS.find((team) => team.id === id);
+export const getWorldTeamById = (id: string) => WORLD_TEAMS.find((team) => team.id === id);
 
-export const getWorldTeamsByRegion = (region: CareerRegion): CareerWorldTeam[] =>
+export const getWorldTeamsByRegion = (region: CareerRegion) =>
   WORLD_TEAMS.filter((team) => team.region === region);

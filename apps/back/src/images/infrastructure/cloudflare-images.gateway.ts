@@ -3,19 +3,13 @@ import { ConfigService } from "@nestjs/config";
 import axios, { AxiosError } from "axios";
 import { createLogger } from "evlog";
 import { nodeEnvironment } from "../../infrastructure/config/env.validation";
-import type { ImageHost, ImageUploadUrl } from "../application/ports/image.repository";
-
-interface CloudflareCredentials {
-  accountId: string;
-  apiToken: string;
-  accountHash: string;
-}
+import type { ImageHost } from "../application/ports/image.repository";
 
 @Injectable()
 export class CloudflareImagesGateway implements ImageHost {
   constructor(private readonly configService: ConfigService) {}
 
-  private credentials(): CloudflareCredentials {
+  private credentials() {
     const accountId = this.configService.get<string>("cloudflare_account_id");
     const apiToken = this.configService.get<string>("cloudflare_api_token");
     const accountHash = this.configService.get<string>("cloudflare_account_hash");
@@ -34,7 +28,7 @@ export class CloudflareImagesGateway implements ImageHost {
     return { accountHash, accountId, apiToken };
   }
 
-  async createUploadUrl(): Promise<ImageUploadUrl> {
+  async createUploadUrl() {
     const { accountId, apiToken } = this.credentials();
 
     const log = createLogger({
@@ -79,7 +73,7 @@ export class CloudflareImagesGateway implements ImageHost {
     }
   }
 
-  imageUrl(imageId: string): string {
+  imageUrl(imageId: string) {
     return `https://imagedelivery.net/${this.credentials().accountHash}/${imageId}/public`;
   }
 }

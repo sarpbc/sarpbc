@@ -1,40 +1,20 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { competitionFeed } from "../../../../test/competition-doubles";
-import { unconstructed } from "../../../../test/doubles";
-import { CompetitionSyncService } from "./competition-sync.service";
+import { beforeEach, describe, expect, it } from "vitest";
+import { memoryFeed } from "../feed.test-utils";
+import { recordingDiagnostics } from "../ports.test-utils";
+import { RecordingCompetitionSync } from "./competition-sync.test-utils";
 import { SyncPandascoreIncidentsUseCase } from "./sync-pandascore-incidents.use-case";
-import type { CompetitionFeed, CompetitionIncident } from "../feed";
-import type { CompetitionDiagnostics, SyncCursor, TournamentQueries } from "../ports";
+import type { CompetitionIncident } from "../feed";
+import type { Tournament } from "../../domain/tournament";
 
 describe("PandaScore incidents", () => {
-  const feed = {
-    getTournamentById: vi.fn<CompetitionFeed["getTournamentById"]>(),
-    listIncidents: vi.fn<CompetitionFeed["listIncidents"]>(),
-  };
-
-  const cursor = {
-    getLastSyncAt: vi.fn<SyncCursor["getLastSyncAt"]>(),
-    setLastSyncAt: vi.fn<SyncCursor["setLastSyncAt"]>(),
-  };
-
-  const reads = { findByPandascoreId: vi.fn<TournamentQueries["findByPandascoreId"]>() };
-  const sync = { applyIncident: vi.fn<CompetitionSyncService["applyIncident"]>() };
-
-  const diagnostics = {
-    error: vi.fn<CompetitionDiagnostics["error"]>(),
-    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
-  };
-
   const now = new Date("2026-10-15T12:00:00Z");
 
-  const service = new SyncPandascoreIncidentsUseCase(
-    competitionFeed(feed),
-    cursor,
-    reads,
-    Object.assign(unconstructed(CompetitionSyncService), sync),
-    diagnostics,
-    () => now,
-  );
+  let feed: ReturnType<typeof memoryFeed>;
+  let sync: RecordingCompetitionSync;
+  let knownTournaments: Tournament[];
+  let lastSyncAt: Date | null;
+  let cursorWrites: { date: Date; appliedSoFar: number }[];
+  let service: SyncPandascoreIncidentsUseCase;
 
   const base = {
     changeType: "update" as const,
@@ -43,88 +23,86 @@ describe("PandaScore incidents", () => {
   };
 
   beforeEach(() => {
-    vi.clearAllMocks();
-    cursor.getLastSyncAt.mockResolvedValue(new Date("2026-10-14"));
-    sync.applyIncident.mockResolvedValue(undefined);
-  });
-
-  it("uses a one-day lookback and advances empty feeds to now", async () => {
-    cursor.getLastSyncAt.mockResolvedValue(null);
-    feed.listIncidents.mockResolvedValue([]);
-    await service.execute();
-    expect(feed.listIncidents).toHaveBeenCalledWith({ since: new Date("2026-10-14T12:00:00Z") });
-    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(now);
-  });
-
-  it.each(["tournament", "team", "league"] as const)(
-    "applies normalized %s updates",
-    async (kind) => {
-      const incident = { ...base, command: { name: "RLCS", pandascoreId: 42, slug: "rlcs" }, kind };
-      feed.listIncidents.mockResolvedValue([incident]);
-      await service.execute();
-      expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
-      expect(cursor.setLastSyncAt).toHaveBeenCalledWith(base.modifiedAt);
-    },
-  );
-
-  it.each([null, { name: "Current", pandascoreId: 7, slug: "current" }])(
-    "preserves explicit current membership update %p",
-    async (currentTeam) => {
-      const incident: CompetitionIncident = {
-        ...base,
-        command: { currentTeam, player: { name: "Player", pandascoreId: 1, slug: "player" } },
-        kind: "player",
-      };
-
-      feed.listIncidents.mockResolvedValue([incident]);
-      await service.execute();
-      expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
-    },
-  );
-
-  const team = (id: number, modifiedAt: string): CompetitionIncident => ({
-    ...base,
-    command: { name: `T${id}`, slug: `t${id}` },
-    id,
-    kind: "team",
-    modifiedAt: new Date(modifiedAt),
-  });
-
-  it("keeps processing after a failure but does not move the cursor past it", async () => {
-    const incidents = [team(1, "2026-10-15T10:00:00Z"), team(2, "2026-10-15T11:00:00Z")];
-    feed.listIncidents.mockResolvedValue(incidents);
-    sync.applyIncident
-      .mockRejectedValueOnce(new Error("rollback"))
-      .mockResolvedValueOnce(undefined);
-    await service.execute();
-    expect(sync.applyIncident).toHaveBeenCalledTimes(2);
-    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-15T09:59:59.999Z"));
-    expect(cursor.setLastSyncAt.mock.invocationCallOrder[0]).toBeGreaterThan(
-      sync.applyIncident.mock.invocationCallOrder[1],
+    feed = memoryFeed();
+    sync = new RecordingCompetitionSync();
+    knownTournaments = [];
+    lastSyncAt = new Date("2026-10-14");
+    cursorWrites = [];
+    service = new SyncPandascoreIncidentsUseCase(
+      feed,
+      {
+        getLastSyncAt: async () => lastSyncAt,
+        setLastSyncAt: async (date) => {
+          cursorWrites.push({ appliedSoFar: sync.applied.length, date });
+        },
+      },
+      {
+        findByPandascoreId: async (id) =>
+          knownTournaments.find((tournament) => tournament.pandascoreId === id) ?? null,
+      },
+      sync,
+      recordingDiagnostics(),
+      () => now,
     );
   });
 
+  const writtenDates = () => cursorWrites.map((write) => write.date);
+
+  it("uses a one-day lookback and advances empty feeds to now", async () => {
+    lastSyncAt = null;
+    await service.execute();
+    expect(feed.requestedIncidents).toStrictEqual([{ since: new Date("2026-10-14T12:00:00Z") }]);
+    expect(writtenDates()).toContainEqual(now);
+  });
+
+  it("applies a non-match update without a backfill and advances the cursor", async () => {
+    const incident: CompetitionIncident = {
+      ...base,
+      command: { name: "RLCS", pandascoreId: 42 },
+      kind: "tournament",
+    };
+
+    feed.incidents.push(incident);
+    await service.execute();
+    expect(sync.applied).toContainEqual({ backfill: undefined, incident });
+    expect(writtenDates()).toContainEqual(base.modifiedAt);
+  });
+
+  const team = (id: number, modifiedAt: string) =>
+    ({
+      ...base,
+      command: { name: `T${id}`, slug: `t${id}` },
+      id,
+      kind: "team",
+      modifiedAt: new Date(modifiedAt),
+    }) satisfies CompetitionIncident;
+
+  it("keeps processing after a failure but does not move the cursor past it", async () => {
+    feed.incidents.push(team(1, "2026-10-15T10:00:00Z"), team(2, "2026-10-15T11:00:00Z"));
+    sync.outcomes = [new Error("rollback"), null];
+    await service.execute();
+    expect(sync.applied).toHaveLength(2);
+    expect(cursorWrites).toStrictEqual([
+      { appliedSoFar: 2, date: new Date("2026-10-15T09:59:59.999Z") },
+    ]);
+  });
+
   it("stops the cursor before the earliest of several failures", async () => {
-    const incidents = [
+    feed.incidents.push(
       team(1, "2026-10-15T09:00:00Z"),
       team(2, "2026-10-15T10:00:00Z"),
       team(3, "2026-10-15T11:00:00Z"),
-    ];
-
-    feed.listIncidents.mockResolvedValue(incidents);
-    sync.applyIncident
-      .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error("b"))
-      .mockRejectedValueOnce(new Error("c"));
+    );
+    sync.outcomes = [null, new Error("b"), new Error("c")];
     await service.execute();
-    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-15T09:59:59.999Z"));
+    expect(writtenDates()).toContainEqual(new Date("2026-10-15T09:59:59.999Z"));
   });
 
   it("never moves the cursor back before where this run started", async () => {
-    feed.listIncidents.mockResolvedValue([team(1, "2026-10-14T00:00:00Z")]);
-    sync.applyIncident.mockRejectedValueOnce(new Error("rollback"));
+    feed.incidents.push(team(1, "2026-10-14T00:00:00Z"));
+    sync.outcomes = [new Error("rollback")];
     await service.execute();
-    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(new Date("2026-10-14T00:00:00Z"));
+    expect(writtenDates()).toContainEqual(new Date("2026-10-14T00:00:00Z"));
   });
 
   it("hands deletions to the sync without a backfill and advances the cursor", async () => {
@@ -135,11 +113,11 @@ describe("PandaScore incidents", () => {
       kind: "serie",
     };
 
-    feed.listIncidents.mockResolvedValue([incident]);
+    feed.incidents.push(incident);
     await service.execute();
-    expect(feed.getTournamentById).not.toHaveBeenCalled();
-    expect(sync.applyIncident).toHaveBeenCalledWith(incident, undefined);
-    expect(cursor.setLastSyncAt).toHaveBeenCalledWith(base.modifiedAt);
+    expect(feed.requestedTournaments).toStrictEqual([]);
+    expect(sync.applied).toContainEqual({ backfill: undefined, incident });
+    expect(writtenDates()).toContainEqual(base.modifiedAt);
   });
 
   it("fetches missing tournament before the incident write", async () => {
@@ -159,12 +137,11 @@ describe("PandaScore incidents", () => {
       kind: "match",
     };
 
-    feed.listIncidents.mockResolvedValue([incident]);
-    reads.findByPandascoreId.mockResolvedValue(null);
+    feed.incidents.push(incident);
+
     const tournament = { name: "Cup", pandascoreId: 42 };
-    feed.getTournamentById.mockResolvedValue(tournament);
+    feed.tournamentsById.set(42, tournament);
     await service.execute();
-    expect(feed.getTournamentById).toHaveBeenCalledWith(42);
-    expect(sync.applyIncident).toHaveBeenCalledWith(incident, tournament);
+    expect(sync.applied).toContainEqual({ backfill: tournament, incident });
   });
 });

@@ -1,6 +1,6 @@
 import { isNonEmptyDateInput } from "@sarpbc/utils";
 
-export const formatDateForInput = (date: Date | string | null | undefined): string => {
+export const formatDateForInput = (date: Date | string | null | undefined) => {
   if (!isNonEmptyDateInput(date)) {
     return "";
   }

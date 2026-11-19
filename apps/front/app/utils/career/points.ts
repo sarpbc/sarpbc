@@ -18,7 +18,7 @@ export const MAJOR_POINTS = {
   winner: 20,
 } satisfies Record<CareerPlacement, number>;
 
-export const regionalCircuitWeight = (region: CareerRegion): number => {
+export const regionalCircuitWeight = (region: CareerRegion) => {
   switch (region) {
     case "eu": {
       return 1;
@@ -50,8 +50,7 @@ export const regionalCircuitWeight = (region: CareerRegion): number => {
   }
 };
 
-export const computeSeasonPoints = (splits: CareerSplitRecord[]): number =>
+export const computeSeasonPoints = (splits: CareerSplitRecord[]) =>
   splits.reduce((sum, split) => sum + split.points, 0);
 
-export const computeCircuitPoints = (splits: CareerSplitRecord[]): number =>
-  computeSeasonPoints(splits);
+export const computeCircuitPoints = (splits: CareerSplitRecord[]) => computeSeasonPoints(splits);

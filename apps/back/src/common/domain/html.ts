@@ -39,7 +39,7 @@ const NEWS_ALLOWED_ATTRS = {
   th: new Set(["colspan", "rowspan"]),
 } as const;
 
-const isSafeUrl = (value: string): boolean => {
+const isSafeUrl = (value: string) => {
   const trimmed = value.trim().toLowerCase();
 
   return (
@@ -50,12 +50,11 @@ const isSafeUrl = (value: string): boolean => {
   );
 };
 
-const asciiLowerCase = (value: string): string =>
-  value.replaceAll(/[A-Z]/gu, (char) => char.toLowerCase());
+const asciiLowerCase = (value: string) => value.replaceAll(/[A-Z]/gu, (char) => char.toLowerCase());
 
-const isWordChar = (char: string): boolean => /\w/u.test(char);
+const isWordChar = (char: string) => /\w/u.test(char);
 
-const rawTextElementAt = (lower: string, index: number): RawTextElement | null => {
+const rawTextElementAt = (lower: string, index: number) => {
   for (const name of RAW_TEXT_ELEMENTS) {
     if (lower.startsWith(`<${name}`, index) && !isWordChar(lower.charAt(index + name.length + 1))) {
       return name;
@@ -65,7 +64,7 @@ const rawTextElementAt = (lower: string, index: number): RawTextElement | null =
   return null;
 };
 
-const findEndTag = (lower: string, name: RawTextElement, from: number): number => {
+const findEndTag = (lower: string, name: RawTextElement, from: number) => {
   let index = lower.indexOf(`</${name}`, from);
 
   while (index !== -1) {
@@ -79,7 +78,7 @@ const findEndTag = (lower: string, name: RawTextElement, from: number): number =
   return -1;
 };
 
-const stripDangerousBlocks = (value: string): string => {
+const stripDangerousBlocks = (value: string) => {
   const lower = asciiLowerCase(value);
   const unclosed = new Set<RawTextElement | "comment">();
   let result = "";
@@ -128,7 +127,7 @@ const stripDangerousBlocks = (value: string): string => {
   return result + value.slice(copiedUntil);
 };
 
-const stripTags = (value: string): string => {
+const stripTags = (value: string) => {
   let result = "";
   let copiedUntil = 0;
   let index = value.indexOf("<");
@@ -151,9 +150,9 @@ const stripTags = (value: string): string => {
   return result + value.slice(copiedUntil);
 };
 
-export const sanitizePlainText = (value: string): string => stripTags(stripDangerousBlocks(value));
+export const sanitizePlainText = (value: string) => stripTags(stripDangerousBlocks(value));
 
-export const sanitizeNewsHtml = (value: string): string =>
+export const sanitizeNewsHtml = (value: string) =>
   stripDangerousBlocks(value).replaceAll(
     /<\/?(?<tag>[a-zA-Z][\w:-]*)\b(?<attrs>[^>]*)>/gu,
     (full: string, rawName: string, rawAttrs: string) => {

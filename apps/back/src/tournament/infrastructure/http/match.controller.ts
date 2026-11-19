@@ -10,7 +10,6 @@ import type {
 } from "@sarpbc/types";
 import { MatchService } from "../../application/match/match.service";
 import { MatchLineupService } from "../../application/match/match-lineup.service";
-import type { MatchListScopeFilters } from "../../application/match/match-list-filters";
 import { mapMatchBlockItem, mapMatchListItem, withPublicSlug } from "./match-list.mapper";
 import { ReplyService } from "../../../reply/application/reply.service";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
@@ -20,7 +19,7 @@ import type { EntityRef } from "../../../common/domain/entity-ref";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { nonBlank } from "../../../common/domain/text";
 
-const parseMatchBlockKeys = (raw?: string | string[]): Map<string, MatchBlockSelector> => {
+const parseMatchBlockKeys = (raw?: string | string[]) => {
   const keys = [...new Set([raw ?? []].flat())];
 
   if (keys.length === 0 || keys.length > NEWS_MATCH_BLOCKS_PER_REQUEST) {
@@ -39,25 +38,18 @@ const parseMatchBlockKeys = (raw?: string | string[]): Map<string, MatchBlockSel
 
       return [key, block];
     }),
-  );
+  ) satisfies Map<string, MatchBlockSelector>;
 };
 
-const parseListScopeFilters = (
-  tournamentId?: string,
-  leagueId?: string,
-): MatchListScopeFilters => ({
+const parseListScopeFilters = (tournamentId?: string, leagueId?: string) => ({
   leagueId: nonBlank(leagueId),
   tournamentId: nonBlank(tournamentId),
 });
 
-const parsePagingValue = (name: string, value?: string): number | undefined => {
-  if (value === undefined || value === "") {
-    return undefined;
-  }
+const parsePagingValue = (name: string, value?: string) => {
+  const parsed = value === undefined || value === "" ? undefined : Number(value);
 
-  const parsed = Number(value);
-
-  if (!Number.isSafeInteger(parsed) || parsed < 0) {
+  if (parsed !== undefined && (!Number.isSafeInteger(parsed) || parsed < 0)) {
     throw new InvalidInputError(`Invalid ${name} "${value}".`);
   }
 
@@ -69,14 +61,11 @@ const parsePaging = (limit?: string, offset?: string) => ({
   offset: parsePagingValue("offset", offset) ?? 0,
 });
 
-const attachCommentCounts = (
-  items: MatchListItem[],
-  counts: Map<string, number>,
-): CountedMatchListItem[] =>
+const attachCommentCounts = (items: MatchListItem[], counts: Map<string, number>) =>
   items.map((item) => ({
     ...item,
     commentCount: counts.get(item.id) ?? 0,
-  }));
+  })) satisfies CountedMatchListItem[];
 
 @Controller("matches")
 export class MatchController {
@@ -94,7 +83,7 @@ export class MatchController {
     @Query("today") today?: string,
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
-  ): Promise<UpcomingMatchesResponse> {
+  ) {
     const options = {
       ...parsePaging(limit, offset),
       todayOnly: today === "true",
@@ -115,7 +104,7 @@ export class MatchController {
       total: upcomingTotal + liveTotal,
       upcoming: attachCommentCounts(upcomingMatches.map(mapMatchListItem), commentCounts),
       upcomingTotal,
-    };
+    } satisfies UpcomingMatchesResponse;
   }
 
   @Get("results")
@@ -124,7 +113,7 @@ export class MatchController {
     @Query("offset") offset?: string,
     @Query("tournamentId") tournamentId?: string,
     @Query("leagueId") leagueId?: string,
-  ): Promise<MatchResultsResponse> {
+  ) {
     const [results, total] = await this.matchService.list("results", {
       ...parsePaging(limit, offset),
       ...parseListScopeFilters(tournamentId, leagueId),
@@ -138,12 +127,12 @@ export class MatchController {
     return {
       results: attachCommentCounts(results.map(mapMatchListItem), commentCounts),
       total,
-    };
+    } satisfies MatchResultsResponse;
   }
 
   @Get("blocks")
   @Header("Cache-Control", "public, max-age=10")
-  async findBlocks(@Query("block") block?: string | string[]): Promise<MatchBlocksResponse> {
+  async findBlocks(@Query("block") block?: string | string[]) {
     const blocks = parseMatchBlockKeys(block);
     const now = new Date();
     const found = await this.matchService.findBlocks([...blocks.values()], now);
@@ -161,7 +150,7 @@ export class MatchController {
           ),
         ]),
       ),
-    };
+    } satisfies MatchBlocksResponse;
   }
 
   @Get(":ref")

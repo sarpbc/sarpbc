@@ -2,18 +2,17 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { isMatchFinished } from "@sarpbc/utils";
 import { Match, Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import type { StatsCandidates } from "../../application/ports";
-import type { CandidateMatch } from "../../domain/replay-matching";
 import { MatchGame } from "./match-game.entity";
 import { nameOf } from "./participant-name";
 
 export class MikroOrmStatsCandidates implements StatsCandidates {
   constructor(private readonly em: EntityManager) {}
 
-  async tournamentExists(tournamentId: string): Promise<boolean> {
+  async tournamentExists(tournamentId: string) {
     return (await this.em.count(Tournament, { id: tournamentId })) > 0;
   }
 
-  async matches(tournamentId: string): Promise<CandidateMatch[]> {
+  async matches(tournamentId: string) {
     const matches = await this.em.find(
       Match,
       { tournament: tournamentId },

@@ -4,14 +4,14 @@ const PUBLIC_ID = /^[1-9]\d{0,9}$/u;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 const MAX_PUBLIC_ID = 2_147_483_647;
 
-export const isUuid = (raw: string): boolean => UUID.test(raw);
+export const isUuid = (raw: string) => UUID.test(raw);
 
-export const parseEntityRef = (raw: string): EntityRef | null => {
+export const parseEntityRef = (raw: string) => {
   if (PUBLIC_ID.test(raw)) {
     const value = Number(raw);
 
-    return value <= MAX_PUBLIC_ID ? { kind: "publicId", value } : null;
+    return value <= MAX_PUBLIC_ID ? ({ kind: "publicId", value } satisfies EntityRef) : null;
   }
 
-  return isUuid(raw) ? { kind: "id", value: raw.toLowerCase() } : null;
+  return isUuid(raw) ? ({ kind: "id", value: raw.toLowerCase() } satisfies EntityRef) : null;
 };

@@ -7,6 +7,7 @@ export default defineConfig({
     coverage: {
       exclude: [
         "src/**/*.test.ts",
+        "src/**/*.test-utils.ts",
         "src/**/*.d.ts",
         "src/**/*.module.ts",
         "src/**/dto/**",

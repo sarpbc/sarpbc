@@ -6,10 +6,9 @@ export interface NewsTagAttr {
 const WORD_CHAR = /\w/u;
 const NOT_LINE_TERMINATOR = /./u;
 
-const isWordChar = (char: string | undefined): boolean =>
-  char !== undefined && WORD_CHAR.test(char);
+const isWordChar = (char: string | undefined) => char !== undefined && WORD_CHAR.test(char);
 
-const findClosingQuote = (raw: string, from: number): number => {
+const findClosingQuote = (raw: string, from: number) => {
   let index = from;
 
   while (index < raw.length) {
@@ -36,13 +35,12 @@ const findClosingQuote = (raw: string, from: number): number => {
   return -1;
 };
 
-export const escapeNewsTagAttrValue = (value: string): string =>
+export const escapeNewsTagAttrValue = (value: string) =>
   value.replaceAll("\\", "\\\\").replaceAll('"', '\\"');
 
-const unescapeAttrValue = (value: string): string =>
-  value.replaceAll('\\"', '"').replaceAll("\\\\", "\\");
+const unescapeAttrValue = (value: string) => value.replaceAll('\\"', '"').replaceAll("\\\\", "\\");
 
-export const parseNewsTagAttrs = (raw: string): NewsTagAttr[] => {
+export const parseNewsTagAttrs = (raw: string) => {
   const attrs: NewsTagAttr[] = [];
   let index = 0;
 

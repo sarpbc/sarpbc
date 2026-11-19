@@ -53,7 +53,7 @@ const NOISE_TABLE_SIZE = 2 ** 20;
 const PRNG_MODULUS = 2_147_483_647;
 const PRNG_MULTIPLIER = 48_271;
 
-export const seededRandom = (seed: number): (() => number) => {
+export const seededRandom = (seed: number) => {
   let state = (Math.abs(Math.trunc(seed)) % (PRNG_MODULUS - 1)) + 1;
 
   return () => {
@@ -63,16 +63,16 @@ export const seededRandom = (seed: number): (() => number) => {
   };
 };
 
-const formatClock = (seconds: number, overtime: boolean): string => {
+const formatClock = (seconds: number, overtime: boolean) => {
   const minutes = Math.floor(seconds / 60);
 
   return `${overtime ? "+" : ""}${minutes}:${String(seconds % 60).padStart(2, "0")}`;
 };
 
-const overlap = (a0: number, a1: number, b0: number, b1: number): number =>
+const overlap = (a0: number, a1: number, b0: number, b1: number) =>
   Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
 
-const rectCoverage = (region: Region, x0: number, x1: number, y0: number, y1: number): number =>
+const rectCoverage = (region: Region, x0: number, x1: number, y0: number, y1: number) =>
   (overlap(x0, x1, region.x, region.x + region.width) *
     overlap(y0, y1, region.y, region.y + region.height)) /
   ((x1 - x0) * (y1 - y0));
@@ -105,13 +105,10 @@ const textInk = (text: string) => {
   return { columns: ink[0]?.length ?? 0, ink };
 };
 
-const backgroundAt = (x: number, y: number): Rgb => [
-  40 + ((x * 7 + y * 3) % 50),
-  70 + ((x + y) % 40),
-  60 + ((x * 3 + y * 5) % 45),
-];
+const backgroundAt = (x: number, y: number) =>
+  [40 + ((x * 7 + y * 3) % 50), 70 + ((x + y) % 40), 60 + ((x * 3 + y * 5) % 45)] satisfies Rgb;
 
-const mix = (a: number, b: number, amount: number): number => a + (b - a) * amount;
+const mix = (a: number, b: number, amount: number) => a + (b - a) * amount;
 
 export class FixtureRenderer {
   readonly frame: Frame;
@@ -160,7 +157,7 @@ export class FixtureRenderer {
     }
   }
 
-  render(scene: Scene, noise: number): Frame {
+  render(scene: Scene, noise: number) {
     const layer =
       scene.kind === "scorebug" ? this.#scorebug(scene) : this.#hiddenLayer(scene.variant);
 
@@ -184,9 +181,7 @@ export class FixtureRenderer {
     return this.frame;
   }
 
-  #bandLayer(
-    paint: (x0: number, x1: number, y0: number, y1: number, base: Rgb) => Rgb,
-  ): Float32Array {
+  #bandLayer(paint: (x0: number, x1: number, y0: number, y1: number, base: Rgb) => Rgb) {
     const band = this.#band;
     const layer = new Float32Array(band.width * band.height * 3);
 
@@ -205,7 +200,7 @@ export class FixtureRenderer {
     return layer;
   }
 
-  #panel(replay: boolean): Float32Array {
+  #panel(replay: boolean) {
     const cached = this.#panels.get(replay);
 
     if (cached !== undefined) {
@@ -242,7 +237,7 @@ export class FixtureRenderer {
     return layer;
   }
 
-  #text(region: Region, text: string): Float32Array {
+  #text(region: Region, text: string) {
     const key = `${region.x}:${text}`;
     const cached = this.#texts.get(key);
 
@@ -291,7 +286,7 @@ export class FixtureRenderer {
     return coverage;
   }
 
-  #scorebug(scene: ScorebugScene): Float32Array {
+  #scorebug(scene: ScorebugScene) {
     const panel = this.#panel(scene.replay);
     const blue = this.#text(TEXT_REGIONS.blue, String(scene.blue));
     const clock = this.#text(TEXT_REGIONS.clock, formatClock(scene.clock, scene.overtime));
@@ -311,7 +306,7 @@ export class FixtureRenderer {
     return layer;
   }
 
-  #hiddenLayer(variant: number): Float32Array {
+  #hiddenLayer(variant: number) {
     const cached = this.#hidden.get(variant);
 
     if (cached !== undefined) {

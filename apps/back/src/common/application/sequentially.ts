@@ -5,10 +5,10 @@
 export const mapSequentially = async <Item, Result>(
   items: readonly Item[],
   task: (item: Item, index: number) => Promise<Result>,
-): Promise<Result[]> => {
+) => {
   const results: Result[] = [];
 
-  const step = async (index: number): Promise<void> => {
+  const step = async (index: number) => {
     if (index === items.length) {
       return;
     }

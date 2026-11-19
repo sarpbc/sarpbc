@@ -9,20 +9,22 @@ const localeObject = z.record(z.string(), localeValue);
 
 export type LocaleValue = z.infer<typeof localeValue>;
 
-const leafKeys = (value: LocaleValue, prefix = ""): string[] => {
+const leafKeys = (value: LocaleValue, prefix = "") => {
   const object = localeObject.safeParse(value);
 
   if (!object.success) {
     return [prefix];
   }
 
-  return Object.entries(object.data).flatMap(([key, child]) =>
+  const keys: string[] = Object.entries(object.data).flatMap(([key, child]) =>
     leafKeys(child, prefix ? `${prefix}.${key}` : key),
   );
+
+  return keys;
 };
 
-export const parityViolations = (directory: string): string[] => {
-  const keys = (locale: string): Set<string> =>
+export const parityViolations = (directory: string) => {
+  const keys = (locale: string) =>
     new Set(
       leafKeys(
         localeValue.parse(

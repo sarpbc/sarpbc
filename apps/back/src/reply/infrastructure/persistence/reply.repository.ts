@@ -5,15 +5,12 @@ import { z } from "zod";
 import type { ReplyTargetType } from "@sarpbc/types";
 import type { ReplyFindOptions } from "../../application/ports";
 import { REPLY_TARGETS, replySortOrder } from "../../domain/reply";
-import type { ReplyTargetFields } from "../../domain/reply";
 import { Reply } from "./reply.entity";
 import { REPLY_POPULATE } from "./reply.mapper";
 
 type ReplyTargetMatch = { id: string } | { $in: string[] };
 
-type ReplyTargetFilter = Partial<Record<keyof ReplyTargetFields, ReplyTargetMatch>>;
-
-const onTarget = (targetType: ReplyTargetType, target: ReplyTargetMatch): ReplyTargetFilter => ({
+const onTarget = (targetType: ReplyTargetType, target: ReplyTargetMatch) => ({
   [REPLY_TARGETS[targetType].field]: target,
 });
 
@@ -29,7 +26,7 @@ export class ReplyRepository {
     targetType: ReplyTargetType,
     targetId: string,
     options: ReplyFindOptions = {},
-  ): Promise<Reply[]> {
+  ) {
     const { includeHidden = false, limit, offset, rootsOnly = false } = options;
 
     const where: FilterQuery<Reply> = onTarget(targetType, { id: targetId });
@@ -51,18 +48,18 @@ export class ReplyRepository {
     });
   }
 
-  async findById(id: string): Promise<Reply | null> {
+  async findById(id: string) {
     return await this.rows.findOne({ id }, { populate: [...REPLY_POPULATE] });
   }
 
-  async findLatestByUser(userId: string): Promise<Reply | null> {
+  async findLatestByUser(userId: string) {
     return await this.rows.findOne(
       { author: { id: userId } },
       { orderBy: { createdAt: QueryOrder.DESC }, populate: [...REPLY_POPULATE] },
     );
   }
 
-  async countRootsByTarget(targetType: ReplyTargetType, targetId: string): Promise<number> {
+  async countRootsByTarget(targetType: ReplyTargetType, targetId: string) {
     return await this.rows.count({
       ...onTarget(targetType, { id: targetId }),
       hiddenAt: null,
@@ -70,10 +67,7 @@ export class ReplyRepository {
     });
   }
 
-  async countByTargetIds(
-    targetType: ReplyTargetType,
-    targetIds: string[],
-  ): Promise<Map<string, number>> {
+  async countByTargetIds(targetType: ReplyTargetType, targetIds: string[]) {
     if (targetIds.length === 0) {
       return new Map();
     }
@@ -91,11 +85,7 @@ export class ReplyRepository {
     return counts;
   }
 
-  async findDescendantsForRoots(
-    targetType: ReplyTargetType,
-    targetId: string,
-    rootIds: string[],
-  ): Promise<Reply[]> {
+  async findDescendantsForRoots(targetType: ReplyTargetType, targetId: string, rootIds: string[]) {
     if (rootIds.length === 0) {
       return [];
     }
@@ -136,14 +126,14 @@ export class ReplyRepository {
     return [...collected.values()];
   }
 
-  async findChildren(replyId: string): Promise<Reply[]> {
+  async findChildren(replyId: string) {
     return await this.rows.findAll({
       populate: [...REPLY_POPULATE],
       where: { replyTo: { id: replyId } },
     });
   }
 
-  async findRecentForModeration(limit: number): Promise<{ reply: Reply; reportCount: number }[]> {
+  async findRecentForModeration(limit: number) {
     const rows = moderationRows.parse(
       await this.em.getConnection().execute(
         `

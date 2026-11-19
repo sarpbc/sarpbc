@@ -1,3 +1,4 @@
+import type { TrackedStreamer } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -11,7 +12,6 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import type { TrackedStreamer } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -20,12 +20,13 @@ import { StreamerService } from "../../application/streamer.service";
 import { CreateStreamerDto } from "./dto/create-streamer.dto";
 import type { CreateStreamerInput } from "./dto/create-streamer.dto";
 
-const mapTrackedStreamer = (streamer: TrackedStreamerRecord): TrackedStreamer => ({
-  createdAt: streamer.createdAt.toISOString(),
-  displayName: streamer.displayName,
-  id: streamer.id,
-  login: streamer.login,
-});
+const mapTrackedStreamer = (streamer: TrackedStreamerRecord) =>
+  ({
+    createdAt: streamer.createdAt.toISOString(),
+    displayName: streamer.displayName,
+    id: streamer.id,
+    login: streamer.login,
+  }) satisfies TrackedStreamer;
 
 @Controller("streamers")
 export class StreamerController {
@@ -42,20 +43,22 @@ export class StreamerController {
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("streamers.manage")
   @Get()
-  async list(): Promise<{ streamers: TrackedStreamer[] }> {
+  async list() {
     const streamers = await this.streamerService.list();
 
-    return { streamers: streamers.map(mapTrackedStreamer) };
+    return { streamers: streamers.map(mapTrackedStreamer) } satisfies {
+      streamers: TrackedStreamer[];
+    };
   }
 
   @UseGuards(AuthGuard, PermissionGuard)
   @RequirePermissions("streamers.manage")
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Body({ schema: CreateStreamerDto }) dto: CreateStreamerInput,
-  ): Promise<TrackedStreamer> {
-    return mapTrackedStreamer(await this.streamerService.add(dto.login, dto.displayName));
+  async create(@Body({ schema: CreateStreamerDto }) dto: CreateStreamerInput) {
+    return mapTrackedStreamer(
+      await this.streamerService.add(dto.login, dto.displayName),
+    ) satisfies TrackedStreamer;
   }
 
   @UseGuards(AuthGuard, PermissionGuard)

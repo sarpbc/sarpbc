@@ -24,7 +24,6 @@ const refreshSearch = async () => {
   const query = search.value;
   const { teams, players } = await searchTeamsAndPlayers({ query });
 
-  // A newer keystroke or a cleared field owns the results now.
   if (request !== latestRequest) {
     return;
   }
@@ -62,15 +61,15 @@ const updateSearch = (value: string | null) => {
   handleFocus();
 };
 
-const handleBlur = (): void => {
+const handleBlur = () => {
   open.value = false;
 };
 
-const handleMouseDown = (event: MouseEvent): void => {
+const handleMouseDown = (event: MouseEvent) => {
   event.preventDefault();
 };
 
-const handleLinkClick = (event: MouseEvent): void => {
+const handleLinkClick = (event: MouseEvent) => {
   if (event.target instanceof Element && event.target.closest("a")) {
     search.value = "";
     resetResults();

@@ -12,7 +12,7 @@ interface ReplyNotificationReadFilter {
 const hasTarget = () => REPLY_HAS_TARGET.map((target) => ({ reply: target }));
 
 export class ReplyNotificationRepository extends EntityRepository<ReplyNotification> {
-  async findForRecipient(recipientId: string, limit: number): Promise<ReplyNotification[]> {
+  async findForRecipient(recipientId: string, limit: number) {
     return await this.findAll({
       limit,
       orderBy: { createdAt: "DESC" },
@@ -21,7 +21,7 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
     });
   }
 
-  async countUnread(recipientId: string): Promise<number> {
+  async countUnread(recipientId: string) {
     return await this.count({
       $or: hasTarget(),
       readAt: null,
@@ -29,7 +29,7 @@ export class ReplyNotificationRepository extends EntityRepository<ReplyNotificat
     });
   }
 
-  async markRead(recipientId: string, ids?: string[]): Promise<number> {
+  async markRead(recipientId: string, ids?: string[]) {
     const where: ReplyNotificationReadFilter = {
       readAt: null,
       recipient: { id: recipientId },

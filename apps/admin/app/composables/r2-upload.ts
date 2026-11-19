@@ -7,26 +7,22 @@ interface ImageUploadContext {
   articleTitle?: string | null;
 }
 
-const messageFromNestBody = (responseText: string): string | undefined => {
+const messageFromNestBody = (responseText: string) => {
   try {
     const message = getApiErrorBody(JSON.parse(responseText))?.message;
 
     if (Array.isArray(message)) {
       const joined = message.filter((item) => item.trim().length > 0).join(" ");
 
-      return joined.length > 0 ? joined : undefined;
+      return joined.length > 0 ? joined : null;
     }
 
     const text = message?.trim();
 
-    if (isNonEmptyString(text)) {
-      return text;
-    }
+    return isNonEmptyString(text) ? text : null;
   } catch {
-    return undefined;
+    return null;
   }
-
-  return undefined;
 };
 
 export const useR2Upload = () => {
@@ -35,7 +31,7 @@ export const useR2Upload = () => {
   const isUploading = ref(false);
   const error = ref<string | null>(null);
 
-  const uploadFile = async (file: File, context: ImageUploadContext): Promise<string> => {
+  const uploadFile = async (file: File, context: ImageUploadContext) => {
     isUploading.value = true;
     progress.value = 0;
     error.value = null;

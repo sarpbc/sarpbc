@@ -22,13 +22,13 @@ if (!season.value) {
   });
 }
 
-const awardTitle = (award: SeasonArchiveAward): string => {
+const awardTitle = (award: SeasonArchiveAward) => {
   const type = seasonAwardTypeLabel(award.awardType);
 
   return award.region ? `${type} · ${award.region}` : type;
 };
 
-const awardMeta = (award: SeasonArchiveAward): string =>
+const awardMeta = (award: SeasonArchiveAward) =>
   [
     award.presentedBy
       ? t("page.seasons.archive.awards.presentedBy", { name: award.presentedBy })

@@ -17,19 +17,12 @@ import {
   Tournament,
   TournamentParticipant,
 } from "../../../tournament/infrastructure/competition-persistence";
-import type {
-  ForumPostSitemapRow,
-  MatchSitemapRow,
-  SitemapQueries,
-  SlugSitemapRow,
-  StageSitemapRow,
-  WeeklyDigestSitemapRow,
-} from "../../application/ports";
+import type { SitemapQueries } from "../../application/ports";
 
 export class SitemapStore implements SitemapQueries {
   constructor(private readonly em: EntityManager) {}
 
-  async news(): Promise<SlugSitemapRow[]> {
+  async news() {
     const rows = await this.em.find(
       NewsArticle,
       { isDraft: false },
@@ -42,7 +35,7 @@ export class SitemapStore implements SitemapQueries {
     }));
   }
 
-  async weeklyDigests(): Promise<WeeklyDigestSitemapRow[]> {
+  async weeklyDigests() {
     const rows = await this.em.find(
       NewsArticle,
       { isDraft: false, type: WEEKLY_DIGEST_NEWS_TYPE },
@@ -55,7 +48,7 @@ export class SitemapStore implements SitemapQueries {
     }));
   }
 
-  async stages(): Promise<StageSitemapRow[]> {
+  async stages() {
     const rows = await this.em.find(
       Tournament,
       {},
@@ -69,7 +62,7 @@ export class SitemapStore implements SitemapQueries {
     }));
   }
 
-  async matches(): Promise<MatchSitemapRow[]> {
+  async matches() {
     const rows = await this.em.find(
       Match,
       {},
@@ -104,7 +97,7 @@ export class SitemapStore implements SitemapQueries {
     }));
   }
 
-  async playerSlugs(): Promise<string[]> {
+  async playerSlugs() {
     const appeared = this.em
       .createQueryBuilder(TournamentParticipant, "tp")
       .join("tp.players", "p")
@@ -122,7 +115,7 @@ export class SitemapStore implements SitemapQueries {
     return rows.map((row) => row.slug);
   }
 
-  async staffSlugs(): Promise<string[]> {
+  async staffSlugs() {
     const rows = await this.em.find(
       Player,
       { contracts: { $some: { role: { $in: [...STAFF_CONTRACT_ROLES] } } }, mergedInto: null },
@@ -132,7 +125,7 @@ export class SitemapStore implements SitemapQueries {
     return rows.map((row) => row.slug);
   }
 
-  async teamSlugs(): Promise<string[]> {
+  async teamSlugs() {
     const appeared = this.em.createQueryBuilder(TournamentParticipant, "tp").select("tp.team");
     const contracted = this.em.createQueryBuilder(Contract, "c").select("c.team");
 
@@ -152,13 +145,13 @@ export class SitemapStore implements SitemapQueries {
     return rows.map((row) => row.slug);
   }
 
-  async circuits(): Promise<SlugSitemapRow[]> {
+  async circuits() {
     const rows = await this.em.find(Circuit, {}, { fields: ["slug", "updatedAt"] });
 
     return rows.map((row) => ({ lastmod: new Date(row.updatedAt), slug: row.slug }));
   }
 
-  async seasons(): Promise<SlugSitemapRow[]> {
+  async seasons() {
     const rows = await this.em.find(
       Season,
       { slug: { $ne: null } },
@@ -172,7 +165,7 @@ export class SitemapStore implements SitemapQueries {
     );
   }
 
-  async countryCodes(): Promise<string[]> {
+  async countryCodes() {
     const rows: { code: string }[] = await this.em
       .getConnection()
       .execute(
@@ -182,7 +175,7 @@ export class SitemapStore implements SitemapQueries {
     return rows.map(({ code }) => code);
   }
 
-  async forumPosts(): Promise<ForumPostSitemapRow[]> {
+  async forumPosts() {
     const rows = await this.em.find(
       Post,
       {},

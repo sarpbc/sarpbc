@@ -2,11 +2,10 @@
 type CardSize = "s" | "m" | "l";
 
 const { size = null } = defineProps<{
-  /** Min height on the hub row grid (`n × row-double`). Grows by `row-double` so both side rails stay aligned. */
   size?: CardSize | null;
 }>();
 
-const cardSizeClasses = (value: CardSize): string => {
+const cardSizeClasses = (value: CardSize) => {
   switch (value) {
     case "s": {
       return "min-h-card-s h-row-snap";

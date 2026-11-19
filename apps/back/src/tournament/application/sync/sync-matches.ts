@@ -8,7 +8,7 @@ import type { CompetitionWriteScope } from "../ports";
 const opponentParticipantIds = (
   command: UpsertMatchCommand,
   participants: TournamentParticipant[],
-): string[] => {
+) => {
   const ids =
     command.opponentPandascoreIds?.length !== undefined &&
     command.opponentPandascoreIds.length !== 0
@@ -24,10 +24,10 @@ export const applyMatches = async (
   scope: CompetitionWriteScope,
   tournament: Tournament,
   commands: UpsertMatchCommand[],
-): Promise<string[]> => {
+) => {
   const participants = await scope.tournaments.participants(tournament.id);
 
-  // Bracket links only resolve to matches already written, so earlier matches go first.
+  // WARNING: bracket links only resolve to matches already written, so earlier matches go first.
   const ordered = commands.toSorted(
     (a, b) => (a.beginAt?.getTime() ?? 0) - (b.beginAt?.getTime() ?? 0),
   );

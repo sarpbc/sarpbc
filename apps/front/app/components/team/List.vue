@@ -9,11 +9,11 @@ interface Props {
 
 const { title = null, query = "" } = defineProps<Props>();
 
-const formerNameFor = (team: Team): string | undefined => {
+const formerNameFor = (team: Team) => {
   const needle = query.trim().toLocaleLowerCase();
 
   if (!needle || team.name.toLocaleLowerCase().includes(needle)) {
-    return undefined;
+    return;
   }
 
   return team.aliases.find((alias) => alias.name.toLocaleLowerCase().includes(needle))?.name;

@@ -1,25 +1,16 @@
-import type { LookupAddress } from "node:dns";
+import type { RequestOptions } from "node:https";
 import { PassThrough } from "node:stream";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { downloadPublicHttps, isPublicAddress } from "./public-https-download";
 import type { PublicHttpsTransport } from "./public-https-download";
 
-const fakes = {
-  addresses: new Map<string, string[]>(),
-  request: vi.fn<PublicHttpsTransport["request"]>(),
-};
-
-const transport: PublicHttpsTransport = {
-  lookup: async (hostname): Promise<LookupAddress[]> =>
-    (fakes.addresses.get(hostname) ?? []).map((address) => ({
-      address,
-      family: address.includes(":") ? 6 : 4,
-    })),
-  request: fakes.request,
-};
-
 type Reply = { status: number; headers?: Record<string, string>; body?: string[] } | "hang";
+
+interface RecordedRequest {
+  url: URL;
+  options: RequestOptions;
+}
 
 const limits = {
   isAllowedHost: (hostname: string) => !/(?:^|\.)liquipedia\.net$/iu.test(hostname),
@@ -28,12 +19,28 @@ const limits = {
   timeoutMs: 1000,
 };
 
-const resolveDns = (addresses: Record<string, string[]>) => {
-  fakes.addresses = new Map(Object.entries(addresses));
+let addresses = new Map<string, string[]>();
+let routes: Record<string, Reply> = {};
+const requests: RecordedRequest[] = [];
+
+const resolveDns = (hosts: Record<string, string[]>) => {
+  addresses = new Map(Object.entries(hosts));
 };
 
-const serve = (routes: Record<string, Reply>) => {
-  fakes.request.mockImplementation((url, options) => {
+const serve = (served: Record<string, Reply>) => {
+  routes = served;
+};
+
+const transport: PublicHttpsTransport = {
+  lookup: async (hostname) =>
+    await Promise.resolve(
+      (addresses.get(hostname) ?? []).map((address) => ({
+        address,
+        family: address.includes(":") ? 6 : 4,
+      })),
+    ),
+  request: (url, options) => {
+    requests.push({ options, url });
     const { lookup, signal } = options;
 
     if (!lookup || !signal) {
@@ -80,7 +87,7 @@ const serve = (routes: Record<string, Reply>) => {
     });
 
     return req;
-  });
+  },
 };
 
 const download = async (url: string, overrides: Partial<typeof limits> = {}) =>
@@ -117,7 +124,8 @@ describe(isPublicAddress, () => {
 
 describe(downloadPublicHttps, () => {
   beforeEach(() => {
-    fakes.request.mockReset();
+    requests.length = 0;
+    serve({});
     resolveDns({
       "cdn.kcorp.gg": ["104.16.0.2", "2606:4700::1"],
       "internal.kcorp.gg": ["104.16.0.3", "10.0.0.5"],
@@ -132,10 +140,13 @@ describe(downloadPublicHttps, () => {
     const bytes = await download("https://kcorp.gg/logo.png");
 
     expect(new TextDecoder().decode(bytes)).toBe("logobytes");
-    expect(fakes.request).toHaveBeenCalledWith(
-      new URL("https://kcorp.gg/logo.png"),
-      expect.objectContaining({ agent: false, method: "GET" }),
-    );
+    expect(
+      requests.map(({ options, url }) => ({
+        agent: options.agent,
+        href: url.href,
+        method: options.method,
+      })),
+    ).toStrictEqual([{ agent: false, href: "https://kcorp.gg/logo.png", method: "GET" }]);
   });
 
   it.each([
@@ -149,7 +160,7 @@ describe(downloadPublicHttps, () => {
     ["https://liquipedia.net/commons/images/kc.png", "not an accepted source"],
   ])("rejects %s before connecting", async (url, message) => {
     await expect(download(url)).rejects.toThrow(message);
-    expect(fakes.request).not.toHaveBeenCalled();
+    expect(requests).toHaveLength(0);
   });
 
   it.each(["https://metadata.kcorp.gg/logo.png", "https://internal.kcorp.gg/logo.png"])(

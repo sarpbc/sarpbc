@@ -7,7 +7,7 @@ import type { z } from "zod";
 export const useFormErrors = <S extends z.ZodObject>(schema: S, state: Partial<z.input<S>>) => {
   const submitted = ref(false);
 
-  const errors = computed((): Partial<Record<string, string>> => {
+  const errors = computed(() => {
     if (!submitted.value) {
       return {};
     }
@@ -23,7 +23,7 @@ export const useFormErrors = <S extends z.ZodObject>(schema: S, state: Partial<z
     );
   });
 
-  const markSubmitted = (): void => {
+  const markSubmitted = () => {
     submitted.value = true;
   };
 

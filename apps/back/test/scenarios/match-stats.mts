@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import type { StatsPlayerLinkInput, TournamentStatsGame } from "@sarpbc/types";
+import type { StatsPlayerLinkInput } from "@sarpbc/types";
 import { z } from "zod";
 import type {
   GamePlayerRecord,
@@ -8,7 +8,7 @@ import type {
   PlayerLink,
 } from "../../src/match-stats/application/ports.ts";
 import type { Side } from "../../src/match-stats/domain/replay-matching.ts";
-import type { Application, JsonResponse, Orm, Request } from "./support.mts";
+import type { Application, Orm, Request } from "./support.mts";
 
 interface MatchStatsContext {
   app: Application;
@@ -118,7 +118,7 @@ export const verifyMatchStats = async ({
   staffCookie,
   memberCookie,
   competition,
-}: MatchStatsContext): Promise<void> => {
+}: MatchStatsContext) => {
   const { RequestContext } = await import("@mikro-orm/core");
 
   const { MikroOrmGameStatsStore } =
@@ -277,8 +277,7 @@ export const verifyMatchStats = async ({
     async () => await merges.mergePlayers(playerId, duplicateId),
   );
 
-  const statRows = async (player: string): Promise<number> =>
-    await orm.em.fork().count(MatchGamePlayer, { player });
+  const statRows = async (player: string) => await orm.em.fork().count(MatchGamePlayer, { player });
 
   assert.equal(await statRows(duplicateId), 0, "a player merge leaves no stats on the duplicate");
   assert.equal(await statRows(playerId), 2, "a player merge moves stats to the kept player");
@@ -362,7 +361,7 @@ export const verifyMatchStats = async ({
     number: number,
     players: GamePlayerRecord[],
     learnedLinks: PlayerLink[] = [],
-  ): Promise<TournamentStatsGame> =>
+  ) =>
     await new MikroOrmGameStatsStore(orm.em.fork()).save({
       ...game,
       ballchasingId: `integration-replay-${number}`,
@@ -377,7 +376,7 @@ export const verifyMatchStats = async ({
     name: string,
     side: Side,
     rowPlayerId: string | null = null,
-  ): GamePlayerRecord => ({
+  ) => ({
     ...stat,
     name,
     platform: "steam",
@@ -386,7 +385,7 @@ export const verifyMatchStats = async ({
     side,
   });
 
-  const linkOf = async (platformId: string): Promise<string | null> => {
+  const linkOf = async (platformId: string) => {
     const findOneResult = await orm.em
       .fork()
       .findOne(PlayerPlatformLink, { platform: "steam", platformId });
@@ -394,7 +393,7 @@ export const verifyMatchStats = async ({
     return findOneResult?.player.id ?? null;
   };
 
-  const rowPlayers = async (platformId: string): Promise<(string | null)[]> => {
+  const rowPlayers = async (platformId: string) => {
     const findResult = await orm.em
       .fork()
       .find(MatchGamePlayer, { platform: "steam", platformId }, { orderBy: { name: "ASC" } });
@@ -415,7 +414,7 @@ export const verifyMatchStats = async ({
     "learning links earlier unlinked rows of the account",
   );
 
-  const accounts = async (): Promise<z.infer<typeof statsPlayerAccounts>> => {
+  const accounts = async () => {
     const response8 = await request("GET", linksUrl, undefined, staffCookie);
 
     return response8.json(statsPlayerAccounts);
@@ -443,7 +442,7 @@ export const verifyMatchStats = async ({
     "rows without a platform id cannot be linked and are not listed",
   );
 
-  const rosterIds = (participant: string): string[] => {
+  const rosterIds = (participant: string) => {
     const roster = known.rosters.find((entry) => entry.participantId === participant);
     assert.ok(roster, "the participant has a roster");
 
@@ -456,7 +455,7 @@ export const verifyMatchStats = async ({
     "every roster of the tournament is offered",
   );
 
-  const link = async (body: StatsPlayerLinkInput, status?: number): Promise<JsonResponse> =>
+  const link = async (body: StatsPlayerLinkInput, status?: number) =>
     await request("PUT", `${linksUrl}/link`, body, staffCookie, status);
 
   await link({ platform: "steam", platformId: " ", playerId }, 400);
@@ -562,7 +561,7 @@ export const verifyMatchStats = async ({
   const response12 = await request("GET", `/tournaments/${tournamentId}`);
   const { tournament } = response12.json(tournamentBody);
 
-  const teamName = (id: string): string | undefined =>
+  const teamName = (id: string) =>
     tournament.participants.find((entry) => entry.id === id)?.team?.name;
 
   assert.deepEqual(await store().attachment("integration-replay-3"), {

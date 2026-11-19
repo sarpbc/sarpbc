@@ -13,7 +13,6 @@ const {
   description?: string | null;
   disabled?: boolean;
   label?: string | null;
-  /** Once settled, whether this choice was right: tints the chosen card. */
   status?: RadioStatus | null;
   value: SelectValue;
 }>();

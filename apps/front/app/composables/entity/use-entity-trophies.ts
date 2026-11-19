@@ -2,7 +2,7 @@ import { tournamentStagePath, isNonEmptyString } from "@sarpbc/utils";
 import type { MaybeRef } from "vue";
 import { getPlayerTrophies } from "~/composables/player/api";
 import { getTeamTrophies } from "~/composables/team/api";
-import type { EntityKind, EntityTrophyListItem } from "~/types/entity";
+import type { EntityKind } from "~/types/entity";
 import type { Tournament } from "~/types/tournament";
 
 const FETCH_TROPHIES = {
@@ -10,7 +10,7 @@ const FETCH_TROPHIES = {
   team: getTeamTrophies,
 } satisfies Record<EntityKind, (id: string) => Promise<Tournament[]>>;
 
-const toTrophyListItem = (tournament: Tournament): EntityTrophyListItem => ({
+const toTrophyListItem = (tournament: Tournament) => ({
   displayName: tournament.event.name,
   endAt: tournament.endAt ?? null,
   formatLabel: nonDefaultFormatLabel(tournament.format),

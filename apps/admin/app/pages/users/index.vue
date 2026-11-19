@@ -58,7 +58,7 @@ watchDebounced(
   { debounce: SEARCH_DEBOUNCE_MS },
 );
 
-const roleOf = (user: UserListItem): AssignableRole => user.role ?? "member";
+const roleOf = (user: UserListItem) => user.role ?? "member";
 
 const applyRoleChange = async (user: UserListItem, role: AssignableRole) => {
   savingId.value = user.id;

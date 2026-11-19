@@ -31,7 +31,7 @@ interface PullRequestFixture {
   head: { ref: string; sha: string };
 }
 
-const fixture = (t: TestContext): string => {
+const fixture = (t: TestContext) => {
   const directory = mkdtempSync(path.join(tmpdir(), "sarpbc-git-names-"));
   t.after(() => {
     rmSync(directory, { force: true, recursive: true });
@@ -46,10 +46,10 @@ interface RunOptions {
   input?: string;
 }
 
-const run = (args: string[], options: RunOptions = {}): SpawnSyncReturns<string> =>
+const run = (args: string[], options: RunOptions = {}) =>
   spawnSync(process.execPath, [script, ...args], { encoding: "utf-8", ...options });
 
-const expectStatus = (result: SpawnSyncReturns<string>, status: number): void => {
+const expectStatus = (result: SpawnSyncReturns<string>, status: number) => {
   assert.equal(result.status, status, result.stderr);
 };
 

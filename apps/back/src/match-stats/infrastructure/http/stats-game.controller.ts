@@ -1,3 +1,4 @@
+import type { TournamentStatsGame } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -8,7 +9,6 @@ import {
   Post,
   UseGuards,
 } from "@nestjs/common";
-import type { TournamentStatsGame } from "@sarpbc/types";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -23,16 +23,18 @@ export class StatsGameController {
   constructor(private readonly service: ManualGameService) {}
 
   @Get()
-  async list(@Param("id") tournamentId: string): Promise<{ games: TournamentStatsGame[] }> {
-    return { games: await this.service.list(tournamentId) };
+  async list(@Param("id") tournamentId: string) {
+    return { games: await this.service.list(tournamentId) } satisfies {
+      games: TournamentStatsGame[];
+    };
   }
 
   @Post()
   async attach(
     @Param("id") tournamentId: string,
     @Body({ schema: AttachReplayDto }) dto: AttachReplayInput,
-  ): Promise<TournamentStatsGame> {
-    return await this.service.attach(tournamentId, dto);
+  ) {
+    return (await this.service.attach(tournamentId, dto)) satisfies TournamentStatsGame;
   }
 
   @Delete(":matchId/:number")
@@ -40,7 +42,7 @@ export class StatsGameController {
     @Param("id") tournamentId: string,
     @Param("matchId") matchId: string,
     @Param("number", ParseIntPipe) number: number,
-  ): Promise<TournamentStatsGame> {
-    return await this.service.remove(tournamentId, matchId, number);
+  ) {
+    return (await this.service.remove(tournamentId, matchId, number)) satisfies TournamentStatsGame;
   }
 }

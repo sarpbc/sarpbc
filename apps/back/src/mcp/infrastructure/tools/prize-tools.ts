@@ -7,14 +7,13 @@ import {
 } from "@sarpbc/utils";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
 import { defineTool } from "../define-tool";
-import type { McpTool } from "../define-tool";
 import { proposalSourceUrlSchema, proposer } from "./proposals";
 
 export interface PrizeToolServices {
   rosterProposalService: Pick<RosterProposalService, "propose">;
 }
 
-export const prizeTools = ({ rosterProposalService }: PrizeToolServices): McpTool[] => {
+export const prizeTools = ({ rosterProposalService }: PrizeToolServices) => {
   const propose = proposer(rosterProposalService);
 
   return [

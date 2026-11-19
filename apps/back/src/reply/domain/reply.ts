@@ -35,7 +35,7 @@ const replyTargetSpec = <F extends keyof ReplyTargetFields>(spec: {
   label: string;
   sortOrder: ReplyTargetSpec["sortOrder"];
   link: (target: NonNullable<ReplyTargetFields[F]>) => { id: string; label: string; path: string };
-}): ReplyTargetSpec => {
+}) => {
   const { link, ...rest } = spec;
 
   return {
@@ -45,7 +45,7 @@ const replyTargetSpec = <F extends keyof ReplyTargetFields>(spec: {
 
       return target ? link(target) : null;
     },
-  };
+  } satisfies ReplyTargetSpec;
 };
 
 export const REPLY_TARGETS = {
@@ -84,7 +84,7 @@ export const replyTarget = (input: {
   postId?: string;
   newsArticleId?: string;
   matchId?: string;
-}): ReplyTarget => {
+}) => {
   const targets = REPLY_TARGET_TYPES.flatMap((kind) => {
     const id = input[REPLY_TARGETS[kind].inputKey];
 
@@ -101,7 +101,7 @@ export const replyTarget = (input: {
 export const sameReplyTarget = (
   child: Record<keyof ReplyTargetFields, { id: string } | null>,
   parent: Record<keyof ReplyTargetFields, { id: string } | null>,
-): boolean =>
+) =>
   REPLY_TARGET_TYPES.some((kind) => {
     const { field } = REPLY_TARGETS[kind];
     const id = child[field]?.id;
@@ -109,10 +109,9 @@ export const sameReplyTarget = (
     return Boolean(id) && parent[field]?.id === id;
   });
 
-export const replySortOrder = (kind: ReplyTargetType): "asc" | "desc" =>
-  REPLY_TARGETS[kind].sortOrder;
+export const replySortOrder = (kind: ReplyTargetType) => REPLY_TARGETS[kind].sortOrder;
 
-export const resolveReplyTargetLink = (reply: ReplyTargetFields): ReplyTargetLink | null => {
+export const resolveReplyTargetLink = (reply: ReplyTargetFields) => {
   for (const kind of REPLY_TARGET_TYPES) {
     const link = REPLY_TARGETS[kind].describe(reply);
 

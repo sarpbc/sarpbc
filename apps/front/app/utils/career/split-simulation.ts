@@ -40,7 +40,7 @@ export interface FieldPlayer {
   skipMajor?: boolean;
 }
 
-const blendWithTeam = (personal: number, teamStrength: number | undefined): number => {
+const blendWithTeam = (personal: number, teamStrength: number | undefined) => {
   if (teamStrength === undefined || teamStrength === null) {
     return personal;
   }
@@ -48,11 +48,7 @@ const blendWithTeam = (personal: number, teamStrength: number | undefined): numb
   return personal * 0.55 + teamStrength * 0.45;
 };
 
-const teamFieldStrength = (
-  teamId: string,
-  world: CareerWorldState,
-  player: FieldPlayer,
-): number => {
+const teamFieldStrength = (teamId: string, world: CareerWorldState, player: FieldPlayer) => {
   const team = WORLD_TEAMS.find((entry) => entry.id === teamId);
   const rosterIds = world.rosters[teamId] ?? (team ? [...team.players] : []);
 
@@ -67,29 +63,30 @@ const teamFieldStrength = (
   return rosterStrength;
 };
 
-const eventRng = (careerId: string, season: number, key: string): (() => number) =>
+const eventRng = (careerId: string, season: number, key: string) =>
   createRng(hashString(`${careerId}:sim:${season}:${key}`));
 
-const emptySplitSimulation = (): SplitSimulation => ({
-  major: null,
-  points: 0,
-  regionals: Array.from({ length: REGIONALS_PER_SPLIT }, () => "group"),
-});
+const emptySplitSimulation = () =>
+  ({
+    major: null,
+    points: 0,
+    regionals: Array.from({ length: REGIONALS_PER_SPLIT }, () => "group"),
+  }) satisfies SplitSimulation;
 
-const rawRegionalPoints = (sim: Pick<SplitSimulation, "regionals">): number =>
+const rawRegionalPoints = (sim: Pick<SplitSimulation, "regionals">) =>
   sim.regionals.reduce((sum, placement) => sum + REGIONAL_POINTS[placement], 0);
 
 const circuitPointsForSplit = (
   sim: Pick<SplitSimulation, "regionals" | "major">,
   region: CareerRegion,
-): number => {
+) => {
   const regional = Math.round(rawRegionalPoints(sim) * regionalCircuitWeight(region));
   const major = sim.major ? MAJOR_POINTS[sim.major] : 0;
 
   return regional + major;
 };
 
-export const getSplitFeedback = (sim: SplitSimulation): Partial<CareerStats> => {
+export const getSplitFeedback = (sim: SplitSimulation) => {
   if (sim.major === "winner") {
     return { morale: 4, rating: 5 };
   }
@@ -109,7 +106,7 @@ export const getSplitFeedback = (sim: SplitSimulation): Partial<CareerStats> => 
   return { morale: -3 };
 };
 
-export const getWorldsFeedback = (placement: CareerPlacement): Partial<CareerStats> => {
+export const getWorldsFeedback = (placement: CareerPlacement) => {
   switch (placement) {
     case "winner": {
       return { morale: 5, rating: 5 };
@@ -149,7 +146,7 @@ export const simulateSplitField = (
   split: number,
   world: CareerWorldState,
   player: FieldPlayer,
-): Map<string, SplitSimulation> => {
+) => {
   const results = new Map<string, SplitSimulation>();
 
   for (const team of WORLD_TEAMS) {
@@ -240,7 +237,7 @@ export const splitFieldToResult = (
   season: number,
   split: number,
   field: Map<string, SplitSimulation>,
-): CareerSplitFieldResult => {
+) => {
   const points: Record<string, number> = {};
 
   for (const [teamId, sim] of field) {
@@ -253,7 +250,7 @@ export const splitFieldToResult = (
 export const upsertSplitField = (
   fields: CareerSplitFieldResult[],
   next: CareerSplitFieldResult,
-): CareerSplitFieldResult[] => [
+) => [
   ...fields.filter((field) => !(field.season === next.season && field.split === next.split)),
   next,
 ];
@@ -264,7 +261,7 @@ export const simulateWorldsField = (
   world: CareerWorldState,
   qualifiedTeamIds: readonly string[],
   player: FieldPlayer,
-): Map<string, CareerPlacement> => {
+) => {
   const field = qualifiedTeamIds.map((teamId) => ({
     id: teamId,
     strength: teamFieldStrength(teamId, world, player),
@@ -273,11 +270,7 @@ export const simulateWorldsField = (
   return playSingleElim(field, eventRng(careerId, season, "worlds"));
 };
 
-export const getEventsBeforeStage = (
-  careerId: string,
-  season: number,
-  stage: CareerStage,
-): number => {
+export const getEventsBeforeStage = (careerId: string, season: number, stage: CareerStage) => {
   if (stage === "worlds") {
     return 1;
   }
@@ -285,5 +278,5 @@ export const getEventsBeforeStage = (
   return 1 + (hashString(`${careerId}:events:${season}:${stage}`) % MAX_EVENTS_BEFORE_SPLIT);
 };
 
-export const qualifiesForWorlds = (rank: number, teamCount: number): boolean =>
+export const qualifiesForWorlds = (rank: number, teamCount: number) =>
   rank <= Math.min(WORLDS_QUALIFICATION_RANK, teamCount);

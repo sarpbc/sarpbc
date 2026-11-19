@@ -1,6 +1,6 @@
 import type { DirectorySearchProps } from "../../application/search-props";
 
-const namePattern = (name: string | undefined, start: string | undefined): string | null => {
+const namePattern = (name: string | undefined, start: string | undefined) => {
   if (name !== undefined && name !== "") {
     return `%${name}%`;
   }

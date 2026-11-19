@@ -28,7 +28,6 @@ if (!player.value) {
   });
 }
 
-// A merged duplicate's slug resolves to the kept player.
 if (player.value && player.value.slug !== slug.value) {
   await redirectToCanonical(route, localePath(playerPath(player.value.slug)));
 }

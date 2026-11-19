@@ -3,7 +3,6 @@ import type { ReplyTargetType } from "@sarpbc/types";
 import { Post } from "../../../forum/infrastructure/forum-persistence";
 import { NewsArticle } from "../../../news/infrastructure/news-persistence";
 import { Match, toMatchSlug } from "../../../tournament/infrastructure/competition-persistence";
-import type { ReplyRecord } from "../../application/models";
 import { REPLY_TARGETS } from "../../domain/reply";
 import type { ReplyTargetFields } from "../../domain/reply";
 import type { Reply } from "./reply.entity";
@@ -64,7 +63,7 @@ export const REPLY_TARGET_LOADERS = {
   (em: EntityManager, id: string) => Promise<Partial<ReplyTargetFields> | null>
 >;
 
-export const replySnapshot = (row: Reply): ReplyRecord => ({
+export const replySnapshot = (row: Reply) => ({
   author: { id: row.author.id, userName: row.author.userName },
   content: row.content,
   createdAt: new Date(row.createdAt),

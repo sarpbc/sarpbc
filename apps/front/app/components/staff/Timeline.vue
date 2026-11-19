@@ -12,7 +12,7 @@ const headingId = useId();
 
 const mediumDate = computed(() => mediumDateFormatter(locale.value));
 
-const formatRange = (contract: PlayerContract): string => {
+const formatRange = (contract: PlayerContract) => {
   const start = mediumDate.value.format(new Date(contract.startDate));
 
   const end = contract.endDate

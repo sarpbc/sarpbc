@@ -1,97 +1,43 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { PlayerService } from "../../roster/application/player.service";
-import type { TeamService } from "../../roster/application/team.service";
-import type { TournamentQueries } from "../../tournament/application/ports";
+import { describe, expect, it } from "vitest";
 import { Player } from "../../roster/domain/player";
 import { Team } from "../../roster/domain/team";
 import { Tournament } from "../../tournament/domain/tournament";
+import { InMemorySearchSource } from "./search.test-utils";
 import { SearchService } from "./search.service";
 
-const player = (id: string) => Object.assign(new Player(), { id });
-const team = (id: string) => Object.assign(new Team(), { id });
-const tournament = (id: string, name = id) => Object.assign(new Tournament(), { id, name });
+const ROWS = ["a", "b", "c", "x", "d", "e", "f"].map((id) => ({
+  id,
+  name: id === "x" ? "Other" : `RL ${id}`,
+}));
+
+const service = new SearchService(
+  new InMemorySearchSource(ROWS.map((row) => Object.assign(new Player(), row))),
+  new InMemorySearchSource(ROWS.map((row) => Object.assign(new Team(), row))),
+  new InMemorySearchSource(ROWS.map((row) => Object.assign(new Tournament(), row))),
+);
+
+const ids = (rows: { id: string }[]) => rows.map(({ id }) => id);
 
 describe(SearchService, () => {
-  const playerService = { find: vi.fn<PlayerService["find"]>() };
-  const teamService = { find: vi.fn<TeamService["find"]>() };
-  const tournamentService = { searchByName: vi.fn<TournamentQueries["searchByName"]>() };
-  let service: SearchService;
+  it("splits an odd page across every kind of an all search without losing a row", async () => {
+    const result = await service.search({ limit: 5, offset: 3, query: "rl", type: "all" });
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    service = new SearchService(playerService, teamService, tournamentService);
-  });
-
-  it("includes tournaments when type is all", async () => {
-    const rlcs = tournament("t1", "RLCS");
-    playerService.find.mockResolvedValue([player("p1")]);
-    teamService.find.mockResolvedValue([team("tm1")]);
-    tournamentService.searchByName.mockResolvedValue([rlcs]);
-
-    const result = await service.search({
-      limit: 10,
-      offset: 0,
-      query: "rl",
-      type: "all",
-    });
-
-    expect(result.tournaments).toStrictEqual([rlcs]);
-    expect(result.total.tournaments).toBe(1);
-    expect(tournamentService.searchByName).toHaveBeenCalledWith({
-      limit: 5,
-      name: "rl",
-      offset: 0,
-    });
-  });
-
-  it("splits an odd page across the kinds of an all search without losing a row", async () => {
-    for (const source of [playerService.find, teamService.find, tournamentService.searchByName]) {
-      source.mockResolvedValue([]);
-    }
-
-    await service.search({ limit: 5, offset: 3, query: "rl", type: "all" });
-
-    const page = { limit: 3, name: "rl", offset: 1 };
-    expect(playerService.find).toHaveBeenCalledWith(page);
-    expect(teamService.find).toHaveBeenCalledWith(page);
-    expect(tournamentService.searchByName).toHaveBeenCalledWith(page);
+    expect(ids(result.players)).toStrictEqual(["b", "c", "d"]);
+    expect(ids(result.teams)).toStrictEqual(["b", "c", "d"]);
+    expect(ids(result.tournaments)).toStrictEqual(["b", "c", "d"]);
+    expect(result.total).toStrictEqual({ players: 3, teams: 3, tournaments: 3 });
   });
 
   it.each([
-    ["player", () => playerService.find.mockResolvedValue([player("x")]), playerService.find],
-    ["team", () => teamService.find.mockResolvedValue([team("x")]), teamService.find],
-  ] as const)("searches only %ss when type is %s", async (type, seed, source) => {
-    seed();
-
+    ["player", { players: 4, teams: 0, tournaments: 0 }],
+    ["team", { players: 0, teams: 4, tournaments: 0 }],
+    ["tournament", { players: 0, teams: 0, tournaments: 4 }],
+  ] as const)("searches only %ss, with the whole page", async (type, total) => {
     const result = await service.search({ limit: 4, offset: 1, query: "rl", type });
 
-    expect(source).toHaveBeenCalledWith({ limit: 4, name: "rl", offset: 1 });
-    expect(result.total).toStrictEqual({
-      players: type === "player" ? 1 : 0,
-      teams: type === "team" ? 1 : 0,
-      tournaments: 0,
-    });
-    expect(tournamentService.searchByName).not.toHaveBeenCalled();
-  });
-
-  it("searches only tournaments when type is tournament", async () => {
-    tournamentService.searchByName.mockResolvedValue([tournament("t1")]);
-
-    const result = await service.search({
-      limit: 8,
-      offset: 2,
-      query: "major",
-      type: "tournament",
-    });
-
-    expect(playerService.find).not.toHaveBeenCalled();
-    expect(teamService.find).not.toHaveBeenCalled();
-    expect(result.players).toStrictEqual([]);
-    expect(result.teams).toStrictEqual([]);
-    expect(tournamentService.searchByName).toHaveBeenCalledWith({
-      limit: 8,
-      name: "major",
-      offset: 2,
-    });
+    expect(result.total).toStrictEqual(total);
+    expect(
+      [...result.players, ...result.teams, ...result.tournaments].map(({ id }) => id),
+    ).toStrictEqual(["b", "c", "d", "e"]);
   });
 });

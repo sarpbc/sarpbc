@@ -21,10 +21,7 @@ export const hasFrenchTranslation = (
 ): article is { titleFr: string; contentFr: string } =>
   isNonEmptyString(article.titleFr?.trim()) && isNonEmptyString(article.contentFr?.trim());
 
-export const localizedNewsFields = (
-  article: NewsLocalizableFields,
-  locale: SupportedLocale,
-): LocalizedNewsFields => {
+export const localizedNewsFields = (article: NewsLocalizableFields, locale: SupportedLocale) => {
   if (locale === "fr-FR" && hasFrenchTranslation(article)) {
     return { content: article.contentFr, title: article.titleFr };
   }

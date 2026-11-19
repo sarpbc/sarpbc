@@ -11,12 +11,12 @@ export interface TournamentParticipantEntry {
   hasReliableRoster: boolean;
 }
 
-const hasReliableParticipantRoster = (players: ParticipantPlayer[]): boolean =>
+const hasReliableParticipantRoster = (players: ParticipantPlayer[]) =>
   players.some((player) => Boolean(player.slug));
 
 export const buildTournamentParticipantEntries = (
   tournament: Pick<TournamentDetail, "participants">,
-): TournamentParticipantEntry[] => {
+) => {
   const seen = new Set<string>();
   const result: TournamentParticipantEntry[] = [];
 

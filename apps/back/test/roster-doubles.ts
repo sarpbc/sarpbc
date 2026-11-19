@@ -9,7 +9,7 @@ import type {
   TeamWriter,
 } from "../src/roster/application/ports";
 
-const unused = async (): Promise<never> => await Promise.reject(new Error("unused"));
+const unused = async () => await Promise.reject(new Error("unused"));
 
 export const unusedPlayerQueries: PlayerQueries = {
   bornOnDay: unused,

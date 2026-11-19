@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import { MANUAL_STAGE_ID, memoryFactStore } from "../../../test/on-this-day-fixtures";
+import { MANUAL_STAGE_ID, memoryFactStore } from "../../../test/on-this-day.fixture";
 import { OnThisDayFactService } from "./on-this-day-fact.service";
 
 const input = {

@@ -5,13 +5,7 @@ import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Post } from "./post.entity";
 
 export class PostRepository extends EntityRepository<Post> {
-  async findPaginated({
-    limit = 20,
-    offset = 0,
-  }: {
-    limit?: number;
-    offset?: number;
-  }): Promise<Post[]> {
+  async findPaginated({ limit = 20, offset = 0 }: { limit?: number; offset?: number }) {
     return await super.findAll({
       limit,
       offset,
@@ -20,18 +14,18 @@ export class PostRepository extends EntityRepository<Post> {
     });
   }
 
-  async findByTopicId(topicId: string): Promise<Post[]> {
+  async findByTopicId(topicId: string) {
     return await super.findAll({
       populate: ["author", "topic"],
       where: { topic: { id: topicId } },
     });
   }
 
-  async findById(id: string): Promise<Post | null> {
+  async findById(id: string) {
     return await this.findOne({ id }, { populate: ["author", "topic"] });
   }
 
-  async findWithDetails(ref: EntityRef): Promise<Post | null> {
+  async findWithDetails(ref: EntityRef) {
     return await this.findOne(
       ref.kind === "publicId" ? { publicId: ref.value } : { id: ref.value },
       {
@@ -40,15 +34,7 @@ export class PostRepository extends EntityRepository<Post> {
     );
   }
 
-  async findRecentActivity(limit: number): Promise<
-    {
-      id: string;
-      publicId: number;
-      title: string;
-      messageCount: number;
-      lastActivity: Date;
-    }[]
-  > {
+  async findRecentActivity(limit: number) {
     const query = `
       SELECT
         p.id,
@@ -87,7 +73,7 @@ export class PostRepository extends EntityRepository<Post> {
     }));
   }
 
-  async findLatestByUser(userId: string): Promise<Post | null> {
+  async findLatestByUser(userId: string) {
     return await this.findOne(
       { author: { id: userId } },
       { orderBy: { createdAt: "DESC" }, populate: ["author", "topic"] },

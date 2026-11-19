@@ -18,7 +18,7 @@ export interface OnThisDayFactFields {
   sourceUrl: string | null;
 }
 
-const requiredText = (value: string, language: string): string => {
+const requiredText = (value: string, language: string) => {
   const text = value.trim();
 
   if (!text || text.length > ON_THIS_DAY_TEXT_MAX_LENGTH) {
@@ -30,7 +30,7 @@ const requiredText = (value: string, language: string): string => {
   return text;
 };
 
-const parseYear = (year: number | null, month: number, day: number): number | null => {
+const parseYear = (year: number | null, month: number, day: number) => {
   if (year === null) {
     return null;
   }
@@ -48,7 +48,7 @@ const parseYear = (year: number | null, month: number, day: number): number | nu
   return year;
 };
 
-const parseFactSourceUrl = (value: string | null): string | null => {
+const parseFactSourceUrl = (value: string | null) => {
   const raw = value?.trim() ?? "";
 
   if (!raw) {
@@ -80,7 +80,7 @@ const parseFactSourceUrl = (value: string | null): string | null => {
   return url.href;
 };
 
-export const parseOnThisDayFact = (input: OnThisDayFactFields): OnThisDayFactFields => {
+export const parseOnThisDayFact = (input: OnThisDayFactFields) => {
   if (!isMonthDay(input.month, input.day)) {
     throw new InvalidInputError("The month and day do not form a calendar date.");
   }
@@ -99,5 +99,4 @@ export const parseOnThisDayFact = (input: OnThisDayFactFields): OnThisDayFactFie
 export const isFactShownOn = (
   fact: Pick<OnThisDayFactFields, "month" | "day" | "year">,
   on: { year: number; month: number; day: number },
-): boolean =>
-  fact.month === on.month && fact.day === on.day && (fact.year === null || fact.year <= on.year);
+) => fact.month === on.month && fact.day === on.day && (fact.year === null || fact.year <= on.year);

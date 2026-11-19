@@ -11,11 +11,10 @@ import type {
   TournamentQueries,
   TournamentWriter,
 } from "../src/tournament/application/ports";
-import type { CompetitionFeed } from "../src/tournament/application/feed";
 
-const unused = async (): Promise<never> => await Promise.reject(new Error("unused collaborator"));
+const unused = async () => await Promise.reject(new Error("unused collaborator"));
 
-export const tournamentWriter = (overrides: Partial<TournamentWriter> = {}): TournamentWriter => ({
+export const tournamentWriter = (overrides: Partial<TournamentWriter> = {}) => ({
   byPandascoreId: unused,
   league: unused,
   leagueByPandascoreId: unused,
@@ -35,7 +34,7 @@ export const tournamentWriter = (overrides: Partial<TournamentWriter> = {}): Tou
   ...overrides,
 });
 
-export const eventWriter = (overrides: Partial<EventWriter> = {}): EventWriter => ({
+export const eventWriter = (overrides: Partial<EventWriter> = {}) => ({
   bySerieId: unused,
   load: unused,
   remove: unused,
@@ -47,7 +46,7 @@ export const eventWriter = (overrides: Partial<EventWriter> = {}): EventWriter =
   ...overrides,
 });
 
-export const matchWriter = (overrides: Partial<MatchWriter> = {}): MatchWriter => ({
+export const matchWriter = (overrides: Partial<MatchWriter> = {}) => ({
   bracket: unused,
   byPandascoreId: unused,
   load: unused,
@@ -60,11 +59,13 @@ export const matchWriter = (overrides: Partial<MatchWriter> = {}): MatchWriter =
   ...overrides,
 });
 
-export const rosterIdentityWriter = (
-  overrides: Partial<RosterIdentityWriter> = {},
-): RosterIdentityWriter => ({ upsertPlayer: unused, upsertTeam: unused, ...overrides });
+export const rosterIdentityWriter = (overrides: Partial<RosterIdentityWriter> = {}) => ({
+  upsertPlayer: unused,
+  upsertTeam: unused,
+  ...overrides,
+});
 
-export const awardWriter = (overrides: Partial<AwardWriter> = {}): AwardWriter => ({
+const awardWriter = (overrides: Partial<AwardWriter> = {}) => ({
   awardTaken: unused,
   context: unused,
   create: unused,
@@ -72,7 +73,7 @@ export const awardWriter = (overrides: Partial<AwardWriter> = {}): AwardWriter =
   ...overrides,
 });
 
-export const prizeWriter = (overrides: Partial<PrizeWriter> = {}): PrizeWriter => ({
+const prizeWriter = (overrides: Partial<PrizeWriter> = {}) => ({
   entries: unused,
   participants: unused,
   replace: unused,
@@ -80,15 +81,13 @@ export const prizeWriter = (overrides: Partial<PrizeWriter> = {}): PrizeWriter =
   ...overrides,
 });
 
-export const lineupWriter = (overrides: Partial<LineupWriter> = {}): LineupWriter => ({
+export const lineupWriter = (overrides: Partial<LineupWriter> = {}) => ({
   activePlayersExist: unused,
   replace: unused,
   ...overrides,
 });
 
-export const competitionScope = (
-  overrides: Partial<CompetitionWriteScope> = {},
-): CompetitionWriteScope => ({
+export const competitionScope = (overrides: Partial<CompetitionWriteScope> = {}) => ({
   awards: awardWriter(),
   events: eventWriter(),
   lineups: lineupWriter(),
@@ -99,7 +98,7 @@ export const competitionScope = (
   ...overrides,
 });
 
-export const matchQueries = (overrides: Partial<MatchQueries> = {}): MatchQueries => ({
+export const matchQueries = (overrides: Partial<MatchQueries> = {}) => ({
   betweenTeams: unused,
   byIds: unused,
   byPlayer: unused,
@@ -113,7 +112,7 @@ export const matchQueries = (overrides: Partial<MatchQueries> = {}): MatchQuerie
   ...overrides,
 });
 
-export const eventQueries = (overrides: Partial<EventQueries> = {}): EventQueries => ({
+export const eventQueries = (overrides: Partial<EventQueries> = {}) => ({
   find: unused,
   list: unused,
   stageId: unused,
@@ -121,9 +120,7 @@ export const eventQueries = (overrides: Partial<EventQueries> = {}): EventQuerie
   ...overrides,
 });
 
-export const tournamentQueries = (
-  overrides: Partial<TournamentQueries> = {},
-): TournamentQueries => ({
+export const tournamentQueries = (overrides: Partial<TournamentQueries> = {}) => ({
   finalsOnDay: unused,
   find: unused,
   findById: unused,
@@ -139,15 +136,5 @@ export const tournamentQueries = (
   leagues: unused,
   searchByName: unused,
   wonOnDay: unused,
-  ...overrides,
-});
-
-export const competitionFeed = (overrides: Partial<CompetitionFeed> = {}): CompetitionFeed => ({
-  getTournamentBrackets: unused,
-  getTournamentById: unused,
-  getTournamentMatches: unused,
-  getTournamentStandings: unused,
-  getTournaments: unused,
-  listIncidents: unused,
   ...overrides,
 });

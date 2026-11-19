@@ -1,11 +1,7 @@
 import type { JwtService } from "@nestjs/jwt";
 import { z } from "zod";
 import type { AuthenticatedUser } from "../../common/application/models/authenticated-user";
-import type {
-  AuthTokenPair,
-  AuthTokenType,
-  SessionTokens,
-} from "../application/ports/authentication";
+import type { AuthTokenType, SessionTokens } from "../application/ports/authentication";
 
 export const ACCESS_TOKEN_TTL_SECONDS = 2 * 60 * 60;
 export const REFRESH_TOKEN_TTL_SECONDS = 30 * 24 * 60 * 60;
@@ -24,7 +20,7 @@ export class JwtTokenGateway implements SessionTokens {
     private readonly secret: string,
   ) {}
 
-  async sign(user: AuthenticatedUser): Promise<AuthTokenPair> {
+  async sign(user: AuthenticatedUser) {
     const { secret } = this;
 
     const [accessToken, refreshToken] = await Promise.all([
@@ -41,7 +37,7 @@ export class JwtTokenGateway implements SessionTokens {
     return { accessToken, refreshToken };
   }
 
-  async verify(token: string, type: AuthTokenType): Promise<AuthenticatedUser | null> {
+  async verify(token: string, type: AuthTokenType) {
     try {
       const parsed = payloadSchema.safeParse(
         await this.jwt.verifyAsync<object>(token, { secret: this.secret }),

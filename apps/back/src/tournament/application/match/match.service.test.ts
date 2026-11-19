@@ -1,49 +1,26 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { Match } from "../../domain/match";
 import type { TournamentSummary } from "../../domain/match";
 import { TournamentParticipant } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
 import { CompetitionAfterCommit } from "../after-commit";
 import { MatchService } from "./match.service";
-import type {
-  CompetitionCache,
-  CompetitionDiagnostics,
-  CompetitionEvents,
-  CompetitionTransaction,
-  MatchQueries,
-  MatchWriter,
-} from "../ports";
-import { competitionScope, matchQueries, matchWriter } from "../../../../test/competition-doubles";
+import {
+  memoryMatchWriter,
+  recordingCache,
+  recordingDiagnostics,
+  recordingEvents,
+  transactionOver,
+} from "../ports.test-utils";
+import { matchQueries } from "../../../../test/competition-doubles";
 
 describe("MatchService decided events", () => {
   const participants = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
-  let persisted: Match;
-
-  const matches = {
-    byPandascoreId: vi.fn<MatchWriter["byPandascoreId"]>(),
-    load: vi.fn<MatchWriter["load"]>(),
-    participants: vi.fn<MatchWriter["participants"]>(),
-    save: vi.fn<MatchWriter["save"]>(),
-    tournament: vi.fn<MatchWriter["tournament"]>(),
-  };
-
-  const reads = { detail: vi.fn<MatchQueries["detail"]>() };
-  const events = { publish: vi.fn<CompetitionEvents["publish"]>() };
-
-  const diagnostics = {
-    error: vi.fn<CompetitionDiagnostics["error"]>(),
-    warn: vi.fn<CompetitionDiagnostics["warn"]>(),
-  };
-
-  const cache = { invalidateTournament: vi.fn<CompetitionCache["invalidateTournament"]>() };
-
-  const service = new MatchService(
-    matchQueries(reads),
-    {
-      run: async (work) => await work(competitionScope({ matches: matchWriter(matches) })),
-    } satisfies CompetitionTransaction,
-    new CompetitionAfterCommit(cache, events, diagnostics),
-  );
+  let matches = memoryMatchWriter();
+  let events = recordingEvents();
+  let diagnostics = recordingDiagnostics();
+  let cache = recordingCache();
+  let service: MatchService;
 
   const cup: TournamentSummary = {
     beginAt: null,
@@ -67,56 +44,63 @@ describe("MatchService decided events", () => {
       ...fields,
     });
 
+  const seed = (match: Match) => matches.matches.set(match.id, match);
+
   beforeEach(() => {
-    vi.resetAllMocks();
-    persisted = storedMatch();
-    matches.load.mockImplementation(async () => persisted);
-    matches.save.mockImplementation(async (match: Match) => {
-      persisted = match;
-    });
-    reads.detail.mockImplementation(async () => persisted);
-    matches.tournament.mockResolvedValue(cup);
-    matches.participants.mockResolvedValue(participants);
-    matches.byPandascoreId.mockResolvedValue(null);
+    matches = memoryMatchWriter();
+    events = recordingEvents();
+    diagnostics = recordingDiagnostics();
+    cache = recordingCache();
+    matches.summaries.set(cup.id, cup);
+    matches.participantsByTournament.set(cup.id, participants);
+    seed(storedMatch());
+    service = new MatchService(
+      matchQueries({
+        detail: async () => matches.savedMatches.at(-1) ?? matches.matches.get("match") ?? null,
+      }),
+      transactionOver({ matches }),
+      new CompetitionAfterCommit(cache, events, diagnostics),
+    );
   });
 
   it("publishes MatchDecided once a winner is set", async () => {
     await service.setMatchWinner("match", "a");
 
-    expect(events.publish).toHaveBeenCalledExactlyOnceWith(matchDecided("match"));
+    expect(events.published).toStrictEqual([matchDecided("match")]);
   });
 
   it("stays silent for an undecided match", async () => {
     await service.createMatch("cup", { name: "Final", participantIds: ["a", "b"] });
 
-    expect(events.publish).not.toHaveBeenCalled();
+    expect(events.published).toStrictEqual([]);
   });
 
   it("does not re-score a decided match when only its VODs change", async () => {
-    persisted = storedMatch({ status: "finished", winner: participants[0] });
+    seed(storedMatch({ status: "finished", winner: participants[0] }));
 
     await service.setVods("match", [{ game: 1, language: "en", url: "https://youtu.be/a" }]);
     await service.setGameVods("match", 2, []);
 
-    expect(events.publish).not.toHaveBeenCalled();
+    expect(events.published).toStrictEqual([]);
   });
 
   it("refreshes the cached tournament without re-scoring when only the source changes", async () => {
-    persisted = storedMatch({ status: "finished", winner: participants[0] });
+    seed(storedMatch({ status: "finished", winner: participants[0] }));
 
     await service.setSource("match", "https://www.rocketleague.com/en/news/rlcs-official-rules");
 
-    expect(cache.invalidateTournament).toHaveBeenCalledWith("cup");
-    expect(events.publish).not.toHaveBeenCalled();
+    expect(cache.invalidated).toContain("cup");
+    expect(events.published).toStrictEqual([]);
   });
 
   it("returns the match when publication fails", async () => {
-    events.publish.mockRejectedValue(new Error("listener"));
+    const failure = new Error("listener");
+    events.failWith(failure);
 
     await expect(service.setMatchWinner("match", "a")).resolves.toMatchObject({ id: "match" });
-    expect(diagnostics.error).toHaveBeenCalledWith(
-      "MatchDecided publication failed",
-      expect.any(Error),
-    );
+    expect(diagnostics.errors).toContainEqual({
+      cause: failure,
+      message: "MatchDecided publication failed",
+    });
   });
 });

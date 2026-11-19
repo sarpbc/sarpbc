@@ -101,11 +101,11 @@ const title = computed(() => {
   return t("page.game.career.offseason.unsignedTitle");
 });
 
-const setHoveredTeam = (teamId: string | null): void => {
+const setHoveredTeam = (teamId: string | null) => {
   emit("update:hoveredTeamId", teamId);
 };
 
-const offerRowClass = (teamId: string, withBottomBorder: boolean): string[] => {
+const offerRowClass = (teamId: string, withBottomBorder: boolean) => {
   const highlighted = hoveredTeamId === teamId;
 
   return [
@@ -121,7 +121,7 @@ const retireRowClass = [
   "hover:bg-elevated",
 ];
 
-const onRowLeave = (event: MouseEvent, teamId: string): void => {
+const onRowLeave = (event: MouseEvent, teamId: string) => {
   const { currentTarget: current, relatedTarget: next } = event;
 
   if (current instanceof Node && next instanceof Node && current.contains(next)) {
@@ -133,7 +133,7 @@ const onRowLeave = (event: MouseEvent, teamId: string): void => {
   }
 };
 
-const onRowFocusOut = (event: FocusEvent, teamId: string): void => {
+const onRowFocusOut = (event: FocusEvent, teamId: string) => {
   const { currentTarget: current, relatedTarget: next } = event;
 
   if (current instanceof Node && next instanceof Node && current.contains(next)) {

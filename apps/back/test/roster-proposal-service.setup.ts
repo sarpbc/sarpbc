@@ -5,20 +5,6 @@ import type {
   Viewership,
 } from "@sarpbc/types";
 import { vi } from "vitest";
-import type { PlayerService } from "../src/roster/application/player.service";
-import type { TeamService } from "../src/roster/application/team.service";
-import type { TeamAliasService } from "../src/roster/application/team-alias.service";
-import type { TeamLogoService } from "../src/roster/application/team-logo.service";
-import type { ContractService } from "../src/roster/application/contract.service";
-import type { RosterMergeService } from "../src/roster/application/roster-merge.service";
-import type { MatchService } from "../src/tournament/application/match/match.service";
-import type { MatchLineupService } from "../src/tournament/application/match/match-lineup.service";
-import type { PlayerAwardService } from "../src/tournament/application/player-award.service";
-import type { StreamService } from "../src/tournament/application/stream.service";
-import type { ViewershipService } from "../src/tournament/application/viewership.service";
-import type { TournamentPrizeService } from "../src/tournament/application/tournament-prize.service";
-import type { CircuitService } from "../src/circuit/application/circuit.service";
-import type { SeasonService } from "../src/season/application/season.service";
 import { ConflictError } from "../src/common/domain/errors/conflict-error";
 import { InvalidInputError } from "../src/common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../src/common/domain/errors/not-found-error";
@@ -26,13 +12,13 @@ import { Contract } from "../src/roster/domain/contract";
 import { Player } from "../src/roster/domain/player";
 import { Team } from "../src/roster/domain/team";
 import { TeamAlias } from "../src/roster/domain/team-alias";
+import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
+import type { RosterProposalStore } from "../src/roster-proposal/application/ports";
+import { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 import { replaceStreams } from "../src/tournament/domain/stream";
 import type { StreamEditSource, StreamOwner } from "../src/tournament/domain/stream";
 import { requireViewership } from "../src/tournament/domain/viewership";
 import type { ViewershipOwner } from "../src/tournament/domain/viewership";
-import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
-import type { RosterProposalStore } from "../src/roster-proposal/application/ports";
-import { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 
 const teamGuard = async (id: string) => {
   if (id === "kc") {
@@ -49,6 +35,8 @@ const matchGuard = async (id: string) => {
     throw new InvalidInputError("Final is synced from PandaScore and cannot be deleted");
   }
 };
+
+const emptyPrizes = { prizepool: null, prizes: [], source: "manual" as const };
 
 const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
 
@@ -68,15 +56,43 @@ const awardError = (tournamentId: string, playerId: string) => {
   return null;
 };
 
+type FailureKey =
+  | "awards.createForTeam"
+  | "awards.requireProposable"
+  | "lineups.set"
+  | "logos.discard"
+  | "logos.upload"
+  | "matches.deleteMatch"
+  | "players.joinTeam"
+  | "store.save"
+  | "teams.delete";
+
 export const setupRosterProposalService = () => {
   const saved = new Map<string, RosterProposal>();
+  const failures = new Map<FailureKey, Error>();
   let sequence = 0;
+
+  const failNext = (key: FailureKey, error: Error) => {
+    failures.set(key, error);
+  };
+
+  const throwIfFailing = (key: FailureKey) => {
+    const error = failures.get(key);
+
+    if (error) {
+      failures.delete(key);
+
+      throw error;
+    }
+  };
 
   const store = {
     findById: async (id) => saved.get(id) ?? null,
     list: async (status) => [...saved.values()].filter((p) => p.status === status),
-    names: vi.fn<RosterProposalStore["names"]>(async () => ({ kc: "Karmine Corp", zen: "zen" })),
+    names: async () => ({ kc: "Karmine Corp", zen: "zen" }),
     save: async (proposal) => {
+      throwIfFailing("store.save");
+
       if (proposal.id === "") {
         sequence += 1;
         proposal.id = `proposal-${sequence}`;
@@ -86,223 +102,259 @@ export const setupRosterProposalService = () => {
     },
   } satisfies RosterProposalStore;
 
+  vi.spyOn(store, "names");
+
   const zen = Object.assign(new Player(), { id: "zen", name: "zen" });
   const kc = Object.assign(new Team(), { id: "kc", name: "Karmine Corp" });
   const kcCopy = Object.assign(new Team(), { id: "kc-copy", name: "Karmine Corp Esports" });
   const knownTeams = new Map([kc, kcCopy].map((team) => [team.id, team]));
+  const mergedPlayers = new Map<string, Player>();
 
   const players = {
-    create: vi.fn<PlayerService["create"]>(async () =>
-      Object.assign(new Player(), { id: "new-player" }),
-    ),
-    findById: vi.fn<PlayerService["findById"]>(async (id: string) =>
-      id === "zen" || id === "zen-dup" ? zen : null,
-    ),
-    joinTeam: vi.fn<PlayerService["joinTeam"]>(async () => zen),
-    leaveTeam: vi.fn<PlayerService["leaveTeam"]>(),
-    update: vi.fn<PlayerService["update"]>(async () => zen),
+    create: async () => Object.assign(new Player(), { id: "new-player" }),
+    findById: async (id: string) =>
+      mergedPlayers.get(id) ?? (id === "zen" || id === "zen-dup" ? zen : null),
+    joinTeam: async () => {
+      throwIfFailing("players.joinTeam");
+
+      return zen;
+    },
+    leaveTeam: async () => zen,
+    update: async () => zen,
   };
+
+  vi.spyOn(players, "create");
+  vi.spyOn(players, "joinTeam");
 
   const teams = {
-    create: vi.fn<TeamService["create"]>(async () => Object.assign(new Team(), { id: "new-team" })),
-    delete: vi.fn<TeamService["delete"]>(teamGuard),
-    findById: vi.fn<TeamService["findById"]>(async (id: string) => knownTeams.get(id) ?? null),
-    requireDeletable: vi.fn<TeamService["requireDeletable"]>(teamGuard),
-    update: vi.fn<TeamService["update"]>(async () => kc),
+    create: async () => Object.assign(new Team(), { id: "new-team" }),
+    delete: async (id: string) => {
+      throwIfFailing("teams.delete");
+      await teamGuard(id);
+    },
+    findById: async (id: string) => knownTeams.get(id) ?? null,
+    requireDeletable: teamGuard,
+    update: async () => kc,
   };
+
+  vi.spyOn(teams, "delete");
+  vi.spyOn(teams, "update");
 
   const matches = {
-    deleteMatch: vi.fn<MatchService["deleteMatch"]>(matchGuard),
-    requireProposableDeletion: vi.fn<MatchService["requireProposableDeletion"]>(
-      async (id: string) => {
-        await matchGuard(id);
+    deleteMatch: async (id: string) => {
+      throwIfFailing("matches.deleteMatch");
+      await matchGuard(id);
+    },
+    requireProposableDeletion: async (id: string) => {
+      await matchGuard(id);
 
-        if (id === "startgg-match") {
-          throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
-        }
-      },
-    ),
+      if (id === "startgg-match") {
+        throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
+      }
+    },
   };
+
+  vi.spyOn(matches, "deleteMatch");
 
   const viewerships = {
-    requireProposable: vi.fn<ViewershipService["requireProposable"]>(
-      async (owner: ViewershipOwner, input: Viewership) => {
-        requireViewership(input);
+    requireProposable: async (owner: ViewershipOwner, input: Viewership) => {
+      requireViewership(input);
 
-        if (owner.id === "startgg-match") {
-          throw new InvalidInputError("The viewership of a start.gg match cannot be proposed");
-        }
-      },
-    ),
-    set: vi.fn<ViewershipService["set"]>(async (_: ViewershipOwner, input: Viewership | null) => ({
+      if (owner.id === "startgg-match") {
+        throw new InvalidInputError("The viewership of a start.gg match cannot be proposed");
+      }
+    },
+    set: async (_: ViewershipOwner, input: Viewership | null) => ({
       viewership: input && requireViewership(input),
-    })),
+    }),
   };
+
+  vi.spyOn(viewerships, "set");
 
   const streams = {
-    requireProposable: vi.fn<StreamService["requireProposable"]>(
-      async (owner: StreamOwner, inputs: readonly StreamInput[]) => {
-        if (owner.id === "startgg-match") {
-          throw new InvalidInputError("Streams of a start.gg match cannot be proposed");
-        }
+    requireProposable: async (owner: StreamOwner, inputs: readonly StreamInput[]) => {
+      if (owner.id === "startgg-match") {
+        throw new InvalidInputError("Streams of a start.gg match cannot be proposed");
+      }
 
-        replaceStreams([], inputs, "manual");
-      },
-    ),
-    set: vi.fn<StreamService["set"]>(
-      async (_: StreamOwner, inputs: readonly StreamInput[], from: StreamEditSource) => ({
-        inherited: [],
-        streams: replaceStreams([], inputs, from),
-      }),
-    ),
+      replaceStreams([], inputs, "manual");
+    },
+    set: async (_: StreamOwner, inputs: readonly StreamInput[], from: StreamEditSource) => ({
+      inherited: [],
+      streams: replaceStreams([], inputs, from),
+    }),
   };
+
+  vi.spyOn(streams, "set");
 
   const lineups = {
-    requireProposable: vi.fn<MatchLineupService["requireProposable"]>(
-      async (matchId: string, inputs: readonly MatchLineupInput[]) => {
-        if (matchId === "startgg-match") {
-          throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
-        }
+    requireProposable: async (matchId: string, inputs: readonly MatchLineupInput[]) => {
+      if (matchId === "startgg-match") {
+        throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
+      }
 
-        const playerIds = inputs.flatMap(({ playerIds: ids }) => ids);
+      const playerIds = inputs.flatMap(({ playerIds: ids }) => ids);
 
-        if (new Set(playerIds).size !== playerIds.length) {
-          throw new InvalidInputError("A player appears twice in the match lineups");
-        }
-      },
-    ),
-    set: vi.fn<MatchLineupService["set"]>(async () => ({ lineups: [], source: "manual" as const })),
+      if (new Set(playerIds).size !== playerIds.length) {
+        throw new InvalidInputError("A player appears twice in the match lineups");
+      }
+    },
+    set: async () => {
+      throwIfFailing("lineups.set");
+
+      return { lineups: [], source: "manual" as const };
+    },
   };
+
+  vi.spyOn(lineups, "set");
 
   const circuits = {
-    requireStageSettings: vi.fn<CircuitService["requireStageSettings"]>(
-      async (_: string, tournamentId: string, input: CircuitStageScaleInput) => {
-        if (tournamentId === "missing-stage") {
-          throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
-        }
+    requireStageSettings: async (
+      _: string,
+      tournamentId: string,
+      input: CircuitStageScaleInput,
+    ) => {
+      if (tournamentId === "missing-stage") {
+        throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
+      }
 
-        return { finishes: [], regionTeamIds: [], worldwide: false, ...input };
-      },
-    ),
-    setStageScale: vi.fn<CircuitService["setStageScale"]>().mockResolvedValue(undefined),
+      return { finishes: [], regionTeamIds: [], worldwide: false, ...input };
+    },
+    setStageScale: async () => {},
   };
+
+  vi.spyOn(circuits, "setStageScale");
 
   const teamAliases = {
-    add: vi.fn<TeamAliasService["add"]>(async () => new TeamAlias()),
-    requireProposable: vi.fn<TeamAliasService["requireProposable"]>(
-      async (_teamId: string, input: { sourceUrl: string }) => {
-        if (input.sourceUrl.includes("liquipedia")) {
-          throw new InvalidInputError("Liquipedia is not an accepted source");
-        }
-      },
-    ),
-    update: vi.fn<TeamAliasService["update"]>(async () => new TeamAlias()),
+    add: async () => new TeamAlias(),
+    requireProposable: async (_teamId: string, input: { sourceUrl: string }) => {
+      if (input.sourceUrl.includes("liquipedia")) {
+        throw new InvalidInputError("Liquipedia is not an accepted source");
+      }
+    },
+    update: async () => new TeamAlias(),
   };
 
+  vi.spyOn(teamAliases, "add");
+  vi.spyOn(teamAliases, "update");
+
   const seasons = {
-    addAward: vi.fn<SeasonService["addAward"]>(async () => ({
+    addAward: async () => ({
       awardType: "regional_mvp" as const,
       id: "season-award-1",
       player: { id: "zen", name: "zen", slug: "zen" },
       presentedBy: null,
       region: "Europe",
       sourceUrl: "https://x.com/RLEsports/status/1",
-    })),
-    requireAward: vi.fn<SeasonService["requireAward"]>(
-      async (seasonId: string, input: { region?: string | null }) => {
-        if (seasonId !== "season-1") {
-          throw new NotFoundError("Season not found");
-        }
+    }),
+    requireAward: async (seasonId: string, input: { region?: string | null }) => {
+      if (seasonId !== "season-1") {
+        throw new NotFoundError("Season not found");
+      }
 
-        return {
-          awardType: "regional_mvp" as const,
-          presentedBy: null,
-          region: input.region ?? null,
-          sourceUrl: "https://x.com/RLEsports/status/1",
-        };
-      },
-    ),
+      return {
+        awardType: "regional_mvp" as const,
+        presentedBy: null,
+        region: input.region ?? null,
+        sourceUrl: "https://x.com/RLEsports/status/1",
+      };
+    },
   };
+
+  vi.spyOn(seasons, "addAward");
 
   const logos = {
-    discard: vi.fn<TeamLogoService["discard"]>().mockResolvedValue(undefined),
-    publish: vi.fn<TeamLogoService["publish"]>(async (pendingKey: string) =>
-      stored(pendingKey.slice("pending/".length)),
-    ),
-    upload: vi.fn<TeamLogoService["upload"]>(async (teamId: string, variant: string) =>
-      stored(`pending/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`),
-    ),
+    discard: async () => {
+      throwIfFailing("logos.discard");
+    },
+    publish: async (pendingKey: string) => stored(pendingKey.slice("pending/".length)),
+    upload: async (teamId: string, variant: string) => {
+      throwIfFailing("logos.upload");
+
+      return stored(`pending/teams/${teamId}/logo-${variant}-0123456789abcdef.webp`);
+    },
   };
+
+  vi.spyOn(logos, "discard");
+  vi.spyOn(logos, "publish");
+  vi.spyOn(logos, "upload");
 
   const contracts = {
-    getContractsByPlayer: vi.fn<ContractService["getContractsByPlayer"]>(async () => [
-      Object.assign(new Contract(), { id: "zen-kc" }),
-    ]),
-    recordPeriod: vi.fn<ContractService["recordPeriod"]>(async () =>
-      Object.assign(new Contract(), { id: "new-contract" }),
-    ),
-    revisePeriod: vi.fn<ContractService["revisePeriod"]>(async () =>
-      Object.assign(new Contract(), { id: "zen-kc" }),
-    ),
+    getContractsByPlayer: async () => [Object.assign(new Contract(), { id: "zen-kc" })],
+    recordPeriod: async () => Object.assign(new Contract(), { id: "new-contract" }),
+    revisePeriod: async () => Object.assign(new Contract(), { id: "zen-kc" }),
   };
 
+  vi.spyOn(contracts, "recordPeriod");
+  vi.spyOn(contracts, "revisePeriod");
+
   const merges = {
-    mergePlayers: vi.fn<RosterMergeService["mergePlayers"]>(),
-    mergeTeams: vi.fn<RosterMergeService["mergeTeams"]>(async () => ({ kept: kc, merged: kcCopy })),
+    mergePlayers: async () => ({ kept: zen, merged: zen }),
+    mergeTeams: async (keptId: string, duplicateId: string) => ({
+      kept: knownTeams.get(keptId) ?? kc,
+      merged: knownTeams.get(duplicateId) ?? kcCopy,
+    }),
   };
+
+  vi.spyOn(merges, "mergeTeams");
 
   const permissions: string[] = [];
   const staff = { allowed: true, permissions };
 
   const prizes = {
-    requireProposablePrize: vi.fn<TournamentPrizeService["requireProposablePrize"]>(
-      async (tournamentId: string, teamId: string) => {
-        if (tournamentId !== "cup") {
-          throw new NotFoundError(`Tournament "${tournamentId}" not found`);
-        }
+    requireProposablePrize: async (tournamentId: string, teamId: string) => {
+      if (tournamentId !== "cup") {
+        throw new NotFoundError(`Tournament "${tournamentId}" not found`);
+      }
 
-        if (teamId !== "kc") {
-          throw new NotFoundError(`Team "${teamId}" has no prize`);
-        }
-      },
-    ),
-    requireProposableTournament: vi.fn<TournamentPrizeService["requireProposableTournament"]>(
-      async (id: string) => {
-        if (id === "startgg-cup") {
-          throw new InvalidInputError(
-            "Prize distributions of start.gg tournaments cannot be proposed",
-          );
-        }
+      if (teamId !== "kc") {
+        throw new NotFoundError(`Team "${teamId}" has no prize`);
+      }
+    },
+    requireProposableTournament: async (id: string) => {
+      if (id === "startgg-cup") {
+        throw new InvalidInputError(
+          "Prize distributions of start.gg tournaments cannot be proposed",
+        );
+      }
 
-        if (id !== "cup") {
-          throw new NotFoundError(`Tournament with id "${id}" not found`);
-        }
-      },
-    ),
-    setDistribution: vi.fn<TournamentPrizeService["setDistribution"]>(),
-    updateEntry: vi.fn<TournamentPrizeService["updateEntry"]>(),
+      if (id !== "cup") {
+        throw new NotFoundError(`Tournament with id "${id}" not found`);
+      }
+    },
+    setDistribution: async () => emptyPrizes,
+    updateEntry: async () => emptyPrizes,
   };
+
+  vi.spyOn(prizes, "setDistribution");
+  vi.spyOn(prizes, "updateEntry");
 
   const awards = {
-    createForTeam: vi.fn<PlayerAwardService["createForTeam"]>(async () => ({
-      awardType: "mvp" as const,
-      id: "award-1",
-      participant: { id: "part-kc" },
-      player: { id: "zen", name: "zen", slug: "zen" },
-    })),
-    requireProposable: vi.fn<PlayerAwardService["requireProposable"]>(
-      async (tournamentId: string, _team: string, playerId: string) => {
-        const error = awardError(tournamentId, playerId);
+    createForTeam: async () => {
+      throwIfFailing("awards.createForTeam");
 
-        if (error) {
-          throw error;
-        }
-      },
-    ),
+      return {
+        awardType: "mvp" as const,
+        id: "award-1",
+        participant: { id: "part-kc" },
+        player: { id: "zen", name: "zen", slug: "zen" },
+      };
+    },
+    requireProposable: async (tournamentId: string, _team: string, playerId: string) => {
+      throwIfFailing("awards.requireProposable");
+
+      const error = awardError(tournamentId, playerId);
+
+      if (error) {
+        throw error;
+      }
+    },
   };
 
+  vi.spyOn(awards, "createForTeam");
+
   const rollingBack = {
-    run: async <T>(work: (proposals: RosterProposalStore) => Promise<T>): Promise<T> => {
+    run: async <T>(work: (proposals: RosterProposalStore) => Promise<T>) => {
       const before = new Map(
         [...saved].map(([id, proposal]) => [
           id,
@@ -354,9 +406,11 @@ export const setupRosterProposalService = () => {
     awards,
     circuits,
     contracts,
+    failNext,
     lineups,
     logos,
     matches,
+    mergedPlayers,
     merges,
     players,
     prizes,

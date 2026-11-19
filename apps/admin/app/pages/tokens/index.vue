@@ -58,7 +58,7 @@ const {
   refresh,
   error,
 } = await useLazyAsyncData("admin-pat-tokens", () => getPatTokens(), {
-  default: (): PatToken[] => [],
+  default: () => [],
   server: false,
 });
 

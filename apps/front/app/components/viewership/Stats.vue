@@ -15,7 +15,7 @@ const dateTimeFormatter = computed(
   () => new Intl.DateTimeFormat(locale.value, { dateStyle: "medium", timeStyle: "short" }),
 );
 
-const scopeLabel = (scope: ViewershipScope): string => {
+const scopeLabel = (scope: ViewershipScope) => {
   switch (scope) {
     case "official": {
       return t("components.viewership.scope.official");

@@ -1,4 +1,3 @@
-import { forumPostSlug } from "@sarpbc/utils";
 import { describe, expect, it } from "vitest";
 import type { PostActivity, PostRecord, TopicRecord } from "../../application/models";
 import { PostType } from "../../domain/post-type.enum";
@@ -45,22 +44,21 @@ const activity: PostActivity = {
 };
 
 describe("forum responses", () => {
-  it("keeps the post list item JSON identical to the spread record", () => {
-    const previous = { ...post, slug: forumPostSlug(post.title) };
-
-    expect(JSON.stringify(postWithSlugResponse(post))).toBe(JSON.stringify(previous));
+  it("serializes a post with its translations and slug", () => {
+    expect(JSON.stringify(postWithSlugResponse(post))).toBe(
+      JSON.stringify({ ...post, slug: "who-wins-the-open" }),
+    );
   });
 
-  it("keeps the topic JSON identical to the record", () => {
+  it("serializes a topic with its posts", () => {
     expect(JSON.stringify(topicResponse(topic))).toBe(JSON.stringify(topic));
   });
 
-  it("keeps the recent activity JSON identical to the spread record", () => {
-    const previous = { ...activity, slug: forumPostSlug(activity.title) };
-
+  it("serializes recent activity with its slug and an ISO date", () => {
     expect(postActivityResponse(activity)).toStrictEqual({
-      ...previous,
-      lastActivity: previous.lastActivity.toISOString(),
+      ...activity,
+      lastActivity: "2026-01-04T00:00:00.000Z",
+      slug: "who-wins-the-open",
     });
   });
 });

@@ -13,7 +13,7 @@ export class PermissionGuard implements CanActivate {
     private readonly reflector: Reflector,
   ) {}
 
-  async canActivate(context: ExecutionContext): Promise<boolean> {
+  async canActivate(context: ExecutionContext) {
     const requestUser = context.switchToHttp().getRequest<FastifyRequest>().user;
 
     if (!requestUser) {

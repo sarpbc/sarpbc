@@ -22,16 +22,16 @@ import {
 } from "./manual-tournament-lineup";
 import { nonBlank } from "../../common/domain/text";
 
-const optionalDate = (value: string | null | undefined): Date | null =>
+const optionalDate = (value: string | null | undefined) =>
   value !== null && value !== undefined && value !== "" ? new Date(value) : null;
 
-/** `new Date("YYYY-MM-DD")` is midnight UTC, which would end the stage before its last day is played. */
-const optionalEndDate = (value: string | null | undefined): Date | null =>
+// WARNING: `new Date("YYYY-MM-DD")` is midnight UTC, which would end the stage before its last day is played.
+const optionalEndDate = (value: string | null | undefined) =>
   value === null || value === undefined
     ? null
     : (endOfIsoDayIn(value, SITE_TIME_ZONE) ?? optionalDate(value));
 
-const draftTournament = (input: CreateTournamentInput): Tournament => {
+const draftTournament = (input: CreateTournamentInput) => {
   const tournament = new Tournament();
   tournament.source = input.source ?? "manual";
   tournament.pandascoreId = null;
@@ -51,11 +51,7 @@ const draftTournament = (input: CreateTournamentInput): Tournament => {
   return tournament;
 };
 
-const bracketToggle = async (
-  matches: MatchWriter,
-  tournamentId: string,
-  hasBracket: boolean,
-): Promise<boolean> => {
+const bracketToggle = async (matches: MatchWriter, tournamentId: string, hasBracket: boolean) => {
   if (hasBracket) {
     return true;
   }
@@ -77,7 +73,7 @@ export class ManualTournamentService {
     private readonly transaction: CompetitionTransaction,
     private readonly afterCommit: CompetitionAfterCommit,
   ) {}
-  async create(input: CreateTournamentInput): Promise<Tournament> {
+  async create(input: CreateTournamentInput) {
     const id = await this.transaction.run(async ({ tournaments, events }) => {
       const tournament = draftTournament(input);
       tournament.league = await requireLeague(tournaments, input.leagueId);
@@ -108,7 +104,7 @@ export class ManualTournamentService {
 
     return await this.detail(id);
   }
-  async update(id: string, input: UpdateTournamentInput): Promise<Tournament> {
+  async update(id: string, input: UpdateTournamentInput) {
     await this.transaction.run(async ({ tournaments, events, matches }) => {
       const tournament = await tournaments.load(id);
 
@@ -176,7 +172,7 @@ export class ManualTournamentService {
 
     return await this.detail(id);
   }
-  async setPickemsEnabled(id: string, enabled: boolean): Promise<void> {
+  async setPickemsEnabled(id: string, enabled: boolean) {
     await this.transaction.run(async ({ tournaments }) => {
       const tournament = await tournaments.load(id);
 
@@ -189,7 +185,7 @@ export class ManualTournamentService {
     });
     await this.afterCommit.settle({ tournamentIds: [id] });
   }
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     await this.transaction.run(async ({ tournaments, matches }) => {
       const tournament = await tournaments.load(id);
 

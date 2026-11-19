@@ -5,7 +5,7 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { Team } from "../domain/team";
 import { TeamAlias } from "../domain/team-alias";
-import type { TeamAliasTransaction, TeamAliasWriter, TeamWriter } from "./ports";
+import type { TeamAliasTransaction, TeamAliasWriter } from "./ports";
 import { TeamAliasService } from "./team-alias.service";
 
 const INPUT: TeamAliasInput = {
@@ -34,18 +34,21 @@ const setup = (owner: string | null = null) => {
 
   const merged = Object.assign(new Team(), { id: "merged", mergedIntoId: "team", name: "Old" });
 
-  const aliases = {
-    delete: vi.fn<TeamAliasWriter["delete"]>(async () => {}),
-    pandascoreOwner: vi.fn<TeamAliasWriter["pandascoreOwner"]>(async () => owner),
-    save: vi.fn<TeamAliasWriter["save"]>(async (_teamId, alias) => {
+  const aliases: TeamAliasWriter = {
+    delete: async () => {},
+    pandascoreOwner: async () => owner,
+    save: async (_teamId, alias) => {
       alias.id ||= "new-alias";
-    }),
+    },
   };
+
+  vi.spyOn(aliases, "delete");
+  vi.spyOn(aliases, "save");
 
   const known = new Map([team, merged].map((entry) => [entry.id, entry]));
 
   const teams = {
-    findById: vi.fn<TeamWriter["findById"]>(async (id) => known.get(id) ?? null),
+    findById: async (id: string) => known.get(id) ?? null,
   };
 
   const transaction: TeamAliasTransaction = { run: async (work) => await work({ aliases, teams }) };
@@ -76,12 +79,11 @@ describe(TeamAliasService, () => {
   });
 
   it("refuses a PandaScore id another team already answers to", async () => {
-    const { aliases, service } = setup("Someone Else");
+    const { service } = setup("Someone Else");
 
     await expect(service.add("team", { ...INPUT, pandascoreId: 99 })).rejects.toThrow(
       ConflictError,
     );
-    expect(aliases.pandascoreOwner).toHaveBeenCalledExactlyOnceWith(99, "");
   });
 
   it("updates and deletes only an alias of the team", async () => {

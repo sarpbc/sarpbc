@@ -4,7 +4,6 @@ import { tournamentEventPath, tournamentStagePath } from "@sarpbc/utils";
 
 const { events, to = null } = defineProps<{
   events: TournamentEvent<TournamentListItem>[];
-  /** Overrides the stage link (pick'ems); the event name then stays plain text. */
   to?: ((stage: TournamentListItem) => string) | null;
 }>();
 
@@ -12,7 +11,7 @@ const { t, te } = useI18n();
 const localePath = useLocalePath();
 const { formatTournamentPrizepool } = useCurrency();
 
-const eventMeta = (event: TournamentEvent<TournamentListItem>): string => {
+const eventMeta = (event: TournamentEvent<TournamentListItem>) => {
   const typeKey = `components.tournaments.${event.type}`;
 
   return [event.type && te(typeKey) ? t(typeKey) : "", formatTournamentPrizepool(event.prizepool)]
@@ -20,7 +19,7 @@ const eventMeta = (event: TournamentEvent<TournamentListItem>): string => {
     .join(" · ");
 };
 
-const stageHref = (event: TournamentEvent<TournamentListItem>, stage: TournamentListItem): string =>
+const stageHref = (event: TournamentEvent<TournamentListItem>, stage: TournamentListItem) =>
   to ? to(stage) : localePath(tournamentStagePath(event.slug, stage.slug));
 </script>
 

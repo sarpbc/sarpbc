@@ -79,7 +79,7 @@ export class TournamentSyncRunner {
     }
   }
 
-  private async findPandascoreActiveIds(now: Date): Promise<string[]> {
+  private async findPandascoreActiveIds(now: Date) {
     const active = await this.tournaments.findPandascoreActive({
       beganAfter: new Date(now.getTime() - 7 * 24 * HOUR_MS),
       beginsBefore: new Date(now.getTime() + 24 * HOUR_MS),

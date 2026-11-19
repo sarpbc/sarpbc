@@ -34,9 +34,9 @@ const SELECTORS = ["match", "ids", "tournament", "team"] as const;
 const ATTR_ORDER = [...SELECTORS, "limit"] as const;
 const ATTR_NAMES = new Set<string>(ATTR_ORDER);
 
-const isUuid = (value: string): boolean => UUID_PATTERN.test(value);
+const isUuid = (value: string) => UUID_PATTERN.test(value);
 
-const parseLimit = (value: string | number | null | undefined): number | null => {
+const parseLimit = (value: string | number | null | undefined) => {
   if (value === null || value === undefined || value === "") {
     return NEWS_MATCH_BLOCK_DEFAULT_LIMIT;
   }
@@ -52,7 +52,7 @@ const parseLimit = (value: string | number | null | undefined): number | null =>
   return limit <= NEWS_MATCH_BLOCK_MAX_MATCHES ? limit : null;
 };
 
-const parseIds = (value: string): string[] | null => {
+const parseIds = (value: string) => {
   const ids = value
     .split(",")
     .map((id) => id.trim().toLowerCase())
@@ -65,7 +65,7 @@ const parseIds = (value: string): string[] | null => {
   return new Set(ids).size === ids.length ? ids : null;
 };
 
-const parseAttrs = (inner: string): Record<string, string> | null => {
+const parseAttrs = (inner: string) => {
   const source = inner.trim();
 
   if (!ATTRS_PATTERN.test(source)) {
@@ -89,7 +89,7 @@ const parseAttrs = (inner: string): Record<string, string> | null => {
   return attrs;
 };
 
-export const newsMatchBlockFromAttrs = (attrs: NewsMatchBlockAttrs): MatchBlockSelector | null => {
+export const newsMatchBlockFromAttrs = (attrs: NewsMatchBlockAttrs) => {
   const present = SELECTORS.filter((name) => {
     const value = attrs[name];
 
@@ -107,13 +107,15 @@ export const newsMatchBlockFromAttrs = (attrs: NewsMatchBlockAttrs): MatchBlockS
 
   switch (selector) {
     case "match": {
-      return !hasLimit && isUuid(value) ? { id: value.toLowerCase(), kind: "match" } : null;
+      return !hasLimit && isUuid(value)
+        ? ({ id: value.toLowerCase(), kind: "match" } satisfies MatchBlockSelector)
+        : null;
     }
 
     case "ids": {
       const ids = hasLimit ? null : parseIds(value);
 
-      return ids ? { ids, kind: "matches" } : null;
+      return ids ? ({ ids, kind: "matches" } satisfies MatchBlockSelector) : null;
     }
 
     case "tournament":
@@ -133,7 +135,7 @@ export const newsMatchBlockFromAttrs = (attrs: NewsMatchBlockAttrs): MatchBlockS
   }
 };
 
-export const newsMatchBlockToAttrs = (block: MatchBlockSelector): NewsMatchBlockAttrs => {
+export const newsMatchBlockToAttrs = (block: MatchBlockSelector) => {
   switch (block.kind) {
     case "match": {
       return { match: block.id };
@@ -159,7 +161,7 @@ export const newsMatchBlockToAttrs = (block: MatchBlockSelector): NewsMatchBlock
   }
 };
 
-export const parseNewsMatchTag = (raw: string): NewsMatchTag | null => {
+export const parseNewsMatchTag = (raw: string) => {
   const match = raw.match(MATCH_TAG_PATTERN);
 
   if (!match) {
@@ -172,7 +174,7 @@ export const parseNewsMatchTag = (raw: string): NewsMatchTag | null => {
   return block ? { block, raw: match[0] } : null;
 };
 
-export const serializeNewsMatchTag = (block: MatchBlockSelector): string => {
+export const serializeNewsMatchTag = (block: MatchBlockSelector) => {
   const blockAttrs = newsMatchBlockToAttrs(block);
 
   const attrs = ATTR_ORDER.flatMap((name) => {
@@ -184,7 +186,7 @@ export const serializeNewsMatchTag = (block: MatchBlockSelector): string => {
   return `:matches{${attrs}}`;
 };
 
-export const newsMatchBlockKey = (block: MatchBlockSelector): string => {
+export const newsMatchBlockKey = (block: MatchBlockSelector) => {
   switch (block.kind) {
     case "match": {
       return `match:${block.id}`;
@@ -210,7 +212,7 @@ export const newsMatchBlockKey = (block: MatchBlockSelector): string => {
   }
 };
 
-export const parseNewsMatchBlockKey = (key: string): MatchBlockSelector | null => {
+export const parseNewsMatchBlockKey = (key: string) => {
   const [kind, value, limit, ...rest] = key.split(":");
 
   if (rest.length > 0 || value === undefined) {
@@ -244,7 +246,7 @@ export const parseNewsMatchBlockKey = (key: string): MatchBlockSelector | null =
   return block && newsMatchBlockKey(block) === key ? block : null;
 };
 
-const maskInlineCode = (line: string): string => {
+const maskInlineCode = (line: string) => {
   const runs = [...line.matchAll(BACKTICK_RUN_PATTERN)].map((run) => ({
     length: run[0].length,
     start: run.index,
@@ -287,7 +289,7 @@ const maskInlineCode = (line: string): string => {
   return masked + line.slice(copied);
 };
 
-const maskCode = (content: string): string => {
+const maskCode = (content: string) => {
   let fence: string | null = null;
 
   return content
@@ -319,10 +321,9 @@ const maskCode = (content: string): string => {
     .join("\n");
 };
 
-const isLineSpace = (char: string | undefined): boolean =>
-  char === " " || char === "\t" || char === "\r";
+const isLineSpace = (char: string | undefined) => char === " " || char === "\t" || char === "\r";
 
-const isOwnLine = (text: string, start: number, end: number): boolean => {
+const isOwnLine = (text: string, start: number, end: number) => {
   let before = start;
 
   while (start - before < MAX_TAG_INDENT && text[before - 1] === " ") {
@@ -340,12 +341,7 @@ const isOwnLine = (text: string, start: number, end: number): boolean => {
   );
 };
 
-interface ScannedMatchTag {
-  raw: string;
-  tag: NewsMatchTag | null;
-}
-
-const scanNewsMatchTags = (content: string): ScannedMatchTag[] => {
+const scanNewsMatchTags = (content: string) => {
   const masked = maskCode(content);
 
   return [...masked.matchAll(MATCH_TAG_GLOBAL_PATTERN)].map((match) => {
@@ -357,7 +353,7 @@ const scanNewsMatchTags = (content: string): ScannedMatchTag[] => {
   });
 };
 
-export const extractNewsMatchBlocks = (content: string): MatchBlockSelector[] => {
+export const extractNewsMatchBlocks = (content: string) => {
   const blocks = new Map<string, MatchBlockSelector>();
 
   for (const { tag } of scanNewsMatchTags(content)) {
@@ -369,16 +365,16 @@ export const extractNewsMatchBlocks = (content: string): MatchBlockSelector[] =>
   return [...blocks.values()];
 };
 
-export const findInvalidNewsMatchTags = (content: string): string[] =>
+export const findInvalidNewsMatchTags = (content: string) =>
   scanNewsMatchTags(content)
     .filter(({ tag }) => !tag)
     .map(({ raw }) => raw);
 
-export const newsMatchTagStart = (content: string): number => {
+export const newsMatchTagStart = (content: string) => {
   const block = content.indexOf(MATCH_BLOCK_OPENER);
 
   return block === -1 ? content.indexOf(MATCH_INLINE_OPENER) : block;
 };
 
-export const stripNewsMatchTags = (content: string): string =>
+export const stripNewsMatchTags = (content: string) =>
   content.replaceAll(MATCH_TAG_GLOBAL_PATTERN, " ");

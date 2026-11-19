@@ -39,7 +39,7 @@ export class StatsImportService {
     private readonly reportFailure: (cause: unknown) => void,
   ) {}
 
-  async request(tournamentId: string, group: string): Promise<StatsImport> {
+  async request(tournamentId: string, group: string) {
     requireBallchasing(this.source);
     const groupId = parseBallchasingRef("group", group);
     await requireTournament(this.candidates, tournamentId);
@@ -74,15 +74,15 @@ export class StatsImportService {
     return statsImport;
   }
 
-  async recent(tournamentId: string): Promise<StatsImport[]> {
+  async recent(tournamentId: string) {
     return await this.imports.latest(tournamentId, RECENT_IMPORTS);
   }
 
-  async failInterrupted(): Promise<number> {
+  async failInterrupted() {
     return await this.imports.failUnfinished(INTERRUPTED_IMPORT_ERROR);
   }
 
-  async run(importId: string): Promise<void> {
+  async run(importId: string) {
     const statsImport = await this.imports.load(importId);
 
     const { source } = this;
@@ -118,7 +118,7 @@ export class StatsImportService {
       statsImport.total = assignments.length;
       await this.imports.save(statsImport);
 
-      // One replay at a time: the import record is saved after each, and Ballchasing is rate limited.
+      // WARNING: one replay at a time; the import record is saved after each and Ballchasing is rate limited.
       await mapSequentially(assignments, async (assignment) => {
         statsImport.items.push(await this.process(source, assignment, rosters));
         statsImport.processed += 1;
@@ -146,7 +146,7 @@ export class StatsImportService {
     source: BallchasingSource,
     assignment: ReplayAssignment,
     rosters: ReadonlyMap<string, RosterPlayer[]>,
-  ): Promise<StatsImportItem> {
+  ) {
     const { replay } = assignment;
 
     const base = {
@@ -163,7 +163,7 @@ export class StatsImportService {
           matchId: assignment.matchId,
           reason: assignment.reason,
           status: "unmatched",
-        };
+        } satisfies StatsImportItem;
       }
 
       case "stored": {
@@ -172,7 +172,7 @@ export class StatsImportService {
           gameNumber: assignment.gameNumber,
           matchId: assignment.matchId,
           status: "already_imported",
-        };
+        } satisfies StatsImportItem;
       }
 
       case "matched": {
@@ -182,18 +182,19 @@ export class StatsImportService {
       default: {
         const exhaustive: never = assignment;
 
-        return exhaustive;
+        return exhaustive satisfies StatsImportItem;
       }
     }
 
     const target = { ...base, gameNumber: assignment.gameNumber, matchId: assignment.matchId };
 
-    const failed = (reason: StatsImportFailedReason): StatsImportItem => ({
-      ...target,
-      blueParticipantId: assignment.sides.blue,
-      reason,
-      status: "failed",
-    });
+    const failed = (reason: StatsImportFailedReason) =>
+      ({
+        ...target,
+        blueParticipantId: assignment.sides.blue,
+        reason,
+        status: "failed",
+      }) satisfies StatsImportItem;
 
     let stats: ReplayStats | null;
 
@@ -202,19 +203,19 @@ export class StatsImportService {
     } catch (error) {
       this.reportFailure(error);
 
-      return failed("fetch_failed");
+      return failed("fetch_failed") satisfies StatsImportItem;
     }
 
     if (!stats) {
-      return failed("replay_not_ready");
+      return failed("replay_not_ready") satisfies StatsImportItem;
     }
 
     if (stats.blueGoals !== replay.blue.goals || stats.orangeGoals !== replay.orange.goals) {
-      return failed("score_mismatch");
+      return failed("score_mismatch") satisfies StatsImportItem;
     }
 
     if (!hasBothTeams(stats)) {
-      return failed("player_mismatch");
+      return failed("player_mismatch") satisfies StatsImportItem;
     }
 
     try {
@@ -237,9 +238,9 @@ export class StatsImportService {
     } catch (error) {
       this.reportFailure(error);
 
-      return failed("save_failed");
+      return failed("save_failed") satisfies StatsImportItem;
     }
 
-    return { ...target, status: "imported" };
+    return { ...target, status: "imported" } satisfies StatsImportItem;
   }
 }

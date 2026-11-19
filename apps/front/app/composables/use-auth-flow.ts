@@ -7,7 +7,7 @@ export const useAuthFlow = () => {
   const user = useUser();
   const { apiBase } = useRuntimeConfig().public;
 
-  const redirectTarget = (): string => {
+  const redirectTarget = () => {
     const raw = route.query.redirect;
 
     if (
@@ -23,7 +23,7 @@ export const useAuthFlow = () => {
     return raw;
   };
 
-  const leaveIfSignedIn = async (): Promise<void> => {
+  const leaveIfSignedIn = async () => {
     if (user.value === undefined) {
       user.value = await getProfile();
     }
@@ -37,7 +37,7 @@ export const useAuthFlow = () => {
     path: "/auth/login" | "/auth/signup",
     body: Record<string, string>,
     event: AuthEvent,
-  ): Promise<boolean> => {
+  ) => {
     const res = await apiFetch<{ success?: boolean }>(path, { body, method: "POST" });
 
     if (res.success !== true) {
@@ -56,7 +56,7 @@ export const useAuthFlow = () => {
     return true;
   };
 
-  const googleLogin = (): void => {
+  const googleLogin = () => {
     window.location.href = `${apiBase}/auth/google`;
   };
 

@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 import type { StaffRole } from "@sarpbc/types";
 import { z } from "zod";
 import type { ToolArguments } from "../define-tool";
-import { jsonOf, pendingProposalService } from "../../../../test/mcp-result";
+import { jsonOf } from "../../../../test/mcp-result";
+import { FakeRosterProposals, proposed } from "./roster-proposals.test-utils";
 import { rosterTools } from "./roster-tools";
 
 const MATCH_ID = "0b6e3d8a-1f2c-4e5d-8a9b-7c6d5e4f3a2b";
@@ -17,7 +18,7 @@ const LINEUPS = [
 ];
 
 const setup = (role: StaffRole = "admin") => {
-  const rosterProposalService = pendingProposalService();
+  const rosterProposalService = new FakeRosterProposals();
 
   const tool = rosterTools({ rosterProposalService }).find(
     (candidate) => candidate.name === "set_match_lineups",
@@ -40,11 +41,9 @@ describe("set_match_lineups", () => {
 
     const result = await call({ lineups: LINEUPS, matchId: MATCH_ID, sourceUrl: SOURCE });
 
-    expect(rosterProposalService.propose).toHaveBeenCalledExactlyOnceWith(
-      { kind: "set_match_lineups", lineups: LINEUPS, matchId: MATCH_ID },
-      SOURCE,
-      "u1",
-    );
+    expect(rosterProposalService.changes).toStrictEqual([
+      proposed({ kind: "set_match_lineups", lineups: LINEUPS, matchId: MATCH_ID }, SOURCE),
+    ]);
     const adminUrl: unknown = expect.stringContaining("admin.sarpbc.test");
 
     expect(jsonOf(result)).toMatchObject({
@@ -83,6 +82,6 @@ describe("set_match_lineups", () => {
     const { call, rosterProposalService } = setup("journalist");
     const result = await call({ lineups: LINEUPS, matchId: MATCH_ID, sourceUrl: SOURCE });
     expect(result.isError).toBe(true);
-    expect(rosterProposalService.propose).not.toHaveBeenCalled();
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 });

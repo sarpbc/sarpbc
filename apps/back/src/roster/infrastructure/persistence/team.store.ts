@@ -44,11 +44,11 @@ export class MikroTeamStore implements TeamQueries, TeamWriter {
     return rows.map((row) => toTeam(row));
   }
 
-  async searchAndCount(options: Partial<DirectorySearchProps>): Promise<[Team[], number]> {
+  async searchAndCount(options: Partial<DirectorySearchProps>) {
     const { where, page } = await this.teamDirectoryQuery(options);
     const [rows, count] = await this.em.findAndCount(TeamRow, where, { ...teamOptions, ...page });
 
-    return [rows.map((row) => toTeam(row)), count];
+    return [rows.map((row) => toTeam(row)), count] satisfies [Team[], number];
   }
 
   async findById(id: string) {

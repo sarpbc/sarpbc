@@ -5,7 +5,7 @@ import type { DailyRiddle } from "../../domain/airriddle";
 
 export class MikroDailyRiddles implements DailyRiddles {
   constructor(private readonly em: EntityManager) {}
-  async findTodaysRiddle(start: Date): Promise<DailyRiddle | null> {
+  async findTodaysRiddle(start: Date) {
     const row = await this.em.findOne(AirRiddle, { createdAt: { $gte: start } });
 
     return row
@@ -17,7 +17,7 @@ export class MikroDailyRiddles implements DailyRiddles {
         }
       : null;
   }
-  async save(riddle: DailyRiddle): Promise<void> {
+  async save(riddle: DailyRiddle) {
     this.em.persist(Object.assign(new AirRiddle(), riddle));
     await this.em.flush();
   }

@@ -8,7 +8,7 @@ const PUBLIC_ID_TABLES = [
 export class Migration20261020120000_addPublicIds extends Migration {
   override name = "Migration20261020120000_addPublicIds";
 
-  override up(): void | Promise<void> {
+  override up() {
     for (const { table, chronology } of PUBLIC_ID_TABLES) {
       this.addSql(`alter table "${table}" add "public_id" int null;`);
       this.addSql(
@@ -27,7 +27,7 @@ export class Migration20261020120000_addPublicIds extends Migration {
     }
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     for (const { table } of PUBLIC_ID_TABLES) {
       this.addSql(`alter table "${table}" drop constraint "${table}_public_id_unique";`);
       this.addSql(`alter table "${table}" drop column "public_id";`);

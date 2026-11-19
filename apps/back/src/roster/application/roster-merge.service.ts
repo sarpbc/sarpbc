@@ -12,7 +12,7 @@ export interface RosterMerge<T> {
 
 type Mergeable = Pick<Player | Team, "id" | "name" | "pandascoreId" | "mergedIntoId">;
 
-const assertMergeable = (kind: "player" | "team", kept: Mergeable, merged: Mergeable): void => {
+const assertMergeable = (kind: "player" | "team", kept: Mergeable, merged: Mergeable) => {
   if (kept.mergedIntoId !== null && kept.mergedIntoId !== "") {
     throw new InvalidInputError(
       `${kept.name} was already merged into ${kind} "${kept.mergedIntoId}"; keep that ${kind} instead`,
@@ -41,7 +41,7 @@ const assertMergeable = (kind: "player" | "team", kept: Mergeable, merged: Merge
 export class RosterMergeService {
   constructor(private readonly transaction: RosterMergeTransaction) {}
 
-  async mergePlayers(keptId: string, duplicateId: string): Promise<RosterMerge<Player>> {
+  async mergePlayers(keptId: string, duplicateId: string) {
     if (keptId === duplicateId) {
       throw new InvalidInputError("Choose two different players");
     }
@@ -98,7 +98,7 @@ export class RosterMergeService {
     });
   }
 
-  async mergeTeams(keptId: string, duplicateId: string): Promise<RosterMerge<Team>> {
+  async mergeTeams(keptId: string, duplicateId: string) {
     if (keptId === duplicateId) {
       throw new InvalidInputError("Choose two different teams");
     }
@@ -117,7 +117,6 @@ export class RosterMergeService {
       }
 
       assertMergeable("team", kept, merged);
-      // Two participants of one team in a tournament cannot be merged without rewriting matches.
       const shared = await references.sharedTournamentIds(kept.id, merged.id);
 
       if (shared.length > 0) {

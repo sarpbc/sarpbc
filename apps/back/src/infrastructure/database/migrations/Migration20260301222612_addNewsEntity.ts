@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20260301222612_addNewsEntity extends Migration {
-  override async up(): Promise<void> {
+  override async up() {
     this.addSql(
       `create table "news_article" ("id" uuid not null default gen_random_uuid(), "title" varchar(255) not null, "content" text not null, "author_id" uuid not null, "created_at" timestamptz not null, "updated_at" timestamptz null, constraint "news_article_pkey" primary key ("id"));`,
     );
@@ -26,7 +26,7 @@ export class Migration20260301222612_addNewsEntity extends Migration {
     );
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`alter table "reply" drop constraint "reply_news_article_id_foreign";`);
 
     this.addSql(`drop table if exists "news_article" cascade;`);

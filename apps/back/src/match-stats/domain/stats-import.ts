@@ -16,5 +16,5 @@ export interface StatsImport {
 
 export const ACTIVE_IMPORT_STATUSES: readonly StatsImportStatus[] = ["pending", "running"];
 
-export const isActive = (statsImport: Pick<StatsImport, "status">): boolean =>
+export const isActive = (statsImport: Pick<StatsImport, "status">) =>
   ACTIVE_IMPORT_STATUSES.includes(statsImport.status);

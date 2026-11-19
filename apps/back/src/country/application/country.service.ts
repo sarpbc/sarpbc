@@ -1,5 +1,4 @@
 import { countryCode } from "@sarpbc/utils";
-import type { NationalityCount } from "../../roster/application/ports";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
@@ -25,7 +24,7 @@ export interface CountryMatchPage {
   offset: number;
 }
 
-const currentTeams = (players: Player[]): Team[] => {
+const currentTeams = (players: Player[]) => {
   const teams = new Map<string, Team>();
 
   for (const { team } of players) {
@@ -40,11 +39,11 @@ const currentTeams = (players: Player[]): Team[] => {
 export class CountryService {
   constructor(private readonly sources: CountrySources) {}
 
-  async list(): Promise<NationalityCount[]> {
+  async list() {
     return await this.sources.players.nationalities();
   }
 
-  async detail(rawCode: string, page: CountryMatchPage): Promise<CountryPage> {
+  async detail(rawCode: string, page: CountryMatchPage) {
     const code = countryCode(rawCode);
 
     const players =

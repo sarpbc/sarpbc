@@ -1,10 +1,4 @@
-/**
- * MikroORM entity registry — single manifest for CLI and runtime.
- *
- * Datetime conventions (schema `.type()`):
- * - `timestamptz` — instants (createdAt, updatedAt, beginAt, endAt)
- * - `date` — calendar-only fields (birthday, contract dates)
- */
+// WARNING: `timestamptz` for instants (createdAt, updatedAt, beginAt, endAt), `date` for calendar-only fields (birthday, contract dates).
 import { AirRiddleSchema } from "./game/airriddle/infrastructure/persistence/airriddle.entity";
 import { PickemChoiceSchema } from "./game/pickem/infrastructure/persistence/pickem.entity";
 import {

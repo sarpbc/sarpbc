@@ -35,10 +35,10 @@ export class Tournament {
   updatedAt = new Date();
   matches: Match[] = [];
   participants: TournamentParticipant[] = [];
-  watchStreams(): Stream[] {
-    return effectiveStreams(this.streams, this.eventStreams);
+  watchStreams() {
+    return effectiveStreams(this.streams, this.eventStreams) satisfies Stream[];
   }
-  assertDateOrder(): void {
+  assertDateOrder() {
     if (this.beginAt && this.endAt && this.endAt < this.beginAt) {
       throw new InvalidInputError("End date must be on or after the start date.");
     }

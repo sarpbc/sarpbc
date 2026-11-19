@@ -1,5 +1,5 @@
-import { Body, Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
 import type { StatsPlayerAccounts, StatsPlayerLinkResult } from "@sarpbc/types";
+import { Body, Controller, Get, Param, Put, UseGuards } from "@nestjs/common";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
@@ -14,17 +14,17 @@ export class StatsPlayerLinkController {
   constructor(private readonly service: StatsPlayerLinkService) {}
 
   @Get()
-  async accounts(@Param("id") tournamentId: string): Promise<StatsPlayerAccounts> {
-    return await this.service.accounts(tournamentId);
+  async accounts(@Param("id") tournamentId: string) {
+    return (await this.service.accounts(tournamentId)) satisfies StatsPlayerAccounts;
   }
 
   @Put("link")
   async link(
     @Param("id") tournamentId: string,
     @Body({ schema: LinkStatsPlayerDto }) dto: LinkStatsPlayerInput,
-  ): Promise<StatsPlayerLinkResult> {
+  ) {
     const linkedRows = await this.service.link(tournamentId, dto);
 
-    return { link: dto, linkedRows };
+    return { link: dto, linkedRows } satisfies StatsPlayerLinkResult;
   }
 }

@@ -5,7 +5,7 @@ import path from "node:path";
 import { test } from "node:test";
 import { nativeControlViolations } from "./check-native-controls.ts";
 
-const componentsWith = (files: Record<string, string>): string => {
+const componentsWith = (files: Record<string, string>) => {
   const directory = mkdtempSync(path.join(tmpdir(), "native-controls-"));
 
   for (const [name, content] of Object.entries(files)) {
@@ -15,7 +15,7 @@ const componentsWith = (files: Record<string, string>): string => {
   return directory;
 };
 
-const check = (files: Record<string, string>): string[] => {
+const check = (files: Record<string, string>) => {
   const directory = componentsWith(files);
 
   try {

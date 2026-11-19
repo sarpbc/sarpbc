@@ -3,7 +3,7 @@ import type { UseTimeAgoMessages, UseTimeAgoUnit } from "@vueuse/core";
 
 const RELATIVE_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
-// VueUse switches to "last week" from 6 days; days must last the whole relative window.
+// WARNING: VueUse switches to "last week" from 6 days, so days must last the whole relative window.
 const TIME_AGO_UNITS: UseTimeAgoUnit[] = [
   { max: 60_000, name: "second", value: 1000 },
   { max: 2_760_000, name: "minute", value: 60_000 },
@@ -14,7 +14,7 @@ const TIME_AGO_UNITS: UseTimeAgoUnit[] = [
   { max: Number.POSITIVE_INFINITY, name: "year", value: 31_536_000_000 },
 ];
 
-const pf = (past: boolean): string => (past ? ".past" : ".future");
+const pf = (past: boolean) => (past ? ".past" : ".future");
 
 export const formatLocaleTimeAgo = (date: Date) => {
   const { t, locale } = useI18n();

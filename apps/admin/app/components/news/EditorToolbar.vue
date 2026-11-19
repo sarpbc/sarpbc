@@ -20,7 +20,7 @@ const {
     | null;
 }>();
 
-const isActive = (item: EditorToolbarItem): boolean => {
+const isActive = (item: EditorToolbarItem) => {
   if (item.command === undefined) {
     return false;
   }
@@ -28,7 +28,7 @@ const isActive = (item: EditorToolbarItem): boolean => {
   return handlers[item.command.kind]?.isActive(editor, item.command) ?? false;
 };
 
-const isDisabled = (item: EditorToolbarItem): boolean => {
+const isDisabled = (item: EditorToolbarItem) => {
   if (item.command === undefined) {
     return false;
   }
@@ -45,7 +45,7 @@ const isDisabled = (item: EditorToolbarItem): boolean => {
   );
 };
 
-const run = (item: EditorToolbarItem): void => {
+const run = (item: EditorToolbarItem) => {
   if (item.onClick !== undefined) {
     item.onClick();
 
@@ -57,8 +57,7 @@ const run = (item: EditorToolbarItem): void => {
   }
 };
 
-/* Menus float above the page, so they must not be clipped by the editor's scroll container. */
-const appendToBody = (): HTMLElement => document.body;
+const appendToBody = () => document.body;
 </script>
 
 <template>

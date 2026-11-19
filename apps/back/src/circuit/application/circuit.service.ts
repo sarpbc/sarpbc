@@ -1,8 +1,8 @@
 import type {
   CircuitDetail,
+  CircuitEventTeam,
   CircuitInput,
   CircuitStageScaleInput,
-  CircuitEventTeam,
   CircuitStandings,
   CircuitSummary,
 } from "@sarpbc/types";
@@ -22,11 +22,10 @@ import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { assertCircuitSourceUrl, parseCircuitStageSettings } from "../domain/circuit-scale";
-import type { CircuitStageSettings } from "../domain/circuit-scale";
 import { computeCircuitStandings } from "../domain/circuit-standings";
 import type { CircuitStore } from "./ports";
 
-const cleanName = (name: string): string => {
+const cleanName = (name: string) => {
   const trimmed = name.trim();
 
   if (!trimmed || trimmed.length > CIRCUIT_NAME_MAX_LENGTH) {
@@ -38,7 +37,7 @@ const cleanName = (name: string): string => {
   return trimmed;
 };
 
-const cleanDescription = (description: string | null | undefined): string | null => {
+const cleanDescription = (description: string | null | undefined) => {
   const trimmed = description?.trim() ?? "";
 
   if (trimmed.length > CIRCUIT_DESCRIPTION_MAX_LENGTH) {
@@ -50,7 +49,7 @@ const cleanDescription = (description: string | null | undefined): string | null
   return trimmed || null;
 };
 
-const cleanSpots = (spots: number | null | undefined): number | null => {
+const cleanSpots = (spots: number | null | undefined) => {
   if (spots === null || spots === undefined) {
     return null;
   }
@@ -64,7 +63,7 @@ const cleanSpots = (spots: number | null | undefined): number | null => {
   return spots;
 };
 
-const cleanSeason = (season: number): number => {
+const cleanSeason = (season: number) => {
   if (!Number.isInteger(season) || season < MIN_CIRCUIT_SEASON || season > MAX_CIRCUIT_SEASON) {
     throw new InvalidInputError(
       `A circuit season is a year from ${MIN_CIRCUIT_SEASON} to ${MAX_CIRCUIT_SEASON}.`,
@@ -74,7 +73,7 @@ const cleanSeason = (season: number): number => {
   return season;
 };
 
-const cleanRegion = (region: string | null | undefined): string | null => {
+const cleanRegion = (region: string | null | undefined) => {
   const trimmed = region?.trim() ?? "";
 
   if (trimmed.length > CIRCUIT_REGION_MAX_LENGTH) {
@@ -86,14 +85,14 @@ const cleanRegion = (region: string | null | undefined): string | null => {
   return trimmed || null;
 };
 
-const cleanSourceUrl = (sourceUrl: string): string => {
+const cleanSourceUrl = (sourceUrl: string) => {
   const trimmed = sourceUrl.trim();
   assertCircuitSourceUrl(trimmed);
 
   return trimmed;
 };
 
-const key = (value: string | null): string | null => value?.toLocaleLowerCase("en-US") ?? null;
+const key = (value: string | null) => value?.toLocaleLowerCase("en-US") ?? null;
 
 export class CircuitService {
   constructor(
@@ -101,26 +100,29 @@ export class CircuitService {
     private readonly clock: () => Date = () => new Date(),
   ) {}
 
-  async list(): Promise<CircuitSummary[]> {
-    return await this.store.list();
+  async list() {
+    return (await this.store.list()) satisfies CircuitSummary[];
   }
 
-  async detail(idOrSlug: string): Promise<CircuitDetail> {
+  async detail(idOrSlug: string) {
     const circuit = await this.require(idOrSlug);
 
-    return { ...circuit, stages: await this.store.stages(circuit.id) };
+    return { ...circuit, stages: await this.store.stages(circuit.id) } satisfies CircuitDetail;
   }
 
-  async standings(idOrSlug: string): Promise<CircuitStandings> {
+  async standings(idOrSlug: string) {
     const circuit = await this.require(idOrSlug);
 
     const stageResults = await this.store.stageResults(circuit.id);
     const results = stageResults.filter(({ source }) => isRedistributable(source));
 
-    return { ...circuit, ...computeCircuitStandings(results, circuit.region, this.clock()) };
+    return {
+      ...circuit,
+      ...computeCircuitStandings(results, circuit.region, this.clock()),
+    } satisfies CircuitStandings;
   }
 
-  async create(input: CircuitInput): Promise<CircuitSummary> {
+  async create(input: CircuitInput) {
     const circuit: CircuitSummary = {
       description: cleanDescription(input.description),
       id: v4(),
@@ -136,10 +138,10 @@ export class CircuitService {
     await this.assertUnique(circuit);
     await this.store.save(circuit);
 
-    return circuit;
+    return circuit satisfies CircuitSummary;
   }
 
-  async update(idOrSlug: string, input: Partial<CircuitInput>): Promise<CircuitSummary> {
+  async update(idOrSlug: string, input: Partial<CircuitInput>) {
     const current = await this.require(idOrSlug);
 
     const circuit: CircuitSummary = {
@@ -164,68 +166,64 @@ export class CircuitService {
     await this.assertUnique(circuit);
     await this.store.save(circuit);
 
-    return circuit;
+    return circuit satisfies CircuitSummary;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string) {
     if (!(await this.store.remove(id))) {
       throw new NotFoundError("Circuit not found");
     }
   }
 
-  async stageTeams(circuitId: string, tournamentId: string): Promise<CircuitEventTeam[]> {
+  async stageTeams(circuitId: string, tournamentId: string) {
     await this.require(circuitId);
 
-    return await this.requireEventTeams(tournamentId);
+    return (await this.requireEventTeams(tournamentId)) satisfies CircuitEventTeam[];
   }
 
   async requireStageSettings(
     circuitId: string,
     tournamentId: string,
     input: CircuitStageScaleInput,
-  ): Promise<CircuitStageSettings> {
+  ) {
     await this.require(circuitId);
     const teams = await this.requireEventTeams(tournamentId);
 
     return parseCircuitStageSettings(input, new Set(teams.map(({ team }) => team.id)));
   }
 
-  async setStageScale(
-    circuitId: string,
-    tournamentId: string,
-    input: CircuitStageScaleInput,
-  ): Promise<void> {
+  async setStageScale(circuitId: string, tournamentId: string, input: CircuitStageScaleInput) {
     const settings = await this.requireStageSettings(circuitId, tournamentId, input);
     await this.store.saveStage(circuitId, tournamentId, settings);
   }
 
-  async removeStage(circuitId: string, tournamentId: string): Promise<void> {
+  async removeStage(circuitId: string, tournamentId: string) {
     if (!(await this.store.removeStage(circuitId, tournamentId))) {
       throw new NotFoundError("This tournament is not part of the circuit.");
     }
   }
 
-  private async requireEventTeams(tournamentId: string): Promise<CircuitEventTeam[]> {
+  private async requireEventTeams(tournamentId: string) {
     const teams = await this.store.eventTeams(tournamentId);
 
     if (teams === null) {
       throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
     }
 
-    return teams;
+    return teams satisfies CircuitEventTeam[];
   }
 
-  private async require(idOrSlug: string): Promise<CircuitSummary> {
+  private async require(idOrSlug: string) {
     const circuit = await this.store.find(idOrSlug);
 
     if (!circuit) {
       throw new NotFoundError("Circuit not found");
     }
 
-    return circuit;
+    return circuit satisfies CircuitSummary;
   }
 
-  private async assertUnique({ id, name, season, region }: CircuitSummary): Promise<void> {
+  private async assertUnique({ id, name, season, region }: CircuitSummary) {
     const twins = await this.store.withSeason(season);
 
     if (
@@ -240,7 +238,7 @@ export class CircuitService {
     }
   }
 
-  private async freeSlug(raw: string, id: string): Promise<string> {
+  private async freeSlug(raw: string, id: string) {
     const slug = toSlug(raw);
 
     if (!slug || isUuid(slug)) {

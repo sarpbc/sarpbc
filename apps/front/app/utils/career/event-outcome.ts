@@ -28,7 +28,7 @@ export interface ResolvedEventOutcome {
   failed: boolean;
 }
 
-const mean = (values: readonly number[]): number => {
+const mean = (values: readonly number[]) => {
   if (values.length === 0) {
     return WORLD_STRENGTH_BASELINE;
   }
@@ -36,10 +36,10 @@ const mean = (values: readonly number[]): number => {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 };
 
-const gapChance = (gap: number, scale: number, cap: number): number =>
+const gapChance = (gap: number, scale: number, cap: number) =>
   Math.min(cap, Math.max(0, gap) / scale);
 
-const computeEventFailureChance = (context: EventOutcomeContext): number => {
+const computeEventFailureChance = (context: EventOutcomeContext) => {
   const pastPeak = getSeasonsPastPeak(context.season);
   let chance = 0.02;
 
@@ -71,11 +71,7 @@ const computeEventFailureChance = (context: EventOutcomeContext): number => {
   return Math.min(MAX_FAILURE_CHANCE, chance);
 };
 
-const applyMalus = (
-  authored: Partial<CareerStats>,
-  rng: () => number,
-  pastPeak: number,
-): Partial<CareerStats> => {
+const applyMalus = (authored: Partial<CareerStats>, rng: () => number, pastPeak: number) => {
   let ratingHit = rng() < 0.65 ? MIN_RATING_MALUS : MIN_RATING_MALUS + 1;
 
   if (pastPeak > 0 && rng() < 0.3) {
@@ -94,7 +90,7 @@ const applyMalus = (
   };
 };
 
-const malusSeed = (context: EventOutcomeContext): number =>
+const malusSeed = (context: EventOutcomeContext) =>
   hashString(
     `${context.careerId}:event-fail:${context.eventId}:${context.choiceId}:${context.season}`,
   );
@@ -102,7 +98,7 @@ const malusSeed = (context: EventOutcomeContext): number =>
 export const buildEventOutcomeContext = (
   state: CareerState,
   choice: CareerEventChoiceDefinition,
-): EventOutcomeContext => {
+) => {
   const eventId = state.currentEventId;
 
   if (!isNonEmptyString(eventId)) {
@@ -137,7 +133,7 @@ export const buildEventOutcomeContext = (
 export const resolveEventOutcome = (
   context: EventOutcomeContext,
   rng: () => number = createRng(malusSeed(context)),
-): ResolvedEventOutcome => {
+) => {
   const chance = computeEventFailureChance(context);
 
   if (rng() >= chance) {

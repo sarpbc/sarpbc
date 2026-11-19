@@ -7,23 +7,17 @@ import { CreatePlayerInput, JoinTeamInput, LeaveTeamInput, UpdatePlayerInput } f
 import { Contract } from "../domain/contract";
 import { Player } from "../domain/player";
 import { PlayerPhoto } from "../domain/player-photo";
-import type {
-  ContractWriter,
-  NationalityCount,
-  PhotoQueries,
-  PlayerQueries,
-  RosterTransaction,
-} from "./ports";
+import type { ContractWriter, PhotoQueries, PlayerQueries, RosterTransaction } from "./ports";
 import { requireTeam } from "./require-team";
 import type { DirectorySearchProps } from "./search-props";
 
-const openContracts = async (contracts: ContractWriter, playerId: string): Promise<Contract[]> => {
+const openContracts = async (contracts: ContractWriter, playerId: string) => {
   const all = await contracts.findByPlayer(playerId);
 
   return all.filter((contract) => contract.endDate === null);
 };
 
-const requireUnmerged = (player: Player | null, id: string): Player => {
+const requireUnmerged = (player: Player | null, id: string) => {
   if (!player) {
     throw new NotFoundError(`Player with id "${id}" not found`);
   }
@@ -44,23 +38,23 @@ export class PlayerService {
     private readonly transaction: RosterTransaction,
   ) {}
 
-  async find(options: Partial<DirectorySearchProps>): Promise<Player[]> {
+  async find(options: Partial<DirectorySearchProps>) {
     return await this.players.search(options);
   }
 
-  async findAndCount(options: Partial<DirectorySearchProps>): Promise<[Player[], number]> {
+  async findAndCount(options: Partial<DirectorySearchProps>) {
     return await this.players.searchAndCount(options);
   }
 
-  async findById(id: string): Promise<Player | null> {
+  async findById(id: string) {
     return await this.resolveMerged(await this.players.findById(id));
   }
 
-  async findBySlug(slug: string): Promise<Player | null> {
+  async findBySlug(slug: string) {
     return await this.resolveMerged(await this.players.findBySlug(slug));
   }
 
-  private async resolveMerged(player: Player | null): Promise<Player | null> {
+  private async resolveMerged(player: Player | null) {
     return player?.mergedIntoId !== null &&
       player?.mergedIntoId !== undefined &&
       player.mergedIntoId !== ""
@@ -68,7 +62,7 @@ export class PlayerService {
       : player;
   }
 
-  async create(dto: CreatePlayerInput): Promise<Player> {
+  async create(dto: CreatePlayerInput) {
     return await this.transaction.run(async ({ players, teams }) => {
       const player = new Player();
       player.name = dto.name;
@@ -102,7 +96,7 @@ export class PlayerService {
     });
   }
 
-  async update(id: string, dto: UpdatePlayerInput): Promise<Player> {
+  async update(id: string, dto: UpdatePlayerInput) {
     return await this.transaction.run(async ({ players, photos, teams }) => {
       const player = requireUnmerged(await players.findById(id), id);
 
@@ -157,7 +151,7 @@ export class PlayerService {
     });
   }
 
-  async joinTeam(playerId: string, input: JoinTeamInput): Promise<Player> {
+  async joinTeam(playerId: string, input: JoinTeamInput) {
     return await this.transaction.run(async ({ players, teams, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
       const team = await teams.findById(input.teamId);
@@ -201,14 +195,14 @@ export class PlayerService {
     });
   }
 
-  async leaveTeam(playerId: string, input: LeaveTeamInput): Promise<Player> {
+  async leaveTeam(playerId: string, input: LeaveTeamInput) {
     return await this.transaction.run(async ({ players, contracts }) => {
       const player = requireUnmerged(await players.findById(playerId), playerId);
 
       const open = await openContracts(contracts, playerId);
       const closed = open.filter((contract) => contract.team.id === input.teamId);
 
-      // Players imported from PandaScore have a current team but no contract row.
+      // WARNING: players imported from PandaScore have a current team but no contract row.
       if (closed.length === 0 && player.team?.id !== input.teamId) {
         throw new InvalidInputError(`${player.name} is not on team "${input.teamId}"`);
       }
@@ -229,7 +223,7 @@ export class PlayerService {
     });
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     await this.transaction.run(async ({ players, photos, contracts }) => {
       const player = await players.findById(id);
 
@@ -253,23 +247,23 @@ export class PlayerService {
     });
   }
 
-  async nationalities(): Promise<NationalityCount[]> {
+  async nationalities() {
     return await this.players.nationalities();
   }
 
-  async findByNationality(code: string): Promise<Player[]> {
+  async findByNationality(code: string) {
     return await this.players.findByNationality(code);
   }
 
-  async bornOnDay(month: number, day: number): Promise<Player[]> {
+  async bornOnDay(month: number, day: number) {
     return await this.players.bornOnDay(month, day);
   }
 
-  async getRandomPlayer(): Promise<Player | null> {
+  async getRandomPlayer() {
     return await this.players.getRandomPlayer();
   }
 
-  async getPhotos(playerId: string): Promise<PlayerPhoto[]> {
+  async getPhotos(playerId: string) {
     const player = await this.players.findById(playerId);
 
     if (!player) {
@@ -279,7 +273,7 @@ export class PlayerService {
     return await this.photos.findByPlayer(playerId);
   }
 
-  async addPhoto(playerId: string, url: string): Promise<PlayerPhoto> {
+  async addPhoto(playerId: string, url: string) {
     return await this.transaction.run(async ({ players, photos }) => {
       const player = await players.findById(playerId);
 
@@ -296,7 +290,7 @@ export class PlayerService {
     });
   }
 
-  async deletePhoto(playerId: string, photoId: string): Promise<void> {
+  async deletePhoto(playerId: string, photoId: string) {
     await this.transaction.run(async ({ photos }) => {
       const photo = await photos.findById(photoId);
 
@@ -308,7 +302,7 @@ export class PlayerService {
     });
   }
 
-  async setProfilePhoto(playerId: string, photoId: string): Promise<Player> {
+  async setProfilePhoto(playerId: string, photoId: string) {
     return await this.transaction.run(async ({ players, photos }) => {
       const player = await players.findById(playerId);
 

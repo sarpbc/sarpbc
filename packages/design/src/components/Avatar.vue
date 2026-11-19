@@ -11,9 +11,7 @@ const {
   size = "sm",
   src = null,
 } = defineProps<{
-  /** Names the person or entity; its initials stand in when there is no image. */
   alt: string;
-  /** Replaces the initials when there is no image. */
   icon?: string | null;
   size?: AvatarSize;
   src?: string | null;

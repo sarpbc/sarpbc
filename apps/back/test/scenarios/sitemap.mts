@@ -16,11 +16,7 @@ const staffTournamentsBody = z.object({ tournaments: z.array(z.object({ id: z.st
 
 const sitemapEntries = z.array(z.object({ path: z.string() }));
 
-export const verifySitemap = async ({
-  orm,
-  request,
-  tournament,
-}: SitemapContext): Promise<void> => {
+export const verifySitemap = async ({ orm, request, tournament }: SitemapContext) => {
   const { Match } = await import("../../src/tournament/infrastructure/persistence/match.entity.ts");
 
   const { Tournament } =
@@ -110,7 +106,7 @@ export const verifySitemap = async ({
   stage.beginAt = new Date("2026-01-10T12:00:00Z");
   await em.flush();
 
-  const paths = async (kind: string): Promise<string[]> => {
+  const paths = async (kind: string) => {
     const response = await request("GET", `/sitemap/${kind}`);
 
     return response.json(sitemapEntries).map(({ path }) => path);

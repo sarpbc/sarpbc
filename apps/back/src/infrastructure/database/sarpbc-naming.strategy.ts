@@ -13,7 +13,7 @@ export class SarpbcNamingStrategy extends UnderscoreNamingStrategy {
     tableName: string,
     columns: string[],
     type: Parameters<NamingStrategy["indexName"]>[2],
-  ): string {
+  ) {
     const name = super.indexName(tableName, columns, type);
 
     if (name.length <= PG_IDENTIFIER_LIMIT) {

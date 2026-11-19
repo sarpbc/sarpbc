@@ -1,7 +1,7 @@
 const TEAM_NOISE = new Set(["team", "esports", "esport", "gaming", "club", "rl", "gg"]);
 const MIN_AFFIX_LENGTH = 4;
 
-const tokens = (value: string): string[] =>
+const tokens = (value: string) =>
   value
     .normalize("NFKD")
     .replaceAll(/\p{M}/gu, "")
@@ -9,10 +9,10 @@ const tokens = (value: string): string[] =>
     .split(/[^a-z0-9]+/u)
     .filter(Boolean);
 
-export const normalizeName = (value: string): string => tokens(value).join("");
+export const normalizeName = (value: string) => tokens(value).join("");
 
 /** Tags are glued to in-game names ("KC Vatira", "zen_rl", "BDS.M0nkey M00n"): a player name may be one word of it, or a long enough prefix or suffix. */
-export const playerNameMatches = (inGameName: string, playerName: string): boolean => {
+export const playerNameMatches = (inGameName: string, playerName: string) => {
   const inGame = normalizeName(inGameName);
   const player = normalizeName(playerName);
 
@@ -33,9 +33,9 @@ export const playerNameMatches = (inGameName: string, playerName: string): boole
   );
 };
 
-const initials = (parts: string[]): string => parts.map((part) => part[0]).join("");
+const initials = (parts: string[]) => parts.map((part) => part[0]).join("");
 
-export const teamNameMatches = (replayTeamName: string, teamName: string): boolean => {
+export const teamNameMatches = (replayTeamName: string, teamName: string) => {
   const replayAll = tokens(replayTeamName);
   const teamAll = tokens(teamName);
   const replayParts = replayAll.filter((part) => !TEAM_NOISE.has(part));

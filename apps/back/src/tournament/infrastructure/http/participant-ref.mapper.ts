@@ -5,10 +5,10 @@ import type { TournamentParticipant } from "../../domain/tournament-participant"
 export const mapParticipantRef = <TTeam>(
   participant: TournamentParticipant,
   mapTeam: (team: Team) => TTeam,
-): ParticipantRef<TTeam> =>
+) =>
   participant.team
     ? { id: participant.id, team: mapTeam(participant.team) }
-    : {
+    : ({
         id: participant.id,
         players: participant.players.map(({ id, imageUrl, name, slug }) => ({
           id,
@@ -17,4 +17,4 @@ export const mapParticipantRef = <TTeam>(
           slug,
         })),
         team: null,
-      };
+      } satisfies ParticipantRef<TTeam>);

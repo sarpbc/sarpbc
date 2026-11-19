@@ -7,9 +7,7 @@ import type {
   PickemReads,
   PickemTransaction,
   PickemRuntime,
-  UserPickDto,
   LeaderboardEntryDto,
-  PersonalRankingDto,
 } from "./ports";
 
 export class PickemService {
@@ -19,7 +17,7 @@ export class PickemService {
     private readonly transaction: PickemTransaction,
     private readonly runtime: PickemRuntime,
   ) {}
-  async getUserPicksForTournament(tournamentId: string, userId: string): Promise<UserPickDto[]> {
+  async getUserPicksForTournament(tournamentId: string, userId: string) {
     const picks = await this.reads.list(tournamentId, { userId });
 
     return picks.map((p) => ({
@@ -29,7 +27,7 @@ export class PickemService {
       scored: p.scored,
     }));
   }
-  async makePick(userId: string, matchId: string, participantId: string): Promise<void> {
+  async makePick(userId: string, matchId: string, participantId: string) {
     await this.transaction.run(async (scope) => {
       if (!(await scope.userExists(userId))) {
         throw new NotFoundError("User not found. Sign in and try again.");
@@ -61,7 +59,7 @@ export class PickemService {
       });
     });
   }
-  async validateMatchResult(matchId: string): Promise<{ updated: number }> {
+  async validateMatchResult(matchId: string) {
     const match = await this.matches.find(matchId);
 
     if (!match) {
@@ -94,7 +92,7 @@ export class PickemService {
       return { updated: picks.length };
     });
   }
-  async autoScoreMatch(matchId: string): Promise<void> {
+  async autoScoreMatch(matchId: string) {
     try {
       await this.validateMatchResult(matchId);
     } catch (error) {
@@ -103,7 +101,7 @@ export class PickemService {
       );
     }
   }
-  async leaderboard(tournamentId: string): Promise<LeaderboardEntryDto[]> {
+  async leaderboard(tournamentId: string) {
     const entries = new Map<string, LeaderboardEntryDto>();
 
     const scoredPicks = await this.reads.list(tournamentId, { scoredOnly: true });
@@ -121,7 +119,7 @@ export class PickemService {
 
     return [...entries.values()].toSorted((a, b) => b.points - a.points);
   }
-  async personalRanking(tournamentId: string, userId: string): Promise<PersonalRankingDto> {
+  async personalRanking(tournamentId: string, userId: string) {
     const entries = await this.leaderboard(tournamentId);
     const index = entries.findIndex((e) => e.userId === userId);
 

@@ -1,23 +1,18 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
-import type { Author } from "../../common/domain/author";
-import type { ReplyTarget } from "../domain/reply";
 import type { ReplyRecord } from "./models";
-import type { ReplyWrites, ReplyWriteScope } from "./ports";
-
+import { InMemoryReplyScope } from "./reply-store.test-utils";
 import { ReplyService } from "./reply.service";
-
-type Match = NonNullable<ReplyRecord["match"]>;
 
 const NOW = new Date("2026-06-01T12:00:00Z");
 const GENERATED_ID = "generated-id";
 
-const matchFor = (id: string): Match => ({ id, name: "Match", publicId: 1, slug: "match" });
+const matchFor = (id: string) => ({ id, name: "Match", publicId: 1, slug: "match" });
 
-const makeUser = (id = "user-1"): Author => ({ id, userName: "fan" });
+const makeUser = (id = "user-1") => ({ id, userName: "fan" });
 
-const makeReply = (partial: Partial<ReplyRecord> & { id: string }): ReplyRecord => ({
+const makeReply = (partial: Partial<ReplyRecord> & { id: string }) => ({
   author: makeUser(),
   content: "hello",
   createdAt: new Date("2026-01-01"),
@@ -31,100 +26,54 @@ const makeReply = (partial: Partial<ReplyRecord> & { id: string }): ReplyRecord 
 
 describe(ReplyService, () => {
   let service: ReplyService;
+  let scope: InMemoryReplyScope;
 
-  const replyRepository = {
-    countByTargetIds: vi.fn<ReplyWrites["countByTargetIds"]>(),
-    countRootsByTarget: vi.fn<ReplyWrites["countRootsByTarget"]>(),
-    delete: vi.fn<ReplyWrites["delete"]>(),
-    findById: vi.fn<ReplyWrites["findById"]>(),
-    findByTarget: vi.fn<ReplyWrites["findByTarget"]>(),
-    findChildren: vi.fn<ReplyWrites["findChildren"]>(),
-    findDescendantsForRoots: vi.fn<ReplyWrites["findDescendantsForRoots"]>(),
-    findLatestByUser: vi.fn<ReplyWrites["findLatestByUser"]>(),
-    save: vi.fn<ReplyWrites["save"]>(),
+  const matchTarget = (match: ReturnType<typeof matchFor>) => {
+    scope.addTarget({ id: match.id, kind: "match" }, { match, newsArticle: null, post: null });
   };
 
-  const replyReportRepository = {
-    findByReplyAndReporter: vi.fn<ReplyWriteScope["reports"]["findByReplyAndReporter"]>(),
-    save: vi.fn<ReplyWriteScope["reports"]["save"]>(),
-  };
-
-  const userService = {
-    findById: vi.fn<ReplyWriteScope["users"]["findById"]>(),
-  };
-
-  const notificationService = {
-    createForDirectReply: vi.fn<ReplyWriteScope["notifications"]["createForDirectReply"]>(),
-  };
-
-  const em = {
-    findOne: vi.fn<(target: ReplyTarget) => Promise<Match | null>>(),
-  };
-
-  beforeEach(async () => {
-    const scope: ReplyWriteScope = {
-      notifications: notificationService,
-      replies: {
-        ...replyRepository,
-        findRecentForModeration: vi.fn<ReplyWrites["findRecentForModeration"]>(),
-      },
-      reports: replyReportRepository,
-      targets: {
-        async find(target: ReplyTarget) {
-          const row = await em.findOne(target);
-
-          if (row === null) {
-            return null;
-          }
-
-          return { match: row, newsArticle: null, post: null };
-        },
-      },
-      users: userService,
-    };
-
+  beforeEach(() => {
+    scope = new InMemoryReplyScope();
     service = new ReplyService(
       scope.replies,
-      { run: async (work) => await work(scope) },
+      scope,
       () => NOW,
       () => GENERATED_ID,
     );
-    vi.clearAllMocks();
   });
 
   describe("create target validation", () => {
     it("creates a match-targeted reply", async () => {
-      replyRepository.findLatestByUser.mockResolvedValue(null);
-      userService.findById.mockResolvedValue(makeUser());
+      scope.addUser(makeUser());
       const match = matchFor("22222222-2222-4222-8222-222222222222");
-      em.findOne.mockResolvedValue(match);
-      replyRepository.save.mockResolvedValue(undefined);
+      matchTarget(match);
 
       const result = await service.create("user-1", {
         content: "  Great series  ",
         matchId: match.id,
       });
 
-      expect(replyRepository.save).toHaveBeenCalledExactlyOnceWith({
-        author: makeUser(),
-        content: "Great series",
-        createdAt: NOW,
-        hiddenAt: null,
-        id: GENERATED_ID,
-        match,
-        newsArticle: null,
-        post: null,
-        replyTo: null,
-      });
+      expect(scope.replies.saved).toStrictEqual([
+        {
+          author: makeUser(),
+          content: "Great series",
+          createdAt: NOW,
+          hiddenAt: null,
+          id: GENERATED_ID,
+          match,
+          newsArticle: null,
+          post: null,
+          replyTo: null,
+        },
+      ]);
       expect(result.content).toBe("Great series");
       expect(result.author.userName).toBe("fan");
       expect(result.replies).toStrictEqual([]);
     });
 
     it("rejects empty trimmed content", async () => {
-      replyRepository.findLatestByUser.mockResolvedValue(null);
-      userService.findById.mockResolvedValue(makeUser());
-      em.findOne.mockResolvedValue(matchFor("22222222-2222-4222-8222-222222222222"));
+      scope.addUser(makeUser());
+      matchTarget(matchFor("22222222-2222-4222-8222-222222222222"));
 
       await expect(
         service.create("user-1", {
@@ -135,9 +84,7 @@ describe(ReplyService, () => {
     });
 
     it("throws when match does not exist", async () => {
-      replyRepository.findLatestByUser.mockResolvedValue(null);
-      userService.findById.mockResolvedValue(makeUser());
-      em.findOne.mockResolvedValue(null);
+      scope.addUser(makeUser());
 
       await expect(
         service.create("user-1", {
@@ -161,9 +108,8 @@ describe(ReplyService, () => {
         replyTo: root,
       });
 
-      replyRepository.countRootsByTarget.mockResolvedValue(1);
-      replyRepository.findByTarget.mockResolvedValue([root]);
-      replyRepository.findDescendantsForRoots.mockResolvedValue([child]);
+      scope.replies.add(root);
+      scope.replies.add(child);
 
       const result = await service.findByTargetPaginated("match", "m1", 0, 25);
 
@@ -174,72 +120,97 @@ describe(ReplyService, () => {
       expect(result.replies[0].replies[0].id).toBe("child");
     });
 
-    it("queries root replies of the target, then their descendants", async () => {
-      const root = makeReply({
-        id: "root",
-        match: matchFor("m1"),
-      });
-
-      replyRepository.countRootsByTarget.mockResolvedValue(1);
-      replyRepository.findByTarget.mockResolvedValue([root]);
-      replyRepository.findDescendantsForRoots.mockResolvedValue([]);
-
-      await service.findByTargetPaginated("match", "m1", 0, 25);
-
-      expect(replyRepository.findByTarget).toHaveBeenCalledWith("match", "m1", {
-        limit: 25,
-        offset: 0,
-        rootsOnly: true,
-      });
-      expect(replyRepository.findDescendantsForRoots).toHaveBeenCalledWith("match", "m1", ["root"]);
-    });
-
     it("reports the total of root replies and pages by the requested page", async () => {
-      replyRepository.countRootsByTarget.mockResolvedValue(40);
-      replyRepository.findByTarget.mockResolvedValue([]);
-      replyRepository.findDescendantsForRoots.mockResolvedValue([]);
+      for (let index = 0; index < 40; index += 1) {
+        scope.replies.add(
+          makeReply({
+            createdAt: new Date(Date.UTC(2026, 0, 1, index)),
+            id: `root-${index}`,
+            newsArticle: { id: "n1", slug: "news", title: "News" },
+          }),
+        );
+      }
 
       const result = await service.findByTargetPaginated("newsArticle", "n1", 1, 10);
 
-      expect(result).toMatchObject({ replies: [], total: 40 });
-      expect(replyRepository.findByTarget).toHaveBeenCalledWith("newsArticle", "n1", {
-        limit: 10,
-        offset: 10,
-        rootsOnly: true,
-      });
+      expect(result).toMatchObject({ total: 40 });
+      expect(result.replies.map(({ id }) => id)).toStrictEqual([
+        "root-29",
+        "root-28",
+        "root-27",
+        "root-26",
+        "root-25",
+        "root-24",
+        "root-23",
+        "root-22",
+        "root-21",
+        "root-20",
+      ]);
+    });
+
+    it("fills a page with root replies only and threads their children beneath them", async () => {
+      const article = { id: "n1", slug: "news", title: "News" };
+
+      for (let index = 0; index < 6; index += 1) {
+        const root = makeReply({
+          createdAt: new Date(Date.UTC(2026, 0, 1, index)),
+          id: `root-${index}`,
+          newsArticle: article,
+        });
+
+        scope.replies.add(root);
+
+        scope.replies.add(
+          makeReply({
+            createdAt: new Date(Date.UTC(2026, 0, 2, index)),
+            id: `child-${index}`,
+            newsArticle: article,
+            replyTo: root,
+          }),
+        );
+      }
+
+      const result = await service.findByTargetPaginated("newsArticle", "n1", 0, 3);
+
+      expect(result.total).toBe(6);
+      expect(result.replies.map(({ id }) => id)).toStrictEqual(["root-5", "root-4", "root-3"]);
+      expect(result.replies.map(({ replies }) => replies.map(({ id }) => id))).toStrictEqual([
+        ["child-5"],
+        ["child-4"],
+        ["child-3"],
+      ]);
     });
   });
 
   describe("hide", () => {
     it("sets hiddenAt", async () => {
       const reply = makeReply({ id: "r1" });
-      replyRepository.findById.mockResolvedValue(reply);
-      replyRepository.save.mockResolvedValue(undefined);
+      scope.replies.add(reply);
 
       await service.hide("r1");
 
       expect(reply.hiddenAt).toBeInstanceOf(Date);
-      expect(replyRepository.save).toHaveBeenCalledWith(reply);
+      expect(scope.replies.saved).toStrictEqual([reply]);
     });
   });
 
   describe("report", () => {
     it("persists a report via the repository save method", async () => {
       const reply = makeReply({ author: makeUser("author-1"), id: "r1" });
-      replyRepository.findById.mockResolvedValue(reply);
-      replyReportRepository.findByReplyAndReporter.mockResolvedValue(null);
-      userService.findById.mockResolvedValue(makeUser("reporter-1"));
-      replyReportRepository.save.mockResolvedValue(undefined);
+      scope.replies.add(reply);
+      scope.addUser(makeUser("reporter-1"));
 
       const result = await service.report("reporter-1", "r1", "spam");
 
-      expect(replyReportRepository.save).toHaveBeenCalledExactlyOnceWith({
-        createdAt: NOW,
-        id: GENERATED_ID,
-        reason: "spam",
-        reply,
-        reporter: makeUser("reporter-1"),
-      });
+      expect(scope.reports.saved).toStrictEqual([
+        {
+          createdAt: NOW,
+          id: GENERATED_ID,
+          reason: "spam",
+          reply,
+          reporter: makeUser("reporter-1"),
+        },
+      ]);
       expect(result.reason).toBe("spam");
     });
   });

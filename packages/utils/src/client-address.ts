@@ -34,7 +34,7 @@ const CLOUDFLARE_IPV6 = [
 const cloudflare = new BlockList();
 const nonPublic = new BlockList();
 
-const addCidrs = (list: BlockList, cidrs: readonly string[], family: "ipv4" | "ipv6"): void => {
+const addCidrs = (list: BlockList, cidrs: readonly string[], family: "ipv4" | "ipv6") => {
   for (const cidr of cidrs) {
     const [address, prefix] = cidr.split("/");
 
@@ -93,26 +93,22 @@ export interface ClientRequest {
   raw?: { socket?: { remoteAddress?: string | null } };
 }
 
-export const canonicalIp = (value: string | undefined | null): string | undefined => {
-  if (!isNonEmptyString(value)) {
-    return undefined;
-  }
-
-  const trimmed = value.trim().split("%")[0] ?? "";
+export const canonicalIp = (value: string | undefined | null) => {
+  const trimmed = isNonEmptyString(value) ? (value.trim().split("%")[0] ?? "") : "";
   const mapped = /^::ffff:(?<ipv4>\d{1,3}(?:\.\d{1,3}){3})$/iu.exec(trimmed);
   const candidate = mapped?.[1] ?? trimmed;
   const version = isIP(candidate);
 
-  if (version === 0) {
-    return undefined;
+  if (version === 4) {
+    return candidate;
   }
 
-  return version === 4 ? candidate : candidate.toLowerCase();
+  return version === 6 ? candidate.toLowerCase() : undefined;
 };
 
-const ipFamily = (ip: string): "ipv4" | "ipv6" => (isIP(ip) === 6 ? "ipv6" : "ipv4");
+const ipFamily = (ip: string) => (isIP(ip) === 6 ? "ipv6" : "ipv4");
 
-export const isCloudflareIp = (value: string | undefined): boolean => {
+export const isCloudflareIp = (value: string | undefined) => {
   const ip = canonicalIp(value);
 
   if (!isNonEmptyString(ip)) {
@@ -122,7 +118,7 @@ export const isCloudflareIp = (value: string | undefined): boolean => {
   return cloudflare.check(ip, ipFamily(ip));
 };
 
-export const isTrustedProxy = (value: string | undefined): boolean => {
+export const isTrustedProxy = (value: string | undefined) => {
   const ip = canonicalIp(value);
 
   if (!isNonEmptyString(ip)) {
@@ -132,7 +128,7 @@ export const isTrustedProxy = (value: string | undefined): boolean => {
   return trustedProxy.check(ip, ipFamily(ip));
 };
 
-export const isPublicIp = (value: string | undefined): boolean => {
+export const isPublicIp = (value: string | undefined) => {
   const ip = canonicalIp(value);
 
   if (!isNonEmptyString(ip)) {
@@ -142,7 +138,7 @@ export const isPublicIp = (value: string | undefined): boolean => {
   return !nonPublic.check(ip, ipFamily(ip));
 };
 
-const header = (headers: ClientRequest["headers"], name: string): string | undefined => {
+const header = (headers: ClientRequest["headers"], name: string) => {
   const value = headers?.[name] ?? headers?.[name.toLowerCase()];
 
   if (Array.isArray(value)) {
@@ -156,7 +152,7 @@ const header = (headers: ClientRequest["headers"], name: string): string | undef
   return isNonEmptyString(trimmed) ? trimmed : undefined;
 };
 
-export const resolveClientAddress = (request: ClientRequest): string => {
+export const resolveClientAddress = (request: ClientRequest) => {
   const seen = canonicalIp(request.ip);
 
   if (!isNonEmptyString(seen)) {
@@ -174,13 +170,13 @@ export const resolveClientAddress = (request: ClientRequest): string => {
   return seen;
 };
 
-export const peerAddress = (request: ClientRequest): string | undefined => {
+export const peerAddress = (request: ClientRequest) => {
   const address = request.socket?.remoteAddress ?? request.raw?.socket?.remoteAddress;
 
   return isNonEmptyString(address) ? canonicalIp(address) : undefined;
 };
 
-export const isDirectLoopback = (request: ClientRequest): boolean => {
+export const isDirectLoopback = (request: ClientRequest) => {
   const peer = peerAddress(request);
 
   return peer === "127.0.0.1" || peer === "::1";
@@ -189,11 +185,11 @@ export const isDirectLoopback = (request: ClientRequest): boolean => {
 export const addressSeenByTrustedProxy = (
   socketAddress: string | undefined | null,
   forwardedFor: string | undefined | null,
-): string | undefined => {
+) => {
   const socket = canonicalIp(socketAddress);
 
-  if (!isNonEmptyString(socket)) {
-    return undefined;
+  if (socket === undefined) {
+    return socket;
   }
 
   const forwarded = (forwardedFor ?? "")
@@ -211,7 +207,7 @@ export const addressSeenByTrustedProxy = (
   return chain[index];
 };
 
-const joinedHeader = (value: string | string[] | undefined | null): string | undefined => {
+const joinedHeader = (value: string | string[] | undefined | null) => {
   if (Array.isArray(value)) {
     return value.join(",");
   }
@@ -219,7 +215,7 @@ const joinedHeader = (value: string | string[] | undefined | null): string | und
   return value ?? undefined;
 };
 
-const singleHeader = (value: string | string[] | undefined | null): string | undefined => {
+const singleHeader = (value: string | string[] | undefined | null) => {
   if (Array.isArray(value)) {
     return value.length === 1 ? value[0] : undefined;
   }
@@ -231,11 +227,11 @@ export const visitorAddressFromProxy = (input: {
   socketAddress?: string | null;
   forwardedFor?: string | string[] | null;
   connectingIp?: string | string[] | null;
-}): string | undefined => {
+}) => {
   const seen = addressSeenByTrustedProxy(input.socketAddress, joinedHeader(input.forwardedFor));
 
-  if (!isNonEmptyString(seen)) {
-    return undefined;
+  if (seen === undefined) {
+    return seen;
   }
 
   const resolved = resolveClientAddress({
@@ -246,20 +242,13 @@ export const visitorAddressFromProxy = (input: {
   return isPublicIp(resolved) ? resolved : undefined;
 };
 
-export const forwardedPublicClient = (request: ClientRequest): string | undefined => {
+export const forwardedPublicClient = (request: ClientRequest) => {
   const client = canonicalIp(header(request.headers, INTERNAL_CLIENT_HEADER));
 
-  if (!isNonEmptyString(client) || !isPublicIp(client)) {
-    return undefined;
-  }
-
-  return client;
+  return isNonEmptyString(client) && isPublicIp(client) ? client : undefined;
 };
 
-export const internalApiTokenMatches = (
-  request: ClientRequest,
-  expected: string | undefined,
-): boolean => {
+export const internalApiTokenMatches = (request: ClientRequest, expected: string | undefined) => {
   const token = expected?.trim();
 
   if (!isNonEmptyString(token)) {

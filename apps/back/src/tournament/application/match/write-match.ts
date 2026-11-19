@@ -51,13 +51,13 @@ const setBracketLinks = async (
   writer: MatchWriter,
   match: Match,
   links: readonly BracketLinkInput[],
-): Promise<void> => {
+) => {
   assertManualBracketMatch(match);
   assertBracketLinks(match.id, links, await writer.bracket(match.tournament.id));
   match.previousMatches = toBracketLinks(match.id, links);
 };
 
-const persist = async (writer: MatchWriter, match: Match): Promise<void> => {
+const persist = async (writer: MatchWriter, match: Match) => {
   match.dropBrokenForfeit();
   await writer.save(match);
 };
@@ -66,7 +66,7 @@ const applyMatchFields = (
   match: Match,
   participants: TournamentParticipant[],
   input: MatchFields,
-): void => {
+) => {
   const previousEndAt = match.endAt;
   match.name = input.name;
   match.beginAt = input.beginAt ?? null;
@@ -115,7 +115,7 @@ export const createMatchInTransaction = async (
   writer: MatchWriter,
   tournamentId: string,
   input: ManualMatchInput,
-): Promise<Match> => {
+) => {
   const tournament = await writer.tournament(tournamentId);
 
   if (!tournament) {
@@ -142,7 +142,7 @@ export const createEmptyBracketInTransaction = async (
   writer: MatchWriter,
   tournamentId: string,
   input: EmptyBracketInput,
-): Promise<Match[]> => {
+) => {
   const tournament = await writer.tournament(tournamentId);
 
   if (!tournament) {
@@ -194,14 +194,14 @@ export const createEmptyBracketInTransaction = async (
   return planned.map(({ match }) => match);
 };
 
-const playedBy = (input: SyncedMatchInput, participant: TournamentParticipant): boolean =>
+const playedBy = (input: SyncedMatchInput, participant: TournamentParticipant) =>
   (input.results ?? []).some((r) => r.participantId === participant.id && r.score > 0);
 
 export const upsertSyncedMatchInTransaction = async (
   writer: MatchWriter,
   tournamentId: string,
   input: SyncedMatchInput,
-): Promise<Match> => {
+) => {
   const tournament = await writer.tournament(tournamentId);
 
   if (!tournament) {
@@ -253,7 +253,7 @@ export const upsertSyncedMatchInTransaction = async (
   if (forfeitWinner && reportedForfeiter && match.participants.length === 2) {
     match.declareForfeit(reportedForfeiter);
   } else if (keptForfeiter && match.participants.length === 2 && !playedBy(input, keptForfeiter)) {
-    // The provider often reports a walkover as 0-0 or canceled; a staff forfeit outlives that until it shows the forfeiter playing.
+    // WARNING: the provider often reports a walkover as 0-0 or canceled; a staff forfeit outlives that until it shows the forfeiter playing.
     match.declareForfeit(keptForfeiter);
   }
 
@@ -267,7 +267,7 @@ export const setForfeitInTransaction = async (
   id: string,
   forfeitedById: string | null,
   sourceUrl?: string | null,
-): Promise<Match> => {
+) => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -295,11 +295,7 @@ export const setForfeitInTransaction = async (
   return match;
 };
 
-export const setWinnerInTransaction = async (
-  writer: MatchWriter,
-  id: string,
-  winnerId: string,
-): Promise<Match> => {
+export const setWinnerInTransaction = async (writer: MatchWriter, id: string, winnerId: string) => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -325,7 +321,7 @@ const replaceParticipants = async (
   match: Match,
   participantIds: readonly string[],
   rescored: boolean,
-): Promise<void> => {
+) => {
   assertManualBracketMatch(match);
 
   if (new Set(participantIds).size !== participantIds.length) {
@@ -355,7 +351,7 @@ export const updateMatchInTransaction = async (
   writer: MatchWriter,
   id: string,
   input: UpdateMatchInput,
-): Promise<Match> => {
+) => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -417,7 +413,6 @@ export const updateMatchInTransaction = async (
 
     const winner = match.participants.find((p) => p.id === winnerId) ?? null;
 
-    // A staff-picked winner survives a status-only update on a drawn or unscored match.
     if (winner || input.results) {
       match.winner = winner;
     }
@@ -439,7 +434,7 @@ export const setVodsInTransaction = async (
   writer: MatchWriter,
   id: string,
   vods: readonly MatchVodInput[],
-): Promise<Match> => {
+) => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -456,7 +451,7 @@ export const setSourceInTransaction = async (
   writer: MatchWriter,
   id: string,
   sourceUrl: string | null,
-): Promise<Match> => {
+) => {
   const match = await writer.load(id);
 
   if (!match) {
@@ -474,7 +469,7 @@ export const setGameVodsInTransaction = async (
   id: string,
   game: number,
   links: readonly MatchVodLink[],
-): Promise<Match> => {
+) => {
   const match = await writer.load(id);
 
   if (!match) {

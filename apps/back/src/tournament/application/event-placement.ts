@@ -22,7 +22,7 @@ export const requireLeague = async (writer: TournamentWriter, id: string | null 
   return league;
 };
 
-export const requireEvent = async (events: EventWriter, id: string): Promise<TournamentEvent> => {
+export const requireEvent = async (events: EventWriter, id: string) => {
   const event = await events.load(id);
 
   if (!event) {

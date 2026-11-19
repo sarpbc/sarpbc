@@ -13,27 +13,38 @@ const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` })
 const DEFAULT_SIZE = { height: 256, width: 512 };
 
 const setup = (bytes: Uint8Array, size = DEFAULT_SIZE) => {
-  const source = { download: vi.fn<TeamLogoSource["download"]>(async () => bytes) };
+  const formats: string[] = [];
+  const output = { bytes: WEBP_OUTPUT, formats };
+  const source: TeamLogoSource = { download: async () => bytes };
 
-  const images = {
-    dimensions: vi.fn<TeamLogoImages["dimensions"]>(async () => size),
-    normalize: vi.fn<TeamLogoImages["normalize"]>(async () => WEBP_OUTPUT),
+  const images: TeamLogoImages = {
+    dimensions: async () => size,
+    normalize: async (_bytes, format) => {
+      output.formats.push(format);
+
+      return output.bytes;
+    },
   };
 
-  const storage = {
-    copy: vi.fn<TeamLogoStorage["copy"]>(async (_sourceKey, key) => stored(key)),
-    delete: vi.fn<TeamLogoStorage["delete"]>(async () => {}),
-    put: vi.fn<TeamLogoStorage["put"]>(async (key) => stored(key)),
+  const storage: TeamLogoStorage = {
+    copy: async (_sourceKey, key) => stored(key),
+    delete: async () => {},
+    put: async (key) => stored(key),
   };
 
-  return { images, service: new TeamLogoService(source, images, storage), source, storage };
+  vi.spyOn(source, "download");
+  vi.spyOn(storage, "copy");
+  vi.spyOn(storage, "delete");
+  vi.spyOn(storage, "put");
+
+  return { output, service: new TeamLogoService(source, images, storage), source, storage };
 };
 
 describe(TeamLogoService, () => {
   const hash = "0123456789abcdef";
 
-  it("downloads and normalizes a raster logo", async () => {
-    const { source, images, service } = setup(PNG);
+  it("downloads the logo within the size cap", async () => {
+    const { source, service } = setup(PNG);
 
     await service.upload("kc", "light", "https://kcorp.gg/logo.png");
 
@@ -41,41 +52,39 @@ describe(TeamLogoService, () => {
       new URL("https://kcorp.gg/logo.png"),
       MAX_TEAM_LOGO_BYTES,
     );
-    expect(images.dimensions).toHaveBeenCalledExactlyOnceWith(PNG);
-    expect(images.normalize).toHaveBeenCalledExactlyOnceWith(PNG, "png", expect.any(Number));
   });
 
   it("stages a raster logo under the team's pending variant key", async () => {
-    const { storage, service } = setup(PNG);
+    const { output, storage, service } = setup(PNG);
 
     const logo = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
 
     expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-light-[0-9a-f]{16}\.webp$/u);
     expect(logo.url).toBe(`https://cdn.sarpbc.test/${logo.key}`);
     expect(storage.put).toHaveBeenCalledExactlyOnceWith(logo.key, WEBP_OUTPUT, "image/webp");
+    expect(output.formats).toStrictEqual(["png"]);
   });
 
   it("names the staged asset after its content", async () => {
-    const { images, service } = setup(PNG);
+    const { output, service } = setup(PNG);
 
     const first = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
     const again = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
-    images.normalize.mockResolvedValueOnce(new Uint8Array([7, 7, 7]));
+    output.bytes = new Uint8Array([7, 7, 7]);
     const changed = await service.upload("kc", "light", "https://kcorp.gg/logo.png");
 
     expect(again.key).toBe(first.key);
     expect(changed.key).not.toBe(first.key);
   });
 
-  it("normalizes a safe SVG without a pixel minimum", async () => {
-    const { images, storage, service } = setup(SVG);
+  it("stages a safe SVG without a pixel minimum", async () => {
+    const { output, storage, service } = setup(SVG, { height: 16, width: 16 });
 
     const logo = await service.upload("kc", "dark", "https://kcorp.gg/logo.svg");
 
-    expect(images.dimensions).not.toHaveBeenCalled();
-    expect(images.normalize).toHaveBeenCalledExactlyOnceWith(SVG, "svg", expect.any(Number));
     expect(logo.key).toMatch(/^pending\/teams\/kc\/logo-dark-/u);
     expect(storage.put).toHaveBeenCalledExactlyOnceWith(logo.key, WEBP_OUTPUT, "image/webp");
+    expect(output.formats).toStrictEqual(["svg"]);
   });
 
   it("refuses unsafe URLs before downloading", async () => {
@@ -98,10 +107,9 @@ describe(TeamLogoService, () => {
       "a script element",
     ],
   ])("stores nothing for %s", async (_, bytes, message) => {
-    const { images, storage, service } = setup(bytes);
+    const { storage, service } = setup(bytes);
 
     await expect(service.upload("kc", "light", "https://kcorp.gg/logo")).rejects.toThrow(message);
-    expect(images.normalize).not.toHaveBeenCalled();
     expect(storage.put).not.toHaveBeenCalled();
   });
 

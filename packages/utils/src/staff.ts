@@ -6,15 +6,12 @@ export const ROSTER_PROPOSAL_PERMISSIONS = [
   "tournaments.manage",
 ] as const satisfies readonly StaffPermission[];
 
-export const isStaffUser = (user: User | null | undefined): boolean =>
-  (user?.permissions?.length ?? 0) > 0;
+export const isStaffUser = (user: User | null | undefined) => (user?.permissions?.length ?? 0) > 0;
 
-export const hasPermission = (
-  user: User | null | undefined,
-  permission: StaffPermission,
-): boolean => user?.permissions?.includes(permission) === true;
+export const hasPermission = (user: User | null | undefined, permission: StaffPermission) =>
+  user?.permissions?.includes(permission) === true;
 
-export const canModerateComments = (user: User | null | undefined): boolean =>
+export const canModerateComments = (user: User | null | undefined) =>
   hasPermission(user, "forum.moderate");
 
 const REQUIRED_PERMISSION: Record<RosterChange["kind"], StaffPermission> = {
@@ -46,5 +43,4 @@ const REQUIRED_PERMISSION: Record<RosterChange["kind"], StaffPermission> = {
   upload_team_logo: "teams.manage",
 };
 
-export const requiredPermission = (change: RosterChange): StaffPermission =>
-  REQUIRED_PERMISSION[change.kind];
+export const requiredPermission = (change: RosterChange) => REQUIRED_PERMISSION[change.kind];

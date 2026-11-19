@@ -14,7 +14,7 @@ const languageNames = computed(
   () => new Intl.DisplayNames([locale.value], { fallback: "code", type: "language" }),
 );
 
-const platformLabel = (platform: StreamPlatform): string => {
+const platformLabel = (platform: StreamPlatform) => {
   switch (platform) {
     case "twitch": {
       return t("page.match.detail.watch.platforms.twitch");
@@ -40,7 +40,7 @@ const platformLabel = (platform: StreamPlatform): string => {
   }
 };
 
-const kindLabel = (kind: StreamKind): string => {
+const kindLabel = (kind: StreamKind) => {
   switch (kind) {
     case "official": {
       return t("page.match.detail.watch.kinds.official");

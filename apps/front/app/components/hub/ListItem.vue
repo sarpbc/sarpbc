@@ -10,7 +10,7 @@ const { size = "default", to = null } = defineProps<{
 
 const attrs = useAttrs();
 
-const listItemSizeClasses = (value: ListItemSize): string => {
+const listItemSizeClasses = (value: ListItemSize) => {
   switch (value) {
     case "compact": {
       return "h-row-compact min-h-row-compact";

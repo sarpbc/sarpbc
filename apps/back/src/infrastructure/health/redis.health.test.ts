@@ -1,28 +1,33 @@
+import { ConfigService } from "@nestjs/config";
 import { HealthIndicatorService } from "@nestjs/terminus";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { unconstructed } from "../../../test/doubles";
+import { describe, expect, it } from "vitest";
 import { RedisService } from "../redis/redis.service";
 import { RedisHealthIndicator } from "./redis.health";
 
+class PingingRedisService extends RedisService {
+  constructor(private readonly reply: () => Promise<string>) {
+    super(new ConfigService(), () => {
+      throw new Error("Redis client is not available");
+    });
+  }
+
+  override async ping() {
+    return await this.reply();
+  }
+}
+
+const indicatorFor = (reply: () => Promise<string>) =>
+  new RedisHealthIndicator(new PingingRedisService(reply), new HealthIndicatorService());
+
 describe(RedisHealthIndicator, () => {
-  const ping = vi.fn<RedisService["ping"]>();
-  const redis = Object.assign(unconstructed(RedisService), { ping });
-
-  let indicator: RedisHealthIndicator;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    indicator = new RedisHealthIndicator(redis, new HealthIndicatorService());
-  });
-
   it("is up when ping returns PONG", async () => {
-    ping.mockResolvedValue("PONG");
+    const indicator = indicatorFor(async () => await Promise.resolve("PONG"));
 
     await expect(indicator.pingCheck("redis")).resolves.toStrictEqual({ redis: { status: "up" } });
   });
 
   it("is down when ping returns an unexpected value", async () => {
-    ping.mockResolvedValue("NOPE");
+    const indicator = indicatorFor(async () => await Promise.resolve("NOPE"));
 
     await expect(indicator.pingCheck("redis")).resolves.toStrictEqual({
       redis: { message: "Unexpected ping response", status: "down" },
@@ -30,7 +35,7 @@ describe(RedisHealthIndicator, () => {
   });
 
   it("is down when ping throws", async () => {
-    ping.mockRejectedValue(new Error("ECONNREFUSED"));
+    const indicator = indicatorFor(async () => await Promise.reject(new Error("ECONNREFUSED")));
 
     await expect(indicator.pingCheck("redis")).resolves.toStrictEqual({
       redis: { message: "ECONNREFUSED", status: "down" },

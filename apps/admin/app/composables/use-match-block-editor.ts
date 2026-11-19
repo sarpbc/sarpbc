@@ -10,7 +10,7 @@ type EditMatchBlock = (
 
 const editMatchBlockKey: InjectionKey<EditMatchBlock> = Symbol("editMatchBlock");
 
-export const useEditMatchBlock = (): EditMatchBlock => {
+export const useEditMatchBlock = () => {
   const edit = inject(editMatchBlockKey);
 
   if (!edit) {

@@ -1,4 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
+import { MemoryGames } from "../../../test/memory-games";
 import { ApplicationError } from "../../common/domain/errors/application-error";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { IntegrationError } from "../../common/domain/errors/integration-error";
@@ -7,13 +8,9 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { UnprocessableError } from "../../common/domain/errors/unprocessable-error";
 import type { CandidateMatch } from "../domain/replay-matching";
 import { ManualGameService } from "./manual-game.service";
-import type {
-  BallchasingSource,
-  GameAttachment,
-  GameStatsStore,
-  ReplayStats,
-  StatsCandidates,
-} from "./ports";
+import { FakeBallchasing } from "./fake-ballchasing.test-utils";
+import { FakeStatsCandidates } from "./fake-stats-candidates.test-utils";
+import type { GameAttachment, GameRecord, ReplayStats } from "./ports";
 
 const REPLAY = "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 const PLAYED_AT = new Date("2026-06-01T18:05:00Z");
@@ -54,7 +51,7 @@ const stats: ReplayStats = {
   rocketLeagueId: "RL-1",
 };
 
-const rejection = async (work: Promise<unknown>): Promise<ApplicationError> => {
+const rejection = async (work: Promise<unknown>) => {
   const [settled] = await Promise.allSettled([work]);
 
   if (settled.status === "rejected" && settled.reason instanceof ApplicationError) {
@@ -71,6 +68,25 @@ const input = {
   replay: `https://ballchasing.com/replay/${REPLAY}`,
 };
 
+const STORED = "stored-1";
+
+const storedGame: GameRecord = {
+  ballchasingId: STORED,
+  blueGoals: 1,
+  blueParticipantId: "p-kc",
+  learnedLinks: [],
+  matchId: "m1",
+  number: 1,
+  orangeGoals: 0,
+  orangeParticipantId: "p-bds",
+  playedAt: null,
+  players: [],
+  rocketLeagueId: null,
+};
+
+const added = (games: MemoryGames) =>
+  games.saved.filter(({ ballchasingId }) => ballchasingId !== STORED);
+
 const setup = (
   options: {
     source?: boolean;
@@ -78,46 +94,19 @@ const setup = (
     participants?: CandidateMatch["participants"];
   } = {},
 ) => {
-  const source = {
-    groupReplays: vi.fn<BallchasingSource["groupReplays"]>(),
-    replayStats: vi.fn<BallchasingSource["replayStats"]>(async () => stats),
-  } satisfies BallchasingSource;
+  const source = new FakeBallchasing([], new Map([[REPLAY, stats]]));
 
-  const candidates: StatsCandidates = {
-    matches: vi.fn<StatsCandidates["matches"]>(async () => [
-      {
-        ...match,
-        numberOfGames: options.numberOfGames === undefined ? 5 : options.numberOfGames,
-        participants: options.participants ?? match.participants,
-      },
-    ]),
-    tournamentExists: vi.fn<StatsCandidates["tournamentExists"]>(async (id) => id === "t1"),
-  };
+  const candidates = new FakeStatsCandidates(() => [
+    {
+      ...match,
+      numberOfGames: options.numberOfGames === undefined ? 5 : options.numberOfGames,
+      participants: options.participants ?? match.participants,
+    },
+  ]);
 
-  const games = {
-    attachment: vi.fn<GameStatsStore["attachment"]>(async () => null),
-    byMatch: vi.fn<GameStatsStore["byMatch"]>(async () => []),
-    excluded: vi.fn<GameStatsStore["excluded"]>(async () => new Set()),
-    inTournament: vi.fn<GameStatsStore["inTournament"]>(async () => []),
-    links: vi.fn<GameStatsStore["links"]>(async () => [
-      { platform: "steam", platformId: "stand-in-id", playerId: "vatira" },
-    ]),
-    locations: vi.fn<GameStatsStore["locations"]>(
-      async () => new Map([["stored-1", { matchId: "m1", number: 1 }]]),
-    ),
-    playerLines: vi.fn<GameStatsStore["playerLines"]>(async () => []),
-    remove: vi.fn<GameStatsStore["remove"]>(async () => null),
-    save: vi.fn<GameStatsStore["save"]>(async (record) => ({
-      ballchasingId: record.ballchasingId,
-      blueGoals: record.blueGoals,
-      blueParticipantId: record.blueParticipantId,
-      matchId: record.matchId,
-      number: record.number,
-      orangeGoals: record.orangeGoals,
-      orangeParticipantId: record.orangeParticipantId,
-      playedAt: record.playedAt?.toISOString() ?? null,
-    })),
-  } satisfies GameStatsStore;
+  const games = new MemoryGames();
+  games.saved.push(storedGame);
+  games.linked = [{ platform: "steam", platformId: "stand-in-id", playerId: "vatira" }];
 
   const service = new ManualGameService(
     options.source === false ? null : source,
@@ -130,7 +119,7 @@ const setup = (
 
 describe("ManualGameService.attach", () => {
   it("stores the replay as the chosen game with the chosen sides and resolves players", async () => {
-    const { service, games, source } = setup();
+    const { service, games } = setup();
 
     await expect(service.attach("t1", input)).resolves.toStrictEqual({
       ballchasingId: REPLAY,
@@ -142,14 +131,13 @@ describe("ManualGameService.attach", () => {
       orangeParticipantId: "p-kc",
       playedAt: PLAYED_AT.toISOString(),
     });
-    expect(source.replayStats).toHaveBeenCalledWith(REPLAY);
-    const [[record]] = games.save.mock.calls;
+    const [record] = added(games);
     expect(record).toMatchObject({ number: 2, playedAt: PLAYED_AT, rocketLeagueId: "RL-1" });
-    expect(record.players.map((player) => [player.name, player.playerId])).toStrictEqual([
+    expect(record?.players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Seikoo", "seikoo"],
       ["Stand-in", "vatira"],
     ]);
-    expect(record.learnedLinks).toStrictEqual([
+    expect(record?.learnedLinks).toStrictEqual([
       { platform: "steam", platformId: "seikoo-id", playerId: "seikoo" },
     ]);
   });
@@ -166,16 +154,16 @@ describe("ManualGameService.attach", () => {
       ],
     });
 
-    games.links.mockResolvedValue([]);
+    games.linked = [];
 
     await service.attach("t1", { ...input, blueParticipantId: "p-seikoo" });
 
-    const [[record]] = games.save.mock.calls;
+    const [record] = added(games);
     expect(record).toMatchObject({
       blueParticipantId: "p-seikoo",
       orangeParticipantId: "p-stand-in",
     });
-    expect(record.players.map((player) => [player.side, player.playerId])).toStrictEqual([
+    expect(record?.players.map((player) => [player.side, player.playerId])).toStrictEqual([
       ["blue", "seikoo"],
       ["orange", "stand-in"],
     ]);
@@ -186,7 +174,7 @@ describe("ManualGameService.attach", () => {
 
     await service.attach("t1", { ...input, gameNumber: 9 });
 
-    expect(games.save).toHaveBeenCalledOnce();
+    expect(added(games)).toHaveLength(1);
   });
 
   it("rejects an unknown tournament before calling Ballchasing", async () => {
@@ -195,8 +183,8 @@ describe("ManualGameService.attach", () => {
     await expect(rejection(service.attach("missing", input))).resolves.toBeInstanceOf(
       NotFoundError,
     );
-    expect(source.replayStats).not.toHaveBeenCalled();
-    expect(games.save).not.toHaveBeenCalled();
+    expect(source.statsCalls).toStrictEqual([]);
+    expect(added(games)).toStrictEqual([]);
   });
 
   it.each([
@@ -238,8 +226,8 @@ describe("ManualGameService.attach", () => {
     expect(error).toBeInstanceOf(kind);
 
     expect(error.detail.code).toBe(code);
-    expect(source.replayStats).not.toHaveBeenCalled();
-    expect(games.save).not.toHaveBeenCalled();
+    expect(source.statsCalls).toStrictEqual([]);
+    expect(added(games)).toStrictEqual([]);
   });
 
   it("says where a replay is already attached", async () => {
@@ -252,30 +240,33 @@ describe("ManualGameService.attach", () => {
       tournamentName: "RLCS Paris Major",
     };
 
-    games.attachment.mockResolvedValueOnce(attached);
+    games.attachments.set(REPLAY, attached);
 
     const error = await rejection(service.attach("t1", input));
 
     expect(error).toBeInstanceOf(ConflictError);
     expect(error.detail.code).toBe("replay_already_attached");
     expect(error.message).toContain("game 3 of Vitality vs Falcons in RLCS Paris Major");
-    expect(source.replayStats).not.toHaveBeenCalled();
+    expect(source.statsCalls).toStrictEqual([]);
   });
 
   it("rejects a replay Ballchasing has not processed or that misses a team", async () => {
     const { service, games, source } = setup();
-    source.replayStats.mockResolvedValueOnce(null).mockResolvedValueOnce({
+    source.outcomes.set(REPLAY, null);
+
+    const notReady = await rejection(service.attach("t1", input));
+
+    source.outcomes.set(REPLAY, {
       ...stats,
       players: stats.players.filter((player) => player.side === "blue"),
     });
 
-    const notReady = await rejection(service.attach("t1", input));
     const oneSided = await rejection(service.attach("t1", input));
 
     expect(notReady).toBeInstanceOf(UnprocessableError);
     expect(notReady.detail.code).toBe("replay_not_ready");
     expect(oneSided.detail.code).toBe("player_mismatch");
-    expect(games.save).not.toHaveBeenCalled();
+    expect(added(games)).toStrictEqual([]);
   });
 
   it("explains a missing API key", async () => {
@@ -290,7 +281,7 @@ describe("ManualGameService.remove", () => {
     const { service, games } = setup();
 
     const removed = {
-      ballchasingId: "stored-1",
+      ballchasingId: STORED,
       blueGoals: 1,
       blueParticipantId: "p-kc",
       matchId: "m1",
@@ -300,10 +291,9 @@ describe("ManualGameService.remove", () => {
       playedAt: null,
     };
 
-    games.remove.mockResolvedValueOnce(removed);
-
     await expect(service.remove("t1", "m1", 1)).resolves.toStrictEqual(removed);
-    expect(games.remove).toHaveBeenCalledWith("t1", { matchId: "m1", number: 1 });
+    expect(games.saved).toStrictEqual([]);
+    expect(games.exclusions).toStrictEqual(new Set([STORED]));
   });
 
   it("reports a missing game or tournament", async () => {
@@ -311,16 +301,26 @@ describe("ManualGameService.remove", () => {
 
     await expect(service.remove("t1", "m1", 4)).rejects.toBeInstanceOf(NotFoundError);
     await expect(service.remove("missing", "m1", 1)).rejects.toBeInstanceOf(NotFoundError);
-    expect(games.remove).toHaveBeenCalledOnce();
+    expect(games.saved).toStrictEqual([storedGame]);
   });
 });
 
 describe("ManualGameService.list", () => {
-  it("lists the tournament's stored games", async () => {
-    const { service, games } = setup();
+  it("lists games only for a known tournament", async () => {
+    const { service } = setup();
 
-    await expect(service.list("t1")).resolves.toStrictEqual([]);
-    expect(games.inTournament).toHaveBeenCalledWith("t1");
+    await expect(service.list("t1")).resolves.toStrictEqual([
+      {
+        ballchasingId: STORED,
+        blueGoals: 1,
+        blueParticipantId: "p-kc",
+        matchId: "m1",
+        number: 1,
+        orangeGoals: 0,
+        orangeParticipantId: "p-bds",
+        playedAt: null,
+      },
+    ]);
     await expect(service.list("missing")).rejects.toBeInstanceOf(NotFoundError);
   });
 });

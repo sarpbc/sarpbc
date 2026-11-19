@@ -11,7 +11,7 @@ import {
   newsMdcComponentMap,
 } from "@sarpbc/ui/config";
 
-const envOr = (value: string | undefined, fallback: string): string =>
+const envOr = (value: string | undefined, fallback: string) =>
   isNonEmptyString(value) ? value : fallback;
 
 const apiBase = envOr(process.env.NUXT_PUBLIC_API_BASE, DEFAULT_API_BASE);
@@ -21,7 +21,7 @@ const contentSwr = { swr: 300 } as const;
 
 type RouteRules = NonNullable<NuxtConfig["routeRules"]>;
 
-const localizedRouteRules = (rules: RouteRules): RouteRules =>
+const localizedRouteRules = (rules: RouteRules) =>
   Object.fromEntries(
     Object.entries(rules).flatMap(([path, rule]) => [
       [path, rule],
@@ -37,15 +37,15 @@ const posthogPublicKey = isProduction
 
 const posthogHost = envOr(process.env.NUXT_PUBLIC_POSTHOG_HOST, "https://t.sarpbc.org");
 
-const hostnameFromUrl = (base: string | undefined): string | undefined => {
+const hostnameFromUrl = (base: string | undefined) => {
   if (!isNonEmptyString(base)) {
-    return undefined;
+    return null;
   }
 
   try {
     return new URL(base).hostname;
   } catch {
-    return undefined;
+    return null;
   }
 };
 
@@ -139,7 +139,6 @@ export default defineNuxtConfig({
       scan: true,
       sizeLimitKb: 512,
     },
-    // Utilities and component styles must be able to size icons.
     cssLayer: "base",
   },
 
@@ -237,9 +236,7 @@ export default defineNuxtConfig({
         "@internationalized/date",
         "@vueuse/core",
         "zod",
-        // MDC lazy-loads its markdown parser on client navigation. Its own include list starts at
-        // `@nuxtjs/mdc`, which pnpm does not expose to this app, so these CommonJS deps would ship
-        // unbundled and fail with "does not provide an export named 'default'".
+        // WARNING: MDC's own include list starts at `@nuxtjs/mdc`, which pnpm does not expose to this app, so these CommonJS deps would ship unbundled and fail with "does not provide an export named 'default'".
         "@nuxt/content > @nuxtjs/mdc > debug",
         "@nuxt/content > @nuxtjs/mdc > unified > extend",
       ],

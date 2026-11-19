@@ -22,7 +22,6 @@ const canTeams = computed(() => canAccessSection(user.value, "/teams"));
 const canTournaments = computed(() => canAccessSection(user.value, "/tournaments"));
 const canSearch = computed(() => canPlayers.value || canTeams.value || canTournaments.value);
 
-/* ⌘K on macOS, Ctrl+K elsewhere, even while typing in a field. */
 onKeyStroke(
   (event) => (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k",
   (event) => {
@@ -80,7 +79,7 @@ const closeAndGo = (path: string) => {
   void navigateTo(localePath(path));
 };
 
-const playerItems = (): CommandItem[] => {
+const playerItems = () => {
   if (!canPlayers.value) {
     return [];
   }
@@ -97,7 +96,7 @@ const playerItems = (): CommandItem[] => {
   }));
 };
 
-const teamItems = (): CommandItem[] => {
+const teamItems = () => {
   if (!canTeams.value) {
     return [];
   }
@@ -118,7 +117,7 @@ const teamItems = (): CommandItem[] => {
   });
 };
 
-const tournamentItems = (): CommandItem[] => {
+const tournamentItems = () => {
   if (!canTournaments.value) {
     return [];
   }

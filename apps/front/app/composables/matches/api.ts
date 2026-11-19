@@ -1,7 +1,7 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import type { MatchResultsResponse, MatchVod, UpcomingMatchesResponse } from "@sarpbc/types";
-import type { MatchDetailResponse, MatchDetailWire } from "~/types/matches";
-// Nitro routes import this file and have no Nuxt auto-imports.
+import type { MatchDetailWire } from "~/types/matches";
+// WARNING: Nitro routes import this file and have no Nuxt auto-imports.
 import { apiFetch } from "@sarpbc/composables/api-fetch";
 
 export interface MatchesListQuery {
@@ -11,7 +11,7 @@ export interface MatchesListQuery {
   tournamentId?: string;
 }
 
-const matchesPath = (path: string, query?: MatchesListQuery): string => {
+const matchesPath = (path: string, query?: MatchesListQuery) => {
   const params = new URLSearchParams();
 
   if (query?.limit !== undefined) {
@@ -50,7 +50,7 @@ interface SidebarCache<T> {
 const upcomingSidebar: SidebarCache<UpcomingMatchesResponse> = {};
 const resultsSidebar: SidebarCache<MatchResultsResponse> = {};
 
-const loadSidebar = async <T>(cache: SidebarCache<T>, load: () => Promise<T>): Promise<T> => {
+const loadSidebar = async <T>(cache: SidebarCache<T>, load: () => Promise<T>) => {
   if (cache.slot && cache.slot.expiresAt > Date.now()) {
     return await Promise.resolve(cache.slot.value);
   }
@@ -74,34 +74,30 @@ const loadSidebar = async <T>(cache: SidebarCache<T>, load: () => Promise<T>): P
   return await request;
 };
 
-export const getUpcomingMatches = async (
-  query?: MatchesListQuery,
-): Promise<UpcomingMatchesResponse> =>
+export const getUpcomingMatches = async (query?: MatchesListQuery) =>
   await apiFetch<UpcomingMatchesResponse>(matchesPath("/matches/upcoming", query), {
     method: "GET",
   });
 
-export const getMatchesResults = async (query?: MatchesListQuery): Promise<MatchResultsResponse> =>
+export const getMatchesResults = async (query?: MatchesListQuery) =>
   await apiFetch<MatchResultsResponse>(matchesPath("/matches/results", query), {
     method: "GET",
   });
 
 /** Rendered on every SSR page: share one response across requests instead of calling the API each time. */
-export const getSidebarUpcomingMatches =
-  async function getSidebarUpcomingMatches(): Promise<UpcomingMatchesResponse> {
-    return import.meta.server
-      ? await loadSidebar(upcomingSidebar, getUpcomingMatches)
-      : await getUpcomingMatches();
-  };
+export const getSidebarUpcomingMatches = async function getSidebarUpcomingMatches() {
+  return import.meta.server
+    ? await loadSidebar(upcomingSidebar, getUpcomingMatches)
+    : await getUpcomingMatches();
+};
 
-export const getSidebarMatchesResults =
-  async function getSidebarMatchesResults(): Promise<MatchResultsResponse> {
-    return import.meta.server
-      ? await loadSidebar(resultsSidebar, getMatchesResults)
-      : await getMatchesResults();
-  };
+export const getSidebarMatchesResults = async function getSidebarMatchesResults() {
+  return import.meta.server
+    ? await loadSidebar(resultsSidebar, getMatchesResults)
+    : await getMatchesResults();
+};
 
-export const getMatchById = async (id: string): Promise<MatchDetailResponse> => {
+export const getMatchById = async (id: string) => {
   const response = await apiFetch<MatchDetailWire>(`/matches/${id}`, {
     method: "GET",
   });
@@ -118,10 +114,7 @@ export const getMatchById = async (id: string): Promise<MatchDetailResponse> => 
   };
 };
 
-export const setMatchVods = async (
-  matchId: string,
-  vods: Omit<MatchVod, "source">[],
-): Promise<MatchVod[]> => {
+export const setMatchVods = async (matchId: string, vods: Omit<MatchVod, "source">[]) => {
   const response = await apiFetch<{ match: { vods: MatchVod[] } }>(
     `/tournaments/matches/${matchId}/vods`,
     { body: { vods }, method: "PUT" },
@@ -135,6 +128,6 @@ export type EditableMatchStatus = "not_started" | "running" | "finished";
 export const updateMatchResult = async (
   matchId: string,
   body: { status: EditableMatchStatus; results?: { participantId: string; score: number }[] },
-): Promise<void> => {
+) => {
   await apiFetch(`/tournaments/matches/${matchId}`, { body, method: "PATCH" });
 };

@@ -7,7 +7,7 @@ export interface MatchTiming {
 }
 
 /** PandaScore leaves some stages without an end date and some matches without an end time. */
-export const inferEndAt = (matches: readonly MatchTiming[]): Date | null => {
+export const inferEndAt = (matches: readonly MatchTiming[]) => {
   if (!matches.some((match) => match.status === "finished")) {
     return null;
   }

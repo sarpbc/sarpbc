@@ -12,7 +12,7 @@ import {
   getUpperColumnFromName,
 } from "./panda-score-names";
 import { MIN_ROW_GAP, assignMatchRows, nextAvailableRow, sortMatchesByBeginAt } from "./rows";
-import type { BracketLayoutMatch, BracketSectionLayout } from "./types";
+import type { BracketLayoutMatch } from "./types";
 
 const MAX_DOUBLE_ELIM_COMBINED_COLUMNS = 5;
 const UPPER_TO_LOWER_ROW_GAP = 2;
@@ -27,7 +27,7 @@ const propagateLowerFromWinnerParents = (
   matchIds: Set<string>,
   lowerIds: Set<string>,
   upperIds: Set<string>,
-): boolean => {
+) => {
   let changed = false;
 
   for (const match of matches) {
@@ -53,7 +53,7 @@ const propagateLowerFromLinks = (
   matchById: Map<string, TournamentDetailMatch>,
   lowerIds: Set<string>,
   upperIds: Set<string>,
-): boolean => {
+) => {
   let changed = false;
 
   for (const match of matches) {
@@ -87,9 +87,7 @@ const propagateLowerFromLinks = (
  * cross-bracket finals share the combined grid. Match names are used when PandaScore
  * omits feeder links (common for lower round 1).
  */
-export const splitDoubleEliminationMatches = (
-  matches: TournamentDetailMatch[],
-): DoubleEliminationSplit => {
+export const splitDoubleEliminationMatches = (matches: TournamentDetailMatch[]) => {
   const matchIds = new Set(matches.map((match) => match.id));
   const matchById = new Map(matches.map((match) => [match.id, match]));
   const lowerIds = new Set<string>();
@@ -137,7 +135,7 @@ export const splitDoubleEliminationMatches = (
 const buildDoubleEliminationCombinedLayout = (
   lowerMatches: TournamentDetailMatch[],
   upperIds: Set<string>,
-): BracketSectionLayout | null => {
+) => {
   if (lowerMatches.length === 0) {
     return null;
   }
@@ -230,16 +228,11 @@ const buildDoubleEliminationCombinedLayout = (
   return finalizeSectionLayout(lowerMatches, layoutMatches, maxColumn);
 };
 
-interface UpperAnchor {
-  column: number | null;
-  row: number | null;
-}
-
 const findUpperAnchor = (
   upperMatch: TournamentDetailMatch,
   allMatches: TournamentDetailMatch[],
   lowerPositionById: Map<string, BracketLayoutMatch>,
-): UpperAnchor => {
+) => {
   let column: number | null = getUpperColumnFromName(upperMatch.name);
   let row: number | null = null;
 
@@ -272,7 +265,7 @@ export const buildUnifiedDoubleEliminationLayout = (
   upperMatches: TournamentDetailMatch[],
   lowerMatches: TournamentDetailMatch[],
   allMatches: TournamentDetailMatch[],
-): BracketSectionLayout | null => {
+) => {
   if (upperMatches.length === 0 && lowerMatches.length === 0) {
     return null;
   }

@@ -1,5 +1,4 @@
-import type { ImageMetadata } from "../domain/image";
-import type { ImageHost, ImageRepository, ImageUploadUrl } from "./ports/image.repository";
+import type { ImageHost, ImageRepository } from "./ports/image.repository";
 
 export class ImagesService {
   constructor(
@@ -7,11 +6,11 @@ export class ImagesService {
     private readonly host: ImageHost,
   ) {}
 
-  async createUploadUrl(): Promise<ImageUploadUrl> {
+  async createUploadUrl() {
     return await this.host.createUploadUrl();
   }
 
-  async saveImage(imageId: string): Promise<ImageMetadata> {
+  async saveImage(imageId: string) {
     return await this.images.register(imageId, this.host.imageUrl(imageId));
   }
 }

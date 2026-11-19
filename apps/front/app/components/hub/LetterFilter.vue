@@ -2,7 +2,6 @@
 import type { RouteLocationRaw } from "vue-router";
 
 const { active, to } = defineProps<{
-  /** Selected letter, or an empty string for "all". */
   active: string;
   to: (letter: string) => RouteLocationRaw;
 }>();

@@ -67,7 +67,7 @@ const regionalRegion = computed(() => {
   return region !== null && !isWorldwideCircuitRegion(region) ? region : null;
 });
 
-const statusLabel = (status: CircuitEventStatus): string | null => {
+const statusLabel = (status: CircuitEventStatus) => {
   switch (status) {
     case "scale_missing": {
       return t("page.circuits.standings.status.scaleMissing");
@@ -97,7 +97,7 @@ const statusLabel = (status: CircuitEventStatus): string | null => {
   }
 };
 
-const sourceLabel = (url: string): string => url.replace(/^https?:\/\//u, "");
+const sourceLabel = (url: string) => url.replace(/^https?:\/\//u, "");
 
 watch(
   standings,

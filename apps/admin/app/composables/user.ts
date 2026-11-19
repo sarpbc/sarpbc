@@ -1,6 +1,6 @@
 import type { User } from "@sarpbc/types";
 
-export const getProfile = async (): Promise<User | null> => {
+export const getProfile = async () => {
   try {
     const res = await apiFetch<{ user?: User }>("/user/profile", {
       method: "GET",
@@ -19,7 +19,7 @@ export const useLogout = () => {
   const { $i18n } = useNuxtApp();
   const loggingOut = ref(false);
 
-  const logout = async (): Promise<void> => {
+  const logout = async () => {
     if (loggingOut.value) {
       return;
     }

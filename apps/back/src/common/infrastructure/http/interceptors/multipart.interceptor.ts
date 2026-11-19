@@ -1,4 +1,3 @@
-import { Observable } from "rxjs";
 import {
   CallHandler,
   ExecutionContext,
@@ -7,7 +6,6 @@ import {
   mixin,
   NestInterceptor,
   PayloadTooLargeException,
-  Type,
 } from "@nestjs/common";
 import { FastifyRequest } from "fastify";
 import { createLogger } from "evlog";
@@ -22,7 +20,7 @@ type StoredFilesByField = Record<string, Storage.MultipartFile[]>;
 
 type MultipartFormFields = Record<string, string>;
 
-const isMultipartFileTooLarge = (cause: unknown): boolean => {
+const isMultipartFileTooLarge = (cause: unknown) => {
   if (!(cause instanceof Error)) {
     return false;
   }
@@ -38,12 +36,9 @@ export interface MultipartMessages {
   unreadable: string;
 }
 
-export const MultipartInterceptor = (
-  options: MultipartOptions,
-  messages: MultipartMessages,
-): Type<NestInterceptor> => {
+export const MultipartInterceptor = (options: MultipartOptions, messages: MultipartMessages) => {
   class MixinInterceptor implements NestInterceptor {
-    async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<unknown>> {
+    async intercept(context: ExecutionContext, next: CallHandler) {
       const req = context.switchToHttp().getRequest<FastifyRequest>();
 
       if (!req.isMultipart()) {

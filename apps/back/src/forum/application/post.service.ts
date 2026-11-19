@@ -9,19 +9,8 @@ import type { EntityRef } from "../../common/domain/entity-ref";
 import { sanitizePlainText } from "../../common/domain/html";
 import { POST_CREATION_COOLDOWN_HOURS, POST_CREATION_COOLDOWN_MS } from "../domain/forum.constants";
 import { PostType } from "../domain/post-type.enum";
-import type {
-  NewPostRecord,
-  PostRecord,
-  TranslationRecord,
-  CreatePostInput,
-  CreatedPost,
-} from "./models";
+import type { NewPostRecord, CreatePostInput } from "./models";
 import type { PostStore, ForumTransaction } from "./ports";
-
-interface PostCreationEligibility {
-  canCreate: boolean;
-  nextAvailableAt: Date | null;
-}
 
 export class PostService {
   constructor(
@@ -31,23 +20,23 @@ export class PostService {
     private readonly id: () => string = () => crypto.randomUUID(),
   ) {}
 
-  async find(options: { limit?: number; offset?: number }): Promise<PostRecord[]> {
+  async find(options: { limit?: number; offset?: number }) {
     return await this.postRepository.findPaginated(options);
   }
 
-  async findByTopicId(topicId: string): Promise<PostRecord[]> {
+  async findByTopicId(topicId: string) {
     return await this.postRepository.findByTopicId(topicId);
   }
 
-  async findById(ref: EntityRef): Promise<PostRecord | null> {
+  async findById(ref: EntityRef) {
     return await this.postRepository.findWithDetails(ref);
   }
 
-  async findByIdDto(ref: EntityRef, locale: SupportedLocale): Promise<ForumPost | null> {
+  async findByIdDto(ref: EntityRef, locale: SupportedLocale) {
     const post = await this.findById(ref);
 
     if (!post) {
-      return null;
+      return null satisfies ForumPost | null;
     }
 
     const translation = post.translations.find((t) => t.locale === locale);
@@ -61,20 +50,20 @@ export class PostService {
       slug: forumPostSlug(post.title),
       title: translation?.title ?? post.title,
       topic: { id: post.topic.id, title: post.topic.title },
-    };
+    } satisfies ForumPost | null;
   }
 
-  async getCreationStatus(userId: string): Promise<ForumPostCreationStatus> {
+  async getCreationStatus(userId: string) {
     const eligibility = await this.resolvePostCreationEligibility(userId);
 
     return {
       canCreate: eligibility.canCreate,
       cooldownHours: POST_CREATION_COOLDOWN_HOURS,
       nextAvailableAt: eligibility.nextAvailableAt?.toISOString() ?? null,
-    };
+    } satisfies ForumPostCreationStatus;
   }
 
-  async create(userId: string, createPostInput: CreatePostInput): Promise<CreatedPost> {
+  async create(userId: string, createPostInput: CreatePostInput) {
     await this.transaction.run(async (scope) => {
       const eligibility = await this.resolvePostCreationEligibility(userId, scope.posts);
 
@@ -125,7 +114,7 @@ export class PostService {
         createPostInput.translations?.length !== undefined &&
         createPostInput.translations.length !== 0
       ) {
-        const translations = createPostInput.translations.map((tr): TranslationRecord => ({
+        const translations = createPostInput.translations.map((tr) => ({
           content: sanitizePlainText(tr.content),
           createdAt: this.now(),
           id: this.id(),
@@ -153,7 +142,7 @@ export class PostService {
     return await this.postRepository.findRecentActivity(limit);
   }
 
-  async delete(id: string): Promise<void> {
+  async delete(id: string) {
     await this.transaction.run(async (scope) => {
       const post = await scope.posts.findWithDetails({ kind: "id", value: id });
 
@@ -172,7 +161,7 @@ export class PostService {
   private async resolvePostCreationEligibility(
     userId: string,
     posts: PostStore = this.postRepository,
-  ): Promise<PostCreationEligibility> {
+  ) {
     const latest = await posts.findLatestByUser(userId);
 
     if (!latest) {

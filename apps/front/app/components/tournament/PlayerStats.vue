@@ -54,7 +54,7 @@ const viewOptions = computed(() => [
   { label: t("page.tournaments.stats.perGame"), value: "perGame" as const },
 ]);
 
-const teamKey = (row: TournamentPlayerStats): string => row.team.id ?? row.team.name;
+const teamKey = (row: TournamentPlayerStats) => row.team.id ?? row.team.name;
 
 const teamOptions = computed(() => {
   const teams = new Map<string, string>();
@@ -80,7 +80,7 @@ watch(
   },
 );
 
-const value = (row: TournamentPlayerStats, column: Column): number | null => {
+const value = (row: TournamentPlayerStats, column: Column) => {
   switch (column) {
     case "games": {
       return row.games;
@@ -110,7 +110,7 @@ const value = (row: TournamentPlayerStats, column: Column): number | null => {
 const isSortKey = (id: string): id is SortKey =>
   id === "player" || id === "team" || COLUMNS.some((column) => column === id);
 
-const compare = (a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKey): number => {
+const compare = (a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKey) => {
   if (key === "player") {
     return a.player.name.localeCompare(b.player.name);
   }
@@ -141,7 +141,7 @@ const percentFormat = computed(
   () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1, style: "percent" }),
 );
 
-const display = (row: TournamentPlayerStats, column: Column): string => {
+const display = (row: TournamentPlayerStats, column: Column) => {
   const current = value(row, column);
 
   if (current === null) {
@@ -155,11 +155,10 @@ const display = (row: TournamentPlayerStats, column: Column): string => {
 
 const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
 
-/* Stat headers are abbreviations; the full name is their title and what screen readers say. */
-const columns = computed((): TableColumn<TournamentPlayerStats>[] => [
+const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
   { header: t("page.tournaments.stats.player"), id: "player", meta: { rowHeader: true } },
   { header: t("page.tournaments.stats.team"), id: "team" },
-  ...COLUMNS.map((column): TableColumn<TournamentPlayerStats> => ({
+  ...COLUMNS.map<TableColumn<TournamentPlayerStats>>((column) => ({
     cell: ({ row }) => display(row.original, column),
     header: () =>
       h(

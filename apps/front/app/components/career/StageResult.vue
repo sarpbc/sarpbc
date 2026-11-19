@@ -30,13 +30,13 @@ const railTitle = computed(() =>
     : t("page.game.career.results.splitTitle", { split: split?.split ?? 1 }),
 );
 
-const regionalPlacementPoints = (placement: CareerPlacement): number => {
+const regionalPlacementPoints = (placement: CareerPlacement) => {
   const weight = region ? regionalCircuitWeight(region) : 1;
 
   return Math.round(REGIONAL_POINTS[placement] * weight);
 };
 
-const majorPlacementPoints = (placement: CareerPlacement | null): number => {
+const majorPlacementPoints = (placement: CareerPlacement | null) => {
   if (!placement) {
     return 0;
   }
@@ -44,7 +44,7 @@ const majorPlacementPoints = (placement: CareerPlacement | null): number => {
   return MAJOR_POINTS[placement];
 };
 
-const pointsTooltip = (points: number): string => {
+const pointsTooltip = (points: number) => {
   const shown = points > 0 ? `+${points}` : `${points}`;
 
   return t("page.game.career.results.points", { points: shown });

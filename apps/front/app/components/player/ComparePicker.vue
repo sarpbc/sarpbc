@@ -24,7 +24,7 @@ const query = refDebounced(
   200,
 );
 
-const toOption = (candidate: Player): SelectOption<string> => ({
+const toOption = (candidate: Player) => ({
   description: candidate.team?.name,
   label: candidate.name,
   value: candidate.slug,
@@ -46,7 +46,6 @@ const { data: results, status } = useLazyAsyncData(
   { default: () => [], server: false },
 );
 
-/* Before any search, the list holds the current player so the field can name it. */
 const items = computed(() => {
   if (!query.value) {
     return selected.value === null ? [] : [selected.value];

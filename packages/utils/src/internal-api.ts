@@ -3,7 +3,7 @@ import { isNonEmptyString } from "./text";
 export const INTERNAL_API_HEADER = "x-sarpbc-internal";
 export const INTERNAL_CLIENT_HEADER = "x-sarpbc-client";
 
-const trimSlash = (value: string): string => {
+const trimSlash = (value: string) => {
   let end = value.length;
 
   while (end > 0 && value.codePointAt(end - 1) === 47) {
@@ -17,7 +17,7 @@ export const resolveApiBase = (
   publicBase: string,
   serverBase: string | undefined,
   onServer: boolean,
-): string => {
+) => {
   const fallback = trimSlash(publicBase.trim());
 
   if (!onServer) {

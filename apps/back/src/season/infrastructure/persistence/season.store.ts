@@ -1,5 +1,3 @@
-import { EntityManager } from "@mikro-orm/postgresql";
-import { SEASON_AWARD_TYPES } from "@sarpbc/types";
 import type {
   PlayerSeasonAward,
   SeasonArchiveSummary,
@@ -9,16 +7,13 @@ import type {
   SeasonSummary,
   SeasonTeam,
 } from "@sarpbc/types";
+import { EntityManager } from "@mikro-orm/postgresql";
+import { SEASON_AWARD_TYPES } from "@sarpbc/types";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { isUniqueViolation } from "../../../common/infrastructure/persistence/constraint-violation";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import { Tournament } from "../../../tournament/infrastructure/competition-persistence";
-import type {
-  SeasonAwardPlayer,
-  SeasonParticipantTeam,
-  SeasonRecord,
-  SeasonStore,
-} from "../../application/ports";
+import type { SeasonRecord, SeasonStore } from "../../application/ports";
 import type { SeasonPathEntryFields } from "../../domain/season-archive";
 import type { SeasonAwardFields } from "../../domain/season-award";
 import { Season } from "./season.entity";
@@ -26,23 +21,25 @@ import { SeasonAward } from "./season-award.entity";
 import { SeasonParticipant } from "./season-participant.entity";
 import { SeasonPathEntry } from "./season-path-entry.entity";
 
-const toSummary = (row: Season): SeasonSummary => ({ id: row.id, name: row.name, slug: row.slug });
+const toSummary = (row: Season) =>
+  ({ id: row.id, name: row.name, slug: row.slug }) satisfies SeasonSummary;
 
-const toRecord = (row: Season): SeasonRecord => ({
+const toRecord = (row: Season) => ({
   ...toSummary(row),
   format: { phases: row.formatPhases, summary: row.formatSummary },
   winnerTeamId: row.winnerTeam?.id ?? null,
 });
 
-const toTeam = (row: Team): SeasonTeam => ({
-  darkModeImageUrl: row.darkModeImageUrl,
-  id: row.id,
-  imageUrl: row.imageUrl,
-  name: row.name,
-  slug: row.slug,
-});
+const toTeam = (row: Team) =>
+  ({
+    darkModeImageUrl: row.darkModeImageUrl,
+    id: row.id,
+    imageUrl: row.imageUrl,
+    name: row.name,
+    slug: row.slug,
+  }) satisfies SeasonTeam;
 
-const toPathEntry = (row: SeasonPathEntry): SeasonPathEntryItem => {
+const toPathEntry = (row: SeasonPathEntry) => {
   const { tournament } = row;
 
   return {
@@ -62,29 +59,31 @@ const toPathEntry = (row: SeasonPathEntry): SeasonPathEntryItem => {
           source: tournament.source,
         }
       : null,
-  };
+  } satisfies SeasonPathEntryItem;
 };
 
 const byCreation = (a: { createdAt: Date; id: string }, b: { createdAt: Date; id: string }) =>
   a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id);
 
-const toParticipant = (row: SeasonParticipant): SeasonParticipantItem => ({
-  id: row.id,
-  path: row.path.getItems().toSorted(byCreation).map(toPathEntry),
-  pathNote: row.pathNote,
-  team: toTeam(row.team),
-});
+const toParticipant = (row: SeasonParticipant) =>
+  ({
+    id: row.id,
+    path: row.path.getItems().toSorted(byCreation).map(toPathEntry),
+    pathNote: row.pathNote,
+    team: toTeam(row.team),
+  }) satisfies SeasonParticipantItem;
 
-const toAward = (row: SeasonAward): SeasonAwardItem => ({
-  awardType: row.awardType,
-  id: row.id,
-  player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
-  presentedBy: row.presentedBy,
-  region: row.region,
-  sourceUrl: row.sourceUrl,
-});
+const toAward = (row: SeasonAward) =>
+  ({
+    awardType: row.awardType,
+    id: row.id,
+    player: { id: row.player.id, name: row.player.name, slug: row.player.slug },
+    presentedBy: row.presentedBy,
+    region: row.region,
+    sourceUrl: row.sourceUrl,
+  }) satisfies SeasonAwardItem;
 
-const byAwardOrder = (a: SeasonAward, b: SeasonAward): number =>
+const byAwardOrder = (a: SeasonAward, b: SeasonAward) =>
   SEASON_AWARD_TYPES.indexOf(a.awardType) - SEASON_AWARD_TYPES.indexOf(b.awardType) ||
   (a.region ?? "").localeCompare(b.region ?? "");
 
@@ -99,7 +98,7 @@ export class SeasonPersistence implements SeasonStore {
     return rows.map(toSummary);
   }
 
-  async published(): Promise<SeasonArchiveSummary[]> {
+  async published() {
     const rows = await this.em.find(
       Season,
       { slug: { $ne: null } },
@@ -110,7 +109,7 @@ export class SeasonPersistence implements SeasonStore {
       slug !== null && slug !== ""
         ? [{ name, slug, winner: winnerTeam ? toTeam(winnerTeam) : null }]
         : [],
-    );
+    ) satisfies SeasonArchiveSummary[];
   }
 
   async find(id: string) {
@@ -182,7 +181,7 @@ export class SeasonPersistence implements SeasonStore {
     return rows.toSorted(byAwardOrder).map(toAward);
   }
 
-  async awardsOfPlayer(playerId: string): Promise<PlayerSeasonAward[]> {
+  async awardsOfPlayer(playerId: string) {
     const rows = await this.em.find(
       SeasonAward,
       { player: { id: playerId } },
@@ -200,10 +199,10 @@ export class SeasonPersistence implements SeasonStore {
       region: row.region,
       season: toSummary(row.season),
       sourceUrl: row.sourceUrl,
-    }));
+    })) satisfies PlayerSeasonAward[];
   }
 
-  async player(id: string): Promise<SeasonAwardPlayer | null> {
+  async player(id: string) {
     const row = await this.em.findOne(Player, { id }, { populate: ["mergedInto"] });
 
     return row ? { id: row.id, mergedIntoId: row.mergedInto?.id ?? null, name: row.name } : null;
@@ -248,7 +247,7 @@ export class SeasonPersistence implements SeasonStore {
     return removed > 0;
   }
 
-  async team(id: string): Promise<SeasonParticipantTeam | null> {
+  async team(id: string) {
     const row = await this.em.findOne(Team, { id }, { populate: ["mergedInto"] });
 
     return row ? { id: row.id, mergedIntoId: row.mergedInto?.id ?? null, name: row.name } : null;

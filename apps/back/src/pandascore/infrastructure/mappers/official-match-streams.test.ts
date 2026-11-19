@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { mapOfficialMatchStreams } from "./official-match-streams";
 import type { MatchStreamDto } from "../dto/match.dto";
 
-const stream = (overrides: Partial<MatchStreamDto> = {}): MatchStreamDto => ({
+const stream = (overrides: Partial<MatchStreamDto> = {}) => ({
   embed_url: "https://player.twitch.tv/?channel=rlcs",
   language: "en",
   main: false,

@@ -9,39 +9,39 @@ export interface Transfer {
   sourceUrl: string | null;
 }
 
-const joinType = (role: ContractRole): TransferType => {
+const joinType = (role: ContractRole) => {
   switch (role) {
     case "active": {
-      return "arrival";
+      return "arrival" satisfies TransferType;
     }
 
     case "benched": {
-      return "benched";
+      return "benched" satisfies TransferType;
     }
 
     case "loaned": {
-      return "loan";
+      return "loan" satisfies TransferType;
     }
 
     case "coach":
     case "assistant_coach":
     case "analyst":
     case "manager": {
-      return "staff";
+      return "staff" satisfies TransferType;
     }
 
     default: {
       const unreachable: never = role;
 
-      return unreachable;
+      return unreachable satisfies TransferType;
     }
   }
 };
 
-const stint = (contract: Contract, day: Date): string =>
+const stint = (contract: Contract, day: Date) =>
   `${contract.player.id}:${contract.team.id}:${day.getTime()}`;
 
-export const deriveTransfers = (contracts: Contract[], until: Date): Transfer[] => {
+export const deriveTransfers = (contracts: Contract[], until: Date) => {
   const starts = new Set(contracts.map((contract) => stint(contract, contract.startDate)));
 
   const transfers: Transfer[] = [];

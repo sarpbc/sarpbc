@@ -10,11 +10,7 @@ import type { TournamentListOptions } from "../../application/inputs";
 
 export class CompetitionEventQueries implements EventQueries {
   constructor(private readonly em: EntityManager) {}
-  async list({
-    limit,
-    offset = 0,
-    ...filters
-  }: TournamentListOptions): Promise<[EventListing[], number]> {
+  async list({ limit, offset = 0, ...filters }: TournamentListOptions) {
     const where = stageFilter(filters);
 
     const [page, count] = await Promise.all([
@@ -36,7 +32,7 @@ export class CompetitionEventQueries implements EventQueries {
     const ids = page.map((row) => row.id);
 
     if (!ids.length) {
-      return [[], count];
+      return [[], count] satisfies [EventListing[], number];
     }
 
     const [events, stages] = await Promise.all([
@@ -68,9 +64,9 @@ export class CompetitionEventQueries implements EventQueries {
           : [];
       }),
       count,
-    ];
+    ] satisfies [EventListing[], number];
   }
-  async find(idOrSlug: string): Promise<EventListing | null> {
+  async find(idOrSlug: string) {
     const row = await this.em.findOne(
       TournamentEvent,
       isUuid(idOrSlug) ? { id: idOrSlug.toLowerCase() } : { slug: idOrSlug },
@@ -99,7 +95,7 @@ export class CompetitionEventQueries implements EventQueries {
 
     return { event: toTournamentEvent(row), stages: stages.map(toTournament) };
   }
-  async unsynced(): Promise<EventListing[]> {
+  async unsynced() {
     const rows = await this.em.find(
       TournamentEvent,
       { pandascoreSerieId: null },

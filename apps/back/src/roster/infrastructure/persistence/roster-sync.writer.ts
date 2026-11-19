@@ -17,7 +17,7 @@ export class RosterSyncWriter {
   private readonly aliasedTeams = new Map<string, string | null>();
   private readonly players = new Map<number, Player>();
   constructor(private readonly em: Pick<EntityManager, "findOne" | "persist" | "getReference">) {}
-  async upsertTeam(input: UpsertTeamCommand): Promise<{ id: string }> {
+  async upsertTeam(input: UpsertTeamCommand) {
     const key = input.pandascoreId === undefined ? input.slug : String(input.pandascoreId);
 
     if (!this.teams.has(key) && !this.aliasedTeams.has(key)) {
@@ -48,10 +48,7 @@ export class RosterSyncWriter {
 
     return { id: row.id };
   }
-  async upsertPlayer(
-    input: UpsertPlayerCommand,
-    currentTeamId?: string | null,
-  ): Promise<{ id: string }> {
+  async upsertPlayer(input: UpsertPlayerCommand, currentTeamId?: string | null) {
     const existing =
       this.players.get(input.pandascoreId) ??
       (await findPandascorePlayer(this.em, input.pandascoreId, input.slug));
@@ -76,7 +73,7 @@ export class RosterSyncWriter {
 
     return { id: row.id };
   }
-  private async hasOpenContract(playerId: string): Promise<boolean> {
+  private async hasOpenContract(playerId: string) {
     return (await this.em.findOne(Contract, { endDate: null, player: playerId })) !== null;
   }
 }

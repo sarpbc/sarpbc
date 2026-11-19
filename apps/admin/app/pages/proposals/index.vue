@@ -13,10 +13,10 @@ const dateFormatter = useDateFormatter({ dateStyle: "medium", timeStyle: "short"
 
 const user = useUser();
 
-const isDeletion = ({ change }: RosterProposal): boolean =>
+const isDeletion = ({ change }: RosterProposal) =>
   change.kind === "delete_match" || change.kind === "delete_team";
 
-const canReview = (proposal: RosterProposal): boolean =>
+const canReview = (proposal: RosterProposal) =>
   hasPermission(user.value, requiredPermission(proposal.change));
 
 const { status, data, error, refresh } = await useLazyAsyncData(
@@ -28,9 +28,9 @@ const { status, data, error, refresh } = await useLazyAsyncData(
 const proposals = computed(() => data.value?.proposals ?? []);
 const names = computed(() => data.value?.names ?? {});
 
-const nameOf = (id: string): string => names.value[id] ?? id;
+const nameOf = (id: string) => names.value[id] ?? id;
 
-const formatValue = (key: string, value: string | boolean | null): string => {
+const formatValue = (key: string, value: string | boolean | null) => {
   if (value === null) {
     return t("page.proposals.values.ongoing");
   }
@@ -66,25 +66,21 @@ const formatValue = (key: string, value: string | boolean | null): string => {
   }
 };
 
-const formatAmount = (amount: number, currency: string): string =>
+const formatAmount = (amount: number, currency: string) =>
   new Intl.NumberFormat(parseLocale(locale.value), {
     currency,
     maximumFractionDigits: 0,
     style: "currency",
   }).format(amount);
 
-const optionalRow = (
-  key: string,
-  label: string,
-  value: string | undefined,
-): { key: string; label: string; value: string }[] =>
+const optionalRow = (key: string, label: string, value: string | undefined) =>
   value === undefined ? [] : [{ key, label, value }];
 
 const streamRows = (
   targetKey: "eventId" | "tournamentId" | "matchId",
   targetId: string,
   streams: StreamInput[],
-): { key: string; label: string; value: string }[] => [
+) => [
   { key: targetKey, label: t(`page.proposals.fields.${targetKey}`), value: nameOf(targetId) },
   ...(streams.length === 0
     ? [
@@ -110,7 +106,7 @@ const viewershipRows = (
   targetKey: "eventId" | "matchId",
   targetId: string,
   viewership: Viewership,
-): { key: string; label: string; value: string }[] => {
+) => {
   const count = new Intl.NumberFormat(parseLocale(locale.value));
 
   return [
@@ -153,7 +149,7 @@ interface ProposalRow {
 
 const prizesRows = (
   change: Extract<RosterProposal["change"], { kind: "set_tournament_prizes" }>,
-): ProposalRow[] => [
+) => [
   {
     key: "tournamentId",
     label: t("page.proposals.fields.tournamentId"),
@@ -182,12 +178,9 @@ const prizesRows = (
       }))),
 ];
 
-const amountText = (
-  amount: number | undefined,
-  currency: string | undefined,
-): string | undefined => {
+const amountText = (amount: number | undefined, currency: string | undefined) => {
   if (amount === undefined) {
-    return undefined;
+    return;
   }
 
   return currency === undefined ? String(amount) : formatAmount(amount, currency);
@@ -195,7 +188,7 @@ const amountText = (
 
 const prizeUpdateRows = (
   change: Extract<RosterProposal["change"], { kind: "update_tournament_prize" }>,
-): ProposalRow[] => {
+) => {
   const { patch } = change;
 
   const patched = [
@@ -240,7 +233,7 @@ const prizeUpdateRows = (
 
 const circuitScaleRows = (
   change: Extract<RosterProposal["change"], { kind: "set_circuit_stage_scale" }>,
-): ProposalRow[] => [
+) => [
   {
     key: "circuitId",
     label: t("page.proposals.fields.circuitId"),
@@ -279,7 +272,7 @@ const circuitScaleRows = (
 
 const seasonAwardRows = (
   change: Extract<RosterProposal["change"], { kind: "award_season_player" }>,
-): ProposalRow[] => [
+) => [
   {
     key: "seasonId",
     label: t("page.proposals.fields.seasonId"),
@@ -309,9 +302,7 @@ const seasonAwardRows = (
     : []),
 ];
 
-const lineupRows = (
-  change: Extract<RosterProposal["change"], { kind: "set_match_lineups" }>,
-): ProposalRow[] => {
+const lineupRows = (change: Extract<RosterProposal["change"], { kind: "set_match_lineups" }>) => {
   const lineups = change.lineups.flatMap((lineup, index) =>
     lineup.playerIds.length > 0
       ? [
@@ -340,7 +331,7 @@ const lineupRows = (
 
 const aliasRows = (
   change: Extract<RosterProposal["change"], { kind: "add_team_alias" | "update_team_alias" }>,
-): ProposalRow[] => {
+) => {
   const { alias } = change;
 
   return [
@@ -373,7 +364,7 @@ const aliasRows = (
   ];
 };
 
-const changeRows = (proposal: RosterProposal): ProposalRow[] => {
+const changeRows = (proposal: RosterProposal) => {
   const { change } = proposal;
 
   if (change.kind === "set_tournament_prizes") {
@@ -450,12 +441,11 @@ type ReviewAction = "approve" | "reject";
 const reviewingIds = ref(new Set<string>());
 const selectedIds = ref<string[]>([]);
 
-const isReviewing = (proposal: RosterProposal): boolean => reviewingIds.value.has(proposal.id);
+const isReviewing = (proposal: RosterProposal) => reviewingIds.value.has(proposal.id);
 
-const isSelectable = (proposal: RosterProposal): boolean =>
-  canReview(proposal) && !isReviewing(proposal);
+const isSelectable = (proposal: RosterProposal) => canReview(proposal) && !isReviewing(proposal);
 
-const proposalId = (proposal: RosterProposal): string => proposal.id;
+const proposalId = (proposal: RosterProposal) => proposal.id;
 
 const selectable = computed(() => proposals.value.filter(isSelectable));
 
@@ -463,11 +453,11 @@ const selected = computed(() =>
   selectable.value.filter((proposal) => selectedIds.value.includes(proposal.id)),
 );
 
-const unselect = (id: string): void => {
+const unselect = (id: string) => {
   selectedIds.value = selectedIds.value.filter((selectedId) => selectedId !== id);
 };
 
-const removeProposal = (id: string): void => {
+const removeProposal = (id: string) => {
   unselect(id);
 
   if (data.value) {
@@ -478,8 +468,7 @@ const removeProposal = (id: string): void => {
   }
 };
 
-/* The row leaves the list as soon as the API answers, so the queue never reloads between reviews. */
-const reviewOne = async (proposal: RosterProposal, action: ReviewAction): Promise<boolean> => {
+const reviewOne = async (proposal: RosterProposal, action: ReviewAction) => {
   reviewingIds.value.add(proposal.id);
   unselect(proposal.id);
 
@@ -497,7 +486,7 @@ const reviewOne = async (proposal: RosterProposal, action: ReviewAction): Promis
   }
 };
 
-const review = async (proposal: RosterProposal, action: ReviewAction): Promise<void> => {
+const review = async (proposal: RosterProposal, action: ReviewAction) => {
   if (!isReviewing(proposal)) {
     await reviewOne(proposal, action);
   }
@@ -505,8 +494,8 @@ const review = async (proposal: RosterProposal, action: ReviewAction): Promise<v
 
 const bulkAction = ref<ReviewAction | null>(null);
 
-/* Sequential, oldest first: a proposal may depend on an earlier one (a new team, then its contract). */
-const reviewSelected = async (action: ReviewAction): Promise<void> => {
+// WARNING: review sequentially, oldest first: a proposal may depend on an earlier one (a new team, then its contract).
+const reviewSelected = async (action: ReviewAction) => {
   if (bulkAction.value !== null) {
     return;
   }

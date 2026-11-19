@@ -1,29 +1,19 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { MatchSitemapRow, SitemapQueries } from "./ports";
+import { describe, expect, it } from "vitest";
+import type { MatchSitemapRow } from "./ports";
 import { SitemapService } from "./sitemap.service";
+import { MemorySitemapQueries } from "./sitemap-queries.test-utils";
+import type { SitemapRows } from "./sitemap-queries.test-utils";
 
 const team = (name: string) => ({ team: { name } });
 
-describe(SitemapService, () => {
-  const queries = {
-    circuits: vi.fn<SitemapQueries["circuits"]>(),
-    countryCodes: vi.fn<SitemapQueries["countryCodes"]>(),
-    forumPosts: vi.fn<SitemapQueries["forumPosts"]>(),
-    matches: vi.fn<SitemapQueries["matches"]>(),
-    news: vi.fn<SitemapQueries["news"]>(),
-    playerSlugs: vi.fn<SitemapQueries["playerSlugs"]>(),
-    seasons: vi.fn<SitemapQueries["seasons"]>(),
-    staffSlugs: vi.fn<SitemapQueries["staffSlugs"]>(),
-    stages: vi.fn<SitemapQueries["stages"]>(),
-    teamSlugs: vi.fn<SitemapQueries["teamSlugs"]>(),
-    weeklyDigests: vi.fn<SitemapQueries["weeklyDigests"]>(),
-  };
+const serviceOver = (rows: Partial<SitemapRows>) =>
+  new SitemapService(new MemorySitemapQueries(rows));
 
-  const service = new SitemapService(queries);
+describe(SitemapService, () => {
   const older = new Date("2026-02-01T00:00:00.000Z");
   const lastmod = new Date("2026-03-01T12:00:00.000Z");
 
-  const match = (overrides: Partial<MatchSitemapRow>): MatchSitemapRow => ({
+  const match = (overrides: Partial<MatchSitemapRow>) => ({
     lastmod,
     name: "Grand Final",
     participants: [team("Vitality"), team("Karmine Corp")],
@@ -33,13 +23,8 @@ describe(SitemapService, () => {
     ...overrides,
   });
 
-  beforeEach(() => {
-    vi.resetAllMocks();
-  });
-
   it("links news to their article", async () => {
-    queries.news.mockResolvedValue([{ lastmod, slug: "a-news" }]);
-    queries.weeklyDigests.mockResolvedValue([]);
+    const service = serviceOver({ news: [{ lastmod, slug: "a-news" }] });
 
     await expect(service.entries("news")).resolves.toStrictEqual([
       { lastmod: lastmod.toISOString(), path: "/news/a-news" },
@@ -47,12 +32,13 @@ describe(SitemapService, () => {
   });
 
   it("links each week of short news once, dated by its latest short", async () => {
-    queries.news.mockResolvedValue([]);
-    queries.weeklyDigests.mockResolvedValue([
-      { createdAt: new Date("2026-03-02T10:00:00.000Z"), lastmod: older },
-      { createdAt: new Date("2026-03-08T22:00:00.000Z"), lastmod },
-      { createdAt: new Date("2026-03-09T08:00:00.000Z"), lastmod: older },
-    ]);
+    const service = serviceOver({
+      weeklyDigests: [
+        { createdAt: new Date("2026-03-02T10:00:00.000Z"), lastmod: older },
+        { createdAt: new Date("2026-03-08T22:00:00.000Z"), lastmod },
+        { createdAt: new Date("2026-03-09T08:00:00.000Z"), lastmod: older },
+      ],
+    });
 
     await expect(service.entries("news")).resolves.toStrictEqual([
       { lastmod: lastmod.toISOString(), path: "/news/week/2026-W10" },
@@ -61,10 +47,12 @@ describe(SitemapService, () => {
   });
 
   it("links circuits, season archives, countries and forum posts", async () => {
-    queries.circuits.mockResolvedValue([{ lastmod, slug: "rlcs-2026-europe" }]);
-    queries.seasons.mockResolvedValue([{ lastmod, slug: "rlcs-season-8" }]);
-    queries.countryCodes.mockResolvedValue(["FR"]);
-    queries.forumPosts.mockResolvedValue([{ lastmod, publicId: 7, title: "Who wins Worlds?" }]);
+    const service = serviceOver({
+      circuits: [{ lastmod, slug: "rlcs-2026-europe" }],
+      countryCodes: ["FR"],
+      forumPosts: [{ lastmod, publicId: 7, title: "Who wins Worlds?" }],
+      seasons: [{ lastmod, slug: "rlcs-season-8" }],
+    });
 
     await expect(service.entries("circuits")).resolves.toStrictEqual([
       { lastmod: lastmod.toISOString(), path: "/circuits/rlcs-2026-europe" },
@@ -81,10 +69,12 @@ describe(SitemapService, () => {
   });
 
   it("links each event once, dated by its latest stage, and each of its stages", async () => {
-    queries.stages.mockResolvedValue([
-      { eventSlug: "rlcs-2026", lastmod: older, slug: "major-1" },
-      { eventSlug: "rlcs-2026", lastmod, slug: "major-2" },
-    ]);
+    const service = serviceOver({
+      stages: [
+        { eventSlug: "rlcs-2026", lastmod: older, slug: "major-1" },
+        { eventSlug: "rlcs-2026", lastmod, slug: "major-2" },
+      ],
+    });
 
     await expect(service.entries("tournaments")).resolves.toStrictEqual([
       { lastmod: lastmod.toISOString(), path: "/tournaments/rlcs-2026" },
@@ -94,7 +84,7 @@ describe(SitemapService, () => {
   });
 
   it("links a match to the canonical slug its page redirects to", async () => {
-    queries.matches.mockResolvedValue([match({})]);
+    const service = serviceOver({ matches: [match({})] });
 
     await expect(service.entries("matches")).resolves.toStrictEqual([
       {
@@ -111,21 +101,23 @@ describe(SitemapService, () => {
     ["with a TBD team", { participants: [team("Vitality"), team(" tbd ")] }],
     ["with a blank team", { participants: [team("Vitality"), team("  ")] }],
   ])("leaves out a match %s", async (_label, overrides) => {
-    queries.matches.mockResolvedValue([match(overrides)]);
+    const service = serviceOver({ matches: [match(overrides)] });
 
     await expect(service.entries("matches")).resolves.toStrictEqual([]);
   });
 
   it("keeps a match whose status is unknown", async () => {
-    queries.matches.mockResolvedValue([match({ status: null })]);
+    const service = serviceOver({ matches: [match({ status: null })] });
 
     await expect(service.entries("matches")).resolves.toHaveLength(1);
   });
 
   it("links players, staff and teams without an unknown modification date", async () => {
-    queries.playerSlugs.mockResolvedValue(["zen"]);
-    queries.staffSlugs.mockResolvedValue(["coach"]);
-    queries.teamSlugs.mockResolvedValue(["vitality"]);
+    const service = serviceOver({
+      playerSlugs: ["zen"],
+      staffSlugs: ["coach"],
+      teamSlugs: ["vitality"],
+    });
 
     await expect(service.entries("players")).resolves.toStrictEqual([
       { lastmod: null, path: "/player/zen" },

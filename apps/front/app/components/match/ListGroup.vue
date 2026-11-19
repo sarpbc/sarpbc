@@ -12,9 +12,7 @@ const {
 } = defineProps<{
   matches: MatchListItem[];
   variant: "live" | "upcoming" | "result";
-  /** When set, links carry `?from=` and emit `match_row_clicked`. */
   discoverySource?: MatchDiscoverySource | null;
-  /** Match ids treated as live when mixed into an upcoming schedule list. */
   liveMatchIds?: ReadonlySet<string> | null;
 }>();
 
@@ -28,7 +26,7 @@ interface ListBlock {
 
 const useDateGrouping = computed(() => variant === "upcoming");
 
-const blocks = computed((): ListBlock[] => {
+const blocks = computed(() => {
   if (!useDateGrouping.value) {
     return [
       {

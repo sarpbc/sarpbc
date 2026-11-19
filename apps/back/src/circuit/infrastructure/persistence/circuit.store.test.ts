@@ -5,7 +5,7 @@ import {
 } from "@mikro-orm/core";
 import type { CircuitSummary } from "@sarpbc/types";
 import { unconstructed } from "../../../../test/doubles";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ConflictError } from "../../../common/domain/errors/conflict-error";
 import { CircuitPersistence } from "./circuit.store";
 
@@ -20,11 +20,13 @@ const circuit: CircuitSummary = {
   sourceUrl: "https://example.org/rules",
 };
 
-const storeFailingWith = (error: Error) => {
+const storeFailingWith = (failure: Error) => {
+  const flushing = { flush: async () => await Promise.reject(failure) };
+
   const em = {
-    findOne: vi.fn<EntityManager["findOne"]>().mockResolvedValue(null),
-    flush: vi.fn<EntityManager["flush"]>().mockRejectedValue(error),
-    persist: vi.fn<EntityManager["persist"]>().mockReturnThis(),
+    findOne: async () => await Promise.resolve(null),
+    flush: flushing.flush,
+    persist: () => flushing,
   };
 
   return new CircuitPersistence(Object.assign(unconstructed(EntityManager), em));

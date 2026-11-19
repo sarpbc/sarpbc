@@ -1,71 +1,61 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { ServiceUnavailableException } from "@nestjs/common";
-import type { TestingModule } from "@nestjs/testing";
 import { Test } from "@nestjs/testing";
-import { HealthCheckService } from "@nestjs/terminus";
-import type { HealthCheckResult, HealthIndicatorResult } from "@nestjs/terminus";
+import { HealthIndicatorService, TerminusModule } from "@nestjs/terminus";
 import { HealthController } from "./health.controller";
 import { PostgresHealthIndicator } from "./postgres.health";
 import { RedisHealthIndicator } from "./redis.health";
 import { ShutdownStateService } from "./shutdown-state.service";
 
+class UpIndicator {
+  constructor(private readonly indicators = new HealthIndicatorService()) {}
+
+  async pingCheck(key: string) {
+    return await Promise.resolve(this.indicators.check(key).up());
+  }
+}
+
+const createController = async () => {
+  const postgres = new UpIndicator();
+  const redis = new UpIndicator();
+  const shutdownState = new ShutdownStateService();
+
+  const module = await Test.createTestingModule({
+    controllers: [HealthController],
+    imports: [TerminusModule],
+    providers: [
+      { provide: PostgresHealthIndicator, useValue: postgres },
+      { provide: RedisHealthIndicator, useValue: redis },
+      { provide: ShutdownStateService, useValue: shutdownState },
+    ],
+  }).compile();
+
+  return { controller: module.get(HealthController), shutdownState };
+};
+
 describe(HealthController, () => {
-  let controller: HealthController;
+  it("live reports that the process is up", async () => {
+    const { controller } = await createController();
 
-  const health = {
-    check:
-      vi.fn<(indicators: (() => Promise<HealthIndicatorResult>)[]) => Promise<HealthCheckResult>>(),
-  };
-
-  const postgres = {
-    pingCheck: vi.fn<PostgresHealthIndicator["pingCheck"]>(),
-  };
-
-  const redis = {
-    pingCheck: vi.fn<RedisHealthIndicator["pingCheck"]>(),
-  };
-
-  const shutdownState = {
-    isShuttingDown: vi.fn<ShutdownStateService["isShuttingDown"]>().mockReturnValue(false),
-  };
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [HealthController],
-      providers: [
-        { provide: HealthCheckService, useValue: health },
-        { provide: PostgresHealthIndicator, useValue: postgres },
-        { provide: RedisHealthIndicator, useValue: redis },
-        { provide: ShutdownStateService, useValue: shutdownState },
-      ],
-    }).compile();
-
-    controller = module.get(HealthController);
-    vi.clearAllMocks();
-    shutdownState.isShuttingDown.mockReturnValue(false);
-  });
-
-  it("live reports that the process is up", () => {
     expect(controller.live()).toStrictEqual({ status: "ok" });
   });
 
-  it("ready pings postgres and redis", async () => {
-    health.check.mockImplementation(async (indicators) => {
-      await Promise.all(indicators.map(async (indicator) => await indicator()));
+  it("ready reports postgres and redis as up", async () => {
+    const { controller } = await createController();
 
-      return { details: {}, status: "ok" };
+    await expect(controller.ready()).resolves.toStrictEqual({
+      details: { postgres: { status: "up" }, redis: { status: "up" } },
+      error: {},
+      info: { postgres: { status: "up" }, redis: { status: "up" } },
+      status: "ok",
     });
-
-    await expect(controller.ready()).resolves.toStrictEqual({ details: {}, status: "ok" });
-    expect(postgres.pingCheck).toHaveBeenCalledExactlyOnceWith("postgres");
-    expect(redis.pingCheck).toHaveBeenCalledExactlyOnceWith("redis");
   });
 
   it("ready returns 503 while shutting down", async () => {
-    shutdownState.isShuttingDown.mockReturnValue(true);
+    const { controller, shutdownState } = await createController();
+    shutdownState.onModuleDestroy();
 
     await expect(controller.ready()).rejects.toThrow(ServiceUnavailableException);
     await expect(controller.ready()).rejects.toThrow(/Shutting down/u);
-    expect(health.check).not.toHaveBeenCalled();
   });
 });

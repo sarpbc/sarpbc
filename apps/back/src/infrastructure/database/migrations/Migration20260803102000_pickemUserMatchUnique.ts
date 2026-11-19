@@ -1,8 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20260803102000_pickemUserMatchUnique extends Migration {
-  override async up(): Promise<void> {
-    // Keep the newest pick per (user, match) before enforcing uniqueness.
+  override async up() {
     this.addSql(`
       delete from "pickem_choice" a
       using "pickem_choice" b
@@ -20,7 +19,7 @@ export class Migration20260803102000_pickemUserMatchUnique extends Migration {
     `);
   }
 
-  override async down(): Promise<void> {
+  override async down() {
     this.addSql(`
       alter table "pickem_choice" drop constraint if exists "pickem_choice_user_match_unique";
     `);

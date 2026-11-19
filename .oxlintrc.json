@@ -1,5 +1,6 @@
 {
   "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "extends": ["./node_modules/@interfere/landmines/configs/recommended.json"],
   "options": {
     "typeAware": true
   },
@@ -136,6 +137,11 @@
     "jsdoc/require-yields": "error",
     "jsdoc/require-yields-description": "error",
     "jsdoc/require-yields-type": "error",
+    "landmines-style/no-comments": ["error", { "allow": ["WARNING", "SAFETY"] }],
+    "landmines-testing/no-flake-masking": [
+      "error",
+      { "allow": { "apps/back/test/backend.integration.test.mts": 1 } }
+    ],
     "logical-assignment-operators": "error",
     "max-classes-per-file": "error",
     "max-depth": "off",

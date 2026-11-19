@@ -8,7 +8,6 @@ import {
   updateLeagueFields,
 } from "../../../tournament/infrastructure/http/dto/manual-catalog.dto";
 import { defineTool } from "../define-tool";
-import type { McpTool } from "../define-tool";
 import { mapEvent, mapLeague } from "../mappers";
 import type { RedistributableCompetition } from "../redistributable-competition";
 import { describeFields, listLimit } from "./tool-input";
@@ -22,7 +21,7 @@ export interface EventToolServices {
   competition: Pick<RedistributableCompetition, "events" | "event">;
 }
 
-export const eventTools = ({ catalogService, competition }: EventToolServices): McpTool[] => [
+export const eventTools = ({ catalogService, competition }: EventToolServices) => [
   defineTool({
     description:
       "List leagues with id, name, slug and source. manual leagues were created by staff; pandascore leagues come from the sync. Use the id as leagueId on events and tournaments.",

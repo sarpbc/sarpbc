@@ -8,10 +8,7 @@ import type { TeamService } from "../../../roster/application/team.service";
 import type { ManualTournamentService } from "../../../tournament/application/manual-tournament.service";
 import type { MatchService } from "../../../tournament/application/match/match.service";
 import type { TournamentQueries } from "../../../tournament/application/ports";
-import type {
-  SyncNewTournamentsResult,
-  SyncNewTournamentsUseCase,
-} from "../../../tournament/application/sync/sync-new-tournaments.use-case";
+import type { SyncNewTournamentsUseCase } from "../../../tournament/application/sync/sync-new-tournaments.use-case";
 import type { SyncPandascoreTournamentUseCase } from "../../../tournament/application/sync/sync-pandascore-tournament.use-case";
 import { matchPublicSlug } from "../../../tournament/domain/match";
 import {
@@ -19,7 +16,6 @@ import {
   updateTournamentFields,
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { defineTool } from "../define-tool";
-import type { McpTool, ToolWrite } from "../define-tool";
 import { mapListedParticipants, mapMatchListResponse } from "../mappers";
 import { tournamentNotFound } from "../redistributable-competition";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
@@ -46,10 +42,6 @@ const matchResultSchema = z.object({
 const previousMatchesInput = bracketLinksSchema.describe(
   "Bracket feeders of this manual match: up to two { previousMatchId, type } entries, where previousMatchId is a match UUID of the same stage and type says whether its winner or loser plays here. The stage must have hasBracket enabled. Links must not form a cycle, and the winner (or loser) of a match feeds a single match.",
 );
-
-type TriggeredSync =
-  | { success: true; scope: "single"; tournamentId: string }
-  | { success: true; scope: "new_tournaments"; sync: SyncNewTournamentsResult };
 
 const NEWS_TYPE_MEANING =
   "short = follow the scene (results, rosters, announcements). article = understand the scene (analysis, context, stories).";
@@ -86,7 +78,7 @@ export const writeTools = ({
   manualTournamentService,
   pandascoreTournamentSync,
   pandascoreNewTournamentsSync,
-}: WriteToolServices): McpTool[] => [
+}: WriteToolServices) => [
   defineTool({
     description: `Create a news article draft. Write the English title and body. Optionally add French title and body so /fr readers see French. When mentioning a player or team, you MUST use the custom MDC components and resolve slugs with search_players / search_teams first; do not use plain names when a slug exists. When the primary source is an X/Twitter post, put the tweet tag on its own line in both English and French bodies (same URL). ${BODY_TAGS} A human must review and publish it in the admin app.`,
     handler: async (input, user) => {
@@ -598,7 +590,7 @@ export const writeTools = ({
   defineTool({
     description:
       "Trigger a PandaScore sync. Pass tournamentId to sync one local event, or omit to discover missing tournaments (reconcile past/upcoming/running) then apply PandaScore incidents (creations and updates).",
-    handler: async ({ tournamentId }): Promise<ToolWrite<TriggeredSync>> => {
+    handler: async ({ tournamentId }) => {
       if (tournamentId !== undefined && tournamentId !== "") {
         await pandascoreTournamentSync.execute(tournamentId);
 

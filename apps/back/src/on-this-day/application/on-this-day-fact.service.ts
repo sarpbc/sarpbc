@@ -8,27 +8,27 @@ import type { OnThisDayFactStore } from "./ports";
 export class OnThisDayFactService {
   constructor(private readonly store: OnThisDayFactStore) {}
 
-  async list(): Promise<OnThisDayFact[]> {
-    return await this.store.list();
+  async list() {
+    return (await this.store.list()) satisfies OnThisDayFact[];
   }
 
-  async create(input: OnThisDayFactInput): Promise<OnThisDayFact> {
-    return await this.write(v4(), input);
+  async create(input: OnThisDayFactInput) {
+    return (await this.write(v4(), input)) satisfies OnThisDayFact;
   }
 
-  async update(id: string, input: OnThisDayFactInput): Promise<OnThisDayFact> {
+  async update(id: string, input: OnThisDayFactInput) {
     await this.require(id);
 
-    return await this.write(id, input);
+    return (await this.write(id, input)) satisfies OnThisDayFact;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string) {
     if (!(await this.store.remove(id))) {
       throw new NotFoundError("Fact not found");
     }
   }
 
-  private async write(id: string, input: OnThisDayFactInput): Promise<OnThisDayFact> {
+  private async write(id: string, input: OnThisDayFactInput) {
     const fields = parseOnThisDayFact(input);
 
     if (fields.link && !(await this.store.linkExists(fields.link))) {
@@ -39,16 +39,16 @@ export class OnThisDayFactService {
 
     await this.store.save(id, fields);
 
-    return await this.require(id);
+    return (await this.require(id)) satisfies OnThisDayFact;
   }
 
-  private async require(id: string): Promise<OnThisDayFact> {
+  private async require(id: string) {
     const fact = await this.store.find(id);
 
     if (!fact) {
       throw new NotFoundError("Fact not found");
     }
 
-    return fact;
+    return fact satisfies OnThisDayFact;
   }
 }

@@ -1,5 +1,4 @@
 import type { Editor } from "@tiptap/core";
-import type { EditorToolbarItem } from "~/utils/editor/handlers";
 
 const DEFAULT_TABLE = { cols: 3, rows: 3, withHeaderRow: true } as const;
 
@@ -23,7 +22,7 @@ export const useTableEditor = () => {
     },
   };
 
-  const tableToolbarItems = (editor: Editor): EditorToolbarItem[][] => [
+  const tableToolbarItems = (editor: Editor) => [
     [
       {
         icon: "i-lucide-arrow-up-to-line",

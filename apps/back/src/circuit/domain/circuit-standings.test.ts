@@ -13,7 +13,7 @@ const scale: CircuitScaleTier[] = [
   { from: 3, points: 3, to: 4 },
 ];
 
-const event = (id: string): TournamentEventRef => ({ id, name: `Event ${id}`, slug: id });
+const event = (id: string) => ({ id, name: `Event ${id}`, slug: id });
 
 const team = (id: string) => ({
   darkModeImageUrl: null,

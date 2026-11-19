@@ -21,7 +21,7 @@ const CLOCK_TEXT = /^(?<overtime>\+?)(?<minutes>\d{1,2}):(?<seconds>\d{2})$/u;
 const DIGITS = new Set("0123456789");
 const CLOCK_CHARS = new Set("0123456789:+");
 
-const matches = (frame: Frame, overlay: Overlay, anchor: Anchor): boolean => {
+const matches = (frame: Frame, overlay: Overlay, anchor: Anchor) => {
   const region = scaleRegion(anchor.region, overlay.reference, frame);
 
   return colorDistance(meanColor(frame, region), anchor.color) <= anchor.tolerance;
@@ -32,19 +32,19 @@ const readRegion = (
   overlay: Overlay,
   region: Region,
   templates: readonly GlyphTemplate[],
-): { text: string; confidence: number } | null => {
+) => {
   const settings: GlyphSettings = { size: overlay.glyph, threshold: overlay.text.threshold };
 
   return readText(frame, scaleRegion(region, overlay.reference, frame), settings, templates);
 };
 
-export const readScoreboard = (frame: Frame, overlay: Overlay): ScoreboardReading => {
+export const readScoreboard = (frame: Frame, overlay: Overlay) => {
   const visible =
     overlay.visibleWhen.every((anchor) => matches(frame, overlay, anchor)) &&
     !overlay.ignoreWhen.some((anchor) => matches(frame, overlay, anchor));
 
   if (!visible) {
-    return { kind: "hidden" };
+    return { kind: "hidden" } satisfies ScoreboardReading;
   }
 
   const digits = overlay.templates.filter((template) => DIGITS.has(template.char));
@@ -54,20 +54,20 @@ export const readScoreboard = (frame: Frame, overlay: Overlay): ScoreboardReadin
   const clock = readRegion(frame, overlay, overlay.regions.clock, clockGlyphs);
 
   if (blue === null || orange === null || clock === null) {
-    return { kind: "unreadable" };
+    return { kind: "unreadable" } satisfies ScoreboardReading;
   }
 
   const clockParts = CLOCK_TEXT.exec(clock.text);
 
   if (!SCORE_TEXT.test(blue.text) || !SCORE_TEXT.test(orange.text) || clockParts === null) {
-    return { kind: "unreadable" };
+    return { kind: "unreadable" } satisfies ScoreboardReading;
   }
 
   const seconds = Number(clockParts.groups?.seconds);
   const confidence = Math.min(blue.confidence, orange.confidence, clock.confidence);
 
   if (seconds > 59 || confidence < overlay.text.minConfidence) {
-    return { kind: "unreadable" };
+    return { kind: "unreadable" } satisfies ScoreboardReading;
   }
 
   return {
@@ -77,5 +77,5 @@ export const readScoreboard = (frame: Frame, overlay: Overlay): ScoreboardReadin
     kind: "score",
     orange: Number(orange.text),
     overtime: clockParts.groups?.overtime === "+",
-  };
+  } satisfies ScoreboardReading;
 };

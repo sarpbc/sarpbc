@@ -23,7 +23,6 @@ const {
   loading = false,
   placeholder,
 } = defineProps<{
-  /** Shown when no group has an item for the search. */
   empty: string;
   groups: readonly CommandGroup[];
   loading?: boolean;
@@ -32,10 +31,9 @@ const {
 
 const adapters = useDesignAdapters();
 
-const matches = (item: CommandItem, query: string): boolean =>
+const matches = (item: CommandItem, query: string) =>
   `${item.label} ${item.suffix ?? ""}`.toLowerCase().includes(query);
 
-/* Groups of server results arrive already searched; the others filter by label here. */
 const visibleGroups = computed(() => {
   const query = searchTerm.value.trim().toLowerCase();
 

@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20260723191839 extends Migration {
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(`alter table "user" drop column "admin";`);
     this.addSql(`alter table "user" add "role" varchar(255) null;`);
 
@@ -9,7 +9,7 @@ export class Migration20260723191839 extends Migration {
     this.addSql(`drop index "reply_match_id_index";`);
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(`create index "reply_hidden_at_index" on "reply" ("hidden_at");`);
     this.addSql(`create index "reply_match_id_index" on "reply" ("match_id");`);
 

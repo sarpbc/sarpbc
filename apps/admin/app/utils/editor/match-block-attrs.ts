@@ -10,7 +10,7 @@ export const EMPTY_MATCH_BLOCK_ATTRS: Required<NewsMatchBlockAttrs> = {
   tournament: null,
 };
 
-export const matchBlockNodeAttrs = (block: MatchBlockSelector): Required<NewsMatchBlockAttrs> => ({
+export const matchBlockNodeAttrs = (block: MatchBlockSelector) => ({
   ...EMPTY_MATCH_BLOCK_ATTRS,
   ...newsMatchBlockToAttrs(block),
 });

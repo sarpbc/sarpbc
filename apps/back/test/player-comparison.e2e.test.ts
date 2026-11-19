@@ -20,7 +20,7 @@ import { MatchLineupService } from "../src/tournament/application/match/match-li
 import { PlayerAwardService } from "../src/tournament/application/player-award.service";
 import { TournamentPrizeService } from "../src/tournament/application/tournament-prize.service";
 import { TOURNAMENT_QUERIES } from "../src/tournament/infrastructure/competition-queries.tokens";
-import { careerSources, zenSeasonAward } from "./career-fixtures";
+import { careerSources, zenSeasonAward } from "./career.fixture";
 
 const comparisonBody = z.object({
   comparison: z.object({

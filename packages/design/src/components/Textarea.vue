@@ -15,7 +15,6 @@ const {
 } = defineProps<{
   autoresize?: boolean;
   id?: string | null;
-  /** With autoresize, the height stops growing at this many rows and scrolls. */
   maxrows?: number | null;
   rows?: number;
 }>();
@@ -25,21 +24,19 @@ const field = useFormField();
 const textarea = useTemplateRef("textarea");
 
 defineExpose({
-  blur: (): void => textarea.value?.blur(),
-  focus: (): void => textarea.value?.focus(),
+  blur: () => textarea.value?.blur(),
+  focus: () => textarea.value?.focus(),
 });
 
 const invalid = computed(() => field?.invalid.value ?? false);
 
-/* Layout classes size the wrapper; every other attribute belongs to the native textarea. */
 const textareaAttrs = computed(() =>
   Object.fromEntries(Object.entries(attrs).filter(([key]) => key !== "class")),
 );
 
-/* Computed lengths always resolve to pixels, e.g. "20px". */
-const pixels = (length: string): number => Number(length.replace("px", ""));
+const pixels = (length: string) => Number(length.replace("px", ""));
 
-const fitContent = async (): Promise<void> => {
+const fitContent = async () => {
   await nextTick();
 
   if (!autoresize || textarea.value === null) {

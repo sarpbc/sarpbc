@@ -12,7 +12,6 @@ import { attachReplayFields } from "../../../match-stats/infrastructure/http/dto
 import { linkStatsPlayerFields } from "../../../match-stats/infrastructure/http/dto/link-stats-player.dto";
 import { requestStatsImportFields } from "../../../match-stats/infrastructure/http/dto/request-stats-import.dto";
 import { defineTool } from "../define-tool";
-import type { McpTool } from "../define-tool";
 import { describeFields } from "./tool-input";
 
 const OTHER_STAGE_REASONS: readonly StatsImportUnmatchedReason[] = [
@@ -20,7 +19,7 @@ const OTHER_STAGE_REASONS: readonly StatsImportUnmatchedReason[] = [
   "outside_match_window",
 ];
 
-const isOtherStage = (item: StatsImportItem): boolean =>
+const isOtherStage = (item: StatsImportItem) =>
   item.status === "unmatched" && OTHER_STAGE_REASONS.includes(item.reason);
 
 export const summarizeStatsImport = (statsImport: StatsImport, includeOtherStages: boolean) => {
@@ -67,7 +66,7 @@ export const gameStatsTools = ({
   statsImportService,
   statsPlayerLinkService,
   manualGameService,
-}: GameStatsToolServices): McpTool[] => {
+}: GameStatsToolServices) => {
   const tournamentId = z.string().min(1).describe("Tournament UUID from get_tournaments.");
 
   return [

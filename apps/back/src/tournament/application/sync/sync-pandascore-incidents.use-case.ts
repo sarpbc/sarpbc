@@ -14,7 +14,7 @@ export class SyncPandascoreIncidentsUseCase {
     private readonly diagnostics: CompetitionDiagnostics,
     private readonly now: () => Date = () => new Date(),
   ) {}
-  async execute(): Promise<void> {
+  async execute() {
     const since =
       (await this.cursor.getLastSyncAt()) ?? new Date(this.now().getTime() - FALLBACK_LOOKBACK_MS);
 
@@ -26,7 +26,7 @@ export class SyncPandascoreIncidentsUseCase {
       return;
     }
 
-    // Incidents are applied in feed order: later ones can depend on earlier ones.
+    // WARNING: incidents are applied in feed order; later ones can depend on earlier ones.
     const failures = await mapSequentially(incidents, async (incident) => {
       try {
         const backfill =

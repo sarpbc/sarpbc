@@ -12,10 +12,10 @@ import {
 } from "@sarpbc/utils";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 
-const isWhole = (value: number, min: number, max: number): boolean =>
+const isWhole = (value: number, min: number, max: number) =>
   Number.isInteger(value) && value >= min && value <= max;
 
-export const parseCircuitScale = (tiers: readonly CircuitScaleTier[]): CircuitScaleTier[] => {
+export const parseCircuitScale = (tiers: readonly CircuitScaleTier[]) => {
   if (tiers.length > MAX_CIRCUIT_SCALE_TIERS) {
     throw new InvalidInputError(`A points scale has at most ${MAX_CIRCUIT_SCALE_TIERS} tiers.`);
   }
@@ -48,16 +48,13 @@ export const parseCircuitScale = (tiers: readonly CircuitScaleTier[]): CircuitSc
     }
   }
 
-  return sorted;
+  return sorted satisfies CircuitScaleTier[];
 };
 
-export const pointsForPlacement = (
-  scale: readonly CircuitScaleTier[],
-  placement: number,
-): number | null =>
+export const pointsForPlacement = (scale: readonly CircuitScaleTier[], placement: number) =>
   scale.find((tier) => tier.from <= placement && placement <= tier.to)?.points ?? null;
 
-export const assertCircuitSourceUrl = (value: string): void => {
+export const assertCircuitSourceUrl = (value: string) => {
   if (!URL.canParse(value) || !/^https?:$/u.test(new URL(value).protocol)) {
     throw new InvalidInputError("A circuit source must be an http(s) URL.");
   }
@@ -77,7 +74,7 @@ export interface CircuitStageSettings {
   finishes: CircuitStageFinishInput[];
 }
 
-const requireEventTeams = (teamIds: readonly string[], eventTeamIds: ReadonlySet<string>): void => {
+const requireEventTeams = (teamIds: readonly string[], eventTeamIds: ReadonlySet<string>) => {
   if (teamIds.length > MAX_CIRCUIT_STAGE_TEAMS) {
     throw new InvalidInputError(`A circuit stage lists at most ${MAX_CIRCUIT_STAGE_TEAMS} teams.`);
   }
@@ -98,7 +95,7 @@ const requireEventTeams = (teamIds: readonly string[], eventTeamIds: ReadonlySet
 export const parseCircuitStageSettings = (
   input: CircuitStageScaleInput,
   eventTeamIds: ReadonlySet<string>,
-): CircuitStageSettings => {
+) => {
   assertCircuitSourceUrl(input.sourceUrl);
   const regionTeamIds = [...(input.regionTeamIds ?? [])];
   const finishes = (input.finishes ?? []).map(({ teamId, placement }) => ({ placement, teamId }));

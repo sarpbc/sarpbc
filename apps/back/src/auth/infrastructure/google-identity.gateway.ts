@@ -2,11 +2,7 @@ import { auth, oauth2 } from "@googleapis/oauth2";
 import type { oauth2_v2 } from "@googleapis/oauth2";
 import { z } from "zod";
 import { AuthenticationError } from "../../common/domain/errors/authentication-error";
-import type {
-  GoogleIdentity,
-  GoogleProfile,
-  OAuthReturnTo,
-} from "../application/ports/authentication";
+import type { GoogleIdentity, OAuthReturnTo } from "../application/ports/authentication";
 
 const profileSchema = z.object({
   email: z.string().min(1),
@@ -31,10 +27,10 @@ export const createGoogleOAuthSession = (
   clientId: string,
   clientSecret: string,
   redirectUri: string,
-): GoogleOAuthSession => {
+) => {
   const client = new auth.OAuth2(clientId, clientSecret, redirectUri);
 
-  return {
+  const session: GoogleOAuthSession = {
     generateAuthUrl: (options) => client.generateAuthUrl(options),
     getToken: async (code) => await client.getToken(code),
     setCredentials: (tokens) => {
@@ -46,12 +42,14 @@ export const createGoogleOAuthSession = (
       return data;
     },
   };
+
+  return session;
 };
 
 export class GoogleIdentityGateway implements GoogleIdentity {
   constructor(private readonly newSession: () => GoogleOAuthSession) {}
 
-  async profile(code: string): Promise<GoogleProfile> {
+  async profile(code: string) {
     const session = this.newSession();
     const { tokens } = await session.getToken(code);
     session.setCredentials(tokens);
@@ -66,7 +64,7 @@ export class GoogleIdentityGateway implements GoogleIdentity {
     return { ...parsed.data, picture: parsed.data.picture ?? null };
   }
 
-  authorizationUrl(returnTo: OAuthReturnTo): string {
+  authorizationUrl(returnTo: OAuthReturnTo) {
     return this.newSession().generateAuthUrl({
       access_type: "offline",
       prompt: "consent",

@@ -1,4 +1,3 @@
-// Linters without Vue support cannot resolve .vue files, so the tiptap node views are typed here.
 declare module "~/components/news/EntityTagNodeView.vue" {
   import type { NodeViewProps } from "@tiptap/vue-3";
   import type { Component } from "vue";

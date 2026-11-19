@@ -9,14 +9,10 @@ import type {
 } from "../feed";
 import { placeStage } from "../event-placement";
 import type { CompetitionWriteScope, EventWriter } from "../ports";
-import type { Applied } from "./sync-applied";
 
 type IncidentDeletion = Extract<CompetitionIncident, { changeType: "deletion" }>;
 
-export const applyLeague = async (
-  scope: CompetitionWriteScope,
-  command: UpsertLeagueCommand,
-): Promise<League> => {
+export const applyLeague = async (scope: CompetitionWriteScope, command: UpsertLeagueCommand) => {
   const league =
     (await scope.tournaments.leagueByPandascoreId(command.pandascoreId)) ??
     Object.assign(new League(), { pandascoreId: command.pandascoreId });
@@ -31,10 +27,7 @@ export const applyLeague = async (
   return league;
 };
 
-export const applySerie = async (
-  events: EventWriter,
-  command: UpsertSerieCommand,
-): Promise<Applied | null> => {
+export const applySerie = async (events: EventWriter, command: UpsertSerieCommand) => {
   const event = await events.bySerieId(command.pandascoreId);
   const serieName = command.fullName?.trim();
 
@@ -53,11 +46,7 @@ export const applySerie = async (
   return { matches: [], stageIds: stages.map((stage) => stage.id) };
 };
 
-const mergeSerie = async (
-  scope: CompetitionWriteScope,
-  serieId: number,
-  intoId: number,
-): Promise<Applied | null> => {
+const mergeSerie = async (scope: CompetitionWriteScope, serieId: number, intoId: number) => {
   const from = await scope.events.bySerieId(serieId);
 
   if (!from) {
@@ -75,7 +64,7 @@ const mergeSerie = async (
     return { matches: [], stageIds };
   }
 
-  // Each placement derives its slug from the stages already in the target event, so order matters.
+  // WARNING: each placement derives its slug from the stages already in the target event, so order matters.
   await mapSequentially(stages, async (stage) => {
     const tournament = await scope.tournaments.load(stage.id);
 
@@ -101,7 +90,7 @@ const applySerieDeletion = async (
   scope: CompetitionWriteScope,
   serieId: number,
   deletion: ProviderDeletion,
-): Promise<Applied | null> => {
+) => {
   switch (deletion.kind) {
     case "merged": {
       return await mergeSerie(scope, serieId, deletion.intoId);
@@ -120,10 +109,7 @@ const applySerieDeletion = async (
   }
 };
 
-export const applyDeletion = async (
-  scope: CompetitionWriteScope,
-  incident: IncidentDeletion,
-): Promise<Applied | null> => {
+export const applyDeletion = async (scope: CompetitionWriteScope, incident: IncidentDeletion) => {
   switch (incident.kind) {
     case "serie": {
       return await applySerieDeletion(scope, incident.id, incident.deletion);

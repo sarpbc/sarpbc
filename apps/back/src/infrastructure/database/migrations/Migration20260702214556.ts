@@ -1,7 +1,7 @@
 import { Migration } from "@mikro-orm/migrations";
 
 export class Migration20260702214556 extends Migration {
-  override up(): void | Promise<void> {
+  override up() {
     this.addSql(
       `alter table "tournament_participant_players" drop constraint "tournament_participant_players_tournament_partic_f2b12_foreign";`,
     );
@@ -49,7 +49,7 @@ export class Migration20260702214556 extends Migration {
     );
   }
 
-  override down(): void | Promise<void> {
+  override down() {
     this.addSql(
       `alter table "tournament_participant_players" drop constraint "tournament_participant_players_foreign_tournament_part_5cea64eb";`,
     );

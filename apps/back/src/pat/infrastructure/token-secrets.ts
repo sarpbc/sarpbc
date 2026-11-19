@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from "node:crypto";
 import type { TokenSecrets } from "../application/ports/token-store";
 
-const hash = (raw: string): string => createHash("sha256").update(raw).digest("hex");
+const hash = (raw: string) => createHash("sha256").update(raw).digest("hex");
 
 export const tokenSecrets: TokenSecrets = {
   hash,

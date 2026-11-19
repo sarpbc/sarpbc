@@ -1,3 +1,4 @@
+import type { ForumPostCreationStatus, ForumPostListItem } from "@sarpbc/types";
 import {
   Body,
   Controller,
@@ -10,7 +11,6 @@ import {
   UseGuards,
   Request,
 } from "@nestjs/common";
-import type { ForumPostCreationStatus, ForumPostListItem } from "@sarpbc/types";
 import { forumPostSlug, parseLocale } from "@sarpbc/utils";
 import { EntityRefPipe } from "../../../common/infrastructure/http/entity-ref.pipe";
 import type { EntityRef } from "../../../common/domain/entity-ref";
@@ -21,9 +21,7 @@ import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { CurrentUserId } from "../../../user/infrastructure/http/decorator/current-user.decorator";
 import { CreatePostDto } from "./post/dto/create-post.dto";
 import type { CreatePostInput } from "./post/dto/create-post.dto";
-import { PostResponse } from "./post/dto/post-response.dto";
 import { postWithSlugResponse } from "./forum-response";
-import type { CreatedPost } from "../../application/models";
 import { AuthenticatedUserRequest } from "../../../common/infrastructure/http/types/authenticated.interface";
 import { ReplyService } from "../../../reply/application/reply.service";
 
@@ -35,7 +33,7 @@ export class PostController {
   ) {}
 
   @Get()
-  async findAll(): Promise<{ posts: ForumPostListItem[] }> {
+  async findAll() {
     const posts = await this.postService.find({});
 
     const commentCounts = await this.replyService.countByTargetIds(
@@ -57,7 +55,7 @@ export class PostController {
           title: post.topic.title,
         },
       })),
-    };
+    } satisfies { posts: ForumPostListItem[] };
   }
 
   @Get("topic/:topicId")
@@ -69,15 +67,15 @@ export class PostController {
 
   @Get("creation-status")
   @UseGuards(AuthGuard)
-  async getCreationStatus(@CurrentUserId() userId: string): Promise<ForumPostCreationStatus> {
-    return await this.postService.getCreationStatus(userId);
+  async getCreationStatus(@CurrentUserId() userId: string) {
+    return (await this.postService.getCreationStatus(userId)) satisfies ForumPostCreationStatus;
   }
 
   @Get(":ref")
   async findById(
     @Param("ref", EntityRefPipe) ref: EntityRef,
     @Request() req: AuthenticatedUserRequest,
-  ): Promise<PostResponse> {
+  ) {
     const locale = parseLocale(req.headers["accept-language"]);
 
     return { post: await this.postService.findByIdDto(ref, locale) };
@@ -88,7 +86,7 @@ export class PostController {
   async create(
     @CurrentUserId() userId: string,
     @Body({ schema: CreatePostDto }) createPostDto: CreatePostInput,
-  ): Promise<CreatedPost> {
+  ) {
     return await this.postService.create(userId, createPostDto);
   }
 

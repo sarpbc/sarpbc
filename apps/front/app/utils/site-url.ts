@@ -1,13 +1,7 @@
 import { isNonEmptyString } from "@sarpbc/utils";
 import { SITE_ORIGIN } from "@sarpbc/ui/config";
 
-export const resolveSiteUrl = (value: string | undefined | null): string | undefined => {
-  const trimmed = value?.trim();
-
-  if (!isNonEmptyString(trimmed)) {
-    return undefined;
-  }
-
+const absoluteSiteUrl = (trimmed: string) => {
   if (/^https?:\/\//iu.test(trimmed)) {
     return trimmed;
   }
@@ -19,4 +13,10 @@ export const resolveSiteUrl = (value: string | undefined | null): string | undef
   const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
 
   return `${SITE_ORIGIN}${path}`;
+};
+
+export const resolveSiteUrl = (value: string | undefined | null) => {
+  const trimmed = value?.trim();
+
+  return isNonEmptyString(trimmed) ? absoluteSiteUrl(trimmed) : undefined;
 };

@@ -6,7 +6,7 @@ import type { Orm, Payload, Request } from "./support.mts";
 
 const DAY = "2026-02-17";
 
-const participantOf = (stage: StageRef, teamId: string): string => {
+const participantOf = (stage: StageRef, teamId: string) => {
   const participant = stage.participants.find(({ team }) => team.id === teamId);
   assert.ok(participant, "the stage has the team");
 
@@ -85,8 +85,8 @@ export const verifyOnThisDay = async ({
   request,
   staffCookie,
   memberCookie,
-}: OnThisDayContext): Promise<void> => {
-  const created = async <T,>(schema: z.ZodType<T>, path: string, body: Payload): Promise<T> => {
+}: OnThisDayContext) => {
+  const created = async <T,>(schema: z.ZodType<T>, path: string, body: Payload) => {
     const response = await request("POST", path, body, staffCookie, 201);
 
     return response.json(schema);
@@ -100,7 +100,7 @@ export const verifyOnThisDay = async ({
   const response3 = await created(teamBody, "/team", { name: "Anniversary Away" });
   const away = response3.team;
 
-  const stage = async (name: string, source = "manual"): Promise<StageRef> => {
+  const stage = async (name: string, source = "manual") => {
     const response4 = await created(stageBody, "/tournaments", {
       name,
       source,

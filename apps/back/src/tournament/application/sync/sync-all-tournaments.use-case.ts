@@ -9,11 +9,11 @@ export class SyncAllTournamentsUseCase {
     private readonly reads: Pick<TournamentQueries, "knownPandascoreIds">,
     private readonly synchronization: CompetitionSyncService,
   ) {}
-  async execute(): Promise<string[]> {
+  async execute() {
     const commands = await this.feed.getTournaments();
     const known = await this.reads.knownPandascoreIds();
 
-    // Each upsert may create the league, serie or event the next one reuses, so run them in order.
+    // WARNING: upserts run in order; each may create the league, serie or event the next one reuses.
     const upserted = await mapSequentially(commands, async (command) => {
       if (known.has(command.pandascoreId)) {
         return null;

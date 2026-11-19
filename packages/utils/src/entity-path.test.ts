@@ -1,13 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import {
-  localizedPath,
-  newsPath,
-  playerPath,
-  stageMatchesPath,
-  teamPath,
-  tournamentStagePath,
-} from "./entity-path";
+import { localizedPath, newsPath, playerPath, stageMatchesPath, teamPath } from "./entity-path";
 
 void describe("entity paths", () => {
   void it("builds profile and news paths from slugs", () => {
@@ -19,7 +12,7 @@ void describe("entity paths", () => {
   void it("appends the matches tab to the stage path", () => {
     assert.equal(
       stageMatchesPath("rlcs-2026", "playoffs"),
-      `${tournamentStagePath("rlcs-2026", "playoffs")}/matches`,
+      "/tournaments/rlcs-2026/playoffs/matches",
     );
   });
 

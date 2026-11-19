@@ -5,9 +5,8 @@ import type {
   CompetitionDiagnostics,
 } from "../ports";
 import type { CompetitionIncident, UpsertMatchCommand, UpsertTournamentCommand } from "../feed";
-import type { Tournament } from "../../domain/tournament";
 import { assertPandascoreUpsertAllowed } from "../../domain/tournament-source";
-import type { Applied, AppliedTournament } from "./sync-applied";
+import type { AppliedTournament } from "./sync-applied";
 import { applyDeletion, applyLeague, applySerie } from "./sync-catalog";
 import { applyMatches } from "./sync-matches";
 import { applyTournament, settleEndAt } from "./sync-tournament";
@@ -24,7 +23,7 @@ export class CompetitionSyncService {
     command: UpsertTournamentCommand,
     matches: UpsertMatchCommand[] = [],
     linkTournamentId?: string,
-  ): Promise<Tournament> {
+  ) {
     const result = await this.transaction.run(async (scope) => {
       const { tournament, stageIds } = await applyTournament(
         scope,
@@ -46,10 +45,7 @@ export class CompetitionSyncService {
 
     return result.tournament;
   }
-  async applyIncident(
-    incident: CompetitionIncident,
-    backfill?: UpsertTournamentCommand | null,
-  ): Promise<void> {
+  async applyIncident(incident: CompetitionIncident, backfill?: UpsertTournamentCommand | null) {
     const applied = await this.transaction.run(async (scope) =>
       incident.changeType === "deletion"
         ? await applyDeletion(scope, incident)
@@ -67,7 +63,7 @@ export class CompetitionSyncService {
     scope: CompetitionWriteScope,
     incident: IncidentChange,
     backfill: UpsertTournamentCommand | null | undefined,
-  ): Promise<Applied | null> {
+  ) {
     switch (incident.kind) {
       case "tournament": {
         const { tournament, stageIds } = await applyTournament(

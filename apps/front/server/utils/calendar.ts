@@ -17,7 +17,7 @@ interface TournamentMatchesResponse {
   matches?: TournamentMatchListItem[];
 }
 
-export const sendIcs = (event: H3Event, ics: string, filename: string): string => {
+export const sendIcs = (event: H3Event, ics: string, filename: string) => {
   setHeader(event, "Content-Type", "text/calendar; charset=utf-8");
   setHeader(event, "Content-Disposition", `inline; filename="${filename}"`);
   setHeader(event, "Cache-Control", "public, max-age=300");
@@ -25,14 +25,14 @@ export const sendIcs = (event: H3Event, ics: string, filename: string): string =
   return ics;
 };
 
-export const parseIcsSlug = (pathname: string): string | null => {
+export const parseIcsSlug = (pathname: string) => {
   const segment = pathname.split("/").pop() ?? "";
   const match = /^(?<slug>.+)\.ics$/iu.exec(segment);
 
   return match?.groups?.slug ?? null;
 };
 
-export const fetchMatchForCalendar = async (id: string): Promise<Match> => {
+export const fetchMatchForCalendar = async (id: string) => {
   try {
     const { match } = await getMatchById(id);
 
@@ -45,9 +45,7 @@ export const fetchMatchForCalendar = async (id: string): Promise<Match> => {
   }
 };
 
-export const fetchTournamentForCalendar = async (
-  id: string,
-): Promise<{ tournament: TournamentDetail; matches: TournamentMatchListItem[] }> => {
+export const fetchTournamentForCalendar = async (id: string) => {
   let tournamentRes: TournamentResponse;
   let matchesRes: TournamentMatchesResponse;
 
@@ -73,7 +71,7 @@ export const fetchTournamentForCalendar = async (
   };
 };
 
-export const buildMatchIcs = (match: Match, now: Date): string => {
+export const buildMatchIcs = (match: Match, now: Date) => {
   const event = matchToCalendarEvent(match, match.tournament, now);
 
   if (!event) {
@@ -93,7 +91,7 @@ export const buildTournamentIcs = (
   tournament: TournamentDetail,
   matches: TournamentMatchListItem[],
   now: Date,
-): string => {
+) => {
   const events = matches.flatMap((match) =>
     isMatchOnCalendar(match) ? (matchToCalendarEvent(match, tournament, now) ?? []) : [],
   );
@@ -105,7 +103,7 @@ export const buildTournamentIcs = (
   });
 };
 
-export const icsFilename = (prefix: string, id: string): string => {
+export const icsFilename = (prefix: string, id: string) => {
   const safe = id.replaceAll(/[^a-zA-Z0-9_-]/gu, "").slice(0, 48) || "event";
 
   return `sarpbc-${prefix}-${safe}.ics`;

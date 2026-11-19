@@ -41,7 +41,7 @@ const KC_NAMES = ["Vatira", "Atow", "Rise"];
 const BDS_NAMES = ["M0nkey M00n", "Seikoo", "ExoTiiK"];
 const VIT_NAMES = ["zen", "Alpha54", "Radosin"];
 
-const at = (iso: string): Date => new Date(iso);
+const at = (iso: string) => new Date(iso);
 
 const won = (winner: CandidateParticipant, loser: CandidateParticipant, games = 1) =>
   new Map([
@@ -54,7 +54,7 @@ const match = (
   participants: CandidateParticipant[],
   beginAt: string | null,
   overrides: Partial<CandidateMatch> = {},
-): CandidateMatch => ({
+) => ({
   beginAt: beginAt === null ? null : at(beginAt),
   endAt: null,
   finished: true,
@@ -73,7 +73,7 @@ const replay = (
   blue: { names: string[]; goals: number; name?: string },
   orange: { names: string[]; goals: number; name?: string },
   overrides: Partial<ReplaySummary> = {},
-): ReplaySummary => {
+) => {
   sequence += 1;
 
   return {
@@ -88,7 +88,7 @@ const replay = (
   };
 };
 
-const describeAssignment = (assignment: ReplayAssignment): string => {
+const describeAssignment = (assignment: ReplayAssignment) => {
   if (assignment.kind === "matched") {
     return `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`;
   }

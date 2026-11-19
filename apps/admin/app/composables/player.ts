@@ -32,10 +32,7 @@ interface UpdatePlayerContractDto {
   endDate?: string | null;
 }
 
-export const getAllPlayers = async (query: {
-  limit: number;
-  offset: number;
-}): Promise<{ players: Player[]; total: number }> => {
+export const getAllPlayers = async (query: { limit: number; offset: number }) => {
   const res = await apiFetch<{ players: Player[]; count: number }>("/player", {
     method: "GET",
     query: { limit: query.limit, offset: query.offset },
@@ -44,7 +41,7 @@ export const getAllPlayers = async (query: {
   return { players: res.players, total: res.count };
 };
 
-export const getPlayerById = async (id: string): Promise<Player> => {
+export const getPlayerById = async (id: string) => {
   const res = await apiFetch<{ player: Player | null }>(`/player/${id}`, { method: "GET" });
 
   if (!res.player) {
@@ -54,23 +51,23 @@ export const getPlayerById = async (id: string): Promise<Player> => {
   return res.player;
 };
 
-export const createPlayer = async (body: CreatePlayerDto): Promise<Player> => {
+export const createPlayer = async (body: CreatePlayerDto) => {
   const res = await apiFetch<{ player: Player }>("/player", { body, method: "POST" });
 
   return res.player;
 };
 
-export const updatePlayer = async (id: string, body: UpdatePlayerDto): Promise<Player> => {
+export const updatePlayer = async (id: string, body: UpdatePlayerDto) => {
   const res = await apiFetch<{ player: Player }>(`/player/${id}`, { body, method: "PATCH" });
 
   return res.player;
 };
 
-export const deletePlayer = async (id: string): Promise<void> => {
+export const deletePlayer = async (id: string) => {
   await apiFetch(`/player/${id}`, { method: "DELETE" });
 };
 
-export const getPlayerContracts = async (playerId: string): Promise<PlayerContract[]> => {
+export const getPlayerContracts = async (playerId: string) => {
   const res = await apiFetch<{ contracts: PlayerContract[] }>(`/player/${playerId}/contract`, {
     method: "GET",
   });
@@ -78,10 +75,7 @@ export const getPlayerContracts = async (playerId: string): Promise<PlayerContra
   return res.contracts;
 };
 
-export const createPlayerContract = async (
-  playerId: string,
-  body: CreatePlayerContractDto,
-): Promise<PlayerContract> => {
+export const createPlayerContract = async (playerId: string, body: CreatePlayerContractDto) => {
   const res = await apiFetch<{ contract: PlayerContract }>(`/player/${playerId}/contract`, {
     body,
     method: "POST",
@@ -94,7 +88,7 @@ export const updatePlayerContract = async (
   playerId: string,
   contractId: string,
   body: UpdatePlayerContractDto,
-): Promise<PlayerContract> => {
+) => {
   const res = await apiFetch<{ contract: PlayerContract }>(
     `/player/${playerId}/contract/${contractId}`,
     { body, method: "PATCH" },
@@ -103,6 +97,6 @@ export const updatePlayerContract = async (
   return res.contract;
 };
 
-export const deletePlayerContract = async (playerId: string, contractId: string): Promise<void> => {
+export const deletePlayerContract = async (playerId: string, contractId: string) => {
   await apiFetch(`/player/${playerId}/contract/${contractId}`, { method: "DELETE" });
 };

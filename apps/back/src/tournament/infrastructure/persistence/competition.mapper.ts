@@ -1,6 +1,6 @@
+import type { TournamentEventRef } from "@sarpbc/types";
 import { wrap } from "@mikro-orm/core";
 import { log } from "evlog";
-import type { TournamentEventRef } from "@sarpbc/types";
 import type { League as LeagueRow } from "./league.entity";
 import type { TournamentEvent as TournamentEventRow } from "./tournament-event.entity";
 import type { TournamentParticipant as TournamentParticipantRow } from "./tournament-participant.entity";
@@ -8,7 +8,6 @@ import type { Tournament as TournamentRow } from "./tournament.entity";
 import type { Match as MatchRow } from "./match.entity";
 import { League } from "../../domain/league";
 import { Match, matchPublicSlug } from "../../domain/match";
-import type { TournamentSummary } from "../../domain/match";
 import { Tournament } from "../../domain/tournament";
 import { TournamentParticipant } from "../../domain/tournament-participant";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
@@ -16,7 +15,7 @@ import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
 import { teamNameAt, toPlayer, toTeam } from "../../../roster/infrastructure/roster-persistence";
 import { teamAt } from "../../../roster/domain/team-alias";
 
-export const toLeague = (row: LeagueRow): League =>
+export const toLeague = (row: LeagueRow) =>
   Object.assign(new League(), {
     createdAt: row.createdAt,
     id: row.id,
@@ -29,7 +28,7 @@ export const toLeague = (row: LeagueRow): League =>
     url: row.url,
   });
 
-export const toTournamentEvent = (row: TournamentEventRow): TournamentEvent =>
+export const toTournamentEvent = (row: TournamentEventRow) =>
   Object.assign(new TournamentEvent(), {
     createdAt: row.createdAt,
     id: row.id,
@@ -52,22 +51,19 @@ export const MATCH_WRITE_POPULATE = [
   "previousMatches.previousMatch",
 ] as const;
 
-const eventRefOf = (row: TournamentEventRow): TournamentEventRef => {
-  // An unpopulated reference would silently map to an empty slug and break every public URL.
+const eventRefOf = (row: TournamentEventRow) => {
+  // WARNING: an unpopulated reference silently maps to an empty slug and breaks every public URL.
   if (!wrap(row).isInitialized()) {
     throw new Error(`Tournament event ${row.id} is not populated`);
   }
 
-  return toEventRef(row);
+  return toEventRef(row) satisfies TournamentEventRef;
 };
 
-const stageDate = (tournament: TournamentRow): Date | null =>
+const stageDate = (tournament: TournamentRow) =>
   wrap(tournament).isInitialized() ? tournament.beginAt : null;
 
-export const toParticipant = (
-  row: TournamentParticipantRow,
-  at?: Date | null,
-): TournamentParticipant | null => {
+export const toParticipant = (row: TournamentParticipantRow, at?: Date | null) => {
   const { team } = row;
   const tournament: TournamentRow | undefined = row.tournament;
 
@@ -98,9 +94,9 @@ export const toParticipant = (
   });
 };
 
-const matchDate = (row: MatchRow): Date | null => row.beginAt ?? stageDate(row.tournament);
+const matchDate = (row: MatchRow) => row.beginAt ?? stageDate(row.tournament);
 
-const toTournamentSummary = (row: TournamentRow): TournamentSummary => ({
+const toTournamentSummary = (row: TournamentRow) => ({
   beginAt: row.beginAt,
   event: eventRefOf(row.event),
   eventStreams: row.event.streams ?? [],
@@ -114,7 +110,7 @@ const toTournamentSummary = (row: TournamentRow): TournamentSummary => ({
   streams: row.streams ?? [],
 });
 
-export const toMatch = (row: MatchRow): Match => {
+export const toMatch = (row: MatchRow) => {
   const participants = row.participants.isInitialized()
     ? row.participants
         .getItems()
@@ -125,7 +121,7 @@ export const toMatch = (row: MatchRow): Match => {
     beginAt: row.beginAt,
     createdAt: row.createdAt,
     endAt: row.endAt,
-    // The forfeiter is always one of the participants, so no read populates the relation.
+    // WARNING: no read populates the forfeiter relation; it is always one of the participants.
     forfeitedBy: participants.find((p) => p.id === row.forfeitedBy?.id) ?? null,
     id: row.id,
     name: row.name,
@@ -162,7 +158,7 @@ export const toMatch = (row: MatchRow): Match => {
   });
 };
 
-export const toTournament = (row: TournamentRow): Tournament =>
+export const toTournament = (row: TournamentRow) =>
   Object.assign(new Tournament(), {
     beginAt: row.beginAt,
     country: row.country,
@@ -195,7 +191,7 @@ export const toTournament = (row: TournamentRow): Tournament =>
     winnerType: row.winnerType,
   });
 
-export const toMatchSlug = (row: MatchRow): string => {
+export const toMatchSlug = (row: MatchRow) => {
   const loaded = wrap(row).isInitialized();
 
   const rowTournament: TournamentRow | undefined = row.tournament;

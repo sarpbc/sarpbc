@@ -22,7 +22,7 @@ export const isSpoilerConcealed = (
   enabled: boolean,
   reveals: SpoilerReveals,
   scope: SpoilerScope,
-): boolean => {
+) => {
   if (!enabled) {
     return false;
   }
@@ -36,10 +36,7 @@ export const isSpoilerConcealed = (
   );
 };
 
-export const revealSpoilers = (
-  reveals: SpoilerReveals,
-  target: SpoilerRevealTarget,
-): SpoilerReveals => {
+export const revealSpoilers = (reveals: SpoilerReveals, target: SpoilerRevealTarget) => {
   switch (target.kind) {
     case "match": {
       return reveals.matchIds.includes(target.id)

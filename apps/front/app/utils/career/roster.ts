@@ -53,7 +53,7 @@ const SPARE_GAMERTAGS = [
 
 type DisplacementFate = "swap" | "free_agent" | "leave";
 
-const asRoster = (ids: string[]): CareerRoster => {
+const asRoster = (ids: string[]) => {
   const [first, second, third] = ids;
 
   if (
@@ -65,10 +65,12 @@ const asRoster = (ids: string[]): CareerRoster => {
     throw new Error(`Roster must have ${ROSTER_SIZE} players`);
   }
 
-  return [first, second, third];
+  const roster: CareerRoster = [first, second, third];
+
+  return roster;
 };
 
-const cloneWorld = (world: CareerWorldState): CareerWorldState => {
+const cloneWorld = (world: CareerWorldState) => {
   const rosters: Record<string, CareerRoster> = {};
 
   for (const [teamId, roster] of Object.entries(world.rosters)) {
@@ -92,23 +94,27 @@ const cloneWorld = (world: CareerWorldState): CareerWorldState => {
       season: field.season,
       split: field.split,
     })),
-  };
+  } satisfies CareerWorldState;
 };
 
-const emptyCareerWorld = (): CareerWorldState => ({
-  freeAgentIds: [],
-  nextGeneratedId: 1,
-  players: {},
-  rankSnapshot: null,
-  rosters: {},
-  splitFields: [],
-});
+const emptyCareerWorld = () => {
+  const world: CareerWorldState = {
+    freeAgentIds: [],
+    nextGeneratedId: 1,
+    players: {},
+    rankSnapshot: null,
+    rosters: {},
+    splitFields: [],
+  };
+
+  return world;
+};
 
 export const getRosterPlayerRating = (
   playerId: string,
   world: CareerWorldState,
   userRating: number,
-): number => {
+) => {
   if (playerId === USER_ROSTER_ID) {
     return userRating;
   }
@@ -120,7 +126,7 @@ export const getRosterStrength = (
   roster: readonly string[],
   world: CareerWorldState,
   userRating: number,
-): number => {
+) => {
   if (roster.length === 0) {
     return 0;
   }
@@ -139,7 +145,7 @@ export interface MatchStrengthUser {
   role?: CareerRole | null;
 }
 
-const npcStats = (player: CareerNpcPlayer): CareerStats => ({
+const npcStats = (player: CareerNpcPlayer) => ({
   form: player.form,
   morale: player.morale,
   rating: player.rating,
@@ -149,7 +155,7 @@ const getPlayerMatchStrength = (
   playerId: string,
   world: CareerWorldState,
   user: MatchStrengthUser,
-): number => {
+) => {
   if (playerId === USER_ROSTER_ID) {
     if (user.stats) {
       return computePerformance(user.stats, user.role);
@@ -171,7 +177,7 @@ export const getRosterMatchStrength = (
   roster: readonly string[],
   world: CareerWorldState,
   user: MatchStrengthUser,
-): number => {
+) => {
   if (roster.length === 0) {
     return 0;
   }
@@ -184,12 +190,12 @@ export const getRosterMatchStrength = (
   return sum / roster.length;
 };
 
-const rollNpcFormMorale = (rng: () => number): Pick<CareerNpcPlayer, "form" | "morale"> => ({
+const rollNpcFormMorale = (rng: () => number) => ({
   form: clampStat(56 + rng() * 18),
   morale: clampStat(56 + rng() * 18),
 });
 
-const npcWalkSpan = (tick: NpcRatingTick): number => {
+const npcWalkSpan = (tick: NpcRatingTick) => {
   switch (tick) {
     case "split1":
     case "split2":
@@ -209,7 +215,7 @@ const npcWalkSpan = (tick: NpcRatingTick): number => {
   }
 };
 
-const npcFormWalkSpan = (tick: NpcRatingTick): number => {
+const npcFormWalkSpan = (tick: NpcRatingTick) => {
   switch (tick) {
     case "split1":
     case "split2":
@@ -229,8 +235,7 @@ const npcFormWalkSpan = (tick: NpcRatingTick): number => {
   }
 };
 
-/** Rising / stable / declining lane, hashed from id so stars fade and prospects climb. */
-const npcCareerBias = (playerId: string, season: number, tick: NpcRatingTick): number => {
+const npcCareerBias = (playerId: string, season: number, tick: NpcRatingTick) => {
   if (tick !== "season") {
     return 0;
   }
@@ -253,7 +258,7 @@ export const tickNpcRatings = (
   careerId: string,
   season: number,
   tick: NpcRatingTick,
-): CareerWorldState => {
+) => {
   const next = cloneWorld(world);
   const ratingSpan = npcWalkSpan(tick);
   const formSpan = npcFormWalkSpan(tick);
@@ -275,7 +280,7 @@ export const tickNpcRatings = (
   return next;
 };
 
-export const createCareerWorld = (careerId: string): CareerWorldState => {
+export const createCareerWorld = (careerId: string) => {
   const world = emptyCareerWorld();
 
   for (const team of WORLD_TEAMS) {
@@ -320,7 +325,7 @@ export const createCareerWorld = (careerId: string): CareerWorldState => {
   return world;
 };
 
-const pickDisplacementFate = (rng: () => number, canSwap: boolean): DisplacementFate => {
+const pickDisplacementFate = (rng: () => number, canSwap: boolean) => {
   const roll = rng();
 
   if (canSwap && roll < 0.5) {
@@ -339,7 +344,7 @@ const pickPlayerToDisplace = (
   world: CareerWorldState,
   userRating: number,
   rng: () => number,
-): string => {
+) => {
   const npcs = roster.filter((id) => id !== USER_ROSTER_ID);
 
   const sorted = npcs.toSorted(
@@ -362,7 +367,7 @@ const pickPlayerToDisplace = (
   return bottom[Math.floor(rng() * bottom.length)] ?? worst;
 };
 
-const isSigned = (playerId: string, world: CareerWorldState): boolean => {
+const isSigned = (playerId: string, world: CareerWorldState) => {
   if (playerId === USER_ROSTER_ID) {
     return true;
   }
@@ -376,7 +381,7 @@ const isSigned = (playerId: string, world: CareerWorldState): boolean => {
   return false;
 };
 
-const usedNames = (world: CareerWorldState): Set<string> => {
+const usedNames = (world: CareerWorldState) => {
   const names = new Set<string>();
 
   for (const player of Object.values(world.players)) {
@@ -386,11 +391,7 @@ const usedNames = (world: CareerWorldState): Set<string> => {
   return names;
 };
 
-const generateReplacement = (
-  world: CareerWorldState,
-  region: CareerRegion,
-  rating: number,
-): string => {
+const generateReplacement = (world: CareerWorldState, region: CareerRegion, rating: number) => {
   const names = usedNames(world);
 
   const name =
@@ -415,7 +416,7 @@ const takeReplacement = (
   team: CareerWorldTeam,
   userRating: number,
   rng: () => number,
-): string => {
+) => {
   const regional = world.freeAgentIds.filter(
     (id) => world.players[id]?.region === team.region && !isSigned(id, world),
   );
@@ -447,7 +448,7 @@ const takeReplacement = (
   return generateReplacement(world, team.region, baseline + (rng() * 8 - 6));
 };
 
-const releasePlayer = (world: CareerWorldState, playerId: string, fate: DisplacementFate): void => {
+const releasePlayer = (world: CareerWorldState, playerId: string, fate: DisplacementFate) => {
   switch (fate) {
     case "swap": {
       break;
@@ -481,7 +482,7 @@ const fillVacancy = (
   fate: DisplacementFate,
   userRating: number,
   rng: () => number,
-): void => {
+) => {
   const team = getWorldTeamById(teamId);
 
   if (!team) {
@@ -518,7 +519,7 @@ export const moveUserToTeam = (
   fromTeamId: string | null,
   userRating: number,
   seed: number,
-): CareerWorldState => {
+) => {
   const next = cloneWorld(world);
   const destination = next.rosters[toTeamId];
 

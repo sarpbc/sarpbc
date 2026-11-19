@@ -11,7 +11,7 @@ setPageSeo({
   title: t("page.brand.metaTitle"),
 });
 
-const copyHex = async (): Promise<void> => {
+const copyHex = async () => {
   try {
     await navigator.clipboard.writeText(BRAND_BLUE);
     toast.add({ color: "success", title: t("page.brand.hexCopied") });

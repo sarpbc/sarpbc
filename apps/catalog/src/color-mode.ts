@@ -7,7 +7,6 @@ export const COLOR_MODES = [
 
 export const colorMode = ref(matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
 
-/* Same switch the apps use: a `.dark` class on <html>, plus color-scheme for the catalog chrome. */
 watchEffect(() => {
   document.documentElement.classList.toggle("dark", colorMode.value === "dark");
   document.documentElement.style.colorScheme = colorMode.value;

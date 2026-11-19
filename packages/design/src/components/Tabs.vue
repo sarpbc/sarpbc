@@ -7,7 +7,6 @@ const model = defineModel<string>({ required: true });
 
 const { ariaLabel, items } = defineProps<{
   ariaLabel: string;
-  /** Short labels; the panels below are the page's own content. */
   items: readonly SelectOption<string>[];
 }>();
 </script>

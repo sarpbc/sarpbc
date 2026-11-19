@@ -48,9 +48,9 @@ const kindOptions = computed(() =>
   STREAM_KINDS.map((kind) => ({ label: t(`page.tournaments.streams.kinds.${kind}`), value: kind })),
 );
 
-const normalizeLanguage = (language: string): string => language.trim().toLowerCase();
+const normalizeLanguage = (language: string) => language.trim().toLowerCase();
 
-const languageFeedback = (language: string): FieldFeedback => {
+const languageFeedback = (language: string) => {
   const code = normalizeLanguage(language);
 
   return isIso6391Code(code)
@@ -58,7 +58,7 @@ const languageFeedback = (language: string): FieldFeedback => {
     : { error: t("page.tournaments.streams.errors.invalid-language") };
 };
 
-const platformLabel = (platform: StreamPlatform): string => {
+const platformLabel = (platform: StreamPlatform) => {
   switch (platform) {
     case "twitch": {
       return t("page.tournaments.streams.platforms.twitch");
@@ -84,7 +84,7 @@ const platformLabel = (platform: StreamPlatform): string => {
   }
 };
 
-const urlFeedback = (url: string): FieldFeedback => {
+const urlFeedback = (url: string) => {
   if (!url.trim()) {
     return {};
   }
@@ -100,13 +100,13 @@ const urlFeedback = (url: string): FieldFeedback => {
     : { error: t(`page.tournaments.streams.errors.${parsed.error}`) };
 };
 
-const derivedChannel = (url: string): string | null => {
+const derivedChannel = (url: string) => {
   const parsed = parseStreamUrl(url);
 
   return parsed.ok ? parsed.channel : null;
 };
 
-const channelFeedback = (row: StreamRow): FieldFeedback => {
+const channelFeedback = (row: StreamRow) => {
   if (row.channel.trim() || derivedChannel(row.url) || !row.url.trim()) {
     return {};
   }
@@ -114,7 +114,7 @@ const channelFeedback = (row: StreamRow): FieldFeedback => {
   return { error: t("page.tournaments.streams.errors.channel-required") };
 };
 
-const isRowValid = (row: StreamRow): boolean =>
+const isRowValid = (row: StreamRow) =>
   parseStreamUrl(row.url).ok &&
   isIso6391Code(normalizeLanguage(row.language)) &&
   Boolean(row.channel.trim() || derivedChannel(row.url));

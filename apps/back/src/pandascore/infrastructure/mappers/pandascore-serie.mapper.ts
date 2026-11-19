@@ -1,7 +1,7 @@
-import type { ProviderDeletion, UpsertSerieCommand } from "../../../tournament/application/feed";
+import type { ProviderDeletion } from "../../../tournament/application/feed";
 import type { SerieDto } from "../dto/tournament.dto";
 
-export const toUpsertSerieCommand = (dto: SerieDto): UpsertSerieCommand => ({
+export const toUpsertSerieCommand = (dto: SerieDto) => ({
   fullName: dto.full_name,
   pandascoreId: dto.id,
   year: dto.year,
@@ -11,7 +11,7 @@ const MERGED = /^Merged with (?<id>[0-9]+)$/u;
 const REPLACED = /^Replaced by (?<entity>serie|tournament) (?<id>[0-9]+)$/u;
 
 /** PandaScore deletion reasons: "Merged with <id>", "Replaced by serie|tournament <id>", "Model deleted". */
-export const parseProviderDeletion = (reason: string | null): ProviderDeletion => {
+export const parseProviderDeletion = ((reason) => {
   if (reason === null || reason === "") {
     return { kind: "deleted" };
   }
@@ -33,4 +33,4 @@ export const parseProviderDeletion = (reason: string | null): ProviderDeletion =
   }
 
   return { kind: "deleted" };
-};
+}) satisfies (reason: string | null) => ProviderDeletion;

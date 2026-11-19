@@ -5,11 +5,11 @@ import { CircuitStageTeam } from "./circuit-stage-team.entity";
 export class CircuitRosterReferences implements RosterReferenceMover {
   constructor(private readonly em: EntityManager) {}
 
-  async movePlayer(): Promise<void> {
-    // No circuit row references a player.
+  async movePlayer() {
+    // WARNING: no circuit row references a player yet; move them here once one does.
   }
 
-  async moveTeam(from: string, to: string): Promise<void> {
+  async moveTeam(from: string, to: string) {
     const entries = await this.em.find(
       CircuitStageTeam,
       { team: { $in: [from, to] } },

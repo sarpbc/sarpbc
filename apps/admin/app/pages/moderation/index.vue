@@ -27,7 +27,7 @@ const { status, data, error, refresh } = await useLazyAsyncData(
 
 const replies = computed(() => data.value ?? []);
 
-const targetTypeLabel = (targetType: ModerationReply["targetType"]): string => {
+const targetTypeLabel = (targetType: ModerationReply["targetType"]) => {
   switch (targetType) {
     case "forumPost": {
       return t("page.moderation.targetTypes.forumPost");
@@ -49,7 +49,7 @@ const targetTypeLabel = (targetType: ModerationReply["targetType"]): string => {
   }
 };
 
-const publicTargetUrl = (reply: ModerationReply): string =>
+const publicTargetUrl = (reply: ModerationReply) =>
   `${config.public.publicSiteUrl}${reply.targetPath}`;
 
 const hideReply = async (reply: ModerationReply) => {

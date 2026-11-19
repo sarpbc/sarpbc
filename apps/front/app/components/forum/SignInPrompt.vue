@@ -7,7 +7,7 @@ const { t } = useI18n();
 const localePath = useLocalePath();
 const user = useUser();
 
-/** `undefined` = session still resolving — avoid flashing the sign-in CTA. */
+// WARNING: `undefined` means the session is still resolving; do not flash the sign-in CTA.
 const sessionReady = computed(() => user.value !== undefined);
 const isSignedIn = computed(() => !!user.value);
 

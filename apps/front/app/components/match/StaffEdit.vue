@@ -32,7 +32,7 @@ const statusItems = computed<SelectOption<EditableMatchStatus>[]>(() =>
   })),
 );
 
-const toEditableStatus = (value: string | undefined): EditableMatchStatus =>
+const toEditableStatus = (value: string | undefined) =>
   value === "running" || value === "finished" ? value : "not_started";
 
 watch(open, (isOpen) => {

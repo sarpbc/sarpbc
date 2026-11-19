@@ -1,4 +1,3 @@
-import type { R2UploadResponse } from "@sarpbc/types";
 import * as z from "zod/mini";
 
 const r2UploadResponseSchema = z.object({ key: z.string(), publicUrl: z.string() });
@@ -24,7 +23,7 @@ export const IMAGE_UPLOAD_TARGETS = ["news", "tournament"] as const;
 
 export type ImageUploadTarget = (typeof IMAGE_UPLOAD_TARGETS)[number];
 
-export const canonicalImageContentType = (contentType: string): string => {
+export const canonicalImageContentType = (contentType: string) => {
   const normalized = contentType.toLowerCase().split(";")[0]?.trim() ?? "";
 
   return IMAGE_CONTENT_TYPE_ALIASES.some((alias) => alias === normalized)
@@ -32,12 +31,18 @@ export const canonicalImageContentType = (contentType: string): string => {
     : normalized;
 };
 
-export const parseR2UploadResponse = (text: string): R2UploadResponse | undefined => {
+const jsonOrNull = (text: string) => {
   try {
-    const parsed = r2UploadResponseSchema.safeParse(JSON.parse(text));
+    const json: unknown = JSON.parse(text);
 
-    return parsed.success ? parsed.data : undefined;
+    return json;
   } catch {
-    return undefined;
+    return null;
   }
+};
+
+export const parseR2UploadResponse = (text: string) => {
+  const parsed = r2UploadResponseSchema.safeParse(jsonOrNull(text));
+
+  return parsed.success ? parsed.data : undefined;
 };
