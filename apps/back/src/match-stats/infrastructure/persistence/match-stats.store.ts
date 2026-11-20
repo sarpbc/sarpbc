@@ -9,7 +9,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { z } from "zod";
 import { mapSequentially } from "../../../common/application/sequentially";
 import { TournamentParticipant } from "../../../tournament/infrastructure/competition-persistence";
-import type { PlayerStatsSummary, StatsScope } from "../../domain/player-stats";
+import type { PlayerStatsSummary, StatsMinGames, StatsScope } from "../../domain/player-stats";
 import type {
   GameAttachment,
   GameRecord,
@@ -31,16 +31,16 @@ const STATS_FROM = `from match_game_player p
   join tournament_participant part on part.id =
     case when p.side = 'blue' then g.blue_participant_id else g.orange_participant_id end`;
 
-const eraFilter = (era: StatsEra) => {
-  const playedOn = "coalesce(g.played_at, m.begin_at, t.begin_at)";
+const PLAYED_ON = "coalesce(g.played_at, m.begin_at, t.begin_at)";
 
+const eraFilter = (era: StatsEra) => {
   switch (era) {
     case "open": {
-      return `${playedOn} >= ?`;
+      return `${PLAYED_ON} >= ?`;
     }
 
     case "pre-open": {
-      return `${playedOn} < ?`;
+      return `${PLAYED_ON} < ?`;
     }
 
     default: {
@@ -56,7 +56,7 @@ const scopeFilter = (scope: StatsScope) => {
     case "tournaments": {
       return {
         filter: `m.tournament_id in (${scope.ids.map(() => "?").join(", ")})`,
-        minGames: 1,
+        minGames: { count: 1, per: "team" as const },
         params: scope.ids,
       };
     }
@@ -81,6 +81,37 @@ const scopeFilter = (scope: StatsScope) => {
   }
 };
 
+const regularPlayers = (
+  filter: string,
+  params: readonly string[],
+  { count: minGames, per }: StatsMinGames,
+) => {
+  switch (per) {
+    case "player": {
+      return {
+        having: "",
+        params: [...params, ...params, minGames],
+        where: `${filter} and p.player_id in (select p.player_id ${STATS_FROM} where ${filter}
+          group by p.player_id having count(distinct p.game_id) >= ?)`,
+      };
+    }
+
+    case "team": {
+      return {
+        having: "having count(distinct p.game_id) >= ?",
+        params: [...params, minGames],
+        where: filter,
+      };
+    }
+
+    default: {
+      const exhaustive: never = per;
+
+      return exhaustive;
+    }
+  }
+};
+
 const count = z.coerce.number().int().nonnegative();
 
 const summaryRows = z.array(z.object({ games: count, unlinked_accounts: count }));
@@ -91,6 +122,7 @@ const tallyRows = z.array(
     demolitions: count,
     games: count,
     goals: count,
+    last_played_at: z.coerce.date().nullable(),
     lineup_id: z.string().nullable(),
     player_id: z.string(),
     player_name: z.string(),
@@ -293,6 +325,8 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       ),
     );
 
+    const regular = regularPlayers(filter, params, minGames);
+
     const rows = tallyRows.parse(
       await connection.execute(
         `select pl.id as player_id, pl.name as player_name, pl.slug as player_slug,
@@ -301,14 +335,15 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
           count(distinct p.game_id) as games,
           sum(p.goals) as goals, sum(p.assists) as assists, sum(p.saves) as saves,
           sum(p.shots) as shots, sum(p.demolitions) as demolitions,
-          sum(case when p.side = 'blue' then g.blue_goals else g.orange_goals end) as team_goals
+          sum(case when p.side = 'blue' then g.blue_goals else g.orange_goals end) as team_goals,
+          max(${PLAYED_ON}) as last_played_at
         ${STATS_FROM}
         join player pl on pl.id = p.player_id
         left join team tm on tm.id = part.team_id
-        where ${filter}
+        where ${regular.where}
         group by pl.id, tm.id, lineup_id
-        having count(distinct p.game_id) >= ?`,
-        [...params, minGames],
+        ${regular.having}`,
+        regular.params,
       ),
     );
 
@@ -320,6 +355,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       games: summary?.games ?? 0,
       tallies: rows.map((row) => ({
         games: row.games,
+        lastPlayedAt: row.last_played_at,
         player: { id: row.player_id, name: row.player_name, slug: row.player_slug },
         team: {
           id: row.team_id,

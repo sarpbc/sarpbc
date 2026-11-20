@@ -7,6 +7,7 @@ import type {
   GameRecord,
   PlayerLink,
 } from "../../src/match-stats/application/ports.ts";
+import { mapSequentially } from "../../src/common/application/sequentially.ts";
 import type { Side } from "../../src/match-stats/domain/replay-matching.ts";
 import type { Application, Orm, Request } from "./support.mts";
 
@@ -62,6 +63,7 @@ const playerStats = z.looseObject({
       games: z.number(),
       goalParticipation: z.number(),
       player: identified,
+      teams: z.array(z.looseObject({ name: z.string() })).min(1),
       totals: z.looseObject({
         assists: statCount,
         demolitions: statCount,
@@ -337,6 +339,15 @@ export const verifyMatchStats = async ({
     "the pre-open era leaves out games played since 2020",
   );
   await request("GET", "/stats/players?era=rlcs-x", undefined, undefined, 400);
+
+  const byTeamResponse = await request("GET", "/stats/players?by=team");
+  const byTeam = byTeamResponse.json(playerStats);
+  assert.equal(byTeam.games, overall.games, "splitting by team counts the same games");
+  assert.ok(
+    byTeam.players.every(({ teams }) => teams.length === 1),
+    "a row split by team lists one team",
+  );
+  await request("GET", "/stats/players?by=season", undefined, undefined, 400);
 
   const linksUrl = `/tournaments/${tournamentId}/stats-players`;
   await request("GET", linksUrl, undefined, undefined, 401);
@@ -621,4 +632,48 @@ export const verifyMatchStats = async ({
   await saveGame(3, [steam("s-renamed", "Racer", "orange", otherId)]);
   const excludedResult = await store().excluded(["integration-replay-3"]);
   assert.equal(excludedResult.size, 0, "attaching a removed replay again clears its exclusion");
+
+  const transferId = randomUUID();
+  const transferSetup = orm.em.fork();
+  transferSetup.persist(
+    transferSetup.create(Player, {
+      id: transferId,
+      name: "Transfer Regular",
+      slug: transferId,
+      source: "manual",
+      status: "active",
+    }),
+  );
+  await transferSetup.flush();
+
+  await mapSequentially(Array.from({ length: 10 }), async (_, index) => {
+    await saveGame(11 + index, [
+      steam("s-transfer", "Transfer Regular", index < 5 ? "blue" : "orange", transferId),
+    ]);
+  });
+
+  const { RedisService } = await import("../../src/infrastructure/redis/redis.service.ts");
+
+  await app.get(RedisService).deleteByPrefix("player-stats:overall:");
+
+  const overallResponse2 = await request("GET", "/stats/players");
+
+  const transfer = overallResponse2
+    .json(playerStats)
+    .players.find((row) => row.player.id === transferId);
+
+  assert.ok(transfer, "a player regular over two teams makes the leaderboard");
+  assert.equal(transfer.games, 10, "the leaderboard sums a player over every team");
+  assert.deepEqual(
+    new Set(transfer.teams.map(({ name }) => name)),
+    new Set([teamName(participantId), teamName(rivalParticipantId)]),
+    "a player row lists each team played for",
+  );
+
+  const byTeamResponse2 = await request("GET", "/stats/players?by=team");
+  assert.equal(
+    byTeamResponse2.json(playerStats).players.some((row) => row.player.id === transferId),
+    false,
+    "split by team, the minimum games applies to each team",
+  );
 };

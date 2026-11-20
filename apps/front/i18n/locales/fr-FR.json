@@ -1658,6 +1658,7 @@
         "empty": "Aucune statistique de joueur pour ce tournoi pour le moment.",
         "emptyHint": "Les statistiques apparaissent une fois les replays des parties importés depuis Ballchasing.",
         "unlinked": "{count} compte de jeu non relié à un joueur n’est pas affiché. | {count} comptes de jeu non reliés à un joueur ne sont pas affichés.",
+        "formerTeams": "A aussi joué pour {teams}",
         "error": "Impossible de charger les statistiques des joueurs. Vérifiez votre connexion et réessayez."
       }
     },
@@ -1977,6 +1978,8 @@
       "title": "Stats des joueurs",
       "games": "{count} partie | {count} parties",
       "minGames": "Joueurs avec {count} parties ou plus",
+      "minGamesPerTeam": "Joueurs avec {count} parties ou plus dans une même équipe",
+      "byTeam": "Séparer par équipe",
       "caption": "Stats des joueurs sur toutes les parties de tournoi dont les replays sont importés",
       "empty": "Aucune stat de joueur pour le moment.",
       "era": {

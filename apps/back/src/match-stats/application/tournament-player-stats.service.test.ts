@@ -13,6 +13,7 @@ const service = new TournamentPlayerStatsService({
       tallies: [
         {
           games: 2,
+          lastPlayedAt: null,
           player: { id: "zen", name: "zen", slug: "zen" },
           team: { id: "team-vit", name: "Vitality", slug: "vitality" },
           teamGoals: 6,
@@ -50,18 +51,22 @@ describe(TournamentPlayerStatsService, () => {
   it("aggregates every redistributable tournament into the overall leaderboard", async () => {
     scopes.length = 0;
 
-    await expect(service.overall(null)).resolves.toMatchObject({
+    await expect(service.overall(null, "player")).resolves.toMatchObject({
       games: 2,
       players: [{ games: 2 }],
     });
-    expect(scopes).toStrictEqual([{ era: null, kind: "redistributable", minGames: 10 }]);
+    expect(scopes).toStrictEqual([
+      { era: null, kind: "redistributable", minGames: { count: 10, per: "player" } },
+    ]);
   });
 
   it("narrows the overall leaderboard to one era", async () => {
     scopes.length = 0;
 
-    await service.overall("open");
+    await service.overall("open", "team");
 
-    expect(scopes).toStrictEqual([{ era: "open", kind: "redistributable", minGames: 10 }]);
+    expect(scopes).toStrictEqual([
+      { era: "open", kind: "redistributable", minGames: { count: 10, per: "team" } },
+    ]);
   });
 });

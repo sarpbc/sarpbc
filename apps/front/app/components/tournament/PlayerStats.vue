@@ -57,13 +57,19 @@ const viewOptions = computed(() => [
   { label: t("page.tournaments.stats.perGame"), value: "perGame" as const },
 ]);
 
-const teamKey = (row: TournamentPlayerStats) => row.team.id ?? row.team.name;
+type Team = TournamentPlayerStats["teams"][number];
+
+const teamKey = ({ id, name }: Team) => id ?? name;
+
+const latestTeam = (row: TournamentPlayerStats) => row.teams[0]?.name ?? "";
 
 const teamOptions = computed(() => {
   const teams = new Map<string, string>();
 
   for (const row of stats?.players ?? []) {
-    teams.set(teamKey(row), row.team.name);
+    for (const rowTeam of row.teams) {
+      teams.set(teamKey(rowTeam), rowTeam.name);
+    }
   }
 
   return [
@@ -119,7 +125,7 @@ const compare = (a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKe
   }
 
   if (key === "team") {
-    return a.team.name.localeCompare(b.team.name);
+    return latestTeam(a).localeCompare(latestTeam(b));
   }
 
   return (value(a, key) ?? -1) - (value(b, key) ?? -1);
@@ -130,7 +136,10 @@ const rows = computed(() => {
   const key: SortKey = isSortKey(id) ? id : "goals";
 
   return (stats?.players ?? [])
-    .filter((row) => team.value === ALL_TEAMS || teamKey(row) === team.value)
+    .filter(
+      (row) =>
+        team.value === ALL_TEAMS || row.teams.some((rowTeam) => teamKey(rowTeam) === team.value),
+    )
     .toSorted(
       (a, b) => (desc ? -1 : 1) * compare(a, b, key) || a.player.name.localeCompare(b.player.name),
     );
@@ -156,6 +165,13 @@ const averageFormat = computed(
 const percentFormat = computed(
   () => new Intl.NumberFormat(locale.value, { maximumFractionDigits: 1, style: "percent" }),
 );
+
+const listFormat = computed(() => new Intl.ListFormat(locale.value, { type: "conjunction" }));
+
+const formerTeams = (row: TournamentPlayerStats) =>
+  t("page.tournaments.stats.formerTeams", {
+    teams: listFormat.value.format(row.teams.slice(1).map(({ name }) => name)),
+  });
 
 const display = (row: TournamentPlayerStats, column: Column) => {
   const current = value(row, column);
@@ -247,16 +263,25 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
           </SLink>
         </template>
         <template #team-cell="{ row }">
-          <SLink
-            v-if="row.original.team.slug"
-            :to="$localePath(teamPath(row.original.team.slug))"
-            class="block max-w-40 truncate"
-          >
-            {{ row.original.team.name }}
-          </SLink>
-          <span v-else class="block max-w-40 truncate text-muted">{{
-            row.original.team.name
-          }}</span>
+          <span v-if="row.original.teams[0]" class="flex max-w-48 items-center gap-1">
+            <SLink
+              v-if="row.original.teams[0].slug"
+              :to="$localePath(teamPath(row.original.teams[0].slug))"
+              class="truncate"
+            >
+              {{ row.original.teams[0].name }}
+            </SLink>
+            <span v-else class="truncate text-muted">{{ row.original.teams[0].name }}</span>
+            <STooltip v-if="row.original.teams.length > 1" :text="formerTeams(row.original)">
+              <span
+                tabindex="0"
+                class="shrink-0 text-xs text-muted"
+                :aria-label="formerTeams(row.original)"
+              >
+                +{{ row.original.teams.length - 1 }}
+              </span>
+            </STooltip>
+          </span>
         </template>
       </STable>
 
