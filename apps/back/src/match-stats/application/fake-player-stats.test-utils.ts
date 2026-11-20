@@ -1,7 +1,7 @@
 import type { PlayerTally, StatsScope } from "../domain/player-stats";
 import type { GameStatsStore } from "./ports";
 
-export const fakePlayerStats = (tally: Omit<PlayerTally, "games">) => {
+export const fakePlayerStats = (tally: Omit<PlayerTally, "games" | "lastPlayedAt">) => {
   const scopes: StatsScope[] = [];
 
   const playerStats: GameStatsStore["playerStats"] = async (scope) => {
@@ -11,7 +11,7 @@ export const fakePlayerStats = (tally: Omit<PlayerTally, "games">) => {
 
     return {
       games: ids.length,
-      tallies: ids.map(() => ({ ...tally, games: 1 })),
+      tallies: ids.map(() => ({ ...tally, games: 1, lastPlayedAt: null })),
       unlinkedAccounts: 0,
     };
   };

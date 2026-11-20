@@ -1658,6 +1658,7 @@
         "empty": "No player stats for this tournament yet.",
         "emptyHint": "Stats appear once the game replays are imported from Ballchasing.",
         "unlinked": "{count} game account not linked to a player is not shown. | {count} game accounts not linked to a player are not shown.",
+        "formerTeams": "Also played for {teams}",
         "error": "Could not load the player stats. Check your connection and try again."
       }
     },
@@ -1977,6 +1978,8 @@
       "title": "Player Stats",
       "games": "{count} game | {count} games",
       "minGames": "Players with {count} games or more",
+      "minGamesPerTeam": "Players with {count} games or more for one team",
+      "byTeam": "Split by team",
       "caption": "Player stats over every tournament game with imported replays",
       "empty": "No player stats yet.",
       "era": {

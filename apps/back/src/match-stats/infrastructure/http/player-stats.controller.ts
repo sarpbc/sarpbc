@@ -11,6 +11,9 @@ export class PlayerStatsController {
   @Get("players")
   @Header("Cache-Control", "public, max-age=60")
   async players(@Query({ schema: PlayerStatsQueryDto }) query: PlayerStatsQueryInput) {
-    return (await this.stats.overall(query.era ?? null)) satisfies TournamentPlayerStatsResponse;
+    return (await this.stats.overall(
+      query.era ?? null,
+      query.by,
+    )) satisfies TournamentPlayerStatsResponse;
   }
 }

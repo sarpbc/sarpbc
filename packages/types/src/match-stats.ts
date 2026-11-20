@@ -150,7 +150,8 @@ export interface TournamentPlayerStatsTeam {
 
 export interface TournamentPlayerStats {
   player: { id: string; name: string; slug: string };
-  team: TournamentPlayerStatsTeam;
+  /** Most recently played for first. */
+  teams: TournamentPlayerStatsTeam[];
   games: number;
   totals: PlayerStatCounts;
   perGame: PlayerStatCounts;
@@ -169,6 +170,11 @@ export const OVERALL_STATS_MIN_GAMES = 10;
 export const STATS_ERAS = ["open", "pre-open"] as const;
 
 export type StatsEra = (typeof STATS_ERAS)[number];
+
+/** Whether a leaderboard row sums a player over every team or over one team only. */
+export const STATS_GROUPINGS = ["player", "team"] as const;
+
+export type StatsGrouping = (typeof STATS_GROUPINGS)[number];
 
 /** First day of RLCS X, the first season whose qualifiers were open to every team. */
 export const OPEN_ERA_START = "2020-08-01";

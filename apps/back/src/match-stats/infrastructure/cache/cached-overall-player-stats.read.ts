@@ -1,10 +1,12 @@
 import { log } from "evlog";
 import { z } from "zod";
-import type { StatsEra, TournamentPlayerStatsResponse } from "@sarpbc/types";
+import type { StatsEra, StatsGrouping, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentPlayerStatsService } from "../../application/tournament-player-stats.service";
 
-const keyOf = (era: StatsEra | null) => `player-stats:overall:${era ?? "all"}`;
+const keyOf = (era: StatsEra | null, by: StatsGrouping) =>
+  `player-stats:overall:${era ?? "all"}:${by}`;
+
 const TTL_SECONDS = 60;
 
 const counts = z.object({
@@ -24,7 +26,9 @@ const response = z.object({
       perGame: counts,
       player: z.object({ id: z.string(), name: z.string(), slug: z.string() }),
       shootingPercentage: z.number().nullable(),
-      team: z.object({ id: z.string().nullable(), name: z.string(), slug: z.string().nullable() }),
+      teams: z.array(
+        z.object({ id: z.string().nullable(), name: z.string(), slug: z.string().nullable() }),
+      ),
       totals: counts,
     }),
   ),
@@ -49,12 +53,12 @@ export class CachedOverallPlayerStatsRead {
     private readonly redis: Pick<RedisService, "get" | "set">,
   ) {}
 
-  async overall(era: StatsEra | null) {
-    const key = keyOf(era);
+  async overall(era: StatsEra | null, by: StatsGrouping) {
+    const key = keyOf(era, by);
     let pending = this.pending.get(key);
 
     if (!pending) {
-      pending = this.load(key, era).finally(() => {
+      pending = this.load(key, era, by).finally(() => {
         this.pending.delete(key);
       });
       this.pending.set(key, pending);
@@ -63,14 +67,14 @@ export class CachedOverallPlayerStatsRead {
     return (await pending) satisfies TournamentPlayerStatsResponse;
   }
 
-  private async load(key: string, era: StatsEra | null) {
+  private async load(key: string, era: StatsEra | null, by: StatsGrouping) {
     const cached = await this.readCached(key);
 
     if (cached) {
       return cached satisfies TournamentPlayerStatsResponse;
     }
 
-    const stats = await this.stats.overall(era);
+    const stats = await this.stats.overall(era, by);
 
     try {
       await this.redis.set(key, JSON.stringify(stats), TTL_SECONDS);

@@ -16,6 +16,15 @@ const era = computed(() => {
   return isEra(value) ? value : null;
 });
 
+const byTeam = computed(() => routeQueryString(route.query.by) === "team");
+
+const setByTeam = async (value: boolean) => {
+  await navigateTo(
+    { query: { ...route.query, by: value ? "team" : undefined } },
+    { replace: true },
+  );
+};
+
 const openEraStart = computed(() =>
   new Intl.DateTimeFormat(locale.value, { month: "long", timeZone: "UTC", year: "numeric" }).format(
     new Date(OPEN_ERA_START),
@@ -41,8 +50,8 @@ const {
   error,
   refresh,
 } = await useAsyncData(
-  () => `player-stats-leaderboard-${era.value ?? ALL_ERAS}`,
-  () => getPlayerStatsLeaderboard(era.value),
+  () => `player-stats-leaderboard-${era.value ?? ALL_ERAS}-${byTeam.value ? "team" : "player"}`,
+  () => getPlayerStatsLeaderboard(era.value, byTeam.value ? "team" : "player"),
   { default: () => null },
 );
 
@@ -58,7 +67,11 @@ setPageSeo({
       <template #title>{{ t("page.stats.title") }}</template>
       <template v-if="stats && stats.games > 0" #meta>
         <span>{{ t("page.stats.games", { count: stats.games }) }}</span>
-        <span>{{ t("page.stats.minGames", { count: OVERALL_STATS_MIN_GAMES }) }}</span>
+        <span>{{
+          t(byTeam ? "page.stats.minGamesPerTeam" : "page.stats.minGames", {
+            count: OVERALL_STATS_MIN_GAMES,
+          })
+        }}</span>
       </template>
     </HubPageHeader>
 
@@ -84,6 +97,11 @@ setPageSeo({
             })
           }}
         </span>
+        <SSwitch
+          :model-value="byTeam"
+          :label="t('page.stats.byTeam')"
+          @update:model-value="setByTeam"
+        />
       </template>
     </TournamentPlayerStats>
   </div>

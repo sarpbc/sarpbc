@@ -1,6 +1,7 @@
 import type {
   PlayerStatCounts,
   StatsEra,
+  StatsGrouping,
   TournamentPlayerStats,
   TournamentPlayerStatsResponse,
   TournamentPlayerStatsTeam,
@@ -12,6 +13,7 @@ export interface PlayerTally {
   games: number;
   totals: PlayerStatCounts;
   teamGoals: number;
+  lastPlayedAt: Date | null;
 }
 
 export interface PlayerStatsSummary {
@@ -20,9 +22,19 @@ export interface PlayerStatsSummary {
   tallies: readonly PlayerTally[];
 }
 
+export interface StatsMinGames {
+  count: number;
+  /** Applies to each player over every team, or to each player and team pair. */
+  per: StatsGrouping;
+}
+
 export type StatsScope =
   | { kind: "tournaments"; ids: string[] }
-  | { kind: "redistributable"; minGames: number; era: StatsEra | null };
+  | {
+      kind: "redistributable";
+      era: StatsEra | null;
+      minGames: StatsMinGames;
+    };
 
 const COUNTS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 
@@ -44,7 +56,17 @@ const emptyCounts = () =>
     shots: 0,
   }) satisfies PlayerStatCounts;
 
-const toStats = ({ player, team, games, totals, teamGoals }: PlayerTally) => {
+interface PlayerRow {
+  player: PlayerTally["player"];
+  teams: Map<string, Pick<PlayerTally, "team" | "lastPlayedAt">>;
+  games: number;
+  totals: PlayerStatCounts;
+  teamGoals: number;
+}
+
+const playedTime = (date: Date | null) => date?.getTime() ?? Number.NEGATIVE_INFINITY;
+
+const toStats = ({ player, teams, games, totals, teamGoals }: PlayerRow) => {
   const perGame = emptyCounts();
 
   for (const count of COUNTS) {
@@ -57,41 +79,81 @@ const toStats = ({ player, team, games, totals, teamGoals }: PlayerTally) => {
     perGame,
     player,
     shootingPercentage: percentage(totals.goals, totals.shots),
-    team,
+    teams: [...teams.values()]
+      .toSorted((a, b) => playedTime(b.lastPlayedAt) - playedTime(a.lastPlayedAt))
+      .map(({ team }) => team),
     totals,
   } satisfies TournamentPlayerStats;
 };
 
-const merge = (into: PlayerTally, tally: PlayerTally) => {
-  into.games += tally.games;
-  into.teamGoals += tally.teamGoals;
+const teamKey = (team: PlayerTally["team"]) => team.id ?? team.name;
 
-  for (const count of COUNTS) {
-    into.totals[count] += tally.totals[count];
+const rowKey = (tally: PlayerTally, by: StatsGrouping) => {
+  switch (by) {
+    case "player": {
+      return tally.player.id;
+    }
+
+    case "team": {
+      return JSON.stringify([tally.player.id, teamKey(tally.team)]);
+    }
+
+    default: {
+      const exhaustive: never = by;
+
+      return exhaustive;
+    }
   }
 };
 
-export const playerStatsResponse = ({ games, unlinkedAccounts, tallies }: PlayerStatsSummary) => {
-  const merged = new Map<string, PlayerTally>();
+const add = (row: PlayerRow, tally: PlayerTally) => {
+  row.games += tally.games;
+  row.teamGoals += tally.teamGoals;
+
+  for (const count of COUNTS) {
+    row.totals[count] += tally.totals[count];
+  }
+
+  const key = teamKey(tally.team);
+  const known = row.teams.get(key);
+
+  if (!known || playedTime(tally.lastPlayedAt) > playedTime(known.lastPlayedAt)) {
+    row.teams.set(key, { lastPlayedAt: tally.lastPlayedAt, team: tally.team });
+  }
+};
+
+export const playerStatsResponse = (
+  { games, unlinkedAccounts, tallies }: PlayerStatsSummary,
+  by: StatsGrouping,
+) => {
+  const rows = new Map<string, PlayerRow>();
 
   for (const tally of tallies) {
-    const key = JSON.stringify([tally.player.id, tally.team.id ?? tally.team.name]);
-    const existing = merged.get(key);
+    const key = rowKey(tally, by);
+    let row = rows.get(key);
 
-    if (existing) {
-      merge(existing, tally);
-    } else {
-      merged.set(key, { ...tally, totals: { ...tally.totals } });
+    if (!row) {
+      row = {
+        games: 0,
+        player: tally.player,
+        teamGoals: 0,
+        teams: new Map(),
+        totals: emptyCounts(),
+      };
+      rows.set(key, row);
     }
+
+    add(row, tally);
   }
 
   return {
     games,
-    players: [...merged.values()]
+    players: [...rows.values()]
       .map(toStats)
       .toSorted(
         (a, b) =>
-          a.team.name.localeCompare(b.team.name) || a.player.name.localeCompare(b.player.name),
+          a.player.name.localeCompare(b.player.name) ||
+          (a.teams[0]?.name ?? "").localeCompare(b.teams[0]?.name ?? ""),
       ),
     unlinkedAccounts,
   } satisfies TournamentPlayerStatsResponse;
