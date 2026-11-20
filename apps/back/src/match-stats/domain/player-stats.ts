@@ -1,5 +1,6 @@
 import type {
   PlayerStatCounts,
+  StatsEra,
   TournamentPlayerStats,
   TournamentPlayerStatsResponse,
   TournamentPlayerStatsTeam,
@@ -21,7 +22,7 @@ export interface PlayerStatsSummary {
 
 export type StatsScope =
   | { kind: "tournaments"; ids: string[] }
-  | { kind: "redistributable"; minGames: number };
+  | { kind: "redistributable"; minGames: number; era: StatsEra | null };
 
 const COUNTS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
 

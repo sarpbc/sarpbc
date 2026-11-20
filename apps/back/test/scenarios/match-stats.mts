@@ -327,6 +327,17 @@ export const verifyMatchStats = async ({
   );
   assert.ok(overall.games >= stageStats.games, "the overall leaderboard counts every stage game");
 
+  const openEraResponse = await request("GET", "/stats/players?era=open");
+  const openEra = openEraResponse.json(playerStats);
+  assert.ok(openEra.games >= stageStats.games, "the open era counts games played since 2020");
+  const preOpenEraResponse = await request("GET", "/stats/players?era=pre-open");
+  const preOpenEra = preOpenEraResponse.json(playerStats);
+  assert.ok(
+    preOpenEra.games <= overall.games - stageStats.games,
+    "the pre-open era leaves out games played since 2020",
+  );
+  await request("GET", "/stats/players?era=rlcs-x", undefined, undefined, 400);
+
   const linksUrl = `/tournaments/${tournamentId}/stats-players`;
   await request("GET", linksUrl, undefined, undefined, 401);
   await request("GET", linksUrl, undefined, memberCookie, 403);

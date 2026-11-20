@@ -106,9 +106,10 @@ export type {
   TournamentPlayerStats,
   TournamentPlayerStatsResponse,
   TournamentPlayerStatsTeam,
+  StatsEra,
 } from "./match-stats";
 
-export { OVERALL_STATS_MIN_GAMES } from "./match-stats";
+export { OPEN_ERA_START, OVERALL_STATS_MIN_GAMES, STATS_ERAS } from "./match-stats";
 
 export type { CreatedPatToken, ModerationReply, PatToken, TrackedStreamer } from "./staff-console";
 

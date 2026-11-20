@@ -1,4 +1,10 @@
-import type { MatchGameStats, MatchGameTeamStats, TournamentStatsGame } from "@sarpbc/types";
+import { OPEN_ERA_START } from "@sarpbc/types";
+import type {
+  MatchGameStats,
+  MatchGameTeamStats,
+  StatsEra,
+  TournamentStatsGame,
+} from "@sarpbc/types";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { z } from "zod";
 import { mapSequentially } from "../../../common/application/sequentially";
@@ -25,6 +31,26 @@ const STATS_FROM = `from match_game_player p
   join tournament_participant part on part.id =
     case when p.side = 'blue' then g.blue_participant_id else g.orange_participant_id end`;
 
+const eraFilter = (era: StatsEra) => {
+  const playedOn = "coalesce(g.played_at, m.begin_at, t.begin_at)";
+
+  switch (era) {
+    case "open": {
+      return `${playedOn} >= ?`;
+    }
+
+    case "pre-open": {
+      return `${playedOn} < ?`;
+    }
+
+    default: {
+      const exhaustive: never = era;
+
+      return exhaustive;
+    }
+  }
+};
+
 const scopeFilter = (scope: StatsScope) => {
   switch (scope.kind) {
     case "tournaments": {
@@ -36,7 +62,15 @@ const scopeFilter = (scope: StatsScope) => {
     }
 
     case "redistributable": {
-      return { filter: "t.source <> 'startgg'", minGames: scope.minGames, params: [] };
+      const redistributable = "t.source <> 'startgg'";
+
+      return scope.era === null
+        ? { filter: redistributable, minGames: scope.minGames, params: [] }
+        : {
+            filter: `${redistributable} and ${eraFilter(scope.era)}`,
+            minGames: scope.minGames,
+            params: [OPEN_ERA_START],
+          };
     }
 
     default: {

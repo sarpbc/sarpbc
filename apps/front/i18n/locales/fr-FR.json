@@ -1979,6 +1979,14 @@
       "minGames": "Joueurs avec {count} parties ou plus",
       "caption": "Stats des joueurs sur toutes les parties de tournoi dont les replays sont importés",
       "empty": "Aucune stat de joueur pour le moment.",
+      "era": {
+        "label": "Ère",
+        "all": "Toutes les ères",
+        "open": "Ère Open",
+        "preOpen": "Avant l'ère Open",
+        "openSince": "Parties depuis {date}, quand les RLCS ont ouvert les qualifications à toutes les équipes",
+        "preOpenUntil": "Parties avant {date}, quand les RLCS ont ouvert les qualifications à toutes les équipes"
+      },
       "seo": {
         "title": "Classement des stats joueurs Rocket League {'|'} sarpbc.org",
         "description": "Comparez les joueurs de l'esport Rocket League sur sarpbc.org : buts, passes décisives, arrêts, tirs, démolitions et pourcentage de réussite sur les parties de tournoi."

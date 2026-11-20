@@ -165,3 +165,10 @@ export interface TournamentPlayerStatsResponse {
 }
 
 export const OVERALL_STATS_MIN_GAMES = 10;
+
+export const STATS_ERAS = ["open", "pre-open"] as const;
+
+export type StatsEra = (typeof STATS_ERAS)[number];
+
+/** First day of RLCS X, the first season whose qualifiers were open to every team. */
+export const OPEN_ERA_START = "2020-08-01";
