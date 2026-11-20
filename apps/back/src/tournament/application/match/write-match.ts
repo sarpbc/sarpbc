@@ -125,7 +125,7 @@ export const createMatchInTransaction = async (
   const participants = await requireParticipants(writer, tournamentId, input.participantIds);
   const match = new Match();
   match.tournament = tournament;
-  match.source = tournament.source === "startgg" ? "startgg" : "manual";
+  match.source = "manual";
   match.sourceUrl = parseDataSourceUrl(input.sourceUrl ?? null);
 
   if (input.previousMatches?.length !== undefined && input.previousMatches.length !== 0) {
@@ -168,7 +168,7 @@ export const createEmptyBracketInTransaction = async (
   const planned = emptySingleEliminationBracket(input.teams).map((slot) => {
     const match = new Match();
     match.tournament = tournament;
-    match.source = tournament.source === "startgg" ? "startgg" : "manual";
+    match.source = "manual";
 
     return { match, slot };
   });

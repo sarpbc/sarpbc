@@ -109,7 +109,6 @@ describe("get_season", () => {
                 id: "s1",
                 name: "Open",
                 slug: "open",
-                source: "startgg",
               },
             },
           ],

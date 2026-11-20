@@ -181,36 +181,6 @@ export const verifyStreams = async ({
     "clearing the override restores inheritance",
   );
 
-  const response7 = await request(
-    "POST",
-    "/tournaments",
-    { name: "Integration start.gg Cup", source: "startgg" },
-    staffCookie,
-    201,
-  );
-
-  const startggCup = response7.json(
-    z.object({ tournament: z.object({ id: z.string() }) }),
-  ).tournament;
-
-  const response8 = await request(
-    "PUT",
-    `/tournaments/${startggCup.id}/streams`,
-    {
-      streams: [
-        { kind: "official", language: "en", url: "https://twitch.tv/integration_startgg_cup" },
-      ],
-    },
-    staffCookie,
-  );
-
-  const startggStreams = response8.json(streamsResponse).streams;
-
-  assert.deepEqual(
-    startggStreams.map((entry) => entry.source),
-    ["startgg"],
-    "staff edits on a start.gg tournament are start.gg data",
-  );
   await request("PUT", tournamentPath, { streams: [] }, staffCookie);
   await request("PUT", eventPath, { streams: [] }, staffCookie);
   assert.deepEqual(await watched(), []);
@@ -227,7 +197,7 @@ export const verifyStreamProposals = async ({
   const proposed = {
     kind: "official",
     language: "en",
-    url: "https://twitch.tv/integration_startgg",
+    url: "https://twitch.tv/integration_proposed",
   };
 
   const refused = await callTool(
@@ -238,13 +208,27 @@ export const verifyStreamProposals = async ({
 
   assert.deepEqual(refused, { error: true }, "set_match_streams requires a sourceUrl");
 
-  const startgg = await callTool("set_tournament_streams", {
-    sourceUrl: "https://www.start.gg/tournament/integration/event/main",
+  assert.deepEqual(
+    await callTool(
+      "set_tournament_streams",
+      {
+        sourceUrl: "https://www.start.gg/tournament/integration/event/main",
+        streams: [proposed],
+        tournamentId: tournament.id,
+      },
+      toolFailure,
+    ),
+    { error: true },
+    "a start.gg source is refused",
+  );
+
+  const tournamentProposal = await callTool("set_tournament_streams", {
+    sourceUrl: "https://x.com/integration/status/streams",
     streams: [proposed],
     tournamentId: tournament.id,
   });
 
-  assert.equal(startgg.status, "pending");
+  assert.equal(tournamentProposal.status, "pending");
 
   const response9 = await request(
     "GET",
@@ -254,7 +238,7 @@ export const verifyStreamProposals = async ({
   );
 
   assert.deepEqual(response9.json(streamsResponse).streams, [], "nothing changes before approval");
-  const reviewResult = await review(startgg);
+  const reviewResult = await review(tournamentProposal);
   assert.equal(reviewResult.status, "applied");
 
   const response10 = await request("GET", `/tournaments/${tournament.id}`);
@@ -262,8 +246,8 @@ export const verifyStreamProposals = async ({
 
   assert.deepEqual(
     listed.map(({ url, source }) => [url, source]),
-    [[proposed.url, "startgg"]],
-    "the site keeps start.gg streams with their source for the credit",
+    [[proposed.url, "manual"]],
+    "an approved stream list is manual data",
   );
 
   const callToolResult = await callTool(
@@ -272,7 +256,7 @@ export const verifyStreamProposals = async ({
     z.object({ streams: z.array(z.unknown()) }),
   );
 
-  assert.deepEqual(callToolResult.streams, []);
+  assert.equal(callToolResult.streams.length, 1, "MCP tournament reads return the streams");
   const upcoming = await callTool("get_upcoming_matches", {}, mcpMatches);
 
   const mcpMatch = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? [])].find(
@@ -280,7 +264,7 @@ export const verifyStreamProposals = async ({
   );
 
   assert.ok(mcpMatch, "the upcoming match is listed through the MCP");
-  assert.deepEqual(mcpMatch.streams, [], "MCP match reads drop inherited start.gg streams");
+  assert.equal(mcpMatch.streams?.length, 1, "MCP match reads return inherited streams");
 
   const manual = await callTool("set_match_streams", {
     matchId: match.id,

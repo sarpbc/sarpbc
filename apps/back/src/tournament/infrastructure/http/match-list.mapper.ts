@@ -7,7 +7,6 @@ import type {
 } from "@sarpbc/types";
 import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
 import { Match, matchPublicSlug } from "../../domain/match";
-import { isRedistributable } from "../../../common/domain/data-source";
 import { isMatchBlockLive } from "../../application/match/match-blocks";
 import { mapParticipantRef } from "./participant-ref.mapper";
 
@@ -64,7 +63,6 @@ export const mapMatchBlockItem = (match: Match, now: Date, commentCount: number)
   ({
     ...mapMatchListItem(match),
     commentCount,
-    startgg: !isRedistributable(match.source) || !isRedistributable(match.tournament.source),
     state: matchBlockState(match, now),
   }) satisfies MatchBlockItem;
 

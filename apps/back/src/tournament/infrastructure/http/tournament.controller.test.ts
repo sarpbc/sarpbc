@@ -99,7 +99,7 @@ describe("TournamentController stage reads", () => {
           byPlayer: async () => [],
           byTeam: async () => [],
           byTournament: async () => null,
-          tournamentSource: async () => null,
+          tournamentExists: async () => false,
         },
         { run: async () => await Promise.reject(new Error("unused")) },
         new CompetitionAfterCommit(
@@ -134,7 +134,7 @@ describe("TournamentController stage reads", () => {
     expect(result.tournament).toMatchObject({ id: "t1", matches: [], participants: [] });
   });
 
-  it("aggregates the player stats of a stage, 404 for start.gg or unknown stages", async () => {
+  it("aggregates the player stats of a stage, 404 for unknown stages", async () => {
     known = (id) =>
       id === "missing"
         ? null
@@ -142,16 +142,13 @@ describe("TournamentController stage reads", () => {
             event: { id: "e1", name: "Coupe de France", slug: "coupe-de-france-slash-2026" },
             id,
             slug: id,
-            source: id === "open-qualifier" ? "startgg" : "manual",
+            source: "manual",
           });
 
     await expect(controller.getPlayerStats("group-stage")).resolves.toMatchObject({
       games: 1,
       players: [{ goalParticipation: 50, player: { id: "zen" }, totals: { goals: 1, saves: 2 } }],
     });
-    await expect(controller.getPlayerStats("open-qualifier")).rejects.toBeInstanceOf(
-      NotFoundException,
-    );
     await expect(controller.getPlayerStats("missing")).rejects.toBeInstanceOf(NotFoundException);
   });
 });

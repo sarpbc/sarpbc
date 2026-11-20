@@ -20,12 +20,6 @@ export type ParsedViewership =
   | { ok: true; viewership: Viewership }
   | { ok: false; error: ViewershipError };
 
-export const isForbiddenViewershipSource = (hostname: string) => {
-  const host = hostname.toLowerCase().replace(/\.$/u, "");
-
-  return isForbiddenSourceHost(host) || host === "start.gg" || host.endsWith(".start.gg");
-};
-
 const isViewerCount = (value: number) =>
   Number.isInteger(value) && value >= 0 && value <= MAX_VIEWERS;
 
@@ -70,7 +64,7 @@ export const parseViewership = (input: Viewership) => {
     return { error: "invalid-source-url", ok: false } satisfies ParsedViewership;
   }
 
-  if (isForbiddenViewershipSource(url.hostname)) {
+  if (isForbiddenSourceHost(url.hostname)) {
     return { error: "forbidden-source", ok: false } satisfies ParsedViewership;
   }
 

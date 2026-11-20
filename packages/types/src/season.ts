@@ -1,4 +1,3 @@
-import type { DataSource } from "./competition";
 import type { TournamentEventRef } from "./tournament-event";
 
 export const SEASON_AWARD_TYPES = ["season_mvp", "regular_season_mvp", "regional_mvp"] as const;
@@ -40,7 +39,6 @@ export interface SeasonPathTournament {
   id: string;
   name: string;
   slug: string;
-  source: DataSource;
   event: TournamentEventRef;
 }
 

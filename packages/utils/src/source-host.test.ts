@@ -1,6 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { isBlastSourceHost, isForbiddenSourceHost, isLiquipediaSourceHost } from "./source-host";
+import {
+  isBlastSourceHost,
+  isForbiddenSourceHost,
+  isLiquipediaSourceHost,
+  isStartggSourceHost,
+} from "./source-host";
 
 void describe("isLiquipediaSourceHost", () => {
   void it("matches Liquipedia and its mirrors", () => {
@@ -24,13 +29,25 @@ void describe("isBlastSourceHost", () => {
   });
 });
 
+void describe("isStartggSourceHost", () => {
+  void it("matches start.gg and its subdomains but not lookalikes", () => {
+    for (const host of ["start.gg", "www.START.gg", "api.start.gg."]) {
+      assert.equal(isStartggSourceHost(host), true);
+    }
+
+    for (const host of ["notstart.gg", "start.gg.example"]) {
+      assert.equal(isStartggSourceHost(host), false);
+    }
+  });
+});
+
 void describe("isForbiddenSourceHost", () => {
-  void it("refuses Liquipedia and BLAST.tv and accepts official sources", () => {
-    for (const host of ["liquipedia.net", "www.blast.tv"]) {
+  void it("refuses Liquipedia, BLAST.tv and start.gg and accepts official sources", () => {
+    for (const host of ["liquipedia.net", "www.blast.tv", "www.start.gg"]) {
       assert.equal(isForbiddenSourceHost(host), true);
     }
 
-    for (const host of ["rocketleague.com", "start.gg", "notblast.tv"]) {
+    for (const host of ["rocketleague.com", "notstart.gg", "notblast.tv"]) {
       assert.equal(isForbiddenSourceHost(host), false);
     }
   });

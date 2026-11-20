@@ -37,7 +37,7 @@ export class CompetitionAwardWriter implements AwardWriter {
           }
         : null,
       player: player ? { id: player.id, name: player.name, slug: player.slug } : null,
-      tournament: t ? { id: t.id, name: t.name, source: t.source } : null,
+      tournament: t ? { id: t.id, name: t.name } : null,
     };
   }
   async awardTaken(tournamentId: string, awardType: PlayerAwardType) {

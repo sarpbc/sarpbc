@@ -1,11 +1,7 @@
 import type { RosterChange, RosterProposalStatus, TeamLogoVariant } from "@sarpbc/types";
 import { isAcceptedDataSourceUrl, requiredPermission } from "@sarpbc/utils";
 import { mapSequentially } from "../../common/application/sequentially";
-import {
-  REFUSED_DATA_SOURCE_MESSAGE,
-  isRedistributable,
-  sourceFromUrl,
-} from "../../common/domain/data-source";
+import { REFUSED_DATA_SOURCE_MESSAGE } from "../../common/domain/data-source";
 import { ForbiddenError } from "../../common/domain/errors/forbidden-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
@@ -166,10 +162,6 @@ export class RosterProposalService {
     }
 
     if (change.kind === "set_match_lineups") {
-      if (!isRedistributable(sourceFromUrl(sourceUrl))) {
-        throw new InvalidInputError("Lineups sourced from start.gg cannot be proposed");
-      }
-
       await this.lineups.requireProposable(change.matchId, change.lineups);
     }
 
@@ -395,15 +387,15 @@ export class RosterProposalService {
             teamId,
           }),
         ),
-      create_player: async (change, sourceUrl) => {
+      create_player: async (change) => {
         const { kind: _, ...input } = change;
 
-        return await idOf(this.players.create({ ...input, source: sourceFromUrl(sourceUrl) }));
+        return await idOf(this.players.create(input));
       },
-      create_team: async (change, sourceUrl) => {
+      create_team: async (change) => {
         const { kind: _, ...input } = change;
 
-        return await idOf(this.teams.create({ ...input, source: sourceFromUrl(sourceUrl) }));
+        return await idOf(this.teams.create(input));
       },
       delete_match: async (change) => {
         await this.matches.deleteMatch(change.matchId);
@@ -438,7 +430,7 @@ export class RosterProposalService {
 
         return circuitId;
       },
-      set_event_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_event_streams: async (change) => await this.setStreams(change),
       set_event_viewership: async (change) => {
         await this.viewerships.set({ id: change.eventId, kind: "event" }, change.viewership);
 
@@ -449,7 +441,7 @@ export class RosterProposalService {
 
         return change.matchId;
       },
-      set_match_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_match_streams: async (change) => await this.setStreams(change),
       set_match_viewership: async (change) => {
         await this.viewerships.set({ id: change.matchId, kind: "match" }, change.viewership);
 
@@ -463,7 +455,7 @@ export class RosterProposalService {
 
         return change.tournamentId;
       },
-      set_tournament_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
+      set_tournament_streams: async (change) => await this.setStreams(change),
       update_contract: async (
         { contractId, playerId, teamId, startDate, endDate, contractRole },
         sourceUrl,
@@ -502,9 +494,9 @@ export class RosterProposalService {
     } satisfies ApplyHandlers;
   }
 
-  private async setStreams(change: Parameters<typeof streamChangeFor>[0], sourceUrl: string) {
+  private async setStreams(change: Parameters<typeof streamChangeFor>[0]) {
     const { owner, streams } = streamChangeFor(change);
-    await this.streams.set(owner, streams, sourceFromUrl(sourceUrl));
+    await this.streams.set(owner, streams);
 
     return owner.id;
   }

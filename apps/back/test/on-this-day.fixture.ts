@@ -150,25 +150,15 @@ export const onThisDaySources = (
 
 type FactLink = NonNullable<OnThisDayFact["link"]>;
 
-export const STARTGG_STAGE_ID = "6e2f3a4b-5c6d-4e7f-8a9b-0c1d2e3f4a5b";
 export const MANUAL_STAGE_ID = "0f1e2d3c-4b5a-4968-8776-5a4b3c2d1e0f";
 
 const LINKABLE = [
-  {
-    event: { name: "Community Cup", slug: "community-cup" },
-    id: STARTGG_STAGE_ID,
-    kind: "tournament",
-    name: "Open qualifier",
-    slug: "open-qualifier",
-    source: "startgg",
-  },
   {
     event: { name: "French Cup", slug: "french-cup" },
     id: MANUAL_STAGE_ID,
     kind: "tournament",
     name: "Playoffs",
     slug: "playoffs",
-    source: "manual",
   },
 ] satisfies FactLink[];
 

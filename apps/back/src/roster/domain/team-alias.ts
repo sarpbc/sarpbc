@@ -24,7 +24,7 @@ export class TeamAlias {
 const ERRORS = {
   "forbidden-logo-source": "Liquipedia is not an accepted logo source; use the official asset.",
   "forbidden-source":
-    "Liquipedia and BLAST.tv are not accepted sources; cite the team, its players, the organiser, RLEsports or PandaScore.",
+    "Liquipedia, BLAST.tv and start.gg are not accepted sources; cite the team, its players, the organiser, RLEsports or PandaScore.",
   "invalid-from": "The alias start date must be a real YYYY-MM-DD date.",
   "invalid-logo-url": "The alias logo must be an https URL.",
   "invalid-pandascore-id": "The PandaScore team id must be a positive whole number.",

@@ -127,12 +127,6 @@ describe("GET /player/compare (e2e)", () => {
     expect(comparison.a.seasonAwards).toStrictEqual([zenSeasonAward]);
   });
 
-  it("leaves start.gg competition data out of the comparison", async () => {
-    const { response } = await zenVersusVatira();
-
-    expect(JSON.stringify(response.body)).not.toContain("startgg");
-  });
-
   it.each([
     ["an unknown player", { a: "zen", b: "ghost" }, 404],
     ["a player compared with themselves", { a: "zen", b: "zen" }, 400],

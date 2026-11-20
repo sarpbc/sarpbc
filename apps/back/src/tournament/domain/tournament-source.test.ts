@@ -7,19 +7,19 @@ import {
 } from "./tournament-source";
 
 describe("tournament source", () => {
-  it("edits start.gg tournaments like manual ones", () => {
+  it("edits manual tournaments freely", () => {
     expect(() => {
-      assertTournamentUpdateAllowed("startgg", { name: "RLCS Open" });
+      assertTournamentUpdateAllowed("manual", { name: "RLCS Open" });
     }).not.toThrow();
   });
 
-  it("never pulls PandaScore into a start.gg tournament", () => {
+  it("never pulls PandaScore into a manual tournament", () => {
     expect(() => {
-      assertPandascoreSyncAllowed("startgg");
-    }).toThrow("Cannot sync a startgg");
+      assertPandascoreSyncAllowed("manual");
+    }).toThrow("Cannot sync a manual");
     expect(() => {
-      assertPandascoreUpsertAllowed({ id: "t1", source: "startgg" }, 42);
-    }).toThrow("source=startgg");
+      assertPandascoreUpsertAllowed({ id: "t1", source: "manual" }, 42);
+    }).toThrow("source=manual");
   });
 
   it("lets staff fix the image and end date of a PandaScore tournament", () => {
@@ -48,11 +48,8 @@ describe("tournament source", () => {
     });
   });
 
-  it("refuses to claim a synced or start.gg tournament", () => {
+  it("refuses to claim a synced tournament", () => {
     const base = { endAt: null, endAtCorrected: false, id: "t1", pandascoreId: null };
-    expect(() => {
-      claimForPandascore({ ...base, source: "startgg" }, 42, null);
-    }).toThrow("source=startgg");
     expect(() => {
       claimForPandascore({ ...base, source: "pandascore" }, 42, null);
     }).toThrow("source=pandascore");

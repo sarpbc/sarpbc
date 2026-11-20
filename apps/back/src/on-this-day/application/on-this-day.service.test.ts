@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import {
-  STARTGG_STAGE_ID,
   fact,
   player,
   grandFinal,
@@ -121,35 +120,6 @@ describe(OnThisDayService, () => {
     });
   });
 
-  it("drops start.gg titles, finals and facts linked to start.gg from the public payload", async () => {
-    const startggStage = stage("community-cup", "startgg", "2024-12-06T18:00:00Z");
-    const manualStage = stage("cup", "manual", "2021-12-06T18:00:00Z");
-
-    const { sources } = onThisDaySources({
-      facts: [
-        fact({
-          link: {
-            event: { name: "Community Cup", slug: "community-cup" },
-            id: STARTGG_STAGE_ID,
-            kind: "tournament",
-            name: "Open qualifier",
-            slug: "open-qualifier",
-            source: "startgg",
-          },
-        }),
-      ],
-      finals: [
-        grandFinal(startggStage, "2024-12-06T17:00:00Z"),
-        grandFinal(manualStage, "2021-12-06T17:00:00Z", { source: "startgg" }),
-      ],
-      titles: [startggStage, manualStage],
-    });
-
-    const { events } = await new OnThisDayService(sources).forDay(ON, NOW);
-
-    expect(events).toStrictEqual([expect.objectContaining({ kind: "title", year: 2021 })]);
-  });
-
   it("shows only staff facts of this day that are not dated in a future year", async () => {
     const { sources } = onThisDaySources({
       facts: [
@@ -176,7 +146,6 @@ describe(OnThisDayService, () => {
         kind: "player",
         name: "Vatira",
         slug: "vatira",
-        source: null,
       },
     });
 

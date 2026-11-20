@@ -187,7 +187,6 @@ export class CircuitPersistence implements CircuitStore {
       placements: placements.get(stage.tournament.id) ?? [],
       regionTeamIds: regionTeams(stage).map(({ id }) => id),
       scale: stage.scale,
-      source: stage.tournament.source,
       sourceUrl: stage.sourceUrl,
       worldwide: stage.worldwide,
     }));

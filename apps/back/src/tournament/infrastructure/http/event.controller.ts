@@ -16,7 +16,6 @@ import {
 } from "@nestjs/common";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
-import { isRedistributable } from "../../../common/domain/data-source";
 import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import type { ListTournamentsQueryInput } from "./dto/list-tournaments-query.dto";
 import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
@@ -112,7 +111,7 @@ export class EventController {
     @Param("id") id: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
-    return await this.streamService.set({ id, kind: "event" }, body.streams, "manual");
+    return await this.streamService.set({ id, kind: "event" }, body.streams);
   }
 
   @RequirePermissions("tournaments.manage")
@@ -144,7 +143,7 @@ export class EventController {
   async playerStats(@Param("event") event: string) {
     const found = await this.events.find(event);
 
-    if (found?.stages.some((stage) => isRedistributable(stage.source)) !== true) {
+    if (!found || found.stages.length === 0) {
       throw new NotFoundError(MISSING);
     }
 

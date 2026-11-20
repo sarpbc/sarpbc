@@ -134,12 +134,9 @@ const save = async (input: OnThisDayFactInput) => {
               </div>
             </template>
             <template #link-cell="{ row }">
-              <div v-if="row.original.link" class="flex flex-col items-start gap-1">
-                <span class="text-sm" translate="no">{{ linkLabel(row.original.link) }}</span>
-                <SBadge v-if="row.original.link.source === 'startgg'" color="warning">
-                  {{ $t("page.onThisDay.table.hiddenStartgg") }}
-                </SBadge>
-              </div>
+              <span v-if="row.original.link" class="text-sm" translate="no">
+                {{ linkLabel(row.original.link) }}
+              </span>
               <span v-else class="text-sm text-muted">{{ $t("page.onThisDay.table.noLink") }}</span>
             </template>
             <template #actions-cell="{ row }">

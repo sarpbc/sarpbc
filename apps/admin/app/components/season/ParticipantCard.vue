@@ -146,11 +146,8 @@ const addEntry = async () => {
               <span class="font-medium">{{ entry.label }}</span>
               · {{ entry.result }}
             </span>
-            <span v-if="entry.tournament" class="flex flex-row items-center gap-2 text-muted">
+            <span v-if="entry.tournament" class="text-muted">
               {{ entryTournamentLabel(entry) }}
-              <SBadge v-if="entry.tournament.source === 'startgg'" color="warning">
-                {{ $t("page.seasons.path.startgg") }}
-              </SBadge>
             </span>
           </div>
           <SButton

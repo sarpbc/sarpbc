@@ -16,8 +16,8 @@ import {
   updateTournamentFields,
 } from "../../../tournament/infrastructure/http/dto/create-tournament.dto";
 import { defineTool } from "../define-tool";
-import { mapListedParticipants, mapMatchListResponse } from "../mappers";
-import { tournamentNotFound } from "../redistributable-competition";
+import { mapMatchListResponse, mapTournamentParticipant } from "../mappers";
+import { tournamentNotFound } from "../competition-reads";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
 import { BODY_TAGS } from "./news-syntax";
 import { resolveMatchParticipantIds } from "./resolve-match-participants";
@@ -26,12 +26,11 @@ import {
   bracketLinksSchema,
   emptyBracketTeamsSchema,
 } from "../../../tournament/infrastructure/http/dto/create-match.dto";
-import { isRedistributable } from "../../../common/domain/data-source";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { requireUpdateFields } from "./update-fields";
 
 const matchSourceUrlInput = dataSourceUrlField(
-  "Public page the match, its schedule or its score was taken from: the organiser's announcement, the official Rocket League rules or the start.gg or PandaScore page. Never Liquipedia, a mirror of it or BLAST.tv.",
+  "Public page the match, its schedule or its score was taken from: the organiser's announcement, the official Rocket League rules or the PandaScore page. Never Liquipedia, a mirror of it, BLAST.tv or start.gg.",
 );
 
 const matchResultSchema = z.object({
@@ -154,7 +153,7 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Create a tournament match. Pass participantIds (tournament participant UUIDs from get_tournament), teams (team UUIDs or slugs from search_teams or get_tournament) and/or players (player UUIDs or slugs, for 1v1 and 2v2 participants without a team). Every team or player must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists participants for manual and PandaScore tournaments. start.gg tournaments are not returned by get_tournament.",
+      "Create a tournament match. Pass participantIds (tournament participant UUIDs from get_tournament), teams (team UUIDs or slugs from search_teams or get_tournament) and/or players (player UUIDs or slugs, for 1v1 and 2v2 participants without a team). Every team or player must already be registered in the tournament. At least two different sides are required. results still use participant UUIDs. The response lists the match participants.",
     handler: async ({
       tournamentId,
       name,
@@ -198,8 +197,8 @@ export const writeTools = ({
         result: {
           id: match.id,
           name: match.name,
+          participants: participants.map(mapTournamentParticipant),
           tournamentId,
-          ...mapListedParticipants(tournament.source, participants),
           url: matchUrl(match.publicId, matchPublicSlug(match)),
         },
       };
@@ -389,7 +388,7 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Mark one side of a two-sided match as having forfeited or been disqualified, or clear the forfeit. Works on any match, PandaScore included. When the cited source (for example a start.gg set shown as DQ with a -1 score) reports a forfeit or disqualification, record it here instead of entering the score. A forfeit keeps the series counted normally for circuit points, standings and pick'em: the winner becomes the other side and the score becomes the series default (3-0 in a best of 5; the score is kept when the series length is unknown). Passing participantId null clears the forfeit without touching the score or the winner. sourceUrl is required to declare a forfeit and optional to clear one; when given it is recorded as the match source like set_match_source.",
+      "Mark one side of a two-sided match as having forfeited or been disqualified, or clear the forfeit. Works on any match, PandaScore included. When the cited source (for example a bracket set shown as DQ with a -1 score) reports a forfeit or disqualification, record it here instead of entering the score. A forfeit keeps the series counted normally for circuit points, standings and pick'em: the winner becomes the other side and the score becomes the series default (3-0 in a best of 5; the score is kept when the series length is unknown). Passing participantId null clears the forfeit without touching the score or the winner. sourceUrl is required to declare a forfeit and optional to clear one; when given it is recorded as the match source like set_match_source.",
     handler: async ({ matchId, participantId, sourceUrl }) => {
       if (participantId !== null && sourceUrl === undefined) {
         throw new InvalidInputError(
@@ -440,9 +439,7 @@ export const writeTools = ({
 
       return {
         entityId: tournamentId,
-        result: isRedistributable(tournament.source)
-          ? { ...result, matches: matches.map(mapMatchListResponse) }
-          : result,
+        result: { ...result, matches: matches.map(mapMatchListResponse) },
       };
     },
     input: {
@@ -463,7 +460,7 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Create a manual tournament on sarpbc.org. PandaScore-synced tournaments cannot be created through this tool. Pass eventId to add it as a stage (phase) of an existing event from list_events or create_event; otherwise it gets an event of its own named after it. The response includes participants (participant id plus team id, slug and name) unless source is startgg.",
+      "Create a manual tournament on sarpbc.org. PandaScore-synced tournaments cannot be created through this tool. Pass eventId to add it as a stage (phase) of an existing event from list_events or create_event; otherwise it gets an event of its own named after it. The response includes participants (participant id plus team id, slug and name).",
     handler: async (input) => {
       const tournament = await manualTournamentService.create(input);
 
@@ -473,9 +470,9 @@ export const writeTools = ({
           event: tournament.event,
           id: tournament.id,
           name: tournament.name,
+          participants: tournament.participants.map(mapTournamentParticipant),
           slug: tournament.slug,
           source: tournament.source,
-          ...mapListedParticipants(tournament.source, tournament.participants),
           url: tournamentUrl(tournament),
         },
       };
@@ -494,8 +491,6 @@ export const writeTools = ({
       playerParticipants:
         "Participants without a team, for 1v1 and 2v2: each entry lists the player UUIDs of one participant (one player in 1v1, two in 2v2). Use search_players to find ids. Never create a team for a single player. The response lists each participant id.",
       slug: "Optional URL slug of the new event. Generated from the name when omitted. Not allowed with eventId.",
-      source:
-        "startgg when the data comes from start.gg; MCP reads then never return it. Defaults to manual.",
       teamIds:
         "Team UUIDs to register as participants. Use search_teams to find ids. Each participant gets a snapshot of its team's current active players as its roster; correct it with update_tournament rosters. Not allowed in 1v1. The response lists each participant id.",
       tier: "Optional competitive tier label (e.g. S-Tier).",
@@ -519,9 +514,9 @@ export const writeTools = ({
           id: tournament.id,
           imageUrl: tournament.imageUrl,
           name: tournament.name,
+          participants: tournament.participants.map(mapTournamentParticipant),
           slug: tournament.slug,
           source: tournament.source,
-          ...mapListedParticipants(tournament.source, tournament.participants),
           url: tournamentUrl(tournament),
         },
       };
@@ -542,7 +537,7 @@ export const writeTools = ({
         playerParticipants:
           "Replace the participants without a team (1v1 players, 2v2 duos) with this list; each entry lists the player UUIDs of one participant. Team participants are kept. The response lists each participant id.",
         rosters:
-          "Manual tournaments only. Replace the tournament roster of the listed participants (teamId of an existing participant, playerIds who played this tournament for the team, and optionally sourceUrl: the public page the roster comes from, null to clear it, never Liquipedia or BLAST.tv; omitted keeps the current source); other participants keep theirs. Applied after teamIds.",
+          "Manual tournaments only. Replace the tournament roster of the listed participants (teamId of an existing participant, playerIds who played this tournament for the team, and optionally sourceUrl: the public page the roster comes from, null to clear it, never Liquipedia, BLAST.tv or start.gg; omitted keeps the current source); other participants keep theirs. Applied after teamIds.",
         slug: "URL slug of the event this tournament has of its own. Not allowed with eventId.",
         teamIds:
           "Replace participating teams with this list of team UUIDs. A newly added team gets a snapshot of its current active players as its tournament roster. Participants without a team are kept. The response lists each participant id.",

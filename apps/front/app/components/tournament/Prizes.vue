@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import { teamPath } from "@sarpbc/utils";
 import type { TournamentDetail } from "@sarpbc/types";
-import { STARTGG_URL } from "~/composables/prizes";
 
 const { tournament } = defineProps<{
   tournament: TournamentDetail;
@@ -89,15 +88,6 @@ const showSection = computed(
             </HubListItem>
           </li>
         </ol>
-        <p
-          v-if="distribution?.source === 'startgg'"
-          class="flex h-row items-center border-b border-separator px-2 text-xs text-muted"
-        >
-          <span>
-            {{ t("common.prizes.dataFrom") }}
-            <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
-          </span>
-        </p>
       </HubCard>
     </HubRail>
   </section>

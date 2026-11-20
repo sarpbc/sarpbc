@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { DataSource, PrizeEntry, TournamentPrizes } from "@sarpbc/types";
+import type { PrizeEntry, TournamentPrizes } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { PrizeParticipant, PrizeTransaction } from "./ports";
@@ -20,18 +20,18 @@ const RULES = "https://www.rocketleague.com/en/news/rlcs-official-rules";
 
 const rosterA: PrizeParticipant = { playerIds: ["player-a", "player-b"], teamId: "team-a" };
 
-const EMPTY_PRIZES: TournamentPrizes = { prizepool: null, prizes: [], source: "manual" };
+const EMPTY_PRIZES: TournamentPrizes = { prizepool: null, prizes: [] };
 
 const setup = ({
   exists = true,
   participants = [rosterA],
   prizes = EMPTY_PRIZES,
-  source = "manual",
+  known = true,
 }: {
   exists?: boolean;
   participants?: PrizeParticipant[];
   prizes?: TournamentPrizes | null;
-  source?: DataSource | null;
+  known?: boolean;
 } = {}) => {
   const stored = { entries: [entry] };
   const replaced: { tournamentId: string; entries: PrizeEntry[] }[] = [];
@@ -49,7 +49,7 @@ const setup = ({
     byPlayer: async () => [],
     byTeam: async () => [],
     byTournament: async () => prizes,
-    tournamentSource: async () => source,
+    tournamentExists: async () => known,
   };
 
   const transaction: PrizeTransaction = { run: async (work) => await work({ prizes: writer }) };
@@ -129,14 +129,11 @@ describe(TournamentPrizeService, () => {
     await expect(service.findByTournamentId("missing")).rejects.toThrow(NotFoundError);
   });
 
-  it("only accepts proposals for known tournaments outside start.gg", async () => {
+  it("only accepts proposals for known tournaments", async () => {
     await expect(setup().service.requireProposableTournament("cup")).resolves.toBeUndefined();
     await expect(
-      setup({ source: null }).service.requireProposableTournament("cup"),
+      setup({ known: false }).service.requireProposableTournament("cup"),
     ).rejects.toThrow(NotFoundError);
-    await expect(
-      setup({ source: "startgg" }).service.requireProposableTournament("cup"),
-    ).rejects.toThrow(InvalidInputError);
   });
 
   it("corrects one row and re-sources it without touching the other rows", async () => {

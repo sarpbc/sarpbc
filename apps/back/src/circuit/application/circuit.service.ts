@@ -17,7 +17,6 @@ import {
 } from "@sarpbc/utils";
 import { v4 } from "uuid";
 import { isUuid } from "../../common/domain/entity-ref";
-import { isRedistributable } from "../../common/domain/data-source";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
@@ -113,8 +112,7 @@ export class CircuitService {
   async standings(idOrSlug: string) {
     const circuit = await this.require(idOrSlug);
 
-    const stageResults = await this.store.stageResults(circuit.id);
-    const results = stageResults.filter(({ source }) => isRedistributable(source));
+    const results = await this.store.stageResults(circuit.id);
 
     return {
       ...circuit,

@@ -20,8 +20,7 @@ export const assertTournamentUpdateAllowed = (
   },
 ) => {
   switch (source) {
-    case "manual":
-    case "startgg": {
+    case "manual": {
       return;
     }
 
@@ -112,10 +111,9 @@ export const assertTournamentDeletable = (source: DataSource) => {
       return;
     }
 
-    case "pandascore":
-    case "startgg": {
+    case "pandascore": {
       throw new InvalidInputError(
-        `Only manual stages can be deleted; this one is imported from ${source === "pandascore" ? "PandaScore" : "start.gg"}.`,
+        "Only manual stages can be deleted; this one is imported from PandaScore.",
       );
     }
 

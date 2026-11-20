@@ -1,6 +1,5 @@
-import type { DataSource, Stream, NewsArticleAdmin } from "@sarpbc/types";
+import type { NewsArticleAdmin } from "@sarpbc/types";
 import { isoDay, participantName } from "@sarpbc/utils";
-import { isRedistributable } from "../../common/domain/data-source";
 import type { Contract } from "../../roster/domain/contract";
 import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
@@ -26,13 +25,6 @@ const days = (dates: (Date | null)[]) =>
   dates.flatMap((date) => (date === null ? [] : [date.getTime()]));
 
 const timeOf = (date: Date | null) => date?.getTime() ?? Number.POSITIVE_INFINITY;
-
-/** start.gg teams may play in a redistributable match; only the match and tournament source count. */
-export const isRedistributableMatch = (match: Match) =>
-  isRedistributable(match.source) && isRedistributable(match.tournament.source);
-
-export const redistributableStreams = (streams: readonly Stream[]) =>
-  streams.filter((stream) => isRedistributable(stream.source)) satisfies Stream[];
 
 export const mapPlayerSummary = (player: Player) => ({
   id: player.id,
@@ -128,11 +120,8 @@ export const mapLeague = (league: League) => ({
   url: league.url,
 });
 
-/** start.gg stages stay out of MCP reads. */
 export const mapEvent = ({ event, stages }: EventListing) => {
-  const phases = stages
-    .filter((stage) => isRedistributable(stage.source))
-    .toSorted((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
+  const phases = stages.toSorted((a, b) => timeOf(a.beginAt) - timeOf(b.beginAt));
 
   const starts = days(phases.map((phase) => phase.beginAt));
   const ends = days(phases.map((phase) => phase.endAt));
@@ -146,13 +135,13 @@ export const mapEvent = ({ event, stages }: EventListing) => {
     name: event.name,
     slug: event.slug,
     stages: phases.map((phase) => ({ ...mapTournamentListItem(phase), tier: phase.tier })),
-    streams: redistributableStreams(event.streams),
+    streams: event.streams,
     url: eventUrl(event.slug),
-    viewership: stages.length === 0 || phases.length > 0 ? event.viewership : null,
+    viewership: event.viewership,
   };
 };
 
-const mapTournamentParticipant = (participant: TournamentParticipant) => ({
+export const mapTournamentParticipant = (participant: TournamentParticipant) => ({
   id: participant.id,
   name: participantName(participant),
   players: participant.players.map(({ id, name, slug }) => ({ id, name, slug })),
@@ -161,18 +150,6 @@ const mapTournamentParticipant = (participant: TournamentParticipant) => ({
     ? { id: participant.team.id, name: participant.team.name, slug: participant.team.slug }
     : null,
 });
-
-/** start.gg tournaments stay out of MCP responses, including write confirmations. */
-export const mapListedParticipants = (
-  source: DataSource,
-  participants: TournamentParticipant[],
-) => {
-  if (!isRedistributable(source)) {
-    return {};
-  }
-
-  return { participants: participants.map(mapTournamentParticipant) };
-};
 
 export const mapMatchListResponse = (match: Match) => {
   const item = mapMatchListItem(match);
@@ -190,9 +167,9 @@ export const mapMatchListResponse = (match: Match) => {
     })),
     sourceUrl: match.sourceUrl,
     status: match.status,
-    streams: redistributableStreams(match.watchStreams()),
+    streams: match.watchStreams(),
     url: matchUrl(item.publicId, item.slug),
-    viewership: isRedistributableMatch(match) ? match.viewership : null,
+    viewership: match.viewership,
     winner: winner ? { name: participantName(winner), participantId: winner.id } : null,
   };
 };
@@ -201,13 +178,13 @@ export const mapTournamentDetail = (tournament: Tournament) => ({
   ...mapTournamentListItem(tournament),
   description: tournament.description,
   hasBracket: tournament.hasBracket,
+  matches: tournament.matches.map(mapMatchListResponse),
+  participants: tournament.participants.map(mapTournamentParticipant),
+  streams: tournament.watchStreams(),
   tier: tournament.tier,
   winner: tournament.winner
     ? { name: participantName(tournament.winner), participantId: tournament.winner.id }
     : null,
-  ...mapListedParticipants(tournament.source, tournament.participants),
-  matches: tournament.matches.filter(isRedistributableMatch).map(mapMatchListResponse),
-  streams: redistributableStreams(tournament.watchStreams()),
 });
 
 export const mapNewsListItem = (article: NewsArticleAdmin) => ({

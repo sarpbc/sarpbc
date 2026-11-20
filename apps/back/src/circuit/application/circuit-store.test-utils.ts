@@ -1,11 +1,12 @@
 import type { CircuitEventTeam, CircuitSummary } from "@sarpbc/types";
 import type { CircuitStageSettings } from "../domain/circuit-scale";
-import type { CircuitStore, StoredStageResult } from "./ports";
+import type { CircuitStageResult } from "../domain/circuit-standings";
+import type { CircuitStore } from "./ports";
 
 export class MemoryCircuitStore implements CircuitStore {
   readonly circuits = new Map<string, CircuitSummary>();
   readonly saved = new Map<string, CircuitStageSettings>();
-  readonly results: StoredStageResult[] = [];
+  readonly results: CircuitStageResult[] = [];
 
   constructor(private readonly teamsByTournament: Map<string, CircuitEventTeam[]>) {}
 

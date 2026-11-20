@@ -13,7 +13,7 @@ const official: StreamInput = {
 const costream: StreamInput = { kind: "costream", language: "fr", url: "https://kick.com/kameto" };
 
 const stream = (url: string, source: Stream["source"] = "manual") => {
-  const streamUrl = replaceStreams([], [{ kind: "official", language: "en", url }], "manual").at(0);
+  const streamUrl = replaceStreams([{ kind: "official", language: "en", url }]).at(0);
 
   if (streamUrl === undefined) {
     throw new Error("fixture");
@@ -40,9 +40,7 @@ const matchIn = (tournament: { streams: Stream[]; eventStreams: Stream[] }) =>
 
 describe(replaceStreams, () => {
   it("normalizes each stream and derives its platform and channel", () => {
-    expect(
-      replaceStreams([], [official, { ...costream, language: " FR " }], "manual"),
-    ).toStrictEqual([
+    expect(replaceStreams([official, { ...costream, language: " FR " }])).toStrictEqual([
       {
         channel: "rlesports",
         kind: "official",
@@ -63,25 +61,21 @@ describe(replaceStreams, () => {
   });
 
   it("keeps an explicit channel name and drops duplicate URLs", () => {
-    const streams = replaceStreams(
-      [],
-      [{ ...official, channel: "RLEsports B" }, official],
-      "manual",
-    );
+    const streams = replaceStreams([{ ...official, channel: "RLEsports B" }, official]);
 
     expect(streams).toHaveLength(1);
     expect(streams[0]?.channel).toBe("RLEsports B");
   });
 
   it("rejects invalid URLs, languages and unnamed channels", () => {
-    expect(() =>
-      replaceStreams([], [{ ...official, url: "http://twitch.tv/rl" }], "manual"),
-    ).toThrow("Stream 1 must use https.");
-    expect(() => replaceStreams([], [official, { ...costream, language: "xx" }], "manual")).toThrow(
+    expect(() => replaceStreams([{ ...official, url: "http://twitch.tv/rl" }])).toThrow(
+      "Stream 1 must use https.",
+    );
+    expect(() => replaceStreams([official, { ...costream, language: "xx" }])).toThrow(
       "Stream 2 needs a two-letter ISO 639-1 language code",
     );
     expect(() =>
-      replaceStreams([], [{ ...official, url: "https://www.youtube.com/watch?v=abc" }], "manual"),
+      replaceStreams([{ ...official, url: "https://www.youtube.com/watch?v=abc" }]),
     ).toThrow("Stream 1 needs a channel name.");
   });
 
@@ -91,27 +85,13 @@ describe(replaceStreams, () => {
       url: `https://twitch.tv/channel${index}`,
     }));
 
-    expect(() => replaceStreams([], many, "manual")).toThrow("at most 12 streams");
+    expect(() => replaceStreams(many)).toThrow("at most 12 streams");
   });
 
-  it("marks every stream of a start.gg sourced list", () => {
-    expect(replaceStreams([], [official], "startgg").map((s) => s.source)).toStrictEqual([
-      "startgg",
-    ]);
-  });
-
-  it("keeps the start.gg mark of a stream a staff edit carries over", () => {
-    const current = replaceStreams([], [official], "startgg");
-
-    const edited = replaceStreams(
-      current,
-      [{ ...official, channel: "Renamed" }, costream],
+  it("marks every staff-entered stream as manual", () => {
+    expect(replaceStreams([official, costream]).map((s) => s.source)).toStrictEqual([
       "manual",
-    );
-
-    expect(edited.map((s) => [s.url, s.source])).toStrictEqual([
-      ["https://twitch.tv/rlesports", "startgg"],
-      ["https://kick.com/kameto", "manual"],
+      "manual",
     ]);
   });
 });

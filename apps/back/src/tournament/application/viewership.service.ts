@@ -1,13 +1,11 @@
 import type { Viewership, ViewershipResponse } from "@sarpbc/types";
-import { isRedistributable } from "../../common/domain/data-source";
-import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { requireViewership } from "../domain/viewership";
 import type { ViewershipOwner } from "../domain/viewership";
 import type { EventWriter, MatchWriter } from "./ports";
 
 export interface ViewershipScope {
-  events: Pick<EventWriter, "load" | "stages" | "save">;
+  events: Pick<EventWriter, "load" | "save">;
   matches: Pick<MatchWriter, "load" | "save">;
 }
 
@@ -17,7 +15,6 @@ export interface ViewershipTransaction {
 
 interface LoadedOwner {
   viewership: Viewership | null;
-  redistributable: boolean;
   save: (viewership: Viewership | null) => Promise<void>;
 }
 
@@ -30,11 +27,7 @@ const loadOwner = (async (scope, owner) => {
         throw new NotFoundError(`Event with id "${owner.id}" was not found.`);
       }
 
-      const stages = await scope.events.stages(event.id);
-
       return {
-        redistributable:
-          stages.length === 0 || stages.some((stage) => isRedistributable(stage.source)),
         save: async (viewership) => {
           event.viewership = viewership;
           await scope.events.save(event);
@@ -51,8 +44,6 @@ const loadOwner = (async (scope, owner) => {
       }
 
       return {
-        redistributable:
-          isRedistributable(match.source) && isRedistributable(match.tournament.source),
         save: async (viewership) => {
           match.viewership = viewership;
           await scope.matches.save(match);
@@ -94,13 +85,7 @@ export class ViewershipService {
   async requireProposable(owner: ViewershipOwner, input: Viewership) {
     requireViewership(input);
     await this.transaction.run(async (scope) => {
-      const loaded = await loadOwner(scope, owner);
-
-      if (!loaded.redistributable) {
-        throw new InvalidInputError(
-          `The viewership of a start.gg ${owner.kind} cannot be proposed`,
-        );
-      }
+      await loadOwner(scope, owner);
     });
   }
 }

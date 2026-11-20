@@ -43,7 +43,6 @@ const withState = (state: MatchBlockState) =>
 const live = computed(() => withState("live"));
 const upcoming = computed(() => withState("upcoming"));
 const finished = computed(() => withState("finished"));
-const startgg = computed(() => items.value?.some((item) => item.startgg) ?? false);
 
 const dateFormatter = computed(
   () =>
@@ -133,18 +132,6 @@ const stateLabel = useMatchStateLabel(t, (beginAt) =>
           · {{ tournamentStageLabel(item.tournament) }} · {{ stateLabel(item) }}
         </li>
       </ul>
-
-      <p v-if="startgg" class="flex h-row items-center gap-1 pl-2 text-xs text-muted">
-        {{ t("newsTag.matchDataBy") }}
-        <a
-          :href="STARTGG_URL"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="font-medium text-toned transition-none hover:text-highlighted"
-          translate="no"
-          >start.gg</a
-        >
-      </p>
     </template>
 
     <p

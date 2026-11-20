@@ -58,6 +58,6 @@ describe(TeamController, () => {
     expect(getTournamentsByTeam).toHaveBeenCalledWith("kept");
     expect(getFormerPlayersByTeam).toHaveBeenCalledWith("kept");
     expect(getContractsByTeam).toHaveBeenCalledWith("kept");
-    expect(teamEarnings).toHaveBeenCalledWith("kept", { redistributableOnly: false });
+    expect(teamEarnings).toHaveBeenCalledWith("kept");
   });
 });

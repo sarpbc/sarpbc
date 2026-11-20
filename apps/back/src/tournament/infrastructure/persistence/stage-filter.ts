@@ -2,7 +2,6 @@ import type { TournamentListOptions } from "../../application/inputs";
 
 interface StageFilter {
   pickemsEnabled?: boolean;
-  source?: { $ne: "startgg" };
   winner?: null;
   $or?: [{ endAt: null }, { endAt: { $gt: Date } }];
 }
@@ -10,16 +9,11 @@ interface StageFilter {
 export const stageFilter = ({
   pickems,
   activeOnly = false,
-  redistributableOnly = false,
-}: Pick<TournamentListOptions, "pickems" | "activeOnly" | "redistributableOnly">) => {
+}: Pick<TournamentListOptions, "pickems" | "activeOnly">) => {
   const where: StageFilter = {};
 
   if (pickems !== undefined) {
     where.pickemsEnabled = pickems;
-  }
-
-  if (redistributableOnly) {
-    where.source = { $ne: "startgg" };
   }
 
   if (activeOnly) {

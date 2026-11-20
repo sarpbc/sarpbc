@@ -194,10 +194,7 @@ interface KnownTournament {
   tournament: Tournament | null;
 }
 
-const setupCreateMatch = (
-  source: "manual" | "startgg" = "manual",
-  role: "admin" | "journalist" = "admin",
-) => {
+const setupCreateMatch = (role: "admin" | "journalist" = "admin") => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
   const kc = side("p-kc", "team-kc", "karmine-corp", "Karmine Corp");
   const m8 = side("p-m8", "team-m8", "gentle-mates", "Gentle Mates");
@@ -216,7 +213,7 @@ const setupCreateMatch = (
     name: "Coupe",
     participants: [kc, m8],
     slug: "coupe",
-    source,
+    source: "manual",
   });
 
   const match = Object.assign(new Match(), {
@@ -262,7 +259,6 @@ const setupCreateMatch = (
       participantIds?: string[];
       beginAt?: string;
       endAt?: string;
-      source?: "manual" | "startgg";
       teamIds?: string[];
       eventId?: string;
     },
@@ -348,34 +344,6 @@ describe("create_match participants", () => {
     expect(matchService.calls).toStrictEqual([]);
   });
 
-  it("does not return participants of a start.gg tournament", async () => {
-    const { call } = setupCreateMatch("startgg");
-
-    const created = await call("create_match", {
-      name: "Bo5",
-      participantIds: ["p-kc", "p-m8"],
-      tournamentId: "cup",
-    });
-
-    expect(created.body).not.toHaveProperty("participants");
-
-    const tournament = await call("create_tournament", {
-      beginAt: "2026-11-02",
-      endAt: "2026-11-03",
-      name: "Hidden",
-      source: "startgg",
-    });
-
-    expect(tournament.body).not.toHaveProperty("participants");
-
-    const updated = await call("update_tournament", {
-      teamIds: ["11111111-1111-4111-8111-111111111111"],
-      tournamentId: "cup",
-    });
-
-    expect(updated.body).not.toHaveProperty("participants");
-  });
-
   it("returns participants after creating or updating a manual tournament", async () => {
     const { call } = setupCreateMatch();
 
@@ -407,7 +375,7 @@ describe("create_match participants", () => {
   });
 
   it("accepts teams without participantIds and requires tournaments.manage", async () => {
-    const { registered, matchService, call } = setupCreateMatch("manual", "journalist");
+    const { registered, matchService, call } = setupCreateMatch("journalist");
     const schema = z.object(registered("create_match").inputSchema);
     expect(
       schema.safeParse({
@@ -428,9 +396,9 @@ describe("create_match participants", () => {
   });
 });
 
-const setupBracket = (source: "manual" | "startgg") => {
+const setupBracket = () => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
-  const stage = { event: { slug: "cdf-2026" }, slug: "finals", source, streams: [] };
+  const stage = { event: { slug: "cdf-2026" }, slug: "finals", source: "manual", streams: [] };
 
   const match = Object.assign(new Match(), {
     id: "final",
@@ -439,7 +407,7 @@ const setupBracket = (source: "manual" | "startgg") => {
       { id: "l1", match: { id: "final" }, previousMatch: { id: "semi-1" }, type: "winner" },
     ],
     publicId: 3,
-    source,
+    source: "manual",
     tournament: { ...stage, eventStreams: [] },
   });
 
@@ -461,7 +429,7 @@ const setupBracket = (source: "manual" | "startgg") => {
 
 describe("bracket tools", () => {
   it("forwards bracket links and participants to update_match", async () => {
-    const { matchService, run } = setupBracket("manual");
+    const { matchService, run } = setupBracket();
     const previousMatches = [{ previousMatchId: "semi-1", type: "winner" }];
 
     const result = await run("update_match", {
@@ -477,8 +445,8 @@ describe("bracket tools", () => {
     expect(jsonOf(result)).toHaveProperty("previousMatches", previousMatches);
   });
 
-  it("records or clears a match source and refuses BLAST.tv and Liquipedia mirrors", async () => {
-    const { tools, matchService, run } = setupBracket("manual");
+  it("records or clears a match source and refuses BLAST.tv, Liquipedia mirrors and start.gg", async () => {
+    const { tools, matchService, run } = setupBracket();
     const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
     await run("set_match_source", { matchId: "final", sourceUrl });
     expect(matchService.calls).toContainEqual({ args: ["final", sourceUrl], method: "setSource" });
@@ -486,14 +454,18 @@ describe("bracket tools", () => {
     const input = z.object(defined(tools, "set_match_source").inputSchema);
     expect(input.safeParse({ matchId: "final", sourceUrl: null }).success).toBe(true);
 
-    for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"]) {
+    for (const refused of [
+      "https://blast.tv/rl",
+      "https://liquipedia-mirror.example/rl",
+      "https://www.start.gg/tournament/cup",
+    ]) {
       expect(input.safeParse({ matchId: "final", sourceUrl: refused }).success).toBe(false);
     }
   });
 
   it("declares a forfeit with its source and clears it without one", async () => {
-    const { matchService, run } = setupBracket("manual");
-    const sourceUrl = "https://www.start.gg/tournament/cup/event/main/set/1";
+    const { matchService, run } = setupBracket();
+    const sourceUrl = "https://x.com/organiser/status/1";
 
     await run("set_match_forfeit", { matchId: "final", participantId: "b", sourceUrl });
     await run("set_match_forfeit", { matchId: "final", participantId: null });
@@ -505,7 +477,7 @@ describe("bracket tools", () => {
   });
 
   it("refuses a forfeit without a source", async () => {
-    const { matchService, run } = setupBracket("manual");
+    const { matchService, run } = setupBracket();
 
     const result = await run("set_match_forfeit", { matchId: "final", participantId: "b" });
 
@@ -514,7 +486,7 @@ describe("bracket tools", () => {
   });
 
   it("refuses more than two feeders and bracket sizes other than 4, 8 or 16", () => {
-    const { tools } = setupBracket("manual");
+    const { tools } = setupBracket();
     const update = z.object(defined(tools, "update_match").inputSchema);
     const link = { previousMatchId: "m", type: "winner" };
     expect(
@@ -525,21 +497,8 @@ describe("bracket tools", () => {
     expect(generate.safeParse({ teams: 6, tournamentId: "finals" }).success).toBe(false);
   });
 
-  it("keeps generated start.gg matches out of the response", async () => {
-    const { matchService, run } = setupBracket("startgg");
-
-    const body = jsonOf(await run("create_empty_bracket", { teams: 4, tournamentId: "finals" }));
-
-    expect(matchService.calls).toContainEqual({
-      args: ["finals", { numberOfGames: undefined, teams: 4 }],
-      method: "createEmptyBracket",
-    });
-    expect(body).toMatchObject({ created: 1 });
-    expect(body).not.toHaveProperty("matches");
-  });
-
   it("lists generated manual matches with their links", async () => {
-    const { run } = setupBracket("manual");
+    const { run } = setupBracket();
 
     const body = jsonOf(await run("create_empty_bracket", { teams: 4, tournamentId: "finals" }));
 

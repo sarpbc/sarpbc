@@ -17,7 +17,6 @@ const line = (id: string, amount: number, currency: string, endAt: string | null
       id: `t-${id}`,
       name: "Main Event",
       slug: "main-event",
-      source: "manual",
     },
   }) satisfies EarningsLine;
 

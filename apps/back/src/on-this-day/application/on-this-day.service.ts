@@ -10,7 +10,6 @@ import type {
 } from "@sarpbc/types";
 import { SITE_TIME_ZONE, calendarDayIn, formatIsoDay } from "@sarpbc/utils";
 import type { CalendarDay } from "@sarpbc/utils";
-import { isRedistributable } from "../../common/domain/data-source";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { Player } from "../../roster/domain/player";
 import type { Team } from "../../roster/domain/team";
@@ -78,7 +77,7 @@ const dated = (at: Date) => {
 const title = (tournament: Tournament) => {
   const { winner, endAt } = tournament;
 
-  if (!winner || !endAt || !isRedistributable(tournament.source)) {
+  if (!winner || !endAt) {
     return [] satisfies OnThisDayEvent[];
   }
 
@@ -99,10 +98,6 @@ const final = (match: Match) => {
   const { winner, endAt, tournament } = match;
 
   if (!winner || !endAt) {
-    return [] satisfies OnThisDayEvent[];
-  }
-
-  if (!isRedistributable(match.source) || !isRedistributable(tournament.source)) {
     return [] satisfies OnThisDayEvent[];
   }
 
@@ -188,21 +183,15 @@ const publicLink = (link: NonNullable<OnThisDayFact["link"]>) => {
   }
 };
 
-const fact = ({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact) => {
-  if (link?.source && !isRedistributable(link.source)) {
-    return [] satisfies OnThisDayEvent[];
-  }
-
-  return [
-    {
-      kind: "fact",
-      link: link ? publicLink(link) : null,
-      sourceUrl,
-      text: { en: textEn, fr: textFr },
-      year,
-    } satisfies EventOf<"fact">,
-  ];
-};
+const fact = ({ year, textEn, textFr, link, sourceUrl }: OnThisDayFact) => [
+  {
+    kind: "fact",
+    link: link ? publicLink(link) : null,
+    sourceUrl,
+    text: { en: textEn, fr: textFr },
+    year,
+  } satisfies EventOf<"fact">,
+];
 
 const rank = (event: OnThisDayEvent) => {
   switch (event.kind) {

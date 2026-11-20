@@ -67,10 +67,6 @@ const headToHead = computed(() => matchDetail.value?.headToHead ?? null);
 const games = computed(() => matchDetail.value?.games ?? []);
 const lineups = computed(() => matchDetail.value?.lineups ?? []);
 
-const startgg = computed(
-  () => match.value?.source === "startgg" || match.value?.tournament.source === "startgg",
-);
-
 const participants = computed(() => match.value?.participants ?? []);
 const teamA = computed(() => participants.value[0]);
 const teamB = computed(() => participants.value[1]);
@@ -425,10 +421,7 @@ const scoreboardLabel = computed(() => {
       </div>
 
       <HubRail v-if="match.viewership" :title="t('components.viewership.title')">
-        <ViewershipStats
-          :viewership="match.viewership"
-          :startgg="match.source === 'startgg' || match.tournament.source === 'startgg'"
-        />
+        <ViewershipStats :viewership="match.viewership" />
       </HubRail>
 
       <template v-if="!isBothTeamsTbd">
@@ -445,7 +438,7 @@ const scoreboardLabel = computed(() => {
               : t('page.match.detail.sections.rosters')
           "
         >
-          <MatchRosterTable :participants="participants" :lineups="lineups" :startgg="startgg" />
+          <MatchRosterTable :participants="participants" :lineups="lineups" />
         </HubRail>
 
         <HubRail v-if="matchStatus !== 'finished' && headToHead && teamA && teamB">

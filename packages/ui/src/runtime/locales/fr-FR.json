@@ -10,7 +10,6 @@
     "matchLive": "En direct",
     "matchFinal": "Terminé",
     "matchTbd": "À déterminer",
-    "matchDataBy": "Données des matchs fournies par",
     "matchesUnavailable": "Impossible de charger ces matchs."
   },
   "design": {

@@ -1,4 +1,3 @@
-import type { DataSource } from "./competition";
 import type { TeamLogos } from "./team";
 import type { TransferType } from "./transfer";
 
@@ -111,6 +110,6 @@ export interface OnThisDayFact {
   year: number | null;
   textEn: string;
   textFr: string;
-  link: (OnThisDayLink & { id: string; source: DataSource | null }) | null;
+  link: (OnThisDayLink & { id: string }) | null;
   sourceUrl: string | null;
 }

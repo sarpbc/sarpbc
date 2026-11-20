@@ -8,7 +8,7 @@ const REVIEW_NOTE =
   "Nothing changed yet. A staff member must approve this proposal in the admin app before it applies.";
 
 export const proposalSourceUrlSchema = dataSourceUrlField(
-  "Required public source: the official team or player announcement, the official Rocket League rules, RLEsports, the PandaScore page, or the start.gg event. Never Liquipedia, a mirror of it or BLAST.tv. A start.gg source marks created players and teams as start.gg data; they stay public and readable through the MCP.",
+  "Required public source: the official team or player announcement, the official Rocket League rules, RLEsports, or the PandaScore page. Never Liquipedia, a mirror of it, BLAST.tv or start.gg.",
 );
 
 export const proposed = (proposal: RosterProposal, sourceUrl: string | undefined) => ({

@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { PlayerStandIn } from "@sarpbc/types";
 import { matchPath, participantName, tournamentStageLabel } from "@sarpbc/utils";
-import { STARTGG_URL } from "~/composables/prizes";
 
 const {
   standIns,
@@ -44,8 +43,6 @@ const rows = computed(() =>
     };
   }),
 );
-
-const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
 </script>
 
 <template>
@@ -83,12 +80,6 @@ const hasStartgg = computed(() => standIns.some((standIn) => standIn.startgg));
             </HubListItem>
           </li>
         </ul>
-        <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
-          <span>
-            {{ t("common.prizes.dataFrom") }}
-            <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
-          </span>
-        </p>
       </HubCard>
     </HubRail>
   </section>

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { Viewership } from "@sarpbc/types";
-import { isForbiddenViewershipSource, parseViewership } from "./viewership";
+import { parseViewership } from "./viewership";
 
 const VALID: Viewership = {
   averageViewers: 80_000,
@@ -47,15 +47,5 @@ void describe("parseViewership", () => {
     assert.equal(error({ averageViewers: -3 }), "invalid-average");
     assert.equal(error({ averageViewers: 120_001 }), "average-above-peak");
     assert.equal(error({ measuredAt: "yesterday" }), "invalid-measured-at");
-  });
-});
-
-void describe("isForbiddenViewershipSource", () => {
-  void it("matches the forbidden hosts and their subdomains only", () => {
-    assert.equal(isForbiddenViewershipSource("Liquipedia.net"), true);
-    assert.equal(isForbiddenViewershipSource("blast.tv"), true);
-    assert.equal(isForbiddenViewershipSource("www.start.gg"), true);
-    assert.equal(isForbiddenViewershipSource("notblast.tv"), false);
-    assert.equal(isForbiddenViewershipSource("escharts.com"), false);
   });
 });

@@ -97,7 +97,6 @@ export {
   MAX_VIEWERS,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
   VIEWERSHIP_SOURCE_URL_MAX_LENGTH,
-  isForbiddenViewershipSource,
   parseViewership,
   type ParsedViewership,
   type ViewershipError,

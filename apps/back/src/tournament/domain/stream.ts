@@ -1,4 +1,4 @@
-import type { DataSource, Stream, StreamInput } from "@sarpbc/types";
+import type { Stream, StreamInput } from "@sarpbc/types";
 import {
   MAX_STREAMS,
   STREAM_CHANNEL_MAX_LENGTH,
@@ -17,8 +17,6 @@ export interface StreamOwner {
   id: string;
 }
 
-export type StreamEditSource = Exclude<DataSource, "pandascore">;
-
 const URL_ERRORS = {
   "invalid-url": "is not a valid URL",
   "not-https": "must use https",
@@ -27,18 +25,10 @@ const URL_ERRORS = {
 const invalid = (index: number, reason: string) =>
   new InvalidInputError(`Stream ${index + 1} ${reason}.`);
 
-export const replaceStreams = (
-  current: readonly Stream[],
-  inputs: readonly StreamInput[],
-  source: StreamEditSource,
-) => {
+export const replaceStreams = (inputs: readonly StreamInput[]) => {
   if (inputs.length > MAX_STREAMS) {
     throw new InvalidInputError(`A stream list holds at most ${MAX_STREAMS} streams.`);
   }
-
-  const startgg = new Set(
-    current.flatMap((stream) => (stream.source === "startgg" ? [stream.url] : [])),
-  );
 
   const seen = new Set<string>();
   const streams: Stream[] = [];
@@ -76,7 +66,7 @@ export const replaceStreams = (
       kind: input.kind,
       language,
       platform: parsed.platform,
-      source: startgg.has(parsed.url) ? "startgg" : source,
+      source: "manual",
       url: parsed.url,
     });
   }

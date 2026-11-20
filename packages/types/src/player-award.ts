@@ -1,4 +1,3 @@
-import type { DataSource } from "./competition";
 import type { TournamentEventRef } from "./tournament-event";
 
 export type PlayerAwardType =
@@ -15,7 +14,6 @@ export interface PlayerProfileAward {
     id: string;
     name: string;
     slug: string;
-    source: DataSource;
     endAt: Date | string | null;
     event: TournamentEventRef;
   };

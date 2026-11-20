@@ -78,10 +78,6 @@ export class PlayerService {
         player.status = dto.status;
       }
 
-      if (dto.source !== undefined) {
-        player.source = dto.source;
-      }
-
       if (await players.findBySlug(player.slug)) {
         throw new ConflictError(`A player with slug "${player.slug}" already exists`);
       }

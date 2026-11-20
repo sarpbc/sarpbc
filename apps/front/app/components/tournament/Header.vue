@@ -2,11 +2,10 @@
 import type { TournamentTab } from "@sarpbc/types";
 import { tournamentTabPath } from "~/utils/tournament-tab-route";
 
-const { eventSlug, stageSlug, activeTab, stats } = defineProps<{
+const { eventSlug, stageSlug, activeTab } = defineProps<{
   eventSlug: string;
   stageSlug: string;
   activeTab: TournamentTab;
-  stats: boolean;
 }>();
 
 const { t } = useI18n();
@@ -19,17 +18,11 @@ const TABS = [
 ] as const;
 
 const tabItems = computed(() =>
-  TABS.flatMap(({ tab, label }) =>
-    stats || tab !== "stats"
-      ? [
-          {
-            active: activeTab === tab,
-            label: t(label),
-            to: localePath(tournamentTabPath(tab, eventSlug, stageSlug)),
-          },
-        ]
-      : [],
-  ),
+  TABS.map(({ tab, label }) => ({
+    active: activeTab === tab,
+    label: t(label),
+    to: localePath(tournamentTabPath(tab, eventSlug, stageSlug)),
+  })),
 );
 </script>
 

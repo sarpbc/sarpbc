@@ -56,7 +56,6 @@ const toPathEntry = (row: SeasonPathEntry) => {
           id: tournament.id,
           name: tournament.name,
           slug: tournament.slug,
-          source: tournament.source,
         }
       : null,
   } satisfies SeasonPathEntryItem;

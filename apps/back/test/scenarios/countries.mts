@@ -55,7 +55,6 @@ export const verifyCountries = async ({ request, staffCookie }: CountriesContext
       "/tournaments",
       {
         name: `Country ${source} Cup`,
-        source,
         teamIds: [home.id, away.id],
       },
       z.object({
@@ -82,7 +81,6 @@ export const verifyCountries = async ({ request, staffCookie }: CountriesContext
   };
 
   const manualFinal = await finishedMatchOf("manual");
-  await finishedMatchOf("startgg");
 
   const response5 = await request("GET", "/countries");
   const { countries } = response5.json(countriesBody);
@@ -111,7 +109,7 @@ export const verifyCountries = async ({ request, staffCookie }: CountriesContext
   assert.deepEqual(
     country.matches.map(({ id }) => id),
     [manualFinal],
-    "the public country page leaves out start.gg matches",
+    "the public country page lists the finished matches of its players",
   );
   assert.equal(country.matchTotal, 1);
 

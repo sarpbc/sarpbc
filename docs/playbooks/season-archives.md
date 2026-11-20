@@ -5,10 +5,10 @@ How sarpbc.org staff publish an RLCS season archive: one public page per season 
 ## Rules
 
 - Write the format, path notes and results in your own words from official announcements and the tournament pages already on sarpbc.org.
-- Never use Liquipedia or BLAST.tv as a source, and never copy text, tables or brackets from them or from any other third-party wiki. No Epic Games assets.
+- Never use Liquipedia, BLAST.tv or start.gg as a source, and never copy text, tables or brackets from them or from any other third-party wiki. No Epic Games assets.
 - Do not import or paste a historical dataset. Enter each season by hand.
 - Pick winners and participants from existing teams. Create a missing team through the usual team workflow first; the archive never creates teams.
-- A path result can link an existing tournament stage. A result linked to a start.gg stage stays visible in the admin, flagged, but is left out of the public page and of the API.
+- A path result can link an existing tournament stage.
 
 ## Create the pilot season
 

@@ -1,6 +1,4 @@
 import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, winnerFromResults } from "@sarpbc/utils";
-import { isRedistributable } from "../../../common/domain/data-source";
-import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import type { MatchBlockSelector } from "@sarpbc/types";
@@ -302,10 +300,6 @@ export class MatchService {
 
       if (!match) {
         throw new NotFoundError("Match not found");
-      }
-
-      if (!isRedistributable(match.source) || !isRedistributable(match.tournament.source)) {
-        throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
       }
 
       await assertDeletable(matches, match);

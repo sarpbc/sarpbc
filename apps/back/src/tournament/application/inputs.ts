@@ -17,7 +17,6 @@ interface ManualTournamentFields {
 
 export interface CreateTournamentInput extends ManualTournamentFields {
   name: string;
-  source?: "manual" | "startgg";
 }
 
 export interface ParticipantRosterInput {
@@ -99,5 +98,4 @@ export interface TournamentListOptions {
   offset?: number;
   pickems?: boolean;
   activeOnly?: boolean;
-  redistributableOnly?: boolean;
 }

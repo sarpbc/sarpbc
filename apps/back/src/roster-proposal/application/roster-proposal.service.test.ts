@@ -173,20 +173,15 @@ describe(RosterProposalService, () => {
     });
   });
 
-  it("flags players created from a start.gg source", async () => {
-    const { id } = await service.propose(
-      { kind: "create_player", name: "Atow", status: "free_agent" },
-      "https://www.start.gg/tournament/rlcs/event/main",
-      "journalist",
-    );
-
-    const approveResult = await service.approve(id, "admin");
-    expect(approveResult.entityId).toBe("new-player");
-    expect(players.create).toHaveBeenCalledWith({
-      name: "Atow",
-      source: "startgg",
-      status: "free_agent",
-    });
+  it("refuses a start.gg source", async () => {
+    await expect(
+      service.propose(
+        { kind: "create_player", name: "Atow", status: "free_agent" },
+        "https://www.start.gg/tournament/rlcs/event/main",
+        "journalist",
+      ),
+    ).rejects.toThrow(InvalidInputError);
+    expect(saved.size).toBe(0);
   });
 
   it("records a sourced career contract on approval", async () => {
@@ -323,7 +318,7 @@ describe(RosterProposalService, () => {
     );
   });
 
-  it("rejects prize proposals with an unknown or start.gg tournament, team or invalid currency", async () => {
+  it("rejects prize proposals with an unknown tournament, team or invalid currency", async () => {
     const proposePrizes = async (tournamentId: string, entry: typeof prizeEntry) =>
       await service.propose(
         { kind: "set_tournament_prizes", prizes: [entry], tournamentId },
@@ -332,7 +327,6 @@ describe(RosterProposalService, () => {
       );
 
     await expect(proposePrizes("missing", prizeEntry)).rejects.toThrow(NotFoundError);
-    await expect(proposePrizes("startgg-cup", prizeEntry)).rejects.toThrow(InvalidInputError);
     await expect(proposePrizes("cup", { ...prizeEntry, teamId: "nope" })).rejects.toThrow(
       NotFoundError,
     );
@@ -376,9 +370,8 @@ describe(RosterProposalService, () => {
     expect(awards.createForTeam).toHaveBeenCalledWith("cup", "kc", "zen", "grand_finals_mvp");
   });
 
-  it("rejects award proposals for an unknown or start.gg tournament and an unknown player", async () => {
+  it("rejects award proposals for an unknown tournament and an unknown player", async () => {
     await expect(propose({ tournamentId: "missing" })).rejects.toThrow(NotFoundError);
-    await expect(propose({ tournamentId: "startgg-cup" })).rejects.toThrow(InvalidInputError);
     await expect(propose({ playerId: "bench" })).rejects.toThrow(NotFoundError);
     expect(saved.size).toBe(0);
   });
@@ -525,10 +518,9 @@ describe(RosterProposalService, () => {
       expect(matches.deleteMatch).not.toHaveBeenCalled();
     });
 
-    it("refuses to propose deleting a missing, PandaScore or start.gg match", async () => {
+    it("refuses to propose deleting a missing or PandaScore match", async () => {
       await expect(deleteMatch("missing-match")).rejects.toThrow(NotFoundError);
       await expect(deleteMatch("pandascore-match")).rejects.toThrow("synced from PandaScore");
-      await expect(deleteMatch("startgg-match")).rejects.toThrow("start.gg");
       expect(saved.size).toBe(0);
     });
 
@@ -620,7 +612,7 @@ describe(RosterProposalService, () => {
       expect(streams.set).not.toHaveBeenCalled();
     });
 
-    it("refuses an invalid list or a start.gg match before recording anything", async () => {
+    it("refuses an invalid list before recording anything", async () => {
       await expect(
         service.propose(
           {
@@ -632,38 +624,17 @@ describe(RosterProposalService, () => {
           "journalist",
         ),
       ).rejects.toThrow("must use https");
-      await expect(setMatchStreams(source, "startgg-match")).rejects.toThrow("start.gg");
       expect(saved.size).toBe(0);
     });
 
-    it("replaces the whole list on approval and marks start.gg sourced streams", async () => {
-      const manual = await setMatchStreams(source);
+    it("replaces the whole list on approval", async () => {
+      const proposal = await setMatchStreams(source);
 
-      const startgg = await service.propose(
-        { eventId: "event-1", kind: "set_event_streams", streams: list },
-        "https://www.start.gg/tournament/rl-open",
-        "journalist",
-      );
-
-      await expect(service.approve(manual.id, "admin")).resolves.toMatchObject({
+      await expect(service.approve(proposal.id, "admin")).resolves.toMatchObject({
         entityId: "match-1",
       });
-      await expect(service.approve(startgg.id, "admin")).resolves.toMatchObject({
-        entityId: "event-1",
-      });
 
-      expect(streams.set).toHaveBeenNthCalledWith(
-        1,
-        { id: "match-1", kind: "match" },
-        list,
-        "manual",
-      );
-      expect(streams.set).toHaveBeenNthCalledWith(
-        2,
-        { id: "event-1", kind: "event" },
-        list,
-        "startgg",
-      );
+      expect(streams.set).toHaveBeenCalledExactlyOnceWith({ id: "match-1", kind: "match" }, list);
     });
 
     it("asks the reviewer for the tournament permission", async () => {
@@ -706,10 +677,9 @@ describe(RosterProposalService, () => {
       expect(staff.permissions).toContain("tournaments.manage");
     });
 
-    it("refuses a start.gg match, a start.gg source or an unknown player", async () => {
-      await expect(setLineups(source, "startgg-match")).rejects.toThrow("start.gg match");
+    it("refuses a start.gg source or an unknown player", async () => {
       await expect(setLineups("https://www.start.gg/tournament/rl-open")).rejects.toThrow(
-        "sourced from start.gg",
+        InvalidInputError,
       );
       await expect(
         service.propose(
@@ -763,7 +733,7 @@ describe(RosterProposalService, () => {
       );
     });
 
-    it("refuses a missing credit or a start.gg match before recording anything", async () => {
+    it("refuses a missing credit before recording anything", async () => {
       await expect(
         service.propose(
           {
@@ -775,13 +745,6 @@ describe(RosterProposalService, () => {
           "journalist",
         ),
       ).rejects.toThrow("name of its source");
-      await expect(
-        service.propose(
-          { kind: "set_match_viewership", matchId: "startgg-match", viewership },
-          viewership.sourceUrl,
-          "journalist",
-        ),
-      ).rejects.toThrow("start.gg");
       expect(saved.size).toBe(0);
     });
 

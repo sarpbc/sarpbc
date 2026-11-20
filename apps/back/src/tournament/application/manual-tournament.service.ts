@@ -33,7 +33,7 @@ const optionalEndDate = (value: string | null | undefined) =>
 
 const draftTournament = (input: CreateTournamentInput) => {
   const tournament = new Tournament();
-  tournament.source = input.source ?? "manual";
+  tournament.source = "manual";
   tournament.pandascoreId = null;
   tournament.name = input.name;
   tournament.format = input.format ?? "3v3";

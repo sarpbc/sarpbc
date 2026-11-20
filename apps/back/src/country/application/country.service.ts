@@ -56,7 +56,6 @@ export class CountryService {
     const [matches, matchTotal] = await this.sources.matches.list("results", {
       ...page,
       playerIds: players.map(({ id }) => id),
-      redistributableOnly: true,
     });
 
     return { code, matchTotal, matches, players, teams: currentTeams(players) };

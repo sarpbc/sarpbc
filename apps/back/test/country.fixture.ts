@@ -1,5 +1,4 @@
 import { vi } from "vitest";
-import { isRedistributable } from "../src/common/domain/data-source";
 import type { CountrySources } from "../src/country/application/country.service";
 import { Player } from "../src/roster/domain/player";
 import { Team } from "../src/roster/domain/team";
@@ -21,27 +20,12 @@ export const vatira = countryPlayer("vatira", "Vatira", kc);
 export const exotiik = countryPlayer("exotiik", "ExoTiiK", null);
 const french = [alpha54, exotiik, vatira, zen];
 
-const countryMatches: Match[] = [
-  careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 }),
-  careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], source: "startgg", winner: 0 }),
-  careerMatch({
-    id: "startgg-stage",
-    sides: [[vatira], [zen]],
-    tournamentSource: "startgg",
-    winner: 1,
-  }),
-];
-
-const redistributable = (match: Match) =>
-  isRedistributable(match.source) && isRedistributable(match.tournament.source);
+const countryMatches: Match[] = [careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 })];
 
 export const countrySources = () => {
   const matches: CountrySources["matches"] = {
-    list: async (kind, options) => {
-      const rows = countryMatches.filter(
-        (match) =>
-          kind === "results" && (options?.redistributableOnly !== true || redistributable(match)),
-      );
+    list: async (kind) => {
+      const rows = kind === "results" ? countryMatches : [];
 
       return [rows, rows.length];
     },

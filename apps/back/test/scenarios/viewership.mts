@@ -34,8 +34,6 @@ export interface ViewershipProposalsContext {
   callTool: CallTool;
   review: Review;
   match: { id: string };
-  startggCupId: string;
-  startggMatchId: string;
 }
 
 const ENTRY = {
@@ -148,8 +146,6 @@ export const verifyViewershipProposals = async ({
   callTool,
   review,
   match,
-  startggCupId,
-  startggMatchId,
 }: ViewershipProposalsContext) => {
   const sourceUrl = "https://escharts.com/tournaments/rl/integration-cup/final";
 
@@ -205,68 +201,18 @@ export const verifyViewershipProposals = async ({
 
   assert.deepEqual(mcpMatch?.viewership, expected, "MCP reads return sarpbc numbers");
 
-  const startggEntry = { ...expected, averageViewers: 6000, peakViewers: 9000 };
-  await request(
-    "PUT",
-    `/tournaments/matches/${startggMatchId}/viewership`,
-    { viewership: startggEntry },
-    staffCookie,
-  );
-
-  const response8 = await request("GET", `/matches/${startggMatchId}`);
-
-  const site = response8.json(
-    z.object({ match: credited.extend({ tournament: z.object({ source: z.string() }) }) }),
-  ).match;
-
-  assert.deepEqual(site.viewership, startggEntry, "the site shows start.gg match numbers");
-  assert.equal(site.tournament.source, "startgg", "the site can credit start.gg");
   assert.deepEqual(
     await callTool(
       "set_match_viewership",
-      { matchId: startggMatchId, ...proposal, sourceUrl },
+      {
+        matchId: match.id,
+        ...proposal,
+        sourceUrl: "https://www.start.gg/tournament/integration-cup",
+      },
       toolFailure,
     ),
     { error: true },
-    "start.gg matches are refused",
-  );
-
-  const results = await callTool(
-    "get_match_results",
-    {},
-    z.object({ results: z.array(z.object({ id: z.string() })) }),
-  );
-
-  const reads = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? []), ...results.results];
-  assert.ok(
-    reads.every((candidate) => candidate.id !== startggMatchId),
-    "MCP reads leave start.gg matches and their numbers out",
-  );
-
-  const response9 = await request("GET", `/tournaments/${startggCupId}`);
-
-  const startggEvent = response9.json(z.object({ tournament: z.object({ event: eventRef }) }))
-    .tournament.event;
-
-  await request(
-    "PUT",
-    `/events/${startggEvent.id}/viewership`,
-    { viewership: startggEntry },
-    staffCookie,
-  );
-  const response10 = await request("GET", `/events/resolve/${startggEvent.slug}`);
-  assert.deepEqual(response10.json(creditedEvent).event.viewership, startggEntry);
-  assert.deepEqual(await callTool("get_event", { idOrSlug: startggEvent.id }, toolFailure), {
-    error: true,
-  });
-  assert.deepEqual(
-    await callTool(
-      "set_event_viewership",
-      { eventId: startggEvent.id, ...proposal, sourceUrl },
-      toolFailure,
-    ),
-    { error: true },
-    "start.gg events are refused",
+    "start.gg is not an accepted source",
   );
 
   await request(

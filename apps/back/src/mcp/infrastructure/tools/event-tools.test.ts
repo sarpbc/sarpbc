@@ -10,7 +10,7 @@ import { League } from "../../../tournament/domain/league";
 import { Tournament } from "../../../tournament/domain/tournament";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import type { DataSource } from "@sarpbc/types";
-import { redistributableCompetition } from "../redistributable-competition";
+import { competitionReads } from "../competition-reads";
 import { eventTools } from "./event-tools";
 import { FakeCatalog } from "./fake-catalog.test-utils";
 import type { Listing } from "./fake-catalog.test-utils";
@@ -62,7 +62,6 @@ const setup = (role: "admin" | "journalist" = "admin") => {
     event,
     stages: [
       stage("finals", "manual", "2026-11-12T18:00:00Z"),
-      stage("qualifier", "startgg", "2026-10-01T18:00:00Z"),
       stage("pool", "manual", "2026-11-05T18:00:00Z"),
     ],
   };
@@ -72,7 +71,7 @@ const setup = (role: "admin" | "journalist" = "admin") => {
 
   const tools = eventTools({
     catalogService,
-    competition: redistributableCompetition({
+    competition: competitionReads({
       catalogService,
       events: eventQueries,
       matchLineupService: { find: vi.fn<MatchLineupService["find"]>() },
@@ -110,7 +109,7 @@ const setup = (role: "admin" | "journalist" = "admin") => {
 };
 
 describe("event tools", () => {
-  it("returns an event's redistributable stages earliest first with its overall dates", async () => {
+  it("returns an event's stages earliest first with its overall dates", async () => {
     const { tool } = setup();
     expect(json(await tool("get_event")({ idOrSlug: "cdf-2026" }))).toMatchObject({
       beginAt: "2026-11-05T18:00:00.000Z",
@@ -125,29 +124,16 @@ describe("event tools", () => {
     });
   });
 
-  it("hides an event made only of start.gg stages but returns an empty one", async () => {
+  it("returns an event without stages", async () => {
     const { tool, catalogService, listing } = setup();
-    catalogService.listing = {
-      event: listing.event,
-      stages: [stage("qualifier", "startgg", null)],
-    };
-    const awaited = await tool("get_event")({ idOrSlug: "cdf" });
-    expect(awaited.isError).toBe(true);
     catalogService.listing = { event: listing.event, stages: [] };
     expect(json(await tool("get_event")({ idOrSlug: "cdf" }))).toMatchObject({ stages: [] });
   });
 
-  it("excludes start.gg events in the list query", async () => {
+  it("lists events with the default page", async () => {
     const { tool, eventQueries } = setup();
     await tool("list_events")({});
-    expect(eventQueries.requests).toStrictEqual([
-      {
-        activeOnly: false,
-        limit: 20,
-        offset: 0,
-        redistributableOnly: true,
-      },
-    ]);
+    expect(eventQueries.requests).toStrictEqual([{ activeOnly: false, limit: 20, offset: 0 }]);
   });
 
   it("reports synced events as not editable", async () => {

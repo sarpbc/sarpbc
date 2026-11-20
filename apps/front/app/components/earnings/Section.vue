@@ -1,7 +1,6 @@
 <script lang="ts" setup>
 import type { EarningsEntry, ProfileEarnings } from "@sarpbc/types";
 import { distinctStageName, tournamentStagePath } from "@sarpbc/utils";
-import { STARTGG_URL } from "~/composables/prizes";
 
 const { owner, ownerId } = defineProps<{
   owner: "player" | "team";
@@ -26,10 +25,6 @@ const {
 
 const years = computed(() => earnings.value?.years ?? []);
 const totals = computed(() => earnings.value?.totals ?? []);
-
-const hasStartgg = computed(() =>
-  years.value.some((year) => year.entries.some((entry) => entry.tournament.source === "startgg")),
-);
 
 const entryMeta = (entry: EarningsEntry) => {
   const parts = [distinctStageName(entry.tournament), formatPlacement(entry.placement)];
@@ -103,14 +98,10 @@ const entryMeta = (entry: EarningsEntry) => {
         </template>
 
         <p
-          v-if="owner === 'player' || hasStartgg"
+          v-if="owner === 'player'"
           class="flex min-h-row flex-col justify-center gap-0.5 border-b border-separator px-2 py-2 text-xs text-muted"
         >
-          <span v-if="owner === 'player'">{{ t("common.prizes.earnings.splitHint") }}</span>
-          <span v-if="hasStartgg">
-            {{ t("common.prizes.dataFrom") }}
-            <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
-          </span>
+          <span>{{ t("common.prizes.earnings.splitHint") }}</span>
         </p>
       </HubCard>
 

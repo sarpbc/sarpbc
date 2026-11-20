@@ -153,13 +153,12 @@ describe(EventController, () => {
     expect(resolvedEvent.stages[0]).toMatchObject({ event: ref, matches: [] });
   });
 
-  it("aggregates player stats over the redistributable stages of an event", async () => {
+  it("aggregates player stats over the stages of an event", async () => {
     events.listings.splice(0, events.listings.length, {
       event,
       stages: [
         stage({ id: "group-stage", source: "manual" }),
-        stage({ id: "qualifier", source: "startgg" }),
-        stage({ id: "finals", source: "manual" }),
+        stage({ id: "finals", source: "pandascore" }),
       ],
     });
 
@@ -171,14 +170,8 @@ describe(EventController, () => {
     await expect(controller.playerStats("unknown-event")).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  it("hides the player stats of an event whose stages all come from start.gg", async () => {
-    events.listings.splice(0, events.listings.length, {
-      event,
-      stages: [
-        stage({ id: "open-qualifier", source: "startgg" }),
-        stage({ id: "main-event", source: "startgg" }),
-      ],
-    });
+  it("reports the player stats of an event without stages as not found", async () => {
+    events.listings.splice(0, events.listings.length, { event, stages: [] });
 
     await expect(controller.playerStats(event.slug)).rejects.toBeInstanceOf(NotFoundError);
   });

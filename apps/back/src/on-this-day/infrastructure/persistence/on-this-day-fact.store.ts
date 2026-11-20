@@ -1,7 +1,6 @@
 import { EntityManager } from "@mikro-orm/postgresql";
-import type { DataSource, OnThisDayFactLinkInput } from "@sarpbc/types";
+import type { OnThisDayFactLinkInput } from "@sarpbc/types";
 import { participantName } from "@sarpbc/utils";
-import { isRedistributable } from "../../../common/domain/data-source";
 import { Player, Team } from "../../../roster/infrastructure/roster-persistence";
 import {
   Match,
@@ -21,9 +20,6 @@ const FACT_POPULATE = [
   "match.participants.players",
 ] as const;
 
-const matchSource = (match: Match) =>
-  isRedistributable(match.source) ? match.tournament.source : (match.source satisfies DataSource);
-
 const matchName = (match: Match) => {
   const sides = match.participants
     .getItems()
@@ -36,11 +32,11 @@ const matchName = (match: Match) => {
 
 const toLink = (({ player, team, tournament, match }: OnThisDayFact) => {
   if (player) {
-    return { id: player.id, kind: "player", name: player.name, slug: player.slug, source: null };
+    return { id: player.id, kind: "player", name: player.name, slug: player.slug };
   }
 
   if (team) {
-    return { id: team.id, kind: "team", name: team.name, slug: team.slug, source: null };
+    return { id: team.id, kind: "team", name: team.name, slug: team.slug };
   }
 
   if (tournament) {
@@ -50,7 +46,6 @@ const toLink = (({ player, team, tournament, match }: OnThisDayFact) => {
       kind: "tournament",
       name: tournament.name,
       slug: tournament.slug,
-      source: tournament.source,
     };
   }
 
@@ -61,7 +56,6 @@ const toLink = (({ player, team, tournament, match }: OnThisDayFact) => {
       name: matchName(match),
       publicId: match.publicId,
       slug: toMatchSlug(match),
-      source: matchSource(match),
     };
   }
 

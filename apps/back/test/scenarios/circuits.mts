@@ -168,16 +168,6 @@ export const verifyCircuits = async ({
       ),
   );
 
-  const response2 = await request(
-    "POST",
-    "/tournaments",
-    { name: "Fake Circuit start.gg Open", source: "startgg" },
-    staffCookie,
-    201,
-  );
-
-  const startgg = response2.json(z.object({ tournament: stageRef })).tournament;
-
   const identity = { season: 2026, sourceUrl: RULES };
   await request("POST", "/circuits", { name: "Fake Circuit", ...identity }, memberCookie, 403);
 
@@ -440,34 +430,23 @@ export const verifyCircuits = async ({
     return found.team.id;
   };
 
-  await Promise.all(
-    [tournament, startgg].map(
-      async (attached) =>
-        await request("PUT", stagePath(attached.id), { scale, sourceUrl: RULES }, staffCookie),
-    ),
-  );
+  await request("PUT", stagePath(tournament.id), { scale, sourceUrl: RULES }, staffCookie);
 
   const response8 = await request("GET", `/circuits/${circuit.id}`, undefined, staffCookie);
   const withAll = response8.json(circuitDetail);
 
   assert.deepEqual(
     withAll.stages.map(({ tournament: { source } }) => source).toSorted(),
-    ["manual", "pandascore", "pandascore", "startgg"],
-    "staff see manual and start.gg stages",
+    ["manual", "pandascore", "pandascore"],
+    "staff see manual and PandaScore stages",
   );
   const standingsResult3 = await standings();
   const publicEvents = new Set(standingsResult3.events.map(({ event }) => event.id));
   assert.ok(publicEvents.has(tournament.event.id), "a manual stage is public");
-  assert.ok(!publicEvents.has(startgg.event.id), "a start.gg stage stays out of the standings");
   const mcpAll = await callTool("get_circuit", { idOrSlug: circuit.slug }, mcpCircuit);
-  assert.ok(!JSON.stringify(mcpAll).includes(startgg.id), "get_circuit leaves start.gg out");
+  assert.ok(JSON.stringify(mcpAll).includes(tournament.id), "get_circuit returns the manual stage");
 
-  await Promise.all(
-    [tournament, startgg].map(
-      async (attached) =>
-        await request("DELETE", stagePath(attached.id), undefined, staffCookie, 204),
-    ),
-  );
+  await request("DELETE", stagePath(tournament.id), undefined, staffCookie, 204);
 
   await request(
     "PUT",

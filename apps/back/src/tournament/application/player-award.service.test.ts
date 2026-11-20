@@ -5,7 +5,7 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { PlayerAwardService } from "./player-award.service";
 import type { AwardTransaction } from "./ports";
 
-const setup = (source: "manual" | "startgg" = "manual") => {
+const setup = () => {
   const given = new Set<PlayerAwardType>();
 
   const created: {
@@ -30,7 +30,7 @@ const setup = (source: "manual" | "startgg" = "manual") => {
       return {
         participant: onTeam ? { id: "part-kc", name: "Karmine Corp", playerIds: ["zen"] } : null,
         player: playerId === "nobody" ? null : { id: playerId, name: playerId, slug: playerId },
-        tournament: tournamentId === "cup" ? { id: "cup", name: "Fake Cup", source } : null,
+        tournament: tournamentId === "cup" ? { id: "cup", name: "Fake Cup" } : null,
       };
     },
     create: async (input: {
@@ -92,14 +92,6 @@ describe("PlayerAwardService by team", () => {
     );
   });
 
-  it("refuses start.gg tournaments", async () => {
-    const { service } = setup("startgg");
-
-    await expect(service.requireProposable("cup", "kc", "zen", "mvp")).rejects.toThrow(
-      "Awards of start.gg tournaments cannot be proposed",
-    );
-  });
-
   it("refuses a second award of the same type, whoever receives it", async () => {
     const { created, service } = setup();
     await service.createForTeam("cup", "kc", "zen", "mvp");
@@ -114,14 +106,5 @@ describe("PlayerAwardService by team", () => {
       service.requireProposable("cup", "kc", "zen", "defensive_mvp"),
     ).resolves.toBeUndefined();
     expect(created).toHaveLength(1);
-  });
-
-  it("refuses to create an award on a start.gg tournament", async () => {
-    const { created, service } = setup("startgg");
-
-    await expect(service.createForTeam("cup", "kc", "zen", "grand_finals_mvp")).rejects.toThrow(
-      "Awards of start.gg tournaments cannot be proposed",
-    );
-    expect(created).toStrictEqual([]);
   });
 });

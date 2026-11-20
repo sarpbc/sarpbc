@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { Stream, StreamKind, StreamPlatform } from "@sarpbc/types";
 import { orderStreams } from "@sarpbc/utils";
-import { STARTGG_URL } from "~/composables/prizes";
 
 const { streams, live = false } = defineProps<{
   streams: Stream[];
@@ -75,8 +74,6 @@ const rows = computed(() =>
     };
   }),
 );
-
-const hasStartgg = computed(() => streams.some((stream) => stream.source === "startgg"));
 </script>
 
 <template>
@@ -112,11 +109,5 @@ const hasStartgg = computed(() => streams.some((stream) => stream.source === "st
     <HubListItem v-else class="text-sm text-muted">
       {{ t("page.match.detail.watch.noStream") }}
     </HubListItem>
-    <p v-if="hasStartgg" class="flex h-row items-center px-2 text-xs text-muted">
-      <span>
-        {{ t("page.match.detail.watch.dataFrom") }}
-        <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
-      </span>
-    </p>
   </HubCard>
 </template>

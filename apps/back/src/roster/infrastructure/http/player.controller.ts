@@ -36,11 +36,7 @@ import { mapPlayer } from "./player.mapper";
 import { mapProfileMatchListItem } from "../../../tournament/infrastructure/http/match-list.mapper";
 import { mapTournament } from "../../../tournament/infrastructure/http/tournament.mapper";
 import { MatchService } from "../../../tournament/application/match/match.service";
-import {
-  MatchLineupService,
-  lineupSource,
-} from "../../../tournament/application/match/match-lineup.service";
-import { isRedistributable } from "../../../common/domain/data-source";
+import { MatchLineupService } from "../../../tournament/application/match/match-lineup.service";
 import { PlayerAwardService } from "../../../tournament/application/player-award.service";
 import { SeasonService } from "../../../season/application/season.service";
 import { TournamentPrizeService } from "../../../tournament/application/tournament-prize.service";
@@ -211,9 +207,7 @@ export class PlayerController {
       throw new NotFoundException(`Player with id "${id}" not found`);
     }
 
-    const earnings = await this.tournamentPrizeService.playerEarnings(player.id, {
-      redistributableOnly: false,
-    });
+    const earnings = await this.tournamentPrizeService.playerEarnings(player.id);
 
     return { earnings };
   }
@@ -232,7 +226,6 @@ export class PlayerController {
       standIns: standIns.map(({ participantId, match }) => ({
         match: mapProfileMatchListItem(match),
         participantId,
-        startgg: !isRedistributable(lineupSource(match)),
       })),
     } satisfies { standIns: PlayerStandIn[] };
   }

@@ -1,5 +1,4 @@
-import type { DataSource, MatchLineup, MatchLineupInput } from "@sarpbc/types";
-import { isRedistributable } from "../../../common/domain/data-source";
+import type { MatchLineup, MatchLineupInput } from "@sarpbc/types";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../../common/domain/errors/not-found-error";
 import type { Match } from "../../domain/match";
@@ -12,20 +11,10 @@ import type {
   MatchWriter,
 } from "../ports";
 
-export interface MatchLineups {
-  source: DataSource;
-  lineups: MatchLineup[];
-}
-
 export interface StandInMatch {
   participantId: string;
   match: Match;
 }
-
-export const lineupSource = (match: Pick<Match, "source" | "tournament">) =>
-  isRedistributable(match.tournament.source)
-    ? match.source
-    : (match.tournament.source satisfies DataSource);
 
 const requireMatch = async (matches: MatchWriter, id: string) => {
   const match = await matches.load(id);
@@ -77,7 +66,7 @@ export class MatchLineupService {
       async ({ matches }) => await requireMatch(matches, matchId),
     );
 
-    return { lineups: await this.forMatch(match), source: lineupSource(match) };
+    return { lineups: await this.forMatch(match) };
   }
 
   async set(matchId: string, inputs: readonly MatchLineupInput[]) {
@@ -92,11 +81,6 @@ export class MatchLineupService {
   async requireProposable(matchId: string, inputs: readonly MatchLineupInput[]) {
     await this.transaction.run(async ({ matches, lineups }) => {
       const match = await requireMatch(matches, matchId);
-
-      if (!isRedistributable(lineupSource(match))) {
-        throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
-      }
-
       await validLineups(match, lineups, inputs);
     });
   }

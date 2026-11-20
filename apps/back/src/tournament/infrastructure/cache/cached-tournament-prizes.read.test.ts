@@ -23,7 +23,6 @@ const distribution: TournamentPrizes = {
       },
     },
   ],
-  source: "manual",
 };
 
 describe(CachedTournamentPrizesRead, () => {

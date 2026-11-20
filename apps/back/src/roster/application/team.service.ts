@@ -53,10 +53,6 @@ export class TeamService {
       team.darkModeImageUrl = dto.darkModeImageUrl ?? null;
       team.slug = dto.slug ?? (toSlug(dto.name) || "team");
 
-      if (dto.source !== undefined) {
-        team.source = dto.source;
-      }
-
       if (await teams.findBySlug(team.slug)) {
         throw new ConflictError(`A team with slug "${team.slug}" already exists`);
       }

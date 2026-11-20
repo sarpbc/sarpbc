@@ -5,7 +5,6 @@ import type {
   ProfileEarnings,
   SeriesRecord,
 } from "@sarpbc/types";
-import { isRedistributable } from "../../common/domain/data-source";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { ContractService } from "../../roster/application/contract.service";
@@ -17,7 +16,6 @@ import type { MatchService } from "../../tournament/application/match/match.serv
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { TournamentQueries } from "../../tournament/application/ports";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
-import type { Match } from "../../tournament/domain/match";
 import type { Tournament } from "../../tournament/domain/tournament";
 import { headToHead, seriesRecord } from "../domain/series-record";
 
@@ -46,9 +44,6 @@ export interface Comparison {
   b: Career;
   headToHead: HeadToHead;
 }
-
-const isRedistributableMatch = (match: Match) =>
-  isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
 export class PlayerComparisonService {
   constructor(private readonly sources: PlayerComparisonSources) {}
@@ -82,24 +77,22 @@ export class PlayerComparisonService {
       contracts.getContractsByPlayer(player.id),
       tournaments.getTournamentsWonByPlayer(player.id),
       matches.getMatchesByPlayer(player.id),
-      prizes.playerEarnings(player.id, { redistributableOnly: true }),
+      prizes.playerEarnings(player.id),
       awards.findByPlayerId(player.id),
       seasons.awardsOfPlayer(player.id),
     ]);
 
-    const redistributableMatches = matchList.filter(isRedistributableMatch);
-
     return {
       career: {
-        awards: awardList.filter(({ tournament }) => isRedistributable(tournament.source)),
+        awards: awardList,
         contracts: contractList,
         earnings,
         player,
         seasonAwards,
-        series: seriesRecord(redistributableMatches, player.id),
-        titles: titles.filter(({ source }) => isRedistributable(source)),
+        series: seriesRecord(matchList, player.id),
+        titles,
       },
-      matches: redistributableMatches,
+      matches: matchList,
     };
   }
 }

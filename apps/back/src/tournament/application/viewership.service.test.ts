@@ -4,7 +4,6 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { Match } from "../domain/match";
 import { TournamentEvent } from "../domain/tournament-event";
-import type { EventStage } from "./ports";
 import { ViewershipService } from "./viewership.service";
 import type { ViewershipScope } from "./viewership.service";
 
@@ -34,7 +33,6 @@ const stage = (source: DataSource) => ({
 describe(ViewershipService, () => {
   const events = new Map<string, TournamentEvent>();
   const matches = new Map<string, Match>();
-  let stages: EventStage[] = [];
 
   const scope: ViewershipScope = {
     events: {
@@ -42,7 +40,6 @@ describe(ViewershipService, () => {
       save: async (event) => {
         events.set(event.id, event);
       },
-      stages: async () => stages,
     },
     matches: {
       load: async (id) => matches.get(id) ?? null,
@@ -57,19 +54,10 @@ describe(ViewershipService, () => {
   beforeEach(() => {
     events.clear();
     matches.clear();
-    stages = [];
     events.set("event", Object.assign(new TournamentEvent(), { id: "event" }));
     matches.set(
       "manual",
       Object.assign(new Match(), { id: "manual", tournament: stage("manual") }),
-    );
-    matches.set(
-      "startgg",
-      Object.assign(new Match(), {
-        id: "startgg",
-        source: "startgg",
-        tournament: stage("startgg"),
-      }),
     );
   });
 
@@ -97,21 +85,17 @@ describe(ViewershipService, () => {
     expect(events.get("event")?.viewership).toBeNull();
   });
 
-  it("lets staff enter start.gg numbers for the site but refuses them as proposals", async () => {
-    await service.set({ id: "startgg", kind: "match" }, VIEWERSHIP);
-    expect(matches.get("startgg")?.viewership?.peakViewers).toBe(64_000);
-
+  it("accepts a proposal for an existing match or event without writing", async () => {
     await expect(
-      service.requireProposable({ id: "startgg", kind: "match" }, VIEWERSHIP),
-    ).rejects.toThrow("start.gg match");
-    stages = [{ id: "s1", name: "Swiss", source: "startgg" }];
-    await expect(
-      service.requireProposable({ id: "event", kind: "event" }, VIEWERSHIP),
-    ).rejects.toThrow("start.gg event");
-    stages = [...stages, { id: "s2", name: "Playoffs", source: "manual" }];
+      service.requireProposable({ id: "manual", kind: "match" }, VIEWERSHIP),
+    ).resolves.toBeUndefined();
     await expect(
       service.requireProposable({ id: "event", kind: "event" }, VIEWERSHIP),
     ).resolves.toBeUndefined();
+    expect(matches.get("manual")?.viewership).toBeNull();
+    await expect(
+      service.requireProposable({ id: "missing", kind: "match" }, VIEWERSHIP),
+    ).rejects.toThrow(NotFoundError);
   });
 
   it("reports a missing owner", async () => {

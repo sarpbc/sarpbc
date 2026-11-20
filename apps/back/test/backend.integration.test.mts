@@ -14,7 +14,7 @@ import { verifyCompetitionImport } from "./scenarios/competition-import.mts";
 import {
   verifyCompetitionSyncLookups,
   verifyPandascoreAdoption,
-  verifyRedistributableScope,
+  verifyResultsAndEarnings,
 } from "./scenarios/competition-sync-lookups.mts";
 import { verifyPlayerAwards } from "./scenarios/player-awards.mts";
 import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mts";
@@ -134,8 +134,6 @@ const sourcedBody = identified.extend({ source: z.string() });
 
 const mcpMatch = identified.extend({ participants: z.array(participantBody) });
 
-const mcpLimitedMatch = identified.extend({ participants: z.undefined().optional() });
-
 const mcpCreatedTournament = identified.extend({ participants: z.array(participantBody) });
 
 const mcpTournament = identified.extend({
@@ -146,8 +144,6 @@ const mcpTournament = identified.extend({
   ),
   participants: z.array(participantBody),
 });
-
-const mcpLimitedTournament = identified.extend({ participants: z.undefined().optional() });
 
 interface Mergeable {
   id: string;
@@ -1016,19 +1012,16 @@ describe("backend integration", () => {
       );
 
       let lineupFixtures: Awaited<ReturnType<typeof verifyLineups>>;
-      await check(
-        "series lineups replace per match, flag stand-ins and keep start.gg lineups on the site",
-        async () => {
-          lineupFixtures = await verifyLineups({
-            match,
-            memberCookie,
-            player,
-            request,
-            staffCookie,
-            tournament,
-          });
-        },
-      );
+      await check("series lineups replace per match and flag stand-ins", async () => {
+        lineupFixtures = await verifyLineups({
+          match,
+          memberCookie,
+          player,
+          request,
+          staffCookie,
+          tournament,
+        });
+      });
       await check("staff enter credited viewership on matches and events", async () => {
         await verifyViewership({ match, memberCookie, request, staffCookie, tournament });
       });
@@ -1632,7 +1625,7 @@ describe("backend integration", () => {
         },
       );
 
-      await check("MCP roster proposals, approval, merges and start.gg sources", async () => {
+      await check("MCP roster proposals, approval, merges and refused sources", async () => {
         const response68 = await request(
           "POST",
           "/pat/tokens",
@@ -2039,11 +2032,22 @@ describe("backend integration", () => {
           [["staff", "2026-06-01", "coach"]],
         );
 
-        const startgg = "https://www.start.gg/tournament/integration/event/main";
+        assert.deepEqual(
+          await callTool(
+            "create_player",
+            {
+              name: "MCP Startgg Player",
+              sourceUrl: "https://www.start.gg/tournament/integration/event/main",
+            },
+            toolFailure,
+          ),
+          { error: true },
+          "a start.gg source is refused",
+        );
 
         const scoutProposal = await callTool("create_player", {
-          name: "MCP Startgg Player",
-          sourceUrl: startgg,
+          name: "MCP Scout Player",
+          sourceUrl: source,
         });
 
         const pendingIds = async () => {
@@ -2062,24 +2066,24 @@ describe("backend integration", () => {
         const scouted = reviewResult2.entityId;
         const pendingIdsResult2 = await pendingIds();
         assert.ok(!pendingIdsResult2.includes(scoutProposal.proposalId));
-        const response74 = await request("GET", "/player/slug/mcp-startgg-player");
+        const response74 = await request("GET", "/player/slug/mcp-scout-player");
         assert.equal(
           response74.json(z.object({ player: z.object({ source: z.string() }) })).player.source,
-          "startgg",
+          "manual",
         );
 
         const callToolResult4 = await callTool(
           "search_players",
-          { query: "MCP Startgg" },
+          { query: "MCP Scout" },
           z.array(sourcedBody),
         );
 
         assert.deepEqual(
           callToolResult4.map(({ id, source: origin }) => [id, origin]),
-          [[scouted, "startgg"]],
+          [[scouted, "manual"]],
         );
         const callToolResult5 = await callTool("get_player", { idOrSlug: scouted }, sourcedBody);
-        assert.equal(callToolResult5.source, "startgg");
+        assert.equal(callToolResult5.source, "manual");
 
         const callToolResult6 = await callTool(
           "search_players",
@@ -2090,48 +2094,33 @@ describe("backend integration", () => {
         assert.equal(callToolResult6[0].id, created);
 
         const scoutedTeam = await applied("create_team", {
-          name: "MCP Startgg Team",
-          sourceUrl: startgg,
+          name: "MCP Scout Team",
+          sourceUrl: source,
         });
 
         const callToolResult7 = await callTool(
           "search_teams",
-          { query: "MCP Startgg" },
+          { query: "MCP Scout" },
           z.array(identified),
         );
 
         assert.equal(callToolResult7[0].id, scoutedTeam);
         const callToolResult8 = await callTool("get_team", { idOrSlug: scoutedTeam }, sourcedBody);
-        assert.equal(callToolResult8.source, "startgg");
+        assert.equal(callToolResult8.source, "manual");
 
-        const { TournamentParticipant: ParticipantRow } =
-          await import("../src/tournament/infrastructure/competition-persistence.ts");
+        const manualCreated = await callTool(
+          "create_tournament",
+          {
+            beginAt: "2026-10-20",
+            endAt: "2026-10-30",
+            name: "MCP manual Cup",
+            teamIds: [alpha, scoutedTeam],
+          },
+          mcpCreatedTournament,
+        );
 
-        const participantIds = async (tournamentId: string) => {
-          const findResult2 = await orm.em
-            .fork()
-            .getRepository(ParticipantRow)
-            .find({ tournament: tournamentId });
-
-          return findResult2.map(({ id }) => id);
-        };
-
-        const createCup = async <T,>(tournamentSource: string, schema: z.ZodType<T>) =>
-          await callTool(
-            "create_tournament",
-            {
-              beginAt: "2026-10-20",
-              endAt: "2026-10-30",
-              name: `MCP ${tournamentSource} Cup`,
-              source: tournamentSource,
-              teamIds: [alpha, scoutedTeam],
-            },
-            schema,
-          );
-
-        const manualCreated = await createCup("manual", mcpCreatedTournament);
         const manualCup = manualCreated.id;
-        assert.deepEqual(teamNames(manualCreated.participants), ["MCP Alpha", "MCP Startgg Team"]);
+        assert.deepEqual(teamNames(manualCreated.participants), ["MCP Alpha", "MCP Scout Team"]);
 
         const detail = await callTool("get_tournament", { id: manualCup }, mcpTournament);
         assert.deepEqual(
@@ -2228,39 +2217,8 @@ describe("backend integration", () => {
         assert.equal(manualMatches.length, 3);
 
         for (const manualMatch of manualMatches) {
-          assert.deepEqual(teamNames(manualMatch.participants), ["MCP Alpha", "MCP Startgg Team"]);
+          assert.deepEqual(teamNames(manualMatch.participants), ["MCP Alpha", "MCP Scout Team"]);
         }
-
-        const startggCreated = await createCup("startgg", mcpLimitedTournament);
-        const startggCup = startggCreated.id;
-        assert.equal(startggCreated.participants, undefined);
-
-        const startggMatch = await callTool(
-          "create_match",
-          {
-            name: "MCP startgg Final",
-            participantIds: await participantIds(startggCup),
-            tournamentId: startggCup,
-          },
-          mcpLimitedMatch,
-        );
-
-        assert.equal(startggMatch.participants, undefined);
-
-        const startggByTeam = await callTool(
-          "create_match",
-          {
-            name: "MCP startgg by team",
-            teams: slugs,
-            tournamentId: startggCup,
-          },
-          mcpLimitedMatch,
-        );
-
-        assert.equal(startggByTeam.participants, undefined);
-        assert.deepEqual(await callTool("get_tournament", { id: startggCup }, toolFailure), {
-          error: true,
-        });
 
         const callToolResult10 = await callTool(
           "get_tournaments",
@@ -2271,7 +2229,6 @@ describe("backend integration", () => {
         const listed = new Set(callToolResult10.map(({ id }) => id));
 
         assert.ok(listed.has(manualCup));
-        assert.ok(!listed.has(startggCup));
 
         const matchResults = await callTool(
           "get_match_results",
@@ -2282,7 +2239,7 @@ describe("backend integration", () => {
         assert.equal(
           matchResults.total,
           matchResults.results.length,
-          "start.gg rows are excluded before counting",
+          "the total counts the returned rows",
         );
 
         const upcoming = await callTool(
@@ -2313,8 +2270,6 @@ describe("backend integration", () => {
           request,
           review,
           staffCookie,
-          startggCupId: startggCup,
-          startggMatchId: startggMatch.id,
         });
         await verifyTeamAliasProposals({ callTool, request, review, ...aliasFixtures });
         await verifyCircuits({
@@ -2334,7 +2289,6 @@ describe("backend integration", () => {
           otherTeam,
           request,
           staffCookie,
-          startggCupId: startggCup,
           team,
           tournament,
         });
@@ -2885,7 +2839,7 @@ describe("backend integration", () => {
       );
 
       await check(
-        "on this day reads titles, bracket finals and transfers on the Paris day without start.gg",
+        "on this day reads titles, bracket finals and transfers on the Paris day",
         async () => {
           await verifyOnThisDay({ memberCookie, orm, request, staffCookie });
         },
@@ -2898,19 +2852,13 @@ describe("backend integration", () => {
         },
       );
 
-      await check(
-        "redistributable scope drops start.gg matches and earnings from lists in SQL",
-        async () => {
-          await verifyRedistributableScope({ RequestContext, app, orm, request, staffCookie });
-        },
-      );
+      await check("match results and team earnings are listed in SQL", async () => {
+        await verifyResultsAndEarnings({ RequestContext, app, orm, request, staffCookie });
+      });
 
-      await check(
-        "PandaScore player import adopts legacy slugs and never relabels start.gg rows",
-        async () => {
-          await verifyPandascoreAdoption({ RequestContext, app, orm, request, staffCookie });
-        },
-      );
+      await check("PandaScore player import adopts legacy slugs", async () => {
+        await verifyPandascoreAdoption({ RequestContext, app, orm, request, staffCookie });
+      });
 
       await check(
         "sitemap lists public entities and leaves out merged, empty, canceled and TBD rows",

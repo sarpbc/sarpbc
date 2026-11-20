@@ -5,13 +5,7 @@ import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { assertPrizeDistribution, patchPrizeEntry } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
 import type { CompetitionAfterCommit } from "./after-commit";
-import type {
-  EarningsScope,
-  PrizeParticipant,
-  PrizeQueries,
-  PrizeTransaction,
-  PrizeWriter,
-} from "./ports";
+import type { PrizeParticipant, PrizeQueries, PrizeTransaction, PrizeWriter } from "./ports";
 
 const assertParticipants = (entries: PrizeEntry[], participants: PrizeParticipant[]) => {
   const rosters = new Map(participants.map(({ teamId, playerIds }) => [teamId, playerIds]));
@@ -53,14 +47,8 @@ export class TournamentPrizeService {
   }
 
   async requireProposableTournament(id: string) {
-    const source = await this.reads.tournamentSource(id);
-
-    if (!source) {
+    if (!(await this.reads.tournamentExists(id))) {
       throw new NotFoundError(`Tournament with id "${id}" not found`);
-    }
-
-    if (source === "startgg") {
-      throw new InvalidInputError("Prize distributions of start.gg tournaments cannot be proposed");
     }
   }
 
@@ -73,12 +61,12 @@ export class TournamentPrizeService {
     });
   }
 
-  async teamEarnings(teamId: string, scope: EarningsScope) {
-    return summarizeEarnings(await this.reads.byTeam(teamId, scope)) satisfies ProfileEarnings;
+  async teamEarnings(teamId: string) {
+    return summarizeEarnings(await this.reads.byTeam(teamId)) satisfies ProfileEarnings;
   }
 
-  async playerEarnings(playerId: string, scope: EarningsScope) {
-    return summarizeEarnings(await this.reads.byPlayer(playerId, scope)) satisfies ProfileEarnings;
+  async playerEarnings(playerId: string) {
+    return summarizeEarnings(await this.reads.byPlayer(playerId)) satisfies ProfileEarnings;
   }
 
   async setDistribution(tournamentId: string, entries: PrizeEntry[]) {

@@ -169,7 +169,7 @@ export interface RosterIdentityWriter {
 export type AwardParticipantRef = { participantId: string } | { teamId: string };
 
 export interface AwardContext {
-  tournament: { id: string; name: string; source: DataSource } | null;
+  tournament: { id: string; name: string } | null;
   participant: { id: string; name: string; playerIds: string[] } | null;
   player: { id: string; name: string; slug: string } | null;
 }
@@ -195,15 +195,11 @@ export interface AwardQueries {
   byTournament: (id: string) => Promise<TournamentAwardListItem[] | null>;
 }
 
-export interface EarningsScope {
-  redistributableOnly: boolean;
-}
-
 export interface PrizeQueries {
-  tournamentSource: (id: string) => Promise<DataSource | null>;
+  tournamentExists: (id: string) => Promise<boolean>;
   byTournament: (id: string) => Promise<TournamentPrizes | null>;
-  byTeam: (id: string, scope: EarningsScope) => Promise<EarningsLine[]>;
-  byPlayer: (id: string, scope: EarningsScope) => Promise<EarningsLine[]>;
+  byTeam: (id: string) => Promise<EarningsLine[]>;
+  byPlayer: (id: string) => Promise<EarningsLine[]>;
 }
 
 export interface PrizeParticipant {

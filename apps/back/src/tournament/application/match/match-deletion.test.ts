@@ -149,14 +149,6 @@ describe("MatchService deletion", () => {
     await expect(service.requireProposableDeletion("gone")).rejects.toBeInstanceOf(NotFoundError);
   });
 
-  it("lets staff delete a start.gg match but keeps it out of proposals", async () => {
-    stored = match({ source: "startgg" });
-
-    await expect(service.requireProposableDeletion("dup")).rejects.toThrow("start.gg");
-    await service.deleteMatch("dup");
-    expect(removed).toStrictEqual(["dup"]);
-  });
-
   it("checks a proposable deletion without deleting", async () => {
     await service.requireProposableDeletion("dup");
 

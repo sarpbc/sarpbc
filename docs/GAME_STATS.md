@@ -84,7 +84,7 @@ This PR first downloaded each `.replay` file and parsed it with a Rust CLI built
 
 ## Display and licensing
 
-The match page shows a "Game Stats" section when a match has imported games, with a game switcher and a link to each replay on Ballchasing for attribution. Without games, the page is unchanged. A linked row shows the sarpbc.org player's name with a link to their profile, not the in-game name. The stats ride on the existing `GET /matches/:ref` response used by the site, which carries no platform ids, and no other public API exposes them. MCP has staff tools that manage imports, games and player links under `tournaments.manage` (see [MCP.md](MCP.md)); they do not make the stats public, and no public or read-only MCP tool returns them. No Epic assets are used, and Liquipedia and BLAST.tv are never sources.
+The match page shows a "Game Stats" section when a match has imported games, with a game switcher and a link to each replay on Ballchasing for attribution. Without games, the page is unchanged. A linked row shows the sarpbc.org player's name with a link to their profile, not the in-game name. The stats ride on the existing `GET /matches/:ref` response used by the site, which carries no platform ids, and no other public API exposes them. MCP has staff tools that manage imports, games and player links under `tournaments.manage` (see [MCP.md](MCP.md)); they do not make the stats public, and no public or read-only MCP tool returns them. No Epic assets are used, and Liquipedia, BLAST.tv and start.gg are never sources.
 
 ## What remains
 

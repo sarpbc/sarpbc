@@ -57,14 +57,12 @@ import { StreamService } from "../../application/stream.service";
 import { SetStreamsDto } from "./dto/set-streams.dto";
 import type { SetStreamsInput } from "./dto/set-streams.dto";
 import { MatchLineupService } from "../../application/match/match-lineup.service";
-import type { MatchLineups } from "../../application/match/match-lineup.service";
 import { lineupsFromGames } from "../../domain/match-lineup";
 import { SetMatchLineupsDto } from "./dto/set-match-lineups.dto";
 import type { SetMatchLineupsInput } from "./dto/set-match-lineups.dto";
 import type { GameStatsStore } from "../../../match-stats/application/ports";
 import { GAME_STATS_STORE } from "../../../match-stats/infrastructure/game-stats.tokens";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
-import { isRedistributable } from "../../../common/domain/data-source";
 import { ViewershipService } from "../../application/viewership.service";
 import { SetViewershipDto } from "./dto/set-viewership.dto";
 import type { SetViewershipInput } from "./dto/set-viewership.dto";
@@ -256,7 +254,7 @@ export class TournamentController {
   async getPlayerStats(@Param("id") id: string) {
     const tournament = await this.tournamentRead.findById(id);
 
-    if (!tournament || !isRedistributable(tournament.source)) {
+    if (!tournament) {
       throw new NotFoundException(`Tournament with id "${id}" not found`);
     }
 
@@ -432,7 +430,7 @@ export class TournamentController {
     @Param("matchId") matchId: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
-    return await this.streamService.set({ id: matchId, kind: "match" }, body.streams, "manual");
+    return await this.streamService.set({ id: matchId, kind: "match" }, body.streams);
   }
 
   @RequirePermissions("tournaments.manage")
@@ -489,7 +487,7 @@ export class TournamentController {
     @Param("id") id: string,
     @Body({ schema: SetStreamsDto }) body: SetStreamsInput,
   ) {
-    return await this.streamService.set({ id, kind: "tournament" }, body.streams, "manual");
+    return await this.streamService.set({ id, kind: "tournament" }, body.streams);
   }
 
   @RequirePermissions("tournaments.manage")
@@ -514,7 +512,10 @@ export class TournamentController {
     return { matches: matches.map(mapProfileMatchListItem) };
   }
 
-  private async lineupsResponse(matchId: string, pending: Promise<MatchLineups>) {
+  private async lineupsResponse(
+    matchId: string,
+    pending: Promise<Omit<MatchLineupsResponse, "suggested">>,
+  ) {
     const lineups = await pending;
 
     return {

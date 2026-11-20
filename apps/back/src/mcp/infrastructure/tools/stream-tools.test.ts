@@ -78,20 +78,19 @@ describe("stream tools", () => {
     expect(rosterProposalService.changes).toStrictEqual([]);
   });
 
-  it("hides start.gg sourced stream lists from list_roster_proposals", async () => {
+  it("lists stream proposals with their streams", async () => {
     const { tool: _, rosterProposalService } = setup("set_match_streams");
-
-    const proposal = (sourceUrl: string) =>
-      Object.assign(new RosterProposal(), {
-        change: { kind: "set_match_streams", matchId: MATCH_ID, streams: STREAMS },
-        createdAt: new Date(0),
-        id: sourceUrl,
-        sourceUrl,
-      });
 
     rosterProposalService.proposals = {
       names: {},
-      proposals: [proposal("https://www.start.gg/tournament/fake"), proposal(SOURCE)],
+      proposals: [
+        Object.assign(new RosterProposal(), {
+          change: { kind: "set_match_streams", matchId: MATCH_ID, streams: STREAMS },
+          createdAt: new Date(0),
+          id: "proposal-1",
+          sourceUrl: SOURCE,
+        }),
+      ],
     };
 
     const list = rosterTools({ rosterProposalService }).find(
@@ -103,8 +102,6 @@ describe("stream tools", () => {
     }
 
     const result = await list.run({ email: "staff@test.com", id: "u1", role: "admin" }, {});
-    expect(jsonOf(result)).toMatchObject({
-      proposals: [{ change: { streams: [] } }, { change: { streams: STREAMS } }],
-    });
+    expect(jsonOf(result)).toMatchObject({ proposals: [{ change: { streams: STREAMS } }] });
   });
 });

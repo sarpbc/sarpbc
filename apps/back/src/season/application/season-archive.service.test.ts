@@ -103,7 +103,7 @@ describe(SeasonArchiveService, () => {
       });
 
       expect(linked).toMatchObject({ label: "RLCS Major", result: "1st" });
-      expect(linked.tournament).toMatchObject({ id: "major", source: "pandascore" });
+      expect(linked.tournament).toMatchObject({ id: "major" });
     });
 
     it("attaches an entry without a tournament", async () => {
@@ -158,11 +158,6 @@ describe(SeasonArchiveService, () => {
 
       await archives.addParticipant(season.id, { teamId: "falcons" });
       await archives.addPathEntry(season.id, vitality.id, {
-        label: "Community Open",
-        result: "Qualified",
-        tournamentId: "open",
-      });
-      await archives.addPathEntry(season.id, vitality.id, {
         label: "RLCS Major",
         result: "1st",
         tournamentId: "major",
@@ -199,7 +194,7 @@ describe(SeasonArchiveService, () => {
       ]);
     });
 
-    it("publishes a participant path without its unpublished tournaments", () => {
+    it("publishes a participant path with its linked tournaments", () => {
       expect(archive.participants[1]?.path).toStrictEqual([
         {
           label: "RLCS Major",
@@ -228,7 +223,7 @@ describe(SeasonArchiveService, () => {
     });
 
     it("omits staff-only fields", () => {
-      expect(JSON.stringify(archive)).not.toMatch(/startgg|Community Open|participant-|"source"/u);
+      expect(JSON.stringify(archive)).not.toMatch(/participant-|"source"/u);
     });
 
     it("lists the season with its winner", async () => {

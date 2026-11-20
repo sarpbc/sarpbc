@@ -6,7 +6,7 @@ import { Tournament } from "../../../tournament/domain/tournament";
 import { TournamentParticipant } from "../../../tournament/domain/tournament-participant";
 import { TournamentEvent } from "../../../tournament/domain/tournament-event";
 import { TournamentPlayerStatsService } from "../../../match-stats/application/tournament-player-stats.service";
-import { redistributableCompetition } from "../redistributable-competition";
+import { competitionReads } from "../competition-reads";
 import { jsonOf } from "../../../../test/mcp-result";
 import { readTools } from "./read-tools";
 import { fakePlayerStats } from "../../../match-stats/application/fake-player-stats.test-utils";
@@ -43,14 +43,12 @@ const setup = () => {
     id: "t1",
     name: "Scouted",
     slug: "scouted",
-    source: "startgg",
   });
 
   const player = Object.assign(new Player(), {
     id: "p1",
     name: "Scout",
     slug: "scout",
-    source: "startgg",
     team,
   });
 
@@ -65,7 +63,7 @@ const setup = () => {
   } satisfies Pick<MatchService, "list">;
 
   const matchLineupService = {
-    find: async (matchId) => ({
+    find: async () => ({
       lineups: [
         {
           participantId: "part-kc",
@@ -81,7 +79,6 @@ const setup = () => {
           ],
         },
       ],
-      source: matchId === "startgg-match" ? ("startgg" as const) : ("manual" as const),
     }),
   } satisfies Pick<MatchLineupService, "find">;
 
@@ -103,7 +100,6 @@ const setup = () => {
           id: "team-kc",
           name: "Karmine Corp",
           slug: "karmine-corp",
-          source: "startgg",
         }),
       }),
     ],
@@ -122,25 +118,24 @@ const setup = () => {
 
       return [[], 0];
     },
-    findById: async (id) =>
-      id === manualCup.id ? manualCup : Object.assign(new Tournament(), { id, source: "startgg" }),
+    findById: async (id) => (id === manualCup.id ? manualCup : null),
   } satisfies Pick<TournamentQueries, "find" | "findById">;
 
   const prizes: PrizeState = {
-    distribution: { prizepool: null, prizes: [], source: "manual" },
+    distribution: { prizepool: null, prizes: [] },
   };
 
-  const earnings: { kind: "player" | "team"; id: string; scope: object }[] = [];
+  const earnings: { kind: "player" | "team"; id: string }[] = [];
 
   const tournamentPrizeService = {
     findByTournamentId: async () => prizes.distribution,
-    playerEarnings: async (id, scope) => {
-      earnings.push({ id, kind: "player", scope });
+    playerEarnings: async (id) => {
+      earnings.push({ id, kind: "player" });
 
       return { totals: [], years: [] };
     },
-    teamEarnings: async (id, scope) => {
-      earnings.push({ id, kind: "team", scope });
+    teamEarnings: async (id) => {
+      earnings.push({ id, kind: "team" });
 
       return { totals: [], years: [] };
     },
@@ -181,12 +176,12 @@ const setup = () => {
   const catalogService = {
     findEvent: async (idOrSlug) => ({
       event: Object.assign(new TournamentEvent(), { id: "event", name: "Coupe", slug: idOrSlug }),
-      stages: [manualCup, Object.assign(new Tournament(), { id: "c1", source: "startgg" })],
+      stages: [manualCup],
     }),
   } satisfies Pick<ManualCatalogService, "findEvent">;
 
   const tools = readTools({
-    competition: redistributableCompetition({
+    competition: competitionReads({
       catalogService,
       events: { list: vi.fn<EventQueries["list"]>() },
       matchLineupService,
@@ -228,41 +223,34 @@ const setup = () => {
 };
 
 describe("MCP read tools", () => {
-  it("excludes start.gg rows in the list queries so totals and pages stay consistent", async () => {
+  it("lists upcoming, live and finished matches and tournaments", async () => {
     const { listed, tournamentQueries, call } = setup();
     await call("get_upcoming_matches");
     await call("get_match_results");
     await call("get_tournaments");
 
-    const redistributableOnly: unknown = expect.objectContaining({ redistributableOnly: true });
-    expect(listed).toContainEqual(["upcoming", redistributableOnly]);
-    expect(listed).toContainEqual(["live", redistributableOnly]);
-    expect(listed).toContainEqual(["results", redistributableOnly]);
-    expect(tournamentQueries).toContainEqual(redistributableOnly);
+    expect(listed.map(([kind]) => kind)).toStrictEqual(
+      expect.arrayContaining(["upcoming", "live", "results"]),
+    );
+    expect(tournamentQueries).toHaveLength(1);
   });
 
-  it("returns start.gg players and teams with their source", async () => {
+  it("returns players and teams with their source", async () => {
     const { json } = setup();
     const anyString: unknown = expect.any(String);
 
-    const startgg: unknown = expect.objectContaining({
-      id: anyString,
-      source: "startgg",
-    });
+    const manual: unknown = expect.objectContaining({ id: anyString, source: "manual" });
 
-    await expect(json("search_players", { query: "Scout" })).resolves.toStrictEqual([startgg]);
-    await expect(json("search_teams", { query: "Scouted" })).resolves.toStrictEqual([startgg]);
+    await expect(json("search_players", { query: "Scout" })).resolves.toStrictEqual([manual]);
+    await expect(json("search_teams", { query: "Scouted" })).resolves.toStrictEqual([manual]);
     await expect(json("get_player", { idOrSlug: "scout" })).resolves.toMatchObject({
       role: "active",
-      source: "startgg",
-      team: { id: "t1", source: "startgg" },
-    });
-    await expect(json("get_team", { idOrSlug: "scouted" })).resolves.toMatchObject({
-      source: "startgg",
+      source: "manual",
+      team: { id: "t1", source: "manual" },
     });
   });
 
-  it("returns registered participants and hides start.gg tournaments", async () => {
+  it("returns registered participants and reports an unknown tournament", async () => {
     const { call, json } = setup();
 
     await expect(json("get_tournament", { id: "manual-cup" })).resolves.toMatchObject({
@@ -298,18 +286,18 @@ describe("MCP read tools", () => {
     });
   });
 
-  it("leaves start.gg stages out and requires a selector", async () => {
+  it("reports an unknown tournament and requires a selector", async () => {
     const { call } = setup();
 
-    const startgg = await call("get_tournament_player_stats", { tournamentId: "c1" });
+    const unknown = await call("get_tournament_player_stats", { tournamentId: "c1" });
     const missing = await call("get_tournament_player_stats", {});
 
-    expect(startgg.isError).toBe(true);
+    expect(unknown.isError).toBe(true);
     expect(missing.isError).toBe(true);
   });
 
-  it("returns match lineups with stand-in flags and hides start.gg matches", async () => {
-    const { call, json } = setup();
+  it("returns match lineups with stand-in flags", async () => {
+    const { json } = setup();
     await expect(json("get_match_lineups", { matchId: "manual-match" })).resolves.toStrictEqual({
       lineups: [
         {
@@ -319,20 +307,9 @@ describe("MCP read tools", () => {
       ],
       matchId: "manual-match",
     });
-    const hidden = await call("get_match_lineups", { matchId: "startgg-match" });
-    expect(hidden.isError).toBe(true);
-    const [block] = hidden.content;
-    expect(block?.type === "text" ? block.text : "").not.toContain("Scout");
   });
 
-  it("hides start.gg prize distributions", async () => {
-    const { call, prizes } = setup();
-    prizes.distribution = { prizepool: null, prizes: [], source: "startgg" };
-    const callResult4 = await call("get_tournament_prizes", { id: "c1" });
-    expect(callResult4.isError).toBe(true);
-  });
-
-  it("returns redistributable distributions with the PandaScore prize pool", async () => {
+  it("returns distributions with the PandaScore prize pool", async () => {
     const { json } = setup();
     await expect(json("get_tournament_prizes", { id: "c1" })).resolves.toStrictEqual({
       prizepool: null,
@@ -341,13 +318,13 @@ describe("MCP read tools", () => {
     });
   });
 
-  it("hides the awards of start.gg tournaments", async () => {
+  it("reports the awards of an unknown tournament as not found", async () => {
     const { call } = setup();
-    const callResult5 = await call("get_tournament_awards", { id: "startgg-cup" });
-    expect(callResult5.isError).toBe(true);
+    const unknown = await call("get_tournament_awards", { id: "missing-cup" });
+    expect(unknown.isError).toBe(true);
   });
 
-  it("returns the awards of a redistributable tournament with their player and team", async () => {
+  it("returns the awards of a tournament with their player and team", async () => {
     const { json } = setup();
     await expect(json("get_tournament_awards", { id: "manual-cup" })).resolves.toStrictEqual({
       awards: [
@@ -362,13 +339,13 @@ describe("MCP read tools", () => {
     });
   });
 
-  it("excludes start.gg earnings in the queries", async () => {
+  it("reads team and player earnings", async () => {
     const { call, earnings } = setup();
     await call("get_team_earnings", { idOrSlug: "scouted" });
     await call("get_player_earnings", { idOrSlug: "scout" });
     expect(earnings).toStrictEqual([
-      { id: "t1", kind: "team", scope: { redistributableOnly: true } },
-      { id: "p1", kind: "player", scope: { redistributableOnly: true } },
+      { id: "t1", kind: "team" },
+      { id: "p1", kind: "player" },
     ]);
   });
 

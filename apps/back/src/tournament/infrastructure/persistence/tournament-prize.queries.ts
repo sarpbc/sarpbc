@@ -2,7 +2,7 @@ import type { TournamentPrize as TournamentPrizeItem } from "@sarpbc/types";
 import { EntityManager } from "@mikro-orm/postgresql";
 import { QueryOrder } from "@mikro-orm/core";
 import type { FilterQuery } from "@mikro-orm/core";
-import type { EarningsScope, PrizeQueries } from "../../application/ports";
+import type { PrizeQueries } from "../../application/ports";
 import { toEventRef } from "../../domain/tournament-event";
 import { Tournament } from "./tournament.entity";
 import { TournamentPrize } from "./tournament-prize.entities";
@@ -44,7 +44,6 @@ const toEarningsLine = (row: TournamentPrize, shares: number) => {
       id: tournament.id,
       name: tournament.name,
       slug: tournament.slug,
-      source: tournament.source,
     },
   };
 };
@@ -52,10 +51,8 @@ const toEarningsLine = (row: TournamentPrize, shares: number) => {
 export class CompetitionPrizeQueries implements PrizeQueries {
   constructor(private readonly em: Pick<EntityManager, "find" | "findOne">) {}
 
-  async tournamentSource(id: string) {
-    const tournament = await this.em.findOne(Tournament, { id }, { fields: ["source"] });
-
-    return tournament?.source ?? null;
+  async tournamentExists(id: string) {
+    return (await this.em.findOne(Tournament, { id }, { fields: ["id"] })) !== null;
   }
 
   async byTournament(id: string) {
@@ -74,43 +71,29 @@ export class CompetitionPrizeQueries implements PrizeQueries {
     return {
       prizepool: tournament.prizepool,
       prizes: rows.map(toPrizeItem),
-      source: tournament.source,
     };
   }
 
-  async byTeam(id: string, scope: EarningsScope) {
-    const rows = await this.earnings({ team: { id } }, scope);
+  async byTeam(id: string) {
+    const rows = await this.earnings({ team: { id } });
 
     return rows.map((row) => toEarningsLine(row, 1));
   }
 
-  async byPlayer(id: string, scope: EarningsScope) {
-    const rows = await this.earnings({ players: { id } }, scope, ["players"]);
+  async byPlayer(id: string) {
+    const rows = await this.earnings({ players: { id } }, ["players"]);
 
     return rows.map((row) => toEarningsLine(row, row.players.length));
   }
 
-  private async earnings(
-    where: FilterQuery<TournamentPrize>,
-    { redistributableOnly }: EarningsScope,
-    populate: "players"[] = [],
-  ) {
-    return await this.em.find(
-      TournamentPrize,
-      {
-        $and: [
-          where,
-          { tournament: redistributableOnly ? { source: { $ne: "startgg" as const } } : {} },
-        ],
-      },
-      {
-        orderBy: [
-          { tournament: { endAt: QueryOrder.DESC_NULLS_LAST } },
-          { tournament: { beginAt: QueryOrder.DESC } },
-          { placement: "ASC" },
-        ],
-        populate: ["team", "tournament.event", ...populate],
-      },
-    );
+  private async earnings(where: FilterQuery<TournamentPrize>, populate: "players"[] = []) {
+    return await this.em.find(TournamentPrize, where, {
+      orderBy: [
+        { tournament: { endAt: QueryOrder.DESC_NULLS_LAST } },
+        { tournament: { beginAt: QueryOrder.DESC } },
+        { placement: "ASC" },
+      ],
+      populate: ["team", "tournament.event", ...populate],
+    });
   }
 }

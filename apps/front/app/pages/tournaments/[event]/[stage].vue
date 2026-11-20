@@ -49,11 +49,7 @@ const { tournament: resolvedStage, tab: resolvedTab } = resolved.value;
 const requestedTab = resolvedTab === "overview" ? activeTab.value : resolvedTab;
 
 const canonicalPath = localePath(
-  tournamentTabPath(
-    requestedTab === "stats" && resolvedStage.source === "startgg" ? "overview" : requestedTab,
-    resolvedStage.event.slug,
-    resolvedStage.slug,
-  ),
+  tournamentTabPath(requestedTab, resolvedStage.event.slug, resolvedStage.slug),
 );
 
 if (route.path !== canonicalPath) {
@@ -168,7 +164,6 @@ setJsonLd("ld-json-tournament-detail", tournamentJsonLd);
           :event-slug="tournament.event.slug"
           :stage-slug="tournament.slug"
           :active-tab="activeTab"
-          :stats="tournament.source !== 'startgg'"
         />
       </TournamentHero>
       <NuxtPage :tournament="tournament" />

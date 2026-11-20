@@ -21,7 +21,7 @@ describe(OnThisDayFactService, () => {
     const created = await service.create(input);
     expect(created).toMatchObject({
       day: 13,
-      link: { id: MANUAL_STAGE_ID, kind: "tournament", name: "Playoffs", source: "manual" },
+      link: { id: MANUAL_STAGE_ID, kind: "tournament", name: "Playoffs" },
       month: 11,
     });
 

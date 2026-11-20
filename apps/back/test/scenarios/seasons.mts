@@ -21,8 +21,7 @@ export interface SeasonArchivesContext {
   memberCookie: string;
   team: { id: string };
   otherTeam: { id: string };
-  tournament: { id: string; source: string };
-  startggCupId: string;
+  tournament: { id: string };
 }
 
 const idRef = z.object({ id: z.string() });
@@ -44,7 +43,7 @@ const seasonDetail = z.object({
   participants: z.array(
     z.object({
       id: z.string(),
-      path: z.array(z.object({ tournament: z.object({ source: z.string() }).nullish() })),
+      path: z.array(z.object({ tournament: idRef.nullish() })),
     }),
   ),
 });
@@ -229,7 +228,6 @@ export const verifySeasonArchives = async ({
   team,
   otherTeam,
   tournament,
-  startggCupId,
 }: SeasonArchivesContext) => {
   const slug = "fake-archive-2026";
   await request("POST", "/seasons", { name: "Fake Archive 2026", slug }, memberCookie, 403);
@@ -277,7 +275,6 @@ export const verifySeasonArchives = async ({
 
   await mapSequentially(
     [
-      { label: "Fake Open", result: "Qualified", tournamentId: startggCupId },
       { label: "Fake Major", result: "1st", tournamentId: tournament.id },
       { label: "Fake Regional", result: "Top 4" },
     ],
@@ -304,8 +301,8 @@ export const verifySeasonArchives = async ({
   assert.ok(staffEntry, "the season lists the winner");
   const staffPath = staffEntry.path;
   assert.deepEqual(
-    staffPath.map(({ tournament: linked }) => linked?.source ?? null),
-    ["startgg", tournament.source, null],
+    staffPath.map(({ tournament: linked }) => linked?.id ?? null),
+    [tournament.id, null],
   );
 
   const response11 = await request("GET", `/season-archives/${slug}`);
@@ -321,7 +318,6 @@ export const verifySeasonArchives = async ({
     publicPath.map(({ label }) => label),
     ["Fake Major", "Fake Regional"],
   );
-  assert.ok(!JSON.stringify(archiveBody).includes(startggCupId));
   const response12 = await request("GET", "/season-archives");
   assert.ok(
     response12

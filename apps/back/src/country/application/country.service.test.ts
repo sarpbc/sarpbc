@@ -33,11 +33,10 @@ describe(CountryService, () => {
     expect(list).toHaveBeenCalledWith("results", {
       ...firstPage,
       playerIds: ["alpha54", "exotiik", "vatira", "zen"],
-      redistributableOnly: true,
     });
   });
 
-  it("leaves start.gg matches and stages out of the public page", async () => {
+  it("lists the finished matches of the country players", async () => {
     const { sources } = countrySources();
     const page = await new CountryService(sources).detail("FR", firstPage);
 

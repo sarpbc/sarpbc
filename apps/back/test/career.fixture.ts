@@ -35,7 +35,6 @@ interface MatchSpec {
   sides: [Player[], Player[]];
   winner: 0 | 1 | null;
   source?: DataSource;
-  tournamentSource?: DataSource;
   finished?: boolean;
 }
 
@@ -60,24 +59,24 @@ export const careerMatch = (spec: MatchSpec) => {
       pandascoreId: null,
       pickemsEnabled: false,
       slug: "main-stage",
-      source: spec.tournamentSource ?? "manual",
+      source: "manual",
       streams: [],
     },
     winner: spec.winner === null ? null : participants[spec.winner],
   });
 };
 
-const careerTitle = (id: string, source: DataSource) =>
+const careerTitle = (id: string) =>
   Object.assign(new Tournament(), {
     endAt: new Date("2026-05-01T00:00:00.000Z"),
     event: cup,
     id,
     name: `Title ${id}`,
     slug: id,
-    source,
+    source: "pandascore",
   });
 
-const careerAward = (id: string, source: DataSource) => ({
+const careerAward = (id: string) => ({
   awardType: "mvp" as const,
   id,
   tournament: {
@@ -86,7 +85,6 @@ const careerAward = (id: string, source: DataSource) => ({
     id: `${id}-stage`,
     name: "Main Stage",
     slug: "main-stage",
-    source,
   },
 });
 
@@ -107,13 +105,6 @@ export const careerEarnings = (amount: number) => ({
 const careerMatches: Match[] = [
   careerMatch({ id: "final", sides: [[zen], [vatira]], winner: 0 }),
   careerMatch({ id: "rematch", sides: [[zen], [vatira]], source: "pandascore", winner: 1 }),
-  careerMatch({ id: "startgg-match", sides: [[zen], [vatira]], source: "startgg", winner: 0 }),
-  careerMatch({
-    id: "startgg-stage",
-    sides: [[vatira], [zen]],
-    tournamentSource: "startgg",
-    winner: 0,
-  }),
   careerMatch({ finished: false, id: "upcoming", sides: [[zen], [mawkzy]], winner: null }),
   careerMatch({ id: "groups", sides: [[zen], [mawkzy]], winner: 0 }),
   careerMatch({ id: "scrim-cup", sides: [[zen, vatira], [mawkzy]], winner: 1 }),
@@ -131,16 +122,13 @@ export const careerSources = () => {
   });
 
   const prizes: PlayerComparisonSources["prizes"] = {
-    playerEarnings: async (playerId, scope) =>
-      careerEarnings(scope.redistributableOnly && playerId === zen.id ? 1500 : 0),
+    playerEarnings: async (playerId) => careerEarnings(playerId === zen.id ? 1500 : 0),
   };
 
   const sources = {
     awards: {
       findByPlayerId: async (playerId: string) =>
-        playerId === zen.id
-          ? [careerAward("major-mvp", "pandascore"), careerAward("open-mvp", "startgg")]
-          : [],
+        playerId === zen.id ? [careerAward("major-mvp")] : [],
     },
     contracts: {
       getContractsByPlayer: async (playerId: string) => (playerId === zen.id ? [contract] : []),
@@ -160,9 +148,7 @@ export const careerSources = () => {
     },
     tournaments: {
       getTournamentsWonByPlayer: async (playerId: string) =>
-        playerId === zen.id
-          ? [careerTitle("rlcs", "pandascore"), careerTitle("open", "startgg")]
-          : [],
+        playerId === zen.id ? [careerTitle("rlcs")] : [],
     },
   } satisfies PlayerComparisonSources;
 

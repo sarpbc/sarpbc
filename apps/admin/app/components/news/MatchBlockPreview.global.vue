@@ -124,12 +124,6 @@ const stateLabel = useMatchStateLabel(t, (beginAt) => dateFormatter.value.format
           </span>
         </li>
       </ul>
-      <p
-        v-if="data.some((item) => item.startgg)"
-        class="border-t border-default px-3 py-2 text-xs text-muted"
-      >
-        {{ t("newsTag.matchDataBy") }} start.gg
-      </p>
     </template>
   </div>
 </template>

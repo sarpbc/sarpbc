@@ -9,7 +9,7 @@ import {
 } from "../../../tournament/infrastructure/http/dto/manual-catalog.dto";
 import { defineTool } from "../define-tool";
 import { mapEvent, mapLeague } from "../mappers";
-import type { RedistributableCompetition } from "../redistributable-competition";
+import type { CompetitionReads } from "../competition-reads";
 import { describeFields, listLimit } from "./tool-input";
 import { requireUpdateFields } from "./update-fields";
 
@@ -18,7 +18,7 @@ export interface EventToolServices {
     ManualCatalogService,
     "leagues" | "createLeague" | "updateLeague" | "createEvent" | "updateEvent"
   >;
-  competition: Pick<RedistributableCompetition, "events" | "event">;
+  competition: Pick<CompetitionReads, "events" | "event">;
 }
 
 export const eventTools = ({ catalogService, competition }: EventToolServices) => [

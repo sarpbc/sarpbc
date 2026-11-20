@@ -122,7 +122,7 @@ describe("set_circuit_stage_scale", () => {
 });
 
 describe("get_circuit", () => {
-  it("keeps start.gg stages, their region teams and their placements out of the MCP response", async () => {
+  it("returns every stage with its public URL", async () => {
     vi.stubEnv("FRONT_URL", "https://sarpbc.test");
 
     const team = {
@@ -133,7 +133,7 @@ describe("get_circuit", () => {
       slug: "fake-team",
     };
 
-    const stage = (id: string, source: "pandascore" | "manual" | "startgg") => ({
+    const stage = (id: string, source: "pandascore" | "manual") => ({
       finishes: [{ placement: 13, team }],
       regionTeams: [team],
       scale: SCALE,
@@ -163,7 +163,7 @@ describe("get_circuit", () => {
 
     const detail: CircuitDetail = {
       ...summary,
-      stages: [stage("ps", "pandascore"), stage("manual", "manual"), stage("sgg", "startgg")],
+      stages: [stage("ps", "pandascore"), stage("manual", "manual")],
     };
 
     const standings: CircuitStandings = { ...summary, events: [], rows: [], sourceUrls: [] };
@@ -181,7 +181,6 @@ describe("get_circuit", () => {
     expect(body).toMatchObject({
       stages: [{ tournament: { id: "ps" } }, { tournament: { id: "manual" } }],
     });
-    expect(JSON.stringify(body)).not.toContain("sgg");
   });
 });
 

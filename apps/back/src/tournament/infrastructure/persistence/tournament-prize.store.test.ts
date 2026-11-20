@@ -18,22 +18,21 @@ const prizeRow = (playerCount: number) => ({
     id: "t1",
     name: "Main Event",
     slug: "main-event",
-    source: "startgg",
   },
 });
 
 describe(CompetitionPrizeQueries, () => {
-  it("reports an earnings line with its share count, amount and tournament source", async () => {
+  it("reports an earnings line with its share count, amount and tournament dates", async () => {
     const queries = new CompetitionPrizeQueries(
       Object.assign(unconstructed(EntityManager), { find: async () => [prizeRow(3)] }),
     );
 
-    const [line] = await queries.byPlayer("player-a", { redistributableOnly: false });
+    const [line] = await queries.byPlayer("player-a");
 
     expect(line).toMatchObject({
       amount: 900,
       shares: 3,
-      tournament: { beginAt: null, endAt: "2026-02-01T00:00:00.000Z", source: "startgg" },
+      tournament: { beginAt: null, endAt: "2026-02-01T00:00:00.000Z" },
     });
   });
 });

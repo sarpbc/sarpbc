@@ -16,7 +16,7 @@ import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
 import type { RosterProposalStore } from "../src/roster-proposal/application/ports";
 import { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 import { replaceStreams } from "../src/tournament/domain/stream";
-import type { StreamEditSource, StreamOwner } from "../src/tournament/domain/stream";
+import type { StreamOwner } from "../src/tournament/domain/stream";
 import { requireViewership } from "../src/tournament/domain/viewership";
 import type { ViewershipOwner } from "../src/tournament/domain/viewership";
 
@@ -36,15 +36,11 @@ const matchGuard = async (id: string) => {
   }
 };
 
-const emptyPrizes = { prizepool: null, prizes: [], source: "manual" as const };
+const emptyPrizes = { prizepool: null, prizes: [] };
 
 const stored = (key: string) => ({ key, url: `https://cdn.sarpbc.test/${key}` });
 
 const awardError = (tournamentId: string, playerId: string) => {
-  if (tournamentId === "startgg-cup") {
-    return new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
-  }
-
   if (tournamentId !== "cup") {
     return new NotFoundError(`Tournament with id "${tournamentId}" not found`);
   }
@@ -147,22 +143,14 @@ export const setupRosterProposalService = () => {
     },
     requireProposableDeletion: async (id: string) => {
       await matchGuard(id);
-
-      if (id === "startgg-match") {
-        throw new InvalidInputError("Deleting start.gg matches cannot be proposed");
-      }
     },
   };
 
   vi.spyOn(matches, "deleteMatch");
 
   const viewerships = {
-    requireProposable: async (owner: ViewershipOwner, input: Viewership) => {
+    requireProposable: async (_: ViewershipOwner, input: Viewership) => {
       requireViewership(input);
-
-      if (owner.id === "startgg-match") {
-        throw new InvalidInputError("The viewership of a start.gg match cannot be proposed");
-      }
     },
     set: async (_: ViewershipOwner, input: Viewership | null) => ({
       viewership: input && requireViewership(input),
@@ -172,27 +160,19 @@ export const setupRosterProposalService = () => {
   vi.spyOn(viewerships, "set");
 
   const streams = {
-    requireProposable: async (owner: StreamOwner, inputs: readonly StreamInput[]) => {
-      if (owner.id === "startgg-match") {
-        throw new InvalidInputError("Streams of a start.gg match cannot be proposed");
-      }
-
-      replaceStreams([], inputs, "manual");
+    requireProposable: async (_: StreamOwner, inputs: readonly StreamInput[]) => {
+      replaceStreams(inputs);
     },
-    set: async (_: StreamOwner, inputs: readonly StreamInput[], from: StreamEditSource) => ({
+    set: async (_: StreamOwner, inputs: readonly StreamInput[]) => ({
       inherited: [],
-      streams: replaceStreams([], inputs, from),
+      streams: replaceStreams(inputs),
     }),
   };
 
   vi.spyOn(streams, "set");
 
   const lineups = {
-    requireProposable: async (matchId: string, inputs: readonly MatchLineupInput[]) => {
-      if (matchId === "startgg-match") {
-        throw new InvalidInputError("Lineups of a start.gg match cannot be proposed");
-      }
-
+    requireProposable: async (_: string, inputs: readonly MatchLineupInput[]) => {
       const playerIds = inputs.flatMap(({ playerIds: ids }) => ids);
 
       if (new Set(playerIds).size !== playerIds.length) {
@@ -312,12 +292,6 @@ export const setupRosterProposalService = () => {
       }
     },
     requireProposableTournament: async (id: string) => {
-      if (id === "startgg-cup") {
-        throw new InvalidInputError(
-          "Prize distributions of start.gg tournaments cannot be proposed",
-        );
-      }
-
       if (id !== "cup") {
         throw new NotFoundError(`Tournament with id "${id}" not found`);
       }

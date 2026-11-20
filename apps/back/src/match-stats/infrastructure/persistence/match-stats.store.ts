@@ -61,16 +61,10 @@ const scopeFilter = (scope: StatsScope) => {
       };
     }
 
-    case "redistributable": {
-      const redistributable = "t.source <> 'startgg'";
-
+    case "overall": {
       return scope.era === null
-        ? { filter: redistributable, minGames: scope.minGames, params: [] }
-        : {
-            filter: `${redistributable} and ${eraFilter(scope.era)}`,
-            minGames: scope.minGames,
-            params: [OPEN_ERA_START],
-          };
+        ? { filter: "true", minGames: scope.minGames, params: [] }
+        : { filter: eraFilter(scope.era), minGames: scope.minGames, params: [OPEN_ERA_START] };
     }
 
     default: {

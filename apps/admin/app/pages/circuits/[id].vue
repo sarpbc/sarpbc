@@ -183,9 +183,6 @@ const formatDates = (stage: CircuitStage) => {
                     }}
                   </template>
                 </span>
-                <span v-if="stage.tournament.source === 'startgg'" class="text-muted">
-                  {{ $t("page.circuits.stages.startggNotice") }}
-                </span>
                 <SLink
                   variant="secondary"
                   :to="stage.sourceUrl"

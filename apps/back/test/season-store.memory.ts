@@ -33,14 +33,6 @@ const SEASON_TOURNAMENTS = {
     id: "major",
     name: "Playoffs",
     slug: "playoffs",
-    source: "pandascore",
-  },
-  open: {
-    event: { id: "open-event", name: "Community Open", slug: "community-open" },
-    id: "open",
-    name: "Open Qualifier",
-    slug: "open-qualifier",
-    source: "startgg",
   },
 } satisfies Record<string, SeasonPathTournament>;
 

@@ -100,10 +100,9 @@ export const verifyOnThisDay = async ({
   const response3 = await created(teamBody, "/team", { name: "Anniversary Away" });
   const away = response3.team;
 
-  const stage = async (name: string, source = "manual") => {
+  const stage = async (name: string) => {
     const response4 = await created(stageBody, "/tournaments", {
       name,
-      source,
       teamIds: [home.id, away.id],
     });
 
@@ -166,7 +165,6 @@ export const verifyOnThisDay = async ({
   await crown(await stage("Anniversary Late Night Cup"), "2022-02-16T23:30:00Z");
   await crown(await stage("Anniversary Next Day Cup"), "2021-02-17T23:30:00Z");
   await crown(await stage("Anniversary This Year Cup"), "2026-02-17T12:00:00Z");
-  await crown(await stage("Anniversary Community Cup", "startgg"), "2023-02-17T20:00:00Z");
 
   const { player } = await created(playerBody, "/player", { name: "Anniversary Rookie" });
 
@@ -208,7 +206,6 @@ export const verifyOnThisDay = async ({
     kind: "team",
     name: home.name,
     slug: home.slug,
-    source: null,
   });
 
   const response8 = await created(savedFact, "/on-this-day-facts", {
@@ -263,7 +260,7 @@ export const verifyOnThisDay = async ({
       ["final", 2024, 4, away.name],
       ["title", 2022, "2022-02-17", home.name],
     ],
-    "titles and finals use the Paris day; start.gg, next-day and current-year titles stay out",
+    "titles and finals use the Paris day; next-day and current-year titles stay out",
   );
   assert.deepEqual(
     summary.filter(([kind]) => kind === "birthday"),

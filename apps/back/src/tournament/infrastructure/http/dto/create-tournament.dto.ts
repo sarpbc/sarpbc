@@ -48,7 +48,6 @@ const tournamentName = z.string().trim().min(1, "Enter a tournament name.").max(
 export const createTournamentFields = {
   ...tournamentWriteFields,
   name: tournamentName,
-  source: z.enum(["manual", "startgg"]).optional(),
 };
 
 export const CreateTournamentDto = z.strictObject(createTournamentFields);

@@ -6,8 +6,6 @@ export interface MatchListScopeFilters {
   leagueId?: string;
   teamId?: string;
   playerIds?: string[];
-  /** Excludes start.gg matches and tournaments, whose data may not be redistributed. */
-  redistributableOnly?: boolean;
 }
 
 export interface MatchListQueryOptions extends MatchListScopeFilters {

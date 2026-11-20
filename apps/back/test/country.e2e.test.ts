@@ -80,13 +80,12 @@ describe("country pages (e2e)", () => {
     });
   });
 
-  it("returns the teams and matches of a country without start.gg matches", async () => {
+  it("returns the teams and matches of a country", async () => {
     const country = await frenchCountry();
 
     expect(country.teams.map(({ slug }) => slug)).toStrictEqual(["karmine-corp", "team-vitality"]);
     expect(country.matches.map(({ id }) => id)).toStrictEqual(["final"]);
     expect(country.matchTotal).toBe(1);
-    expect(JSON.stringify(country)).not.toContain("startgg");
   });
 
   it("pages the matches", async () => {
@@ -95,7 +94,7 @@ describe("country pages (e2e)", () => {
     expect(response.status).toBe(200);
     expect(list).toHaveBeenLastCalledWith(
       "results",
-      expect.objectContaining({ limit: 5, offset: 10, redistributableOnly: true }),
+      expect.objectContaining({ limit: 5, offset: 10 }),
     );
   });
 

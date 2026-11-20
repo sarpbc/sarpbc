@@ -5,7 +5,7 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { CircuitService } from "./circuit.service";
 import { MemoryCircuitStore } from "./circuit-store.test-utils";
-import type { StoredStageResult } from "./ports";
+import type { CircuitStageResult } from "../domain/circuit-standings";
 import { mapSequentially } from "../../common/application/sequentially";
 
 const SOURCE = "https://example.org/official-rules";
@@ -21,7 +21,7 @@ const team = (id: string) => ({
 
 const setup = () => {
   const eventTeams = new Map<string, CircuitEventTeam[]>(
-    ["ps-stage", "startgg-stage", "manual-stage"].map((id) => [
+    ["ps-stage", "manual-stage"].map((id) => [
       id,
       [
         { placement: 1, team: team("kc") },
@@ -36,7 +36,7 @@ const setup = () => {
   return { results: store.results, saved: store.saved, service };
 };
 
-const result = (overrides: Partial<StoredStageResult>) => {
+const result = (overrides: Partial<CircuitStageResult>) => {
   const base = {
     beginAt: new Date("2026-01-01T00:00:00Z"),
     endAt: new Date("2026-01-05T00:00:00Z"),
@@ -45,10 +45,9 @@ const result = (overrides: Partial<StoredStageResult>) => {
     placements: [{ placement: 1, team: team("t1") }],
     regionTeamIds: [],
     scale,
-    source: "pandascore",
     sourceUrl: SOURCE,
     worldwide: false,
-  } satisfies StoredStageResult;
+  } satisfies CircuitStageResult;
 
   return { ...base, ...overrides };
 };
@@ -219,15 +218,12 @@ describe(CircuitService, () => {
     });
   });
 
-  it("accepts manual and start.gg stages", async () => {
-    await mapSequentially(["manual-stage", "startgg-stage"], async (id) => {
+  it("accepts PandaScore and manual stages", async () => {
+    await mapSequentially(["ps-stage", "manual-stage"], async (id) => {
       await service.setStageScale(circuitId, id, { scale, sourceUrl: SOURCE });
     });
 
-    expect([...saved.keys()]).toStrictEqual([
-      `${circuitId}:manual-stage`,
-      `${circuitId}:startgg-stage`,
-    ]);
+    expect([...saved.keys()]).toStrictEqual([`${circuitId}:ps-stage`, `${circuitId}:manual-stage`]);
   });
 
   it("stores the worldwide flag, the region teams and the final placements sorted", async () => {
@@ -311,20 +307,12 @@ describe(CircuitService, () => {
     });
   });
 
-  it("counts manual stages and leaves start.gg stages out of the public standings", async () => {
-    const startgg = "https://www.start.gg/tournament/fake-open/event/3v3/overview/prizing";
+  it("counts a manual stage from its staff-entered finishes", async () => {
     results.push(
       result({
         event: { id: "manual", name: "Manual Cup", slug: "manual" },
         finishes: [{ placement: 1, team: team("manual-winner") }],
         placements: [],
-        source: "manual",
-      }),
-      result({
-        event: { id: "sgg", name: "start.gg Open", slug: "sgg" },
-        placements: [{ placement: 1, team: team("startgg-winner") }],
-        source: "startgg",
-        sourceUrl: startgg,
       }),
     );
 
@@ -332,7 +320,6 @@ describe(CircuitService, () => {
 
     expect(standings.rows.map(({ team: { id } }) => id)).toStrictEqual(["manual-winner"]);
     expect(standings.events.map(({ event: { id } }) => id)).toStrictEqual(["manual"]);
-    expect(standings.sourceUrls).not.toContain(startgg);
   });
 
   it("credits only the circuit region's teams from a worldwide stage", async () => {

@@ -3,7 +3,6 @@ import { z } from "zod";
 import type { TournamentPrizes } from "@sarpbc/types";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentPrizeService } from "../../application/tournament-prize.service";
-import { DATA_SOURCES } from "@sarpbc/types";
 
 const nullableText = z.string().nullable();
 
@@ -26,7 +25,6 @@ const distribution = z.object({
       }),
     }),
   ),
-  source: z.enum(DATA_SOURCES),
 }) satisfies z.ZodType<TournamentPrizes>;
 
 export const tournamentPrizesCacheKey = (id: string) => `tournament-prizes:${id}`;

@@ -8,7 +8,6 @@ import {
   MIN_CIRCUIT_SEASON,
 } from "@sarpbc/utils";
 import { z } from "zod";
-import { isRedistributable } from "../../../common/domain/data-source";
 import type { CircuitService } from "../../../circuit/application/circuit.service";
 import { defineTool } from "../define-tool";
 import { circuitUrl, tournamentUrl } from "../urls";
@@ -62,7 +61,7 @@ const descriptionSchema = z
   .describe("Short neutral description shown on the circuit page.");
 
 const sourceUrlSchema = dataSourceUrlField(
-  "Required public page with the official circuit rules or announcement from the organiser. Never Liquipedia, a mirror of it or BLAST.tv.",
+  "Required public page with the official circuit rules or announcement from the organiser. Never Liquipedia, a mirror of it, BLAST.tv or start.gg.",
 );
 
 const qualificationSpotsSchema = z
@@ -87,7 +86,7 @@ export const circuitTools = ({ circuitService }: CircuitToolServices) => [
 
   defineTool({
     description:
-      "Get one points circuit: each counted tournament stage with its official points scale (placement ranges and points), source, worldwide flag, region teams and staff-entered final placements, then the standings with an event-by-event breakdown. Placements come from PandaScore standings and from the final placements staff entered. In a regional circuit a worldwide stage credits only its region teams. PandaScore and manual stages are returned; start.gg stages and their placements and points are left out of this response, even when staff attached them. Propose a stage scale with set_circuit_stage_scale.",
+      "Get one points circuit: each counted tournament stage with its official points scale (placement ranges and points), source, worldwide flag, region teams and staff-entered final placements, then the standings with an event-by-event breakdown. Placements come from PandaScore standings and from the final placements staff entered. In a regional circuit a worldwide stage credits only its region teams. Propose a stage scale with set_circuit_stage_scale.",
     handler: async ({ idOrSlug }) => {
       const detail = await circuitService.detail(idOrSlug);
       const standings = await circuitService.standings(detail.id);
@@ -95,9 +94,7 @@ export const circuitTools = ({ circuitService }: CircuitToolServices) => [
       return {
         ...withUrl(detail),
         events: standings.events,
-        stages: detail.stages
-          .filter(({ tournament }) => isRedistributable(tournament.source))
-          .map((stage) => ({ ...stage, url: tournamentUrl(stage.tournament) })),
+        stages: detail.stages.map((stage) => ({ ...stage, url: tournamentUrl(stage.tournament) })),
         standings: standings.rows,
       };
     },

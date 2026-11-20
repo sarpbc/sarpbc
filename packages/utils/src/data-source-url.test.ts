@@ -11,6 +11,7 @@ void describe("isAcceptedDataSourceUrl", () => {
     "https://blast.tv/rl/tournaments/open",
     "https://www.blast.tv/rl",
     "https://liquipedia.net/rocketleague/RLCS",
+    "https://www.start.gg/tournament/rlcs-open",
     "ftp://example.com/rules",
     "https://user:pass@example.com/rules",
     "not a url",

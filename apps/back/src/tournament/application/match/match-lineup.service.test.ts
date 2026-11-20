@@ -127,8 +127,7 @@ describe(MatchLineupService, () => {
     for (const found of [
       match("manual-match", "manual"),
       match("pandascore-match", "pandascore"),
-      match("startgg-match", "startgg", "startgg"),
-      match("startgg-stage-match", "manual", "startgg"),
+      match("other-match", "manual"),
     ]) {
       matches.set(found.id, found);
     }
@@ -167,7 +166,6 @@ describe(MatchLineupService, () => {
           ],
         },
       ],
-      source: "manual",
     });
   });
 
@@ -188,42 +186,29 @@ describe(MatchLineupService, () => {
     expect(replaced).toStrictEqual([]);
   });
 
-  it("reports start.gg as the source of a start.gg match or stage", async () => {
-    const findResult = await service.find("pandascore-match");
-    expect(findResult.source).toBe("pandascore");
-    const findResult2 = await service.find("startgg-match");
-    expect(findResult2.source).toBe("startgg");
-    const findResult3 = await service.find("startgg-stage-match");
-    expect(findResult3.source).toBe("startgg");
-  });
-
-  it("accepts proposals for manual and PandaScore matches only", async () => {
+  it("accepts proposals for manual and PandaScore matches without writing", async () => {
     const lineups = [{ participantId: "side-a", playerIds: ["delta"] }];
     await expect(service.requireProposable("manual-match", lineups)).resolves.toBeUndefined();
     await expect(service.requireProposable("pandascore-match", lineups)).resolves.toBeUndefined();
-    await expect(service.requireProposable("startgg-match", lineups)).rejects.toThrow("start.gg");
-    await expect(service.requireProposable("startgg-stage-match", lineups)).rejects.toThrow(
-      "start.gg",
-    );
     expect(replaced).toStrictEqual([]);
   });
 
   describe("stand-in history", () => {
     beforeEach(() => {
       playerRows = [
-        { matchId: "startgg-match", participantId: "side-b", rosterIds: ["echo", "foxtrot"] },
+        { matchId: "other-match", participantId: "side-b", rosterIds: ["echo", "foxtrot"] },
         { matchId: "manual-match", participantId: "side-a", rosterIds: ["alpha", "bravo"] },
         { matchId: "pandascore-match", participantId: "side-a", rosterIds: ["delta", "bravo"] },
       ];
     });
 
-    it("lists only the series played outside the participant roster, start.gg included for the site", async () => {
+    it("lists only the series played outside the participant roster", async () => {
       const standIns = await service.standIns("delta");
 
       expect(
         standIns.map(({ participantId, match: { id } }) => ({ id, participantId })),
       ).toStrictEqual([
-        { id: "startgg-match", participantId: "side-b" },
+        { id: "other-match", participantId: "side-b" },
         { id: "manual-match", participantId: "side-a" },
       ]);
     });

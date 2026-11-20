@@ -58,10 +58,6 @@ const requireProposableAward = async (
     playerId,
   );
 
-  if (tournament.source === "startgg") {
-    throw new InvalidInputError("Awards of start.gg tournaments cannot be proposed");
-  }
-
   if (await awards.awardTaken(tournamentId, awardType)) {
     throw new InvalidInputError(
       `${tournament.name} already has a ${awardType.replaceAll(

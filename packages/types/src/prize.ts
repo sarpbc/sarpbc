@@ -1,4 +1,3 @@
-import type { DataSource } from "./competition";
 import type { TeamLogos } from "./team";
 import type { TournamentEventRef } from "./tournament-event";
 
@@ -35,7 +34,6 @@ export interface TournamentPrize {
 }
 
 export interface TournamentPrizes {
-  source: DataSource;
   prizepool: string | null;
   prizes: TournamentPrize[];
 }
@@ -50,7 +48,6 @@ export interface EarningsEntry {
     id: string;
     name: string;
     slug: string;
-    source: DataSource;
     beginAt: string | null;
     endAt: string | null;
     event: TournamentEventRef;

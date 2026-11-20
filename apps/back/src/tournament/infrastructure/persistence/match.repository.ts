@@ -1,5 +1,4 @@
 import { EntityRepository } from "@mikro-orm/core";
-import type { DataSource } from "@sarpbc/types";
 import type { EntityRef } from "../../../common/domain/entity-ref";
 import { Match } from "./match.entity";
 import { MATCH_TOURNAMENT_POPULATE } from "./match-populate";
@@ -12,7 +11,6 @@ import type {
 interface MatchTournamentScopeFilter {
   id?: string;
   league?: { id: string };
-  source?: { $ne: DataSource };
 }
 
 interface MatchListFilter {
@@ -20,7 +18,6 @@ interface MatchListFilter {
   endAt?: null | { $ne: null };
   tournament?: MatchTournamentScopeFilter;
   participants?: { team?: { id: string }; players?: { id: { $in: string[] } } };
-  source?: { $ne: DataSource };
 }
 
 const LIST_POPULATE = [
@@ -76,7 +73,7 @@ const buildLiveQuery = (todayOnly: boolean, liveSince?: Date) => {
 };
 
 const buildTournamentFilter = (scope: MatchListScopeFilters) => {
-  const { tournamentId, leagueId, redistributableOnly } = scope;
+  const { tournamentId, leagueId } = scope;
   const filter: MatchTournamentScopeFilter = {};
 
   if (tournamentId !== undefined && tournamentId !== "") {
@@ -85,10 +82,6 @@ const buildTournamentFilter = (scope: MatchListScopeFilters) => {
 
   if (leagueId !== undefined && leagueId !== "") {
     filter.league = { id: leagueId };
-  }
-
-  if (redistributableOnly === true) {
-    filter.source = { $ne: "startgg" };
   }
 
   return Object.keys(filter).length > 0 ? filter : undefined;
@@ -107,10 +100,6 @@ const mergeScopeFilters = (base: MatchListFilter, scope: MatchListScopeFilters) 
       ...(scope.teamId !== undefined && scope.teamId !== "" && { team: { id: scope.teamId } }),
       ...(scope.playerIds && { players: { id: { $in: scope.playerIds } } }),
     };
-  }
-
-  if (scope.redistributableOnly === true) {
-    query.source = { $ne: "startgg" };
   }
 
   return query;

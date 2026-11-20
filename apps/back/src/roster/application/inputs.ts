@@ -1,8 +1,7 @@
-import type { ContractRole, DataSource, PlayerStatus } from "@sarpbc/types";
+import type { ContractRole, PlayerStatus } from "@sarpbc/types";
 
 export interface CreatePlayerInput {
   name: string;
-  source?: Exclude<DataSource, "pandascore">;
   teamId?: string;
   firstName?: string;
   lastName?: string;
@@ -63,7 +62,6 @@ export interface SourcedContractUpdate extends UpdateContractInput {
 
 export interface CreateTeamInput {
   name: string;
-  source?: Exclude<DataSource, "pandascore">;
   location?: string;
   imageUrl?: string;
   darkModeImageUrl?: string;

@@ -25,36 +25,34 @@ const service = new TournamentPlayerStatsService({
 });
 
 describe(TournamentPlayerStatsService, () => {
-  it("aggregates only the redistributable stages of an event", async () => {
+  it("aggregates every stage of an event", async () => {
     scopes.length = 0;
 
-    const stats = await service.forStages([
-      { id: "group-stage", source: "manual" },
-      { id: "qualifier", source: "startgg" },
-      { id: "finals", source: "pandascore" },
-    ]);
+    const stats = await service.forStages([{ id: "group-stage" }, { id: "finals" }]);
 
     expect(scopes).toStrictEqual([{ ids: ["group-stage", "finals"], kind: "tournaments" }]);
     expect(stats).toMatchObject({ games: 2, players: [{ games: 2, totals: { goals: 2 } }] });
   });
 
-  it("returns empty stats for a start.gg stage without querying", async () => {
+  it("returns empty stats for an event without stages without querying", async () => {
     scopes.length = 0;
 
-    await expect(
-      service.forStages([{ id: "qualifier", source: "startgg" }]),
-    ).resolves.toStrictEqual({ games: 0, players: [], unlinkedAccounts: 0 });
+    await expect(service.forStages([])).resolves.toStrictEqual({
+      games: 0,
+      players: [],
+      unlinkedAccounts: 0,
+    });
     expect(scopes).toStrictEqual([]);
   });
 
-  it("aggregates every redistributable tournament into the overall leaderboard", async () => {
+  it("aggregates every tournament into the overall leaderboard", async () => {
     scopes.length = 0;
 
     await expect(service.overall(null)).resolves.toMatchObject({
       games: 2,
       players: [{ games: 2 }],
     });
-    expect(scopes).toStrictEqual([{ era: null, kind: "redistributable", minGames: 10 }]);
+    expect(scopes).toStrictEqual([{ era: null, kind: "overall", minGames: 10 }]);
   });
 
   it("narrows the overall leaderboard to one era", async () => {
@@ -62,6 +60,6 @@ describe(TournamentPlayerStatsService, () => {
 
     await service.overall("open");
 
-    expect(scopes).toStrictEqual([{ era: "open", kind: "redistributable", minGames: 10 }]);
+    expect(scopes).toStrictEqual([{ era: "open", kind: "overall", minGames: 10 }]);
   });
 });

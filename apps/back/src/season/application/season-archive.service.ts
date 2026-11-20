@@ -8,7 +8,6 @@ import type {
   SeasonPathEntry,
   SeasonPathEntryInput,
 } from "@sarpbc/types";
-import { isRedistributable } from "../../common/domain/data-source";
 import { ConflictError } from "../../common/domain/errors/conflict-error";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
@@ -16,18 +15,14 @@ import { parsePathEntry, parsePathNote } from "../domain/season-archive";
 import type { SeasonRecord, SeasonStore } from "./ports";
 
 const publicPath = (path: SeasonPathEntry[]) =>
-  path.flatMap<SeasonArchivePathEntry>(({ label, result, tournament }) => {
+  path.map(({ label, result, tournament }) => {
     if (!tournament) {
-      return [{ label, result, tournament: null }];
-    }
-
-    if (!isRedistributable(tournament.source)) {
-      return [];
+      return { label, result, tournament: null };
     }
 
     const { id, name, slug, event } = tournament;
 
-    return [{ label, result, tournament: { event, id, name, slug } }];
+    return { label, result, tournament: { event, id, name, slug } };
   }) satisfies SeasonArchivePathEntry[];
 
 const publicAward = ({ awardType, region, presentedBy, sourceUrl, player }: SeasonAward) => ({

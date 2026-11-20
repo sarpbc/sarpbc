@@ -3,12 +3,10 @@ import { Player } from "./player.entity";
 import { Team } from "./team.entity";
 import { TeamAlias } from "./team-alias.entity";
 
-// WARNING: adopt only rows stored before the PandaScore id was recorded, never start.gg rows, or their start.gg credit is lost.
 const adoptable = (slug: string) => ({
   mergedInto: null,
   pandascoreId: null,
   slug,
-  source: { $ne: "startgg" as const },
 });
 
 /**

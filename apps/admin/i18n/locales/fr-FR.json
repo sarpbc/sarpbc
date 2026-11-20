@@ -13,7 +13,7 @@
       "analyst": "Analyste",
       "manager": "Manager"
     },
-    "sourceUrlInvalid": "Saisissez une URL http ou https valide. Liquipedia et BLAST.tv ne sont pas des sources acceptées.",
+    "sourceUrlInvalid": "Saisissez une URL http ou https valide. Liquipedia, BLAST.tv et start.gg ne sont pas des sources acceptées.",
     "sourceUrl": "URL de la source",
     "openSource": "Ouvrir la source"
   },
@@ -359,8 +359,7 @@
       },
       "source": {
         "manual": "Manuel",
-        "pandascore": "PandaScore",
-        "startgg": "start.gg"
+        "pandascore": "PandaScore"
       },
       "matchSource": {
         "action": "Source",
@@ -1173,7 +1172,7 @@
           "invalid-to": "Saisissez une date valide ou laissez vide.",
           "to-not-after-from": "La date de fin doit suivre la date de début.",
           "invalid-source-url": "Saisissez l'URL http(s) d'une source officielle.",
-          "forbidden-source": "Liquipedia et BLAST.tv ne sont pas des sources acceptées.",
+          "forbidden-source": "Liquipedia, BLAST.tv et start.gg ne sont pas des sources acceptées.",
           "invalid-logo-url": "Saisissez une URL https.",
           "forbidden-logo-source": "Liquipedia n'est pas une source de logo acceptée.",
           "invalid-pandascore-id": "Saisissez un nombre entier positif."
@@ -1295,7 +1294,7 @@
       },
       "stages": {
         "title": "Étapes",
-        "hint": "Ajoutez des étapes PandaScore, manuelles ou start.gg. Les étapes start.gg ne comptent qu’ici : le site public et le MCP les excluent.",
+        "hint": "Ajoutez des étapes PandaScore ou manuelles.",
         "add": "Ajouter une étape",
         "edit": "Modifier le barème",
         "empty": "Aucune étape. Ajoutez une étape, puis saisissez son barème de points officiel.",
@@ -1307,8 +1306,7 @@
         },
         "worldwide": "Étape mondiale",
         "regionTeams": "Étape mondiale, aucune équipe de la région | Étape mondiale, {count} équipe de la région | Étape mondiale, {count} équipes de la région",
-        "finishes": "{count} place finale | {count} places finales",
-        "startggNotice": "Données start.gg. Non affichées sur le site public ni dans le MCP."
+        "finishes": "{count} place finale | {count} places finales"
       },
       "picker": {
         "title": "Ajouter une étape",
@@ -1475,7 +1473,6 @@
         "linked": "Lié à {name}",
         "add": "Ajouter le résultat",
         "addFailed": "Impossible d'ajouter le résultat.",
-        "startgg": "start.gg · non affiché sur le site public",
         "picker": {
           "title": "Lier un tournoi",
           "hint": "Recherchez l'étape de tournoi existante dont provient ce résultat."
@@ -1500,8 +1497,7 @@
         "date": "Jour",
         "text": "Texte",
         "link": "Lié à",
-        "noLink": "Aucun lien",
-        "hiddenStartgg": "start.gg : non affiché sur le site public"
+        "noLink": "Aucun lien"
       },
       "create": {
         "button": "Ajouter un fait",
@@ -1532,7 +1528,7 @@
         "textFr": "Texte français",
         "textHint": "Une phrase courte, telle qu'elle s'affichera.",
         "sourceUrl": "Source officielle",
-        "sourceUrlHint": "Facultatif. Liquipedia et BLAST.tv ne sont pas acceptés.",
+        "sourceUrlHint": "Facultatif. Liquipedia, BLAST.tv et start.gg ne sont pas acceptés.",
         "link": {
           "label": "Lien",
           "hint": "Facultatif. Un joueur, une équipe, une phase ou un match déjà sur le site.",

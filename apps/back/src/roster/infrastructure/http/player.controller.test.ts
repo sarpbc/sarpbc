@@ -21,7 +21,7 @@ import { unconstructed } from "../../../../test/doubles";
 import { memorySeasonStore } from "../../../../test/season-store.memory";
 import { tournamentQueries } from "../../../../test/competition-doubles";
 
-const standInMatch = (id: string, source: "manual" | "startgg", publicId: number) =>
+const standInMatch = (id: string, publicId: number) =>
   Object.assign(new Match(), {
     id,
     name: "Grand Final",
@@ -30,7 +30,7 @@ const standInMatch = (id: string, source: "manual" | "startgg", publicId: number
       Object.assign(new TournamentParticipant(), { id: `${id}-b`, players: [] }),
     ],
     publicId,
-    source,
+    source: "manual",
     tournament: {
       beginAt: null,
       event: { id: "fake-event", name: "Fake Cup", slug: "fake-cup" },
@@ -41,7 +41,7 @@ const standInMatch = (id: string, source: "manual" | "startgg", publicId: number
       pandascoreId: null,
       pickemsEnabled: false,
       slug: "main-stage",
-      source,
+      source: "manual",
       streams: [],
     },
   });
@@ -101,13 +101,10 @@ describe(PlayerController, () => {
 
   const prizes = Object.assign(unconstructed(TournamentPrizeService), prizeQueries);
 
-  const standInMatches = [
-    standInMatch("startgg-final", "startgg", 7),
-    standInMatch("cup-final", "manual", 8),
-  ];
+  const standInMatches = [standInMatch("open-final", 7), standInMatch("cup-final", 8)];
 
   const lineupRows: PlayerLineupRow[] = [
-    { matchId: "startgg-final", participantId: "startgg-final-a", rosterIds: [] },
+    { matchId: "open-final", participantId: "open-final-a", rosterIds: [] },
     { matchId: "cup-final", participantId: "cup-final-b", rosterIds: ["kept"] },
   ];
 
@@ -171,9 +168,7 @@ describe(PlayerController, () => {
     });
 
     it("reads the earnings of the resolved player", () => {
-      expect(playerEarnings).toHaveBeenCalledExactlyOnceWith("kept", {
-        redistributableOnly: false,
-      });
+      expect(playerEarnings).toHaveBeenCalledExactlyOnceWith("kept");
     });
 
     it("reads the tournaments of the resolved player", () => {
@@ -193,19 +188,16 @@ describe(PlayerController, () => {
     });
   });
 
-  it("lists stand-in series for the site, keeping start.gg ones with their credit flag", async () => {
+  it("lists stand-in series for the site", async () => {
     const { standIns } = await controller.getStandIns("kept");
 
     expect(
-      standIns.map(({ participantId, startgg, match }) => ({
+      standIns.map(({ participantId, match }) => ({
         id: match.id,
         participantId,
         publicId: match.publicId,
-        startgg,
       })),
-    ).toStrictEqual([
-      { id: "startgg-final", participantId: "startgg-final-a", publicId: 7, startgg: true },
-    ]);
+    ).toStrictEqual([{ id: "open-final", participantId: "open-final-a", publicId: 7 }]);
   });
 
   it("looks up tournaments over each staff tenure", async () => {

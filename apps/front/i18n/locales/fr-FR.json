@@ -33,7 +33,6 @@
       "other": "{n}e"
     },
     "prizes": {
-      "dataFrom": "Données issues de",
       "earnings": {
         "title": "Gains",
         "total": "Total",
@@ -1754,7 +1753,6 @@
           "noStream": "Aucun stream officiel annoncé",
           "noReplay": "Aucune rediffusion disponible",
           "linkLabel": "Regarder {channel} sur {platform}, {language} (s’ouvre dans un nouvel onglet)",
-          "dataFrom": "Streams référencés par",
           "platforms": {
             "twitch": "Twitch",
             "youtube": "YouTube",
@@ -2095,7 +2093,7 @@
         "matches": {
           "title": "Matchs",
           "empty": "Aucun match terminé pour le moment.",
-          "rule": "Matchs terminés avec au moins un joueur de ce pays dans l’effectif d’un tournoi, du plus récent au plus ancien. Les matchs start.gg ne sont pas listés."
+          "rule": "Matchs terminés avec au moins un joueur de ce pays dans l’effectif d’un tournoi, du plus récent au plus ancien."
         }
       }
     },

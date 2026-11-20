@@ -4,7 +4,7 @@ import type { PatUser } from "../../pat/application/pat.service";
 import { registerTools } from "./define-tool";
 import { MCP_SERVICES } from "./mcp-services";
 import type { McpServices } from "./mcp-services";
-import { redistributableCompetition } from "./redistributable-competition";
+import { competitionReads } from "./competition-reads";
 import { circuitTools } from "./tools/circuit-tools";
 import { eventTools } from "./tools/event-tools";
 import { gameStatsTools } from "./tools/game-stats-tools";
@@ -27,7 +27,7 @@ export class McpServerFactory {
       { capabilities: { logging: {} } },
     );
 
-    const competition = redistributableCompetition(this.services);
+    const competition = competitionReads(this.services);
     registerTools(server, user, [
       ...readTools({ ...this.services, competition }),
       ...eventTools({ ...this.services, competition }),

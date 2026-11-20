@@ -62,15 +62,6 @@ describe(mapMatchBlockItem, () => {
     expect(mapMatchBlockItem(stale, NOW, 0).state).toBe("finished");
   });
 
-  it("flags start.gg matches and matches of start.gg tournaments for credit", () => {
-    expect(mapMatchBlockItem(match({}), NOW, 0).startgg).toBe(false);
-    expect(mapMatchBlockItem(match({ source: "startgg" }), NOW, 0).startgg).toBe(true);
-    expect(
-      mapMatchBlockItem(match({ source: "manual", tournament: tournament("startgg") }), NOW, 0)
-        .startgg,
-    ).toBe(true);
-  });
-
   it("keeps the list item fields and the comment count", () => {
     expect(mapMatchBlockItem(match({}), NOW, 3)).toMatchObject({
       commentCount: 3,

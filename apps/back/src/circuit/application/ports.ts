@@ -1,10 +1,6 @@
-import type { CircuitStage, CircuitEventTeam, CircuitSummary, DataSource } from "@sarpbc/types";
+import type { CircuitStage, CircuitEventTeam, CircuitSummary } from "@sarpbc/types";
 import type { CircuitStageSettings } from "../domain/circuit-scale";
 import type { CircuitStageResult } from "../domain/circuit-standings";
-
-export interface StoredStageResult extends CircuitStageResult {
-  source: DataSource;
-}
 
 export interface CircuitStore {
   list: () => Promise<CircuitSummary[]>;
@@ -14,7 +10,7 @@ export interface CircuitStore {
   save: (circuit: CircuitSummary) => Promise<void>;
   remove: (id: string) => Promise<boolean>;
   stages: (circuitId: string) => Promise<CircuitStage[]>;
-  stageResults: (circuitId: string) => Promise<StoredStageResult[]>;
+  stageResults: (circuitId: string) => Promise<CircuitStageResult[]>;
   eventTeams: (tournamentId: string) => Promise<CircuitEventTeam[] | null>;
   saveStage: (
     circuitId: string,

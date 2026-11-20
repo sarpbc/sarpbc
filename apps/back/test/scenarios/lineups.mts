@@ -14,28 +14,18 @@ type MatchLineup = z.infer<typeof matchLineup>;
 
 const matchLineupsResponse = z.looseObject({
   lineups: z.array(matchLineup),
-  source: z.string(),
   suggested: z.array(z.unknown()),
 });
 
-const matchDetail = z.looseObject({
-  lineups: z.array(matchLineup),
-  match: z.looseObject({ tournament: z.looseObject({ source: z.string() }) }),
-});
+const matchDetail = z.looseObject({ lineups: z.array(matchLineup) });
 
 const standIns = z.object({
-  standIns: z.array(
-    z.looseObject({ match: identified, participantId: z.string(), startgg: z.boolean() }),
-  ),
+  standIns: z.array(z.looseObject({ match: identified, participantId: z.string() })),
 });
 
 const createdPlayer = z.object({ player: identified });
 
 const participant = z.looseObject({ id: z.string(), team: identified });
-
-const startggCupBody = z.object({
-  tournament: z.looseObject({ id: z.string(), participants: z.array(participant) }),
-});
 
 const lineupsTool = z.looseObject({ lineups: z.array(matchLineup) });
 
@@ -56,7 +46,6 @@ interface LineupsContext {
 
 export interface LineupFixtures {
   standIn: Identified;
-  startggMatch: Identified;
 }
 
 interface LineupProposalsContext extends LineupFixtures {
@@ -126,7 +115,6 @@ export const verifyLineups = async ({
 
   const saved = response4.json(matchLineupsResponse);
 
-  assert.equal(saved.source, "manual");
   assert.deepEqual(saved.suggested, []);
   assert.deepEqual(sides(saved.lineups), [
     [
@@ -144,12 +132,8 @@ export const verifyLineups = async ({
   );
   const standInsOfResult = await standInsOf(standIn.id);
   assert.deepEqual(
-    standInsOfResult.map(({ participantId, startgg, match: { id } }) => [
-      participantId,
-      startgg,
-      id,
-    ]),
-    [[alpha, false, match.id]],
+    standInsOfResult.map(({ participantId, match: { id } }) => [participantId, id]),
+    [[alpha, match.id]],
   );
   assert.deepEqual(await standInsOf(player.id), [], "a rostered player has no stand-in history");
 
@@ -209,64 +193,7 @@ export const verifyLineups = async ({
     [beta],
   );
 
-  const response6 = await request(
-    "POST",
-    "/tournaments",
-    {
-      name: "Integration start.gg Lineups",
-      source: "startgg",
-      teamIds: tournament.participants.map(({ team }) => team.id),
-    },
-    staffCookie,
-    201,
-  );
-
-  const startggCup = response6.json(startggCupBody).tournament;
-
-  const response7 = await request(
-    "POST",
-    `/tournaments/${startggCup.id}/matches`,
-    {
-      beginAt: new Date(Date.now() - 86_400_000).toISOString(),
-      name: "Integration start.gg Final",
-      participantIds: startggCup.participants.map(({ id }) => id),
-      status: "finished",
-    },
-    staffCookie,
-    201,
-  );
-
-  const startggMatch = response7.json(z.object({ match: identified })).match;
-
-  const response8 = await request(
-    "PUT",
-    `/tournaments/matches/${startggMatch.id}/lineups`,
-    { lineups: [{ participantId: startggCup.participants[0].id, playerIds: [standIn.id] }] },
-    staffCookie,
-  );
-
-  const startggLineups = response8.json(matchLineupsResponse);
-
-  assert.equal(startggLineups.source, "startgg");
-  const response9 = await request("GET", `/matches/${startggMatch.id}`);
-  const startggDetail = response9.json(matchDetail);
-  assert.deepEqual(
-    sides(startggDetail.lineups),
-    [[startggCup.participants[0].id, [[standIn.id, true]]]],
-    "the site shows start.gg lineups",
-  );
-  assert.equal(startggDetail.match.tournament.source, "startgg", "with the source for the credit");
-  const standInsOfResult3 = await standInsOf(standIn.id);
-  assert.deepEqual(
-    standInsOfResult3.map(({ startgg, match: { id } }) => [id, startgg]),
-    [
-      [match.id, false],
-      [startggMatch.id, true],
-    ],
-    "the stand-in history keeps start.gg series, newest first, flagged for the credit",
-  );
-
-  return { standIn, startggMatch };
+  return { standIn };
 };
 
 export const verifyLineupProposals = async ({
@@ -278,7 +205,6 @@ export const verifyLineupProposals = async ({
   match,
   player,
   standIn,
-  startggMatch,
 }: LineupProposalsContext) => {
   const [alpha, beta] = tournament.participants.map(({ id }) => id);
   const sourceUrl = "https://x.com/integration/status/lineups";
@@ -303,19 +229,6 @@ export const verifyLineupProposals = async ({
     await callTool(
       "set_match_lineups",
       {
-        lineups: [],
-        matchId: startggMatch.id,
-        sourceUrl,
-      },
-      toolFailure,
-    ),
-    { error: true },
-    "start.gg match lineups cannot be proposed",
-  );
-  assert.deepEqual(
-    await callTool(
-      "set_match_lineups",
-      {
         lineups,
         matchId: match.id,
         sourceUrl: "https://www.start.gg/tournament/integration/event/main",
@@ -324,11 +237,6 @@ export const verifyLineupProposals = async ({
     ),
     { error: true },
     "start.gg sources are refused",
-  );
-  assert.deepEqual(
-    await callTool("get_match_lineups", { matchId: startggMatch.id }, toolFailure),
-    { error: true },
-    "MCP reads leave start.gg lineups out",
   );
 
   const before = await detail();

@@ -2,7 +2,7 @@ import type { TeamLogos, TeamSummary } from "./team";
 import type { Stream } from "./stream";
 import type { TournamentEventRef } from "./tournament-event";
 
-export const DATA_SOURCES = ["pandascore", "manual", "startgg"] as const;
+export const DATA_SOURCES = ["pandascore", "manual"] as const;
 
 export type DataSource = (typeof DATA_SOURCES)[number];
 
@@ -168,7 +168,6 @@ export type MatchBlockState = "upcoming" | "live" | "finished";
 
 export interface MatchBlockItem extends CountedMatchListItem {
   state: MatchBlockState;
-  startgg: boolean;
 }
 
 export interface MatchBlocksResponse {

@@ -210,7 +210,6 @@ export const verifyPandascoreAdoption = async ({
     await import("../../src/tournament/application/sync/competition-sync.service.ts");
 
   const { Player } = await import("../../src/roster/infrastructure/persistence/player.entity.ts");
-  const { randomUUID } = await import("node:crypto");
   const sync = app.get(CompetitionSyncService);
 
   const run = <T,>(work: () => T) => RequestContext.create(orm.em.fork(), work);
@@ -243,32 +242,9 @@ export const verifyPandascoreAdoption = async ({
     legacy.id,
     "a legacy row without a provider id is adopted through its slug",
   );
-
-  const startgg = randomUUID();
-  const em = orm.em.fork();
-  em.persist(
-    em.create(Player, {
-      id: startgg,
-      name: "Adoption Startgg",
-      slug: "adoption-startgg",
-      source: "startgg",
-      status: "active",
-    }),
-  );
-  await em.flush();
-  await importPlayer(9952, "adoption-startgg");
-  const created = await imported(9952);
-  assert.notEqual(created.id, startgg, "a start.gg row is never adopted through its slug");
-  assert.equal(created.slug, "adoption-startgg-9952");
-  const findOneOrFailResult = await orm.em.fork().findOneOrFail(Player, { id: startgg });
-  assert.equal(
-    findOneOrFailResult.pandascoreId,
-    null,
-    "the start.gg row keeps its source and has no provider id",
-  );
 };
 
-export const verifyRedistributableScope = async ({
+export const verifyResultsAndEarnings = async ({
   app,
   orm,
   request,
@@ -302,7 +278,6 @@ export const verifyRedistributableScope = async ({
       "/tournaments",
       {
         name: `Scope ${source} Cup`,
-        source,
         teamIds: [alpha, beta],
       },
       z.object({
@@ -342,42 +317,20 @@ export const verifyRedistributableScope = async ({
   };
 
   const manualCup = await finishedMatchOf("manual");
-  const startggCup = await finishedMatchOf("startgg");
 
-  const finishedCups = async (options: { redistributableOnly: boolean }) => {
-    const [rows, total] = await run(
-      async () => await matches.list("results", { teamId: alpha, ...options }),
-    );
+  const finishedCups = async () => {
+    const [rows, total] = await run(async () => await matches.list("results", { teamId: alpha }));
 
     assert.equal(total, rows.length, "the total counts the rows that are returned");
 
     return rows.map((match) => match.tournament.id).toSorted(byText);
   };
 
-  assert.deepEqual(
-    await finishedCups({ redistributableOnly: false }),
-    [manualCup, startggCup].toSorted(),
-  );
-  assert.deepEqual(
-    await finishedCups({ redistributableOnly: true }),
-    [manualCup],
-    "redistributable lists never carry start.gg matches",
-  );
+  assert.deepEqual(await finishedCups(), [manualCup]);
 
-  const earned = async (redistributableOnly: boolean) => {
-    const runResult = await run(
-      async () => await prizes.teamEarnings(alpha, { redistributableOnly }),
-    );
+  const earned = await run(async () => await prizes.teamEarnings(alpha));
 
-    return runResult.totals;
-  };
-
-  assert.deepEqual(await earned(false), [{ amount: 2000, currency: "USD" }]);
-  assert.deepEqual(
-    await earned(true),
-    [{ amount: 1000, currency: "USD" }],
-    "redistributable earnings leave out start.gg tournaments",
-  );
+  assert.deepEqual(earned.totals, [{ amount: 1000, currency: "USD" }]);
 
   await verifyCountries({ request, staffCookie });
 };

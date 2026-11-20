@@ -72,9 +72,7 @@ if (canonicalPath.value && route.path !== canonicalPath.value) {
 
 const event = computed(() => (resolved.value?.kind === "event" ? resolved.value.event : null));
 
-const statsStages = computed(
-  () => event.value?.stages.filter((stage) => stage.source !== "startgg") ?? [],
-);
+const statsStages = computed(() => event.value?.stages ?? []);
 
 const showStats = computed(() => statsStages.value.length > 0 && route.query.tab === "stats");
 
@@ -187,10 +185,7 @@ watch(
                 {{ t("components.viewership.title") }}
               </h2>
             </template>
-            <ViewershipStats
-              :viewership="event.viewership"
-              :startgg="event.stages.every((stage) => stage.source === 'startgg')"
-            />
+            <ViewershipStats :viewership="event.viewership" />
           </HubRail>
         </section>
 

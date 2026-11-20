@@ -112,9 +112,7 @@ export class TeamController {
       throw new NotFoundException(`Team with id "${id}" not found`);
     }
 
-    const earnings = await this.tournamentPrizeService.teamEarnings(team.id, {
-      redistributableOnly: false,
-    });
+    const earnings = await this.tournamentPrizeService.teamEarnings(team.id);
 
     return { earnings };
   }

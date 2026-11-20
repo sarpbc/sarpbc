@@ -1,10 +1,8 @@
 <script setup lang="ts">
 import type { Viewership, ViewershipScope } from "@sarpbc/types";
-import { STARTGG_URL } from "~/composables/prizes";
 
-const { viewership, startgg } = defineProps<{
+const { viewership } = defineProps<{
   viewership: Viewership;
-  startgg: boolean;
 }>();
 
 const { t, locale } = useI18n();
@@ -91,10 +89,6 @@ const details = computed(() =>
         >
           {{ viewership.sourceName }}
         </SLink>
-      </span>
-      <span v-if="startgg">
-        {{ t("common.prizes.dataFrom") }}
-        <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
       </span>
     </p>
   </HubCard>

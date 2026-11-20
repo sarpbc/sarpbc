@@ -523,8 +523,8 @@ describe(ManualTournamentService, () => {
     expect(events).toStrictEqual(["remove", "commit", "invalidate"]);
   });
 
-  it.each(["pandascore", "startgg"] as const)("refuses to delete a %s stage", async (source) => {
-    tournament.source = source;
+  it("refuses to delete a PandaScore stage", async () => {
+    tournament.source = "pandascore";
     await expect(service.delete("ewc")).rejects.toBeInstanceOf(InvalidInputError);
     expect(writer.removedTournamentIds).toStrictEqual([]);
   });

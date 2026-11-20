@@ -13,7 +13,7 @@
       "analyst": "Analyst",
       "manager": "Manager"
     },
-    "sourceUrlInvalid": "Enter a valid http or https URL. Liquipedia and BLAST.tv are not accepted sources.",
+    "sourceUrlInvalid": "Enter a valid http or https URL. Liquipedia, BLAST.tv and start.gg are not accepted sources.",
     "sourceUrl": "Source URL",
     "openSource": "Open source"
   },
@@ -359,8 +359,7 @@
       },
       "source": {
         "manual": "Manual",
-        "pandascore": "PandaScore",
-        "startgg": "start.gg"
+        "pandascore": "PandaScore"
       },
       "matchSource": {
         "action": "Source",
@@ -1173,7 +1172,7 @@
           "invalid-to": "Enter a valid date or leave it empty.",
           "to-not-after-from": "The end date must come after the start date.",
           "invalid-source-url": "Enter the http(s) URL of an official source.",
-          "forbidden-source": "Liquipedia and BLAST.tv are not accepted sources.",
+          "forbidden-source": "Liquipedia, BLAST.tv and start.gg are not accepted sources.",
           "invalid-logo-url": "Enter an https URL.",
           "forbidden-logo-source": "Liquipedia is not an accepted logo source.",
           "invalid-pandascore-id": "Enter a positive whole number."
@@ -1295,7 +1294,7 @@
       },
       "stages": {
         "title": "Stages",
-        "hint": "Attach PandaScore, manual or start.gg stages. start.gg stages count only here: the public site and the MCP leave them out.",
+        "hint": "Attach PandaScore or manual stages.",
         "add": "Add Stage",
         "edit": "Edit Scale",
         "empty": "No stages yet. Add a stage, then enter its official points scale.",
@@ -1307,8 +1306,7 @@
         },
         "worldwide": "Worldwide stage",
         "regionTeams": "Worldwide stage, no region team | Worldwide stage, {count} region team | Worldwide stage, {count} region teams",
-        "finishes": "{count} final place | {count} final places",
-        "startggNotice": "Data from start.gg. Not shown on the public site or in the MCP."
+        "finishes": "{count} final place | {count} final places"
       },
       "picker": {
         "title": "Add Stage",
@@ -1475,7 +1473,6 @@
         "linked": "Linked to {name}",
         "add": "Add Result",
         "addFailed": "Could not add the result.",
-        "startgg": "start.gg · not shown on the public site",
         "picker": {
           "title": "Link Tournament",
           "hint": "Search for an existing tournament stage this result comes from."
@@ -1500,8 +1497,7 @@
         "date": "Day",
         "text": "Text",
         "link": "Linked to",
-        "noLink": "No link",
-        "hiddenStartgg": "start.gg: not shown on the public site"
+        "noLink": "No link"
       },
       "create": {
         "button": "Add fact",
@@ -1532,7 +1528,7 @@
         "textFr": "French text",
         "textHint": "One short sentence, as it will appear.",
         "sourceUrl": "Official source",
-        "sourceUrlHint": "Optional. Liquipedia and BLAST.tv are not accepted.",
+        "sourceUrlHint": "Optional. Liquipedia, BLAST.tv and start.gg are not accepted.",
         "link": {
           "label": "Link",
           "hint": "Optional. A player, team, stage or match already on the site.",

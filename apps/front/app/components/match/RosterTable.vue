@@ -2,16 +2,10 @@
 import type { MatchLineup, MatchLineupPlayer } from "@sarpbc/types";
 import { participantLogo, participantName, playerPath } from "@sarpbc/utils";
 import type { TournamentParticipant } from "~/types/tournament";
-import { STARTGG_URL } from "~/composables/prizes";
 
-const {
-  participants,
-  lineups,
-  startgg = false,
-} = defineProps<{
+const { participants, lineups } = defineProps<{
   participants: TournamentParticipant[];
   lineups: MatchLineup[];
-  startgg?: boolean;
 }>();
 
 const { t } = useI18n();
@@ -42,8 +36,6 @@ const rows = computed(() =>
 const hasStandIn = computed(() =>
   lineups.some((lineup) => lineup.players.some((player) => player.standIn)),
 );
-
-const showCredit = computed(() => startgg && lineups.length > 0);
 </script>
 
 <template>
@@ -84,12 +76,6 @@ const showCredit = computed(() => startgg && lineups.length > 0);
     </div>
     <p v-if="hasStandIn" class="flex h-row items-center px-2 text-xs text-muted">
       {{ t("page.match.detail.lineups.standInHint") }}
-    </p>
-    <p v-if="showCredit" class="flex h-row items-center px-2 text-xs text-muted">
-      <span>
-        {{ t("common.prizes.dataFrom") }}
-        <SLink :to="STARTGG_URL" external target="_blank">start.gg</SLink>
-      </span>
     </p>
   </div>
 </template>

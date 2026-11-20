@@ -594,7 +594,7 @@ describe("Match forfeits", () => {
   });
 
   it("records the source given with a forfeit", async () => {
-    const sourceUrl = "https://www.start.gg/tournament/cup/event/main/set/1";
+    const sourceUrl = "https://x.com/organiser/status/1";
     writer.matches.set("match", bestOfFive());
 
     const match = await setForfeitInTransaction(writer, "match", "b", sourceUrl);

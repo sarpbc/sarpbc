@@ -9,7 +9,7 @@ import {
   TEAM_LOGO_VARIANTS,
   VIEWERSHIP_SCOPES,
 } from "@sarpbc/types";
-import type { PlayerStatus, RosterChange, RosterProposalStatus } from "@sarpbc/types";
+import type { PlayerStatus, RosterProposalStatus } from "@sarpbc/types";
 import {
   MAX_LINEUP_PLAYERS,
   MAX_CIRCUIT_PLACEMENT,
@@ -26,10 +26,8 @@ import {
   TEAM_ALIAS_NAME_MAX_LENGTH,
   TEAM_ALIAS_URL_MAX_LENGTH,
   VIEWERSHIP_SOURCE_NAME_MAX_LENGTH,
-  isForbiddenViewershipSource,
   isLiquipediaSourceHost,
 } from "@sarpbc/utils";
-import { isRedistributable, sourceFromUrl } from "../../../common/domain/data-source";
 import { InvalidInputError } from "../../../common/domain/errors/invalid-input-error";
 import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
@@ -99,7 +97,7 @@ const circuitScaleSchema = z
   );
 
 const circuitSourceUrlSchema = sourceUrlSchema.describe(
-  "Required public page of the official rules or announcement that publishes the scale. Never Liquipedia, a mirror of it or BLAST.tv.",
+  "Required public page of the official rules or announcement that publishes the scale. Never Liquipedia, a mirror of it, BLAST.tv or start.gg.",
 );
 
 const circuitWorldwideSchema = z
@@ -130,14 +128,10 @@ const circuitFinishesSchema = z
   );
 
 const STREAMS_NOTE =
-  "An event list is inherited by its tournaments that have no list of their own, and a tournament list by its matches that have none; a list set lower down replaces the inherited one entirely. PandaScore entities are accepted. start.gg tournaments and matches are refused. A start.gg sourceUrl marks the streams as start.gg data: the site shows them with credit and they stay out of the MCP.";
+  "An event list is inherited by its tournaments that have no list of their own, and a tournament list by its matches that have none; a list set lower down replaces the inherited one entirely. PandaScore entities are accepted.";
 
 const viewershipSourceUrlSchema = sourceUrlSchema
   .regex(/^https:\/\//u, "Use an https URL")
-  .refine(
-    (url) => !URL.canParse(url) || !isForbiddenViewershipSource(new URL(url).hostname),
-    "Liquipedia, BLAST.tv and start.gg are not accepted viewership sources",
-  )
   .describe(
     "Required public https page that states the numbers, such as an Esports Charts page or a public viewer counter. It is shown on the site as the credit. Never Liquipedia, BLAST.tv or start.gg.",
   );
@@ -170,7 +164,7 @@ const viewershipInput = {
 };
 
 const VIEWERSHIP_NOTE =
-  "Once approved, it replaces the current numbers. Enter only numbers a public source states; no replay statistics. PandaScore entities are accepted. start.gg tournaments and matches are refused.";
+  "Once approved, it replaces the current numbers. Enter only numbers a public source states; no replay statistics. PandaScore entities are accepted.";
 
 const reasonSchema = z
   .string()
@@ -186,7 +180,7 @@ const effectiveDateSchema = contractDateSchema.describe(
 );
 
 const aliasSourceUrlSchema = sourceUrlSchema.describe(
-  "Required official source for the name and its dates: the team, one of its players, the organiser, RLEsports or PandaScore. Never Liquipedia, a mirror of it or BLAST.tv, not even as a lead.",
+  "Required official source for the name and its dates: the team, one of its players, the organiser, RLEsports or PandaScore. Never Liquipedia, a mirror of it, BLAST.tv or start.gg, not even as a lead.",
 );
 
 const teamAliasInput = {
@@ -237,20 +231,6 @@ const LOGO_LIMITS = `at most ${MAX_TEAM_LOGO_BYTES / (1024 * 1024)} MB, at least
 export interface RosterToolServices {
   rosterProposalService: Pick<RosterProposalService, "propose" | "proposeTeamLogo" | "list">;
 }
-
-const redistributableChange = (change: RosterChange, sourceUrl: string) => {
-  if (
-    change.kind === "set_event_streams" ||
-    change.kind === "set_tournament_streams" ||
-    change.kind === "set_match_streams"
-  ) {
-    return isRedistributable(sourceFromUrl(sourceUrl))
-      ? change
-      : ({ ...change, streams: [] } satisfies RosterChange);
-  }
-
-  return change satisfies RosterChange;
-};
 
 export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
   const propose = proposer(rosterProposalService);
@@ -587,7 +567,7 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose a player award of one tournament stage. Only propose awards the organiser officially announced. Use mvp for the tournament or World Championship MVP and grand_finals_mvp for a separate Grand Finals MVP. Read get_tournament_awards first: a stage holds several awards but at most one of each type. The team must be a participant of the stage and the player must be on that team's stage roster. start.gg tournaments are refused.",
+        "Propose a player award of one tournament stage. Only propose awards the organiser officially announced. Use mvp for the tournament or World Championship MVP and grand_finals_mvp for a separate Grand Finals MVP. Read get_tournament_awards first: a stage holds several awards but at most one of each type. The team must be a participant of the stage and the player must be on that team's stage roster.",
       handler: async ({ tournamentId, teamId, playerId, awardType, sourceUrl }, user) =>
         await propose(
           { awardType, kind: "award_player", playerId, teamId, tournamentId },
@@ -700,7 +680,7 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose the lineups of one match (series): for each participant, the players who actually played, substitutes and stand-ins included. Nothing changes until a staff member approves it in the admin app; once approved it replaces every lineup of the match, and a participant left out has no lineup. Read get_tournament for the participant ids and rosters and get_match_lineups for the current lineups. A player outside the participant's tournament roster is shown as a stand-in. Every player must already exist: use search_players, and create_player first if needed. start.gg matches and start.gg sources are refused.",
+        "Propose the lineups of one match (series): for each participant, the players who actually played, substitutes and stand-ins included. Nothing changes until a staff member approves it in the admin app; once approved it replaces every lineup of the match, and a participant left out has no lineup. Read get_tournament for the participant ids and rosters and get_match_lineups for the current lineups. A player outside the participant's tournament roster is shown as a stand-in. Every player must already exist: use search_players, and create_player first if needed.",
       handler: async ({ matchId, lineups, sourceUrl }, user) =>
         await propose({ kind: "set_match_lineups", lineups, matchId }, sourceUrl, user.id),
       input: {
@@ -731,7 +711,7 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose the official points scale of one tournament stage in a points circuit, adding the stage to the circuit if needed; once approved it replaces the stage's whole settings. Nothing changes until a staff member approves it in the admin app. Points are then computed from the final placements of that stage (PandaScore standings) and from the final placements listed in finishes. PandaScore, manual and start.gg stages are accepted. A start.gg stage counts only on staff surfaces: the public site, get_circuit and list_circuits never show it or its points. Read get_circuit and get_tournament first.",
+        "Propose the official points scale of one tournament stage in a points circuit, adding the stage to the circuit if needed; once approved it replaces the stage's whole settings. Nothing changes until a staff member approves it in the admin app. Points are then computed from the final placements of that stage (PandaScore standings) and from the final placements listed in finishes. PandaScore and manual stages are accepted. Read get_circuit and get_tournament first.",
       handler: async (
         { circuitId, tournamentId, scale, worldwide, regionTeamIds, finishes, sourceUrl },
         user,
@@ -767,7 +747,7 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose deleting a match that should not exist, such as a series imported twice. Nothing is deleted until a staff member approves it in the admin app. Once approved, the match is deleted with its scores, its incoming bracket links and its game stats, and standings and team records are recomputed from the remaining matches. PandaScore and start.gg matches are refused, and so are matches with pick'em picks, comments or bracket matches fed by them. Read get_tournament first and run list_roster_proposals to avoid proposing it twice.",
+        "Propose deleting a match that should not exist, such as a series imported twice. Nothing is deleted until a staff member approves it in the admin app. Once approved, the match is deleted with its scores, its incoming bracket links and its game stats, and standings and team records are recomputed from the remaining matches. PandaScore matches are refused, and so are matches with pick'em picks, comments or bracket matches fed by them. Read get_tournament first and run list_roster_proposals to avoid proposing it twice.",
       handler: async ({ matchId, reason, sourceUrl }, user) =>
         proposed(
           await rosterProposalService.propose(
@@ -872,7 +852,7 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
         return {
           names,
           proposals: proposals.map((proposal) => ({
-            change: redistributableChange(proposal.change, proposal.sourceUrl),
+            change: proposal.change,
             createdAt: proposal.createdAt,
             entityId: proposal.entityId,
             id: proposal.id,

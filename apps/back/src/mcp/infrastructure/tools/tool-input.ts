@@ -58,7 +58,7 @@ export const describeFields = <Fields extends Record<string, z.ZodType>>(
 export const toPatchedDate = (value: string | null | undefined) =>
   value === undefined || value === null ? value : new Date(value);
 
-/** The one source URL rule of every MCP write: http(s), no credentials, never Liquipedia or BLAST.tv. */
+/** The one source URL rule of every MCP write: http(s), no credentials, never Liquipedia, BLAST.tv or start.gg. */
 export const dataSourceUrlField = (description: string) =>
   z
     .string()

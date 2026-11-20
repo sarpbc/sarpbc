@@ -1,4 +1,4 @@
-import type { DataSource, ProfileMatchListItem } from "./competition";
+import type { ProfileMatchListItem } from "./competition";
 
 export interface MatchLineupInput {
   participantId: string;
@@ -20,13 +20,11 @@ export interface MatchLineup {
 }
 
 export interface MatchLineupsResponse {
-  source: DataSource;
   lineups: MatchLineup[];
   suggested: MatchLineupInput[];
 }
 
 export interface PlayerStandIn {
   participantId: string;
-  startgg: boolean;
   match: ProfileMatchListItem;
 }

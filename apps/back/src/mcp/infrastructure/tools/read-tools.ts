@@ -17,7 +17,7 @@ import {
   mapTournamentDetail,
   mapTournamentListItem,
 } from "../mappers";
-import type { RedistributableCompetition } from "../redistributable-competition";
+import type { CompetitionReads } from "../competition-reads";
 import { requireByIdOrSlug } from "./find-by-id-or-slug";
 import { PLAYER_TAG, TEAM_TAG } from "./news-syntax";
 import { SEARCH_LIMIT, idOrSlugField, listLimit } from "./tool-input";
@@ -27,7 +27,7 @@ export interface ReadToolServices {
   teamService: Pick<TeamService, "find" | "findById" | "findBySlug">;
   contractService: Pick<ContractService, "getContractsByPlayer">;
   newsService: Pick<NewsService, "findAll" | "findOneAdminByIdOrSlug">;
-  competition: RedistributableCompetition;
+  competition: CompetitionReads;
 }
 
 export const readTools = ({
@@ -128,7 +128,7 @@ export const readTools = ({
 
   defineTool({
     description:
-      "Get full tournament detail, including matches (each with forfeitedBy: the participant id of the side that forfeited or was disqualified, or null for a played match), the public URL, and format (1v1, 2v2 or 3v3) and registered participants (participant id, display name, team id, slug and name or null for a participant without a team, and players). start.gg tournaments are not returned.",
+      "Get full tournament detail, including matches (each with forfeitedBy: the participant id of the side that forfeited or was disqualified, or null for a played match), the public URL, and format (1v1, 2v2 or 3v3) and registered participants (participant id, display name, team id, slug and name or null for a participant without a team, and players).",
     handler: async ({ id }) => mapTournamentDetail(await competition.tournament(id)),
     input: { id: z.string().min(1).describe("Tournament UUID.") },
     name: "get_tournament",
@@ -148,7 +148,7 @@ export const readTools = ({
 
   defineTool({
     description:
-      "Get per-player stats aggregated over a tournament stage (tournamentId) or a whole event (event), from the Ballchasing games imported for it. Each row is a sarpbc.org player with the team they played for (a stand-in counts for the side they played on): games, totals and per-game averages of goals, assists, saves, shots and demolitions, shootingPercentage (goals per shot) and goalParticipation (goals and assists per goal of their side), both percentages or null. Game accounts not linked to a player are only counted in unlinkedAccounts; link them with link_game_player. games is 0 when no stats were imported. start.gg tournaments are not returned, and an event only counts its other stages.",
+      "Get per-player stats aggregated over a tournament stage (tournamentId) or a whole event (event), from the Ballchasing games imported for it. Each row is a sarpbc.org player with the team they played for (a stand-in counts for the side they played on): games, totals and per-game averages of goals, assists, saves, shots and demolitions, shootingPercentage (goals per shot) and goalParticipation (goals and assists per goal of their side), both percentages or null. Game accounts not linked to a player are only counted in unlinkedAccounts; link them with link_game_player. games is 0 when no stats were imported.",
     handler: async ({ tournamentId, event }) => {
       if (
         tournamentId !== undefined &&
@@ -197,7 +197,7 @@ export const readTools = ({
 
   defineTool({
     description:
-      "Get the lineups entered for one match (series): per participant id, the players who actually played, in order. standIn is true for a player who is not on that participant's tournament roster. A match without entered lineups returns an empty list. start.gg matches are not returned. Read it before set_match_lineups.",
+      "Get the lineups entered for one match (series): per participant id, the players who actually played, in order. standIn is true for a player who is not on that participant's tournament roster. A match without entered lineups returns an empty list. Read it before set_match_lineups.",
     handler: async ({ matchId }) => {
       const lineups = await competition.matchLineups(matchId);
 

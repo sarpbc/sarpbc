@@ -15,12 +15,7 @@ import { OnThisDayService } from "../src/on-this-day/application/on-this-day.ser
 import { OnThisDayFactController } from "../src/on-this-day/infrastructure/http/on-this-day-fact.controller";
 import { OnThisDayController } from "../src/on-this-day/infrastructure/http/on-this-day.controller";
 import { UserService } from "../src/user/application/user.service";
-import {
-  MANUAL_STAGE_ID,
-  STARTGG_STAGE_ID,
-  memoryFactStore,
-  onThisDaySources,
-} from "./on-this-day.fixture";
+import { MANUAL_STAGE_ID, memoryFactStore, onThisDaySources } from "./on-this-day.fixture";
 
 const STAFF = "access_token=staff";
 const MEMBER = "access_token=member";
@@ -161,20 +156,6 @@ describe("on this day (e2e)", () => {
       expect(day.body).toStrictEqual({ date, events: [] });
     });
 
-    it("hides a fact once it links to a start.gg stage", async () => {
-      const { id } = await createFact();
-
-      const edited = await http()
-        .patch(`/on-this-day-facts/${id}`)
-        .set("Cookie", STAFF)
-        .send({ ...fact, link: { id: STARTGG_STAGE_ID, kind: "tournament" } });
-
-      const hidden = await http().get("/on-this-day").query({ date: "2026-06-05" });
-
-      expect(edited.status).toBe(200);
-      expect(hidden.body).toHaveProperty("events", []);
-    });
-
     it("deletes a fact once", async () => {
       const { id } = await createFact();
 
@@ -186,17 +167,18 @@ describe("on this day (e2e)", () => {
     });
   });
 
-  it.each(["https://liquipedia.net/rocketleague/RLCS", "https://www.blast.tv/rl"])(
-    "refuses %s as a fact source",
-    async (sourceUrl) => {
-      const response = await http()
-        .post("/on-this-day-facts")
-        .set("Cookie", STAFF)
-        .send({ ...fact, sourceUrl });
+  it.each([
+    "https://liquipedia.net/rocketleague/RLCS",
+    "https://www.blast.tv/rl",
+    "https://www.start.gg/tournament/rlcs-open",
+  ])("refuses %s as a fact source", async (sourceUrl) => {
+    const response = await http()
+      .post("/on-this-day-facts")
+      .set("Cookie", STAFF)
+      .send({ ...fact, sourceUrl });
 
-      expect(response.status).toBe(400);
-    },
-  );
+    expect(response.status).toBe(400);
+  });
 
   it.each(["2026-02-30", "june"])("refuses the date query %s", async (date) => {
     const response = await http().get("/on-this-day").query({ date });

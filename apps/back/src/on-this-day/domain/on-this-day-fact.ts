@@ -73,7 +73,7 @@ const parseFactSourceUrl = (value: string | null) => {
 
   if (isForbiddenSourceHost(url.hostname)) {
     throw new InvalidInputError(
-      "Liquipedia and BLAST.tv are not accepted sources; cite the official announcement.",
+      "Liquipedia, BLAST.tv and start.gg are not accepted sources; cite the official announcement.",
     );
   }
 

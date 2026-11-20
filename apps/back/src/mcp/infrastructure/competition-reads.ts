@@ -1,19 +1,14 @@
-import { isRedistributable } from "../../common/domain/data-source";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { TournamentPlayerStatsService } from "../../match-stats/application/tournament-player-stats.service";
 import type { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import type { MatchService } from "../../tournament/application/match/match.service";
 import type { MatchLineupService } from "../../tournament/application/match/match-lineup.service";
 import type { MatchListKind } from "../../tournament/application/match/match-list-filters";
-import type {
-  EventListing,
-  EventQueries,
-  TournamentQueries,
-} from "../../tournament/application/ports";
+import type { EventQueries, TournamentQueries } from "../../tournament/application/ports";
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
 
-export interface RedistributableCompetitionServices {
+export interface CompetitionReadServices {
   tournaments: Pick<TournamentQueries, "find" | "findById">;
   events: Pick<EventQueries, "list">;
   catalogService: Pick<ManualCatalogService, "findEvent">;
@@ -27,17 +22,13 @@ export interface RedistributableCompetitionServices {
   tournamentPlayerStatsService: Pick<TournamentPlayerStatsService, "forStages">;
 }
 
-// WARNING: an event whose stages all come from start.gg is hidden, but one without stages stays visible for staff to reuse.
-const isHiddenEvent = ({ stages }: EventListing) =>
-  stages.length > 0 && !stages.some((stage) => isRedistributable(stage.source));
-
 export const tournamentNotFound = (id: string) =>
   new NotFoundError(
     `Tournament "${id}" was not found. Use get_tournaments to list available events.`,
   );
 
-/** The only way read tools reach competition data: every query already excludes start.gg. */
-export const redistributableCompetition = (services: RedistributableCompetitionServices) => {
+/** The competition data read tools reach, with not-found errors that point to the listing tools. */
+export const competitionReads = (services: CompetitionReadServices) => {
   const {
     tournaments: tournamentQueries,
     events: eventQueries,
@@ -52,22 +43,14 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
   const tournament = async (id: string) => {
     const found = await tournamentQueries.findById(id);
 
-    if (!found || !isRedistributable(found.source)) {
+    if (!found) {
       throw tournamentNotFound(id);
     }
 
     return found;
   };
 
-  const event = async (idOrSlug: string) => {
-    const listing = await catalogService.findEvent(idOrSlug);
-
-    if (isHiddenEvent(listing)) {
-      throw new NotFoundError(`Event "${idOrSlug}" was not found.`);
-    }
-
-    return listing;
-  };
+  const event = async (idOrSlug: string) => await catalogService.findEvent(idOrSlug);
 
   return {
     event,
@@ -79,39 +62,29 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
     },
 
     async events(options: { activeOnly: boolean; limit: number; offset: number }) {
-      return await eventQueries.list({ ...options, redistributableOnly: true });
+      return await eventQueries.list(options);
     },
 
     async matchLineups(matchId: string) {
-      const { source, lineups } = await matchLineupService.find(matchId);
-
-      if (!isRedistributable(source)) {
-        throw new NotFoundError(`Match "${matchId}" was not found.`);
-      }
+      const { lineups } = await matchLineupService.find(matchId);
 
       return lineups;
     },
 
     async matches(kind: MatchListKind, limit: number) {
-      return await matchService.list(kind, { limit, redistributableOnly: true });
+      return await matchService.list(kind, { limit });
     },
 
     async playerEarnings(playerId: string) {
-      return await tournamentPrizeService.playerEarnings(playerId, { redistributableOnly: true });
+      return await tournamentPrizeService.playerEarnings(playerId);
     },
 
     async prizeDistribution(tournamentId: string) {
-      const distribution = await tournamentPrizeService.findByTournamentId(tournamentId);
-
-      if (!isRedistributable(distribution.source)) {
-        throw tournamentNotFound(tournamentId);
-      }
-
-      return distribution;
+      return await tournamentPrizeService.findByTournamentId(tournamentId);
     },
 
     async teamEarnings(teamId: string) {
-      return await tournamentPrizeService.teamEarnings(teamId, { redistributableOnly: true });
+      return await tournamentPrizeService.teamEarnings(teamId);
     },
 
     tournament,
@@ -127,15 +100,11 @@ export const redistributableCompetition = (services: RedistributableCompetitionS
     },
 
     async tournaments(options: { activeOnly: boolean; limit: number }) {
-      const [found] = await tournamentQueries.find({
-        ...options,
-        offset: 0,
-        redistributableOnly: true,
-      });
+      const [found] = await tournamentQueries.find({ ...options, offset: 0 });
 
       return found;
     },
   };
 };
 
-export type RedistributableCompetition = ReturnType<typeof redistributableCompetition>;
+export type CompetitionReads = ReturnType<typeof competitionReads>;
