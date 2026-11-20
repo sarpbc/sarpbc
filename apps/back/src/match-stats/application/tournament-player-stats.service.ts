@@ -1,5 +1,5 @@
 import { OVERALL_STATS_MIN_GAMES } from "@sarpbc/types";
-import type { DataSource, TournamentPlayerStatsResponse } from "@sarpbc/types";
+import type { DataSource, StatsEra, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
 import { playerStatsResponse } from "../domain/player-stats";
 import type { GameStatsStore } from "./ports";
@@ -22,9 +22,13 @@ export class TournamentPlayerStatsService {
     ) satisfies TournamentPlayerStatsResponse;
   }
 
-  async overall() {
+  async overall(era: StatsEra | null) {
     return playerStatsResponse(
-      await this.games.playerStats({ kind: "redistributable", minGames: OVERALL_STATS_MIN_GAMES }),
+      await this.games.playerStats({
+        era,
+        kind: "redistributable",
+        minGames: OVERALL_STATS_MIN_GAMES,
+      }),
     ) satisfies TournamentPlayerStatsResponse;
   }
 }

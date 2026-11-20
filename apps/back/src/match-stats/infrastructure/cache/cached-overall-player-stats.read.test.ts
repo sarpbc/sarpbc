@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { TournamentPlayerStatsResponse } from "@sarpbc/types";
+import type { StatsEra, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import { memoryRedis } from "../../../tournament/infrastructure/cache/memory-redis.test-utils";
 import { CachedOverallPlayerStatsRead } from "./cached-overall-player-stats.read";
 
@@ -20,10 +20,14 @@ const stats: TournamentPlayerStatsResponse = {
 };
 
 const countingStats = (results: (() => Promise<TournamentPlayerStatsResponse>)[] = []) => {
+  const eras: (StatsEra | null)[] = [];
+
   const source = {
     calls: 0,
-    overall: async () => {
+    eras,
+    overall: async (era: StatsEra | null) => {
       source.calls += 1;
+      source.eras.push(era);
 
       return await (results.shift() ?? (async () => stats))();
     },
@@ -38,12 +42,27 @@ describe(CachedOverallPlayerStatsRead, () => {
     const redis = memoryRedis();
     const read = new CachedOverallPlayerStatsRead(source, redis);
 
-    await Promise.all(Array.from({ length: 50 }, async () => await read.overall()));
-    await expect(read.overall()).resolves.toStrictEqual(stats);
+    await Promise.all(Array.from({ length: 50 }, async () => await read.overall(null)));
+    await expect(read.overall(null)).resolves.toStrictEqual(stats);
 
     expect(source.calls).toBe(1);
     expect(redis.writes).toStrictEqual([
-      { key: "player-stats:overall", ttl: 60, value: JSON.stringify(stats) },
+      { key: "player-stats:overall:all", ttl: 60, value: JSON.stringify(stats) },
+    ]);
+  });
+
+  it("caches each era under its own key", async () => {
+    const source = countingStats();
+    const redis = memoryRedis();
+    const read = new CachedOverallPlayerStatsRead(source, redis);
+
+    await Promise.all([read.overall("open"), read.overall("pre-open"), read.overall(null)]);
+
+    expect(source.eras).toStrictEqual(["open", "pre-open", null]);
+    expect(redis.writes.map(({ key }) => key)).toStrictEqual([
+      "player-stats:overall:open",
+      "player-stats:overall:pre-open",
+      "player-stats:overall:all",
     ]);
   });
 
@@ -56,8 +75,8 @@ describe(CachedOverallPlayerStatsRead, () => {
 
     const read = new CachedOverallPlayerStatsRead(source, redis);
 
-    await expect(read.overall()).resolves.toStrictEqual(stats);
-    await expect(read.overall()).resolves.toStrictEqual(stats);
+    await expect(read.overall(null)).resolves.toStrictEqual(stats);
+    await expect(read.overall(null)).resolves.toStrictEqual(stats);
     expect(source.calls).toBe(2);
   });
 
@@ -65,11 +84,11 @@ describe(CachedOverallPlayerStatsRead, () => {
     const source = countingStats();
     const redis = memoryRedis();
 
-    redis.entries.set("player-stats:overall", JSON.stringify({ players: "stale" }));
+    redis.entries.set("player-stats:overall:all", JSON.stringify({ players: "stale" }));
 
-    await expect(new CachedOverallPlayerStatsRead(source, redis).overall()).resolves.toStrictEqual(
-      stats,
-    );
+    await expect(
+      new CachedOverallPlayerStatsRead(source, redis).overall(null),
+    ).resolves.toStrictEqual(stats);
     expect(source.calls).toBe(1);
   });
 
@@ -77,7 +96,7 @@ describe(CachedOverallPlayerStatsRead, () => {
     const source = countingStats([async () => await Promise.reject(new Error("db down"))]);
     const read = new CachedOverallPlayerStatsRead(source, memoryRedis());
 
-    await expect(read.overall()).rejects.toThrow("db down");
-    await expect(read.overall()).resolves.toStrictEqual(stats);
+    await expect(read.overall(null)).rejects.toThrow("db down");
+    await expect(read.overall(null)).resolves.toStrictEqual(stats);
   });
 });

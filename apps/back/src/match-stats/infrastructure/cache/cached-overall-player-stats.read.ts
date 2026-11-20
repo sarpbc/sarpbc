@@ -1,10 +1,10 @@
 import { log } from "evlog";
 import { z } from "zod";
-import type { TournamentPlayerStatsResponse } from "@sarpbc/types";
+import type { StatsEra, TournamentPlayerStatsResponse } from "@sarpbc/types";
 import type { RedisService } from "../../../infrastructure/redis/redis.service";
 import type { TournamentPlayerStatsService } from "../../application/tournament-player-stats.service";
 
-const KEY = "player-stats:overall";
+const keyOf = (era: StatsEra | null) => `player-stats:overall:${era ?? "all"}`;
 const TTL_SECONDS = 60;
 
 const counts = z.object({
@@ -31,53 +31,59 @@ const response = z.object({
   unlinkedAccounts: z.number(),
 }) satisfies z.ZodType<TournamentPlayerStatsResponse>;
 
-const diagnose = (operation: string, error: Error) => {
+const diagnose = (key: string, operation: string, error: Error) => {
   log.warn({
     component: "CachedOverallPlayerStatsRead",
     error,
-    key: KEY,
+    key,
     message: "Optional overall player stats cache failed",
     operation,
   });
 };
 
 export class CachedOverallPlayerStatsRead {
-  private pending: Promise<TournamentPlayerStatsResponse> | null = null;
+  private readonly pending = new Map<string, Promise<TournamentPlayerStatsResponse>>();
 
   constructor(
     private readonly stats: Pick<TournamentPlayerStatsService, "overall">,
     private readonly redis: Pick<RedisService, "get" | "set">,
   ) {}
 
-  async overall() {
-    this.pending ??= this.load().finally(() => {
-      this.pending = null;
-    });
+  async overall(era: StatsEra | null) {
+    const key = keyOf(era);
+    let pending = this.pending.get(key);
 
-    return (await this.pending) satisfies TournamentPlayerStatsResponse;
+    if (!pending) {
+      pending = this.load(key, era).finally(() => {
+        this.pending.delete(key);
+      });
+      this.pending.set(key, pending);
+    }
+
+    return (await pending) satisfies TournamentPlayerStatsResponse;
   }
 
-  private async load() {
-    const cached = await this.readCached();
+  private async load(key: string, era: StatsEra | null) {
+    const cached = await this.readCached(key);
 
     if (cached) {
       return cached satisfies TournamentPlayerStatsResponse;
     }
 
-    const stats = await this.stats.overall();
+    const stats = await this.stats.overall(era);
 
     try {
-      await this.redis.set(KEY, JSON.stringify(stats), TTL_SECONDS);
+      await this.redis.set(key, JSON.stringify(stats), TTL_SECONDS);
     } catch (error) {
-      diagnose("write", error instanceof Error ? error : new Error(String(error)));
+      diagnose(key, "write", error instanceof Error ? error : new Error(String(error)));
     }
 
     return stats satisfies TournamentPlayerStatsResponse;
   }
 
-  private async readCached() {
+  private async readCached(key: string) {
     try {
-      const cached = await this.redis.get(KEY);
+      const cached = await this.redis.get(key);
 
       if (cached === null) {
         return null;
@@ -86,14 +92,14 @@ export class CachedOverallPlayerStatsRead {
       const result = response.safeParse(JSON.parse(cached));
 
       if (!result.success) {
-        diagnose("decode", result.error);
+        diagnose(key, "decode", result.error);
 
         return null;
       }
 
       return result.data satisfies TournamentPlayerStatsResponse;
     } catch (error) {
-      diagnose("read", error instanceof Error ? error : new Error(String(error)));
+      diagnose(key, "read", error instanceof Error ? error : new Error(String(error)));
 
       return null;
     }

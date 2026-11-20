@@ -50,7 +50,18 @@ describe(TournamentPlayerStatsService, () => {
   it("aggregates every redistributable tournament into the overall leaderboard", async () => {
     scopes.length = 0;
 
-    await expect(service.overall()).resolves.toMatchObject({ games: 2, players: [{ games: 2 }] });
-    expect(scopes).toStrictEqual([{ kind: "redistributable", minGames: 10 }]);
+    await expect(service.overall(null)).resolves.toMatchObject({
+      games: 2,
+      players: [{ games: 2 }],
+    });
+    expect(scopes).toStrictEqual([{ era: null, kind: "redistributable", minGames: 10 }]);
+  });
+
+  it("narrows the overall leaderboard to one era", async () => {
+    scopes.length = 0;
+
+    await service.overall("open");
+
+    expect(scopes).toStrictEqual([{ era: "open", kind: "redistributable", minGames: 10 }]);
   });
 });
