@@ -14,14 +14,14 @@
   },
   "dependencies": {
     "@iconify-json/lucide": "catalog:",
-    "@iconify/vue": "^5.0.4",
+    "@iconify/vue": "^5.0.5",
     "@sarpbc/design": "workspace:*",
     "vue": "catalog:"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.10",
+    "@vitejs/plugin-vue": "^6.0.11",
     "typescript": "catalog:",
-    "vite": "^8.3.5",
+    "vite": "^8.3.8",
     "vue-tsc": "catalog:",
     "zod": "^4.6.7"
   }

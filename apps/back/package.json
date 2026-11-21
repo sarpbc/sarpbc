@@ -25,11 +25,11 @@
     "test:integration": "pnpm run build && vitest run --project integration"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.1166.0",
-    "@aws-sdk/s3-request-presigner": "^3.1166.0",
+    "@aws-sdk/client-s3": "^3.1171.0",
+    "@aws-sdk/s3-request-presigner": "^3.1171.0",
     "@fastify/cookie": "^11.1.5",
     "@fastify/helmet": "^13.2.0",
-    "@fastify/multipart": "^10.1.8",
+    "@fastify/multipart": "^10.1.9",
     "@googleapis/oauth2": "^10.0.1",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/decorators": "catalog:",
@@ -45,8 +45,8 @@
     "@nestjs/jwt": "12.0.5",
     "@nestjs/platform-fastify": "catalog:",
     "@nestjs/schedule": "12.0.4",
-    "@nestjs/terminus": "12.1.0",
-    "@nestjs/throttler": "6.7.1",
+    "@nestjs/terminus": "12.2.0",
+    "@nestjs/throttler": "6.8.0",
     "@sarpbc/types": "workspace:*",
     "@sarpbc/utils": "workspace:*",
     "axios": "^1.21.1",
@@ -57,7 +57,7 @@
     "ioredis": "^6.0.0",
     "luxon": "^3.7.2",
     "pg": "^8.23.1",
-    "posthog-node": "^5.74.0",
+    "posthog-node": "^6.0.2",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "sharp": "^0.35.5",
@@ -75,12 +75,12 @@
     "@types/luxon": "^3.7.6",
     "@types/node": "catalog:",
     "@types/supertest": "^7.2.1",
-    "@vitest/coverage-v8": "^5.1.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "msw": "^3.0.7",
     "supertest": "^7.3.2",
     "typescript": "catalog:",
     "unplugin-swc": "^2.0.0",
-    "vitest": "^5.1.0"
+    "vitest": "^5.1.1"
   },
   "mikro-orm": {
     "configPaths": [
