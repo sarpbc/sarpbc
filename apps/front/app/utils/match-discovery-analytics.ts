@@ -1,43 +1,14 @@
-import { isMatchFinished, isMatchLive, matchPath } from "@sarpbc/utils";
-import type { MatchLinkTarget } from "~/types/matches";
+import { isMatchFinished, isMatchLive } from "@sarpbc/utils";
 
-export const MATCH_DISCOVERY_FROM_QUERY = "from";
-
-const MATCH_DISCOVERY_SOURCES = [
-  "matches_list",
-  "results_list",
-  "home_strip",
-  "lateral_bar",
-  "tournament_hub",
-  "news_article",
-] as const;
-
-export type MatchDiscoverySource = (typeof MATCH_DISCOVERY_SOURCES)[number];
+export type MatchDiscoverySource =
+  | "matches_list"
+  | "results_list"
+  | "home_strip"
+  | "lateral_bar"
+  | "tournament_hub"
+  | "news_article";
 
 export type MatchDiscoveryStatus = "live" | "upcoming" | "finished";
-
-export type MatchDiscoveryQueryValue = string | (string | null)[] | null | undefined;
-
-export interface MatchDiscoveryDetailTo {
-  path: string;
-  query: { from: MatchDiscoverySource };
-}
-
-const SOURCE_SET = new Set<string>(MATCH_DISCOVERY_SOURCES);
-
-const isMatchDiscoverySource = (value: MatchDiscoveryQueryValue): value is MatchDiscoverySource => {
-  if (value === null || value === undefined || Array.isArray(value)) {
-    return false;
-  }
-
-  return SOURCE_SET.has(value);
-};
-
-export const parseMatchDiscoverySource = (value: MatchDiscoveryQueryValue) => {
-  const candidate = Array.isArray(value) ? value[0] : value;
-
-  return isMatchDiscoverySource(candidate) ? candidate : null;
-};
 
 export const listVariantToDiscoveryStatus = (variant: "live" | "upcoming" | "result") => {
   switch (variant) {
@@ -73,12 +44,3 @@ export const resolveMatchDiscoveryStatus = (input: {
 
   return isMatchLive(input, input.now ?? Date.now()) ? "live" : "upcoming";
 };
-
-export const buildMatchDetailTo = (
-  localePath: (path: string) => string,
-  match: MatchLinkTarget,
-  source: MatchDiscoverySource,
-) => ({
-  path: localePath(matchPath(match.publicId, match.slug)),
-  query: { [MATCH_DISCOVERY_FROM_QUERY]: source },
-});

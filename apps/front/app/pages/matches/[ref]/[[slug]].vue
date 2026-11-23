@@ -3,11 +3,7 @@ import type { MatchVod } from "@sarpbc/types";
 import type { Match, MatchDetailResponse } from "~/types/matches";
 import { displayMatchScore, getMatchParticipantScore } from "~/utils/match-score";
 import type { TournamentParticipant } from "~/types/tournament";
-import {
-  MATCH_DISCOVERY_FROM_QUERY,
-  parseMatchDiscoverySource,
-  resolveMatchDiscoveryStatus,
-} from "~/utils/match-discovery-analytics";
+import { resolveMatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 import { getApiErrorStatus, matchPath, participantName, tournamentStageLabel } from "@sarpbc/utils";
 
 const { t, locale } = useI18n();
@@ -17,10 +13,6 @@ const { setPageSeo, getCanonicalUrl } = useSarpbcSeo();
 
 const matchRef = computed(() => String(route.params.ref));
 const { trackMatchDetailViewed } = useMatchDiscoveryAnalytics();
-
-const discoverySource = computed(() =>
-  parseMatchDiscoverySource(route.query[MATCH_DISCOVERY_FROM_QUERY]),
-);
 
 const {
   data: matchDetail,
@@ -163,15 +155,14 @@ const heroScoreClass = (participantId: string | undefined) => {
 };
 
 watch(
-  () => (match.value ? `${match.value.id}:${discoverySource.value ?? ""}` : null),
-  (key) => {
-    if (!key || !match.value) {
+  () => match.value?.id ?? null,
+  (matchId) => {
+    if (!matchId) {
       return;
     }
 
     trackMatchDetailViewed({
-      matchId: match.value.id,
-      source: discoverySource.value,
+      matchId,
       status: matchStatus.value,
     });
   },

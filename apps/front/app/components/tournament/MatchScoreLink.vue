@@ -8,7 +8,7 @@ import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/match-d
 
 const { t } = useI18n();
 const localePath = useLocalePath();
-const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
+const { trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
 const {
   match,
@@ -48,13 +48,7 @@ const {
   discoveryStatus?: MatchDiscoveryStatus | null;
 }>();
 
-const detailTo = computed(() => {
-  if (discoverySource) {
-    return matchDetailTo(match, discoverySource);
-  }
-
-  return localePath(matchPath(match.publicId, match.slug));
-});
+const detailTo = computed(() => localePath(matchPath(match.publicId, match.slug)));
 
 const { isConcealed } = useSpoilerFree();
 
