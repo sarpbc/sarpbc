@@ -39,18 +39,31 @@ const matchOptions = computed(() =>
   pickable.value.map((candidate) => ({ label: matchLabel(candidate), value: candidate.id })),
 );
 
-const gameOptions = computed(() => {
-  const taken = new Set(
-    games.filter((game) => game.matchId === matchId.value).map((game) => game.number),
-  );
+const taken = computed(
+  () => new Set(games.filter((game) => game.matchId === matchId.value).map((game) => game.number)),
+);
 
-  return Array.from({ length: maxVodGame(match.value?.numberOfGames) }, (_, index) => ({
-    disabled: taken.has(index + 1),
-    label: taken.has(index + 1)
+const gameOptions = computed(() =>
+  Array.from({ length: maxVodGame(match.value?.numberOfGames) }, (_, index) => ({
+    label: taken.value.has(index + 1)
       ? t("page.tournaments.statsAttach.gameTaken", { number: index + 1 })
       : t("page.tournaments.statsAttach.gameOption", { number: index + 1 }),
     value: index + 1,
-  }));
+  })),
+);
+
+const appending = computed(
+  () => gameNumber.value !== undefined && taken.value.has(gameNumber.value),
+);
+
+const gameHelp = computed(() => {
+  if (!matchId.value) {
+    return t("page.tournaments.statsAttach.chooseMatchFirst");
+  }
+
+  return appending.value
+    ? t("page.tournaments.statsAttach.appendHelp", { number: gameNumber.value })
+    : undefined;
 });
 
 const sideOptions = computed(() =>
@@ -83,7 +96,7 @@ watch(matchId, () => {
     blueParticipantId.value = undefined;
   }
 
-  if (gameOptions.value.find((option) => option.value === gameNumber.value)?.disabled !== false) {
+  if (!gameOptions.value.some((option) => option.value === gameNumber.value)) {
     gameNumber.value = undefined;
   }
 });
@@ -102,16 +115,21 @@ const save = async () => {
   saving.value = true;
 
   try {
-    const game = await attachStatsReplay(tournamentId, {
-      blueParticipantId: blueParticipantId.value,
-      gameNumber: gameNumber.value,
-      matchId: matchId.value,
-      replay: item.replayId,
-    });
+    const replay = { blueParticipantId: blueParticipantId.value, replay: item.replayId };
+
+    const game = appending.value
+      ? await appendStatsReplay(tournamentId, matchId.value, gameNumber.value, replay)
+      : await attachStatsReplay(tournamentId, {
+          ...replay,
+          gameNumber: gameNumber.value,
+          matchId: matchId.value,
+        });
 
     toast.add({
       color: "success",
-      title: t("page.tournaments.statsAttach.saved", { number: game.number }),
+      title: appending.value
+        ? t("page.tournaments.statsAttach.appended", { number: game.number })
+        : t("page.tournaments.statsAttach.saved", { number: game.number }),
     });
     emit("attached", game);
     target.value = null;
@@ -145,11 +163,7 @@ const save = async () => {
           />
         </SFormField>
 
-        <SFormField
-          :label="t('page.tournaments.statsAttach.game')"
-          :help="matchId ? undefined : t('page.tournaments.statsAttach.chooseMatchFirst')"
-          required
-        >
+        <SFormField :label="t('page.tournaments.statsAttach.game')" :help="gameHelp" required>
           <SSelect
             v-model="gameNumber"
             :items="gameOptions"
