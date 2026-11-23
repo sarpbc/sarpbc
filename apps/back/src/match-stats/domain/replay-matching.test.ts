@@ -90,20 +90,30 @@ const replay = (
 
 const describeAssignment = (assignment: ReplayAssignment) => {
   if (assignment.kind === "matched") {
-    return `${assignment.matchId}#${assignment.gameNumber} blue=${assignment.sides.blue}`;
+    const { gameNumber, matchId, segments } = assignment;
+    const part = (index: number) => (segments.length > 1 ? `.${index + 1}` : "");
+
+    return segments.map(({ replay: { id }, sides }, index) => [
+      id,
+      `${matchId}#${gameNumber}${part(index)} blue=${sides.blue}`,
+    ]) satisfies [string, string][];
   }
+
+  const { id } = assignment.replay;
 
   if (assignment.kind === "stored") {
-    return `stored:${assignment.matchId}#${assignment.gameNumber}`;
+    const stored = `stored:${assignment.matchId}#${assignment.gameNumber}`;
+
+    return [[id, stored]] satisfies [string, string][];
   }
 
-  return `unmatched:${assignment.reason}${assignment.matchId === null ? "" : `@${assignment.matchId}`}`;
+  const where = assignment.matchId === null ? "" : `@${assignment.matchId}`;
+
+  return [[id, `unmatched:${assignment.reason}${where}`]] satisfies [string, string][];
 };
 
 const byReplay = (assignments: ReplayAssignment[]) =>
-  Object.fromEntries(
-    assignments.map((assignment) => [assignment.replay.id, describeAssignment(assignment)]),
-  );
+  Object.fromEntries(assignments.flatMap(describeAssignment));
 
 describe("assignReplays with player participants", () => {
   const zen: CandidateParticipant = {
@@ -762,6 +772,103 @@ describe(assignReplays, () => {
 
     expect(byReplay(assignReplays([game], [tbd]))).toStrictEqual({
       [game.id]: "unmatched:unknown_teams",
+    });
+  });
+});
+
+const titled = (
+  title: string,
+  playedAt: string,
+  kcGoals: number,
+  bdsGoals: number,
+  kcBlue = true,
+) => {
+  const kcSide = { goals: kcGoals, names: KC_NAMES };
+  const bdsSide = { goals: bdsGoals, names: BDS_NAMES };
+
+  return kcBlue
+    ? replay(playedAt, kcSide, bdsSide, { title })
+    : replay(playedAt, bdsSide, kcSide, { title });
+};
+
+const bo3 = (overrides: Partial<CandidateMatch> = {}) =>
+  bo5({ numberOfGames: 3, scores: won(kc, bds, 2), ...overrides });
+
+describe("assignReplays with a game split over several replays", () => {
+  it("makes one game of the G<x>.<y> replays of a match, ordered by suffix", () => {
+    const second = titled("RLCS KC vs BDS G1.2", "2026-06-01T18:05:00Z", 2, 1);
+    const first = titled("RLCS KC vs BDS G1.1", "2026-06-01T18:05:00Z", 1, 1, false);
+    const game2 = titled("RLCS KC vs BDS G2", "2026-06-01T18:25:00Z", 3, 0);
+
+    expect(byReplay(assignReplays([game2, second, first], [bo3()]))).toStrictEqual({
+      [first.id]: "m1#1.1 blue=p-bds",
+      [second.id]: "m1#1.2 blue=p-kc",
+      [game2.id]: "m1#2 blue=p-kc",
+    });
+  });
+
+  it("keeps a lone G<x>.<y> replay as a game of its own", () => {
+    const [g1, g2] = sweep().map((game, index) => ({ ...game, title: `G${index + 1}.1` }));
+
+    expect(byReplay(assignReplays([g1, g2], [bo3()]))).toStrictEqual({
+      [g1.id]: "m1#1 blue=p-kc",
+      [g2.id]: "m1#2 blue=p-kc",
+    });
+  });
+
+  it("takes the winner from the last replay and refuses a draw there", () => {
+    const cut = titled("G1.1", "2026-06-01T18:05:00Z", 1, 1);
+    const restart = titled("G1.2", "2026-06-01T18:12:00Z", 1, 1);
+    const game2 = titled("G2", "2026-06-01T18:25:00Z", 3, 0);
+
+    expect(
+      new Set(Object.values(byReplay(assignReplays([cut, restart, game2], [bo3()])))),
+    ).toStrictEqual(new Set(["unmatched:inconsistent_series@m1"]));
+  });
+
+  it("reports a stored split game where it is and numbers the rest after it", () => {
+    const cut = titled("G1.1", "2026-06-01T18:05:00Z", 1, 1);
+    const restart = titled("G1.2", "2026-06-01T18:12:00Z", 2, 1);
+    const game2 = titled("G2", "2026-06-01T18:25:00Z", 3, 0);
+    const at1 = { matchId: "m1", number: 1 };
+
+    const stored = new Map([
+      [cut.id, at1],
+      [restart.id, at1],
+    ]);
+
+    expect(
+      byReplay(
+        assignReplays(
+          [cut, restart, game2],
+          [bo3({ storedReplayIds: [cut.id, restart.id] })],
+          stored,
+        ),
+      ),
+    ).toStrictEqual({
+      [cut.id]: "stored:m1#1",
+      [game2.id]: "m1#2 blue=p-kc",
+      [restart.id]: "stored:m1#1",
+    });
+  });
+
+  it("holds back the other replays of a game stored only in part", () => {
+    const cut = titled("G1.1", "2026-06-01T18:05:00Z", 1, 1);
+    const restart = titled("G1.2", "2026-06-01T18:12:00Z", 2, 1);
+    const game2 = titled("G2", "2026-06-01T18:25:00Z", 3, 0);
+
+    expect(
+      byReplay(
+        assignReplays(
+          [cut, restart, game2],
+          [bo3({ storedReplayIds: [cut.id] })],
+          new Map([[cut.id, { matchId: "m1", number: 1 }]]),
+        ),
+      ),
+    ).toStrictEqual({
+      [cut.id]: "stored:m1#1",
+      [game2.id]: "unmatched:match_has_other_stats@m1",
+      [restart.id]: "unmatched:match_has_other_stats@m1",
     });
   });
 });

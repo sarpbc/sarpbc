@@ -52,18 +52,27 @@ export interface PlayerLink extends PlatformAccount {
   playerId: string;
 }
 
-export interface GameRecord {
-  matchId: string;
-  number: number;
+export interface GameReplayRecord {
   ballchasingId: string;
   rocketLeagueId: string | null;
   playedAt: Date | null;
-  blueParticipantId: string;
-  orangeParticipantId: string;
   blueGoals: number;
   orangeGoals: number;
   players: GamePlayerRecord[];
+}
+
+export interface GameRecord {
+  matchId: string;
+  number: number;
+  blueParticipantId: string;
+  orangeParticipantId: string;
+  replays: GameReplayRecord[];
   /** Links taught by unique roster-name matches; an existing link is never replaced. */
+  learnedLinks: PlayerLink[];
+}
+
+export interface ReplayAppend {
+  replay: GameReplayRecord;
   learnedLinks: PlayerLink[];
 }
 
@@ -78,15 +87,25 @@ export interface GameStatsStore {
   attachment: (replayId: string) => Promise<GameAttachment | null>;
   links: (accounts: PlatformAccount[]) => Promise<PlayerLink[]>;
   /**
-   * Saves the game, its player rows and its learned links atomically, links earlier unlinked
-   * rows of each learned account and clears any staff exclusion of the replay.
+   * Saves the game, its replays, their player rows and its learned links atomically, links
+   * earlier unlinked rows of each learned account and clears any staff exclusion of its replays.
    */
   save: (game: GameRecord) => Promise<TournamentStatsGame>;
+  appendReplay: (
+    tournamentId: string,
+    location: GameLocation,
+    append: ReplayAppend,
+  ) => Promise<TournamentStatsGame | null>;
+  game: (tournamentId: string, location: GameLocation) => Promise<TournamentStatsGame | null>;
   byMatch: (matchId: string) => Promise<MatchGameStats[]>;
   inTournament: (tournamentId: string) => Promise<TournamentStatsGame[]>;
   playerStats: (scope: StatsScope) => Promise<PlayerStatsSummary>;
-  /** Deletes the game with its player rows and excludes its replay atomically. */
   remove: (tournamentId: string, location: GameLocation) => Promise<TournamentStatsGame | null>;
+  removeReplay: (
+    tournamentId: string,
+    location: GameLocation,
+    replayId: string,
+  ) => Promise<TournamentStatsGame | null>;
 }
 
 export interface PlayerLinkStore {

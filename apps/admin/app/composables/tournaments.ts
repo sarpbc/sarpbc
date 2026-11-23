@@ -1,4 +1,5 @@
 import type {
+  AppendReplayInput,
   AttachReplayInput,
   EventInput,
   League,
@@ -283,6 +284,28 @@ export const attachStatsReplay = async (tournamentId: string, body: AttachReplay
 export const removeStatsGame = async (tournamentId: string, matchId: string, number: number) =>
   await apiFetch<TournamentStatsGame>(
     `/tournaments/${tournamentId}/stats-games/${matchId}/${number}`,
+    { method: "DELETE" },
+  );
+
+export const appendStatsReplay = async (
+  tournamentId: string,
+  matchId: string,
+  number: number,
+  body: AppendReplayInput,
+) =>
+  await apiFetch<TournamentStatsGame>(
+    `/tournaments/${tournamentId}/stats-games/${matchId}/${number}/replays`,
+    { body, method: "POST" },
+  );
+
+export const removeStatsReplay = async (
+  tournamentId: string,
+  matchId: string,
+  number: number,
+  replayId: string,
+) =>
+  await apiFetch<TournamentStatsGame>(
+    `/tournaments/${tournamentId}/stats-games/${matchId}/${number}/replays/${replayId}`,
     { method: "DELETE" },
   );
 

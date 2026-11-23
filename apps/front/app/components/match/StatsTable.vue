@@ -56,11 +56,23 @@ const teams = computed(() => {
     });
 });
 
-const replayUrl = computed(() => `https://ballchasing.com/replay/${game.value?.ballchasingId}`);
+const replays = computed(() => {
+  const number = game.value?.number ?? 1;
+  const ids = game.value?.ballchasingIds ?? [];
 
-const replayLabel = computed(() =>
-  t("page.match.detail.stats.replayLink", { number: game.value?.number ?? 1 }),
-);
+  return ids.map((id, index) => ({
+    ariaLabel:
+      ids.length > 1
+        ? t("page.match.detail.stats.segmentLink", { number, position: index + 1 })
+        : t("page.match.detail.stats.replayLink", { number }),
+    id,
+    label:
+      ids.length > 1
+        ? t("page.match.detail.stats.segment", { position: index + 1 })
+        : t("page.match.detail.stats.source"),
+    url: `https://ballchasing.com/replay/${id}`,
+  }));
+});
 </script>
 
 <template>
@@ -135,15 +147,18 @@ const replayLabel = computed(() =>
       </table>
     </div>
 
-    <p class="flex h-row items-center px-2 text-xs text-muted">
+    <p class="flex h-row items-center gap-3 px-2 text-xs text-muted">
+      <span v-if="replays.length > 1">{{ t("page.match.detail.stats.source") }}</span>
       <SLink
-        :to="replayUrl"
+        v-for="replay in replays"
+        :key="replay.id"
+        :to="replay.url"
         external
         target="_blank"
         rel="noopener noreferrer"
-        :aria-label="replayLabel"
+        :aria-label="replay.ariaLabel"
       >
-        {{ t("page.match.detail.stats.source") }}
+        {{ replay.label }}
       </SLink>
     </p>
   </HubCard>

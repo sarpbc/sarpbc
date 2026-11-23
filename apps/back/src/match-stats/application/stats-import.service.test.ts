@@ -10,7 +10,7 @@ import { FakeBallchasing } from "./fake-ballchasing.test-utils";
 import { FakeStatsCandidates } from "./fake-stats-candidates.test-utils";
 import { RecordingScheduler } from "./recording-scheduler.test-utils";
 import { SaveFailingGames } from "./save-failing-games.test-utils";
-import type { StatsImportStore } from "./ports";
+import type { GameRecord, StatsImportStore } from "./ports";
 import { INTERRUPTED_IMPORT_ERROR, StatsImportService } from "./stats-import.service";
 
 const KC = ["Vatira", "Atow", "Rise"];
@@ -72,6 +72,8 @@ const statsFor = (replay: ReplaySummary) => ({
   rocketLeagueId: replay.rocketLeagueId,
 });
 
+const replayIdsOf = (game: GameRecord) => game.replays.map((replay) => replay.ballchasingId);
+
 class MemoryImports implements StatsImportStore {
   rows = new Map<string, StatsImport>();
   saves: StatsImport[] = [];
@@ -121,7 +123,7 @@ const setup = (options: { replays?: ReplaySummary[] } = {}) => {
   const candidates = new FakeStatsCandidates(() => [
     {
       ...candidate,
-      storedReplayIds: games.saved.map((game) => game.ballchasingId),
+      storedReplayIds: games.saved.flatMap(replayIdsOf),
     },
   ]);
 
@@ -213,18 +215,19 @@ describe("StatsImportService.run", () => {
   it("imports the matched games", async () => {
     const { games } = await runImport();
 
-    expect(games.saved.map((game) => [game.ballchasingId, game.number])).toStrictEqual([
-      ["r1", 1],
-      ["r2", 2],
+    expect(games.saved.map((game) => [replayIdsOf(game), game.number])).toStrictEqual([
+      [["r1"], 1],
+      [["r2"], 2],
     ]);
     expect(games.saved[0]).toMatchObject({
-      blueGoals: 2,
       blueParticipantId: "p-kc",
       matchId: "m1",
-      orangeGoals: 0,
       orangeParticipantId: "p-bds",
+      replays: [{ blueGoals: 2, orangeGoals: 0 }],
     });
-    expect(games.saved[0].players.map((player) => [player.name, player.playerId])).toStrictEqual([
+    expect(
+      games.saved[0].replays[0].players.map((player) => [player.name, player.playerId]),
+    ).toStrictEqual([
       ["Vatira", "Vatira"],
       ["Atow", "Atow"],
       ["Stand-in", null],
@@ -247,7 +250,7 @@ describe("StatsImportService.run", () => {
       { platform: "epic", platformId: "Seikoo-id", playerId: "Seikoo" },
     ]);
     expect(games.saved[1].learnedLinks).toStrictEqual([]);
-    expect(games.saved[1].players.map((player) => player.playerId)).toStrictEqual([
+    expect(games.saved[1].replays[0].players.map((player) => player.playerId)).toStrictEqual([
       "Vatira",
       "Atow",
       null,
@@ -269,7 +272,7 @@ describe("StatsImportService.run", () => {
     await service.run(response2.id);
 
     const [saved] = games.saved;
-    expect(saved.players.map((player) => [player.name, player.playerId])).toStrictEqual([
+    expect(saved.replays[0].players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Vatira", "Atow"],
       ["Atow", "Atow"],
       ["Stand-in", "outsider"],
@@ -313,7 +316,7 @@ describe("StatsImportService.run", () => {
     await service.run(id);
 
     expect(source.statsCalls).toStrictEqual([]);
-    expect(games.saved.map((game) => game.ballchasingId)).toStrictEqual(["r1"]);
+    expect(games.saved.flatMap(replayIdsOf)).toStrictEqual(["r1"]);
     expect(imports.rows.get(id)?.items).toStrictEqual([
       expect.objectContaining({ gameNumber: 1, replayId: "r1", status: "already_imported" }),
       expect.objectContaining({ reason: "excluded_by_staff", replayId: "r2", status: "unmatched" }),
@@ -329,17 +332,21 @@ describe("StatsImportService.run", () => {
   it("reports a game staff attached under another number where it is, and adds nothing", async () => {
     const { service, games, imports, source } = setup({ replays: [game1, game2] });
     games.saved.push({
-      ballchasingId: "r1",
-      blueGoals: 2,
       blueParticipantId: "p-kc",
       learnedLinks: [],
       matchId: "m1",
       number: 2,
-      orangeGoals: 0,
       orangeParticipantId: "p-bds",
-      playedAt: game1.playedAt,
-      players: [],
-      rocketLeagueId: game1.rocketLeagueId,
+      replays: [
+        {
+          ballchasingId: "r1",
+          blueGoals: 2,
+          orangeGoals: 0,
+          playedAt: game1.playedAt,
+          players: [],
+          rocketLeagueId: game1.rocketLeagueId,
+        },
+      ],
     });
 
     const { id } = await service.request("t1", "pilot-abc123");
@@ -447,6 +454,217 @@ describe("StatsImportService.run", () => {
     await service.run("unknown");
 
     expect(source.groupCalls).toStrictEqual([]);
+  });
+});
+
+const FUT = ["FUT One", "FUT Two", "FUT Three"];
+const WC = ["WC One", "WC Two", "WC Three"];
+const VIT = ["VIT One", "VIT Two", "VIT Three"];
+
+const participant = (id: string, names: string[], teamName: string) => ({
+  id,
+  players: names.map((name) => ({ id: name, name })),
+  teamNames: [teamName],
+});
+
+const series = (id: string, beginAt: string, sides: [string, string[], string, number][]) => ({
+  ...candidate,
+  beginAt: new Date(beginAt),
+  id,
+  participants: sides.map(([participantId, names, teamName]) =>
+    participant(participantId, names, teamName),
+  ),
+  scores: new Map(sides.map((entry) => [entry[0], entry[3]])),
+});
+
+interface Segment {
+  title: string;
+  playedAt: string;
+  blue: string[];
+  orange: string[];
+  listScore: [number, number];
+  ownGoals: [number, number];
+}
+
+const segment = ({ title, playedAt, blue, orange, listScore, ownGoals }: Segment) => {
+  const listed: ReplaySummary = {
+    blue: { goals: listScore[0], name: null, playerNames: blue },
+    id: title,
+    orange: { goals: listScore[1], name: null, playerNames: orange },
+    playedAt: new Date(playedAt),
+    playedAtHasTimezone: true,
+    rocketLeagueId: `guid-${title}`,
+    title,
+  };
+
+  const stats = {
+    blueGoals: ownGoals[0],
+    orangeGoals: ownGoals[1],
+    playedAt: listed.playedAt,
+    players: [...side(blue, "blue"), ...side(orange, "orange")],
+    rocketLeagueId: listed.rocketLeagueId,
+  };
+
+  return { listed, stats };
+};
+
+const kcFut = (game: string, minute: number, listScore: [number, number], ownGoals = listScore) =>
+  segment({
+    blue: KC,
+    listScore,
+    orange: FUT,
+    ownGoals,
+    playedAt: `2026-11-15T14:${String(minute).padStart(2, "0")}:00Z`,
+    title: `MAJOR_2 J KC vs FUT ${game}`,
+  });
+
+const wcVit = (game: string, minute: number, listScore: [number, number], ownGoals = listScore) =>
+  segment({
+    blue: WC,
+    listScore,
+    orange: VIT,
+    ownGoals,
+    playedAt: `2026-11-15T17:${String(minute).padStart(2, "0")}:00Z`,
+    title: `MAJOR_2 I WC vs VIT ${game}`,
+  });
+
+const majorReplays = () => [
+  kcFut("G1.1", 5, [1, 1]),
+  kcFut("G1.2", 12, [1, 2], [0, 1]),
+  kcFut("G2", 25, [2, 0]),
+  kcFut("G3", 40, [0, 3]),
+  kcFut("G4", 55, [1, 0]),
+  kcFut("G5", 59, [4, 2]),
+  wcVit("G1.1", 5, [0, 1]),
+  wcVit("G1.2", 12, [0, 2], [0, 1]),
+  wcVit("G2", 25, [0, 2]),
+  wcVit("G3", 40, [1, 3]),
+];
+
+const importMajor = async (replays = majorReplays()) => {
+  const source = new FakeBallchasing(
+    replays.map(({ listed }) => listed),
+    new Map(replays.map(({ stats, listed }) => [listed.id, stats])),
+  );
+
+  const games = new MemoryGames();
+
+  const candidates = new FakeStatsCandidates(() => [
+    series("kc-fut", "2026-11-15T14:00:00Z", [
+      ["p-kc", KC, "Karmine Corp", 3],
+      ["p-fut", FUT, "FUT Esports", 2],
+    ]),
+    series("wc-vit", "2026-11-15T17:00:00Z", [
+      ["p-wc", WC, "Wildcard", 0],
+      ["p-vit", VIT, "Team Vitality", 3],
+    ]),
+  ]);
+
+  const imports = new MemoryImports();
+
+  const service = new StatsImportService(
+    source,
+    candidates,
+    games,
+    imports,
+    new RecordingScheduler(),
+    () => {},
+  );
+
+  const { id } = await service.request("t1", "major-group");
+  await service.run(id);
+
+  return { games, items: imports.rows.get(id)?.items ?? [] };
+};
+
+describe("StatsImportService with a game split over several replays", () => {
+  it("imports the Paris Major series with their crashed first games as one game each", async () => {
+    const { games, items } = await importMajor();
+
+    expect(items.map((item) => [item.replayId, item.status])).toStrictEqual(
+      majorReplays().map(({ listed }) => [listed.id, "imported"]),
+    );
+
+    const gamesOf = (matchId: string, prefix: string) =>
+      games.saved
+        .filter((game) => game.matchId === matchId)
+        .map((game) => [
+          game.number,
+          game.replays.map((replay) => [
+            replay.ballchasingId.replace(prefix, ""),
+            replay.blueGoals,
+            replay.orangeGoals,
+          ]),
+        ]);
+
+    expect(gamesOf("kc-fut", "MAJOR_2 J KC vs FUT ")).toStrictEqual([
+      [
+        1,
+        [
+          ["G1.1", 1, 1],
+          ["G1.2", 0, 1],
+        ],
+      ],
+      [2, [["G2", 2, 0]]],
+      [3, [["G3", 0, 3]]],
+      [4, [["G4", 1, 0]]],
+      [5, [["G5", 4, 2]]],
+    ]);
+    expect(gamesOf("wc-vit", "MAJOR_2 I WC vs VIT ")).toStrictEqual([
+      [
+        1,
+        [
+          ["G1.1", 0, 1],
+          ["G1.2", 0, 1],
+        ],
+      ],
+      [2, [["G2", 0, 2]]],
+      [3, [["G3", 1, 3]]],
+    ]);
+    expect(items.find((item) => item.replayId === "MAJOR_2 J KC vs FUT G1.2")).toMatchObject({
+      gameNumber: 1,
+      matchId: "kc-fut",
+    });
+  });
+
+  it("fails every replay of a game when a restart's score does not add up", async () => {
+    const replays = majorReplays();
+    replays[1] = kcFut("G1.2", 12, [1, 2], [1, 1]);
+
+    const { games, items } = await importMajor(replays);
+
+    expect(
+      items.filter((item) => item.status === "failed").map((item) => [item.replayId, item.reason]),
+    ).toStrictEqual([
+      ["MAJOR_2 J KC vs FUT G1.1", "score_mismatch"],
+      ["MAJOR_2 J KC vs FUT G1.2", "score_mismatch"],
+    ]);
+    expect(games.saved.filter((game) => game.matchId === "kc-fut")).toHaveLength(4);
+  });
+
+  it("stores a restart that swapped sides in the game's orientation", async () => {
+    const replays = majorReplays();
+
+    replays[1] = segment({
+      blue: FUT,
+      listScore: [2, 1],
+      orange: KC,
+      ownGoals: [1, 0],
+      playedAt: "2026-11-15T14:12:00Z",
+      title: "MAJOR_2 J KC vs FUT G1.2",
+    });
+
+    const { games } = await importMajor(replays);
+    const [first] = games.saved;
+
+    expect(first?.blueParticipantId).toBe("p-kc");
+    expect(first?.replays[1]).toMatchObject({ blueGoals: 0, orangeGoals: 1 });
+    expect(
+      first?.replays[1]?.players.map((player) => [player.side, player.playerId]).slice(0, 2),
+    ).toStrictEqual([
+      ["orange", "FUT One"],
+      ["orange", "FUT Two"],
+    ]);
   });
 });
 

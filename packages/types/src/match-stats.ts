@@ -16,7 +16,7 @@ export interface MatchGameTeamStats {
 
 export interface MatchGameStats {
   number: number;
-  ballchasingId: string;
+  ballchasingIds: string[];
   playedAt: string | null;
   teams: MatchGameTeamStats[];
 }
@@ -42,15 +42,27 @@ export interface StatsPlayerAccounts {
   rosters: StatsRoster[];
 }
 
+export interface StatsGameReplay {
+  ballchasingId: string;
+  playedAt: string | null;
+  blueGoals: number;
+  orangeGoals: number;
+}
+
 export interface TournamentStatsGame {
   matchId: string;
   number: number;
-  ballchasingId: string;
   playedAt: string | null;
   blueParticipantId: string;
   orangeParticipantId: string;
   blueGoals: number;
   orangeGoals: number;
+  replays: StatsGameReplay[];
+}
+
+export interface AppendReplayInput {
+  replay: string;
+  blueParticipantId: string;
 }
 
 export interface AttachReplayInput {

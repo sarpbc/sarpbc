@@ -1823,7 +1823,9 @@
             }
           },
           "source": "Stats from replays on Ballchasing",
-          "replayLink": "Game {number} replay on Ballchasing (opens in a new tab)"
+          "replayLink": "Game {number} replay on Ballchasing (opens in a new tab)",
+          "segment": "Replay {position}",
+          "segmentLink": "Game {number}, replay {position} on Ballchasing (opens in a new tab)"
         },
         "forfeitNote": "{team} forfeited or was disqualified."
       }

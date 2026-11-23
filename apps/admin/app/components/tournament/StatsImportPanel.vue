@@ -61,7 +61,9 @@ const attachTarget = ref<StatsImportItem | null>(null);
 const linksVersion = ref(0);
 
 const attachedGame = (item: StatsImportItem) =>
-  games.value?.find((game) => game.ballchasingId === item.replayId);
+  games.value?.find((game) =>
+    game.replays.some((replay) => replay.ballchasingId === item.replayId),
+  );
 
 const onGamesChanged = async () => {
   linksVersion.value += 1;
@@ -323,6 +325,7 @@ const submit = async () => {
       :match-label="labelOf"
       @retry="refreshGames()"
       @removed="onGamesChanged"
+      @added="onGamesChanged"
     />
 
     <TournamentStatsPlayerLinks

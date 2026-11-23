@@ -49,6 +49,7 @@ import {
   MatchGameExclusionSchema,
   MatchGameSchema,
   MatchGamePlayerSchema,
+  MatchGameReplaySchema,
   MatchStatsImportSchema,
   PlayerPlatformLinkSchema,
 } from "./match-stats/infrastructure/persistence/match-stats.schemas";
@@ -71,6 +72,7 @@ export const mikroOrmEntities = [
   MatchResultSchema,
   MatchGameSchema,
   MatchGamePlayerSchema,
+  MatchGameReplaySchema,
   MatchGameExclusionSchema,
   MatchStatsImportSchema,
   PlayerPlatformLinkSchema,

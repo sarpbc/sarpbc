@@ -372,13 +372,13 @@
       },
       "indexes": [
         {
-          "columnNames": [],
-          "composite": false,
+          "columnNames": ["lower(name::text)", "season", "lower(region::text)"],
+          "composite": true,
           "constraint": false,
           "keyName": "circuit_identity_unique",
           "primary": false,
           "unique": true,
-          "expression": "create unique index \"circuit_identity_unique\" on \"circuit\" (lower(\"name\"), \"season\", lower(\"region\")) nulls not distinct;"
+          "expression": "CREATE UNIQUE INDEX circuit_identity_unique ON public.circuit USING btree (lower((name)::text), season, lower((region)::text)) NULLS NOT DISTINCT"
         },
         {
           "columnNames": ["id"],
@@ -907,7 +907,7 @@
           "keyName": "contract_open_player_team_idx",
           "primary": false,
           "unique": false,
-          "where": "\"end_date\" is null"
+          "where": "end_date IS NULL"
         },
         {
           "columnNames": ["id"],
@@ -1607,40 +1607,6 @@
       "name": "match_game",
       "schema": "public",
       "columns": {
-        "ballchasing_id": {
-          "name": "ballchasing_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": true,
-          "length": 255,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "string"
-        },
-        "blue_goals": {
-          "name": "blue_goals",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "integer"
-        },
         "blue_participant_id": {
           "name": "blue_participant_id",
           "type": "varchar(255)",
@@ -1726,23 +1692,6 @@
           "enumItems": [],
           "mappedType": "integer"
         },
-        "orange_goals": {
-          "name": "orange_goals",
-          "type": "int",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "integer"
-        },
         "orange_participant_id": {
           "name": "orange_participant_id",
           "type": "varchar(255)",
@@ -1759,51 +1708,9 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "string"
-        },
-        "played_at": {
-          "name": "played_at",
-          "type": "timestamptz(6)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "unique": false,
-          "length": 6,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "datetime"
-        },
-        "rocket_league_id": {
-          "name": "rocket_league_id",
-          "type": "varchar(255)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "unique": false,
-          "length": 255,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "string"
         }
       },
       "indexes": [
-        {
-          "columnNames": ["ballchasing_id"],
-          "composite": false,
-          "constraint": true,
-          "keyName": "match_game_ballchasing_id_unique",
-          "primary": false,
-          "unique": true
-        },
         {
           "columnNames": ["match_id"],
           "composite": false,
@@ -1952,23 +1859,6 @@
           "enumItems": [],
           "mappedType": "integer"
         },
-        "game_id": {
-          "name": "game_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "uuid"
-        },
         "goals": {
           "name": "goals",
           "type": "int",
@@ -2071,6 +1961,23 @@
           "enumItems": [],
           "mappedType": "uuid"
         },
+        "replay_id": {
+          "name": "replay_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
         "saves": {
           "name": "saves",
           "type": "int",
@@ -2125,14 +2032,6 @@
       },
       "indexes": [
         {
-          "columnNames": ["game_id"],
-          "composite": false,
-          "constraint": false,
-          "keyName": "match_game_player_game_id_index",
-          "primary": false,
-          "unique": false
-        },
-        {
           "columnNames": ["id"],
           "composite": false,
           "constraint": true,
@@ -2147,20 +2046,19 @@
           "keyName": "match_game_player_player_id_index",
           "primary": false,
           "unique": false
+        },
+        {
+          "columnNames": ["replay_id"],
+          "composite": false,
+          "constraint": false,
+          "keyName": "match_game_player_replay_id_index",
+          "primary": false,
+          "unique": false
         }
       ],
       "checks": [],
       "triggers": [],
       "foreignKeys": {
-        "match_game_player_game_id_foreign": {
-          "columnNames": ["game_id"],
-          "constraintName": "match_game_player_game_id_foreign",
-          "localTableName": "public.match_game_player",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.match_game",
-          "updateRule": "cascade",
-          "deleteRule": "cascade"
-        },
         "match_game_player_player_id_foreign": {
           "columnNames": ["player_id"],
           "constraintName": "match_game_player_player_id_foreign",
@@ -2169,6 +2067,198 @@
           "referencedTableName": "public.player",
           "updateRule": "cascade",
           "deleteRule": "set null"
+        },
+        "match_game_player_replay_id_foreign": {
+          "columnNames": ["replay_id"],
+          "constraintName": "match_game_player_replay_id_foreign",
+          "localTableName": "public.match_game_player",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.match_game_replay",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
+        }
+      },
+      "comment": null
+    },
+    {
+      "name": "match_game_replay",
+      "schema": "public",
+      "columns": {
+        "ballchasing_id": {
+          "name": "ballchasing_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "blue_goals": {
+          "name": "blue_goals",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "game_id": {
+          "name": "game_id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "gen_random_uuid()",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "uuid"
+        },
+        "orange_goals": {
+          "name": "orange_goals",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "played_at": {
+          "name": "played_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "position": {
+          "name": "position",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "rocket_league_id": {
+          "name": "rocket_league_id",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": ["ballchasing_id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "match_game_replay_ballchasing_id_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": ["game_id", "position"],
+          "composite": true,
+          "constraint": true,
+          "keyName": "match_game_replay_game_id_position_unique",
+          "primary": false,
+          "unique": true,
+          "expression": "CREATE UNIQUE INDEX match_game_replay_game_id_position_unique ON public.match_game_replay USING btree (game_id, \"position\")"
+        },
+        {
+          "columnNames": ["id"],
+          "composite": false,
+          "constraint": true,
+          "keyName": "match_game_replay_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {
+        "match_game_replay_game_id_foreign": {
+          "columnNames": ["game_id"],
+          "constraintName": "match_game_replay_game_id_foreign",
+          "localTableName": "public.match_game_replay",
+          "referencedColumnNames": ["id"],
+          "referencedTableName": "public.match_game",
+          "updateRule": "cascade",
+          "deleteRule": "cascade"
         }
       },
       "comment": null
@@ -5698,7 +5788,7 @@
           "autoincrement": false,
           "primary": false,
           "nullable": false,
-          "unique": false,
+          "unique": true,
           "length": null,
           "precision": null,
           "scale": null,
@@ -5744,13 +5834,12 @@
           "unique": false
         },
         {
-          "columnNames": [],
-          "composite": false,
+          "columnNames": ["season_id", "award_type", "region"],
+          "composite": true,
           "constraint": true,
           "keyName": "season_award_season_id_award_type_region_unique",
           "primary": false,
-          "unique": true,
-          "expression": "alter table \"season_award\" add constraint \"season_award_season_id_award_type_region_unique\" unique nulls not distinct (\"season_id\", \"award_type\", \"region\");"
+          "unique": true
         }
       ],
       "checks": [

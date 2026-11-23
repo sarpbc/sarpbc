@@ -7,6 +7,7 @@ import type { ManualGameService } from "../../../match-stats/application/manual-
 import type { StatsImportService } from "../../../match-stats/application/stats-import.service";
 import type { StatsPlayerLinkService } from "../../../match-stats/application/stats-player-link.service";
 import type { PlayerLink } from "../../../match-stats/application/ports";
+import type { GameLocation } from "../../../match-stats/domain/replay-matching";
 import { callLog } from "./call-log.test-utils";
 import type { Call } from "./call-log.test-utils";
 import { gameStatsTools, summarizeStatsImport } from "./game-stats-tools";
@@ -18,6 +19,7 @@ const TOOLS = [
   "link_game_player",
   "attach_replay_to_game",
   "remove_match_game",
+  "remove_game_replay",
 ];
 
 const base = (replayId: string) => ({ playedAt: null, replayId, title: replayId });
@@ -91,8 +93,9 @@ const accounts: StatsPlayerAccounts = {
   rosters: [{ participantId: "p1", players: [{ id: "zen", name: "zen" }], teamName: "Vitality" }],
 };
 
+const REPLAY = "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
+
 const game: TournamentStatsGame = {
-  ballchasingId: "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
   blueGoals: 3,
   blueParticipantId: "p1",
   matchId: "m1",
@@ -100,6 +103,7 @@ const game: TournamentStatsGame = {
   orangeGoals: 1,
   orangeParticipantId: "p2",
   playedAt: null,
+  replays: [{ ballchasingId: REPLAY, blueGoals: 3, orangeGoals: 1, playedAt: null }],
 };
 
 const fakeStatsImports = (imports: StatsImport[]) => {
@@ -142,6 +146,15 @@ const fakeManualGames = (attachFailure: Error | null) => {
   const { calls, record } = callLog();
 
   return {
+    appendReplay: async (
+      tournamentId: string,
+      location: GameLocation,
+      input: Parameters<ManualGameService["appendReplay"]>[2],
+    ) => {
+      record("appendReplay", tournamentId, location, input);
+
+      return game;
+    },
     attach: async (tournamentId: string, input: Parameters<ManualGameService["attach"]>[1]) => {
       record("attach", tournamentId, input);
 
@@ -157,7 +170,14 @@ const fakeManualGames = (attachFailure: Error | null) => {
 
       return game;
     },
-  } satisfies Pick<ManualGameService, "attach" | "remove"> & { calls: Call[] };
+    removeReplay: async (tournamentId: string, location: GameLocation, replay: string) => {
+      record("removeReplay", tournamentId, location, replay);
+
+      return game;
+    },
+  } satisfies Pick<ManualGameService, "attach" | "appendReplay" | "remove" | "removeReplay"> & {
+    calls: Call[];
+  };
 };
 
 const setup = (
@@ -279,7 +299,7 @@ describe("game stats tools", () => {
       blueParticipantId: "p1",
       gameNumber: 2,
       matchId: "m1",
-      replay: game.ballchasingId,
+      replay: REPLAY,
     };
 
     const callResult6 = await call("attach_replay_to_game", { tournamentId: "t1", ...input });
@@ -299,6 +319,41 @@ describe("game stats tools", () => {
     });
   });
 
+  it("adds and removes one replay of a split game through the staff service", async () => {
+    const { call, manualGameService } = setup("admin");
+    const location = { matchId: "m1", number: 2 };
+
+    const appended = await call("attach_replay_to_game", {
+      addSegment: true,
+      blueParticipantId: "p2",
+      gameNumber: 2,
+      matchId: "m1",
+      replay: REPLAY,
+      tournamentId: "t1",
+    });
+
+    expect(appended.body).toStrictEqual(game);
+    expect(manualGameService.calls).toStrictEqual([
+      {
+        args: ["t1", location, { blueParticipantId: "p2", replay: REPLAY }],
+        method: "appendReplay",
+      },
+    ]);
+
+    const removed = await call("remove_game_replay", {
+      gameNumber: 2,
+      matchId: "m1",
+      replay: REPLAY,
+      tournamentId: "t1",
+    });
+
+    expect(removed.body).toStrictEqual(game);
+    expect(manualGameService.calls).toContainEqual({
+      args: ["t1", location, REPLAY],
+      method: "removeReplay",
+    });
+  });
+
   it("returns a refusal as a tool error", async () => {
     const { call } = setup(
       "admin",
@@ -310,7 +365,7 @@ describe("game stats tools", () => {
       blueParticipantId: "p1",
       gameNumber: 2,
       matchId: "m1",
-      replay: game.ballchasingId,
+      replay: REPLAY,
       tournamentId: "t1",
     });
 
@@ -332,7 +387,7 @@ describe("game stats tools", () => {
       platform: "steam",
       platformId: "1",
       playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
-      replay: game.ballchasingId,
+      replay: REPLAY,
       tournamentId: "t1",
     });
 

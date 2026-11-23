@@ -1823,7 +1823,9 @@
             }
           },
           "source": "Stats issues des replays sur Ballchasing",
-          "replayLink": "Replay de la game {number} sur Ballchasing (s’ouvre dans un nouvel onglet)"
+          "replayLink": "Replay de la game {number} sur Ballchasing (s’ouvre dans un nouvel onglet)",
+          "segment": "Replay {position}",
+          "segmentLink": "Game {number}, replay {position} sur Ballchasing (s’ouvre dans un nouvel onglet)"
         },
         "forfeitNote": "Forfait ou disqualification de {team}."
       }

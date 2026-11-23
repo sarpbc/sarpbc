@@ -149,7 +149,7 @@ describe("API smoke (e2e)", () => {
 
   const games: MatchGameStats[] = [
     {
-      ballchasingId: "replay-1",
+      ballchasingIds: ["replay-1"],
       number: 1,
       playedAt: "2026-06-01T18:05:00.000Z",
       teams: [

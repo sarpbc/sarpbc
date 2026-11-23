@@ -9,6 +9,7 @@ import {
 import type { Side } from "../../domain/replay-matching";
 import { MatchGame } from "./match-game.entity";
 import { MatchGamePlayer } from "./match-game-player.entity";
+import { MatchGameReplay } from "./match-game-replay.entity";
 import { PlayerPlatformLink } from "./player-platform-link.entity";
 import { MatchGameExclusion } from "./match-game-exclusion.entity";
 import { MatchStatsImport } from "./match-stats-import.entity";
@@ -17,35 +18,46 @@ export const MatchGameSchema = defineEntity({
   class: MatchGame,
   indexes: [{ properties: ["match"] }],
   properties: {
-    ballchasingId: p.string(),
-    blueGoals: p.integer(),
     blueParticipant: p.manyToOne(TournamentParticipant),
     createdAt: p.datetime().type("timestamptz").defaultRaw("now()"),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     match: p.manyToOne(Match).deleteRule("cascade"),
     number: p.integer(),
-    orangeGoals: p.integer(),
     orangeParticipant: p.manyToOne(TournamentParticipant),
+    replays: p.oneToMany(MatchGameReplay).mappedBy("game"),
+  },
+  uniques: [{ properties: ["match", "number"] }],
+});
+
+export const MatchGameReplaySchema = defineEntity({
+  class: MatchGameReplay,
+  properties: {
+    ballchasingId: p.string(),
+    blueGoals: p.integer(),
+    game: p.manyToOne(MatchGame).deleteRule("cascade"),
+    id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
+    orangeGoals: p.integer(),
     playedAt: p.datetime().type("timestamptz").nullable(),
-    players: p.oneToMany(MatchGamePlayer).mappedBy("game"),
+    players: p.oneToMany(MatchGamePlayer).mappedBy("replay"),
+    position: p.integer(),
     rocketLeagueId: p.string().nullable(),
   },
-  uniques: [{ properties: ["ballchasingId"] }, { properties: ["match", "number"] }],
+  uniques: [{ properties: ["ballchasingId"] }, { properties: ["game", "position"] }],
 });
 
 export const MatchGamePlayerSchema = defineEntity({
   class: MatchGamePlayer,
-  indexes: [{ properties: ["game"] }, { properties: ["player"] }],
+  indexes: [{ properties: ["replay"] }, { properties: ["player"] }],
   properties: {
     assists: p.integer(),
     demolitions: p.integer(),
-    game: p.manyToOne(MatchGame).deleteRule("cascade"),
     goals: p.integer(),
     id: p.uuid().primary().defaultRaw("gen_random_uuid()"),
     name: p.text(),
     platform: p.text(),
     platformId: p.text().nullable(),
     player: p.manyToOne(Player).nullable().deleteRule("set null"),
+    replay: p.manyToOne(MatchGameReplay).deleteRule("cascade"),
     saves: p.integer(),
     shots: p.integer(),
     side: p.text().$type<Side>(),
