@@ -1985,18 +1985,8 @@
       "title": "Player Stats",
       "games": "{count} game | {count} games",
       "minGames": "Players with {count} games or more",
-      "minGamesPerTeam": "Players with {count} games or more for one team",
-      "byTeam": "Split by team",
       "caption": "Player stats over every tournament game with imported replays",
       "empty": "No player stats yet.",
-      "era": {
-        "label": "Era",
-        "all": "All eras",
-        "open": "Open era",
-        "preOpen": "Before the Open era",
-        "openSince": "Games since {date}, when RLCS opened qualifiers to every team",
-        "preOpenUntil": "Games before {date}, when RLCS opened qualifiers to every team"
-      },
       "seo": {
         "title": "Rocket League Player Stats Leaderboard {'|'} sarpbc.org",
         "description": "Compare Rocket League esports players on sarpbc.org: goals, assists, saves, shots, demolitions and shooting percentage across tournament games."

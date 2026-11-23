@@ -105,6 +105,7 @@ export type {
   StatsGameReplay,
   AppendReplayInput,
   PlayerStatCounts,
+  PlayerStatsCurrentTeam,
   TournamentPlayerStats,
   TournamentPlayerStatsResponse,
   TournamentPlayerStatsTeam,

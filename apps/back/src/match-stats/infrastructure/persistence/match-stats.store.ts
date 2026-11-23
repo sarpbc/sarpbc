@@ -125,6 +125,12 @@ const summaryRows = z.array(z.object({ games: count, unlinked_accounts: count })
 const tallyRows = z.array(
   z.object({
     assists: count,
+    current_team_dark_mode_image_url: z.string().nullable(),
+    current_team_image_url: z.string().nullable(),
+    current_team_logo_dark_url: z.string().nullable(),
+    current_team_logo_light_url: z.string().nullable(),
+    current_team_name: z.string().nullable(),
+    current_team_slug: z.string().nullable(),
     demolitions: count,
     games: count,
     goals: count,
@@ -458,6 +464,11 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       await connection.execute(
         `select pl.id as player_id, pl.name as player_name, pl.slug as player_slug,
           tm.id as team_id, tm.name as team_name, tm.slug as team_slug,
+          ct.name as current_team_name, ct.slug as current_team_slug,
+          ct.image_url as current_team_image_url,
+          ct.dark_mode_image_url as current_team_dark_mode_image_url,
+          ct.logo_light_url as current_team_logo_light_url,
+          ct.logo_dark_url as current_team_logo_dark_url,
           case when tm.id is null then part.id end as lineup_id,
           count(distinct r.game_id) as games,
           sum(p.goals) as goals, sum(p.assists) as assists, sum(p.saves) as saves,
@@ -467,8 +478,9 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         ${STATS_FROM}
         join player pl on pl.id = p.player_id
         left join team tm on tm.id = part.team_id
+        left join team ct on ct.id = pl.team_id
         where ${regular.where}
-        group by pl.id, tm.id, lineup_id
+        group by pl.id, tm.id, ct.id, lineup_id
         ${regular.having}`,
         regular.params,
       ),
@@ -483,7 +495,22 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       tallies: rows.map((row) => ({
         games: row.games,
         lastPlayedAt: row.last_played_at,
-        player: { id: row.player_id, name: row.player_name, slug: row.player_slug },
+        player: {
+          currentTeam:
+            row.current_team_name === null || row.current_team_slug === null
+              ? null
+              : {
+                  darkModeImageUrl: row.current_team_dark_mode_image_url,
+                  imageUrl: row.current_team_image_url,
+                  logoDarkUrl: row.current_team_logo_dark_url,
+                  logoLightUrl: row.current_team_logo_light_url,
+                  name: row.current_team_name,
+                  slug: row.current_team_slug,
+                },
+          id: row.player_id,
+          name: row.player_name,
+          slug: row.player_slug,
+        },
         team: {
           id: row.team_id,
           name: row.team_name ?? lineups.get(row.lineup_id ?? "") ?? "",

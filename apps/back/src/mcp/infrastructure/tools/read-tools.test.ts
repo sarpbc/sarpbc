@@ -30,7 +30,7 @@ interface PrizeState {
 }
 
 const { playerStats } = fakePlayerStats({
-  player: { id: "p1", name: "Scout", slug: "scout" },
+  player: { currentTeam: null, id: "p1", name: "Scout", slug: "scout" },
   team: { id: "team-kc", name: "Karmine Corp", slug: "karmine-corp" },
   teamGoals: 4,
   totals: { assists: 1, demolitions: 1, goals: 2, saves: 0, shots: 4 },

@@ -24,7 +24,21 @@ const response = z.object({
       games: z.number(),
       goalParticipation: z.number().nullable(),
       perGame: counts,
-      player: z.object({ id: z.string(), name: z.string(), slug: z.string() }),
+      player: z.object({
+        currentTeam: z
+          .object({
+            darkModeImageUrl: z.string().nullable(),
+            imageUrl: z.string().nullable(),
+            logoDarkUrl: z.string().nullable(),
+            logoLightUrl: z.string().nullable(),
+            name: z.string(),
+            slug: z.string(),
+          })
+          .nullable(),
+        id: z.string(),
+        name: z.string(),
+        slug: z.string(),
+      }),
       shootingPercentage: z.number().nullable(),
       teams: z.array(
         z.object({ id: z.string().nullable(), name: z.string(), slug: z.string().nullable() }),

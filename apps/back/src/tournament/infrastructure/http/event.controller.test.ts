@@ -81,7 +81,7 @@ const stages = new Map(
 
 describe(EventController, () => {
   const stats = fakePlayerStats({
-    player: { id: "zen", name: "zen", slug: "zen" },
+    player: { currentTeam: null, id: "zen", name: "zen", slug: "zen" },
     team: { id: "team-vit", name: "Vitality", slug: "vitality" },
     teamGoals: 0,
     totals: { assists: 0, demolitions: 0, goals: 0, saves: 0, shots: 0 },
