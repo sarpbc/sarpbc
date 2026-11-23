@@ -233,7 +233,10 @@ export const verifyPlayerTournaments = async ({
   );
 
   assert.equal(assignment.kind, "matched");
-  assert.deepEqual(assignment.sides, { blue: rivalParticipant, orange: soloParticipant });
+  assert.deepEqual(assignment.segments[0].sides, {
+    blue: rivalParticipant,
+    orange: soloParticipant,
+  });
 
   const stat = { assists: 0, demolitions: 0, platform: "epic", saves: 1, shots: 2 } as const;
   await new MikroOrmGameStatsStore(orm.em.fork()).save({

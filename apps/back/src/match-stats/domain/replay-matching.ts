@@ -53,13 +53,18 @@ export interface GameLocation {
   number: number;
 }
 
+export interface GameSegment {
+  replay: ReplaySummary;
+  sides: SideAssignment;
+}
+
 export type ReplayAssignment =
   | {
       kind: "matched";
-      replay: ReplaySummary;
       matchId: string;
       gameNumber: number;
-      sides: SideAssignment;
+      /** In play order; a game cut by a crash has several replays. */
+      segments: GameSegment[];
     }
   | { kind: "stored"; replay: ReplaySummary; matchId: string; gameNumber: number }
   | {
@@ -205,14 +210,82 @@ const place = ((replay, matches) => {
   return { kind: "placed", matchId: started[0].matchId, sides: started[0].sides };
 }) satisfies (replay: ReplaySummary, matches: readonly CandidateMatch[]) => Placement;
 
-interface SeriesGame {
-  replay: ReplaySummary;
-  sides: SideAssignment;
+export const byPlayedAt = (a: ReplaySummary, b: ReplaySummary) =>
+  (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
+
+interface PlacedReplay extends GameSegment {
   storedNumber: number | null;
 }
 
+type Stored = { kind: "new" } | { kind: "stored"; number: number } | { kind: "partial" };
+
+interface SeriesGame {
+  segments: PlacedReplay[];
+  stored: Stored;
+}
+
+const SEGMENT_TITLE = /\bG(?<game>\d+)\.(?<part>\d+)\b/iu;
+
+const segmentKey = (title: string) => {
+  const groups = SEGMENT_TITLE.exec(title)?.groups;
+
+  return groups ? { game: Number(groups.game), part: Number(groups.part) } : null;
+};
+
+const storedState = (segments: readonly PlacedReplay[]) => {
+  const numbers = new Set(segments.map(({ storedNumber }) => storedNumber));
+  const [number] = numbers;
+
+  if (numbers.size > 1) {
+    return { kind: "partial" } satisfies Stored;
+  }
+
+  return number === null
+    ? ({ kind: "new" } satisfies Stored)
+    : ({ kind: "stored", number } satisfies Stored);
+};
+
+const groupGames = (placed: readonly PlacedReplay[]) => {
+  const games: PlacedReplay[][] = [];
+  const split = new Map<number, PlacedReplay[]>();
+
+  const ordered = placed.toSorted(
+    (a, b) =>
+      (segmentKey(a.replay.title)?.part ?? 0) - (segmentKey(b.replay.title)?.part ?? 0) ||
+      byPlayedAt(a.replay, b.replay),
+  );
+
+  for (const entry of ordered) {
+    const key = segmentKey(entry.replay.title);
+    const known = key === null ? undefined : split.get(key.game);
+
+    if (known) {
+      known.push(entry);
+      continue;
+    }
+
+    const segments = [entry];
+    games.push(segments);
+
+    if (key !== null) {
+      split.set(key.game, segments);
+    }
+  }
+
+  return games
+    .toSorted((a, b) => byPlayedAt(a[0].replay, b[0].replay))
+    .map((segments) => ({ segments, stored: storedState(segments) }) satisfies SeriesGame);
+};
+
 const seriesProblem = (match: CandidateMatch, games: readonly SeriesGame[]) => {
-  if (match.storedReplayIds.some((id) => !games.some((game) => game.replay.id === id))) {
+  const placedIds = new Set(
+    games.flatMap(({ segments }) => segments.map((segment) => segment.replay.id)),
+  );
+
+  if (
+    match.storedReplayIds.some((id) => !placedIds.has(id)) ||
+    games.some(({ stored }) => stored.kind === "partial")
+  ) {
     return "match_has_other_stats" satisfies UnmatchedReason | null;
   }
 
@@ -222,7 +295,9 @@ const seriesProblem = (match: CandidateMatch, games: readonly SeriesGame[]) => {
 
   const wins = new Map<string, number>();
 
-  for (const { replay, sides } of games) {
+  for (const { segments } of games) {
+    const [{ replay, sides }] = segments.toReversed();
+
     if (replay.blue.goals === replay.orange.goals) {
       return "inconsistent_series" satisfies UnmatchedReason | null;
     }
@@ -247,45 +322,73 @@ const seriesProblem = (match: CandidateMatch, games: readonly SeriesGame[]) => {
     return "incomplete_series" satisfies UnmatchedReason | null;
   }
 
-  if (games.some((game, index) => game.storedNumber !== null && game.storedNumber !== index + 1)) {
+  if (games.some(({ stored }, index) => stored.kind === "stored" && stored.number !== index + 1)) {
     return "match_has_other_stats" satisfies UnmatchedReason | null;
   }
 
   return null satisfies UnmatchedReason | null;
 };
 
-export const byPlayedAt = (a: ReplaySummary, b: ReplaySummary) =>
-  (a.playedAt?.getTime() ?? 0) - (b.playedAt?.getTime() ?? 0) || a.id.localeCompare(b.id);
-
 const seriesAssignments = (
   matches: readonly CandidateMatch[],
-  series: ReadonlyMap<string, readonly SeriesGame[]>,
+  series: ReadonlyMap<string, readonly PlacedReplay[]>,
 ) => {
   const assignments: ReplayAssignment[] = [];
 
   for (const match of matches) {
-    const games = series.get(match.id);
+    const placed = series.get(match.id);
 
-    if (!games) {
+    if (!placed) {
       continue;
     }
 
+    const games = groupGames(placed);
     const problem = seriesProblem(match, games);
 
-    for (const [index, { replay, sides, storedNumber }] of games.entries()) {
-      if (storedNumber !== null) {
-        continue;
+    for (const [index, { segments, stored }] of games.entries()) {
+      if (problem) {
+        for (const { replay, sides, storedNumber } of segments) {
+          if (storedNumber === null) {
+            assignments.push({
+              kind: "unmatched",
+              matchId: match.id,
+              reason: problem,
+              replay,
+              sides,
+            });
+          }
+        }
+      } else if (stored.kind === "new") {
+        assignments.push({
+          gameNumber: index + 1,
+          kind: "matched",
+          matchId: match.id,
+          segments: segments.map(({ replay, sides }) => ({ replay, sides })),
+        });
       }
-
-      assignments.push(
-        problem
-          ? { kind: "unmatched", matchId: match.id, reason: problem, replay, sides }
-          : { gameNumber: index + 1, kind: "matched", matchId: match.id, replay, sides },
-      );
     }
   }
 
   return assignments;
+};
+
+export const firstReplay = (assignment: ReplayAssignment) => {
+  switch (assignment.kind) {
+    case "matched": {
+      return assignment.segments[0].replay;
+    }
+
+    case "stored":
+    case "unmatched": {
+      return assignment.replay;
+    }
+
+    default: {
+      const exhaustive: never = assignment;
+
+      return exhaustive;
+    }
+  }
 };
 
 /**
@@ -299,7 +402,7 @@ export const assignReplays = (
   excluded: ReadonlySet<string> = new Set(),
 ) => {
   const assignments: ReplayAssignment[] = [];
-  const series = new Map<string, SeriesGame[]>();
+  const series = new Map<string, PlacedReplay[]>();
 
   const taken = new Set(
     replays.flatMap((replay) =>
@@ -369,9 +472,9 @@ export const assignReplays = (
       continue;
     }
 
-    const games = series.get(placement.matchId) ?? [];
-    games.push({ replay, sides: placement.sides, storedNumber: location?.number ?? null });
-    series.set(placement.matchId, games);
+    const placed = series.get(placement.matchId) ?? [];
+    placed.push({ replay, sides: placement.sides, storedNumber: location?.number ?? null });
+    series.set(placement.matchId, placed);
   }
 
   return [...assignments, ...seriesAssignments(matches, series)];

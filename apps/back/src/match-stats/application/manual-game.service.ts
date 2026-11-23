@@ -106,7 +106,7 @@ export class ManualGameService {
     const rosters = new Map(match.participants.map(({ id, players }) => [id, players] as const));
 
     const record = buildGameRecord(
-      { matchId: match.id, number: gameNumber },
+      { matchId: match.id, number: gameNumber, sides },
       [
         {
           stats,

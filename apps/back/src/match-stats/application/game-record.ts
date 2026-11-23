@@ -14,6 +14,8 @@ import type {
 export interface GameTarget {
   matchId: string;
   number: number;
+  /** Participants on each side in the game's orientation. */
+  sides: SideAssignment;
 }
 
 export interface ReplayTarget {
@@ -116,15 +118,13 @@ export const buildReplayRecord = (
   };
 };
 
-/** The first replay sets the game's orientation. */
 export const buildGameRecord = (
-  target: GameTarget,
-  segments: readonly [ReplaySegment, ...ReplaySegment[]],
+  { sides, ...target }: GameTarget,
+  segments: readonly ReplaySegment[],
   rosters: ReadonlyMap<string, RosterPlayer[]>,
   links: PlayerLink[],
 ) => {
-  const [{ target: first }] = segments;
-  const built = segments.map((segment) => buildReplayRecord(segment, first.sides, rosters, links));
+  const built = segments.map((segment) => buildReplayRecord(segment, sides, rosters, links));
 
   const learnedLinks = built
     .flatMap((replay) => replay.learnedLinks)
@@ -137,9 +137,9 @@ export const buildGameRecord = (
 
   return {
     ...target,
-    blueParticipantId: first.sides.blue,
+    blueParticipantId: sides.blue,
     learnedLinks,
-    orangeParticipantId: first.sides.orange,
+    orangeParticipantId: sides.orange,
     replays: built.map(({ replay }) => replay),
   } satisfies GameRecord;
 };
