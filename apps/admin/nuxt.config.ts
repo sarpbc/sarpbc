@@ -91,7 +91,7 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    "/**": { appMiddleware: ["admin"] },
+    "/**": { appMiddleware: ["admin"], headers: { "x-robots-tag": "noindex, nofollow" } },
     "/login": loginRule,
     [localizedPath("/login", "fr")]: loginRule,
   },
