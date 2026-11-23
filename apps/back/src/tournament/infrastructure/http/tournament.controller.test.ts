@@ -46,7 +46,7 @@ const unusedViewerships = new ViewershipService({
 });
 
 const fakeStats = fakePlayerStats({
-  player: { id: "zen", name: "zen", slug: "zen" },
+  player: { currentTeam: null, id: "zen", name: "zen", slug: "zen" },
   team: { id: "team-vit", name: "Vitality", slug: "vitality" },
   teamGoals: 2,
   totals: { assists: 0, demolitions: 1, goals: 1, saves: 2, shots: 3 },

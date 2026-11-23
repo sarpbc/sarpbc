@@ -7,13 +7,14 @@ import type {
   TournamentPlayerStatsResponse,
 } from "@sarpbc/types";
 
-const { stats, pending, error, caption, emptyTitle, teamFilter } = defineProps<{
+const { stats, pending, error, caption, emptyTitle, teamFilter, overall } = defineProps<{
   stats: TournamentPlayerStatsResponse | null;
   pending: boolean;
   error: boolean;
   caption: string;
   emptyTitle: string;
   teamFilter?: boolean;
+  overall?: boolean;
 }>();
 
 const emit = defineEmits<{ retry: [] }>();
@@ -193,7 +194,7 @@ const hasStats = computed(() => (stats?.players.length ?? 0) > 0);
 
 const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
   { header: t("page.tournaments.stats.player"), id: "player", meta: { rowHeader: true } },
-  { header: t("page.tournaments.stats.team"), id: "team" },
+  ...(overall ? [] : [{ header: t("page.tournaments.stats.team"), id: "team" }]),
   ...COLUMNS.map<TableColumn<TournamentPlayerStats>>((column) => ({
     cell: ({ row }) => display(row.original, column),
     header: () =>
@@ -215,7 +216,10 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
 
 <template>
   <div class="flex w-full flex-col gap-2">
-    <div v-if="hasStats || $slots.filters" class="flex flex-wrap items-center gap-2 px-2">
+    <div
+      v-if="!overall && (hasStats || $slots.filters)"
+      class="flex flex-wrap items-center gap-2 px-2"
+    >
       <slot name="filters" />
       <SSelect
         v-if="teamFilter && hasStats && teamOptions.length > 2"
@@ -255,7 +259,18 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
     <HubCard v-else class="flex flex-col">
       <STable v-model:sorting="sort" :caption="caption" :columns="columns" :data="pageRows">
         <template #player-cell="{ row }">
+          <span v-if="overall" class="flex max-w-48 items-center gap-2">
+            <TeamImg
+              :team-name="row.original.player.currentTeam?.name"
+              :logo="row.original.player.currentTeam"
+              size="xs"
+            />
+            <SLink :to="$localePath(playerPath(row.original.player.slug))" class="truncate">
+              {{ row.original.player.name }}
+            </SLink>
+          </span>
           <SLink
+            v-else
             :to="$localePath(playerPath(row.original.player.slug))"
             class="block max-w-40 truncate"
           >

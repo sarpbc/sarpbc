@@ -4,8 +4,8 @@ import type { PlayerTally } from "./player-stats";
 
 const vitality = { id: "team-vit", name: "Vitality", slug: "vitality" };
 const solary = { id: "team-sly", name: "Solary", slug: "solary" };
-const zen = { id: "zen", name: "zen", slug: "zen" };
-const kaydop = { id: "kaydop", name: "Kaydop", slug: "kaydop" };
+const zen = { currentTeam: null, id: "zen", name: "zen", slug: "zen" };
+const kaydop = { currentTeam: null, id: "kaydop", name: "Kaydop", slug: "kaydop" };
 
 const tally = (
   player: PlayerTally["player"],

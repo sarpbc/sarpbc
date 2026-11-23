@@ -10,7 +10,7 @@ const stats: TournamentPlayerStatsResponse = {
       games: 12,
       goalParticipation: 50,
       perGame: { assists: 0.5, demolitions: 1, goals: 1, saves: 2, shots: 3 },
-      player: { id: "zen", name: "zen", slug: "zen" },
+      player: { currentTeam: null, id: "zen", name: "zen", slug: "zen" },
       shootingPercentage: 33.3,
       teams: [{ id: "team-vit", name: "Vitality", slug: "vitality" }],
       totals: { assists: 6, demolitions: 12, goals: 12, saves: 24, shots: 36 },

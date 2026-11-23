@@ -14,7 +14,7 @@ const service = new TournamentPlayerStatsService({
         {
           games: 2,
           lastPlayedAt: null,
-          player: { id: "zen", name: "zen", slug: "zen" },
+          player: { currentTeam: null, id: "zen", name: "zen", slug: "zen" },
           team: { id: "team-vit", name: "Vitality", slug: "vitality" },
           teamGoals: 6,
           totals: { assists: 2, demolitions: 0, goals: 2, saves: 2, shots: 4 },

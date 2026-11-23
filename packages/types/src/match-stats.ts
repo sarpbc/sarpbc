@@ -1,3 +1,5 @@
+import type { TeamLogos } from "./team";
+
 export interface MatchGamePlayerStats {
   name: string;
   player: { id: string; name: string; slug: string } | null;
@@ -160,8 +162,13 @@ export interface TournamentPlayerStatsTeam {
   slug: string | null;
 }
 
+export interface PlayerStatsCurrentTeam extends TeamLogos {
+  name: string;
+  slug: string;
+}
+
 export interface TournamentPlayerStats {
-  player: { id: string; name: string; slug: string };
+  player: { id: string; name: string; slug: string; currentTeam: PlayerStatsCurrentTeam | null };
   /** Most recently played for first. */
   teams: TournamentPlayerStatsTeam[];
   games: number;
