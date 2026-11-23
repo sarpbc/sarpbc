@@ -279,3 +279,17 @@ export type {
   OnThisDayText,
   OnThisDayTournament,
 } from "./on-this-day";
+
+export { RECORD_TABLE_SIZE, RECORD_VENUES } from "./records";
+
+export type {
+  PlayerTitlesRecord,
+  RecordBook,
+  RecordPlayer,
+  RecordStage,
+  RecordTeam,
+  RecordVenue,
+  TeamTitlesRecord,
+  WinStreakRecord,
+  YoungestChampionRecord,
+} from "./records";

@@ -9,6 +9,7 @@ export class Team {
   name = "";
   players: Player[] = [];
   active = true;
+  national = false;
   location: string | null = null;
   imageUrl: string | null = null;
   darkModeImageUrl: string | null = null;

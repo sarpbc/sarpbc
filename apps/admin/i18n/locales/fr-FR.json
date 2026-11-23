@@ -1133,6 +1133,8 @@
       },
       "fields": {
         "name": "Nom",
+        "national": "Équipe nationale",
+        "nationalHint": "Les équipes nationales sont exclues des records des clubs.",
         "location": "Localisation",
         "imageUrl": "URL de l'image"
       },

@@ -11,6 +11,7 @@ export interface UpdateTeamDto {
   name?: string;
   location?: string;
   imageUrl?: string;
+  national?: boolean;
 }
 
 interface TeamContractDto {

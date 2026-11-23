@@ -119,6 +119,10 @@ export class TeamService {
         team.active = dto.active;
       }
 
+      if (dto.national !== undefined) {
+        team.national = dto.national;
+      }
+
       await teams.save(team);
 
       return team;

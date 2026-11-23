@@ -35,6 +35,7 @@ import { RosterProposalModule } from "./roster-proposal/infrastructure/roster-pr
 import { CareerModule } from "./career/infrastructure/career.module";
 import { CountryModule } from "./country/infrastructure/country.module";
 import { OnThisDayModule } from "./on-this-day/infrastructure/on-this-day.module";
+import { RecordsModule } from "./records/infrastructure/records.module";
 import { StreamerModule } from "./streamer/infrastructure/streamer.module";
 import { MatchStatsModule } from "./match-stats/infrastructure/match-stats.module";
 import { SitemapModule } from "./sitemap/infrastructure/sitemap.module";
@@ -84,6 +85,7 @@ import mikroOrmConfig from "./mikro-orm.config";
     CareerModule,
     CountryModule,
     OnThisDayModule,
+    RecordsModule,
     StreamerModule,
     MatchStatsModule,
     SitemapModule,

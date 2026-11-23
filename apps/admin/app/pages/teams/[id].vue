@@ -20,6 +20,7 @@ const teamForm = ref({
   imageUrl: "",
   location: "",
   name: "",
+  national: false,
 });
 
 const {
@@ -49,6 +50,7 @@ watch(
         imageUrl: p.imageUrl ?? "",
         location: p.location ?? "",
         name: p.name ?? "",
+        national: p.national,
       };
     }
   },
@@ -63,7 +65,7 @@ const saveTeam = async () => {
   isSavingTeam.value = true;
 
   try {
-    const body: UpdateTeamDto = { name: teamForm.value.name };
+    const body: UpdateTeamDto = { name: teamForm.value.name, national: teamForm.value.national };
 
     if (teamForm.value.location) {
       body.location = teamForm.value.location;
@@ -239,6 +241,11 @@ const contractModalTitle = computed(() =>
             <SFormField :label="$t('page.teams.fields.imageUrl')">
               <SInput v-model="teamForm.imageUrl" class="w-full" />
             </SFormField>
+            <SSwitch
+              v-model="teamForm.national"
+              :label="$t('page.teams.fields.national')"
+              :description="$t('page.teams.fields.nationalHint')"
+            />
           </div>
         </div>
 

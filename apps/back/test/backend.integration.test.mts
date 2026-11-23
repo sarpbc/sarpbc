@@ -21,6 +21,7 @@ import { verifyPlayerTournaments } from "./scenarios/player-tournaments.mts";
 import { verifyManualBrackets } from "./scenarios/manual-brackets.mts";
 import { verifyMatchStats } from "./scenarios/match-stats.mts";
 import { verifyOnThisDay } from "./scenarios/on-this-day.mts";
+import { verifyRecords } from "./scenarios/records.mts";
 import { verifySeasonArchives, verifySeasonAwards } from "./scenarios/seasons.mts";
 import { verifySitemap } from "./scenarios/sitemap.mts";
 import { verifyStageDeletion } from "./scenarios/stage-deletion.mts";
@@ -2888,6 +2889,13 @@ describe("backend integration", () => {
         "on this day reads titles, bracket finals and transfers on the Paris day without start.gg",
         async () => {
           await verifyOnThisDay({ memberCookie, orm, request, staffCookie });
+        },
+      );
+
+      await check(
+        "records count event titles, win streaks and young champions by venue without start.gg",
+        async () => {
+          await verifyRecords({ orm, request, staffCookie });
         },
       );
 
