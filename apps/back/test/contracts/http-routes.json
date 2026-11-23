@@ -864,6 +864,14 @@
     "permissions": []
   },
   {
+    "controller": "\"records\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"replies\"",
     "verb": "DELETE",
     "path": "\":id\"",

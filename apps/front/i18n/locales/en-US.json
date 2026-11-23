@@ -115,6 +115,7 @@
     "transfers": "Transfers",
     "circuits": "Circuits",
     "stats": "Stats",
+    "records": "Records",
     "seasons": "Seasons",
     "countries": "Countries",
     "formerly": "Formerly {name}"
@@ -2104,6 +2105,30 @@
       "seoTitle": "On This Day in Rocket League Esports {'|'} sarpbc.org",
       "description": "What happened on this day in earlier years of Rocket League esports: titles, finals, player birthdays, transfers and facts from sarpbc.org staff.",
       "note": "Titles, finals, birthdays and transfers come from sarpbc.org's records for this day in earlier years. The other entries are written by sarpbc.org staff, with their source when there is one."
+    },
+    "records": {
+      "title": "Records",
+      "seoTitle": "Rocket League Esports Records {'|'} sarpbc.org",
+      "description": "All-time Rocket League esports records from sarpbc.org match data, at LAN and online: most titled teams and players, longest series win streaks and youngest champions.",
+      "sections": {
+        "teamTitles": "Most Titled Teams",
+        "playerTitles": "Most Titled Players",
+        "winStreaks": "Longest Series Win Streaks",
+        "youngestChampions": "Youngest Champions"
+      },
+      "venue": {
+        "label": "Venue",
+        "all": "All",
+        "lan": "LAN",
+        "online": "Online"
+      },
+      "titles": "{count} title | {count} titles",
+      "series": "{count} series | {count} series",
+      "age": "{years}, {days}",
+      "years": "{count} year | {count} years",
+      "days": "{count} day | {count} days",
+      "empty": "No record yet",
+      "error": "The records could not be loaded. Try again."
     }
   }
 }
