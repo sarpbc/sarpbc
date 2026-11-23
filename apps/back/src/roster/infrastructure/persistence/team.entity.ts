@@ -7,6 +7,7 @@ export class Team {
   name!: string;
   players = new Collection<Player>(this);
   active = true;
+  national = false;
   location: string | null = null;
   imageUrl: string | null = null;
   darkModeImageUrl: string | null = null;

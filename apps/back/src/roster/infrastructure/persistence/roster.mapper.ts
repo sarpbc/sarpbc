@@ -15,6 +15,7 @@ type TeamColumn =
   | "slug"
   | "pandascoreId"
   | "active"
+  | "national"
   | "source"
   | "location"
   | "imageUrl"
@@ -46,6 +47,7 @@ export const teamColumns = (model: Pick<TeamRow, TeamColumn>) => ({
   logoDarkUrl: model.logoDarkUrl,
   logoLightUrl: model.logoLightUrl,
   name: model.name,
+  national: model.national,
   pandascoreId: model.pandascoreId,
   slug: model.slug,
   source: model.source,

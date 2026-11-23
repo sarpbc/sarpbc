@@ -33,6 +33,7 @@ export interface TeamAlias extends TeamAliasInput {
 }
 
 export interface Team extends TeamSummary {
+  national: boolean;
   pandascoreId: number | null;
   source: DataSource;
   players: Player[];

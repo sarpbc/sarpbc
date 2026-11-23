@@ -79,6 +79,7 @@ export interface UpdateTeamInput {
   logoDarkUrl?: string;
   slug?: string;
   active?: boolean;
+  national?: boolean;
 }
 
 export interface CreateTeamContractInput {

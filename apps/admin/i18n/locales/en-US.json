@@ -1133,6 +1133,8 @@
       },
       "fields": {
         "name": "Name",
+        "national": "National team",
+        "nationalHint": "National teams stay out of the club records.",
         "location": "Location",
         "imageUrl": "Image URL"
       },

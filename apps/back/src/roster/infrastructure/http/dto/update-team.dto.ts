@@ -5,6 +5,7 @@ export const UpdateTeamDto = z.strictObject({
   imageUrl: z.string().optional(),
   location: z.string().optional(),
   name: z.string().optional(),
+  national: z.boolean().optional(),
   slug: z.string().optional(),
 });
 

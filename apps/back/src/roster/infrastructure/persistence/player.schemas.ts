@@ -26,6 +26,7 @@ export const TeamSchema = defineEntity({
     logoLightUrl: p.text().nullable(),
     mergedInto: p.manyToOne(Team).nullable().deleteRule("restrict"),
     name: p.string(),
+    national: p.boolean().default(false),
     pandascoreId: p.integer().nullable(),
     players: p.oneToMany(Player).mappedBy("team"),
     slug: p.string(),

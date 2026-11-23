@@ -56,6 +56,7 @@ export const mapTeam = (team: Team) =>
   ({
     ...mapTeamSummary(team),
     aliases: team.aliases.map(mapTeamAlias),
+    national: team.national,
     pandascoreId: team.pandascoreId,
     players: team.players.map((player) => mapPlayer(player)),
     source: team.source,

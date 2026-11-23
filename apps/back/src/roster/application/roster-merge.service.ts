@@ -141,6 +141,7 @@ export class RosterMergeService {
       kept.logoLightUrl ??= merged.logoLightUrl;
       kept.logoDarkUrl ??= merged.logoDarkUrl;
       kept.active ||= merged.active;
+      kept.national ||= merged.national;
 
       merged.active = false;
       merged.pandascoreId = null;
