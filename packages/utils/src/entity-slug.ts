@@ -86,6 +86,17 @@ const knownTeamName = (name: string | null | undefined) => {
 
 export const isKnownTeamName = (name: string | null | undefined) => knownTeamName(name) !== null;
 
+const stageWordsBeyondEvent = (event: string, stage: string) => {
+  const eventWords = new Set(event.split("-"));
+
+  return (
+    stage
+      .split("-")
+      .filter((word) => !eventWords.has(word) || /^\d{1,2}$/u.test(word))
+      .join("-") || null
+  );
+};
+
 export const matchSlug = ({
   teamNames,
   matchName,
@@ -101,7 +112,7 @@ export const matchSlug = ({
 
   const lead = first !== null && second !== null ? [first, "vs", second] : [roundLabel(matchName)];
 
-  return toSlug(...lead, event, stage === event ? null : stage) || "match";
+  return toSlug(...lead, event, stageWordsBeyondEvent(event, stage)) || "match";
 };
 
 export const forumPostSlug = (title: string) => toSlug(title) || "post";
