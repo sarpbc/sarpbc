@@ -17,11 +17,9 @@ const {
 
 const attrs = useAttrs();
 const localePath = useLocalePath();
-const { matchDetailTo, trackMatchRowClicked } = useMatchDiscoveryAnalytics();
+const { trackMatchRowClicked } = useMatchDiscoveryAnalytics();
 
-const to = computed(() =>
-  source ? matchDetailTo(match, source) : localePath(matchPath(match.publicId, match.slug)),
-);
+const to = computed(() => localePath(matchPath(match.publicId, match.slug)));
 
 const linkClass = computed(() => ["group block interactive-surface", attrs.class]);
 

@@ -96,6 +96,30 @@ void describe("matchSlug", () => {
     assert.match(swapped, /^karmine-corp-vs-team-falcons-/u);
   });
 
+  void it("drops the stage words the event slug already carries", () => {
+    assert.equal(
+      matchSlug({
+        eventSlug: "coupe-de-france-slash-2026",
+        matchName: "Round 1",
+        stageSlug: "coupe-de-france-slash-group-stage-2026",
+        teamNames: ["Vitality", "Gentle Mates"],
+      }),
+      "gentle-mates-vs-vitality-coupe-de-france-slash-2026-group-stage",
+    );
+  });
+
+  void it("keeps a stage number the event slug happens to share", () => {
+    assert.equal(
+      matchSlug({
+        eventSlug: "rlcs-2026-major-1",
+        matchName: "Round 1",
+        stageSlug: "day-1",
+        teamNames: ["Vitality", "Gentle Mates"],
+      }),
+      "gentle-mates-vs-vitality-rlcs-2026-major-1-day-1",
+    );
+  });
+
   void it("falls back to the round label when a team is missing", () => {
     assert.equal(
       matchSlug({

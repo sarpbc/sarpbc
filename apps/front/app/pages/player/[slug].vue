@@ -115,11 +115,17 @@ const birthday = computed(() =>
 
 const { tab, tabItems, setTab } = useEntityTabs("player");
 
-const title = computed(() =>
-  currentPlayer.value.name
-    ? t("page.player.slug.seoTitleWithName", { name: currentPlayer.value.name })
-    : t("page.player.slug.seoTitleDefault"),
-);
+const title = computed(() => {
+  const { name, team } = currentPlayer.value;
+
+  if (!name) {
+    return t("page.player.slug.seoTitleDefault");
+  }
+
+  return team?.name
+    ? t("page.player.slug.seoTitleWithTeam", { name, team: team.name })
+    : t("page.player.slug.seoTitleWithName", { name });
+});
 
 const description = computed(() => {
   const { name, team } = currentPlayer.value;
@@ -128,9 +134,19 @@ const description = computed(() => {
     return t("page.player.slug.seoDescriptionDefault");
   }
 
-  return team?.name
-    ? t("page.player.slug.seoDescriptionWithTeam", { name, team: team.name })
-    : t("page.player.slug.seoDescriptionWithName", { name });
+  const age = birthday.value ? getAgeFromBirthday(birthday.value) : "-";
+
+  return [
+    t("page.player.slug.seoDescriptionLead", { name }),
+    realName.value && t("page.player.slug.seoFactRealName", { realName: realName.value }),
+    age !== "-" && t("page.player.slug.seoFactAge", { age }),
+    nationalityCode.value &&
+      t("page.player.slug.seoFactNationality", { country: countryName(nationalityCode.value) }),
+    team?.name && t("page.player.slug.seoFactTeam", { team: team.name }),
+    t("page.player.slug.seoDescriptionTail"),
+  ]
+    .filter(Boolean)
+    .join(" ");
 });
 
 setPageSeo({

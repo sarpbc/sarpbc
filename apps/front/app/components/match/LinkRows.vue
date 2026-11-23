@@ -1,10 +1,7 @@
 <script lang="ts" setup>
 import { matchPath } from "@sarpbc/utils";
 import type { MatchRowItem } from "~/types/matches";
-import {
-  MATCH_DISCOVERY_FROM_QUERY,
-  listVariantToDiscoveryStatus,
-} from "~/utils/match-discovery-analytics";
+import { listVariantToDiscoveryStatus } from "~/utils/match-discovery-analytics";
 import type { MatchDiscoverySource, MatchDiscoveryStatus } from "~/utils/match-discovery-analytics";
 
 const {
@@ -34,11 +31,7 @@ const statusFor = (matchId: string) => {
   return isLive(matchId) ? "live" : "upcoming";
 };
 
-const href = (match: MatchRowItem) => {
-  const path = localePath(matchPath(match.publicId, match.slug));
-
-  return source ? `${path}?${MATCH_DISCOVERY_FROM_QUERY}=${source}` : path;
-};
+const href = (match: MatchRowItem) => localePath(matchPath(match.publicId, match.slug));
 
 const onClick = useLinkDelegation((link) => {
   const { matchId } = link.dataset;

@@ -1280,7 +1280,6 @@
         "playerNotFound": "Joueur introuvable",
         "seoTitleWithName": "{name} : profil et résultats du joueur Rocket League {'|'} sarpbc.org",
         "seoTitleDefault": "Profil de joueur Rocket League {'|'} sarpbc.org",
-        "seoDescriptionWithName": "{name} sur sarpbc.org : profil esport Rocket League avec équipes, matchs à venir, résultats récents et parcours en tournoi.",
         "seoDescriptionDefault": "Profil de joueur esport Rocket League sur sarpbc.org : équipes, matchs à venir, résultats récents et parcours en tournoi.",
         "currentTeam": "Équipe actuelle",
         "role": "Rôle",
@@ -1386,7 +1385,13 @@
         "viewStaffProfile": "Voir la fiche staff",
         "compare": "Comparer",
         "compareCareers": "Comparer les carrières",
-        "seoDescriptionWithTeam": "{name} ({team}) sur sarpbc.org : profil esport Rocket League avec équipes, matchs à venir, résultats récents et parcours en tournoi."
+        "seoTitleWithTeam": "{name} ({team}) : profil du joueur Rocket League {'|'} sarpbc.org",
+        "seoDescriptionLead": "{name} : profil esport Rocket League.",
+        "seoFactRealName": "Vrai nom : {realName}.",
+        "seoFactAge": "Âge : {age} ans.",
+        "seoFactNationality": "Nationalité : {country}.",
+        "seoFactTeam": "Équipe : {team}.",
+        "seoDescriptionTail": "Équipes, titres, résultats et matchs à venir sur sarpbc.org."
       }
     },
     "staff": {
