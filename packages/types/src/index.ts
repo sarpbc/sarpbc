@@ -102,6 +102,8 @@ export type {
   StatsPlayerLinkResult,
   StatsRoster,
   TournamentStatsGame,
+  StatsGameReplay,
+  AppendReplayInput,
   PlayerStatCounts,
   TournamentPlayerStats,
   TournamentPlayerStatsResponse,

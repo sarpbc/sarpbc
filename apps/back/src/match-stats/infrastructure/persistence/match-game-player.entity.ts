@@ -1,10 +1,11 @@
 import type { Player } from "../../../roster/infrastructure/roster-persistence";
 import type { Side } from "../../domain/replay-matching";
-import type { MatchGame } from "./match-game.entity";
+import type { MatchGameReplay } from "./match-game-replay.entity";
 
 export class MatchGamePlayer {
   id!: string;
-  game!: MatchGame;
+  replay!: MatchGameReplay;
+  /** In the game's orientation. */
   side!: Side;
   player: Player | null = null;
   name!: string;

@@ -52,17 +52,23 @@ export interface PlayerLink extends PlatformAccount {
   playerId: string;
 }
 
-export interface GameRecord {
-  matchId: string;
-  number: number;
+/** One Ballchasing replay of a game; goals and player sides are in the game's orientation. */
+export interface GameReplayRecord {
   ballchasingId: string;
   rocketLeagueId: string | null;
   playedAt: Date | null;
-  blueParticipantId: string;
-  orangeParticipantId: string;
   blueGoals: number;
   orangeGoals: number;
   players: GamePlayerRecord[];
+}
+
+export interface GameRecord {
+  matchId: string;
+  number: number;
+  blueParticipantId: string;
+  orangeParticipantId: string;
+  /** In play order. */
+  replays: GameReplayRecord[];
   /** Links taught by unique roster-name matches; an existing link is never replaced. */
   learnedLinks: PlayerLink[];
 }
@@ -78,14 +84,14 @@ export interface GameStatsStore {
   attachment: (replayId: string) => Promise<GameAttachment | null>;
   links: (accounts: PlatformAccount[]) => Promise<PlayerLink[]>;
   /**
-   * Saves the game, its player rows and its learned links atomically, links earlier unlinked
-   * rows of each learned account and clears any staff exclusion of the replay.
+   * Saves the game, its replays, their player rows and its learned links atomically, links
+   * earlier unlinked rows of each learned account and clears any staff exclusion of its replays.
    */
   save: (game: GameRecord) => Promise<TournamentStatsGame>;
   byMatch: (matchId: string) => Promise<MatchGameStats[]>;
   inTournament: (tournamentId: string) => Promise<TournamentStatsGame[]>;
   playerStats: (scope: StatsScope) => Promise<PlayerStatsSummary>;
-  /** Deletes the game with its player rows and excludes its replay atomically. */
+  /** Deletes the game with its replays and player rows and excludes every replay atomically. */
   remove: (tournamentId: string, location: GameLocation) => Promise<TournamentStatsGame | null>;
 }
 

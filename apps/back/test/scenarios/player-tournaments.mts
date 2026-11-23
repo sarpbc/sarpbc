@@ -237,34 +237,38 @@ export const verifyPlayerTournaments = async ({
 
   const stat = { assists: 0, demolitions: 0, platform: "epic", saves: 1, shots: 2 } as const;
   await new MikroOrmGameStatsStore(orm.em.fork()).save({
-    ballchasingId: "fake-1v1-replay",
-    blueGoals: 0,
     blueParticipantId: rivalParticipant,
     learnedLinks: [],
     matchId: match.id,
     number: 1,
-    orangeGoals: 2,
     orangeParticipantId: soloParticipant,
-    playedAt,
-    players: [
+    replays: [
       {
-        ...stat,
-        goals: 0,
-        name: "Fake Solo Two",
-        platformId: "fake-two",
-        playerId: rival.id,
-        side: "blue",
-      },
-      {
-        ...stat,
-        goals: 2,
-        name: "Fake Solo One",
-        platformId: "fake-one",
-        playerId: solo.id,
-        side: "orange",
+        ballchasingId: "fake-1v1-replay",
+        blueGoals: 0,
+        orangeGoals: 2,
+        playedAt,
+        players: [
+          {
+            ...stat,
+            goals: 0,
+            name: "Fake Solo Two",
+            platformId: "fake-two",
+            playerId: rival.id,
+            side: "blue",
+          },
+          {
+            ...stat,
+            goals: 2,
+            name: "Fake Solo One",
+            platformId: "fake-one",
+            playerId: solo.id,
+            side: "orange",
+          },
+        ],
+        rocketLeagueId: "RL-1v1",
       },
     ],
-    rocketLeagueId: "RL-1v1",
   });
   const response7 = await request("GET", `/matches/${match.id}`);
   const [game] = response7.json(gameBody).games;

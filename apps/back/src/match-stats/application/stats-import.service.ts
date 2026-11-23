@@ -222,15 +222,18 @@ export class StatsImportService {
       const links = await this.games.links(platformAccounts(stats));
       await this.games.save(
         buildGameRecord(
-          {
-            ballchasingId: replay.id,
-            matchId: assignment.matchId,
-            number: assignment.gameNumber,
-            playedAt: replay.playedAt,
-            rocketLeagueId: replay.rocketLeagueId,
-            sides: assignment.sides,
-          },
-          stats,
+          { matchId: assignment.matchId, number: assignment.gameNumber },
+          [
+            {
+              stats,
+              target: {
+                ballchasingId: replay.id,
+                playedAt: replay.playedAt,
+                rocketLeagueId: replay.rocketLeagueId,
+                sides: assignment.sides,
+              },
+            },
+          ],
           rosters,
           links,
         ),

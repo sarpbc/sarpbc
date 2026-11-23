@@ -18,38 +18,42 @@ export class MikroOrmPlayerLinkStore implements PlayerLinkStore {
   async accounts(tournamentId: string) {
     const rows = await this.em.find(
       MatchGamePlayer,
-      { game: { match: { tournament: tournamentId } }, platformId: { $ne: null } },
+      { platformId: { $ne: null }, replay: { game: { match: { tournament: tournamentId } } } },
       {
-        orderBy: { game: { playedAt: QueryOrder.DESC_NULLS_LAST } },
+        orderBy: { replay: { playedAt: QueryOrder.DESC_NULLS_LAST } },
         populate: [
           "player",
-          "game.blueParticipant.team",
-          "game.blueParticipant.players",
-          "game.orangeParticipant.team",
-          "game.orangeParticipant.players",
+          "replay.game.blueParticipant.team",
+          "replay.game.blueParticipant.players",
+          "replay.game.orangeParticipant.team",
+          "replay.game.orangeParticipant.players",
         ],
       },
     );
 
     const accounts = new Map<string, StatsPlayerAccount>();
+    const games = new Map<string, Set<string>>();
 
     for (const row of rows) {
       const { platformId } = row;
+      const { game } = row.replay;
 
       if (platformId === null) {
         continue;
       }
 
       const key = JSON.stringify([row.platform, platformId]);
+      const played = games.get(key) ?? new Set<string>();
+      played.add(game.id);
+      games.set(key, played);
       const known = accounts.get(key);
 
       if (known) {
-        known.games += 1;
+        known.games = played.size;
         continue;
       }
 
-      const participant =
-        row.side === "blue" ? row.game.blueParticipant : row.game.orangeParticipant;
+      const participant = row.side === "blue" ? game.blueParticipant : game.orangeParticipant;
 
       accounts.set(key, {
         games: 1,

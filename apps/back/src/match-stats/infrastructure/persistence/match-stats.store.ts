@@ -1,5 +1,6 @@
 import { OPEN_ERA_START } from "@sarpbc/types";
 import type {
+  MatchGamePlayerStats,
   MatchGameStats,
   MatchGameTeamStats,
   StatsEra,
@@ -13,25 +14,29 @@ import type { PlayerStatsSummary, StatsMinGames, StatsScope } from "../../domain
 import type {
   GameAttachment,
   GameRecord,
+  GameReplayRecord,
   GameStatsStore,
   PlatformAccount,
+  PlayerLink,
 } from "../../application/ports";
 import type { GameLocation, Side } from "../../domain/replay-matching";
 import { MatchGame } from "./match-game.entity";
 import { MatchGameExclusion } from "./match-game-exclusion.entity";
 import { MatchGamePlayer } from "./match-game-player.entity";
+import { MatchGameReplay } from "./match-game-replay.entity";
 import { PlayerPlatformLink } from "./player-platform-link.entity";
 import { nameOf } from "./participant-name";
 import { toLink } from "./player-link.store";
 
 const STATS_FROM = `from match_game_player p
-  join match_game g on g.id = p.game_id
+  join match_game_replay r on r.id = p.replay_id
+  join match_game g on g.id = r.game_id
   join match m on m.id = g.match_id
   join tournament t on t.id = m.tournament_id
   join tournament_participant part on part.id =
     case when p.side = 'blue' then g.blue_participant_id else g.orange_participant_id end`;
 
-const PLAYED_ON = "coalesce(g.played_at, m.begin_at, t.begin_at)";
+const PLAYED_ON = "coalesce(r.played_at, m.begin_at, t.begin_at)";
 
 const eraFilter = (era: StatsEra) => {
   switch (era) {
@@ -92,13 +97,13 @@ const regularPlayers = (
         having: "",
         params: [...params, ...params, minGames],
         where: `${filter} and p.player_id in (select p.player_id ${STATS_FROM} where ${filter}
-          group by p.player_id having count(distinct p.game_id) >= ?)`,
+          group by p.player_id having count(distinct r.game_id) >= ?)`,
       };
     }
 
     case "team": {
       return {
-        having: "having count(distinct p.game_id) >= ?",
+        having: "having count(distinct r.game_id) >= ?",
         params: [...params, minGames],
         where: filter,
       };
@@ -136,38 +141,151 @@ const tallyRows = z.array(
   }),
 );
 
-const toTeam = (game: MatchGame, side: Side) =>
+const STAT_KEYS = ["goals", "assists", "saves", "shots", "demolitions"] as const;
+
+type ReplayScore = Pick<
+  MatchGameReplay,
+  "ballchasingId" | "playedAt" | "blueGoals" | "orangeGoals"
+>;
+
+const replaysOf = (game: MatchGame) =>
+  game.replays.getItems().toSorted((a, b) => a.position - b.position);
+
+const goalsOf = (replays: readonly ReplayScore[], side: Side) =>
+  replays.reduce(
+    (sum, replay) => sum + (side === "blue" ? replay.blueGoals : replay.orangeGoals),
+    0,
+  );
+
+const teamPlayers = (replays: readonly MatchGameReplay[], side: Side) => {
+  const players = new Map<string, MatchGamePlayerStats>();
+
+  for (const row of replays.flatMap((replay) => replay.players.getItems())) {
+    if (row.side !== side) {
+      continue;
+    }
+
+    const key = JSON.stringify([row.platform, row.platformId ?? row.name]);
+    const known = players.get(key);
+
+    if (known) {
+      for (const stat of STAT_KEYS) {
+        known[stat] += row[stat];
+      }
+
+      continue;
+    }
+
+    players.set(key, {
+      assists: row.assists,
+      demolitions: row.demolitions,
+      goals: row.goals,
+      name: row.name,
+      player: row.player
+        ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
+        : null,
+      saves: row.saves,
+      shots: row.shots,
+    });
+  }
+
+  return [...players.values()].toSorted((a, b) => a.name.localeCompare(b.name));
+};
+
+const toTeam = (game: MatchGame, replays: readonly MatchGameReplay[], side: Side) =>
   ({
-    goals: side === "blue" ? game.blueGoals : game.orangeGoals,
+    goals: goalsOf(replays, side),
     participantId: (side === "blue" ? game.blueParticipant : game.orangeParticipant).id,
-    players: game.players
-      .getItems()
-      .filter((row) => row.side === side)
-      .toSorted((a, b) => a.name.localeCompare(b.name))
-      .map((row) => ({
-        assists: row.assists,
-        demolitions: row.demolitions,
-        goals: row.goals,
-        name: row.name,
-        player: row.player
-          ? { id: row.player.id, name: row.player.name, slug: row.player.slug }
-          : null,
-        saves: row.saves,
-        shots: row.shots,
-      })),
+    players: teamPlayers(replays, side),
   }) satisfies MatchGameTeamStats;
 
-const toTournamentGame = (game: MatchGame) =>
+type GameKey = Pick<
+  TournamentStatsGame,
+  "matchId" | "number" | "blueParticipantId" | "orangeParticipantId"
+>;
+
+const summarize = (
+  { matchId, number, blueParticipantId, orangeParticipantId }: GameKey,
+  replays: readonly ReplayScore[],
+) =>
   ({
-    ballchasingId: game.ballchasingId,
-    blueGoals: game.blueGoals,
-    blueParticipantId: game.blueParticipant.id,
-    matchId: game.match.id,
-    number: game.number,
-    orangeGoals: game.orangeGoals,
-    orangeParticipantId: game.orangeParticipant.id,
-    playedAt: game.playedAt?.toISOString() ?? null,
+    blueGoals: goalsOf(replays, "blue"),
+    blueParticipantId,
+    matchId,
+    number,
+    orangeGoals: goalsOf(replays, "orange"),
+    orangeParticipantId,
+    playedAt: replays.at(0)?.playedAt?.toISOString() ?? null,
+    replays: replays.map((replay) => ({
+      ballchasingId: replay.ballchasingId,
+      blueGoals: replay.blueGoals,
+      orangeGoals: replay.orangeGoals,
+      playedAt: replay.playedAt?.toISOString() ?? null,
+    })),
   }) satisfies TournamentStatsGame;
+
+const toTournamentGame = (game: MatchGame) =>
+  summarize(
+    {
+      blueParticipantId: game.blueParticipant.id,
+      matchId: game.match.id,
+      number: game.number,
+      orangeParticipantId: game.orangeParticipant.id,
+    },
+    replaysOf(game),
+  );
+
+const learn = async (em: EntityManager, links: readonly PlayerLink[]) => {
+  await mapSequentially(links, async ({ playerId, ...account }) => {
+    await em.upsert(
+      PlayerPlatformLink,
+      { ...account, player: playerId },
+      { onConflictAction: "ignore", onConflictFields: ["platform", "platformId"] },
+    );
+    const kept = await em.findOneOrFail(PlayerPlatformLink, account, { refresh: true });
+    await em.nativeUpdate(MatchGamePlayer, { ...account, player: null }, { player: kept.player });
+  });
+};
+
+const createReplay = (
+  em: EntityManager,
+  game: MatchGame,
+  position: number,
+  { players, ...replay }: GameReplayRecord,
+) => {
+  const row = em.create(MatchGameReplay, { ...replay, game, position });
+
+  for (const player of players) {
+    em.create(MatchGamePlayer, {
+      assists: player.assists,
+      demolitions: player.demolitions,
+      goals: player.goals,
+      name: player.name,
+      platform: player.platform,
+      platformId: player.platformId,
+      player: player.playerId,
+      replay: row,
+      saves: player.saves,
+      shots: player.shots,
+      side: player.side,
+    });
+  }
+};
+
+const findGame = async (em: EntityManager, tournamentId: string, location: GameLocation) =>
+  await em.findOne(
+    MatchGame,
+    { match: { id: location.matchId, tournament: tournamentId }, number: location.number },
+    { populate: ["replays"] },
+  );
+
+const exclude = async (em: EntityManager, ballchasingIds: readonly string[]) => {
+  await em.upsertMany(
+    MatchGameExclusion,
+    ballchasingIds.map((ballchasingId) => ({ ballchasingId })),
+    { onConflictAction: "ignore", onConflictFields: ["ballchasingId"] },
+  );
+};
 
 export class MikroOrmGameStatsStore implements GameStatsStore {
   constructor(private readonly em: EntityManager) {}
@@ -178,13 +296,16 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     }
 
     const rows = await this.em.find(
-      MatchGame,
+      MatchGameReplay,
       { ballchasingId: { $in: replayIds } },
-      { fields: ["ballchasingId", "match", "number"] },
+      { populate: ["game"] },
     );
 
     return new Map(
-      rows.map((row) => [row.ballchasingId, { matchId: row.match.id, number: row.number }]),
+      rows.map((row) => [
+        row.ballchasingId,
+        { matchId: row.game.match.id, number: row.game.number } satisfies GameLocation,
+      ]),
     );
   }
 
@@ -201,19 +322,21 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
   }
 
   async attachment(replayId: string) {
-    const game = await this.em.findOne(
-      MatchGame,
+    const replay = await this.em.findOne(
+      MatchGameReplay,
       { ballchasingId: replayId },
       {
         populate: [
-          "match.tournament",
-          "blueParticipant.team",
-          "blueParticipant.players",
-          "orangeParticipant.team",
-          "orangeParticipant.players",
+          "game.match.tournament",
+          "game.blueParticipant.team",
+          "game.blueParticipant.players",
+          "game.orangeParticipant.team",
+          "game.orangeParticipant.players",
         ],
       },
     );
+
+    const game = replay?.game;
 
     return game
       ? ({
@@ -237,52 +360,24 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
 
   async save(game: GameRecord) {
     return (await this.em.transactional(async (em) => {
-      await em.nativeDelete(MatchGameExclusion, { ballchasingId: game.ballchasingId });
-
-      await mapSequentially(game.learnedLinks, async ({ playerId, ...account }) => {
-        await em.upsert(
-          PlayerPlatformLink,
-          { ...account, player: playerId },
-          { onConflictAction: "ignore", onConflictFields: ["platform", "platformId"] },
-        );
-        const kept = await em.findOneOrFail(PlayerPlatformLink, account, { refresh: true });
-        await em.nativeUpdate(
-          MatchGamePlayer,
-          { ...account, player: null },
-          { player: kept.player },
-        );
+      await em.nativeDelete(MatchGameExclusion, {
+        ballchasingId: { $in: game.replays.map((replay) => replay.ballchasingId) },
       });
+      await learn(em, game.learnedLinks);
 
       const row = em.create(MatchGame, {
-        ballchasingId: game.ballchasingId,
-        blueGoals: game.blueGoals,
         blueParticipant: game.blueParticipantId,
         createdAt: new Date(),
         match: game.matchId,
         number: game.number,
-        orangeGoals: game.orangeGoals,
         orangeParticipant: game.orangeParticipantId,
-        playedAt: game.playedAt,
-        rocketLeagueId: game.rocketLeagueId,
       });
 
-      for (const player of game.players) {
-        em.create(MatchGamePlayer, {
-          assists: player.assists,
-          demolitions: player.demolitions,
-          game: row,
-          goals: player.goals,
-          name: player.name,
-          platform: player.platform,
-          platformId: player.platformId,
-          player: player.playerId,
-          saves: player.saves,
-          shots: player.shots,
-          side: player.side,
-        });
+      for (const [index, replay] of game.replays.entries()) {
+        createReplay(em, row, index + 1, replay);
       }
 
-      return toTournamentGame(row);
+      return summarize(game, game.replays);
     })) satisfies TournamentStatsGame;
   }
 
@@ -290,22 +385,26 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     const games = await this.em.find(
       MatchGame,
       { match: matchId },
-      { orderBy: { number: "ASC" }, populate: ["players.player"] },
+      { orderBy: { number: "ASC" }, populate: ["replays.players.player"] },
     );
 
-    return games.map((game) => ({
-      ballchasingId: game.ballchasingId,
-      number: game.number,
-      playedAt: game.playedAt?.toISOString() ?? null,
-      teams: [toTeam(game, "blue"), toTeam(game, "orange")],
-    })) satisfies MatchGameStats[];
+    return games.map((game) => {
+      const replays = replaysOf(game);
+
+      return {
+        ballchasingIds: replays.map((replay) => replay.ballchasingId),
+        number: game.number,
+        playedAt: replays.at(0)?.playedAt?.toISOString() ?? null,
+        teams: [toTeam(game, replays, "blue"), toTeam(game, replays, "orange")],
+      };
+    }) satisfies MatchGameStats[];
   }
 
   async inTournament(tournamentId: string) {
     const games = await this.em.find(
       MatchGame,
       { match: { tournament: tournamentId } },
-      { orderBy: { number: "ASC" } },
+      { orderBy: { number: "ASC" }, populate: ["replays"] },
     );
 
     return games.map(toTournamentGame) satisfies TournamentStatsGame[];
@@ -317,7 +416,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
 
     const [summary] = summaryRows.parse(
       await connection.execute(
-        `select count(distinct p.game_id) as games,
+        `select count(distinct r.game_id) as games,
           count(distinct case when p.player_id is null
             then p.platform || ':' || coalesce(p.platform_id, p.name) end) as unlinked_accounts
         ${STATS_FROM} where ${filter}`,
@@ -332,10 +431,10 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
         `select pl.id as player_id, pl.name as player_name, pl.slug as player_slug,
           tm.id as team_id, tm.name as team_name, tm.slug as team_slug,
           case when tm.id is null then part.id end as lineup_id,
-          count(distinct p.game_id) as games,
+          count(distinct r.game_id) as games,
           sum(p.goals) as goals, sum(p.assists) as assists, sum(p.saves) as saves,
           sum(p.shots) as shots, sum(p.demolitions) as demolitions,
-          sum(case when p.side = 'blue' then g.blue_goals else g.orange_goals end) as team_goals,
+          sum(case when p.side = 'blue' then r.blue_goals else r.orange_goals end) as team_goals,
           max(${PLAYED_ON}) as last_played_at
         ${STATS_FROM}
         join player pl on pl.id = p.player_id
@@ -390,10 +489,7 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
 
   async remove(tournamentId: string, location: GameLocation) {
     return (await this.em.transactional(async (em) => {
-      const game = await em.findOne(MatchGame, {
-        match: { id: location.matchId, tournament: tournamentId },
-        number: location.number,
-      });
+      const game = await findGame(em, tournamentId, location);
 
       if (!game) {
         return null;
@@ -401,10 +497,9 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
 
       const removed = toTournamentGame(game);
       await em.nativeDelete(MatchGame, { id: game.id });
-      await em.upsert(
-        MatchGameExclusion,
-        { ballchasingId: game.ballchasingId },
-        { onConflictAction: "ignore", onConflictFields: ["ballchasingId"] },
+      await exclude(
+        em,
+        removed.replays.map((replay) => replay.ballchasingId),
       );
 
       return removed;

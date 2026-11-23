@@ -16,7 +16,8 @@ export interface MatchGameTeamStats {
 
 export interface MatchGameStats {
   number: number;
-  ballchasingId: string;
+  /** One Ballchasing replay per segment of the game, in play order. */
+  ballchasingIds: string[];
   playedAt: string | null;
   teams: MatchGameTeamStats[];
 }
@@ -42,15 +43,33 @@ export interface StatsPlayerAccounts {
   rosters: StatsRoster[];
 }
 
+/** One Ballchasing replay of a game: its own goals, in the game's orientation. */
+export interface StatsGameReplay {
+  ballchasingId: string;
+  playedAt: string | null;
+  blueGoals: number;
+  orangeGoals: number;
+}
+
 export interface TournamentStatsGame {
   matchId: string;
   number: number;
-  ballchasingId: string;
+  /** When the first replay was played. */
   playedAt: string | null;
   blueParticipantId: string;
   orangeParticipantId: string;
+  /** Sum of the replays' goals. */
   blueGoals: number;
   orangeGoals: number;
+  /** In play order; a game cut by a crash has several. */
+  replays: StatsGameReplay[];
+}
+
+export interface AppendReplayInput {
+  /** Ballchasing replay link or id. */
+  replay: string;
+  /** Participant that played blue in this replay. */
+  blueParticipantId: string;
 }
 
 export interface AttachReplayInput {

@@ -10,7 +10,7 @@ import { FakeBallchasing } from "./fake-ballchasing.test-utils";
 import { FakeStatsCandidates } from "./fake-stats-candidates.test-utils";
 import { RecordingScheduler } from "./recording-scheduler.test-utils";
 import { SaveFailingGames } from "./save-failing-games.test-utils";
-import type { StatsImportStore } from "./ports";
+import type { GameRecord, StatsImportStore } from "./ports";
 import { INTERRUPTED_IMPORT_ERROR, StatsImportService } from "./stats-import.service";
 
 const KC = ["Vatira", "Atow", "Rise"];
@@ -72,6 +72,8 @@ const statsFor = (replay: ReplaySummary) => ({
   rocketLeagueId: replay.rocketLeagueId,
 });
 
+const replayIdsOf = (game: GameRecord) => game.replays.map((replay) => replay.ballchasingId);
+
 class MemoryImports implements StatsImportStore {
   rows = new Map<string, StatsImport>();
   saves: StatsImport[] = [];
@@ -121,7 +123,7 @@ const setup = (options: { replays?: ReplaySummary[] } = {}) => {
   const candidates = new FakeStatsCandidates(() => [
     {
       ...candidate,
-      storedReplayIds: games.saved.map((game) => game.ballchasingId),
+      storedReplayIds: games.saved.flatMap(replayIdsOf),
     },
   ]);
 
@@ -213,18 +215,19 @@ describe("StatsImportService.run", () => {
   it("imports the matched games", async () => {
     const { games } = await runImport();
 
-    expect(games.saved.map((game) => [game.ballchasingId, game.number])).toStrictEqual([
-      ["r1", 1],
-      ["r2", 2],
+    expect(games.saved.map((game) => [replayIdsOf(game), game.number])).toStrictEqual([
+      [["r1"], 1],
+      [["r2"], 2],
     ]);
     expect(games.saved[0]).toMatchObject({
-      blueGoals: 2,
       blueParticipantId: "p-kc",
       matchId: "m1",
-      orangeGoals: 0,
       orangeParticipantId: "p-bds",
+      replays: [{ blueGoals: 2, orangeGoals: 0 }],
     });
-    expect(games.saved[0].players.map((player) => [player.name, player.playerId])).toStrictEqual([
+    expect(
+      games.saved[0].replays[0].players.map((player) => [player.name, player.playerId]),
+    ).toStrictEqual([
       ["Vatira", "Vatira"],
       ["Atow", "Atow"],
       ["Stand-in", null],
@@ -247,7 +250,7 @@ describe("StatsImportService.run", () => {
       { platform: "epic", platformId: "Seikoo-id", playerId: "Seikoo" },
     ]);
     expect(games.saved[1].learnedLinks).toStrictEqual([]);
-    expect(games.saved[1].players.map((player) => player.playerId)).toStrictEqual([
+    expect(games.saved[1].replays[0].players.map((player) => player.playerId)).toStrictEqual([
       "Vatira",
       "Atow",
       null,
@@ -269,7 +272,7 @@ describe("StatsImportService.run", () => {
     await service.run(response2.id);
 
     const [saved] = games.saved;
-    expect(saved.players.map((player) => [player.name, player.playerId])).toStrictEqual([
+    expect(saved.replays[0].players.map((player) => [player.name, player.playerId])).toStrictEqual([
       ["Vatira", "Atow"],
       ["Atow", "Atow"],
       ["Stand-in", "outsider"],
@@ -313,7 +316,7 @@ describe("StatsImportService.run", () => {
     await service.run(id);
 
     expect(source.statsCalls).toStrictEqual([]);
-    expect(games.saved.map((game) => game.ballchasingId)).toStrictEqual(["r1"]);
+    expect(games.saved.flatMap(replayIdsOf)).toStrictEqual(["r1"]);
     expect(imports.rows.get(id)?.items).toStrictEqual([
       expect.objectContaining({ gameNumber: 1, replayId: "r1", status: "already_imported" }),
       expect.objectContaining({ reason: "excluded_by_staff", replayId: "r2", status: "unmatched" }),
@@ -329,17 +332,21 @@ describe("StatsImportService.run", () => {
   it("reports a game staff attached under another number where it is, and adds nothing", async () => {
     const { service, games, imports, source } = setup({ replays: [game1, game2] });
     games.saved.push({
-      ballchasingId: "r1",
-      blueGoals: 2,
       blueParticipantId: "p-kc",
       learnedLinks: [],
       matchId: "m1",
       number: 2,
-      orangeGoals: 0,
       orangeParticipantId: "p-bds",
-      playedAt: game1.playedAt,
-      players: [],
-      rocketLeagueId: game1.rocketLeagueId,
+      replays: [
+        {
+          ballchasingId: "r1",
+          blueGoals: 2,
+          orangeGoals: 0,
+          playedAt: game1.playedAt,
+          players: [],
+          rocketLeagueId: game1.rocketLeagueId,
+        },
+      ],
     });
 
     const { id } = await service.request("t1", "pilot-abc123");

@@ -3,19 +3,14 @@ import type {
   Match,
   TournamentParticipant,
 } from "../../../tournament/infrastructure/competition-persistence";
-import type { MatchGamePlayer } from "./match-game-player.entity";
+import type { MatchGameReplay } from "./match-game-replay.entity";
 
 export class MatchGame {
   id!: string;
   match!: Match;
   number!: number;
-  ballchasingId!: string;
-  rocketLeagueId: string | null = null;
-  playedAt: Date | null = null;
   blueParticipant!: TournamentParticipant;
   orangeParticipant!: TournamentParticipant;
-  blueGoals!: number;
-  orangeGoals!: number;
-  players = new Collection<MatchGamePlayer>(this);
+  replays = new Collection<MatchGameReplay>(this);
   createdAt = new Date();
 }

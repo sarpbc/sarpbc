@@ -91,8 +91,9 @@ const accounts: StatsPlayerAccounts = {
   rosters: [{ participantId: "p1", players: [{ id: "zen", name: "zen" }], teamName: "Vitality" }],
 };
 
+const REPLAY = "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
+
 const game: TournamentStatsGame = {
-  ballchasingId: "0d1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d",
   blueGoals: 3,
   blueParticipantId: "p1",
   matchId: "m1",
@@ -100,6 +101,7 @@ const game: TournamentStatsGame = {
   orangeGoals: 1,
   orangeParticipantId: "p2",
   playedAt: null,
+  replays: [{ ballchasingId: REPLAY, blueGoals: 3, orangeGoals: 1, playedAt: null }],
 };
 
 const fakeStatsImports = (imports: StatsImport[]) => {
@@ -279,7 +281,7 @@ describe("game stats tools", () => {
       blueParticipantId: "p1",
       gameNumber: 2,
       matchId: "m1",
-      replay: game.ballchasingId,
+      replay: REPLAY,
     };
 
     const callResult6 = await call("attach_replay_to_game", { tournamentId: "t1", ...input });
@@ -310,7 +312,7 @@ describe("game stats tools", () => {
       blueParticipantId: "p1",
       gameNumber: 2,
       matchId: "m1",
-      replay: game.ballchasingId,
+      replay: REPLAY,
       tournamentId: "t1",
     });
 
@@ -332,7 +334,7 @@ describe("game stats tools", () => {
       platform: "steam",
       platformId: "1",
       playerId: "0f8fad5b-d9cb-469f-a165-70867728950e",
-      replay: game.ballchasingId,
+      replay: REPLAY,
       tournamentId: "t1",
     });
 

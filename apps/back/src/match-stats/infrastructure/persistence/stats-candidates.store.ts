@@ -2,7 +2,7 @@ import { EntityManager } from "@mikro-orm/postgresql";
 import { isMatchFinished } from "@sarpbc/utils";
 import { Match, Tournament } from "../../../tournament/infrastructure/competition-persistence";
 import type { StatsCandidates } from "../../application/ports";
-import { MatchGame } from "./match-game.entity";
+import { MatchGameReplay } from "./match-game-replay.entity";
 import { nameOf } from "./participant-name";
 
 export class MikroOrmStatsCandidates implements StatsCandidates {
@@ -20,9 +20,9 @@ export class MikroOrmStatsCandidates implements StatsCandidates {
     );
 
     const stored = await this.em.find(
-      MatchGame,
-      { match: { $in: matches.map((match) => match.id) } },
-      { fields: ["ballchasingId", "match"] },
+      MatchGameReplay,
+      { game: { match: { $in: matches.map((match) => match.id) } } },
+      { populate: ["game"] },
     );
 
     return matches.map((match) => ({
@@ -43,8 +43,8 @@ export class MikroOrmStatsCandidates implements StatsCandidates {
         match.results.getItems().map((result) => [result.participant.id, result.score]),
       ),
       storedReplayIds: stored
-        .filter((game) => game.match.id === match.id)
-        .map((game) => game.ballchasingId),
+        .filter((replay) => replay.game.match.id === match.id)
+        .map((replay) => replay.ballchasingId),
     }));
   }
 }

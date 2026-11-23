@@ -106,15 +106,18 @@ export class ManualGameService {
     const rosters = new Map(match.participants.map(({ id, players }) => [id, players] as const));
 
     const record = buildGameRecord(
-      {
-        ballchasingId: replayId,
-        matchId: match.id,
-        number: gameNumber,
-        playedAt: stats.playedAt,
-        rocketLeagueId: stats.rocketLeagueId,
-        sides,
-      },
-      stats,
+      { matchId: match.id, number: gameNumber },
+      [
+        {
+          stats,
+          target: {
+            ballchasingId: replayId,
+            playedAt: stats.playedAt,
+            rocketLeagueId: stats.rocketLeagueId,
+            sides,
+          },
+        },
+      ],
       rosters,
       await this.games.links(platformAccounts(stats)),
     );

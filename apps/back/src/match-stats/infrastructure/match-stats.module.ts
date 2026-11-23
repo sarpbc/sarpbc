@@ -21,6 +21,7 @@ import { StatsPlayerLinkController } from "./http/stats-player-link.controller";
 import { MatchGame } from "./persistence/match-game.entity";
 import { MatchGameExclusion } from "./persistence/match-game-exclusion.entity";
 import { MatchGamePlayer } from "./persistence/match-game-player.entity";
+import { MatchGameReplay } from "./persistence/match-game-replay.entity";
 import { MatchStatsImport } from "./persistence/match-stats-import.entity";
 import { PlayerPlatformLink } from "./persistence/player-platform-link.entity";
 import { MikroOrmGameStatsStore } from "./persistence/match-stats.store";
@@ -52,6 +53,7 @@ const STATS_CANDIDATES = Symbol("StatsCandidates");
       MatchGame,
       MatchGameExclusion,
       MatchGamePlayer,
+      MatchGameReplay,
       MatchStatsImport,
       PlayerPlatformLink,
     ]),

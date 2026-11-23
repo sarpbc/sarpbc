@@ -1,16 +1,32 @@
 import { IntegrationError } from "../../common/domain/errors/integration-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { resolvePlayerId } from "../domain/replay-matching";
-import type { RosterPlayer, SideAssignment } from "../domain/replay-matching";
-import type { BallchasingSource, PlayerLink, ReplayStats, StatsCandidates } from "./ports";
+import type { RosterPlayer, Side, SideAssignment } from "../domain/replay-matching";
+import type {
+  BallchasingSource,
+  GameRecord,
+  GameReplayRecord,
+  PlayerLink,
+  ReplayStats,
+  StatsCandidates,
+} from "./ports";
 
 export interface GameTarget {
   matchId: string;
   number: number;
+}
+
+export interface ReplayTarget {
   ballchasingId: string;
   rocketLeagueId: string | null;
   playedAt: Date | null;
+  /** Participants on each side of this replay. */
   sides: SideAssignment;
+}
+
+export interface ReplaySegment {
+  target: ReplayTarget;
+  stats: ReplayStats;
 }
 
 export const requireBallchasing = (source: BallchasingSource | null) => {
@@ -40,15 +56,36 @@ export const platformAccounts = (stats: ReplayStats) =>
     platformId !== null && platformId !== "" ? [{ platform, platformId }] : [],
   );
 
-export const buildGameRecord = (
-  { sides, ...target }: GameTarget,
-  stats: ReplayStats,
+const opposite = (side: Side) => {
+  switch (side) {
+    case "blue": {
+      return "orange" satisfies Side;
+    }
+
+    case "orange": {
+      return "blue" satisfies Side;
+    }
+
+    default: {
+      const exhaustive: never = side;
+
+      return exhaustive;
+    }
+  }
+};
+
+/** Orients the replay like the game, whose sides may be swapped in this replay. */
+export const buildReplayRecord = (
+  { target: { sides, ...target }, stats }: ReplaySegment,
+  gameSides: SideAssignment,
   rosters: ReadonlyMap<string, RosterPlayer[]>,
   links: PlayerLink[],
 ) => {
+  const swapped = sides.blue !== gameSides.blue;
   const learnedLinks: PlayerLink[] = [];
 
   const players = stats.players.map((player) => {
+    const side = swapped ? opposite(player.side) : player.side;
     const { platform, platformId } = player;
 
     const linked = links.find(
@@ -56,25 +93,53 @@ export const buildGameRecord = (
     );
 
     if (linked) {
-      return { ...player, playerId: linked.playerId };
+      return { ...player, playerId: linked.playerId, side };
     }
 
-    const playerId = resolvePlayerId(player.name, rosters.get(sides[player.side]) ?? []);
+    const playerId = resolvePlayerId(player.name, rosters.get(gameSides[side]) ?? []);
 
     if (playerId !== null && playerId !== "" && platformId !== null && platformId !== "") {
       learnedLinks.push({ platform, platformId, playerId });
     }
 
-    return { ...player, playerId };
+    return { ...player, playerId, side };
   });
 
   return {
-    ...target,
-    blueGoals: stats.blueGoals,
-    blueParticipantId: sides.blue,
     learnedLinks,
-    orangeGoals: stats.orangeGoals,
-    orangeParticipantId: sides.orange,
-    players,
+    replay: {
+      ...target,
+      blueGoals: swapped ? stats.orangeGoals : stats.blueGoals,
+      orangeGoals: swapped ? stats.blueGoals : stats.orangeGoals,
+      players,
+    } satisfies GameReplayRecord,
   };
+};
+
+/** The first replay sets the game's orientation. */
+export const buildGameRecord = (
+  target: GameTarget,
+  segments: readonly [ReplaySegment, ...ReplaySegment[]],
+  rosters: ReadonlyMap<string, RosterPlayer[]>,
+  links: PlayerLink[],
+) => {
+  const [{ target: first }] = segments;
+  const built = segments.map((segment) => buildReplayRecord(segment, first.sides, rosters, links));
+
+  const learnedLinks = built
+    .flatMap((replay) => replay.learnedLinks)
+    .filter(
+      (link, index, all) =>
+        all.findIndex(
+          (other) => other.platform === link.platform && other.platformId === link.platformId,
+        ) === index,
+    );
+
+  return {
+    ...target,
+    blueParticipantId: first.sides.blue,
+    learnedLinks,
+    orangeParticipantId: first.sides.orange,
+    replays: built.map(({ replay }) => replay),
+  } satisfies GameRecord;
 };
