@@ -39,7 +39,6 @@ const itemBase = (replay: ReplaySummary) => ({
   title: replay.title,
 });
 
-// WARNING: a restarted replay's list score carries the goals of the game's earlier replays; its stats count only its own.
 const scoresAgree = (segments: readonly GameSegment[], fetched: readonly ReplaySegment[]) => {
   const goals = new Map<string, number>();
 
@@ -146,7 +145,6 @@ export class StatsImportService {
       statsImport.total = replays.length;
       await this.imports.save(statsImport);
 
-      // WARNING: one game at a time; the import record is saved after each and Ballchasing is rate limited.
       await mapSequentially(assignments, async (assignment) => {
         const items = await this.process(source, assignment, rosters);
         statsImport.items.push(...items);
@@ -230,7 +228,6 @@ export class StatsImportService {
     { matchId, gameNumber, segments }: MatchedGame,
     rosters: ReadonlyMap<string, RosterPlayer[]>,
   ) {
-    // WARNING: one replay at a time; Ballchasing is rate limited.
     const details = await mapSequentially(segments, async ({ replay }) => {
       try {
         return await source.replayStats(replay.id);

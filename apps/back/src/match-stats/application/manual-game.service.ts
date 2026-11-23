@@ -128,7 +128,6 @@ export class ManualGameService {
     return (await this.games.save(record)) satisfies TournamentStatsGame;
   }
 
-  /** Adds a replay after the game's last one, with no score check: staff vouch for it. */
   async appendReplay(tournamentId: string, location: GameLocation, input: AppendReplayInput) {
     const source = requireBallchasing(this.source);
     const replayId = parseBallchasingRef("replay", input.replay);
@@ -180,7 +179,6 @@ export class ManualGameService {
     return removed satisfies TournamentStatsGame;
   }
 
-  /** Removes one replay of a game cut into several; a game keeps at least one replay. */
   async removeReplay(tournamentId: string, location: GameLocation, replay: string) {
     const replayId = parseBallchasingRef("replay", replay);
     await requireTournament(this.candidates, tournamentId);

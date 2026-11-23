@@ -63,7 +63,6 @@ export type ReplayAssignment =
       kind: "matched";
       matchId: string;
       gameNumber: number;
-      /** In play order; a game cut by a crash has several replays. */
       segments: GameSegment[];
     }
   | { kind: "stored"; replay: ReplaySummary; matchId: string; gameNumber: number }

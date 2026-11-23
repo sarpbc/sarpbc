@@ -14,7 +14,6 @@ import type {
 export interface GameTarget {
   matchId: string;
   number: number;
-  /** Participants on each side in the game's orientation. */
   sides: SideAssignment;
 }
 
@@ -22,7 +21,6 @@ export interface ReplayTarget {
   ballchasingId: string;
   rocketLeagueId: string | null;
   playedAt: Date | null;
-  /** Participants on each side of this replay. */
   sides: SideAssignment;
 }
 
@@ -76,7 +74,6 @@ const opposite = (side: Side) => {
   }
 };
 
-/** Orients the replay like the game, whose sides may be swapped in this replay. */
 export const buildReplayRecord = (
   { target: { sides, ...target }, stats }: ReplaySegment,
   gameSides: SideAssignment,
