@@ -13,8 +13,8 @@ import { AuthGuard } from "../../../auth/infrastructure/http/auth.guard";
 import { RequirePermissions } from "../../../user/infrastructure/http/decorator/require-permissions.decorator";
 import { PermissionGuard } from "../../../user/infrastructure/http/user.guard";
 import { ManualGameService } from "../../application/manual-game.service";
-import { AttachReplayDto } from "./dto/attach-replay.dto";
-import type { AttachReplayInput } from "./dto/attach-replay.dto";
+import { AppendReplayDto, AttachReplayDto } from "./dto/attach-replay.dto";
+import type { AppendReplayInput, AttachReplayInput } from "./dto/attach-replay.dto";
 
 @Controller("tournaments/:id/stats-games")
 @UseGuards(AuthGuard, PermissionGuard)
@@ -44,5 +44,33 @@ export class StatsGameController {
     @Param("number", ParseIntPipe) number: number,
   ) {
     return (await this.service.remove(tournamentId, matchId, number)) satisfies TournamentStatsGame;
+  }
+
+  @Post(":matchId/:number/replays")
+  async appendReplay(
+    @Param("id") tournamentId: string,
+    @Param("matchId") matchId: string,
+    @Param("number", ParseIntPipe) number: number,
+    @Body({ schema: AppendReplayDto }) dto: AppendReplayInput,
+  ) {
+    return (await this.service.appendReplay(
+      tournamentId,
+      { matchId, number },
+      dto,
+    )) satisfies TournamentStatsGame;
+  }
+
+  @Delete(":matchId/:number/replays/:replayId")
+  async removeReplay(
+    @Param("id") tournamentId: string,
+    @Param("matchId") matchId: string,
+    @Param("number", ParseIntPipe) number: number,
+    @Param("replayId") replayId: string,
+  ) {
+    return (await this.service.removeReplay(
+      tournamentId,
+      { matchId, number },
+      replayId,
+    )) satisfies TournamentStatsGame;
   }
 }

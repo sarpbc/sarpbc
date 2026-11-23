@@ -5,7 +5,9 @@ import type {
   GameStatsStore,
   PlatformAccount,
   PlayerLink,
+  ReplayAppend,
 } from "../src/match-stats/application/ports";
+import type { GameLocation } from "../src/match-stats/domain/replay-matching";
 
 const sum = (game: GameRecord, side: "blueGoals" | "orangeGoals") =>
   game.replays.reduce((total, replay) => total + replay[side], 0);
@@ -64,6 +66,46 @@ export class MemoryGames implements GameStatsStore {
 
     return toTournamentGame(game);
   }
+  async appendReplay(
+    _tournamentId: string,
+    { matchId, number }: GameLocation,
+    { replay, learnedLinks }: ReplayAppend,
+  ) {
+    const game = this.gameAt(matchId, number);
+
+    if (!game) {
+      return null;
+    }
+
+    const appended = { ...game, replays: [...game.replays, replay] };
+    this.saved = this.saved.map((saved) => (saved === game ? appended : saved));
+    this.exclusions.delete(replay.ballchasingId);
+    this.learn(learnedLinks);
+
+    return toTournamentGame(appended);
+  }
+  async game(_tournamentId: string, { matchId, number }: GameLocation) {
+    const game = this.gameAt(matchId, number);
+
+    return game ? toTournamentGame(game) : null;
+  }
+  async removeReplay(_tournamentId: string, { matchId, number }: GameLocation, replayId: string) {
+    const game = this.gameAt(matchId, number);
+
+    if (game === undefined || !game.replays.some((replay) => replay.ballchasingId === replayId)) {
+      return null;
+    }
+
+    const kept = {
+      ...game,
+      replays: game.replays.filter((replay) => replay.ballchasingId !== replayId),
+    };
+
+    this.saved = this.saved.map((saved) => (saved === game ? kept : saved));
+    this.exclusions.add(replayId);
+
+    return toTournamentGame(kept);
+  }
   async byMatch() {
     return [];
   }
@@ -73,7 +115,7 @@ export class MemoryGames implements GameStatsStore {
   async playerStats() {
     return { games: 0, tallies: [], unlinkedAccounts: 0 };
   }
-  async remove(_tournamentId: string, { matchId, number }: { matchId: string; number: number }) {
+  async remove(_tournamentId: string, { matchId, number }: GameLocation) {
     const game = this.gameAt(matchId, number);
 
     if (!game) {

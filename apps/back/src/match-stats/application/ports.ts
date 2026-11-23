@@ -73,6 +73,11 @@ export interface GameRecord {
   learnedLinks: PlayerLink[];
 }
 
+export interface ReplayAppend {
+  replay: GameReplayRecord;
+  learnedLinks: PlayerLink[];
+}
+
 export interface GameAttachment extends GameLocation {
   tournamentName: string;
   teams: [string, string];
@@ -88,11 +93,24 @@ export interface GameStatsStore {
    * earlier unlinked rows of each learned account and clears any staff exclusion of its replays.
    */
   save: (game: GameRecord) => Promise<TournamentStatsGame>;
+  /** Saves the replay after the game's last one, the same way `save` saves a game. */
+  appendReplay: (
+    tournamentId: string,
+    location: GameLocation,
+    append: ReplayAppend,
+  ) => Promise<TournamentStatsGame | null>;
+  game: (tournamentId: string, location: GameLocation) => Promise<TournamentStatsGame | null>;
   byMatch: (matchId: string) => Promise<MatchGameStats[]>;
   inTournament: (tournamentId: string) => Promise<TournamentStatsGame[]>;
   playerStats: (scope: StatsScope) => Promise<PlayerStatsSummary>;
   /** Deletes the game with its replays and player rows and excludes every replay atomically. */
   remove: (tournamentId: string, location: GameLocation) => Promise<TournamentStatsGame | null>;
+  /** Deletes one replay of the game with its player rows and excludes it atomically. */
+  removeReplay: (
+    tournamentId: string,
+    location: GameLocation,
+    replayId: string,
+  ) => Promise<TournamentStatsGame | null>;
 }
 
 export interface PlayerLinkStore {

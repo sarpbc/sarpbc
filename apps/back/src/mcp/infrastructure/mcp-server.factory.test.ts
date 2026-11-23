@@ -97,6 +97,7 @@ const TOOL_NAMES = [
   "link_game_player",
   "attach_replay_to_game",
   "remove_match_game",
+  "remove_game_replay",
   "list_circuits",
   "get_circuit",
   "list_seasons",

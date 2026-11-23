@@ -26,7 +26,7 @@ const match: CandidateMatch = {
     { id: "p-bds", players: [{ id: "seikoo", name: "Seikoo" }], teamNames: ["BDS"] },
   ],
   scores: new Map(),
-  storedReplayIds: ["stored-1"],
+  storedReplayIds: ["5e1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"],
 };
 
 const line = (name: string, platformId: string) => ({
@@ -68,7 +68,7 @@ const input = {
   replay: `https://ballchasing.com/replay/${REPLAY}`,
 };
 
-const STORED = "stored-1";
+const STORED = "5e1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d";
 
 const storedGame: GameRecord = {
   blueParticipantId: "p-kc",
@@ -296,6 +296,124 @@ describe("ManualGameService.attach", () => {
     const { service } = setup({ source: false });
 
     await expect(service.attach("t1", input)).rejects.toBeInstanceOf(IntegrationError);
+  });
+});
+
+const at1 = { matchId: "m1", number: 1 };
+const append = { blueParticipantId: "p-bds", replay: REPLAY };
+
+describe("ManualGameService.appendReplay", () => {
+  it("adds the replay after the game's last one in the game's orientation, with no score check", async () => {
+    const { service, games } = setup();
+
+    await expect(service.appendReplay("t1", at1, append)).resolves.toStrictEqual({
+      ...storedSummary,
+      blueGoals: 4,
+      orangeGoals: 1,
+      replays: [
+        ...storedSummary.replays,
+        { ballchasingId: REPLAY, blueGoals: 3, orangeGoals: 1, playedAt: PLAYED_AT.toISOString() },
+      ],
+    });
+
+    const [game] = games.saved;
+    expect(game?.replays[1]?.players.map((player) => [player.side, player.playerId])).toStrictEqual(
+      [
+        ["orange", "seikoo"],
+        ["blue", "vatira"],
+      ],
+    );
+    expect(games.linked).toContainEqual({
+      platform: "steam",
+      platformId: "seikoo-id",
+      playerId: "seikoo",
+    });
+  });
+
+  it("clears a staff exclusion of the replay", async () => {
+    const { service, games } = setup();
+    games.exclusions.add(REPLAY);
+
+    await service.appendReplay("t1", at1, append);
+
+    expect(games.exclusions.has(REPLAY)).toBe(false);
+  });
+
+  it.each([
+    [
+      "a game without stats",
+      { matchId: "m1", number: 3 },
+      {},
+      NotFoundError,
+      "match_game_not_found",
+    ],
+    [
+      "a team outside the match",
+      at1,
+      { blueParticipantId: "p-vit" },
+      InvalidInputError,
+      "participant_not_in_match",
+    ],
+    [
+      "an invalid replay",
+      at1,
+      { replay: "https://ballchasing.com/group/x" },
+      InvalidInputError,
+      "invalid_ballchasing_replay",
+    ],
+  ])("rejects %s before calling Ballchasing", async (_label, location, change, kind, code) => {
+    const { service, source, games } = setup();
+
+    const error = await rejection(service.appendReplay("t1", location, { ...append, ...change }));
+
+    expect(error).toBeInstanceOf(kind);
+    expect(error.detail.code).toBe(code);
+    expect(source.statsCalls).toStrictEqual([]);
+    expect(games.saved).toStrictEqual([storedGame]);
+  });
+
+  it("refuses a replay attached anywhere, or not processed", async () => {
+    const { service, games, source } = setup();
+
+    games.attachments.set(REPLAY, {
+      matchId: "m9",
+      number: 3,
+      teams: ["Vitality", "Falcons"],
+      tournamentName: "RLCS Paris Major",
+    });
+
+    const attached = await rejection(service.appendReplay("t1", at1, append));
+    games.attachments.clear();
+    source.outcomes.set(REPLAY, null);
+    const notReady = await rejection(service.appendReplay("t1", at1, append));
+
+    expect(attached.detail.code).toBe("replay_already_attached");
+    expect(notReady.detail.code).toBe("replay_not_ready");
+    expect(games.saved).toStrictEqual([storedGame]);
+  });
+});
+
+describe("ManualGameService.removeReplay", () => {
+  it("removes one replay of a split game and excludes it", async () => {
+    const { service, games } = setup();
+    await service.appendReplay("t1", at1, append);
+
+    await expect(service.removeReplay("t1", at1, REPLAY)).resolves.toStrictEqual(storedSummary);
+    expect(games.exclusions).toStrictEqual(new Set([REPLAY]));
+  });
+
+  it("refuses the game's only replay and a replay of another game", async () => {
+    const { service, games } = setup();
+
+    const only = await rejection(service.removeReplay("t1", at1, STORED));
+    const other = await rejection(service.removeReplay("t1", at1, REPLAY));
+
+    expect([only, other].map((error) => [error.constructor, error.detail.code])).toStrictEqual([
+      [ConflictError, "last_game_replay"],
+      [NotFoundError, "match_game_replay_not_found"],
+    ]);
+    expect(games.saved).toStrictEqual([storedGame]);
+    expect(games.exclusions).toStrictEqual(new Set());
   });
 });
 

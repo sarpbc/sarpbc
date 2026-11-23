@@ -1282,6 +1282,14 @@
   {
     "controller": "\"tournaments/:id/stats-games\"",
     "verb": "DELETE",
+    "path": "\":matchId/:number/replays/:replayId\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-games\"",
+    "verb": "DELETE",
     "path": "\":matchId/:number\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
@@ -1291,6 +1299,14 @@
     "controller": "\"tournaments/:id/stats-games\"",
     "verb": "GET",
     "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"tournaments/:id/stats-games\"",
+    "verb": "POST",
+    "path": "\":matchId/:number/replays\"",
     "status": null,
     "guards": ["AuthGuard", "PermissionGuard"],
     "permissions": ["\"tournaments.manage\""]

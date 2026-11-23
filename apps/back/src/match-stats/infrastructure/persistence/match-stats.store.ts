@@ -18,6 +18,7 @@ import type {
   GameStatsStore,
   PlatformAccount,
   PlayerLink,
+  ReplayAppend,
 } from "../../application/ports";
 import type { GameLocation, Side } from "../../domain/replay-matching";
 import { MatchGame } from "./match-game.entity";
@@ -224,16 +225,15 @@ const summarize = (
     })),
   }) satisfies TournamentStatsGame;
 
-const toTournamentGame = (game: MatchGame) =>
-  summarize(
-    {
-      blueParticipantId: game.blueParticipant.id,
-      matchId: game.match.id,
-      number: game.number,
-      orangeParticipantId: game.orangeParticipant.id,
-    },
-    replaysOf(game),
-  );
+const keyOf = (game: MatchGame) =>
+  ({
+    blueParticipantId: game.blueParticipant.id,
+    matchId: game.match.id,
+    number: game.number,
+    orangeParticipantId: game.orangeParticipant.id,
+  }) satisfies GameKey;
+
+const toTournamentGame = (game: MatchGame) => summarize(keyOf(game), replaysOf(game));
 
 const learn = async (em: EntityManager, links: readonly PlayerLink[]) => {
   await mapSequentially(links, async ({ playerId, ...account }) => {
@@ -381,6 +381,34 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
     })) satisfies TournamentStatsGame;
   }
 
+  async appendReplay(
+    tournamentId: string,
+    location: GameLocation,
+    { replay, learnedLinks }: ReplayAppend,
+  ) {
+    return (await this.em.transactional(async (em) => {
+      const game = await findGame(em, tournamentId, location);
+
+      if (!game) {
+        return null;
+      }
+
+      await em.nativeDelete(MatchGameExclusion, { ballchasingId: replay.ballchasingId });
+      await learn(em, learnedLinks);
+
+      const replays = replaysOf(game);
+      createReplay(em, game, (replays.at(-1)?.position ?? 0) + 1, replay);
+
+      return summarize(keyOf(game), [...replays, replay]);
+    })) satisfies TournamentStatsGame | null;
+  }
+
+  async game(tournamentId: string, location: GameLocation) {
+    const game = await findGame(this.em, tournamentId, location);
+
+    return game ? toTournamentGame(game) : null;
+  }
+
   async byMatch(matchId: string) {
     const games = await this.em.find(
       MatchGame,
@@ -503,6 +531,26 @@ export class MikroOrmGameStatsStore implements GameStatsStore {
       );
 
       return removed;
+    })) satisfies TournamentStatsGame | null;
+  }
+
+  async removeReplay(tournamentId: string, location: GameLocation, replayId: string) {
+    return (await this.em.transactional(async (em) => {
+      const game = await findGame(em, tournamentId, location);
+      const replays = game ? replaysOf(game) : [];
+      const replay = replays.find((candidate) => candidate.ballchasingId === replayId);
+
+      if (!game || !replay) {
+        return null;
+      }
+
+      await em.nativeDelete(MatchGameReplay, { id: replay.id });
+      await exclude(em, [replayId]);
+
+      return summarize(
+        keyOf(game),
+        replays.filter((kept) => kept !== replay),
+      );
     })) satisfies TournamentStatsGame | null;
   }
 }

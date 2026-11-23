@@ -59,7 +59,7 @@ const filterAccounts = (accounts: StatsPlayerAccounts, includeLinked: boolean) =
 export interface GameStatsToolServices {
   statsImportService: Pick<StatsImportService, "request" | "recent">;
   statsPlayerLinkService: Pick<StatsPlayerLinkService, "accounts" | "link">;
-  manualGameService: Pick<ManualGameService, "attach" | "remove">;
+  manualGameService: Pick<ManualGameService, "attach" | "appendReplay" | "remove" | "removeReplay">;
 }
 
 export const gameStatsTools = ({
@@ -154,13 +154,26 @@ export const gameStatsTools = ({
 
     defineTool({
       description:
-        "Attach a Ballchasing replay to one game of a match as a staff override, when the import refused or misplaced it. Skips the import's team, date and series rules, but refuses a match outside the tournament, a blue side that is not one of the match's two participants, a game number below 1 or above the format, a number that already has stats, a replay already attached anywhere (the error says where) and a replay Ballchasing has not processed. Players are linked like in the import. Attaching a replay staff removed clears its removal.",
-      handler: async ({ tournamentId: id, ...input }) => {
-        const game = await manualGameService.attach(id, input);
+        "Attach a Ballchasing replay to one game of a match as a staff override, when the import refused or misplaced it. Skips the import's team, date and series rules, but refuses a match outside the tournament, a blue side that is not one of the match's two participants, a game number below 1 or above the format, a number that already has stats, a replay already attached anywhere (the error says where) and a replay Ballchasing has not processed. With addSegment true, the replay is added after the last replay of that existing game instead, for a game cut by a crash and restarted, with no score check; the game must have stats. Players are linked like in the import. Attaching a replay staff removed clears its removal.",
+      handler: async ({ tournamentId: id, addSegment, ...input }) => {
+        const game =
+          addSegment === true
+            ? await manualGameService.appendReplay(
+                id,
+                { matchId: input.matchId, number: input.gameNumber },
+                { blueParticipantId: input.blueParticipantId, replay: input.replay },
+              )
+            : await manualGameService.attach(id, input);
 
         return { entityId: game.matchId, result: game };
       },
       input: {
+        addSegment: z
+          .boolean()
+          .optional()
+          .describe(
+            "Add the replay to the existing game instead of creating it, when a crash split the game over several replays. Defaults to false.",
+          ),
         tournamentId,
         ...describeFields(attachReplayFields, {
           blueParticipantId:
@@ -189,6 +202,34 @@ export const gameStatsTools = ({
         tournamentId,
       },
       name: "remove_match_game",
+      permission: "tournaments.manage",
+      write: true,
+    }),
+
+    defineTool({
+      description:
+        "Remove one replay from a game split over several replays, with its player rows. The replay is excluded like a removed game; the game keeps its other replays. Refuses the game's only replay: remove the game with remove_match_game instead. Returns the game as it now stands.",
+      handler: async ({ tournamentId: id, matchId, gameNumber, replay }) => {
+        const game = await manualGameService.removeReplay(
+          id,
+          { matchId, number: gameNumber },
+          replay,
+        );
+
+        return { entityId: game.matchId, result: game };
+      },
+      input: {
+        gameNumber: z.number().int().min(1).describe("Game number of the replay."),
+        matchId: z.string().min(1).describe("Match UUID."),
+        replay: z
+          .string()
+          .trim()
+          .min(1)
+          .max(500)
+          .describe("Ballchasing replay link (https://ballchasing.com/replay/…) or replay id."),
+        tournamentId,
+      },
+      name: "remove_game_replay",
       permission: "tournaments.manage",
       write: true,
     }),

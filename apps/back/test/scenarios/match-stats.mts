@@ -706,6 +706,8 @@ export const verifyMatchStats = async ({
   const stageBefore = beforeSplit.json(stageTotals);
 
   const veteranBefore = stageBefore.players.find((row) => row.player.id === playerId);
+  const splitFirst = randomUUID();
+  const splitSecond = randomUUID();
   const veteranLine = { ...stat, goals: 1, name: "KC Veteran", platformId: "a", playerId };
   const standInLine = { ...stat, goals: 1, name: "Stand-in", platformId: null, playerId: null };
 
@@ -717,7 +719,7 @@ export const verifyMatchStats = async ({
     orangeParticipantId: rivalParticipantId,
     replays: [
       {
-        ballchasingId: "integration-split-1",
+        ballchasingId: splitFirst,
         blueGoals: 1,
         orangeGoals: 1,
         playedAt: new Date("2026-06-01T18:00:00Z"),
@@ -728,7 +730,7 @@ export const verifyMatchStats = async ({
         rocketLeagueId: "RL-split-1",
       },
       {
-        ballchasingId: "integration-split-2",
+        ballchasingId: splitSecond,
         blueGoals: 0,
         orangeGoals: 1,
         playedAt: new Date("2026-06-01T18:10:00Z"),
@@ -746,7 +748,7 @@ export const verifyMatchStats = async ({
   const splitShown = splitMatch.json(matchGames).games.find((shownGame) => shownGame.number === 30);
 
   assert.ok(splitShown, "a game split over two replays is shown once");
-  assert.deepEqual(splitShown.ballchasingIds, ["integration-split-1", "integration-split-2"]);
+  assert.deepEqual(splitShown.ballchasingIds, [splitFirst, splitSecond]);
   assert.deepEqual(
     splitShown.teams.map((team) => [team.goals, team.players.length]),
     [
@@ -762,7 +764,7 @@ export const verifyMatchStats = async ({
 
   assert.deepEqual(
     splitListed?.replays.map((replay) => replay.ballchasingId),
-    ["integration-split-1", "integration-split-2"],
+    [splitFirst, splitSecond],
   );
 
   const afterSplit = await request("GET", stageStatsUrl);
@@ -774,7 +776,41 @@ export const verifyMatchStats = async ({
   assert.equal(veteranAfter?.games, (veteranBefore?.games ?? 0) + 1);
   assert.equal(veteranAfter?.totals.goals, (veteranBefore?.totals.goals ?? 0) + 1);
 
+  const replaysUrl = `${gamesUrl}/${matchId}/30/replays`;
+  const segment = { blueParticipantId: participantId, replay: splitSecond };
+
+  await request("POST", replaysUrl, segment, memberCookie, 403);
+  await request("DELETE", `${replaysUrl}/${splitSecond}`, undefined, memberCookie, 403);
+  const unconfiguredAppend = await request("POST", replaysUrl, segment, staffCookie, 500);
+  assert.equal(unconfiguredAppend.json(errorBody).code, "ballchasing_not_configured");
+
+  const splitRemoved = await request(
+    "DELETE",
+    `${replaysUrl}/${splitSecond}`,
+    undefined,
+    staffCookie,
+  );
+
+  assert.deepEqual(
+    splitRemoved.json(deletedGame).replays.map((replay) => replay.ballchasingId),
+    [splitFirst],
+    "removing a replay keeps the game's other replays",
+  );
+  const secondExcluded = await store().excluded([splitFirst, splitSecond]);
+  assert.deepEqual([...secondExcluded], [splitSecond]);
+
+  const lastReplay = await request(
+    "DELETE",
+    `${replaysUrl}/${splitFirst}`,
+    undefined,
+    staffCookie,
+    409,
+  );
+
+  assert.equal(lastReplay.json(errorBody).code, "last_game_replay");
+  await request("DELETE", `${replaysUrl}/${splitSecond}`, undefined, staffCookie, 404);
+
   await request("DELETE", `${gamesUrl}/${matchId}/30`, undefined, staffCookie);
-  const splitExcluded = await store().excluded(["integration-split-1", "integration-split-2"]);
+  const splitExcluded = await store().excluded([splitFirst, splitSecond]);
   assert.equal(splitExcluded.size, 2, "removing a split game excludes every replay");
 };
