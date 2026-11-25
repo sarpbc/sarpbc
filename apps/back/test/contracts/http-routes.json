@@ -1288,6 +1288,46 @@
     "permissions": ["\"teams.manage\""]
   },
   {
+    "controller": "\"timeline-entries\"",
+    "verb": "DELETE",
+    "path": "\":id\"",
+    "status": "HttpStatus.NO_CONTENT",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"timeline-entries\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"timeline-entries\"",
+    "verb": "PATCH",
+    "path": "\":id\"",
+    "status": null,
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"timeline-entries\"",
+    "verb": "POST",
+    "path": "\"\"",
+    "status": "HttpStatus.CREATED",
+    "guards": ["AuthGuard", "PermissionGuard"],
+    "permissions": ["\"tournaments.manage\""]
+  },
+  {
+    "controller": "\"timeline\"",
+    "verb": "GET",
+    "path": "\"\"",
+    "status": null,
+    "guards": [],
+    "permissions": []
+  },
+  {
     "controller": "\"tournaments/:id/stats-games\"",
     "verb": "DELETE",
     "path": "\":matchId/:number/replays/:replayId\"",
