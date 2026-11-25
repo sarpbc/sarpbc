@@ -77,7 +77,8 @@
       "streamers": "Live Streamers",
       "circuits": "Circuits",
       "seasons": "Seasons",
-      "onThisDay": "On this day"
+      "onThisDay": "On this day",
+      "timeline": "RLCS timeline"
     },
     "search": {
       "title": "Search",
@@ -1572,6 +1573,58 @@
             "tournament": "Search stages"
           }
         }
+      }
+    },
+    "timeline": {
+      "title": "RLCS timeline",
+      "description": "Dated game patches and competition format changes shown on the public RLCS timeline. Enter the date and name from the official source, a short neutral note in your own words in English and in French, and the source. Never paste Epic patch notes.",
+      "loading": "Loading…",
+      "loadError": "Could not load the timeline. Check your connection and try again.",
+      "empty": {
+        "title": "No Entries Yet",
+        "description": "Add the first patch or format change, with its official source."
+      },
+      "kinds": {
+        "patch": "Patch",
+        "format": "Format"
+      },
+      "table": {
+        "date": "Date",
+        "kind": "Type",
+        "name": "Name"
+      },
+      "create": {
+        "button": "Add entry",
+        "title": "Add an Entry",
+        "submit": "Add entry",
+        "success": "Entry added",
+        "failed": "Could not add the entry."
+      },
+      "edit": {
+        "title": "Edit Entry",
+        "submit": "Save",
+        "saved": "Entry saved",
+        "failed": "Could not save the entry."
+      },
+      "delete": {
+        "title": "Delete Entry",
+        "confirmButton": "Delete",
+        "confirm": "Delete \"{name}\"? It disappears from the public timeline."
+      },
+      "form": {
+        "description": "Plain text only. Nothing is rewritten or generated.",
+        "date": "Date",
+        "dateInvalid": "Enter a valid date from {min}.",
+        "kind": "Type",
+        "nameEn": "English name",
+        "nameFr": "French name",
+        "nameHint": "Short, as the official source titles it.",
+        "noteEn": "English note",
+        "noteFr": "French note",
+        "noteHint": "What changed for competitive play, in your own words.",
+        "sourceUrl": "Official source",
+        "sourceUrlHint": "Required. Liquipedia and BLAST.tv are not accepted.",
+        "sourceUrlRequired": "The official source is required."
       }
     }
   },

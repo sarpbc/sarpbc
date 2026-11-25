@@ -77,7 +77,8 @@
       "streamers": "Streamers en direct",
       "circuits": "Circuits",
       "seasons": "Saisons",
-      "onThisDay": "Ce jour-là"
+      "onThisDay": "Ce jour-là",
+      "timeline": "Frise RLCS"
     },
     "search": {
       "title": "Recherche",
@@ -1572,6 +1573,58 @@
             "tournament": "Rechercher une phase"
           }
         }
+      }
+    },
+    "timeline": {
+      "title": "Frise RLCS",
+      "description": "Patchs du jeu et changements de format de compétition datés, affichés sur la frise RLCS publique. Saisissez la date et le nom de la source officielle, une courte note neutre rédigée avec vos mots en anglais et en français, ainsi que la source. Ne collez jamais les notes de patch d'Epic.",
+      "loading": "Chargement…",
+      "loadError": "Impossible de charger la frise. Vérifiez votre connexion et réessayez.",
+      "empty": {
+        "title": "Aucune entrée",
+        "description": "Ajoutez le premier patch ou changement de format, avec sa source officielle."
+      },
+      "kinds": {
+        "patch": "Patch",
+        "format": "Format"
+      },
+      "table": {
+        "date": "Date",
+        "kind": "Type",
+        "name": "Nom"
+      },
+      "create": {
+        "button": "Ajouter une entrée",
+        "title": "Ajouter une entrée",
+        "submit": "Ajouter l'entrée",
+        "success": "Entrée ajoutée",
+        "failed": "Impossible d'ajouter l'entrée."
+      },
+      "edit": {
+        "title": "Modifier l'entrée",
+        "submit": "Enregistrer",
+        "saved": "Entrée enregistrée",
+        "failed": "Impossible d'enregistrer l'entrée."
+      },
+      "delete": {
+        "title": "Supprimer l'entrée",
+        "confirmButton": "Supprimer",
+        "confirm": "Supprimer « {name} » ? Elle disparaît de la frise publique."
+      },
+      "form": {
+        "description": "Texte brut uniquement. Rien n'est réécrit ni généré.",
+        "date": "Date",
+        "dateInvalid": "Saisissez une date valide à partir de {min}.",
+        "kind": "Type",
+        "nameEn": "Nom anglais",
+        "nameFr": "Nom français",
+        "nameHint": "Court, tel que la source officielle le titre.",
+        "noteEn": "Note anglaise",
+        "noteFr": "Note française",
+        "noteHint": "Ce qui change pour la compétition, avec vos mots.",
+        "sourceUrl": "Source officielle",
+        "sourceUrlHint": "Obligatoire. Liquipedia et BLAST.tv ne sont pas acceptés.",
+        "sourceUrlRequired": "La source officielle est obligatoire."
       }
     }
   },
