@@ -13,6 +13,7 @@ import { PlayerService } from "../../roster/application/player.service";
 import { TeamService } from "../../roster/application/team.service";
 import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
 import { SeasonService } from "../../season/application/season.service";
+import { TimelineService } from "../../timeline/application/timeline.service";
 import { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { MatchService } from "../../tournament/application/match/match.service";
@@ -106,6 +107,9 @@ const TOOL_NAMES = [
   "get_season",
   "create_circuit",
   "update_circuit",
+  "list_timeline_entries",
+  "create_timeline_entry",
+  "update_timeline_entry",
 ];
 
 const unused = async () => await Promise.reject(new Error("unused"));
@@ -129,6 +133,7 @@ const services: McpServices = {
   statsImportService: unconstructed(StatsImportService),
   statsPlayerLinkService: unconstructed(StatsPlayerLinkService),
   teamService: unconstructed(TeamService),
+  timelineService: unconstructed(TimelineService),
   tournamentPlayerStatsService: unconstructed(TournamentPlayerStatsService),
   tournamentPrizeService: unconstructed(TournamentPrizeService),
   tournaments: {

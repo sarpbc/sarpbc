@@ -10,6 +10,7 @@ import { PlayerService } from "../../roster/application/player.service";
 import { TeamService } from "../../roster/application/team.service";
 import { RosterProposalService } from "../../roster-proposal/application/roster-proposal.service";
 import { SeasonService } from "../../season/application/season.service";
+import { TimelineService } from "../../timeline/application/timeline.service";
 import { ManualCatalogService } from "../../tournament/application/manual-catalog.service";
 import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { MatchService } from "../../tournament/application/match/match.service";
@@ -54,6 +55,7 @@ const SERVICES = {
   statsImportService: StatsImportService,
   statsPlayerLinkService: StatsPlayerLinkService,
   teamService: TeamService,
+  timelineService: TimelineService,
   tournamentPlayerStatsService: TournamentPlayerStatsService,
   tournamentPrizeService: TournamentPrizeService,
   tournaments: query<TournamentQueries>(TOURNAMENT_QUERIES),

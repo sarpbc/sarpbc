@@ -7,6 +7,7 @@ import { TournamentModule } from "../../tournament/infrastructure/tournament.mod
 import { NewsModule } from "../../news/infrastructure/news.module";
 import { RosterProposalModule } from "../../roster-proposal/infrastructure/roster-proposal.module";
 import { SeasonModule } from "../../season/infrastructure/season.module";
+import { TimelineModule } from "../../timeline/infrastructure/timeline.module";
 import { McpController } from "./mcp.controller";
 import { McpServerFactory } from "./mcp-server.factory";
 import { mcpServicesProvider } from "./mcp-services";
@@ -22,6 +23,7 @@ import { mcpServicesProvider } from "./mcp-services";
     MatchStatsModule,
     CircuitModule,
     SeasonModule,
+    TimelineModule,
   ],
   providers: [mcpServicesProvider, McpServerFactory],
 })
