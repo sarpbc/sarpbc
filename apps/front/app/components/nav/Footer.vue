@@ -36,6 +36,7 @@ const columns = computed<FooterColumn[]>(() => [
       { label: t("general.countries"), to: localePath("/countries") },
       { label: t("general.transfers"), to: localePath("/transfers") },
       { label: t("general.records"), to: localePath("/records") },
+      { label: t("general.timeline"), to: localePath("/timeline") },
     ],
     title: t("components.footer.columns.explore"),
   },
