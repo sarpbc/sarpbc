@@ -1,0 +1,3 @@
+export const TIMELINE_NAME_MAX_LENGTH = 80;
+export const TIMELINE_NOTE_MAX_LENGTH = 500;
+export const TIMELINE_MIN_YEAR = 2016;
