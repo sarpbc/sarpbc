@@ -61,7 +61,7 @@ export interface WriteToolServices {
     | "setSource"
     | "setForfeit"
   >;
-  manualTournamentService: Pick<ManualTournamentService, "create" | "update">;
+  manualTournamentService: Pick<ManualTournamentService, "create" | "update" | "setSource">;
   pandascoreTournamentSync: Pick<
     SyncPandascoreTournamentUseCase,
     "execute" | "executeByPandascoreId"
@@ -550,6 +550,34 @@ export const writeTools = ({
       }),
     },
     name: "update_tournament",
+    permission: "tournaments.manage",
+    write: true,
+  }),
+
+  defineTool({
+    description:
+      "Record, replace or clear the public source of a tournament stage: the page its format, dates, participants or results were taken from. Works on any stage, PandaScore included: the sync never overwrites it. Changes nothing else; use set_match_source for one match and update_tournament rosters or set_tournament_roster for a stage roster.",
+    handler: async ({ tournamentId, sourceUrl }) => {
+      const tournament = await manualTournamentService.setSource(tournamentId, sourceUrl);
+
+      return {
+        entityId: tournament.id,
+        result: {
+          id: tournament.id,
+          name: tournament.name,
+          sourceUrl: tournament.sourceUrl,
+          url: tournamentUrl(tournament),
+        },
+        sourceUrl: tournament.sourceUrl ?? undefined,
+      };
+    },
+    input: {
+      sourceUrl: dataSourceUrlField(
+        "Public page the stage was taken from: the organiser's announcement or rules, RLEsports, the PandaScore page or the start.gg event. Never Liquipedia, a mirror of it or BLAST.tv. null clears it.",
+      ).nullable(),
+      tournamentId: z.uuid().describe("Tournament (stage) UUID."),
+    },
+    name: "set_tournament_source",
     permission: "tournaments.manage",
     write: true,
   }),

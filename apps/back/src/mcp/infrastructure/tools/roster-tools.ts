@@ -279,7 +279,7 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose removing a player from a team's current roster. Once approved, closes the open contract at effectiveDate instead of deleting it and sets the player's status.",
+        "Propose removing a player from a team's current roster. Once approved, closes the open contract at effectiveDate instead of deleting it, clears the player's current team and sets the player's status. Also detaches a player whose current team has no contract, such as one imported from PandaScore: pass that team.",
       handler: async ({ sourceUrl, status, ...input }, user) =>
         await propose(
           {
@@ -725,6 +725,29 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
         sourceUrl: sourceUrlSchema,
       },
       name: "set_match_lineups",
+      permission: "tournaments.manage",
+      write: true,
+    }),
+
+    defineTool({
+      description:
+        "Propose correcting the roster of one team participant of a tournament stage: the players who played the stage for that team. Works on any stage, PandaScore included. Nothing changes until a staff member approves it in the admin app; once approved it replaces that participant's roster, records sourceUrl as its roster source, and later PandaScore syncs keep it instead of the imported roster. Read get_tournament for the participants and their current rosters. Every player must already exist: use search_players, and create_player first if needed.",
+      handler: async ({ tournamentId, teamId, playerIds, sourceUrl }, user) =>
+        await propose(
+          { kind: "set_tournament_roster", playerIds, teamId, tournamentId },
+          sourceUrl,
+          user.id,
+        ),
+      input: {
+        playerIds: z
+          .array(z.uuid())
+          .min(1)
+          .describe("Player UUIDs who played the stage for this team, each listed once."),
+        sourceUrl: sourceUrlSchema,
+        teamId: z.uuid().describe("Team UUID of a participant of the stage, from get_tournament."),
+        tournamentId: z.uuid().describe("Tournament (stage) UUID."),
+      },
+      name: "set_tournament_roster",
       permission: "tournaments.manage",
       write: true,
     }),

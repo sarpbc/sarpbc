@@ -34,6 +34,7 @@ const REQUIRED_PERMISSION: Record<RosterChange["kind"], StaffPermission> = {
   set_match_streams: "tournaments.manage",
   set_match_viewership: "tournaments.manage",
   set_tournament_prizes: "tournaments.manage",
+  set_tournament_roster: "tournaments.manage",
   set_tournament_streams: "tournaments.manage",
   update_contract: "players.manage",
   update_player: "players.manage",

@@ -91,6 +91,7 @@ export class CompetitionTournamentWriter implements TournamentWriter {
       prizepool: model.prizepool,
       slug: model.slug,
       source: model.source,
+      sourceUrl: model.sourceUrl,
       streams: unchangedJson(row.streams, model.streams),
       tier: model.tier,
       type: model.type,

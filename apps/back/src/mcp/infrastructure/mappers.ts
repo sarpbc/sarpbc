@@ -201,6 +201,7 @@ export const mapTournamentDetail = (tournament: Tournament) => ({
   ...mapTournamentListItem(tournament),
   description: tournament.description,
   hasBracket: tournament.hasBracket,
+  sourceUrl: tournament.sourceUrl,
   tier: tournament.tier,
   winner: tournament.winner
     ? { name: participantName(tournament.winner), participantId: tournament.winner.id }

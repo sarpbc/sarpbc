@@ -9,6 +9,7 @@ import { TournamentParticipant } from "../../domain/tournament-participant";
 import type { ParticipantSnapshot } from "../../domain/tournament-participant";
 import { matchDecided } from "../../domain/match-decided";
 import { TournamentEvent, toEventRef } from "../../domain/tournament-event";
+import { Player } from "../../../roster/domain/player";
 import { Team } from "../../../roster/domain/team";
 import type { CompetitionTransaction, EventWriter } from "../ports";
 import type {
@@ -492,6 +493,24 @@ describe("Competition synchronization", () => {
 
       expect(store.savedParticipants).toContainEqual(
         expect.objectContaining({ id: "participant", playerIds: ["1", "3"], teamId: "team" }),
+      );
+    });
+
+    it("keeps a staff roster that carries a source", async () => {
+      const rosterSourceUrl = "https://x.com/RLEsports/status/1";
+      store.tournamentParticipants.push(
+        Object.assign(new TournamentParticipant(), {
+          id: "participant",
+          players: [Object.assign(new Player(), { id: "staff-pick" })],
+          rosterSourceUrl,
+          team: Object.assign(new Team(), { id: "team" }),
+        }),
+      );
+
+      await upsertPastCup();
+
+      expect(store.savedParticipants).toContainEqual(
+        expect.objectContaining({ id: "participant", playerIds: ["staff-pick"], rosterSourceUrl }),
       );
     });
   });

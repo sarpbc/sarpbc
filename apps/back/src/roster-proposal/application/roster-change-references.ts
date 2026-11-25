@@ -28,6 +28,7 @@ const playerReferences: ReferenceTable = {
   set_match_streams: none,
   set_match_viewership: none,
   set_tournament_prizes: (change) => change.prizes.flatMap(({ playerIds }) => playerIds),
+  set_tournament_roster: (change) => change.playerIds,
   set_tournament_streams: none,
   update_contract: (change) => [change.playerId],
   update_player: (change) => [change.playerId],
@@ -65,6 +66,7 @@ const teamReferences: ReferenceTable = {
   set_match_streams: none,
   set_match_viewership: none,
   set_tournament_prizes: (change) => change.prizes.map(({ teamId }) => teamId),
+  set_tournament_roster: (change) => [change.teamId],
   set_tournament_streams: none,
   update_contract: (change) =>
     change.teamId !== undefined && change.teamId !== "" ? [change.teamId] : [],
