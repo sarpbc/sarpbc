@@ -116,6 +116,7 @@
     "circuits": "Circuits",
     "stats": "Stats",
     "records": "Records",
+    "timeline": "Frise RLCS",
     "seasons": "Saisons",
     "countries": "Pays",
     "formerly": "Anciennement {name}"
@@ -2129,6 +2130,18 @@
       "days": "{count} jour | {count} jours",
       "empty": "Aucun record pour l'instant",
       "error": "Les records n'ont pas pu être chargés. Réessayez."
+    },
+    "timeline": {
+      "title": "Frise RLCS",
+      "seoTitle": "Frise des patchs et des formats RLCS {'|'} sarpbc.org",
+      "description": "Une frise datée des patchs de Rocket League et des changements de format de la compétition RLCS, rédigée par le staff de sarpbc.org avec un lien vers la source officielle.",
+      "source": "Source",
+      "empty": "Aucune entrée pour le moment",
+      "error": "La frise n'a pas pu être chargée. Réessayez.",
+      "kinds": {
+        "patch": "Patch",
+        "format": "Format"
+      }
     }
   }
 }

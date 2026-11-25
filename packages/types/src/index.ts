@@ -293,3 +293,12 @@ export type {
   WinStreakRecord,
   YoungestChampionRecord,
 } from "./records";
+
+export { TIMELINE_ENTRY_KINDS } from "./timeline";
+
+export type {
+  StaffTimelineEntry,
+  TimelineEntry,
+  TimelineEntryInput,
+  TimelineEntryKind,
+} from "./timeline";

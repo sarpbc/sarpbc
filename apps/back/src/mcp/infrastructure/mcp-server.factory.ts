@@ -12,6 +12,7 @@ import { readTools } from "./tools/read-tools";
 import { prizeTools } from "./tools/prize-tools";
 import { rosterTools } from "./tools/roster-tools";
 import { seasonTools } from "./tools/season-tools";
+import { timelineTools } from "./tools/timeline-tools";
 import { writeTools } from "./tools/write-tools";
 
 @Injectable()
@@ -37,6 +38,7 @@ export class McpServerFactory {
       ...gameStatsTools(this.services),
       ...circuitTools(this.services),
       ...seasonTools(this.services),
+      ...timelineTools(this.services),
     ]);
 
     return server;

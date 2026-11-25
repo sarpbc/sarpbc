@@ -53,6 +53,12 @@ const ADMIN_SECTIONS = [
     permissions: ["tournaments.manage"],
   },
   {
+    icon: "i-fluent-timeline-24-regular",
+    label: "page.nav.timeline",
+    path: "/timeline",
+    permissions: ["tournaments.manage"],
+  },
+  {
     icon: "i-fluent-predictions-24-regular",
     label: "page.nav.pickems",
     path: "/pickems",

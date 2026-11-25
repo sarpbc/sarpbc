@@ -277,3 +277,5 @@ export { DATA_SOURCE_URL_MAX_LENGTH, isAcceptedDataSourceUrl } from "./data-sour
 export { isForbiddenSourceHost, isLiquipediaSourceHost } from "./source-host";
 
 export { isNonEmptyDateInput, isNonEmptyString } from "./text";
+
+export { TIMELINE_MIN_YEAR, TIMELINE_NAME_MAX_LENGTH, TIMELINE_NOTE_MAX_LENGTH } from "./timeline";

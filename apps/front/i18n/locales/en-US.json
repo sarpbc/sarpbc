@@ -116,6 +116,7 @@
     "circuits": "Circuits",
     "stats": "Stats",
     "records": "Records",
+    "timeline": "RLCS timeline",
     "seasons": "Seasons",
     "countries": "Countries",
     "formerly": "Formerly {name}"
@@ -2129,6 +2130,18 @@
       "days": "{count} day | {count} days",
       "empty": "No record yet",
       "error": "The records could not be loaded. Try again."
+    },
+    "timeline": {
+      "title": "RLCS timeline",
+      "seoTitle": "RLCS Timeline of Patches and Format Changes {'|'} sarpbc.org",
+      "description": "A dated timeline of Rocket League game patches and RLCS competition format changes, written by sarpbc.org staff with a link to the official source.",
+      "source": "Source",
+      "empty": "No entry yet",
+      "error": "The timeline could not be loaded. Try again.",
+      "kinds": {
+        "patch": "Patch",
+        "format": "Format"
+      }
     }
   }
 }
