@@ -6326,6 +6326,23 @@
           "enumItems": [],
           "mappedType": "string"
         },
+        "national": {
+          "name": "national",
+          "type": "boolean",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "false",
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "boolean"
+        },
         "pandascore_id": {
           "name": "pandascore_id",
           "type": "int",
@@ -6819,7 +6836,14 @@
           "unique": true
         }
       ],
-      "checks": [],
+      "checks": [
+        {
+          "name": "timeline_entry_kind_check",
+          "expression": "\"kind\" in ('patch', 'format')",
+          "definition": "check (\"kind\" in ('patch', 'format'))",
+          "columnName": "kind"
+        }
+      ],
       "triggers": [],
       "foreignKeys": {},
       "comment": null
