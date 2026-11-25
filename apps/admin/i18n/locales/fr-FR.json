@@ -1623,8 +1623,7 @@
         "noteFr": "Note française",
         "noteHint": "Ce qui change pour la compétition, avec vos mots.",
         "sourceUrl": "Source officielle",
-        "sourceUrlHint": "Obligatoire. Liquipedia et BLAST.tv ne sont pas acceptés.",
-        "sourceUrlRequired": "La source officielle est obligatoire."
+        "sourceUrlHint": "Obligatoire. Liquipedia et BLAST.tv ne sont pas acceptés."
       }
     }
   },

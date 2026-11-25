@@ -35,19 +35,17 @@ const kindOptions = computed(() =>
 const dateError = computed(() => {
   const day = parseIsoDay(date.value);
 
-  return day && day.year >= TIMELINE_MIN_YEAR
+  return !date.value || (day && day.year >= TIMELINE_MIN_YEAR)
     ? undefined
     : t("page.timeline.form.dateInvalid", { min: TIMELINE_MIN_YEAR });
 });
 
-const sourceError = computed(() =>
-  sourceUrl.value.trim()
-    ? checkSourceUrl(sourceUrl.value)
-    : t("page.timeline.form.sourceUrlRequired"),
-);
+const sourceError = computed(() => checkSourceUrl(sourceUrl.value));
 
 const isValid = computed(
   () =>
+    date.value.length > 0 &&
+    sourceUrl.value.trim().length > 0 &&
     !dateError.value &&
     !sourceError.value &&
     nameEn.value.trim().length > 0 &&

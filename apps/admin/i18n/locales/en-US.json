@@ -1623,8 +1623,7 @@
         "noteFr": "French note",
         "noteHint": "What changed for competitive play, in your own words.",
         "sourceUrl": "Official source",
-        "sourceUrlHint": "Required. Liquipedia and BLAST.tv are not accepted.",
-        "sourceUrlRequired": "The official source is required."
+        "sourceUrlHint": "Required. Liquipedia and BLAST.tv are not accepted."
       }
     }
   },
