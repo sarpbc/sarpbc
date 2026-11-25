@@ -68,6 +68,11 @@ const fakeManualTournaments = (tournament: Tournament) => {
 
       return tournament;
     },
+    setSource: async (...args: Parameters<ManualTournaments["setSource"]>) => {
+      record("setSource", ...args);
+
+      return Object.assign(new Tournament(), tournament, { sourceUrl: args[1] });
+    },
     update: async (...args: Parameters<ManualTournaments["update"]>) => {
       record("update", ...args);
 
@@ -79,6 +84,7 @@ const fakeManualTournaments = (tournament: Tournament) => {
 const services = () => ({
   manualTournamentService: {
     create: vi.fn<WriteToolServices["manualTournamentService"]["create"]>(),
+    setSource: vi.fn<WriteToolServices["manualTournamentService"]["setSource"]>(),
     update: vi.fn<WriteToolServices["manualTournamentService"]["update"]>(),
   },
   newsService: {
@@ -428,7 +434,7 @@ describe("create_match participants", () => {
   });
 });
 
-const setupBracket = (source: "manual" | "startgg") => {
+const setupBracket = (source: "manual" | "pandascore" | "startgg") => {
   vi.stubEnv("FRONT_URL", "https://sarpbc.test");
   const stage = { event: { slug: "cdf-2026" }, slug: "finals", source, streams: [] };
 
@@ -445,10 +451,11 @@ const setupBracket = (source: "manual" | "startgg") => {
 
   const matchService = fakeMatches(match);
   const tournament = Object.assign(new Tournament(), { id: "finals", ...stage });
+  const manualTournamentService = fakeManualTournaments(tournament);
 
   const tools = writeTools({
     ...services(),
-    manualTournamentService: fakeManualTournaments(tournament),
+    manualTournamentService,
     matchService,
     tournaments: { findById: async () => tournament },
   });
@@ -456,7 +463,7 @@ const setupBracket = (source: "manual" | "startgg") => {
   const run = async (name: string, input: ToolArguments) =>
     await defined(tools, name).run({ email: "staff@test.com", id: "u1", role: "admin" }, input);
 
-  return { matchService, run, tools };
+  return { manualTournamentService, matchService, run, tools };
 };
 
 describe("bracket tools", () => {
@@ -489,6 +496,25 @@ describe("bracket tools", () => {
     for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"]) {
       expect(input.safeParse({ matchId: "final", sourceUrl: refused }).success).toBe(false);
     }
+  });
+
+  it("records or clears a stage source and refuses Liquipedia", async () => {
+    const { tools, manualTournamentService, run } = setupBracket("pandascore");
+    const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
+    const tournamentId = "6f1c1b5e-8f5a-4c1e-9b1a-2f0d3c4b5a69";
+
+    const result = await run("set_tournament_source", { sourceUrl, tournamentId });
+
+    expect(manualTournamentService.calls).toStrictEqual([
+      { args: [tournamentId, sourceUrl], method: "setSource" },
+    ]);
+    expect(jsonOf(result)).toHaveProperty("sourceUrl", sourceUrl);
+
+    const input = z.object(defined(tools, "set_tournament_source").inputSchema);
+    expect(input.safeParse({ sourceUrl: null, tournamentId }).success).toBe(true);
+    expect(
+      input.safeParse({ sourceUrl: "https://liquipedia.net/rocketleague/x", tournamentId }).success,
+    ).toBe(false);
   });
 
   it("declares a forfeit with its source and clears it without one", async () => {

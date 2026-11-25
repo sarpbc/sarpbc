@@ -257,7 +257,10 @@ const importExpectedRoster = async (
       async (player) => await scope.rosters.upsertPlayer(player),
     );
 
-    const playerIds = imported.map((player) => player.id);
+    const playerIds =
+      existingParticipant !== undefined && existingParticipant.rosterSourceUrl !== null
+        ? existingParticipant.players.map((player) => player.id)
+        : imported.map((player) => player.id);
 
     const participantId = existingParticipant?.id ?? v4();
 

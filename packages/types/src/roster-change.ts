@@ -106,6 +106,7 @@ export type RosterChange =
   | { kind: "set_tournament_streams"; tournamentId: string; streams: StreamInput[] }
   | { kind: "set_match_streams"; matchId: string; streams: StreamInput[] }
   | { kind: "set_match_lineups"; matchId: string; lineups: MatchLineupInput[] }
+  | { kind: "set_tournament_roster"; tournamentId: string; teamId: string; playerIds: string[] }
   | { kind: "set_event_viewership"; eventId: string; viewership: Viewership }
   | { kind: "set_match_viewership"; matchId: string; viewership: Viewership }
   | {

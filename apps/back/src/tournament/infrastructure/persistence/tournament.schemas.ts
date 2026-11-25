@@ -73,6 +73,7 @@ export const TournamentSchema = defineEntity({
     prizepool: p.string().nullable(),
     slug: p.string(),
     source: p.string().$type<DataSource>().default("pandascore"),
+    sourceUrl: p.text().nullable(),
     streams: p.json().$type<Stream[]>().default([]),
     tier: p.string().nullable(),
     type: p.string().nullable(),

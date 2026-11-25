@@ -329,6 +329,22 @@ const lineupRows = (change: Extract<RosterProposal["change"], { kind: "set_match
   ];
 };
 
+const tournamentRosterRows = (
+  change: Extract<RosterProposal["change"], { kind: "set_tournament_roster" }>,
+) => [
+  {
+    key: "tournamentId",
+    label: t("page.proposals.fields.tournamentId"),
+    value: nameOf(change.tournamentId),
+  },
+  { key: "teamId", label: t("page.proposals.fields.teamId"), value: nameOf(change.teamId) },
+  {
+    key: "playerIds",
+    label: t("page.proposals.fields.playerIds"),
+    value: change.playerIds.map(nameOf).join(", "),
+  },
+];
+
 const aliasRows = (
   change: Extract<RosterProposal["change"], { kind: "add_team_alias" | "update_team_alias" }>,
 ) => {
@@ -397,6 +413,10 @@ const changeRows = (proposal: RosterProposal) => {
 
   if (change.kind === "set_match_lineups") {
     return lineupRows(change);
+  }
+
+  if (change.kind === "set_tournament_roster") {
+    return tournamentRosterRows(change);
   }
 
   if (change.kind === "add_team_alias" || change.kind === "update_team_alias") {

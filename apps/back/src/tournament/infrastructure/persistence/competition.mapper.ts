@@ -183,6 +183,7 @@ export const toTournament = (row: TournamentRow) =>
     prizepool: row.prizepool,
     slug: row.slug,
     source: row.source,
+    sourceUrl: row.sourceUrl,
     streams: row.streams ?? [],
     tier: row.tier,
     type: row.type,

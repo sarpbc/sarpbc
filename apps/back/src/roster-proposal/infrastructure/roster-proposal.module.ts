@@ -20,6 +20,7 @@ import { CircuitService } from "../../circuit/application/circuit.service";
 import { CircuitModule } from "../../circuit/infrastructure/circuit.module";
 import { SeasonService } from "../../season/application/season.service";
 import { SeasonModule } from "../../season/infrastructure/season.module";
+import { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import { TournamentModule } from "../../tournament/infrastructure/tournament.module";
 import { RosterProposalService } from "../application/roster-proposal.service";
 import { RosterProposalController } from "./http/roster-proposal.controller";
@@ -59,6 +60,7 @@ import {
         CircuitService,
         TeamAliasService,
         SeasonService,
+        ManualTournamentService,
       ],
       provide: RosterProposalService,
       useFactory: (
@@ -78,6 +80,7 @@ import {
         circuits: CircuitService,
         teamAliases: TeamAliasService,
         seasons: SeasonService,
+        tournamentRosters: ManualTournamentService,
       ) =>
         new RosterProposalService(
           rosterProposalStore(em),
@@ -97,6 +100,7 @@ import {
           circuits,
           teamAliases,
           seasons,
+          tournamentRosters,
         ),
     },
   ],

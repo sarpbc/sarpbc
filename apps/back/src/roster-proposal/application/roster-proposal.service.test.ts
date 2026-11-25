@@ -32,6 +32,7 @@ describe(RosterProposalService, () => {
   let viewerships: ReturnType<typeof setup>["viewerships"];
   let circuits: ReturnType<typeof setup>["circuits"];
   let teamAliases: ReturnType<typeof setup>["teamAliases"];
+  let tournamentRosters: ReturnType<typeof setup>["tournamentRosters"];
   let failNext: ReturnType<typeof setup>["failNext"];
   let mergedPlayers: ReturnType<typeof setup>["mergedPlayers"];
   let service: RosterProposalService;
@@ -54,6 +55,7 @@ describe(RosterProposalService, () => {
       viewerships,
       circuits,
       teamAliases,
+      tournamentRosters,
       failNext,
       mergedPlayers,
       service,
@@ -78,6 +80,13 @@ describe(RosterProposalService, () => {
     await service.propose(
       { kind: "delete_team", mergeIntoTeamId, reason: "Empty duplicate", teamId },
       "",
+      "journalist",
+    );
+
+  const setRoster = async (teamId = "kc", tournamentId = "rlcs-major") =>
+    await service.propose(
+      { kind: "set_tournament_roster", playerIds: ["zen"], teamId, tournamentId },
+      source,
       "journalist",
     );
 
@@ -673,6 +682,49 @@ describe(RosterProposalService, () => {
       await expect(service.approve(id, "admin")).rejects.toThrow(ForbiddenError);
       expect(staff.permissions).toContain("tournaments.manage");
       expect(streams.set).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("stage roster proposals", () => {
+    it("replaces the participant roster with the proposal source on approval", async () => {
+      const { id } = await setRoster();
+      expect(tournamentRosters.setRoster).not.toHaveBeenCalled();
+
+      const approved = await service.approve(id, "admin");
+
+      expect(tournamentRosters.setRoster).toHaveBeenCalledExactlyOnceWith("rlcs-major", {
+        playerIds: ["zen"],
+        sourceUrl: source,
+        teamId: "kc",
+      });
+      expect(approved).toMatchObject({ entityId: "rlcs-major", status: "applied" });
+      expect(staff.permissions).toContain("tournaments.manage");
+    });
+
+    it("refuses an unknown stage, a team outside it or an unknown player", async () => {
+      await expect(setRoster("kc", "nope")).rejects.toThrow(NotFoundError);
+      await expect(setRoster("kc-copy")).rejects.toThrow("not a participant");
+      await expect(
+        service.propose(
+          {
+            kind: "set_tournament_roster",
+            playerIds: ["ghost"],
+            teamId: "kc",
+            tournamentId: "rlcs-major",
+          },
+          source,
+          "journalist",
+        ),
+      ).rejects.toThrow(NotFoundError);
+      expect(saved.size).toBe(0);
+    });
+
+    it("leaves the proposal pending when the roster no longer applies", async () => {
+      const { id } = await setRoster();
+      failNext("tournamentRosters.setRoster", new InvalidInputError("Team left the stage"));
+
+      await expect(service.approve(id, "admin")).rejects.toThrow("left the stage");
+      expect(saved.get(id)?.status).toBe("pending");
     });
   });
 

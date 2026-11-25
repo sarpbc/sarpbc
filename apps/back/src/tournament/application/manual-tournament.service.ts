@@ -9,18 +9,29 @@ import {
   assertTournamentUpdateAllowed,
 } from "../domain/tournament-source";
 import { assertLineupFitsFormat } from "../domain/tournament-format";
-import type { CreateTournamentInput, UpdateTournamentInput } from "./inputs";
+import type {
+  CreateTournamentInput,
+  ParticipantRosterInput,
+  UpdateTournamentInput,
+} from "./inputs";
 import type { CompetitionAfterCommit } from "./after-commit";
-import type { CompetitionTransaction, MatchWriter, TournamentQueries } from "./ports";
+import type {
+  CompetitionTransaction,
+  MatchWriter,
+  TournamentQueries,
+  TournamentWriter,
+} from "./ports";
 import { placeStage, requireEvent, requireLeague } from "./event-placement";
 import { createOwnEvent, sharedEventSlugError, updateEvent } from "./manual-tournament-event";
 import {
+  assertParticipantRoster,
   assertUpdatedLineup,
   setRosters,
   syncParticipants,
   syncPlayerParticipants,
 } from "./manual-tournament-lineup";
 import { nonBlank } from "../../common/domain/text";
+import { parseDataSourceUrl } from "../../common/domain/data-source";
 
 const optionalDate = (value: string | null | undefined) =>
   value !== null && value !== undefined && value !== "" ? new Date(value) : null;
@@ -65,6 +76,16 @@ const bracketToggle = async (matches: MatchWriter, tournamentId: string, hasBrac
   }
 
   return false;
+};
+
+const requireTournament = async (writer: TournamentWriter, id: string) => {
+  const tournament = await writer.load(id);
+
+  if (!tournament) {
+    throw new NotFoundError(`Tournament with id "${id}" was not found.`);
+  }
+
+  return tournament;
 };
 
 export class ManualTournamentService {
@@ -166,6 +187,34 @@ export class ManualTournamentService {
         }
       }
 
+      await tournaments.save(tournament);
+    });
+    await this.afterCommit.settle({ tournamentIds: [id] });
+
+    return await this.detail(id);
+  }
+  async requireRoster(id: string, roster: Omit<ParticipantRosterInput, "sourceUrl">) {
+    await this.transaction.run(async ({ tournaments }) => {
+      await requireTournament(tournaments, id);
+      await assertParticipantRoster(tournaments, id, roster);
+    });
+  }
+  /** Any stage, PandaScore included: a roster with a source is a staff correction the sync keeps. */
+  async setRoster(id: string, roster: ParticipantRosterInput & { sourceUrl: string }) {
+    await this.transaction.run(async ({ tournaments }) => {
+      const tournament = await requireTournament(tournaments, id);
+      await assertParticipantRoster(tournaments, id, roster);
+      await setRosters(tournaments, tournament, [roster]);
+    });
+    await this.afterCommit.settle({ tournamentIds: [id] });
+
+    return await this.detail(id);
+  }
+  /** A stage source is staff metadata, so it applies to PandaScore and start.gg stages too. */
+  async setSource(id: string, sourceUrl: string | null) {
+    await this.transaction.run(async ({ tournaments }) => {
+      const tournament = await requireTournament(tournaments, id);
+      tournament.sourceUrl = parseDataSourceUrl(sourceUrl);
       await tournaments.save(tournament);
     });
     await this.afterCommit.settle({ tournamentIds: [id] });

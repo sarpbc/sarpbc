@@ -16,6 +16,7 @@ import { RosterProposal } from "../src/roster-proposal/domain/roster-proposal";
 import type { RosterProposalStore } from "../src/roster-proposal/application/ports";
 import { RosterProposalService } from "../src/roster-proposal/application/roster-proposal.service";
 import { replaceStreams } from "../src/tournament/domain/stream";
+import { Tournament } from "../src/tournament/domain/tournament";
 import type { StreamEditSource, StreamOwner } from "../src/tournament/domain/stream";
 import { requireViewership } from "../src/tournament/domain/viewership";
 import type { ViewershipOwner } from "../src/tournament/domain/viewership";
@@ -65,7 +66,9 @@ type FailureKey =
   | "matches.deleteMatch"
   | "players.joinTeam"
   | "store.save"
-  | "teams.delete";
+  | "teams.delete"
+  | "tournamentRosters.requireRoster"
+  | "tournamentRosters.setRoster";
 
 export const setupRosterProposalService = () => {
   const saved = new Map<string, RosterProposal>();
@@ -235,6 +238,27 @@ export const setupRosterProposalService = () => {
     update: async () => new TeamAlias(),
   };
 
+  const tournamentRosters = {
+    requireRoster: async (tournamentId: string, roster: { teamId: string }) => {
+      throwIfFailing("tournamentRosters.requireRoster");
+
+      if (tournamentId !== "rlcs-major") {
+        throw new NotFoundError(`Tournament with id "${tournamentId}" was not found.`);
+      }
+
+      if (roster.teamId !== "kc") {
+        throw new InvalidInputError(`Team "${roster.teamId}" is not a participant`);
+      }
+    },
+    setRoster: async () => {
+      throwIfFailing("tournamentRosters.setRoster");
+
+      return Object.assign(new Tournament(), { id: "rlcs-major" });
+    },
+  };
+
+  vi.spyOn(tournamentRosters, "setRoster");
+
   vi.spyOn(teamAliases, "add");
   vi.spyOn(teamAliases, "update");
 
@@ -400,6 +424,7 @@ export const setupRosterProposalService = () => {
     circuits,
     teamAliases,
     seasons,
+    tournamentRosters,
   );
 
   return {
@@ -422,6 +447,7 @@ export const setupRosterProposalService = () => {
     streams,
     teamAliases,
     teams,
+    tournamentRosters,
     viewerships,
   };
 };

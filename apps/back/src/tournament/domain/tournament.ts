@@ -26,6 +26,7 @@ export class Tournament {
   country: string | null = null;
   prizepool: string | null = null;
   imageUrl: string | null = null;
+  sourceUrl: string | null = null;
   league: League | null = null;
   pickemsEnabled = false;
   hasBracket = false;

@@ -76,6 +76,7 @@ Write tools (staff permission required):
 | `trigger_tournament_sync`    | `tournaments.manage` | Sync one tournament or PandaScore additions                                              |
 | `create_tournament`          | `tournaments.manage` | Create a manual tournament, as a stage of an existing event or with an event of its own  |
 | `update_tournament`          | `tournaments.manage` | Edit a manual tournament; on a synced one, only the image and an end date the sync keeps |
+| `set_tournament_source`      | `tournaments.manage` | Record, replace or clear the public source of any stage, PandaScore included             |
 | `link_pandascore_tournament` | `tournaments.manage` | Turn a manual tournament into its PandaScore stage instead of importing a duplicate      |
 | `sync_pandascore_tournament` | `tournaments.manage` | Import or refresh a tournament by its PandaScore id                                      |
 | `create_league`              | `tournaments.manage` | Create a league for manual events and tournaments                                        |
@@ -104,7 +105,7 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 | Tool                        | Permission                                               | Description once approved                                                                                      |
 | --------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | `add_player_to_team`        | `players.manage`                                         | Close the player's open contracts and open one with the new team and contract role                             |
-| `remove_player_from_team`   | `players.manage`                                         | Close the contract and set the player `free_agent` or `retired`                                                |
+| `remove_player_from_team`   | `players.manage`                                         | Close the contract, or detach a current team without one, and set the player `free_agent` or `retired`         |
 | `create_player`             | `players.manage`                                         | Create a player without a team (name, country, status)                                                         |
 | `update_player`             | `players.manage`                                         | Update name, country or status (`active`, `free_agent`, `retired`)                                             |
 | `create_team`               | `teams.manage`                                           | Create a team (name, country, logo)                                                                            |
@@ -122,6 +123,7 @@ Roster tools (staff permission and a public `sourceUrl` required). They only que
 | `set_tournament_streams`    | `tournaments.manage`                                     | Replace the live streams of a tournament stage, inherited by its matches without their own list                |
 | `set_match_streams`         | `tournaments.manage`                                     | Replace the live streams of one match, overriding the inherited list                                           |
 | `set_match_lineups`         | `tournaments.manage`                                     | Replace the lineups of one match: the players who actually played each side, stand-ins included                |
+| `set_tournament_roster`     | `tournaments.manage`                                     | Replace one team participant's stage roster, PandaScore included; later syncs keep it                          |
 | `set_event_viewership`      | `tournaments.manage`                                     | Replace the credited peak and average viewers of an event                                                      |
 | `set_match_viewership`      | `tournaments.manage`                                     | Replace the credited peak and average viewers of one match                                                     |
 | `set_circuit_stage_scale`   | `tournaments.manage`                                     | Add a stage to a points circuit or replace its scale, region teams and final places                            |

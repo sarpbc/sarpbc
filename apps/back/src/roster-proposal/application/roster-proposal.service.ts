@@ -23,6 +23,7 @@ import type { MatchLineupService } from "../../tournament/application/match/matc
 import type { PlayerAwardService } from "../../tournament/application/player-award.service";
 import type { StreamService } from "../../tournament/application/stream.service";
 import type { ViewershipService } from "../../tournament/application/viewership.service";
+import type { ManualTournamentService } from "../../tournament/application/manual-tournament.service";
 import type { CircuitService } from "../../circuit/application/circuit.service";
 import type { SeasonService } from "../../season/application/season.service";
 import type { TournamentPrizeService } from "../../tournament/application/tournament-prize.service";
@@ -101,6 +102,8 @@ type TeamAliases = Pick<TeamAliasService, "requireProposable" | "add" | "update"
 
 type Seasons = Pick<SeasonService, "requireAward" | "addAward">;
 
+type TournamentRosters = Pick<ManualTournamentService, "requireRoster" | "setRoster">;
+
 export interface TeamLogoProposal {
   teamId: string;
   variant: TeamLogoVariant;
@@ -128,6 +131,7 @@ export class RosterProposalService {
     private readonly circuits: Circuits,
     private readonly teamAliases: TeamAliases,
     private readonly seasons: Seasons,
+    private readonly tournamentRosters: TournamentRosters,
   ) {}
 
   async propose(change: RosterChange, sourceUrl: string, proposedById: string) {
@@ -199,6 +203,11 @@ export class RosterProposalService {
         change.tournamentId,
         circuitStageInput(change, sourceUrl),
       );
+    }
+
+    if (change.kind === "set_tournament_roster") {
+      const { tournamentId, teamId, playerIds } = change;
+      await this.tournamentRosters.requireRoster(tournamentId, { playerIds, teamId });
     }
 
     if (change.kind === "add_team_alias") {
@@ -295,6 +304,7 @@ export class RosterProposalService {
             change.kind === "update_tournament_prize" ||
             change.kind === "award_player" ||
             change.kind === "set_tournament_streams" ||
+            change.kind === "set_tournament_roster" ||
             change.kind === "set_circuit_stage_scale"
               ? [change.tournamentId]
               : [],
@@ -462,6 +472,11 @@ export class RosterProposalService {
         );
 
         return change.tournamentId;
+      },
+      set_tournament_roster: async ({ tournamentId, teamId, playerIds }, sourceUrl) => {
+        await this.tournamentRosters.setRoster(tournamentId, { playerIds, sourceUrl, teamId });
+
+        return tournamentId;
       },
       set_tournament_streams: async (change, sourceUrl) => await this.setStreams(change, sourceUrl),
       update_contract: async (

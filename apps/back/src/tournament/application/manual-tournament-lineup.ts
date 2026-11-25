@@ -138,6 +138,27 @@ export const assertUpdatedLineup = async (
   });
 };
 
+/** Checks one team participant's roster before it is proposed or replaced. */
+export const assertParticipantRoster = async (
+  writer: TournamentWriter,
+  tournamentId: string,
+  roster: Omit<ParticipantRosterInput, "sourceUrl">,
+) => {
+  if (new Set(roster.playerIds).size !== roster.playerIds.length) {
+    throw new InvalidInputError("A player is listed twice in the roster.");
+  }
+
+  if (roster.playerIds.length && !(await writer.playersExist(roster.playerIds))) {
+    throw playersNotFound();
+  }
+
+  const participants = await writer.participants(tournamentId);
+
+  if (!participants.some((participant) => participant.team?.id === roster.teamId)) {
+    throw new InvalidInputError(`Team "${roster.teamId}" is not a participant of this tournament.`);
+  }
+};
+
 export const setRosters = async (
   writer: TournamentWriter,
   tournament: Tournament,
