@@ -14,7 +14,7 @@ const matchBody = z.object({ match: z.object({ slug: z.string() }) });
 
 const staffTournamentsBody = z.object({ tournaments: z.array(z.object({ id: z.string() })) });
 
-const sitemapEntries = z.array(z.object({ path: z.string() }));
+const sitemapEntries = z.array(z.object({ lastmod: z.string().nullable(), path: z.string() }));
 
 export const verifySitemap = async ({ orm, request, tournament }: SitemapContext) => {
   const { Match } = await import("../../src/tournament/infrastructure/persistence/match.entity.ts");
@@ -71,6 +71,9 @@ export const verifySitemap = async ({ orm, request, tournament }: SitemapContext
   const oneTeam = addMatch("Sitemap One Team", "not_started", participants.slice(0, 1));
   const tbd = addMatch("Sitemap TBD", "not_started", [participants[0], tbdParticipant]);
   const canceled = addMatch("Sitemap Canceled", "canceled", participants.slice(0, 2));
+  const finished = addMatch("Sitemap Finished", "finished", participants.slice(0, 2));
+  const finishedEndAt = new Date("2021-03-14T20:00:00.000Z");
+  finished.endAt = finishedEndAt;
   const emptyPlayer = new Player();
   Object.assign(emptyPlayer, { name: "Sitemap Empty Player", slug: "sitemap-empty-player" });
   em.persist(emptyPlayer);
@@ -106,23 +109,40 @@ export const verifySitemap = async ({ orm, request, tournament }: SitemapContext
   stage.beginAt = new Date("2026-01-10T12:00:00Z");
   await em.flush();
 
-  const paths = async (kind: string) => {
+  const entries = async (kind: string) => {
     const response = await request("GET", `/sitemap/${kind}`);
 
-    return response.json(sitemapEntries).map(({ path }) => path);
+    return response.json(sitemapEntries);
+  };
+
+  const paths = async (kind: string) => {
+    const list = await entries(kind);
+
+    return list.map(({ path }) => path);
   };
 
   const stages = await paths("tournaments");
   assert.ok(stages.includes(`/tournaments/${tournament.event.slug}`));
   assert.ok(stages.includes(`/tournaments/${tournament.event.slug}/${tournament.slug}`));
 
-  const matches = await paths("matches");
+  const matchEntries = await entries("matches");
+  const matches = matchEntries.map(({ path }) => path);
   const publicIds = new Set(matches.map((path) => Number(path.split("/")[2])));
   assert.ok(publicIds.has(listed.publicId));
 
   for (const excluded of [noTeams, oneTeam, tbd, canceled]) {
     assert.ok(!publicIds.has(excluded.publicId), `${excluded.name} stays out of the sitemap`);
   }
+
+  const finishedEntry = matchEntries.find(({ path }) =>
+    path.startsWith(`/matches/${finished.publicId}/`),
+  );
+
+  assert.equal(
+    finishedEntry?.lastmod,
+    finishedEndAt.toISOString(),
+    "a finished match is dated by its end",
+  );
 
   const response2 = await request("GET", `/matches/${listed.publicId}`);
   const { match } = response2.json(matchBody);
@@ -185,6 +205,7 @@ export const verifySitemap = async ({ orm, request, tournament }: SitemapContext
     oneTeam,
     tbd,
     canceled,
+    finished,
     tbdParticipant,
     tbdTeam,
     emptyPlayer,

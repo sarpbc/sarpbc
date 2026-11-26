@@ -281,7 +281,12 @@ setPageSeo({
       </div>
 
       <template v-if="tab === 'info'">
-        <EntityOverview kind="player" :past-matches="pastMatches" :trophies="trophies" />
+        <EntityOverview
+          kind="player"
+          :past-matches="pastMatches"
+          :past-events="pastEvents"
+          :trophies="trophies"
+        />
         <PlayerFormerTeams v-if="oldTeams && oldTeams.length > 0" :contracts="oldTeams" />
         <PlayerFaqSection :player="currentPlayer" :trophies="trophies" />
       </template>

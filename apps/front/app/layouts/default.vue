@@ -12,7 +12,9 @@ const isHome = computed(() => getRouteBaseName(route) === "index");
         <div class="flex flex-1 flex-col gap-2 md:grid md:grid-cols-12 md:gap-6 lg:gap-8">
           <div class="hidden md:flex md:col-span-3 lg:col-span-3">
             <HubColumn variant="main">
-              <LazyMatchLateralBar hydrate-on-visible />
+              <ClientOnly>
+                <LazyMatchLateralBar />
+              </ClientOnly>
             </HubColumn>
           </div>
 

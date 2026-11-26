@@ -280,6 +280,7 @@
     },
     "entity": {
       "overview": {
+        "recentEvents": "Recent events",
         "recentMatches": "Recent matches"
       }
     },
@@ -1367,9 +1368,9 @@
           "title": "Frequently Asked Questions",
           "who": {
             "question": "Who is {name}?",
-            "answerWithTeam": "{name} is a {nationality} Rocket League esports player currently competing for {team}.",
+            "answerWithTeam": "{nationality} Rocket League esports player {name} currently competes for {team}.",
             "answerWithTeamGeneric": "{name} is a Rocket League esports player currently competing for {team}.",
-            "answerFreeAgent": "{name} is a {nationality} Rocket League esports player currently listed as a free agent.",
+            "answerFreeAgent": "{nationality} Rocket League esports player {name} is currently listed as a free agent.",
             "answerFreeAgentGeneric": "{name} is a Rocket League esports player currently listed as a free agent."
           },
           "age": {

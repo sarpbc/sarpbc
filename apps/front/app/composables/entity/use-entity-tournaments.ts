@@ -101,25 +101,23 @@ export const splitTournaments = (
 export const useEntityTournaments = (kind: EntityKind, entityId: MaybeRef<string | undefined>) => {
   const idRef = toRef(entityId);
 
-  const { data, pending, error, refresh } = useAsyncData(
+  const {
+    data: sections,
+    pending,
+    error,
+    refresh,
+  } = useAsyncData(
     () => `${kind}-tournaments-${idRef.value ?? "unknown"}`,
-    async () => ({
-      // WARNING: fetchedAt is captured with the fetch so server and client build identical results on hydration.
-      fetchedAt: Date.now(),
-      tournaments: isNonEmptyString(idRef.value) ? await FETCH_TOURNAMENTS[kind](idRef.value) : [],
-    }),
+    async () =>
+      splitTournaments(
+        isNonEmptyString(idRef.value) ? await FETCH_TOURNAMENTS[kind](idRef.value) : [],
+        (tournament) => wonBy(kind, tournament, idRef.value ?? ""),
+        Date.now(),
+      ),
     {
-      default: () => ({ fetchedAt: 0, tournaments: [] }),
+      default: () => ({ live: [], past: [], upcoming: [] }),
       watch: [idRef],
     },
-  );
-
-  const sections = computed(() =>
-    splitTournaments(
-      data.value?.tournaments ?? [],
-      (tournament) => wonBy(kind, tournament, idRef.value ?? ""),
-      data.value?.fetchedAt ?? 0,
-    ),
   );
 
   return {

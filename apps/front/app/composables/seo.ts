@@ -31,7 +31,7 @@ interface PageSeoMeta {
   twitterTitle: string;
   twitterDescription: string;
   twitterImage: string;
-  robots: "noindex, nofollow" | "index, follow";
+  robots: "noindex, nofollow" | "noindex, follow" | "index, follow";
 }
 
 const resolveImageUrl = (image?: string | null) =>
@@ -125,7 +125,11 @@ export const useSarpbcSeo = () => {
       seoMeta.ogImageType = imageType;
     }
 
-    useSeoMeta({ ...seoMeta, ogUrl: getCanonicalUrl });
+    // WARNING: a query string only selects a tab, page or filter of the canonical path, so its URL stays out of the index while its links are still followed.
+    const robots = () =>
+      !noIndex && Object.keys(route.query).length > 0 ? "noindex, follow" : seoMeta.robots;
+
+    useSeoMeta({ ...seoMeta, ogUrl: getCanonicalUrl, robots });
   };
 
   return {
