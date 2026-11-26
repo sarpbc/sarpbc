@@ -338,6 +338,20 @@ export const verifyRedistributableScope = async ({
       "a prize keeps the source staff entered",
     );
 
+    const crowned = await request("GET", `/tournaments/${tournament.id}`);
+
+    assert.equal(
+      crowned.json(
+        z.object({
+          tournament: z.looseObject({
+            winner: z.looseObject({ team: z.looseObject({ id: z.string() }) }).nullable(),
+          }),
+        }),
+      ).tournament.winner?.team.id,
+      alpha,
+      "a stage without a bracket is won by its first-place team",
+    );
+
     return tournament.id;
   };
 

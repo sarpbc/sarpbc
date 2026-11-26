@@ -4,6 +4,7 @@ import { InvalidInputError } from "../../common/domain/errors/invalid-input-erro
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { assertPrizeDistribution, patchPrizeEntry } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
+import { settleStageWinner } from "./stage-winner";
 import type { CompetitionAfterCommit } from "./after-commit";
 import type {
   EarningsScope,
@@ -109,7 +110,7 @@ export class TournamentPrizeService {
     tournamentId: string,
     buildEntries: (prizes: PrizeWriter) => Promise<PrizeEntry[]>,
   ) {
-    await this.transaction.run(async ({ prizes }) => {
+    await this.transaction.run(async ({ prizes, tournaments }) => {
       if (!(await prizes.tournamentExists(tournamentId))) {
         throw new NotFoundError(`Tournament with id "${tournamentId}" not found`);
       }
@@ -118,6 +119,7 @@ export class TournamentPrizeService {
       assertPrizeDistribution(entries);
       assertParticipants(entries, await prizes.participants(tournamentId));
       await prizes.replace(tournamentId, entries);
+      await settleStageWinner(tournaments, tournamentId);
     });
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
 

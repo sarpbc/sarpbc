@@ -12,6 +12,7 @@ import type {
   MatchWriter,
 } from "../ports";
 import { MatchService } from "./match.service";
+import { memoryTournamentWriter } from "../ports.test-utils";
 
 const unused = (): never => {
   throw new Error("Not part of a match deletion");
@@ -73,9 +74,7 @@ describe("MatchService deletion", () => {
     get rosters() {
       return unused();
     },
-    get tournaments() {
-      return unused();
-    },
+    tournaments: memoryTournamentWriter(),
   };
 
   const transaction: CompetitionTransaction = { run: async (work) => await work(scope) };

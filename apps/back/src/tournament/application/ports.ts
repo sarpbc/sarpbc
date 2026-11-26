@@ -22,6 +22,7 @@ import type { MatchDecided } from "../domain/match-decided";
 import type { MatchReferences } from "../domain/match-deletion";
 import type { LineupRow } from "../domain/match-lineup";
 import type { StageBracket } from "../domain/bracket";
+import type { StageOutcome } from "../domain/stage-winner";
 import type { UpsertPlayerCommand, UpsertTeamCommand } from "../../roster/application/imports";
 import type { Player } from "../../roster/domain/player";
 import type { EntityRef } from "../../common/domain/entity-ref";
@@ -99,6 +100,8 @@ export interface TournamentWriter {
   byPandascoreId: (id: number) => Promise<Tournament | null>;
   manualCandidates: (window: { from: Date; to: Date }) => Promise<ManualCandidate[]>;
   save: (tournament: Tournament) => Promise<void>;
+  outcome: (id: string) => Promise<StageOutcome | null>;
+  setWinner: (id: string, participantId: string | null) => Promise<void>;
   league: (id: string) => Promise<League | null>;
   leagueByPandascoreId: (id: number) => Promise<League | null>;
   saveLeague: (league: League) => Promise<void>;
@@ -219,7 +222,9 @@ export interface PrizeWriter {
 }
 
 export interface PrizeTransaction {
-  run: <T>(work: (scope: Pick<CompetitionWriteScope, "prizes">) => Promise<T>) => Promise<T>;
+  run: <T>(
+    work: (scope: Pick<CompetitionWriteScope, "prizes" | "tournaments">) => Promise<T>,
+  ) => Promise<T>;
 }
 
 export interface AwardTransaction {

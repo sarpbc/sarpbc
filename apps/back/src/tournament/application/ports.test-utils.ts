@@ -4,6 +4,7 @@ import type { Match, TournamentSummary } from "../domain/match";
 import type { MatchDecided } from "../domain/match-decided";
 import type { MatchReferences } from "../domain/match-deletion";
 import type { StageBracket } from "../domain/bracket";
+import type { StageOutcome } from "../domain/stage-winner";
 import type { MatchTiming } from "../domain/tournament-end";
 import type { Tournament } from "../domain/tournament";
 import type { TournamentEvent } from "../domain/tournament-event";
@@ -43,6 +44,8 @@ export const memoryTournamentWriter = () => {
   const removedTournamentIds: string[] = [];
   const removedParticipantIds: string[] = [];
   const placements: ReadonlyMap<string, number | null>[] = [];
+  const outcomesByTournament = new Map<string, StageOutcome>();
+  const winners: { tournamentId: string; participantId: string | null }[] = [];
 
   return {
     byPandascoreId: async (id: number) =>
@@ -53,6 +56,8 @@ export const memoryTournamentWriter = () => {
     leagues,
     load: async (id: string) => tournaments.get(id) ?? null,
     manualCandidates: async () => [],
+    outcome: async (id: string) => outcomesByTournament.get(id) ?? null,
+    outcomesByTournament,
     participantReferences: async (tournamentId: string, participantId: string) =>
       referencesByParticipant.get(`${tournamentId}:${participantId}`) ?? NO_PARTICIPANT_REFERENCES,
     participants: async (id: string) => participantsByTournament.get(id) ?? [],
@@ -85,11 +90,15 @@ export const memoryTournamentWriter = () => {
     setPlacements: async (next: ReadonlyMap<string, number | null>) => {
       placements.push(next);
     },
+    setWinner: async (tournamentId: string, participantId: string | null) => {
+      winners.push({ participantId, tournamentId });
+    },
     teamPlayers: async (teamId: string) => playersByTeam.get(teamId) ?? [],
     teamsExist: async (ids: string[]) => ids.every((id) => !unknownTeamIds.has(id)),
     tournaments,
     unknownPlayerIds,
     unknownTeamIds,
+    winners,
   };
 };
 

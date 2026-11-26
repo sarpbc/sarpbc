@@ -11,6 +11,7 @@ import { PlayerAward as PlayerAwardRow } from "./player-award.entities";
 import { TournamentPrize as TournamentPrizeRow } from "./tournament-prize.entities";
 import type { Tournament } from "../../domain/tournament";
 import type { League } from "../../domain/league";
+import type { StageOutcome } from "../../domain/stage-winner";
 import type { ParticipantSnapshot } from "../../domain/tournament-participant";
 import type { TournamentWriter } from "../../application/ports";
 import { toTournament, toLeague, toParticipant } from "./competition.mapper";
@@ -102,6 +103,50 @@ export class CompetitionTournamentWriter implements TournamentWriter {
     row.winner = model.winner
       ? this.em.getReference(TournamentParticipantRow, model.winner.id)
       : null;
+    this.em.persist(row);
+    this.tournaments.set(row.id, row);
+  }
+  async outcome(id: string) {
+    const row = this.tournaments.get(id) ?? (await this.em.findOne(TournamentRow, { id }));
+
+    if (!row) {
+      return null;
+    }
+
+    const matches = await this.em.find(
+      MatchRow,
+      { tournament: id },
+      { populate: ["previousMatches"] },
+    );
+
+    const firstPlaces = await this.em.findAll(TournamentPrizeRow, {
+      where: { placement: 1, tournament: id },
+    });
+
+    const winners =
+      firstPlaces.length === 0
+        ? []
+        : await this.em.findAll(TournamentParticipantRow, {
+            where: { team: { $in: firstPlaces.map(({ team }) => team.id) }, tournament: id },
+          });
+
+    return {
+      firstPlaceIds: winners.map((participant) => participant.id),
+      matches: matches.map((match) => ({
+        id: match.id,
+        previousMatchIds: match.previousMatches
+          .getItems()
+          .map(({ previousMatch }) => previousMatch.id),
+        winnerId: match.winner?.id ?? null,
+      })),
+      source: row.source,
+      winnerId: row.winner?.id ?? null,
+    } satisfies StageOutcome;
+  }
+  async setWinner(id: string, participantId: string | null) {
+    const row = this.tournaments.get(id) ?? (await this.em.findOneOrFail(TournamentRow, { id }));
+    row.winner =
+      participantId === null ? null : this.em.getReference(TournamentParticipantRow, participantId);
     this.em.persist(row);
     this.tournaments.set(row.id, row);
   }

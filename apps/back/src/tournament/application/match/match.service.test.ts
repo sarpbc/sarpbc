@@ -7,6 +7,7 @@ import { CompetitionAfterCommit } from "../after-commit";
 import { MatchService } from "./match.service";
 import {
   memoryMatchWriter,
+  memoryTournamentWriter,
   recordingCache,
   recordingDiagnostics,
   recordingEvents,
@@ -17,6 +18,7 @@ import { matchQueries } from "../../../../test/competition-doubles";
 describe("MatchService decided events", () => {
   const participants = ["a", "b"].map((id) => Object.assign(new TournamentParticipant(), { id }));
   let matches = memoryMatchWriter();
+  let tournaments = memoryTournamentWriter();
   let events = recordingEvents();
   let diagnostics = recordingDiagnostics();
   let cache = recordingCache();
@@ -48,6 +50,7 @@ describe("MatchService decided events", () => {
 
   beforeEach(() => {
     matches = memoryMatchWriter();
+    tournaments = memoryTournamentWriter();
     events = recordingEvents();
     diagnostics = recordingDiagnostics();
     cache = recordingCache();
@@ -58,7 +61,7 @@ describe("MatchService decided events", () => {
       matchQueries({
         detail: async () => matches.savedMatches.at(-1) ?? matches.matches.get("match") ?? null,
       }),
-      transactionOver({ matches }),
+      transactionOver({ matches, tournaments }),
       new CompetitionAfterCommit(cache, events, diagnostics),
     );
   });
@@ -67,6 +70,19 @@ describe("MatchService decided events", () => {
     await service.setMatchWinner("match", "a");
 
     expect(events.published).toStrictEqual([matchDecided("match")]);
+  });
+
+  it("crowns the stage winner in the same write as the final", async () => {
+    tournaments.outcomesByTournament.set(cup.id, {
+      firstPlaceIds: [],
+      matches: [{ id: "match", previousMatchIds: ["semi"], winnerId: "a" }],
+      source: "manual",
+      winnerId: null,
+    });
+
+    await service.setMatchWinner("match", "a");
+
+    expect(tournaments.winners).toStrictEqual([{ participantId: "a", tournamentId: cup.id }]);
   });
 
   it("stays silent for an undecided match", async () => {

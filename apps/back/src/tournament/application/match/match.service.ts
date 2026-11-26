@@ -9,6 +9,7 @@ import { assertMatchDeletable } from "../../domain/match-deletion";
 import type { MatchListKind, MatchListQueryOptions } from "./match-list-filters";
 import { findMatchBlocks } from "./match-blocks";
 import { buildHeadToHead } from "./match-head-to-head";
+import { settleStageWinner } from "../stage-winner";
 import type { CompetitionAfterCommit } from "../after-commit";
 import type { CompetitionTransaction, MatchQueries, MatchWriter } from "../ports";
 import type { EmptyBracketInput, ManualMatchInput, UpdateMatchInput } from "../inputs";
@@ -234,32 +235,44 @@ export class MatchService {
   }
 
   async createMatch(tournamentId: string, input: ManualMatchInput) {
-    const written = await this.transaction.run(
-      async ({ matches }) => await createMatchInTransaction(matches, tournamentId, input),
-    );
+    const written = await this.transaction.run(async ({ matches, tournaments }) => {
+      const match = await createMatchInTransaction(matches, tournamentId, input);
+      await settleStageWinner(tournaments, tournamentId);
+
+      return match;
+    });
 
     return await this.settled(written.id);
   }
   async createEmptyBracket(tournamentId: string, input: EmptyBracketInput) {
-    const written = await this.transaction.run(
-      async ({ matches }) => await createEmptyBracketInTransaction(matches, tournamentId, input),
-    );
+    const written = await this.transaction.run(async ({ matches, tournaments }) => {
+      const bracket = await createEmptyBracketInTransaction(matches, tournamentId, input);
+      await settleStageWinner(tournaments, tournamentId);
+
+      return bracket;
+    });
 
     await this.afterCommit.settle({ tournamentIds: [tournamentId] });
 
     return await this.reads.byIds(written.map((match) => match.id));
   }
   async setMatchWinner(matchId: string, winnerId: string) {
-    const written = await this.transaction.run(
-      async ({ matches }) => await setWinnerInTransaction(matches, matchId, winnerId),
-    );
+    const written = await this.transaction.run(async ({ matches, tournaments }) => {
+      const match = await setWinnerInTransaction(matches, matchId, winnerId);
+      await settleStageWinner(tournaments, match.tournament.id);
+
+      return match;
+    });
 
     return await this.settled(written.id);
   }
   async updateMatch(matchId: string, input: UpdateMatchInput) {
-    const written = await this.transaction.run(
-      async ({ matches }) => await updateMatchInTransaction(matches, matchId, input),
-    );
+    const written = await this.transaction.run(async ({ matches, tournaments }) => {
+      const match = await updateMatchInTransaction(matches, matchId, input);
+      await settleStageWinner(tournaments, match.tournament.id);
+
+      return match;
+    });
 
     return await this.settled(written.id);
   }
@@ -282,10 +295,12 @@ export class MatchService {
   }
   /** A forfeit is staff data, so it applies to PandaScore matches too. */
   async setForfeit(matchId: string, forfeitedById: string | null, sourceUrl?: string | null) {
-    const written = await this.transaction.run(
-      async ({ matches }) =>
-        await setForfeitInTransaction(matches, matchId, forfeitedById, sourceUrl),
-    );
+    const written = await this.transaction.run(async ({ matches, tournaments }) => {
+      const match = await setForfeitInTransaction(matches, matchId, forfeitedById, sourceUrl);
+      await settleStageWinner(tournaments, match.tournament.id);
+
+      return match;
+    });
 
     return await this.settled(written.id);
   }
@@ -312,7 +327,7 @@ export class MatchService {
     });
   }
   async deleteMatch(id: string) {
-    const tournamentId = await this.transaction.run(async ({ matches }) => {
+    const tournamentId = await this.transaction.run(async ({ matches, tournaments }) => {
       const match = await matches.load(id);
 
       if (!match) {
@@ -321,6 +336,7 @@ export class MatchService {
 
       await assertDeletable(matches, match);
       await matches.remove(id);
+      await settleStageWinner(tournaments, match.tournament.id);
 
       return match.tournament.id;
     });

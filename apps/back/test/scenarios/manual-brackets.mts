@@ -27,6 +27,8 @@ type TournamentDetail = z.infer<typeof tournamentDetail>;
 
 const tournamentBody = z.object({ tournament: tournamentDetail });
 
+const stageWinner = z.object({ tournament: z.looseObject({ winner: identified.nullable() }) });
+
 const decidedMatches = z.object({
   tournament: z.object({
     matches: z.array(
@@ -155,6 +157,18 @@ export const verifyManualBrackets = async ({
     "the public stage carries the links the bracket tree is drawn from",
   );
 
+  const winnerOf = async (id: string) => {
+    const response = await request("GET", `/tournaments/${id}`);
+
+    return response.json(stageWinner).tournament.winner?.id ?? null;
+  };
+
+  assert.equal(await winnerOf(stage.id), null, "an undecided final crowns nobody");
+  await request("PUT", `/tournaments/matches/${semi1.id}/winner`, { winnerId: p1 }, staffCookie);
+  assert.equal(await winnerOf(stage.id), null, "a semifinal crowns nobody");
+  await request("PUT", `/tournaments/matches/${final.id}/winner`, { winnerId: p3 }, staffCookie);
+  assert.equal(await winnerOf(stage.id), p3, "the winner of the bracket final wins the stage");
+
   const setBracket = async (matchId: string, body: Payload, status = 200) =>
     await request("PUT", `/tournaments/matches/${matchId}/bracket`, body, staffCookie, status);
 
@@ -183,6 +197,7 @@ export const verifyManualBrackets = async ({
 
   await request("DELETE", `/tournaments/matches/${semi1.id}`, undefined, staffCookie, 409);
   await request("DELETE", `/tournaments/matches/${final.id}`, undefined, staffCookie, 204);
+  assert.equal(await winnerOf(stage.id), null, "deleting the final clears the stage winner");
   await request("DELETE", `/tournaments/matches/${semi1.id}`, undefined, staffCookie, 204);
   await request("POST", `/tournaments/${stage.id}/bracket`, { teams: 4 }, staffCookie, 400);
   await request("DELETE", `/tournaments/matches/${semi2.id}`, undefined, staffCookie, 204);

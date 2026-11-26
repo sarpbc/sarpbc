@@ -100,8 +100,6 @@ export const verifyRecords = async ({ orm, request, staffCookie }: RecordsContex
     ]);
 
   const major = await stage("Almanac Major");
-
-  await crown(major, kings.id, "2025-03-01T20:00:00Z", "offline");
   const onlineCup = await stage("Almanac Online Cup");
 
   await crown(onlineCup, kings.id, "2025-04-01T20:00:00Z");
@@ -147,6 +145,7 @@ export const verifyRecords = async ({ orm, request, staffCookie }: RecordsContex
     );
     await sql(`update "match" set "end_at" = ? where "id" = ?`, [endAt, match.id]);
   });
+  await crown(major, kings.id, "2025-03-01T20:00:00Z", "offline");
 
   const response = await request("GET", "/records");
   assert.equal(response.headers["cache-control"], "public, max-age=3600");

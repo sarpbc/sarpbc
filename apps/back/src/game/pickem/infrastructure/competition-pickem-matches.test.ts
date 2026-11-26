@@ -10,7 +10,12 @@ import type {
   CompetitionEvents,
   CompetitionTransaction,
 } from "../../../tournament/application/ports";
-import { competitionScope, matchQueries, matchWriter } from "../../../../test/competition-doubles";
+import {
+  competitionScope,
+  matchQueries,
+  matchWriter,
+  tournamentWriter,
+} from "../../../../test/competition-doubles";
 import { PickemService } from "../application/pickem.service";
 import { CompetitionPickemMatches } from "./competition-pickem-matches";
 
@@ -56,7 +61,13 @@ const arrange = () => {
   const competition = new MatchService(
     matchQueries({ detail: async () => stored }),
     {
-      run: async (work) => await work(competitionScope({ matches: writer })),
+      run: async (work) =>
+        await work(
+          competitionScope({
+            matches: writer,
+            tournaments: tournamentWriter({ outcome: async () => null }),
+          }),
+        ),
     } satisfies CompetitionTransaction,
     new CompetitionAfterCommit(
       { invalidateTournament: async () => {} },

@@ -3,7 +3,12 @@ import type { DataSource, PrizeEntry, TournamentPrizes } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import type { PrizeParticipant, PrizeTransaction } from "./ports";
-import { recordingCache, recordingDiagnostics, recordingEvents } from "./ports.test-utils";
+import {
+  memoryTournamentWriter,
+  recordingCache,
+  recordingDiagnostics,
+  recordingEvents,
+} from "./ports.test-utils";
 import { CompetitionAfterCommit } from "./after-commit";
 import { TournamentPrizeService } from "./tournament-prize.service";
 
@@ -52,7 +57,11 @@ const setup = ({
     tournamentSource: async () => source,
   };
 
-  const transaction: PrizeTransaction = { run: async (work) => await work({ prizes: writer }) };
+  const tournaments = memoryTournamentWriter();
+
+  const transaction: PrizeTransaction = {
+    run: async (work) => await work({ prizes: writer, tournaments }),
+  };
 
   const cache = recordingCache();
   const diagnostics = recordingDiagnostics();
@@ -63,7 +72,7 @@ const setup = ({
     new CompetitionAfterCommit(cache, recordingEvents(), diagnostics),
   );
 
-  return { cache, diagnostics, replaced, service, stored };
+  return { cache, diagnostics, replaced, service, stored, tournaments };
 };
 
 describe(TournamentPrizeService, () => {
@@ -74,6 +83,22 @@ describe(TournamentPrizeService, () => {
 
     expect(replaced).toStrictEqual([{ entries: [entry], tournamentId: "cup" }]);
     expect(cache.invalidated).toStrictEqual(["cup"]);
+  });
+
+  it("crowns the first-place team of a manual stage in the same write", async () => {
+    const { service, tournaments } = setup();
+    tournaments.outcomesByTournament.set("cup", {
+      firstPlaceIds: ["participant-a"],
+      matches: [],
+      source: "manual",
+      winnerId: null,
+    });
+
+    await service.setDistribution("cup", [entry]);
+
+    expect(tournaments.winners).toStrictEqual([
+      { participantId: "participant-a", tournamentId: "cup" },
+    ]);
   });
 
   it("invalidates the cached tournament and keeps the saved distribution when Redis fails", async () => {
