@@ -28,8 +28,7 @@ export const i18nOptions: NuxtI18nOptions = {
     redirectOn: "root",
     useCookie: true,
   },
-  // WARNING: the messages URL carries a hash of every locale file, so a translation change gets a new URL.
-  experimental: { httpCacheDuration: 60 * 60 * 24 * 365 },
+  experimental: { prerenderMessages: true },
   langDir: "locales",
   locales: [
     { code: "en", file: "en-US.json", language: "en", name: "English" },

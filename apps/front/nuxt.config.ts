@@ -179,18 +179,22 @@ export default defineNuxtConfig({
     preset: "node-server",
   },
 
-  routeRules: localizedRouteRules({
-    "/about": { appLayout: "marketing", ...contentSwr },
-    "/brand": { appLayout: "marketing", ...contentSwr },
-    "/cookie-policy": contentSwr,
-    "/game/career": { appLayout: "game" },
-    "/game/career/**": { appLayout: "game" },
-    "/legal-notice": contentSwr,
-    "/login": { appLayout: "login" },
-    "/privacy-policy": contentSwr,
-    "/register": { appLayout: "login" },
-    "/terms-of-service": contentSwr,
-  }),
+  routeRules: {
+    // WARNING: the prerendered messages URL carries a hash of every locale file, so a translation change gets a new URL.
+    "/_i18n/**": { headers: { "cache-control": "public, max-age=31536000, immutable" } },
+    ...localizedRouteRules({
+      "/about": { appLayout: "marketing", ...contentSwr },
+      "/brand": { appLayout: "marketing", ...contentSwr },
+      "/cookie-policy": contentSwr,
+      "/game/career": { appLayout: "game" },
+      "/game/career/**": { appLayout: "game" },
+      "/legal-notice": contentSwr,
+      "/login": { appLayout: "login" },
+      "/privacy-policy": contentSwr,
+      "/register": { appLayout: "login" },
+      "/terms-of-service": contentSwr,
+    }),
+  },
 
   runtimeConfig: {
     apiBaseServer: "",
