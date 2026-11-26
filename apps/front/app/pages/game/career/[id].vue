@@ -3,6 +3,8 @@ import CareerEnd from "~/components/career/CareerEnd.vue";
 import { decodeCareerResultFromShare, loadCareerResult } from "~/composables/use-career-storage";
 import type { CareerResult } from "~/types/career";
 
+await useCareerMessages();
+
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const localePath = useLocalePath();

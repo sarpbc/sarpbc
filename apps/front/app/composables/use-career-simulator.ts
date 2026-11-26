@@ -13,6 +13,7 @@ import {
   reduceCareerState,
 } from "~/utils/career/career-reducer";
 import type { CareerAction } from "~/utils/career/career-reducer";
+import type { WorldRankings } from "~/utils/career/rankings";
 import {
   computeSeasonPoints,
   computeStateRankings,
@@ -31,8 +32,12 @@ import { getPlayerAge, getSeasonsPastPeak, SPLITS_PER_SEASON } from "~/types/car
 
 const careerSimulatorKey = Symbol("careerSimulator");
 
+const sameRankings = (a: WorldRankings, b: WorldRankings) =>
+  JSON.stringify(a) === JSON.stringify(b);
+
 export const useCareerSimulator = () => {
-  const state = ref(createInitialCareerState());
+  // WARNING: the reducer returns a new state on every action and never mutates it, so deep reactivity would only add proxy work to each tap.
+  const state = shallowRef(createInitialCareerState());
   const hydrated = ref(false);
 
   const dispatch = (action: CareerAction) => {
@@ -62,7 +67,11 @@ export const useCareerSimulator = () => {
     state.value = createInitialCareerState();
   };
 
-  const worldRankings = computed(() => computeStateRankings(state.value));
+  const worldRankings = computed((previous?: WorldRankings) => {
+    const next = computeStateRankings(state.value);
+
+    return previous && sameRankings(previous, next) ? previous : next;
+  });
 
   const currentTeamName = computed(
     () => getWorldTeamById(state.value.currentTeamId)?.name ?? state.value.currentTeamId,

@@ -5,6 +5,8 @@ import CareerEnd from "~/components/career/CareerEnd.vue";
 import { encodeCareerResultForShare } from "~/composables/use-career-storage";
 import { useCareerSimulator } from "~/composables/use-career-simulator";
 
+await useCareerMessages();
+
 const { t } = useI18n();
 const { setPageSeo } = useSarpbcSeo();
 const localePath = useLocalePath();
