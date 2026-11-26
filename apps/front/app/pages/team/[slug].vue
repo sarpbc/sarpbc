@@ -151,7 +151,12 @@ setPageSeo({
       </div>
 
       <template v-if="tab === 'info'">
-        <EntityOverview kind="team" :past-matches="pastMatches" :trophies="trophies" />
+        <EntityOverview
+          kind="team"
+          :past-matches="pastMatches"
+          :past-events="pastEvents"
+          :trophies="trophies"
+        />
         <TeamStaffSection v-if="staff.length > 0" :staff="staff" />
         <TeamNameHistory v-if="team.aliases.length > 0" :aliases="team.aliases" />
         <TeamRosterTimeline

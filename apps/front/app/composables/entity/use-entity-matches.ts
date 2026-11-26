@@ -41,21 +41,22 @@ const splitMatches = (matches: ProfileMatchListItem[], now: number) => {
 export const useEntityMatches = (kind: EntityKind, entityId: MaybeRef<string | undefined>) => {
   const idRef = toRef(entityId);
 
-  const { data, pending, error, refresh } = useAsyncData(
+  const {
+    data: sections,
+    pending,
+    error,
+    refresh,
+  } = useAsyncData(
     () => `${kind}-matches-${idRef.value ?? "unknown"}`,
-    async () => ({
-      // WARNING: fetchedAt is captured with the fetch so server and client build identical results on hydration.
-      fetchedAt: Date.now(),
-      matches: isNonEmptyString(idRef.value) ? await FETCH_MATCHES[kind](idRef.value) : [],
-    }),
+    async () =>
+      splitMatches(
+        isNonEmptyString(idRef.value) ? await FETCH_MATCHES[kind](idRef.value) : [],
+        Date.now(),
+      ),
     {
-      default: () => ({ fetchedAt: 0, matches: [] }),
+      default: () => ({ live: [], past: [], upcoming: [] }),
       watch: [idRef],
     },
-  );
-
-  const sections = computed(() =>
-    splitMatches(data.value?.matches ?? [], data.value?.fetchedAt ?? 0),
   );
 
   return {

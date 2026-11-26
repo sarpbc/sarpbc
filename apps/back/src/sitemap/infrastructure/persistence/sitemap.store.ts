@@ -19,6 +19,10 @@ import {
 } from "../../../tournament/infrastructure/competition-persistence";
 import type { SitemapQueries } from "../../application/ports";
 
+// WARNING: imports and syncs rewrite updatedAt on every row, so a finished match or stage is dated by its end.
+const contentLastmod = (updatedAt: Date, endAt: Date | null) =>
+  new Date(endAt && endAt < updatedAt ? endAt : updatedAt);
+
 export class SitemapStore implements SitemapQueries {
   constructor(private readonly em: EntityManager) {}
 
@@ -52,12 +56,12 @@ export class SitemapStore implements SitemapQueries {
     const rows = await this.em.find(
       Tournament,
       {},
-      { fields: ["slug", "updatedAt", "event.slug"], populate: ["event"] },
+      { fields: ["slug", "updatedAt", "endAt", "event.slug"], populate: ["event"] },
     );
 
     return rows.map((row) => ({
       eventSlug: row.event.slug,
-      lastmod: new Date(row.updatedAt),
+      lastmod: contentLastmod(row.updatedAt, row.endAt),
       slug: row.slug,
     }));
   }
@@ -73,6 +77,7 @@ export class SitemapStore implements SitemapQueries {
           "status",
           "updatedAt",
           "beginAt",
+          "endAt",
           "participants.team.name",
           "participants.team.aliases",
           "participants.players.name",
@@ -85,7 +90,7 @@ export class SitemapStore implements SitemapQueries {
     );
 
     return rows.map((row) => ({
-      lastmod: new Date(row.updatedAt),
+      lastmod: contentLastmod(row.updatedAt, row.endAt),
       name: row.name,
       participants: row.participants.getItems().map(({ team, players }) => ({
         players: players.getItems().map(({ name }) => ({ name })),

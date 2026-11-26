@@ -280,6 +280,7 @@
     },
     "entity": {
       "overview": {
+        "recentEvents": "Derniers événements",
         "recentMatches": "Derniers matchs"
       }
     },
