@@ -28,6 +28,7 @@ export const i18nOptions: NuxtI18nOptions = {
     redirectOn: "root",
     useCookie: true,
   },
+  experimental: { prerenderMessages: true },
   langDir: "locales",
   locales: [
     { code: "en", file: "en-US.json", language: "en", name: "English" },

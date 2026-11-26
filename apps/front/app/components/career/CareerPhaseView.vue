@@ -51,12 +51,24 @@ const {
 const hoveredTeamId = ref<string | null>(null);
 
 const phase = computed(() => state.value.phase);
+
+// WARNING: both rankings sit beside the game, or below it on mobile, so they mount after the first paint to keep the tap that opens the game responsive.
+const rankingsReady = ref(false);
+
+onMounted(() => {
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      rankingsReady.value = true;
+    }, 0);
+  });
+});
 </script>
 
 <template>
   <div class="flex flex-col gap-4 md:grid md:grid-cols-12 md:items-start md:gap-4">
     <HubColumn variant="main" class="order-2 md:order-1 md:col-span-3">
       <CareerWorldRankings
+        v-if="rankingsReady"
         kind="teams"
         :teams="worldRankings.teams"
         v-model:hovered-team-id="hoveredTeamId"
@@ -169,6 +181,7 @@ const phase = computed(() => state.value.phase);
 
     <HubColumn variant="rail" class="order-3 md:col-span-3">
       <CareerWorldRankings
+        v-if="rankingsReady"
         kind="players"
         :players="worldRankings.players"
         v-model:hovered-team-id="hoveredTeamId"
