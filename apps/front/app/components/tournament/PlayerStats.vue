@@ -53,6 +53,28 @@ const setView = (value: string) => {
   }
 };
 
+const isColumn = (id: string): id is Column => COLUMNS.some((column) => column === id);
+
+const metric = computed<Column>({
+  get: () => (isColumn(sort.value.id) ? sort.value.id : "goals"),
+  set: (id) => {
+    sort.value = { desc: true, id };
+  },
+});
+
+const setMetric = (id: string) => {
+  if (isColumn(id)) {
+    metric.value = id;
+  }
+};
+
+const metricOptions = computed(() =>
+  COLUMNS.map((column) => ({
+    label: t(`page.tournaments.stats.metric.${column}`),
+    value: column,
+  })),
+);
+
 const viewOptions = computed(() => [
   { label: t("page.tournaments.stats.totals"), value: "totals" as const },
   { label: t("page.tournaments.stats.perGame"), value: "perGame" as const },
@@ -117,8 +139,7 @@ const value = (row: TournamentPlayerStats, column: Column) => {
   }
 };
 
-const isSortKey = (id: string): id is SortKey =>
-  id === "player" || id === "team" || COLUMNS.some((column) => column === id);
+const isSortKey = (id: string): id is SortKey => id === "player" || id === "team" || isColumn(id);
 
 const compare = (a: TournamentPlayerStats, b: TournamentPlayerStats, key: SortKey) => {
   if (key === "player") {
@@ -238,6 +259,16 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
       />
     </div>
 
+    <div v-if="hasStats && !pending && !error" class="flex items-center gap-2 px-2 md:hidden">
+      <SSelect
+        :model-value="metric"
+        :items="metricOptions"
+        :aria-label="t('page.tournaments.stats.sortBy')"
+        class="w-full"
+        @update:model-value="setMetric"
+      />
+    </div>
+
     <HubCard v-if="pending" class="min-h-row-stack p-2" aria-live="polite">
       <div class="flex w-full flex-col gap-2">
         <SSkeleton v-for="index in 6" :key="index" class="h-row" />
@@ -257,7 +288,41 @@ const columns = computed<TableColumn<TournamentPlayerStats>[]>(() => [
     </HubCard>
 
     <HubCard v-else class="flex flex-col">
-      <STable v-model:sorting="sort" :caption="caption" :columns="columns" :data="pageRows">
+      <ol class="flex flex-col md:hidden" :aria-label="caption">
+        <li v-for="(row, index) in pageRows" :key="row.player.id">
+          <HubListItem :to="$localePath(playerPath(row.player.slug))" class="min-w-0 gap-3">
+            <span class="w-6 shrink-0 text-right text-sm text-muted tabular-nums">
+              {{ (page - 1) * ROWS_PER_PAGE + index + 1 }}
+            </span>
+            <TeamImg
+              v-if="overall"
+              :team-name="row.player.currentTeam?.name"
+              :logo="row.player.currentTeam"
+              size="xs"
+            />
+            <span class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-row text-default group-hover:text-highlighted">
+                {{ row.player.name }}
+              </span>
+              <span class="truncate text-xs text-muted">
+                <template v-if="!overall && row.teams[0]">{{ row.teams[0].name }} · </template>
+                {{ t("page.tournaments.stats.gamesCount", row.games) }}
+              </span>
+            </span>
+            <span class="shrink-0 font-medium text-highlighted tabular-nums">
+              {{ display(row, metric) }}
+              <span class="sr-only">{{ t(`page.tournaments.stats.metric.${metric}`) }}</span>
+            </span>
+          </HubListItem>
+        </li>
+      </ol>
+      <STable
+        v-model:sorting="sort"
+        :caption="caption"
+        :columns="columns"
+        :data="pageRows"
+        class="hidden md:block"
+      >
         <template #player-cell="{ row }">
           <span v-if="overall" class="flex max-w-48 items-center gap-2">
             <TeamImg

@@ -2,6 +2,10 @@
 import type { Player, Team } from "@sarpbc/types";
 import { useTimeoutFn } from "@vueuse/core";
 
+const { block = false } = defineProps<{
+  block?: boolean;
+}>();
+
 const { t } = useI18n();
 
 const inputRef = useTemplateRef("inputRef");
@@ -85,7 +89,7 @@ const handleLinkClick = (event: MouseEvent) => {
       <InputSearch
         ref="inputRef"
         :search="search"
-        class="md:w-48 lg:w-64"
+        :class="block ? 'w-full' : 'md:w-48 lg:w-64'"
         @update:search="updateSearch"
         @focus="handleFocus"
         @blur="handleBlur"
@@ -93,7 +97,8 @@ const handleLinkClick = (event: MouseEvent) => {
     </template>
     <template #content>
       <div
-        class="w-48 lg:w-64 flex flex-col p-4 gap-2"
+        class="flex flex-col p-4 gap-2"
+        :class="block ? 'w-(--reka-popper-anchor-width)' : 'w-48 lg:w-64'"
         @mousedown="handleMouseDown"
         @click="handleLinkClick"
       >

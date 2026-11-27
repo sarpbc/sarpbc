@@ -25,7 +25,7 @@ const typeLabel = computed(() =>
   <HubListItem class="min-w-0 gap-3">
     <time
       :datetime="transfer.date"
-      class="w-20 shrink-0 truncate text-xs text-muted tabular-nums sm:w-24"
+      class="hidden w-24 shrink-0 truncate text-xs text-muted tabular-nums sm:block"
     >
       {{ dateDf.format(new Date(transfer.date)) }}
     </time>
@@ -38,19 +38,27 @@ const typeLabel = computed(() =>
         :img="transfer.player.imageUrl || undefined"
         size="list"
       />
-      <span class="truncate text-sm font-medium">{{ transfer.player.name }}</span>
-      <FlagIcon
-        v-if="transfer.player.nationality"
-        :nationality="transfer.player.nationality"
-        size="md"
-        class="shrink-0"
-      />
-    </SLink>
-    <span class="flex shrink-0 items-center gap-1.5 text-xs text-muted sm:w-28">
-      <Icon :name="transferTypeIcon(transfer.type)" class="size-4 shrink-0" aria-hidden="true" />
-      <span class="sr-only truncate sm:not-sr-only">
-        {{ typeLabel }}
+      <span class="flex min-w-0 flex-col">
+        <span class="flex min-w-0 items-center gap-2">
+          <span class="truncate text-sm font-medium">{{ transfer.player.name }}</span>
+          <FlagIcon
+            v-if="transfer.player.nationality"
+            :nationality="transfer.player.nationality"
+            size="md"
+            class="shrink-0"
+          />
+        </span>
+        <span class="truncate text-xs font-normal text-muted sm:hidden">
+          {{ typeLabel }} ·
+          <time :datetime="transfer.date" class="tabular-nums">
+            {{ dateDf.format(new Date(transfer.date)) }}
+          </time>
+        </span>
       </span>
+    </SLink>
+    <span class="hidden w-28 shrink-0 items-center gap-1.5 text-xs text-muted sm:flex">
+      <Icon :name="transferTypeIcon(transfer.type)" class="size-4 shrink-0" aria-hidden="true" />
+      <span class="truncate">{{ typeLabel }}</span>
     </span>
     <SLink
       v-if="showTeam"
