@@ -34,14 +34,14 @@ const setup = (toolName: string, role: StaffRole = "admin") => {
 
 describe("stream tools", () => {
   it.each([
-    ["set_event_streams", "eventId", "set_event_streams"],
-    ["set_tournament_streams", "tournamentId", "set_tournament_streams"],
-    ["set_match_streams", "matchId", "set_match_streams"],
-  ])("%s queues a proposal that replaces the whole list", async (name, idField, kind) => {
+    ["event", "eventId", "set_event_streams"],
+    ["tournament", "tournamentId", "set_tournament_streams"],
+    ["match", "matchId", "set_match_streams"],
+  ])("queues a proposal that replaces the whole %s list", async (target, idField, kind) => {
     vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
-    const { call, rosterProposalService } = setup(name);
+    const { call, rosterProposalService } = setup("set_streams");
 
-    const result = await call({ [idField]: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS });
+    const result = await call({ id: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS, target });
 
     expect(rosterProposalService.changes).toStrictEqual([
       {
@@ -57,8 +57,8 @@ describe("stream tools", () => {
   });
 
   it("requires a non-Liquipedia sourceUrl and well-formed streams", () => {
-    const schema = z.object(setup("set_match_streams").tool.inputSchema);
-    const input = { matchId: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS };
+    const schema = z.object(setup("set_streams").tool.inputSchema);
+    const input = { id: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS, target: "match" };
     expect(schema.safeParse(input).success).toBe(true);
     expect(schema.safeParse({ ...input, sourceUrl: undefined }).success).toBe(false);
     expect(
@@ -72,14 +72,21 @@ describe("stream tools", () => {
   });
 
   it("requires tournaments.manage", async () => {
-    const { call, rosterProposalService } = setup("set_match_streams", "journalist");
-    const result = await call({ matchId: MATCH_ID, sourceUrl: SOURCE, streams: STREAMS });
+    const { call, rosterProposalService } = setup("set_streams", "journalist");
+
+    const result = await call({
+      id: MATCH_ID,
+      sourceUrl: SOURCE,
+      streams: STREAMS,
+      target: "match",
+    });
+
     expect(result.isError).toBe(true);
     expect(rosterProposalService.changes).toStrictEqual([]);
   });
 
   it("hides start.gg sourced stream lists from list_roster_proposals", async () => {
-    const { tool: _, rosterProposalService } = setup("set_match_streams");
+    const { tool: _, rosterProposalService } = setup("set_streams");
 
     const proposal = (sourceUrl: string) =>
       Object.assign(new RosterProposal(), {

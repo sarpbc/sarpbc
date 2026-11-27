@@ -487,14 +487,16 @@ describe("bracket tools", () => {
   it("records or clears a match source and refuses BLAST.tv and Liquipedia mirrors", async () => {
     const { tools, matchService, run } = setupBracket("manual");
     const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
-    await run("set_match_source", { matchId: "final", sourceUrl });
+    await run("set_source", { id: "final", sourceUrl, target: "match" });
     expect(matchService.calls).toContainEqual({ args: ["final", sourceUrl], method: "setSource" });
 
-    const input = z.object(defined(tools, "set_match_source").inputSchema);
-    expect(input.safeParse({ matchId: "final", sourceUrl: null }).success).toBe(true);
+    const input = z.object(defined(tools, "set_source").inputSchema);
+    expect(input.safeParse({ id: "final", sourceUrl: null, target: "match" }).success).toBe(true);
 
     for (const refused of ["https://blast.tv/rl", "https://liquipedia-mirror.example/rl"]) {
-      expect(input.safeParse({ matchId: "final", sourceUrl: refused }).success).toBe(false);
+      expect(input.safeParse({ id: "final", sourceUrl: refused, target: "match" }).success).toBe(
+        false,
+      );
     }
   });
 
@@ -503,17 +505,18 @@ describe("bracket tools", () => {
     const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";
     const tournamentId = "6f1c1b5e-8f5a-4c1e-9b1a-2f0d3c4b5a69";
 
-    const result = await run("set_tournament_source", { sourceUrl, tournamentId });
+    const result = await run("set_source", { id: tournamentId, sourceUrl, target: "tournament" });
 
     expect(manualTournamentService.calls).toStrictEqual([
       { args: [tournamentId, sourceUrl], method: "setSource" },
     ]);
     expect(jsonOf(result)).toHaveProperty("sourceUrl", sourceUrl);
 
-    const input = z.object(defined(tools, "set_tournament_source").inputSchema);
-    expect(input.safeParse({ sourceUrl: null, tournamentId }).success).toBe(true);
+    const input = z.object(defined(tools, "set_source").inputSchema);
+    const stage = { id: tournamentId, target: "tournament" };
+    expect(input.safeParse({ ...stage, sourceUrl: null }).success).toBe(true);
     expect(
-      input.safeParse({ sourceUrl: "https://liquipedia.net/rocketleague/x", tournamentId }).success,
+      input.safeParse({ ...stage, sourceUrl: "https://liquipedia.net/rocketleague/x" }).success,
     ).toBe(false);
   });
 

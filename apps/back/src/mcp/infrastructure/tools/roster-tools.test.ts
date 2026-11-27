@@ -143,6 +143,50 @@ describe("roster proposals", () => {
     });
   });
 
+  it("creates a staff member on a team in one proposal", async () => {
+    const { rosterProposalService, call } = setup("admin");
+
+    await call("create_player", {
+      effectiveDate: "2026-11-01",
+      name: "Kasper",
+      role: "coach",
+      sourceUrl: input.sourceUrl,
+      teamId: TEAM_ID,
+    });
+
+    expect(rosterProposalService.changes).toContainEqual({
+      change: {
+        contractRole: "coach",
+        effectiveDate: "2026-11-01",
+        kind: "create_player",
+        name: "Kasper",
+        nationality: undefined,
+        status: "active",
+        teamId: TEAM_ID,
+      },
+      proposedById: "u1",
+      sourceUrl: input.sourceUrl,
+    });
+  });
+
+  it("refuses an incomplete team for a created player", async () => {
+    const { rosterProposalService, call } = setup("admin");
+    const player = { name: "Kasper", sourceUrl: input.sourceUrl };
+
+    const results = await Promise.all(
+      [
+        { ...player, teamId: TEAM_ID },
+        { ...player, role: "coach" },
+        { ...player, effectiveDate: "2026-11-01" },
+        { ...player, effectiveDate: "2026-11-01", status: "retired", teamId: TEAM_ID },
+      ].map(async (invalid) => await call("create_player", invalid)),
+    );
+
+    expect(results.map(({ isError }) => isError)).toStrictEqual([true, true, true, true]);
+
+    expect(rosterProposalService.changes).toStrictEqual([]);
+  });
+
   it("maps role to contractRole and country to nationality", async () => {
     const { rosterProposalService, call } = setup("admin");
 
@@ -212,13 +256,15 @@ describe("delete proposals", () => {
   it("records a pending match deletion with its reason and optional source", async () => {
     const { rosterProposalService, call } = setup("admin");
 
-    const unsourced = await call("propose_delete_match", {
-      matchId: MATCH_ID,
+    const unsourced = await call("propose_delete", {
+      entity: "match",
+      id: MATCH_ID,
       reason: "Series imported twice",
     });
 
-    await call("propose_delete_match", {
-      matchId: MATCH_ID,
+    await call("propose_delete", {
+      entity: "match",
+      id: MATCH_ID,
       reason: "Series imported twice",
       sourceUrl: input.sourceUrl,
     });
@@ -248,11 +294,12 @@ describe("delete proposals", () => {
   it("records a pending team deletion or merge", async () => {
     const { rosterProposalService, call } = setup("admin");
 
-    await call("propose_delete_team", { reason: "Empty duplicate", teamId: TEAM_ID });
-    await call("propose_delete_team", {
+    await call("propose_delete", { entity: "team", id: TEAM_ID, reason: "Empty duplicate" });
+    await call("propose_delete", {
+      entity: "team",
+      id: TEAM_ID,
       mergeIntoTeamId: KEPT_TEAM_ID,
       reason: "Empty duplicate",
-      teamId: TEAM_ID,
     });
 
     expect(rosterProposalService.changes[0]).toStrictEqual(
@@ -275,28 +322,21 @@ describe("delete proposals", () => {
 
   it("requires an id and a reason and refuses Liquipedia", () => {
     const { tool } = setup("admin");
-    const match = z.object(tool("propose_delete_match").inputSchema);
-    const team = z.object(tool("propose_delete_team").inputSchema);
+    const schema = z.object(tool("propose_delete").inputSchema);
+    const match = { entity: "match", id: MATCH_ID, reason: "Duplicate" };
 
-    expect(match.safeParse({ matchId: MATCH_ID, reason: "Duplicate" }).success).toBe(true);
+    expect(schema.safeParse(match).success).toBe(true);
 
     for (const invalid of [
-      { matchId: "7395", reason: "Duplicate" },
-      { matchId: MATCH_ID, reason: "  " },
-      { matchId: MATCH_ID },
-      {
-        matchId: MATCH_ID,
-        reason: "Duplicate",
-        sourceUrl: "https://liquipedia.net/rocketleague/RLCS",
-      },
+      { ...match, id: "7395" },
+      { ...match, reason: "  " },
+      { ...match, reason: undefined },
+      { ...match, entity: "player" },
+      { ...match, sourceUrl: "https://liquipedia.net/rocketleague/RLCS" },
+      { ...match, entity: "team", mergeIntoTeamId: "kc" },
     ]) {
-      expect(match.safeParse(invalid).success).toBe(false);
+      expect(schema.safeParse(invalid).success).toBe(false);
     }
-
-    expect(team.safeParse({ reason: "Duplicate", teamId: TEAM_ID }).success).toBe(true);
-    expect(
-      team.safeParse({ mergeIntoTeamId: "kc", reason: "Duplicate", teamId: TEAM_ID }).success,
-    ).toBe(false);
   });
 
   it("returns a refused proposal as a tool error", async () => {
@@ -305,7 +345,11 @@ describe("delete proposals", () => {
       new InvalidInputError("Group A is synced from PandaScore and cannot be deleted"),
     );
 
-    const result = await call("propose_delete_match", { matchId: MATCH_ID, reason: "Duplicate" });
+    const result = await call("propose_delete", {
+      entity: "match",
+      id: MATCH_ID,
+      reason: "Duplicate",
+    });
 
     expect(result).toMatchObject({
       content: [{ text: "Group A is synced from PandaScore and cannot be deleted" }],
@@ -316,16 +360,64 @@ describe("delete proposals", () => {
   it("requires the permission that reviews the deletion", async () => {
     const { rosterProposalService, call, tool } = setup("journalist");
 
-    const callResult2 = await call("propose_delete_match", {
-      matchId: MATCH_ID,
+    const callResult2 = await call("propose_delete", {
+      entity: "match",
+      id: MATCH_ID,
       reason: "Duplicate",
     });
 
     expect(callResult2.isError).toBe(true);
-    const callResult3 = await call("propose_delete_team", { reason: "Duplicate", teamId: TEAM_ID });
+
+    const callResult3 = await call("propose_delete", {
+      entity: "team",
+      id: TEAM_ID,
+      reason: "Duplicate",
+    });
+
     expect(callResult3.isError).toBe(true);
     expect(rosterProposalService.changes).toStrictEqual([]);
-    expect(tool("propose_delete_match").description).toContain("Requires tournaments.manage.");
-    expect(tool("propose_delete_team").description).toContain("Requires teams.manage.");
+    expect(tool("propose_delete").description).toContain(
+      "Requires tournaments.manage or teams.manage.",
+    );
+  });
+});
+
+describe("merge proposals", () => {
+  const DUPLICATE_ID = "9c858901-8a57-4791-81fe-4c455b099bc9";
+
+  it.each([
+    ["player", "merge_players"],
+    ["team", "merge_teams"],
+  ])("records a pending %s merge", async (entity, kind) => {
+    const { rosterProposalService, call } = setup("admin");
+
+    await call("merge", {
+      duplicateId: DUPLICATE_ID,
+      entity,
+      keptId: TEAM_ID,
+      sourceUrl: input.sourceUrl,
+    });
+
+    expect(rosterProposalService.changes).toStrictEqual([
+      {
+        change: { duplicateId: DUPLICATE_ID, keptId: TEAM_ID, kind },
+        proposedById: "u1",
+        sourceUrl: input.sourceUrl,
+      },
+    ]);
+  });
+
+  it("refuses a match deletion merged into a team", async () => {
+    const { rosterProposalService, call } = setup("admin");
+
+    const result = await call("propose_delete", {
+      entity: "match",
+      id: DUPLICATE_ID,
+      mergeIntoTeamId: TEAM_ID,
+      reason: "Duplicate",
+    });
+
+    expect(result.isError).toBe(true);
+    expect(rosterProposalService.changes).toStrictEqual([]);
   });
 });

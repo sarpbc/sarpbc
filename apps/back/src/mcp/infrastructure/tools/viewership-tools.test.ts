@@ -35,13 +35,13 @@ const setup = (toolName: string, role: StaffRole = "admin") => {
 
 describe("viewership tools", () => {
   it.each([
-    ["set_event_viewership", "eventId"],
-    ["set_match_viewership", "matchId"],
-  ])("%s queues a proposal credited to its sourceUrl", async (kind, idField) => {
+    ["event", "eventId", "set_event_viewership"],
+    ["match", "matchId", "set_match_viewership"],
+  ])("queues a %s proposal credited to its sourceUrl", async (target, idField, kind) => {
     vi.stubEnv("ADMIN_URL", "https://admin.sarpbc.test");
-    const { call, rosterProposalService } = setup(kind);
+    const { call, rosterProposalService } = setup("set_viewership");
 
-    const result = await call({ [idField]: MATCH_ID, ...INPUT, averageViewers: 30_000 });
+    const result = await call({ id: MATCH_ID, target, ...INPUT, averageViewers: 30_000 });
 
     expect(rosterProposalService.changes).toStrictEqual([
       {
@@ -68,8 +68,8 @@ describe("viewership tools", () => {
   });
 
   it("requires an https sourceUrl outside Liquipedia, BLAST.tv and start.gg, and a source name", () => {
-    const schema = z.object(setup("set_match_viewership").tool.inputSchema);
-    const input = { matchId: MATCH_ID, ...INPUT };
+    const schema = z.object(setup("set_viewership").tool.inputSchema);
+    const input = { id: MATCH_ID, target: "match", ...INPUT };
     expect(schema.safeParse(input).success).toBe(true);
 
     for (const invalid of [
@@ -88,8 +88,8 @@ describe("viewership tools", () => {
   });
 
   it("requires tournaments.manage", async () => {
-    const { call, rosterProposalService } = setup("set_match_viewership", "journalist");
-    const result = await call({ matchId: MATCH_ID, ...INPUT });
+    const { call, rosterProposalService } = setup("set_viewership", "journalist");
+    const result = await call({ id: MATCH_ID, target: "match", ...INPUT });
     expect(result.isError).toBe(true);
     expect(rosterProposalService.changes).toStrictEqual([]);
   });

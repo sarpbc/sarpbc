@@ -313,7 +313,7 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_match_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them. On a forfeited match (forfeitedBy set), scores that make the forfeiting side the winner, sides that leave it out or a status other than finished clear the forfeit.",
+      "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them. On a forfeited match (forfeitedBy set), scores that make the forfeiting side the winner, sides that leave it out or a status other than finished clear the forfeit.",
     handler: async ({
       matchId,
       beginAt,
@@ -372,24 +372,42 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Record or clear the public source of a match: where its schedule, sides or score were taken from. Works on any match, PandaScore included, and changes nothing else.",
-    handler: async ({ matchId, sourceUrl }) => {
-      const match = await matchService.setSource(matchId, sourceUrl);
+      "Record, replace or clear the public source of a match or a tournament stage: where a match's schedule, sides or score, or a stage's format, dates, participants or results were taken from. Works on any match or stage, PandaScore included: the sync never overwrites it. Changes nothing else; use update_tournament rosters or set_tournament_roster for a stage roster.",
+    handler: async ({ target, id, sourceUrl }) => {
+      if (target === "match") {
+        const match = await matchService.setSource(id, sourceUrl);
 
-      return { entityId: match.id, result: mapMatchListResponse(match) };
+        return { entityId: match.id, result: mapMatchListResponse(match) };
+      }
+
+      const tournament = await manualTournamentService.setSource(id, sourceUrl);
+
+      return {
+        entityId: tournament.id,
+        result: {
+          id: tournament.id,
+          name: tournament.name,
+          sourceUrl: tournament.sourceUrl,
+          url: tournamentUrl(tournament),
+        },
+        sourceUrl: tournament.sourceUrl ?? undefined,
+      };
     },
     input: {
-      matchId: z.string().min(1).describe("Match UUID."),
-      sourceUrl: matchSourceUrlInput.nullable().describe("Public source, or null to clear it."),
+      id: z.string().min(1).describe("UUID of the match or tournament stage."),
+      sourceUrl: dataSourceUrlField(
+        "Public page the data was taken from: the organiser's announcement or rules, the official Rocket League rules, RLEsports, or the PandaScore or start.gg page. Never Liquipedia, a mirror of it or BLAST.tv. null clears it.",
+      ).nullable(),
+      target: z.enum(["match", "tournament"]).describe("Whether id is a match or a stage."),
     },
-    name: "set_match_source",
+    name: "set_source",
     permission: "tournaments.manage",
     write: true,
   }),
 
   defineTool({
     description:
-      "Mark one side of a two-sided match as having forfeited or been disqualified, or clear the forfeit. Works on any match, PandaScore included. When the cited source (for example a start.gg set shown as DQ with a -1 score) reports a forfeit or disqualification, record it here instead of entering the score. A forfeit keeps the series counted normally for circuit points, standings and pick'em: the winner becomes the other side and the score becomes the series default (3-0 in a best of 5; the score is kept when the series length is unknown). Passing participantId null clears the forfeit without touching the score or the winner. sourceUrl is required to declare a forfeit and optional to clear one; when given it is recorded as the match source like set_match_source.",
+      "Mark one side of a two-sided match as having forfeited or been disqualified, or clear the forfeit. Works on any match, PandaScore included. When the cited source (for example a start.gg set shown as DQ with a -1 score) reports a forfeit or disqualification, record it here instead of entering the score. A forfeit keeps the series counted normally for circuit points, standings and pick'em: the winner becomes the other side and the score becomes the series default (3-0 in a best of 5; the score is kept when the series length is unknown). Passing participantId null clears the forfeit without touching the score or the winner. sourceUrl is required to declare a forfeit and optional to clear one; when given it is recorded as the match source like set_source.",
     handler: async ({ matchId, participantId, sourceUrl }) => {
       if (participantId !== null && sourceUrl === undefined) {
         throw new InvalidInputError(
@@ -556,76 +574,30 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Record, replace or clear the public source of a tournament stage: the page its format, dates, participants or results were taken from. Works on any stage, PandaScore included: the sync never overwrites it. Changes nothing else; use set_match_source for one match and update_tournament rosters or set_tournament_roster for a stage roster.",
-    handler: async ({ tournamentId, sourceUrl }) => {
-      const tournament = await manualTournamentService.setSource(tournamentId, sourceUrl);
-
-      return {
-        entityId: tournament.id,
-        result: {
-          id: tournament.id,
-          name: tournament.name,
-          sourceUrl: tournament.sourceUrl,
-          url: tournamentUrl(tournament),
-        },
-        sourceUrl: tournament.sourceUrl ?? undefined,
-      };
-    },
-    input: {
-      sourceUrl: dataSourceUrlField(
-        "Public page the stage was taken from: the organiser's announcement or rules, RLEsports, the PandaScore page or the start.gg event. Never Liquipedia, a mirror of it or BLAST.tv. null clears it.",
-      ).nullable(),
-      tournamentId: z.uuid().describe("Tournament (stage) UUID."),
-    },
-    name: "set_tournament_source",
-    permission: "tournaments.manage",
-    write: true,
-  }),
-
-  defineTool({
-    description:
-      "Link a manual tournament to its PandaScore tournament when the sync did not match it automatically. The manual tournament becomes the synced stage (keeping its id, URLs and image) and PandaScore fills its details and matches, so no duplicate is created. Fails if that PandaScore tournament is already imported as another tournament.",
-    handler: async ({ tournamentId, pandascoreId }) => {
-      const tournament = await pandascoreTournamentSync.executeByPandascoreId(
-        pandascoreId,
-        tournamentId,
-      );
-
-      return {
-        entityId: tournament.id,
-        result: {
-          id: tournament.id,
-          name: tournament.name,
-          pandascoreId: tournament.pandascoreId,
-          source: tournament.source,
-          url: tournamentUrl(tournament),
-        },
-      };
-    },
-    input: {
-      pandascoreId: z
-        .number()
-        .int()
-        .positive()
-        .describe("PandaScore tournament id (from api.pandascore.co /tournaments/:id)."),
-      tournamentId: z.uuid().describe("Manual tournament UUID to link."),
-    },
-    name: "link_pandascore_tournament",
-    permission: "tournaments.manage",
-    write: true,
-  }),
-
-  defineTool({
-    description:
-      "Trigger a PandaScore sync. Pass tournamentId to sync one local event, or omit to discover missing tournaments (reconcile past/upcoming/running) then apply PandaScore incidents (creations and updates).",
-    handler: async ({ tournamentId }) => {
-      if (tournamentId !== undefined && tournamentId !== "") {
-        await pandascoreTournamentSync.execute(tournamentId);
+      "Run a PandaScore sync. With pandascoreId and tournamentId, link that manual tournament to its PandaScore tournament when the sync did not match it automatically: the manual tournament becomes the synced stage (keeping its id, URLs and image) and PandaScore fills its details and matches, so no duplicate is created; fails if that PandaScore tournament is already imported as another tournament. With pandascoreId only, import or refresh that PandaScore tournament (e.g. 21623 for EWC 2026 Group A), for one that exists on PandaScore but is missing from sarpbc. With tournamentId only, refresh that synced tournament. With neither, discover missing tournaments (reconcile past, upcoming and running) then apply PandaScore incidents (creations and updates).",
+    handler: async ({ pandascoreId, tournamentId }) => {
+      if (pandascoreId !== undefined) {
+        const tournament = await pandascoreTournamentSync.executeByPandascoreId(
+          pandascoreId,
+          tournamentId,
+        );
 
         return {
-          entityId: tournamentId,
-          result: { scope: "single", success: true, tournamentId },
+          entityId: tournament.id,
+          result: {
+            id: tournament.id,
+            name: tournament.name,
+            pandascoreId: tournament.pandascoreId,
+            source: tournament.source,
+            url: tournamentUrl(tournament),
+          },
         };
+      }
+
+      if (tournamentId !== undefined) {
+        await pandascoreTournamentSync.execute(tournamentId);
+
+        return { entityId: tournamentId, result: { scope: "single", success: true, tournamentId } };
       }
 
       const sync = await pandascoreNewTournamentsSync.execute();
@@ -633,41 +605,18 @@ export const writeTools = ({
       return { result: { scope: "new_tournaments", success: true, sync } };
     },
     input: {
-      tournamentId: z
-        .string()
-        .min(1)
-        .optional()
-        .describe("Local tournament UUID to sync. Omit to run the global new-tournament sync."),
-    },
-    name: "trigger_tournament_sync",
-    permission: "tournaments.manage",
-    write: true,
-  }),
-
-  defineTool({
-    description:
-      "Import or refresh a tournament by its PandaScore numeric ID (e.g. 21623 for EWC 2026 Group A). Use when a tournament exists on PandaScore but is missing from sarpbc.",
-    handler: async ({ pandascoreId }) => {
-      const tournament = await pandascoreTournamentSync.executeByPandascoreId(pandascoreId);
-
-      return {
-        entityId: tournament.id,
-        result: {
-          pandascoreId,
-          success: true,
-          tournamentId: tournament.id,
-          url: tournamentUrl(tournament),
-        },
-      };
-    },
-    input: {
       pandascoreId: z
         .number()
         .int()
         .positive()
+        .optional()
         .describe("PandaScore tournament id (from api.pandascore.co /tournaments/:id)."),
+      tournamentId: z
+        .uuid()
+        .optional()
+        .describe("Local tournament UUID: the manual one to link, or the synced one to refresh."),
     },
-    name: "sync_pandascore_tournament",
+    name: "sync_pandascore",
     permission: "tournaments.manage",
     write: true,
   }),

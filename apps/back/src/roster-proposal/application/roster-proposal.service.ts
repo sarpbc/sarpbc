@@ -406,9 +406,25 @@ export class RosterProposalService {
           }),
         ),
       create_player: async (change, sourceUrl) => {
-        const { kind: _, ...input } = change;
+        const { name, nationality, status } = change;
 
-        return await idOf(this.players.create({ ...input, source: sourceFromUrl(sourceUrl) }));
+        const { id } = await this.players.create({
+          name,
+          nationality,
+          source: sourceFromUrl(sourceUrl),
+          status,
+        });
+
+        if (change.teamId !== undefined) {
+          await this.players.joinTeam(id, {
+            effectiveDate: change.effectiveDate,
+            role: change.contractRole,
+            sourceUrl,
+            teamId: change.teamId,
+          });
+        }
+
+        return id;
       },
       create_team: async (change, sourceUrl) => {
         const { kind: _, ...input } = change;

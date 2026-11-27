@@ -1841,12 +1841,13 @@ describe("backend integration", () => {
         await applied("add_player_to_team", move(created, alpha, "2026-10-25"));
 
         const mergePlayers = {
-          duplicatePlayerId: twin,
-          keptPlayerId: created,
+          duplicateId: twin,
+          entity: "player",
+          keptId: created,
           sourceUrl: source,
         };
 
-        assert.equal(await applied("merge_players", mergePlayers), created);
+        assert.equal(await applied("merge", mergePlayers), created);
         const twinRow = await orm.em.fork().findOneOrFail(rosterRows.Player, { id: twin });
         assert.equal(twinRow.mergedInto?.id, created);
         assert.deepEqual(await contracts({ player: twin }), []);
@@ -1882,13 +1883,14 @@ describe("backend integration", () => {
           response72.json(z.object({ players: z.array(identified) })).players.map(({ id }) => id),
           [created],
         );
-        assert.deepEqual(await callTool("merge_players", mergePlayers, toolFailure), {
+        assert.deepEqual(await callTool("merge", mergePlayers, toolFailure), {
           error: true,
         });
 
-        await applied("merge_teams", {
-          duplicateTeamId: beta,
-          keptTeamId: alpha,
+        await applied("merge", {
+          duplicateId: beta,
+          entity: "team",
+          keptId: alpha,
           sourceUrl: source,
         });
         const contractsResult = await contracts({ player: created });
@@ -1901,6 +1903,23 @@ describe("backend integration", () => {
         assert.equal(await orm.em.fork().count(rosterRows.Team, { id: beta }), 1);
 
         const gamma = await applied("create_team", { name: "MCP Gamma", sourceUrl: source });
+
+        const staffCoach = await applied("create_player", {
+          effectiveDate: "2026-03-01",
+          name: "MCP Staff Coach",
+          role: "coach",
+          sourceUrl: source,
+          teamId: gamma,
+        });
+
+        const staffContract = await orm.em
+          .fork()
+          .findOneOrFail(rosterRows.Contract, { player: staffCoach });
+
+        assert.deepEqual(
+          [staffContract.team.id, staffContract.role, staffContract.endDate],
+          [gamma, "coach", null],
+        );
 
         const veteran = await applied("create_player", {
           name: "MCP Career Player",
@@ -2274,28 +2293,25 @@ describe("backend integration", () => {
         assert.ok(listed.has(manualCup));
         assert.ok(!listed.has(startggCup));
 
-        const matchResults = await callTool(
-          "get_match_results",
-          {},
-          z.intersection(counted, z.object({ results: z.array(identified) })),
-        );
-
-        assert.equal(
-          matchResults.total,
-          matchResults.results.length,
-          "start.gg rows are excluded before counting",
-        );
-
-        const upcoming = await callTool(
-          "get_upcoming_matches",
-          {},
-          z.intersection(
-            counted,
-            z.object({ live: z.array(identified), upcoming: z.array(identified) }),
+        const matchListings = await Promise.all(
+          ["live", "upcoming", "results"].map(
+            async (status) =>
+              await callTool(
+                "get_matches",
+                { status },
+                z.intersection(counted, z.object({ matches: z.array(identified) })),
+              ),
           ),
         );
 
-        assert.equal(upcoming.total, upcoming.upcoming.length + upcoming.live.length);
+        for (const listing of matchListings) {
+          assert.equal(
+            listing.total,
+            listing.matches.length,
+            "start.gg rows are excluded before counting",
+          );
+        }
+
         await callTool("get_tournaments", {}, z.array(z.unknown()));
         await verifyStreamProposals({ callTool, match, request, review, staffCookie, tournament });
         await verifyLineupProposals({

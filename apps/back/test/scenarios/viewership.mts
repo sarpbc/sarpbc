@@ -12,8 +12,7 @@ const creditedEvent = z.object({ event: credited });
 const viewershipResponse = z.unknown();
 
 const mcpMatches = z.object({
-  live: z.array(z.object({ id: z.string(), viewership: z.unknown() })).optional(),
-  upcoming: z.array(z.object({ id: z.string(), viewership: z.unknown() })).optional(),
+  matches: z.array(z.object({ id: z.string(), viewership: z.unknown() })),
 });
 
 const eventRef = z.object({ id: z.string(), slug: z.string() });
@@ -161,15 +160,16 @@ export const verifyViewershipProposals = async ({
   };
 
   assert.deepEqual(
-    await callTool("set_match_viewership", { matchId: match.id, ...proposal }, toolFailure),
+    await callTool("set_viewership", { id: match.id, target: "match", ...proposal }, toolFailure),
     { error: true },
-    "set_match_viewership requires a sourceUrl",
+    "set_viewership requires a sourceUrl",
   );
   assert.deepEqual(
     await callTool(
-      "set_match_viewership",
+      "set_viewership",
       {
-        matchId: match.id,
+        id: match.id,
+        target: "match",
         ...proposal,
         sourceUrl: "https://blast.tv/rl/integration-cup",
       },
@@ -179,8 +179,9 @@ export const verifyViewershipProposals = async ({
     "BLAST.tv is not an accepted source",
   );
 
-  const pending = await callTool("set_match_viewership", {
-    matchId: match.id,
+  const pending = await callTool("set_viewership", {
+    id: match.id,
+    target: "match",
     ...proposal,
     sourceUrl,
   });
@@ -197,11 +198,16 @@ export const verifyViewershipProposals = async ({
   const expected = { ...proposal, measuredAt: null, sourceUrl };
   const response7 = await request("GET", `/matches/${match.id}`);
   assert.deepEqual(response7.json(creditedMatch).match.viewership, expected);
-  const upcoming = await callTool("get_upcoming_matches", {}, mcpMatches);
 
-  const mcpMatch = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? [])].find(
-    (candidate) => candidate.id === match.id,
+  const listings = await Promise.all(
+    ["live", "upcoming"].map(
+      async (status) => await callTool("get_matches", { status }, mcpMatches),
+    ),
   );
+
+  const upcoming = listings.flatMap(({ matches }) => matches);
+
+  const mcpMatch = upcoming.find((candidate) => candidate.id === match.id);
 
   assert.deepEqual(mcpMatch?.viewership, expected, "MCP reads return sarpbc numbers");
 
@@ -223,8 +229,8 @@ export const verifyViewershipProposals = async ({
   assert.equal(site.tournament.source, "startgg", "the site can credit start.gg");
   assert.deepEqual(
     await callTool(
-      "set_match_viewership",
-      { matchId: startggMatchId, ...proposal, sourceUrl },
+      "set_viewership",
+      { id: startggMatchId, target: "match", ...proposal, sourceUrl },
       toolFailure,
     ),
     { error: true },
@@ -232,12 +238,12 @@ export const verifyViewershipProposals = async ({
   );
 
   const results = await callTool(
-    "get_match_results",
-    {},
-    z.object({ results: z.array(z.object({ id: z.string() })) }),
+    "get_matches",
+    { status: "results" },
+    z.object({ matches: z.array(z.object({ id: z.string() })) }),
   );
 
-  const reads = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? []), ...results.results];
+  const reads = [...upcoming, ...results.matches];
   assert.ok(
     reads.every((candidate) => candidate.id !== startggMatchId),
     "MCP reads leave start.gg matches and their numbers out",
@@ -261,8 +267,8 @@ export const verifyViewershipProposals = async ({
   });
   assert.deepEqual(
     await callTool(
-      "set_event_viewership",
-      { eventId: startggEvent.id, ...proposal, sourceUrl },
+      "set_viewership",
+      { id: startggEvent.id, target: "event", ...proposal, sourceUrl },
       toolFailure,
     ),
     { error: true },

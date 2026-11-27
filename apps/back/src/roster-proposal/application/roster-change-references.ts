@@ -44,7 +44,7 @@ const teamReferences: ReferenceTable = {
   award_player: (change) => [change.teamId],
   award_season_player: none,
   create_contract: (change) => [change.teamId],
-  create_player: none,
+  create_player: (change) => (change.teamId === undefined ? [] : [change.teamId]),
   create_team: none,
   delete_match: none,
   delete_team: (change) =>

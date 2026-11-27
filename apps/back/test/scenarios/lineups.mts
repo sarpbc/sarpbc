@@ -365,9 +365,10 @@ export const verifyLineupProposals = async ({
     staffCookie,
   );
 
-  const merge = await callTool("merge_players", {
-    duplicatePlayerId: duplicate.id,
-    keptPlayerId: standIn.id,
+  const merge = await callTool("merge", {
+    duplicateId: duplicate.id,
+    entity: "player",
+    keptId: standIn.id,
     sourceUrl,
   });
 

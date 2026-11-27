@@ -230,8 +230,9 @@ const setup = () => {
 describe("MCP read tools", () => {
   it("excludes start.gg rows in the list queries so totals and pages stay consistent", async () => {
     const { listed, tournamentQueries, call } = setup();
-    await call("get_upcoming_matches");
-    await call("get_match_results");
+    await call("get_matches", { status: "upcoming" });
+    await call("get_matches", { status: "live" });
+    await call("get_matches", { status: "results" });
     await call("get_tournaments");
 
     const redistributableOnly: unknown = expect.objectContaining({ redistributableOnly: true });

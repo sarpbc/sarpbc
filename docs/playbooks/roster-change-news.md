@@ -17,16 +17,15 @@ Client configuration lives in [MCP.md](../MCP.md#client-configuration).
 
 **Read** (any valid PAT):
 
-| Tool                   | Parameters                                            | Returns (summary)                                                        |
-| ---------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------ |
-| `search_players`       | `query` (string, min 1)                               | Up to 20 players: `id`, `slug`, `name`, `nationality`, `team`, `url`     |
-| `search_teams`         | `query` (string, min 1)                               | Up to 20 teams: `id`, `slug`, `name`, `url`                              |
-| `get_player`           | `idOrSlug` (slug or UUID)                             | Player profile + current team + `url`                                    |
-| `get_team`             | `idOrSlug` (slug or UUID)                             | Team profile, roster, `location`, `url`                                  |
-| `get_tournaments`      | `activeOnly?` (boolean), `limit?` (1–100, default 20) | Tournament list with `url`                                               |
-| `get_tournament`       | `id` (UUID)                                           | Matches and `participants` (participant `id`, team `id`, `slug`, `name`) |
-| `get_upcoming_matches` | `limit?` (1–100, default 20)                          | Upcoming + live matches                                                  |
-| `get_match_results`    | `limit?` (1–100, default 20)                          | Recent finished results                                                  |
+| Tool              | Parameters                                                               | Returns (summary)                                                        |
+| ----------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------ |
+| `search_players`  | `query` (string, min 1)                                                  | Up to 20 players: `id`, `slug`, `name`, `nationality`, `team`, `url`     |
+| `search_teams`    | `query` (string, min 1)                                                  | Up to 20 teams: `id`, `slug`, `name`, `url`                              |
+| `get_player`      | `idOrSlug` (slug or UUID)                                                | Player profile + current team + `url`                                    |
+| `get_team`        | `idOrSlug` (slug or UUID)                                                | Team profile, roster, `location`, `url`                                  |
+| `get_tournaments` | `activeOnly?` (boolean), `limit?` (1–100, default 20)                    | Tournament list with `url`                                               |
+| `get_tournament`  | `id` (UUID)                                                              | Matches and `participants` (participant `id`, team `id`, `slug`, `name`) |
+| `get_matches`     | `status` (`live`, `upcoming` or `results`), `limit?` (1–100, default 20) | Live, upcoming or recently finished matches                              |
 
 **News** (requires `news.manage`):
 
