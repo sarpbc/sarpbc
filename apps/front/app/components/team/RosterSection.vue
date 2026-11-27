@@ -37,9 +37,11 @@ const headingId = "team-roster-title";
           />
           <PlayerImg v-else :player-name="player.name" size="lg" />
         </div>
-        <div class="flex min-w-0 items-center gap-2 px-3 py-3">
+        <div class="flex min-w-0 items-center gap-2 px-2 py-3 sm:px-3">
           <FlagIcon :nationality="player.nationality" class="shrink-0" />
-          <span class="truncate text-sm font-medium text-default group-hover:text-highlighted">
+          <span
+            class="min-w-0 line-clamp-2 break-words text-sm font-medium text-default group-hover:text-highlighted"
+          >
             {{ player.name }}
           </span>
         </div>

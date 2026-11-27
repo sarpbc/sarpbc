@@ -59,6 +59,9 @@ const tableRows = computed<StandingTableRow[]>(() => {
   }));
 });
 
+const countedEvents = (entry: StandingTableRow) =>
+  entry.cells.filter((cell) => cell !== null).length;
+
 const hasCutoff = computed(() => tableRows.value.some((entry) => entry.cutoffBelow));
 
 const regionalRegion = computed(() => {
@@ -154,8 +157,77 @@ watch(
       </HubCard>
 
       <HubCard v-else>
+        <ol
+          class="flex flex-col md:hidden"
+          :aria-label="t('page.circuits.standings.caption', { name: standings.name })"
+        >
+          <li
+            v-for="entry in tableRows"
+            :key="entry.row.team.id"
+            :class="entry.cutoffBelow && 'border-b-2 border-primary'"
+          >
+            <details class="group/standing">
+              <summary
+                class="flex h-row cursor-pointer list-none items-center gap-3 px-2 row-separator interactive-surface [&::-webkit-details-marker]:hidden"
+              >
+                <span class="w-6 shrink-0 text-right text-sm text-muted tabular-nums">
+                  {{ entry.row.rank }}
+                </span>
+                <TeamImg :team-name="entry.row.team.name" :logo="entry.row.team" size="xs" />
+                <span class="flex min-w-0 flex-1 flex-col">
+                  <span class="truncate text-row text-default">{{ entry.row.team.name }}</span>
+                  <span class="text-xs text-muted">
+                    {{ t("page.circuits.standings.eventsWithPoints", countedEvents(entry)) }}
+                  </span>
+                </span>
+                <span class="shrink-0 font-medium text-highlighted tabular-nums">
+                  {{ numberFormat.format(entry.row.points) }}
+                  <span class="sr-only">{{ t("page.circuits.standings.points") }}</span>
+                </span>
+                <Icon
+                  name="i-fluent-chevron-down-20-regular"
+                  class="size-4 shrink-0 text-muted group-open/standing:rotate-180"
+                  aria-hidden="true"
+                />
+              </summary>
+              <div class="flex flex-col bg-muted">
+                <template
+                  v-for="(cell, index) in entry.cells"
+                  :key="standings.events[index]?.event.id ?? index"
+                >
+                  <HubListItem
+                    v-if="cell && standings.events[index]"
+                    :to="$localePath(tournamentEventPath(standings.events[index].event.slug))"
+                    class="min-w-0 gap-3 pl-11"
+                  >
+                    <span class="flex min-w-0 flex-1 flex-col">
+                      <span class="truncate text-sm text-default group-hover:text-highlighted">
+                        {{ standings.events[index].event.name }}
+                      </span>
+                      <span class="text-xs text-muted">{{ formatPlacement(cell.placement) }}</span>
+                    </span>
+                    <span class="shrink-0 text-sm font-medium text-highlighted tabular-nums">
+                      +{{ numberFormat.format(cell.points) }}
+                    </span>
+                  </HubListItem>
+                </template>
+                <HubListItem
+                  v-if="countedEvents(entry) < entry.cells.length"
+                  class="pl-11 text-xs text-muted"
+                >
+                  {{
+                    t(
+                      "page.circuits.standings.eventsWithoutPoints",
+                      entry.cells.length - countedEvents(entry),
+                    )
+                  }}
+                </HubListItem>
+              </div>
+            </details>
+          </li>
+        </ol>
         <div
-          class="overflow-x-auto"
+          class="relative hidden overflow-x-auto md:block"
           role="region"
           tabindex="0"
           :aria-label="t('page.circuits.standings.caption', { name: standings.name })"

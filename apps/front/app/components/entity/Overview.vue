@@ -19,8 +19,10 @@ const mediumDate = computed(() => mediumDateFormatter(locale.value));
 const recentTrophies = computed(() => trophies.slice(0, OVERVIEW_LIMIT));
 const recentEvents = computed(() => pastEvents.slice(0, OVERVIEW_LIMIT));
 
-const eventLabel = (event: EntityEventListItem) =>
-  [event.event.name, distinctStageName(event)].filter(Boolean).join(" · ");
+const eventMeta = (event: EntityEventListItem) =>
+  [distinctStageName(event), formatTournamentDateRange(event.beginAt, event.endAt, locale.value)]
+    .filter(Boolean)
+    .join(" · ");
 </script>
 
 <template>
@@ -45,16 +47,18 @@ const eventLabel = (event: EntityEventListItem) =>
             :to="$localePath(trophy.path)"
             class="min-w-0 gap-3"
           >
-            <span class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
-              {{ trophy.displayName }}
+            <span class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm text-default group-hover:text-highlighted">
+                {{ trophy.displayName }}
+              </span>
+              <time
+                v-if="trophy.endAt"
+                :datetime="new Date(trophy.endAt).toISOString()"
+                class="text-xs text-muted tabular-nums"
+              >
+                {{ mediumDate.format(new Date(trophy.endAt)) }}
+              </time>
             </span>
-            <time
-              v-if="trophy.endAt"
-              :datetime="new Date(trophy.endAt).toISOString()"
-              class="shrink-0 text-xs text-muted tabular-nums"
-            >
-              {{ mediumDate.format(new Date(trophy.endAt)) }}
-            </time>
           </HubListItem>
         </HubCard>
       </HubRail>
@@ -66,11 +70,11 @@ const eventLabel = (event: EntityEventListItem) =>
             :to="$localePath(tournamentStagePath(event.event.slug, event.slug))"
             class="min-w-0 gap-3"
           >
-            <span class="min-w-0 flex-1 truncate text-sm text-default group-hover:text-highlighted">
-              {{ eventLabel(event) }}
-            </span>
-            <span class="shrink-0 text-xs text-muted tabular-nums">
-              {{ formatTournamentDateRange(event.beginAt, event.endAt, locale) }}
+            <span class="flex min-w-0 flex-1 flex-col">
+              <span class="truncate text-sm text-default group-hover:text-highlighted">
+                {{ event.event.name }}
+              </span>
+              <span class="truncate text-xs text-muted tabular-nums">{{ eventMeta(event) }}</span>
             </span>
           </HubListItem>
         </HubCard>

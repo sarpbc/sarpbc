@@ -202,7 +202,12 @@
     },
     "tournament": {
       "bracket": {
-        "missingLinks": "La structure du bracket n'est pas encore disponible. Les matchs sont regroupés par round."
+        "missingLinks": "La structure du bracket n'est pas encore disponible. Les matchs sont regroupés par round.",
+        "rounds": "Rounds du bracket",
+        "round": "Round {number}",
+        "final": "Finale",
+        "upper": "Upper bracket",
+        "lower": "Lower bracket"
       }
     },
     "discussion": {
@@ -897,6 +902,18 @@
         "view": "Affichage des stats",
         "totals": "Totaux",
         "perGame": "Par partie",
+        "sortBy": "Trier par",
+        "gamesCount": "{count} partie | {count} parties",
+        "metric": {
+          "games": "Parties jouées",
+          "goals": "Buts",
+          "assists": "Passes décisives",
+          "saves": "Arrêts",
+          "shots": "Tirs",
+          "shootingPercentage": "Réussite aux tirs",
+          "demolitions": "Démolitions",
+          "goalParticipation": "Participation aux buts"
+        },
         "columns": {
           "games": {
             "short": "PJ",
@@ -1286,6 +1303,8 @@
         "team": "Équipe",
         "points": "Points",
         "noPoints": "Aucun point",
+        "eventsWithPoints": "Aucun événement avec des points | {count} événement avec des points | {count} événements avec des points",
+        "eventsWithoutPoints": "Aucun point sur {count} autre événement | Aucun point sur {count} autres événements",
         "qualification": "Les équipes au-dessus de la ligne occupent les {count} places qualificatives.",
         "aboutTitle": "Calcul des points",
         "explainer": "Les points suivent le barème officiel saisi par l’équipe de sarpbc.org, appliqué à la place finale de chaque équipe : classement PandaScore ou place officielle saisie par l’équipe, comme les 9e à 16e places décidées en poules.",

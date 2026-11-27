@@ -202,7 +202,12 @@
     },
     "tournament": {
       "bracket": {
-        "missingLinks": "Bracket structure is not available yet. Matches are grouped by round."
+        "missingLinks": "Bracket structure is not available yet. Matches are grouped by round.",
+        "rounds": "Bracket rounds",
+        "round": "Round {number}",
+        "final": "Final",
+        "upper": "Upper bracket",
+        "lower": "Lower bracket"
       }
     },
     "discussion": {
@@ -897,6 +902,18 @@
         "view": "Stats view",
         "totals": "Totals",
         "perGame": "Per game",
+        "sortBy": "Sort by",
+        "gamesCount": "{count} game | {count} games",
+        "metric": {
+          "games": "Games played",
+          "goals": "Goals",
+          "assists": "Assists",
+          "saves": "Saves",
+          "shots": "Shots",
+          "shootingPercentage": "Shooting %",
+          "demolitions": "Demolitions",
+          "goalParticipation": "Goal participation"
+        },
         "columns": {
           "games": {
             "short": "GP",
@@ -1286,6 +1303,8 @@
         "team": "Team",
         "points": "Points",
         "noPoints": "No points",
+        "eventsWithPoints": "No events with points | {count} event with points | {count} events with points",
+        "eventsWithoutPoints": "No points at {count} other event | No points at {count} other events",
         "qualification": "Teams above the line hold the top {count} qualification spots.",
         "aboutTitle": "How Points Work",
         "explainer": "Points follow the official scale entered by sarpbc.org staff, applied to each team's final placement: PandaScore standings, or the official placement staff entered, such as 9th to 16th places decided in groups.",

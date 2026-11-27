@@ -86,6 +86,26 @@ const items = computed<NavigationItem[]>(() => [
   },
 ]);
 
+const mobileItems = computed<NavigationItem[]>(() => [
+  ...items.value,
+  {
+    label: t("general.teams"),
+    to: localePath("/team"),
+  },
+  {
+    label: t("general.players"),
+    to: localePath("/player"),
+  },
+  {
+    label: t("general.transfers"),
+    to: localePath("/transfers"),
+  },
+  {
+    label: t("general.forum"),
+    to: localePath("/forum"),
+  },
+]);
+
 const menuToggleLabel = computed(() =>
   menuOpen.value ? t("components.header.closeMenu") : t("components.header.openMenu"),
 );
@@ -142,8 +162,9 @@ const menuToggleLabel = computed(() =>
         <div
           class="w-full max-w-7xl px-9 mx-auto flex flex-col items-center justify-start gap-1.5 pt-6 pb-12 min-h-full"
         >
+          <NavHeaderSearch block class="w-full" />
           <SNavigationMenu
-            :items="items"
+            :items="mobileItems"
             orientation="vertical"
             class="w-full [&_a]:text-lg [&_a]:font-medium [&_a]:py-3 [&_button]:text-lg [&_button]:font-medium [&_button]:py-3"
           />
