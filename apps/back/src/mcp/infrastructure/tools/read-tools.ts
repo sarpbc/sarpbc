@@ -239,35 +239,19 @@ export const readTools = ({
 
   defineTool({
     description:
-      "List upcoming and live matches across tournaments, mirroring the public /matches page.",
-    handler: async ({ limit }) => {
-      const [[upcomingMatches, upcomingTotal], [liveMatches, liveTotal]] = await Promise.all([
-        competition.matches("upcoming", limit ?? DEFAULT_PAGE_SIZE),
-        competition.matches("live", limit ?? DEFAULT_PAGE_SIZE),
-      ]);
+      "List matches across tournaments, mirroring the public /matches page: live matches, upcoming matches, or recently finished results. forfeitedBy is the participant id of the side that forfeited or was disqualified, or null for a played match.",
+    handler: async ({ status, limit }) => {
+      const [matches, total] = await competition.matches(status, limit ?? DEFAULT_PAGE_SIZE);
 
-      return {
-        live: liveMatches.map(mapMatchListResponse),
-        liveTotal,
-        total: upcomingTotal + liveTotal,
-        upcoming: upcomingMatches.map(mapMatchListResponse),
-        upcomingTotal,
-      };
+      return { matches: matches.map(mapMatchListResponse), total };
     },
-    input: { limit: listLimit("matches per category") },
-    name: "get_upcoming_matches",
-  }),
-
-  defineTool({
-    description:
-      "List recently finished match results across tournaments, mirroring the public /matches results view. forfeitedBy is the participant id of the side that forfeited or was disqualified, or null for a played match.",
-    handler: async ({ limit }) => {
-      const [results, total] = await competition.matches("results", limit ?? DEFAULT_PAGE_SIZE);
-
-      return { results: results.map(mapMatchListResponse), total };
+    input: {
+      limit: listLimit("matches"),
+      status: z
+        .enum(["live", "upcoming", "results"])
+        .describe("live, upcoming, or results for recently finished matches."),
     },
-    input: { limit: listLimit("results") },
-    name: "get_match_results",
+    name: "get_matches",
   }),
 
   defineTool({

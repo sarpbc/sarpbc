@@ -9,7 +9,7 @@ import {
   TEAM_LOGO_VARIANTS,
   VIEWERSHIP_SCOPES,
 } from "@sarpbc/types";
-import type { PlayerStatus, RosterChange, RosterProposalStatus } from "@sarpbc/types";
+import type { PlayerStatus, RosterChange, RosterProposalStatus, StreamInput } from "@sarpbc/types";
 import {
   MAX_LINEUP_PLAYERS,
   MAX_CIRCUIT_PLACEMENT,
@@ -34,7 +34,12 @@ import { InvalidInputError } from "../../../common/domain/errors/invalid-input-e
 import { MAX_TEAM_LOGO_BYTES, MIN_TEAM_LOGO_PIXELS } from "../../../roster/domain/team-logo";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
 import { defineTool } from "../define-tool";
-import { proposalSourceUrlSchema as sourceUrlSchema, proposed, proposer } from "./proposals";
+import {
+  proposalSourceUrlSchema as sourceUrlSchema,
+  proposed,
+  proposer,
+  requireChangePermission,
+} from "./proposals";
 import { requireUpdateFields } from "./update-fields";
 
 const DEFAULT_PLAYER_STATUS = "free_agent" satisfies PlayerStatus;
@@ -132,6 +137,37 @@ const circuitFinishesSchema = z
 const STREAMS_NOTE =
   "An event list is inherited by its tournaments that have no list of their own, and a tournament list by its matches that have none; a list set lower down replaces the inherited one entirely. PandaScore entities are accepted. start.gg tournaments and matches are refused. A start.gg sourceUrl marks the streams as start.gg data: the site shows them with credit and they stay out of the MCP.";
 
+const streamsChange = (
+  target: "event" | "tournament" | "match",
+  id: string,
+  streams: StreamInput[],
+) => {
+  switch (target) {
+    case "event": {
+      return { eventId: id, kind: "set_event_streams", streams } satisfies RosterChange;
+    }
+
+    case "tournament": {
+      return { kind: "set_tournament_streams", streams, tournamentId: id } satisfies RosterChange;
+    }
+
+    case "match": {
+      return { kind: "set_match_streams", matchId: id, streams } satisfies RosterChange;
+    }
+
+    default: {
+      const unreachable: never = target;
+
+      return unreachable;
+    }
+  }
+};
+
+const MERGE_KINDS = {
+  player: "merge_players",
+  team: "merge_teams",
+} as const satisfies Record<string, RosterChange["kind"]>;
+
 const viewershipSourceUrlSchema = sourceUrlSchema
   .regex(/^https:\/\//u, "Use an https URL")
   .refine(
@@ -217,7 +253,7 @@ const teamAliasInput = {
 };
 
 const ALIAS_NOTE =
-  "Use this for a rebrand or a sponsor name, never merge_teams or create_team. Past tournaments and matches then show the name in force on their date, and search finds the team by it. Only record names and dates the source states.";
+  "Use this for a rebrand or a sponsor name, never merge or create_team. Past tournaments and matches then show the name in force on their date, and search finds the team by it. Only record names and dates the source states.";
 
 const contractRoleSchema = z
   .enum(CONTRACT_ROLES)
@@ -306,23 +342,46 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
     }),
 
     defineTool({
-      description: `Propose creating a player without a team. Run search_players and list_roster_proposals first to avoid duplicates, then propose add_player_to_team once the player exists. The status defaults to ${DEFAULT_PLAYER_STATUS}.`,
-      handler: async ({ name, country, status, sourceUrl }, user) =>
-        await propose(
-          {
-            kind: "create_player",
-            name,
-            nationality: country,
-            status: status ?? DEFAULT_PLAYER_STATUS,
-          },
+      description: `Propose creating a player or staff member. Run search_players and list_roster_proposals first to avoid duplicates. Pass teamId and effectiveDate, and role for staff, to also open a contract with that team once approved, as add_player_to_team does; the player is then active. Without a team, the status defaults to ${DEFAULT_PLAYER_STATUS}.`,
+      handler: async ({ name, country, status, sourceUrl, teamId, effectiveDate, role }, user) => {
+        const player = { kind: "create_player", name, nationality: country } as const;
+
+        if (teamId === undefined) {
+          if (effectiveDate !== undefined || role !== undefined) {
+            throw new InvalidInputError("effectiveDate and role require teamId");
+          }
+
+          return await propose(
+            { ...player, status: status ?? DEFAULT_PLAYER_STATUS },
+            sourceUrl,
+            user.id,
+          );
+        }
+
+        if (effectiveDate === undefined) {
+          throw new InvalidInputError("teamId requires effectiveDate");
+        }
+
+        if (status !== undefined && status !== "active") {
+          throw new InvalidInputError("A player who joins a team is active; omit status");
+        }
+
+        return await propose(
+          { ...player, contractRole: role, effectiveDate, status: "active", teamId },
           sourceUrl,
           user.id,
-        ),
+        );
+      },
       input: {
         country: countrySchema.optional(),
+        effectiveDate: effectiveDateSchema
+          .optional()
+          .describe("Date the player joins teamId according to the source (YYYY-MM-DD)."),
         name: z.string().min(1).max(255).describe("In-game name."),
+        role: contractRoleSchema.optional(),
         sourceUrl: sourceUrlSchema,
         status: playerStatusSchema.optional(),
+        teamId: z.uuid().optional().describe("Optional UUID of the team the player joins."),
       },
       name: "create_player",
       permission: "players.manage",
@@ -375,7 +434,7 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose updating a team's name, country, or logo URL, or marking it inactive. Prefer upload_team_logo for logos. Remove current players before setting active to false. Use propose_delete_team only for a team created by mistake.",
+        "Propose updating a team's name, country, or logo URL, or marking it inactive. Prefer upload_team_logo for logos. Remove current players before setting active to false. Use propose_delete only for a team created by mistake.",
       handler: async ({ teamId, name, country, imageUrl, active, sourceUrl }, user) => {
         requireUpdateFields({ active, country, imageUrl, name });
 
@@ -480,39 +539,26 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose merging a duplicate player into the player to keep. Once approved, contracts, photos, awards and tournament rosters move to the kept player, and the duplicate stays as a redirect to it instead of being deleted. Fails when both are distinct PandaScore players or play for different current teams.",
-      handler: async ({ keptPlayerId, duplicatePlayerId, sourceUrl }, user) =>
-        await propose(
-          { duplicateId: duplicatePlayerId, keptId: keptPlayerId, kind: "merge_players" },
-          sourceUrl,
-          user.id,
-        ),
-      input: {
-        duplicatePlayerId: z.uuid().describe("UUID of the duplicate to merge into it."),
-        keptPlayerId: z.uuid().describe("UUID of the player to keep."),
-        sourceUrl: sourceUrlSchema,
-      },
-      name: "merge_players",
-      permission: "players.manage",
-      write: true,
-    }),
+        "Propose merging a duplicate player or team into the one to keep; the duplicate stays as a redirect to it instead of being deleted. Players: contracts, photos, awards and tournament rosters move to the kept player; fails when both are distinct PandaScore players or play for different current teams. Teams: contracts, current players and tournament participations move to the kept team, and the duplicate becomes inactive; fails when both teams played in the same tournament or are distinct PandaScore teams. Merging players requires players.manage, merging teams teams.manage.",
+      handler: async ({ entity, keptId, duplicateId, sourceUrl }, user) => {
+        const change = {
+          duplicateId,
+          keptId,
+          kind: MERGE_KINDS[entity],
+        } satisfies RosterChange;
 
-    defineTool({
-      description:
-        "Propose merging a duplicate team into the team to keep. Once approved, contracts, current players and tournament participations move to the kept team, and the duplicate becomes an inactive redirect to it instead of being deleted. Fails when both teams played in the same tournament or are distinct PandaScore teams.",
-      handler: async ({ keptTeamId, duplicateTeamId, sourceUrl }, user) =>
-        await propose(
-          { duplicateId: duplicateTeamId, keptId: keptTeamId, kind: "merge_teams" },
-          sourceUrl,
-          user.id,
-        ),
+        requireChangePermission(user, change);
+
+        return await propose(change, sourceUrl, user.id);
+      },
       input: {
-        duplicateTeamId: z.uuid().describe("UUID of the duplicate to merge into it."),
-        keptTeamId: z.uuid().describe("UUID of the team to keep."),
+        duplicateId: z.uuid().describe("UUID of the duplicate to merge into the kept one."),
+        entity: z.enum(["player", "team"]).describe("What to merge."),
+        keptId: z.uuid().describe("UUID of the player or team to keep."),
         sourceUrl: sourceUrlSchema,
       },
-      name: "merge_teams",
-      permission: "teams.manage",
+      name: "merge",
+      permission: ["players.manage", "teams.manage"],
       write: true,
     }),
 
@@ -653,47 +699,18 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
     }),
 
     defineTool({
-      description: `Propose the live streams of a tournament event. Nothing changes until a staff member approves it in the admin app. Read get_event first. ${STREAMS_NOTE}`,
-      handler: async ({ eventId, streams, sourceUrl }, user) =>
-        await propose({ eventId, kind: "set_event_streams", streams }, sourceUrl, user.id),
+      description: `Propose the live streams of a tournament event, a tournament stage, or one match broadcast on another channel than its tournament (a B stream, a regional channel). Nothing changes until a staff member approves it in the admin app. Read get_event or get_tournament first. ${STREAMS_NOTE}`,
+      handler: async ({ target, id, streams, sourceUrl }, user) =>
+        await propose(streamsChange(target, id, streams), sourceUrl, user.id),
       input: {
-        eventId: z.uuid().describe("Event UUID."),
+        id: z.uuid().describe("UUID of the event, tournament stage or match."),
         sourceUrl: sourceUrlSchema,
         streams: streamsSchema,
+        target: z
+          .enum(["event", "tournament", "match"])
+          .describe("Whether id is an event, a tournament stage or a match."),
       },
-      name: "set_event_streams",
-      permission: "tournaments.manage",
-      write: true,
-    }),
-
-    defineTool({
-      description: `Propose the live streams of one tournament stage. Nothing changes until a staff member approves it in the admin app. Read get_tournament first. ${STREAMS_NOTE}`,
-      handler: async ({ tournamentId, streams, sourceUrl }, user) =>
-        await propose(
-          { kind: "set_tournament_streams", streams, tournamentId },
-          sourceUrl,
-          user.id,
-        ),
-      input: {
-        sourceUrl: sourceUrlSchema,
-        streams: streamsSchema,
-        tournamentId: z.uuid().describe("Tournament stage UUID."),
-      },
-      name: "set_tournament_streams",
-      permission: "tournaments.manage",
-      write: true,
-    }),
-
-    defineTool({
-      description: `Propose the live streams of one match, for a series broadcast on another channel than its tournament (a B stream, a regional channel). Nothing changes until a staff member approves it in the admin app. ${STREAMS_NOTE}`,
-      handler: async ({ matchId, streams, sourceUrl }, user) =>
-        await propose({ kind: "set_match_streams", matchId, streams }, sourceUrl, user.id),
-      input: {
-        matchId: z.uuid().describe("Match UUID."),
-        sourceUrl: sourceUrlSchema,
-        streams: streamsSchema,
-      },
-      name: "set_match_streams",
+      name: "set_streams",
       permission: "tournaments.manage",
       write: true,
     }),
@@ -790,97 +807,69 @@ export const rosterTools = ({ rosterProposalService }: RosterToolServices) => {
 
     defineTool({
       description:
-        "Propose deleting a match that should not exist, such as a series imported twice. Nothing is deleted until a staff member approves it in the admin app. Once approved, the match is deleted with its scores, its incoming bracket links and its game stats, and standings and team records are recomputed from the remaining matches. PandaScore and start.gg matches are refused, and so are matches with pick'em picks, comments or bracket matches fed by them. Read get_tournament first and run list_roster_proposals to avoid proposing it twice.",
-      handler: async ({ matchId, reason, sourceUrl }, user) =>
-        proposed(
-          await rosterProposalService.propose(
-            { kind: "delete_match", matchId, reason },
-            sourceUrl ?? "",
-            user.id,
-          ),
+        "Propose deleting a match or a team that should not exist. Nothing is deleted until a staff member approves it in the admin app. Run list_roster_proposals first to avoid proposing it twice. A match, such as a series imported twice, is deleted with its scores, its incoming bracket links and its game stats, and standings and team records are recomputed from the remaining matches; PandaScore and start.gg matches are refused, and so are matches with pick'em picks, comments or bracket matches fed by them. Read get_tournament first. A team created by mistake, such as an empty duplicate, is deleted, and both the proposal and the approval are refused for a PandaScore team or a team with current players, contracts, tournament participations, matches or prizes. With mergeIntoTeamId, approval merges the team into that one instead, like merge: its references move there and it stays as a redirect. Run search_teams first. Deleting a match requires tournaments.manage, a team teams.manage.",
+      handler: async ({ entity, id, reason, sourceUrl, mergeIntoTeamId }, user) => {
+        if (entity === "match" && mergeIntoTeamId !== undefined) {
+          throw new InvalidInputError("mergeIntoTeamId only applies to a team");
+        }
+
+        const change =
+          entity === "match"
+            ? ({ kind: "delete_match", matchId: id, reason } satisfies RosterChange)
+            : ({ kind: "delete_team", mergeIntoTeamId, reason, teamId: id } satisfies RosterChange);
+
+        requireChangePermission(user, change);
+
+        return proposed(
+          await rosterProposalService.propose(change, sourceUrl ?? "", user.id),
           sourceUrl,
-        ),
+        );
+      },
       input: {
-        matchId: z.uuid().describe("Match UUID."),
+        entity: z.enum(["match", "team"]).describe("What to delete."),
+        id: z.uuid().describe("UUID of the match or team to delete."),
+        mergeIntoTeamId: z
+          .uuid()
+          .optional()
+          .describe(
+            "Teams only: UUID of the team this one duplicates. Its references move there on approval.",
+          ),
         reason: reasonSchema,
         sourceUrl: sourceUrlSchema
           .optional()
           .describe(
-            "Optional public source showing the correct results, such as the official bracket. Never Liquipedia.",
+            "Optional public source, such as the official bracket showing the correct results. Never Liquipedia.",
           ),
       },
-      name: "propose_delete_match",
-      permission: "tournaments.manage",
+      name: "propose_delete",
+      permission: ["tournaments.manage", "teams.manage"],
       write: true,
     }),
 
     defineTool({
-      description:
-        "Propose removing a team created by mistake, such as an empty duplicate. Nothing is deleted until a staff member approves it in the admin app. Without mergeIntoTeamId, approval deletes the team, and both the proposal and the approval are refused for a PandaScore team or a team with current players, contracts, tournament participations, matches or prizes. With mergeIntoTeamId, approval merges the team into that one instead, like merge_teams: its references move there and it stays as a redirect. Run search_teams and list_roster_proposals first.",
-      handler: async ({ teamId, reason, mergeIntoTeamId }, user) =>
-        proposed(
-          await rosterProposalService.propose(
-            { kind: "delete_team", mergeIntoTeamId, reason, teamId },
-            "",
-            user.id,
-          ),
-          undefined,
-        ),
+      description: `Propose the viewership of a tournament event or of one match: peak and average viewers, with the source credited on the site. Nothing changes until a staff member approves it in the admin app. Read get_event first for an event. ${VIEWERSHIP_NOTE}`,
+      handler: async ({ target, id, averageViewers, measuredAt, sourceUrl, ...rest }, user) => {
+        const viewership = {
+          ...rest,
+          averageViewers: averageViewers ?? null,
+          measuredAt: measuredAt ?? null,
+          sourceUrl,
+        };
+
+        return await propose(
+          target === "event"
+            ? { eventId: id, kind: "set_event_viewership", viewership }
+            : { kind: "set_match_viewership", matchId: id, viewership },
+          sourceUrl,
+          user.id,
+        );
+      },
       input: {
-        mergeIntoTeamId: z
-          .uuid()
-          .optional()
-          .describe("UUID of the team this one duplicates. Its references move there on approval."),
-        reason: reasonSchema,
-        teamId: z.uuid().describe("UUID of the team to remove."),
+        id: z.uuid().describe("UUID of the event or match."),
+        target: z.enum(["event", "match"]).describe("Whether id is an event or a match."),
+        ...viewershipInput,
       },
-      name: "propose_delete_team",
-      permission: "teams.manage",
-      write: true,
-    }),
-
-    defineTool({
-      description: `Propose the viewership of a tournament event: peak and average viewers, with the source credited on the site. Nothing changes until a staff member approves it in the admin app. Read get_event first. ${VIEWERSHIP_NOTE}`,
-      handler: async ({ eventId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
-        await propose(
-          {
-            eventId,
-            kind: "set_event_viewership",
-            viewership: {
-              ...rest,
-              averageViewers: averageViewers ?? null,
-              measuredAt: measuredAt ?? null,
-              sourceUrl,
-            },
-          },
-          sourceUrl,
-          user.id,
-        ),
-      input: { eventId: z.uuid().describe("Event UUID."), ...viewershipInput },
-      name: "set_event_viewership",
-      permission: "tournaments.manage",
-      write: true,
-    }),
-
-    defineTool({
-      description: `Propose the viewership of one match: peak and average viewers, with the source credited on the site. Nothing changes until a staff member approves it in the admin app. ${VIEWERSHIP_NOTE}`,
-      handler: async ({ matchId, averageViewers, measuredAt, sourceUrl, ...rest }, user) =>
-        await propose(
-          {
-            kind: "set_match_viewership",
-            matchId,
-            viewership: {
-              ...rest,
-              averageViewers: averageViewers ?? null,
-              measuredAt: measuredAt ?? null,
-              sourceUrl,
-            },
-          },
-          sourceUrl,
-          user.id,
-        ),
-      input: { matchId: z.uuid().describe("Match UUID."), ...viewershipInput },
-      name: "set_match_viewership",
+      name: "set_viewership",
       permission: "tournaments.manage",
       write: true,
     }),

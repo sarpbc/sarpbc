@@ -35,7 +35,8 @@ interface ReadToolSpec<Fields extends Record<string, z.ZodType>> extends ToolSpe
 
 interface WriteToolSpec<Fields extends Record<string, z.ZodType>> extends ToolSpec<Fields> {
   write: true;
-  permission: StaffPermission;
+  /** With several, any one of them opens the tool; the handler checks the one its change needs. */
+  permission: StaffPermission | readonly StaffPermission[];
   handler: (input: ToolInput<Fields>, user: PatUser) => Promise<ToolWrite>;
 }
 

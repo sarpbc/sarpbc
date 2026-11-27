@@ -21,8 +21,7 @@ const watchedTournament = z.object({
 });
 
 const mcpMatches = z.object({
-  live: z.array(z.object({ id: z.string(), streams: z.array(z.unknown()) })).optional(),
-  upcoming: z.array(z.object({ id: z.string(), streams: z.array(z.unknown()) })).optional(),
+  matches: z.array(z.object({ id: z.string(), streams: z.array(z.unknown()) })),
 });
 
 export interface StreamsContext {
@@ -231,17 +230,18 @@ export const verifyStreamProposals = async ({
   };
 
   const refused = await callTool(
-    "set_match_streams",
-    { matchId: match.id, streams: [proposed] },
+    "set_streams",
+    { id: match.id, streams: [proposed], target: "match" },
     toolFailure,
   );
 
-  assert.deepEqual(refused, { error: true }, "set_match_streams requires a sourceUrl");
+  assert.deepEqual(refused, { error: true }, "set_streams requires a sourceUrl");
 
-  const startgg = await callTool("set_tournament_streams", {
+  const startgg = await callTool("set_streams", {
+    id: tournament.id,
     sourceUrl: "https://www.start.gg/tournament/integration/event/main",
     streams: [proposed],
-    tournamentId: tournament.id,
+    target: "tournament",
   });
 
   assert.equal(startgg.status, "pending");
@@ -273,17 +273,22 @@ export const verifyStreamProposals = async ({
   );
 
   assert.deepEqual(callToolResult.streams, []);
-  const upcoming = await callTool("get_upcoming_matches", {}, mcpMatches);
 
-  const mcpMatch = [...(upcoming.live ?? []), ...(upcoming.upcoming ?? [])].find(
-    (candidate) => candidate.id === match.id,
+  const listings = await Promise.all(
+    ["live", "upcoming"].map(
+      async (status) => await callTool("get_matches", { status }, mcpMatches),
+    ),
   );
+
+  const upcoming = listings.flatMap(({ matches }) => matches);
+
+  const mcpMatch = upcoming.find((candidate) => candidate.id === match.id);
 
   assert.ok(mcpMatch, "the upcoming match is listed through the MCP");
   assert.deepEqual(mcpMatch.streams, [], "MCP match reads drop inherited start.gg streams");
 
-  const manual = await callTool("set_match_streams", {
-    matchId: match.id,
+  const manual = await callTool("set_streams", {
+    id: match.id,
     sourceUrl: "https://x.com/integration/status/2",
     streams: [
       {
@@ -293,6 +298,7 @@ export const verifyStreamProposals = async ({
         url: "https://twitch.tv/integration_b",
       },
     ],
+    target: "match",
   });
 
   const reviewResult2 = await review(manual);

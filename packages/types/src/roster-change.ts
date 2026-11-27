@@ -9,6 +9,10 @@ import type { StreamInput } from "./stream";
 import type { TeamAliasInput, TeamLogoVariant } from "./team";
 import type { Viewership } from "./viewership";
 
+type CreatedPlayerContract =
+  | { teamId: string; effectiveDate: string; contractRole?: ContractRole }
+  | { teamId?: undefined; effectiveDate?: undefined; contractRole?: undefined };
+
 export type RosterChange =
   | {
       kind: "add_player_to_team";
@@ -24,12 +28,12 @@ export type RosterChange =
       effectiveDate: string;
       status: Extract<PlayerStatus, "free_agent" | "retired">;
     }
-  | {
+  | ({
       kind: "create_player";
       name: string;
       nationality?: string;
       status: PlayerStatus;
-    }
+    } & CreatedPlayerContract)
   | {
       kind: "update_player";
       playerId: string;

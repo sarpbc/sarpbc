@@ -31,12 +31,12 @@ Use **sarpbc.org** when the task needs **current, site-hosted Rocket League espo
 
 The NestJS MCP server is for **staff** with a personal access token from the admin app.
 
-|                 |                                                                                                                                                                                        |
-| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Endpoint**    | `https://api.sarpbc.org/mcp`                                                                                                                                                           |
-| **Auth**        | `Authorization: Bearer <PAT>` from admin `/tokens`                                                                                                                                     |
-| **Read tools**  | `search_players`, `search_teams`, `get_player`, `get_team`, `get_tournaments`, `get_tournament`, `get_upcoming_matches`, `get_match_results`, `list_news_articles`, `get_news_article` |
-| **Write tools** | `create_news_draft`, `update_news_article`, `create_match`, `set_match_winner`, `set_match_game_vods`, `trigger_tournament_sync` (staff permissions required)                          |
+|                 |                                                                                                                                                          |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Endpoint**    | `https://api.sarpbc.org/mcp`                                                                                                                             |
+| **Auth**        | `Authorization: Bearer <PAT>` from admin `/tokens`                                                                                                       |
+| **Read tools**  | `search_players`, `search_teams`, `get_player`, `get_team`, `get_tournaments`, `get_tournament`, `get_matches`, `list_news_articles`, `get_news_article` |
+| **Write tools** | `create_news_draft`, `update_news_article`, `create_match`, `set_match_winner`, `set_match_game_vods`, `sync_pandascore` (staff permissions required)    |
 
 `get_tournament` returns registered `participants` (participant id, team id, slug and name) for manual and PandaScore tournaments. `create_match` accepts those participant ids or team ids and slugs in `teams`. start.gg tournaments stay hidden.
 

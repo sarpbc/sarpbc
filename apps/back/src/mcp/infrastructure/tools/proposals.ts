@@ -1,6 +1,10 @@
 import type { RosterChange } from "@sarpbc/types";
+import { requiredPermission } from "@sarpbc/utils";
+import { ForbiddenError } from "../../../common/domain/errors/forbidden-error";
+import type { PatUser } from "../../../pat/application/pat.service";
 import type { RosterProposalService } from "../../../roster-proposal/application/roster-proposal.service";
 import type { RosterProposal } from "../../../roster-proposal/domain/roster-proposal";
+import { roleHasPermission } from "../../../user/domain/staff-access";
 import { adminRosterProposalsUrl } from "../urls";
 import { dataSourceUrlField } from "./tool-input";
 
@@ -28,3 +32,13 @@ export const proposer =
   (proposals: Pick<RosterProposalService, "propose">) =>
   async (change: RosterChange, sourceUrl: string, userId: string) =>
     proposed(await proposals.propose(change, sourceUrl, userId), sourceUrl);
+
+export const requireChangePermission = (user: PatUser, change: RosterChange) => {
+  const permission = requiredPermission(change);
+
+  if (!roleHasPermission(user.role, permission)) {
+    throw new ForbiddenError(
+      `You need the ${permission} permission. Ask an admin to update your staff role.`,
+    );
+  }
+};

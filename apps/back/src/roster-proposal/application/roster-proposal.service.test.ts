@@ -198,6 +198,52 @@ describe(RosterProposalService, () => {
     });
   });
 
+  it("creates a staff member and opens their contract on approval", async () => {
+    const { id } = await service.propose(
+      {
+        contractRole: "coach",
+        effectiveDate: "2026-10-24",
+        kind: "create_player",
+        name: "Kasper",
+        status: "active",
+        teamId: "kc",
+      },
+      source,
+      "journalist",
+    );
+
+    const approved = await service.approve(id, "admin");
+
+    expect(approved.entityId).toBe("new-player");
+    expect(players.create).toHaveBeenCalledWith({
+      name: "Kasper",
+      source: "manual",
+      status: "active",
+    });
+    expect(players.joinTeam).toHaveBeenCalledWith("new-player", {
+      effectiveDate: "2026-10-24",
+      role: "coach",
+      sourceUrl: source,
+      teamId: "kc",
+    });
+  });
+
+  it("rejects a created player joining a missing team", async () => {
+    await expect(
+      service.propose(
+        {
+          effectiveDate: "2026-10-24",
+          kind: "create_player",
+          name: "Kasper",
+          status: "active",
+          teamId: "nope",
+        },
+        source,
+        "journalist",
+      ),
+    ).rejects.toThrow(NotFoundError);
+  });
+
   it("records a sourced career contract on approval", async () => {
     const { id } = await service.propose(
       {
