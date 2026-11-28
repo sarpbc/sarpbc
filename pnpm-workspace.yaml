@@ -45,40 +45,40 @@ allowBuilds:
 
 catalog:
   typescript: ^6.0.3
-  "@types/node": ^26.6.6
+  "@types/node": ^26.6.10
   nuxt: ^4.7.0
   "@nuxt/kit": ^4.7.0
   vue: 3.5.46
   vue-router: ^5.5.0
-  vue-i18n: 11.4.18
+  vue-i18n: 11.4.23
   "@nuxtjs/i18n": ^10.6.0
-  "@tiptap/core": ^3.34.0
-  "@tiptap/extension-table": ^3.34.0
-  "@tiptap/extension-code": ^3.34.0
-  "@tiptap/extension-drag-handle-vue-3": ^3.34.0
-  "@tiptap/extension-horizontal-rule": ^3.34.0
-  "@tiptap/extension-image": ^3.34.0
-  "@tiptap/extension-placeholder": ^3.34.0
-  "@tiptap/markdown": ^3.34.0
-  "@tiptap/starter-kit": ^3.34.0
-  "@tiptap/suggestion": ^3.34.0
-  "@tiptap/pm": ^3.34.0
-  "@tiptap/vue-3": ^3.34.0
+  "@tiptap/core": ^3.35.0
+  "@tiptap/extension-table": ^3.35.0
+  "@tiptap/extension-code": ^3.35.0
+  "@tiptap/extension-drag-handle-vue-3": ^3.35.0
+  "@tiptap/extension-horizontal-rule": ^3.35.0
+  "@tiptap/extension-image": ^3.35.0
+  "@tiptap/extension-placeholder": ^3.35.0
+  "@tiptap/markdown": ^3.35.0
+  "@tiptap/starter-kit": ^3.35.0
+  "@tiptap/suggestion": ^3.35.0
+  "@tiptap/pm": ^3.35.0
+  "@tiptap/vue-3": ^3.35.0
   vue-tsc: ^3.3.14
-  "@iconify-json/fluent": ^1.2.61
-  "@iconify-json/lucide": ^1.2.153
-  "@iconify-json/logos": ^1.2.19
-  evlog: ^2.35.1
+  "@iconify-json/fluent": ^1.2.62
+  "@iconify-json/lucide": ^1.2.159
+  "@iconify-json/logos": ^1.2.21
+  evlog: ^2.37.1
   fastify: 5.12.8
-  "@nestjs/common": 12.5.0
-  "@nestjs/core": 12.5.0
-  "@nestjs/platform-fastify": 12.5.0
-  "@nestjs/testing": 12.5.0
-  "@mikro-orm/cli": ^7.2.8
-  "@mikro-orm/core": ^7.2.8
-  "@mikro-orm/decorators": ^7.2.8
-  "@mikro-orm/migrations": ^7.2.8
-  "@mikro-orm/postgresql": ^7.2.8
+  "@nestjs/common": 12.6.0
+  "@nestjs/core": 12.6.0
+  "@nestjs/platform-fastify": 12.6.0
+  "@nestjs/testing": 12.6.0
+  "@mikro-orm/cli": ^7.2.11
+  "@mikro-orm/core": ^7.2.11
+  "@mikro-orm/decorators": ^7.2.11
+  "@mikro-orm/migrations": ^7.2.11
+  "@mikro-orm/postgresql": ^7.2.11
 
 minimumReleaseAgeExclude:
   - "@nuxt/image@2.2.1"
