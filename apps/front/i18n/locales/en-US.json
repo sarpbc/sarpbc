@@ -529,6 +529,14 @@
         "statistic": "Statistic",
         "higher": "(higher)",
         "present": "present",
+        "era": {
+          "label": "Era",
+          "all": "All eras",
+          "open": "Open era",
+          "preOpen": "Before the Open era",
+          "openSince": "Since {date}, when RLCS opened qualifiers to every team. Season awards are undated and only count across all eras.",
+          "preOpenUntil": "Before {date}, when RLCS opened qualifiers to every team. Season awards are undated and only count across all eras."
+        },
         "rows": {
           "titles": "Titles",
           "seriesWon": "Series won",

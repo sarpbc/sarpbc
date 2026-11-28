@@ -4,6 +4,7 @@ import type {
   PlayerProfileAward,
   MatchLineupInput,
   PrizeEntry,
+  StatsEra,
   TournamentAwardListItem,
   TournamentPrizes,
 } from "@sarpbc/types";
@@ -197,6 +198,8 @@ export interface AwardQueries {
 
 export interface EarningsScope {
   redistributableOnly: boolean;
+  /** Keeps the prizes of tournaments dated in this era only. */
+  era?: StatsEra | null;
 }
 
 export interface PrizeQueries {

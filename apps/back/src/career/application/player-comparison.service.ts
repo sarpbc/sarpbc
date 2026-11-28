@@ -4,10 +4,12 @@ import type {
   PlayerSeasonAward,
   ProfileEarnings,
   SeriesRecord,
+  StatsEra,
 } from "@sarpbc/types";
 import { isRedistributable } from "../../common/domain/data-source";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import { isInEra, overlapsEra } from "../../common/domain/stats-era";
 import type { ContractService } from "../../roster/application/contract.service";
 import type { PlayerService } from "../../roster/application/player.service";
 import type { Contract } from "../../roster/domain/contract";
@@ -50,17 +52,26 @@ export interface Comparison {
 const isRedistributableMatch = (match: Match) =>
   isRedistributable(match.source) && isRedistributable(match.tournament.source);
 
+const playedOn = (match: Match) => match.beginAt ?? match.endAt ?? match.tournament.beginAt;
+
+const keepInEra = <T>(
+  items: T[],
+  era: StatsEra | null,
+  belongs: (item: T, current: StatsEra) => boolean,
+) => (era === null ? items : items.filter((item) => belongs(item, era)));
+
 export class PlayerComparisonService {
   constructor(private readonly sources: PlayerComparisonSources) {}
 
-  async compare(slugA: string, slugB: string) {
+  /** Season awards are undated, so an era leaves them out. */
+  async compare(slugA: string, slugB: string, era: StatsEra | null) {
     const [playerA, playerB] = await Promise.all([this.player(slugA), this.player(slugB)]);
 
     if (playerA.id === playerB.id) {
       throw new InvalidInputError("Choose two different players to compare.");
     }
 
-    const [a, b] = await Promise.all([this.career(playerA), this.career(playerB)]);
+    const [a, b] = await Promise.all([this.career(playerA, era), this.career(playerB, era)]);
 
     return { a: a.career, b: b.career, headToHead: headToHead(a.matches, playerA.id, playerB.id) };
   }
@@ -75,29 +86,43 @@ export class PlayerComparisonService {
     return player;
   }
 
-  private async career(player: Player) {
+  private async career(player: Player, era: StatsEra | null) {
     const { contracts, tournaments, matches, prizes, awards, seasons } = this.sources;
 
     const [contractList, titles, matchList, earnings, awardList, seasonAwards] = await Promise.all([
       contracts.getContractsByPlayer(player.id),
       tournaments.getTournamentsWonByPlayer(player.id),
       matches.getMatchesByPlayer(player.id),
-      prizes.playerEarnings(player.id, { redistributableOnly: true }),
+      prizes.playerEarnings(player.id, { era, redistributableOnly: true }),
       awards.findByPlayerId(player.id),
       seasons.awardsOfPlayer(player.id),
     ]);
 
-    const redistributableMatches = matchList.filter(isRedistributableMatch);
+    const redistributableMatches = keepInEra(
+      matchList.filter(isRedistributableMatch),
+      era,
+      (match, current) => isInEra(playedOn(match), current),
+    );
 
     return {
       career: {
-        awards: awardList.filter(({ tournament }) => isRedistributable(tournament.source)),
-        contracts: contractList,
+        awards: keepInEra(
+          awardList.filter(({ tournament }) => isRedistributable(tournament.source)),
+          era,
+          ({ tournament }, current) => isInEra(tournament.endAt, current),
+        ),
+        contracts: keepInEra(contractList, era, ({ startDate, endDate }, current) =>
+          overlapsEra(startDate, endDate, current),
+        ),
         earnings,
         player,
-        seasonAwards,
+        seasonAwards: era === null ? seasonAwards : [],
         series: seriesRecord(redistributableMatches, player.id),
-        titles: titles.filter(({ source }) => isRedistributable(source)),
+        titles: keepInEra(
+          titles.filter(({ source }) => isRedistributable(source)),
+          era,
+          ({ endAt, beginAt }, current) => isInEra(endAt ?? beginAt, current),
+        ),
       },
       matches: redistributableMatches,
     };

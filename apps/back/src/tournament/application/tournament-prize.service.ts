@@ -1,9 +1,11 @@
 import type { PrizeEntry, PrizeEntryPatch, ProfileEarnings, TournamentPrizes } from "@sarpbc/types";
 import { parseDataSourceUrl } from "../../common/domain/data-source";
+import { isInEra } from "../../common/domain/stats-era";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
 import { assertPrizeDistribution, patchPrizeEntry } from "../domain/prize-distribution";
 import { summarizeEarnings } from "./earnings";
+import type { EarningsLine } from "./earnings";
 import type { CompetitionAfterCommit } from "./after-commit";
 import type {
   EarningsScope,
@@ -34,6 +36,11 @@ const assertParticipants = (entries: PrizeEntry[], participants: PrizeParticipan
     }
   }
 };
+
+const inEra = (lines: EarningsLine[], { era = null }: EarningsScope) =>
+  era === null
+    ? lines
+    : lines.filter(({ tournament }) => isInEra(tournament.endAt ?? tournament.beginAt, era));
 
 export class TournamentPrizeService {
   constructor(
@@ -74,11 +81,15 @@ export class TournamentPrizeService {
   }
 
   async teamEarnings(teamId: string, scope: EarningsScope) {
-    return summarizeEarnings(await this.reads.byTeam(teamId, scope)) satisfies ProfileEarnings;
+    return summarizeEarnings(
+      inEra(await this.reads.byTeam(teamId, scope), scope),
+    ) satisfies ProfileEarnings;
   }
 
   async playerEarnings(playerId: string, scope: EarningsScope) {
-    return summarizeEarnings(await this.reads.byPlayer(playerId, scope)) satisfies ProfileEarnings;
+    return summarizeEarnings(
+      inEra(await this.reads.byPlayer(playerId, scope), scope),
+    ) satisfies ProfileEarnings;
   }
 
   async setDistribution(tournamentId: string, entries: PrizeEntry[]) {

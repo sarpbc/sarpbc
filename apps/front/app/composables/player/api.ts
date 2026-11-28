@@ -9,6 +9,7 @@ import type {
   PlayerStandIn,
   ProfileEarnings,
   ProfileMatchListItem,
+  StatsEra,
 } from "@sarpbc/types";
 
 export const getPlayerFromSlug = async (slug: string) => {
@@ -130,10 +131,10 @@ export const getPlayerTournaments = async (playerId: string) => {
   return res.tournaments ?? [];
 };
 
-export const getPlayerComparison = async (a: string, b: string) => {
+export const getPlayerComparison = async (a: string, b: string, era: StatsEra | null) => {
   const res = await apiFetch<{ comparison: PlayerComparison }>("/player/compare", {
     method: "GET",
-    query: { a, b },
+    query: { a, b, era: era ?? undefined },
   });
 
   return res.comparison;

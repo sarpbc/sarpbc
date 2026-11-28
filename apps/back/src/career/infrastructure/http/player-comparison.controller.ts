@@ -12,7 +12,9 @@ export class PlayerComparisonController {
   @Get("compare")
   async compare(@Query({ schema: ComparePlayersQueryDto }) query: ComparePlayersQueryInput) {
     return {
-      comparison: mapComparison(await this.comparisons.compare(query.a, query.b)),
+      comparison: mapComparison(
+        await this.comparisons.compare(query.a, query.b, query.era ?? null),
+      ),
     } satisfies { comparison: PlayerComparison };
   }
 }

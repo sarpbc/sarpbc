@@ -76,7 +76,7 @@ describe("GET /player/compare (e2e)", () => {
     await app.close();
   });
 
-  const compare = async (query: { a?: string; b?: string }) =>
+  const compare = async (query: { a?: string; b?: string; era?: string }) =>
     await request(app.getHttpServer()).get("/player/compare").query(query);
 
   const zenVersusVatira = async () => {
@@ -133,7 +133,21 @@ describe("GET /player/compare (e2e)", () => {
     expect(JSON.stringify(response.body)).not.toContain("startgg");
   });
 
+  it("narrows the comparison to the chosen era", async () => {
+    const response = await compare({ a: "zen", b: "vatira", era: "pre-open" });
+
+    expect(response.status).toBe(200);
+
+    const { comparison } = comparisonBody.parse(response.body);
+
+    expect(comparison.a.titles).toStrictEqual([]);
+    expect(comparison.a.teams).toStrictEqual([]);
+    expect(comparison.a.seasonAwards).toStrictEqual([]);
+    expect(comparison.headToHead).toStrictEqual({ a: 0, b: 0 });
+  });
+
   it.each([
+    ["an unknown era", { a: "zen", b: "vatira", era: "rlcs-x" }, 400],
     ["an unknown player", { a: "zen", b: "ghost" }, 404],
     ["a player compared with themselves", { a: "zen", b: "zen" }, 400],
     ["a missing slug", { a: "zen" }, 400],

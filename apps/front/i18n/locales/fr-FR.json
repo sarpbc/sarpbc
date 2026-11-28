@@ -529,6 +529,14 @@
         "statistic": "Statistique",
         "higher": "(plus élevé)",
         "present": "aujourd'hui",
+        "era": {
+          "label": "Ère",
+          "all": "Toutes les ères",
+          "open": "Ère Open",
+          "preOpen": "Avant l'ère Open",
+          "openSince": "Depuis {date}, quand les RLCS ont ouvert les qualifications à toutes les équipes. Les distinctions de saison ne sont pas datées et ne comptent que sur toutes les ères.",
+          "preOpenUntil": "Avant {date}, quand les RLCS ont ouvert les qualifications à toutes les équipes. Les distinctions de saison ne sont pas datées et ne comptent que sur toutes les ères."
+        },
         "rows": {
           "titles": "Titres",
           "seriesWon": "Séries gagnées",

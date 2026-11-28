@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import type { CareerStint, Player, PlayerCareer } from "@sarpbc/types";
+import { OPEN_ERA_START, STATS_ERAS } from "@sarpbc/types";
+import type { CareerStint, PlayerCareer, StatsEra } from "@sarpbc/types";
 import { playerPath, teamPath, tournamentStagePath } from "@sarpbc/utils";
 
 definePageMeta({ key: (route) => route.fullPath });
@@ -31,6 +32,13 @@ const { awardTypeLabel, seasonAwardTypeLabel } = usePlayerAwardLabels();
 
 const slugA = routeQueryString(route.query.a);
 const slugB = routeQueryString(route.query.b);
+
+const ALL_ERAS = "all";
+
+const isEra = (value: string): value is StatsEra => STATS_ERAS.some((era) => era === value);
+
+const eraQuery = routeQueryString(route.query.era);
+const era = isEra(eraQuery) ? eraQuery : null;
 
 const loadPlayer = async (slug: string) => (slug ? getPlayerFromSlug(slug) : null);
 
@@ -74,17 +82,33 @@ const {
   error: comparisonError,
   refresh: refreshComparison,
 } = await useAsyncData(
-  `player-compare-${pair.value?.a ?? ""}-${pair.value?.b ?? ""}`,
+  `player-compare-${pair.value?.a ?? ""}-${pair.value?.b ?? ""}-${era ?? ALL_ERAS}`,
   async () => {
     const current = pair.value;
 
-    return current ? getPlayerComparison(current.a, current.b) : null;
+    return current ? getPlayerComparison(current.a, current.b, era) : null;
   },
   { default: () => null },
 );
 
 const selectPlayer = (side: Side, slug: string) => {
   router.replace({ query: { ...route.query, [side]: slug } });
+};
+
+const eraOptions = computed(() => [
+  { label: t("page.player.compare.era.all"), value: ALL_ERAS },
+  { label: t("page.player.compare.era.open"), value: "open" },
+  { label: t("page.player.compare.era.preOpen"), value: "pre-open" },
+]);
+
+const openEraStart = computed(() =>
+  new Intl.DateTimeFormat(locale.value, { month: "long", timeZone: "UTC", year: "numeric" }).format(
+    new Date(OPEN_ERA_START),
+  ),
+);
+
+const selectEra = (value: string) => {
+  router.replace({ query: { ...route.query, era: isEra(value) ? value : undefined } });
 };
 
 const retryPlayers = () => {
@@ -339,6 +363,24 @@ setPageSeo({
                 </span>
               </SLink>
             </div>
+          </div>
+          <div v-if="pair" class="flex min-w-0 flex-col gap-2">
+            <STabs
+              :model-value="era ?? ALL_ERAS"
+              :items="eraOptions"
+              :ariaLabel="t('page.player.compare.era.label')"
+              @update:model-value="selectEra"
+            />
+            <p v-if="era" class="text-xs text-muted">
+              {{
+                t(
+                  era === "open"
+                    ? "page.player.compare.era.openSince"
+                    : "page.player.compare.era.preOpenUntil",
+                  { date: openEraStart },
+                )
+              }}
+            </p>
           </div>
         </div>
       </HubCrossCard>

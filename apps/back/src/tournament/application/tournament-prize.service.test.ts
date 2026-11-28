@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { DataSource, PrizeEntry, TournamentPrizes } from "@sarpbc/types";
 import { InvalidInputError } from "../../common/domain/errors/invalid-input-error";
 import { NotFoundError } from "../../common/domain/errors/not-found-error";
+import type { EarningsLine } from "./earnings";
 import type { PrizeParticipant, PrizeTransaction } from "./ports";
 import { recordingCache, recordingDiagnostics, recordingEvents } from "./ports.test-utils";
 import { CompetitionAfterCommit } from "./after-commit";
@@ -22,12 +23,33 @@ const rosterA: PrizeParticipant = { playerIds: ["player-a", "player-b"], teamId:
 
 const EMPTY_PRIZES: TournamentPrizes = { prizepool: null, prizes: [], source: "manual" };
 
+const earningsLine = (id: string, endAt: string | null) =>
+  ({
+    amount: 1000,
+    currency: "USD",
+    id,
+    placement: 1,
+    shares: 1,
+    team: { id: "team-a", name: "Team A", slug: "team-a" },
+    tournament: {
+      beginAt: null,
+      endAt,
+      event: { id: "e1", name: "Fake Cup", slug: "fake-cup" },
+      id: `t-${id}`,
+      name: "Main Event",
+      slug: "main-event",
+      source: "manual",
+    },
+  }) satisfies EarningsLine;
+
 const setup = ({
+  earnings = [],
   exists = true,
   participants = [rosterA],
   prizes = EMPTY_PRIZES,
   source = "manual",
 }: {
+  earnings?: EarningsLine[];
   exists?: boolean;
   participants?: PrizeParticipant[];
   prizes?: TournamentPrizes | null;
@@ -46,7 +68,7 @@ const setup = ({
   };
 
   const reads = {
-    byPlayer: async () => [],
+    byPlayer: async () => earnings,
     byTeam: async () => [],
     byTournament: async () => prizes,
     tournamentSource: async () => source,
@@ -201,6 +223,28 @@ describe(TournamentPrizeService, () => {
     expect(replaced).toStrictEqual([
       { entries: [{ ...entry, sourceUrl: RULES }, legacy], tournamentId: "cup" },
     ]);
+  });
+
+  it("keeps the earnings of tournaments dated in the chosen era", async () => {
+    const { service } = setup({
+      earnings: [
+        earningsLine("season-9", "2020-06-01T00:00:00.000Z"),
+        earningsLine("worlds", "2024-09-01T00:00:00.000Z"),
+        earningsLine("undated", null),
+      ],
+    });
+
+    const open = await service.playerEarnings("player-a", {
+      era: "open",
+      redistributableOnly: true,
+    });
+
+    const all = await service.playerEarnings("player-a", { redistributableOnly: true });
+
+    expect(open.years.flatMap(({ entries }) => entries.map(({ id }) => id))).toStrictEqual([
+      "worlds",
+    ]);
+    expect(all.totals).toStrictEqual([{ amount: 3000, currency: "USD" }]);
   });
 
   it("refuses a BLAST.tv source", async () => {

@@ -3,6 +3,7 @@ import type { PlayerComparisonSources } from "../src/career/application/player-c
 import { Contract } from "../src/roster/domain/contract";
 import { Player } from "../src/roster/domain/player";
 import { Team } from "../src/roster/domain/team";
+import type { EarningsScope } from "../src/tournament/application/ports";
 import { Match } from "../src/tournament/domain/match";
 import { Tournament } from "../src/tournament/domain/tournament";
 import { TournamentParticipant } from "../src/tournament/domain/tournament-participant";
@@ -37,6 +38,7 @@ interface MatchSpec {
   source?: DataSource;
   tournamentSource?: DataSource;
   finished?: boolean;
+  playedAt?: string;
 }
 
 export const careerMatch = (spec: MatchSpec) => {
@@ -46,6 +48,7 @@ export const careerMatch = (spec: MatchSpec) => {
   ];
 
   return Object.assign(new Match(), {
+    beginAt: new Date(spec.playedAt ?? "2026-03-01T00:00:00.000Z"),
     id: spec.id,
     participants,
     source: spec.source ?? "manual",
@@ -81,7 +84,7 @@ const careerAward = (id: string, source: DataSource) => ({
   awardType: "mvp" as const,
   id,
   tournament: {
-    endAt: null,
+    endAt: "2026-05-01T00:00:00.000Z",
     event: cup,
     id: `${id}-stage`,
     name: "Main Stage",
@@ -130,9 +133,14 @@ export const careerSources = () => {
     team: kc,
   });
 
+  const earningsScopes: EarningsScope[] = [];
+
   const prizes: PlayerComparisonSources["prizes"] = {
-    playerEarnings: async (playerId, scope) =>
-      careerEarnings(scope.redistributableOnly && playerId === zen.id ? 1500 : 0),
+    playerEarnings: async (playerId, scope) => {
+      earningsScopes.push(scope);
+
+      return careerEarnings(scope.redistributableOnly && playerId === zen.id ? 1500 : 0);
+    },
   };
 
   const sources = {
@@ -166,5 +174,5 @@ export const careerSources = () => {
     },
   } satisfies PlayerComparisonSources;
 
-  return { sources };
+  return { earningsScopes, sources };
 };
