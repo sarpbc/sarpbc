@@ -347,6 +347,17 @@ const replaceParticipants = async (
   }
 };
 
+const applyScheduleFields = (
+  match: Match,
+  { name, numberOfGames, beginAt, endAt, status }: UpdateMatchInput,
+) => {
+  match.name = name ?? match.name;
+  match.numberOfGames = numberOfGames === undefined ? match.numberOfGames : numberOfGames;
+  match.beginAt = beginAt === undefined ? match.beginAt : beginAt;
+  match.endAt = endAt === undefined ? match.endAt : endAt;
+  match.status = status ?? match.status;
+};
+
 export const updateMatchInTransaction = async (
   writer: MatchWriter,
   id: string,
@@ -370,17 +381,7 @@ export const updateMatchInTransaction = async (
     await setBracketLinks(writer, match, input.previousMatches);
   }
 
-  if (input.beginAt !== undefined) {
-    match.beginAt = input.beginAt;
-  }
-
-  if (input.endAt !== undefined) {
-    match.endAt = input.endAt;
-  }
-
-  if (input.status !== undefined) {
-    match.status = input.status;
-  }
+  applyScheduleFields(match, input);
 
   if (input.status !== undefined && input.status !== "finished" && input.endAt === undefined) {
     match.endAt = null;

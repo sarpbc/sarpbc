@@ -456,6 +456,38 @@
           "confirm": "Delete {match} ({score})? Its scores and game stats are deleted too, and standings and team records are recomputed. This cannot be undone. PandaScore matches, and matches with pick'em picks, comments or later bracket matches, are refused."
         }
       },
+      "matchForm": {
+        "createAction": "Add Match",
+        "editAction": "Edit",
+        "createTitle": "Add a match",
+        "editTitle": "Edit · {match}",
+        "description": "Name, sides, best-of length, schedule and score of a match of this stage. Link it to other matches with Bracket.",
+        "name": "Name",
+        "namePlaceholder": "Semi-final 1, Grand Final…",
+        "side": "Side {number}",
+        "chooseSide": "Choose a participant",
+        "sameSides": "Choose two different participants",
+        "sidesHelp": "Change the sides of this match with Bracket.",
+        "status": "Status",
+        "statuses": {
+          "not_started": "Not started",
+          "running": "Live",
+          "finished": "Finished"
+        },
+        "numberOfGames": "Best of",
+        "numberOfGamesHelp": "Optional, for example 5 for a best of 5.",
+        "beginAt": "Start",
+        "endAt": "End",
+        "endAtHelp": "A finished match saved without an end ends at the time of saving.",
+        "score": "{side} score",
+        "drawnFinished": "A finished match needs a winner",
+        "cancel": "Cancel",
+        "create": "Add Match",
+        "save": "Save Match",
+        "saved": "Match saved",
+        "saveError": "Could not save the match",
+        "unchanged": "Nothing to save"
+      },
       "bracket": {
         "action": "Bracket",
         "title": "Bracket · {match}",

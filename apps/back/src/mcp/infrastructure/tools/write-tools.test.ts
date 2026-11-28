@@ -484,6 +484,29 @@ describe("bracket tools", () => {
     expect(jsonOf(result)).toHaveProperty("previousMatches", previousMatches);
   });
 
+  it("forwards a new name, best-of length and schedule to update_match", async () => {
+    const { matchService, run } = setupBracket("manual");
+
+    await run("update_match", {
+      beginAt: "2026-11-12T18:00:00+01:00",
+      matchId: "final",
+      name: "Grand Final",
+      numberOfGames: 7,
+    });
+
+    expect(matchService.calls).toContainEqual({
+      args: [
+        "final",
+        expect.objectContaining({
+          beginAt: new Date("2026-11-12T17:00:00Z"),
+          name: "Grand Final",
+          numberOfGames: 7,
+        }),
+      ],
+      method: "updateMatch",
+    });
+  });
+
   it("records or clears a match source and refuses BLAST.tv and Liquipedia mirrors", async () => {
     const { tools, matchService, run } = setupBracket("manual");
     const sourceUrl = "https://www.rocketleague.com/en/news/rlcs-official-rules";

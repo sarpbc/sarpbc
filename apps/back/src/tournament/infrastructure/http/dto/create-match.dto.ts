@@ -40,8 +40,12 @@ export const SetMatchWinnerDto = z.strictObject({ winnerId: z.string() });
 
 export type SetMatchWinnerInput = z.infer<typeof SetMatchWinnerDto>;
 
-export const UpdateMatchResultDto = z
+export const UpdateMatchDto = z
   .strictObject({
+    beginAt: isoDateSchema.nullable().optional(),
+    endAt: isoDateSchema.nullable().optional(),
+    name: z.string().trim().min(1).optional(),
+    numberOfGames: z.number().int().min(1).max(9).nullable().optional(),
     results: z
       .array(z.strictObject({ participantId: z.string().min(1), score: z.number().int().min(0) }))
       .length(2)
@@ -52,17 +56,14 @@ export const UpdateMatchResultDto = z
       .optional(),
     status: z.enum(["not_started", "running", "finished"]).optional(),
   })
-  .refine(
-    ({ results, status }) => results !== undefined || status !== undefined,
-    "Give a status or the scores",
-  )
+  .refine((fields) => Object.values(fields).some((value) => value !== undefined), "Give a change")
   .refine(
     ({ results, status }) =>
       status !== "finished" || results === undefined || results[0]?.score !== results[1]?.score,
     "A finished match needs a winner",
   );
 
-export type UpdateMatchResultInput = z.infer<typeof UpdateMatchResultDto>;
+export type UpdateMatchBody = z.infer<typeof UpdateMatchDto>;
 
 const MatchVodLinkDto = z.strictObject({
   language: z.string().min(1).max(8),

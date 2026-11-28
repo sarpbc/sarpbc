@@ -54,10 +54,6 @@ export const describeFields = <Fields extends Record<string, z.ZodType>>(
   return described;
 };
 
-/** PATCH semantics: undefined leaves the date untouched, null clears it. */
-export const toPatchedDate = (value: string | null | undefined) =>
-  value === undefined || value === null ? value : new Date(value);
-
 /** The one source URL rule of every MCP write: http(s), no credentials, never Liquipedia or BLAST.tv. */
 export const dataSourceUrlField = (description: string) =>
   z

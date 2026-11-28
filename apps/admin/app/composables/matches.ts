@@ -59,3 +59,37 @@ export const createEmptyBracket = async (
 ) => {
   await apiFetch(`/tournaments/${tournamentId}/bracket`, { body, method: "POST" });
 };
+
+export type EditableMatchStatus = "not_started" | "running" | "finished";
+
+interface MatchScoreInput {
+  participantId: string;
+  score: number;
+}
+
+export interface CreateMatchInput {
+  name: string;
+  participantIds: string[];
+  numberOfGames?: number;
+  beginAt?: string;
+  endAt?: string;
+  status: EditableMatchStatus;
+  results?: MatchScoreInput[];
+}
+
+export interface UpdateMatchInput {
+  name?: string;
+  numberOfGames?: number | null;
+  beginAt?: string | null;
+  endAt?: string | null;
+  status?: EditableMatchStatus;
+  results?: MatchScoreInput[];
+}
+
+export const createMatch = async (tournamentId: string, body: CreateMatchInput) => {
+  await apiFetch(`/tournaments/${tournamentId}/matches`, { body, method: "POST" });
+};
+
+export const updateMatch = async (matchId: string, body: UpdateMatchInput) => {
+  await apiFetch(`/tournaments/matches/${matchId}`, { body, method: "PATCH" });
+};

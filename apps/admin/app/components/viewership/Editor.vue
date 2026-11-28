@@ -60,19 +60,6 @@ const scopeOptions = computed(() =>
   })),
 );
 
-const pad = (value: number) => String(value).padStart(2, "0");
-
-const toLocalInput = (iso: string | null) => {
-  if (!iso) {
-    return "";
-  }
-
-  const date = new Date(iso);
-  const day = `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-
-  return `${day}T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-};
-
 const toCount = (value: string) => (value.trim() === "" ? Number.NaN : Number(value));
 
 const toViewership = (values: ViewershipForm) => ({
@@ -135,7 +122,7 @@ const apply = (viewership: Viewership | null) => {
   form.value = viewership
     ? {
         averageViewers: viewership.averageViewers === null ? "" : String(viewership.averageViewers),
-        measuredAt: toLocalInput(viewership.measuredAt),
+        measuredAt: formatDateTimeForInput(viewership.measuredAt),
         peakViewers: String(viewership.peakViewers),
         scope: viewership.scope,
         sourceName: viewership.sourceName,

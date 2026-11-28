@@ -31,6 +31,8 @@ const sourceOpen = ref(false);
 const forfeitMatch = ref<TournamentMatchListItem | null>(null);
 const forfeitOpen = ref(false);
 const emptyBracketOpen = ref(false);
+const matchFormMatch = ref<TournamentDetailMatch | null>(null);
+const matchFormOpen = ref(false);
 const matchToDelete = ref<TournamentMatchListItem | null>(null);
 const stageToDelete = ref<TournamentDetail | null>(null);
 const awardsPanel = ref<{ refreshAwards: () => Promise<void> } | null>(null);
@@ -83,10 +85,13 @@ const detailMatches = computed(
   () => new Map((tournament.value?.matches ?? []).map((match) => [match.id, match])),
 );
 
-const editsBracket = computed(() => !!tournament.value && tournament.value.source !== "pandascore");
+const managesMatches = computed(
+  () => !!tournament.value && tournament.value.source !== "pandascore",
+);
 
 const canGenerateBracket = computed(
-  () => editsBracket.value && tournament.value?.hasBracket === true && matches.value?.length === 0,
+  () =>
+    managesMatches.value && tournament.value?.hasBracket === true && matches.value?.length === 0,
 );
 
 const matchLabel = (match: TournamentMatchListItem) => {
@@ -110,6 +115,11 @@ const openBracket = (match: TournamentMatchListItem) => {
 
 const matchSourceUrl = (match: TournamentMatchListItem) =>
   detailMatches.value.get(match.id)?.sourceUrl ?? null;
+
+const openMatchForm = (match: TournamentMatchListItem | null) => {
+  matchFormMatch.value = match ? (detailMatches.value.get(match.id) ?? null) : null;
+  matchFormOpen.value = true;
+};
 
 const openSource = (match: TournamentMatchListItem) => {
   sourceMatch.value = match;
@@ -230,6 +240,13 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
           "
         />
         <SButton
+          v-if="managesMatches"
+          variant="secondary"
+          icon="i-fluent-add-24-regular"
+          :label="$t('page.tournaments.matchForm.createAction')"
+          @click="openMatchForm(null)"
+        />
+        <SButton
           v-if="canGenerateBracket"
           variant="secondary"
           icon="i-fluent-organization-horizontal-24-regular"
@@ -334,6 +351,14 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
 
             <div class="flex shrink-0 flex-row flex-wrap gap-1">
               <SButton
+                v-if="managesMatches && detailMatches.has(match.id)"
+                variant="secondary"
+                size="sm"
+                icon="i-fluent-edit-24-regular"
+                :label="$t('page.tournaments.matchForm.editAction')"
+                @click="openMatchForm(match)"
+              />
+              <SButton
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-video-clip-24-regular"
@@ -386,7 +411,7 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
                 @click="openStreamScore(match)"
               />
               <SButton
-                v-if="editsBracket"
+                v-if="managesMatches"
                 variant="secondary"
                 size="sm"
                 icon="i-fluent-organization-horizontal-24-regular"
@@ -496,6 +521,16 @@ const handleSetWinner = async (match: TournamentMatchListItem, participantId: st
       :label="bracketMatch.label"
       :participants="tournament.participants ?? []"
       :stage-matches="tournament.matches"
+      @saved="reload()"
+    />
+
+    <TournamentMatchForm
+      v-if="tournament && managesMatches"
+      :key="matchFormMatch?.id ?? 'new'"
+      v-model:open="matchFormOpen"
+      :tournament-id="tournamentId"
+      :participants="tournament.participants ?? []"
+      :match="matchFormMatch"
       @saved="reload()"
     />
 
