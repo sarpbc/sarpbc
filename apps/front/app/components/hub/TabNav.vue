@@ -11,6 +11,19 @@ const { items, ariaLabel } = defineProps<{
   items: TabNavItem[];
   ariaLabel: string;
 }>();
+
+usePageOptionAgentTool({
+  choose: async (label) => {
+    const item = items.find((candidate) => candidate.label === label);
+
+    if (item) {
+      await navigateTo(item.to);
+    }
+  },
+  control: () => ariaLabel,
+  current: () => items.find((item) => item.active)?.label,
+  options: () => items.map((item) => ({ label: item.label, value: item.label })),
+});
 </script>
 
 <template>

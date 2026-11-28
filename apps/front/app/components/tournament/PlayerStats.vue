@@ -103,6 +103,29 @@ const teamOptions = computed(() => {
   ];
 });
 
+usePageOptionAgentTool({
+  choose: (value) => {
+    team.value = value;
+  },
+  control: () => t("page.tournaments.stats.team"),
+  current: team,
+  options: () => (teamFilter && !overall && teamOptions.value.length > 2 ? teamOptions.value : []),
+});
+
+usePageOptionAgentTool({
+  choose: setView,
+  control: () => t("page.tournaments.stats.view"),
+  current: view,
+  options: () => (overall ? [] : viewOptions.value),
+});
+
+usePageOptionAgentTool({
+  choose: setMetric,
+  control: () => t("page.tournaments.stats.sortBy"),
+  current: metric,
+  options: metricOptions,
+});
+
 watch(
   () => stats,
   () => {

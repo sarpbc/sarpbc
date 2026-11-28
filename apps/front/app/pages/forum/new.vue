@@ -118,7 +118,21 @@ const topicItems = computed(() =>
   topics.value.map((topic) => ({ label: topic.title, value: topic.id })),
 );
 
-const onSubmit = async () => {
+const agentInput = computed(() => {
+  const [first, ...rest] = topics.value.map((topic) =>
+    z.literal(topic.id).meta({ title: topic.title }),
+  );
+
+  return first ? schema.extend({ topicId: z.union([first, ...rest]) }) : schema;
+});
+
+// oxlint-disable-next-line landmines-style/no-comments
+/**
+ * Start a new discussion on the sarpbc.org forum. Use when the user wants to ask the community something or share a topic with it.
+ * @tool confirm
+ * @input agentInput
+ */
+const startDiscussion = async () => {
   if (!canSubmit.value) {
     return;
   }
@@ -188,7 +202,7 @@ const onSubmit = async () => {
       <p v-else-if="rateLimitMessage" class="text-sm text-muted">
         {{ rateLimitMessage }}
       </p>
-      <form v-else class="w-full space-y-4" novalidate @submit.prevent="onSubmit">
+      <form v-else class="w-full space-y-4" novalidate @submit.prevent="startDiscussion">
         <SFormField
           :label="$t('page.forum.new.form.title')"
           :error="errors.title"

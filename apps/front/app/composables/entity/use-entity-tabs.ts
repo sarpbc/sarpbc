@@ -53,6 +53,13 @@ export const useEntityTabs = (kind: EntityKind) => {
     void router.replace({ query });
   };
 
+  usePageOptionAgentTool({
+    choose: setTab,
+    control: () => t(`page.${kind}.slug.tabsLabel`),
+    current: tab,
+    options: tabItems,
+  });
+
   return { setTab, tab, tabItems };
 };
 

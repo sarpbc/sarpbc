@@ -16,6 +16,15 @@ const stageOptions = computed(() => [
   ...stages.map(({ id, name }) => ({ label: name, value: id })),
 ]);
 
+usePageOptionAgentTool({
+  choose: (value) => {
+    stage.value = value;
+  },
+  control: () => t("page.tournaments.stats.stage"),
+  current: stage,
+  options: stageOptions,
+});
+
 const {
   data: stats,
   pending,

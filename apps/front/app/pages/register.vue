@@ -28,7 +28,12 @@ const errorMessage = ref<string | null>(null);
 
 onMounted(leaveIfSignedIn);
 
-const onSubmit = async (event: Event) => {
+// oxlint-disable-next-line landmines-style/no-comments
+/**
+ * Create a sarpbc.org account. Use when the user has no account yet and wants to comment, post on the forum or play pick'ems.
+ * @tool confirm
+ */
+const createAccount = async (event: Event) => {
   event.preventDefault();
   errorMessage.value = null;
 
@@ -73,7 +78,7 @@ const onSubmit = async (event: Event) => {
 
         <SSeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <form class="w-full h-fit" method="post" @submit="onSubmit">
+        <form class="w-full h-fit" method="post" @submit="createAccount">
           <SFormField :label="$t('page.authentication.userName')" class="w-full pb-4">
             <SInput v-model="state.userName" type="text" class="w-full" />
           </SFormField>

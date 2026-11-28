@@ -42,6 +42,13 @@ const setVenue = async (value: string) => {
   );
 };
 
+usePageOptionAgentTool({
+  choose: setVenue,
+  control: () => t("page.records.venue.label"),
+  current: () => venue.value ?? ALL_VENUES,
+  options: venueOptions,
+});
+
 const {
   data: book,
   pending,

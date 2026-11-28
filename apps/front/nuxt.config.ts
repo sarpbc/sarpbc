@@ -115,6 +115,7 @@ export default defineNuxtConfig({
     // WARNING: the server builds its route matcher once at startup, so no code may add routes at runtime.
     staticRoutes: true,
     viewTransition: true,
+    webmcp: true,
     writeEarlyHints: false,
   },
 

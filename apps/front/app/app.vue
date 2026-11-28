@@ -7,6 +7,8 @@ const colorMode = useColorMode();
 
 setPageSeo();
 
+useSearchAgentTool();
+
 useHead({
   htmlAttrs: {
     lang: computed(() => uiLocale(locale.value)),

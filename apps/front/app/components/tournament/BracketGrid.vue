@@ -108,6 +108,15 @@ watch(
   },
 );
 
+usePageOptionAgentTool({
+  choose: (value) => {
+    selectedRound.value = value;
+  },
+  control: () => t("components.tournament.bracket.rounds"),
+  current: selectedRound,
+  options: roundOptions,
+});
+
 const selectedGroups = computed(() => {
   const matches =
     rounds.value.find((round) => String(round.column) === selectedRound.value)?.matches ?? [];

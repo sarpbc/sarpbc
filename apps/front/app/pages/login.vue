@@ -27,7 +27,12 @@ const errorMessage = ref<string | null>(null);
 
 onMounted(leaveIfSignedIn);
 
-const onSubmit = async (event: Event) => {
+// oxlint-disable-next-line landmines-style/no-comments
+/**
+ * Sign in to an existing sarpbc.org account. Use when the user is signed out and wants to comment, post on the forum or play pick'ems.
+ * @tool confirm
+ */
+const signIn = async (event: Event) => {
   event.preventDefault();
 
   if (pending.value) {
@@ -80,7 +85,7 @@ const onSubmit = async (event: Event) => {
 
         <SSeparator :label="$t('page.authentication.or')" class="my-6" />
 
-        <form class="w-full h-fit" method="post" @submit="onSubmit">
+        <form class="w-full h-fit" method="post" @submit="signIn">
           <SFormField :label="$t('page.authentication.email')" class="w-full pb-4">
             <SInput
               v-model="state.email"
