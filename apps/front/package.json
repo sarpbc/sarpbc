@@ -33,7 +33,7 @@
     "@vueuse/core": "^15.0.0",
     "evlog": "catalog:",
     "nuxt": "catalog:",
-    "posthog-js": "^1.455.2",
+    "posthog-js": "^1.455.4",
     "tailwindcss": "^4.3.3",
     "vue": "catalog:",
     "vue-i18n": "catalog:",
