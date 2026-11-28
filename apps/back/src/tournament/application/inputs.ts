@@ -86,6 +86,8 @@ export interface SyncedMatchInput extends MatchFields {
 }
 
 export interface UpdateMatchInput {
+  name?: string;
+  numberOfGames?: number | null;
   beginAt?: Date | null;
   endAt?: Date | null;
   status?: string;

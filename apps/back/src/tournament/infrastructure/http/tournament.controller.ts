@@ -24,7 +24,7 @@ import {
   CreateMatchDto,
   SetMatchBracketDto,
   SetMatchForfeitDto,
-  UpdateMatchResultDto,
+  UpdateMatchDto,
   SetMatchSourceDto,
   SetMatchVodsDto,
   SetMatchWinnerDto,
@@ -34,7 +34,7 @@ import type {
   CreateMatchInput,
   SetMatchBracketInput,
   SetMatchForfeitInput,
-  UpdateMatchResultInput,
+  UpdateMatchBody,
   SetMatchSourceInput,
   SetMatchVodsInput,
   SetMatchWinnerInput,
@@ -74,6 +74,7 @@ import type { CreatePlayerAwardInput } from "./dto/create-player-award.dto";
 import { TournamentPrizeService } from "../../application/tournament-prize.service";
 import { SetTournamentPrizesDto } from "./dto/set-tournament-prizes.dto";
 import type { SetTournamentPrizesInput } from "./dto/set-tournament-prizes.dto";
+import { toPatchedDate } from "../../../common/infrastructure/http/dto/iso-date.schema";
 import { ListTournamentsQueryDto } from "./dto/list-tournaments-query.dto";
 import type { ListTournamentsQueryInput } from "./dto/list-tournaments-query.dto";
 import {
@@ -373,11 +374,15 @@ export class TournamentController {
   @RequirePermissions("tournaments.manage")
   @UseGuards(AuthGuard, PermissionGuard)
   @Patch("matches/:matchId")
-  async updateMatchResult(
+  async updateMatch(
     @Param("matchId") matchId: string,
-    @Body({ schema: UpdateMatchResultDto }) body: UpdateMatchResultInput,
+    @Body({ schema: UpdateMatchDto }) { beginAt, endAt, ...body }: UpdateMatchBody,
   ) {
-    const match = await this.matchService.updateMatch(matchId, body);
+    const match = await this.matchService.updateMatch(matchId, {
+      ...body,
+      beginAt: toPatchedDate(beginAt),
+      endAt: toPatchedDate(endAt),
+    });
 
     return { match: withPublicSlug(match) };
   }

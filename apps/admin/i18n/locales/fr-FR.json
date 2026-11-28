@@ -456,6 +456,38 @@
           "confirm": "Supprimer {match} ({score}) ? Ses scores et ses statistiques de manches sont aussi supprimés, et les classements et bilans d'équipe sont recalculés. Cette action est irréversible. Les matchs PandaScore, et ceux qui ont des pronostics, des commentaires ou des matchs suivants dans le bracket, sont refusés."
         }
       },
+      "matchForm": {
+        "createAction": "Ajouter un match",
+        "editAction": "Modifier",
+        "createTitle": "Ajouter un match",
+        "editTitle": "Modifier · {match}",
+        "description": "Nom, adversaires, format, horaires et score d’un match de cette phase. Reliez-le aux autres matchs depuis Arbre.",
+        "name": "Nom",
+        "namePlaceholder": "Demi-finale 1, Grande finale…",
+        "side": "Adversaire {number}",
+        "chooseSide": "Choisissez un participant",
+        "sameSides": "Choisissez deux participants différents",
+        "sidesHelp": "Changez les adversaires de ce match depuis Arbre.",
+        "status": "Statut",
+        "statuses": {
+          "not_started": "Pas commencé",
+          "running": "En direct",
+          "finished": "Terminé"
+        },
+        "numberOfGames": "Format (BO)",
+        "numberOfGamesHelp": "Facultatif, par exemple 5 pour un BO5.",
+        "beginAt": "Début",
+        "endAt": "Fin",
+        "endAtHelp": "Un match terminé enregistré sans fin se termine à l’heure de l’enregistrement.",
+        "score": "Score de {side}",
+        "drawnFinished": "Un match terminé doit avoir un vainqueur",
+        "cancel": "Annuler",
+        "create": "Ajouter le match",
+        "save": "Enregistrer le match",
+        "saved": "Match enregistré",
+        "saveError": "Impossible d’enregistrer le match",
+        "unchanged": "Aucune modification"
+      },
       "bracket": {
         "action": "Arbre",
         "title": "Arbre · {match}",

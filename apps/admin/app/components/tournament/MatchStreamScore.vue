@@ -138,7 +138,7 @@ const confirm = async () => {
   confirming.value = true;
 
   try {
-    await setMatchResult(match.id, series);
+    await updateMatch(match.id, { results: series, status: "finished" });
     toast.add({ color: "success", title: t("page.tournaments.streamScore.confirmed") });
     emit("confirmed");
     open.value = false;

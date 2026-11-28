@@ -164,6 +164,22 @@ describe("Manual match corrections", () => {
     expect(writer.savedMatches).toContain(match);
   });
 
+  it("renames a match and changes its best-of length without touching its result", async () => {
+    writer.matches.set("match", manualMatch());
+
+    const match = await updateMatchInTransaction(writer, "match", {
+      name: "Grand Final",
+      numberOfGames: 7,
+    });
+
+    expect(match).toMatchObject({
+      name: "Grand Final",
+      numberOfGames: 7,
+      status: "finished",
+      winner: { id: "a" },
+    });
+  });
+
   it("clears the winner when the match is reopened", async () => {
     writer.matches.set("match", manualMatch());
     const match = await updateMatchInTransaction(writer, "match", { status: "running" });

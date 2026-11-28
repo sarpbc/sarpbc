@@ -21,7 +21,8 @@ import { tournamentNotFound } from "../redistributable-competition";
 import { adminNewsEditUrl, matchUrl, tournamentUrl } from "../urls";
 import { BODY_TAGS } from "./news-syntax";
 import { resolveMatchParticipantIds } from "./resolve-match-participants";
-import { dataSourceUrlField, describeFields, toPatchedDate } from "./tool-input";
+import { dataSourceUrlField, describeFields } from "./tool-input";
+import { toPatchedDate } from "../../../common/infrastructure/http/dto/iso-date.schema";
 import {
   bracketLinksSchema,
   emptyBracketTeamsSchema,
@@ -313,25 +314,14 @@ export const writeTools = ({
 
   defineTool({
     description:
-      "Correct the score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them. On a forfeited match (forfeitedBy set), scores that make the forfeiting side the winner, sides that leave it out or a status other than finished clear the forfeit.",
-    handler: async ({
-      matchId,
-      beginAt,
-      endAt,
-      status,
-      results,
-      participantIds,
-      previousMatches,
-    }) => {
-      requireUpdateFields({ beginAt, endAt, participantIds, previousMatches, results, status });
+      "Correct the name, best-of length, score, status, dates, participants or bracket links of a manual match (pandascoreId is null). Use set_source to record where the match data comes from. Scores replace all existing scores; on a finished match they also set the winner. A status other than finished clears the winner. participantIds fills or replaces the sides of a match, for example an empty bracket slot once its teams are known; changing the sides of a scored match needs its new results in the same call. previousMatches replaces every bracket link of the match; pass an empty list to clear them. On a forfeited match (forfeitedBy set), scores that make the forfeiting side the winner, sides that leave it out or a status other than finished clear the forfeit.",
+    handler: async ({ matchId, beginAt, endAt, ...fields }) => {
+      requireUpdateFields({ beginAt, endAt, ...fields });
 
       const match = await matchService.updateMatch(matchId, {
+        ...fields,
         beginAt: toPatchedDate(beginAt),
         endAt: toPatchedDate(endAt),
-        participantIds,
-        previousMatches,
-        results,
-        status,
       });
 
       return { entityId: match.id, result: mapMatchListResponse(match) };
@@ -348,6 +338,20 @@ export const writeTools = ({
         .optional()
         .describe("End time (ISO 8601), or null."),
       matchId: z.string().min(1).describe("Match UUID."),
+      name: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe("Match display name carrying its round (e.g. Semi-final 1, Grand Final)."),
+      numberOfGames: z
+        .number()
+        .int()
+        .min(1)
+        .max(9)
+        .nullable()
+        .optional()
+        .describe("Best-of series length, or null when unknown."),
       participantIds: z
         .array(z.string().min(1))
         .max(2)
