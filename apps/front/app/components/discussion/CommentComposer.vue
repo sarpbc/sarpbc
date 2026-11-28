@@ -118,7 +118,13 @@ const submitComment = async () => {
   });
 };
 
-const onSubmit = async () => {
+// oxlint-disable-next-line landmines-style/no-comments
+/**
+ * Post a comment in the discussion on this page. Use when the user wants to react to this news article, match or forum post.
+ * @tool confirm
+ * @input schema
+ */
+const postComment = async () => {
   await submitComment();
 };
 
@@ -135,7 +141,7 @@ const onEnterKey = (event: KeyboardEvent) => {
       v-else-if="isSignedIn"
       class="w-full flex flex-col gap-2"
       novalidate
-      @submit.prevent="onSubmit"
+      @submit.prevent="postComment"
     >
       <SFormField
         :label="$t('components.discussion.inputTitle')"

@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import * as z from "zod";
 import type { RouteLocationRaw } from "vue-router";
 
 const { currentPage, totalPages, hasPrevious, hasNext, previousTo, nextTo } = defineProps<{
@@ -11,6 +12,27 @@ const { currentPage, totalPages, hasPrevious, hasNext, previousTo, nextTo } = de
 }>();
 
 const { t } = useI18n();
+
+useAgentTool(
+  defineAgentTool({
+    annotations: { readOnlyHint: true },
+    description:
+      "Show the previous or next page of the list on screen. Use when the user wants entries beyond the ones the current page shows.",
+    input: z.object({ direction: z.enum(["previous", "next"]) }),
+    name: "change_list_page",
+  }),
+  {
+    execute: async ({ direction }) => {
+      const available = direction === "next" ? hasNext : hasPrevious;
+
+      if (!available) {
+        throw new Error(`There is no ${direction} page.`);
+      }
+
+      await navigateTo(direction === "next" ? nextTo : previousTo);
+    },
+  },
+);
 
 const scrollToTopOnNavigate = (event: MouseEvent, enabled: boolean) => {
   if (!enabled) {

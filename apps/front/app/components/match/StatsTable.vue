@@ -30,6 +30,15 @@ const tabs = computed(() =>
   })),
 );
 
+usePageOptionAgentTool({
+  choose: (value) => {
+    selected.value = value;
+  },
+  control: () => t("page.match.detail.stats.games"),
+  current: selected,
+  options: tabs,
+});
+
 const playerLabel = (row: MatchGamePlayerStats) => row.player?.name ?? row.name;
 
 const teams = computed(() => {

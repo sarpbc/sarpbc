@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import * as z from "zod";
 import type { CareerStint, Player, PlayerCareer } from "@sarpbc/types";
 import { playerPath, teamPath, tournamentStagePath } from "@sarpbc/utils";
 
@@ -86,6 +87,24 @@ const {
 const selectPlayer = (side: Side, slug: string) => {
   router.replace({ query: { ...route.query, [side]: slug } });
 };
+
+useAgentTool(
+  defineAgentTool({
+    annotations: { readOnlyHint: true },
+    description:
+      "Compare the careers of two Rocket League players side by side: titles, earnings, teams and matches. Use when the user asks how two players stack up; find their slugs with search_teams_and_players.",
+    input: z.object({
+      first: z.string().trim().min(1).describe("The slug of the first player."),
+      second: z.string().trim().min(1).describe("The slug of the second player."),
+    }),
+    name: "compare_players",
+  }),
+  {
+    execute: async ({ first, second }) => {
+      await router.replace({ query: { a: first, b: second } });
+    },
+  },
+);
 
 const retryPlayers = () => {
   refreshPlayerA();

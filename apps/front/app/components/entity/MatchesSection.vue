@@ -32,6 +32,13 @@ const tabItems = computed(() => [
   { label: t(`page.${kind}.slug.matches.tabs.past`), value: "past" as const },
 ]);
 
+usePageOptionAgentTool({
+  choose: setTab,
+  control: () => t(`page.${kind}.slug.matches.sectionTitle`),
+  current: tab,
+  options: tabItems,
+});
+
 const activeMatches = computed(() => (tab.value === "past" ? pastMatches : upcomingMatches));
 
 const live = computed(() => (tab.value === "upcoming" ? liveMatches : []));

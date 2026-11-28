@@ -116,7 +116,7 @@
     "init-declarations": "off",
     "jsdoc/check-access": "error",
     "jsdoc/check-property-names": "error",
-    "jsdoc/check-tag-names": "error",
+    "jsdoc/check-tag-names": ["error", { "definedTags": ["tool", "input"] }],
     "jsdoc/empty-tags": "error",
     "jsdoc/implements-on-classes": "error",
     "jsdoc/no-blank-blocks": "error",

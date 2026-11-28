@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { DateFormatter } from "@internationalized/date";
+import * as z from "zod";
 import { matchPath, tournamentStageLabel } from "@sarpbc/utils";
 import type { RadioStatus } from "@sarpbc/design";
 import type { TournamentDetailMatch } from "@sarpbc/types";
@@ -318,6 +319,54 @@ const pickTeam = async (matchId: string, participantId: string) => {
     submittingMatchId.value = null;
   }
 };
+
+useAgentTool(
+  defineAgentTool({
+    description:
+      "Pick the team the signed-in user expects to win a match of this pick'em, or change that pick before the match starts. Use when the user tells you who they think will win.",
+    input: z.object({
+      winner: z
+        .string()
+        .trim()
+        .min(1)
+        .describe("The name of the team to pick, as shown for the match."),
+    }),
+    name: "pick_match_winner",
+  }),
+  {
+    enabled: () => Boolean(user.value) && !picksPending.value,
+    execute: async ({ winner }, { target }) => {
+      if (!target) {
+        throw new Error("Choose a match.");
+      }
+
+      const match = target.item;
+
+      const index = [0, 1].find(
+        (slot) => slotName(match.participants, slot)?.toLowerCase() === winner.toLowerCase(),
+      );
+
+      const participantId = index === undefined ? undefined : match.participants?.[index]?.id;
+
+      if (!participantId) {
+        throw new Error(`${winner} does not play in this match.`);
+      }
+
+      await pickTeam(match.id, participantId);
+
+      if (pickedParticipant(match) !== participantId) {
+        throw new Error("The pick was not saved.");
+      }
+
+      return `Picked ${winner}.`;
+    },
+    label: pickLabel,
+    targets: () =>
+      matchesByDay.value
+        .flatMap((day) => day.matches)
+        .filter((match) => !isMatchLockedForPickem(match)),
+  },
+);
 
 onMounted(() => {
   posthog?.capture("pickem_tournament_opened", { tournament_id: tournamentId.value });

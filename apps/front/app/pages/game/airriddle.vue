@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import { useMediaQuery } from "@vueuse/core";
+import * as z from "zod";
 import AirRiddleHowToPlayPopover from "~/components/airriddle/HowToPlayPopover.vue";
 import AirRiddleKeyboard from "~/components/airriddle/Keyboard.vue";
 import AirRiddleTile from "~/components/airriddle/Tile.vue";
@@ -40,7 +41,7 @@ const gameState = reactive<GameState>({
 
 const targetLength = computed(() => gameState.targetLength);
 
-const { currentGuess, canSubmit, appendToGuess, removeFromGuess, clearGuess } =
+const { currentGuess, canSubmit, appendToGuess, removeFromGuess, clearGuess, setGuess } =
   useAirRiddleGuess(targetLength);
 
 const canType = computed(
@@ -234,6 +235,39 @@ const submitGuess = async () => {
     focusHiddenInput();
   }
 };
+
+useAgentTool(
+  defineAgentTool({
+    annotations: { consequentialHint: true },
+    description:
+      "Try a player name in today's Air Riddle, the daily game where the user finds a Rocket League player in a few attempts. Use when the user tells you which name to try; each try uses one of their attempts.",
+    input: z.object({
+      name: z.string().trim().min(1).describe("The player name to try, as long as today's answer."),
+    }),
+    name: "guess_air_riddle",
+  }),
+  {
+    enabled: canType,
+    execute: async ({ name }) => {
+      setGuess(name);
+
+      if (!canSubmit.value) {
+        throw new Error(`Today's answer has ${gameState.targetLength} characters.`);
+      }
+
+      await submitGuess();
+
+      if (error.value) {
+        throw new Error(t(`page.game.airriddle.${error.value}`));
+      }
+
+      return {
+        letters: gameState.attempts.at(-1)?.results,
+        status: statusMessage.value,
+      };
+    },
+  },
+);
 
 const onPhysicalKeydown = (event: KeyboardEvent) => {
   if (isMobile.value || !canType.value) {
